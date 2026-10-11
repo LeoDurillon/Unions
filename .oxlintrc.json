@@ -1,0 +1,194 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "oxc", "import", "node", "promise", "react", "jsx-a11y"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "error",
+    "pedantic": "error",
+    "perf": "error",
+    "style": "error",
+    "restriction": "off"
+  },
+  "env": {
+    "builtin": true,
+    "es2024": true,
+    "browser": true,
+    "node": true
+  },
+  "ignorePatterns": ["**/node_modules", "**/dist", "**/drizzle", "bun.lock"],
+  "rules": {
+    "eqeqeq": ["error", "always"],
+    "curly": ["error", "all"],
+    "no-console": "error",
+    "no-var": "error",
+    "prefer-const": "error",
+    "no-param-reassign": "error",
+    "no-eval": "error",
+    "no-implied-eval": "error",
+    "no-throw-literal": "error",
+    "no-else-return": "error",
+    "no-nested-ternary": "error",
+    "no-shadow": "error",
+    "no-void": "off",
+    "max-depth": ["error", 3],
+    "max-params": ["error", 4],
+    "max-lines-per-function": [
+      "error",
+      {
+        "max": 60,
+        "skipBlankLines": true,
+        "skipComments": true
+      }
+    ],
+    "max-lines": [
+      "error",
+      {
+        "max": 300,
+        "skipBlankLines": true,
+        "skipComments": true
+      }
+    ],
+    "complexity": ["error", 12],
+    "typescript/no-explicit-any": "error",
+    "typescript/no-non-null-assertion": "error",
+    "typescript/ban-ts-comment": "error",
+    "typescript/consistent-type-imports": "error",
+    "typescript/consistent-type-definitions": ["error", "type"],
+    "typescript/array-type": [
+      "error",
+      {
+        "default": "array"
+      }
+    ],
+    "typescript/explicit-function-return-type": [
+      "error",
+      {
+        "allowExpressions": true,
+        "allowTypedFunctionExpressions": true
+      }
+    ],
+    "typescript/no-floating-promises": "error",
+    "typescript/no-misused-promises": "error",
+    "typescript/await-thenable": "error",
+    "typescript/require-await": "error",
+    "typescript/no-unnecessary-condition": "error",
+    "typescript/no-unnecessary-type-assertion": "error",
+    "typescript/switch-exhaustiveness-check": "error",
+    "typescript/strict-boolean-expressions": "off",
+    "typescript/no-import-type-side-effects": "error",
+    "typescript/prefer-readonly": "error",
+    "import/no-cycle": "error",
+    "import/no-default-export": "off",
+    "import/no-duplicates": "error",
+    "import/no-self-import": "error",
+    "import/no-unassigned-import": "error",
+    "promise/no-return-wrap": "error",
+    "promise/param-names": "error",
+    "unicorn/no-null": "off",
+    "unicorn/prefer-node-protocol": "error",
+    "unicorn/filename-case": [
+      "error",
+      {
+        "case": "kebabCase",
+        "ignore": ["^App\\.tsx$"]
+      }
+    ],
+    "unicorn/no-array-for-each": "error",
+    "unicorn/prefer-ternary": "off",
+    "react/react-in-jsx-scope": "off",
+    "react/only-export-components": "off",
+    "react/no-array-index-key": "error",
+    "react/exhaustive-deps": "error",
+    "react/rules-of-hooks": "error",
+    "import/no-named-export": "off",
+    "import/group-exports": "off",
+    "import/exports-last": "off",
+    "import/prefer-default-export": "off",
+    "import/no-namespace": "off",
+    "import/no-nodejs-modules": "off",
+    "import/no-anonymous-default-export": "off",
+    "import/consistent-type-specifier-style": "off",
+    "eslint/one-var": "off",
+    "eslint/sort-keys": "off",
+    "eslint/sort-imports": "off",
+    "eslint/id-length": "off",
+    "eslint/func-style": "off",
+    "eslint/no-inline-comments": "off",
+    "eslint/capitalized-comments": "off",
+    "eslint/no-ternary": "off",
+    "eslint/no-underscore-dangle": "off",
+    "eslint/no-await-in-loop": "off",
+    "eslint/max-statements": "off",
+    "typescript/prefer-readonly-parameter-types": "off",
+    "typescript/method-signature-style": "off",
+    "promise/avoid-new": "off",
+    "unicorn/custom-error-definition": "off",
+    "unicorn/prefer-query-selector": "off",
+    "no-magic-numbers": [
+      "error",
+      {
+        "ignore": [0, 1, -1, 2],
+        "ignoreArrayIndexes": true,
+        "ignoreDefaultValues": true,
+        "enforceConst": true
+      }
+    ],
+    "unicorn/max-nested-calls": "off",
+    "typescript/parameter-properties": "off",
+    "react/jsx-max-depth": [
+      "error",
+      {
+        "max": 8
+      }
+    ],
+    "react/jsx-props-no-spreading": "off"
+  },
+  "overrides": [
+    {
+      "files": ["**/*.test.ts"],
+      "rules": {
+        "max-lines-per-function": "off",
+        "no-magic-numbers": "off",
+        "init-declarations": "off",
+        "typescript/no-unsafe-type-assertion": "off",
+        "unicorn/no-await-expression-member": "off"
+      }
+    },
+    {
+      "files": ["**/*.config.ts"],
+      "rules": {
+        "import/no-default-export": "off",
+        "typescript/explicit-function-return-type": "off"
+      }
+    },
+    {
+      "files": ["apps/worker/src/index.ts"],
+      "rules": {
+        "no-console": "off"
+      }
+    },
+    {
+      "files": ["apps/web/client/main.tsx"],
+      "rules": {
+        "import/no-unassigned-import": "off"
+      }
+    },
+    {
+      "files": ["apps/web/client/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              {
+                "name": "@union/core",
+                "allowTypeImports": true,
+                "message": "The core index pulls in bun:sqlite, which breaks the browser. Use `import type` or a browser-safe entry such as '@union/core/states'."
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

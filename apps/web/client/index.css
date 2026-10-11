@@ -1,0 +1,70 @@
+@import 'tailwindcss';
+
+:root {
+  color-scheme: light dark;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-zinc-50 text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100;
+  font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+dialog::backdrop {
+  background: rgb(0 0 0 / 0.5);
+}
+
+.markdown {
+  @apply text-sm leading-relaxed;
+}
+.markdown h1,
+.markdown h2,
+.markdown h3 {
+  @apply mt-4 mb-2 font-semibold;
+}
+.markdown h2 {
+  @apply text-base;
+}
+.markdown h3 {
+  @apply text-sm;
+}
+.markdown p,
+.markdown ul,
+.markdown ol,
+.markdown table,
+.markdown pre {
+  @apply my-2;
+}
+.markdown ul {
+  @apply list-disc pl-5;
+}
+.markdown ol {
+  @apply list-decimal pl-5;
+}
+.markdown code {
+  @apply rounded bg-zinc-200 px-1 py-0.5 font-mono text-xs dark:bg-zinc-800;
+}
+.markdown pre {
+  @apply overflow-x-auto rounded-md bg-zinc-200 p-3 dark:bg-zinc-800;
+}
+.markdown pre code {
+  @apply bg-transparent p-0;
+}
+.markdown table {
+  @apply w-full border-collapse text-xs;
+}
+.markdown th,
+.markdown td {
+  @apply border border-zinc-300 px-2 py-1 text-left align-top dark:border-zinc-700;
+}
+.markdown details {
+  @apply my-2 rounded-md border border-zinc-300 p-2 dark:border-zinc-700;
+}
+.markdown summary {
+  @apply cursor-pointer font-medium;
+}

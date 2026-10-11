@@ -1,0 +1,1 @@
+ALTER TABLE `projects` ADD `notion_token` text;

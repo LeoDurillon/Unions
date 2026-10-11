@@ -1,0 +1,68 @@
+# Development stack: `docker compose up`, then open http://localhost:5173
+#
+# The repository is bind-mounted, so code changes reload as with `bun run dev`, and `union.sqlite`
+# at the repository root is the same database the host commands use.
+# The worker reaches the host Docker daemon through its socket: agent containers (union-t*) run next
+# to these ones, not inside them.
+#
+# Overrides (shell or .env): UNION_UID / UNION_GID (default 1000, your host user), DOCKER_GID (group
+# of /var/run/docker.sock: `stat -c %g /var/run/docker.sock`), UNION_WEB_PORT (default 5173),
+# GITHUB_TOKEN (fallback for projects without their own token).
+name: union-next
+
+x-app: &app
+  build:
+    context: docker
+    dockerfile: dev.Dockerfile
+  image: union-dev:local
+  user: '${UNION_UID:-1000}:${UNION_GID:-1000}'
+  working_dir: /app
+  init: true
+  volumes:
+    - .:/app
+
+services:
+  # Installs workspace dependencies into the mounted repository, then exits.
+  install:
+    <<: *app
+    command: ['bun', 'install', '--frozen-lockfile']
+    restart: 'no'
+
+  # Builds the image agent containers run from (union-agent:local), then exits.
+  agent-image:
+    build:
+      context: docker
+      dockerfile: agent.Dockerfile
+    image: union-agent:local
+    entrypoint: ['true']
+    restart: 'no'
+
+  web:
+    <<: *app
+    command: ['bun', 'run', 'dev:web']
+    environment:
+      UNION_DEV_HOST: 0.0.0.0
+    ports:
+      - '${UNION_WEB_PORT:-5173}:5173'
+    depends_on:
+      install:
+        condition: service_completed_successfully
+
+  worker:
+    <<: *app
+    command: ['bun', 'run', 'dev:worker']
+    group_add:
+      - '${DOCKER_GID:-1001}'
+    environment:
+      # The directory is mounted (not the file) so token refreshes on the host stay visible.
+      UNION_CLAUDE_CREDENTIALS: /home/bun/.claude-host/.credentials.json
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+    volumes:
+      - .:/app
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${HOME}/.claude:/home/bun/.claude-host:ro
+    depends_on:
+      install:
+        condition: service_completed_successfully
+      agent-image:
+        condition: service_completed_successfully

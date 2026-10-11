@@ -1,0 +1,14 @@
+{
+  "name": "@union/worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun --watch src/index.ts",
+    "start": "bun src/index.ts"
+  },
+  "dependencies": {
+    "@union/core": "workspace:*",
+    "drizzle-orm": "catalog:database",
+    "octokit": "catalog:github"
+  }
+}

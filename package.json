@@ -1,0 +1,67 @@
+{
+  "name": "union-next",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "type": "module",
+  "scripts": {
+    "dev": "bun run --filter '@union/web' --filter '@union/worker' dev",
+    "build": "bun run --cwd apps/web build",
+    "start": "bun run build && bun run --filter '@union/web' --filter '@union/worker' start",
+    "compose": "docker compose up --build",
+    "compose:down": "docker compose down",
+    "compose:logs": "docker compose logs -f",
+    "dev:web": "bun run --cwd apps/web dev",
+    "dev:worker": "bun run --cwd apps/worker dev",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint --type-aware --deny-warnings",
+    "lint:fix": "oxlint --type-aware --fix",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check",
+    "check": "bun run fmt:check && bun run lint && bun run typecheck && bun test"
+  },
+  "devDependencies": {
+    "@types/bun": "catalog:development",
+    "oxfmt": "catalog:development",
+    "oxlint": "catalog:development",
+    "oxlint-tsgolint": "catalog:development",
+    "typescript": "catalog:development"
+  },
+  "catalogs": {
+    "development": {
+      "@types/bun": "1.4.2",
+      "oxfmt": "0.72.0",
+      "oxlint": "1.87.0",
+      "oxlint-tsgolint": "7.0.2004",
+      "typescript": "7.0.2"
+    },
+    "ui": {
+      "@dnd-kit/core": "6.3.1",
+      "@tailwindcss/vite": "4.3.3",
+      "@tanstack/react-query": "5.104.1",
+      "@types/react": "19.3.0",
+      "@types/react-dom": "19.3.0",
+      "@vitejs/plugin-react": "6.1.2",
+      "react": "19.3.0",
+      "react-dom": "19.3.0",
+      "react-markdown": "10.1.0",
+      "remark-gfm": "4.0.1",
+      "tailwindcss": "4.3.3",
+      "vite": "8.3.4"
+    },
+    "server": {
+      "@hono/bun": "1.0.1",
+      "hono": "4.13.13"
+    },
+    "database": {
+      "drizzle-kit": "0.31.11",
+      "drizzle-orm": "0.45.4"
+    },
+    "github": {
+      "octokit": "5.0.5"
+    }
+  }
+}

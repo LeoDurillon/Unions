@@ -1,0 +1,1 @@
+ALTER TABLE `tickets` ADD `pr_ready_at` integer;

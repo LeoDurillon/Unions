@@ -1,0 +1,16 @@
+{
+  "name": "@union/core",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./states": "./src/states.ts",
+    "./diff": "./src/diff.ts"
+  },
+  "dependencies": {
+    "drizzle-orm": "catalog:database"
+  },
+  "devDependencies": {
+    "drizzle-kit": "catalog:database"
+  }
+}

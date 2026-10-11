@@ -1,0 +1,33 @@
+{
+  "name": "@union/web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun run dev:api & bun run dev:ui",
+    "dev:api": "bun --hot src/server.ts",
+    "dev:ui": "bunx --bun vite",
+    "build": "bunx --bun vite build",
+    "start": "NODE_ENV=production bun src/server.ts"
+  },
+  "dependencies": {
+    "@dnd-kit/core": "catalog:ui",
+    "@hono/bun": "catalog:server",
+    "@tailwindcss/vite": "catalog:ui",
+    "@tanstack/react-query": "catalog:ui",
+    "@union/core": "workspace:*",
+    "drizzle-orm": "catalog:database",
+    "hono": "catalog:server",
+    "octokit": "catalog:github",
+    "react": "catalog:ui",
+    "react-dom": "catalog:ui",
+    "react-markdown": "catalog:ui",
+    "remark-gfm": "catalog:ui",
+    "tailwindcss": "catalog:ui"
+  },
+  "devDependencies": {
+    "@types/react": "catalog:ui",
+    "@types/react-dom": "catalog:ui",
+    "@vitejs/plugin-react": "catalog:ui",
+    "vite": "catalog:ui"
+  }
+}

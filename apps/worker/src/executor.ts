@@ -1,0 +1,66 @@
+import { modelFor, resolveAgent, type ContainerRuntime, type Db, type Project } from '@union/core';
+
+import { runAgent, runResumable } from './agent';
+import { approvedBefore } from './approved';
+import type { GitHubApi } from './github/api';
+import { runImplementStep } from './implement';
+import { buildPrompt, isPlanningStep, PLANNING_TOOLS } from './prompts';
+import { ensureTicketContainer, REPO_DIR, type ProvisionConfig } from './provision';
+import { runReviewStep } from './review';
+import type { StepContext, StepExecutor, StepResult } from './scheduler';
+
+/** Every pipeline step: planning, implementation and final review. */
+export function createExecutor(
+  db: Db,
+  runtime: ContainerRuntime,
+  config: ProvisionConfig,
+  github: (project: Project) => GitHubApi | null,
+): StepExecutor {
+  return async (context: StepContext): Promise<StepResult> => {
+    const { ticket, step } = context;
+    const deps = { db, runtime, config, github, agent: runAgent };
+    if (step === 'implement') {
+      return runImplementStep(deps, context);
+    }
+    if (step === 'final_review') {
+      return runReviewStep(deps, context);
+    }
+    if (!isPlanningStep(step)) {
+      return { kind: 'error', error: `Unknown step ${JSON.stringify(step)}` };
+    }
+    // Read on every run, so edits made in the settings apply to the next run.
+    const agent = resolveAgent(db, step);
+    const shared = resolveAgent(db, 'shared');
+    const container = await ensureTicketContainer(db, runtime, config, ticket);
+    try {
+      // The planning prompt carries the previous version and the feedback, so a lost session can
+      // start over from the same prompt.
+      const prompt = buildPrompt({
+        ticket,
+        shared: shared.prompt,
+        instructions: agent.prompt,
+        approved: approvedBefore(db, ticket.id, step),
+        revision: context.revision,
+      });
+      const run = {
+        container: container.name,
+        cwd: REPO_DIR,
+        model: modelFor(db, step),
+        prompt,
+        tools: PLANNING_TOOLS,
+        resumeSessionId: context.resumeSessionId,
+        signal: context.signal,
+        onEvent: context.log,
+      };
+      const outcome = await runResumable(runAgent, runtime, run, prompt);
+      if (outcome.kind === 'ok') {
+        return { kind: 'ok', output: outcome.text, sessionId: outcome.sessionId };
+      }
+      return outcome.kind === 'rate_limited'
+        ? { kind: 'rate_limited', retryAt: null }
+        : { kind: 'error', error: outcome.message };
+    } finally {
+      await runtime.stop(container.name);
+    }
+  };
+}
