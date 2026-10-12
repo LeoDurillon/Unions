@@ -68,3 +68,61 @@ dialog::backdrop {
 .markdown summary {
   @apply cursor-pointer font-medium;
 }
+
+/* Syntax highlighting in the review diff (highlight.js classes from lowlight), GitHub-like. */
+.hljs-comment,
+.hljs-quote {
+  @apply text-zinc-500 italic dark:text-zinc-400;
+}
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-meta .hljs-keyword,
+.hljs-doctag,
+.hljs-template-tag {
+  @apply text-rose-700 dark:text-rose-400;
+}
+.hljs-string,
+.hljs-regexp,
+.hljs-meta .hljs-string,
+.hljs-char.escape_ {
+  @apply text-sky-900 dark:text-sky-300;
+}
+.hljs-number,
+.hljs-literal,
+.hljs-variable.constant_,
+.hljs-attr,
+.hljs-attribute,
+.hljs-selector-attr,
+.hljs-selector-class,
+.hljs-selector-id,
+.hljs-operator {
+  @apply text-blue-700 dark:text-blue-300;
+}
+.hljs-title,
+.hljs-title.function_,
+.hljs-title.class_,
+.hljs-section {
+  @apply text-violet-700 dark:text-violet-300;
+}
+.hljs-built_in,
+.hljs-type,
+.hljs-symbol,
+.hljs-variable.language_ {
+  @apply text-orange-700 dark:text-orange-300;
+}
+.hljs-name,
+.hljs-tag,
+.hljs-selector-pseudo {
+  @apply text-green-800 dark:text-green-400;
+}
+.hljs-meta,
+.hljs-subst,
+.hljs-template-variable {
+  @apply text-zinc-700 dark:text-zinc-300;
+}
+.hljs-emphasis {
+  @apply italic;
+}
+.hljs-strong {
+  @apply font-semibold;
+}

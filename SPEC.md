@@ -45,7 +45,8 @@ Everything the agent does is mirrored to the GitHub issue.
    From final review onward the user can run the ticket's branch as a live preview (see Preview environments),
    and rebase it onto the latest base branch (see Rebase).
    **Review changes** opens a full-page diff of the branch (files on the left, one file at a time), built from a
-   snapshot the worker saves after each implementation run. The user comments on a line or a block of lines; the
+   snapshot the worker saves after each implementation run, syntax-highlighted, unified or split (side by side; the
+   choice is remembered in the browser). The user comments on a line or a block of lines; the
    comments stay local drafts until **Send review**, which is allowed when the ticket waits on the user at the
    implementation or the final review and works like Request changes.
 6. On archive (or project deletion) the containers and volumes are removed. Done alone keeps them, so the

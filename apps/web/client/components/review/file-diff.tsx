@@ -1,17 +1,21 @@
 import { parsePatch, type DiffLine } from '@union/core/diff';
 import { useMemo, useState, type ReactElement, type ReactNode } from 'react';
 
-import type { CommentView } from '../../../src/api-types';
-import { anchorOf, isSelected, select, type Selection } from '../../lib/diff-selection';
+import { anchorOf, isSelected, select } from '../../lib/diff-selection';
+import { highlightDiff, languageFor, type Token } from '../../lib/highlight';
+import {
+  Code,
+  commentsAt,
+  Gutter,
+  ROW_TONE,
+  SELECTED_TONE,
+  SIGN,
+  type DiffViewProps,
+} from './diff-parts';
+import { SplitDiff } from './split-diff';
 
-const ROW_TONE = {
-  add: 'bg-green-50 dark:bg-green-950/40',
-  del: 'bg-red-50 dark:bg-red-950/40',
-  context: '',
-  hunk: 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300',
-  meta: 'text-zinc-400',
-} as const;
-const SIGN = { add: '+', del: '−', context: ' ', hunk: '', meta: '' } as const;
+export type DiffView = 'unified' | 'split';
+
 /** Stable row keys from the line numbers; hunk headers and notes are numbered in order. */
 function keyed(lines: DiffLine[]): { line: DiffLine; key: string }[] {
   let other = 0;
@@ -41,87 +45,58 @@ function keyed(lines: DiffLine[]): { line: DiffLine; key: string }[] {
 /** Rendering stays fast on huge files: the rest is one click away. */
 const FIRST_LINES = 3000;
 
-function Gutter({
-  value,
-  onPick,
-}: {
-  value: number | null;
-  onPick: ((extend: boolean) => void) | null;
-}): ReactElement {
-  if (value === null || !onPick) {
-    return <td className="w-12 select-none px-2 text-right text-zinc-400">{value ?? ''}</td>;
-  }
-  return (
-    <td className="w-12 select-none px-2 text-right">
-      <button
-        type="button"
-        className="text-zinc-400 hover:text-indigo-600"
-        aria-label={`Comment on line ${value}`}
-        onClick={(event) => {
-          onPick(event.shiftKey);
-        }}
-      >
-        {value}
-      </button>
-    </td>
-  );
-}
-
 function Row({
   line,
+  tokens,
   selected,
   onPick,
 }: {
   line: DiffLine;
+  tokens: Token[] | undefined;
   selected: boolean;
   onPick: (extend: boolean) => void;
 }): ReactElement {
   const anchor = anchorOf(line);
   const oldNumber = line.kind === 'del' || line.kind === 'context' ? line.oldLine : null;
   const newNumber = line.kind === 'add' || line.kind === 'context' ? line.newLine : null;
-  const tone = selected ? 'bg-yellow-100 dark:bg-yellow-900/40' : ROW_TONE[line.kind];
+  const tone = selected ? SELECTED_TONE : ROW_TONE[line.kind];
   return (
     <tr className={tone}>
       <Gutter value={oldNumber} onPick={anchor?.side === 'old' ? onPick : null} />
       <Gutter value={newNumber} onPick={anchor?.side === 'new' ? onPick : null} />
       <td className="whitespace-pre px-2">
         <span className="select-none text-zinc-400">{SIGN[line.kind]} </span>
-        {line.text}
+        <Code line={line} tokens={tokens} />
       </td>
     </tr>
   );
 }
 
-type TableProps = {
-  lines: { line: DiffLine; key: string }[];
-  comments: CommentView[];
-  selection: Selection | null;
-  onSelect: (selection: Selection) => void;
-  renderBelow: (side: 'old' | 'new', line: number, comments: CommentView[]) => ReactNode;
-};
-
-function DiffTable({
+function UnifiedDiff({
   lines: shown,
   comments,
+  tokens,
   selection,
   onSelect,
   renderBelow,
-}: TableProps): ReactElement {
+}: DiffViewProps & { lines: { line: DiffLine; key: string }[] }): ReactElement {
   return (
     <table className="w-full border-collapse">
       <tbody>
         {shown.map(({ line, key }) => {
           const anchor = anchorOf(line);
-          const here = anchor
-            ? comments.filter(
-                (comment) => comment.side === anchor.side && comment.endLine === anchor.number,
+          const below = anchor
+            ? renderBelow(
+                anchor.side,
+                anchor.number,
+                commentsAt(comments, anchor.side, anchor.number),
               )
-            : [];
-          const below = anchor ? renderBelow(anchor.side, anchor.number, here) : null;
+            : null;
           return (
             <RowWithBelow key={key} below={below}>
               <Row
                 line={line}
+                tokens={tokens.get(line)}
                 selected={anchor !== null && isSelected(selection, anchor.side, anchor.number)}
                 onPick={(extend) => {
                   if (anchor) {
@@ -137,23 +112,18 @@ function DiffTable({
   );
 }
 
-/** One file's diff; comments and the editor appear under the last line they cover. */
+/** One file's diff, unified or side by side; comments and the editor appear under the last line they cover. */
 export function FileDiff({
+  path,
   patch,
-  comments,
-  selection,
-  onSelect,
-  renderBelow,
-}: {
-  patch: string;
-  comments: CommentView[];
-  selection: Selection | null;
-  onSelect: (selection: Selection) => void;
-  renderBelow: (side: 'old' | 'new', line: number, comments: CommentView[]) => ReactNode;
-}): ReactElement {
+  view,
+  ...props
+}: Omit<DiffViewProps, 'tokens'> & { path: string; patch: string; view: DiffView }): ReactElement {
   const lines = useMemo(() => keyed(parsePatch(patch)), [patch]);
   const [showAll, setShowAll] = useState(false);
-  const shown = showAll ? lines : lines.slice(0, FIRST_LINES);
+  const shown = useMemo(() => (showAll ? lines : lines.slice(0, FIRST_LINES)), [lines, showAll]);
+  const plain = useMemo(() => shown.map(({ line }) => line), [shown]);
+  const tokens = useMemo(() => highlightDiff(plain, languageFor(path)), [plain, path]);
   if (lines.length === 0) {
     return (
       <p className="text-sm text-zinc-500">
@@ -163,13 +133,11 @@ export function FileDiff({
   }
   return (
     <div className="overflow-x-auto font-mono text-xs">
-      <DiffTable
-        lines={shown}
-        comments={comments}
-        selection={selection}
-        onSelect={onSelect}
-        renderBelow={renderBelow}
-      />
+      {view === 'split' ? (
+        <SplitDiff lines={plain} tokens={tokens} {...props} />
+      ) : (
+        <UnifiedDiff lines={shown} tokens={tokens} {...props} />
+      )}
       {lines.length > shown.length ? (
         <button
           type="button"

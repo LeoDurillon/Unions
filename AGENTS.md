@@ -27,8 +27,9 @@ behavior; this file covers how to work in the repo.
     (`components/github-app/`, also a global page in the sidebar). The board columns fill the viewport height; each column scrolls itself.
   - Code review: after each implementation run the worker stores the branch diff (`diff-snapshot.ts`,
     `diff_snapshots`/`diff_files`, newest only). The web reads it from SQLite (`routes/review.ts`), never from Docker or
-    GitHub; `components/review/` renders one file at a time. Line comments are drafts in `review_comments` until sent;
-    sending formats them (`review-feedback.ts`) into a normal `revise` command. Files matching the project's
+    GitHub; `components/review/` renders one file at a time, unified or split (`lib/split-rows.ts` pairs the lines),
+    highlighted by lowlight per hunk side (`lib/highlight.ts`). Line comments are drafts in `review_comments` until
+    sent; sending formats them (`review-feedback.ts`) into a normal `revise` command. Files matching the project's
     review ignore rules (`isIgnoredPath` in `@union/core/diff`: built-in lock files plus `config.reviewIgnore`
     gitignore-style patterns) are flagged `ignored` and listed apart, never dropped. `@union/core/diff` parses diffs and
     is browser-safe.

@@ -3,117 +3,25 @@ import { useState, type ReactElement } from 'react';
 import type { CommentView, DiffResponse } from '../../../src/api-types';
 import type { Selection } from '../../lib/diff-selection';
 import { useCommentMutations, useComments, useDiff, useDiffFile } from '../../lib/use-review';
-import { Button, ErrorText } from '../ui';
-import { CommentCard } from './comment-card';
-import { CommentEditor } from './comment-editor';
-import { FileDiff } from './file-diff';
+import { ErrorText } from '../ui';
+import { hasThread, OutdatedComments, Thread } from './comment-thread';
+import { FileDiff, type DiffView } from './file-diff';
 import { FileList } from './file-list';
-import { SendReview } from './send-review';
+import { ReviewHeader } from './review-header';
+import { useDiffView } from './view-toggle';
 
 type Mutations = ReturnType<typeof useCommentMutations>;
-
-function Thread({
-  path,
-  comments,
-  selection,
-  side,
-  line,
-  mutations,
-  onDone,
-}: {
-  path: string;
-  comments: CommentView[];
-  selection: Selection | null;
-  side: 'old' | 'new';
-  line: number;
-  mutations: Mutations;
-  onDone: () => void;
-}): ReactElement | null {
-  const editing = selection?.side === side && selection.end === line;
-  const current = comments.filter((comment) => !comment.outdated);
-  if (!editing && current.length === 0) {
-    return null;
-  }
-  return (
-    <div className="max-w-3xl space-y-2">
-      {current.map((comment) => (
-        <CommentCard
-          key={comment.id}
-          comment={comment}
-          onSave={(body) => {
-            mutations.edit.mutate({ id: comment.id, body });
-          }}
-          onDelete={() => {
-            mutations.remove.mutate(comment.id);
-          }}
-        />
-      ))}
-      {editing ? (
-        <CommentEditor
-          selection={selection}
-          pending={mutations.add.isPending}
-          error={mutations.add.error}
-          onCancel={onDone}
-          onSave={(body) => {
-            mutations.add.mutate(
-              {
-                path,
-                side: selection.side,
-                startLine: selection.start,
-                endLine: selection.end,
-                body,
-              },
-              { onSuccess: onDone },
-            );
-          }}
-        />
-      ) : null}
-    </div>
-  );
-}
-
-function OutdatedComments({
-  comments,
-  mutations,
-}: {
-  comments: CommentView[];
-  mutations: Mutations;
-}): ReactElement | null {
-  if (comments.length === 0) {
-    return null;
-  }
-  return (
-    <details className="rounded-md border border-amber-300 p-2 text-sm dark:border-amber-900">
-      <summary className="cursor-pointer">
-        {comments.length} comment(s) on an older version of this file
-      </summary>
-      <div className="mt-2 space-y-2">
-        {comments.map((comment) => (
-          <CommentCard
-            key={comment.id}
-            comment={comment}
-            showExcerpt
-            onSave={(body) => {
-              mutations.edit.mutate({ id: comment.id, body });
-            }}
-            onDelete={() => {
-              mutations.remove.mutate(comment.id);
-            }}
-          />
-        ))}
-      </div>
-    </details>
-  );
-}
 
 function OpenFile({
   ticketId,
   fileId,
+  view,
   comments,
   mutations,
 }: {
   ticketId: number;
   fileId: number;
+  view: DiffView;
   comments: CommentView[];
   mutations: Mutations;
 }): ReactElement {
@@ -130,68 +38,30 @@ function OpenFile({
       <h3 className="font-mono text-sm font-semibold">{path}</h3>
       <OutdatedComments comments={outdated} mutations={mutations} />
       <FileDiff
+        path={path}
+        view={view}
         patch={file.data.patch}
         comments={forFile}
         selection={selection}
         onSelect={setSelection}
-        renderBelow={(side, line, here) => (
-          <Thread
-            path={path}
-            comments={here}
-            selection={selection}
-            side={side}
-            line={line}
-            mutations={mutations}
-            onDone={() => {
-              setSelection(null);
-            }}
-          />
-        )}
+        renderBelow={(side, line, here) =>
+          // Null keeps the diff free of empty rows under lines with nothing to show.
+          hasThread(here, selection, side, line) ? (
+            <Thread
+              path={path}
+              comments={here}
+              selection={selection}
+              side={side}
+              line={line}
+              mutations={mutations}
+              onDone={() => {
+                setSelection(null);
+              }}
+            />
+          ) : null
+        }
       />
     </div>
-  );
-}
-
-const SHORT_SHA = 7;
-
-function ReviewHeader({
-  title,
-  diff,
-  drafts,
-  mutations,
-  onClose,
-}: {
-  title: string;
-  diff: DiffResponse | undefined;
-  drafts: number;
-  mutations: Mutations;
-  onClose: () => void;
-}): ReactElement {
-  const snapshot = diff?.snapshot;
-  const ignoredCount = diff?.files.filter((file) => file.ignored).length ?? 0;
-  return (
-    <header className="flex items-center gap-3 border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
-      <Button onClick={onClose}>Back</Button>
-      <div className="min-w-0 flex-1">
-        <h2 className="truncate font-semibold">Review: {title}</h2>
-        {snapshot ? (
-          <p className="text-xs text-zinc-500">
-            {diff.files.length} files changed against {snapshot.baseBranch}
-            {ignoredCount > 0 ? ` (${ignoredCount} ignored)` : ''} ·{' '}
-            {snapshot.headSha.slice(0, SHORT_SHA)}
-          </p>
-        ) : null}
-      </div>
-      <SendReview
-        drafts={drafts}
-        canSend={diff?.canSend ?? false}
-        pending={mutations.send.isPending}
-        error={mutations.send.error}
-        onSend={(summary) => {
-          mutations.send.mutate(summary, { onSuccess: onClose });
-        }}
-      />
-    </header>
   );
 }
 
@@ -216,6 +86,7 @@ export function ReviewPage({
   const mutations = useCommentMutations(ticketId);
   const files = diff.data?.files ?? [];
   const [picked, setPicked] = useState<number | null>(null);
+  const [view, setView] = useDiffView();
   const fileId = openFileId(files, picked);
   const all = comments.data ?? [];
   const drafts = all.filter((comment) => comment.status === 'draft').length;
@@ -227,6 +98,8 @@ export function ReviewPage({
         title={title}
         diff={diff.data}
         drafts={drafts}
+        view={view}
+        onView={setView}
         mutations={mutations}
         onClose={onClose}
       />
@@ -246,6 +119,7 @@ export function ReviewPage({
               key={fileId}
               ticketId={ticketId}
               fileId={fileId}
+              view={view}
               comments={all}
               mutations={mutations}
             />

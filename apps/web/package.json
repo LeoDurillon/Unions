@@ -17,6 +17,7 @@
     "@union/core": "workspace:*",
     "drizzle-orm": "catalog:database",
     "hono": "catalog:server",
+    "lowlight": "catalog:ui",
     "octokit": "catalog:github",
     "react": "catalog:ui",
     "react-dom": "catalog:ui",
