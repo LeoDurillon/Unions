@@ -2,6 +2,7 @@ import {
   modelFor,
   parentOf,
   resolveAgent,
+  sharedPrompt,
   toolsFor,
   type ContainerRuntime,
   type Db,
@@ -52,7 +53,7 @@ function freshPrompt({ deps, context, project }: Workspace): string {
   const prompt = buildPrompt({
     ticket,
     parent: parentOf(deps.db, ticket),
-    shared: resolveAgent(deps.db, 'shared').prompt,
+    shared: sharedPrompt(deps.db, ticket.projectId),
     instructions: resolveAgent(deps.db, 'implement').prompt + gateHint(project.config.gateCommand),
     approved: approvedBefore(deps.db, ticket.id, 'implement'),
     revision: null,

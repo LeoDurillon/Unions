@@ -14,7 +14,7 @@ export type PromptInput = {
   ticket: Ticket;
   /** The done ticket this one builds on: its changes are already in the checkout. */
   parent?: Ticket | null;
-  /** Instructions every agent receives first (editable as the "shared" agent). */
+  /** Instructions every agent receives first: the "shared" agent's, then the project's own. */
   shared: string;
   /** This step's own instructions (editable per agent). */
   instructions: string;

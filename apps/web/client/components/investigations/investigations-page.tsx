@@ -71,7 +71,8 @@ function Detail({
   );
 }
 
-function ProjectInvestigations({ project }: { project: PublicProject }): ReactElement {
+/** Ad-hoc agent runs on a custom prompt for the project; no GitHub issue is created. */
+export function InvestigationsPage({ project }: { project: PublicProject }): ReactElement {
   const query = useQuery({
     queryKey: ['investigations', project.id],
     queryFn: () => api.investigations(project.id),
@@ -79,7 +80,7 @@ function ProjectInvestigations({ project }: { project: PublicProject }): ReactEl
   const [selection, setSelection] = useState<Selection>('new');
   const investigations = query.data ?? [];
   return (
-    <div className="flex min-h-0 flex-1">
+    <div className="flex h-full min-h-0">
       <nav
         aria-label="Investigations"
         className="flex w-72 shrink-0 flex-col gap-2 overflow-y-auto border-r border-zinc-200 p-3 dark:border-zinc-800"
@@ -92,6 +93,10 @@ function ProjectInvestigations({ project }: { project: PublicProject }): ReactEl
         >
           + New investigation
         </Button>
+        <p className="px-1 text-xs text-zinc-500">
+          Run an agent on your own prompt, about the repository or a general subject. Nothing is
+          posted to GitHub.
+        </p>
         <ErrorText error={query.error} />
         <ul className="space-y-0.5">
           {investigations.map((investigation) => (
@@ -117,33 +122,6 @@ function ProjectInvestigations({ project }: { project: PublicProject }): ReactEl
           />
         </div>
       </div>
-    </div>
-  );
-}
-
-/** Ad-hoc agent runs on a custom prompt for the current project; no GitHub issue is created. */
-export function InvestigationsPage({ project }: { project: PublicProject | null }): ReactElement {
-  return (
-    <div className="flex h-full min-w-0 flex-1 flex-col">
-      <header className="border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
-        <h2 className="text-base font-semibold">
-          Investigations
-          {project ? (
-            <span className="ml-2 font-normal text-zinc-500">
-              {project.owner}/{project.repo}
-            </span>
-          ) : null}
-        </h2>
-        <p className="text-xs text-zinc-500">
-          Run an agent on your own prompt, about the repository or a general subject. Nothing is
-          posted to GitHub.
-        </p>
-      </header>
-      {project ? (
-        <ProjectInvestigations key={project.id} project={project} />
-      ) : (
-        <p className="p-4 text-sm text-zinc-500">Add a project first.</p>
-      )}
     </div>
   );
 }

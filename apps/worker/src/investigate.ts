@@ -3,6 +3,7 @@ import {
   emitEvent,
   failInterruptedInvestigations,
   finishInvestigation,
+  projectInstructions,
   schema,
   type ContainerRuntime,
   type Db,
@@ -58,10 +59,11 @@ export function investigationPrompt(investigation: Investigation, project: Proje
     investigation.scope === 'repository'
       ? `The repository ${project.owner}/${project.repo} is checked out at ${REPO_DIR} on its \`${project.config.baseBranch}\` branch. Read the code to answer; do not change it.`
       : `No repository is checked out: this is a general question for the team working on ${project.owner}/${project.repo}. Answer from your knowledge and the tools you have.`;
+  const own = projectInstructions(project);
   return `${earlierExchanges(investigation)}${investigation.prompt}
 
 ---
-${where}
+${own === '' ? '' : `${own}\n\n`}${where}
 Output only your findings as markdown: the answer first, then the evidence (files, links) it rests on.`;
 }
 

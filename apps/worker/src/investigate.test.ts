@@ -184,6 +184,14 @@ test('the prompt says where the code is, or that there is none', () => {
   expect(repository).not.toContain('follows up');
 });
 
+test('the prompt carries the project instructions when there are some', () => {
+  const own = { ...project, config: { ...project.config, instructions: 'Answer in French.' } };
+  expect(investigationPrompt(queue(), own)).toContain(
+    '---\n# Project instructions\n\nAnswer in French.\n\nNo repository',
+  );
+  expect(investigationPrompt(queue(), project)).not.toContain('Project instructions');
+});
+
 test('a follow-up prompt carries the earlier questions and answers', () => {
   const { id } = queue();
   claimInvestigation(db);

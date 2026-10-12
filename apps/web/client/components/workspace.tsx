@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react';
+import { useState, type ReactElement } from 'react';
 
 import type { PublicProject } from '../../src/api-types';
 import type { Page } from '../lib/use-navigation';
@@ -6,13 +6,31 @@ import { AgentsPage } from './agents/agents-page';
 import { Board, BoardView } from './board';
 import { GitHubAppPage } from './github-app/github-app-page';
 import { InvestigationsPage } from './investigations/investigations-page';
-import { ProjectBar } from './project-bar';
+import { ProjectBar, type ProjectView } from './project-bar';
 
 function noop(): void {
   // The empty board behind the first-run wizard is display only.
 }
 
-/** Project bar plus board (or the empty board behind the first-run wizard). */
+function ProjectBody({
+  project,
+  view,
+  onOpenTicket,
+}: {
+  project: PublicProject | null;
+  view: ProjectView;
+  onOpenTicket: (id: number) => void;
+}): ReactElement {
+  if (!project) {
+    return <BoardView tickets={[]} error={null} onOpen={onOpenTicket} onStart={noop} />;
+  }
+  if (view === 'investigations') {
+    return <InvestigationsPage key={project.id} project={project} />;
+  }
+  return <Board projectId={project.id} onOpen={onOpenTicket} />;
+}
+
+/** Project bar plus board or investigations (or the empty board behind the first-run wizard). */
 export function Workspace({
   project,
   onOpenTicket,
@@ -24,21 +42,24 @@ export function Workspace({
   onNewTicket: () => void;
   onSettings: () => void;
 }): ReactElement {
+  const [view, setView] = useState<ProjectView>('board');
   return (
     <div className="flex min-w-0 flex-1 flex-col">
-      <ProjectBar project={project} onNewTicket={onNewTicket} onSettings={onSettings} />
+      <ProjectBar
+        project={project}
+        view={view}
+        onView={setView}
+        onNewTicket={onNewTicket}
+        onSettings={onSettings}
+      />
       <main className="min-h-0 flex-1">
-        {project ? (
-          <Board projectId={project.id} onOpen={onOpenTicket} />
-        ) : (
-          <BoardView tickets={[]} error={null} onOpen={onOpenTicket} onStart={noop} />
-        )}
+        <ProjectBody project={project} view={view} onOpenTicket={onOpenTicket} />
       </main>
     </div>
   );
 }
 
-/** Right-hand side of the app: a global page, or the current project's board or investigations. */
+/** Right-hand side of the app: a global page, or the current project. */
 export function MainArea({
   page,
   project,
@@ -57,9 +78,6 @@ export function MainArea({
   }
   if (page === 'github-app') {
     return <GitHubAppPage />;
-  }
-  if (page === 'investigations') {
-    return <InvestigationsPage project={project} />;
   }
   return (
     <Workspace

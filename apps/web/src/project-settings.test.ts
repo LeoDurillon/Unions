@@ -114,6 +114,19 @@ test('review ignore rules: patterns are trimmed and validated; lock files can be
   );
 });
 
+function patchInstructions(instructions: unknown): Promise<Response> | Response {
+  return send('PATCH', `/api/projects/${projectId}`, { instructions });
+}
+
+test('project instructions are trimmed, cleared by an empty string and size-limited', async () => {
+  expect((await patchInstructions('  Use pnpm.\n')).status).toBe(200);
+  expect(stored()?.config.instructions).toBe('Use pnpm.');
+  expect((await patchInstructions(3)).status).toBe(400);
+  expect((await patchInstructions('x'.repeat(20_001))).status).toBe(400);
+  await patchInstructions('');
+  expect(stored()?.config.instructions).toBeUndefined();
+});
+
 test('delete removes the project and its tickets and queues container cleanup', async () => {
   const ticket = createTicket(db, { projectId, title: 't' });
   dispatch(db, ticket.id, { type: 'start' });

@@ -3,6 +3,7 @@ import {
   modelFor,
   parentOf,
   resolveAgent,
+  sharedPrompt,
   schema,
   ticketBase,
   toolsFor,
@@ -56,7 +57,7 @@ export async function runReviewStep(
       prompt: buildPrompt({
         ticket,
         parent: parentOf(db, ticket),
-        shared: resolveAgent(db, 'shared').prompt,
+        shared: sharedPrompt(db, ticket.projectId),
         instructions: resolveAgent(db, 'final_review').prompt + reviewContext(base, ticket.branch),
         approved: approvedBefore(db, ticket.id, 'final_review'),
         revision: null,

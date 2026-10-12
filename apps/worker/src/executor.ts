@@ -2,6 +2,7 @@ import {
   modelFor,
   parentOf,
   resolveAgent,
+  sharedPrompt,
   toolsFor,
   type ContainerRuntime,
   type Db,
@@ -38,7 +39,6 @@ export function createExecutor(
     }
     // Read on every run, so edits made in the settings apply to the next run.
     const agent = resolveAgent(db, step);
-    const shared = resolveAgent(db, 'shared');
     const container = await ensureTicketContainer(db, runtime, config, ticket);
     try {
       // The planning prompt carries the previous version and the feedback, so a lost session can
@@ -46,7 +46,7 @@ export function createExecutor(
       const prompt = buildPrompt({
         ticket,
         parent: parentOf(db, ticket),
-        shared: shared.prompt,
+        shared: sharedPrompt(db, ticket.projectId),
         instructions: agent.prompt,
         approved: approvedBefore(db, ticket.id, step),
         revision: context.revision,

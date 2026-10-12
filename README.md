@@ -12,9 +12,9 @@ your Claude Max subscription) works through a pipeline on a clone of the project
 3. **Final review**: a separate agent reviews the branch against the plan. You can also review the diff in Union,
    comment on lines and send the comments back to the implementer. Approving marks the PR ready for review.
 
-**Investigations** (in the sidebar) run an agent once on a prompt of your own, about the project's repository or a
-general subject, with the model and tools you pick, and you can ask follow-up questions on the answer. It stays in
-Union: no ticket, no GitHub issue.
+**Investigations** (a tab next to the board) run an agent once on a prompt of your own, about the project's
+repository or a general subject, with the model and tools you pick, and you can ask follow-up questions on the
+answer. It stays in Union: no ticket, no GitHub issue.
 
 A ticket can depend on another one: it waits until that ticket is Done, then starts from its branch, and its
 pull request targets that branch.

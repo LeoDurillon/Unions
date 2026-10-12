@@ -8,6 +8,7 @@ import {
   resetAgent,
   resolveAgent,
   saveAgent,
+  sharedPrompt,
 } from './agents';
 import { createDb, migrateDb, type Db } from './db';
 import * as schema from './schema';
@@ -92,4 +93,19 @@ test('the rebase prompt has no model of its own and never stores one', () => {
     model: null,
     customized: true,
   });
+});
+
+test('the shared prompt is followed by the project instructions when the project has some', () => {
+  const insert = (repo: string, instructions?: string): number =>
+    db
+      .insert(schema.projects)
+      .values({ owner: 'o', repo, config: { baseBranch: 'main', instructions } })
+      .returning()
+      .get().id;
+  saveAgent(db, 'shared', { prompt: 'Be brief.', model: null });
+  expect(sharedPrompt(db, insert('plain'))).toBe('Be brief.');
+  expect(sharedPrompt(db, insert('blank', '  '))).toBe('Be brief.');
+  expect(sharedPrompt(db, insert('own', 'Use pnpm.'))).toBe(
+    'Be brief.\n\n# Project instructions\n\nUse pnpm.',
+  );
 });

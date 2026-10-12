@@ -95,6 +95,20 @@ function defaultTools(agent: AgentId): string[] | null {
   return step ? [...DEFAULT_TOOLS[step]] : null;
 }
 
+/** The project's own instructions as a prompt section; empty when it has none. */
+export function projectInstructions(project: { config: schema.ProjectConfig }): string {
+  const text = project.config.instructions?.trim() ?? '';
+  return text === '' ? '' : `# Project instructions\n\n${text}`;
+}
+
+/** What every ticket agent gets first: the shared instructions, then the project's own. */
+export function sharedPrompt(db: Db, projectId: number): string {
+  const shared = resolveAgent(db, 'shared').prompt;
+  const project = db.select().from(schema.projects).where(eq(schema.projects.id, projectId)).get();
+  const own = project ? projectInstructions(project) : '';
+  return own === '' ? shared : `${shared}\n\n${own}`;
+}
+
 export function resolveAgent(db: Db, agent: AgentId): AgentConfig {
   const row = db
     .select()

@@ -120,6 +120,7 @@ export const api = {
       reviewIgnore?: string[];
       notionToken?: string;
       notionDataSourceId?: string;
+      instructions?: string;
     },
   ): Promise<PublicProject> => request('PATCH', `/api/projects/${id}`, change),
   deleteProject: (id: number): Promise<unknown> => request('DELETE', `/api/projects/${id}`),

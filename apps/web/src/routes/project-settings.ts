@@ -113,6 +113,26 @@ function notionTokenChange(body: Record<string, unknown>, current: string | null
   return optionalText(body, 'notionToken') ?? null;
 }
 
+const MAX_INSTRUCTIONS = 20_000;
+
+/** A present key replaces the instructions (empty clears them); an absent key leaves them. */
+function instructionsChange(
+  body: Record<string, unknown>,
+  current: string | undefined,
+): string | undefined {
+  if (!('instructions' in body)) {
+    return current;
+  }
+  const { instructions } = body;
+  if (typeof instructions !== 'string' || instructions.length > MAX_INSTRUCTIONS) {
+    throw fail(
+      BAD_REQUEST,
+      `"instructions" must be text of at most ${MAX_INSTRUCTIONS} characters`,
+    );
+  }
+  return instructions.trim() === '' ? undefined : instructions.trim();
+}
+
 function configChange(project: Project, body: Record<string, unknown>): ProjectConfig {
   const { config } = project;
   return {
@@ -125,6 +145,7 @@ function configChange(project: Project, body: Record<string, unknown>): ProjectC
     installCommand: commandChange(body, 'installCommand', config.installCommand),
     gateCommand: commandChange(body, 'gateCommand', config.gateCommand),
     maxIterations: iterationsChange(body, config.maxIterations),
+    instructions: instructionsChange(body, config.instructions),
   };
 }
 
@@ -155,6 +176,7 @@ const UPDATABLE = [
   'reviewIgnore',
   'notionToken',
   'notionDataSourceId',
+  'instructions',
   ...CHECK_FIELDS,
 ];
 

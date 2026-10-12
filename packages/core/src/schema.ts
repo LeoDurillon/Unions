@@ -36,6 +36,8 @@ export type ProjectConfig = {
   reviewIgnore?: string[];
   /** Notion data source tickets can be imported from (with `notionToken`). */
   notionDataSourceId?: string;
+  /** Markdown sent to every agent run on this project, after the shared instructions. */
+  instructions?: string;
 };
 
 export const projects = sqliteTable(

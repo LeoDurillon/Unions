@@ -3,13 +3,54 @@ import type { ReactElement } from 'react';
 import type { PublicProject } from '../../src/api-types';
 import { Button } from './ui';
 
-/** Slim bar above the board: which project is open, and the New ticket action. */
+export type ProjectView = 'board' | 'investigations';
+
+const VIEWS: { view: ProjectView; label: string }[] = [
+  { view: 'board', label: 'Board' },
+  { view: 'investigations', label: 'Investigations' },
+];
+
+function ViewTabs({
+  view,
+  onView,
+}: {
+  view: ProjectView;
+  onView: (view: ProjectView) => void;
+}): ReactElement {
+  return (
+    <div role="tablist" aria-label="Project" className="flex gap-1">
+      {VIEWS.map((entry) => {
+        const on = entry.view === view;
+        return (
+          <button
+            key={entry.view}
+            type="button"
+            role="tab"
+            aria-selected={on}
+            onClick={() => {
+              onView(entry.view);
+            }}
+            className={`rounded-md px-3 py-1 text-sm transition ${on ? 'bg-indigo-100 font-medium dark:bg-indigo-950' : 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800/60 dark:hover:text-zinc-100'}`}
+          >
+            {entry.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/** Slim bar above the project: which project is open, Board / Investigations tabs, and the actions. */
 export function ProjectBar({
   project,
+  view,
+  onView,
   onNewTicket,
   onSettings,
 }: {
   project: PublicProject | null;
+  view: ProjectView;
+  onView: (view: ProjectView) => void;
   onNewTicket: () => void;
   onSettings: () => void;
 }): ReactElement {
@@ -18,6 +59,7 @@ export function ProjectBar({
       <h2 className="text-base font-semibold">
         {project ? `${project.owner}/${project.repo}` : 'No project selected'}
       </h2>
+      {project ? <ViewTabs view={view} onView={onView} /> : null}
       {project?.githubAccess === 'none' ? (
         <button
           type="button"
