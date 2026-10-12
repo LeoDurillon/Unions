@@ -99,6 +99,11 @@ export const tickets = sqliteTable(
     prNumber: integer('pr_number'),
     /** When the draft PR was marked ready for review (set once, after the final approval). */
     prReadyAt: integer('pr_ready_at'),
+    /**
+     * Commits the base branch has that the PR's branch lacks, polled from GitHub while the PR is open
+     * and a rebase could be asked; null otherwise (no PR, closed or merged, not checked yet).
+     */
+    behindBy: integer('behind_by'),
     containerName: text('container_name'),
     homeVolume: text('home_volume'),
     workspaceVolume: text('workspace_volume'),

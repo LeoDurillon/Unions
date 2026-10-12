@@ -149,6 +149,13 @@ async function queueCommand(db: Db, c: Context): Promise<Response> {
   if (type === 'start') {
     assertStartable(db, ticket);
   }
+  // The worker knows the PR is open (and how far behind it is) from GitHub: no count, no rebase.
+  if (type === 'rebase' && (ticket.branch === null || ticket.behindBy === null)) {
+    throw fail(
+      CONFLICT,
+      'Nothing to rebase: the ticket has no open pull request (or it was not checked yet)',
+    );
+  }
   if (hasPendingCommand(db, id)) {
     throw fail(CONFLICT, 'A command for this ticket is still being processed');
   }

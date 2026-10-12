@@ -210,6 +210,27 @@ export class OctokitGitHubApi implements GitHubApi {
     }
   }
 
+  async pullRequestBehind(repo: RepoRef, number: number): Promise<number | null> {
+    const pull = await this.octokit.rest.pulls
+      .get({ ...repo, pull_number: number })
+      .catch((error: unknown) => {
+        if (isNotFound(error)) {
+          return null;
+        }
+        throw error;
+      });
+    if (!pull || pull.data.state !== 'open') {
+      return null;
+    }
+    const { base, head } = pull.data;
+    const { data } = await this.octokit.rest.repos.compareCommitsWithBasehead({
+      ...repo,
+      basehead: `${base.ref}...${head.sha}`,
+      per_page: 1,
+    });
+    return data.behind_by;
+  }
+
   /** The dependency endpoints take the blocking issue's database id, not its number. */
   private async issueId(repo: RepoRef, number: number): Promise<number> {
     const { data } = await this.octokit.rest.issues.get({ ...repo, issue_number: number });

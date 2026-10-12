@@ -43,13 +43,14 @@ export type TicketDetail = {
   runs: Run[];
 };
 
-export type CommandType = 'start' | 'approve' | 'revise' | 'retry' | 'cancel';
+export type CommandType = 'start' | 'approve' | 'revise' | 'retry' | 'rebase' | 'cancel';
 
 export const COMMAND_TYPES: readonly CommandType[] = [
   'start',
   'approve',
   'revise',
   'retry',
+  'rebase',
   'cancel',
 ];
 

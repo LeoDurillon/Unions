@@ -266,3 +266,44 @@ test('approving the final review marks the draft PR ready, once', async () => {
   expect(api.calls.filter((call) => call === 'markPullRequestReady')).toHaveLength(1);
   expect(eventTypes()).toContain('pull_request_ready');
 });
+
+test('the pull keeps how far behind an open PR is, for tickets that could be rebased', async () => {
+  await sync.push();
+  const pull = await api.createPullRequest(
+    { owner: 'o', repo: 'r' },
+    { title: 't', body: '', head: 'feature', base: 'main' },
+  );
+  const stored = api.pulls.find((candidate) => candidate.number === pull.number);
+  if (!stored) {
+    throw new Error('the fake did not keep the pull request');
+  }
+  stored.behindBy = 3;
+  db.update(schema.tickets)
+    .set({
+      prNumber: pull.number,
+      branch: 'feature',
+      phase: { kind: 'running', step: 'implement' },
+    })
+    .run();
+  await sync.pull();
+  // Still implementing: there is nothing to rebase yet, so GitHub is not asked.
+  expect(getTicket(db, ticketId).behindBy).toBeNull();
+  expect(api.calls).not.toContain('pullRequestBehind');
+
+  db.update(schema.tickets)
+    .set({ phase: { kind: 'awaiting_approval', step: 'final_review' } })
+    .run();
+  await sync.pull();
+  expect(getTicket(db, ticketId).behindBy).toBe(3);
+  expect(eventTypes().filter((type) => type === 'branch_behind')).toHaveLength(1);
+  await sync.pull();
+  expect(eventTypes().filter((type) => type === 'branch_behind')).toHaveLength(1);
+
+  // Merged or closed: nothing to rebase any more.
+  db.update(schema.tickets)
+    .set({ phase: { kind: 'done' } })
+    .run();
+  stored.state = 'closed';
+  await sync.pull();
+  expect(getTicket(db, ticketId).behindBy).toBeNull();
+});

@@ -1,0 +1,1 @@
+ALTER TABLE `tickets` ADD `behind_by` integer;

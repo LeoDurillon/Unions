@@ -91,6 +91,7 @@ function execute(db: Db, command: Command, hooks: CommandHooks): void {
     }
     case 'start':
     case 'retry':
+    case 'rebase':
     case 'cancel': {
       dispatch(db, requireTicketId(command), { type: command.type });
       return;

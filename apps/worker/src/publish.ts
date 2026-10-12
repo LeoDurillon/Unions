@@ -17,7 +17,7 @@ import { eq } from 'drizzle-orm';
 
 import { projectGitToken } from './credentials';
 import type { GitHubApi } from './github/api';
-import { cloneSource, hostGit, type ProvisionConfig } from './provision';
+import { cloneSource, hostGit, type CloneSource, type ProvisionConfig } from './provision';
 import { exportBranch } from './workspace-git';
 
 export type PublishResult = {
@@ -30,14 +30,17 @@ export type PublishResult = {
 
 /**
  * Takes the ticket's branch out of the container as a git bundle and pushes it from the host with the
- * project's token or GitHub App installation; the container never sees a credential.
+ * project's token or GitHub App installation; the container never sees a credential. With `lease`
+ * (the commit the remote branch must still be on) it force-pushes, for a rewritten history: if
+ * someone pushed in between, GitHub refuses and nothing is overwritten.
  */
-async function pushBranch(
+export async function pushBranch(
   runtime: ContainerRuntime,
   container: string,
   remote: { url: string; secret: string | null },
-  branch: string,
+  target: { branch: string; lease?: string },
 ): Promise<void> {
+  const { branch, lease } = target;
   const dir = await mkdtemp(path.join(tmpdir(), 'union-push-'));
   try {
     const bundle = path.join(dir, 'branch.bundle');
@@ -48,13 +51,32 @@ async function pushBranch(
       ['-C', bare, 'fetch', '--quiet', bundle, `refs/heads/${branch}:refs/heads/${branch}`],
       null,
     );
+    const force = lease ? [`--force-with-lease=refs/heads/${branch}:${lease}`] : [];
     await hostGit(
-      ['-C', bare, 'push', '--quiet', remote.url, `refs/heads/${branch}:refs/heads/${branch}`],
+      [
+        '-C',
+        bare,
+        'push',
+        '--quiet',
+        ...force,
+        remote.url,
+        `refs/heads/${branch}:refs/heads/${branch}`,
+      ],
       remote.secret,
     );
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
+}
+
+/** Where the host pushes: the project's repository, with its token or app installation. */
+export async function projectRemote(
+  db: Db,
+  gitBaseUrl: string,
+  project: Project,
+): Promise<CloneSource> {
+  const token = await projectGitToken(db, project);
+  return cloneSource(gitBaseUrl, project.owner, project.repo, token);
 }
 
 /** `Closes #n`, plus the parent's PR when the branch is stacked on it. */
@@ -118,9 +140,8 @@ export async function publishBranch(input: {
 }): Promise<PublishResult> {
   const { db, project, ticket, branch, base } = input;
   try {
-    const token = await projectGitToken(db, project);
-    const remote = cloneSource(input.config.gitBaseUrl, project.owner, project.repo, token);
-    await pushBranch(input.runtime, input.container, remote, branch);
+    const remote = await projectRemote(db, input.config.gitBaseUrl, project);
+    await pushBranch(input.runtime, input.container, remote, { branch });
     emitEvent(db, { type: 'branch_pushed', ticketId: ticket.id, payload: { branch } });
     // Re-read: the user may have linked a PR while the agent was working. A linked PR is kept.
     const { prNumber } = getTicket(db, ticket.id);

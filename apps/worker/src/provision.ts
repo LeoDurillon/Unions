@@ -100,17 +100,20 @@ export function cloneSource(
   return { url: authed, publicUrl, secret: token };
 }
 
-/** Runs git on the host without ever prompting; the token is masked in error messages. */
-export async function hostGit(args: string[], secret: string | null): Promise<void> {
+/** Runs git on the host without ever prompting and returns its output; the token is masked in errors. */
+export async function hostGit(args: string[], secret: string | null): Promise<string> {
   const proc = Bun.spawn(['git', ...args], {
+    stdout: 'pipe',
     stderr: 'pipe',
     env: { ...process.env, GIT_TERMINAL_PROMPT: '0' },
   });
-  if ((await proc.exited) !== 0) {
+  const [code, stdout] = await Promise.all([proc.exited, new Response(proc.stdout).text()]);
+  if (code !== 0) {
     const stderr = await new Response(proc.stderr).text();
     const safe = secret ? stderr.replaceAll(secret, '***') : stderr;
     throw new Error(`git ${args[0] ?? ''} failed: ${safe.trim()}`);
   }
+  return stdout;
 }
 
 /** The host clones; the container only receives the files, with a token-free `origin`. */

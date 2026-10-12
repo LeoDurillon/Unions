@@ -49,7 +49,7 @@ function branchLine(report: ImplementReport): string {
     return `**Branch** \`${branch}\`: pushed · PR #${publish.pullRequest}.`;
   }
   const note = publish.manualPullRequest
-    ? " No pull request opened (automatic creation is off): link one from the ticket's Overview tab."
+    ? " No pull request opened (automatic creation is off): link one from the ticket's PR tab."
     : '';
   return `**Branch** \`${branch}\`: pushed.${note}`;
 }

@@ -7,6 +7,7 @@ export const STEP_TITLES: Record<Step, string> = {
   test_plan: 'Test plan',
   implement: 'Implementation',
   final_review: 'Final review',
+  rebase: 'Rebase',
 };
 
 export const COLUMNS: { status: BoardStatus; title: string }[] = [

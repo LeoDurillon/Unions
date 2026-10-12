@@ -84,3 +84,43 @@ test('approving the final review finishes the ticket', () => {
     kind: 'done',
   });
 });
+
+test('a rebase from the final review or from done chains into a new final review', () => {
+  const rebasing: Phase = { kind: 'running', step: 'rebase', thenRun: 'final_review' };
+  expect(
+    transition({ kind: 'awaiting_approval', step: 'final_review' }, { type: 'rebase' }),
+  ).toEqual(rebasing);
+  expect(transition({ kind: 'done' }, { type: 'rebase' })).toEqual(rebasing);
+  expect(transition(rebasing, { type: 'run_finished' })).toEqual({
+    kind: 'running',
+    step: 'final_review',
+  });
+  expect(boardStatus(rebasing)).toBe('in_review');
+});
+
+test('a failed rebase is retried as a rebase that still chains into the review', () => {
+  const failed = transition(
+    { kind: 'running', step: 'rebase', thenRun: 'final_review' },
+    {
+      type: 'run_failed',
+      error: 'conflict',
+    },
+  );
+  expect(failed).toEqual({ kind: 'failed', step: 'rebase', error: 'conflict' });
+  expect(transition(failed, { type: 'retry' })).toEqual({
+    kind: 'running',
+    step: 'rebase',
+    thenRun: 'final_review',
+  });
+});
+
+test('a rebase is refused before the final review and once cancelled', () => {
+  for (const phase of [
+    { kind: 'awaiting_approval', step: 'implement' },
+    { kind: 'running', step: 'final_review' },
+    { kind: 'backlog' },
+    { kind: 'cancelled' },
+  ] satisfies Phase[]) {
+    expect(() => transition(phase, { type: 'rebase' })).toThrow(InvalidTransition);
+  }
+});

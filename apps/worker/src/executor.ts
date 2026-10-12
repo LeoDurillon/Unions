@@ -15,6 +15,7 @@ import type { GitHubApi } from './github/api';
 import { runImplementStep } from './implement';
 import { buildPrompt, isPlanningStep } from './prompts';
 import { ensureTicketContainer, REPO_DIR, type ProvisionConfig } from './provision';
+import { runRebaseStep } from './rebase';
 import { runReviewStep } from './review';
 import type { StepContext, StepExecutor, StepResult } from './scheduler';
 
@@ -33,6 +34,9 @@ export function createExecutor(
     }
     if (step === 'final_review') {
       return runReviewStep(deps, context);
+    }
+    if (step === 'rebase') {
+      return runRebaseStep(deps, context);
     }
     if (!isPlanningStep(step)) {
       return { kind: 'error', error: `Unknown step ${JSON.stringify(step)}` };

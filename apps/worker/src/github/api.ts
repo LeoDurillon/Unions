@@ -51,6 +51,11 @@ export type GitHubApi = {
   ): Promise<PullRequestRef>;
   /** Un-drafts the pull request; does nothing if it is already ready. */
   markPullRequestReady(repo: RepoRef, number: number): Promise<void>;
+  /**
+   * Commits the pull request's base branch has that its branch lacks; null when the pull request is
+   * closed, merged or gone (there is nothing to rebase then).
+   */
+  pullRequestBehind(repo: RepoRef, number: number): Promise<number | null>;
   /** Numbers of the issues of `repo` the issue is marked as blocked by. */
   listBlockedBy(repo: RepoRef, issueNumber: number): Promise<number[]>;
   /** Marks the issue as blocked by another issue of the same repository. */

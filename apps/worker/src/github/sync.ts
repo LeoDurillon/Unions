@@ -15,7 +15,7 @@ import { and, eq, isNull } from 'drizzle-orm';
 import type { GitHubApi, ProjectInfo, RepoRef } from './api';
 import { pushDependency } from './dependency';
 import { applyRemoteItem } from './inbound';
-import { markReadyWhenDone } from './pull-request';
+import { markReadyWhenDone, refreshBehind } from './pull-request';
 import { hashBody, renderIssueBody, renderStepComment, stepMarker } from './render';
 import { optionFor } from './status';
 
@@ -293,6 +293,9 @@ export class GitHubSync {
       if (item) {
         applyRemoteItem(this.db, project, ticket, item);
       }
+      await this.guarded(ticket.id, () =>
+        refreshBehind(this.db, this.api, repoOf(project), ticket),
+      );
     }
   }
 }

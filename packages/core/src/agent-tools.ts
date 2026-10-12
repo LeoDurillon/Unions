@@ -25,6 +25,8 @@ export const DEFAULT_TOOLS: Record<Step, readonly string[]> = {
     ...READ_GIT.map((command) => `Bash(git ${command}*)`),
     ...READ_GIT.map((command) => `Bash(git -C ${AGENT_REPO_DIR} ${command}*)`),
   ],
+  // Added to the implementer's tools for a rebase (see `toolsFor`).
+  rebase: ['Bash(git rebase*)', 'Bash(git merge-base*)', 'Bash(git add*)', 'Bash(git status*)'],
 };
 
 /** Claude Code's own tools, always offered. */

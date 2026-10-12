@@ -37,7 +37,12 @@ function workerTabsFor(detail: TicketDetail): TabEntry<WorkerTab>[] {
     label: STEP_TITLES[step],
     enabled: step === active || detail.outputs.some((output) => output.step === step),
   }));
-  return [...steps, { id: 'log', label: 'Log', enabled: true }];
+  // Rebase is not a pipeline step: its tab appears once one ran or runs.
+  const rebased = active === 'rebase' || detail.outputs.some((output) => output.step === 'rebase');
+  const rebase = rebased
+    ? [{ id: 'rebase' as const, label: STEP_TITLES.rebase, enabled: true }]
+    : [];
+  return [...steps, ...rebase, { id: 'log', label: 'Log', enabled: true }];
 }
 
 const LOOKS = {

@@ -35,6 +35,9 @@ export class FakeGitHubApi implements GitHubApi {
     title: string;
     body: string;
     draft: boolean;
+    /** Unset: open. */
+    state?: 'open' | 'closed';
+    behindBy?: number;
   })[] = [];
   private clock = 0;
   private commentSeq = 0;
@@ -165,6 +168,12 @@ export class FakeGitHubApi implements GitHubApi {
       pull.draft = false;
     }
     return Promise.resolve();
+  }
+
+  pullRequestBehind(_repo: RepoRef, number: number): Promise<number | null> {
+    this.calls.push('pullRequestBehind');
+    const pull = this.pulls.find((candidate) => candidate.number === number);
+    return Promise.resolve(pull && pull.state !== 'closed' ? (pull.behindBy ?? 0) : null);
   }
 
   listBlockedBy(_repo: RepoRef, issueNumber: number): Promise<number[]> {

@@ -43,12 +43,17 @@ behavior; this file covers how to work in the repo.
 - `apps/worker`: long-running Bun process. Drains the `commands` table, drives state machines, runs agents,
   syncs GitHub, writes `events`.
   - `commands.ts` maps UI commands to state-machine actions; `scheduler.ts` runs one step per ticket with a
-    concurrency cap through an injected `StepExecutor`; `executor.ts` is the real one (planning steps only so far).
+    concurrency cap through an injected `StepExecutor`; `executor.ts` is the real one (planning, implement, review
+    and rebase steps).
   - `implement.ts` / `implement-loop.ts`: the implementation step. The host checks out the ticket branch
     (`branch.ts`, `workspace-git.ts`), runs the project's install command, then loops agent turn → leftover commit →
     check command (`gate.ts`), resuming the same session with the failure until green or `maxIterations`.
     `publish.ts` exports the branch as a git bundle, pushes it from the host with the project token and opens the
     draft PR. The agent may run shell commands but never push, switch branches or rewrite history.
+  - `rebase.ts` (with `rebase-agent.ts`, `rebase-fetch.ts`, `rebase-git.ts`, `rebase-publish.ts`): the on-demand
+    rebase step. The host fetches base and branch into the container as a bundle, resumes the implementer's session
+    with the rebase prompt, checks the result and the project's checks, then force-pushes with a lease; any failure
+    puts the branch back as it was. `github/pull-request.ts` keeps `tickets.behind_by` current during the pull.
   - `investigate.ts`: `InvestigationRunner` runs queued investigations in throwaway `union-i<id>` containers
     (removed after each run), sharing the scheduler's `RunSlots` (`slots.ts`); cancellation arrives through the
     `cancel_investigation` command hook.

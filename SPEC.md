@@ -155,42 +155,52 @@ A one-off agent run on a custom prompt, outside the ticket pipeline (project bar
 - **Not yet:** resuming the agent's own session on a follow-up, choosing another branch, turning an answer into a
   ticket.
 
-## Rebase (planned)
+## Rebase
 
-Once implementation is done (final review, or Done while the PR is still open), the ticket panel shows how far the
+Once implementation is done (final review, or Done while the PR is still open), the ticket's PR tab shows how far the
 branch is behind the base branch ("4 commits behind `main`") and a **Rebase** button. The implementation agent then
 rebases the branch, resolves conflicts, re-runs the checks, and the host pushes the result.
 
 ### Flow
 
-1. **Behind count:** the worker asks GitHub (`compare/<base>...<branch>`, `behind_by`) during its regular polling,
-   for tickets with a pushed branch and an open PR. No count, no button: a branch that is up to date shows
-   "Up to date with `main`".
-2. **Fetch for the container:** the container has no GitHub credentials, so the host fetches the base branch with
-   the project's credentials, writes it as a `git bundle`, copies the bundle in, and fetches from it inside the container
-   (`refs/remotes/origin/<base>`). The same path will serve the implement loop.
+1. **Behind count:** the worker asks GitHub (the PR, then `compare/<PR base>...<head>`, `behind_by`) during its
+   regular pull, for tickets with a PR that could be rebased (at the final review, Done, or after a failed rebase),
+   and stores it in `tickets.behind_by`; null for the others and once the PR is closed or merged. No count, no
+   button (the web refuses the command too): a branch that is up to date shows "Up to date with `main`".
+2. **Fetch for the container:** the container has no GitHub credentials, so the host fetches the base branch and
+   the pushed branch with the project's credentials, writes them as a `git bundle`, copies it in and fetches from it
+   inside the container (`origin/<base>`, the local `<base>` that diffs compare with, and `origin/<branch>`). If the
+   pushed branch has commits the workspace lacks (someone pushed), the rebase stops before the agent runs: rewriting
+   would drop them.
 3. **Agent run (decided):** the same implementation agent, started with `claude -p --resume <implement session id>`
    and the rebase prompt, on the Implementation model. There is no separate rebase agent; the rebase prompt is its
    own entry in Agent settings (default: rebase onto `origin/<base>`, resolve conflicts keeping both intents, run
    the project's checks, fix what the rebase broke, abort if unsafe, never push). Allowed tools add `git rebase`,
-   `git merge-base` and the checks; push stays denied.
-4. **Push:** on success the host force-pushes with `--force-with-lease` (the rebase rewrites history), so a commit
-   pushed by someone else in the meantime is never overwritten; the PR updates by itself. The step's report
+   `git merge-base`, `git add` and `git status`; push, checkout, reset and branch deletion stay denied. A lost
+   session falls back to a fresh one given the task and the approved plan first.
+   The host then checks the result: no rebase left unfinished, still on the branch, `origin/<base>` now in its
+   history; it runs the project's check command.
+4. **Push:** on success the host force-pushes with `--force-with-lease` on the commit it fetched (the rebase
+   rewrites history), so a commit pushed by someone else in the meantime is never overwritten; the PR updates by
+   itself, and the review diff is captured again. The step's report
    (conflicts met and how they were resolved, check results) becomes the step's output and issue comment.
 5. **Back to review (decided):** the diff changed, so `final_review` always runs again and the ticket returns to awaiting final
    review. A ticket that was Done goes back to In review.
 
 ### Failure
 
-- Conflicts the agent cannot resolve, or checks that still fail: the agent runs `git rebase --abort`, so the branch
-  is left exactly as it was, and the ticket goes to `failed` on the `rebase` step with the agent's explanation.
-  **Retry** runs it again; **Revise** gives the agent guidance first ("keep our version of the API client").
+- Conflicts the agent cannot resolve, checks that still fail, or any other failure: the host aborts any rebase in
+  progress and resets the branch to the commit it started from, so it is left exactly as it was (and unpushed),
+  and the ticket goes to `failed` on the `rebase` step with the reason and the agent's report. **Retry** runs it
+  again. Not yet: **Revise** to give the agent guidance first ("keep our version of the API client").
 - Push rejected by the lease (the remote branch moved): `failed` with a message; nothing is overwritten.
 
 ### State machine
 
-New action `rebase`, allowed from `awaiting_approval` on `final_review` and from `done` while the PR is open, leading
-to `running` on the `rebase` step; `run_finished` on `rebase` leads to `running` on `final_review`.
+New action `rebase`, allowed from `awaiting_approval` on `final_review` and from `done` (the web checks the PR is
+open), leading to `running` on the `rebase` step with `thenRun: final_review`, so `run_finished` leads to `running`
+on `final_review`; a retry keeps that chain. `rebase` is a `Step` but not a pipeline step (`STEPS`); it shows on the
+board as In review.
 
 ## Preview environments (planned)
 

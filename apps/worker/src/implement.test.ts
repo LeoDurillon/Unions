@@ -242,5 +242,5 @@ test('with automatic pull requests off, the report says how to link one', () => 
     publish: { pushed: true, pullRequest: null, manualPullRequest: true, error: null },
   });
   expect(report).toContain('automatic creation is off');
-  expect(report).toContain('Overview tab');
+  expect(report).toContain('PR tab');
 });

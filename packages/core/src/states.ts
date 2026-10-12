@@ -2,7 +2,8 @@
 
 export const PLANNING_STEPS = ['intake', 'summary', 'technical', 'test_plan'] as const;
 export type PlanningStep = (typeof PLANNING_STEPS)[number];
-export type Step = PlanningStep | 'implement' | 'final_review';
+/** `rebase` is outside the pipeline: run on demand once the branch exists, then the review runs again. */
+export type Step = PlanningStep | 'implement' | 'final_review' | 'rebase';
 
 /** Models an agent can run on: the aliases `claude --model` accepts. */
 export const AGENT_MODELS = ['haiku', 'sonnet', 'opus'] as const;
@@ -19,6 +20,8 @@ export const MODEL_BY_STEP = {
   test_plan: 'sonnet',
   implement: 'opus',
   final_review: 'opus',
+  // Only a fallback: the rebase resumes the implementer's session, on its model (`modelFor`).
+  rebase: 'opus',
 } as const satisfies Record<Step, AgentModel>;
 
 /** Board column, mirrored to the GitHub Project `Status` field. */
@@ -43,11 +46,20 @@ export type Action =
   | { type: 'approve' }
   | { type: 'revise' } // feedback is stored separately, then the same step re-runs
   | { type: 'retry' }
+  // Brings the branch up to date with its base; the caller checks the pull request is still open.
+  | { type: 'rebase' }
   | { type: 'cancel' };
 
-/** Every step, in pipeline order. */
+/** Every pipeline step, in order (`rebase` is not one). */
 export const STEPS: readonly Step[] = [...PLANNING_STEPS, 'implement', 'final_review'];
 const ORDER = STEPS;
+
+/** A run of `step`; a rebase always chains into a new final review, since the code changed. */
+function running(step: Step): Phase {
+  return step === 'rebase'
+    ? { kind: 'running', step, thenRun: 'final_review' }
+    : { kind: 'running', step };
+}
 
 export function nextStep(step: Step): Step | null {
   return ORDER[ORDER.indexOf(step) + 1] ?? null;
@@ -95,11 +107,14 @@ function fromAwaitingApproval(phase: PhaseOf<'awaiting_approval'>, action: Actio
     const next = nextStep(phase.step);
     return next ? { kind: 'running', step: next } : { kind: 'done' };
   }
+  if (action.type === 'rebase' && phase.step === 'final_review') {
+    return running('rebase');
+  }
   return null;
 }
 
 function fromStalled(phase: PhaseOf<'failed' | 'rate_limited'>, action: Action): Phase | null {
-  return action.type === 'retry' ? { kind: 'running', step: phase.step } : null;
+  return action.type === 'retry' ? running(phase.step) : null;
 }
 
 function applyAction(phase: Phase, action: Action): Phase | null {
@@ -117,7 +132,10 @@ function applyAction(phase: Phase, action: Action): Phase | null {
     case 'rate_limited': {
       return fromStalled(phase, action);
     }
-    case 'done':
+    case 'done': {
+      // Done keeps an open pull request; a rebase sends it back to review.
+      return action.type === 'rebase' ? running('rebase') : null;
+    }
     case 'cancelled': {
       return null;
     }
@@ -152,7 +170,7 @@ export function boardStatus(phase: Phase): BoardStatus {
     case 'awaiting_approval':
     case 'rate_limited':
     case 'failed': {
-      return phase.step === 'final_review' ? 'in_review' : 'in_progress';
+      return phase.step === 'final_review' || phase.step === 'rebase' ? 'in_review' : 'in_progress';
     }
     default: {
       return assertNever(phase);

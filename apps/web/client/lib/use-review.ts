@@ -24,13 +24,16 @@ export function useDiffFile(
   });
 }
 
-/** The linked pull request's discussion, read from GitHub; under the review key, so imports refresh it. */
+/**
+ * The linked pull request's discussion, read from GitHub. Its own key: live events refresh the
+ * review data, and must not call GitHub each time; comment changes refresh it (`useCommentMutations`).
+ */
 export function useDiscussion(
   ticketId: number,
   enabled: boolean,
 ): UseQueryResult<DiscussionResponse> {
   return useQuery({
-    queryKey: ['review', ticketId, 'discussion'],
+    queryKey: ['pull-request', ticketId, 'discussion'],
     queryFn: () => api.discussion(ticketId),
     enabled,
     retry: false,
@@ -56,8 +59,13 @@ export function useCommentMutations(ticketId: number): {
   importNote: ReturnType<typeof useMutation<unknown, Error, string>>;
 } {
   const queryClient = useQueryClient();
-  const refresh = (): Promise<void> =>
-    queryClient.invalidateQueries({ queryKey: ['review', ticketId] });
+  // The discussion lists what is imported, so it follows the comments.
+  const refresh = async (): Promise<void> => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['review', ticketId] }),
+      queryClient.invalidateQueries({ queryKey: ['pull-request', ticketId] }),
+    ]);
+  };
   return {
     add: useMutation({
       mutationFn: (input: CommentInput) => api.addComment(ticketId, input),

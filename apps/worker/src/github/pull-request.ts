@@ -24,3 +24,34 @@ export async function markReadyWhenDone(
     payload: { number: ticket.prNumber },
   });
 }
+
+/** Where the user could ask for a rebase: at the final review, done with the PR open, or after a failed one. */
+function canRebase(ticket: Ticket): boolean {
+  const { phase } = ticket;
+  return (
+    phase.kind === 'done' ||
+    (phase.kind === 'awaiting_approval' && phase.step === 'final_review') ||
+    (phase.kind === 'failed' && phase.step === 'rebase')
+  );
+}
+
+/**
+ * Keeps `behind_by` current for tickets that could be rebased (null for the others, or once the PR
+ * is closed or merged). An event is recorded only when it changes, so the panel refreshes.
+ */
+export async function refreshBehind(
+  db: Db,
+  api: GitHubApi,
+  repo: RepoRef,
+  ticket: Ticket,
+): Promise<void> {
+  const behindBy =
+    ticket.prNumber !== null && canRebase(ticket)
+      ? await api.pullRequestBehind(repo, ticket.prNumber)
+      : null;
+  if (behindBy === ticket.behindBy) {
+    return;
+  }
+  db.update(schema.tickets).set({ behindBy }).where(eq(schema.tickets.id, ticket.id)).run();
+  emitEvent(db, { type: 'branch_behind', ticketId: ticket.id, payload: { behindBy } });
+}

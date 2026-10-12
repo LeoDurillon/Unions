@@ -137,11 +137,19 @@ export function listAgents(db: Db): AgentConfig[] {
 
 /** The model a run of `step` uses: the user's choice, else the built-in one. */
 export function modelFor(db: Db, step: Step): AgentModel {
+  // The rebase is the implementer's own session, so it keeps its model.
+  if (step === 'rebase') {
+    return modelFor(db, 'implement');
+  }
   return resolveAgent(db, step).model ?? MODEL_BY_STEP[step];
 }
 
 /** The tools a run of `step` is allowed: the user's choice, else the step's defaults. */
 export function toolsFor(db: Db, step: Step): string[] {
+  // The implementer's tools, plus the git commands a rebase needs.
+  if (step === 'rebase') {
+    return [...new Set([...toolsFor(db, 'implement'), ...DEFAULT_TOOLS.rebase])];
+  }
   return resolveAgent(db, step).tools ?? [...DEFAULT_TOOLS[step]];
 }
 
