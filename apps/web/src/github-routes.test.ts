@@ -55,6 +55,7 @@ function fakeGitHub(calls: Call[]): OnboardingGitHub {
     getDiscussion: () => Promise.resolve(null),
     listPullRequests: () => Promise.resolve(null),
     getPullRequestFiles: () => Promise.resolve(null),
+    getIssue: () => Promise.resolve(null),
     verifyApp: (app) => {
       calls.push({ method: 'verifyApp', args: [app.appId] });
       if (app.appId === '0') {

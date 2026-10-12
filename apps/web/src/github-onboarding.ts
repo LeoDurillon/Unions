@@ -7,6 +7,7 @@ import type {
   InstallationOption,
   ProjectOption,
   PullRequestInfo,
+  GitHubIssue,
   PullRequestDiscussion,
   PullRequestFilter,
   RepoOption,
@@ -55,6 +56,12 @@ export type OnboardingGitHub = {
     repo: { owner: string; repo: string },
     number: number,
   ): Promise<PullRequestFiles | null>;
+  /** One issue of the repository; null when there is none with that number. */
+  getIssue(
+    auth: GitHubAuth,
+    repo: { owner: string; repo: string },
+    number: number,
+  ): Promise<GitHubIssue | null>;
   /** The app the credentials belong to (`GET /app`); rejects a wrong App ID or key. */
   verifyApp(app: GitHubAppCredentials): Promise<AppInfo>;
   listInstallations(app: GitHubAppCredentials): Promise<InstallationOption[]>;
@@ -290,6 +297,30 @@ export class OctokitOnboarding implements OnboardingGitHub {
   ): Promise<PullRequestFiles | null> {
     try {
       return await fetchPullRequestFiles(this.client(auth), repo, number);
+    } catch (error) {
+      if (isNotFound(error)) {
+        return null;
+      }
+      throw error;
+    }
+  }
+
+  async getIssue(
+    auth: GitHubAuth,
+    repo: { owner: string; repo: string },
+    number: number,
+  ): Promise<GitHubIssue | null> {
+    try {
+      const { data } = await this.client(auth).rest.issues.get({ ...repo, issue_number: number });
+      return {
+        number: data.number,
+        nodeId: data.node_id,
+        title: data.title,
+        body: data.body ?? '',
+        url: data.html_url,
+        state: data.state === 'closed' ? 'closed' : 'open',
+        pullRequest: data.pull_request !== undefined,
+      };
     } catch (error) {
       if (isNotFound(error)) {
         return null;

@@ -43,14 +43,29 @@ export function getTicket(db: Executor, id: number): Ticket {
   return ticket;
 }
 
+/**
+ * A new backlog ticket. With `issue` it starts from an existing GitHub issue: the sync then adds
+ * that issue to the project board instead of creating one.
+ */
 export function createTicket(
   db: Db,
-  input: { projectId: number; title: string; body?: string },
+  input: {
+    projectId: number;
+    title: string;
+    body?: string;
+    issue?: { number: number; nodeId: string };
+  },
 ): Ticket {
   return db.transaction((tx) => {
     const ticket = tx
       .insert(schema.tickets)
-      .values({ projectId: input.projectId, title: input.title, body: input.body ?? '' })
+      .values({
+        projectId: input.projectId,
+        title: input.title,
+        body: input.body ?? '',
+        issueNumber: input.issue?.number ?? null,
+        issueNodeId: input.issue?.nodeId ?? null,
+      })
       .returning()
       .get();
     emitEvent(tx, {

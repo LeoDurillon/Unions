@@ -15,6 +15,7 @@ import type {
   DiscussionResponse,
   GitHubAppStatus,
   InstallationOption,
+  IssueImport,
   NotionImport,
   ProjectOption,
   PublicProject,
@@ -209,6 +210,12 @@ export const api = {
     remove: (): Promise<GitHubAppStatus> => request('DELETE', '/api/github/app'),
     installations: (): Promise<InstallationOption[]> =>
       request('GET', '/api/github/app/installations'),
+  },
+  githubIssue: {
+    preview: (projectId: number, issue: string): Promise<IssueImport> =>
+      request('POST', '/api/tickets/github-issue/preview', { projectId, issue }),
+    importIssue: (projectId: number, issue: string): Promise<TicketSummary> =>
+      request('POST', '/api/tickets/github-issue', { projectId, issue }),
   },
   notion: {
     verify: (

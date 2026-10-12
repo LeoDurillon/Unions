@@ -30,7 +30,9 @@ Everything the agent does is mirrored to the GitHub issue.
 0. First run: a setup wizard connects GitHub (token or GitHub App installation), picks the repository, and picks or creates the GitHub Project.
 1. Create a ticket (title, description), or import it from Notion when the project is connected (optional wizard
    step or project settings: integration secret + data source; the page must be a row of that data source)
-   → GitHub issue added to the Project.
+   → GitHub issue added to the Project. Or import an existing issue of the repository (number or URL; pull requests
+   and issues already on a ticket are refused): the ticket is on that issue, which the sync adds to the Project
+   instead of creating one, and its title and description keep following GitHub.
 2. Move to In Progress → the worker creates volumes + container, clones the repo into the workspace volume.
    A ticket that depends on another one cannot start before it is done (see Ticket dependencies).
 3. Planning steps, each a tab on the ticket: `intake` (Haiku) → `summary` (Sonnet) → `technical` (Opus) → `test_plan` (Sonnet).

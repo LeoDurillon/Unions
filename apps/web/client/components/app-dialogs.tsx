@@ -2,24 +2,35 @@ import { useState, type ReactElement } from 'react';
 
 import type { PublicProject } from '../../src/api-types';
 import type { Overlay } from '../lib/use-navigation';
+import { GitHubIssueImportPanel } from './github-issue-import';
 import { NotionImportPanel } from './notion-import';
 import { SettingsDialog } from './settings/settings-dialog';
 import { TicketForm } from './ticket-form';
 import { Dialog } from './ui';
 
 type Draft = { title: string; body: string; key: number };
+type Source = 'write' | 'github' | 'notion';
+
+/** Writing by hand always; importing from GitHub or Notion when the project reaches them. */
+function sourcesFor(project: PublicProject): { id: Source; label: string }[] {
+  return [
+    { id: 'write', label: 'Write' },
+    ...(project.githubAccess === 'none'
+      ? []
+      : [{ id: 'github' as const, label: 'Import from GitHub' }]),
+    ...(project.hasNotion ? [{ id: 'notion' as const, label: 'Import from Notion' }] : []),
+  ];
+}
 
 function TicketTabs({
+  tabs,
   tab,
   onChange,
 }: {
-  tab: 'write' | 'notion';
-  onChange: (tab: 'write' | 'notion') => void;
+  tabs: { id: Source; label: string }[];
+  tab: Source;
+  onChange: (tab: Source) => void;
 }): ReactElement {
-  const tabs = [
-    { id: 'write', label: 'Write' },
-    { id: 'notion', label: 'Import from Notion' },
-  ] as const;
   return (
     <div role="tablist" className="flex gap-1 border-b border-zinc-200 dark:border-zinc-800">
       {tabs.map(({ id, label }) => (
@@ -40,7 +51,7 @@ function TicketTabs({
   );
 }
 
-/** New ticket: written by hand, or imported from Notion when the project is connected. */
+/** New ticket: written by hand, or imported from a GitHub issue or a Notion page. */
 function TicketBody({
   project,
   onCreated,
@@ -48,7 +59,8 @@ function TicketBody({
   project: PublicProject;
   onCreated: (id: number) => void;
 }): ReactElement {
-  const [tab, setTab] = useState<'write' | 'notion'>('write');
+  const [tab, setTab] = useState<Source>('write');
+  const tabs = sourcesFor(project);
   const [draft, setDraft] = useState<Draft>({ title: '', body: '', key: 0 });
   const form = (
     <TicketForm
@@ -59,15 +71,17 @@ function TicketBody({
       onCreated={onCreated}
     />
   );
-  if (!project.hasNotion) {
+  if (tabs.length === 1) {
     return form;
   }
   return (
     <div className="space-y-4">
-      <TicketTabs tab={tab} onChange={setTab} />
-      {tab === 'write' ? (
-        form
-      ) : (
+      <TicketTabs tabs={tabs} tab={tab} onChange={setTab} />
+      {tab === 'write' ? form : null}
+      {tab === 'github' ? (
+        <GitHubIssueImportPanel projectId={project.id} onCreated={onCreated} />
+      ) : null}
+      {tab === 'notion' ? (
         <NotionImportPanel
           projectId={project.id}
           onCreated={onCreated}
@@ -76,7 +90,7 @@ function TicketBody({
             setTab('write');
           }}
         />
-      )}
+      ) : null}
     </div>
   );
 }

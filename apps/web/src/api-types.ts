@@ -210,5 +210,20 @@ export type DiscussionResponse = PullRequestDiscussion & {
 /** What an import from the pull request did. */
 export type ReviewImportResult = { imported: number; alreadyImported: number; resolved: number };
 
+/** A GitHub issue of the project's repository, as fetched to create a ticket from it. */
+export type GitHubIssue = {
+  number: number;
+  nodeId: string;
+  title: string;
+  body: string;
+  url: string;
+  state: 'open' | 'closed';
+  /** GitHub serves pull requests as issues too; those are refused. */
+  pullRequest: boolean;
+};
+
+/** The import preview: the issue, and the ticket it already belongs to, if any. */
+export type IssueImport = Omit<GitHubIssue, 'nodeId' | 'pullRequest'> & { ticketId: number | null };
+
 /** A Notion page fetched for import: shown as a preview, then turned into a ticket. */
 export type NotionImport = { title: string; body: string; url: string; truncated: boolean };

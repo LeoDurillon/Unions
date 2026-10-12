@@ -307,3 +307,14 @@ test('the pull keeps how far behind an open PR is, for tickets that could be reb
   await sync.pull();
   expect(getTicket(db, ticketId).behindBy).toBeNull();
 });
+
+test('a ticket created from an existing issue gets that issue on the board, not a new one', async () => {
+  db.update(schema.tickets).set({ issueNumber: 7, issueNodeId: 'I_existing' }).run();
+  await sync.push();
+  expect(api.calls).not.toContain('createIssue');
+  expect(api.calls).toContain('addToProject');
+  expect(getTicket(db, ticketId)).toMatchObject({
+    issueNumber: 7,
+    projectItemId: 'item_I_existing',
+  });
+});
