@@ -4,7 +4,7 @@ import { useState, type ReactElement } from 'react';
 import type { RepoOption } from '../../../src/api-types';
 import { api } from '../../lib/api';
 import { Badge, Button, ErrorText, inputClass } from '../ui';
-import type { StepProps } from './draft';
+import { credentialOf, type StepProps } from './draft';
 
 function RepoCard({
   repo,
@@ -38,8 +38,8 @@ function RepoCard({
 export function RepositoryStep({ draft, patch }: StepProps): ReactElement {
   const [filter, setFilter] = useState('');
   const query = useInfiniteQuery({
-    queryKey: ['gh-repos', draft.token],
-    queryFn: ({ pageParam }) => api.github.repos(draft.token, pageParam),
+    queryKey: ['gh-repos', credentialOf(draft)],
+    queryFn: ({ pageParam }) => api.github.repos(credentialOf(draft), pageParam),
     initialPageParam: 1,
     getNextPageParam: (last, pages) => (last.hasNext ? pages.length + 1 : undefined),
   });

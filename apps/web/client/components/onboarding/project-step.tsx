@@ -4,7 +4,7 @@ import type { ReactElement } from 'react';
 import type { ProjectOption } from '../../../src/api-types';
 import { api } from '../../lib/api';
 import { ErrorText, inputClass } from '../ui';
-import type { ProjectChoice, StepProps } from './draft';
+import { credentialOf, type ProjectChoice, type StepProps } from './draft';
 
 const CHOICE_ON = 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40';
 const CHOICE_OFF = 'border-zinc-200 hover:border-zinc-400 dark:border-zinc-800';
@@ -82,8 +82,8 @@ function NewProject({ draft, patch }: StepProps): ReactElement {
 export function ProjectStep({ draft, patch }: StepProps): ReactElement {
   const owner = draft.repo?.owner ?? '';
   const query = useQuery({
-    queryKey: ['gh-projects', draft.token, owner],
-    queryFn: () => api.github.projects(draft.token, owner),
+    queryKey: ['gh-projects', credentialOf(draft), owner],
+    queryFn: () => api.github.projects(credentialOf(draft), owner),
     enabled: owner !== '',
   });
   const chosen = draft.project;

@@ -16,7 +16,7 @@ export function apiRoutes(db: Db, github: OnboardingGitHub, notion: NotionApi): 
   api.get('/health', (c) => c.json({ ok: true }));
   api.route('/agents', agentRoutes(db));
   api.route('/projects', projectRoutes(db));
-  api.route('/github', githubRoutes(github));
+  api.route('/github', githubRoutes(db, github));
   api.route('/notion', notionRoutes(db, notion));
   api.route('/tickets', ticketRoutes(db, github));
   api.route('/events', eventRoutes(db));

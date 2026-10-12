@@ -4,6 +4,7 @@ import type { PublicProject } from '../../src/api-types';
 import type { Page } from '../lib/use-navigation';
 import { AgentsPage } from './agents/agents-page';
 import { Board, BoardView } from './board';
+import { GitHubAppPage } from './github-app/github-app-page';
 import { ProjectBar } from './project-bar';
 
 function noop(): void {
@@ -36,7 +37,7 @@ export function Workspace({
   );
 }
 
-/** Right-hand side of the app: the agent settings page or the current project's board. */
+/** Right-hand side of the app: a global settings page or the current project's board. */
 export function MainArea({
   page,
   project,
@@ -50,9 +51,13 @@ export function MainArea({
   onNewTicket: () => void;
   onSettings: () => void;
 }): ReactElement {
-  return page === 'agents' ? (
-    <AgentsPage />
-  ) : (
+  if (page === 'agents') {
+    return <AgentsPage />;
+  }
+  if (page === 'github-app') {
+    return <GitHubAppPage />;
+  }
+  return (
     <Workspace
       project={project}
       onOpenTicket={onOpenTicket}

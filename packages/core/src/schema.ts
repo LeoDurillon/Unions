@@ -42,6 +42,8 @@ export const projects = sqliteTable(
     githubProjectUrl: text('github_project_url'),
     /** Fine-grained or classic PAT (`repo`, `project`). Never sent to the browser. */
     githubToken: text('github_token'),
+    /** Installation of the GitHub App (`github_app`) to use instead of a token. */
+    githubInstallationId: integer('github_installation_id'),
     /** Notion internal integration secret, for importing tickets. Never sent to the browser. */
     notionToken: text('notion_token'),
     statusFieldId: text('status_field_id'),
@@ -50,6 +52,20 @@ export const projects = sqliteTable(
   },
   (t) => [uniqueIndex('projects_repo_idx').on(t.owner, t.repo)],
 );
+
+/**
+ * The GitHub App projects can authenticate with instead of a token. One row at most (`id` 1): one
+ * app can be installed on several accounts, each project picks an installation.
+ */
+export const githubApp = sqliteTable('github_app', {
+  id: integer('id').primaryKey(),
+  appId: text('app_id').notNull(),
+  slug: text('slug').notNull(),
+  name: text('name').notNull(),
+  /** PEM private key. Never sent to the browser. */
+  privateKey: text('private_key').notNull(),
+  ...timestamps,
+});
 
 export const tickets = sqliteTable(
   'tickets',

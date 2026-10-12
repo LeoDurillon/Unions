@@ -1,6 +1,8 @@
 import type { AgentConfig, AgentModel } from '@union/core';
 
 import type {
+  GitHubAppStatus,
+  InstallationOption,
   CommentView,
   NotionImport,
   DiffResponse,
@@ -13,6 +15,9 @@ import type {
   Viewer,
 } from '../../src/api-types';
 import type { LinkResult } from '../../src/routes/ticket-pull-request';
+
+/** What a GitHub call is made with: a token, or an installation of the stored GitHub App. */
+export type GitHubCredential = { token: string } | { installationId: number };
 
 export class ApiError extends Error {
   constructor(
@@ -52,19 +57,21 @@ export const api = {
   ): Promise<AgentConfig> => request('PUT', `/api/agents/${agent}`, change),
   resetAgent: (agent: string): Promise<AgentConfig> => request('DELETE', `/api/agents/${agent}`),
   projects: (): Promise<PublicProject[]> => request('GET', '/api/projects'),
-  createProject: (input: {
-    owner: string;
-    repo: string;
-    baseBranch: string;
-    token: string;
-    githubProjectNodeId: string;
-    notionToken?: string;
-    notionDataSourceId?: string;
-  }): Promise<PublicProject> => request('POST', '/api/projects', input),
+  createProject: (
+    input: {
+      owner: string;
+      repo: string;
+      baseBranch: string;
+      githubProjectNodeId: string;
+      notionToken?: string;
+      notionDataSourceId?: string;
+    } & GitHubCredential,
+  ): Promise<PublicProject> => request('POST', '/api/projects', input),
   updateProject: (
     id: number,
     change: {
       token?: string;
+      installationId?: number;
       baseBranch?: string;
       installCommand?: string;
       gateCommand?: string;
@@ -108,15 +115,28 @@ export const api = {
   editOutput: (id: number, step: string, content: string): Promise<unknown> =>
     request('PUT', `/api/tickets/${id}/steps/${step}/output`, { content }),
   github: {
-    verify: (token: string): Promise<Viewer> => request('POST', '/api/github/verify', { token }),
-    repos: (token: string, page: number): Promise<{ repos: RepoOption[]; hasNext: boolean }> =>
-      request('POST', '/api/github/repos', { token, page }),
-    projects: (token: string, owner: string): Promise<ProjectOption[]> =>
-      request('POST', '/api/github/projects', { token, owner }),
+    verify: (credential: GitHubCredential): Promise<Viewer> =>
+      request('POST', '/api/github/verify', credential),
+    repos: (
+      credential: GitHubCredential,
+      page: number,
+    ): Promise<{ repos: RepoOption[]; hasNext: boolean }> =>
+      request('POST', '/api/github/repos', { ...credential, page }),
+    projects: (credential: GitHubCredential, owner: string): Promise<ProjectOption[]> =>
+      request('POST', '/api/github/projects', { ...credential, owner }),
     createProject: (
-      token: string,
+      credential: GitHubCredential,
       input: { ownerId: string; repositoryId: string; title: string },
-    ): Promise<ProjectOption> => request('POST', '/api/github/create-project', { token, ...input }),
+    ): Promise<ProjectOption> =>
+      request('POST', '/api/github/create-project', { ...credential, ...input }),
+  },
+  githubApp: {
+    status: (): Promise<GitHubAppStatus> => request('GET', '/api/github/app'),
+    save: (input: { appId: string; privateKey: string }): Promise<GitHubAppStatus> =>
+      request('PUT', '/api/github/app', input),
+    remove: (): Promise<GitHubAppStatus> => request('DELETE', '/api/github/app'),
+    installations: (): Promise<InstallationOption[]> =>
+      request('GET', '/api/github/app/installations'),
   },
   notion: {
     verify: (

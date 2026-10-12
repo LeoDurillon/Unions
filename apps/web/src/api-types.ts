@@ -1,17 +1,28 @@
 import type { BoardStatus, Project, ReviewComment, Run, StepOutput, Ticket } from '@union/core';
 
+/** How a project reaches GitHub, as the browser sees it. */
+export type GitHubAccess = 'token' | 'app' | 'none';
+
 /** A project as the browser sees it: the GitHub token never leaves the server. */
 export type PublicProject = Omit<Project, 'githubToken' | 'notionToken'> & {
-  hasGithubToken: boolean;
+  /** `app` wins when both are set, like in the worker. */
+  githubAccess: GitHubAccess;
   /** Token and data source both set: the New ticket dialog offers the Notion import. */
   hasNotion: boolean;
 };
+
+function accessOf(installationId: number | null, token: string | null): GitHubAccess {
+  if (installationId !== null) {
+    return 'app';
+  }
+  return token === null ? 'none' : 'token';
+}
 
 export function toPublicProject(project: Project): PublicProject {
   const { githubToken, notionToken, ...rest } = project;
   return {
     ...rest,
-    hasGithubToken: githubToken !== null,
+    githubAccess: accessOf(project.githubInstallationId, githubToken),
     hasNotion: notionToken !== null && Boolean(project.config.notionDataSourceId),
   };
 }
@@ -57,6 +68,16 @@ export type RepoOption = {
   defaultBranch: string;
   isPrivate: boolean;
 };
+
+/** The configured GitHub App; its private key never leaves the server. */
+export type AppInfo = { slug: string; name: string; url: string };
+
+export type GitHubAppStatus =
+  | { configured: false }
+  | ({ configured: true; appId: string } & AppInfo);
+
+/** An account (user or organization) the GitHub App is installed on. */
+export type InstallationOption = { id: number; account: string; allRepositories: boolean };
 
 export type ProjectOption = { id: string; number: number; title: string; url: string };
 

@@ -26,8 +26,10 @@ export function App(): ReactElement {
           goTo('board')();
         }}
         onNewProject={show('wizard')}
-        settingsActive={page === 'agents'}
-        onSettings={goTo('agents')}
+        page={page}
+        onPage={(next) => {
+          goTo(next)();
+        }}
       />
       <MainArea
         page={page}

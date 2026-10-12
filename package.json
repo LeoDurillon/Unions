@@ -21,10 +21,14 @@
     "lint:fix": "oxlint --type-aware --fix",
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check",
-    "check": "bun run fmt:check && bun run lint && bun run typecheck && bun test"
+    "check": "bun run fmt:check && bun run lint && bun run typecheck && bun test",
+    "db:backup": "bun scripts/db-backup.ts",
+    "db:restore": "bun scripts/db-restore.ts",
+    "db:reset": "bun scripts/db-reset.ts"
   },
   "devDependencies": {
     "@types/bun": "catalog:development",
+    "@union/core": "workspace:*",
     "oxfmt": "catalog:development",
     "oxlint": "catalog:development",
     "oxlint-tsgolint": "catalog:development",
@@ -61,6 +65,7 @@
       "drizzle-orm": "0.45.4"
     },
     "github": {
+      "@octokit/auth-app": "8.3.1",
       "octokit": "5.0.5"
     }
   }

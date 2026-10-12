@@ -3,6 +3,7 @@ import { and, eq, inArray, isNull } from 'drizzle-orm';
 import type { Context } from 'hono';
 
 import { toPublicProject } from '../api-types';
+import { optionalInstallationId, requireApp } from '../github-credentials';
 import {
   BAD_REQUEST,
   CONFLICT,
@@ -127,8 +128,26 @@ function configChange(project: Project, body: Record<string, unknown>): ProjectC
   };
 }
 
+/** A new token or installation replaces the other kind: one way to reach GitHub per project. */
+function githubChange(
+  db: Db,
+  project: Project,
+  body: Record<string, unknown>,
+): { githubToken: string | null; githubInstallationId: number | null } {
+  const installationId = optionalInstallationId(body);
+  if (installationId !== undefined) {
+    requireApp(db);
+    return { githubToken: null, githubInstallationId: installationId };
+  }
+  const token = optionalText(body, 'token');
+  return token
+    ? { githubToken: token, githubInstallationId: null }
+    : { githubToken: project.githubToken, githubInstallationId: project.githubInstallationId };
+}
+
 const UPDATABLE = [
   'token',
+  'installationId',
   'baseBranch',
   'maxIterations',
   'createPullRequest',
@@ -139,7 +158,7 @@ const UPDATABLE = [
   ...CHECK_FIELDS,
 ];
 
-/** Updates the token, base branch and checks. Omitted fields are left as they are. */
+/** Updates the GitHub credentials, base branch and checks. Omitted fields are left as they are. */
 export async function updateProject(db: Db, c: Context): Promise<Response> {
   const project = loadProject(db, c);
   const body = await readObject(c.req.raw);
@@ -149,7 +168,7 @@ export async function updateProject(db: Db, c: Context): Promise<Response> {
   const updated = db
     .update(schema.projects)
     .set({
-      githubToken: optionalText(body, 'token') ?? project.githubToken,
+      ...githubChange(db, project, body),
       notionToken: notionTokenChange(body, project.notionToken),
       config: configChange(project, body),
     })

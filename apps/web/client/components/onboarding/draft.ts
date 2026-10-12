@@ -1,4 +1,6 @@
 import type { ProjectOption, RepoOption, Viewer } from '../../../src/api-types';
+import type { GitHubCredential } from '../../lib/api';
+import type { AccessMethod } from '../github-app/access-method';
 
 export type ProjectChoice =
   | { kind: 'existing'; project: ProjectOption }
@@ -7,7 +9,10 @@ export type ProjectChoice =
 
 /** Everything the wizard collects; nothing is saved until the last step. */
 export type Draft = {
+  method: AccessMethod;
   token: string;
+  /** With `method: 'app'`: the chosen installation of the GitHub App. */
+  installationId: number | null;
   viewer: Viewer | null;
   repo: RepoOption | null;
   project: ProjectChoice;
@@ -19,7 +24,9 @@ export type Draft = {
 };
 
 export const EMPTY_DRAFT: Draft = {
+  method: 'token',
   token: '',
+  installationId: null,
   viewer: null,
   repo: null,
   project: null,
@@ -33,7 +40,7 @@ export const STEPS = [
   {
     label: 'Connect',
     title: 'Connect GitHub',
-    description: 'Paste a personal access token. It stays on this machine.',
+    description: 'Use a personal access token or a GitHub App. Credentials stay on this machine.',
   },
   {
     label: 'Repository',
@@ -56,6 +63,13 @@ export const STEPS = [
     description: 'Check the summary, then create the project.',
   },
 ] as const;
+
+/** What the wizard's GitHub calls and the new project use. */
+export function credentialOf(draft: Draft): GitHubCredential {
+  return draft.method === 'app' && draft.installationId !== null
+    ? { installationId: draft.installationId }
+    : { token: draft.token.trim() };
+}
 
 export type StepProps = {
   draft: Draft;

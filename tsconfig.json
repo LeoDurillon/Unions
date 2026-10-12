@@ -13,6 +13,6 @@
     "verbatimModuleSyntax": true,
     "isolatedModules": true
   },
-  "include": ["packages", "apps"],
+  "include": ["packages", "apps", "scripts"],
   "exclude": ["**/node_modules", "**/dist"]
 }

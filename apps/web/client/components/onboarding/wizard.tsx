@@ -4,7 +4,7 @@ import { useState, type ReactElement } from 'react';
 import { api } from '../../lib/api';
 import { Button, ErrorText } from '../ui';
 import { ConnectStep } from './connect-step';
-import { canContinue, EMPTY_DRAFT, STEPS, type Draft, type StepProps } from './draft';
+import { canContinue, credentialOf, EMPTY_DRAFT, STEPS, type Draft, type StepProps } from './draft';
 import { Stepper } from './stepper';
 import { STEP_VIEWS } from './steps';
 
@@ -19,7 +19,7 @@ async function createFrom(draft: Draft): Promise<number> {
   if (project.kind === 'existing') {
     githubProjectNodeId = project.project.id;
   } else {
-    const created = await api.github.createProject(draft.token, {
+    const created = await api.github.createProject(credentialOf(draft), {
       ownerId: repo.ownerNodeId,
       repositoryId: repo.nodeId,
       title: project.title.trim(),
@@ -30,7 +30,7 @@ async function createFrom(draft: Draft): Promise<number> {
     owner: repo.owner,
     repo: repo.name,
     baseBranch: draft.baseBranch.trim(),
-    token: draft.token,
+    ...credentialOf(draft),
     githubProjectNodeId,
     ...(draft.notionTitle === null
       ? {}

@@ -18,13 +18,13 @@ export function ProjectBar({
       <h2 className="text-base font-semibold">
         {project ? `${project.owner}/${project.repo}` : 'No project selected'}
       </h2>
-      {project && !project.hasGithubToken ? (
+      {project?.githubAccess === 'none' ? (
         <button
           type="button"
           onClick={onSettings}
           className="text-xs text-red-600 underline dark:text-red-400"
         >
-          No GitHub token: set one
+          No GitHub access: set a token or the GitHub App
         </button>
       ) : null}
       <div className="flex-1" />

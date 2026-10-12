@@ -6,7 +6,7 @@ import { GitHubSync } from './sync';
 type Project = typeof schema.projects.$inferSelect;
 type Entry = { api: GitHubApi; sync: GitHubSync };
 
-/** Runs one `GitHubSync` per project, each with the project's own token. */
+/** Runs one `GitHubSync` per project, each with the project's own credentials. */
 export class GitHubMirror {
   private readonly entries = new Map<number, Entry>();
   private readonly reportedMissing = new Set<number>();
@@ -58,7 +58,9 @@ export class GitHubMirror {
     this.reportedMissing.add(project.id);
     emitEvent(this.db, {
       type: 'github_sync_error',
-      payload: { error: `Project ${project.owner}/${project.repo} has no GitHub token` },
+      payload: {
+        error: `Project ${project.owner}/${project.repo} has no GitHub credentials (token or GitHub App installation)`,
+      },
     });
   }
 }

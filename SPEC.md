@@ -14,6 +14,9 @@ Everything the agent does is mirrored to the GitHub issue.
 - One persistent container per ticket, with one HOME volume and one workspace volume per ticket.
 - The host owns every GitHub write and pushes the ticket's branch. The container holds no GitHub credentials.
 - Memory (feedback + lessons) lives in the database.
+- GitHub access per project: a personal access token (classic or fine-grained) or an installation of one global
+  GitHub App (App ID + private key stored once; installation tokens are minted per use and expire after an hour).
+  Fine-grained tokens and apps cannot reach Projects owned by a user account: those need a classic token.
 - Final review: the user decides on `CHANGES_REQUESTED` (no automatic loop); the reviewer states the last check result
   instead of re-running the checks.
 - Rebase reuses the implementation agent (`--resume` + a rebase prompt), and the final review always re-runs
@@ -21,7 +24,7 @@ Everything the agent does is mirrored to the GitHub issue.
 
 ## Flow
 
-0. First run: a setup wizard connects GitHub (token), picks the repository, and picks or creates the GitHub Project.
+0. First run: a setup wizard connects GitHub (token or GitHub App installation), picks the repository, and picks or creates the GitHub Project.
 1. Create a ticket (title, description), or import it from Notion when the project is connected (optional wizard
    step or project settings: integration secret + data source; the page must be a row of that data source)
    → GitHub issue added to the Project.
@@ -104,7 +107,7 @@ rebases the branch, resolves conflicts, re-runs the checks, and the host pushes 
    for tickets with a pushed branch and an open PR. No count, no button: a branch that is up to date shows
    "Up to date with `main`".
 2. **Fetch for the container:** the container has no GitHub credentials, so the host fetches the base branch with
-   the project token, writes it as a `git bundle`, copies the bundle in, and fetches from it inside the container
+   the project's credentials, writes it as a `git bundle`, copies the bundle in, and fetches from it inside the container
    (`refs/remotes/origin/<base>`). The same path will serve the implement loop.
 3. **Agent run (decided):** the same implementation agent, started with `claude -p --resume <implement session id>`
    and the rebase prompt, on the Implementation model. There is no separate rebase agent; the rebase prompt is its

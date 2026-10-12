@@ -13,6 +13,7 @@ import {
 } from '@union/core';
 import { eq } from 'drizzle-orm';
 
+import { projectGitToken } from './credentials';
 import type { GitHubApi } from './github/api';
 import { cloneSource, hostGit, type ProvisionConfig } from './provision';
 import { exportBranch } from './workspace-git';
@@ -27,7 +28,7 @@ export type PublishResult = {
 
 /**
  * Takes the ticket's branch out of the container as a git bundle and pushes it from the host with the
- * project token; the container never sees a credential.
+ * project's token or GitHub App installation; the container never sees a credential.
  */
 async function pushBranch(
   runtime: ContainerRuntime,
@@ -99,9 +100,9 @@ export async function publishBranch(input: {
   branch: string;
 }): Promise<PublishResult> {
   const { db, project, ticket, branch } = input;
-  const token = project.githubToken ?? process.env.GITHUB_TOKEN ?? null;
-  const remote = cloneSource(input.config.gitBaseUrl, project.owner, project.repo, token);
   try {
+    const token = await projectGitToken(db, project);
+    const remote = cloneSource(input.config.gitBaseUrl, project.owner, project.repo, token);
     await pushBranch(input.runtime, input.container, remote, branch);
     emitEvent(db, { type: 'branch_pushed', ticketId: ticket.id, payload: { branch } });
     // Re-read: the user may have linked a PR while the agent was working. A linked PR is kept.

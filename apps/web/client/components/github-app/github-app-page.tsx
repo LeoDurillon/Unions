@@ -1,0 +1,137 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useState, type ReactElement } from 'react';
+
+import type { GitHubAppStatus } from '../../../src/api-types';
+import { api } from '../../lib/api';
+import { useGitHubApp } from '../../lib/use-github-app';
+import { Badge, Button, ErrorText } from '../ui';
+import { AppSetupForm } from './app-setup-form';
+
+const CARD =
+  'space-y-3 rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900';
+
+function InstallationList(): ReactElement {
+  const query = useQuery({
+    queryKey: ['github-app', 'installations'],
+    queryFn: api.githubApp.installations,
+  });
+  return (
+    <div className="space-y-1">
+      <h4 className="text-sm font-medium">Installed on</h4>
+      <ErrorText error={query.error} />
+      <ul className="space-y-1 text-sm">
+        {(query.data ?? []).map((installation) => (
+          <li key={installation.id} className="flex items-center gap-2">
+            {installation.account}
+            <Badge tone="neutral">
+              {installation.allRepositories ? 'all repositories' : 'selected repositories'}
+            </Badge>
+          </li>
+        ))}
+      </ul>
+      {query.data?.length === 0 ? (
+        <p className="text-sm text-zinc-500">Not installed yet.</p>
+      ) : null}
+    </div>
+  );
+}
+
+function AppLinks({ url }: { url: string }): ReactElement {
+  return (
+    <p className="flex gap-3 text-sm">
+      <a
+        className="text-indigo-600 underline dark:text-indigo-400"
+        href={url}
+        target="_blank"
+        rel="noreferrer"
+      >
+        App page
+      </a>
+      <a
+        className="text-indigo-600 underline dark:text-indigo-400"
+        href={`${url}/installations/new`}
+        target="_blank"
+        rel="noreferrer"
+      >
+        Install on an account
+      </a>
+    </p>
+  );
+}
+
+function ConfiguredApp({
+  app,
+}: {
+  app: Extract<GitHubAppStatus, { configured: true }>;
+}): ReactElement {
+  const queryClient = useQueryClient();
+  const [replacing, setReplacing] = useState(false);
+  const remove = useMutation({
+    mutationFn: api.githubApp.remove,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['github-app'] }),
+  });
+  return (
+    <section className={CARD}>
+      <header className="flex flex-wrap items-center gap-2">
+        <h3 className="font-semibold">{app.name}</h3>
+        <Badge tone="green">connected</Badge>
+        <span className="text-xs text-zinc-500">App ID {app.appId}</span>
+      </header>
+      <AppLinks url={app.url} />
+      <InstallationList />
+      {replacing ? (
+        <AppSetupForm
+          onSaved={() => {
+            setReplacing(false);
+          }}
+        />
+      ) : null}
+      <ErrorText error={remove.error} />
+      <div className="flex gap-2">
+        <Button
+          onClick={() => {
+            setReplacing(!replacing);
+          }}
+        >
+          {replacing ? 'Cancel' : 'Replace credentials'}
+        </Button>
+        <Button
+          variant="danger"
+          disabled={remove.isPending}
+          onClick={() => {
+            remove.mutate();
+          }}
+        >
+          Remove
+        </Button>
+      </div>
+    </section>
+  );
+}
+
+/** The GitHub App every project may use instead of a personal token. */
+export function GitHubAppPage(): ReactElement {
+  const status = useGitHubApp();
+  return (
+    <div className="flex h-full min-w-0 flex-1 flex-col">
+      <header className="border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
+        <h2 className="text-base font-semibold">GitHub App</h2>
+        <p className="text-xs text-zinc-500">
+          An alternative to personal tokens: projects pick one of the app’s installations in their
+          settings. Issues, comments and pull requests are then authored by the app.
+        </p>
+      </header>
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        <div className="mx-auto max-w-2xl space-y-4 p-4">
+          <ErrorText error={status.error} />
+          {status.data?.configured ? <ConfiguredApp app={status.data} /> : null}
+          {status.data?.configured === false ? (
+            <section className={CARD}>
+              <AppSetupForm />
+            </section>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
+}

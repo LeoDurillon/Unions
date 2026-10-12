@@ -2,6 +2,7 @@ import { parseProjectUrl, schema, type Db } from '@union/core';
 import { Hono } from 'hono';
 
 import { toPublicProject } from '../api-types';
+import { optionalInstallationId, requireApp } from '../github-credentials';
 import {
   BAD_REQUEST,
   CONFLICT,
@@ -24,6 +25,19 @@ function notionDataSourceOf(body: Record<string, unknown>): string | undefined {
     throw fail(BAD_REQUEST, 'Give both the Notion token and the data source ID, or neither');
   }
   return source ? requireNotionId(body, 'notionDataSourceId', 'data source') : undefined;
+}
+
+/** A GitHub App installation or a token (or neither: the worker falls back to `GITHUB_TOKEN`). */
+function credentialsOf(
+  db: Db,
+  body: Record<string, unknown>,
+): { githubToken: string | null; githubInstallationId: number | null } {
+  const installationId = optionalInstallationId(body);
+  if (installationId !== undefined) {
+    requireApp(db);
+    return { githubToken: null, githubInstallationId: installationId };
+  }
+  return { githubToken: optionalText(body, 'token') ?? null, githubInstallationId: null };
 }
 
 export function projectRoutes(db: Db): Hono {
@@ -69,7 +83,7 @@ export function projectRoutes(db: Db): Hono {
         repo,
         githubProjectUrl: projectUrl ?? null,
         githubProjectNodeId: nodeId ?? '',
-        githubToken: optionalText(body, 'token') ?? null,
+        ...credentialsOf(db, body),
         notionToken: optionalText(body, 'notionToken') ?? null,
         config: {
           baseBranch: optionalText(body, 'baseBranch') ?? DEFAULT_BRANCH,

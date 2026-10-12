@@ -13,13 +13,22 @@ declare global {
   var __unionDb: Db | undefined;
 }
 
+const handles = new WeakMap<Db, Database>();
+
 /** Fresh handle, never cached: tests use `createDb(':memory:')`. */
 export function createDb(file: string): Db {
   const sqlite = new Database(file, { create: true });
   sqlite.run('PRAGMA journal_mode = WAL');
   sqlite.run('PRAGMA busy_timeout = 5000');
   sqlite.run('PRAGMA foreign_keys = ON');
-  return drizzle(sqlite, { schema });
+  const db = drizzle(sqlite, { schema });
+  handles.set(db, sqlite);
+  return db;
+}
+
+/** Closes a handle from `createDb` (scripts and tests that open files directly). */
+export function closeDb(db: Db): void {
+  handles.get(db)?.close();
 }
 
 /**

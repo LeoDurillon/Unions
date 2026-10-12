@@ -1,7 +1,17 @@
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../src/api-types';
+import type { Page } from '../lib/use-navigation';
 import { Button } from './ui';
+
+const ACTIVE = 'bg-indigo-100 font-medium text-indigo-900 dark:bg-indigo-950 dark:text-indigo-200';
+const IDLE = 'hover:bg-zinc-200/70 dark:hover:bg-zinc-800';
+
+/** Global settings pages, below the projects. */
+const SETTINGS_PAGES: { page: Page; label: string }[] = [
+  { page: 'agents', label: 'Agent settings' },
+  { page: 'github-app', label: 'GitHub App' },
+];
 
 function ProjectItem({
   project,
@@ -12,9 +22,7 @@ function ProjectItem({
   active: boolean;
   onSelect: (id: number) => void;
 }): ReactElement {
-  const state = active
-    ? 'bg-indigo-100 font-medium text-indigo-900 dark:bg-indigo-950 dark:text-indigo-200'
-    : 'hover:bg-zinc-200/70 dark:hover:bg-zinc-800';
+  const state = active ? ACTIVE : IDLE;
   return (
     <li>
       <button
@@ -39,15 +47,15 @@ export function Sidebar({
   projectId,
   onSelect,
   onNewProject,
-  settingsActive,
-  onSettings,
+  page,
+  onPage,
 }: {
   projects: PublicProject[];
   projectId: number | null;
   onSelect: (id: number) => void;
   onNewProject: () => void;
-  settingsActive: boolean;
-  onSettings: () => void;
+  page: Page;
+  onPage: (page: Page) => void;
 }): ReactElement {
   return (
     <aside className="flex w-60 shrink-0 flex-col gap-3 border-r border-zinc-200 bg-zinc-100/60 p-3 dark:border-zinc-800 dark:bg-zinc-900/40">
@@ -61,7 +69,7 @@ export function Sidebar({
             <ProjectItem
               key={project.id}
               project={project}
-              active={!settingsActive && project.id === projectId}
+              active={page === 'board' && project.id === projectId}
               onSelect={onSelect}
             />
           ))}
@@ -71,14 +79,21 @@ export function Sidebar({
         ) : null}
       </nav>
       <Button onClick={onNewProject}>+ Add project</Button>
-      <button
-        type="button"
-        aria-current={settingsActive ? 'page' : undefined}
-        onClick={onSettings}
-        className={`rounded-md px-3 py-2 text-left text-sm transition ${settingsActive ? 'bg-indigo-100 font-medium text-indigo-900 dark:bg-indigo-950 dark:text-indigo-200' : 'hover:bg-zinc-200/70 dark:hover:bg-zinc-800'}`}
-      >
-        Agent settings
-      </button>
+      <div className="flex flex-col gap-0.5">
+        {SETTINGS_PAGES.map((entry) => (
+          <button
+            key={entry.page}
+            type="button"
+            aria-current={page === entry.page ? 'page' : undefined}
+            onClick={() => {
+              onPage(entry.page);
+            }}
+            className={`rounded-md px-3 py-2 text-left text-sm transition ${page === entry.page ? ACTIVE : IDLE}`}
+          >
+            {entry.label}
+          </button>
+        ))}
+      </div>
     </aside>
   );
 }

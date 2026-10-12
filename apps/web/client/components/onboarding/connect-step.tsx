@@ -2,6 +2,8 @@ import { useMutation } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 
 import { api } from '../../lib/api';
+import { AccessMethodTabs } from '../github-app/access-method';
+import { InstallationPicker } from '../github-app/installation-picker';
 import { Button, ErrorText, Field, inputClass } from '../ui';
 import { EMPTY_DRAFT, type StepProps } from './draft';
 
@@ -53,9 +55,9 @@ export function TokenInput({
   );
 }
 
-export function ConnectStep({ draft, patch }: StepProps): ReactElement {
+function TokenConnect({ draft, patch }: StepProps): ReactElement {
   const verify = useMutation({
-    mutationFn: () => api.github.verify(draft.token.trim()),
+    mutationFn: () => api.github.verify({ token: draft.token.trim() }),
     onSuccess: (viewer) => {
       patch({ viewer });
     },
@@ -101,6 +103,35 @@ export function ConnectStep({ draft, patch }: StepProps): ReactElement {
         </p>
       ) : null}
       <Scopes missing={draft.viewer?.missingScopes ?? []} />
+    </div>
+  );
+}
+
+export function ConnectStep({ draft, patch }: StepProps): ReactElement {
+  return (
+    <div className="space-y-4">
+      <AccessMethodTabs
+        method={draft.method}
+        onChange={(method) => {
+          patch({ ...EMPTY_DRAFT, method });
+        }}
+      />
+      {draft.method === 'token' ? (
+        <TokenConnect draft={draft} patch={patch} />
+      ) : (
+        <InstallationPicker
+          selected={draft.installationId}
+          onSelect={(installation) => {
+            // Listed with the app's own credentials, so the installation needs no further check.
+            patch({
+              ...EMPTY_DRAFT,
+              method: 'app',
+              installationId: installation.id,
+              viewer: { login: installation.account, missingScopes: [] },
+            });
+          }}
+        />
+      )}
     </div>
   );
 }

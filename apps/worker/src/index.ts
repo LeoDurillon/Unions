@@ -2,10 +2,9 @@ import { DockerCli, migrateDb, openDb } from '@union/core';
 
 import { drainCommands, type CommandHooks } from './commands';
 import { createExecutor } from './executor';
-import type { GitHubApi } from './github/api';
+import { githubApis } from './github/clients';
 import { runGitHubLoop } from './github/loop';
 import { GitHubMirror } from './github/mirror';
-import { OctokitGitHubApi } from './github/octokit-api';
 import { removeContainers } from './janitor';
 import { defaultProvisionConfig } from './provision';
 import { Scheduler } from './scheduler';
@@ -25,17 +24,7 @@ const hooks: CommandHooks = {
   },
 };
 
-const apis = new Map<string, GitHubApi>();
-/** A project's own token wins; `GITHUB_TOKEN` is the fallback for projects without one. */
-const apiFor = (project: { githubToken: string | null }): GitHubApi | null => {
-  const token = project.githubToken ?? process.env.GITHUB_TOKEN;
-  if (!token) {
-    return null;
-  }
-  const known = apis.get(token) ?? new OctokitGitHubApi(token);
-  apis.set(token, known);
-  return known;
-};
+const apiFor = githubApis(db);
 
 const executor = createExecutor(db, runtime, defaultProvisionConfig(), apiFor);
 const scheduler = new Scheduler(db, executor, maxConcurrent);
@@ -54,7 +43,9 @@ const githubLoop = runGitHubLoop(
   shutdown.signal,
 );
 
-console.log(`worker running (max ${maxConcurrent} concurrent runs, GitHub sync per project token)`);
+console.log(
+  `worker running (max ${maxConcurrent} concurrent runs, GitHub sync per project credentials)`,
+);
 while (!shutdown.signal.aborted) {
   drainCommands(db, hooks);
   scheduler.tick();

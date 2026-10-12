@@ -14,8 +14,9 @@ behavior; this file covers how to work in the repo.
 - `apps/web`: Hono API and React/Vite SPA, served by one Bun process in production.
   - `src/app.ts` is `createApp(db)`; routes live in `src/routes/` (`projects`, `tickets`, `events`); `src/server.ts`
     only wires the DB and `Bun.serve`. `src/api-types.ts` holds the response shapes shared with the client.
-  - Setup is a four-step wizard (`components/onboarding/`: Connect, Repository, Project, Review) shown over the board
-    on first run and from "Add project". The board columns fill the viewport height; each column scrolls itself.
+  - Setup is a wizard (`components/onboarding/`: Connect, Repository, Project, Notion, Review) shown over the board
+    on first run and from "Add project". Connect takes a token or an installation of the GitHub App
+    (`components/github-app/`, also a global page in the sidebar). The board columns fill the viewport height; each column scrolls itself.
   - Code review: after each implementation run the worker stores the branch diff (`diff-snapshot.ts`,
     `diff_snapshots`/`diff_files`, newest only). The web reads it from SQLite (`routes/review.ts`), never from Docker or
     GitHub; `components/review/` renders one file at a time. Line comments are drafts in `review_comments` until sent;
@@ -45,8 +46,9 @@ behavior; this file covers how to work in the repo.
     `claude -p` in it and parses stream-json; `prompts.ts` builds the step prompts.
   - `github/`: `api.ts` is the narrow `GitHubApi` the worker depends on, `octokit-api.ts` the real client,
     `fake-api.ts` the in-memory one for tests, `sync.ts` the mirror (issue, Status field, one comment per step,
-    pull of title/description and "move to In Progress"), `queries.ts` the GraphQL. Needs `GITHUB_TOKEN` with
-    `repo` and `project` scopes; without it the worker runs with sync off. GraphQL changes must be validated
+    pull of title/description and "move to In Progress"), `queries.ts` the GraphQL. `clients.ts` builds each
+    project's API from its credentials (`projectGitHubAuth`); projects without any fall back to `GITHUB_TOKEN`, else
+    their sync is off. GraphQL changes must be validated
     against GitHub's schema, and new sync behavior needs a test against the fake.
 - `docker/agent.Dockerfile`: the agent image (`union-agent:local`, build with
   `docker build -t union-agent:local -f docker/agent.Dockerfile docker`).
@@ -63,6 +65,14 @@ behavior; this file covers how to work in the repo.
   http://localhost:5173. See the header of `compose.yaml` for the overrides (`DOCKER_GID`, `UNION_UID`, ports). The
   worker uses the host Docker socket; agent containers run beside the stack, not inside it.
 - `bun run start`: builds the client, then runs the production web server (port 3000) and the worker together.
+- `bun run db:backup [file]`: consistent copy of the database (`VACUUM INTO`, safe while running) into
+  `backups/` (gitignored). `bun run db:restore <file> [--force]`: refuses while web or worker has the database open
+  (host processes or compose services), saves the current database to `backups/union-before-restore-*`, then
+  rebuilds the target from the backup (never a plain file copy: in WAL mode recent data lives in `-wal`).
+- `bun run db:reset --yes`: empty database with every migration applied. Without `--yes` it only prints what would go.
+  Same in-use refusal as restore, backup to `backups/union-before-reset-*` first, and it removes the agent
+  containers and volumes of the deleted tickets (ticket ids restart at 1, so `union-t1` would otherwise be reused).
+  GitHub and Notion are not touched.
 - After editing `packages/core/src/schema.ts`: `cd packages/core && bunx drizzle-kit generate`. Commit the migration.
 
 Web and worker must open the same SQLite file. The default is `union.sqlite` at the repository root (an absolute
@@ -85,17 +95,22 @@ both.
   streams `events` over SSE.
 - All GitHub writes for tickets (issues, comments, Project status, push, PR) happen in the worker. Containers never
   hold GitHub credentials. The only GitHub calls the web server makes are the ones the UI needs answered right away:
-  the setup wizard (verify the token, list repositories and Projects, create a Project) and looking up a pull
+  the setup wizard (verify the token, list repositories and Projects, create a Project), checking and listing the
+  GitHub App's installations (`/api/github/app`), and looking up a pull
   request a user links to a ticket (`src/github-onboarding.ts`, behind the `OnboardingGitHub` interface so tests
   use a fake).
 - Notion (read only, from the web server): verifying a project's integration secret and data source, and importing
   a page of that data source as a ticket (`src/notion.ts` behind `NotionApi`, `routes/notion.ts`). Uses API version
   `2026-03-11` and `GET /v1/pages/{id}/markdown`. The secret is stored in `projects.notion_token` and never sent to
   the browser (`hasNotion` only). Pages outside the configured data source are refused.
-- A project's GitHub token is stored in `projects.github_token` (local single-user app, plain text like the original
-  Union) and must never reach the browser: responses use `PublicProject` / `toPublicProject`, which only expose
-  `hasGithubToken`. The worker syncs each project with its own token (`GitHubMirror`), falling back to the
-  `GITHUB_TOKEN` environment variable.
+- A project reaches GitHub with a token (`projects.github_token`) or an installation of the GitHub App
+  (`projects.github_installation_id`; the app's ID and private key are one row of `github_app`). Both are stored in
+  plain text (local single-user app, like the original Union) and never reach the browser: responses use
+  `PublicProject` / `toPublicProject` (`githubAccess` only) and the app status omits the key. Resolve credentials
+  with `projectGitHubAuth` (`@union/core`; installation wins, then token, then `GITHUB_TOKEN`) and build clients
+  with `@union/core/github-client`: clients are cached per credential so an installation token is minted once an
+  hour, and git gets a fresh token (`gitToken`) right before each clone or push. Never build an Octokit from a
+  project's token by hand.
 - Keep `states.ts` pure: no I/O, no clock, no DB. The worker persists whatever `transition` returns. New phases
   or actions need a test in `states.test.ts`.
 - Reach Docker only through `ContainerRuntime`. Do not call `docker` from anywhere else.

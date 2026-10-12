@@ -1,26 +1,39 @@
-import { Octokit } from 'octokit';
+import type { GitHubAppCredentials, GitHubAuth } from '@union/core';
+import { githubAppClient, githubClient, type ClientOptions } from '@union/core/github-client';
+import type { Octokit } from 'octokit';
 
-import type { ProjectOption, PullRequestInfo, RepoOption, Viewer } from './api-types';
+import type {
+  AppInfo,
+  InstallationOption,
+  ProjectOption,
+  PullRequestInfo,
+  RepoOption,
+  Viewer,
+} from './api-types';
 import { CREATE_PROJECT, OWNER_PROJECTS } from './github-queries';
 
 /**
  * GitHub calls the web server makes itself, because the UI needs the answer right away: the setup
- * wizard's reads and Project creation, and looking up a pull request to link. Tests use a fake.
+ * wizard's reads and Project creation, checking the GitHub App, and looking up a pull request to
+ * link. Every call takes a token or an app installation. Tests use a fake.
  */
 export type OnboardingGitHub = {
-  verify(token: string): Promise<Viewer>;
-  listRepos(token: string, page: number): Promise<{ repos: RepoOption[]; hasNext: boolean }>;
-  listProjects(token: string, owner: string): Promise<ProjectOption[]>;
+  verify(auth: GitHubAuth): Promise<Viewer>;
+  listRepos(auth: GitHubAuth, page: number): Promise<{ repos: RepoOption[]; hasNext: boolean }>;
+  listProjects(auth: GitHubAuth, owner: string): Promise<ProjectOption[]>;
   createProject(
-    token: string,
+    auth: GitHubAuth,
     input: { ownerId: string; repositoryId: string; title: string },
   ): Promise<ProjectOption>;
   /** Null when the repository has no pull request with that number. */
   getPullRequest(
-    token: string,
+    auth: GitHubAuth,
     repo: { owner: string; repo: string },
     number: number,
   ): Promise<PullRequestInfo | null>;
+  /** The app the credentials belong to (`GET /app`); rejects a wrong App ID or key. */
+  verifyApp(app: GitHubAppCredentials): Promise<AppInfo>;
+  listInstallations(app: GitHubAppCredentials): Promise<InstallationOption[]>;
 };
 
 const REQUIRED_SCOPES = ['repo', 'project'];
@@ -38,38 +51,120 @@ function missingScopes(header: string | undefined): string[] {
   return REQUIRED_SCOPES.filter((scope) => !granted.has(scope));
 }
 
+type RawRepo = {
+  id: number;
+  node_id: string;
+  name: string;
+  full_name: string;
+  owner: { login: string; node_id: string };
+  default_branch?: string;
+  private: boolean;
+};
+
+function toRepoOption(repo: RawRepo): RepoOption {
+  return {
+    id: repo.id,
+    nodeId: repo.node_id,
+    name: repo.name,
+    fullName: repo.full_name,
+    owner: repo.owner.login,
+    ownerNodeId: repo.owner.node_id,
+    defaultBranch: repo.default_branch ?? 'main',
+    isPrivate: repo.private,
+  };
+}
+
+/** Users and organizations have a login; enterprises only a slug. */
+function accountLogin(account: unknown): string {
+  if (typeof account !== 'object' || account === null) {
+    return '';
+  }
+  if ('login' in account && typeof account.login === 'string') {
+    return account.login;
+  }
+  return 'slug' in account && typeof account.slug === 'string' ? account.slug : '';
+}
+
+async function verifyInstallation(
+  auth: Extract<GitHubAuth, { kind: 'app' }>,
+  options: ClientOptions,
+): Promise<Viewer> {
+  const { data } = await githubAppClient(auth.app, options).rest.apps.getInstallation({
+    installation_id: auth.installationId,
+  });
+  return { login: accountLogin(data.account), missingScopes: [] };
+}
+
+async function installationRepos(
+  octokit: Octokit,
+  page: number,
+): Promise<{ repos: RepoOption[]; hasNext: boolean }> {
+  const { data } = await octokit.rest.apps.listReposAccessibleToInstallation({
+    per_page: PAGE_SIZE,
+    page,
+  });
+  return {
+    repos: data.repositories.map((repo) => toRepoOption(repo)),
+    hasNext: page * PAGE_SIZE < data.total_count,
+  };
+}
+
 export class OctokitOnboarding implements OnboardingGitHub {
-  async verify(token: string): Promise<Viewer> {
-    const { data, headers } = await new Octokit({ auth: token }).rest.users.getAuthenticated();
+  constructor(private readonly options: ClientOptions = {}) {}
+
+  private client(auth: GitHubAuth): Octokit {
+    return githubClient(auth, this.options);
+  }
+
+  async verify(auth: GitHubAuth): Promise<Viewer> {
+    if (auth.kind === 'app') {
+      return verifyInstallation(auth, this.options);
+    }
+    const { data, headers } = await this.client(auth).rest.users.getAuthenticated();
     return { login: data.login, missingScopes: missingScopes(headers['x-oauth-scopes']) };
   }
 
-  async listRepos(token: string, page: number): Promise<{ repos: RepoOption[]; hasNext: boolean }> {
-    const { data, headers } = await new Octokit({
-      auth: token,
-    }).rest.repos.listForAuthenticatedUser({
+  async listRepos(
+    auth: GitHubAuth,
+    page: number,
+  ): Promise<{ repos: RepoOption[]; hasNext: boolean }> {
+    if (auth.kind === 'app') {
+      return installationRepos(this.client(auth), page);
+    }
+    const { data, headers } = await this.client(auth).rest.repos.listForAuthenticatedUser({
       affiliation: 'owner,collaborator,organization_member',
       sort: 'pushed',
       per_page: PAGE_SIZE,
       page,
     });
     return {
-      repos: data.map((repo) => ({
-        id: repo.id,
-        nodeId: repo.node_id,
-        name: repo.name,
-        fullName: repo.full_name,
-        owner: repo.owner.login,
-        ownerNodeId: repo.owner.node_id,
-        defaultBranch: repo.default_branch,
-        isPrivate: repo.private,
-      })),
+      repos: data.map((repo) => toRepoOption(repo)),
       hasNext: headers.link?.includes('rel="next"') ?? false,
     };
   }
 
-  async listProjects(token: string, owner: string): Promise<ProjectOption[]> {
-    const data = await new Octokit({ auth: token }).graphql<{
+  async verifyApp(app: GitHubAppCredentials): Promise<AppInfo> {
+    const { data } = await githubAppClient(app, this.options).rest.apps.getAuthenticated();
+    if (!data) {
+      throw new Error('GitHub returned no app for these credentials');
+    }
+    return { slug: data.slug ?? '', name: data.name, url: data.html_url };
+  }
+
+  async listInstallations(app: GitHubAppCredentials): Promise<InstallationOption[]> {
+    const octokit = githubAppClient(app, this.options);
+    const installations = await octokit.paginate(octokit.rest.apps.listInstallations, {
+      per_page: PAGE_SIZE,
+    });
+    return installations.map((installation) => ({
+      id: installation.id,
+      account: accountLogin(installation.account),
+      allRepositories: installation.repository_selection === 'all',
+    }));
+  }
+
+  async listProjects(auth: GitHubAuth, owner: string): Promise<ProjectOption[]> {
+    const data = await this.client(auth).graphql<{
       repositoryOwner: { projectsV2?: { nodes: (ProjectNode | null)[] } } | null;
     }>(OWNER_PROJECTS, { login: owner });
     const nodes = data.repositoryOwner?.projectsV2?.nodes ?? [];
@@ -81,22 +176,22 @@ export class OctokitOnboarding implements OnboardingGitHub {
   }
 
   async createProject(
-    token: string,
+    auth: GitHubAuth,
     input: { ownerId: string; repositoryId: string; title: string },
   ): Promise<ProjectOption> {
-    const data = await new Octokit({ auth: token }).graphql<{
+    const data = await this.client(auth).graphql<{
       createProjectV2: { projectV2: ProjectOption };
     }>(CREATE_PROJECT, input);
     return data.createProjectV2.projectV2;
   }
 
   async getPullRequest(
-    token: string,
+    auth: GitHubAuth,
     repo: { owner: string; repo: string },
     number: number,
   ): Promise<PullRequestInfo | null> {
     try {
-      const { data } = await new Octokit({ auth: token }).rest.pulls.get({
+      const { data } = await this.client(auth).rest.pulls.get({
         ...repo,
         pull_number: number,
       });

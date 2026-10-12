@@ -1,4 +1,11 @@
-import { getTicket, schema, type Db, type Project, type Ticket } from '@union/core';
+import {
+  getTicket,
+  projectGitHubAuth,
+  schema,
+  type Db,
+  type Project,
+  type Ticket,
+} from '@union/core';
 import { eq } from 'drizzle-orm';
 import type { Context } from 'hono';
 
@@ -57,12 +64,15 @@ export async function linkPullRequest(
       `Give a pull request number or a URL of ${project.owner}/${project.repo}`,
     );
   }
-  const token = project.githubToken ?? process.env.GITHUB_TOKEN;
-  if (!token) {
-    throw fail(CONFLICT, 'This project has no GitHub token: set one in the project settings');
+  const auth = projectGitHubAuth(db, project, process.env.GITHUB_TOKEN);
+  if (!auth) {
+    throw fail(
+      CONFLICT,
+      'This project has no GitHub credentials: set a token or a GitHub App in the project settings',
+    );
   }
   const pull = await github.getPullRequest(
-    token,
+    auth,
     { owner: project.owner, repo: project.repo },
     number,
   );

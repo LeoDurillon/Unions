@@ -5,10 +5,10 @@ import { Dialog } from '../ui';
 import { BranchSection } from './branch-section';
 import { ChecksSection } from './checks-section';
 import { DeleteSection } from './delete-section';
+import { GitHubAccessSection } from './github-access-section';
 import { NotionSection } from './notion-section';
 import { PullRequestSection } from './pull-request-section';
 import { ReviewSection } from './review-section';
-import { TokenSection } from './token-section';
 
 const PANES = [
   { id: 'general', label: 'General' },
@@ -59,7 +59,7 @@ function PaneBody({
   const bodies: Record<Pane, ReactElement> = {
     general: (
       <div className="space-y-6">
-        <TokenSection project={project} />
+        <GitHubAccessSection project={project} />
         <BranchSection project={project} />
       </div>
     ),

@@ -1,5 +1,5 @@
 import type { ProjectLocator } from '@union/core';
-import { Octokit } from 'octokit';
+import type { Octokit } from 'octokit';
 
 import type {
   GitHubApi,
@@ -64,11 +64,8 @@ function toRemoteItem(node: ItemNode): RemoteItem | null {
 }
 
 export class OctokitGitHubApi implements GitHubApi {
-  private readonly octokit: Octokit;
-
-  constructor(token: string) {
-    this.octokit = new Octokit({ auth: token });
-  }
+  /** A token client or an installation client (`githubClient` in `@union/core/github-client`). */
+  constructor(private readonly octokit: Octokit) {}
 
   async resolveProject(locator: ProjectLocator): Promise<string> {
     const variables = { login: locator.login, number: locator.number };

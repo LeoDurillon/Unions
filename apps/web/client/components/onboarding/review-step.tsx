@@ -17,7 +17,11 @@ export function ReviewStep({ draft, patch }: StepProps): ReactElement {
   return (
     <div className="space-y-4">
       <dl>
-        <Row label="GitHub account">{draft.viewer?.login}</Row>
+        <Row label="GitHub account">
+          {draft.method === 'app'
+            ? `${draft.viewer?.login ?? ''} (GitHub App)`
+            : draft.viewer?.login}
+        </Row>
         <Row label="Repository">{draft.repo?.fullName}</Row>
         <Row label="Notion">{draft.notionTitle ?? 'Not connected'}</Row>
         <Row label="GitHub Project">

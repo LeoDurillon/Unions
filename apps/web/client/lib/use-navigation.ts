@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export type Page = 'board' | 'agents';
+export type Page = 'board' | 'agents' | 'github-app';
 export type Overlay = 'wizard' | 'settings' | 'ticket' | null;
 
 /** Which page is shown and which overlay is open; `show`/`goTo` return click handlers. */
