@@ -1,3 +1,4 @@
+export * from './agent-tools';
 export * from './agents';
 export * from './db';
 export * from './diff';

@@ -1,8 +1,17 @@
 import { expect, test } from 'bun:test';
 
-import { createDb, createTicket, migrateDb, schema, type ContainerRuntime } from '@union/core';
+import {
+  createDb,
+  createTicket,
+  DEFAULT_TOOLS,
+  migrateDb,
+  schema,
+  type ContainerRuntime,
+} from '@union/core';
 
-import { REVIEW_TOOLS, reviewContext, runReviewStep } from './review';
+import { reviewContext, runReviewStep } from './review';
+
+const REVIEW_TOOLS = DEFAULT_TOOLS.final_review;
 
 test('the reviewer can read the change but never edit or run commands beyond git reads', () => {
   expect(REVIEW_TOOLS).toContain('Bash(git diff*)');

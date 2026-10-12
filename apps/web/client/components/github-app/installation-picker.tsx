@@ -21,7 +21,7 @@ function InstallationCard({
 }): ReactElement {
   return (
     <label
-      className={`flex cursor-pointer items-center justify-between rounded-lg border p-3 transition has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-indigo-500 ${selected ? CHOICE_ON : CHOICE_OFF}`}
+      className={`relative flex cursor-pointer items-center justify-between rounded-lg border p-3 transition has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-indigo-500 ${selected ? CHOICE_ON : CHOICE_OFF}`}
     >
       <input
         type="radio"

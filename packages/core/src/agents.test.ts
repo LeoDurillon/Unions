@@ -28,9 +28,12 @@ test('without edits every agent uses the built-in prompt and model', () => {
     prompt: DEFAULT_PROMPTS.intake,
     defaultModel: 'haiku',
     defaultPrompt: DEFAULT_PROMPTS.intake,
+    tools: ['Read', 'Grep', 'Glob'],
+    defaultTools: ['Read', 'Grep', 'Glob'],
     customized: false,
   });
   expect(resolveAgent(db, 'shared').model).toBeNull();
+  expect(resolveAgent(db, 'shared').tools).toBeNull();
   expect(modelFor(db, 'technical')).toBe('opus');
   expect(modelFor(db, 'implement')).toBe('opus');
 });

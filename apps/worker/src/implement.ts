@@ -10,7 +10,7 @@ import { publishBranch } from './publish';
 import type { StepContext, StepResult } from './scheduler';
 import { commitsAhead, ensureBranch } from './workspace-git';
 
-export { IMPLEMENT_DENIED, IMPLEMENT_TOOLS, type ImplementDeps } from './implement-loop';
+export { IMPLEMENT_DENIED, type ImplementDeps } from './implement-loop';
 
 function loadProject(db: Db, projectId: number): Project {
   const project = db.select().from(schema.projects).where(eq(schema.projects.id, projectId)).get();

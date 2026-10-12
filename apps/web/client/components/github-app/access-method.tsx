@@ -21,7 +21,7 @@ export function AccessMethodTabs({
       {METHODS.map(({ id, label }) => (
         <label
           key={id}
-          className={`cursor-pointer rounded-md px-3 py-1 text-sm transition has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-indigo-500 ${method === id ? 'bg-indigo-600 text-white' : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100'}`}
+          className={`relative cursor-pointer rounded-md px-3 py-1 text-sm transition has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-indigo-500 ${method === id ? 'bg-indigo-600 text-white' : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100'}`}
         >
           <input
             type="radio"

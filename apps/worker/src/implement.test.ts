@@ -4,6 +4,8 @@ import {
   createDb,
   createTicket,
   migrateDb,
+  resolveAgent,
+  saveAgent,
   schema,
   type ContainerRuntime,
   type Db,
@@ -108,6 +110,16 @@ test('green checks after the first turn end the loop', async () => {
   expect(loop).toMatchObject({ iterations: 1, gate: { green: true } });
   expect(runs).toHaveLength(1);
   expect(runs[0]?.prompt).toContain('the checks run with `bun test`');
+  expect(runs[0]?.denied).toContain('Bash(git checkout*)');
+  expect(runs[0]?.tools).toEqual(['Read', 'Edit', 'Write', 'Grep', 'Glob', 'Bash']);
+});
+
+test('the agent runs with the tools selected in the agent settings', async () => {
+  const { prompt, model } = resolveAgent(db, 'implement');
+  saveAgent(db, 'implement', { prompt, model, tools: ['Read', 'Edit', 'Bash', 'Skill'] });
+  const { runtime } = fakeRuntime(() => ({ exitCode: 0, lines: [] }));
+  await implementLoop(workspace(runtime, [ok(1)]));
+  expect(runs[0]?.tools).toEqual(['Read', 'Edit', 'Bash', 'Skill']);
   expect(runs[0]?.denied).toContain('Bash(git checkout*)');
 });
 

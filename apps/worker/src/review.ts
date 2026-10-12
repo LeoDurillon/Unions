@@ -5,6 +5,7 @@ import {
   resolveAgent,
   schema,
   ticketBase,
+  toolsFor,
   type Db,
   type Project,
 } from '@union/core';
@@ -12,24 +13,12 @@ import { eq } from 'drizzle-orm';
 
 import { approvedBefore } from './approved';
 import type { ImplementDeps } from './implement-loop';
-import { PLANNING_TOOLS, buildPrompt } from './prompts';
+import { buildPrompt } from './prompts';
 import { ensureTicketContainer, REPO_DIR } from './provision';
 import type { StepContext, StepResult } from './scheduler';
 import { ensureBranch } from './workspace-git';
 
-const READ_GIT = ['diff', 'log', 'show', 'status'] as const;
-
-/**
- * Read-only, plus the git commands needed to read the change, in both the plain form and the
- * `git -C <repo>` form agents often use. Chained commands (`&&`) cannot be matched by these rules,
- * hence the one-command-per-call instruction in `reviewContext`.
- */
-export const REVIEW_TOOLS = [
-  ...PLANNING_TOOLS,
-  ...READ_GIT.map((command) => `Bash(git ${command}*)`),
-  ...READ_GIT.map((command) => `Bash(git -C ${REPO_DIR} ${command}*)`),
-] as const;
-
+/** Reading the change needs git; the default review tools allow the read-only git commands. */
 export function reviewContext(base: string, branch: string): string {
   return `\n\nThe ticket branch \`${branch}\` is checked out and you are in the repository root. Compare it with the base branch with \`git diff ${base}...HEAD\` and \`git log ${base}..HEAD\`. Run one git command per call: no \`&&\`, no \`cd\`.`;
 }
@@ -72,7 +61,7 @@ export async function runReviewStep(
         approved: approvedBefore(db, ticket.id, 'final_review'),
         revision: null,
       }),
-      tools: REVIEW_TOOLS,
+      tools: toolsFor(db, 'final_review'),
       signal: context.signal,
       onEvent: context.log,
     });

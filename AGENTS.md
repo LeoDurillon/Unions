@@ -8,7 +8,10 @@ behavior; this file covers how to work in the repo.
 
 - `packages/core`: shared code. `agents.ts` holds the default agent prompts and models; edits made in the UI's
   Agent settings are stored in `agent_configs` (overrides only, Reset deletes the row) and the worker resolves them
-  on every run (`resolveAgent`, `modelFor`). Change a default there, not in the worker.
+  on every run (`resolveAgent`, `modelFor`, `toolsFor`). Change a default there, not in the worker.
+  `agent-tools.ts` holds each step's default allowed tools and the tool list agents pick from (Claude Code's tools,
+  the rules the defaults use, and the user's additions in `agent_tools`). Denied rules (`BASE_DENIED`,
+  `IMPLEMENT_DENIED` in the worker) are not editable and always win over a selected tool.
   Drizzle schema and migrations, the pure ticket state machine (`states.ts`), ticket dependencies
   (`ticket-links.ts`: `setParent`, `ticketBase`; the start gate `blockingParent` is in `tickets.ts`), the
   `ContainerRuntime` interface and its Docker CLI implementation.

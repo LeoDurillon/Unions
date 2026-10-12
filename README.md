@@ -106,7 +106,8 @@ Environment variables (shell or `.env`), all optional:
 | `UNION_CLAUDE_CREDENTIALS` | `~/.claude/.credentials.json`         | Claude credential seeded into containers                 |
 | `UNION_AGENT_IMAGE`        | `union-agent:local`                   | Image agent containers run from                          |
 
-Agent prompts and models are edited in **Agent settings** in the sidebar and stored in the database.
+Agent prompts, models and allowed tools are edited in **Agent settings** in the sidebar and stored in the
+database.
 
 ## Database
 

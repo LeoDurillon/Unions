@@ -1,86 +1,125 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { AgentConfig, AgentModel } from '@union/core';
-import { AGENT_MODELS, isAgentModel } from '@union/core/states';
 import { useState, type ReactElement } from 'react';
 
 import { api } from '../../lib/api';
 import { Badge, Button, ErrorText, inputClass } from '../ui';
-import { AGENT_LABELS, MODEL_LABELS } from './agent-labels';
+import { AGENT_LABELS } from './agent-labels';
+import { ModelField } from './model-field';
+import { ToolsField } from './tools-field';
+
+function sameTools(a: string[] | null, b: string[] | null): boolean {
+  return a?.join('\n') === b?.join('\n');
+}
 
 function useAgentEdits(config: AgentConfig): {
   prompt: string;
   model: AgentModel | null;
+  tools: string[] | null;
   setPrompt: (value: string) => void;
   handleModel: (value: AgentModel) => void;
+  handleTools: (value: string[]) => void;
   dirty: boolean;
   handleDiscard: () => void;
 } {
   const [prompt, setPrompt] = useState(config.prompt);
   const [model, setModel] = useState(config.model);
-  const dirty = prompt !== config.prompt || model !== config.model;
+  const [tools, setTools] = useState(config.tools);
+  const dirty =
+    prompt !== config.prompt || model !== config.model || !sameTools(tools, config.tools);
   const handleDiscard = (): void => {
     setPrompt(config.prompt);
     setModel(config.model);
+    setTools(config.tools);
   };
-  return { prompt, model, setPrompt, handleModel: setModel, dirty, handleDiscard };
+  return {
+    prompt,
+    model,
+    tools,
+    setPrompt,
+    handleModel: setModel,
+    handleTools: setTools,
+    dirty,
+    handleDiscard,
+  };
 }
 
-function ModelField({
+function CardHeader({
+  config,
   model,
-  onChange,
+  onModel,
 }: {
-  model: AgentModel;
-  onChange: (value: AgentModel) => void;
+  config: AgentConfig;
+  model: AgentModel | null;
+  onModel: (value: AgentModel) => void;
 }): ReactElement {
+  const label = AGENT_LABELS[config.agent];
   return (
-    <label className="flex items-center gap-2 text-sm">
-      <span className="text-zinc-500">Model</span>
-      <select
-        className="rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-sm dark:border-zinc-700 dark:bg-zinc-900"
-        value={model}
-        onChange={(event) => {
-          const { value } = event.target;
-          if (isAgentModel(value)) {
-            onChange(value);
-          }
-        }}
-      >
-        {AGENT_MODELS.map((option) => (
-          <option key={option} value={option}>
-            {MODEL_LABELS[option]}
-          </option>
-        ))}
-      </select>
-    </label>
+    <header className="flex flex-wrap items-center gap-2">
+      <h3 className="font-semibold">{label.title}</h3>
+      <Badge tone={config.customized ? 'blue' : 'neutral'}>
+        {config.customized ? 'customized' : 'default'}
+      </Badge>
+      {label.notRunYet ? <Badge tone="amber">step not run yet</Badge> : null}
+      <div className="flex-1" />
+      {model === null ? null : <ModelField model={model} onChange={onModel} />}
+    </header>
   );
 }
 
-/** One agent's prompt and model, saved to the database; the next run of that step uses them. */
+function CardActions({
+  canSave,
+  dirty,
+  customized,
+  busy,
+  onSave,
+  onDiscard,
+  onReset,
+}: {
+  canSave: boolean;
+  dirty: boolean;
+  customized: boolean;
+  busy: boolean;
+  onSave: () => void;
+  onDiscard: () => void;
+  onReset: () => void;
+}): ReactElement {
+  return (
+    <div className="flex flex-wrap gap-2">
+      <Button variant="primary" disabled={!canSave || busy} onClick={onSave}>
+        Save
+      </Button>
+      {dirty ? <Button onClick={onDiscard}>Discard changes</Button> : null}
+      {customized ? (
+        <Button disabled={busy} onClick={onReset}>
+          Reset to default
+        </Button>
+      ) : null}
+    </div>
+  );
+}
+
+/** One agent's prompt, model and tools, saved to the database; the next run of that step uses them. */
 export function AgentCard({ config }: { config: AgentConfig }): ReactElement {
   const queryClient = useQueryClient();
   const edits = useAgentEdits(config);
   const refresh = (): Promise<void> => queryClient.invalidateQueries({ queryKey: ['agents'] });
   const save = useMutation({
-    mutationFn: () => api.saveAgent(config.agent, { prompt: edits.prompt, model: edits.model }),
+    mutationFn: () =>
+      api.saveAgent(config.agent, {
+        prompt: edits.prompt,
+        model: edits.model,
+        // Unchanged default tools stay unsaved, so a later change of the defaults applies.
+        tools: sameTools(edits.tools, config.defaultTools) ? null : edits.tools,
+      }),
     onSuccess: refresh,
   });
   const reset = useMutation({ mutationFn: () => api.resetAgent(config.agent), onSuccess: refresh });
   const label = AGENT_LABELS[config.agent];
-  const busy = save.isPending || reset.isPending;
 
   return (
     <section className="space-y-3 rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
-      <header className="flex flex-wrap items-center gap-2">
-        <h3 className="font-semibold">{label.title}</h3>
-        <Badge tone={config.customized ? 'blue' : 'neutral'}>
-          {config.customized ? 'customized' : 'default'}
-        </Badge>
-        {label.notRunYet ? <Badge tone="amber">step not run yet</Badge> : null}
-        <div className="flex-1" />
-        {edits.model === null ? null : (
-          <ModelField model={edits.model} onChange={edits.handleModel} />
-        )}
-      </header>
+      <CardHeader config={config} model={edits.model} onModel={edits.handleModel} />
       <p className="text-xs text-zinc-500">{label.description}</p>
       <textarea
         className={`${inputClass} min-h-48 font-mono text-xs`}
@@ -90,29 +129,28 @@ export function AgentCard({ config }: { config: AgentConfig }): ReactElement {
           edits.setPrompt(event.target.value);
         }}
       />
+      {edits.tools === null || config.defaultTools === null ? null : (
+        <ToolsField
+          agentTitle={label.title}
+          value={edits.tools}
+          defaults={config.defaultTools}
+          onChange={edits.handleTools}
+        />
+      )}
       <ErrorText error={save.error ?? reset.error} />
-      <div className="flex flex-wrap gap-2">
-        <Button
-          variant="primary"
-          disabled={!edits.dirty || edits.prompt.trim() === '' || busy}
-          onClick={() => {
-            save.mutate();
-          }}
-        >
-          Save
-        </Button>
-        {edits.dirty ? <Button onClick={edits.handleDiscard}>Discard changes</Button> : null}
-        {config.customized ? (
-          <Button
-            disabled={busy}
-            onClick={() => {
-              reset.mutate();
-            }}
-          >
-            Reset to default
-          </Button>
-        ) : null}
-      </div>
+      <CardActions
+        canSave={edits.dirty && edits.prompt.trim() !== '' && edits.tools?.length !== 0}
+        dirty={edits.dirty}
+        customized={config.customized}
+        busy={save.isPending || reset.isPending}
+        onSave={() => {
+          save.mutate();
+        }}
+        onDiscard={edits.handleDiscard}
+        onReset={() => {
+          reset.mutate();
+        }}
+      />
     </section>
   );
 }

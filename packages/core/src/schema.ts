@@ -206,12 +206,22 @@ export const lessons = sqliteTable(
   (t) => [index('lessons_idx').on(t.projectId, t.section)],
 );
 
-/** User edits to an agent's prompt and model. No row means the built-in default (see agents.ts). */
+/** User edits to an agent's prompt, model and tools. No row means the built-in default (see agents.ts). */
 export const agentConfigs = sqliteTable('agent_configs', {
   agent: text('agent').primaryKey(), // 'shared' or a planning step
   model: text('model'), // an AgentModel; null for 'shared', which has no model of its own
   prompt: text('prompt').notNull(),
+  /** Allowed tools (`--allowedTools` entries); null: the step's default tools. */
+  tools: text('tools', { mode: 'json' }).$type<string[]>(),
   ...timestamps,
+});
+
+/** Tools the user added to the list agents pick from, on top of the built-in ones (agent-tools.ts). */
+export const agentTools = sqliteTable('agent_tools', {
+  /** A Claude Code tool or permission rule: `WebFetch`, `Bash(pnpm *)`, `mcp__server__tool`. */
+  name: text('name').primaryKey(),
+  description: text('description'),
+  createdAt: integer('created_at').notNull().default(now),
 });
 
 /** The branch diff after the latest implementation run; only the newest snapshot per ticket is kept. */

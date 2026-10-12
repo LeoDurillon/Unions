@@ -28,12 +28,10 @@ export const AGENT_LABELS: Record<
   implement: {
     title: 'Implementation',
     description: 'Writes the code and the planned tests, runs the checks, commits locally.',
-    notRunYet: true,
   },
   final_review: {
     title: 'Final review',
     description: 'Reviews the diff against the plan and gives a verdict before you approve.',
-    notRunYet: true,
   },
   rebase: {
     title: 'Rebase',

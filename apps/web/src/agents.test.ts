@@ -7,6 +7,7 @@ import {
   resolveAgent,
   type AgentConfig,
   type Db,
+  type ToolOption,
 } from '@union/core';
 import type { Hono } from 'hono';
 
@@ -74,4 +75,37 @@ test('rejects unknown agents, empty prompts and invalid models; shared needs no 
   expect((await send('PUT', '/api/agents/shared', { prompt: 'House rules.' })).status).toBe(200);
   expect((await send('PUT', '/api/agents/rebase', { prompt: 'Prefer ours.' })).status).toBe(200);
   expect(resolveAgent(db, 'shared')).toMatchObject({ prompt: 'House rules.', model: null });
+});
+
+test('tools: added to the list, selected for an agent, removed once unused', async () => {
+  const added = await send('POST', '/api/agents/tools', {
+    name: 'Bash(pnpm lint*)',
+    description: 'Lint',
+  });
+  expect(added.status).toBe(201);
+  expect((await send('POST', '/api/agents/tools', { name: 'two words' })).status).toBe(400);
+  const tools = (await (await send('GET', '/api/agents/tools')).json()) as ToolOption[];
+  expect(tools.at(-1)).toEqual({ name: 'Bash(pnpm lint*)', description: 'Lint', source: 'custom' });
+
+  const { prompt, model } = resolveAgent(db, 'implement');
+  const saved = await send('PUT', '/api/agents/implement', {
+    prompt,
+    model,
+    tools: ['Read', 'Skill', 'Bash(pnpm lint*)'],
+  });
+  expect(((await saved.json()) as AgentConfig).tools).toEqual([
+    'Read',
+    'Skill',
+    'Bash(pnpm lint*)',
+  ]);
+  const unknown = await send('PUT', '/api/agents/implement', { prompt, model, tools: ['Nope'] });
+  expect(unknown.status).toBe(400);
+  expect(
+    (await send('PUT', '/api/agents/implement', { prompt, model, tools: 'Read' })).status,
+  ).toBe(400);
+
+  const path = `/api/agents/tools/${encodeURIComponent('Bash(pnpm lint*)')}`;
+  expect((await send('DELETE', path)).status).toBe(409);
+  await send('DELETE', '/api/agents/implement');
+  expect((await send('DELETE', path)).status).toBe(200);
 });

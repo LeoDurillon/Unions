@@ -2,6 +2,7 @@ import {
   modelFor,
   parentOf,
   resolveAgent,
+  toolsFor,
   type ContainerRuntime,
   type Db,
   type Project,
@@ -17,7 +18,6 @@ import { REPO_DIR, type ProvisionConfig } from './provision';
 import type { StepContext } from './scheduler';
 import { commitLeftovers } from './workspace-git';
 
-export const IMPLEMENT_TOOLS = ['Read', 'Edit', 'Write', 'Grep', 'Glob', 'Bash'] as const;
 /** Branch moves and history rewrites belong to the host (rebase has its own step). */
 export const IMPLEMENT_DENIED = [
   'Bash(git checkout*)',
@@ -83,7 +83,7 @@ export async function implementLoop(workspace: Workspace): Promise<Loop> {
         cwd: REPO_DIR,
         model: modelFor(deps.db, 'implement'),
         prompt,
-        tools: IMPLEMENT_TOOLS,
+        tools: toolsFor(deps.db, 'implement'),
         denied: IMPLEMENT_DENIED,
         resumeSessionId: sessionId,
         signal: context.signal,

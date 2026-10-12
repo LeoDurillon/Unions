@@ -6,8 +6,6 @@ import {
   type Ticket,
 } from '@union/core';
 
-export const PLANNING_TOOLS = ['Read', 'Grep', 'Glob'] as const;
-
 export function isPlanningStep(step: Step): step is PlanningStep {
   return PLANNING_STEPS.some((planning) => planning === step);
 }

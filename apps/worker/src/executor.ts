@@ -2,6 +2,7 @@ import {
   modelFor,
   parentOf,
   resolveAgent,
+  toolsFor,
   type ContainerRuntime,
   type Db,
   type Project,
@@ -11,7 +12,7 @@ import { runAgent, runResumable } from './agent';
 import { approvedBefore } from './approved';
 import type { GitHubApi } from './github/api';
 import { runImplementStep } from './implement';
-import { buildPrompt, isPlanningStep, PLANNING_TOOLS } from './prompts';
+import { buildPrompt, isPlanningStep } from './prompts';
 import { ensureTicketContainer, REPO_DIR, type ProvisionConfig } from './provision';
 import { runReviewStep } from './review';
 import type { StepContext, StepExecutor, StepResult } from './scheduler';
@@ -55,7 +56,7 @@ export function createExecutor(
         cwd: REPO_DIR,
         model: modelFor(db, step),
         prompt,
-        tools: PLANNING_TOOLS,
+        tools: toolsFor(db, step),
         resumeSessionId: context.resumeSessionId,
         signal: context.signal,
         onEvent: context.log,

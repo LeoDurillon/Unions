@@ -1,4 +1,4 @@
-import type { AgentConfig, AgentModel } from '@union/core';
+import type { AgentConfig, AgentModel, ToolOption } from '@union/core';
 
 import type {
   GitHubAppStatus,
@@ -53,8 +53,13 @@ export const api = {
   agents: (): Promise<AgentConfig[]> => request('GET', '/api/agents'),
   saveAgent: (
     agent: string,
-    change: { prompt: string; model: AgentModel | null },
+    change: { prompt: string; model: AgentModel | null; tools: string[] | null },
   ): Promise<AgentConfig> => request('PUT', `/api/agents/${agent}`, change),
+  tools: (): Promise<ToolOption[]> => request('GET', '/api/agents/tools'),
+  addTool: (input: { name: string; description: string }): Promise<ToolOption> =>
+    request('POST', '/api/agents/tools', input),
+  removeTool: (name: string): Promise<ToolOption[]> =>
+    request('DELETE', `/api/agents/tools/${encodeURIComponent(name)}`),
   resetAgent: (agent: string): Promise<AgentConfig> => request('DELETE', `/api/agents/${agent}`),
   projects: (): Promise<PublicProject[]> => request('GET', '/api/projects'),
   createProject: (

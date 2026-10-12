@@ -2,14 +2,14 @@ import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { homedir, tmpdir } from 'node:os';
 import path from 'node:path';
 
-import { schema, type ContainerRuntime, type Db, type Ticket } from '@union/core';
+import { AGENT_REPO_DIR, schema, type ContainerRuntime, type Db, type Ticket } from '@union/core';
 import { eq } from 'drizzle-orm';
 
 import { projectGitToken } from './credentials';
 import { resolveTicketBase } from './ticket-base';
 
 export const AGENT_HOME = '/home/node';
-export const REPO_DIR = '/workspace/repo';
+export const REPO_DIR = AGENT_REPO_DIR;
 
 export type ProvisionConfig = {
   image: string;

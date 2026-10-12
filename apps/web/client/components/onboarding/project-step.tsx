@@ -32,7 +32,7 @@ function ExistingProject({
 }): ReactElement {
   return (
     <label
-      className={`block cursor-pointer rounded-lg border p-3 transition has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-indigo-500 ${selected ? CHOICE_ON : CHOICE_OFF}`}
+      className={`relative block cursor-pointer rounded-lg border p-3 transition has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-indigo-500 ${selected ? CHOICE_ON : CHOICE_OFF}`}
     >
       <Radio selected={selected} onSelect={onSelect} />
       <span className="block text-sm font-medium">{project.title}</span>
@@ -52,7 +52,7 @@ function NewProject({ draft, patch }: StepProps): ReactElement {
     <div
       className={`space-y-2 rounded-lg border p-3 transition ${selected ? CHOICE_ON : CHOICE_OFF}`}
     >
-      <label className="block cursor-pointer text-sm font-medium has-[:focus-visible]:underline">
+      <label className="relative block cursor-pointer text-sm font-medium has-[:focus-visible]:underline">
         <input
           type="radio"
           name="github-project"

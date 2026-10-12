@@ -1,5 +1,6 @@
 import { eq } from 'drizzle-orm';
 
+import { DEFAULT_TOOLS, validateTools } from './agent-tools';
 import type { Db } from './db';
 import * as schema from './schema';
 import {
@@ -69,6 +70,9 @@ export type AgentConfig = {
   prompt: string;
   defaultModel: AgentModel | null;
   defaultPrompt: string;
+  /** Allowed tools; null for the agents that do not run on their own (`shared`, `rebase`). */
+  tools: string[] | null;
+  defaultTools: string[] | null;
   customized: boolean;
 };
 
@@ -86,6 +90,11 @@ function defaultModel(agent: AgentId): AgentModel | null {
   return step ? MODEL_BY_STEP[step] : null;
 }
 
+function defaultTools(agent: AgentId): string[] | null {
+  const step = stepOf(agent);
+  return step ? [...DEFAULT_TOOLS[step]] : null;
+}
+
 export function resolveAgent(db: Db, agent: AgentId): AgentConfig {
   const row = db
     .select()
@@ -95,12 +104,15 @@ export function resolveAgent(db: Db, agent: AgentId): AgentConfig {
   const fallbackModel = defaultModel(agent);
   // A stored value outside the list (an older free-text entry) falls back to the default.
   const storedModel = isAgentModel(row?.model) ? row.model : null;
+  const fallbackTools = defaultTools(agent);
   return {
     agent,
     model: fallbackModel === null ? null : (storedModel ?? fallbackModel),
     prompt: row?.prompt ?? DEFAULT_PROMPTS[agent],
     defaultModel: fallbackModel,
     defaultPrompt: DEFAULT_PROMPTS[agent],
+    tools: fallbackTools === null ? null : (row?.tools ?? fallbackTools),
+    defaultTools: fallbackTools,
     customized: row !== undefined,
   };
 }
@@ -114,17 +126,25 @@ export function modelFor(db: Db, step: Step): AgentModel {
   return resolveAgent(db, step).model ?? MODEL_BY_STEP[step];
 }
 
+/** The tools a run of `step` is allowed: the user's choice, else the step's defaults. */
+export function toolsFor(db: Db, step: Step): string[] {
+  return resolveAgent(db, step).tools ?? [...DEFAULT_TOOLS[step]];
+}
+
+/** Saves the agent's edits. Tools left out (or given to an agent without a step) are not stored. */
 export function saveAgent(
   db: Db,
   agent: AgentId,
-  change: { prompt: string; model: AgentModel | null },
+  change: { prompt: string; model: AgentModel | null; tools?: readonly string[] | null },
 ): AgentConfig {
-  const model = stepOf(agent) ? change.model : null;
+  const step = stepOf(agent);
+  const model = step ? change.model : null;
+  const tools = step && change.tools ? validateTools(db, change.tools) : null;
   db.insert(schema.agentConfigs)
-    .values({ agent, model, prompt: change.prompt })
+    .values({ agent, model, prompt: change.prompt, tools })
     .onConflictDoUpdate({
       target: schema.agentConfigs.agent,
-      set: { model, prompt: change.prompt, updatedAt: Date.now() },
+      set: { model, prompt: change.prompt, tools, updatedAt: Date.now() },
     })
     .run();
   return resolveAgent(db, agent);
