@@ -7,6 +7,7 @@ import {
   modelFor,
   resetAgent,
   resolveAgent,
+  effortFor,
   saveAgent,
   sharedPrompt,
 } from './agents';
@@ -26,6 +27,7 @@ test('without edits every agent uses the built-in prompt and model', () => {
   expect(resolveAgent(db, 'intake')).toEqual({
     agent: 'intake',
     model: 'haiku',
+    effort: null,
     prompt: DEFAULT_PROMPTS.intake,
     defaultModel: 'haiku',
     defaultPrompt: DEFAULT_PROMPTS.intake,
@@ -108,4 +110,20 @@ test('the shared prompt is followed by the project instructions when the project
   expect(sharedPrompt(db, insert('own', 'Use pnpm.'))).toBe(
     'Be brief.\n\n# Project instructions\n\nUse pnpm.',
   );
+});
+
+test("an effort is saved per agent with a model; the rebase uses the implementer's", () => {
+  expect(effortFor(db, 'implement')).toBeNull();
+  saveAgent(db, 'implement', { prompt: DEFAULT_PROMPTS.implement, model: 'opus', effort: 'xhigh' });
+  saveAgent(db, 'shared', { prompt: 'Be brief.', model: null, effort: 'max' });
+  expect(effortFor(db, 'implement')).toBe('xhigh');
+  expect(effortFor(db, 'rebase')).toBe('xhigh');
+  expect(effortFor(db, 'intake')).toBeNull();
+  // Agents without a model of their own never keep an effort.
+  expect(resolveAgent(db, 'shared').effort).toBeNull();
+  // A stored value outside the list (edited by hand) reads as the default.
+  db.update(schema.agentConfigs)
+    .set({ effort: 'huge' as never })
+    .run();
+  expect(effortFor(db, 'implement')).toBeNull();
 });

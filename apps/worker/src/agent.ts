@@ -1,9 +1,11 @@
-import type { ContainerRuntime } from '@union/core';
+import type { AgentEffort, ContainerRuntime } from '@union/core';
 
 export type AgentRun = {
   container: string;
   cwd: string;
   model: string;
+  /** Thinking effort (`--effort`); null or absent: the CLI's default. */
+  effort?: AgentEffort | null;
   prompt: string;
   tools: readonly string[];
   /** Extra denied tools on top of `BASE_DENIED`. */
@@ -59,7 +61,7 @@ function parseLine(line: string): unknown {
 }
 
 export function claudeArgs(
-  run: Pick<AgentRun, 'model' | 'tools' | 'denied' | 'resumeSessionId'>,
+  run: Pick<AgentRun, 'model' | 'effort' | 'tools' | 'denied' | 'resumeSessionId'>,
 ): string[] {
   const args = [
     'claude',
@@ -74,6 +76,9 @@ export function claudeArgs(
     '--disallowedTools',
     [...BASE_DENIED, ...(run.denied ?? [])].join(','),
   ];
+  if (run.effort) {
+    args.push('--effort', run.effort);
+  }
   if (run.resumeSessionId) {
     args.push('--resume', run.resumeSessionId);
   }

@@ -4,10 +4,12 @@ import { DEFAULT_TOOLS, validateTools } from './agent-tools';
 import type { Db } from './db';
 import * as schema from './schema';
 import {
+  isAgentEffort,
   isAgentModel,
   MODEL_BY_STEP,
   PLANNING_STEPS,
   STEPS,
+  type AgentEffort,
   type AgentModel,
   type Step,
 } from './states';
@@ -67,6 +69,8 @@ export type AgentConfig = {
   agent: AgentId;
   /** Null only for `shared`. */
   model: AgentModel | null;
+  /** Thinking effort; null: the CLI's default (always for the agents without a model). */
+  effort: AgentEffort | null;
   prompt: string;
   defaultModel: AgentModel | null;
   defaultPrompt: string;
@@ -109,6 +113,17 @@ export function sharedPrompt(db: Db, projectId: number): string {
   return own === '' ? shared : `${shared}\n\n${own}`;
 }
 
+/** A stored value outside its list (an older free-text entry, a hand edit) reads as the default. */
+function storedChoices(row: { model: string | null; effort: string | null } | undefined): {
+  model: AgentModel | null;
+  effort: AgentEffort | null;
+} {
+  return {
+    model: isAgentModel(row?.model) ? row.model : null,
+    effort: isAgentEffort(row?.effort) ? row.effort : null,
+  };
+}
+
 export function resolveAgent(db: Db, agent: AgentId): AgentConfig {
   const row = db
     .select()
@@ -116,12 +131,12 @@ export function resolveAgent(db: Db, agent: AgentId): AgentConfig {
     .where(eq(schema.agentConfigs.agent, agent))
     .get();
   const fallbackModel = defaultModel(agent);
-  // A stored value outside the list (an older free-text entry) falls back to the default.
-  const storedModel = isAgentModel(row?.model) ? row.model : null;
+  const stored = storedChoices(row);
   const fallbackTools = defaultTools(agent);
   return {
     agent,
-    model: fallbackModel === null ? null : (storedModel ?? fallbackModel),
+    model: fallbackModel === null ? null : (stored.model ?? fallbackModel),
+    effort: fallbackModel === null ? null : stored.effort,
     prompt: row?.prompt ?? DEFAULT_PROMPTS[agent],
     defaultModel: fallbackModel,
     defaultPrompt: DEFAULT_PROMPTS[agent],
@@ -144,6 +159,12 @@ export function modelFor(db: Db, step: Step): AgentModel {
   return resolveAgent(db, step).model ?? MODEL_BY_STEP[step];
 }
 
+/** The thinking effort a run of `step` uses; null: the CLI's default. */
+export function effortFor(db: Db, step: Step): AgentEffort | null {
+  // Like its model, the rebase keeps the implementer's effort.
+  return resolveAgent(db, step === 'rebase' ? 'implement' : step).effort;
+}
+
 /** The tools a run of `step` is allowed: the user's choice, else the step's defaults. */
 export function toolsFor(db: Db, step: Step): string[] {
   // The implementer's tools, plus the git commands a rebase needs.
@@ -157,16 +178,22 @@ export function toolsFor(db: Db, step: Step): string[] {
 export function saveAgent(
   db: Db,
   agent: AgentId,
-  change: { prompt: string; model: AgentModel | null; tools?: readonly string[] | null },
+  change: {
+    prompt: string;
+    model: AgentModel | null;
+    effort?: AgentEffort | null;
+    tools?: readonly string[] | null;
+  },
 ): AgentConfig {
   const step = stepOf(agent);
   const model = step ? change.model : null;
+  const effort = step ? (change.effort ?? null) : null;
   const tools = step && change.tools ? validateTools(db, change.tools) : null;
   db.insert(schema.agentConfigs)
-    .values({ agent, model, prompt: change.prompt, tools })
+    .values({ agent, model, effort, prompt: change.prompt, tools })
     .onConflictDoUpdate({
       target: schema.agentConfigs.agent,
-      set: { model, prompt: change.prompt, tools, updatedAt: Date.now() },
+      set: { model, effort, prompt: change.prompt, tools, updatedAt: Date.now() },
     })
     .run();
   return resolveAgent(db, agent);

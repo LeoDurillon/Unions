@@ -4,11 +4,14 @@ import {
   isAgentId,
   listAgents,
   listTools,
+  AGENT_EFFORTS,
   AGENT_MODELS,
+  isAgentEffort,
   isAgentModel,
   removeTool,
   resetAgent,
   saveAgent,
+  type AgentEffort,
   type AgentId,
   type AgentModel,
   type Db,
@@ -43,6 +46,18 @@ function modelOf(agent: AgentId, body: Record<string, unknown>): AgentModel | nu
     throw fail(BAD_REQUEST, `"model" must be one of ${AGENT_MODELS.join(', ')}`);
   }
   return model;
+}
+
+/** Absent or null: the CLI's default effort. */
+function effortOf(body: Record<string, unknown>): AgentEffort | null {
+  const { effort } = body;
+  if (effort === undefined || effort === null) {
+    return null;
+  }
+  if (!isAgentEffort(effort)) {
+    throw fail(BAD_REQUEST, `"effort" must be one of ${AGENT_EFFORTS.join(', ')}, or null`);
+  }
+  return effort;
 }
 
 /** Absent: keep the step's default tools. */
@@ -99,6 +114,7 @@ export function agentRoutes(db: Db): Hono {
     const change = {
       prompt: requireText(body, 'prompt'),
       model: modelOf(agent, body),
+      effort: effortOf(body),
       tools: toolsOf(body),
     };
     return c.json(toolErrors(BAD_REQUEST, () => saveAgent(db, agent, change)));

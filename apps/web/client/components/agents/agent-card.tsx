@@ -1,10 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { AgentConfig, AgentModel } from '@union/core';
+import type { AgentConfig, AgentEffort, AgentModel } from '@union/core';
 import { useState, type ReactElement } from 'react';
 
 import { api } from '../../lib/api';
 import { Badge, Button, ErrorText, inputClass } from '../ui';
 import { AGENT_LABELS } from './agent-labels';
+import { EffortField } from './effort-field';
 import { ModelField } from './model-field';
 import { ToolsField } from './tools-field';
 
@@ -15,29 +16,38 @@ function sameTools(a: string[] | null, b: string[] | null): boolean {
 function useAgentEdits(config: AgentConfig): {
   prompt: string;
   model: AgentModel | null;
+  effort: AgentEffort | null;
   tools: string[] | null;
   setPrompt: (value: string) => void;
   handleModel: (value: AgentModel) => void;
+  handleEffort: (value: AgentEffort | null) => void;
   handleTools: (value: string[]) => void;
   dirty: boolean;
   handleDiscard: () => void;
 } {
   const [prompt, setPrompt] = useState(config.prompt);
   const [model, setModel] = useState(config.model);
+  const [effort, setEffort] = useState(config.effort);
   const [tools, setTools] = useState(config.tools);
   const dirty =
-    prompt !== config.prompt || model !== config.model || !sameTools(tools, config.tools);
+    prompt !== config.prompt ||
+    model !== config.model ||
+    effort !== config.effort ||
+    !sameTools(tools, config.tools);
   const handleDiscard = (): void => {
     setPrompt(config.prompt);
     setModel(config.model);
+    setEffort(config.effort);
     setTools(config.tools);
   };
   return {
     prompt,
     model,
+    effort,
     tools,
     setPrompt,
     handleModel: setModel,
+    handleEffort: setEffort,
     handleTools: setTools,
     dirty,
     handleDiscard,
@@ -47,11 +57,15 @@ function useAgentEdits(config: AgentConfig): {
 function CardHeader({
   config,
   model,
+  effort,
   onModel,
+  onEffort,
 }: {
   config: AgentConfig;
   model: AgentModel | null;
+  effort: AgentEffort | null;
   onModel: (value: AgentModel) => void;
+  onEffort: (value: AgentEffort | null) => void;
 }): ReactElement {
   const label = AGENT_LABELS[config.agent];
   return (
@@ -62,7 +76,12 @@ function CardHeader({
       </Badge>
       {label.notRunYet ? <Badge tone="amber">step not run yet</Badge> : null}
       <div className="flex-1" />
-      {model === null ? null : <ModelField model={model} onChange={onModel} />}
+      {model === null ? null : (
+        <>
+          <ModelField model={model} onChange={onModel} />
+          <EffortField effort={effort} onChange={onEffort} />
+        </>
+      )}
     </header>
   );
 }
@@ -99,7 +118,7 @@ function CardActions({
   );
 }
 
-/** One agent's prompt, model and tools, saved to the database; the next run of that step uses them. */
+/** One agent's prompt, model, effort and tools, saved to the database; the next run of that step uses them. */
 export function AgentCard({ config }: { config: AgentConfig }): ReactElement {
   const queryClient = useQueryClient();
   const edits = useAgentEdits(config);
@@ -109,6 +128,7 @@ export function AgentCard({ config }: { config: AgentConfig }): ReactElement {
       api.saveAgent(config.agent, {
         prompt: edits.prompt,
         model: edits.model,
+        effort: edits.effort,
         // Unchanged default tools stay unsaved, so a later change of the defaults applies.
         tools: sameTools(edits.tools, config.defaultTools) ? null : edits.tools,
       }),
@@ -119,7 +139,13 @@ export function AgentCard({ config }: { config: AgentConfig }): ReactElement {
 
   return (
     <section className="space-y-3 rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
-      <CardHeader config={config} model={edits.model} onModel={edits.handleModel} />
+      <CardHeader
+        config={config}
+        model={edits.model}
+        effort={edits.effort}
+        onModel={edits.handleModel}
+        onEffort={edits.handleEffort}
+      />
       <p className="text-xs text-zinc-500">{label.description}</p>
       <textarea
         className={`${inputClass} min-h-48 font-mono text-xs`}

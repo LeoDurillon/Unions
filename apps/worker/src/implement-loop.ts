@@ -1,12 +1,13 @@
 import {
+  type ContainerRuntime,
+  type Db,
+  effortFor,
   modelFor,
   parentOf,
+  type Project,
   resolveAgent,
   sharedPrompt,
   toolsFor,
-  type ContainerRuntime,
-  type Db,
-  type Project,
 } from '@union/core';
 
 import { runResumable, type AgentFn, type AgentOutcome } from './agent';
@@ -83,6 +84,7 @@ export async function implementLoop(workspace: Workspace): Promise<Loop> {
         container,
         cwd: REPO_DIR,
         model: modelFor(deps.db, 'implement'),
+        effort: effortFor(deps.db, 'implement'),
         prompt,
         tools: toolsFor(deps.db, 'implement'),
         denied: IMPLEMENT_DENIED,

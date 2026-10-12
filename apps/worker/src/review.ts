@@ -1,14 +1,15 @@
 import {
+  type Db,
+  effortFor,
   getTicket,
   modelFor,
   parentOf,
+  type Project,
   resolveAgent,
-  sharedPrompt,
   schema,
+  sharedPrompt,
   ticketBase,
   toolsFor,
-  type Db,
-  type Project,
 } from '@union/core';
 import { eq } from 'drizzle-orm';
 
@@ -54,6 +55,7 @@ export async function runReviewStep(
       container: name,
       cwd: REPO_DIR,
       model: modelFor(db, 'final_review'),
+      effort: effortFor(db, 'final_review'),
       prompt: buildPrompt({
         ticket,
         parent: parentOf(db, ticket),

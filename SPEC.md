@@ -17,6 +17,9 @@ Everything the agent does is mirrored to the GitHub issue.
 - GitHub access per project: a personal access token (classic or fine-grained) or an installation of one global
   GitHub App (App ID + private key stored once; installation tokens are minted per use and expire after an hour).
   Fine-grained tokens and apps cannot reach Projects owned by a user account: those need a classic token.
+- Each agent with a model (the pipeline steps) has an editable prompt, model, thinking effort and tools in Agent
+  settings. The effort is passed as `claude --effort` (low, medium, high, xhigh, max); Default passes nothing, so
+  Claude Code decides. The rebase and the PR description use the implementer's model and effort.
 - Final review: the user decides on `CHANGES_REQUESTED` (no automatic loop); the reviewer states the last check result
   instead of re-running the checks.
 - Rebase reuses the implementation agent (`--resume` + a rebase prompt), and the final review always re-runs

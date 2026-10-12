@@ -1,5 +1,6 @@
 import type {
   AgentConfig,
+  AgentEffort,
   AgentModel,
   Investigation,
   InvestigationScope,
@@ -73,7 +74,12 @@ export const api = {
   agents: (): Promise<AgentConfig[]> => request('GET', '/api/agents'),
   saveAgent: (
     agent: string,
-    change: { prompt: string; model: AgentModel | null; tools: string[] | null },
+    change: {
+      prompt: string;
+      model: AgentModel | null;
+      effort: AgentEffort | null;
+      tools: string[] | null;
+    },
   ): Promise<AgentConfig> => request('PUT', `/api/agents/${agent}`, change),
   tools: (): Promise<ToolOption[]> => request('GET', '/api/agents/tools'),
   addTool: (input: { name: string; description: string }): Promise<ToolOption> =>

@@ -1,12 +1,13 @@
 import {
+  type ContainerRuntime,
+  type Db,
+  effortFor,
   modelFor,
   parentOf,
+  type Project,
   resolveAgent,
   sharedPrompt,
   toolsFor,
-  type ContainerRuntime,
-  type Db,
-  type Project,
 } from '@union/core';
 
 import { runAgent, runResumable } from './agent';
@@ -59,6 +60,7 @@ export function createExecutor(
         container: container.name,
         cwd: REPO_DIR,
         model: modelFor(db, step),
+        effort: effortFor(db, step),
         prompt,
         tools: toolsFor(db, step),
         resumeSessionId: context.resumeSessionId,

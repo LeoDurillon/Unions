@@ -8,7 +8,8 @@ behavior; this file covers how to work in the repo.
 
 - `packages/core`: shared code. `agents.ts` holds the default agent prompts and models; edits made in the UI's
   Agent settings are stored in `agent_configs` (overrides only, Reset deletes the row) and the worker resolves them
-  on every run (`resolveAgent`, `modelFor`, `toolsFor`). Change a default there, not in the worker. Ticket agents
+  on every run (`resolveAgent`, `modelFor`, `effortFor`, `toolsFor`; the effort becomes `claude --effort`, unset
+  leaves the CLI's default). Change a default there, not in the worker. Ticket agents
   get `sharedPrompt` first: the shared instructions, then the project's own (`config.instructions`, project
   settings → Instructions; investigations get those too, via `projectInstructions`).
   `agent-tools.ts` holds each step's default allowed tools and the tool list agents pick from (Claude Code's tools,

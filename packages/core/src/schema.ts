@@ -9,7 +9,7 @@ import {
 } from 'drizzle-orm/sqlite-core';
 
 import type { InvestigationExchange, ProjectConfig, PullRequestFile } from './schema-types';
-import type { AgentModel, BoardStatus, Phase, Step } from './states';
+import type { AgentEffort, AgentModel, BoardStatus, Phase, Step } from './states';
 
 export type { InvestigationExchange, ProjectConfig, PullRequestFile } from './schema-types';
 
@@ -203,6 +203,8 @@ export const lessons = sqliteTable(
 export const agentConfigs = sqliteTable('agent_configs', {
   agent: text('agent').primaryKey(), // 'shared' or a planning step
   model: text('model'), // an AgentModel; null for 'shared', which has no model of its own
+  /** Thinking effort (`--effort`); null: the CLI's default. Only for agents with a model. */
+  effort: text('effort').$type<AgentEffort>(),
   prompt: text('prompt').notNull(),
   /** Allowed tools (`--allowedTools` entries); null: the step's default tools. */
   tools: text('tools', { mode: 'json' }).$type<string[]>(),

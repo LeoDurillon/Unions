@@ -13,6 +13,14 @@ export function isAgentModel(value: unknown): value is AgentModel {
   return AGENT_MODELS.some((model) => model === value);
 }
 
+/** Thinking effort levels `claude --effort` accepts; an agent without one runs at the CLI's default. */
+export const AGENT_EFFORTS = ['low', 'medium', 'high', 'xhigh', 'max'] as const;
+export type AgentEffort = (typeof AGENT_EFFORTS)[number];
+
+export function isAgentEffort(value: unknown): value is AgentEffort {
+  return AGENT_EFFORTS.some((effort) => effort === value);
+}
+
 export const MODEL_BY_STEP = {
   intake: 'haiku',
   summary: 'sonnet',

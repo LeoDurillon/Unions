@@ -1,11 +1,12 @@
 import {
+  type Db,
+  effortFor,
   modelFor,
   parentOf,
   resolveAgent,
   schema,
   sharedPrompt,
   toolsFor,
-  type Db,
 } from '@union/core';
 import { and, desc, eq, inArray } from 'drizzle-orm';
 
@@ -76,6 +77,7 @@ export function runRebaseAgent(rebase: Rebase): Promise<AgentOutcome> {
       container,
       cwd: REPO_DIR,
       model: modelFor(db, 'rebase'),
+      effort: effortFor(db, 'rebase'),
       prompt: session ? instructions(db, rebase) : fresh,
       tools: toolsFor(db, 'rebase'),
       denied: REBASE_DENIED,

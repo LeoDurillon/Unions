@@ -1,4 +1,4 @@
-import { modelFor, toolsFor, type ContainerRuntime, type Db } from '@union/core';
+import { type ContainerRuntime, type Db, effortFor, modelFor, toolsFor } from '@union/core';
 
 import type { AgentFn } from './agent';
 import { runIn } from './container-exec';
@@ -87,6 +87,7 @@ export async function writeDescription(
       container,
       cwd: REPO_DIR,
       model: modelFor(describer.db, 'implement'),
+      effort: effortFor(describer.db, 'implement'),
       prompt: descriptionPrompt(template),
       // Reading only: the work is pushed already.
       tools: toolsFor(describer.db, 'final_review'),

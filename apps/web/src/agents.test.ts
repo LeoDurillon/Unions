@@ -109,3 +109,20 @@ test('tools: added to the list, selected for an agent, removed once unused', asy
   await send('DELETE', '/api/agents/implement');
   expect((await send('DELETE', path)).status).toBe(200);
 });
+
+function saveEffort(effort: unknown): Response | Promise<Response> {
+  return send('PUT', '/api/agents/implement', {
+    prompt: DEFAULT_PROMPTS.implement,
+    model: 'opus',
+    effort,
+  });
+}
+
+test('an effort is saved with the model, cleared by null, and refused when unknown', async () => {
+  expect(await (await saveEffort('max')).json()).toMatchObject({ effort: 'max', model: 'opus' });
+  expect(resolveAgent(db, 'implement').effort).toBe('max');
+  expect((await saveEffort('extreme')).status).toBe(400);
+  expect(resolveAgent(db, 'implement').effort).toBe('max');
+  await saveEffort(null);
+  expect(resolveAgent(db, 'implement').effort).toBeNull();
+});

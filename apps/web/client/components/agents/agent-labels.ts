@@ -1,4 +1,4 @@
-import type { AgentId, AgentModel } from '@union/core';
+import type { AgentEffort, AgentId, AgentModel } from '@union/core';
 
 export const AGENT_LABELS: Record<
   AgentId,
@@ -36,7 +36,7 @@ export const AGENT_LABELS: Record<
   rebase: {
     title: 'Rebase',
     description:
-      'Prompt the implementation agent gets when you click Rebase. It resumes its own session and uses the Implementation model.',
+      'Prompt the implementation agent gets when you click Rebase. It resumes its own session and uses the Implementation model and effort.',
     notRunYet: true,
   },
 };
@@ -45,4 +45,12 @@ export const MODEL_LABELS: Record<AgentModel, string> = {
   haiku: 'Haiku (fastest)',
   sonnet: 'Sonnet (balanced)',
   opus: 'Opus (most capable)',
+};
+
+export const EFFORT_LABELS: Record<AgentEffort, string> = {
+  low: 'Low',
+  medium: 'Medium',
+  high: 'High',
+  xhigh: 'Extra high',
+  max: 'Max',
 };
