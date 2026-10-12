@@ -1,4 +1,4 @@
-import { schema, type Db, type Project } from '@union/core';
+import { getTicket, schema, ticketBase, type Db, type Project } from '@union/core';
 import { eq } from 'drizzle-orm';
 
 import { branchName } from './branch';
@@ -23,17 +23,16 @@ function loadProject(db: Db, projectId: number): Project {
 async function prepare(
   deps: ImplementDeps,
   context: StepContext,
-): Promise<Workspace & { branch: string }> {
+): Promise<Workspace & { branch: string; base: string }> {
   const project = loadProject(deps.db, context.ticket.projectId);
   const { name } = await ensureTicketContainer(deps.db, deps.runtime, deps.config, context.ticket);
-  const branch = context.ticket.branch ?? branchName(context.ticket);
-  deps.db
-    .update(schema.tickets)
-    .set({ branch })
-    .where(eq(schema.tickets.id, context.ticket.id))
-    .run();
-  await ensureBranch(deps.runtime, name, branch, project.config.baseBranch);
-  return { deps, context, project, container: name, branch };
+  // Re-read: provisioning may have just chosen the base (the parent's branch).
+  const ticket = getTicket(deps.db, context.ticket.id);
+  const branch = ticket.branch ?? branchName(ticket);
+  deps.db.update(schema.tickets).set({ branch }).where(eq(schema.tickets.id, ticket.id)).run();
+  const base = ticketBase(project, ticket);
+  await ensureBranch(deps.runtime, name, branch, base);
+  return { deps, context: { ...context, ticket }, project, container: name, branch, base };
 }
 
 /** Implements the approved plan on the ticket's branch, checks it, pushes it, opens the draft PR. */
@@ -42,7 +41,7 @@ export async function runImplementStep(
   context: StepContext,
 ): Promise<StepResult> {
   const workspace = await prepare(deps, context);
-  const { project, container, branch } = workspace;
+  const { project, container, branch, base } = workspace;
   try {
     const installError = await install(workspace);
     if (installError) {
@@ -55,7 +54,6 @@ export async function runImplementStep(
     if (loop.outcome.kind === 'error') {
       return { kind: 'error', error: loop.outcome.message };
     }
-    const base = project.config.baseBranch;
     await captureDiff(deps.db, deps.runtime, {
       container,
       ticketId: context.ticket.id,
@@ -67,9 +65,10 @@ export async function runImplementStep(
       ...deps,
       github: deps.github(project),
       project,
-      ticket: context.ticket,
+      ticket: workspace.context.ticket,
       container,
       branch,
+      base,
     });
     const output = renderImplementReport({
       agentReport: loop.outcome.text,

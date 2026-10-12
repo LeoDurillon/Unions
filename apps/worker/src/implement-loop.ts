@@ -1,4 +1,11 @@
-import { modelFor, resolveAgent, type ContainerRuntime, type Db, type Project } from '@union/core';
+import {
+  modelFor,
+  parentOf,
+  resolveAgent,
+  type ContainerRuntime,
+  type Db,
+  type Project,
+} from '@union/core';
 
 import { runResumable, type AgentFn, type AgentOutcome } from './agent';
 import { approvedBefore } from './approved';
@@ -44,6 +51,7 @@ function freshPrompt({ deps, context, project }: Workspace): string {
   const { ticket, revision } = context;
   const prompt = buildPrompt({
     ticket,
+    parent: parentOf(deps.db, ticket),
     shared: resolveAgent(deps.db, 'shared').prompt,
     instructions: resolveAgent(deps.db, 'implement').prompt + gateHint(project.config.gateCommand),
     approved: approvedBefore(deps.db, ticket.id, 'implement'),

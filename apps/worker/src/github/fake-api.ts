@@ -16,6 +16,7 @@ type FakeIssue = {
   status: string | null;
   updatedAt: string;
   comments: RemoteComment[];
+  blockedBy: number[];
 };
 
 const DEFAULT_INFO: ProjectInfo = {
@@ -78,6 +79,7 @@ export class FakeGitHubApi implements GitHubApi {
       status: null,
       updatedAt: this.tick(),
       comments: [],
+      blockedBy: [],
     });
     return Promise.resolve({ number, nodeId: `I_${number}` });
   }
@@ -162,6 +164,28 @@ export class FakeGitHubApi implements GitHubApi {
     if (pull) {
       pull.draft = false;
     }
+    return Promise.resolve();
+  }
+
+  listBlockedBy(_repo: RepoRef, issueNumber: number): Promise<number[]> {
+    this.calls.push('listBlockedBy');
+    return Promise.resolve([...this.issueByNumber(issueNumber).blockedBy]);
+  }
+
+  addBlockedBy(_repo: RepoRef, issueNumber: number, blockingNumber: number): Promise<void> {
+    this.calls.push('addBlockedBy');
+    const issue = this.issueByNumber(issueNumber);
+    if (issue.blockedBy.includes(blockingNumber)) {
+      return Promise.reject(new Error('Validation Failed: dependency already exists'));
+    }
+    issue.blockedBy.push(blockingNumber);
+    return Promise.resolve();
+  }
+
+  removeBlockedBy(_repo: RepoRef, issueNumber: number, blockingNumber: number): Promise<void> {
+    this.calls.push('removeBlockedBy');
+    const issue = this.issueByNumber(issueNumber);
+    issue.blockedBy = issue.blockedBy.filter((number) => number !== blockingNumber);
     return Promise.resolve();
   }
 

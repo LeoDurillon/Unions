@@ -29,6 +29,7 @@ Everything the agent does is mirrored to the GitHub issue.
    step or project settings: integration secret + data source; the page must be a row of that data source)
    → GitHub issue added to the Project.
 2. Move to In Progress → the worker creates volumes + container, clones the repo into the workspace volume.
+   A ticket that depends on another one cannot start before it is done (see Ticket dependencies).
 3. Planning steps, each a tab on the ticket: `intake` (Haiku) → `summary` (Sonnet) → `technical` (Opus) → `test_plan` (Sonnet).
    After each, the user clicks **Approve** or **Revise** (with feedback). Revise resumes the agent session.
    Each step's output is posted/edited as one issue comment.
@@ -92,8 +93,29 @@ Everything the agent does is mirrored to the GitHub issue.
 | step output   | one issue comment per step, found by hidden marker `<!-- union:ticket=<id> step=<step> -->` |
 | branch        | `<issue#>-<slug>`, pushed by the host                                                       |
 | PR            | draft PR, `Closes #n`                                                                       |
+| parent ticket | the child issue is "blocked by" the parent issue (issue dependencies)                       |
 
 GitHub is the source of truth for title, description and status; the local DB owns run state.
+
+## Ticket dependencies
+
+A ticket can depend on one other ticket of the same project, its parent, set in the New ticket dialog or on the
+ticket's Overview while it is in the backlog (`tickets.parent_ticket_id`; cycles are refused).
+
+- **Start gate:** the child cannot start until the parent is Done. The check lives in core (`blockingParent`,
+  called by `dispatch` on `start`), so the web refuses with 409, the worker refuses a queued start, and a move to
+  In Progress made on GitHub is reverted (`start_blocked` event). The board shows "Waiting for parent" and the card
+  cannot be dragged.
+- **Branch:** at the child's first clone the worker picks its base (`resolveTicketBase`): the parent's branch while
+  it exists on GitHub, else the project's base branch (a parent merged with its branch deleted is already in it).
+  The choice is stored in `tickets.base_branch` and used everywhere the project's base was: clone, the ticket
+  branch's starting point, the review's `git diff <base>...HEAD`, the diff snapshot, and the PR base. A stacked PR
+  says "Builds on #<parent PR>, which it targets: merge that one first."
+- **Prompts:** every agent of the child gets a "Builds on" section with the parent's title and description.
+- **GitHub:** once both issues exist, the worker marks the child's issue "blocked by" the parent's (REST issue
+  dependencies, `github/dependency.ts`) and records it in `tickets.github_blocked_by`. Changing or removing the
+  parent swaps or removes that relation. Local links win: dependencies edited on GitHub are not pulled back, and
+  Union only removes the relation it added.
 
 ## Rebase (planned)
 

@@ -13,6 +13,7 @@ import {
 import { and, eq, isNull } from 'drizzle-orm';
 
 import type { GitHubApi, ProjectInfo, RepoRef } from './api';
+import { pushDependency } from './dependency';
 import { applyRemoteItem } from './inbound';
 import { markReadyWhenDone } from './pull-request';
 import { hashBody, renderIssueBody, renderStepComment, stepMarker } from './render';
@@ -143,6 +144,7 @@ export class GitHubSync {
     await this.ensureIssue(project, ticketId);
     await this.pushStatus(project, ticketId);
     await this.pushComments(project, ticketId);
+    await pushDependency(this.db, this.api, repoOf(project), getTicket(this.db, ticketId));
     await markReadyWhenDone(this.db, this.api, repoOf(project), getTicket(this.db, ticketId));
   }
 

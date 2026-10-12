@@ -1,5 +1,5 @@
 import type { ProjectLocator } from '@union/core';
-import type { Octokit } from 'octokit';
+import { RequestError, type Octokit } from 'octokit';
 
 import type {
   GitHubApi,
@@ -19,6 +19,12 @@ import {
   RESOLVE_USER_PROJECT,
   SET_STATUS,
 } from './queries';
+
+const NOT_FOUND = 404;
+
+function isNotFound(error: unknown): boolean {
+  return error instanceof RequestError && error.status === NOT_FOUND;
+}
 
 type ProjectInfoResponse = {
   node: { field: { id: string; options: { id: string; name: string }[] } | null } | null;
@@ -201,6 +207,46 @@ export class OctokitGitHubApi implements GitHubApi {
     const { data } = await this.octokit.rest.pulls.get({ ...repo, pull_number: number });
     if (data.draft) {
       await this.octokit.graphql(MARK_READY, { id: data.node_id });
+    }
+  }
+
+  /** The dependency endpoints take the blocking issue's database id, not its number. */
+  private async issueId(repo: RepoRef, number: number): Promise<number> {
+    const { data } = await this.octokit.rest.issues.get({ ...repo, issue_number: number });
+    return data.id;
+  }
+
+  async listBlockedBy(repo: RepoRef, issueNumber: number): Promise<number[]> {
+    const issues = await this.octokit.paginate(this.octokit.rest.issues.listDependenciesBlockedBy, {
+      ...repo,
+      issue_number: issueNumber,
+      per_page: 100,
+    });
+    const own = `/repos/${repo.owner}/${repo.repo}`.toLowerCase();
+    return issues
+      .filter((issue) => issue.repository_url.toLowerCase().endsWith(own))
+      .map((issue) => issue.number);
+  }
+
+  async addBlockedBy(repo: RepoRef, issueNumber: number, blockingNumber: number): Promise<void> {
+    await this.octokit.rest.issues.addBlockedByDependency({
+      ...repo,
+      issue_number: issueNumber,
+      issue_id: await this.issueId(repo, blockingNumber),
+    });
+  }
+
+  async removeBlockedBy(repo: RepoRef, issueNumber: number, blockingNumber: number): Promise<void> {
+    try {
+      await this.octokit.rest.issues.removeDependencyBlockedBy({
+        ...repo,
+        issue_number: issueNumber,
+        issue_id: await this.issueId(repo, blockingNumber),
+      });
+    } catch (error) {
+      if (!isNotFound(error)) {
+        throw error;
+      }
     }
   }
 }

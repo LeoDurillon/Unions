@@ -6,6 +6,7 @@ import { schema, type ContainerRuntime, type Db, type Ticket } from '@union/core
 import { eq } from 'drizzle-orm';
 
 import { projectGitToken } from './credentials';
+import { resolveTicketBase } from './ticket-base';
 
 export const AGENT_HOME = '/home/node';
 export const REPO_DIR = '/workspace/repo';
@@ -155,7 +156,8 @@ export async function ensureTicketContainer(
   if (!(await hasFile(runtime, names.name, `${REPO_DIR}/.git`))) {
     const token = await projectGitToken(db, project);
     const source = cloneSource(config.gitBaseUrl, project.owner, project.repo, token);
-    await cloneInto(runtime, names.name, source, project.config.baseBranch);
+    const base = await resolveTicketBase(db, ticket, source);
+    await cloneInto(runtime, names.name, source, base ?? project.config.baseBranch);
   }
   db.update(schema.tickets)
     .set({

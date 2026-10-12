@@ -1,4 +1,11 @@
-import { modelFor, resolveAgent, type ContainerRuntime, type Db, type Project } from '@union/core';
+import {
+  modelFor,
+  parentOf,
+  resolveAgent,
+  type ContainerRuntime,
+  type Db,
+  type Project,
+} from '@union/core';
 
 import { runAgent, runResumable } from './agent';
 import { approvedBefore } from './approved';
@@ -37,6 +44,7 @@ export function createExecutor(
       // start over from the same prompt.
       const prompt = buildPrompt({
         ticket,
+        parent: parentOf(db, ticket),
         shared: shared.prompt,
         instructions: agent.prompt,
         approved: approvedBefore(db, ticket.id, step),

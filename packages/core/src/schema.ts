@@ -1,5 +1,12 @@
 import { sql } from 'drizzle-orm';
-import { index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import {
+  index,
+  integer,
+  sqliteTable,
+  text,
+  uniqueIndex,
+  type AnySQLiteColumn,
+} from 'drizzle-orm/sqlite-core';
 
 import type { BoardStatus, Phase, Step } from './states';
 
@@ -76,11 +83,17 @@ export const tickets = sqliteTable(
       .references(() => projects.id, { onDelete: 'cascade' }),
     title: text('title').notNull(),
     body: text('body').notNull().default(''),
+    /** The ticket this one builds on: it cannot start before the parent is done, and branches from it. */
+    parentTicketId: integer('parent_ticket_id').references((): AnySQLiteColumn => tickets.id, {
+      onDelete: 'set null',
+    }),
     issueNumber: integer('issue_number'),
     issueNodeId: text('issue_node_id'),
     projectItemId: text('project_item_id'),
     phase: text('phase', { mode: 'json' }).$type<Phase>().notNull().default({ kind: 'backlog' }),
     branch: text('branch'),
+    /** Branch the ticket was cloned from and is compared with (the parent's branch); null: the project's. */
+    baseBranch: text('base_branch'),
     prNumber: integer('pr_number'),
     /** When the draft PR was marked ready for review (set once, after the final approval). */
     prReadyAt: integer('pr_ready_at'),
@@ -90,6 +103,8 @@ export const tickets = sqliteTable(
     sessionId: text('session_id'), // current Claude session, resumed between steps
     /** Board column last pushed to (or seen on) the GitHub Project. */
     githubSyncedStatus: text('github_synced_status').$type<BoardStatus>(),
+    /** Issue number of the parent last mirrored as "blocked by" on the issue; null: none. */
+    githubBlockedBy: integer('github_blocked_by'),
     /** `updatedAt` of the issue when title and body were last reconciled. */
     githubUpdatedAt: text('github_updated_at'),
     ...timestamps,

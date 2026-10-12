@@ -2,7 +2,7 @@ import { useDraggable } from '@dnd-kit/core';
 import type { ReactElement } from 'react';
 
 import type { TicketSummary } from '../../src/api-types';
-import { describePhase } from '../lib/labels';
+import { describePhase, isBlocked, refLabel } from '../lib/labels';
 import { Badge } from './ui';
 
 export function TicketCard({
@@ -12,7 +12,8 @@ export function TicketCard({
   ticket: TicketSummary;
   onOpen: (id: number) => void;
 }): ReactElement {
-  const draggable = ticket.phase.kind === 'backlog';
+  const blocked = isBlocked(ticket);
+  const draggable = ticket.phase.kind === 'backlog' && !blocked;
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: ticket.id,
     disabled: !draggable,
@@ -40,8 +41,17 @@ export function TicketCard({
       >
         {ticket.title}
       </button>
+      {ticket.parent ? (
+        <p className="text-xs text-zinc-500">
+          ↳ after {refLabel(ticket.parent)} {ticket.parent.title}
+        </p>
+      ) : null}
       <div className="flex items-center justify-between gap-2">
-        <Badge tone={tone}>{label}</Badge>
+        {blocked ? (
+          <Badge tone="amber">Waiting for parent</Badge>
+        ) : (
+          <Badge tone={tone}>{label}</Badge>
+        )}
         <span className="text-xs text-zinc-500">
           {ticket.issueNumber === null ? 'not on GitHub yet' : `#${ticket.issueNumber}`}
         </span>

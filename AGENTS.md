@@ -9,7 +9,8 @@ behavior; this file covers how to work in the repo.
 - `packages/core`: shared code. `agents.ts` holds the default agent prompts and models; edits made in the UI's
   Agent settings are stored in `agent_configs` (overrides only, Reset deletes the row) and the worker resolves them
   on every run (`resolveAgent`, `modelFor`). Change a default there, not in the worker.
-  Drizzle schema and migrations, the pure ticket state machine (`states.ts`), the
+  Drizzle schema and migrations, the pure ticket state machine (`states.ts`), ticket dependencies
+  (`ticket-links.ts`: `setParent`, `ticketBase`; the start gate `blockingParent` is in `tickets.ts`), the
   `ContainerRuntime` interface and its Docker CLI implementation.
 - `apps/web`: Hono API and React/Vite SPA, served by one Bun process in production.
   - `src/app.ts` is `createApp(db)`; routes live in `src/routes/` (`projects`, `tickets`, `events`); `src/server.ts`
@@ -46,7 +47,7 @@ behavior; this file covers how to work in the repo.
     `claude -p` in it and parses stream-json; `prompts.ts` builds the step prompts.
   - `github/`: `api.ts` is the narrow `GitHubApi` the worker depends on, `octokit-api.ts` the real client,
     `fake-api.ts` the in-memory one for tests, `sync.ts` the mirror (issue, Status field, one comment per step,
-    pull of title/description and "move to In Progress"), `queries.ts` the GraphQL. `clients.ts` builds each
+    pull of title/description and "move to In Progress"; `dependency.ts` pushes a ticket's parent as "blocked by"), `queries.ts` the GraphQL. `clients.ts` builds each
     project's API from its credentials (`projectGitHubAuth`); projects without any fall back to `GITHUB_TOKEN`, else
     their sync is off. GraphQL changes must be validated
     against GitHub's schema, and new sync behavior needs a test against the fake.
@@ -111,6 +112,9 @@ both.
   with `@union/core/github-client`: clients are cached per credential so an installation token is minted once an
   hour, and git gets a fresh token (`gitToken`) right before each clone or push. Never build an Octokit from a
   project's token by hand.
+- A ticket's base branch is `ticketBase(project, ticket)`: the parent's branch it was cloned from, else the project's.
+  Never use `project.config.baseBranch` directly in the worker. Starting goes through `dispatch`, which refuses a
+  ticket whose parent is not done; check `blockingParent` before queueing or honouring a start anywhere else.
 - Keep `states.ts` pure: no I/O, no clock, no DB. The worker persists whatever `transition` returns. New phases
   or actions need a test in `states.test.ts`.
 - Reach Docker only through `ContainerRuntime`. Do not call `docker` from anywhere else.

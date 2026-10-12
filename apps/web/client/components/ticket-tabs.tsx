@@ -56,9 +56,17 @@ export function Tabs({
   );
 }
 
-export function PanelBody({ detail, tab }: { detail: TicketDetail; tab: TabId }): ReactElement {
+export function PanelBody({
+  detail,
+  tab,
+  onOpenTicket,
+}: {
+  detail: TicketDetail;
+  tab: TabId;
+  onOpenTicket: (id: number) => void;
+}): ReactElement {
   if (tab === 'overview') {
-    return <OverviewTab detail={detail} />;
+    return <OverviewTab detail={detail} onOpenTicket={onOpenTicket} />;
   }
   if (tab === 'log') {
     return <LogTab key={detail.ticket.id} ticketId={detail.ticket.id} />;

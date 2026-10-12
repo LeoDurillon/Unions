@@ -12,9 +12,13 @@ your Claude Max subscription) works through a pipeline on a clone of the project
 3. **Final review**: a separate agent reviews the branch against the plan. You can also review the diff in Union,
    comment on lines and send the comments back to the implementer. Approving marks the PR ready for review.
 
-Everything is mirrored to GitHub: one issue per ticket, one comment per step, and the ticket's column on the GitHub
-Project board. Tickets can also be imported from a Notion database. Each ticket keeps its own container and volumes,
-so work survives between steps, and several tickets can run in parallel.
+A ticket can depend on another one: it waits until that ticket is Done, then starts from its branch, and its
+pull request targets that branch.
+
+Everything is mirrored to GitHub: one issue per ticket, one comment per step, the ticket's column on the GitHub
+Project board, and "blocked by" between the issues of linked tickets. Tickets can also be imported from a Notion
+database. Each ticket keeps its own container and volumes, so work survives between steps, and several tickets can
+run in parallel.
 
 The app runs on your machine only. Credentials (GitHub token or App key, Notion secret) stay in a local SQLite
 database and never reach the agent containers: the host does every clone, push and GitHub call.

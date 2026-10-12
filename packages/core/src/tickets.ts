@@ -60,10 +60,35 @@ export function createTicket(
   });
 }
 
+/** `#<issue>` once the ticket is on GitHub, else its local id. */
+export function ticketLabel(ticket: Pick<Ticket, 'id' | 'issueNumber'>): string {
+  return ticket.issueNumber === null ? `ticket ${ticket.id}` : `#${ticket.issueNumber}`;
+}
+
+/** A ticket may not start before the ticket it builds on is done. */
+export class StartBlocked extends Error {
+  constructor(readonly parent: Ticket) {
+    super(`Blocked by ${ticketLabel(parent)} (${parent.title}) until it is done`);
+  }
+}
+
+/** The parent that keeps the ticket from starting, or null when it may start. */
+export function blockingParent(db: Executor, ticket: Ticket): Ticket | null {
+  if (ticket.parentTicketId === null) {
+    return null;
+  }
+  const parent = getTicket(db, ticket.parentTicketId);
+  return parent.phase.kind === 'done' ? null : parent;
+}
+
 /** Applies a state-machine action, persists the new phase, and emits `phase_changed`. */
 export function dispatch(db: Db, ticketId: number, action: Action): Phase {
   return db.transaction((tx) => {
     const ticket = getTicket(tx, ticketId);
+    const parent = action.type === 'start' ? blockingParent(tx, ticket) : null;
+    if (parent) {
+      throw new StartBlocked(parent);
+    }
     const next = transition(ticket.phase, action);
     tx.update(schema.tickets).set({ phase: next }).where(eq(schema.tickets.id, ticketId)).run();
     emitEvent(tx, {

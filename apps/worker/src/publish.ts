@@ -5,7 +5,9 @@ import path from 'node:path';
 import {
   emitEvent,
   getTicket,
+  parentOf,
   schema,
+  ticketLabel,
   type ContainerRuntime,
   type Db,
   type Project,
@@ -55,18 +57,31 @@ async function pushBranch(
   }
 }
 
+/** `Closes #n`, plus the parent's PR when the branch is stacked on it. */
+export function pullRequestBody(db: Db, ticket: Ticket): string {
+  const own = ticket.issueNumber === null ? ticket.body : `Closes #${ticket.issueNumber}`;
+  const parent = parentOf(db, ticket);
+  if (!parent || parent.branch !== ticket.baseBranch) {
+    return own;
+  }
+  const after = parent.prNumber === null ? ticketLabel(parent) : `#${parent.prNumber}`;
+  return `${own}\n\nBuilds on ${after}, which it targets: merge that one first.`;
+}
+
 async function ensurePullRequest({
   db,
   github,
   project,
   ticket,
   branch,
+  base,
 }: {
   db: Db;
   github: GitHubApi;
   project: Project;
   ticket: Ticket;
   branch: string;
+  base: string;
 }): Promise<number> {
   const repo = { owner: project.owner, repo: project.repo };
   const existing = await github.findPullRequest(repo, branch);
@@ -74,9 +89,9 @@ async function ensurePullRequest({
     existing ??
     (await github.createPullRequest(repo, {
       title: ticket.title,
-      body: ticket.issueNumber === null ? ticket.body : `Closes #${ticket.issueNumber}`,
+      body: pullRequestBody(db, ticket),
       head: branch,
-      base: project.config.baseBranch,
+      base,
     }));
   if (!existing) {
     emitEvent(db, { type: 'pull_request_opened', ticketId: ticket.id, payload: pull });
@@ -98,8 +113,10 @@ export async function publishBranch(input: {
   ticket: Ticket;
   container: string;
   branch: string;
+  /** The PR targets this branch: the parent's while it is not merged, else the project's. */
+  base: string;
 }): Promise<PublishResult> {
-  const { db, project, ticket, branch } = input;
+  const { db, project, ticket, branch, base } = input;
   try {
     const token = await projectGitToken(db, project);
     const remote = cloneSource(input.config.gitBaseUrl, project.owner, project.repo, token);
@@ -111,7 +128,7 @@ export async function publishBranch(input: {
     const pullRequest =
       prNumber ??
       (input.github && !manualPullRequest
-        ? await ensurePullRequest({ db, github: input.github, project, ticket, branch })
+        ? await ensurePullRequest({ db, github: input.github, project, ticket, branch, base })
         : null);
     return { pushed: true, pullRequest, manualPullRequest, error: null };
   } catch (error) {

@@ -9,6 +9,7 @@ import {
   recordValidation,
   saveOutput,
   schema,
+  setParent,
   type Db,
 } from '@union/core';
 
@@ -144,6 +145,20 @@ test('other remote moves are reverted to the local status', async () => {
   expect(eventTypes()).toContain('github_status_reverted');
   await sync.push();
   expect(api.issueByNumber(1).status).toBe('Todo');
+});
+
+test('a child moved to In Progress on GitHub before its parent is done is reverted', async () => {
+  const { projectId } = getTicket(db, ticketId);
+  const child = createTicket(db, { projectId, title: 'Search filters' }).id;
+  setParent(db, child, ticketId);
+  await sync.push();
+  await sync.pull();
+  api.editRemote(2, { status: 'In Progress' });
+  await sync.pull();
+  expect(db.select().from(schema.commands).all()).toHaveLength(0);
+  expect(eventTypes()).toContain('start_blocked');
+  await sync.push();
+  expect(api.issueByNumber(2).status).toBe('Todo');
 });
 
 test('API failures are reported once per distinct error and do not throw', async () => {

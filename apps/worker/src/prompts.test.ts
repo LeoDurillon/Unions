@@ -41,3 +41,18 @@ test('only the four planning steps are planning steps', () => {
   expect(isPlanningStep('test_plan')).toBe(true);
   expect(isPlanningStep('implement')).toBe(false);
 });
+
+test('a parent ticket is described after the task', () => {
+  const parent = { id: 3, issueNumber: 12, title: 'Search index', body: 'Index titles.' } as Ticket;
+  const prompt = buildPrompt({
+    ticket,
+    parent,
+    shared: 's',
+    instructions: 'i',
+    approved: [],
+    revision: null,
+  });
+  expect(prompt).toContain('# Builds on\n\nThis ticket builds on #12 "Search index"');
+  expect(prompt.indexOf('# Builds on')).toBeGreaterThan(prompt.indexOf('## Add search'));
+  expect(prompt).toContain('Index titles.');
+});

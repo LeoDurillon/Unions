@@ -1,4 +1,13 @@
-import { boardStatus, emitEvent, getTicket, schema, type Db, type Ticket } from '@union/core';
+import {
+  blockingParent,
+  boardStatus,
+  emitEvent,
+  getTicket,
+  schema,
+  ticketLabel,
+  type Db,
+  type Ticket,
+} from '@union/core';
 import { eq } from 'drizzle-orm';
 
 import type { RemoteItem } from './api';
@@ -30,16 +39,28 @@ function pullFields(db: Db, ticket: Ticket, item: RemoteItem): void {
   }
 }
 
-/** Only "move to In Progress" is honoured from GitHub; any other remote move is reverted. */
+/**
+ * Only "move to In Progress" is honoured from GitHub, and not while the parent is unfinished; any
+ * other remote move is reverted.
+ */
 function pullStatus(db: Db, project: Project, ticket: Ticket, item: RemoteItem): void {
   const remote = boardStatusFor(project.config.statusOptions, item.status);
   if (remote === null || remote === ticket.githubSyncedStatus) {
     return;
   }
-  if (remote === 'in_progress' && ticket.phase.kind === 'backlog') {
+  const starts = remote === 'in_progress' && ticket.phase.kind === 'backlog';
+  const blocker = starts ? blockingParent(db, ticket) : null;
+  if (starts && !blocker) {
     db.insert(schema.commands).values({ type: 'start', ticketId: ticket.id }).run();
     setSynced(db, ticket.id, remote);
     return;
+  }
+  if (blocker) {
+    emitEvent(db, {
+      type: 'start_blocked',
+      ticketId: ticket.id,
+      payload: { parent: ticketLabel(blocker), parentId: blocker.id },
+    });
   }
   emitEvent(db, {
     type: 'github_status_reverted',

@@ -1,4 +1,13 @@
-import { modelFor, resolveAgent, schema, type Db, type Project } from '@union/core';
+import {
+  getTicket,
+  modelFor,
+  parentOf,
+  resolveAgent,
+  schema,
+  ticketBase,
+  type Db,
+  type Project,
+} from '@union/core';
 import { eq } from 'drizzle-orm';
 
 import { approvedBefore } from './approved';
@@ -47,8 +56,8 @@ export async function runReviewStep(
     };
   }
   const project = loadProject(db, ticket.projectId);
-  const base = project.config.baseBranch;
   const { name } = await ensureTicketContainer(db, runtime, deps.config, ticket);
+  const base = ticketBase(project, getTicket(db, ticket.id));
   try {
     await ensureBranch(runtime, name, ticket.branch, base);
     const outcome = await deps.agent(runtime, {
@@ -57,6 +66,7 @@ export async function runReviewStep(
       model: modelFor(db, 'final_review'),
       prompt: buildPrompt({
         ticket,
+        parent: parentOf(db, ticket),
         shared: resolveAgent(db, 'shared').prompt,
         instructions: resolveAgent(db, 'final_review').prompt + reviewContext(base, ticket.branch),
         approved: approvedBefore(db, ticket.id, 'final_review'),

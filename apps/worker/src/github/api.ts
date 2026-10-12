@@ -51,4 +51,10 @@ export type GitHubApi = {
   ): Promise<PullRequestRef>;
   /** Un-drafts the pull request; does nothing if it is already ready. */
   markPullRequestReady(repo: RepoRef, number: number): Promise<void>;
+  /** Numbers of the issues of `repo` the issue is marked as blocked by. */
+  listBlockedBy(repo: RepoRef, issueNumber: number): Promise<number[]>;
+  /** Marks the issue as blocked by another issue of the same repository. */
+  addBlockedBy(repo: RepoRef, issueNumber: number, blockingNumber: number): Promise<void>;
+  /** Removes that relation; does nothing if it (or the blocking issue) is gone. */
+  removeBlockedBy(repo: RepoRef, issueNumber: number, blockingNumber: number): Promise<void>;
 };

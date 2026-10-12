@@ -12,9 +12,11 @@ import { ErrorText } from './ui';
 export function TicketPanel({
   ticketId,
   onClose,
+  onOpenTicket,
 }: {
   ticketId: number;
   onClose: () => void;
+  onOpenTicket: (id: number) => void;
 }): ReactElement {
   const query = useQuery({ queryKey: ['ticket', ticketId], queryFn: () => api.ticket(ticketId) });
   const [tab, setTab] = useState<TabId>('overview');
@@ -65,7 +67,7 @@ export function TicketPanel({
         {detail ? <Tabs detail={detail} tab={tab} onChange={setTab} /> : null}
         <div className="min-h-0 flex-1 overflow-y-auto p-4">
           <ErrorText error={query.error} />
-          {detail ? <PanelBody detail={detail} tab={tab} /> : null}
+          {detail ? <PanelBody detail={detail} tab={tab} onOpenTicket={onOpenTicket} /> : null}
         </div>
       </aside>
     </div>

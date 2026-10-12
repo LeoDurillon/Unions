@@ -51,3 +51,13 @@ export function describePhase(phase: Phase): { label: string; tone: Tone } {
 export function currentStep(phase: Phase): Step | null {
   return 'step' in phase ? phase.step : null;
 }
+
+/** `#12` once the ticket has a GitHub issue, else its local id. */
+export function refLabel(ref: { id: number; issueNumber: number | null }): string {
+  return ref.issueNumber === null ? `ticket ${ref.id}` : `#${ref.issueNumber}`;
+}
+
+/** The ticket waits for its parent: it cannot start before the parent is done. */
+export function isBlocked(ticket: { parent: { done: boolean } | null }): boolean {
+  return ticket.parent !== null && !ticket.parent.done;
+}

@@ -2,7 +2,27 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, type ReactElement, type SubmitEvent } from 'react';
 
 import { api } from '../lib/api';
+import { ParentPicker } from './parent-picker';
 import { Button, ErrorText, Field, inputClass } from './ui';
+
+function ParentField({
+  projectId,
+  value,
+  onChange,
+}: {
+  projectId: number;
+  value: number | null;
+  onChange: (parentId: number | null) => void;
+}): ReactElement {
+  return (
+    <Field
+      label="Depends on"
+      hint="Optional. The ticket starts only once its parent is done, from the parent's branch."
+    >
+      <ParentPicker projectId={projectId} ticketId={null} value={value} onChange={onChange} />
+    </Field>
+  );
+}
 
 export function TicketForm({
   projectId,
@@ -18,9 +38,10 @@ export function TicketForm({
   const queryClient = useQueryClient();
   const [title, setTitle] = useState(initialTitle);
   const [body, setBody] = useState(initialBody);
+  const [parentId, setParentId] = useState<number | null>(null);
 
   const create = useMutation({
-    mutationFn: () => api.createTicket({ projectId, title, body }),
+    mutationFn: () => api.createTicket({ projectId, title, body, parentId }),
     onSuccess: async (ticket) => {
       await queryClient.invalidateQueries({ queryKey: ['tickets'] });
       onCreated(ticket.id);
@@ -53,6 +74,7 @@ export function TicketForm({
           }}
         />
       </Field>
+      <ParentField projectId={projectId} value={parentId} onChange={setParentId} />
       <ErrorText error={create.error} />
       <Button type="submit" variant="primary" disabled={create.isPending}>
         {create.isPending ? 'Creating…' : 'Create ticket'}

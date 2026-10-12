@@ -28,11 +28,17 @@ export function toPublicProject(project: Project): PublicProject {
 }
 
 /** Shapes returned by the HTTP API, shared by the server and the React client. */
-export type TicketSummary = Ticket & { board: BoardStatus };
+/** Another ticket, as the target of a parent link. */
+export type TicketRef = { id: number; title: string; issueNumber: number | null; done: boolean };
+
+/** `parent`: the ticket this one builds on; it cannot start before the parent is done. */
+export type TicketSummary = Ticket & { board: BoardStatus; parent: TicketRef | null };
 
 export type TicketDetail = {
   ticket: TicketSummary;
   project: PublicProject;
+  /** Tickets that build on this one. */
+  children: TicketRef[];
   outputs: StepOutput[];
   runs: Run[];
 };

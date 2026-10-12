@@ -91,7 +91,10 @@ export const api = {
     projectId: number;
     title: string;
     body: string;
+    parentId?: number | null;
   }): Promise<TicketSummary> => request('POST', '/api/tickets', input),
+  setParent: (id: number, parentId: number | null): Promise<TicketSummary> =>
+    request('PUT', `/api/tickets/${id}/parent`, { parentId }),
   command: (id: number, type: CommandType, feedback?: string): Promise<unknown> =>
     request('POST', `/api/tickets/${id}/commands`, { type, feedback }),
   linkPullRequest: (id: number, pullRequest: string): Promise<LinkResult> =>

@@ -1,5 +1,4 @@
 import {
-  boardStatus,
   createTicket,
   getTicket,
   InvalidTransition,
@@ -10,7 +9,6 @@ import {
   transition,
   type Db,
   type Step,
-  type Ticket,
 } from '@union/core';
 import { and, eq, isNull } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
@@ -36,15 +34,19 @@ import {
   requireText,
 } from '../http';
 import { reviewRoutes } from './review';
+import {
+  assertStartable,
+  changeParent,
+  childrenOf,
+  findTicket,
+  linkParent,
+  summarize,
+} from './ticket-links';
 import { linkPullRequest, unlinkPullRequest } from './ticket-pull-request';
-
-function summarize(ticket: Ticket): TicketSummary {
-  return { ...ticket, board: boardStatus(ticket.phase) };
-}
 
 function loadTicket(db: Db, id: number): TicketSummary {
   try {
-    return summarize(getTicket(db, id));
+    return summarize(getTicket(db, id), findTicket(db));
   } catch {
     throw fail(NOT_FOUND, `Ticket ${id} not found`);
   }
@@ -71,7 +73,8 @@ function listTickets(db: Db, c: Context): Response {
   const projectId = c.req.query('projectId');
   const rows = db.select().from(schema.tickets).all();
   const filtered = projectId ? rows.filter((row) => row.projectId === Number(projectId)) : rows;
-  return c.json(filtered.map((row) => summarize(row)));
+  const byId = new Map(rows.map((row) => [row.id, row]));
+  return c.json(filtered.map((row) => summarize(row, (id) => byId.get(id))));
 }
 
 async function addTicket(db: Db, c: Context): Promise<Response> {
@@ -85,12 +88,18 @@ async function addTicket(db: Db, c: Context): Promise<Response> {
   if (!known) {
     throw fail(BAD_REQUEST, 'Unknown project');
   }
+  const parentId = typeof body.parentId === 'number' ? body.parentId : null;
+  // Checked first: a new ticket can only fail the link through its parent's project.
+  if (parentId !== null && findTicket(db)(parentId)?.projectId !== projectId) {
+    throw fail(BAD_REQUEST, 'The parent must be a ticket of the same project');
+  }
   const ticket = createTicket(db, {
     projectId,
     title: requireText(body, 'title'),
     body: optionalText(body, 'body') ?? '',
   });
-  return c.json(summarize(ticket), CREATED);
+  const linked = parentId === null ? ticket : linkParent(db, ticket.id, parentId);
+  return c.json(summarize(linked, findTicket(db)), CREATED);
 }
 
 function ticketDetail(db: Db, c: Context): Response {
@@ -107,6 +116,7 @@ function ticketDetail(db: Db, c: Context): Response {
   const detail: TicketDetail = {
     ticket,
     project: toPublicProject(project),
+    children: childrenOf(db, id),
     outputs: db
       .select()
       .from(schema.stepOutputs)
@@ -136,6 +146,9 @@ async function queueCommand(db: Db, c: Context): Promise<Response> {
   }
   const feedback = type === 'revise' ? requireText(body, 'feedback') : undefined;
   assertAllowed(ticket, type);
+  if (type === 'start') {
+    assertStartable(db, ticket);
+  }
   if (hasPendingCommand(db, id)) {
     throw fail(CONFLICT, 'A command for this ticket is still being processed');
   }
@@ -172,6 +185,7 @@ export function ticketRoutes(db: Db, github: OnboardingGitHub): Hono {
   routes.get('/:id', (c) => ticketDetail(db, c));
   routes.post('/:id/commands', (c) => queueCommand(db, c));
   routes.put('/:id/steps/:step/output', (c) => editOutput(db, c));
+  routes.put('/:id/parent', (c) => changeParent(db, c));
   routes.put('/:id/pull-request', (c) => linkPullRequest(db, github, c));
   routes.delete('/:id/pull-request', (c) => unlinkPullRequest(db, c));
   routes.route('/', reviewRoutes(db));

@@ -58,10 +58,12 @@ export function App(): ReactElement {
       />
       {ticketId === null ? null : (
         <TicketPanel
+          key={ticketId}
           ticketId={ticketId}
           onClose={() => {
             openTicket(null);
           }}
+          onOpenTicket={openTicket}
         />
       )}
     </div>

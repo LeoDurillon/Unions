@@ -1,10 +1,11 @@
 import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../src/api-types';
-import { STEP_TITLES } from '../lib/labels';
+import { isBlocked, STEP_TITLES } from '../lib/labels';
 import { useTicketCommands } from '../lib/use-ticket-commands';
 import { Markdown } from './markdown';
 import { PullRequestRow } from './pull-request-row';
+import { TicketLinks } from './ticket-links';
 import { Badge, Button, ErrorText } from './ui';
 
 const MS_PER_SECOND = 1000;
@@ -76,8 +77,15 @@ function IssueLine({ detail }: { detail: TicketDetail }): ReactElement {
   );
 }
 
-export function OverviewTab({ detail }: { detail: TicketDetail }): ReactElement {
+export function OverviewTab({
+  detail,
+  onOpenTicket,
+}: {
+  detail: TicketDetail;
+  onOpenTicket: (id: number) => void;
+}): ReactElement {
   const { ticket, project, runs } = detail;
+  const blocked = isBlocked(ticket);
   const { command } = useTicketCommands(ticket.id);
   const { kind } = ticket.phase;
   const finished = kind === 'done' || kind === 'cancelled';
@@ -90,13 +98,15 @@ export function OverviewTab({ detail }: { detail: TicketDetail }): ReactElement 
       ) : (
         <p className="text-sm text-zinc-500">No description.</p>
       )}
+      <TicketLinks detail={detail} onOpen={onOpenTicket} />
       <PullRequestRow ticket={ticket} project={project} />
       <ErrorText error={command.error} />
       <div className="flex gap-2">
         {kind === 'backlog' ? (
           <Button
             variant="primary"
-            disabled={command.isPending}
+            disabled={command.isPending || blocked}
+            title={blocked ? 'Waits for the parent ticket to be done' : undefined}
             onClick={() => {
               command.mutate({ type: 'start' });
             }}
