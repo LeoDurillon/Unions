@@ -1,0 +1,1 @@
+ALTER TABLE `review_comments` ADD `kind` text DEFAULT 'line' NOT NULL;

@@ -28,3 +28,75 @@ export const CREATE_PROJECT = /* GraphQL */ `
     }
   }
 `;
+
+/** A pull request's line-comment threads, with their replies, page by page. */
+export const PULL_REQUEST_THREADS = /* GraphQL */ `
+  query PullRequestThreads($owner: String!, $repo: String!, $number: Int!, $after: String) {
+    repository(owner: $owner, name: $repo) {
+      pullRequest(number: $number) {
+        reviewThreads(first: 50, after: $after) {
+          pageInfo {
+            hasNextPage
+            endCursor
+          }
+          nodes {
+            isResolved
+            path
+            diffSide
+            line
+            startLine
+            originalLine
+            originalStartLine
+            comments(first: 50) {
+              nodes {
+                author {
+                  login
+                }
+                body
+                url
+                createdAt
+                diffHunk
+                originalCommit {
+                  oid
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+/** A pull request's review summaries and conversation comments (the newest 100 of each). */
+export const PULL_REQUEST_NOTES = /* GraphQL */ `
+  query PullRequestNotes($owner: String!, $repo: String!, $number: Int!) {
+    repository(owner: $owner, name: $repo) {
+      pullRequest(number: $number) {
+        reviews(last: 100) {
+          nodes {
+            author {
+              __typename
+              login
+            }
+            body
+            url
+            state
+            createdAt
+          }
+        }
+        comments(last: 100) {
+          nodes {
+            author {
+              __typename
+              login
+            }
+            body
+            url
+            createdAt
+          }
+        }
+      }
+    }
+  }
+`;

@@ -1,9 +1,13 @@
 import { useState, type ReactElement } from 'react';
 
 import type { CommentView } from '../../../src/api-types';
+import { Markdown } from '../markdown';
 import { Badge, Button, inputClass } from '../ui';
 
 function lines(comment: CommentView): string {
+  if (comment.kind === 'general') {
+    return 'whole pull request';
+  }
   const range =
     comment.startLine === comment.endLine
       ? `line ${comment.startLine}`
@@ -21,8 +25,26 @@ function CommentHeader({ comment }: { comment: CommentView }): ReactElement {
         <Badge tone="neutral">sent</Badge>
       )}
       {comment.outdated ? <Badge tone="amber">outdated</Badge> : null}
+      {comment.githubUrl ? (
+        <a
+          href={comment.githubUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="ml-auto text-indigo-600 hover:underline dark:text-indigo-400"
+        >
+          on GitHub
+        </a>
+      ) : null}
     </div>
   );
+}
+
+function CommentText({ comment }: { comment: CommentView }): ReactElement {
+  if (comment.githubUrl) {
+    // Imported from GitHub, where it was written as markdown.
+    return <Markdown>{comment.body}</Markdown>;
+  }
+  return <p className="whitespace-pre-wrap">{comment.body}</p>;
 }
 
 function DraftActions({
@@ -84,7 +106,7 @@ export function CommentCard({
           }}
         />
       ) : (
-        <p className="whitespace-pre-wrap">{comment.body}</p>
+        <CommentText comment={comment} />
       )}
       {comment.status === 'draft' ? (
         <DraftActions

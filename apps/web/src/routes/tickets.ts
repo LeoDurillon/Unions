@@ -188,6 +188,6 @@ export function ticketRoutes(db: Db, github: OnboardingGitHub): Hono {
   routes.put('/:id/parent', (c) => changeParent(db, c));
   routes.put('/:id/pull-request', (c) => linkPullRequest(db, github, c));
   routes.delete('/:id/pull-request', (c) => unlinkPullRequest(db, c));
-  routes.route('/', reviewRoutes(db));
+  routes.route('/', reviewRoutes(db, github));
   return routes;
 }

@@ -4,6 +4,7 @@ import type { DiffResponse } from '../../../src/api-types';
 import type { useCommentMutations } from '../../lib/use-review';
 import { Button } from '../ui';
 import type { DiffView } from './file-diff';
+import { ImportComments } from './import-comments';
 import { SendReview } from './send-review';
 import { ViewToggle } from './view-toggle';
 
@@ -11,7 +12,7 @@ type Mutations = ReturnType<typeof useCommentMutations>;
 
 const SHORT_SHA = 7;
 
-/** Back, the ticket and snapshot, the diff layout switch and Send review. */
+/** Back, the ticket and snapshot, the GitHub import, the diff layout switch and Send review. */
 export function ReviewHeader({
   title,
   diff,
@@ -44,6 +45,9 @@ export function ReviewHeader({
           </p>
         ) : null}
       </div>
+      {diff?.pullRequest ? (
+        <ImportComments pullRequest={diff.pullRequest} mutations={mutations} />
+      ) : null}
       <ViewToggle view={view} onChange={onView} />
       <SendReview
         drafts={drafts}

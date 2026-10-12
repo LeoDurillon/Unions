@@ -7,15 +7,17 @@ import type {
   InstallationOption,
   ProjectOption,
   PullRequestInfo,
+  PullRequestDiscussion,
   RepoOption,
   Viewer,
 } from './api-types';
+import { fetchDiscussion } from './github-discussion';
 import { CREATE_PROJECT, OWNER_PROJECTS } from './github-queries';
 
 /**
  * GitHub calls the web server makes itself, because the UI needs the answer right away: the setup
- * wizard's reads and Project creation, checking the GitHub App, and looking up a pull request to
- * link. Every call takes a token or an app installation. Tests use a fake.
+ * wizard's reads and Project creation, checking the GitHub App, looking up a pull request to link,
+ * and reading its discussion for the PR tab and the review import. Every call takes a token or an app installation. Tests use a fake.
  */
 export type OnboardingGitHub = {
   verify(auth: GitHubAuth): Promise<Viewer>;
@@ -31,6 +33,12 @@ export type OnboardingGitHub = {
     repo: { owner: string; repo: string },
     number: number,
   ): Promise<PullRequestInfo | null>;
+  /** Line threads, review summaries and conversation comments; null when there is no such pull request. */
+  getDiscussion(
+    auth: GitHubAuth,
+    repo: { owner: string; repo: string },
+    number: number,
+  ): Promise<PullRequestDiscussion | null>;
   /** The app the credentials belong to (`GET /app`); rejects a wrong App ID or key. */
   verifyApp(app: GitHubAppCredentials): Promise<AppInfo>;
   listInstallations(app: GitHubAppCredentials): Promise<InstallationOption[]>;
@@ -39,6 +47,24 @@ export type OnboardingGitHub = {
 const REQUIRED_SCOPES = ['repo', 'project'];
 const PAGE_SIZE = 30;
 const NOT_FOUND = 404;
+
+function isNotFound(error: unknown): boolean {
+  if (typeof error !== 'object' || error === null) {
+    return false;
+  }
+  if ('status' in error && error.status === NOT_FOUND) {
+    return true;
+  }
+  // GraphQL answers 200 with a NOT_FOUND error for a missing pull request.
+  return (
+    'errors' in error &&
+    Array.isArray(error.errors) &&
+    error.errors.some(
+      (item: unknown) =>
+        typeof item === 'object' && item !== null && 'type' in item && item.type === 'NOT_FOUND',
+    )
+  );
+}
 
 type ProjectNode = { id: string; number: number; title: string; url: string; closed: boolean };
 
@@ -204,12 +230,22 @@ export class OctokitOnboarding implements OnboardingGitHub {
         merged: data.merged,
       };
     } catch (error) {
-      if (
-        typeof error === 'object' &&
-        error !== null &&
-        'status' in error &&
-        error.status === NOT_FOUND
-      ) {
+      if (isNotFound(error)) {
+        return null;
+      }
+      throw error;
+    }
+  }
+
+  async getDiscussion(
+    auth: GitHubAuth,
+    repo: { owner: string; repo: string },
+    number: number,
+  ): Promise<PullRequestDiscussion | null> {
+    try {
+      return await fetchDiscussion(this.client(auth), repo, number);
+    } catch (error) {
+      if (isNotFound(error)) {
         return null;
       }
       throw error;

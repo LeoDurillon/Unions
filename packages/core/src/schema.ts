@@ -313,6 +313,13 @@ export const reviewComments = sqliteTable(
     ticketId: integer('ticket_id')
       .notNull()
       .references(() => tickets.id, { onDelete: 'cascade' }),
+    /**
+     * `line`: on lines of a file. `general`: about the whole pull request (a review summary or a
+     * conversation comment imported from GitHub); its path, side, lines and excerpt are empty.
+     */
+    kind: text('kind', { enum: ['line', 'general'] })
+      .notNull()
+      .default('line'),
     path: text('path').notNull(),
     side: text('side', { enum: ['old', 'new'] }).notNull(),
     startLine: integer('start_line').notNull(),
@@ -325,7 +332,12 @@ export const reviewComments = sqliteTable(
       .notNull()
       .default('draft'),
     sentAt: integer('sent_at'),
+    /** Set when imported from the pull request (a thread's first comment, a review, a comment): a re-import skips it. */
+    githubUrl: text('github_url'),
     createdAt: integer('created_at').notNull().default(now),
   },
-  (t) => [index('review_comments_ticket_idx').on(t.ticketId, t.status)],
+  (t) => [
+    index('review_comments_ticket_idx').on(t.ticketId, t.status),
+    uniqueIndex('review_comments_github_idx').on(t.ticketId, t.githubUrl),
+  ],
 );

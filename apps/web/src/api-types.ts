@@ -115,9 +115,58 @@ export type DiffResponse = {
   files: DiffFileSummary[];
   /** True while the ticket waits on the user after code was written (a review can be sent). */
   canSend: boolean;
+  /** The linked pull request, whose review comments can be imported. */
+  pullRequest: number | null;
 };
 
 export type CommentView = ReviewComment & { outdated: boolean };
+
+/** One line-comment thread of a pull request, as GitHub returns it. */
+export type PullRequestThread = {
+  resolved: boolean;
+  path: string;
+  side: 'old' | 'new';
+  /** Where the thread sits in the pull request's latest diff; null once GitHub marks it outdated. */
+  line: number | null;
+  startLine: number | null;
+  /** Where it sat in the diff it was written on. */
+  originalLine: number | null;
+  originalStartLine: number | null;
+  /** The first comment, then the replies. */
+  comments: {
+    author: string;
+    body: string;
+    url: string;
+    createdAt: string;
+    /** The diff around the commented line, ending at it. */
+    diffHunk: string;
+    commitSha: string;
+  }[];
+};
+
+/** A review summary or a conversation comment: about the whole pull request, not a line. */
+export type PullRequestNote = {
+  kind: 'review' | 'comment';
+  author: string;
+  bot: boolean;
+  body: string;
+  url: string;
+  /** For reviews: APPROVED, CHANGES_REQUESTED, COMMENTED or DISMISSED. */
+  state: string | null;
+  createdAt: string;
+};
+
+export type PullRequestDiscussion = { threads: PullRequestThread[]; notes: PullRequestNote[] };
+
+/** The discussion as the PR tab shows it, with what is already among the ticket's review comments. */
+export type DiscussionResponse = PullRequestDiscussion & {
+  number: number;
+  url: string;
+  imported: string[];
+};
+
+/** What an import from the pull request did. */
+export type ReviewImportResult = { imported: number; alreadyImported: number; resolved: number };
 
 /** A Notion page fetched for import: shown as a preview, then turned into a ticket. */
 export type NotionImport = { title: string; body: string; url: string; truncated: boolean };

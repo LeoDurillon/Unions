@@ -1,16 +1,9 @@
-import {
-  getTicket,
-  isIgnoredPath,
-  parsePatch,
-  schema,
-  type Db,
-  type DiffLine,
-  type Ticket,
-} from '@union/core';
+import { getTicket, isIgnoredPath, schema, type Db, type Ticket } from '@union/core';
 import { and, desc, eq } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
 
 import type { CommentView, DiffResponse } from '../api-types';
+import type { OnboardingGitHub } from '../github-onboarding';
 import {
   BAD_REQUEST,
   CONFLICT,
@@ -21,7 +14,9 @@ import {
   requireId,
   requireText,
 } from '../http';
+import { diffExcerpt } from '../review-excerpt';
 import { formatReview } from '../review-feedback';
+import { getDiscussion, importPullRequestComments, importPullRequestNote } from './review-import';
 
 function loadTicket(db: Db, c: Context): Ticket {
   const id = requireId(c.req.param('id'), 'ticket id');
@@ -89,6 +84,7 @@ function getDiff(db: Db, c: Context): Response {
       : null,
     files,
     canSend: canSendReview(ticket),
+    pullRequest: ticket.prNumber,
   };
   return c.json(body);
 }
@@ -110,26 +106,13 @@ function getFile(db: Db, c: Context): Response {
   return c.json({ id: file.id, path: file.path, patch: file.patch });
 }
 
-function lineNumber(line: DiffLine, side: 'old' | 'new'): number | null {
-  if (line.kind === 'context') {
-    return side === 'old' ? line.oldLine : line.newLine;
-  }
-  if (line.kind === 'add') {
-    return side === 'new' ? line.newLine : null;
-  }
-  return line.kind === 'del' && side === 'old' ? line.oldLine : null;
-}
-
 /** The text of `start..end` on one side of the file's current patch; refuses lines outside the diff. */
 function excerptOf(patch: string, side: 'old' | 'new', start: number, end: number): string {
-  const picked = parsePatch(patch).filter((line) => {
-    const number = lineNumber(line, side);
-    return number !== null && number >= start && number <= end;
-  });
-  if (picked.length === 0) {
+  const excerpt = diffExcerpt(patch, side, start, end);
+  if (excerpt === null) {
     throw fail(BAD_REQUEST, 'Those lines are not part of the diff');
   }
-  return picked.map((line) => ('text' in line ? line.text : '')).join('\n');
+  return excerpt;
 }
 
 function commentsOf(db: Db, c: Context): Response {
@@ -142,7 +125,8 @@ function commentsOf(db: Db, c: Context): Response {
     .orderBy(schema.reviewComments.id)
     .all();
   const views: CommentView[] = rows.map((row) =>
-    Object.assign(row, { outdated: row.headSha !== head }),
+    // General comments are about the whole pull request: they never go out of date.
+    Object.assign(row, { outdated: row.kind === 'line' && row.headSha !== head }),
   );
   return c.json(views);
 }
@@ -280,7 +264,7 @@ async function sendReview(db: Db, c: Context): Promise<Response> {
   return c.json({ sent: drafts.length, feedback });
 }
 
-export function reviewRoutes(db: Db): Hono {
+export function reviewRoutes(db: Db, github: OnboardingGitHub): Hono {
   const routes = new Hono();
   routes.get('/:id/diff', (c) => getDiff(db, c));
   routes.get('/:id/diff/files/:fileId', (c) => getFile(db, c));
@@ -289,5 +273,14 @@ export function reviewRoutes(db: Db): Hono {
   routes.patch('/:id/comments/:commentId', (c) => editComment(db, c));
   routes.delete('/:id/comments/:commentId', (c) => deleteComment(db, c));
   routes.post('/:id/review', (c) => sendReview(db, c));
+  routes.get('/:id/pull-request/discussion', (c) =>
+    getDiscussion(db, github, loadTicket(db, c), c),
+  );
+  routes.post('/:id/comments/import', (c) =>
+    importPullRequestComments(db, github, loadTicket(db, c), c),
+  );
+  routes.post('/:id/comments/import-note', (c) =>
+    importPullRequestNote(db, github, loadTicket(db, c), c),
+  );
   return routes;
 }

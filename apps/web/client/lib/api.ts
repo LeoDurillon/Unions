@@ -7,15 +7,17 @@ import type {
 } from '@union/core';
 
 import type {
+  CommandType,
+  CommentView,
+  DiffResponse,
+  DiscussionResponse,
   GitHubAppStatus,
   InstallationOption,
-  CommentView,
   NotionImport,
-  DiffResponse,
-  CommandType,
   ProjectOption,
   PublicProject,
   RepoOption,
+  ReviewImportResult,
   TicketDetail,
   TicketSummary,
   Viewer,
@@ -155,6 +157,12 @@ export const api = {
     request('DELETE', `/api/tickets/${id}/comments/${commentId}`),
   sendReview: (id: number, summary: string): Promise<{ sent: number }> =>
     request('POST', `/api/tickets/${id}/review`, { summary }),
+  importReviewComments: (id: number): Promise<ReviewImportResult> =>
+    request('POST', `/api/tickets/${id}/comments/import`),
+  importReviewNote: (id: number, url: string): Promise<unknown> =>
+    request('POST', `/api/tickets/${id}/comments/import-note`, { url }),
+  discussion: (id: number): Promise<DiscussionResponse> =>
+    request('GET', `/api/tickets/${id}/pull-request/discussion`),
   editOutput: (id: number, step: string, content: string): Promise<unknown> =>
     request('PUT', `/api/tickets/${id}/steps/${step}/output`, { content }),
   github: {

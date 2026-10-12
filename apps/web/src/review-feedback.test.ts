@@ -6,6 +6,7 @@ test('comments are grouped by file with their lines and code excerpt', () => {
   const text = formatReview(
     [
       {
+        kind: 'line',
         path: 'math.js',
         side: 'new',
         startLine: 5,
@@ -14,6 +15,7 @@ test('comments are grouped by file with their lines and code excerpt', () => {
         body: 'Validate inputs.',
       },
       {
+        kind: 'line',
         path: 'math.test.js',
         side: 'new',
         startLine: 3,
@@ -22,6 +24,7 @@ test('comments are grouped by file with their lines and code excerpt', () => {
         body: 'Unused import.',
       },
       {
+        kind: 'line',
         path: 'math.js',
         side: 'old',
         startLine: 2,
@@ -48,5 +51,34 @@ test('comments are grouped by file with their lines and code excerpt', () => {
 test('a summary alone is a valid review', () => {
   expect(formatReview([], 'Please split the PR.')).toBe(
     '# Code review from the user\n\nPlease split the PR.',
+  );
+});
+
+test('comments on the whole pull request come before the files, without lines or excerpt', () => {
+  const general = {
+    kind: 'general' as const,
+    path: '',
+    side: 'new' as const,
+    startLine: 0,
+    endLine: 0,
+    excerpt: '',
+  };
+  const line = { ...general, kind: 'line' as const, path: 'a.js', startLine: 1, endLine: 1 };
+  expect(
+    formatReview(
+      [
+        { ...line, excerpt: 'x', body: 'Rename.' },
+        { ...general, body: '**@bot** reviewed on GitHub:\n\nNitpick.' },
+      ],
+      '',
+    ),
+  ).toBe(
+    [
+      '# Code review from the user',
+      '## On the pull request',
+      '**@bot** reviewed on GitHub:\n\nNitpick.',
+      '## a.js',
+      '**Line 1**\n\n```\nx\n```\n\nRename.',
+    ].join('\n\n'),
   );
 });

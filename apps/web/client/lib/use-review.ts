@@ -1,6 +1,11 @@
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 
-import type { CommentView, DiffResponse } from '../../src/api-types';
+import type {
+  CommentView,
+  DiffResponse,
+  DiscussionResponse,
+  ReviewImportResult,
+} from '../../src/api-types';
 import { api } from './api';
 
 export function useDiff(ticketId: number): UseQueryResult<DiffResponse> {
@@ -19,6 +24,19 @@ export function useDiffFile(
   });
 }
 
+/** The linked pull request's discussion, read from GitHub; under the review key, so imports refresh it. */
+export function useDiscussion(
+  ticketId: number,
+  enabled: boolean,
+): UseQueryResult<DiscussionResponse> {
+  return useQuery({
+    queryKey: ['review', ticketId, 'discussion'],
+    queryFn: () => api.discussion(ticketId),
+    enabled,
+    retry: false,
+  });
+}
+
 export function useComments(ticketId: number): UseQueryResult<CommentView[]> {
   return useQuery({
     queryKey: ['review', ticketId, 'comments'],
@@ -34,6 +52,8 @@ export function useCommentMutations(ticketId: number): {
   edit: ReturnType<typeof useMutation<unknown, Error, { id: number; body: string }>>;
   remove: ReturnType<typeof useMutation<unknown, Error, number>>;
   send: ReturnType<typeof useMutation<{ sent: number }, Error, string>>;
+  importFromGitHub: ReturnType<typeof useMutation<ReviewImportResult, Error, void>>;
+  importNote: ReturnType<typeof useMutation<unknown, Error, string>>;
 } {
   const queryClient = useQueryClient();
   const refresh = (): Promise<void> =>
@@ -58,6 +78,14 @@ export function useCommentMutations(ticketId: number): {
         await refresh();
         await queryClient.invalidateQueries({ queryKey: ['ticket', ticketId] });
       },
+    }),
+    importFromGitHub: useMutation({
+      mutationFn: () => api.importReviewComments(ticketId),
+      onSuccess: refresh,
+    }),
+    importNote: useMutation({
+      mutationFn: (url: string) => api.importReviewNote(ticketId, url),
+      onSuccess: refresh,
     }),
   };
 }
