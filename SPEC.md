@@ -283,12 +283,109 @@ Without a `start` command the button is hidden and the panel explains how to con
 - Several exposed ports (separate frontend and API): route `api.<id>.localhost` to a second port, or keep one port?
 - Expose the preview on the local network, or only on this machine (default: this machine only)?
 
+## MCP servers for agents (planned)
+
+Agents can use MCP servers the user configures (an error tracker, docs, a database, a design tool such as Figma),
+chosen per agent like the tools. Today an agent container gets only the Claude login (`claudeAiOauth`): no
+`~/.claude.json`, so no MCP servers. Servers are passed on each run, never installed in the container.
+
+### Constraint that shapes it
+
+An agent has Bash and can read anything in its container, and repository content can carry prompt injections. A
+secret placed in the container is a secret the agent can print or send away. The rule "containers never hold GitHub
+credentials" extends to every credential that can be kept out.
+
+**Decided exception: OAuth servers.** A server that only signs in through the browser (Figma's official
+`https://mcp.figma.com/mcp`) has its OAuth token copied into the container for the runs that use it: the user
+accepts this per server when adding it, and the narrowing below applies. Building it changes the AGENTS.md rule
+"Never copy `mcpOAuth` into a container" to allow exactly this, and nothing else.
+
+### Configuration
+
+- **Registry** (Agent settings → MCP servers, global like the tool list), table `mcp_servers`:
+  `name` (slug, the `mcp__<name>__*` prefix), `transport` (`http` or `stdio`), for `http` the `url` and either secret
+  `headers` or `auth = 'oauth'`, for `stdio` the `command`, `args` and secret `env`. Secrets (headers, variables, the
+  OAuth token in `oauth`) are stored like the GitHub token (plain text, local app) and never sent to the browser: the
+  page shows which are set and whether the server is signed in, not their values. A server whose credentials reach
+  the container (OAuth, or stdio with variables) needs a ticked "agents using it can read its credentials during a
+  run" when added, and is labelled so wherever it can be selected.
+- **Per agent**: `agent_configs.mcp_servers` lists the servers an agent may use (multi-select under its tools);
+  investigations pick theirs in the new-investigation form. Nothing is enabled by default.
+- **Per project** (if wanted, see questions): a project can override a server's `url`, headers or variables, for
+  example its own Sentry project.
+
+### Runtime
+
+- Each run gets `--mcp-config '<json>' --strict-mcp-config` built from the agent's servers: only those servers load,
+  whatever is in the container. Their tools are allowed with `--allowedTools mcp__<name>` (the whole server); denied
+  rules still win.
+- **HTTP servers go through the worker.** The worker listens on a proxy port (`UNION_MCP_PROXY_PORT`); the run's
+  config points the server at `http://host.docker.internal:<port>/mcp/<run token>/<name>`. The proxy checks the run
+  token (random, valid only while that run lasts), adds the real headers and forwards to the server. The secrets stay
+  in the worker; the container only ever sees a token that dies with the run. Agent containers get
+  `--add-host host.docker.internal:host-gateway`; in compose the worker publishes the port to the host.
+- **stdio servers run inside the container**, started by Claude Code with the configured command (`npx` and `bunx` are
+  in the agent image; Python servers need `uvx`, so a project image). Their `env` secrets are therefore visible to the
+  agent: the settings page marks such a server "credentials visible to the agent", and an HTTP server (or an HTTP
+  bridge) is preferred whenever the server needs a secret.
+- **Never GitHub write access**: a GitHub MCP server with a token would let an agent write to GitHub around the
+  host. The registry refuses servers whose secrets look like GitHub tokens (`ghp_`, `github_pat_`, `ghs_`), and the
+  docs say why.
+- **Log**: MCP tool calls show in the Log tab like other tools. The proxy records one event per call (server, tool
+  name, duration, status), never the bodies.
+
+### OAuth servers (Figma)
+
+Claude Code signs in to such servers itself, as an approved client (Figma lets only listed clients connect), with
+`claude mcp login <name> --no-browser`, which prints the authorization URL and waits for the redirect URL to be
+pasted back. Union drives that and keeps the token.
+
+1. **Sign in** (Agent settings → MCP servers → Sign in): a `mcp_login` command. The worker starts a sign-in
+   container `union-mcp-<name>` (Claude login seeded, only that server configured), runs the login there, and
+   stores the printed URL on the server (`login_status: waiting`); the page shows it as a link.
+2. The user approves in Figma. The browser then goes to `http://localhost:<port>/callback?code=…` and fails to load:
+   that is expected. The user pastes that address into the page; the worker writes it to the waiting login.
+3. The worker reads the server's `mcpOAuth` entry from the sign-in container's `~/.claude/.credentials.json`, stores
+   it on the server (`oauth`), marks it signed in, and removes the container. A failure or timeout (10 minutes)
+   leaves it signed out with the reason.
+4. **Each run** of an agent that selected the server: the worker merges the stored entry into the container's
+   `.credentials.json` (next to the Claude login) and passes the server with `--mcp-config` at its real URL (not
+   through the proxy: the token is Claude Code's own). Claude Code refreshes it when needed.
+5. **After the run** (success, failure or cancel) the worker reads the entry back, keeps it if Claude Code refreshed
+   it (newer expiry), and removes it from the container. Runs using the same OAuth server do not overlap: the next one
+   waits for a slot on that server, so two copies never refresh concurrently and invalidate each other.
+6. **Expired or revoked**: the run's MCP tools fail and the agent carries on without them; the worker marks the
+   server "sign in again" (from the run's MCP status) and the next runs skip it until then.
+
+Narrowing: the token is in a container only during runs that selected the server, never in investigations or
+agents that did not, never in the image, and never in the browser. It is still readable by the agent during those
+runs; that is the accepted risk.
+
+To verify before building: that `claude mcp login --no-browser` takes the pasted URL from a pipe (else run it under
+a pseudo-terminal), and that an `mcpOAuth` entry copied into another container is used without signing in again
+(and where in `.credentials.json` it is keyed).
+
+### Order of work
+
+1. Registry and per-agent selection, `--mcp-config`/`--strict-mcp-config`, and OAuth servers with the sign-in flow
+   (Figma first): the two checks above, tests with a fake MCP server, then one real Figma run.
+2. HTTP servers with header secrets through the proxy.
+3. stdio servers (no secrets, or secrets marked visible).
+4. Per-project overrides and a "Test" button (the worker starts the server once and lists its tools).
+
+### Open questions
+
+- Per-project overrides from the start, or global servers only?
+- For stdio servers that need a secret: allow it with the warning, or HTTP only?
+
 ## Open risks
 
 1. OAuth refresh inside a ticket volume may invalidate the host login (untested; needs a test near token expiry).
    Fallback: `claude setup-token` → `CLAUDE_CODE_OAUTH_TOKEN`.
 2. Hono SSE behaviour on client disconnect in production (checked in the skeleton).
 3. Max rate limit under parallel tickets → `rate_limited` is a first-class ticket state.
+4. MCP OAuth tokens (Figma) are readable by the agent during the runs that use them; a prompt injection in a
+   repository could send one away. Accepted per server; revoke it in Figma if a run looks wrong.
 
 ## Out of scope for now
 
