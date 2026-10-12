@@ -16,6 +16,8 @@ import type {
   NotionImport,
   ProjectOption,
   PublicProject,
+  PullRequestFilter,
+  PullRequestList,
   RepoOption,
   ReviewImportResult,
   TicketDetail,
@@ -161,6 +163,8 @@ export const api = {
     request('POST', `/api/tickets/${id}/comments/import`),
   importReviewNote: (id: number, url: string): Promise<unknown> =>
     request('POST', `/api/tickets/${id}/comments/import-note`, { url }),
+  pullRequests: (projectId: number, filter: PullRequestFilter): Promise<PullRequestList> =>
+    request('GET', `/api/projects/${projectId}/pull-requests?state=${filter}`),
   discussion: (id: number): Promise<DiscussionResponse> =>
     request('GET', `/api/tickets/${id}/pull-request/discussion`),
   editOutput: (id: number, step: string, content: string): Promise<unknown> =>

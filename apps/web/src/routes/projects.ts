@@ -3,6 +3,7 @@ import { Hono } from 'hono';
 
 import { toPublicProject } from '../api-types';
 import { optionalInstallationId, requireApp } from '../github-credentials';
+import type { OnboardingGitHub } from '../github-onboarding';
 import {
   BAD_REQUEST,
   CONFLICT,
@@ -15,6 +16,7 @@ import {
 import { investigationRoutes } from './investigations';
 import { requireNotionId } from './notion';
 import { deleteProject, updateProject } from './project-settings';
+import { pullRequestRoutes } from './pull-requests';
 
 const DEFAULT_BRANCH = 'main';
 
@@ -41,7 +43,7 @@ function credentialsOf(
   return { githubToken: optionalText(body, 'token') ?? null, githubInstallationId: null };
 }
 
-export function projectRoutes(db: Db): Hono {
+export function projectRoutes(db: Db, github: OnboardingGitHub): Hono {
   const routes = new Hono();
 
   routes.get('/', (c) =>
@@ -99,6 +101,7 @@ export function projectRoutes(db: Db): Hono {
   routes.patch('/:id', (c) => updateProject(db, c));
   routes.delete('/:id', (c) => deleteProject(db, c));
   routes.route('/:projectId/investigations', investigationRoutes(db));
+  routes.route('/:projectId/pull-requests', pullRequestRoutes(db, github));
 
   return routes;
 }

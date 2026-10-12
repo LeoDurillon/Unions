@@ -7,6 +7,7 @@ import { Board, BoardView } from './board';
 import { GitHubAppPage } from './github-app/github-app-page';
 import { InvestigationsPage } from './investigations/investigations-page';
 import { ProjectBar, type ProjectView } from './project-bar';
+import { PullRequestsPage } from './pull-requests/pull-requests-page';
 
 function noop(): void {
   // The empty board behind the first-run wizard is display only.
@@ -27,10 +28,13 @@ function ProjectBody({
   if (view === 'investigations') {
     return <InvestigationsPage key={project.id} project={project} />;
   }
+  if (view === 'pull-requests') {
+    return <PullRequestsPage key={project.id} project={project} onOpenTicket={onOpenTicket} />;
+  }
   return <Board projectId={project.id} onOpen={onOpenTicket} />;
 }
 
-/** Project bar plus board or investigations (or the empty board behind the first-run wizard). */
+/** Project bar plus the board, investigations or pull requests (or the empty board behind the first-run wizard). */
 export function Workspace({
   project,
   onOpenTicket,

@@ -145,6 +145,31 @@ export type PullRequestThread = {
   }[];
 };
 
+export const PULL_REQUEST_FILTERS = ['open', 'closed', 'all'] as const;
+export type PullRequestFilter = (typeof PULL_REQUEST_FILTERS)[number];
+
+/** One pull request of the project's repository, as the Pull requests tab lists it. */
+export type PullRequestListItem = {
+  number: number;
+  title: string;
+  url: string;
+  state: 'open' | 'closed' | 'merged';
+  draft: boolean;
+  author: string;
+  headBranch: string;
+  baseBranch: string;
+  updatedAt: string;
+  /** APPROVED, CHANGES_REQUESTED or REVIEW_REQUIRED; null when the repository needs no review. */
+  reviewDecision: string | null;
+  additions: number;
+  deletions: number;
+  /** The ticket this pull request is linked to, if any. */
+  ticketId: number | null;
+};
+
+/** The newest 100 pull requests of the filter, and how many there are in all. */
+export type PullRequestList = { total: number; pullRequests: PullRequestListItem[] };
+
 /** A review summary or a conversation comment: about the whole pull request, not a line. */
 export type PullRequestNote = {
   kind: 'review' | 'comment';

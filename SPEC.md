@@ -126,6 +126,14 @@ ticket's Overview while it is in the backlog (`tickets.parent_ticket_id`; cycles
   parent swaps or removes that relation. Local links win: dependencies edited on GitHub are not pulled back, and
   Union only removes the relation it added.
 
+## Pull requests
+
+The project bar's **Pull requests** tab lists the repository's pull requests, read from GitHub by the web server
+(GraphQL, read only, newest 100 by last update): Open (the default), Closed (closed and merged) or All. Each shows its
+state (open, draft, merged, closed), author, branches, review decision, size and, when a ticket is linked to it, an
+**Open ticket** button. It is fetched when the tab opens, at most once a minute, or on **Refresh**: live events do
+not refetch it.
+
 ## Project instructions
 
 Project settings → **Instructions**: free markdown stored in `projects.config.instructions` and sent to every agent

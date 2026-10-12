@@ -3,11 +3,12 @@ import type { ReactElement } from 'react';
 import type { PublicProject } from '../../src/api-types';
 import { Button } from './ui';
 
-export type ProjectView = 'board' | 'investigations';
+export type ProjectView = 'board' | 'investigations' | 'pull-requests';
 
 const VIEWS: { view: ProjectView; label: string }[] = [
   { view: 'board', label: 'Board' },
   { view: 'investigations', label: 'Investigations' },
+  { view: 'pull-requests', label: 'Pull requests' },
 ];
 
 function ViewTabs({
@@ -40,7 +41,7 @@ function ViewTabs({
   );
 }
 
-/** Slim bar above the project: which project is open, Board / Investigations tabs, and the actions. */
+/** Slim bar above the project: which project is open, its tabs, and the actions. */
 export function ProjectBar({
   project,
   view,

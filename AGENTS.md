@@ -122,9 +122,10 @@ both.
 - All GitHub writes for tickets (issues, comments, Project status, push, PR) happen in the worker. Containers never
   hold GitHub credentials. The only GitHub calls the web server makes are the ones the UI needs answered right away:
   the setup wizard (verify the token, list repositories and Projects, create a Project), checking and listing the
-  GitHub App's installations (`/api/github/app`), and looking up a pull
-  request a user links to a ticket (`src/github-onboarding.ts`, behind the `OnboardingGitHub` interface so tests
-  use a fake).
+  GitHub App's installations (`/api/github/app`), looking up a pull request a user links to a ticket, reading
+  a linked pull request's discussion (PR tab, review import) and listing the repository's pull requests (project
+  bar → Pull requests, `routes/pull-requests.ts`), all read only (`src/github-onboarding.ts`, behind the
+  `OnboardingGitHub` interface so tests use a fake).
 - Notion (read only, from the web server): verifying a project's integration secret and data source, and importing
   a page of that data source as a ticket (`src/notion.ts` behind `NotionApi`, `routes/notion.ts`). Uses API version
   `2026-03-11` and `GET /v1/pages/{id}/markdown`. The secret is stored in `projects.notion_token` and never sent to

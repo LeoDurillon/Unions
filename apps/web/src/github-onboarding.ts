@@ -8,16 +8,19 @@ import type {
   ProjectOption,
   PullRequestInfo,
   PullRequestDiscussion,
+  PullRequestFilter,
   RepoOption,
   Viewer,
 } from './api-types';
 import { fetchDiscussion } from './github-discussion';
+import { fetchPullRequests, type RemotePullRequest } from './github-pull-requests';
 import { CREATE_PROJECT, OWNER_PROJECTS } from './github-queries';
 
 /**
  * GitHub calls the web server makes itself, because the UI needs the answer right away: the setup
  * wizard's reads and Project creation, checking the GitHub App, looking up a pull request to link,
- * and reading its discussion for the PR tab and the review import. Every call takes a token or an app installation. Tests use a fake.
+ * reading its discussion for the PR tab and the review import, and listing the repository's pull
+ * requests for the Pull requests tab. Every call takes a token or an app installation. Tests use a fake.
  */
 export type OnboardingGitHub = {
   verify(auth: GitHubAuth): Promise<Viewer>;
@@ -39,6 +42,12 @@ export type OnboardingGitHub = {
     repo: { owner: string; repo: string },
     number: number,
   ): Promise<PullRequestDiscussion | null>;
+  /** The newest 100 pull requests of the filter; null when the repository is not reachable. */
+  listPullRequests(
+    auth: GitHubAuth,
+    repo: { owner: string; repo: string },
+    filter: PullRequestFilter,
+  ): Promise<{ total: number; pullRequests: RemotePullRequest[] } | null>;
   /** The app the credentials belong to (`GET /app`); rejects a wrong App ID or key. */
   verifyApp(app: GitHubAppCredentials): Promise<AppInfo>;
   listInstallations(app: GitHubAppCredentials): Promise<InstallationOption[]>;
@@ -244,6 +253,21 @@ export class OctokitOnboarding implements OnboardingGitHub {
   ): Promise<PullRequestDiscussion | null> {
     try {
       return await fetchDiscussion(this.client(auth), repo, number);
+    } catch (error) {
+      if (isNotFound(error)) {
+        return null;
+      }
+      throw error;
+    }
+  }
+
+  async listPullRequests(
+    auth: GitHubAuth,
+    repo: { owner: string; repo: string },
+    filter: PullRequestFilter,
+  ): Promise<{ total: number; pullRequests: RemotePullRequest[] } | null> {
+    try {
+      return await fetchPullRequests(this.client(auth), repo, filter);
     } catch (error) {
       if (isNotFound(error)) {
         return null;

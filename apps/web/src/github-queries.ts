@@ -100,3 +100,30 @@ export const PULL_REQUEST_NOTES = /* GraphQL */ `
     }
   }
 `;
+
+/** The repository's pull requests in one state set, most recently updated first. */
+export const REPOSITORY_PULL_REQUESTS = /* GraphQL */ `
+  query RepositoryPullRequests($owner: String!, $repo: String!, $states: [PullRequestState!]) {
+    repository(owner: $owner, name: $repo) {
+      pullRequests(states: $states, first: 100, orderBy: { field: UPDATED_AT, direction: DESC }) {
+        totalCount
+        nodes {
+          number
+          title
+          url
+          state
+          isDraft
+          headRefName
+          baseRefName
+          updatedAt
+          reviewDecision
+          additions
+          deletions
+          author {
+            login
+          }
+        }
+      }
+    }
+  }
+`;

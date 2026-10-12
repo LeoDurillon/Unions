@@ -42,6 +42,7 @@ const github: OnboardingGitHub = {
   createProject: () => Promise.reject(new Error('unused')),
   getPullRequest: (_auth, _repo, number) => Promise.resolve(PULLS[number] ?? null),
   getDiscussion: () => Promise.resolve(null),
+  listPullRequests: () => Promise.resolve(null),
   verifyApp: () => Promise.reject(new Error('unused')),
   listInstallations: () => Promise.reject(new Error('unused')),
 };
