@@ -2,6 +2,7 @@ import { beforeEach, expect, test } from 'bun:test';
 
 import { createDb, migrateDb, type Db } from './db';
 import {
+  askFollowUp,
   cancelQueuedInvestigation,
   claimInvestigation,
   createInvestigation,
@@ -113,4 +114,21 @@ test('cancels a queued investigation but leaves a running one to the worker', ()
   expect(getInvestigation(db, running.id)).toMatchObject({ status: 'failed' });
   deleteInvestigation(db, running.id);
   expect(() => getInvestigation(db, running.id)).toThrow('not found');
+});
+
+test('a follow-up keeps the earlier exchange and queues the new question', () => {
+  const created = createInvestigation(db, input);
+  expect(created.history).toEqual([]);
+  expect(() => askFollowUp(db, created.id, 'And the index?')).toThrow('answered');
+  claimInvestigation(db);
+  finishInvestigation(db, created.id, { status: 'succeeded', result: 'The user query' });
+  expect(() => askFollowUp(db, created.id, ' ')).toThrow(InvestigationError);
+
+  expect(askFollowUp(db, created.id, ' And the index? ')).toMatchObject({
+    status: 'queued',
+    prompt: 'And the index?',
+    result: null,
+    history: [{ prompt: 'Find the slow query', answer: 'The user query' }],
+  });
+  expect(eventTypes(created.id).at(-1)).toBe('investigation_queued');
 });

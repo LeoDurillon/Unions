@@ -12,8 +12,8 @@ behavior; this file covers how to work in the repo.
   `agent-tools.ts` holds each step's default allowed tools and the tool list agents pick from (Claude Code's tools,
   the rules the defaults use, and the user's additions in `agent_tools`). Denied rules (`BASE_DENIED`,
   `IMPLEMENT_DENIED` in the worker) are not editable and always win over a selected tool.
-  `investigations.ts`: one-off agent runs on a custom prompt (records, claim, finish, cancel); defaults in the
-  browser-safe `investigation-defaults.ts`.
+  `investigations.ts`: one-off agent runs on a custom prompt (records, claim, finish, cancel, follow-ups); defaults
+  in the browser-safe `investigation-defaults.ts`.
   Drizzle schema and migrations, the pure ticket state machine (`states.ts`), ticket dependencies
   (`ticket-links.ts`: `setParent`, `ticketBase`; the start gate `blockingParent` is in `tickets.ts`), the
   `ContainerRuntime` interface and its Docker CLI implementation.

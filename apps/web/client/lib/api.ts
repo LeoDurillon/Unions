@@ -89,6 +89,8 @@ export const api = {
   ): Promise<Investigation> => request('POST', investigationsPath(projectId), input),
   rerunInvestigation: (investigation: Investigation): Promise<Investigation> =>
     request('POST', `${investigationPath(investigation)}/rerun`),
+  askFollowUp: (investigation: Investigation, prompt: string): Promise<Investigation> =>
+    request('POST', `${investigationPath(investigation)}/follow-up`, { prompt }),
   cancelInvestigation: (investigation: Investigation): Promise<unknown> =>
     request('POST', `${investigationPath(investigation)}/cancel`),
   deleteInvestigation: (investigation: Investigation): Promise<unknown> =>

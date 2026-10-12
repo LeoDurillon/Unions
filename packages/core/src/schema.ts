@@ -237,6 +237,9 @@ export const INVESTIGATION_STATUSES = [
   'cancelled',
 ] as const;
 
+/** One earlier question of an investigation and the answer it got. */
+export type InvestigationExchange = { prompt: string; answer: string };
+
 /**
  * One agent run on a custom prompt, outside the ticket pipeline: nothing is mirrored to GitHub.
  * `repository` runs on a fresh clone of the project's repository, `global` without any code.
@@ -249,7 +252,13 @@ export const investigations = sqliteTable(
       .notNull()
       .references(() => projects.id, { onDelete: 'cascade' }),
     title: text('title').notNull(),
+    /** The latest question: the first prompt, or the newest follow-up. */
     prompt: text('prompt').notNull(),
+    /** Earlier questions and their answers, oldest first; `prompt` and `result` hold the latest. */
+    history: text('history', { mode: 'json' })
+      .$type<InvestigationExchange[]>()
+      .notNull()
+      .default(sql`'[]'`),
     scope: text('scope', { enum: INVESTIGATION_SCOPES }).notNull(),
     model: text('model').$type<AgentModel>().notNull(),
     tools: text('tools', { mode: 'json' }).$type<string[]>().notNull(),

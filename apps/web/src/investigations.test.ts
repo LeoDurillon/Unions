@@ -2,6 +2,7 @@ import { beforeEach, expect, test } from 'bun:test';
 
 import {
   claimInvestigation,
+  finishInvestigation,
   createDb,
   emitEvent,
   migrateDb,
@@ -110,4 +111,22 @@ test('the event stream can follow one investigation', async () => {
   expect(text).toContain('event: investigation_queued');
   expect(text).toContain(`"investigationId":${id}`);
   expect(text).not.toContain('"ticketId":7');
+});
+
+test('a follow-up is asked on an answered investigation only', async () => {
+  const { id } = await created();
+  const ask = (prompt: string): Promise<Response> | Response =>
+    send('POST', `${base()}/${id}/follow-up`, { prompt });
+  expect((await ask('And the refresh tokens?')).status).toBe(409);
+
+  claimInvestigation(db);
+  finishInvestigation(db, id, { status: 'succeeded', result: 'In auth.ts' });
+  expect((await ask(' ')).status).toBe(400);
+  const response = await ask('And the refresh tokens?');
+  expect(response.status).toBe(200);
+  expect(await response.json()).toMatchObject({
+    status: 'queued',
+    prompt: 'And the refresh tokens?',
+    history: [{ prompt: 'List every place we check tokens', answer: 'In auth.ts' }],
+  });
 });

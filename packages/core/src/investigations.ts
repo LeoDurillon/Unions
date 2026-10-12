@@ -10,6 +10,7 @@ export { INVESTIGATION_DEFAULTS } from './investigation-defaults';
 
 export type Investigation = typeof schema.investigations.$inferSelect;
 export type InvestigationScope = (typeof schema.INVESTIGATION_SCOPES)[number];
+export type { InvestigationExchange } from './schema';
 export type InvestigationStatus = (typeof schema.INVESTIGATION_STATUSES)[number];
 
 /** An investigation the request cannot create or change (bad input, or not in a state that allows it). */
@@ -92,6 +93,33 @@ export function rerunInvestigation(db: Db, id: number): Investigation {
       .returning()
       .get();
     emitEvent(tx, { type: 'investigation_queued', investigationId: id, payload: { rerun: true } });
+    return row;
+  });
+}
+
+/**
+ * Queues a follow-up question on an answered investigation: the latest question and its answer move
+ * to the history, which the agent is given as context.
+ */
+export function askFollowUp(db: Db, id: number, prompt: string): Investigation {
+  const current = getInvestigation(db, id);
+  if (current.status !== 'succeeded' || current.result === null) {
+    throw new InvestigationError('Only an answered investigation can take a follow-up');
+  }
+  const history = [...current.history, { prompt: current.prompt, answer: current.result }];
+  const values = { prompt: requireText(prompt, 'follow-up'), history, status: 'queued' as const };
+  return db.transaction((tx) => {
+    const row = tx
+      .update(schema.investigations)
+      .set({ ...values, result: null, error: null, startedAt: null, finishedAt: null })
+      .where(eq(schema.investigations.id, id))
+      .returning()
+      .get();
+    emitEvent(tx, {
+      type: 'investigation_queued',
+      investigationId: id,
+      payload: { followUp: history.length },
+    });
     return row;
   });
 }

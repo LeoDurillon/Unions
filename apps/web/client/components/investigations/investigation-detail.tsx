@@ -8,6 +8,7 @@ import { AgentLog } from '../log-tab';
 import { Markdown } from '../markdown';
 import { Badge, Button, ErrorText } from '../ui';
 import { isActive, SCOPE_LABELS, STATUS_LABELS } from './investigation-labels';
+import { EarlierExchanges, FollowUpForm, LatestQuestion } from './investigation-thread';
 
 type Tab = 'result' | 'log';
 
@@ -131,7 +132,7 @@ function Answer({ investigation }: { investigation: Investigation }): ReactEleme
   return <p className="text-sm text-zinc-500">No answer. {waiting}</p>;
 }
 
-/** One investigation: its prompt, its answer and the agent's live log. */
+/** One investigation: its questions, the latest answer, the agent's live log and a follow-up form. */
 export function InvestigationDetail({
   investigation,
   onDeleted,
@@ -155,10 +156,8 @@ export function InvestigationDetail({
         </p>
         <Actions investigation={investigation} onDeleted={onDeleted} />
       </header>
-      <details className="rounded-md border border-zinc-200 p-3 text-sm dark:border-zinc-800">
-        <summary className="cursor-pointer font-medium">Prompt</summary>
-        <p className="mt-2 font-mono text-xs whitespace-pre-wrap">{investigation.prompt}</p>
-      </details>
+      <EarlierExchanges investigation={investigation} />
+      <LatestQuestion investigation={investigation} />
       <div role="tablist" className="flex border-b border-zinc-200 dark:border-zinc-800">
         <TabButton tab="result" current={tab} label="Answer" onSelect={setTab} />
         <TabButton tab="log" current={tab} label="Log" onSelect={setTab} />
@@ -168,6 +167,7 @@ export function InvestigationDetail({
       ) : (
         <AgentLog url={`/api/events?investigation=${investigation.id}&after=0`} />
       )}
+      {investigation.status === 'succeeded' ? <FollowUpForm investigation={investigation} /> : null}
     </article>
   );
 }

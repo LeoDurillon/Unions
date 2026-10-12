@@ -4,9 +4,11 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 
 import {
+  askFollowUp,
   claimInvestigation,
   createInvestigation,
   createDb,
+  finishInvestigation,
   getInvestigation,
   migrateDb,
   schema,
@@ -179,6 +181,19 @@ test('the prompt says where the code is, or that there is none', () => {
     'acme/shop is checked out at /workspace/repo on its `develop` branch',
   );
   expect(investigationPrompt(queue('global'), project)).toContain('No repository is checked out');
+  expect(repository).not.toContain('follows up');
+});
+
+test('a follow-up prompt carries the earlier questions and answers', () => {
+  const { id } = queue();
+  claimInvestigation(db);
+  finishInvestigation(db, id, { status: 'succeeded', result: 'Use BullMQ' });
+  const prompt = investigationPrompt(askFollowUp(db, id, 'Does it need Redis?'), project);
+  expect(prompt).toStartWith('This follows up on an earlier investigation.');
+  expect(prompt).toContain(
+    '<question>\nWhich queue library fits us?\n</question>\n<answer>\nUse BullMQ\n</answer>',
+  );
+  expect(prompt).toContain('The follow-up question:\n\nDoes it need Redis?\n\n---');
 });
 
 test('the cancel command cancels a queued run itself and hands a running one to the runner', () => {

@@ -35,13 +35,30 @@ export function investigationContainer(id: number): TicketContainer {
   };
 }
 
-/** The user's prompt, then where the agent stands and what to hand back. */
+/** The earlier questions and answers a follow-up builds on; empty for a first question. */
+function earlierExchanges(investigation: Investigation): string {
+  if (investigation.history.length === 0) {
+    return '';
+  }
+  const exchanges = investigation.history.map(
+    ({ prompt, answer }) => `<question>\n${prompt}\n</question>\n<answer>\n${answer}\n</answer>`,
+  );
+  return `This follows up on an earlier investigation. The questions asked so far and your answers, oldest first:
+
+${exchanges.join('\n\n')}
+
+The follow-up question:
+
+`;
+}
+
+/** The user's prompt (after the earlier exchanges, if any), then where the agent stands and what to hand back. */
 export function investigationPrompt(investigation: Investigation, project: Project): string {
   const where =
     investigation.scope === 'repository'
       ? `The repository ${project.owner}/${project.repo} is checked out at ${REPO_DIR} on its \`${project.config.baseBranch}\` branch. Read the code to answer; do not change it.`
       : `No repository is checked out: this is a general question for the team working on ${project.owner}/${project.repo}. Answer from your knowledge and the tools you have.`;
-  return `${investigation.prompt}
+  return `${earlierExchanges(investigation)}${investigation.prompt}
 
 ---
 ${where}

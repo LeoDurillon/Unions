@@ -131,8 +131,13 @@ project). It creates no ticket and no GitHub issue; the answer stays in Union (`
 - **Status:** queued → running → succeeded | failed | cancelled. Cancel is a `cancel_investigation` command (a
   queued run is cancelled at once, a running one is aborted). Run again re-queues a finished one with the same
   prompt. A run left `running` by a stopped worker is failed at the next start and its container removed.
+- **Follow-up:** once answered, the user can ask a follow-up question. The latest question and its answer move to
+  `investigations.history` and the run is queued again; the agent gets the earlier questions and answers in its
+  prompt (each run is still a fresh container and session, and a repository investigation reads a fresh clone).
+  Run again repeats the latest question.
 - **Log:** agent events carry `events.investigation_id`; `/api/events?investigation=<id>` streams one run's log.
-- **Not yet:** follow-up questions in the same session, choosing another branch, turning an answer into a ticket.
+- **Not yet:** resuming the agent's own session on a follow-up, choosing another branch, turning an answer into a
+  ticket.
 
 ## Rebase (planned)
 

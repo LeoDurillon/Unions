@@ -1,4 +1,5 @@
 import {
+  askFollowUp,
   createInvestigation,
   deleteInvestigation,
   getInvestigation,
@@ -101,6 +102,11 @@ export function investigationRoutes(db: Db): Hono {
   routes.post('/:id/rerun', (c) => {
     const { id } = investigationOf(db, c);
     return c.json(refusals(CONFLICT, () => rerunInvestigation(db, id)));
+  });
+  routes.post('/:id/follow-up', async (c) => {
+    const { id } = investigationOf(db, c);
+    const prompt = requireText(await readObject(c.req.raw), 'prompt');
+    return c.json(refusals(CONFLICT, () => askFollowUp(db, id, prompt)));
   });
   routes.post('/:id/cancel', (c) => {
     const { id, status } = investigationOf(db, c);

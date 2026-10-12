@@ -1,0 +1,1 @@
+ALTER TABLE `investigations` ADD `history` text DEFAULT '[]' NOT NULL;
