@@ -27,6 +27,16 @@ export type RemoteComment = { id: string; body: string };
 
 export type PullRequestRef = { number: number; url: string };
 
+/** One line comment of a pull request review, in GitHub's terms (LEFT: the old side). */
+export type ReviewLineComment = {
+  path: string;
+  body: string;
+  side: 'LEFT' | 'RIGHT';
+  line: number;
+  /** Set for a comment on several lines. */
+  startLine?: number;
+};
+
 /** The only surface of GitHub the worker uses. Tests substitute an in-memory fake. */
 export type GitHubApi = {
   resolveProject(locator: ProjectLocator): Promise<string>;
@@ -56,6 +66,12 @@ export type GitHubApi = {
    * closed, merged or gone (there is nothing to rebase then).
    */
   pullRequestBehind(repo: RepoRef, number: number): Promise<number | null>;
+  /** Posts a "Comment" review: an overall note and line comments, anchored at `commitId`. */
+  createPullRequestReview(
+    repo: RepoRef,
+    number: number,
+    review: { commitId: string | null; body: string; comments: ReviewLineComment[] },
+  ): Promise<string>;
   /** Numbers of the issues of `repo` the issue is marked as blocked by. */
   listBlockedBy(repo: RepoRef, issueNumber: number): Promise<number[]>;
   /** Marks the issue as blocked by another issue of the same repository. */

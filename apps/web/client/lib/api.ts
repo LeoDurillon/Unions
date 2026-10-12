@@ -9,6 +9,7 @@ import type {
 import type {
   CommandType,
   CommentView,
+  CurrentReview,
   DiffResponse,
   DiscussionResponse,
   GitHubAppStatus,
@@ -18,6 +19,7 @@ import type {
   PublicProject,
   PullRequestFilter,
   PullRequestList,
+  PullRequestListItem,
   RepoOption,
   ReviewImportResult,
   TicketDetail,
@@ -145,26 +147,35 @@ export const api = {
     request('PUT', `/api/tickets/${id}/pull-request`, { pullRequest }),
   unlinkPullRequest: (id: number): Promise<unknown> =>
     request('DELETE', `/api/tickets/${id}/pull-request`),
-  diff: (id: number): Promise<DiffResponse> => request('GET', `/api/tickets/${id}/diff`),
-  diffFile: (id: number, fileId: number): Promise<{ id: number; path: string; patch: string }> =>
-    request('GET', `/api/tickets/${id}/diff/files/${fileId}`),
-  comments: (id: number): Promise<CommentView[]> => request('GET', `/api/tickets/${id}/comments`),
+  // A review lives under a base URL: a ticket's, or a pull request's under review (review-target.ts).
+  diff: (base: string): Promise<DiffResponse> => request('GET', `${base}/diff`),
+  diffFile: (base: string, fileId: number): Promise<{ id: number; path: string; patch: string }> =>
+    request('GET', `${base}/diff/files/${fileId}`),
+  comments: (base: string): Promise<CommentView[]> => request('GET', `${base}/comments`),
   addComment: (
-    id: number,
+    base: string,
     input: { path: string; side: 'old' | 'new'; startLine: number; endLine: number; body: string },
-  ): Promise<unknown> => request('POST', `/api/tickets/${id}/comments`, input),
-  editComment: (id: number, commentId: number, body: string): Promise<unknown> =>
-    request('PATCH', `/api/tickets/${id}/comments/${commentId}`, { body }),
-  deleteComment: (id: number, commentId: number): Promise<unknown> =>
-    request('DELETE', `/api/tickets/${id}/comments/${commentId}`),
-  sendReview: (id: number, summary: string): Promise<{ sent: number }> =>
-    request('POST', `/api/tickets/${id}/review`, { summary }),
+  ): Promise<unknown> => request('POST', `${base}/comments`, input),
+  editComment: (base: string, commentId: number, body: string): Promise<unknown> =>
+    request('PATCH', `${base}/comments/${commentId}`, { body }),
+  deleteComment: (base: string, commentId: number): Promise<unknown> =>
+    request('DELETE', `${base}/comments/${commentId}`),
+  sendReview: (base: string, summary: string): Promise<unknown> =>
+    request('POST', `${base}/review`, { summary }),
+  reviewDiscussion: (base: string): Promise<DiscussionResponse> =>
+    request('GET', `${base}/discussion`),
   importReviewComments: (id: number): Promise<ReviewImportResult> =>
     request('POST', `/api/tickets/${id}/comments/import`),
   importReviewNote: (id: number, url: string): Promise<unknown> =>
     request('POST', `/api/tickets/${id}/comments/import-note`, { url }),
   pullRequests: (projectId: number, filter: PullRequestFilter): Promise<PullRequestList> =>
     request('GET', `/api/projects/${projectId}/pull-requests?state=${filter}`),
+  currentReviews: (projectId: number): Promise<CurrentReview[]> =>
+    request('GET', `/api/projects/${projectId}/pull-requests/reviews`),
+  addCurrentReview: (projectId: number, pull: PullRequestListItem): Promise<CurrentReview> =>
+    request('POST', `/api/projects/${projectId}/pull-requests/reviews`, pull),
+  removeCurrentReview: (projectId: number, number: number): Promise<unknown> =>
+    request('DELETE', `/api/projects/${projectId}/pull-requests/reviews/${number}`),
   discussion: (id: number): Promise<DiscussionResponse> =>
     request('GET', `/api/tickets/${id}/pull-request/discussion`),
   editOutput: (id: number, step: string, content: string): Promise<unknown> =>

@@ -2,20 +2,20 @@ import { getTicket, isIgnoredPath, schema, type Db, type Ticket } from '@union/c
 import { and, desc, eq } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
 
-import type { CommentView, DiffResponse } from '../api-types';
+import type { DiffResponse } from '../api-types';
 import type { OnboardingGitHub } from '../github-onboarding';
-import {
-  BAD_REQUEST,
-  CONFLICT,
-  CREATED,
-  fail,
-  NOT_FOUND,
-  readObject,
-  requireId,
-  requireText,
-} from '../http';
-import { diffExcerpt } from '../review-excerpt';
+import { BAD_REQUEST, CONFLICT, fail, NOT_FOUND, readObject, requireId } from '../http';
 import { formatReview } from '../review-feedback';
+import {
+  addComment,
+  deleteComment,
+  draftsOf,
+  editComment,
+  listComments,
+  markSent,
+  type CommentDiff,
+  type CommentOwner,
+} from './review-comments';
 import { getDiscussion, importPullRequestComments, importPullRequestNote } from './review-import';
 
 function loadTicket(db: Db, c: Context): Ticket {
@@ -106,113 +106,25 @@ function getFile(db: Db, c: Context): Response {
   return c.json({ id: file.id, path: file.path, patch: file.patch });
 }
 
-/** The text of `start..end` on one side of the file's current patch; refuses lines outside the diff. */
-function excerptOf(patch: string, side: 'old' | 'new', start: number, end: number): string {
-  const excerpt = diffExcerpt(patch, side, start, end);
-  if (excerpt === null) {
-    throw fail(BAD_REQUEST, 'Those lines are not part of the diff');
-  }
-  return excerpt;
+function owner(ticket: Ticket): CommentOwner {
+  return { kind: 'ticket', id: ticket.id };
 }
 
-function commentsOf(db: Db, c: Context): Response {
-  const ticket = loadTicket(db, c);
-  const head = latestSnapshot(db, ticket.id)?.headSha;
-  const rows = db
-    .select()
-    .from(schema.reviewComments)
-    .where(eq(schema.reviewComments.ticketId, ticket.id))
-    .orderBy(schema.reviewComments.id)
-    .all();
-  const views: CommentView[] = rows.map((row) =>
-    // General comments are about the whole pull request: they never go out of date.
-    Object.assign(row, { outdated: row.kind === 'line' && row.headSha !== head }),
-  );
-  return c.json(views);
-}
-
-function rangeOf(body: Record<string, unknown>): {
-  start: number;
-  end: number;
-  side: 'old' | 'new';
-} {
-  const start = Number(body.startLine);
-  const end = Number(body.endLine ?? body.startLine);
-  const side = body.side === 'old' ? 'old' : 'new';
-  if (!Number.isInteger(start) || !Number.isInteger(end) || start < 1 || end < start) {
-    throw fail(BAD_REQUEST, 'Give a valid startLine and endLine');
-  }
-  return { start, end, side };
-}
-
-async function addComment(db: Db, c: Context): Promise<Response> {
-  const ticket = loadTicket(db, c);
-  const body = await readObject(c.req.raw);
-  const path = requireText(body, 'path');
-  const text = requireText(body, 'body');
-  const { start, end, side } = rangeOf(body);
+/** The latest snapshot, as the comments see it. */
+function commentDiff(db: Db, ticket: Ticket): CommentDiff | null {
   const snapshot = latestSnapshot(db, ticket.id);
-  const file = snapshot
-    ? db
-        .select()
-        .from(schema.diffFiles)
-        .where(eq(schema.diffFiles.snapshotId, snapshot.id))
-        .all()
-        .find((row) => row.path === path)
-    : undefined;
-  if (!snapshot || !file) {
-    throw fail(BAD_REQUEST, `${path} is not in the current diff`);
+  if (!snapshot) {
+    return null;
   }
-  const comment = db
-    .insert(schema.reviewComments)
-    .values({
-      ticketId: ticket.id,
-      path,
-      side,
-      startLine: start,
-      endLine: end,
-      excerpt: excerptOf(file.patch, side, start, end),
-      body: text,
-      headSha: snapshot.headSha,
-    })
-    .returning()
-    .get();
-  return c.json(comment, CREATED);
-}
-
-function draftOf(db: Db, c: Context): typeof schema.reviewComments.$inferSelect {
-  const ticket = loadTicket(db, c);
-  const id = requireId(c.req.param('commentId'), 'comment id');
-  const comment = db
+  const files = db
     .select()
-    .from(schema.reviewComments)
-    .where(and(eq(schema.reviewComments.id, id), eq(schema.reviewComments.ticketId, ticket.id)))
-    .get();
-  if (!comment) {
-    throw fail(NOT_FOUND, 'Comment not found');
-  }
-  if (comment.status !== 'draft') {
-    throw fail(CONFLICT, 'This comment was already sent');
-  }
-  return comment;
-}
-
-async function editComment(db: Db, c: Context): Promise<Response> {
-  const comment = draftOf(db, c);
-  const text = requireText(await readObject(c.req.raw), 'body');
-  const updated = db
-    .update(schema.reviewComments)
-    .set({ body: text })
-    .where(eq(schema.reviewComments.id, comment.id))
-    .returning()
-    .get();
-  return c.json(updated);
-}
-
-function deleteComment(db: Db, c: Context): Response {
-  const comment = draftOf(db, c);
-  db.delete(schema.reviewComments).where(eq(schema.reviewComments.id, comment.id)).run();
-  return c.json({ ok: true });
+    .from(schema.diffFiles)
+    .where(eq(schema.diffFiles.snapshotId, snapshot.id))
+    .all();
+  return {
+    headSha: snapshot.headSha,
+    patchOf: (path) => files.find((file) => file.path === path)?.patch,
+  };
 }
 
 /** Sends the drafts (plus an optional overall note) to the implementer as a change request. */
@@ -226,14 +138,7 @@ async function sendReview(db: Db, c: Context): Promise<Response> {
       'A review can be sent when the ticket waits on you at the implementation or the final review',
     );
   }
-  const drafts = db
-    .select()
-    .from(schema.reviewComments)
-    .where(
-      and(eq(schema.reviewComments.ticketId, ticket.id), eq(schema.reviewComments.status, 'draft')),
-    )
-    .orderBy(schema.reviewComments.id)
-    .all();
+  const drafts = draftsOf(db, owner(ticket));
   if (drafts.length === 0 && summary.trim() === '') {
     throw fail(BAD_REQUEST, 'Add at least one comment or an overall note');
   }
@@ -251,15 +156,7 @@ async function sendReview(db: Db, c: Context): Promise<Response> {
     tx.insert(schema.commands)
       .values({ type: 'revise', ticketId: ticket.id, payload: { feedback } })
       .run();
-    tx.update(schema.reviewComments)
-      .set({ status: 'sent', sentAt: Date.now() })
-      .where(
-        and(
-          eq(schema.reviewComments.ticketId, ticket.id),
-          eq(schema.reviewComments.status, 'draft'),
-        ),
-      )
-      .run();
+    markSent(tx, owner(ticket));
   });
   return c.json({ sent: drafts.length, feedback });
 }
@@ -268,10 +165,16 @@ export function reviewRoutes(db: Db, github: OnboardingGitHub): Hono {
   const routes = new Hono();
   routes.get('/:id/diff', (c) => getDiff(db, c));
   routes.get('/:id/diff/files/:fileId', (c) => getFile(db, c));
-  routes.get('/:id/comments', (c) => commentsOf(db, c));
-  routes.post('/:id/comments', (c) => addComment(db, c));
-  routes.patch('/:id/comments/:commentId', (c) => editComment(db, c));
-  routes.delete('/:id/comments/:commentId', (c) => deleteComment(db, c));
+  routes.get('/:id/comments', (c) => {
+    const ticket = loadTicket(db, c);
+    return listComments(c, db, owner(ticket), latestSnapshot(db, ticket.id)?.headSha);
+  });
+  routes.post('/:id/comments', (c) => {
+    const ticket = loadTicket(db, c);
+    return addComment(c, db, owner(ticket), commentDiff(db, ticket));
+  });
+  routes.patch('/:id/comments/:commentId', (c) => editComment(c, db, owner(loadTicket(db, c))));
+  routes.delete('/:id/comments/:commentId', (c) => deleteComment(c, db, owner(loadTicket(db, c))));
   routes.post('/:id/review', (c) => sendReview(db, c));
   routes.get('/:id/pull-request/discussion', (c) =>
     getDiscussion(db, github, loadTicket(db, c), c),

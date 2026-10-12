@@ -88,7 +88,7 @@ export function TicketPanel({
   if (reviewing && detail) {
     return (
       <ReviewPage
-        ticketId={detail.ticket.id}
+        target={{ kind: 'ticket', ticketId: detail.ticket.id }}
         title={detail.ticket.title}
         onClose={() => {
           setReviewing(false);

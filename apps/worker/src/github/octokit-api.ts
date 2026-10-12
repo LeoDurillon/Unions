@@ -9,6 +9,7 @@ import type {
   RemoteComment,
   RemoteItem,
   RepoRef,
+  ReviewLineComment,
 } from './api';
 import {
   ADD_TO_PROJECT,
@@ -229,6 +230,30 @@ export class OctokitGitHubApi implements GitHubApi {
       per_page: 1,
     });
     return data.behind_by;
+  }
+
+  async createPullRequestReview(
+    repo: RepoRef,
+    number: number,
+    review: { commitId: string | null; body: string; comments: ReviewLineComment[] },
+  ): Promise<string> {
+    const { data } = await this.octokit.rest.pulls.createReview({
+      ...repo,
+      pull_number: number,
+      ...(review.commitId ? { commit_id: review.commitId } : {}),
+      body: review.body,
+      event: 'COMMENT',
+      comments: review.comments.map((comment) => ({
+        path: comment.path,
+        body: comment.body,
+        side: comment.side,
+        line: comment.line,
+        ...(comment.startLine === undefined
+          ? {}
+          : { start_line: comment.startLine, start_side: comment.side }),
+      })),
+    });
+    return data.html_url;
   }
 
   /** The dependency endpoints take the blocking issue's database id, not its number. */

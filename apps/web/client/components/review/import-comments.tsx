@@ -1,10 +1,8 @@
 import type { ReactElement } from 'react';
 
 import type { ReviewImportResult } from '../../../src/api-types';
-import type { useCommentMutations } from '../../lib/use-review';
+import { useImportMutations } from '../../lib/use-review';
 import { Button, ErrorText } from '../ui';
-
-type Mutations = ReturnType<typeof useCommentMutations>;
 
 function summary(result: ReviewImportResult, pullRequest: number): string {
   const { imported, alreadyImported, resolved } = result;
@@ -23,13 +21,13 @@ function summary(result: ReviewImportResult, pullRequest: number): string {
 
 /** Pulls the linked pull request's unresolved review threads in as draft comments. */
 export function ImportComments({
+  ticketId,
   pullRequest,
-  mutations,
 }: {
+  ticketId: number;
   pullRequest: number;
-  mutations: Mutations;
 }): ReactElement {
-  const { importFromGitHub } = mutations;
+  const { importFromGitHub } = useImportMutations(ticketId);
   return (
     <div className="flex flex-col items-end gap-1">
       <Button

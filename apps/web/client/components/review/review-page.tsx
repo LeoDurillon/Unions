@@ -1,69 +1,14 @@
-import { useState, type ReactElement } from 'react';
+import { useState, type ReactElement, type ReactNode } from 'react';
 
 import type { CommentView, DiffResponse } from '../../../src/api-types';
-import type { Selection } from '../../lib/diff-selection';
-import { useCommentMutations, useComments, useDiff, useDiffFile } from '../../lib/use-review';
+import { reviewCopy, type ReviewTarget } from '../../lib/review-target';
+import { useCommentMutations, useComments, useDiff } from '../../lib/use-review';
 import { ErrorText } from '../ui';
-import { hasThread, OutdatedComments, Thread } from './comment-thread';
-import { FileDiff, type DiffView } from './file-diff';
+import type { DiffView } from './file-diff';
 import { FileList } from './file-list';
+import { OpenFile } from './open-file';
 import { ReviewHeader } from './review-header';
 import { useDiffView } from './view-toggle';
-
-type Mutations = ReturnType<typeof useCommentMutations>;
-
-function OpenFile({
-  ticketId,
-  fileId,
-  view,
-  comments,
-  mutations,
-}: {
-  ticketId: number;
-  fileId: number;
-  view: DiffView;
-  comments: CommentView[];
-  mutations: Mutations;
-}): ReactElement {
-  const file = useDiffFile(ticketId, fileId);
-  const [selection, setSelection] = useState<Selection | null>(null);
-  if (!file.data) {
-    return <ErrorText error={file.error} />;
-  }
-  const { path } = file.data;
-  const forFile = comments.filter((comment) => comment.path === path);
-  const outdated = forFile.filter((comment) => comment.outdated);
-  return (
-    <div className="space-y-3">
-      <h3 className="font-mono text-sm font-semibold">{path}</h3>
-      <OutdatedComments comments={outdated} mutations={mutations} />
-      <FileDiff
-        path={path}
-        view={view}
-        patch={file.data.patch}
-        comments={forFile}
-        selection={selection}
-        onSelect={setSelection}
-        renderBelow={(side, line, here) =>
-          // Null keeps the diff free of empty rows under lines with nothing to show.
-          hasThread(here, selection, side, line) ? (
-            <Thread
-              path={path}
-              comments={here}
-              selection={selection}
-              side={side}
-              line={line}
-              mutations={mutations}
-              onDone={() => {
-                setSelection(null);
-              }}
-            />
-          ) : null
-        }
-      />
-    </div>
-  );
-}
 
 /** The picked file, else the first file that is not ignored, else the first file. */
 function openFileId(files: DiffResponse['files'], picked: number | null): number | null {
@@ -71,61 +16,192 @@ function openFileId(files: DiffResponse['files'], picked: number | null): number
   return (chosen ?? files.find((file) => !file.ignored) ?? files[0])?.id ?? null;
 }
 
-/** Full-page review: touched files on the left, one file at a time on the right. */
+/** A tab shown before the diff (a pull request's description, its comments). */
+export type ReviewSection = { id: string; label: string; content: ReactNode };
+
+type Mutations = ReturnType<typeof useCommentMutations>;
+
+function SectionTabs({
+  sections,
+  current,
+  onChange,
+}: {
+  sections: { id: string; label: string }[];
+  current: string;
+  onChange: (id: string) => void;
+}): ReactElement {
+  return (
+    <div
+      role="tablist"
+      aria-label="Review"
+      className="flex gap-1 border-b border-zinc-200 px-4 dark:border-zinc-800"
+    >
+      {sections.map(({ id, label }) => (
+        <button
+          key={id}
+          type="button"
+          role="tab"
+          aria-selected={current === id}
+          onClick={() => {
+            onChange(id);
+          }}
+          className={`border-b-2 px-3 py-2 text-sm whitespace-nowrap transition ${current === id ? 'border-indigo-600 font-medium' : 'border-transparent text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100'}`}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** The touched files on the left, the picked one on the right. */
+function DiffBody({
+  target,
+  files,
+  comments,
+  view,
+  mutations,
+  banner,
+  error,
+  emptyText,
+}: {
+  target: ReviewTarget;
+  files: DiffResponse['files'];
+  comments: CommentView[];
+  view: DiffView;
+  mutations: Mutations;
+  banner: ReactNode;
+  error: Error | null;
+  emptyText: string | null;
+}): ReactElement {
+  const [picked, setPicked] = useState<number | null>(null);
+  const fileId = openFileId(files, picked);
+  return (
+    <div className="flex min-h-0 flex-1">
+      <aside className="w-80 shrink-0 overflow-y-auto border-r border-zinc-200 p-2 dark:border-zinc-800">
+        <FileList files={files} comments={comments} selected={fileId} onSelect={setPicked} />
+      </aside>
+      <main className="min-w-0 flex-1 overflow-y-auto p-4">
+        {banner}
+        <ErrorText error={error} />
+        {emptyText ? <p className="text-sm text-zinc-500">{emptyText}</p> : null}
+        {fileId === null ? null : (
+          <OpenFile
+            key={fileId}
+            target={target}
+            fileId={fileId}
+            view={view}
+            comments={comments}
+            mutations={mutations}
+          />
+        )}
+      </main>
+    </div>
+  );
+}
+
+const DIFF_TAB = { id: 'diff', label: 'Diff' };
+const NO_SECTIONS: ReviewSection[] = [];
+
+/** The diff, the comments and their writes, and the wording for the target. */
+function useReviewData(
+  target: ReviewTarget,
+  posting: boolean,
+): {
+  diff: ReturnType<typeof useDiff>;
+  comments: CommentView[];
+  error: Error | null;
+  mutations: Mutations;
+  copy: ReturnType<typeof reviewCopy>;
+  files: DiffResponse['files'];
+  empty: boolean;
+} {
+  const diff = useDiff(target);
+  const comments = useComments(target, posting);
+  const files = diff.data?.files ?? [];
+  return {
+    diff,
+    comments: comments.data ?? [],
+    error: diff.error ?? comments.error,
+    mutations: useCommentMutations(target),
+    copy: reviewCopy(target),
+    files,
+    empty: diff.data !== undefined && (diff.data.snapshot === null || files.length === 0),
+  };
+}
+
+function SectionBody({
+  banner,
+  children,
+}: {
+  banner: ReactNode;
+  children: ReactNode;
+}): ReactElement {
+  return (
+    <main className="min-h-0 flex-1 overflow-y-auto p-4">
+      <div className="mx-auto max-w-4xl">
+        {banner}
+        {children}
+      </div>
+    </main>
+  );
+}
+
+/**
+ * Full-page review of a ticket's branch or of a pull request: touched files on the left, one file at
+ * a time on the right. `sections` add tabs before the diff, and it opens on the first; `banner` shows
+ * above the content (a pull request review's posting status).
+ */
 export function ReviewPage({
-  ticketId,
+  target,
   title,
   onClose,
+  sections = NO_SECTIONS,
+  banner,
+  posting = false,
 }: {
-  ticketId: number;
+  target: ReviewTarget;
   title: string;
   onClose: () => void;
+  sections?: ReviewSection[];
+  banner?: ReactNode;
+  /** The review is being posted: its comments are polled until they turn sent. */
+  posting?: boolean;
 }): ReactElement {
-  const diff = useDiff(ticketId);
-  const comments = useComments(ticketId);
-  const mutations = useCommentMutations(ticketId);
-  const files = diff.data?.files ?? [];
-  const [picked, setPicked] = useState<number | null>(null);
+  const { diff, comments, error, mutations, copy, files, empty } = useReviewData(target, posting);
   const [view, setView] = useDiffView();
-  const fileId = openFileId(files, picked);
-  const all = comments.data ?? [];
-  const drafts = all.filter((comment) => comment.status === 'draft').length;
-  const empty = diff.data !== undefined && diff.data.snapshot === null;
-
+  const [tab, setTab] = useState(sections[0]?.id ?? DIFF_TAB.id);
+  const section = sections.find((candidate) => candidate.id === tab);
   return (
     <div className="fixed inset-0 z-30 flex flex-col bg-zinc-50 dark:bg-zinc-950">
       <ReviewHeader
+        target={target}
+        copy={copy}
         title={title}
         diff={diff.data}
-        drafts={drafts}
+        drafts={comments.filter((comment) => comment.status === 'draft').length}
         view={view}
         onView={setView}
         mutations={mutations}
         onClose={onClose}
       />
-      <div className="flex min-h-0 flex-1">
-        <aside className="w-80 shrink-0 overflow-y-auto border-r border-zinc-200 p-2 dark:border-zinc-800">
-          <FileList files={files} comments={all} selected={fileId} onSelect={setPicked} />
-        </aside>
-        <main className="min-w-0 flex-1 overflow-y-auto p-4">
-          <ErrorText error={diff.error ?? comments.error} />
-          {empty ? (
-            <p className="text-sm text-zinc-500">
-              No changes yet: the diff appears after the implementation runs.
-            </p>
-          ) : null}
-          {fileId === null ? null : (
-            <OpenFile
-              key={fileId}
-              ticketId={ticketId}
-              fileId={fileId}
-              view={view}
-              comments={all}
-              mutations={mutations}
-            />
-          )}
-        </main>
-      </div>
+      {sections.length > 0 ? (
+        <SectionTabs sections={[...sections, DIFF_TAB]} current={tab} onChange={setTab} />
+      ) : null}
+      {section ? (
+        <SectionBody banner={banner}>{section.content}</SectionBody>
+      ) : (
+        <DiffBody
+          target={target}
+          files={files}
+          comments={comments}
+          view={view}
+          mutations={mutations}
+          banner={banner}
+          error={error}
+          emptyText={empty ? copy.empty : null}
+        />
+      )}
     </div>
   );
 }

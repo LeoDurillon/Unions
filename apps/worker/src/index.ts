@@ -1,12 +1,12 @@
 import { DockerCli, migrateDb, openDb } from '@union/core';
 
-import { drainCommands, type CommandHooks } from './commands';
+import { drainCommands } from './commands';
 import { createExecutor } from './executor';
 import { githubApis } from './github/clients';
 import { runGitHubLoop } from './github/loop';
 import { GitHubMirror } from './github/mirror';
+import { workerHooks } from './hooks';
 import { InvestigationRunner } from './investigate';
-import { removeContainers } from './janitor';
 import { defaultProvisionConfig } from './provision';
 import { Scheduler } from './scheduler';
 
@@ -33,14 +33,7 @@ const investigations = new InvestigationRunner({
   slots: scheduler.slots,
 });
 await investigations.recover();
-const hooks: CommandHooks = {
-  removeContainers: (containers) => {
-    void removeContainers(db, runtime, containers);
-  },
-  cancelInvestigation: (id) => {
-    investigations.cancel(id);
-  },
-};
+const hooks = workerHooks({ db, runtime, investigations, apiFor });
 
 const shutdown = new AbortController();
 const stop = (): void => {

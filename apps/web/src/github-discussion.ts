@@ -37,6 +37,7 @@ type ThreadPage = PullRequestData<{
 }>;
 
 type NotesData = PullRequestData<{
+  body: string;
   reviews: { nodes: (RawNote | null)[] };
   comments: { nodes: (RawNote | null)[] };
 }>;
@@ -122,7 +123,7 @@ async function fetchThreads(
   return threads;
 }
 
-/** The pull request's line threads, review summaries and conversation comments; null when it does not exist. */
+/** The pull request's description, line threads, review summaries and conversation comments; null when it does not exist. */
 export async function fetchDiscussion(
   octokit: Octokit,
   repo: { owner: string; repo: string },
@@ -137,5 +138,9 @@ export async function fetchDiscussion(
   if (!threads || !pull) {
     return null;
   }
-  return { threads, notes: toNotes(pull.reviews.nodes, pull.comments.nodes) };
+  return {
+    description: pull.body,
+    threads,
+    notes: toNotes(pull.reviews.nodes, pull.comments.nodes),
+  };
 }

@@ -1,8 +1,10 @@
 import { useState, type ReactElement } from 'react';
 
+import type { ReviewCopy } from '../../lib/review-target';
 import { Button, ErrorText, inputClass } from '../ui';
 
 type SendProps = {
+  copy: ReviewCopy;
   drafts: number;
   canSend: boolean;
   pending: boolean;
@@ -11,6 +13,7 @@ type SendProps = {
 };
 
 function SendPanel({
+  copy,
   drafts,
   pending,
   error,
@@ -21,8 +24,7 @@ function SendPanel({
   return (
     <div className="w-[28rem] space-y-2 rounded-lg border border-zinc-300 bg-white p-3 shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
       <p className="text-sm">
-        {drafts} comment{drafts === 1 ? '' : 's'} go to the implementation agent as a change
-        request.
+        {drafts} comment{drafts === 1 ? '' : 's'} {copy.destination}
       </p>
       <textarea
         className={`${inputClass} min-h-20`}
@@ -42,7 +44,7 @@ function SendPanel({
             onSend(summary);
           }}
         >
-          {pending ? 'Sending…' : 'Send to the implementer'}
+          {pending ? 'Sending…' : copy.action}
         </Button>
         <Button onClick={onCancel}>Cancel</Button>
       </div>
@@ -65,11 +67,7 @@ export function SendReview({ canSend, ...props }: SendProps): ReactElement {
   }
   return (
     <div className="flex items-center gap-3">
-      {canSend ? null : (
-        <span className="text-xs text-zinc-500">
-          Sending opens when the ticket waits on you at the implementation or the final review.
-        </span>
-      )}
+      {canSend ? null : <span className="text-xs text-zinc-500">{props.copy.blocked}</span>}
       <Button
         variant="primary"
         disabled={!canSend}

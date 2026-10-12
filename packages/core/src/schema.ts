@@ -8,7 +8,10 @@ import {
   type AnySQLiteColumn,
 } from 'drizzle-orm/sqlite-core';
 
+import type { InvestigationExchange, ProjectConfig, PullRequestFile } from './schema-types';
 import type { AgentModel, BoardStatus, Phase, Step } from './states';
+
+export type { InvestigationExchange, ProjectConfig, PullRequestFile } from './schema-types';
 
 const now = sql`(unixepoch('subsec') * 1000)`;
 const timestamps = {
@@ -17,27 +20,6 @@ const timestamps = {
     .notNull()
     .default(now)
     .$onUpdate(() => Date.now()),
-};
-
-export type ProjectConfig = {
-  baseBranch: string;
-  /** Project Status option names per board column. Defaults: Todo, In Progress, In Review, Done. */
-  statusOptions?: Partial<Record<BoardStatus, string>>;
-  installCommand?: string;
-  gateCommand?: string;
-  envFiles?: string[];
-  reviewers?: string[];
-  maxIterations?: number;
-  /** Open a draft PR after the implementation (default true). Off: the user links one by hand. */
-  createPullRequest?: boolean;
-  /** Hide lock files from the review page (default true). */
-  hideLockFiles?: boolean;
-  /** Gitignore-style patterns hidden from the review page. */
-  reviewIgnore?: string[];
-  /** Notion data source tickets can be imported from (with `notionToken`). */
-  notionDataSourceId?: string;
-  /** Markdown sent to every agent run on this project, after the shared instructions. */
-  instructions?: string;
 };
 
 export const projects = sqliteTable(
@@ -244,9 +226,6 @@ export const INVESTIGATION_STATUSES = [
   'cancelled',
 ] as const;
 
-/** One earlier question of an investigation and the answer it got. */
-export type InvestigationExchange = { prompt: string; answer: string };
-
 /**
  * One agent run on a custom prompt, outside the ticket pipeline: nothing is mirrored to GitHub.
  * `repository` runs on a fresh clone of the project's repository, `global` without any code.
@@ -311,13 +290,15 @@ export const diffFiles = sqliteTable(
 );
 
 /** The user's line comments on the diff: drafts until the review is sent. */
+/** A review comment belongs to a ticket's review, or to a current review of a pull request (one of them). */
 export const reviewComments = sqliteTable(
   'review_comments',
   {
     id: integer('id').primaryKey({ autoIncrement: true }),
-    ticketId: integer('ticket_id')
-      .notNull()
-      .references(() => tickets.id, { onDelete: 'cascade' }),
+    ticketId: integer('ticket_id').references(() => tickets.id, { onDelete: 'cascade' }),
+    reviewId: integer('review_id').references((): AnySQLiteColumn => currentReviews.id, {
+      onDelete: 'cascade',
+    }),
     /**
      * `line`: on lines of a file. `general`: about the whole pull request (a review summary or a
      * conversation comment imported from GitHub); its path, side, lines and excerpt are empty.
@@ -343,6 +324,35 @@ export const reviewComments = sqliteTable(
   },
   (t) => [
     index('review_comments_ticket_idx').on(t.ticketId, t.status),
+    index('review_comments_review_idx').on(t.reviewId, t.status),
     uniqueIndex('review_comments_github_idx').on(t.ticketId, t.githubUrl),
   ],
+);
+
+/**
+ * Pull requests the user put under review from the Pull requests tab, without a ticket. The fields
+ * are a snapshot of the pull request when it was added, so the tab lists them without calling GitHub.
+ */
+export const currentReviews = sqliteTable(
+  'current_reviews',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    projectId: integer('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    prNumber: integer('pr_number').notNull(),
+    title: text('title').notNull(),
+    url: text('url').notNull(),
+    author: text('author').notNull(),
+    headBranch: text('head_branch').notNull(),
+    baseBranch: text('base_branch').notNull(),
+    /** The pull request's files as last fetched for review, and the head commit they are at. */
+    files: text('files', { mode: 'json' }).$type<PullRequestFile[]>(),
+    headSha: text('head_sha'),
+    /** `sending` while the worker posts the review to GitHub; `failed` with `submitError` when it could not. */
+    submitStatus: text('submit_status', { enum: ['sending', 'failed'] }),
+    submitError: text('submit_error'),
+    createdAt: integer('created_at').notNull().default(now),
+  },
+  (t) => [uniqueIndex('current_reviews_pr_idx').on(t.projectId, t.prNumber)],
 );

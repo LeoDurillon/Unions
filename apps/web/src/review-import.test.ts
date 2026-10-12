@@ -100,7 +100,7 @@ const NOTES: PullRequestNote[] = [
 let threads: PullRequestThread[] | null;
 
 const github = {
-  getDiscussion: () => Promise.resolve(threads ? { threads, notes: NOTES } : null),
+  getDiscussion: () => Promise.resolve(threads ? { description: '', threads, notes: NOTES } : null),
 } as unknown as OnboardingGitHub;
 
 beforeEach(() => {

@@ -13,6 +13,7 @@ import type {
   Viewer,
 } from './api-types';
 import { fetchDiscussion } from './github-discussion';
+import { fetchPullRequestFiles, type PullRequestFiles } from './github-pull-request-files';
 import { fetchPullRequests, type RemotePullRequest } from './github-pull-requests';
 import { CREATE_PROJECT, OWNER_PROJECTS } from './github-queries';
 
@@ -48,6 +49,12 @@ export type OnboardingGitHub = {
     repo: { owner: string; repo: string },
     filter: PullRequestFilter,
   ): Promise<{ total: number; pullRequests: RemotePullRequest[] } | null>;
+  /** A pull request's head commit and changed files, for a review; null when there is no such PR. */
+  getPullRequestFiles(
+    auth: GitHubAuth,
+    repo: { owner: string; repo: string },
+    number: number,
+  ): Promise<PullRequestFiles | null>;
   /** The app the credentials belong to (`GET /app`); rejects a wrong App ID or key. */
   verifyApp(app: GitHubAppCredentials): Promise<AppInfo>;
   listInstallations(app: GitHubAppCredentials): Promise<InstallationOption[]>;
@@ -268,6 +275,21 @@ export class OctokitOnboarding implements OnboardingGitHub {
   ): Promise<{ total: number; pullRequests: RemotePullRequest[] } | null> {
     try {
       return await fetchPullRequests(this.client(auth), repo, filter);
+    } catch (error) {
+      if (isNotFound(error)) {
+        return null;
+      }
+      throw error;
+    }
+  }
+
+  async getPullRequestFiles(
+    auth: GitHubAuth,
+    repo: { owner: string; repo: string },
+    number: number,
+  ): Promise<PullRequestFiles | null> {
+    try {
+      return await fetchPullRequestFiles(this.client(auth), repo, number);
     } catch (error) {
       if (isNotFound(error)) {
         return null;

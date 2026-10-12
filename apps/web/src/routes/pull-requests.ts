@@ -5,6 +5,7 @@ import { Hono, type Context } from 'hono';
 import { PULL_REQUEST_FILTERS, type PullRequestFilter, type PullRequestList } from '../api-types';
 import type { OnboardingGitHub } from '../github-onboarding';
 import { BAD_REQUEST, CONFLICT, fail, NOT_FOUND, requireId } from '../http';
+import { currentReviewRoutes } from './current-reviews';
 import { guarded } from './github-errors';
 
 function filterOf(c: Context): PullRequestFilter {
@@ -58,9 +59,13 @@ async function list(db: Db, github: OnboardingGitHub, c: Context): Promise<Respo
   return c.json(body);
 }
 
-/** `/api/projects/:projectId/pull-requests`: the repository's pull requests, read from GitHub. */
+/**
+ * `/api/projects/:projectId/pull-requests`: the repository's pull requests, read from GitHub, and
+ * under `/reviews` the ones the user put under review.
+ */
 export function pullRequestRoutes(db: Db, github: OnboardingGitHub): Hono {
   const routes = new Hono();
   routes.get('/', (c) => list(db, github, c));
+  routes.route('/reviews', currentReviewRoutes(db, github));
   return routes;
 }

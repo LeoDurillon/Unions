@@ -51,17 +51,37 @@ function When({ at, url }: { at: string; url: string }): ReactElement {
   );
 }
 
-/** A review summary or a conversation comment, with its Add to review action. */
-export function NoteCard({
-  note,
+function NoteAction({
   imported,
   pending,
   onImport,
 }: {
-  note: PullRequestNote;
   imported: boolean;
   pending: boolean;
-  onImport: () => void;
+  onImport: (() => void) | undefined;
+}): ReactElement | null {
+  if (imported) {
+    return <Badge tone="blue">in the review</Badge>;
+  }
+  return onImport ? (
+    <Button disabled={pending} onClick={onImport}>
+      Add to review
+    </Button>
+  ) : null;
+}
+
+/** A review summary or a conversation comment, with its Add to review action when there is one. */
+export function NoteCard({
+  note,
+  imported = false,
+  pending = false,
+  onImport,
+}: {
+  note: PullRequestNote;
+  imported?: boolean;
+  pending?: boolean;
+  /** Without it the note is read only (a pull request reviewed without a ticket). */
+  onImport?: () => void;
 }): ReactElement {
   const state = note.state ? STATE_LABELS[note.state] : undefined;
   return (
@@ -75,13 +95,7 @@ export function NoteCard({
         <When at={note.createdAt} url={note.url} />
       </header>
       <Body text={note.body} />
-      {imported ? (
-        <Badge tone="blue">in the review</Badge>
-      ) : (
-        <Button disabled={pending} onClick={onImport}>
-          Add to review
-        </Button>
-      )}
+      <NoteAction imported={imported} pending={pending} onImport={onImport} />
     </article>
   );
 }
@@ -96,10 +110,10 @@ function place(thread: PullRequestThread): string {
 /** A line-comment thread: where it sits, then each comment. */
 export function ThreadCard({
   thread,
-  imported,
+  imported = false,
 }: {
   thread: PullRequestThread;
-  imported: boolean;
+  imported?: boolean;
 }): ReactElement {
   const [first] = thread.comments;
   return (

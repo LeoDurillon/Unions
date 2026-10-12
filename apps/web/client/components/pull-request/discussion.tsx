@@ -1,13 +1,19 @@
 import { useState, type ReactElement } from 'react';
 
 import type { CommentView, DiscussionResponse } from '../../../src/api-types';
-import { useCommentMutations, useComments, useDiscussion } from '../../lib/use-review';
+import {
+  useCommentMutations,
+  useComments,
+  useDiscussion,
+  useImportMutations,
+} from '../../lib/use-review';
 import { CommentCard } from '../review/comment-card';
 import { ImportComments } from '../review/import-comments';
 import { ErrorText } from '../ui';
 import { NoteCard, ThreadCard } from './note-card';
 
 type Mutations = ReturnType<typeof useCommentMutations>;
+type ImportNote = ReturnType<typeof useImportMutations>['importNote'];
 
 /** The drafts taken from the pull request, editable here; they leave with the next Send review. */
 function ImportedDrafts({
@@ -46,14 +52,13 @@ function ImportedDrafts({
 function Notes({
   discussion,
   hideBots,
-  mutations,
+  importNote,
 }: {
   discussion: DiscussionResponse;
   hideBots: boolean;
-  mutations: Mutations;
+  importNote: ImportNote;
 }): ReactElement {
   const notes = discussion.notes.filter((note) => !(hideBots && note.bot));
-  const { importNote } = mutations;
   return (
     <section className="space-y-2">
       <h3 className="text-sm font-semibold">Reviews and comments ({notes.length})</h3>
@@ -75,11 +80,11 @@ function Notes({
 }
 
 function Threads({
+  ticketId,
   discussion,
-  mutations,
 }: {
+  ticketId: number;
   discussion: DiscussionResponse;
-  mutations: Mutations;
 }): ReactElement {
   const { threads } = discussion;
   return (
@@ -87,7 +92,7 @@ function Threads({
       <div className="flex items-start justify-between gap-2">
         <h3 className="text-sm font-semibold">Line comments ({threads.length})</h3>
         {threads.length > 0 ? (
-          <ImportComments pullRequest={discussion.number} mutations={mutations} />
+          <ImportComments ticketId={ticketId} pullRequest={discussion.number} />
         ) : null}
       </div>
       {threads.length === 0 ? <p className="text-sm text-zinc-500">None.</p> : null}
@@ -105,8 +110,10 @@ function Threads({
 /** The pull request's GitHub discussion, and what of it goes to the implementer. */
 export function Discussion({ ticketId }: { ticketId: number }): ReactElement {
   const discussion = useDiscussion(ticketId, true);
-  const comments = useComments(ticketId);
-  const mutations = useCommentMutations(ticketId);
+  const target = { kind: 'ticket', ticketId } as const;
+  const comments = useComments(target);
+  const mutations = useCommentMutations(target);
+  const { importNote } = useImportMutations(ticketId);
   const [hideBots, setHideBots] = useState(false);
   if (!discussion.data) {
     return discussion.error ? (
@@ -128,8 +135,8 @@ export function Discussion({ ticketId }: { ticketId: number }): ReactElement {
         />
         Hide bots
       </label>
-      <Notes discussion={discussion.data} hideBots={hideBots} mutations={mutations} />
-      <Threads discussion={discussion.data} mutations={mutations} />
+      <Notes discussion={discussion.data} hideBots={hideBots} importNote={importNote} />
+      <Threads ticketId={ticketId} discussion={discussion.data} />
     </div>
   );
 }

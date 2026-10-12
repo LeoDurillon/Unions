@@ -32,7 +32,10 @@ behavior; this file covers how to work in the repo.
     sent; sending formats them (`review-feedback.ts`) into a normal `revise` command. The ticket panel's PR tab
     (`pull-request-tab.tsx`, `pull-request/`) shows the linked PR's discussion (`OnboardingGitHub.getDiscussion`,
     `github-discussion.ts`); `routes/review-import.ts` and `review-import.ts` import threads (line drafts) and single
-    review summaries or comments (`general` drafts). Files matching the project's
+    review summaries or comments (`general` drafts). A pull request under review (Current reviews tab) uses the same
+    page and comment code: `review_comments` rows belong to a ticket or to a `current_reviews` row
+    (`routes/review-comments.ts`, `routes/pr-review.ts`), and the client reviews a `ReviewTarget`
+    (`lib/review-target.ts`), whose base URL serves the diff, the comments and the send. Files matching the project's
     review ignore rules (`isIgnoredPath` in `@union/core/diff`: built-in lock files plus `config.reviewIgnore`
     gitignore-style patterns) are flagged `ignored` and listed apart, never dropped. `@union/core/diff` parses diffs and
     is browser-safe.
@@ -124,8 +127,10 @@ both.
   the setup wizard (verify the token, list repositories and Projects, create a Project), checking and listing the
   GitHub App's installations (`/api/github/app`), looking up a pull request a user links to a ticket, reading
   a linked pull request's discussion (PR tab, review import) and listing the repository's pull requests (project
-  bar → Pull requests, `routes/pull-requests.ts`), all read only (`src/github-onboarding.ts`, behind the
-  `OnboardingGitHub` interface so tests use a fake).
+  bar → Pull requests, `routes/pull-requests.ts`; the Current reviews tab's records are local, under
+  `/pull-requests/reviews`, `routes/current-reviews.ts`), all read only (`src/github-onboarding.ts`, behind the
+  `OnboardingGitHub` interface so tests use a fake). Posting a pull request review is a write: it goes
+  through the `submit_pr_review` command and the worker (`github/pr-review.ts`).
 - Notion (read only, from the web server): verifying a project's integration secret and data source, and importing
   a page of that data source as a ticket (`src/notion.ts` behind `NotionApi`, `routes/notion.ts`). Uses API version
   `2026-03-11` and `GET /v1/pages/{id}/markdown`. The secret is stored in `projects.notion_token` and never sent to

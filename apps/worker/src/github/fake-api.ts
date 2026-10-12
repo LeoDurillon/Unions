@@ -6,6 +6,7 @@ import type {
   RemoteComment,
   RemoteItem,
   RepoRef,
+  ReviewLineComment,
 } from './api';
 
 type FakeIssue = {
@@ -39,6 +40,13 @@ export class FakeGitHubApi implements GitHubApi {
     state?: 'open' | 'closed';
     behindBy?: number;
   })[] = [];
+  /** Reviews posted, in order. */
+  readonly reviews: {
+    number: number;
+    commitId: string | null;
+    body: string;
+    comments: ReviewLineComment[];
+  }[] = [];
   private clock = 0;
   private commentSeq = 0;
 
@@ -174,6 +182,16 @@ export class FakeGitHubApi implements GitHubApi {
     this.calls.push('pullRequestBehind');
     const pull = this.pulls.find((candidate) => candidate.number === number);
     return Promise.resolve(pull && pull.state !== 'closed' ? (pull.behindBy ?? 0) : null);
+  }
+
+  createPullRequestReview(
+    _repo: RepoRef,
+    number: number,
+    review: { commitId: string | null; body: string; comments: ReviewLineComment[] },
+  ): Promise<string> {
+    this.calls.push('createPullRequestReview');
+    this.reviews.push({ number, ...review });
+    return Promise.resolve(`https://github.test/pull/${number}#review-${this.reviews.length}`);
   }
 
   listBlockedBy(_repo: RepoRef, issueNumber: number): Promise<number[]> {

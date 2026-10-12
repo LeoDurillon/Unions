@@ -1,4 +1,12 @@
-import type { BoardStatus, Project, ReviewComment, Run, StepOutput, Ticket } from '@union/core';
+import type {
+  BoardStatus,
+  Project,
+  ReviewComment,
+  Run,
+  StepOutput,
+  Ticket,
+  schema,
+} from '@union/core';
 
 /** How a project reaches GitHub, as the browser sees it. */
 export type GitHubAccess = 'token' | 'app' | 'none';
@@ -167,6 +175,9 @@ export type PullRequestListItem = {
   ticketId: number | null;
 };
 
+/** A pull request put under review from the Pull requests tab (as listed: without its files). */
+export type CurrentReview = Omit<typeof schema.currentReviews.$inferSelect, 'files'>;
+
 /** The newest 100 pull requests of the filter, and how many there are in all. */
 export type PullRequestList = { total: number; pullRequests: PullRequestListItem[] };
 
@@ -182,7 +193,12 @@ export type PullRequestNote = {
   createdAt: string;
 };
 
-export type PullRequestDiscussion = { threads: PullRequestThread[]; notes: PullRequestNote[] };
+export type PullRequestDiscussion = {
+  /** The pull request's own description (markdown). */
+  description: string;
+  threads: PullRequestThread[];
+  notes: PullRequestNote[];
+};
 
 /** The discussion as the PR tab shows it, with what is already among the ticket's review comments. */
 export type DiscussionResponse = PullRequestDiscussion & {

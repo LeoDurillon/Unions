@@ -134,6 +134,21 @@ state (open, draft, merged, closed), author, branches, review decision, size and
 **Open ticket** button. It is fetched when the tab opens, at most once a minute, or on **Refresh**: live events do
 not refetch it.
 
+A pull request without a ticket shows **Add to reviews** on hover (or keyboard focus): it joins the **Current
+reviews** tab, per project (`current_reviews`, a snapshot of its title, author and branches, so the tab needs no
+GitHub call), where it can be removed.
+
+**Open review** opens the same review page as a ticket's (file list, highlighted unified or split diff, comments on
+a line or a block of lines), with three tabs: **Description** (the pull request's description) and **Comments** (its
+review summaries, conversation comments and line threads, read only), both read from GitHub once per opening, then
+**Diff**. The pull request's head commit and files are read from GitHub when the page opens and
+kept on the review (`current_reviews.files`, `head_sha`): comments are checked against those lines, and those
+written on an earlier head read as outdated. **Send review → Post on GitHub** queues a `submit_pr_review` command;
+the worker posts one "Comment" review on the pull request: the overall note as its body, each draft on the reviewed
+head as a line comment, and the others quoted in the body with their code (GitHub refuses line comments outside the
+current diff). The posted drafts turn sent; a failure leaves them drafts and shows GitHub's reason
+(`submit_status`). Approving or requesting changes is not offered yet.
+
 ## Project instructions
 
 Project settings → **Instructions**: free markdown stored in `projects.config.instructions` and sent to every agent

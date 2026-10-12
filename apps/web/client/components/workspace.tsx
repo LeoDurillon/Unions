@@ -7,6 +7,7 @@ import { Board, BoardView } from './board';
 import { GitHubAppPage } from './github-app/github-app-page';
 import { InvestigationsPage } from './investigations/investigations-page';
 import { ProjectBar, type ProjectView } from './project-bar';
+import { CurrentReviewsPage } from './pull-requests/current-reviews-page';
 import { PullRequestsPage } from './pull-requests/pull-requests-page';
 
 function noop(): void {
@@ -27,6 +28,9 @@ function ProjectBody({
   }
   if (view === 'investigations') {
     return <InvestigationsPage key={project.id} project={project} />;
+  }
+  if (view === 'current-reviews') {
+    return <CurrentReviewsPage key={project.id} project={project} />;
   }
   if (view === 'pull-requests') {
     return <PullRequestsPage key={project.id} project={project} onOpenTicket={onOpenTicket} />;

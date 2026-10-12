@@ -7,18 +7,30 @@ import type {
   ReviewImportResult,
 } from '../../src/api-types';
 import { api } from './api';
+import { reviewBase, ticketReviewBase, type ReviewTarget } from './review-target';
 
-export function useDiff(ticketId: number): UseQueryResult<DiffResponse> {
-  return useQuery({ queryKey: ['review', ticketId, 'diff'], queryFn: () => api.diff(ticketId) });
+/** While a pull request review is being posted, its comments are polled to see them turn sent. */
+const POSTING_POLL_MS = 2000;
+
+export function useDiff(target: ReviewTarget): UseQueryResult<DiffResponse> {
+  const base = reviewBase(target);
+  return useQuery({
+    queryKey: ['review', base, 'diff'],
+    queryFn: () => api.diff(base),
+    // A pull request's diff is read from GitHub: not again on every focus.
+    refetchOnWindowFocus: target.kind === 'ticket',
+    retry: false,
+  });
 }
 
 export function useDiffFile(
-  ticketId: number,
+  target: ReviewTarget,
   fileId: number | null,
 ): UseQueryResult<{ id: number; path: string; patch: string }> {
+  const base = reviewBase(target);
   return useQuery({
-    queryKey: ['review', ticketId, 'file', fileId],
-    queryFn: () => api.diffFile(ticketId, fileId ?? 0),
+    queryKey: ['review', base, 'file', fileId],
+    queryFn: () => api.diffFile(base, fileId ?? 0),
     enabled: fileId !== null,
     staleTime: Number.POSITIVE_INFINITY,
   });
@@ -26,7 +38,7 @@ export function useDiffFile(
 
 /**
  * The linked pull request's discussion, read from GitHub. Its own key: live events refresh the
- * review data, and must not call GitHub each time; comment changes refresh it (`useCommentMutations`).
+ * review data, and must not call GitHub each time; comment changes refresh it.
  */
 export function useDiscussion(
   ticketId: number,
@@ -40,21 +52,80 @@ export function useDiscussion(
   });
 }
 
-export function useComments(ticketId: number): UseQueryResult<CommentView[]> {
+/** A pull request under review: its description and discussion, read from GitHub once per opening. */
+export function useReviewDiscussion(target: ReviewTarget): UseQueryResult<DiscussionResponse> {
+  const base = reviewBase(target);
   return useQuery({
-    queryKey: ['review', ticketId, 'comments'],
-    queryFn: () => api.comments(ticketId),
+    queryKey: ['review', base, 'discussion'],
+    queryFn: () => api.reviewDiscussion(base),
+    refetchOnWindowFocus: false,
+    retry: false,
   });
+}
+
+export function useComments(target: ReviewTarget, posting = false): UseQueryResult<CommentView[]> {
+  const base = reviewBase(target);
+  return useQuery({
+    // `posting` in the key: when posting ends, the comments are read once more, now sent.
+    queryKey: ['review', base, 'comments', posting],
+    queryFn: () => api.comments(base),
+    refetchInterval: posting ? POSTING_POLL_MS : false,
+  });
+}
+
+/** What else a review write changes: the ticket's PR discussion, or the current reviews list. */
+function related(target: ReviewTarget): unknown[][] {
+  return target.kind === 'ticket'
+    ? [['pull-request', target.ticketId]]
+    : [['current-reviews', target.projectId]];
 }
 
 type CommentInput = Parameters<typeof api.addComment>[1];
 
-/** Every write refreshes the comments; sending also refreshes the ticket. */
-export function useCommentMutations(ticketId: number): {
+/** Every write refreshes the comments; sending also refreshes the ticket or the review's status. */
+export function useCommentMutations(target: ReviewTarget): {
   add: ReturnType<typeof useMutation<unknown, Error, CommentInput>>;
   edit: ReturnType<typeof useMutation<unknown, Error, { id: number; body: string }>>;
   remove: ReturnType<typeof useMutation<unknown, Error, number>>;
-  send: ReturnType<typeof useMutation<{ sent: number }, Error, string>>;
+  send: ReturnType<typeof useMutation<unknown, Error, string>>;
+} {
+  const queryClient = useQueryClient();
+  const base = reviewBase(target);
+  // Only the comments: refreshing the whole review would read a pull request's diff from GitHub again.
+  const refresh = async (): Promise<void> => {
+    await Promise.all(
+      [['review', base, 'comments'], ...related(target)].map((queryKey) =>
+        queryClient.invalidateQueries({ queryKey }),
+      ),
+    );
+  };
+  return {
+    add: useMutation({
+      mutationFn: (input: CommentInput) => api.addComment(base, input),
+      onSuccess: refresh,
+    }),
+    edit: useMutation({
+      mutationFn: ({ id, body }: { id: number; body: string }) => api.editComment(base, id, body),
+      onSuccess: refresh,
+    }),
+    remove: useMutation({
+      mutationFn: (id: number) => api.deleteComment(base, id),
+      onSuccess: refresh,
+    }),
+    send: useMutation({
+      mutationFn: (summary: string) => api.sendReview(base, summary),
+      onSuccess: async () => {
+        await refresh();
+        if (target.kind === 'ticket') {
+          await queryClient.invalidateQueries({ queryKey: ['ticket', target.ticketId] });
+        }
+      },
+    }),
+  };
+}
+
+/** Importing a ticket's linked pull request comments as drafts (PR tab and review header). */
+export function useImportMutations(ticketId: number): {
   importFromGitHub: ReturnType<typeof useMutation<ReviewImportResult, Error, void>>;
   importNote: ReturnType<typeof useMutation<unknown, Error, string>>;
 } {
@@ -62,31 +133,11 @@ export function useCommentMutations(ticketId: number): {
   // The discussion lists what is imported, so it follows the comments.
   const refresh = async (): Promise<void> => {
     await Promise.all([
-      queryClient.invalidateQueries({ queryKey: ['review', ticketId] }),
+      queryClient.invalidateQueries({ queryKey: ['review', ticketReviewBase(ticketId)] }),
       queryClient.invalidateQueries({ queryKey: ['pull-request', ticketId] }),
     ]);
   };
   return {
-    add: useMutation({
-      mutationFn: (input: CommentInput) => api.addComment(ticketId, input),
-      onSuccess: refresh,
-    }),
-    edit: useMutation({
-      mutationFn: ({ id, body }: { id: number; body: string }) =>
-        api.editComment(ticketId, id, body),
-      onSuccess: refresh,
-    }),
-    remove: useMutation({
-      mutationFn: (id: number) => api.deleteComment(ticketId, id),
-      onSuccess: refresh,
-    }),
-    send: useMutation({
-      mutationFn: (summary: string) => api.sendReview(ticketId, summary),
-      onSuccess: async () => {
-        await refresh();
-        await queryClient.invalidateQueries({ queryKey: ['ticket', ticketId] });
-      },
-    }),
     importFromGitHub: useMutation({
       mutationFn: () => api.importReviewComments(ticketId),
       onSuccess: refresh,

@@ -1,0 +1,40 @@
+// Plain types stored in JSON columns, kept apart so schema.ts holds the tables.
+import type { DiffStatus } from './diff';
+import type { BoardStatus } from './states';
+
+export type ProjectConfig = {
+  baseBranch: string;
+  /** Project Status option names per board column. Defaults: Todo, In Progress, In Review, Done. */
+  statusOptions?: Partial<Record<BoardStatus, string>>;
+  installCommand?: string;
+  gateCommand?: string;
+  envFiles?: string[];
+  reviewers?: string[];
+  maxIterations?: number;
+  /** Open a draft PR after the implementation (default true). Off: the user links one by hand. */
+  createPullRequest?: boolean;
+  /** Hide lock files from the review page (default true). */
+  hideLockFiles?: boolean;
+  /** Gitignore-style patterns hidden from the review page. */
+  reviewIgnore?: string[];
+  /** Notion data source tickets can be imported from (with `notionToken`). */
+  notionDataSourceId?: string;
+  /** Markdown sent to every agent run on this project, after the shared instructions. */
+  instructions?: string;
+};
+
+/** One earlier question of an investigation and the answer it got. */
+export type InvestigationExchange = { prompt: string; answer: string };
+
+/** One file of a pull request under review, numbered in the order GitHub lists them. */
+export type PullRequestFile = {
+  id: number;
+  path: string;
+  oldPath: string;
+  status: DiffStatus;
+  binary: boolean;
+  additions: number;
+  deletions: number;
+  /** The file's hunks (no file headers); empty for binary or very large files. */
+  patch: string;
+};

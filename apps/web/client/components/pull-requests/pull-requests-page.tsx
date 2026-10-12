@@ -5,8 +5,10 @@ import {
   PULL_REQUEST_FILTERS,
   type PublicProject,
   type PullRequestFilter,
+  type PullRequestList,
 } from '../../../src/api-types';
 import { api } from '../../lib/api';
+import { useCurrentReviewMutations, useCurrentReviews } from '../../lib/use-current-reviews';
 import { Button, ErrorText } from '../ui';
 import { PullRequestItem } from './pull-request-item';
 
@@ -45,6 +47,37 @@ function FilterToggle({
   );
 }
 
+/** The filter, how many there are, and Refresh. */
+function Toolbar({
+  filter,
+  onFilter,
+  list,
+  fetching,
+  onRefresh,
+}: {
+  filter: PullRequestFilter;
+  onFilter: (filter: PullRequestFilter) => void;
+  list: PullRequestList | undefined;
+  fetching: boolean;
+  onRefresh: () => void;
+}): ReactElement {
+  const shown = list?.pullRequests.length ?? 0;
+  return (
+    <div className="flex items-center gap-3 border-b border-zinc-200 px-4 py-2 dark:border-zinc-800">
+      <FilterToggle filter={filter} onChange={onFilter} />
+      <span className="text-xs text-zinc-500">
+        {list
+          ? `${list.total} ${filter === 'all' ? 'in all' : filter}${list.total > shown ? `, newest ${shown} shown` : ''}`
+          : ''}
+      </span>
+      <div className="flex-1" />
+      <Button disabled={fetching} onClick={onRefresh}>
+        {fetching ? 'Loading…' : 'Refresh'}
+      </Button>
+    </div>
+  );
+}
+
 /** Every pull request of the project's repository, read from GitHub; linked ones open their ticket. */
 export function PullRequestsPage({
   project,
@@ -60,37 +93,40 @@ export function PullRequestsPage({
     staleTime: STALE_MS,
     retry: false,
   });
+  const reviews = useCurrentReviews(project.id);
+  const { add } = useCurrentReviewMutations(project.id);
+  const inReview = new Set(reviews.data?.map((review) => review.prNumber));
   const list = query.data;
   const shown = list?.pullRequests.length ?? 0;
   return (
     <div className="flex h-full flex-col">
-      <div className="flex items-center gap-3 border-b border-zinc-200 px-4 py-2 dark:border-zinc-800">
-        <FilterToggle filter={filter} onChange={setFilter} />
-        <span className="text-xs text-zinc-500">
-          {list
-            ? `${list.total} ${filter === 'all' ? 'in all' : filter}${list.total > shown ? `, newest ${shown} shown` : ''}`
-            : ''}
-        </span>
-        <div className="flex-1" />
-        <Button
-          disabled={query.isFetching}
-          onClick={() => {
-            void query.refetch();
-          }}
-        >
-          {query.isFetching ? 'Loading…' : 'Refresh'}
-        </Button>
-      </div>
+      <Toolbar
+        filter={filter}
+        onFilter={setFilter}
+        list={list}
+        fetching={query.isFetching}
+        onRefresh={() => {
+          void query.refetch();
+        }}
+      />
       <div className="min-h-0 flex-1 overflow-y-auto">
         <div className="px-4 pt-3">
-          <ErrorText error={query.error} />
+          <ErrorText error={query.error ?? add.error} />
         </div>
         {list && shown === 0 ? (
           <p className="px-4 text-sm text-zinc-500">No pull requests.</p>
         ) : null}
         <ul>
           {list?.pullRequests.map((pull) => (
-            <PullRequestItem key={pull.number} pull={pull} onOpenTicket={onOpenTicket} />
+            <PullRequestItem
+              key={pull.number}
+              pull={pull}
+              inReview={inReview.has(pull.number)}
+              onOpenTicket={onOpenTicket}
+              onAddReview={() => {
+                add.mutate(pull);
+              }}
+            />
           ))}
         </ul>
       </div>

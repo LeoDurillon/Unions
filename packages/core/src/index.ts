@@ -9,6 +9,7 @@ export * from './investigations';
 export * from './project-url';
 export type * from './runtime';
 export * as schema from './schema';
+export type { PullRequestFile } from './schema-types';
 export * from './states';
 export * from './ticket-links';
 export * from './tickets';

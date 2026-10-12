@@ -18,13 +18,19 @@ export type CommandHooks = {
   removeContainers: (containers: ContainerRef[]) => void;
   /** Stops a running investigation. */
   cancelInvestigation: (id: number) => void;
+  /** Posts a current review's drafts and summary on its pull request. */
+  submitPullRequestReview: (reviewId: number, summary: string) => void;
 };
 
 function ignore(): void {
   // Without hooks (tests, tools), container removal and run cancellation are skipped.
 }
 
-const NO_HOOKS: CommandHooks = { removeContainers: ignore, cancelInvestigation: ignore };
+const NO_HOOKS: CommandHooks = {
+  removeContainers: ignore,
+  cancelInvestigation: ignore,
+  submitPullRequestReview: ignore,
+};
 
 function isContainerRef(value: unknown): value is ContainerRef {
   return (
@@ -74,19 +80,33 @@ function cancelInvestigation(db: Db, command: Command, hooks: CommandHooks): voi
   }
 }
 
+function createFromCommand(db: Db, command: Command): void {
+  const projectId = field(command.payload, 'projectId');
+  if (typeof projectId !== 'number') {
+    throw new TypeError('create_ticket needs a numeric "projectId"');
+  }
+  const body = field(command.payload, 'body');
+  createTicket(db, {
+    projectId,
+    title: requireString(command.payload, 'title'),
+    body: typeof body === 'string' ? body : '',
+  });
+}
+
+/** The review is posted by the worker, outside the drain (it calls GitHub). */
+function submitReview(command: Command, hooks: CommandHooks): void {
+  const reviewId = field(command.payload, 'reviewId');
+  const summary = field(command.payload, 'summary');
+  if (typeof reviewId !== 'number') {
+    throw new TypeError('submit_pr_review needs a numeric "reviewId"');
+  }
+  hooks.submitPullRequestReview(reviewId, typeof summary === 'string' ? summary : '');
+}
+
 function execute(db: Db, command: Command, hooks: CommandHooks): void {
   switch (command.type) {
     case 'create_ticket': {
-      const projectId = field(command.payload, 'projectId');
-      if (typeof projectId !== 'number') {
-        throw new TypeError('create_ticket needs a numeric "projectId"');
-      }
-      const body = field(command.payload, 'body');
-      createTicket(db, {
-        projectId,
-        title: requireString(command.payload, 'title'),
-        body: typeof body === 'string' ? body : '',
-      });
+      createFromCommand(db, command);
       return;
     }
     case 'start':
@@ -113,6 +133,10 @@ function execute(db: Db, command: Command, hooks: CommandHooks): void {
     }
     case 'cancel_investigation': {
       cancelInvestigation(db, command, hooks);
+      return;
+    }
+    case 'submit_pr_review': {
+      submitReview(command, hooks);
       return;
     }
     case 'remove_containers': {

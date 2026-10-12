@@ -1,0 +1,47 @@
+/** What a review page reviews: a ticket's branch, or a pull request from the Current reviews tab. */
+export type ReviewTarget =
+  | { kind: 'ticket'; ticketId: number }
+  | { kind: 'pull-request'; projectId: number; number: number };
+
+export function ticketReviewBase(ticketId: number): string {
+  return `/api/tickets/${ticketId}`;
+}
+
+/** Where the target's diff, comments and send live; also the root of its query keys. */
+export function reviewBase(target: ReviewTarget): string {
+  return target.kind === 'ticket'
+    ? ticketReviewBase(target.ticketId)
+    : `/api/projects/${target.projectId}/pull-requests/reviews/${target.number}`;
+}
+
+/** What the review page says, and does after sending, for each kind of target. */
+export type ReviewCopy = {
+  /** After "N comment(s)": where they go. */
+  destination: string;
+  /** The button that sends them. */
+  action: string;
+  /** Next to the disabled Send button. */
+  blocked: string;
+  empty: string;
+  closeOnSend: boolean;
+};
+
+export function reviewCopy(target: ReviewTarget): ReviewCopy {
+  if (target.kind === 'ticket') {
+    return {
+      destination: 'go to the implementation agent as a change request.',
+      action: 'Send to the implementer',
+      blocked:
+        'Sending opens when the ticket waits on you at the implementation or the final review.',
+      empty: 'No changes yet: the diff appears after the implementation runs.',
+      closeOnSend: true,
+    };
+  }
+  return {
+    destination: `will be posted on #${target.number} as one GitHub review.`,
+    action: 'Post on GitHub',
+    blocked: 'The review is being posted on GitHub.',
+    empty: 'This pull request changes no files.',
+    closeOnSend: false,
+  };
+}
