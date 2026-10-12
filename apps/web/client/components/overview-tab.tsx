@@ -4,7 +4,6 @@ import type { TicketDetail } from '../../src/api-types';
 import { isBlocked, STEP_TITLES } from '../lib/labels';
 import { useTicketCommands } from '../lib/use-ticket-commands';
 import { Markdown } from './markdown';
-import { PullRequestRow } from './pull-request-row';
 import { TicketLinks } from './ticket-links';
 import { Badge, Button, ErrorText } from './ui';
 
@@ -84,7 +83,7 @@ export function OverviewTab({
   detail: TicketDetail;
   onOpenTicket: (id: number) => void;
 }): ReactElement {
-  const { ticket, project, runs } = detail;
+  const { ticket, runs } = detail;
   const blocked = isBlocked(ticket);
   const { command } = useTicketCommands(ticket.id);
   const { kind } = ticket.phase;
@@ -99,7 +98,6 @@ export function OverviewTab({
         <p className="text-sm text-zinc-500">No description.</p>
       )}
       <TicketLinks detail={detail} onOpen={onOpenTicket} />
-      <PullRequestRow ticket={ticket} project={project} />
       <ErrorText error={command.error} />
       <div className="flex gap-2">
         {kind === 'backlog' ? (

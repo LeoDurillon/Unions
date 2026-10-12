@@ -49,6 +49,8 @@ Everything the agent does is mirrored to the GitHub issue.
    choice is remembered in the browser). The user comments on a line or a block of lines; the
    comments stay local drafts until **Send review**, which is allowed when the ticket waits on the user at the
    implementation or the final review and works like Request changes.
+   The ticket panel has three tabs: **Overview** (description, links, actions, runs), **Worker** (one tab per step,
+   then the Log; it follows the running step) and **PR** (link the pull request).
 6. On archive (or project deletion) the containers and volumes are removed. Done alone keeps them, so the
    preview still works after approval.
 
