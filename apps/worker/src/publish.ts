@@ -17,6 +17,7 @@ import { eq } from 'drizzle-orm';
 
 import { projectGitToken } from './credentials';
 import type { GitHubApi } from './github/api';
+import { writeDescription, type Describer } from './pr-description';
 import { cloneSource, hostGit, type CloneSource, type ProvisionConfig } from './provision';
 import { exportBranch } from './workspace-git';
 
@@ -79,24 +80,31 @@ export async function projectRemote(
   return cloneSource(gitBaseUrl, project.owner, project.repo, token);
 }
 
-/** `Closes #n`, plus the parent's PR when the branch is stacked on it. */
-export function pullRequestBody(db: Db, ticket: Ticket): string {
-  const own = ticket.issueNumber === null ? ticket.body : `Closes #${ticket.issueNumber}`;
+/**
+ * The agent's description (else the ticket's body when there is no issue), then `Closes #n`, plus
+ * the parent's PR when the branch is stacked on it. The links are always added here, never left to
+ * the agent.
+ */
+export function pullRequestBody(db: Db, ticket: Ticket, description: string | null = null): string {
+  const closes = ticket.issueNumber === null ? null : `Closes #${ticket.issueNumber}`;
+  const parts = [description ?? (closes ? null : ticket.body), closes];
   const parent = parentOf(db, ticket);
-  if (!parent || parent.branch !== ticket.baseBranch) {
-    return own;
+  if (parent && parent.branch === ticket.baseBranch) {
+    const after = parent.prNumber === null ? ticketLabel(parent) : `#${parent.prNumber}`;
+    parts.push(`Builds on ${after}, which it targets: merge that one first.`);
   }
-  const after = parent.prNumber === null ? ticketLabel(parent) : `#${parent.prNumber}`;
-  return `${own}\n\nBuilds on ${after}, which it targets: merge that one first.`;
+  return parts.filter((part) => part !== null && part !== '').join('\n\n');
 }
 
-async function ensurePullRequest({
+/** The open PR for the branch, else a new draft one described by `describe`. */
+export async function ensurePullRequest({
   db,
   github,
   project,
   ticket,
   branch,
   base,
+  describe,
 }: {
   db: Db;
   github: GitHubApi;
@@ -104,6 +112,8 @@ async function ensurePullRequest({
   ticket: Ticket;
   branch: string;
   base: string;
+  /** Writes the description of a new pull request; not called when one exists already. */
+  describe: () => Promise<string | null>;
 }): Promise<number> {
   const repo = { owner: project.owner, repo: project.repo };
   const existing = await github.findPullRequest(repo, branch);
@@ -111,7 +121,7 @@ async function ensurePullRequest({
     existing ??
     (await github.createPullRequest(repo, {
       title: ticket.title,
-      body: pullRequestBody(db, ticket),
+      body: pullRequestBody(db, ticket, await describe()),
       head: branch,
       base,
     }));
@@ -137,6 +147,8 @@ export async function publishBranch(input: {
   branch: string;
   /** The PR targets this branch: the parent's while it is not merged, else the project's. */
   base: string;
+  /** The implementer's session, to describe a new pull request; without it the PR gets the default body. */
+  describer?: Describer;
 }): Promise<PublishResult> {
   const { db, project, ticket, branch, base } = input;
   try {
@@ -149,7 +161,18 @@ export async function publishBranch(input: {
     const pullRequest =
       prNumber ??
       (input.github && !manualPullRequest
-        ? await ensurePullRequest({ db, github: input.github, project, ticket, branch, base })
+        ? await ensurePullRequest({
+            db,
+            github: input.github,
+            project,
+            ticket,
+            branch,
+            base,
+            describe: () =>
+              input.describer
+                ? writeDescription(input.runtime, input.container, input.describer)
+                : Promise.resolve(null),
+          })
         : null);
     return { pushed: true, pullRequest, manualPullRequest, error: null };
   } catch (error) {

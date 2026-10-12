@@ -52,7 +52,8 @@ behavior; this file covers how to work in the repo.
     (`branch.ts`, `workspace-git.ts`), runs the project's install command, then loops agent turn → leftover commit →
     check command (`gate.ts`), resuming the same session with the failure until green or `maxIterations`.
     `publish.ts` exports the branch as a git bundle, pushes it from the host with the project token and opens the
-    draft PR. The agent may run shell commands but never push, switch branches or rewrite history.
+    draft PR, described by the implementer from the repository's PR template (`pr-description.ts`). The agent may
+    run shell commands but never push, switch branches or rewrite history.
   - `rebase.ts` (with `rebase-agent.ts`, `rebase-fetch.ts`, `rebase-git.ts`, `rebase-publish.ts`): the on-demand
     rebase step. The host fetches base and branch into the container as a bundle, resumes the implementer's session
     with the rebase prompt, checks the result and the project's checks, then force-pushes with a lease; any failure

@@ -34,8 +34,13 @@ Everything the agent does is mirrored to the GitHub issue.
    After each, the user clicks **Approve** or **Revise** (with feedback). Revise resumes the agent session.
    Each step's output is posted/edited as one issue comment.
 4. After the test plan is approved: `implement` loop (agent turn → checks → back to the agent on red, up to the
-   project's iteration limit), then the host pushes the branch and opens a draft PR (`Closes #n`). Install and check
-   commands are set per project. Reviewer agents and the refactor pass are not built yet.
+   project's iteration limit), then the host pushes the branch and opens a draft PR (`Closes #n`). Before opening
+   it, one more turn in the implementer's session writes the PR description: it fills in the repository's pull
+   request template when there is one (`.github/`, root or `docs/`, any case, else the first file of
+   `.github/PULL_REQUEST_TEMPLATE/`), in the template's language, else a short summary, changes and testing in the
+   ticket's language. The host adds `Closes #n` (and the stacked-PR note) below it; if the turn fails, the PR gets
+   that default body. An existing PR is never redescribed. Install and check commands are set per project. Reviewer
+   agents and the refactor pass are not built yet.
 5. `final_review`: a fresh review agent (read-only plus `git diff/log/show/status`) compares the branch with the approved
    plan and starts its review with `VERDICT: APPROVED` or `VERDICT: CHANGES_REQUESTED`. It does not re-run the
    checks; it states the last result from the implementation report. The user decides: **Approve** marks the PR

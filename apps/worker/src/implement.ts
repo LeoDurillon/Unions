@@ -69,6 +69,13 @@ export async function runImplementStep(
       container,
       branch,
       base,
+      describer: {
+        db: deps.db,
+        agent: deps.agent,
+        sessionId: loop.outcome.sessionId,
+        signal: context.signal,
+        log: context.log,
+      },
     });
     const output = renderImplementReport({
       agentReport: loop.outcome.text,
