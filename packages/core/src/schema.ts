@@ -8,7 +8,7 @@ import {
   type AnySQLiteColumn,
 } from 'drizzle-orm/sqlite-core';
 
-import type { BoardStatus, Phase, Step } from './states';
+import type { AgentModel, BoardStatus, Phase, Step } from './states';
 
 const now = sql`(unixepoch('subsec') * 1000)`;
 const timestamps = {
@@ -157,11 +157,15 @@ export const events = sqliteTable(
     seq: integer('seq').primaryKey({ autoIncrement: true }),
     ticketId: integer('ticket_id'),
     runId: integer('run_id'),
+    investigationId: integer('investigation_id'),
     type: text('type').notNull(),
     payload: text('payload', { mode: 'json' }).$type<unknown>().notNull(),
     at: integer('at').notNull().default(now),
   },
-  (t) => [index('events_ticket_idx').on(t.ticketId, t.seq)],
+  (t) => [
+    index('events_ticket_idx').on(t.ticketId, t.seq),
+    index('events_investigation_idx').on(t.investigationId, t.seq),
+  ],
 );
 
 /** UI → worker mailbox. */
@@ -223,6 +227,42 @@ export const agentTools = sqliteTable('agent_tools', {
   description: text('description'),
   createdAt: integer('created_at').notNull().default(now),
 });
+
+export const INVESTIGATION_SCOPES = ['global', 'repository'] as const;
+export const INVESTIGATION_STATUSES = [
+  'queued',
+  'running',
+  'succeeded',
+  'failed',
+  'cancelled',
+] as const;
+
+/**
+ * One agent run on a custom prompt, outside the ticket pipeline: nothing is mirrored to GitHub.
+ * `repository` runs on a fresh clone of the project's repository, `global` without any code.
+ */
+export const investigations = sqliteTable(
+  'investigations',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    projectId: integer('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    title: text('title').notNull(),
+    prompt: text('prompt').notNull(),
+    scope: text('scope', { enum: INVESTIGATION_SCOPES }).notNull(),
+    model: text('model').$type<AgentModel>().notNull(),
+    tools: text('tools', { mode: 'json' }).$type<string[]>().notNull(),
+    status: text('status', { enum: INVESTIGATION_STATUSES }).notNull().default('queued'),
+    /** The agent's final answer (markdown). */
+    result: text('result'),
+    error: text('error'),
+    startedAt: integer('started_at'),
+    finishedAt: integer('finished_at'),
+    ...timestamps,
+  },
+  (t) => [index('investigations_project_idx').on(t.projectId)],
+);
 
 /** The branch diff after the latest implementation run; only the newest snapshot per ticket is kept. */
 export const diffSnapshots = sqliteTable('diff_snapshots', {

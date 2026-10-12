@@ -5,6 +5,7 @@ import type { Page } from '../lib/use-navigation';
 import { AgentsPage } from './agents/agents-page';
 import { Board, BoardView } from './board';
 import { GitHubAppPage } from './github-app/github-app-page';
+import { InvestigationsPage } from './investigations/investigations-page';
 import { ProjectBar } from './project-bar';
 
 function noop(): void {
@@ -37,7 +38,7 @@ export function Workspace({
   );
 }
 
-/** Right-hand side of the app: a global settings page or the current project's board. */
+/** Right-hand side of the app: a global page, or the current project's board or investigations. */
 export function MainArea({
   page,
   project,
@@ -56,6 +57,9 @@ export function MainArea({
   }
   if (page === 'github-app') {
     return <GitHubAppPage />;
+  }
+  if (page === 'investigations') {
+    return <InvestigationsPage project={project} />;
   }
   return (
     <Workspace

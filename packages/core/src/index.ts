@@ -4,6 +4,7 @@ export * from './db';
 export * from './diff';
 export * from './docker-cli';
 export * from './github-auth';
+export * from './investigations';
 export * from './project-url';
 export type * from './runtime';
 export * as schema from './schema';

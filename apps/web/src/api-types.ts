@@ -57,6 +57,7 @@ export type EventRow = {
   seq: number;
   ticketId: number | null;
   runId: number | null;
+  investigationId: number | null;
   type: string;
   payload: unknown;
   at: number;

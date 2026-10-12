@@ -189,10 +189,20 @@ export function deleteProject(db: Db, c: Context): Response {
     .from(schema.tickets)
     .where(eq(schema.tickets.projectId, project.id))
     .all();
-  if (tickets.some((ticket) => ticket.phase.kind === 'running')) {
+  const investigating = db
+    .select()
+    .from(schema.investigations)
+    .where(
+      and(
+        eq(schema.investigations.projectId, project.id),
+        eq(schema.investigations.status, 'running'),
+      ),
+    )
+    .get();
+  if (investigating || tickets.some((ticket) => ticket.phase.kind === 'running')) {
     throw fail(
       CONFLICT,
-      'An agent is running on one of this project’s tickets. Wait for it or cancel it first.',
+      'An agent is running on one of this project’s tickets or investigations. Wait for it or cancel it first.',
     );
   }
   const containers = tickets.flatMap((ticket) =>

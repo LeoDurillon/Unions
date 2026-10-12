@@ -19,6 +19,7 @@ export type NewEvent = {
   type: string;
   ticketId?: number;
   runId?: number;
+  investigationId?: number;
   payload: unknown;
 };
 
@@ -28,6 +29,7 @@ export function emitEvent(db: Executor, event: NewEvent): void {
       type: event.type,
       ticketId: event.ticketId ?? null,
       runId: event.runId ?? null,
+      investigationId: event.investigationId ?? null,
       payload: event.payload,
     })
     .run();

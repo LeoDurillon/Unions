@@ -30,6 +30,10 @@ function entriesFor(event: EventRow): Entry[] {
     const text = `Run #${event.runId ?? '?'} · ${stepTitle(event.payload)}`;
     return [{ key: `${event.seq}`, kind: 'run', text }];
   }
+  if (event.type === 'investigation_started') {
+    const time = new Date(event.at).toLocaleString();
+    return [{ key: `${event.seq}`, kind: 'run', text: `Run started ${time}` }];
+  }
   if (event.type !== 'agent_event') {
     return [];
   }
@@ -40,11 +44,11 @@ function entriesFor(event: EventRow): Entry[] {
   }));
 }
 
-/** Replays the ticket's whole agent log, then follows it live. */
-export function LogTab({ ticketId }: { ticketId: number }): ReactElement {
+/** Replays a whole agent log from the event stream at `url`, then follows it live. */
+export function AgentLog({ url }: { url: string }): ReactElement {
   const [entries, setEntries] = useState<Entry[]>([]);
 
-  useEventStream(`/api/events?ticket=${ticketId}&after=0`, (event) => {
+  useEventStream(url, (event) => {
     const added = entriesFor(event);
     if (added.length > 0) {
       setEntries((previous) => [...previous, ...added]);
@@ -66,4 +70,9 @@ export function LogTab({ ticketId }: { ticketId: number }): ReactElement {
       />
     </div>
   );
+}
+
+/** Replays the ticket's whole agent log, then follows it live. */
+export function LogTab({ ticketId }: { ticketId: number }): ReactElement {
+  return <AgentLog url={`/api/events?ticket=${ticketId}&after=0`} />;
 }

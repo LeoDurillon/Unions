@@ -1,4 +1,12 @@
-import { createTicket, dispatch, emitEvent, recordValidation, schema, type Db } from '@union/core';
+import {
+  cancelQueuedInvestigation,
+  createTicket,
+  dispatch,
+  emitEvent,
+  recordValidation,
+  schema,
+  type Db,
+} from '@union/core';
 import { eq, isNull } from 'drizzle-orm';
 
 type Command = typeof schema.commands.$inferSelect;
@@ -8,13 +16,15 @@ export type ContainerRef = { name: string; home: string; workspace: string };
 /** Side effects some commands hand off (they are asynchronous; draining stays synchronous). */
 export type CommandHooks = {
   removeContainers: (containers: ContainerRef[]) => void;
+  /** Stops a running investigation. */
+  cancelInvestigation: (id: number) => void;
 };
 
-function ignoreContainers(): void {
-  // Without hooks (tests, tools), container removal is simply skipped.
+function ignore(): void {
+  // Without hooks (tests, tools), container removal and run cancellation are skipped.
 }
 
-const NO_HOOKS: CommandHooks = { removeContainers: ignoreContainers };
+const NO_HOOKS: CommandHooks = { removeContainers: ignore, cancelInvestigation: ignore };
 
 function isContainerRef(value: unknown): value is ContainerRef {
   return (
@@ -53,6 +63,17 @@ function requireTicketId(command: Command): number {
   return command.ticketId;
 }
 
+/** A queued investigation is cancelled here; a running one is stopped by the runner. */
+function cancelInvestigation(db: Db, command: Command, hooks: CommandHooks): void {
+  const id = field(command.payload, 'investigationId');
+  if (typeof id !== 'number') {
+    throw new TypeError('cancel_investigation needs a numeric "investigationId"');
+  }
+  if (!cancelQueuedInvestigation(db, id)) {
+    hooks.cancelInvestigation(id);
+  }
+}
+
 function execute(db: Db, command: Command, hooks: CommandHooks): void {
   switch (command.type) {
     case 'create_ticket': {
@@ -87,6 +108,10 @@ function execute(db: Db, command: Command, hooks: CommandHooks): void {
         feedback: requireString(command.payload, 'feedback'),
       });
       dispatch(db, ticketId, { type: 'revise' });
+      return;
+    }
+    case 'cancel_investigation': {
+      cancelInvestigation(db, command, hooks);
       return;
     }
     case 'remove_containers': {

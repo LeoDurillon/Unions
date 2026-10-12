@@ -7,8 +7,9 @@ import { Button } from './ui';
 const ACTIVE = 'bg-indigo-100 font-medium text-indigo-900 dark:bg-indigo-950 dark:text-indigo-200';
 const IDLE = 'hover:bg-zinc-200/70 dark:hover:bg-zinc-800';
 
-/** Global settings pages, below the projects. */
+/** Pages below the projects: the current project's investigations, then the global settings. */
 const SETTINGS_PAGES: { page: Page; label: string }[] = [
+  { page: 'investigations', label: 'Investigations' },
   { page: 'agents', label: 'Agent settings' },
   { page: 'github-app', label: 'GitHub App' },
 ];

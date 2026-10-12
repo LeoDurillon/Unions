@@ -53,4 +53,7 @@ const EVENT_TYPES = [
   'github_sync_error',
   'github_status_reverted',
   'ticket_updated_from_github',
+  'investigation_queued',
+  'investigation_started',
+  'investigation_finished',
 ] as const;

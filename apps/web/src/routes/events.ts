@@ -1,5 +1,5 @@
 import { schema, type Db } from '@union/core';
-import { and, asc, eq, gt, max } from 'drizzle-orm';
+import { and, asc, eq, gt, max, type SQL } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { streamSSE } from 'hono/streaming';
 
@@ -19,6 +19,17 @@ function startCursor(db: Db, after: string | undefined): number {
   return after === 'latest' ? latestSeq(db) : Number(after ?? 0);
 }
 
+/** One ticket's events, one investigation's, or (neither given) all of them. */
+function eventFilter(
+  ticket: string | undefined,
+  investigation: string | undefined,
+): SQL | undefined {
+  if (ticket) {
+    return eq(schema.events.ticketId, Number(ticket));
+  }
+  return investigation ? eq(schema.events.investigationId, Number(investigation)) : undefined;
+}
+
 export function eventRoutes(db: Db): Hono {
   const routes = new Hono();
 
@@ -33,12 +44,11 @@ export function eventRoutes(db: Db): Hono {
 
   /**
    * SSE: tail `events` by seq. `Last-Event-ID` (or ?after=) resumes without gaps.
-   * Optional ?ticket=<id> filters to one ticket.
+   * Optional ?ticket=<id> or ?investigation=<id> filters to one ticket or investigation.
    */
   routes.get('/', (c) => {
     let cursor = startCursor(db, c.req.header('last-event-id') ?? c.req.query('after'));
-    const ticketParam = c.req.query('ticket');
-    const filter = ticketParam ? eq(schema.events.ticketId, Number(ticketParam)) : undefined;
+    const filter = eventFilter(c.req.query('ticket'), c.req.query('investigation'));
 
     return streamSSE(c, async (stream) => {
       while (!stream.aborted) {

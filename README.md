@@ -12,6 +12,9 @@ your Claude Max subscription) works through a pipeline on a clone of the project
 3. **Final review**: a separate agent reviews the branch against the plan. You can also review the diff in Union,
    comment on lines and send the comments back to the implementer. Approving marks the PR ready for review.
 
+**Investigations** (in the sidebar) run an agent once on a prompt of your own, about the project's repository or a
+general subject, with the model and tools you pick. The answer stays in Union: no ticket, no GitHub issue.
+
 A ticket can depend on another one: it waits until that ticket is Done, then starts from its branch, and its
 pull request targets that branch.
 
@@ -99,7 +102,7 @@ Environment variables (shell or `.env`), all optional:
 | Variable                   | Default                               | Purpose                                                  |
 | -------------------------- | ------------------------------------- | -------------------------------------------------------- |
 | `GITHUB_TOKEN`             | none                                  | Token for projects that have no credentials of their own |
-| `UNION_MAX_CONCURRENT`     | `2`                                   | Agent runs at the same time (Max usage limits apply)     |
+| `UNION_MAX_CONCURRENT`     | `2`                                   | Agent runs at the same time, tickets and investigations  |
 | `UNION_GITHUB_PULL_MS`     | `30000`                               | How often changes made on GitHub are pulled              |
 | `UNION_WEB_PORT`           | `5173`                                | Port of the web app (Compose)                            |
 | `DB_PATH`                  | `union.sqlite` at the repository root | Database file shared by web and worker                   |

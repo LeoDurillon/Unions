@@ -12,6 +12,7 @@ import {
 import { eq } from 'drizzle-orm';
 
 import { revisionFor } from './revision';
+import { RunSlots } from './slots';
 
 export type StepContext = {
   ticket: Ticket;
@@ -40,16 +41,20 @@ const RUN_STATUS = {
   rate_limited: 'rate_limited',
 } as const satisfies Record<StepResult['kind'], string>;
 
-/** Runs one agent step per ticket in `running` phase, at most `maxConcurrent` at a time. */
+/** Runs one agent step per ticket in `running` phase, within the shared run slots. */
 export class Scheduler {
   private readonly active = new Map<number, Promise<void>>();
   private readonly abort = new AbortController();
+  /** Shared with the other agent runs (investigations). */
+  readonly slots: RunSlots;
 
   constructor(
     private readonly db: Db,
     private readonly executor: StepExecutor,
-    private readonly maxConcurrent: number,
-  ) {}
+    limit: number | RunSlots,
+  ) {
+    this.slots = typeof limit === 'number' ? new RunSlots(limit) : limit;
+  }
 
   tick(now = Date.now()): void {
     for (const ticket of this.db.select().from(schema.tickets).all()) {
@@ -59,10 +64,10 @@ export class Scheduler {
       }
     }
     for (const ticket of this.db.select().from(schema.tickets).all()) {
-      if (this.active.size >= this.maxConcurrent) {
-        return;
-      }
       if (ticket.phase.kind === 'running' && !this.active.has(ticket.id)) {
+        if (!this.slots.tryTake()) {
+          return;
+        }
         this.launch({ ticketId: ticket.id, step: ticket.phase.step });
       }
     }
@@ -87,6 +92,7 @@ export class Scheduler {
       await this.runStep(info);
     } finally {
       this.active.delete(info.ticketId);
+      this.slots.release();
     }
   }
 

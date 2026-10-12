@@ -12,6 +12,8 @@ behavior; this file covers how to work in the repo.
   `agent-tools.ts` holds each step's default allowed tools and the tool list agents pick from (Claude Code's tools,
   the rules the defaults use, and the user's additions in `agent_tools`). Denied rules (`BASE_DENIED`,
   `IMPLEMENT_DENIED` in the worker) are not editable and always win over a selected tool.
+  `investigations.ts`: one-off agent runs on a custom prompt (records, claim, finish, cancel); defaults in the
+  browser-safe `investigation-defaults.ts`.
   Drizzle schema and migrations, the pure ticket state machine (`states.ts`), ticket dependencies
   (`ticket-links.ts`: `setParent`, `ticketBase`; the start gate `blockingParent` is in `tickets.ts`), the
   `ContainerRuntime` interface and its Docker CLI implementation.
@@ -41,6 +43,9 @@ behavior; this file covers how to work in the repo.
     check command (`gate.ts`), resuming the same session with the failure until green or `maxIterations`.
     `publish.ts` exports the branch as a git bundle, pushes it from the host with the project token and opens the
     draft PR. The agent may run shell commands but never push, switch branches or rewrite history.
+  - `investigate.ts`: `InvestigationRunner` runs queued investigations in throwaway `union-i<id>` containers
+    (removed after each run), sharing the scheduler's `RunSlots` (`slots.ts`); cancellation arrives through the
+    `cancel_investigation` command hook.
   - `review.ts`: the final review (fresh session, read-only tools plus git reads, one git command per call because
     permission rules cannot match `&&`). Changes asked at the review go to the implementer through the `thenRun`
     chain in `states.ts`; `revision.ts` hands it the review's feedback. `runResumable` (agent.ts) restarts in a fresh

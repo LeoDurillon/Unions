@@ -6,7 +6,8 @@
     ".": "./src/index.ts",
     "./states": "./src/states.ts",
     "./diff": "./src/diff.ts",
-    "./github-client": "./src/github-client.ts"
+    "./github-client": "./src/github-client.ts",
+    "./investigation-defaults": "./src/investigation-defaults.ts"
   },
   "dependencies": {
     "@octokit/auth-app": "catalog:github",

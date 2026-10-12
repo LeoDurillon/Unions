@@ -1,4 +1,10 @@
-import type { AgentConfig, AgentModel, ToolOption } from '@union/core';
+import type {
+  AgentConfig,
+  AgentModel,
+  Investigation,
+  InvestigationScope,
+  ToolOption,
+} from '@union/core';
 
 import type {
   GitHubAppStatus,
@@ -49,6 +55,14 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
   return data as T;
 }
 
+function investigationsPath(projectId: number): string {
+  return `/api/projects/${projectId}/investigations`;
+}
+
+function investigationPath(investigation: Pick<Investigation, 'id' | 'projectId'>): string {
+  return `${investigationsPath(investigation.projectId)}/${investigation.id}`;
+}
+
 export const api = {
   agents: (): Promise<AgentConfig[]> => request('GET', '/api/agents'),
   saveAgent: (
@@ -61,6 +75,24 @@ export const api = {
   removeTool: (name: string): Promise<ToolOption[]> =>
     request('DELETE', `/api/agents/tools/${encodeURIComponent(name)}`),
   resetAgent: (agent: string): Promise<AgentConfig> => request('DELETE', `/api/agents/${agent}`),
+  investigations: (projectId: number): Promise<Investigation[]> =>
+    request('GET', investigationsPath(projectId)),
+  createInvestigation: (
+    projectId: number,
+    input: {
+      title: string;
+      prompt: string;
+      scope: InvestigationScope;
+      model: AgentModel;
+      tools: string[];
+    },
+  ): Promise<Investigation> => request('POST', investigationsPath(projectId), input),
+  rerunInvestigation: (investigation: Investigation): Promise<Investigation> =>
+    request('POST', `${investigationPath(investigation)}/rerun`),
+  cancelInvestigation: (investigation: Investigation): Promise<unknown> =>
+    request('POST', `${investigationPath(investigation)}/cancel`),
+  deleteInvestigation: (investigation: Investigation): Promise<unknown> =>
+    request('DELETE', investigationPath(investigation)),
   projects: (): Promise<PublicProject[]> => request('GET', '/api/projects'),
   createProject: (
     input: {

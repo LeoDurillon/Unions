@@ -117,6 +117,23 @@ ticket's Overview while it is in the backlog (`tickets.parent_ticket_id`; cycles
   parent swaps or removes that relation. Local links win: dependencies edited on GitHub are not pulled back, and
   Union only removes the relation it added.
 
+## Investigations
+
+A one-off agent run on a custom prompt, outside the ticket pipeline (sidebar → **Investigations**, for the current
+project). It creates no ticket and no GitHub issue; the answer stays in Union (`investigations` table).
+
+- **Scope:** `repository` runs on a fresh host clone of the project's repository at its base branch (agent cwd
+  `/workspace/repo`); `global` runs with no code (cwd `/workspace`), for general subjects.
+- **Run:** the user picks the model and the tools (same list as the agents; `BASE_DENIED` still applies). The web
+  inserts the row as `queued`; the worker claims it (`claimInvestigation`), runs `claude -p` once in a throwaway
+  container `union-i<id>` with its own volumes, stores the final answer or the error, and removes the container
+  and volumes. Investigations share the `UNION_MAX_CONCURRENT` slots with tickets.
+- **Status:** queued → running → succeeded | failed | cancelled. Cancel is a `cancel_investigation` command (a
+  queued run is cancelled at once, a running one is aborted). Run again re-queues a finished one with the same
+  prompt. A run left `running` by a stopped worker is failed at the next start and its container removed.
+- **Log:** agent events carry `events.investigation_id`; `/api/events?investigation=<id>` streams one run's log.
+- **Not yet:** follow-up questions in the same session, choosing another branch, turning an answer into a ticket.
+
 ## Rebase (planned)
 
 Once implementation is done (final review, or Done while the PR is still open), the ticket panel shows how far the
