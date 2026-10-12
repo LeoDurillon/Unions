@@ -145,8 +145,10 @@ both.
   `PublicProject` / `toPublicProject` (`githubAccess` only) and the app status omits the key. Resolve credentials
   with `projectGitHubAuth` (`@union/core`; installation wins, then token, then `GITHUB_TOKEN`) and build clients
   with `@union/core/github-client`: clients are cached per credential so an installation token is minted once an
-  hour, and git gets a fresh token (`gitToken`) right before each clone or push. Never build an Octokit from a
-  project's token by hand.
+  hour, and git gets a fresh token (`gitToken`) right before each clone or push. Every request is bounded
+  (`timeoutMs`, `retries`: 30 s per attempt; the web server 20 s and one retry): Octokit queues token minting and
+  GraphQL per process, so one stuck request used to block every later call until a restart. Never build an Octokit
+  from a project's token by hand.
 - A ticket's base branch is `ticketBase(project, ticket)`: the parent's branch it was cloned from, else the project's.
   Never use `project.config.baseBranch` directly in the worker. Starting goes through `dispatch`, which refuses a
   ticket whose parent is not done; check `blockingParent` before queueing or honouring a start anywhere else.

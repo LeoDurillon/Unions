@@ -7,6 +7,9 @@ import { INTERNAL_ERROR } from './http';
 import { FetchNotionApi, type NotionApi } from './notion';
 import { apiRoutes } from './routes/api';
 
+/** Someone waits on the page: a GitHub call gives up after about 40 s (two 20 s attempts), not 2 minutes. */
+const WEB_GITHUB_LIMITS = { timeoutMs: 20_000, retries: 1 };
+
 function toErrorResponse(failure: Error, c: Context): Response {
   if (failure instanceof HTTPException) {
     return c.json({ error: failure.message }, failure.status);
@@ -16,7 +19,7 @@ function toErrorResponse(failure: Error, c: Context): Response {
 
 export function createApp(
   db: Db,
-  github: OnboardingGitHub = new OctokitOnboarding(),
+  github: OnboardingGitHub = new OctokitOnboarding(WEB_GITHUB_LIMITS),
   notion: NotionApi = new FetchNotionApi(),
 ): Hono {
   const app = new Hono();
