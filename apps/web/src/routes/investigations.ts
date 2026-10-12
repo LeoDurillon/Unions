@@ -6,6 +6,7 @@ import {
   InvestigationError,
   isInvestigationScope,
   listInvestigations,
+  requestTicket,
   rerunInvestigation,
   schema,
   AgentToolError,
@@ -107,6 +108,15 @@ export function investigationRoutes(db: Db): Hono {
     const { id } = investigationOf(db, c);
     const prompt = requireText(await readObject(c.req.raw), 'prompt');
     return c.json(refusals(CONFLICT, () => askFollowUp(db, id, prompt)));
+  });
+  routes.post('/:id/ticket', async (c) => {
+    const { id } = investigationOf(db, c);
+    const { context } = await readObject(c.req.raw);
+    const text = typeof context === 'string' ? context : '';
+    return c.json(
+      refusals(CONFLICT, () => requestTicket(db, id, text)),
+      ACCEPTED,
+    );
   });
   routes.post('/:id/cancel', (c) => {
     const { id, status } = investigationOf(db, c);

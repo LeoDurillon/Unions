@@ -130,3 +130,17 @@ test('a follow-up is asked on an answered investigation only', async () => {
     history: [{ prompt: 'List every place we check tokens', answer: 'In auth.ts' }],
   });
 });
+
+test('a ticket is asked from an answered investigation, once at a time', async () => {
+  const { id } = await created();
+  expect((await send('POST', `${base()}/${id}/ticket`, { context: 'x' })).status).toBe(409);
+  claimInvestigation(db);
+  finishInvestigation(db, id, { status: 'succeeded', result: 'Found it.' });
+  const asked = await send('POST', `${base()}/${id}/ticket`, { context: ' Backend only ' });
+  expect(asked.status).toBe(202);
+  expect(await asked.json()).toMatchObject({
+    ticketStatus: 'queued',
+    ticketContext: 'Backend only',
+  });
+  expect((await send('POST', `${base()}/${id}/ticket`, {})).status).toBe(409);
+});

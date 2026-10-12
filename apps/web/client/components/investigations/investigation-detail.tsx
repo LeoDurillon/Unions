@@ -8,7 +8,7 @@ import { AgentLog } from '../log-tab';
 import { Markdown } from '../markdown';
 import { Badge, Button, ErrorText } from '../ui';
 import { isActive, SCOPE_LABELS, STATUS_LABELS } from './investigation-labels';
-import { EarlierExchanges, FollowUpForm, LatestQuestion } from './investigation-thread';
+import { EarlierExchanges, LatestQuestion, NextSteps } from './investigation-thread';
 
 type Tab = 'result' | 'log';
 
@@ -136,9 +136,11 @@ function Answer({ investigation }: { investigation: Investigation }): ReactEleme
 export function InvestigationDetail({
   investigation,
   onDeleted,
+  onOpenTicket,
 }: {
   investigation: Investigation;
   onDeleted: () => void;
+  onOpenTicket: (id: number) => void;
 }): ReactElement {
   // Remounted on every status change (see the key in the page): running shows the log, done the answer.
   const [tab, setTab] = useState<Tab>(isActive(investigation.status) ? 'log' : 'result');
@@ -167,7 +169,9 @@ export function InvestigationDetail({
       ) : (
         <AgentLog url={`/api/events?investigation=${investigation.id}&after=0`} />
       )}
-      {investigation.status === 'succeeded' ? <FollowUpForm investigation={investigation} /> : null}
+      {investigation.status === 'succeeded' ? (
+        <NextSteps investigation={investigation} onOpenTicket={onOpenTicket} />
+      ) : null}
     </article>
   );
 }

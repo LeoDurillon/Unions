@@ -125,8 +125,12 @@ export function askFollowUp(db: Db, id: number, prompt: string): Investigation {
 }
 
 export function deleteInvestigation(db: Db, id: number): void {
-  if (getInvestigation(db, id).status === 'running') {
+  const investigation = getInvestigation(db, id);
+  if (investigation.status === 'running') {
     throw new InvestigationError('The agent is still running: cancel it first');
+  }
+  if (investigation.ticketStatus === 'running') {
+    throw new InvestigationError('A ticket is being written from it: wait for it to finish');
   }
   db.delete(schema.investigations).where(eq(schema.investigations.id, id)).run();
 }

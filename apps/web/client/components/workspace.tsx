@@ -27,7 +27,7 @@ function ProjectBody({
     return <BoardView tickets={[]} error={null} onOpen={onOpenTicket} onStart={noop} />;
   }
   if (view === 'investigations') {
-    return <InvestigationsPage key={project.id} project={project} />;
+    return <InvestigationsPage key={project.id} project={project} onOpenTicket={onOpenTicket} />;
   }
   if (view === 'current-reviews') {
     return <CurrentReviewsPage key={project.id} project={project} />;

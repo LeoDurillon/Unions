@@ -50,11 +50,13 @@ function Detail({
   investigations,
   selection,
   onSelect,
+  onOpenTicket,
 }: {
   project: PublicProject;
   investigations: Investigation[];
   selection: Selection;
   onSelect: (selection: Selection) => void;
+  onOpenTicket: (id: number) => void;
 }): ReactElement {
   const current = investigations.find((investigation) => investigation.id === selection);
   if (!current) {
@@ -67,12 +69,19 @@ function Detail({
       onDeleted={() => {
         onSelect('new');
       }}
+      onOpenTicket={onOpenTicket}
     />
   );
 }
 
 /** Ad-hoc agent runs on a custom prompt for the project; no GitHub issue is created. */
-export function InvestigationsPage({ project }: { project: PublicProject }): ReactElement {
+export function InvestigationsPage({
+  project,
+  onOpenTicket,
+}: {
+  project: PublicProject;
+  onOpenTicket: (id: number) => void;
+}): ReactElement {
   const query = useQuery({
     queryKey: ['investigations', project.id],
     queryFn: () => api.investigations(project.id),
@@ -119,6 +128,7 @@ export function InvestigationsPage({ project }: { project: PublicProject }): Rea
             investigations={investigations}
             selection={selection}
             onSelect={setSelection}
+            onOpenTicket={onOpenTicket}
           />
         </div>
       </div>

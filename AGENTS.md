@@ -61,7 +61,8 @@ behavior; this file covers how to work in the repo.
     puts the branch back as it was. `github/pull-request.ts` keeps `tickets.behind_by` current during the pull.
   - `investigate.ts`: `InvestigationRunner` runs queued investigations in throwaway `union-i<id>` containers
     (removed after each run), sharing the scheduler's `RunSlots` (`slots.ts`); cancellation arrives through the
-    `cancel_investigation` command hook.
+    `cancel_investigation` command hook. It also drives `TicketDrafter` (`investigation-ticket.ts`), which writes
+    the tickets asked from investigations, in `union-i<id>-ticket` containers.
   - `review.ts`: the final review (fresh session, read-only tools plus git reads, one git command per call because
     permission rules cannot match `&&`). Changes asked at the review go to the implementer through the `thenRun`
     chain in `states.ts`; `revision.ts` hands it the review's feedback. `runResumable` (agent.ts) restarts in a fresh

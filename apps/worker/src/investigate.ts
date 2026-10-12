@@ -15,6 +15,7 @@ import { eq } from 'drizzle-orm';
 
 import { runAgent, type AgentFn, type AgentOutcome } from './agent';
 import { projectGitToken } from './credentials';
+import { TicketDrafter } from './investigation-ticket';
 import {
   cloneInto,
   cloneSource,
@@ -93,16 +94,27 @@ function toOutcome(outcome: AgentOutcome, cancelled: boolean): InvestigationOutc
 export class InvestigationRunner {
   private readonly active = new Map<number, { abort: AbortController; done: Promise<void> }>();
 
-  constructor(private readonly deps: InvestigationDeps) {}
+  /** Tickets asked from investigations are written alongside. */
+  private readonly tickets: TicketDrafter;
+
+  constructor(private readonly deps: InvestigationDeps) {
+    this.tickets = new TicketDrafter(deps);
+  }
 
   /** Fails the runs a stopped worker left behind and removes their containers. */
   async recover(): Promise<void> {
     for (const id of failInterruptedInvestigations(this.deps.db)) {
       await this.removeContainer(id);
     }
+    await this.tickets.recover();
   }
 
   tick(): void {
+    this.claimRuns();
+    this.tickets.tick();
+  }
+
+  private claimRuns(): void {
     while (this.deps.slots.tryTake()) {
       const investigation = claimInvestigation(this.deps.db);
       if (!investigation) {
@@ -128,6 +140,7 @@ export class InvestigationRunner {
 
   async idle(): Promise<void> {
     await Promise.all([...this.active.values()].map((run) => run.done));
+    await this.tickets.idle();
   }
 
   private async runTracked(investigation: Investigation, signal: AbortSignal): Promise<void> {

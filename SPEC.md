@@ -185,8 +185,13 @@ A one-off agent run on a custom prompt, outside the ticket pipeline (project bar
   prompt (each run is still a fresh container and session, and a repository investigation reads a fresh clone).
   Run again repeats the latest question.
 - **Log:** agent events carry `events.investigation_id`; `/api/events?investigation=<id>` streams one run's log.
-- **Not yet:** resuming the agent's own session on a follow-up, choosing another branch, turning an answer into a
-  ticket.
+- **Ticket:** **Create ticket** on an answered investigation asks for optional context (what the ticket must cover).
+  The worker (`TicketDrafter`, driven by the investigation runner, sharing the run slots) writes it in a throwaway
+  container `union-i<id>-ticket` from every question and answer plus that context, in the language of the user's
+  questions: a title, then the problem, what to change, acceptance criteria and the useful findings. It lands in the
+  Backlog (its GitHub issue follows as for any ticket), and the investigation links to it (`ticket_id`); another one
+  can be asked afterwards. `ticket_status` is `queued`, `running` or `failed` (with `ticket_error`) meanwhile.
+- **Not yet:** resuming the agent's own session on a follow-up, choosing another branch.
 
 ## Rebase
 

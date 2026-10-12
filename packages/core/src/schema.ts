@@ -256,6 +256,17 @@ export const investigations = sqliteTable(
     error: text('error'),
     startedAt: integer('started_at'),
     finishedAt: integer('finished_at'),
+    /**
+     * A ticket asked from the investigation: `queued` until the worker takes it, `running` while an
+     * agent writes it, `failed` with `ticketError`; null otherwise. `ticketId` is the last one created.
+     */
+    ticketStatus: text('ticket_status', { enum: ['queued', 'running', 'failed'] }),
+    /** What the user said the ticket should cover, on top of the investigation. */
+    ticketContext: text('ticket_context'),
+    ticketError: text('ticket_error'),
+    ticketId: integer('ticket_id').references((): AnySQLiteColumn => tickets.id, {
+      onDelete: 'set null',
+    }),
     ...timestamps,
   },
   (t) => [index('investigations_project_idx').on(t.projectId)],
