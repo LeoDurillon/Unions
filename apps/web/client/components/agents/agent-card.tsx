@@ -74,7 +74,6 @@ function CardHeader({
       <Badge tone={config.customized ? 'blue' : 'neutral'}>
         {config.customized ? 'customized' : 'default'}
       </Badge>
-      {label.notRunYet ? <Badge tone="amber">step not run yet</Badge> : null}
       <div className="flex-1" />
       {model === null ? null : (
         <>

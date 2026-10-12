@@ -1,9 +1,6 @@
 import type { AgentEffort, AgentId, AgentModel } from '@union/core';
 
-export const AGENT_LABELS: Record<
-  AgentId,
-  { title: string; description: string; notRunYet?: boolean }
-> = {
+export const AGENT_LABELS: Record<AgentId, { title: string; description: string }> = {
   shared: {
     title: 'Shared instructions',
     description: 'Sent first to every agent, before the task and the step instructions.',
@@ -36,8 +33,7 @@ export const AGENT_LABELS: Record<
   rebase: {
     title: 'Rebase',
     description:
-      'Prompt the implementation agent gets when you click Rebase. It resumes its own session and uses the Implementation model and effort.',
-    notRunYet: true,
+      "Prompt the implementation agent gets when you click Rebase in a ticket's PR tab. It resumes its own session and uses the Implementation model and effort.",
   },
 };
 
