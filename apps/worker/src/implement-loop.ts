@@ -11,12 +11,12 @@ import {
   toolsFor,
 } from '@union/core';
 
-import { runResumable, type AgentFn, type AgentOutcome } from './agent';
+import { runResumable, type AgentFn, type AgentOutcome, type AgentRun } from './agent';
 import { approvedBefore } from './approved';
 import { runGate, runInstall, type GateResult } from './gate';
 import type { GitHubApi } from './github/api';
 import { feedbackPrompt, gateFailurePrompt, gateHint } from './implement-prompts';
-import { COMMIT_HOOK_HINT, commitLeftovers, type Refused } from './leftovers';
+import { askSession, COMMIT_HOOK_HINT, commitLeftovers, type Refused } from './leftovers';
 import { attachmentsSection, buildPrompt } from './prompts';
 import { REPO_DIR, type ProvisionConfig } from './provision';
 import type { StepContext } from './scheduler';
@@ -93,29 +93,28 @@ export async function implementLoop(workspace: Workspace): Promise<Loop> {
   let prompt = firstPrompt(workspace);
   let sessionId = context.resumeSessionId;
   let gate: GateResult | null = null;
+  const run = (): AgentRun => ({
+    container,
+    cwd: REPO_DIR,
+    model: modelFor(deps.db, 'implement'),
+    effort: effortFor(deps.db, 'implement'),
+    prompt,
+    tools: toolsFor(deps.db, 'implement'),
+    denied: IMPLEMENT_DENIED,
+    resumeSessionId: sessionId,
+    signal: context.signal,
+    onEvent: context.log,
+  });
   for (let iteration = 1; ; iteration++) {
-    const outcome = await runResumable(
-      deps.agent,
-      deps.runtime,
-      {
-        container,
-        cwd: REPO_DIR,
-        model: modelFor(deps.db, 'implement'),
-        effort: effortFor(deps.db, 'implement'),
-        prompt,
-        tools: toolsFor(deps.db, 'implement'),
-        denied: IMPLEMENT_DENIED,
-        resumeSessionId: sessionId,
-        signal: context.signal,
-        onEvent: context.log,
-      },
-      freshPrompt(workspace),
-    );
+    const outcome = await runResumable(deps.agent, deps.runtime, run(), freshPrompt(workspace));
     if (outcome.kind !== 'ok') {
       return { outcome, gate, iterations: iteration };
     }
     ({ sessionId } = outcome);
-    const leftovers = await commitLeftovers(deps.runtime, container);
+    const leftovers = await commitLeftovers(deps.runtime, container, {
+      report: outcome.text,
+      ask: askSession(deps.agent, deps.runtime, run()),
+    });
     if (leftovers.kind === 'refused') {
       return { outcome, gate: null, iterations: iteration, refused: leftovers };
     }

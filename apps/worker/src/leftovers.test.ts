@@ -15,7 +15,7 @@ import {
   type ExecResult,
 } from '@union/core';
 
-import { applyDecision, commitLeftovers, LEFTOVER_MESSAGE, proposedMessage } from './leftovers';
+import { applyDecision, commitLeftovers, proposedMessage, type Ask } from './leftovers';
 import { REPO_DIR } from './provision';
 import { pauseOnRefusal, pendingRefusal, resumeRefusal } from './refused-commit';
 
@@ -65,27 +65,66 @@ beforeEach(async () => {
   await git('add', '.');
   await git('commit', '--quiet', '-m', 'init');
   await strictHook();
+  asked = [];
+});
+
+let asked: string[];
+
+/** The agent's answer when asked for the message of the changes it left. */
+function agentSays(reply: string | null, act?: () => Promise<unknown>): Ask {
+  return async (prompt) => {
+    asked.push(prompt);
+    await act?.();
+    return reply;
+  };
+}
+
+/** The agent's report already names the message, as the hint asks. */
+const reported = (message: string): { report: string; ask: Ask } => ({
+  report: `Done.\n\nRefused commit: ${message}`,
+  ask: agentSays(null),
 });
 
 afterEach(async () => {
   await rm(dir, { recursive: true, force: true });
 });
 
-test('a clean tree has nothing to commit, and accepted leftovers are committed', async () => {
-  expect(await commitLeftovers(runtime, 'c')).toEqual({ kind: 'clean' });
+test('a clean tree has nothing to commit, and accepted leftovers get the agent message', async () => {
+  const agent = { report: 'Done.', ask: agentSays('Refused commit: ✨ bump the page') };
+  expect(await commitLeftovers(runtime, 'c', agent)).toEqual({ kind: 'clean' });
+  expect(asked).toEqual([]);
   await writeFile(path.join(dir, 'page.ts'), 'export const page = 2;\n');
-  expect(await commitLeftovers(runtime, 'c')).toEqual({ kind: 'committed' });
-  expect(await git('log', '-1', '--format=%s')).toBe(LEFTOVER_MESSAGE);
+  expect(await commitLeftovers(runtime, 'c', agent)).toEqual({ kind: 'committed' });
+  expect(asked[0]).toContain('`page.ts`');
+  expect(await git('log', '-1', '--format=%B')).toBe('✨ bump the page');
+});
+
+test('asked about its leftovers, the agent may commit them itself', async () => {
+  await writeFile(path.join(dir, 'page.ts'), 'export const page = 2;\n');
+  const commits = agentSays('Committed.', () => git('commit', '--quiet', '-am', '🔧 page'));
+  expect(await commitLeftovers(runtime, 'c', { report: 'Done.', ask: commits })).toEqual({
+    kind: 'committed',
+  });
+  expect(await git('log', '-1', '--format=%s')).toBe('🔧 page');
+});
+
+test('Union never commits with a message of its own', async () => {
+  await writeFile(path.join(dir, 'page.ts'), 'export const page = 2;\n');
+  const silent = { report: 'Done.', ask: agentSays('Sorry.') };
+  expect(commitLeftovers(runtime, 'c', silent)).rejects.toThrow('gave no commit message');
+  expect(await git('log', '-1', '--format=%s')).toBe('init');
 });
 
 test('a refusal keeps the changes staged and describes them', async () => {
   await writeFile(path.join(dir, 'page.ts'), 'export const page = 2; // TODO\n');
   await writeFile(path.join(dir, 'new.ts'), 'export {};\n');
-  const result = await commitLeftovers(runtime, 'c');
+  const result = await commitLeftovers(runtime, 'c', reported('🐛 fix the page'));
   if (result.kind !== 'refused') {
     throw new Error(`expected a refusal, got ${result.kind}`);
   }
   expect(result.hookOutput).toContain('lint: 1 warning');
+  expect(result.message).toBe('🐛 fix the page');
+  expect(asked).toEqual([]);
   expect(result.leftovers.files).toEqual(['new.ts', 'page.ts']);
   expect(result.leftovers.diff).toContain('+export const page = 2; // TODO');
   expect(await git('log', '-1', '--format=%s')).toBe('init');
@@ -94,7 +133,7 @@ test('a refusal keeps the changes staged and describes them', async () => {
 
 test('the decision applies to the exact diff: commit without hooks, set aside, or ask again', async () => {
   await writeFile(path.join(dir, 'page.ts'), 'export const page = 2; // TODO\n');
-  const result = await commitLeftovers(runtime, 'c');
+  const result = await commitLeftovers(runtime, 'c', reported('🐛 fix the page'));
   if (result.kind !== 'refused') {
     throw new Error('expected a refusal');
   }
@@ -115,13 +154,13 @@ test('the decision applies to the exact diff: commit without hooks, set aside, o
     kind: 'applied',
   });
   expect(await git('log', '-1', '--format=%s')).toBe(message);
-  expect(await git('log', '-1', '--format=%b')).toContain('--no-verify');
+  expect(await git('log', '-1', '--format=%B')).toBe(message);
   expect(await git('status', '--porcelain')).toBe('');
 });
 
 test('changes set aside go to a stash, out of the branch', async () => {
   await writeFile(path.join(dir, 'new.ts'), 'export {}; // TODO\n');
-  const result = await commitLeftovers(runtime, 'c');
+  const result = await commitLeftovers(runtime, 'c', reported('🐛 fix the page'));
   if (result.kind !== 'refused') {
     throw new Error('expected a refusal');
   }
@@ -136,7 +175,7 @@ test('the commit message is the one the agent asked for at the end of its report
   expect(proposedMessage('Done.\n\nRefused commit: `🐛 highlight every space of a lot`\n')).toBe(
     '🐛 highlight every space of a lot',
   );
-  expect(proposedMessage('Done, nothing refused.')).toBe(LEFTOVER_MESSAGE);
+  expect(proposedMessage('Done, nothing refused.')).toBeNull();
 });
 
 test('a paused run resumes with the decision, and asks again when the changes moved', async () => {
@@ -149,7 +188,7 @@ test('a paused run resumes with the decision, and asks again when the changes mo
     .get();
   const ticketId = createTicket(db, { projectId: project.id, title: 't' }).id;
   await writeFile(path.join(dir, 'page.ts'), 'export const page = 2; // TODO\n');
-  const refused = await commitLeftovers(runtime, 'c');
+  const refused = await commitLeftovers(runtime, 'c', reported('fix the page'));
   if (refused.kind !== 'refused') {
     throw new Error('expected a refusal');
   }

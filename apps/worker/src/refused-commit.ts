@@ -8,7 +8,7 @@ import {
 } from '@union/core';
 
 import type { AgentOutcome } from './agent';
-import { applyDecision, proposedMessage, type Refused } from './leftovers';
+import { applyDecision, type Refused } from './leftovers';
 import type { StepResult } from './scheduler';
 
 type Ok = Extract<AgentOutcome, { kind: 'ok' }>;
@@ -17,11 +17,11 @@ export type Pause = {
   ticketId: number;
   step: 'implement' | 'rebase';
   refused: Refused;
-  /** The agent's report, and its message for the commit when it gave one. */
+  /** The agent's report. */
   report: string;
   sessionId: string | null;
   resumeState: ResumeState;
-  /** Kept when the user already edited it; else taken from the report. */
+  /** Kept when the user already edited it; else the agent's. */
   message?: string;
 };
 
@@ -41,7 +41,7 @@ export function pauseOnRefusal(db: Db, pause: Pause): StepResult {
       hookOutput,
       diff: leftovers.diff,
       diffHash: leftovers.diffHash,
-      message: pause.message ?? proposedMessage(pause.report),
+      message: pause.message ?? pause.refused.message,
       report: pause.report,
       sessionId: pause.sessionId,
       resumeState: pause.resumeState,
@@ -99,6 +99,7 @@ export async function resumeRefusal(
       kind: 'refused',
       hookOutput: `The changes are not the ones you decided on: they changed since. Check them again.\n\n${refusal.hookOutput}`,
       leftovers: decision.leftovers,
+      message: refusal.message,
     },
     report: refusal.report,
     sessionId: refusal.sessionId,

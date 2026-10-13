@@ -79,6 +79,9 @@ behavior; this file covers how to work in the repo.
     replaces `/workspace/attachments` in the container (outside the repo) with the ticket's current files, and
     `prompts.ts` lists them for every step but the rebase. `pushBranch` refuses a branch whose history holds a
     file not allowed in the repository (matched by git blob id, `PrivateFilesError`).
+  - Leftover commits always carry the agent's own message, never one of Union's: taken from the report's
+    `Refused commit: …` line, else asked for in one more turn of the agent's session (which may commit them
+    itself); no message fails the run.
   - Refused commits: when the repository's hook refuses the leftover commit (`leftovers.ts`; told apart from other
     failures by a `--no-verify --dry-run`), the implement or rebase run stops in the `commit_refused` phase with the
     agent's report, and `refused-commit.ts` records the files, hook output, diff and its hash in `refused_commits`.

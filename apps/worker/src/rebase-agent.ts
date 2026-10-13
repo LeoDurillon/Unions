@@ -10,12 +10,12 @@ import {
 } from '@union/core';
 import { and, desc, eq, inArray } from 'drizzle-orm';
 
-import { runResumable, type AgentOutcome } from './agent';
+import { runResumable, type AgentOutcome, type AgentRun } from './agent';
 import { approvedBefore } from './approved';
 import type { GateResult } from './gate';
 import { IMPLEMENT_DENIED, type Workspace } from './implement-loop';
 import { gateHint } from './implement-prompts';
-import { COMMIT_HOOK_HINT } from './leftovers';
+import { askSession, COMMIT_HOOK_HINT, type Ask } from './leftovers';
 import { buildPrompt } from './prompts';
 import { REPO_DIR } from './provision';
 
@@ -58,9 +58,25 @@ function instructions(db: Db, rebase: Rebase): string {
   return `${resolveAgent(db, 'rebase').prompt}\n\nThe base branch was fetched just now as \`origin/${base}\`; your branch is \`${branch}\`.${gateHint(project.config.gateCommand)}${COMMIT_HOOK_HINT}`;
 }
 
+function agentRun(rebase: Rebase, prompt: string, session: string | null): AgentRun {
+  const { deps, context, container } = rebase;
+  return {
+    container,
+    cwd: REPO_DIR,
+    model: modelFor(deps.db, 'rebase'),
+    effort: effortFor(deps.db, 'rebase'),
+    prompt,
+    tools: toolsFor(deps.db, 'rebase'),
+    denied: REBASE_DENIED,
+    resumeSessionId: session,
+    signal: context.signal,
+    onEvent: context.log,
+  };
+}
+
 /** Resumes the implementer's session with the rebase prompt; a fresh session gets the whole task first. */
 export function runRebaseAgent(rebase: Rebase): Promise<AgentOutcome> {
-  const { deps, context, container } = rebase;
+  const { deps, context } = rebase;
   const { db } = deps;
   const session = implementerSession(db, context.ticket.id);
   const fresh = buildPrompt({
@@ -71,23 +87,13 @@ export function runRebaseAgent(rebase: Rebase): Promise<AgentOutcome> {
     approved: approvedBefore(db, context.ticket.id, 'final_review'),
     revision: null,
   });
-  return runResumable(
-    deps.agent,
-    deps.runtime,
-    {
-      container,
-      cwd: REPO_DIR,
-      model: modelFor(db, 'rebase'),
-      effort: effortFor(db, 'rebase'),
-      prompt: session ? instructions(db, rebase) : fresh,
-      tools: toolsFor(db, 'rebase'),
-      denied: REBASE_DENIED,
-      resumeSessionId: session,
-      signal: context.signal,
-      onEvent: context.log,
-    },
-    fresh,
-  );
+  const prompt = session ? instructions(db, rebase) : fresh;
+  return runResumable(deps.agent, deps.runtime, agentRun(rebase, prompt, session), fresh);
+}
+
+/** Another turn in the rebase agent's session, for the commit message of changes it left. */
+export function askRebaseAgent(rebase: Rebase, session: string | null): Ask {
+  return askSession(rebase.deps.agent, rebase.deps.runtime, agentRun(rebase, '', session));
 }
 
 /** What the host checked and pushed, under the agent's own report. */

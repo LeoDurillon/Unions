@@ -149,14 +149,23 @@ test('the loop stops at the iteration limit with the checks still red', async ()
   expect(runs).toHaveLength(3);
 });
 
-test('uncommitted changes are committed by the host after each turn', async () => {
+test('uncommitted changes are committed by the host with the message the agent gives', async () => {
   const { runtime, commands } = fakeRuntime((command) =>
     command.includes('--porcelain')
       ? { exitCode: 0, lines: [' M src/search.ts'] }
       : { exitCode: 0, lines: [] },
   );
-  await implementLoop(workspace(runtime, [ok(1)]));
-  expect(commands.some((command) => command.includes('commit'))).toBe(true);
+  const message: AgentOutcome = {
+    kind: 'ok',
+    text: 'Refused commit: ✨ add search',
+    sessionId: 'session-1',
+    costUsd: null,
+  };
+  await implementLoop(workspace(runtime, [ok(1), message]));
+  expect(runs[1]).toMatchObject({ resumeSessionId: 'session-1' });
+  expect(runs[1]?.prompt).toContain('You left changes uncommitted');
+  const commit = commands.find((command) => command.includes('commit'));
+  expect(commit?.slice(-2)).toEqual(['-m', '✨ add search']);
 });
 
 test('a revision resumes the previous session with the user feedback', async () => {

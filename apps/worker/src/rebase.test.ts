@@ -248,6 +248,9 @@ test('a refused leftover commit pauses the rebase unpushed; the decision pushes 
   await writeFile(hook, '#!/bin/sh\necho "lint: 2 warnings"\nexit 1\n');
   await chmod(hook, 0o755);
   const leavesAChange: AgentFn = async (...args) => {
+    if (args[1].prompt.startsWith('You left changes uncommitted')) {
+      return { kind: 'ok', text: 'Refused commit: 🎨 tidy b', sessionId: 's2', costUsd: null };
+    }
     const outcome = await rebases(...args);
     await writeFile(path.join(container(), 'b.txt'), 'feature, tidied\n');
     return outcome;
@@ -257,7 +260,11 @@ test('a refused leftover commit pauses the rebase unpushed; the decision pushes 
   expect(await git(origin(), 'rev-parse', 'feature')).toBe(before);
   // Not restored: the rebased branch waits with the refused change.
   await git(container(), 'merge-base', '--is-ancestor', 'origin/main', 'HEAD');
-  expect(latestRefusal(db, ticketId)).toMatchObject({ step: 'rebase', files: ['b.txt'] });
+  expect(latestRefusal(db, ticketId)).toMatchObject({
+    step: 'rebase',
+    files: ['b.txt'],
+    message: '🎨 tidy b',
+  });
 
   decideRefusal(db, ticketId, { resolution: 'commit', message: 'tidy b' });
   const resumed = await run(leavesAChange, 'commit');

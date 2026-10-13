@@ -12,7 +12,7 @@ import { captureDiff } from './diff-snapshot';
 import { runGate, type GateResult } from './gate';
 import { commitLeftovers, type Refused } from './leftovers';
 import { PrivateFilesError, projectRemote, pushBranch } from './publish';
-import { renderRebaseReport, type Pushed, type Rebase } from './rebase-agent';
+import { askRebaseAgent, renderRebaseReport, type Pushed, type Rebase } from './rebase-agent';
 import { headCommit, rebaseProblem } from './rebase-git';
 import { outcomeOf, pauseOnRefusal, pendingRefusal, resumeRefusal } from './refused-commit';
 import type { StepResult } from './scheduler';
@@ -28,16 +28,19 @@ export function remoteOf(deps: Rebase['deps'], project: Project): ReturnType<typ
  */
 export async function verifyAndPush(
   rebase: Rebase,
-  pushed: string,
+  { pushed, outcome }: { pushed: string; outcome: Pushed['outcome'] },
 ): Promise<{ error: string } | { refused: Refused } | { gate: GateResult | null }> {
   const { deps, container, project, branch } = rebase;
-  const leftovers = await commitLeftovers(deps.runtime, container);
-  if (leftovers.kind === 'refused') {
-    return { refused: leftovers };
-  }
   const problem = await rebaseProblem(deps.runtime, container, rebase);
   if (problem) {
     return { error: problem };
+  }
+  const leftovers = await commitLeftovers(deps.runtime, container, {
+    report: outcome.text,
+    ask: askRebaseAgent(rebase, outcome.sessionId),
+  });
+  if (leftovers.kind === 'refused') {
+    return { refused: leftovers };
   }
   const { gateCommand } = project.config;
   const gate = gateCommand
@@ -122,7 +125,8 @@ export async function resumeRebase(
   if (paused) {
     return paused;
   }
-  const checked = await verifyAndPush(rebase, lease);
+  const outcome = outcomeOf(refusal);
+  const checked = await verifyAndPush(rebase, { pushed: lease, outcome });
   if ('error' in checked) {
     return { kind: 'error', error: `${checked.error}\n\nThe agent's report:\n\n${refusal.report}` };
   }
@@ -132,5 +136,5 @@ export async function resumeRebase(
       error: 'The hook refused another commit after the decision was applied',
     };
   }
-  return { pushed: true, outcome: outcomeOf(refusal), gate: checked.gate };
+  return { pushed: true, outcome, gate: checked.gate };
 }

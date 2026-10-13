@@ -68,7 +68,7 @@ async function attempt(rebase: Rebase): Promise<StepResult | Pushed> {
   if (outcome.kind === 'error') {
     return { kind: 'error', error: outcome.message };
   }
-  const checked = await verifyAndPush(rebase, pushed);
+  const checked = await verifyAndPush(rebase, { pushed, outcome });
   if ('refused' in checked) {
     return pauseRebase(rebase, { refused: checked.refused, outcome, lease: pushed });
   }
