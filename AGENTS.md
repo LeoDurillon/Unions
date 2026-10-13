@@ -41,8 +41,12 @@ behavior; this file covers how to work in the repo.
     gitignore-style patterns) are flagged `ignored` and listed apart, never dropped. `@union/core/diff` parses diffs and
     is browser-safe.
   - `client/` is the SPA: Tailwind v4, TanStack Query, dnd-kit. `app.tsx` is the shell, `components/` the UI,
-    `lib/` the hooks and the typed `api.ts`. The board and ticket panel refetch on SSE events
-    (`use-live-invalidation.ts`); the Log tab replays and follows one ticket's `agent_event`s.
+    `lib/` the hooks and the typed `api.ts`. The browser keeps one event stream for all its Union tabs
+    (`lib/event-hub.ts`: the tab holding the Web Lock `union-events` reads `/api/events` and relays each event
+    over a BroadcastChannel; browsers allow six connections per host, and a stream per tab or log used to leave
+    clicks waiting). The board and ticket panel refetch on its events (`use-live-invalidation.ts`); the Log tabs
+    load `/api/events/history` once, then follow the stream. Events are sent unnamed: a new event type reaches
+    the client without being listed.
   - Dev: `bun run dev:web` (Vite on 5173 proxies `/api` to Hono on 3000). Production: build, then start (below).
 - `apps/worker`: long-running Bun process. Drains the `commands` table, drives state machines, runs agents,
   syncs GitHub, writes `events`.

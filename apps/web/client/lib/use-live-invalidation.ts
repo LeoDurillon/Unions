@@ -1,12 +1,12 @@
 import { useQueryClient } from '@tanstack/react-query';
 
 import { ticketReviewBase } from './review-target';
-import { useEventStream } from './use-event-stream';
+import { useEvents } from './use-event-stream';
 
 /** Refetches board, ticket and investigation data whenever the worker records a change. */
 export function useLiveInvalidation(): void {
   const queryClient = useQueryClient();
-  useEventStream('/api/events?after=latest', (event) => {
+  useEvents((event) => {
     if (event.type === 'agent_event') {
       return;
     }

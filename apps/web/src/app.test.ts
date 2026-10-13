@@ -2,6 +2,8 @@ import { beforeEach, expect, test } from 'bun:test';
 
 import {
   createDb,
+  createTicket,
+  emitEvent,
   dispatch,
   migrateDb,
   saveOutput,
@@ -178,7 +180,27 @@ test('events: cursor reports the latest seq and the stream filters by ticket and
   const chunk = await reader?.read();
   await reader?.cancel();
   const text = new TextDecoder().decode(chunk?.value);
-  expect(text).toContain('event: ticket_created');
+  expect(text).toContain('"type":"ticket_created"');
   expect(text).toContain(`"ticketId":${second.id}`);
   expect(text).not.toContain(`"ticketId":${first.id}`);
+});
+
+test('a log history is plain JSON for one ticket or investigation, oldest first', async () => {
+  const project = db
+    .insert(schema.projects)
+    .values({ owner: 'h', repo: 'h', githubProjectNodeId: 'P', config: { baseBranch: 'main' } })
+    .returning()
+    .get();
+  const ticket = createTicket(db, { projectId: project.id, title: 'logged' });
+  emitEvent(db, { type: 'agent_event', ticketId: ticket.id, payload: { type: 'result' } });
+  createTicket(db, { projectId: project.id, title: 'other' });
+
+  const response = await app.request(`/api/events/history?ticket=${ticket.id}`);
+  const rows = (await response.json()) as { type: string; ticketId: number; seq: number }[];
+  expect(rows.map((row) => [row.type, row.ticketId])).toEqual([
+    ['ticket_created', ticket.id],
+    ['agent_event', ticket.id],
+  ]);
+  expect((rows[0]?.seq ?? 0) < (rows[1]?.seq ?? 0)).toBe(true);
+  expect((await app.request('/api/events/history')).status).toBe(400);
 });

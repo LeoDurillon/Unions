@@ -3,6 +3,8 @@ import { and, asc, eq, gt, max, type SQL } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { streamSSE } from 'hono/streaming';
 
+import { BAD_REQUEST } from '../http';
+
 const POLL_MS = 200;
 const BATCH = 200;
 
@@ -43,8 +45,24 @@ export function eventRoutes(db: Db): Hono {
   });
 
   /**
+   * One ticket's or one investigation's events so far, oldest first, as plain JSON: the Log tabs
+   * load their history here and follow new events on the shared stream, so they hold no connection.
+   */
+  routes.get('/history', (c) => {
+    const filter = eventFilter(c.req.query('ticket'), c.req.query('investigation'));
+    if (!filter) {
+      return c.json({ error: 'Give ?ticket=<id> or ?investigation=<id>' }, BAD_REQUEST);
+    }
+    return c.json(
+      db.select().from(schema.events).where(filter).orderBy(asc(schema.events.seq)).all(),
+    );
+  });
+
+  /**
    * SSE: tail `events` by seq. `Last-Event-ID` (or ?after=) resumes without gaps.
    * Optional ?ticket=<id> or ?investigation=<id> filters to one ticket or investigation.
+   * Events are sent unnamed (the row carries its `type`), so a client receives every type,
+   * including ones added later, without listing them.
    */
   routes.get('/', (c) => {
     let cursor = startCursor(db, c.req.header('last-event-id') ?? c.req.query('after'));
@@ -61,11 +79,7 @@ export function eventRoutes(db: Db): Hono {
           .all();
         for (const row of rows) {
           cursor = row.seq;
-          await stream.writeSSE({
-            id: String(row.seq),
-            event: row.type,
-            data: JSON.stringify(row),
-          });
+          await stream.writeSSE({ id: String(row.seq), data: JSON.stringify(row) });
         }
         if (rows.length < BATCH) {
           await stream.sleep(POLL_MS);

@@ -108,7 +108,7 @@ test('the event stream can follow one investigation', async () => {
   const chunk = await reader?.read();
   await reader?.cancel();
   const text = new TextDecoder().decode(chunk?.value);
-  expect(text).toContain('event: investigation_queued');
+  expect(text).toContain('"type":"investigation_queued"');
   expect(text).toContain(`"investigationId":${id}`);
   expect(text).not.toContain('"ticketId":7');
 });

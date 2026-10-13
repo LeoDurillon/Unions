@@ -1,10 +1,11 @@
 import { STEPS } from '@union/core/states';
-import { useState, type ReactElement } from 'react';
+import { useEffect, useState, type ReactElement } from 'react';
 
 import type { EventRow } from '../../src/api-types';
 import { summarizeAgentEvent, type LogLine } from '../lib/agent-events';
+import { api } from '../lib/api';
+import { subscribe } from '../lib/event-hub';
 import { STEP_TITLES } from '../lib/labels';
-import { useEventStream } from '../lib/use-event-stream';
 
 type Entry = { key: string; kind: LogLine['kind'] | 'run'; text: string };
 
@@ -44,20 +45,77 @@ function entriesFor(event: EventRow): Entry[] {
   }));
 }
 
-/** Replays a whole agent log from the event stream at `url`, then follows it live. */
-export function AgentLog({ url }: { url: string }): ReactElement {
-  const [entries, setEntries] = useState<Entry[]>([]);
+/** Whose log: a ticket's or an investigation's. */
+export type LogSource = { ticket: number } | { investigation: number };
 
-  useEventStream(url, (event) => {
-    const added = entriesFor(event);
-    if (added.length > 0) {
-      setEntries((previous) => [...previous, ...added]);
-    }
-  });
+function queryOf(source: LogSource): string {
+  return 'ticket' in source ? `ticket=${source.ticket}` : `investigation=${source.investigation}`;
+}
+
+function belongs(event: EventRow, source: LogSource): boolean {
+  return 'ticket' in source
+    ? event.ticketId === source.ticket
+    : event.investigationId === source.investigation;
+}
+
+/**
+ * The log's history, loaded once, then its new events from the shared stream. Events arriving while
+ * the history loads are kept and added after it, without repeats.
+ */
+function useLogEntries(source: LogSource): { entries: Entry[]; error: Error | null } {
+  const [entries, setEntries] = useState<Entry[]>([]);
+  const [failure, setFailure] = useState<Error | null>(null);
+  const query = queryOf(source);
+  useEffect(() => {
+    let lastSeq: number | null = null;
+    const early: EventRow[] = [];
+    const unsubscribe = subscribe((event) => {
+      if (!belongs(event, source)) {
+        return;
+      }
+      if (lastSeq === null) {
+        early.push(event);
+      } else if (event.seq > lastSeq) {
+        lastSeq = event.seq;
+        setEntries((previous) => [...previous, ...entriesFor(event)]);
+      }
+    });
+    let cancelled = false;
+    const load = async (): Promise<void> => {
+      try {
+        const rows = await api.eventHistory(query);
+        if (cancelled) {
+          return;
+        }
+        const known = rows.at(-1)?.seq ?? 0;
+        const all = [...rows, ...early.filter((event) => event.seq > known)];
+        lastSeq = all.at(-1)?.seq ?? 0;
+        setEntries(all.flatMap((event) => entriesFor(event)));
+      } catch (error) {
+        setFailure(error instanceof Error ? error : new Error(String(error)));
+      }
+    };
+    void load();
+    return () => {
+      cancelled = true;
+      unsubscribe();
+    };
+    // `query` identifies the source.
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
+  }, [query]);
+  return { entries, error: failure };
+}
+
+/** Replays a whole agent log, then follows it live. */
+export function AgentLog({ source }: { source: LogSource }): ReactElement {
+  const { entries, error } = useLogEntries(source);
 
   return (
     <div className="space-y-1 font-mono text-xs">
-      {entries.length === 0 ? <p className="text-zinc-500">No agent activity yet.</p> : null}
+      {error ? <p className="text-red-600 dark:text-red-400">{error.message}</p> : null}
+      {entries.length === 0 && !error ? (
+        <p className="text-zinc-500">No agent activity yet.</p>
+      ) : null}
       {entries.map((entry) => (
         <p key={entry.key} className={`whitespace-pre-wrap ${KIND_CLASS[entry.kind]}`}>
           {entry.text}
@@ -74,5 +132,5 @@ export function AgentLog({ url }: { url: string }): ReactElement {
 
 /** Replays the ticket's whole agent log, then follows it live. */
 export function LogTab({ ticketId }: { ticketId: number }): ReactElement {
-  return <AgentLog url={`/api/events?ticket=${ticketId}&after=0`} />;
+  return <AgentLog source={{ ticket: ticketId }} />;
 }

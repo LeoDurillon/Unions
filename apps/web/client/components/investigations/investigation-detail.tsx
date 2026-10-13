@@ -167,7 +167,7 @@ export function InvestigationDetail({
       {tab === 'result' ? (
         <Answer investigation={investigation} />
       ) : (
-        <AgentLog url={`/api/events?investigation=${investigation.id}&after=0`} />
+        <AgentLog source={{ investigation: investigation.id }} />
       )}
       {investigation.status === 'succeeded' ? (
         <NextSteps investigation={investigation} onOpenTicket={onOpenTicket} />
