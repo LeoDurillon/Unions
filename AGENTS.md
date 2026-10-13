@@ -40,6 +40,11 @@ behavior; this file covers how to work in the repo.
     review ignore rules (`isIgnoredPath` in `@union/core/diff`: built-in lock files plus `config.reviewIgnore`
     gitignore-style patterns) are flagged `ignored` and listed apart, never dropped. `@union/core/diff` parses diffs and
     is browser-safe.
+  - Agent review comments: "Review with agent" on either review page queues an `agent_reviews` row
+    (`routes/agent-review.ts`, `@union/core` `agent-reviews.ts`). Its findings become drafts with `author: 'agent'`
+    (badge "suggested", Keep button); keeping or editing one makes it the user's (`author: 'user'`), and a new
+    successful run replaces only the agent's untouched drafts. Nothing is sent: the drafts go out with the usual
+    send. Its prompt and model are the `review_comments` agent in Agent settings; `final_review` is unrelated.
   - `client/` is the SPA: Tailwind v4, TanStack Query, dnd-kit. `app.tsx` is the shell, `components/` the UI,
     `lib/` the hooks and the typed `api.ts`. The browser keeps one event stream for all its Union tabs
     (`lib/event-hub.ts`: the tab holding the Web Lock `union-events` reads `/api/events` and relays each event
@@ -67,6 +72,12 @@ behavior; this file covers how to work in the repo.
     (removed after each run), sharing the scheduler's `RunSlots` (`slots.ts`); cancellation arrives through the
     `cancel_investigation` command hook. It also drives `TicketDrafter` (`investigation-ticket.ts`), which writes
     the tickets asked from investigations, in `union-i<id>-ticket` containers.
+  - `agent-review.ts`: `AgentReviewRunner` (started with the investigations in `side-runs.ts`, same slots) runs
+    queued agent reviews: a ticket's in its own container on its branch (`agent-review-target.ts`), a pull request's
+    in a throwaway `union-a<id>` container where the host cloned it at the reviewed commit (`pr-checkout.ts`, through
+    `pull/<n>/head`, so forks work). The agent ends its answer with a JSON block (`agent-review-findings.ts`, format
+    appended by the host); findings outside the diff's lines become `general` drafts naming the place, so nothing is
+    lost. Cancellation goes through the `cancel_agent_review` command hook.
   - `review.ts`: the final review (fresh session, read-only tools plus git reads, one git command per call because
     permission rules cannot match `&&`). Changes asked at the review go to the implementer through the `thenRun`
     chain in `states.ts`; `revision.ts` hands it the review's feedback. `runResumable` (agent.ts) restarts in a fresh

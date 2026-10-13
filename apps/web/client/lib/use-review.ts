@@ -6,6 +6,7 @@ import type {
   DiscussionResponse,
   ReviewImportResult,
 } from '../../src/api-types';
+import { agentReviewApi } from './agent-review-api';
 import { api } from './api';
 import { reviewBase, ticketReviewBase, type ReviewTarget } from './review-target';
 
@@ -87,6 +88,7 @@ export function useCommentMutations(target: ReviewTarget): {
   add: ReturnType<typeof useMutation<unknown, Error, CommentInput>>;
   edit: ReturnType<typeof useMutation<unknown, Error, { id: number; body: string }>>;
   remove: ReturnType<typeof useMutation<unknown, Error, number>>;
+  keep: ReturnType<typeof useMutation<unknown, Error, number>>;
   send: ReturnType<typeof useMutation<unknown, Error, string>>;
 } {
   const queryClient = useQueryClient();
@@ -110,6 +112,10 @@ export function useCommentMutations(target: ReviewTarget): {
     }),
     remove: useMutation({
       mutationFn: (id: number) => api.deleteComment(base, id),
+      onSuccess: refresh,
+    }),
+    keep: useMutation({
+      mutationFn: (id: number) => agentReviewApi.keepComment(base, id),
       onSuccess: refresh,
     }),
     send: useMutation({

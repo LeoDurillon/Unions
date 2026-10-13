@@ -1,4 +1,4 @@
-import { schema, type Db } from '@union/core';
+import { diffExcerpt, schema, type AgentReviewOwner, type Db } from '@union/core';
 import { and, eq, type SQL } from 'drizzle-orm';
 import type { Context } from 'hono';
 
@@ -13,13 +13,12 @@ import {
   requireId,
   requireText,
 } from '../http';
-import { diffExcerpt } from '../review-excerpt';
 
 type Comment = typeof schema.reviewComments.$inferSelect;
 type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
 
 /** Whose comments these are: a ticket's review, or a current review of a pull request. */
-export type CommentOwner = { kind: 'ticket'; id: number } | { kind: 'review'; id: number };
+export type CommentOwner = AgentReviewOwner;
 
 /** The diff comments are anchored in: its head commit, and each file's patch by path. */
 export type CommentDiff = { headSha: string; patchOf: (path: string) => string | undefined };
@@ -135,11 +134,24 @@ export async function editComment(c: Context, db: Db, owner: CommentOwner): Prom
   const text = requireText(await readObject(c.req.raw), 'body');
   const updated = db
     .update(schema.reviewComments)
-    .set({ body: text })
+    // Edited, a suggestion is the user's: a new agent run no longer replaces it.
+    .set({ body: text, author: 'user' })
     .where(eq(schema.reviewComments.id, comment.id))
     .returning()
     .get();
   return c.json(updated);
+}
+
+/** Keeps the agent's suggestion as is: it becomes the user's. */
+export function keepComment(c: Context, db: Db, owner: CommentOwner): Response {
+  const comment = draftOf(c, db, owner);
+  const kept = db
+    .update(schema.reviewComments)
+    .set({ author: 'user' })
+    .where(eq(schema.reviewComments.id, comment.id))
+    .returning()
+    .get();
+  return c.json(kept);
 }
 
 export function deleteComment(c: Context, db: Db, owner: CommentOwner): Response {

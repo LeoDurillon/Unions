@@ -2,3 +2,4 @@
 export * from './schema';
 export * from './schema-attachments';
 export * from './schema-refused-commits';
+export * from './schema-reviews';

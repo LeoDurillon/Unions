@@ -97,6 +97,29 @@ test('drafts on the reviewed commit become line comments, older ones are quoted'
   ).toContain('pr_review_posted');
 });
 
+test('comments on the whole pull request follow the summary in the body', async () => {
+  draft({ startLine: 3, body: 'Rename this.' });
+  db.insert(schema.reviewComments)
+    .values({
+      reviewId,
+      kind: 'general',
+      path: '',
+      side: 'new',
+      startLine: 0,
+      endLine: 0,
+      excerpt: '',
+      body: 'The cache is never invalidated.',
+      headSha: 'h1',
+    })
+    .run();
+
+  await postPullRequestReview(db, () => api, reviewId, 'Summary.');
+
+  const [posted] = api.reviews;
+  expect(posted?.comments).toHaveLength(1);
+  expect(posted?.body).toBe('Summary.\n\nThe cache is never invalidated.');
+});
+
 test('a failure keeps the drafts and the error on the review', async () => {
   draft({ startLine: 3, body: 'Rename this.' });
   const failing = {

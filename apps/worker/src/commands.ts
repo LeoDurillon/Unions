@@ -1,4 +1,5 @@
 import {
+  cancelQueuedAgentReview,
   cancelQueuedInvestigation,
   createTicket,
   decideRefusal,
@@ -21,6 +22,8 @@ export type CommandHooks = {
   removeContainers: (containers: ContainerRef[]) => void;
   /** Stops a running investigation. */
   cancelInvestigation: (id: number) => void;
+  /** Stops a running agent review. */
+  cancelAgentReview: (id: number) => void;
   /** Posts a current review's drafts and summary on its pull request. */
   submitPullRequestReview: (reviewId: number, summary: string) => void;
 };
@@ -32,6 +35,7 @@ function ignore(): void {
 const NO_HOOKS: CommandHooks = {
   removeContainers: ignore,
   cancelInvestigation: ignore,
+  cancelAgentReview: ignore,
   submitPullRequestReview: ignore,
 };
 
@@ -72,16 +76,22 @@ function requireTicketId(command: Command): number {
   return command.ticketId;
 }
 
-/** A queued investigation is cancelled here; a running one is stopped by the runner. */
-function cancelInvestigation(db: Db, command: Command, hooks: CommandHooks): void {
-  const id = field(command.payload, 'investigationId');
+/** A queued investigation or agent review is cancelled here; a running one is stopped by its runner. */
+function cancelRun(db: Db, command: Command, hooks: CommandHooks): void {
+  const investigation = command.type === 'cancel_investigation';
+  const key = investigation ? 'investigationId' : 'agentReviewId';
+  const id = field(command.payload, key);
   if (typeof id !== 'number') {
-    throw new TypeError('cancel_investigation needs a numeric "investigationId"');
+    throw new TypeError(`${command.type} needs a numeric "${key}"`);
   }
-  if (!cancelQueuedInvestigation(db, id)) {
+  if (investigation && !cancelQueuedInvestigation(db, id)) {
     hooks.cancelInvestigation(id);
+  } else if (!investigation && !cancelQueuedAgentReview(db, id)) {
+    hooks.cancelAgentReview(id);
   }
 }
+
+const CANCELS = new Set(['cancel_investigation', 'cancel_agent_review']);
 
 function createFromCommand(db: Db, command: Command): void {
   const projectId = field(command.payload, 'projectId');
@@ -158,6 +168,10 @@ function execute(db: Db, command: Command, hooks: CommandHooks): void {
     decide(db, command);
     return;
   }
+  if (CANCELS.has(command.type)) {
+    cancelRun(db, command, hooks);
+    return;
+  }
   switch (command.type) {
     case 'create_ticket': {
       createFromCommand(db, command);
@@ -168,10 +182,6 @@ function execute(db: Db, command: Command, hooks: CommandHooks): void {
     case 'rebase':
     case 'cancel': {
       dispatch(db, requireTicketId(command), { type: command.type });
-      return;
-    }
-    case 'cancel_investigation': {
-      cancelInvestigation(db, command, hooks);
       return;
     }
     case 'submit_pr_review': {

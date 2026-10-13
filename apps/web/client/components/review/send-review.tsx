@@ -6,6 +6,8 @@ import { Button, ErrorText, inputClass } from '../ui';
 type SendProps = {
   copy: ReviewCopy;
   drafts: number;
+  /** Drafts the agent suggested that the user has not kept or edited. */
+  suggestions: number;
   canSend: boolean;
   pending: boolean;
   error: Error | null;
@@ -15,6 +17,7 @@ type SendProps = {
 function SendPanel({
   copy,
   drafts,
+  suggestions,
   pending,
   error,
   onSend,
@@ -26,6 +29,13 @@ function SendPanel({
       <p className="text-sm">
         {drafts} comment{drafts === 1 ? '' : 's'} {copy.destination}
       </p>
+      {suggestions > 0 ? (
+        <p className="text-sm text-amber-700 dark:text-amber-400">
+          {suggestions === 1
+            ? '1 of them is an agent suggestion you have not kept or edited.'
+            : `${suggestions} of them are agent suggestions you have not kept or edited.`}
+        </p>
+      ) : null}
       <textarea
         className={`${inputClass} min-h-20`}
         placeholder="Overall note (optional)"

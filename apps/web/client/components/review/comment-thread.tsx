@@ -3,7 +3,7 @@ import type { ReactElement } from 'react';
 import type { CommentView } from '../../../src/api-types';
 import type { Selection } from '../../lib/diff-selection';
 import type { useCommentMutations } from '../../lib/use-review';
-import { CommentCard } from './comment-card';
+import { ReviewCommentCard } from './comment-card';
 import { CommentEditor } from './comment-editor';
 
 type Mutations = ReturnType<typeof useCommentMutations>;
@@ -45,16 +45,7 @@ export function Thread({
   return (
     <div className="max-w-3xl space-y-2">
       {current.map((comment) => (
-        <CommentCard
-          key={comment.id}
-          comment={comment}
-          onSave={(body) => {
-            mutations.edit.mutate({ id: comment.id, body });
-          }}
-          onDelete={() => {
-            mutations.remove.mutate(comment.id);
-          }}
-        />
+        <ReviewCommentCard key={comment.id} comment={comment} mutations={mutations} />
       ))}
       {editing ? (
         <CommentEditor
@@ -98,17 +89,7 @@ export function OutdatedComments({
       </summary>
       <div className="mt-2 space-y-2">
         {comments.map((comment) => (
-          <CommentCard
-            key={comment.id}
-            comment={comment}
-            showExcerpt
-            onSave={(body) => {
-              mutations.edit.mutate({ id: comment.id, body });
-            }}
-            onDelete={() => {
-              mutations.remove.mutate(comment.id);
-            }}
-          />
+          <ReviewCommentCard key={comment.id} comment={comment} mutations={mutations} showExcerpt />
         ))}
       </div>
     </details>

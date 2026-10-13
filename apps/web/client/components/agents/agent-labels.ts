@@ -30,6 +30,11 @@ export const AGENT_LABELS: Record<AgentId, { title: string; description: string 
     title: 'Final review',
     description: 'Reviews the diff against the plan and gives a verdict before you approve.',
   },
+  review_comments: {
+    title: 'Review comments',
+    description:
+      'Leaves line comments on a change when you click "Review with agent" in a review. They arrive as drafts you keep, edit or delete before sending.',
+  },
   rebase: {
     title: 'Rebase',
     description:

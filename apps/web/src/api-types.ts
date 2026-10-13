@@ -141,6 +141,18 @@ export type DiffResponse = {
 
 export type CommentView = ReviewComment & { outdated: boolean };
 
+/** The latest run of the review agent on a ticket's diff or a pull request. */
+export type AgentReviewView = {
+  id: number;
+  status: 'queued' | 'running' | 'succeeded' | 'failed' | 'cancelled';
+  error: string | null;
+  /** Drafts it added, once it succeeded. */
+  comments: number | null;
+  createdAt: number;
+  startedAt: number | null;
+  finishedAt: number | null;
+};
+
 /** One line-comment thread of a pull request, as GitHub returns it. */
 export type PullRequestThread = {
   resolved: boolean;

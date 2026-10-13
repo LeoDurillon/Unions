@@ -27,7 +27,8 @@ function quoted(draft: ReviewComment): string {
 /**
  * The review as GitHub gets it. Drafts written on the commit the review is anchored at become line
  * comments; the others (the pull request moved on since) are quoted in the body with their code,
- * since GitHub refuses line comments outside the current diff.
+ * since GitHub refuses line comments outside the current diff. Comments on the whole pull request
+ * follow the summary in the body.
  */
 export function buildReview(
   review: Pick<Review, 'headSha'>,
@@ -37,8 +38,10 @@ export function buildReview(
   const current = drafts.filter(
     (draft) => draft.kind === 'line' && draft.headSha === review.headSha,
   );
-  const earlier = drafts.filter((draft) => !current.includes(draft));
+  const general = drafts.filter((draft) => draft.kind === 'general');
+  const earlier = drafts.filter((draft) => draft.kind === 'line' && !current.includes(draft));
   const parts = summary.trim() === '' ? [] : [summary.trim()];
+  parts.push(...general.map((draft) => draft.body.trim()));
   if (earlier.length > 0) {
     parts.push(
       '### On an earlier version of the pull request',

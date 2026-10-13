@@ -4,6 +4,7 @@ import type { DiffResponse } from '../../../src/api-types';
 import type { ReviewCopy, ReviewTarget } from '../../lib/review-target';
 import type { useCommentMutations } from '../../lib/use-review';
 import { Button } from '../ui';
+import { AgentReviewButton } from './agent-review-button';
 import type { DiffView } from './file-diff';
 import { ImportComments } from './import-comments';
 import { SendReview } from './send-review';
@@ -25,6 +26,7 @@ export function ReviewHeader({
   title,
   diff,
   drafts,
+  suggestions,
   view,
   onView,
   mutations,
@@ -35,6 +37,8 @@ export function ReviewHeader({
   title: string;
   diff: DiffResponse | undefined;
   drafts: number;
+  /** Drafts still as the agent wrote them. */
+  suggestions: number;
   view: DiffView;
   onView: (view: DiffView) => void;
   mutations: Mutations;
@@ -58,10 +62,12 @@ export function ReviewHeader({
       {target.kind === 'ticket' && diff?.pullRequest ? (
         <ImportComments ticketId={target.ticketId} pullRequest={diff.pullRequest} />
       ) : null}
+      <AgentReviewButton target={target} />
       <ViewToggle view={view} onChange={onView} />
       <SendReview
         copy={withRefusal(copy, diff)}
         drafts={drafts}
+        suggestions={suggestions}
         canSend={diff?.canSend ?? false}
         pending={mutations.send.isPending}
         error={mutations.send.error}

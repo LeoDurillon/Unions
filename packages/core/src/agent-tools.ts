@@ -10,21 +10,25 @@ export const AGENT_REPO_DIR = '/workspace/repo';
 const READ_ONLY = ['Read', 'Grep', 'Glob'] as const;
 const READ_GIT = ['diff', 'log', 'show', 'status'] as const;
 
-/**
- * The tools each step runs with until the user picks others. The review reads the change with git
- * in both the plain and the `git -C <repo>` form agents often use.
- */
-export const DEFAULT_TOOLS: Record<Step, readonly string[]> = {
+/** An agent that runs on its own: every pipeline step, and the reviewer writing draft comments. */
+export type RunAgent = Step | 'review_comments';
+
+/** Reading a change with git, in both the plain and the `git -C <repo>` form agents often use. */
+const REVIEW_TOOLS = [
+  ...READ_ONLY,
+  ...READ_GIT.map((command) => `Bash(git ${command}*)`),
+  ...READ_GIT.map((command) => `Bash(git -C ${AGENT_REPO_DIR} ${command}*)`),
+];
+
+/** The tools each agent runs with until the user picks others. */
+export const DEFAULT_TOOLS: Record<RunAgent, readonly string[]> = {
   intake: READ_ONLY,
   summary: READ_ONLY,
   technical: READ_ONLY,
   test_plan: READ_ONLY,
   implement: ['Read', 'Edit', 'Write', 'Grep', 'Glob', 'Bash'],
-  final_review: [
-    ...READ_ONLY,
-    ...READ_GIT.map((command) => `Bash(git ${command}*)`),
-    ...READ_GIT.map((command) => `Bash(git -C ${AGENT_REPO_DIR} ${command}*)`),
-  ],
+  final_review: REVIEW_TOOLS,
+  review_comments: REVIEW_TOOLS,
   // Added to the implementer's tools for a rebase (see `toolsFor`).
   rebase: ['Bash(git rebase*)', 'Bash(git merge-base*)', 'Bash(git add*)', 'Bash(git status*)'],
 };

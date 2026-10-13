@@ -21,6 +21,9 @@ test('remove_containers hands every container to the hook', () => {
     cancelInvestigation: () => {
       // Not under test.
     },
+    cancelAgentReview: () => {
+      // Not under test.
+    },
     submitPullRequestReview: () => {
       // Not under test.
     },

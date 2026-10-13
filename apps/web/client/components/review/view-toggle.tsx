@@ -2,6 +2,8 @@ import { useState, type ReactElement } from 'react';
 
 import type { DiffView } from './file-diff';
 
+export type { DiffView } from './file-diff';
+
 const STORAGE_KEY = 'union.review.view';
 const VIEWS: { view: DiffView; label: string }[] = [
   { view: 'unified', label: 'Unified' },

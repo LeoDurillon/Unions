@@ -40,6 +40,7 @@ test('lists the shared prompt and every step agent with their defaults', async (
     ['test_plan', 'sonnet', false],
     ['implement', 'opus', false],
     ['final_review', 'opus', false],
+    ['review_comments', 'opus', false],
     ['rebase', null, false],
   ]);
 });

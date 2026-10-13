@@ -5,12 +5,14 @@ import { Hono, type Context } from 'hono';
 import type { DiffResponse, DiscussionResponse } from '../api-types';
 import type { OnboardingGitHub } from '../github-onboarding';
 import { ACCEPTED, BAD_REQUEST, CONFLICT, fail, NOT_FOUND, readObject, requireId } from '../http';
+import { cancelAgentReview, getAgentReview, startAgentReview } from './agent-review';
 import { guarded } from './github-errors';
 import {
   addComment,
   deleteComment,
   draftsOf,
   editComment,
+  keepComment,
   listComments,
   type CommentDiff,
   type CommentOwner,
@@ -169,5 +171,14 @@ export function prReviewRoutes(db: Db, github: OnboardingGitHub): Hono {
   routes.patch('/comments/:commentId', (c) => editComment(c, db, owner(load(db, c).review)));
   routes.delete('/comments/:commentId', (c) => deleteComment(c, db, owner(load(db, c).review)));
   routes.post('/review', (c) => submit(db, c));
+  routes.get('/agent-review', (c) => getAgentReview(c, db, owner(load(db, c).review)));
+  routes.post('/agent-review', (c) => {
+    const { review } = load(db, c);
+    const refusal =
+      review.files && review.headSha ? null : 'Open the diff first: its files are not read yet.';
+    return startAgentReview(c, db, owner(review), refusal);
+  });
+  routes.post('/agent-review/cancel', (c) => cancelAgentReview(c, db, owner(load(db, c).review)));
+  routes.post('/comments/:commentId/keep', (c) => keepComment(c, db, owner(load(db, c).review)));
   return routes;
 }

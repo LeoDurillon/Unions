@@ -4,11 +4,11 @@ import type { CommentView, DiffResponse } from '../../../src/api-types';
 import { reviewCopy, type ReviewTarget } from '../../lib/review-target';
 import { useCommentMutations, useComments, useDiff } from '../../lib/use-review';
 import { ErrorText } from '../ui';
-import type { DiffView } from './file-diff';
 import { FileList } from './file-list';
+import { GeneralComments } from './general-comments';
 import { OpenFile } from './open-file';
 import { ReviewHeader } from './review-header';
-import { useDiffView } from './view-toggle';
+import { useDiffView, type DiffView } from './view-toggle';
 
 /** The picked file, else the first file that is not ignored, else the first file. */
 function openFileId(files: DiffResponse['files'], picked: number | null): number | null {
@@ -85,6 +85,7 @@ function DiffBody({
         {banner}
         <ErrorText error={error} />
         {emptyText ? <p className="text-sm text-zinc-500">{emptyText}</p> : null}
+        <GeneralComments comments={comments} mutations={mutations} />
         {fileId === null ? null : (
           <OpenFile
             key={fileId}
@@ -180,6 +181,10 @@ export function ReviewPage({
         title={title}
         diff={diff.data}
         drafts={comments.filter((comment) => comment.status === 'draft').length}
+        suggestions={
+          comments.filter((comment) => comment.status === 'draft' && comment.author === 'agent')
+            .length
+        }
         view={view}
         onView={setView}
         mutations={mutations}

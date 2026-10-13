@@ -176,6 +176,13 @@
       "when": 1791890296264,
       "tag": "0024_slow_lizard",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "6",
+      "when": 1791905786431,
+      "tag": "0025_lazy_fixer",
+      "breakpoints": true
     }
   ]
 }

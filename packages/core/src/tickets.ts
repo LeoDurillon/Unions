@@ -2,6 +2,7 @@ import { desc, eq } from 'drizzle-orm';
 
 import type { Db } from './db';
 import * as schema from './schema';
+import type { reviewComments } from './schema-reviews';
 import { boardStatus, transition, type Action, type Phase, type Step } from './states';
 
 export type Ticket = typeof schema.tickets.$inferSelect;
@@ -10,7 +11,7 @@ export type ProjectConfig = schema.ProjectConfig;
 export type Run = typeof schema.runs.$inferSelect;
 export type DiffSnapshot = typeof schema.diffSnapshots.$inferSelect;
 export type DiffFileRow = typeof schema.diffFiles.$inferSelect;
-export type ReviewComment = typeof schema.reviewComments.$inferSelect;
+export type ReviewComment = typeof reviewComments.$inferSelect;
 export type StepOutput = typeof schema.stepOutputs.$inferSelect;
 type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
 type Executor = Db | Tx;

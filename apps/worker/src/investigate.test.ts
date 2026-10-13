@@ -221,6 +221,9 @@ test('the cancel command cancels a queued run itself and hands a running one to 
     cancelInvestigation: (id) => {
       cancelled.push(id);
     },
+    cancelAgentReview: () => {
+      // Not under test.
+    },
     submitPullRequestReview: () => {
       // Not under test.
     },

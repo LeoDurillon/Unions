@@ -1,8 +1,7 @@
-import { githubText, schema, type Db } from '@union/core';
+import { diffExcerpt, githubText, schema, type Db } from '@union/core';
 import { and, desc, eq, isNotNull } from 'drizzle-orm';
 
 import type { PullRequestNote, PullRequestThread, ReviewImportResult } from './api-types';
-import { diffExcerpt } from './review-excerpt';
 
 type Thread = PullRequestThread;
 type Snapshot = { headSha: string; patches: Map<string, string> };

@@ -304,46 +304,6 @@ export const diffFiles = sqliteTable(
   (t) => [index('diff_files_snapshot_idx').on(t.snapshotId, t.position)],
 );
 
-/** The user's line comments on the diff: drafts until the review is sent. */
-/** A review comment belongs to a ticket's review, or to a current review of a pull request (one of them). */
-export const reviewComments = sqliteTable(
-  'review_comments',
-  {
-    id: integer('id').primaryKey({ autoIncrement: true }),
-    ticketId: integer('ticket_id').references(() => tickets.id, { onDelete: 'cascade' }),
-    reviewId: integer('review_id').references((): AnySQLiteColumn => currentReviews.id, {
-      onDelete: 'cascade',
-    }),
-    /**
-     * `line`: on lines of a file. `general`: about the whole pull request (a review summary or a
-     * conversation comment imported from GitHub); its path, side, lines and excerpt are empty.
-     */
-    kind: text('kind', { enum: ['line', 'general'] })
-      .notNull()
-      .default('line'),
-    path: text('path').notNull(),
-    side: text('side', { enum: ['old', 'new'] }).notNull(),
-    startLine: integer('start_line').notNull(),
-    endLine: integer('end_line').notNull(),
-    /** The commented lines as they were, so the comment still reads right once the diff changes. */
-    excerpt: text('excerpt').notNull(),
-    body: text('body').notNull(),
-    headSha: text('head_sha').notNull(),
-    status: text('status', { enum: ['draft', 'sent'] })
-      .notNull()
-      .default('draft'),
-    sentAt: integer('sent_at'),
-    /** Set when imported from the pull request (a thread's first comment, a review, a comment): a re-import skips it. */
-    githubUrl: text('github_url'),
-    createdAt: integer('created_at').notNull().default(now),
-  },
-  (t) => [
-    index('review_comments_ticket_idx').on(t.ticketId, t.status),
-    index('review_comments_review_idx').on(t.reviewId, t.status),
-    uniqueIndex('review_comments_github_idx').on(t.ticketId, t.githubUrl),
-  ],
-);
-
 /**
  * Pull requests the user put under review from the Pull requests tab, without a ticket. The fields
  * are a snapshot of the pull request when it was added, so the tab lists them without calling GitHub.

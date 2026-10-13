@@ -1,4 +1,4 @@
-import { parsePatch, type DiffLine } from '@union/core';
+import { parsePatch, type DiffLine } from './diff';
 
 function lineNumber(line: DiffLine, side: 'old' | 'new'): number | null {
   if (line.kind === 'context') {

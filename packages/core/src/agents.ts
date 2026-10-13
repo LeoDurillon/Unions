@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm';
 
-import { DEFAULT_TOOLS, validateTools } from './agent-tools';
+import { DEFAULT_TOOLS, validateTools, type RunAgent } from './agent-tools';
 import type { Db } from './db';
 import * as schema from './schema';
 import {
@@ -11,7 +11,6 @@ import {
   STEPS,
   type AgentEffort,
   type AgentModel,
-  type Step,
 } from './states';
 
 /**
@@ -23,6 +22,7 @@ export const AGENT_IDS = [
   ...PLANNING_STEPS,
   'implement',
   'final_review',
+  'review_comments',
   'rebase',
 ] as const;
 export type AgentId = (typeof AGENT_IDS)[number];
@@ -58,6 +58,11 @@ Read the diff from the base branch. Check correctness, missing acceptance criter
 Do not run the checks: the implementation report states their last result; quote it.
 Output a markdown review starting with one line: "VERDICT: APPROVED" or "VERDICT: CHANGES_REQUESTED".
 Then list the findings, each with the file, the problem and the suggested fix.`,
+  review_comments: `Review the change as a careful senior reviewer and leave line comments on it, as a person reviewing a pull request would.
+Read the diff from the base branch, and the surrounding code wherever a change depends on it.
+Comment only on what matters: bugs, wrong behaviour, missing edge cases, security, data loss, races, misleading names, risky changes without tests.
+No praise, no summary of the change, no style remarks a formatter or linter would catch. At most 15 comments: fewer, sharper comments are better.
+Each comment says what is wrong and suggests the fix, in a few sentences.`,
   rebase: `Rebase your branch onto the latest base branch (\`origin/<base branch>\`, already fetched for you).
 Resolve conflicts keeping the intent of both sides. Run the project's checks and fix anything the rebase broke.
 If a conflict cannot be resolved safely, run \`git rebase --abort\` and explain why.
@@ -84,14 +89,17 @@ export function isAgentId(value: string): value is AgentId {
   return AGENT_IDS.some((agent) => agent === value);
 }
 
-/** Agents with a model of their own: the pipeline steps (not `shared`, not `rebase`). */
-function stepOf(agent: AgentId): Step | null {
-  return STEPS.find((step) => step === agent) ?? null;
+const MODEL_BY_AGENT: Record<RunAgent, AgentModel> = { ...MODEL_BY_STEP, review_comments: 'opus' };
+const RUN_AGENTS: readonly RunAgent[] = [...STEPS, 'review_comments'];
+
+/** Agents with a model of their own: the pipeline steps and the reviewer (not `shared`). */
+function stepOf(agent: AgentId): RunAgent | null {
+  return RUN_AGENTS.find((step) => step === agent) ?? null;
 }
 
 function defaultModel(agent: AgentId): AgentModel | null {
   const step = stepOf(agent);
-  return step ? MODEL_BY_STEP[step] : null;
+  return step ? MODEL_BY_AGENT[step] : null;
 }
 
 function defaultTools(agent: AgentId): string[] | null {
@@ -151,22 +159,22 @@ export function listAgents(db: Db): AgentConfig[] {
 }
 
 /** The model a run of `step` uses: the user's choice, else the built-in one. */
-export function modelFor(db: Db, step: Step): AgentModel {
+export function modelFor(db: Db, step: RunAgent): AgentModel {
   // The rebase is the implementer's own session, so it keeps its model.
   if (step === 'rebase') {
     return modelFor(db, 'implement');
   }
-  return resolveAgent(db, step).model ?? MODEL_BY_STEP[step];
+  return resolveAgent(db, step).model ?? MODEL_BY_AGENT[step];
 }
 
 /** The thinking effort a run of `step` uses; null: the CLI's default. */
-export function effortFor(db: Db, step: Step): AgentEffort | null {
+export function effortFor(db: Db, step: RunAgent): AgentEffort | null {
   // Like its model, the rebase keeps the implementer's effort.
   return resolveAgent(db, step === 'rebase' ? 'implement' : step).effort;
 }
 
 /** The tools a run of `step` is allowed: the user's choice, else the step's defaults. */
-export function toolsFor(db: Db, step: Step): string[] {
+export function toolsFor(db: Db, step: RunAgent): string[] {
   // The implementer's tools, plus the git commands a rebase needs.
   if (step === 'rebase') {
     return [...new Set([...toolsFor(db, 'implement'), ...DEFAULT_TOOLS.rebase])];

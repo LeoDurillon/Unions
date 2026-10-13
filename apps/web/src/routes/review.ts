@@ -6,11 +6,13 @@ import type { DiffResponse } from '../api-types';
 import type { OnboardingGitHub } from '../github-onboarding';
 import { BAD_REQUEST, CONFLICT, fail, NOT_FOUND, readObject, requireId } from '../http';
 import { formatReview } from '../review-feedback';
+import { cancelAgentReview, getAgentReview, startAgentReview } from './agent-review';
 import {
   addComment,
   deleteComment,
   draftsOf,
   editComment,
+  keepComment,
   listComments,
   markSent,
   type CommentDiff,
@@ -174,6 +176,28 @@ async function sendReview(db: Db, c: Context): Promise<Response> {
   return c.json({ sent: drafts.length, feedback });
 }
 
+/** Why the agent cannot review the ticket's change now, or null when it can. */
+function agentRefusal(db: Db, ticket: Ticket): string | null {
+  if (!ticket.branch || !latestSnapshot(db, ticket.id)) {
+    return 'No diff to review yet: run the implementation first.';
+  }
+  return ticket.phase.kind === 'running'
+    ? 'Wait for the current run to finish: the agent reviews in the same workspace.'
+    : null;
+}
+
+function agentReviewRoutes(routes: Hono, db: Db): void {
+  routes.get('/:id/agent-review', (c) => getAgentReview(c, db, owner(loadTicket(db, c))));
+  routes.post('/:id/agent-review', (c) => {
+    const ticket = loadTicket(db, c);
+    return startAgentReview(c, db, owner(ticket), agentRefusal(db, ticket));
+  });
+  routes.post('/:id/agent-review/cancel', (c) =>
+    cancelAgentReview(c, db, owner(loadTicket(db, c))),
+  );
+  routes.post('/:id/comments/:commentId/keep', (c) => keepComment(c, db, owner(loadTicket(db, c))));
+}
+
 export function reviewRoutes(db: Db, github: OnboardingGitHub): Hono {
   const routes = new Hono();
   routes.get('/:id/diff', (c) => getDiff(db, c));
@@ -198,5 +222,6 @@ export function reviewRoutes(db: Db, github: OnboardingGitHub): Hono {
   routes.post('/:id/comments/import-note', (c) =>
     importPullRequestNote(db, github, loadTicket(db, c), c),
   );
+  agentReviewRoutes(routes, db);
   return routes;
 }

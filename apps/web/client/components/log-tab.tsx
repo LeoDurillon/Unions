@@ -27,7 +27,31 @@ function stepTitle(payload: unknown): string {
   return known ? STEP_TITLES[known] : '';
 }
 
+/** The review agent's runs on the ticket: a header when it starts, a line when it ends. */
+function agentReviewEntries(event: EventRow): Entry[] {
+  const payload = typeof event.payload === 'object' && event.payload !== null ? event.payload : {};
+  const status = 'status' in payload ? payload.status : null;
+  const key = `${event.seq}`;
+  if (status === 'running') {
+    return [{ key, kind: 'run', text: 'Review comments · agent review' }];
+  }
+  if (status === 'succeeded') {
+    const count = 'comments' in payload ? Number(payload.comments) : 0;
+    return [
+      { key, kind: 'result', text: `${count} suggestion${count === 1 ? '' : 's'} added as drafts` },
+    ];
+  }
+  if (status === 'failed') {
+    const error = 'error' in payload ? String(payload.error) : '';
+    return [{ key, kind: 'error', text: `Agent review failed: ${error}` }];
+  }
+  return [];
+}
+
 function entriesFor(event: EventRow): Entry[] {
+  if (event.type === 'agent_review_changed') {
+    return agentReviewEntries(event);
+  }
   if (event.type === 'run_started') {
     const text = `Run #${event.runId ?? '?'} · ${stepTitle(event.payload)}`;
     return [{ key: `${event.seq}`, kind: 'run', text }];
