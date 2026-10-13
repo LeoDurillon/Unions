@@ -3,9 +3,13 @@ import { useState, type ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
 import { api } from '../../lib/api';
+import { eventRulesApi } from '../../lib/event-rules-api';
 import { TokenInput } from '../onboarding/connect-step';
 import { NotionHelp } from '../onboarding/notion-step';
 import { Badge, Button, ErrorText, Field, inputClass } from '../ui';
+
+// Its own tab, beside this one: the event rules write to the Notion pages.
+export { EventsSection } from './events-section';
 
 /** Verifies before saving, so a typo never replaces a working connection. */
 async function connect(project: PublicProject, token: string, dataSource: string): Promise<string> {
@@ -14,6 +18,8 @@ async function connect(project: PublicProject, token: string, dataSource: string
     notionToken: token,
     notionDataSourceId: verified.dataSourceId,
   });
+  // The event rules pick among the data source's columns.
+  await eventRulesApi.refreshNotion(project.id);
   return verified.title || 'Untitled data source';
 }
 

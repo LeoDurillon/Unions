@@ -40,6 +40,13 @@ behavior; this file covers how to work in the repo.
     review ignore rules (`isIgnoredPath` in `@union/core/diff`: built-in lock files plus `config.reviewIgnore`
     gitignore-style patterns) are flagged `ignored` and listed apart, never dropped. `@union/core/diff` parses diffs and
     is browser-safe.
+  - Event rules (project settings → Events, `routes/event-rules.ts`): when something happens to a ticket, set a
+    property of the Notion page it was imported from (`tickets.notion_page_id`, set by the import; older imports are
+    linked from their "Imported from Notion:" line by `backfillNotionPages` at worker start). Rules point at
+    properties by id in the stored copy of the data source's columns (`notion_data_sources`, read again on connect
+    or "Refresh from Notion") and are checked against it on save. Triggers, variables and Notion value shapes are in
+    the browser-safe `@union/core/event-rules`; matching and the delivery queue in `event-rules.ts` and
+    `event-deliveries.ts`. Rules apply only to events logged after their creation (no replay).
   - Agent review comments: "Review with agent" on either review page queues an `agent_reviews` row
     (`routes/agent-review.ts`, `@union/core` `agent-reviews.ts`). Its findings become drafts with `author: 'agent'`
     (badge "suggested", Keep button); keeping or editing one makes it the user's (`author: 'user'`), and a new
@@ -72,6 +79,11 @@ behavior; this file covers how to work in the repo.
     (removed after each run), sharing the scheduler's `RunSlots` (`slots.ts`); cancellation arrives through the
     `cancel_investigation` command hook. It also drives `TicketDrafter` (`investigation-ticket.ts`), which writes
     the tickets asked from investigations, in `union-i<id>-ticket` containers.
+  - `event-dispatcher.ts`: follows the `events` log (cursor in `event_cursors`), queues one `event_deliveries` row
+    per matching rule and event (unique), and writes to Notion a few per tick, one at a time. Rate limits, 5xx and
+    network errors are retried with backoff up to 5 attempts; each outcome is logged as `event_rule_applied` (the
+    ticket's Log tab). `github/pull-request.ts` logs `pull_request_merged`/`pull_request_closed`, and linking a PR by
+    hand logs `pull_request_linked`, for the rules.
   - `agent-review.ts`: `AgentReviewRunner` (started with the investigations in `side-runs.ts`, same slots) runs
     queued agent reviews: a ticket's in its own container on its branch (`agent-review-target.ts`), a pull request's
     in a throwaway `union-a<id>` container where the host cloned it at the reviewed commit (`pr-checkout.ts`, through

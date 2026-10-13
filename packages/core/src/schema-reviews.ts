@@ -7,7 +7,36 @@ import {
   type AnySQLiteColumn,
 } from 'drizzle-orm/sqlite-core';
 
-import { currentReviews, now, tickets } from './schema';
+import { now, projects, tickets } from './schema';
+import type { PullRequestFile } from './schema-types';
+
+/**
+ * Pull requests the user put under review from the Pull requests tab, without a ticket. The fields
+ * are a snapshot of the pull request when it was added, so the tab lists them without calling GitHub.
+ */
+export const currentReviews = sqliteTable(
+  'current_reviews',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    projectId: integer('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    prNumber: integer('pr_number').notNull(),
+    title: text('title').notNull(),
+    url: text('url').notNull(),
+    author: text('author').notNull(),
+    headBranch: text('head_branch').notNull(),
+    baseBranch: text('base_branch').notNull(),
+    /** The pull request's files as last fetched for review, and the head commit they are at. */
+    files: text('files', { mode: 'json' }).$type<PullRequestFile[]>(),
+    headSha: text('head_sha'),
+    /** `sending` while the worker posts the review to GitHub; `failed` with `submitError` when it could not. */
+    submitStatus: text('submit_status', { enum: ['sending', 'failed'] }),
+    submitError: text('submit_error'),
+    createdAt: integer('created_at').notNull().default(now),
+  },
+  (t) => [uniqueIndex('current_reviews_pr_idx').on(t.projectId, t.prNumber)],
+);
 
 /** Comments on a ticket's review or a current review of a pull request (one of them), drafts until sent. */
 export const reviewComments = sqliteTable(

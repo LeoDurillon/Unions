@@ -64,4 +64,18 @@ export async function refreshPullRequest(
     ticketId: ticket.id,
     payload: { prState, behindBy },
   });
+  if (prState !== ticket.prState) {
+    recordEnd(db, ticket, prState);
+  }
+}
+
+/** The ends of a pull request, as events of their own (the event rules wait for them). */
+function recordEnd(db: Db, ticket: Ticket, prState: Ticket['prState']): void {
+  if (prState === 'merged' || prState === 'closed') {
+    emitEvent(db, {
+      type: prState === 'merged' ? 'pull_request_merged' : 'pull_request_closed',
+      ticketId: ticket.id,
+      payload: { number: ticket.prNumber },
+    });
+  }
 }

@@ -1,4 +1,4 @@
-import { schema, type Db, type Project, type ProjectConfig } from '@union/core';
+import { forgetNotionSchema, schema, type Db, type Project, type ProjectConfig } from '@union/core';
 import { and, eq, inArray, isNull } from 'drizzle-orm';
 import type { Context } from 'hono';
 
@@ -198,6 +198,13 @@ export async function updateProject(db: Db, c: Context): Promise<Response> {
     .where(eq(schema.projects.id, project.id))
     .returning()
     .get();
+  // Another data source, or none: its stored columns no longer apply (the next refresh reads them).
+  if (
+    updated.config.notionDataSourceId !== project.config.notionDataSourceId ||
+    updated.notionToken === null
+  ) {
+    forgetNotionSchema(db, project.id);
+  }
   return c.json(toPublicProject(updated));
 }
 

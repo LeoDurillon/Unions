@@ -73,6 +73,19 @@ function IssueLine({ detail }: { detail: TicketDetail }): ReactElement {
       ) : (
         'GitHub issue not created yet'
       )}
+      {ticket.notionPageId ? (
+        <>
+          {' · '}
+          <a
+            className="text-indigo-600 underline dark:text-indigo-400"
+            href={`https://www.notion.so/${ticket.notionPageId.replaceAll('-', '')}`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Notion page
+          </a>
+        </>
+      ) : null}
     </p>
   );
 }

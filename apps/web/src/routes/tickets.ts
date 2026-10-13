@@ -4,6 +4,7 @@ import {
   InvalidTransition,
   latestOutput,
   latestRefusal,
+  parseNotionId,
   saveOutput,
   schema,
   STEPS,
@@ -95,10 +96,16 @@ async function addTicket(db: Db, c: Context): Promise<Response> {
   if (parentId !== null && findTicket(db)(parentId)?.projectId !== projectId) {
     throw fail(BAD_REQUEST, 'The parent must be a ticket of the same project');
   }
+  const notionPage = optionalText(body, 'notionPageId');
+  const notionPageId = notionPage === undefined ? null : parseNotionId(notionPage);
+  if (notionPage !== undefined && notionPageId === null) {
+    throw fail(BAD_REQUEST, 'That is not a Notion page ID');
+  }
   const ticket = createTicket(db, {
     projectId,
     title: requireText(body, 'title'),
     body: optionalText(body, 'body') ?? '',
+    ...(notionPageId ? { notionPageId } : {}),
   });
   const linked = parentId === null ? ticket : linkParent(db, ticket.id, parentId);
   return c.json(summarize(linked, findTicket(db)), CREATED);

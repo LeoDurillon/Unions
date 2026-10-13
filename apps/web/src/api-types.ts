@@ -249,4 +249,11 @@ export type GitHubIssue = {
 export type IssueImport = Omit<GitHubIssue, 'nodeId' | 'pullRequest'> & { ticketId: number | null };
 
 /** A Notion page fetched for import: shown as a preview, then turned into a ticket. */
-export type NotionImport = { title: string; body: string; url: string; truncated: boolean };
+export type NotionImport = {
+  title: string;
+  body: string;
+  url: string;
+  truncated: boolean;
+  /** The page, linked to the ticket created from it (event rules update it). */
+  pageId: string;
+};

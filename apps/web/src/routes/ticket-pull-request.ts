@@ -1,4 +1,5 @@
 import {
+  emitEvent,
   getTicket,
   projectGitHubAuth,
   schema,
@@ -86,6 +87,11 @@ export async function linkPullRequest(
     .set({ prNumber: pull.number, prReadyAt: pull.draft ? null : Date.now() })
     .where(eq(schema.tickets.id, ticket.id))
     .run();
+  emitEvent(db, {
+    type: 'pull_request_linked',
+    ticketId: ticket.id,
+    payload: { number: pull.number },
+  });
   const result: LinkResult = { ...pull, warning: warningFor(ticket, pull) };
   return c.json(result);
 }

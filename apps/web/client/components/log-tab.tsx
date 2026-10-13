@@ -48,7 +48,27 @@ function agentReviewEntries(event: EventRow): Entry[] {
   return [];
 }
 
+function payloadText(payload: unknown, key: string): string {
+  if (typeof payload !== 'object' || payload === null || !(key in payload)) {
+    return '';
+  }
+  const value: unknown = Reflect.get(payload, key);
+  return typeof value === 'string' ? value : '';
+}
+
+/** An event rule applied to the ticket: what it set, or why not. */
+function ruleEntries(event: EventRow): Entry[] {
+  const status = payloadText(event.payload, 'status');
+  const detail = payloadText(event.payload, 'detail');
+  const error = payloadText(event.payload, 'error');
+  const text = `Event rule ${status}${detail ? `: ${detail}` : ''}${error ? ` (${error})` : ''}`;
+  return [{ key: `${event.seq}`, kind: status === 'failed' ? 'error' : 'result', text }];
+}
+
 function entriesFor(event: EventRow): Entry[] {
+  if (event.type === 'event_rule_applied') {
+    return ruleEntries(event);
+  }
   if (event.type === 'agent_review_changed') {
     return agentReviewEntries(event);
   }

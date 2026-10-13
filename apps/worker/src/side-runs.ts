@@ -1,11 +1,15 @@
-import type { ContainerRuntime, Db } from '@union/core';
+import { backfillNotionPages, FetchNotionApi, type ContainerRuntime, type Db } from '@union/core';
 
 import { AgentReviewRunner } from './agent-review';
+import { EventDispatcher } from './event-dispatcher';
 import { InvestigationRunner } from './investigate';
 import type { ProvisionConfig } from './provision';
 import type { RunSlots } from './slots';
 
-/** The runs outside the ticket pipeline, taking their slots from it: investigations and agent reviews. */
+/**
+ * The work outside the ticket pipeline: investigations and agent reviews (taking their slots from it),
+ * and the event rules.
+ */
 export type SideRuns = {
   investigations: InvestigationRunner;
   agentReviews: AgentReviewRunner;
@@ -23,21 +27,24 @@ export async function startSideRuns(deps: {
 }): Promise<SideRuns> {
   const investigations = new InvestigationRunner(deps);
   const agentReviews = new AgentReviewRunner(deps);
+  const events = new EventDispatcher(deps.db, new FetchNotionApi());
   await investigations.recover();
   await agentReviews.recover();
+  backfillNotionPages(deps.db);
   return {
     investigations,
     agentReviews,
     tick: () => {
       investigations.tick();
       agentReviews.tick();
+      events.tick();
     },
     stop: () => {
       investigations.stop();
       agentReviews.stop();
     },
     idle: async () => {
-      await Promise.all([investigations.idle(), agentReviews.idle()]);
+      await Promise.all([investigations.idle(), agentReviews.idle(), events.idle()]);
     },
   };
 }

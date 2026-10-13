@@ -156,6 +156,8 @@ export const api = {
     title: string;
     body: string;
     parentId?: number | null;
+    /** The Notion page it is imported from. */
+    notionPageId?: string;
   }): Promise<TicketSummary> => request('POST', '/api/tickets', input),
   setParent: (id: number, parentId: number | null): Promise<TicketSummary> =>
     request('PUT', `/api/tickets/${id}/parent`, { parentId }),

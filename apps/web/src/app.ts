@@ -1,10 +1,9 @@
-import type { Db } from '@union/core';
+import { FetchNotionApi, type Db, type NotionApi } from '@union/core';
 import { Hono, type Context } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 
 import { OctokitOnboarding, type OnboardingGitHub } from './github-onboarding';
 import { INTERNAL_ERROR } from './http';
-import { FetchNotionApi, type NotionApi } from './notion';
 import { apiRoutes } from './routes/api';
 
 /** Someone waits on the page: a GitHub call gives up after about 40 s (two 20 s attempts), not 2 minutes. */

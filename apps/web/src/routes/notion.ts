@@ -1,4 +1,4 @@
-import { schema, type Db } from '@union/core';
+import { NotionError, parseNotionId, schema, type Db, type NotionApi } from '@union/core';
 import { eq } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
 import { HTTPException } from 'hono/http-exception';
@@ -14,12 +14,9 @@ import {
   requireText,
   UNAUTHORIZED,
 } from '../http';
-import type { NotionApi } from '../notion';
-import { NotionError } from '../notion-error';
-import { parseNotionId } from '../notion-id';
 
 /** Notion failures become messages the UI shows next to the field. */
-async function guarded<T>(work: () => Promise<T>): Promise<T> {
+export async function guarded<T>(work: () => Promise<T>): Promise<T> {
   try {
     return await work();
   } catch (error) {
@@ -83,6 +80,7 @@ async function importPage(db: Db, notion: NotionApi, c: Context): Promise<Respon
     body: `${markdown.trim()}\n\n---\nImported from Notion: ${page.url}`,
     url: page.url,
     truncated,
+    pageId: page.id,
   };
   return c.json(result);
 }

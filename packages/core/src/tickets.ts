@@ -55,6 +55,8 @@ export function createTicket(
     title: string;
     body?: string;
     issue?: { number: number; nodeId: string };
+    /** The Notion page it was imported from. */
+    notionPageId?: string;
   },
 ): Ticket {
   return db.transaction((tx) => {
@@ -66,6 +68,7 @@ export function createTicket(
         body: input.body ?? '',
         issueNumber: input.issue?.number ?? null,
         issueNodeId: input.issue?.nodeId ?? null,
+        notionPageId: input.notionPageId ?? null,
       })
       .returning()
       .get();

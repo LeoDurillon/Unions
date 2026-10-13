@@ -6,7 +6,7 @@ import { ChecksSection } from './checks-section';
 import { DeleteSection } from './delete-section';
 import { GitHubAccessSection } from './github-access-section';
 import { InstructionsSection } from './instructions-section';
-import { NotionSection } from './notion-section';
+import { EventsSection, NotionSection } from './notion-section';
 import { PullRequestSection } from './pull-request-section';
 import { ReviewSection } from './review-section';
 
@@ -17,6 +17,7 @@ export const PANES = [
   { id: 'pull-requests', label: 'Pull requests' },
   { id: 'review', label: 'Review' },
   { id: 'notion', label: 'Notion' },
+  { id: 'events', label: 'Events' },
   { id: 'danger', label: 'Danger zone' },
 ] as const;
 export type Pane = (typeof PANES)[number]['id'];
@@ -43,6 +44,7 @@ export function PaneBody({
     'pull-requests': <PullRequestSection project={project} />,
     review: <ReviewSection project={project} />,
     notion: <NotionSection project={project} />,
+    events: <EventsSection project={project} />,
     danger: <DeleteSection project={project} onDeleted={onDeleted} />,
   };
   return bodies[pane];

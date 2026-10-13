@@ -87,7 +87,12 @@ export function NotionImportPanel({
   });
   const create = useMutation({
     mutationFn: (found: NotionImport) =>
-      api.createTicket({ projectId, title: found.title, body: found.body }),
+      api.createTicket({
+        projectId,
+        title: found.title,
+        body: found.body,
+        notionPageId: found.pageId,
+      }),
     onSuccess: (ticket) => {
       onCreated(ticket.id);
     },
