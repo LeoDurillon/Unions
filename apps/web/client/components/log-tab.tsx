@@ -1,16 +1,17 @@
 import { STEPS } from '@union/core/states';
-import { useEffect, useState, type ReactElement } from 'react';
+import { useEffect, useRef, useState, type ReactElement } from 'react';
 
 import type { EventRow } from '../../src/api-types';
 import { summarizeAgentEvent, type LogLine } from '../lib/agent-events';
 import { api } from '../lib/api';
 import { subscribe } from '../lib/event-hub';
 import { STEP_TITLES } from '../lib/labels';
+import { groupRuns, type LogRun } from '../lib/log-runs';
 
 type Entry = { key: string; kind: LogLine['kind'] | 'run'; text: string };
 
 const KIND_CLASS: Record<Entry['kind'], string> = {
-  run: 'mt-3 border-t border-zinc-300 pt-2 font-semibold dark:border-zinc-700',
+  run: 'font-semibold',
   init: 'text-zinc-500',
   text: '',
   tool: 'text-indigo-600 dark:text-indigo-400',
@@ -106,26 +107,90 @@ function useLogEntries(source: LogSource): { entries: Entry[]; error: Error | nu
   return { entries, error: failure };
 }
 
-/** Replays a whole agent log, then follows it live. */
+function Line({ entry }: { entry: Entry }): ReactElement {
+  return <p className={`whitespace-pre-wrap ${KIND_CLASS[entry.kind]}`}>{entry.text}</p>;
+}
+
+/** One run, folded unless it is the last one or the user opened it. */
+function RunSection({
+  run,
+  open,
+  onToggle,
+}: {
+  run: LogRun<Entry>;
+  open: boolean;
+  onToggle: (open: boolean) => void;
+}): ReactElement {
+  return (
+    <details
+      open={open}
+      onToggle={(event) => {
+        onToggle(event.currentTarget.open);
+      }}
+      className="border-t border-zinc-300 pt-2 first:border-t-0 first:pt-0 dark:border-zinc-700"
+    >
+      <summary className="flex cursor-pointer list-none items-baseline gap-2">
+        <span aria-hidden className="w-3 text-center text-zinc-500">
+          {open ? '▾' : '▸'}
+        </span>
+        {run.header ? (
+          <Line entry={run.header} />
+        ) : (
+          <p className="font-semibold">Before the runs</p>
+        )}
+        <span className="text-zinc-500">
+          {run.lines.length} line{run.lines.length === 1 ? '' : 's'}
+        </span>
+      </summary>
+      {open ? (
+        <div className="mt-1 space-y-1">
+          {run.lines.map((entry) => (
+            <Line key={entry.key} entry={entry} />
+          ))}
+        </div>
+      ) : null}
+    </details>
+  );
+}
+
+/** Replays a whole agent log, then follows it live; every run but the last starts folded. */
 export function AgentLog({ source }: { source: LogSource }): ReactElement {
   const { entries, error } = useLogEntries(source);
+  // The runs the user opened or folded; the others follow the default.
+  const [toggled, setToggled] = useState<ReadonlyMap<string, boolean>>(new Map());
+  const runs = groupRuns(entries, (entry) => entry.kind === 'run');
+  const lastKey = runs.at(-1)?.key;
+  // Follows new lines only: opening or folding a run keeps the reader where they are.
+  const end = useRef<HTMLDivElement>(null);
+  const count = entries.length;
+  useEffect(() => {
+    if (count > 0) {
+      end.current?.scrollIntoView({ block: 'end' });
+    }
+  }, [count]);
 
   return (
-    <div className="space-y-1 font-mono text-xs">
+    <div className="space-y-3 font-mono text-xs">
       {error ? <p className="text-red-600 dark:text-red-400">{error.message}</p> : null}
       {entries.length === 0 && !error ? (
         <p className="text-zinc-500">No agent activity yet.</p>
       ) : null}
-      {entries.map((entry) => (
-        <p key={entry.key} className={`whitespace-pre-wrap ${KIND_CLASS[entry.kind]}`}>
-          {entry.text}
-        </p>
-      ))}
-      <div
-        ref={(node) => {
-          node?.scrollIntoView({ block: 'end' });
-        }}
-      />
+      {runs.map((run) => {
+        const open = toggled.get(run.key) ?? run.key === lastKey;
+        return (
+          <RunSection
+            key={run.key}
+            run={run}
+            open={open}
+            onToggle={(next) => {
+              if (next !== open) {
+                setToggled((current) => new Map(current).set(run.key, next));
+              }
+            }}
+          />
+        );
+      })}
+      <div ref={end} />
     </div>
   );
 }
