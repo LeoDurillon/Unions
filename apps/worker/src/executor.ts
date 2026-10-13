@@ -2,6 +2,7 @@ import {
   type ContainerRuntime,
   type Db,
   effortFor,
+  listAttachments,
   modelFor,
   parentOf,
   type Project,
@@ -55,6 +56,7 @@ export function createExecutor(
         instructions: agent.prompt,
         approved: approvedBefore(db, ticket.id, step),
         revision: context.revision,
+        attachments: listAttachments(db, ticket.id),
       });
       const run = {
         container: container.name,

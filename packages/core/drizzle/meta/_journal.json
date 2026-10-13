@@ -162,6 +162,13 @@
       "when": 1791880936182,
       "tag": "0022_colorful_paladin",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "6",
+      "when": 1791886420251,
+      "tag": "0023_mute_skaar",
+      "breakpoints": true
     }
   ]
 }

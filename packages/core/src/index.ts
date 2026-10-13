@@ -1,4 +1,5 @@
 export * from './agent-tools';
+export * from './attachments';
 export * from './agents';
 export * from './db';
 export * from './diff';
@@ -9,7 +10,7 @@ export * from './investigation-tickets';
 export * from './investigations';
 export * from './project-url';
 export type * from './runtime';
-export * as schema from './schema';
+export * as schema from './tables';
 export type { PullRequestFile } from './schema-types';
 export * from './states';
 export * from './ticket-links';

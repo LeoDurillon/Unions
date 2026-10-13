@@ -5,6 +5,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./states": "./src/states.ts",
+    "./attachment-limits": "./src/attachment-limits.ts",
     "./diff": "./src/diff.ts",
     "./github-client": "./src/github-client.ts",
     "./github-text": "./src/github-text.ts",

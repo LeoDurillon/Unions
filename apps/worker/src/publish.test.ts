@@ -1,9 +1,21 @@
 import { expect, test } from 'bun:test';
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 
-import { createDb, createTicket, getTicket, migrateDb, schema, setParent } from '@union/core';
+import {
+  createDb,
+  createTicket,
+  getTicket,
+  gitBlobId,
+  migrateDb,
+  schema,
+  setParent,
+} from '@union/core';
 import { eq } from 'drizzle-orm';
 
-import { pullRequestBody } from './publish';
+import { hostGit } from './provision';
+import { assertNoPrivateFiles, pullRequestBody } from './publish';
 
 test('a PR stacked on the parent branch names the parent PR', () => {
   const db = createDb(':memory:');
@@ -32,4 +44,30 @@ test('a PR stacked on the parent branch names the parent PR', () => {
   expect(pullRequestBody(db, getTicket(db, child))).toBe(
     'Closes #13\n\nBuilds on #40, which it targets: merge that one first.',
   );
+});
+
+test('a branch holding a private attachment is refused before the push', async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'union-private-'));
+  try {
+    const git = (args: string[]): Promise<string> => hostGit(['-C', dir, ...args], null);
+    await hostGit(['init', '--quiet', dir], null);
+    await writeFile(path.join(dir, 'kept.txt'), 'fine\n');
+    await git(['add', '.']);
+    await git(['-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '--quiet', '-m', 'one']);
+    const secret = new TextEncoder().encode('customer data\n');
+    const privateFile = { name: 'orders.csv', blobId: gitBlobId(secret) };
+    expect(assertNoPrivateFiles(dir, [privateFile])).resolves.toBeUndefined();
+
+    // Committed then deleted: still in the history that would be pushed.
+    await writeFile(path.join(dir, 'fixture.csv'), secret);
+    await git(['add', '.']);
+    await git(['-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '--quiet', '-m', 'two']);
+    await git(['rm', '--quiet', 'fixture.csv']);
+    await git(['-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '--quiet', '-m', 'three']);
+    expect(assertNoPrivateFiles(dir, [privateFile])).rejects.toThrow(
+      'The branch contains the attached file `orders.csv`',
+    );
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
 });

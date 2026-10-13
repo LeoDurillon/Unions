@@ -6,6 +6,7 @@ import {
   emitEvent,
   getTicket,
   parentOf,
+  privateAttachments,
   schema,
   ticketLabel,
   type ContainerRuntime,
@@ -29,6 +30,39 @@ export type PublishResult = {
   error: string | null;
 };
 
+/** A file the branch must not contain: its git blob id, and its name for the error. */
+export type PrivateFile = { name: string; blobId: string };
+
+/** The push was stopped before reaching GitHub, because of a private attachment. */
+export class PrivateFilesError extends Error {}
+
+async function hasObject(bare: string, id: string): Promise<boolean> {
+  try {
+    await hostGit(['-C', bare, 'cat-file', '-e', id], null);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Refuses the push when the branch's history holds a private attachment, committed as is; a copy
+ * changed by even one byte is not caught (the agent is told not to commit them at all).
+ */
+export async function assertNoPrivateFiles(bare: string, files: PrivateFile[]): Promise<void> {
+  const found: string[] = [];
+  for (const file of files) {
+    if (await hasObject(bare, file.blobId)) {
+      found.push(`\`${file.name}\``);
+    }
+  }
+  if (found.length > 0) {
+    throw new PrivateFilesError(
+      `The branch contains the attached file${found.length === 1 ? '' : 's'} ${found.join(', ')}, not allowed in the repository: it was not pushed. Ask for a revision that removes it from the branch's history, or allow the file in the repository from the ticket's Overview tab.`,
+    );
+  }
+}
+
 /**
  * Takes the ticket's branch out of the container as a git bundle and pushes it from the host with the
  * project's token or GitHub App installation; the container never sees a credential. With `lease`
@@ -39,9 +73,9 @@ export async function pushBranch(
   runtime: ContainerRuntime,
   container: string,
   remote: { url: string; secret: string | null },
-  target: { branch: string; lease?: string },
+  target: { branch: string; lease?: string; privateFiles?: PrivateFile[] },
 ): Promise<void> {
-  const { branch, lease } = target;
+  const { branch, lease, privateFiles = [] } = target;
   const dir = await mkdtemp(path.join(tmpdir(), 'union-push-'));
   try {
     const bundle = path.join(dir, 'branch.bundle');
@@ -52,6 +86,7 @@ export async function pushBranch(
       ['-C', bare, 'fetch', '--quiet', bundle, `refs/heads/${branch}:refs/heads/${branch}`],
       null,
     );
+    await assertNoPrivateFiles(bare, privateFiles);
     const force = lease ? [`--force-with-lease=refs/heads/${branch}:${lease}`] : [];
     await hostGit(
       [
@@ -153,7 +188,10 @@ export async function publishBranch(input: {
   const { db, project, ticket, branch, base } = input;
   try {
     const remote = await projectRemote(db, input.config.gitBaseUrl, project);
-    await pushBranch(input.runtime, input.container, remote, { branch });
+    await pushBranch(input.runtime, input.container, remote, {
+      branch,
+      privateFiles: privateAttachments(db, ticket.id),
+    });
     emitEvent(db, { type: 'branch_pushed', ticketId: ticket.id, payload: { branch } });
     // Re-read: the user may have linked a PR while the agent was working. A linked PR is kept.
     const { prNumber } = getTicket(db, ticket.id);

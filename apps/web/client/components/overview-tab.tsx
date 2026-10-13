@@ -4,6 +4,7 @@ import type { TicketDetail } from '../../src/api-types';
 import { isBlocked, STEP_TITLES } from '../lib/labels';
 import { useTicketCommands } from '../lib/use-ticket-commands';
 import { Markdown } from './markdown';
+import { TicketAttachments } from './ticket-attachments';
 import { TicketLinks } from './ticket-links';
 import { Badge, Button, ErrorText } from './ui';
 
@@ -98,6 +99,7 @@ export function OverviewTab({
         <p className="text-sm text-zinc-500">No description.</p>
       )}
       <TicketLinks detail={detail} onOpen={onOpenTicket} />
+      <TicketAttachments ticketId={ticket.id} />
       <ErrorText error={command.error} />
       <div className="flex gap-2">
         {kind === 'backlog' ? (

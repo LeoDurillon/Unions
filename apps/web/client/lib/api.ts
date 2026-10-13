@@ -43,14 +43,14 @@ export class ApiError extends Error {
   }
 }
 
-function errorMessage(data: unknown, fallback: string): string {
+export function errorMessage(data: unknown, fallback: string): string {
   if (typeof data === 'object' && data !== null && 'error' in data) {
     return String(data.error);
   }
   return fallback;
 }
 
-async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
+export async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
   const response = await fetch(path, {
     method,
     headers: { 'content-type': 'application/json' },

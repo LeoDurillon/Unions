@@ -4,7 +4,7 @@ import path from 'node:path';
 import { drizzle, type BunSQLiteDatabase } from 'drizzle-orm/bun-sqlite';
 import { readMigrationFiles } from 'drizzle-orm/migrator';
 
-import * as schema from './schema';
+import * as schema from './tables';
 
 export type Db = BunSQLiteDatabase<typeof schema>;
 

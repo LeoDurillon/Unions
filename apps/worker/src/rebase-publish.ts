@@ -1,9 +1,9 @@
-import { emitEvent, schema, type Project } from '@union/core';
+import { emitEvent, privateAttachments, schema, type Project } from '@union/core';
 import { eq } from 'drizzle-orm';
 
 import { captureDiff } from './diff-snapshot';
 import { runGate, type GateResult } from './gate';
-import { projectRemote, pushBranch } from './publish';
+import { PrivateFilesError, projectRemote, pushBranch } from './publish';
 import { renderRebaseReport, type Pushed, type Rebase } from './rebase-agent';
 import { headCommit, rebaseProblem } from './rebase-git';
 import type { StepResult } from './scheduler';
@@ -38,8 +38,12 @@ export async function verifyAndPush(
     await pushBranch(deps.runtime, container, await remoteOf(deps, project), {
       branch,
       lease: pushed,
+      privateFiles: privateAttachments(deps.db, rebase.context.ticket.id),
     });
   } catch (error) {
+    if (error instanceof PrivateFilesError) {
+      return { error: error.message };
+    }
     return {
       error: `The push was refused (did someone push to \`${branch}\` meanwhile?): ${String(error)}`,
     };

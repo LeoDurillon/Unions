@@ -1,6 +1,7 @@
 import {
   type Db,
   effortFor,
+  listAttachments,
   getTicket,
   modelFor,
   parentOf,
@@ -63,6 +64,7 @@ export async function runReviewStep(
         instructions: resolveAgent(db, 'final_review').prompt + reviewContext(base, ticket.branch),
         approved: approvedBefore(db, ticket.id, 'final_review'),
         revision: null,
+        attachments: listAttachments(db, ticket.id),
       }),
       tools: toolsFor(db, 'final_review'),
       signal: context.signal,

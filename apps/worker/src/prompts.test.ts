@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test';
 
-import type { Ticket } from '@union/core';
+import type { Attachment, Ticket } from '@union/core';
 
 import { buildPrompt, isPlanningStep } from './prompts';
 
@@ -55,4 +55,29 @@ test('a parent ticket is described after the task', () => {
   expect(prompt).toContain('# Builds on\n\nThis ticket builds on #12 "Search index"');
   expect(prompt.indexOf('# Builds on')).toBeGreaterThan(prompt.indexOf('## Add search'));
   expect(prompt).toContain('Index titles.');
+});
+
+test('attached files are listed with where they are and what may not be committed', () => {
+  const attachment = {
+    name: 'orders.csv',
+    size: 2048,
+    contentType: 'text/csv',
+    note: 'the import fails on it',
+    allowInRepo: false,
+  } as Attachment;
+  const prompt = buildPrompt({
+    ticket,
+    shared: 's',
+    instructions: 'i',
+    approved: [],
+    revision: null,
+    attachments: [attachment, { ...attachment, name: 'fixture.json', note: '', allowInRepo: true }],
+  });
+  expect(prompt).toContain('`/workspace/attachments/`');
+  expect(prompt).toContain('- `orders.csv` (2.0 KB, text/csv, private): the import fails on it');
+  expect(prompt).toContain('- `fixture.json` (2.0 KB, text/csv, may be added to the repository)\n');
+  expect(prompt.indexOf('# Attached files')).toBeLessThan(prompt.indexOf('# Your job'));
+  expect(
+    buildPrompt({ ticket, shared: 's', instructions: 'i', approved: [], revision: null }),
+  ).not.toContain('# Attached files');
 });

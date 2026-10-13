@@ -13,6 +13,7 @@ import {
   readObject,
   requireId,
 } from '../http';
+import { removeTicketFiles } from './attachments';
 import { requireNotionId } from './notion';
 
 const NO_CONTENT = 204;
@@ -204,7 +205,7 @@ export async function updateProject(db: Db, c: Context): Promise<Response> {
  * Deletes the project and, by cascade, its tickets, runs and outputs. GitHub is left untouched.
  * The web never calls Docker, so the tickets' containers are handed to the worker to remove.
  */
-export function deleteProject(db: Db, c: Context): Response {
+export async function deleteProject(db: Db, c: Context): Promise<Response> {
   const project = loadProject(db, c);
   const tickets = db
     .select()
@@ -246,5 +247,6 @@ export function deleteProject(db: Db, c: Context): Response {
     }
     tx.delete(schema.projects).where(eq(schema.projects.id, project.id)).run();
   });
+  await removeTicketFiles(ticketIds);
   return c.body(null, NO_CONTENT);
 }

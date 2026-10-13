@@ -5,6 +5,7 @@ import path from 'node:path';
 import { AGENT_REPO_DIR, schema, type ContainerRuntime, type Db, type Ticket } from '@union/core';
 import { eq } from 'drizzle-orm';
 
+import { syncAttachments } from './attachments-sync';
 import { projectGitToken } from './credentials';
 import { resolveTicketBase } from './ticket-base';
 
@@ -133,7 +134,10 @@ export async function cloneInto(
   }
 }
 
-/** Idempotent: creates the container, seeds credentials, clones the repo, leaves it running. */
+/**
+ * Idempotent: creates the container, seeds credentials, clones the repo, puts the ticket's files in,
+ * leaves it running.
+ */
 export async function ensureTicketContainer(
   db: Db,
   runtime: ContainerRuntime,
@@ -162,6 +166,7 @@ export async function ensureTicketContainer(
     const base = await resolveTicketBase(db, ticket, source);
     await cloneInto(runtime, names.name, source, base ?? project.config.baseBranch);
   }
+  await syncAttachments(db, runtime, names.name, ticket.id);
   db.update(schema.tickets)
     .set({
       containerName: names.name,

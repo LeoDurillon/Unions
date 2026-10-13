@@ -13,7 +13,7 @@ import type { AgentEffort, AgentModel, BoardStatus, Phase, Step } from './states
 
 export type { InvestigationExchange, ProjectConfig, PullRequestFile } from './schema-types';
 
-const now = sql`(unixepoch('subsec') * 1000)`;
+export const now = sql`(unixepoch('subsec') * 1000)`;
 const timestamps = {
   createdAt: integer('created_at').notNull().default(now),
   updatedAt: integer('updated_at')

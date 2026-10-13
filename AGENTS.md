@@ -74,6 +74,11 @@ behavior; this file covers how to work in the repo.
   - `provision.ts` creates a ticket's container, seeds credentials, and clones the repo on the host with the
     project's token, resetting `origin` to the token-free URL before copying it in; `agent.ts` runs
     `claude -p` in it and parses stream-json; `prompts.ts` builds the step prompts.
+  - Ticket attachments: the web stores uploads under `attachments/t<ticket>/` (gitignored, `UNION_ATTACHMENTS_DIR`
+    overrides; rows in `ticket_attachments`, `routes/attachments.ts`). Before every step `attachments-sync.ts`
+    replaces `/workspace/attachments` in the container (outside the repo) with the ticket's current files, and
+    `prompts.ts` lists them for every step but the rebase. `pushBranch` refuses a branch whose history holds a
+    file not allowed in the repository (matched by git blob id, `PrivateFilesError`).
   - `github/`: `api.ts` is the narrow `GitHubApi` the worker depends on, `octokit-api.ts` the real client,
     `fake-api.ts` the in-memory one for tests, `sync.ts` the mirror (issue, Status field, one comment per step,
     pull of title/description and "move to In Progress"; `dependency.ts` pushes a ticket's parent as "blocked by"), `queries.ts` the GraphQL. `clients.ts` builds each

@@ -2,6 +2,7 @@ import {
   type ContainerRuntime,
   type Db,
   effortFor,
+  listAttachments,
   modelFor,
   parentOf,
   type Project,
@@ -15,7 +16,7 @@ import { approvedBefore } from './approved';
 import { runGate, runInstall, type GateResult } from './gate';
 import type { GitHubApi } from './github/api';
 import { feedbackPrompt, gateFailurePrompt, gateHint } from './implement-prompts';
-import { buildPrompt } from './prompts';
+import { attachmentsSection, buildPrompt } from './prompts';
 import { REPO_DIR, type ProvisionConfig } from './provision';
 import type { StepContext } from './scheduler';
 import { commitLeftovers } from './workspace-git';
@@ -58,14 +59,21 @@ function freshPrompt({ deps, context, project }: Workspace): string {
     instructions: resolveAgent(deps.db, 'implement').prompt + gateHint(project.config.gateCommand),
     approved: approvedBefore(deps.db, ticket.id, 'implement'),
     revision: null,
+    attachments: listAttachments(deps.db, ticket.id),
   });
   return revision ? `${prompt}\n\n${feedbackPrompt(revision.feedback)}` : prompt;
 }
 
-/** A resumed session already knows the task: only the feedback is sent. */
+/** A resumed session already knows the task: only the feedback is sent, with the files as they are now. */
 function firstPrompt(workspace: Workspace): string {
-  const { revision, resumeSessionId } = workspace.context;
-  return revision && resumeSessionId ? feedbackPrompt(revision.feedback) : freshPrompt(workspace);
+  const { revision, resumeSessionId, ticket } = workspace.context;
+  if (!revision || !resumeSessionId) {
+    return freshPrompt(workspace);
+  }
+  const attachments = listAttachments(workspace.deps.db, ticket.id);
+  return attachments.length === 0
+    ? feedbackPrompt(revision.feedback)
+    : `${feedbackPrompt(revision.feedback)}\n\n${attachmentsSection(attachments)}`;
 }
 
 /** Agent turn, then checks; on red checks the same session gets the failure, up to the limit. */

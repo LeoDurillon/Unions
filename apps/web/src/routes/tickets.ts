@@ -33,7 +33,6 @@ import {
   requireId,
   requireText,
 } from '../http';
-import { issueImportRoutes } from './issue-import';
 import { reviewRoutes } from './review';
 import {
   assertStartable,
@@ -44,6 +43,7 @@ import {
   summarize,
 } from './ticket-links';
 import { linkPullRequest, unlinkPullRequest } from './ticket-pull-request';
+import { ticketSubroutes } from './ticket-subroutes';
 
 function loadTicket(db: Db, id: number): TicketSummary {
   try {
@@ -196,7 +196,7 @@ export function ticketRoutes(db: Db, github: OnboardingGitHub): Hono {
   routes.put('/:id/parent', (c) => changeParent(db, c));
   routes.put('/:id/pull-request', (c) => linkPullRequest(db, github, c));
   routes.delete('/:id/pull-request', (c) => unlinkPullRequest(db, c));
-  routes.route('/github-issue', issueImportRoutes(db, github));
+  routes.route('/', ticketSubroutes(db, github));
   routes.route('/', reviewRoutes(db, github));
   return routes;
 }
