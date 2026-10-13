@@ -168,6 +168,8 @@ export const api = {
     request('PUT', `/api/tickets/${id}/pull-request`, { pullRequest }),
   unlinkPullRequest: (id: number): Promise<unknown> =>
     request('DELETE', `/api/tickets/${id}/pull-request`),
+  /** Only a cancelled ticket: the server refuses the others. */
+  removeTicket: (id: number): Promise<unknown> => request('DELETE', `/api/tickets/${id}`),
   // A review lives under a base URL: a ticket's, or a pull request's under review (review-target.ts).
   diff: (base: string): Promise<DiffResponse> => request('GET', `${base}/diff`),
   diffFile: (base: string, fileId: number): Promise<{ id: number; path: string; patch: string }> =>

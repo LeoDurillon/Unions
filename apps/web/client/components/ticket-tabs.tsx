@@ -148,15 +148,17 @@ export function PanelBody({
   workerTab,
   onWorkerTab,
   onOpenTicket,
+  onRemoved,
 }: {
   detail: TicketDetail;
   section: Section;
   workerTab: WorkerTab;
   onWorkerTab: (tab: WorkerTab) => void;
   onOpenTicket: (id: number) => void;
+  onRemoved: () => void;
 }): ReactElement {
   if (section === 'overview') {
-    return <OverviewTab detail={detail} onOpenTicket={onOpenTicket} />;
+    return <OverviewTab detail={detail} onOpenTicket={onOpenTicket} onRemoved={onRemoved} />;
   }
   if (section === 'pull-request') {
     return <PullRequestTab detail={detail} />;

@@ -4,6 +4,7 @@ import type { TicketDetail } from '../../src/api-types';
 import { isBlocked, STEP_TITLES } from '../lib/labels';
 import { useTicketCommands } from '../lib/use-ticket-commands';
 import { Markdown } from './markdown';
+import { RemoveTicket } from './remove-ticket';
 import { TicketAttachments } from './ticket-attachments';
 import { TicketLinks } from './ticket-links';
 import { Badge, Button, ErrorText } from './ui';
@@ -93,9 +94,12 @@ function IssueLine({ detail }: { detail: TicketDetail }): ReactElement {
 export function OverviewTab({
   detail,
   onOpenTicket,
+  onRemoved,
 }: {
   detail: TicketDetail;
   onOpenTicket: (id: number) => void;
+  /** After a cancelled ticket is removed: the panel closes. */
+  onRemoved: () => void;
 }): ReactElement {
   const { ticket, runs } = detail;
   const blocked = isBlocked(ticket);
@@ -127,6 +131,7 @@ export function OverviewTab({
             Start
           </Button>
         ) : null}
+        {kind === 'cancelled' ? <RemoveTicket ticketId={ticket.id} onRemoved={onRemoved} /> : null}
         {finished ? null : (
           <Button
             variant="danger"

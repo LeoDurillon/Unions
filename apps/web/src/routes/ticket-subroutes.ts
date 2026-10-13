@@ -5,15 +5,17 @@ import type { OnboardingGitHub } from '../github-onboarding';
 import { attachmentRoutes } from './attachments';
 import { issueImportRoutes } from './issue-import';
 import { refusedCommit } from './refused-commit';
+import { removeCancelledTicket } from './ticket-removal';
 
 /**
  * The routes under `/api/tickets` that have their own module: the issue import, a ticket's files,
- * its refused commit.
+ * its refused commit, its removal once cancelled.
  */
 export function ticketSubroutes(db: Db, github: OnboardingGitHub): Hono {
   const routes = new Hono();
   routes.route('/github-issue', issueImportRoutes(db, github));
   routes.route('/:id/attachments', attachmentRoutes(db));
   routes.get('/:id/refused-commit', (c) => refusedCommit(db, c));
+  routes.delete('/:id', (c) => removeCancelledTicket(db, c));
   return routes;
 }
