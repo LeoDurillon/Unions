@@ -189,3 +189,21 @@ test('lock files and the project patterns are flagged as ignored, other files ar
     ['bun.lock', false],
   ]);
 });
+
+test('a done ticket with its branch takes a review too', async () => {
+  await call('POST', '/comments', {
+    path: 'math.js',
+    side: 'new',
+    startLine: 6,
+    body: 'Guard NaN.',
+  });
+  db.update(schema.tickets)
+    .set({ phase: { kind: 'done' }, branch: null })
+    .run();
+  expect((await call('POST', '/review', {})).status).toBe(409);
+  db.update(schema.tickets).set({ branch: '1-t' }).run();
+  const diff = (await (await call('GET', '/diff')).json()) as DiffResponse;
+  expect(diff.canSend).toBe(true);
+  expect((await call('POST', '/review', {})).status).toBe(200);
+  expect(db.select().from(schema.commands).all()[0]?.type).toBe('revise');
+});

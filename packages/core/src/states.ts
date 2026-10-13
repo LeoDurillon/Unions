@@ -121,6 +121,19 @@ function fromAwaitingApproval(phase: PhaseOf<'awaiting_approval'>, action: Actio
   return null;
 }
 
+/**
+ * Done keeps its branch and pull request: a rebase, or changes asked in a review afterwards, send it
+ * back through the implementer, then the final review.
+ */
+function fromDone(action: Action): Phase | null {
+  if (action.type === 'rebase') {
+    return running('rebase');
+  }
+  return action.type === 'revise'
+    ? { kind: 'running', step: 'implement', thenRun: 'final_review' }
+    : null;
+}
+
 function fromStalled(phase: PhaseOf<'failed' | 'rate_limited'>, action: Action): Phase | null {
   return action.type === 'retry' ? running(phase.step) : null;
 }
@@ -141,8 +154,7 @@ function applyAction(phase: Phase, action: Action): Phase | null {
       return fromStalled(phase, action);
     }
     case 'done': {
-      // Done keeps an open pull request; a rebase sends it back to review.
-      return action.type === 'rebase' ? running('rebase') : null;
+      return fromDone(action);
     }
     case 'cancelled': {
       return null;

@@ -32,7 +32,7 @@ export function reviewCopy(target: ReviewTarget): ReviewCopy {
       destination: 'go to the implementation agent as a change request.',
       action: 'Send to the implementer',
       blocked:
-        'Sending opens when the ticket waits on you at the implementation or the final review.',
+        'Sending opens when the ticket waits on you at the implementation or the final review, or once it is done.',
       empty: 'No changes yet: the diff appears after the implementation runs.',
       closeOnSend: true,
     };

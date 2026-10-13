@@ -39,9 +39,15 @@ function latestSnapshot(
     .get();
 }
 
-/** A review can be sent while the ticket waits on the user after code was written. */
+/**
+ * A review can be sent while the ticket waits on the user after code was written, and once it is done
+ * (its branch is kept): the implementer then works on it and the final review runs again.
+ */
 export function canSendReview(ticket: Ticket): boolean {
   const { phase } = ticket;
+  if (phase.kind === 'done') {
+    return ticket.branch !== null;
+  }
   return (
     phase.kind === 'awaiting_approval' &&
     (phase.step === 'implement' || phase.step === 'final_review')
@@ -135,7 +141,7 @@ async function sendReview(db: Db, c: Context): Promise<Response> {
   if (!canSendReview(ticket)) {
     throw fail(
       CONFLICT,
-      'A review can be sent when the ticket waits on you at the implementation or the final review',
+      'A review can be sent when the ticket waits on you at the implementation or the final review, or once it is done',
     );
   }
   const drafts = draftsOf(db, owner(ticket));

@@ -152,10 +152,14 @@ export function recordValidation(
 ): void {
   db.transaction((tx) => {
     const { phase, projectId } = getTicket(tx, ticketId);
-    if (phase.kind !== 'awaiting_approval') {
+    // A done ticket can still be sent back with a review: the feedback goes on its final review,
+    // where the implementer looks for it (`revisionFor`).
+    const sentBack = phase.kind === 'done' && verdict.status === 'revise';
+    if (phase.kind !== 'awaiting_approval' && !sentBack) {
       throw new Error(`Ticket ${ticketId} is not awaiting approval`);
     }
-    const output = latestOutput(tx, ticketId, phase.step);
+    const section = phase.kind === 'awaiting_approval' ? phase.step : 'final_review';
+    const output = latestOutput(tx, ticketId, section);
     if (output) {
       tx.update(schema.stepOutputs)
         .set({ validation: verdict.status, feedback: verdict.feedback ?? null })
@@ -164,7 +168,7 @@ export function recordValidation(
     }
     if (verdict.status === 'revise' && verdict.feedback) {
       tx.insert(schema.feedbackEvents)
-        .values({ projectId, ticketId, section: phase.step, text: verdict.feedback })
+        .values({ projectId, ticketId, section, text: verdict.feedback })
         .run();
     }
   });

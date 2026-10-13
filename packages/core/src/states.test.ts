@@ -124,3 +124,13 @@ test('a rebase is refused before the final review and once cancelled', () => {
     expect(() => transition(phase, { type: 'rebase' })).toThrow(InvalidTransition);
   }
 });
+
+test('a done ticket can be sent back with a review: the implementer, then a new final review', () => {
+  expect(transition({ kind: 'done' }, { type: 'revise' })).toEqual({
+    kind: 'running',
+    step: 'implement',
+    thenRun: 'final_review',
+  });
+  expect(() => transition({ kind: 'done' }, { type: 'approve' })).toThrow(InvalidTransition);
+  expect(() => transition({ kind: 'cancelled' }, { type: 'revise' })).toThrow(InvalidTransition);
+});

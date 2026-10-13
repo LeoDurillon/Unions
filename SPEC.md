@@ -58,7 +58,9 @@ Everything the agent does is mirrored to the GitHub issue.
    snapshot the worker saves after each implementation run, syntax-highlighted, unified or split (side by side; the
    choice is remembered in the browser). The user comments on a line or a block of lines; the
    comments stay local drafts until **Send review**, which is allowed when the ticket waits on the user at the
-   implementation or the final review and works like Request changes.
+   implementation or the final review, or once it is Done (its branch is kept), and works like Request changes: the
+   implementer works on the comments, then the final review runs again (from Done, the feedback is recorded on the
+   final review and the ticket goes back to In progress).
    The ticket panel has three tabs: **Overview** (description, links, actions, runs), **Worker** (one tab per step,
    then the Log; it follows the running step) and **PR** (link the pull request, then its GitHub discussion, read
    only). From the PR tab or the review header, **Import** adds the unresolved line-comment threads as drafts,
