@@ -20,34 +20,45 @@ export const COLUMNS: { status: BoardColumn; title: string }[] = [
 
 export type Tone = 'neutral' | 'blue' | 'amber' | 'red' | 'green';
 
-export function describePhase(phase: Phase): { label: string; tone: Tone } {
+/** What the ticket is doing (`status`), on which step if any; `label` joins the two. */
+export type PhaseDescription = { label: string; status: string; step: string | null; tone: Tone };
+
+function stepPhase(status: string, step: Step, tone: Tone): PhaseDescription {
+  return { label: `${status} · ${STEP_TITLES[step]}`, status, step: STEP_TITLES[step], tone };
+}
+
+function plainPhase(status: string, tone: Tone): PhaseDescription {
+  return { label: status, status, step: null, tone };
+}
+
+export function describePhase(phase: Phase): PhaseDescription {
   switch (phase.kind) {
     case 'backlog': {
-      return { label: 'Not started', tone: 'neutral' };
+      return plainPhase('Not started', 'neutral');
     }
     case 'running': {
-      return { label: `Running · ${STEP_TITLES[phase.step]}`, tone: 'blue' };
+      return stepPhase('Running', phase.step, 'blue');
     }
     case 'awaiting_approval': {
-      return { label: `Needs review · ${STEP_TITLES[phase.step]}`, tone: 'amber' };
+      return stepPhase('Needs review', phase.step, 'amber');
     }
     case 'commit_refused': {
-      return { label: `Commit refused · ${STEP_TITLES[phase.step]}`, tone: 'amber' };
+      return stepPhase('Commit refused', phase.step, 'amber');
     }
     case 'rate_limited': {
-      return { label: `Rate limited · ${STEP_TITLES[phase.step]}`, tone: 'red' };
+      return stepPhase('Rate limited', phase.step, 'red');
     }
     case 'failed': {
-      return { label: `Failed · ${STEP_TITLES[phase.step]}`, tone: 'red' };
+      return stepPhase('Failed', phase.step, 'red');
     }
     case 'done': {
-      return { label: 'Done', tone: 'green' };
+      return plainPhase('Done', 'green');
     }
     case 'cancelled': {
-      return { label: 'Cancelled', tone: 'neutral' };
+      return plainPhase('Cancelled', 'neutral');
     }
     default: {
-      return { label: 'Unknown', tone: 'neutral' };
+      return plainPhase('Unknown', 'neutral');
     }
   }
 }

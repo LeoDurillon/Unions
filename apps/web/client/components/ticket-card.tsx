@@ -18,7 +18,7 @@ export function TicketCard({
     id: ticket.id,
     disabled: !draggable,
   });
-  const { label, tone } = describePhase(ticket.phase);
+  const phase = describePhase(ticket.phase);
   const style = transform
     ? { transform: `translate(${transform.x}px, ${transform.y}px)` }
     : undefined;
@@ -46,13 +46,16 @@ export function TicketCard({
           ↳ after {refLabel(ticket.parent)} {ticket.parent.title}
         </p>
       ) : null}
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
         {blocked ? (
           <Badge tone="amber">Waiting for parent</Badge>
         ) : (
-          <Badge tone={tone}>{label}</Badge>
+          <Badge tone={phase.tone}>{phase.status}</Badge>
         )}
-        <span className="text-xs text-zinc-500">
+        {!blocked && phase.step !== null ? (
+          <span className="text-xs whitespace-nowrap text-zinc-500">{phase.step}</span>
+        ) : null}
+        <span className="ml-auto text-xs whitespace-nowrap text-zinc-500">
           {ticket.issueNumber === null ? 'not on GitHub yet' : `#${ticket.issueNumber}`}
         </span>
       </div>

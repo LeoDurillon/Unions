@@ -41,9 +41,21 @@ const TONES: Record<Tone, string> = {
   green: 'bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300',
 };
 
-export function Badge({ tone, children }: { tone: Tone; children: ReactNode }): ReactElement {
+/** One line: a pill wrapped over two lines reads as a blob; too long, it ends in an ellipsis. */
+export function Badge({
+  tone,
+  title,
+  children,
+}: {
+  tone: Tone;
+  title?: string;
+  children: ReactNode;
+}): ReactElement {
   return (
-    <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${TONES[tone]}`}>
+    <span
+      title={title}
+      className={`inline-block max-w-full truncate rounded-full px-2 py-0.5 align-middle text-xs font-medium ${TONES[tone]}`}
+    >
       {children}
     </span>
   );
