@@ -256,3 +256,33 @@ test('sending the paused implementer back closes the refusal and resumes its ses
   command('drop_leftovers');
   expect(db.select().from(schema.commands).all().at(-1)?.error).toContain('Invalid transition');
 });
+
+test('runs a stopped worker left running are failed and their containers stopped first', async () => {
+  db.update(schema.tickets)
+    .set({ phase: { kind: 'running', step: 'implement' }, containerName: 'union-t9' })
+    .where(eq(schema.tickets.id, ticketId))
+    .run();
+  db.insert(schema.runs)
+    .values({ ticketId, step: 'implement', model: 'opus', status: 'running' })
+    .run();
+  const stopped: string[] = [];
+  const scheduler = new Scheduler(db, echoStep, 1);
+  await scheduler.recover((name) => {
+    stopped.push(name);
+    return Promise.resolve();
+  });
+  expect(stopped).toEqual(['union-t9']);
+  const [orphan] = db.select().from(schema.runs).all();
+  expect(orphan).toMatchObject({ status: 'failed' });
+  expect(orphan?.error).toContain('Interrupted');
+
+  // The step runs again, once.
+  scheduler.tick();
+  await scheduler.idle();
+  const statuses = db
+    .select()
+    .from(schema.runs)
+    .all()
+    .map((run) => run.status);
+  expect(statuses).toEqual(['failed', 'succeeded']);
+});

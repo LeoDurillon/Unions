@@ -25,6 +25,7 @@ const apiFor = githubApis(db);
 
 const executor = createExecutor(db, runtime, provisionConfig, apiFor);
 const scheduler = new Scheduler(db, executor, maxConcurrent);
+await scheduler.recover((name) => runtime.stop(name));
 // Investigations take their runs from the scheduler's slots: UNION_MAX_CONCURRENT caps both.
 const investigations = new InvestigationRunner({
   db,

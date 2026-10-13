@@ -48,6 +48,8 @@ const RUN_STATUS = {
   rate_limited: 'rate_limited',
 } as const satisfies Record<StepResult['kind'], string>;
 
+const INTERRUPTED = 'Interrupted: the worker stopped during the run (it runs the step again).';
+
 /** Runs one agent step per ticket in `running` phase, within the shared run slots. */
 export class Scheduler {
   private readonly active = new Map<number, Promise<void>>();
@@ -61,6 +63,41 @@ export class Scheduler {
     limit: number | RunSlots,
   ) {
     this.slots = typeof limit === 'number' ? new RunSlots(limit) : limit;
+  }
+
+  /**
+   * Runs a stopped worker left `running` (a crash, a reload, a kill) are marked failed, and their
+   * tickets' containers stopped: the agent the old process started may still be working there. The
+   * tickets stay `running`, so the next tick runs their step again, alone.
+   */
+  async recover(stopContainer: (name: string) => Promise<void>): Promise<void> {
+    const orphans = this.db
+      .select()
+      .from(schema.runs)
+      .where(eq(schema.runs.status, 'running'))
+      .all();
+    for (const run of orphans) {
+      this.db
+        .update(schema.runs)
+        .set({ status: 'failed', finishedAt: Date.now(), error: INTERRUPTED })
+        .where(eq(schema.runs.id, run.id))
+        .run();
+      emitEvent(this.db, {
+        type: 'run_finished',
+        ticketId: run.ticketId,
+        runId: run.id,
+        payload: { step: run.step, status: 'failed' },
+      });
+    }
+    for (const ticketId of new Set(orphans.map((run) => run.ticketId))) {
+      const name = getTicket(this.db, ticketId).containerName;
+      if (name) {
+        // Stopping fails when the container is gone or already stopped: nothing to do then.
+        await stopContainer(name).catch((error: unknown) => {
+          emitEvent(this.db, { type: 'container_stop_failed', ticketId, payload: String(error) });
+        });
+      }
+    }
   }
 
   tick(now = Date.now()): void {
