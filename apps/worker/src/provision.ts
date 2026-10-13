@@ -157,9 +157,8 @@ export async function ensureTicketContainer(
   if (!(await runtime.isRunning(names.name))) {
     await runtime.start(names.name);
   }
-  if (!(await hasFile(runtime, names.name, `${AGENT_HOME}/.claude/.credentials.json`))) {
-    await seedCredentials(runtime, names.name, config.credentialsPath);
-  }
+  // Every run: the host refreshes the login, and a refresh retires the token a stale copy holds.
+  await seedCredentials(runtime, names.name, config.credentialsPath);
   if (!(await hasFile(runtime, names.name, `${REPO_DIR}/.git`))) {
     const token = await projectGitToken(db, project);
     const source = cloneSource(config.gitBaseUrl, project.owner, project.repo, token);

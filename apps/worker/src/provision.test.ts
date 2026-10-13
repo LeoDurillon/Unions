@@ -1,11 +1,18 @@
 import { afterEach, expect, test } from 'bun:test';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
-import type { ContainerRuntime } from '@union/core';
+import {
+  createDb,
+  createTicket,
+  migrateDb,
+  schema,
+  type ContainerRuntime,
+  type ExecResult,
+} from '@union/core';
 
-import { cloneInto, cloneSource } from './provision';
+import { AGENT_HOME, cloneInto, cloneSource, ensureTicketContainer } from './provision';
 
 const cleanup: string[] = [];
 afterEach(async () => {
@@ -67,4 +74,46 @@ test('git errors never include the token', async () => {
   const failure = await cloneInto(runtime, 'c', source, 'main').catch((error: unknown) => error);
   expect(failure).toBeInstanceOf(Error);
   expect(String(failure)).not.toContain('ghp_secret');
+});
+
+test('every run hands the ticket container the host login as it is now', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'union-seed-test-'));
+  cleanup.push(root);
+  const credentialsPath = path.join(root, 'credentials.json');
+  const db = createDb(':memory:');
+  migrateDb(db);
+  const project = db
+    .insert(schema.projects)
+    .values({ owner: 'o', repo: 'r', config: { baseBranch: 'main' } })
+    .returning()
+    .get();
+  const ticket = createTicket(db, { projectId: project.id, title: 't' });
+  const written: string[] = [];
+  // A container already set up: running, with its clone and a login seeded by an earlier run.
+  const runtime = {
+    create: () => Promise.resolve(),
+    isRunning: () => Promise.resolve(true),
+    writeFile: (_name: string, file: string, content: string) => {
+      if (file === `${AGENT_HOME}/.claude/.credentials.json`) {
+        written.push(content);
+      }
+      return Promise.resolve();
+    },
+    // The commands print nothing and succeed.
+    *exec(): Generator<string, ExecResult> {
+      yield* [];
+      return { exitCode: 0, stderr: '' };
+    },
+  } as unknown as ContainerRuntime;
+  const config = { image: 'i', gitBaseUrl: 'x', credentialsPath };
+
+  await writeFile(credentialsPath, JSON.stringify({ claudeAiOauth: { accessToken: 'first' } }));
+  await ensureTicketContainer(db, runtime, config, ticket);
+  // The host refreshed its login between the runs.
+  await writeFile(credentialsPath, JSON.stringify({ claudeAiOauth: { accessToken: 'second' } }));
+  await ensureTicketContainer(db, runtime, config, ticket);
+  expect(written.map((content) => JSON.parse(content) as unknown)).toEqual([
+    { claudeAiOauth: { accessToken: 'first' } },
+    { claudeAiOauth: { accessToken: 'second' } },
+  ]);
 });
