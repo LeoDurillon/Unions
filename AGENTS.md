@@ -26,6 +26,8 @@ behavior; this file covers how to work in the repo.
   - Setup is a wizard (`components/onboarding/`: Connect, Repository, Project, Notion, Review) shown over the board
     on first run and from "Add project". Connect takes a token or an installation of the GitHub App
     (`components/github-app/`, also a global page in the sidebar). The board columns fill the viewport height; each column scrolls itself.
+    A ticket whose PR is merged (`pr_state`, polled by the worker) is in the Union-only Merged column (`boardColumn`)
+    for 21 days after `pr_merged_at`, then leaves the board (`leftBoard`); the GitHub Project still sees it as Done.
   - Code review: after each implementation run the worker stores the branch diff (`diff-snapshot.ts`,
     `diff_snapshots`/`diff_files`, newest only). The web reads it from SQLite (`routes/review.ts`), never from Docker or
     GitHub; `components/review/` renders one file at a time, unified or split (`lib/split-rows.ts` pairs the lines),

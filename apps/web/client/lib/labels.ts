@@ -1,4 +1,4 @@
-import type { BoardStatus, Phase, Step } from '@union/core';
+import type { BoardColumn, Phase, Step } from '@union/core';
 
 export const STEP_TITLES: Record<Step, string> = {
   intake: 'Intake',
@@ -10,11 +10,12 @@ export const STEP_TITLES: Record<Step, string> = {
   rebase: 'Rebase',
 };
 
-export const COLUMNS: { status: BoardStatus; title: string }[] = [
+export const COLUMNS: { status: BoardColumn; title: string }[] = [
   { status: 'backlog', title: 'Backlog' },
   { status: 'in_progress', title: 'In progress' },
   { status: 'in_review', title: 'In review' },
   { status: 'done', title: 'Done' },
+  { status: 'merged', title: 'Merged' },
 ];
 
 export type Tone = 'neutral' | 'blue' | 'amber' | 'red' | 'green';

@@ -24,7 +24,7 @@ function ProjectBody({
   onOpenTicket: (id: number) => void;
 }): ReactElement {
   if (!project) {
-    return <BoardView tickets={[]} error={null} onOpen={onOpenTicket} onStart={noop} />;
+    return <BoardView tickets={[]} now={0} error={null} onOpen={onOpenTicket} onStart={noop} />;
   }
   if (view === 'investigations') {
     return <InvestigationsPage key={project.id} project={project} onOpenTicket={onOpenTicket} />;

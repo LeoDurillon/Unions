@@ -7,7 +7,8 @@ import {
   type DragEndEvent,
 } from '@dnd-kit/core';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { BoardStatus } from '@union/core';
+import type { BoardColumn } from '@union/core';
+import { leftBoard } from '@union/core/states';
 import type { ReactElement } from 'react';
 
 import type { TicketSummary } from '../../src/api-types';
@@ -24,7 +25,7 @@ function Column({
   tickets,
   onOpen,
 }: {
-  status: BoardStatus;
+  status: BoardColumn;
   title: string;
   tickets: TicketSummary[];
   onOpen: (id: number) => void;
@@ -62,18 +63,25 @@ function useStartOnDrop(): { start: (event: DragEndEvent) => void; error: Error 
   return { start, error: mutation.error };
 }
 
-/** The four columns, filling the screen down to the bottom edge. */
+/**
+ * The columns, filling the screen down to the bottom edge. Merged keeps a ticket three weeks after
+ * its pull request was merged.
+ */
 export function BoardView({
   tickets,
+  now,
   error,
   onOpen,
   onStart,
 }: {
   tickets: TicketSummary[];
+  /** When the tickets were read: Merged drops those merged three weeks before. */
+  now: number;
   error: Error | null;
   onOpen: (id: number) => void;
   onStart: (event: DragEndEvent) => void;
 }): ReactElement {
+  const shown = tickets.filter((ticket) => !leftBoard(ticket, now));
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: DRAG_DISTANCE_PX } }),
   );
@@ -90,7 +98,7 @@ export function BoardView({
               key={status}
               status={status}
               title={title}
-              tickets={tickets.filter((ticket) => ticket.board === status)}
+              tickets={shown.filter((ticket) => ticket.board === status)}
               onOpen={onOpen}
             />
           ))}
@@ -115,6 +123,7 @@ export function Board({
   return (
     <BoardView
       tickets={tickets.data ?? []}
+      now={tickets.dataUpdatedAt}
       error={error ?? tickets.error}
       onOpen={onOpen}
       onStart={start}

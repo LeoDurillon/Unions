@@ -28,7 +28,12 @@ export type RemoteComment = { id: string; body: string };
 export type PullRequestRef = { number: number; url: string };
 
 export type PullRequestState = 'open' | 'closed' | 'merged';
-export type PullRequestStatus = { state: PullRequestState; behindBy: number | null };
+/** `mergedAt`: when GitHub merged it (epoch ms); null unless merged. */
+export type PullRequestStatus = {
+  state: PullRequestState;
+  behindBy: number | null;
+  mergedAt: number | null;
+};
 
 /** One line comment of a pull request review, in GitHub's terms (LEFT: the old side). */
 export type ReviewLineComment = {

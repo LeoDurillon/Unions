@@ -1,5 +1,5 @@
 import type {
-  BoardStatus,
+  BoardColumn,
   Project,
   ReviewComment,
   Run,
@@ -40,7 +40,7 @@ export function toPublicProject(project: Project): PublicProject {
 export type TicketRef = { id: number; title: string; issueNumber: number | null; done: boolean };
 
 /** `parent`: the ticket this one builds on; it cannot start before the parent is done. */
-export type TicketSummary = Ticket & { board: BoardStatus; parent: TicketRef | null };
+export type TicketSummary = Ticket & { board: BoardColumn; parent: TicketRef | null };
 
 export type TicketDetail = {
   ticket: TicketSummary;

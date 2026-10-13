@@ -231,3 +231,29 @@ export function boardStatus(phase: Phase): BoardStatus {
     }
   }
 }
+
+/** The board's columns: the GitHub Project's, plus Merged, which only Union shows. */
+export type BoardColumn = BoardStatus | 'merged';
+
+/** How long a ticket stays in the Merged column after its pull request was merged: 21 days. */
+export const MERGED_VISIBLE_MS = 1_814_400_000;
+
+/** A ticket whose pull request is merged is in Merged, whatever its phase; else its phase's column. */
+export function boardColumn(ticket: {
+  phase: Phase;
+  prState: 'open' | 'closed' | 'merged' | null;
+}): BoardColumn {
+  return ticket.prState === 'merged' ? 'merged' : boardStatus(ticket.phase);
+}
+
+/** Merged three weeks ago or more: off the board. Until the merge date is known, it stays. */
+export function leftBoard(
+  ticket: { prState: 'open' | 'closed' | 'merged' | null; prMergedAt: number | null },
+  now: number,
+): boolean {
+  return (
+    ticket.prState === 'merged' &&
+    ticket.prMergedAt !== null &&
+    now - ticket.prMergedAt >= MERGED_VISIBLE_MS
+  );
+}

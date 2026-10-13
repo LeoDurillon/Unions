@@ -41,6 +41,8 @@ export class FakeGitHubApi implements GitHubApi {
     /** Unset: open. */
     state?: PullRequestState;
     behindBy?: number;
+    /** When merged; unset reads as 0. */
+    mergedAt?: number;
   })[] = [];
   /** Reviews posted, in order. */
   readonly reviews: {
@@ -192,7 +194,8 @@ export class FakeGitHubApi implements GitHubApi {
     }
     const state = pull.state ?? 'open';
     const behindBy = state === 'open' && behind ? (pull.behindBy ?? 0) : null;
-    return Promise.resolve({ state, behindBy });
+    const mergedAt = state === 'merged' ? (pull.mergedAt ?? 0) : null;
+    return Promise.resolve({ state, behindBy, mergedAt });
   }
 
   createPullRequestReview(

@@ -1,6 +1,14 @@
 import { expect, test } from 'bun:test';
 
-import { boardStatus, InvalidTransition, transition, type Phase } from './states';
+import {
+  boardColumn,
+  boardStatus,
+  InvalidTransition,
+  leftBoard,
+  MERGED_VISIBLE_MS,
+  transition,
+  type Phase,
+} from './states';
 
 test('happy path walks every step then ends done', () => {
   let p: Phase = { kind: 'backlog' };
@@ -162,4 +170,23 @@ test('the implementer can be sent back with guidance after a refused commit', ()
   const paused = transition({ kind: 'running', step: 'implement' }, { type: 'commit_refused' });
   expect(transition(paused, { type: 'revise' })).toEqual({ kind: 'running', step: 'implement' });
   expect(() => transition(paused, { type: 'approve' })).toThrow(InvalidTransition);
+});
+
+function merged(at: number | null): { prState: 'merged'; prMergedAt: number | null } {
+  return { prState: 'merged', prMergedAt: at };
+}
+
+test('a merged pull request puts the ticket in Merged for three weeks', () => {
+  const done: Phase = { kind: 'done' };
+  expect(boardColumn({ phase: done, prState: 'open' })).toBe('done');
+  expect(boardColumn({ phase: done, prState: 'merged' })).toBe('merged');
+  // Merged by hand before the final review ended: still merged.
+  expect(
+    boardColumn({ phase: { kind: 'awaiting_approval', step: 'final_review' }, prState: 'merged' }),
+  ).toBe('merged');
+  const now = 10 * MERGED_VISIBLE_MS;
+  expect(leftBoard(merged(now - MERGED_VISIBLE_MS + 1), now)).toBe(false);
+  expect(leftBoard(merged(now - MERGED_VISIBLE_MS), now)).toBe(true);
+  expect(leftBoard(merged(null), now)).toBe(false);
+  expect(leftBoard({ prState: 'closed', prMergedAt: null }, now)).toBe(false);
 });

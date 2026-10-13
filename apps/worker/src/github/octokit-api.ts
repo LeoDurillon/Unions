@@ -229,10 +229,13 @@ export class OctokitGitHubApi implements GitHubApi {
       return null;
     }
     if (pull.data.state !== 'open') {
-      return { state: pull.data.merged ? 'merged' : 'closed', behindBy: null };
+      const mergedAt = pull.data.merged_at === null ? null : Date.parse(pull.data.merged_at);
+      return pull.data.merged
+        ? { state: 'merged', behindBy: null, mergedAt }
+        : { state: 'closed', behindBy: null, mergedAt: null };
     }
     if (!behind) {
-      return { state: 'open', behindBy: null };
+      return { state: 'open', behindBy: null, mergedAt: null };
     }
     const { base, head } = pull.data;
     const { data } = await this.octokit.rest.repos.compareCommitsWithBasehead({
@@ -240,7 +243,7 @@ export class OctokitGitHubApi implements GitHubApi {
       basehead: `${base.ref}...${head.sha}`,
       per_page: 1,
     });
-    return { state: 'open', behindBy: data.behind_by };
+    return { state: 'open', behindBy: data.behind_by, mergedAt: null };
   }
 
   async createPullRequestReview(

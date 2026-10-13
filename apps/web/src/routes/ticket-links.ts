@@ -1,6 +1,6 @@
 import {
   blockingParent,
-  boardStatus,
+  boardColumn,
   getTicket,
   schema,
   setParent,
@@ -27,7 +27,7 @@ export function ticketRef(ticket: Ticket): TicketRef {
 /** `find` resolves the parent: a map over a listing, or a lookup in the database. */
 export function summarize(ticket: Ticket, find: (id: number) => Ticket | undefined): TicketSummary {
   const parent = ticket.parentTicketId === null ? undefined : find(ticket.parentTicketId);
-  return { ...ticket, board: boardStatus(ticket.phase), parent: parent ? ticketRef(parent) : null };
+  return { ...ticket, board: boardColumn(ticket), parent: parent ? ticketRef(parent) : null };
 }
 
 export function findTicket(db: Db): (id: number) => Ticket | undefined {
