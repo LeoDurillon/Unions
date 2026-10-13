@@ -35,6 +35,11 @@ export const AGENT_LABELS: Record<AgentId, { title: string; description: string 
     description:
       'Leaves line comments on a change when you click "Review with agent" in a review. They arrive as drafts you keep, edit or delete before sending.',
   },
+  pr_description: {
+    title: 'PR description',
+    description:
+      'Writes the pull request description when the PR is opened, and rewrites it when you click "Rewrite description" in the PR tab. It resumes the implementation session and fills in the repository\'s PR template.',
+  },
   rebase: {
     title: 'Rebase',
     description:

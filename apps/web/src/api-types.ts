@@ -1,5 +1,6 @@
 import type {
   BoardColumn,
+  PrDescription,
   Project,
   ReviewComment,
   Run,
@@ -256,4 +257,25 @@ export type NotionImport = {
   truncated: boolean;
   /** The page, linked to the ticket created from it (event rules update it). */
   pageId: string;
+};
+
+/** A rewrite of a ticket's PR description, as the PR tab shows it. */
+export type PrDescriptionDraft = {
+  id: number;
+  status: PrDescription['status'];
+  /** GitHub's description when the agent started, without Union's links. */
+  original: string | null;
+  text: string | null;
+  error: string | null;
+  createdAt: number;
+  finishedAt: number | null;
+  sentAt: number | null;
+};
+
+export type PrDescriptionView = {
+  draft: PrDescriptionDraft | null;
+  /** The branch was pushed after Union last wrote the description. */
+  outdated: boolean;
+  /** Why a rewrite cannot start now; null when it can. */
+  refusal: string | null;
 };

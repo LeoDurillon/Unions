@@ -16,6 +16,7 @@ export * from './investigations';
 export * from './notion-api';
 export * from './notion-error';
 export * from './notion-id';
+export * from './pr-descriptions';
 export * from './project-url';
 export * from './refused-commits';
 export type { ResumeState } from './schema-refused-commits';

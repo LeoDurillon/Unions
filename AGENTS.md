@@ -54,6 +54,12 @@ behavior; this file covers how to work in the repo.
     (badge "suggested", Keep button); keeping or editing one makes it the user's (`author: 'user'`), and a new
     successful run replaces only the agent's untouched drafts. Nothing is sent: the drafts go out with the usual
     send. Its prompt and model are the `review_comments` agent in Agent settings; `final_review` is unrelated.
+  - PR description rewrite: the PR tab's Description section (`pull-request/pr-description.tsx`,
+    `routes/pr-description.ts`, `@union/core` `pr-descriptions.ts`) queues a `pr_descriptions` row. The agent's draft
+    is the user's to edit, send or discard; sending is the `update_pr_description` command. "Outdated" means a
+    `branch_pushed` event came after the last `pull_request_opened` or `pr_description_sent`. Union's links ("Closes
+    #n", the PR it builds on) are never part of the draft: `withoutUnionLinks` strips them, `pullRequestBody` adds them
+    back.
   - `client/` is the SPA: Tailwind v4, TanStack Query, dnd-kit. `app.tsx` is the shell, `components/` the UI,
     `lib/` the hooks and the typed `api.ts`. The browser keeps one event stream for all its Union tabs
     (`lib/event-hub.ts`: the tab holding the Web Lock `union-events` reads `/api/events` and relays each event
@@ -92,6 +98,11 @@ behavior; this file covers how to work in the repo.
     `pull/<n>/head`, so forks work). The agent ends its answer with a JSON block (`agent-review-findings.ts`, format
     appended by the host); findings outside the diff's lines become `general` drafts naming the place, so nothing is
     lost. Cancellation goes through the `cancel_agent_review` command hook.
+  - `pr-description-run.ts`: `PrDescriptionRunner` (same slots) rewrites a PR's description in the ticket's
+    container, resuming the implementer's session (`runResumable`), from GitHub's current description, the PR template
+    and the branch. `github/pr-description-send.ts` writes the user's version only if GitHub's description is still
+    the one the agent read (else `conflict`), so an edit made on GitHub is never overwritten unseen. The first
+    description (`pr-description.ts`, when the PR is opened) and the rewrite both use the `pr_description` agent.
   - `review.ts`: the final review (fresh session, read-only tools plus git reads, one git command per call because
     permission rules cannot match `&&`). Changes asked at the review go to the implementer through the `thenRun`
     chain in `states.ts`; `revision.ts` hands it the review's feedback. `runResumable` (agent.ts) restarts in a fresh

@@ -1,6 +1,7 @@
 import {
   cancelQueuedAgentReview,
   cancelQueuedInvestigation,
+  cancelQueuedPrDescription,
   createTicket,
   decideRefusal,
   dispatch,
@@ -26,6 +27,10 @@ export type CommandHooks = {
   cancelAgentReview: (id: number) => void;
   /** Posts a current review's drafts and summary on its pull request. */
   submitPullRequestReview: (reviewId: number, summary: string) => void;
+  /** Stops a running rewrite of a PR description. */
+  cancelPrDescription: (id: number) => void;
+  /** Writes a rewritten PR description, as the user left it, to GitHub. */
+  sendPrDescription: (id: number) => void;
 };
 
 function ignore(): void {
@@ -37,6 +42,8 @@ const NO_HOOKS: CommandHooks = {
   cancelInvestigation: ignore,
   cancelAgentReview: ignore,
   submitPullRequestReview: ignore,
+  cancelPrDescription: ignore,
+  sendPrDescription: ignore,
 };
 
 function isContainerRef(value: unknown): value is ContainerRef {
@@ -76,22 +83,57 @@ function requireTicketId(command: Command): number {
   return command.ticketId;
 }
 
-/** A queued investigation or agent review is cancelled here; a running one is stopped by its runner. */
-function cancelRun(db: Db, command: Command, hooks: CommandHooks): void {
-  const investigation = command.type === 'cancel_investigation';
-  const key = investigation ? 'investigationId' : 'agentReviewId';
-  const id = field(command.payload, key);
-  if (typeof id !== 'number') {
-    throw new TypeError(`${command.type} needs a numeric "${key}"`);
+/** For each cancel command: the id it carries, the cancel of a queued run, and the stop of a running one. */
+const CANCELS: Record<
+  string,
+  {
+    key: string;
+    queued: (db: Db, id: number) => boolean;
+    running: (hooks: CommandHooks, id: number) => void;
   }
-  if (investigation && !cancelQueuedInvestigation(db, id)) {
-    hooks.cancelInvestigation(id);
-  } else if (!investigation && !cancelQueuedAgentReview(db, id)) {
-    hooks.cancelAgentReview(id);
+> = {
+  cancel_investigation: {
+    key: 'investigationId',
+    queued: cancelQueuedInvestigation,
+    running: (hooks, id) => {
+      hooks.cancelInvestigation(id);
+    },
+  },
+  cancel_agent_review: {
+    key: 'agentReviewId',
+    queued: cancelQueuedAgentReview,
+    running: (hooks, id) => {
+      hooks.cancelAgentReview(id);
+    },
+  },
+  cancel_pr_description: {
+    key: 'prDescriptionId',
+    queued: cancelQueuedPrDescription,
+    running: (hooks, id) => {
+      hooks.cancelPrDescription(id);
+    },
+  },
+};
+
+/** A queued side run is cancelled here; a running one is stopped by its runner. */
+function cancelRun(db: Db, command: Command, hooks: CommandHooks): void {
+  const cancel = CANCELS[command.type];
+  const id = field(command.payload, cancel?.key ?? '');
+  if (!cancel || typeof id !== 'number') {
+    throw new TypeError(`${command.type} needs a numeric "${cancel?.key ?? 'id'}"`);
+  }
+  if (!cancel.queued(db, id)) {
+    cancel.running(hooks, id);
   }
 }
 
-const CANCELS = new Set(['cancel_investigation', 'cancel_agent_review']);
+function numberField(command: Command, key: string): number {
+  const value = field(command.payload, key);
+  if (typeof value !== 'number') {
+    throw new TypeError(`${command.type} needs a numeric "${key}"`);
+  }
+  return value;
+}
 
 function createFromCommand(db: Db, command: Command): void {
   const projectId = field(command.payload, 'projectId');
@@ -168,7 +210,7 @@ function execute(db: Db, command: Command, hooks: CommandHooks): void {
     decide(db, command);
     return;
   }
-  if (CANCELS.has(command.type)) {
+  if (Object.hasOwn(CANCELS, command.type)) {
     cancelRun(db, command, hooks);
     return;
   }
@@ -186,6 +228,10 @@ function execute(db: Db, command: Command, hooks: CommandHooks): void {
     }
     case 'submit_pr_review': {
       submitReview(command, hooks);
+      return;
+    }
+    case 'update_pr_description': {
+      hooks.sendPrDescription(numberField(command, 'prDescriptionId'));
       return;
     }
     case 'remove_containers': {

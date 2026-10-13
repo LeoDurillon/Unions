@@ -23,6 +23,7 @@ export const AGENT_IDS = [
   'implement',
   'final_review',
   'review_comments',
+  'pr_description',
   'rebase',
 ] as const;
 export type AgentId = (typeof AGENT_IDS)[number];
@@ -63,6 +64,10 @@ Read the diff from the base branch, and the surrounding code wherever a change d
 Comment only on what matters: bugs, wrong behaviour, missing edge cases, security, data loss, races, misleading names, risky changes without tests.
 No praise, no summary of the change, no style remarks a formatter or linter would catch. At most 15 comments: fewer, sharper comments are better.
 Each comment says what is wrong and suggests the fix, in a few sentences.`,
+  pr_description: `Write the pull request's description for a reviewer who has not seen the work.
+Describe the change as the branch has it now: read the diff from the base branch, not only what you remember.
+Say what changed and why, the main changes, and how it was verified. Mention what a reviewer should look at closely.
+Keep it short and factual: no marketing, no list of every file.`,
   rebase: `Rebase your branch onto the latest base branch (\`origin/<base branch>\`, already fetched for you).
 Resolve conflicts keeping the intent of both sides. Run the project's checks and fix anything the rebase broke.
 If a conflict cannot be resolved safely, run \`git rebase --abort\` and explain why.
@@ -89,8 +94,12 @@ export function isAgentId(value: string): value is AgentId {
   return AGENT_IDS.some((agent) => agent === value);
 }
 
-const MODEL_BY_AGENT: Record<RunAgent, AgentModel> = { ...MODEL_BY_STEP, review_comments: 'opus' };
-const RUN_AGENTS: readonly RunAgent[] = [...STEPS, 'review_comments'];
+const MODEL_BY_AGENT: Record<RunAgent, AgentModel> = {
+  ...MODEL_BY_STEP,
+  review_comments: 'opus',
+  pr_description: MODEL_BY_STEP.implement,
+};
+const RUN_AGENTS: readonly RunAgent[] = [...STEPS, 'review_comments', 'pr_description'];
 
 /** Agents with a model of their own: the pipeline steps and the reviewer (not `shared`). */
 function stepOf(agent: AgentId): RunAgent | null {

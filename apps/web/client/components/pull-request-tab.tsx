@@ -4,8 +4,12 @@ import type { TicketDetail } from '../../src/api-types';
 import { PullRequestRow } from './pull-request-row';
 import { BranchStatus } from './pull-request/branch-status';
 import { Discussion } from './pull-request/discussion';
+import { PrDescription } from './pull-request/pr-description';
 
-/** The ticket's pull request: link it, then read its GitHub discussion and pick what goes to the agent. */
+/**
+ * The ticket's pull request: link it, keep its description current, then read its GitHub discussion
+ * and pick what goes to the agent.
+ */
 export function PullRequestTab({ detail }: { detail: TicketDetail }): ReactElement {
   const { ticket, project } = detail;
   return (
@@ -17,7 +21,10 @@ export function PullRequestTab({ detail }: { detail: TicketDetail }): ReactEleme
           Link the pull request to read its discussion here and import review comments.
         </p>
       ) : (
-        <Discussion key={ticket.prNumber} ticketId={ticket.id} />
+        <>
+          {ticket.prState === 'merged' ? null : <PrDescription ticketId={ticket.id} />}
+          <Discussion key={ticket.prNumber} ticketId={ticket.id} />
+        </>
       )}
     </div>
   );

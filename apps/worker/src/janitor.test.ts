@@ -27,6 +27,12 @@ test('remove_containers hands every container to the hook', () => {
     submitPullRequestReview: () => {
       // Not under test.
     },
+    cancelPrDescription: () => {
+      // Not under test.
+    },
+    sendPrDescription: () => {
+      // Not under test.
+    },
   });
   expect(removed).toEqual(['union-t1']);
   expect(db.select().from(schema.commands).get()?.error).toBeNull();

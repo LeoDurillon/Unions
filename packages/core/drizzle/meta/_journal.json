@@ -197,6 +197,13 @@
       "when": 1791919963468,
       "tag": "0027_late_sentinels",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "6",
+      "when": 1791922441276,
+      "tag": "0028_worthless_vertigo",
+      "breakpoints": true
     }
   ]
 }

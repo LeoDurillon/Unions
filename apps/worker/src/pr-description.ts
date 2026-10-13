@@ -1,4 +1,11 @@
-import { type ContainerRuntime, type Db, effortFor, modelFor, toolsFor } from '@union/core';
+import {
+  type ContainerRuntime,
+  type Db,
+  effortFor,
+  modelFor,
+  resolveAgent,
+  toolsFor,
+} from '@union/core';
 
 import type { AgentFn } from './agent';
 import { runIn } from './container-exec';
@@ -66,12 +73,62 @@ export async function findTemplate(
   return read.exitCode === 0 ? { path, text: read.stdout.slice(0, MAX_TEMPLATE_CHARS) } : null;
 }
 
-/** Asks the implementer, who knows the work, for the pull request's description. */
-export function descriptionPrompt(template: Template | null): string {
-  const how = template
+/** How to write it: the repository's template, else a plain summary. */
+function templateInstructions(template: Template | null): string {
+  return template
     ? `Fill in the repository's pull request template (\`${template.path}\`), below. Keep its structure and headings, and write in the language the template is written in. Tick a checklist item only when it is true; leave the others unticked.\n\n\`\`\`markdown\n${template.text}\n\`\`\``
     : 'The repository has no pull request template. Write a short summary of the change, then the main changes, then how it was tested, in the language the ticket is written in.';
-  return `# Pull request description\n\nThe pull request for your work is being opened. Write its description.\n\n${how}\n\nOutput only the description in markdown, with no preamble. Do not add a "Closes" line or link the ticket: that is added for you.`;
+}
+
+const OUTPUT_RULES =
+  'Output only the description in markdown, with no preamble. Do not add a "Closes" line or link the ticket: that is added for you.';
+
+/** Asks the implementer, who knows the work, for the pull request's description. */
+export function descriptionPrompt(template: Template | null, guidance = ''): string {
+  const intro = guidance === '' ? '' : `${guidance}\n\n`;
+  return `# Pull request description\n\n${intro}The pull request for your work is being opened. Write its description.\n\n${templateInstructions(template)}\n\n${OUTPUT_RULES}`;
+}
+
+/** Asks for the description again, from the one on GitHub, once the work changed after the PR was opened. */
+export function rewritePrompt(input: {
+  guidance: string;
+  template: Template | null;
+  current: string;
+  base: string;
+  ticket: { title: string; body: string };
+}): string {
+  const current = input.current.trim() === '' ? '(empty)' : input.current;
+  return `# Pull request description, rewritten
+
+${input.guidance}
+
+The pull request is open, and its description below was written earlier. The branch changed since (reviews, revisions, rebases), so parts of it may be wrong or missing. Rewrite it to describe the branch as it is now. Compare it with its base with \`git diff ${input.base}...HEAD\` and \`git log ${input.base}..HEAD\`, one git command per call: no \`&&\`, no \`cd\`. Do not change any file.
+
+Keep what is still true, including anything a person added by hand. Fix what is no longer true, and add what is missing.
+
+${templateInstructions(input.template)}
+
+## The ticket
+
+# ${input.ticket.title}
+
+${input.ticket.body}
+
+## The current description
+
+\`\`\`markdown
+${current}
+\`\`\`
+
+${OUTPUT_RULES}`;
+}
+
+const FENCED = /^```(?:markdown|md)?\n(?<inner>[\s\S]*)\n```$/u;
+
+/** The agent's answer, without the code fence some answers wrap the whole description in. */
+export function unfence(text: string): string {
+  const trimmed = text.trim();
+  return FENCED.exec(trimmed)?.groups?.inner?.trim() ?? trimmed;
 }
 
 /** The description for a new pull request, or null to keep the default body when the turn fails. */
@@ -86,17 +143,17 @@ export async function writeDescription(
     const outcome = await describer.agent(runtime, {
       container,
       cwd: REPO_DIR,
-      model: modelFor(describer.db, 'implement'),
-      effort: effortFor(describer.db, 'implement'),
-      prompt: descriptionPrompt(template),
+      model: modelFor(describer.db, 'pr_description'),
+      effort: effortFor(describer.db, 'pr_description'),
+      prompt: descriptionPrompt(template, resolveAgent(describer.db, 'pr_description').prompt),
       // Reading only: the work is pushed already.
-      tools: toolsFor(describer.db, 'final_review'),
+      tools: toolsFor(describer.db, 'pr_description'),
       denied: IMPLEMENT_DENIED,
       resumeSessionId: describer.sessionId,
       signal: describer.signal,
       onEvent: describer.log,
     });
-    const text = outcome.kind === 'ok' ? outcome.text.trim() : '';
+    const text = outcome.kind === 'ok' ? unfence(outcome.text) : '';
     return text === '' ? null : text;
   } catch (error) {
     describer.log({ type: 'union_pr_description_failed', error: String(error) });

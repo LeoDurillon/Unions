@@ -67,6 +67,9 @@ export type GitHubApi = {
     repo: RepoRef,
     input: { title: string; body: string; head: string; base: string },
   ): Promise<PullRequestRef>;
+  /** The pull request's description as GitHub has it ('' when empty). */
+  pullRequestBody(repo: RepoRef, number: number): Promise<string>;
+  updatePullRequestBody(repo: RepoRef, number: number, body: string): Promise<void>;
   /** Un-drafts the pull request; does nothing if it is already ready. */
   markPullRequestReady(repo: RepoRef, number: number): Promise<void>;
   /**

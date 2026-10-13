@@ -41,6 +41,7 @@ test('lists the shared prompt and every step agent with their defaults', async (
     ['implement', 'opus', false],
     ['final_review', 'opus', false],
     ['review_comments', 'opus', false],
+    ['pr_description', 'opus', false],
     ['rebase', null, false],
   ]);
 });

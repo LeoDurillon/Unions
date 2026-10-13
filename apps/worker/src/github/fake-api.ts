@@ -173,6 +173,20 @@ export class FakeGitHubApi implements GitHubApi {
     return Promise.resolve({ number, url: pull.url });
   }
 
+  pullRequestBody(_repo: RepoRef, number: number): Promise<string> {
+    this.calls.push('pullRequestBody');
+    return Promise.resolve(this.pulls.find((candidate) => candidate.number === number)?.body ?? '');
+  }
+
+  updatePullRequestBody(_repo: RepoRef, number: number, body: string): Promise<void> {
+    this.calls.push('updatePullRequestBody');
+    const pull = this.pulls.find((candidate) => candidate.number === number);
+    if (pull) {
+      pull.body = body;
+    }
+    return Promise.resolve();
+  }
+
   markPullRequestReady(_repo: RepoRef, number: number): Promise<void> {
     this.calls.push('markPullRequestReady');
     const pull = this.pulls.find((candidate) => candidate.number === number);

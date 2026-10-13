@@ -205,6 +205,15 @@ export class OctokitGitHubApi implements GitHubApi {
     return { number: data.number, url: data.html_url };
   }
 
+  async pullRequestBody(repo: RepoRef, number: number): Promise<string> {
+    const { data } = await this.octokit.rest.pulls.get({ ...repo, pull_number: number });
+    return data.body ?? '';
+  }
+
+  async updatePullRequestBody(repo: RepoRef, number: number, body: string): Promise<void> {
+    await this.octokit.rest.pulls.update({ ...repo, pull_number: number, body });
+  }
+
   async markPullRequestReady(repo: RepoRef, number: number): Promise<void> {
     const { data } = await this.octokit.rest.pulls.get({ ...repo, pull_number: number });
     if (data.draft) {
