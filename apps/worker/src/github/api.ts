@@ -27,6 +27,9 @@ export type RemoteComment = { id: string; body: string };
 
 export type PullRequestRef = { number: number; url: string };
 
+export type PullRequestState = 'open' | 'closed' | 'merged';
+export type PullRequestStatus = { state: PullRequestState; behindBy: number | null };
+
 /** One line comment of a pull request review, in GitHub's terms (LEFT: the old side). */
 export type ReviewLineComment = {
   path: string;
@@ -62,10 +65,14 @@ export type GitHubApi = {
   /** Un-drafts the pull request; does nothing if it is already ready. */
   markPullRequestReady(repo: RepoRef, number: number): Promise<void>;
   /**
-   * Commits the pull request's base branch has that its branch lacks; null when the pull request is
-   * closed, merged or gone (there is nothing to rebase then).
+   * The pull request's state and, when `behind` is asked and it is open, how many commits its base
+   * has that its branch lacks. Null when the pull request is gone.
    */
-  pullRequestBehind(repo: RepoRef, number: number): Promise<number | null>;
+  pullRequestStatus(
+    repo: RepoRef,
+    number: number,
+    behind: boolean,
+  ): Promise<PullRequestStatus | null>;
   /** Posts a "Comment" review: an overall note and line comments, anchored at `commitId`. */
   createPullRequestReview(
     repo: RepoRef,

@@ -108,6 +108,7 @@ async function getDiff(db: Db, github: OnboardingGitHub, c: Context): Promise<Re
       Object.assign(file, { ignored: isIgnoredPath(file.path, patterns, hideLockFiles) }),
     ),
     canSend: review.submitStatus !== 'sending',
+    sendRefusal: review.submitStatus === 'sending' ? 'The review is being posted on GitHub.' : null,
     pullRequest: null,
   };
   return c.json(body);

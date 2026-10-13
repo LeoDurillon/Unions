@@ -6,6 +6,7 @@ import type {
   IssueRef,
   ProjectInfo,
   PullRequestRef,
+  PullRequestStatus,
   RemoteComment,
   RemoteItem,
   RepoRef,
@@ -211,7 +212,11 @@ export class OctokitGitHubApi implements GitHubApi {
     }
   }
 
-  async pullRequestBehind(repo: RepoRef, number: number): Promise<number | null> {
+  async pullRequestStatus(
+    repo: RepoRef,
+    number: number,
+    behind: boolean,
+  ): Promise<PullRequestStatus | null> {
     const pull = await this.octokit.rest.pulls
       .get({ ...repo, pull_number: number })
       .catch((error: unknown) => {
@@ -220,8 +225,14 @@ export class OctokitGitHubApi implements GitHubApi {
         }
         throw error;
       });
-    if (!pull || pull.data.state !== 'open') {
+    if (!pull) {
       return null;
+    }
+    if (pull.data.state !== 'open') {
+      return { state: pull.data.merged ? 'merged' : 'closed', behindBy: null };
+    }
+    if (!behind) {
+      return { state: 'open', behindBy: null };
     }
     const { base, head } = pull.data;
     const { data } = await this.octokit.rest.repos.compareCommitsWithBasehead({
@@ -229,7 +240,7 @@ export class OctokitGitHubApi implements GitHubApi {
       basehead: `${base.ref}...${head.sha}`,
       per_page: 1,
     });
-    return data.behind_by;
+    return { state: 'open', behindBy: data.behind_by };
   }
 
   async createPullRequestReview(

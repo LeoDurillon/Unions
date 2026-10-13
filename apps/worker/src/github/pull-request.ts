@@ -36,22 +36,32 @@ function canRebase(ticket: Ticket): boolean {
 }
 
 /**
- * Keeps `behind_by` current for tickets that could be rebased (null for the others, or once the PR
- * is closed or merged). An event is recorded only when it changes, so the panel refreshes.
+ * Keeps the pull request's state (`pr_state`) and, for tickets that could be rebased, how far behind
+ * it is (`behind_by`) current. A merged pull request is final, so it is no longer asked about. An
+ * event is recorded only on a change, so the panel refreshes.
  */
-export async function refreshBehind(
+export async function refreshPullRequest(
   db: Db,
   api: GitHubApi,
   repo: RepoRef,
   ticket: Ticket,
 ): Promise<void> {
-  const behindBy =
-    ticket.prNumber !== null && canRebase(ticket)
-      ? await api.pullRequestBehind(repo, ticket.prNumber)
-      : null;
-  if (behindBy === ticket.behindBy) {
+  const status =
+    ticket.prNumber === null || ticket.prState === 'merged'
+      ? null
+      : await api.pullRequestStatus(repo, ticket.prNumber, canRebase(ticket));
+  const prState = ticket.prNumber === null ? null : (status?.state ?? ticket.prState);
+  const behindBy = status?.behindBy ?? null;
+  if (prState === ticket.prState && behindBy === ticket.behindBy) {
     return;
   }
-  db.update(schema.tickets).set({ behindBy }).where(eq(schema.tickets.id, ticket.id)).run();
-  emitEvent(db, { type: 'branch_behind', ticketId: ticket.id, payload: { behindBy } });
+  db.update(schema.tickets)
+    .set({ prState, behindBy })
+    .where(eq(schema.tickets.id, ticket.id))
+    .run();
+  emitEvent(db, {
+    type: 'pull_request_status',
+    ticketId: ticket.id,
+    payload: { prState, behindBy },
+  });
 }

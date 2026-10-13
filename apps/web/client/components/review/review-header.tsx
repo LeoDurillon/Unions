@@ -13,6 +13,11 @@ type Mutations = ReturnType<typeof useCommentMutations>;
 
 const SHORT_SHA = 7;
 
+/** The server says why sending is refused (a merged pull request, a ticket not waiting on you). */
+function withRefusal(copy: ReviewCopy, diff: DiffResponse | undefined): ReviewCopy {
+  return { ...copy, blocked: diff?.sendRefusal ?? copy.blocked };
+}
+
 /** Back, what is reviewed and at which commit, the GitHub import (tickets), the layout switch and Send. */
 export function ReviewHeader({
   target,
@@ -55,7 +60,7 @@ export function ReviewHeader({
       ) : null}
       <ViewToggle view={view} onChange={onView} />
       <SendReview
-        copy={copy}
+        copy={withRefusal(copy, diff)}
         drafts={drafts}
         canSend={diff?.canSend ?? false}
         pending={mutations.send.isPending}

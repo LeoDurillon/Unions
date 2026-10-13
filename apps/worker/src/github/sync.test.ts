@@ -267,7 +267,11 @@ test('approving the final review marks the draft PR ready, once', async () => {
   expect(eventTypes()).toContain('pull_request_ready');
 });
 
-test('the pull keeps how far behind an open PR is, for tickets that could be rebased', async () => {
+function statusEvents(): number {
+  return eventTypes().filter((type) => type === 'pull_request_status').length;
+}
+
+test('the pull keeps the PR state, and how far behind it is where a rebase could be asked', async () => {
   await sync.push();
   const pull = await api.createPullRequest(
     { owner: 'o', repo: 'r' },
@@ -286,26 +290,31 @@ test('the pull keeps how far behind an open PR is, for tickets that could be reb
     })
     .run();
   await sync.pull();
-  // Still implementing: there is nothing to rebase yet, so GitHub is not asked.
-  expect(getTicket(db, ticketId).behindBy).toBeNull();
-  expect(api.calls).not.toContain('pullRequestBehind');
+  // Still implementing: the state is known, the behind count is not asked for.
+  expect(getTicket(db, ticketId)).toMatchObject({ prState: 'open', behindBy: null });
+  expect(api.calls).not.toContain('pullRequestStatus+behind');
 
   db.update(schema.tickets)
     .set({ phase: { kind: 'awaiting_approval', step: 'final_review' } })
     .run();
   await sync.pull();
-  expect(getTicket(db, ticketId).behindBy).toBe(3);
-  expect(eventTypes().filter((type) => type === 'branch_behind')).toHaveLength(1);
+  expect(getTicket(db, ticketId)).toMatchObject({ prState: 'open', behindBy: 3 });
+  expect(statusEvents()).toBe(2);
   await sync.pull();
-  expect(eventTypes().filter((type) => type === 'branch_behind')).toHaveLength(1);
+  expect(statusEvents()).toBe(2);
 
-  // Merged or closed: nothing to rebase any more.
+  // Merged: nothing to rebase, and GitHub is not asked again.
   db.update(schema.tickets)
     .set({ phase: { kind: 'done' } })
     .run();
-  stored.state = 'closed';
+  stored.state = 'merged';
   await sync.pull();
-  expect(getTicket(db, ticketId).behindBy).toBeNull();
+  expect(getTicket(db, ticketId)).toMatchObject({ prState: 'merged', behindBy: null });
+  const asked = api.calls.length;
+  await sync.pull();
+  expect(api.calls.filter((call) => call.startsWith('pullRequestStatus'))).toHaveLength(
+    api.calls.slice(0, asked).filter((call) => call.startsWith('pullRequestStatus')).length,
+  );
 });
 
 test('a ticket created from an existing issue gets that issue on the board, not a new one', async () => {

@@ -40,18 +40,26 @@ function latestSnapshot(
 }
 
 /**
- * A review can be sent while the ticket waits on the user after code was written, and once it is done
- * (its branch is kept): the implementer then works on it and the final review runs again.
+ * Why a review cannot be sent now, or null when it can: the ticket waits on the user after code was
+ * written, or it is done with its branch kept and its pull request not merged (the implementer then
+ * works on it and the final review runs again).
  */
-export function canSendReview(ticket: Ticket): boolean {
+export function sendRefusal(ticket: Ticket): string | null {
   const { phase } = ticket;
   if (phase.kind === 'done') {
-    return ticket.branch !== null;
+    if (ticket.branch === null) {
+      return 'This ticket has no branch to review.';
+    }
+    return ticket.prState === 'merged'
+      ? 'The pull request is merged: open a new ticket for further changes.'
+      : null;
   }
-  return (
+  const waiting =
     phase.kind === 'awaiting_approval' &&
-    (phase.step === 'implement' || phase.step === 'final_review')
-  );
+    (phase.step === 'implement' || phase.step === 'final_review');
+  return waiting
+    ? null
+    : 'Sending opens when the ticket waits on you at the implementation or the final review, or once it is done.';
 }
 
 function ignoreRule(db: Db, ticket: Ticket): (path: string) => boolean {
@@ -89,7 +97,8 @@ function getDiff(db: Db, c: Context): Response {
         }
       : null,
     files,
-    canSend: canSendReview(ticket),
+    canSend: sendRefusal(ticket) === null,
+    sendRefusal: sendRefusal(ticket),
     pullRequest: ticket.prNumber,
   };
   return c.json(body);
@@ -138,11 +147,9 @@ async function sendReview(db: Db, c: Context): Promise<Response> {
   const ticket = loadTicket(db, c);
   const body = await readObject(c.req.raw);
   const summary = typeof body.summary === 'string' ? body.summary : '';
-  if (!canSendReview(ticket)) {
-    throw fail(
-      CONFLICT,
-      'A review can be sent when the ticket waits on you at the implementation or the final review, or once it is done',
-    );
+  const refusal = sendRefusal(ticket);
+  if (refusal !== null) {
+    throw fail(CONFLICT, refusal);
   }
   const drafts = draftsOf(db, owner(ticket));
   if (drafts.length === 0 && summary.trim() === '') {

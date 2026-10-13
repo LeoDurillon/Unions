@@ -58,7 +58,8 @@ Everything the agent does is mirrored to the GitHub issue.
    snapshot the worker saves after each implementation run, syntax-highlighted, unified or split (side by side; the
    choice is remembered in the browser). The user comments on a line or a block of lines; the
    comments stay local drafts until **Send review**, which is allowed when the ticket waits on the user at the
-   implementation or the final review, or once it is Done (its branch is kept), and works like Request changes: the
+   implementation or the final review, or once it is Done (its branch is kept and its pull request is not merged),
+   and works like Request changes: the
    implementer works on the comments, then the final review runs again (from Done, the feedback is recorded on the
    final review and the ticket goes back to In progress).
    The ticket panel has three tabs: **Overview** (description, links, actions, runs), **Worker** (one tab per step,
@@ -203,10 +204,12 @@ rebases the branch, resolves conflicts, re-runs the checks, and the host pushes 
 
 ### Flow
 
-1. **Behind count:** the worker asks GitHub (the PR, then `compare/<PR base>...<head>`, `behind_by`) during its
-   regular pull, for tickets with a PR that could be rebased (at the final review, Done, or after a failed rebase),
-   and stores it in `tickets.behind_by`; null for the others and once the PR is closed or merged. No count, no
-   button (the web refuses the command too): a branch that is up to date shows "Up to date with `main`".
+1. **Pull request state and behind count:** during its regular pull, the worker asks GitHub about every ticket's
+   pull request and stores its state (`tickets.pr_state`: open, closed or merged; a merged one is final and no longer
+   asked about). For tickets that could be rebased (at the final review, Done, or after a failed rebase) with an open
+   pull request, it also stores how far behind it is (`tickets.behind_by`, from `compare/<PR base>...<head>`); null
+   otherwise. No count, no button (the web refuses the command too): a branch that is up to date shows "Up to date
+   with `main`", a merged pull request "The pull request is merged".
 2. **Fetch for the container:** the container has no GitHub credentials, so the host fetches the base branch and
    the pushed branch with the project's credentials, writes them as a `git bundle`, copies it in and fetches from it
    inside the container (`origin/<base>`, the local `<base>` that diffs compare with, and `origin/<branch>`). If the

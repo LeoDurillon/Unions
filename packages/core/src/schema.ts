@@ -86,6 +86,8 @@ export const tickets = sqliteTable(
      * and a rebase could be asked; null otherwise (no PR, closed or merged, not checked yet).
      */
     behindBy: integer('behind_by'),
+    /** The pull request's state on GitHub, polled by the worker; null until known (or no PR). */
+    prState: text('pr_state', { enum: ['open', 'closed', 'merged'] }),
     containerName: text('container_name'),
     homeVolume: text('home_volume'),
     workspaceVolume: text('workspace_volume'),

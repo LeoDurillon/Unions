@@ -207,3 +207,20 @@ test('a done ticket with its branch takes a review too', async () => {
   expect((await call('POST', '/review', {})).status).toBe(200);
   expect(db.select().from(schema.commands).all()[0]?.type).toBe('revise');
 });
+
+test('a done ticket whose pull request is merged takes no more review, and says why', async () => {
+  db.update(schema.tickets)
+    .set({ phase: { kind: 'done' }, branch: '1-t', prNumber: 9, prState: 'merged' })
+    .run();
+  const diff = (await (await call('GET', '/diff')).json()) as DiffResponse;
+  expect(diff).toMatchObject({
+    canSend: false,
+    sendRefusal: 'The pull request is merged: open a new ticket for further changes.',
+  });
+  const refused = await call('POST', '/review', { summary: 'One more thing.' });
+  expect(refused.status).toBe(409);
+  expect(await refused.text()).toContain('merged');
+  // Closed without merging, it can still be reopened: the review stays possible.
+  db.update(schema.tickets).set({ prState: 'closed' }).run();
+  expect(((await (await call('GET', '/diff')).json()) as DiffResponse).canSend).toBe(true);
+});

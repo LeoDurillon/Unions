@@ -19,6 +19,13 @@ function canRebase(detail: TicketDetail): boolean {
 export function BranchStatus({ detail }: { detail: TicketDetail }): ReactElement | null {
   const { ticket, project } = detail;
   const { command } = useTicketCommands(ticket.id);
+  if (ticket.prState === 'merged') {
+    return (
+      <p className="text-sm text-zinc-500">
+        The pull request is merged: further changes need a new ticket.
+      </p>
+    );
+  }
   if (ticket.behindBy === null || ticket.branch === null) {
     return null;
   }

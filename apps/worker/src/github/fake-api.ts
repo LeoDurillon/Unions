@@ -3,6 +3,8 @@ import type {
   IssueRef,
   ProjectInfo,
   PullRequestRef,
+  PullRequestState,
+  PullRequestStatus,
   RemoteComment,
   RemoteItem,
   RepoRef,
@@ -37,7 +39,7 @@ export class FakeGitHubApi implements GitHubApi {
     body: string;
     draft: boolean;
     /** Unset: open. */
-    state?: 'open' | 'closed';
+    state?: PullRequestState;
     behindBy?: number;
   })[] = [];
   /** Reviews posted, in order. */
@@ -178,10 +180,19 @@ export class FakeGitHubApi implements GitHubApi {
     return Promise.resolve();
   }
 
-  pullRequestBehind(_repo: RepoRef, number: number): Promise<number | null> {
-    this.calls.push('pullRequestBehind');
+  pullRequestStatus(
+    _repo: RepoRef,
+    number: number,
+    behind: boolean,
+  ): Promise<PullRequestStatus | null> {
+    this.calls.push(behind ? 'pullRequestStatus+behind' : 'pullRequestStatus');
     const pull = this.pulls.find((candidate) => candidate.number === number);
-    return Promise.resolve(pull && pull.state !== 'closed' ? (pull.behindBy ?? 0) : null);
+    if (!pull) {
+      return Promise.resolve(null);
+    }
+    const state = pull.state ?? 'open';
+    const behindBy = state === 'open' && behind ? (pull.behindBy ?? 0) : null;
+    return Promise.resolve({ state, behindBy });
   }
 
   createPullRequestReview(

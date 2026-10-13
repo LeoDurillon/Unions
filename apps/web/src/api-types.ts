@@ -122,8 +122,9 @@ export type DiffFileSummary = {
 export type DiffResponse = {
   snapshot: { headSha: string; baseBranch: string; createdAt: number } | null;
   files: DiffFileSummary[];
-  /** True while the ticket waits on the user after code was written (a review can be sent). */
+  /** True while a review can be sent; otherwise `sendRefusal` says why. */
   canSend: boolean;
+  sendRefusal: string | null;
   /** The linked pull request, whose review comments can be imported. */
   pullRequest: number | null;
 };
