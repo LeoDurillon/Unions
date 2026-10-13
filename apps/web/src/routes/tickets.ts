@@ -3,6 +3,7 @@ import {
   getTicket,
   InvalidTransition,
   latestOutput,
+  latestRefusal,
   saveOutput,
   schema,
   STEPS,
@@ -137,6 +138,32 @@ function assertAllowed(ticket: TicketSummary, type: CommandType): void {
   }
 }
 
+/**
+ * The command's payload. A decision on a refused commit names the refusal the user saw: a newer one
+ * (the changes moved) must be looked at first.
+ */
+function commandPayload(
+  db: Db,
+  ticketId: number,
+  type: CommandType,
+  body: Record<string, unknown>,
+): Record<string, unknown> | null {
+  if (type === 'revise') {
+    return { feedback: requireText(body, 'feedback') };
+  }
+  if (type !== 'commit_anyway' && type !== 'drop_leftovers') {
+    return null;
+  }
+  const refusal = latestRefusal(db, ticketId);
+  if (!refusal || refusal.id !== body.refusalId || refusal.resolvedAt !== null) {
+    throw fail(
+      CONFLICT,
+      'The refused changes are not the ones shown: reload them and decide again',
+    );
+  }
+  return type === 'commit_anyway' ? { message: requireText(body, 'message') } : {};
+}
+
 async function queueCommand(db: Db, c: Context): Promise<Response> {
   const id = requireId(c.req.param('id'), 'ticket id');
   const ticket = loadTicket(db, id);
@@ -145,8 +172,8 @@ async function queueCommand(db: Db, c: Context): Promise<Response> {
   if (!isCommandType(type)) {
     throw fail(BAD_REQUEST, `"type" must be one of ${COMMAND_TYPES.join(', ')}`);
   }
-  const feedback = type === 'revise' ? requireText(body, 'feedback') : undefined;
   assertAllowed(ticket, type);
+  const payload = commandPayload(db, id, type, body);
   if (type === 'start') {
     assertStartable(db, ticket);
   }
@@ -162,7 +189,7 @@ async function queueCommand(db: Db, c: Context): Promise<Response> {
   }
   const command = db
     .insert(schema.commands)
-    .values({ type, ticketId: id, payload: feedback ? { feedback } : null })
+    .values({ type, ticketId: id, payload })
     .returning()
     .get();
   return c.json(command, ACCEPTED);

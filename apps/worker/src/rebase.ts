@@ -6,7 +6,14 @@ import { ensureTicketContainer } from './provision';
 import { runRebaseAgent, type Pushed, type Rebase } from './rebase-agent';
 import { fetchIntoContainer } from './rebase-fetch';
 import { contains, headCommit, restoreBranch } from './rebase-git';
-import { published, remoteOf, verifyAndPush } from './rebase-publish';
+import {
+  pausedRebase,
+  pauseRebase,
+  published,
+  remoteOf,
+  resumeRebase,
+  verifyAndPush,
+} from './rebase-publish';
 import type { StepContext, StepResult } from './scheduler';
 import { ensureBranch } from './workspace-git';
 
@@ -62,6 +69,9 @@ async function attempt(rebase: Rebase): Promise<StepResult | Pushed> {
     return { kind: 'error', error: outcome.message };
   }
   const checked = await verifyAndPush(rebase, pushed);
+  if ('refused' in checked) {
+    return pauseRebase(rebase, { refused: checked.refused, outcome, lease: pushed });
+  }
   if ('error' in checked) {
     return { kind: 'error', error: `${checked.error}\n\nThe agent's report:\n\n${outcome.text}` };
   }
@@ -76,18 +86,27 @@ export async function runRebaseStep(
   deps: ImplementDeps,
   context: StepContext,
 ): Promise<StepResult> {
-  const rebase = await prepare(deps, context);
+  const prepared = await prepare(deps, context);
+  const refusal = context.resume ? pausedRebase(deps.db, context.ticket.id) : null;
+  // A resumed rebase restores the branch as it was before the paused run, not the rebased one.
+  const before = refusal?.resumeState.before ?? prepared.before;
+  const rebase = { ...prepared, before };
   const restore = (): Promise<void> =>
     restoreBranch(deps.runtime, rebase.container, rebase.branch, rebase.before);
   try {
-    const result = await attempt(rebase).catch(async (error: unknown) => {
-      await restore();
-      throw error;
-    });
+    const result = await (refusal ? resumeRebase(rebase, refusal) : attempt(rebase)).catch(
+      async (error: unknown) => {
+        await restore();
+        throw error;
+      },
+    );
     if ('pushed' in result) {
       return await published(rebase, result);
     }
-    await restore();
+    // Paused: the rebased branch and the refused changes stay for the user's decision.
+    if (result.kind !== 'commit_refused') {
+      await restore();
+    }
     return result;
   } finally {
     await deps.runtime.stop(rebase.container);

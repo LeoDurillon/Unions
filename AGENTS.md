@@ -79,6 +79,12 @@ behavior; this file covers how to work in the repo.
     replaces `/workspace/attachments` in the container (outside the repo) with the ticket's current files, and
     `prompts.ts` lists them for every step but the rebase. `pushBranch` refuses a branch whose history holds a
     file not allowed in the repository (matched by git blob id, `PrivateFilesError`).
+  - Refused commits: when the repository's hook refuses the leftover commit (`leftovers.ts`; told apart from other
+    failures by a `--no-verify --dry-run`), the implement or rebase run stops in the `commit_refused` phase with the
+    agent's report, and `refused-commit.ts` records the files, hook output, diff and its hash in `refused_commits`.
+    The user commits them without hooks (`commit_anyway`), sets them aside in a stash (`drop_leftovers`), or sends
+    the implementer back (`revise`); the run then resumes (`phase.resume`) without the agent, and asks again if the
+    diff changed. A paused rebase keeps its rebased branch and push lease (`resumeState`).
   - `github/`: `api.ts` is the narrow `GitHubApi` the worker depends on, `octokit-api.ts` the real client,
     `fake-api.ts` the in-memory one for tests, `sync.ts` the mirror (issue, Status field, one comment per step,
     pull of title/description and "move to In Progress"; `dependency.ts` pushes a ticket's parent as "blocked by"), `queries.ts` the GraphQL. `clients.ts` builds each

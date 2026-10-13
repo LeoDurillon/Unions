@@ -2,12 +2,12 @@ import type { Step, StepOutput } from '@union/core';
 import { useState, type ReactElement, type ReactNode } from 'react';
 
 import type { TicketDetail } from '../../src/api-types';
-import { useTicketCommands } from '../lib/use-ticket-commands';
 import { findingsOf, parseVerdict } from '../lib/verdict';
 import { AnswerForm, useAnswers, type Answers } from './answer-form';
 import { Markdown } from './markdown';
 import { ReviewBar } from './review-bar';
-import { Badge, Button, ErrorText } from './ui';
+import { StepNotices } from './step-notices';
+import { Badge } from './ui';
 import { VerdictBadge } from './verdict-badge';
 
 const VALIDATION_TONE = { pending: 'amber', approved: 'green', revise: 'neutral' } as const;
@@ -16,33 +16,6 @@ const VALIDATION_LABEL = {
   approved: 'approved',
   revise: 'revision requested',
 } as const;
-
-function Stalled({ detail, step }: { detail: TicketDetail; step: Step }): ReactElement | null {
-  const { phase, id } = detail.ticket;
-  const { command } = useTicketCommands(id);
-  if ((phase.kind !== 'failed' && phase.kind !== 'rate_limited') || phase.step !== step) {
-    return null;
-  }
-  const message =
-    phase.kind === 'failed'
-      ? `Run failed: ${phase.error}`
-      : 'Claude usage limit reached. Retry when it resets.';
-  return (
-    <div className="space-y-2 rounded-lg border border-red-300 bg-red-50 p-3 dark:border-red-900 dark:bg-red-950/40">
-      <p className="text-sm">{message}</p>
-      <ErrorText error={command.error} />
-      <Button
-        variant="primary"
-        disabled={command.isPending}
-        onClick={() => {
-          command.mutate({ type: 'retry' });
-        }}
-      >
-        Retry
-      </Button>
-    </div>
-  );
-}
 
 function VersionBar({
   versions,
@@ -192,7 +165,7 @@ function StepView({ detail, step }: { detail: TicketDetail; step: Step }): React
         <VersionBar versions={state.versions} shown={shown} onPick={state.handlePick} />
       ) : null}
       {working ? <Notice tone="blue">The agent is working… see the Log tab.</Notice> : null}
-      <Stalled detail={detail} step={step} />
+      <StepNotices detail={detail} step={step} />
       {shown ? (
         <OutputBody
           step={step}

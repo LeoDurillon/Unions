@@ -1,11 +1,13 @@
 import { beforeEach, expect, test } from 'bun:test';
-import { cp, mkdir, mkdtemp, writeFile } from 'node:fs/promises';
+import { chmod, cp, mkdir, mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
 import {
   createDb,
   createTicket,
+  decideRefusal,
+  latestRefusal,
   migrateDb,
   schema,
   type ContainerRuntime,
@@ -141,7 +143,7 @@ const rebases: AgentFn = async () => {
   return { kind: 'ok', text: 'Rebased cleanly.', sessionId: 's2', costUsd: null };
 };
 
-function run(agent: AgentFn): Promise<StepResult> {
+function run(agent: AgentFn, resume: StepContext['resume'] = null): Promise<StepResult> {
   const ticket = db.select().from(schema.tickets).where(eq(schema.tickets.id, ticketId)).get();
   if (!ticket) {
     throw new Error('ticket missing');
@@ -155,6 +157,7 @@ function run(agent: AgentFn): Promise<StepResult> {
       // not checked
     },
     signal: new AbortController().signal,
+    resume,
   };
   return runRebaseStep(
     {
@@ -237,4 +240,29 @@ test('a push made during the rebase is never overwritten: the lease refuses', as
   const result = await run(pushesMeanwhile);
   expect(result.kind === 'error' && result.error).toContain('push was refused');
   expect(await git(origin(), 'log', '--format=%s', '-1', 'feature')).toBe('edit e.txt');
+});
+
+test('a refused leftover commit pauses the rebase unpushed; the decision pushes it', async () => {
+  const before = await git(origin(), 'rev-parse', 'feature');
+  const hook = path.join(container(), '.git', 'hooks', 'pre-commit');
+  await writeFile(hook, '#!/bin/sh\necho "lint: 2 warnings"\nexit 1\n');
+  await chmod(hook, 0o755);
+  const leavesAChange: AgentFn = async (...args) => {
+    const outcome = await rebases(...args);
+    await writeFile(path.join(container(), 'b.txt'), 'feature, tidied\n');
+    return outcome;
+  };
+  const paused = await run(leavesAChange);
+  expect(paused.kind).toBe('commit_refused');
+  expect(await git(origin(), 'rev-parse', 'feature')).toBe(before);
+  // Not restored: the rebased branch waits with the refused change.
+  await git(container(), 'merge-base', '--is-ancestor', 'origin/main', 'HEAD');
+  expect(latestRefusal(db, ticketId)).toMatchObject({ step: 'rebase', files: ['b.txt'] });
+
+  decideRefusal(db, ticketId, { resolution: 'commit', message: 'tidy b' });
+  const resumed = await run(leavesAChange, 'commit');
+  expect(resumed).toMatchObject({ kind: 'ok', sessionId: 's2' });
+  expect(agentCalls).toBe(1);
+  expect(await git(origin(), 'log', '-1', '--format=%s', 'feature')).toBe('tidy b');
+  await git(origin(), 'merge-base', '--is-ancestor', 'main', 'feature');
 });

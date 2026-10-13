@@ -144,6 +144,11 @@ export function saveOutput(db: Db, ticketId: number, step: Step, content: string
   });
 }
 
+/** The step whose latest output a verdict goes on: a done ticket's goes on its final review. */
+function validatedSection(phase: Phase): Step {
+  return 'step' in phase ? phase.step : 'final_review';
+}
+
 /** Records the user's verdict on the latest output of the step the ticket is waiting on. */
 export function recordValidation(
   db: Db,
@@ -155,10 +160,13 @@ export function recordValidation(
     // A done ticket can still be sent back with a review: the feedback goes on its final review,
     // where the implementer looks for it (`revisionFor`).
     const sentBack = phase.kind === 'done' && verdict.status === 'revise';
-    if (phase.kind !== 'awaiting_approval' && !sentBack) {
+    // The implementer paused on a refused commit can be sent back with guidance on its report.
+    const refused =
+      phase.kind === 'commit_refused' && phase.step === 'implement' && verdict.status === 'revise';
+    if (phase.kind !== 'awaiting_approval' && !sentBack && !refused) {
       throw new Error(`Ticket ${ticketId} is not awaiting approval`);
     }
-    const section = phase.kind === 'awaiting_approval' ? phase.step : 'final_review';
+    const section = validatedSection(phase);
     const output = latestOutput(tx, ticketId, section);
     if (output) {
       tx.update(schema.stepOutputs)

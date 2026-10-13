@@ -2,9 +2,9 @@ import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/r
 import type { Step } from '@union/core';
 
 import type { CommandType } from '../../src/api-types';
-import { api } from './api';
+import { api, type CommandExtra } from './api';
 
-type CommandInput = { type: CommandType; feedback?: string };
+type CommandInput = CommandExtra & { type: CommandType };
 type EditInput = { step: Step; content: string };
 /** A command, optionally preceded by saving an edited output (for example typed answers). */
 type ActInput = CommandInput & { saveFirst?: EditInput };
@@ -22,7 +22,7 @@ export function useTicketCommands(ticketId: number): {
     ]);
   };
   const command = useMutation({
-    mutationFn: (input: CommandInput) => api.command(ticketId, input.type, input.feedback),
+    mutationFn: ({ type, ...extra }: CommandInput) => api.command(ticketId, type, extra),
     onSettled: refresh,
   });
   const edit = useMutation({
@@ -34,7 +34,7 @@ export function useTicketCommands(ticketId: number): {
       if (input.saveFirst) {
         await api.editOutput(ticketId, input.saveFirst.step, input.saveFirst.content);
       }
-      return api.command(ticketId, input.type, input.feedback);
+      return api.command(ticketId, input.type, { feedback: input.feedback });
     },
     onSettled: refresh,
   });

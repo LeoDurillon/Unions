@@ -134,3 +134,32 @@ test('a done ticket can be sent back with a review: the implementer, then a new 
   expect(() => transition({ kind: 'done' }, { type: 'approve' })).toThrow(InvalidTransition);
   expect(() => transition({ kind: 'cancelled' }, { type: 'revise' })).toThrow(InvalidTransition);
 });
+
+test('a refused commit pauses the run, keeping its chain, until the user decides', () => {
+  const paused = transition(
+    { kind: 'running', step: 'rebase', thenRun: 'final_review' },
+    { type: 'commit_refused' },
+  );
+  expect(paused).toEqual({ kind: 'commit_refused', step: 'rebase', thenRun: 'final_review' });
+  expect(boardStatus(paused)).toBe('in_review');
+  expect(transition(paused, { type: 'commit_anyway' })).toEqual({
+    kind: 'running',
+    step: 'rebase',
+    thenRun: 'final_review',
+    resume: 'commit',
+  });
+  expect(transition(paused, { type: 'drop_leftovers' })).toEqual({
+    kind: 'running',
+    step: 'rebase',
+    thenRun: 'final_review',
+    resume: 'discard',
+  });
+  expect(() => transition(paused, { type: 'revise' })).toThrow(InvalidTransition);
+  expect(transition(paused, { type: 'cancel' })).toEqual({ kind: 'cancelled' });
+});
+
+test('the implementer can be sent back with guidance after a refused commit', () => {
+  const paused = transition({ kind: 'running', step: 'implement' }, { type: 'commit_refused' });
+  expect(transition(paused, { type: 'revise' })).toEqual({ kind: 'running', step: 'implement' });
+  expect(() => transition(paused, { type: 'approve' })).toThrow(InvalidTransition);
+});

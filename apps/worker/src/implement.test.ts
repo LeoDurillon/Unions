@@ -81,6 +81,7 @@ function workspace(
       // events are not checked here
     },
     signal: new AbortController().signal,
+    resume: null,
   };
   return {
     deps: {

@@ -53,6 +53,7 @@ test('a ticket without an implementation branch fails clearly, before touching D
         // not checked
       },
       signal: new AbortController().signal,
+      resume: null,
     },
   );
   expect(result).toEqual({

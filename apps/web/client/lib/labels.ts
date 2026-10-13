@@ -30,6 +30,9 @@ export function describePhase(phase: Phase): { label: string; tone: Tone } {
     case 'awaiting_approval': {
       return { label: `Needs review · ${STEP_TITLES[phase.step]}`, tone: 'amber' };
     }
+    case 'commit_refused': {
+      return { label: `Commit refused · ${STEP_TITLES[phase.step]}`, tone: 'amber' };
+    }
     case 'rate_limited': {
       return { label: `Rate limited · ${STEP_TITLES[phase.step]}`, tone: 'red' };
     }

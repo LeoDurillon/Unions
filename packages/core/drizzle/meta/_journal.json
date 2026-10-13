@@ -169,6 +169,13 @@
       "when": 1791886420251,
       "tag": "0023_mute_skaar",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "6",
+      "when": 1791890296264,
+      "tag": "0024_slow_lizard",
+      "breakpoints": true
     }
   ]
 }

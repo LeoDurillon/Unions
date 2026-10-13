@@ -51,7 +51,15 @@ export type TicketDetail = {
   runs: Run[];
 };
 
-export type CommandType = 'start' | 'approve' | 'revise' | 'retry' | 'rebase' | 'cancel';
+export type CommandType =
+  | 'start'
+  | 'approve'
+  | 'revise'
+  | 'retry'
+  | 'rebase'
+  | 'cancel'
+  | 'commit_anyway'
+  | 'drop_leftovers';
 
 export const COMMAND_TYPES: readonly CommandType[] = [
   'start',
@@ -60,6 +68,8 @@ export const COMMAND_TYPES: readonly CommandType[] = [
   'retry',
   'rebase',
   'cancel',
+  'commit_anyway',
+  'drop_leftovers',
 ];
 
 export type EventRow = {

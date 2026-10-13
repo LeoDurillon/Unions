@@ -1,7 +1,10 @@
 import {
   cancelQueuedInvestigation,
   createTicket,
+  decideRefusal,
   dispatch,
+  getTicket,
+  transition,
   emitEvent,
   recordValidation,
   schema,
@@ -103,7 +106,58 @@ function submitReview(command: Command, hooks: CommandHooks): void {
   hooks.submitPullRequestReview(reviewId, typeof summary === 'string' ? summary : '');
 }
 
+/**
+ * The user's decision on changes a hook refused to commit: recorded for the run that applies it.
+ * Checked against the phase first, so a refused transition records nothing.
+ */
+function decideOnRefusedCommit(db: Db, command: Command): void {
+  const ticketId = requireTicketId(command);
+  const type = command.type === 'commit_anyway' ? 'commit_anyway' : 'drop_leftovers';
+  transition(getTicket(db, ticketId).phase, { type });
+  decideRefusal(
+    db,
+    ticketId,
+    type === 'commit_anyway'
+      ? { resolution: 'commit', message: requireString(command.payload, 'message') }
+      : { resolution: 'discard' },
+  );
+  dispatch(db, ticketId, { type });
+}
+
+/** Feedback on the latest output; on a refused commit, it also closes the refusal. */
+function revise(db: Db, command: Command): void {
+  const ticketId = requireTicketId(command);
+  const refused = getTicket(db, ticketId).phase.kind === 'commit_refused';
+  recordValidation(db, ticketId, {
+    status: 'revise',
+    feedback: requireString(command.payload, 'feedback'),
+  });
+  if (refused) {
+    decideRefusal(db, ticketId, { resolution: 'revise' });
+  }
+  dispatch(db, ticketId, { type: 'revise' });
+}
+
+/** The user's answer to an output, or to a refused commit. */
+const DECISIONS = new Set(['approve', 'revise', 'commit_anyway', 'drop_leftovers']);
+
+function decide(db: Db, command: Command): void {
+  if (command.type === 'approve') {
+    const ticketId = requireTicketId(command);
+    recordValidation(db, ticketId, { status: 'approved' });
+    dispatch(db, ticketId, { type: 'approve' });
+  } else if (command.type === 'revise') {
+    revise(db, command);
+  } else {
+    decideOnRefusedCommit(db, command);
+  }
+}
+
 function execute(db: Db, command: Command, hooks: CommandHooks): void {
+  if (DECISIONS.has(command.type)) {
+    decide(db, command);
+    return;
+  }
   switch (command.type) {
     case 'create_ticket': {
       createFromCommand(db, command);
@@ -114,21 +168,6 @@ function execute(db: Db, command: Command, hooks: CommandHooks): void {
     case 'rebase':
     case 'cancel': {
       dispatch(db, requireTicketId(command), { type: command.type });
-      return;
-    }
-    case 'approve': {
-      const ticketId = requireTicketId(command);
-      recordValidation(db, ticketId, { status: 'approved' });
-      dispatch(db, ticketId, { type: 'approve' });
-      return;
-    }
-    case 'revise': {
-      const ticketId = requireTicketId(command);
-      recordValidation(db, ticketId, {
-        status: 'revise',
-        feedback: requireString(command.payload, 'feedback'),
-      });
-      dispatch(db, ticketId, { type: 'revise' });
       return;
     }
     case 'cancel_investigation': {

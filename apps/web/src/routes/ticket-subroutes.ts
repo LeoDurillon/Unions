@@ -4,11 +4,16 @@ import { Hono } from 'hono';
 import type { OnboardingGitHub } from '../github-onboarding';
 import { attachmentRoutes } from './attachments';
 import { issueImportRoutes } from './issue-import';
+import { refusedCommit } from './refused-commit';
 
-/** The routes under `/api/tickets` that have their own module: the issue import, a ticket's files. */
+/**
+ * The routes under `/api/tickets` that have their own module: the issue import, a ticket's files,
+ * its refused commit.
+ */
 export function ticketSubroutes(db: Db, github: OnboardingGitHub): Hono {
   const routes = new Hono();
   routes.route('/github-issue', issueImportRoutes(db, github));
   routes.route('/:id/attachments', attachmentRoutes(db));
+  routes.get('/:id/refused-commit', (c) => refusedCommit(db, c));
   return routes;
 }

@@ -27,6 +27,8 @@ export type ImplementReport = {
   ahead: number;
   base: string;
   publish: PublishResult;
+  /** What happened to changes a hook refused to commit, when the run was paused on them. */
+  note?: string;
 };
 
 function checksLine(report: ImplementReport): string {
@@ -59,6 +61,7 @@ export function renderImplementReport(report: ImplementReport): string {
   return [
     report.agentReport.trim(),
     '---',
+    ...(report.note ? [report.note] : []),
     checksLine(report),
     branchLine(report),
     `**Commits:** ${report.ahead} ahead of \`${report.base}\`.`,

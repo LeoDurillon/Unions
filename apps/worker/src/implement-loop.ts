@@ -16,10 +16,10 @@ import { approvedBefore } from './approved';
 import { runGate, runInstall, type GateResult } from './gate';
 import type { GitHubApi } from './github/api';
 import { feedbackPrompt, gateFailurePrompt, gateHint } from './implement-prompts';
+import { COMMIT_HOOK_HINT, commitLeftovers, type Refused } from './leftovers';
 import { attachmentsSection, buildPrompt } from './prompts';
 import { REPO_DIR, type ProvisionConfig } from './provision';
 import type { StepContext } from './scheduler';
-import { commitLeftovers } from './workspace-git';
 
 /** Branch moves and history rewrites belong to the host (rebase has its own step). */
 export const IMPLEMENT_DENIED = [
@@ -41,7 +41,13 @@ export type ImplementDeps = {
   agent: AgentFn;
 };
 
-export type Loop = { outcome: AgentOutcome; gate: GateResult | null; iterations: number };
+export type Loop = {
+  outcome: AgentOutcome;
+  gate: GateResult | null;
+  iterations: number;
+  /** The repository's hook refused the changes the agent left uncommitted: the run pauses. */
+  refused?: Refused;
+};
 export type Workspace = {
   deps: ImplementDeps;
   context: StepContext;
@@ -56,7 +62,10 @@ function freshPrompt({ deps, context, project }: Workspace): string {
     ticket,
     parent: parentOf(deps.db, ticket),
     shared: sharedPrompt(deps.db, ticket.projectId),
-    instructions: resolveAgent(deps.db, 'implement').prompt + gateHint(project.config.gateCommand),
+    instructions:
+      resolveAgent(deps.db, 'implement').prompt +
+      gateHint(project.config.gateCommand) +
+      COMMIT_HOOK_HINT,
     approved: approvedBefore(deps.db, ticket.id, 'implement'),
     revision: null,
     attachments: listAttachments(deps.db, ticket.id),
@@ -106,7 +115,10 @@ export async function implementLoop(workspace: Workspace): Promise<Loop> {
       return { outcome, gate, iterations: iteration };
     }
     ({ sessionId } = outcome);
-    await commitLeftovers(deps.runtime, container);
+    const leftovers = await commitLeftovers(deps.runtime, container);
+    if (leftovers.kind === 'refused') {
+      return { outcome, gate: null, iterations: iteration, refused: leftovers };
+    }
     gate = gateCommand ? await runGate(deps.runtime, container, gateCommand, context.signal) : null;
     if (!gate || gate.green || !gateCommand || iteration >= max) {
       return { outcome, gate, iterations: iteration };

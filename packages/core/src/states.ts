@@ -36,11 +36,17 @@ export const MODEL_BY_STEP = {
 export const BOARD_STATUSES = ['backlog', 'in_progress', 'in_review', 'done'] as const;
 export type BoardStatus = (typeof BOARD_STATUSES)[number];
 
+/** What a run does with the changes a hook refused to commit, once the user decided. */
+export type LeftoverResolution = 'commit' | 'discard';
+
 export type Phase =
   | { kind: 'backlog' }
-  // an agent run is in flight; `thenRun` chains a step without stopping for approval
-  | { kind: 'running'; step: Step; thenRun?: Step }
+  // an agent run is in flight; `thenRun` chains a step without stopping for approval; `resume`
+  // finishes a run paused on a refused commit, without the agent
+  | { kind: 'running'; step: Step; thenRun?: Step; resume?: LeftoverResolution }
   | { kind: 'awaiting_approval'; step: Step } // output written, waiting for the user
+  // the repository's hook refused the changes the agent left uncommitted; the user decides
+  | { kind: 'commit_refused'; step: Step; thenRun?: Step }
   | { kind: 'rate_limited'; step: Step; retryAt: number | null }
   | { kind: 'failed'; step: Step; error: string }
   | { kind: 'done' }
@@ -56,7 +62,12 @@ export type Action =
   | { type: 'retry' }
   // Brings the branch up to date with its base; the caller checks the pull request is still open.
   | { type: 'rebase' }
-  | { type: 'cancel' };
+  | { type: 'cancel' }
+  // A hook refused the leftover commit: the run stops until the user decides.
+  | { type: 'commit_refused' }
+  // Commit the refused changes without the hooks, or set them aside, then finish the run.
+  | { type: 'commit_anyway' }
+  | { type: 'drop_leftovers' };
 
 /** Every pipeline step, in order (`rebase` is not one). */
 export const STEPS: readonly Step[] = [...PLANNING_STEPS, 'implement', 'final_review'];
@@ -100,6 +111,25 @@ function fromRunning(phase: PhaseOf<'running'>, action: Action): Phase | null {
   }
   if (action.type === 'rate_limited') {
     return { kind: 'rate_limited', step: phase.step, retryAt: action.retryAt };
+  }
+  if (action.type === 'commit_refused') {
+    return { kind: 'commit_refused', step: phase.step, ...thenRunOf(phase) };
+  }
+  return null;
+}
+
+function thenRunOf(phase: { thenRun?: Step }): { thenRun?: Step } {
+  return phase.thenRun ? { thenRun: phase.thenRun } : {};
+}
+
+/** The implementer can also be sent back with guidance; a rebase cannot. */
+function fromCommitRefused(phase: PhaseOf<'commit_refused'>, action: Action): Phase | null {
+  if (action.type === 'commit_anyway' || action.type === 'drop_leftovers') {
+    const resume = action.type === 'commit_anyway' ? 'commit' : 'discard';
+    return { kind: 'running', step: phase.step, ...thenRunOf(phase), resume };
+  }
+  if (action.type === 'revise' && phase.step === 'implement') {
+    return { kind: 'running', step: 'implement', ...thenRunOf(phase) };
   }
   return null;
 }
@@ -149,6 +179,9 @@ function applyAction(phase: Phase, action: Action): Phase | null {
     case 'awaiting_approval': {
       return fromAwaitingApproval(phase, action);
     }
+    case 'commit_refused': {
+      return fromCommitRefused(phase, action);
+    }
     case 'failed':
     case 'rate_limited': {
       return fromStalled(phase, action);
@@ -188,6 +221,7 @@ export function boardStatus(phase: Phase): BoardStatus {
     }
     case 'running':
     case 'awaiting_approval':
+    case 'commit_refused':
     case 'rate_limited':
     case 'failed': {
       return phase.step === 'final_review' || phase.step === 'rebase' ? 'in_review' : 'in_progress';

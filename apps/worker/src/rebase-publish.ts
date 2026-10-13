@@ -1,26 +1,40 @@
-import { emitEvent, privateAttachments, schema, type Project } from '@union/core';
+import {
+  emitEvent,
+  privateAttachments,
+  schema,
+  type Db,
+  type Project,
+  type RefusedCommit,
+} from '@union/core';
 import { eq } from 'drizzle-orm';
 
 import { captureDiff } from './diff-snapshot';
 import { runGate, type GateResult } from './gate';
+import { commitLeftovers, type Refused } from './leftovers';
 import { PrivateFilesError, projectRemote, pushBranch } from './publish';
 import { renderRebaseReport, type Pushed, type Rebase } from './rebase-agent';
 import { headCommit, rebaseProblem } from './rebase-git';
+import { outcomeOf, pauseOnRefusal, pendingRefusal, resumeRefusal } from './refused-commit';
 import type { StepResult } from './scheduler';
-import { commitLeftovers } from './workspace-git';
 
 /** The project's repository with its credentials, for the fetch and the push. */
 export function remoteOf(deps: Rebase['deps'], project: Project): ReturnType<typeof projectRemote> {
   return projectRemote(deps.db, deps.config.gitBaseUrl, project);
 }
 
-/** Checks the result, runs the project's checks, then pushes; returns why it could not, or the gate. */
+/**
+ * Checks the result, runs the project's checks, then pushes; returns why it could not, the hook's
+ * refusal of the agent's leftover changes, or the gate.
+ */
 export async function verifyAndPush(
   rebase: Rebase,
   pushed: string,
-): Promise<{ error: string } | { gate: GateResult | null }> {
+): Promise<{ error: string } | { refused: Refused } | { gate: GateResult | null }> {
   const { deps, container, project, branch } = rebase;
-  await commitLeftovers(deps.runtime, container);
+  const leftovers = await commitLeftovers(deps.runtime, container);
+  if (leftovers.kind === 'refused') {
+    return { refused: leftovers };
+  }
   const problem = await rebaseProblem(deps.runtime, container, rebase);
   if (problem) {
     return { error: problem };
@@ -70,4 +84,53 @@ export async function published(rebase: Rebase, { outcome, gate }: Pushed): Prom
     gate,
   });
   return { kind: 'ok', output, sessionId: outcome.sessionId };
+}
+
+/** Stops the rebase on a refused commit, keeping what the run needs to push once the user decides. */
+export function pauseRebase(
+  rebase: Rebase,
+  { refused, outcome, lease }: { refused: Refused; outcome: Pushed['outcome']; lease: string },
+): StepResult {
+  return pauseOnRefusal(rebase.deps.db, {
+    ticketId: rebase.context.ticket.id,
+    step: 'rebase',
+    refused,
+    report: outcome.text,
+    sessionId: outcome.sessionId,
+    resumeState: { lease, before: rebase.before },
+  });
+}
+
+/** The decision a resumed rebase applies. */
+export function pausedRebase(db: Db, ticketId: number): RefusedCommit {
+  return pendingRefusal(db, ticketId, 'rebase');
+}
+
+/** Finishes a rebase paused on a refused commit: the user's decision, then the checks and the push. */
+export async function resumeRebase(
+  rebase: Rebase,
+  refusal: RefusedCommit,
+): Promise<StepResult | Pushed> {
+  const { lease } = refusal.resumeState;
+  if (!lease) {
+    return {
+      kind: 'error',
+      error: 'The paused rebase did not record the branch it was to replace',
+    };
+  }
+  const paused = await resumeRefusal(rebase.deps, rebase.container, refusal);
+  if (paused) {
+    return paused;
+  }
+  const checked = await verifyAndPush(rebase, lease);
+  if ('error' in checked) {
+    return { kind: 'error', error: `${checked.error}\n\nThe agent's report:\n\n${refusal.report}` };
+  }
+  if ('refused' in checked) {
+    return {
+      kind: 'error',
+      error: 'The hook refused another commit after the decision was applied',
+    };
+  }
+  return { pushed: true, outcome: outcomeOf(refusal), gate: checked.gate };
 }

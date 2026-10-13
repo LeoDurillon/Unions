@@ -5,13 +5,16 @@ import {
   createTicket,
   getTicket,
   latestOutput,
+  latestRefusal,
   migrateDb,
+  saveOutput,
   schema,
   type Db,
 } from '@union/core';
+import { eq } from 'drizzle-orm';
 
 import { drainCommands } from './commands';
-import { Scheduler, type StepExecutor } from './scheduler';
+import { Scheduler, type StepExecutor, type StepResult } from './scheduler';
 
 let db: Db;
 let ticketId: number;
@@ -168,4 +171,88 @@ test('a chained run is accepted automatically and the next step sees it as appro
     step: 'final_review',
   });
   expect(latestOutput(db, ticketId, 'final_review')).toMatchObject({ validation: 'pending' });
+});
+
+test('a refused commit pauses the run; the decision resumes it, or the agent is sent back', async () => {
+  const seen: { resume: unknown; revision: unknown }[] = [];
+  const results: StepResult[] = [
+    { kind: 'commit_refused', output: 'report, paused', sessionId: 's1' },
+    { kind: 'ok', output: 'report, committed', sessionId: 's1' },
+  ];
+  const executor: StepExecutor = ({ resume, revision }) => {
+    seen.push({ resume, revision });
+    return Promise.resolve(results[seen.length - 1] ?? { kind: 'error', error: 'no more' });
+  };
+  const scheduler = new Scheduler(db, executor, 1);
+  db.update(schema.tickets)
+    .set({ phase: { kind: 'running', step: 'implement', thenRun: 'final_review' } })
+    .where(eq(schema.tickets.id, ticketId))
+    .run();
+  scheduler.tick();
+  await scheduler.idle();
+  expect(getTicket(db, ticketId).phase).toEqual({
+    kind: 'commit_refused',
+    step: 'implement',
+    thenRun: 'final_review',
+  });
+  expect(latestOutput(db, ticketId, 'implement')).toMatchObject({
+    content: 'report, paused',
+    validation: 'pending',
+  });
+  expect(db.select().from(schema.runs).all().at(-1)).toMatchObject({
+    status: 'succeeded',
+    sessionId: 's1',
+  });
+
+  db.insert(schema.refusedCommits)
+    .values({
+      ticketId,
+      step: 'implement',
+      files: ['a.ts'],
+      hookOutput: 'lint',
+      diff: 'd',
+      diffHash: 'h',
+      message: 'proposed',
+      report: 'report',
+      resumeState: {},
+    })
+    .run();
+  command('commit_anyway', { message: 'chosen message' });
+  expect(latestRefusal(db, ticketId)).toMatchObject({
+    resolution: 'commit',
+    message: 'chosen message',
+  });
+  scheduler.tick();
+  await scheduler.idle();
+  expect(seen[1]).toEqual({ resume: 'commit', revision: null });
+  // The chain goes on: the final review runs next.
+  expect(getTicket(db, ticketId).phase).toEqual({ kind: 'running', step: 'final_review' });
+});
+
+test('sending the paused implementer back closes the refusal and resumes its session', () => {
+  db.update(schema.tickets)
+    .set({ phase: { kind: 'commit_refused', step: 'implement' } })
+    .where(eq(schema.tickets.id, ticketId))
+    .run();
+  saveOutput(db, ticketId, 'implement', 'report, paused');
+  db.insert(schema.refusedCommits)
+    .values({
+      ticketId,
+      step: 'implement',
+      files: ['a.ts'],
+      hookOutput: 'lint',
+      diff: 'd',
+      diffHash: 'h',
+      message: 'proposed',
+      report: 'report',
+      resumeState: {},
+    })
+    .run();
+  command('revise', { feedback: 'fix the warnings in that page' });
+  expect(getTicket(db, ticketId).phase).toEqual({ kind: 'running', step: 'implement' });
+  expect(latestRefusal(db, ticketId)?.resolution).toBe('revise');
+  expect(latestOutput(db, ticketId, 'implement')?.feedback).toBe('fix the warnings in that page');
+
+  command('drop_leftovers');
+  expect(db.select().from(schema.commands).all().at(-1)?.error).toContain('Invalid transition');
 });

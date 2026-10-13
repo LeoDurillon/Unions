@@ -31,6 +31,8 @@ import type {
 } from '../../src/api-types';
 import type { LinkResult } from '../../src/routes/ticket-pull-request';
 
+export type CommandExtra = { feedback?: string; message?: string; refusalId?: number };
+
 /** What a GitHub call is made with: a token, or an installation of the stored GitHub App. */
 export type GitHubCredential = { token: string } | { installationId: number };
 
@@ -157,8 +159,9 @@ export const api = {
   }): Promise<TicketSummary> => request('POST', '/api/tickets', input),
   setParent: (id: number, parentId: number | null): Promise<TicketSummary> =>
     request('PUT', `/api/tickets/${id}/parent`, { parentId }),
-  command: (id: number, type: CommandType, feedback?: string): Promise<unknown> =>
-    request('POST', `/api/tickets/${id}/commands`, { type, feedback }),
+  /** `extra`: the feedback of a revision, or the decision on a refused commit. */
+  command: (id: number, type: CommandType, extra: CommandExtra = {}): Promise<unknown> =>
+    request('POST', `/api/tickets/${id}/commands`, { type, ...extra }),
   linkPullRequest: (id: number, pullRequest: string): Promise<LinkResult> =>
     request('PUT', `/api/tickets/${id}/pull-request`, { pullRequest }),
   unlinkPullRequest: (id: number): Promise<unknown> =>

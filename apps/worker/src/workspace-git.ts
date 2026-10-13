@@ -44,33 +44,6 @@ export async function ensureBranch(
   );
 }
 
-/** Files the agent changed but did not commit. */
-export async function uncommittedFiles(
-  runtime: ContainerRuntime,
-  container: string,
-): Promise<string[]> {
-  const status = await mustRunIn(runtime, container, git(['status', '--porcelain']));
-  return status.split('\n').filter((line) => line.trim() !== '');
-}
-
-/** Commits whatever the agent left uncommitted, so the push contains everything it did. */
-export async function commitLeftovers(
-  runtime: ContainerRuntime,
-  container: string,
-): Promise<boolean> {
-  const leftovers = await uncommittedFiles(runtime, container);
-  if (leftovers.length === 0) {
-    return false;
-  }
-  await mustRunIn(runtime, container, git(['add', '-A']));
-  await mustRunIn(
-    runtime,
-    container,
-    git(['commit', '-m', 'chore: changes the agent left uncommitted']),
-  );
-  return true;
-}
-
 export async function commitsAhead(
   runtime: ContainerRuntime,
   container: string,
