@@ -5,9 +5,14 @@ start command, one port): that one could not run apps needing a database or a qu
 
 ## Idea
 
-A ticket's branch runs as a full environment, built from the repository's own Docker Compose file, served at
+A ticket's work runs as a full environment, built from the repository's own Docker Compose file, served at
 `http://<ticket id>.localhost` (one host per exposed service: `http://api.12.localhost`). The user tries the work
 there, and the agent can run end-to-end tests against it.
+
+The environment runs straight from the ticket's **workspace volume** (`union-t<id>-ws`, which every ticket already
+has: the agent's container mounts it at `/workspace`, with the repository in `/workspace/repo`). No second clone on
+the host, no second install, one Docker image cache shared by all tickets, and no privileged container: the agent
+never touches Docker.
 
 ## Project settings (Preview)
 
@@ -19,36 +24,61 @@ there, and the agent can run end-to-end tests against it.
 - **Compose file path** in the repository (for example `compose.preview.yaml`).
 - **Services**, listed by the worker from the compose file: for each, whether it is exposed, on which port, under
   which name (`web` → `12.localhost`, `api` → `api.12.localhost`).
-- **App env file** (optional): a path in the checkout (`.env`, `apps/web/.env.local`) the variables are written to,
-  for apps that read their configuration from a file (frontends often read URLs at build time).
+- **App env file** (optional): the path, inside a service, where the variables are given as a file (`/app/.env`,
+  `/app/apps/web/.env.local`), for apps that read their configuration from a file (frontends often read URLs at build
+  time).
 - **E2E command** (optional, see "End-to-end tests").
 
 ## How a preview starts
 
-1. **Checkout on the host.** Compose resolves `build:` contexts and bind mounts (`./src:/app`) on the host, and a
-   ticket's code lives in a Docker volume, so the worker checks out the ticket's pushed commit under
-   `previews/t<id>/` (gitignored, like `attachments/`). In the compose stack the worker runs in a container: the
-   previews folder must be mounted at the same path inside the worker as on the host, or Docker will not find it.
-2. **Resolve, never parse by hand.** `docker compose config --format json` in the checkout gives the resolved file
+Available once the ticket has a workspace (its first implementation run created it).
+
+1. **A helper container runs compose.** The worker starts a short-lived `union-t<id>-compose` container from the
+   official Docker CLI image (pinned version, with the compose plugin). It mounts the ticket's workspace volume and
+   the Docker socket, and runs every compose command from `/workspace/repo`. Only this helper sees the socket; the
+   agent's container never does. Compose calls go through `ContainerRuntime` (new compose methods built on the
+   helper), as AGENTS.md requires.
+2. **Resolve, never parse by hand.** `docker compose config --format json` in the helper gives the resolved file
    (includes, `extends`, `${VAR}` interpolation, profiles). The services list in the settings comes from it.
-3. **Check it (safety).** The compose file comes from the branch, and the agent can edit the branch: a compose file
-   asking for a privileged container, `network_mode: host`, `pid: host`, the Docker socket, devices, added
-   capabilities, or a bind mount outside the checkout would hand the host to whoever wrote it, a prompt-injected
-   agent included. Any of these refuses the start, with the reason. External volumes and networks are refused too
-   (they are shared between previews: see "Isolation").
+3. **Check it (safety).** The compose file comes from the workspace, and the agent can edit it: a compose file asking
+   for a privileged container, `network_mode: host`, `pid: host`, the Docker socket, devices or added capabilities
+   would hand the host to whoever wrote it, a prompt-injected agent included. Any of these refuses the start, with the
+   reason. So do external volumes and networks (shared between previews, see "Isolation"), absolute host paths, and
+   any mount that leaves `repo/`: the volume also holds `/workspace/attachments`, the ticket's files, some private,
+   which a preview must never see.
 4. **Write a new file** from the resolved config, not a patched copy of the original:
+   - **source mounts**: a relative bind mount (`./src:/app`) would be resolved on the host, where nothing is; it
+     becomes a mount of the workspace volume's matching folder (`repo/src`, Docker's volume sub-path mounts, Docker
+     Engine 26 or later). The workspace volume is declared external in the generated file (Union created it);
+   - **builds**: `build:` contexts stay as they are: the compose CLI sends the context to Docker over the API, so it
+     reads from the volume;
    - remove `container_name` and every published host port (`ports:`): Traefik routes the traffic;
    - add Traefik labels to the exposed services, and attach them to the proxy network;
-   - point the env file at the generated variables.
-5. **Variables.** The templates are filled in, then written to an env file passed to compose (for `${VAR}` in the
-   compose file) and to the app env file if one is set. Both live in the host checkout, never in the branch.
+   - the app env file, if set, is given to its service as a compose config with inline content mounted at that path:
+     the file exists only inside the service, never in the workspace, so the agent cannot read the secrets in it or
+     commit it.
+5. **Variables.** The templates are filled in and written to an env file inside the helper (for `${VAR}` in the
+   compose file), outside the volume. The generated compose file lives there too.
 6. **Up.** `docker compose -p union-t<id> -f <generated file> up -d --build`. Ready when each exposed service
-   answers HTTP; failed after a timeout, with the log tail.
+   answers HTTP; failed after a timeout, with the log tail. The helper is removed once the command ends (it is
+   started again for stop, restart and logs).
 
-Start, stop and restart are commands handled by the worker (`preview_start`, `preview_stop`, `preview_restart`).
-Compose calls go through `ContainerRuntime` (new compose methods), as AGENTS.md requires. The state (`stopped`,
-`starting`, `running`, `failed`) is stored on the ticket and streamed as events; `docker compose logs -f` feeds a
-**Preview log** tab.
+Start, stop and restart are commands handled by the worker (`preview_start`, `preview_stop`, `preview_restart`). The
+state (`stopped`, `starting`, `running`, `failed`) is stored on the ticket and streamed as events; `docker compose
+logs -f` (in a helper) feeds a **Preview log** tab.
+
+## Which code the preview runs
+
+The agent's working copy, live: where the compose file mounts the source, dev servers with hot reload show the
+agent's changes as it makes them, uncommitted ones included. While the agent works that is the point (it can test
+in its own edit loop); once the ticket is done everything is committed, so the preview shows the pushed work.
+Services built into an image (`build:` without a source mount) show the code as of their last build: restart to
+rebuild.
+
+The workspace is shared live between the agent and the preview's services: a service that writes into the source
+folder (generated files, a build cache, an install into a mounted `node_modules`) changes the agent's working copy.
+Usually harmless (the same platform, so a `node_modules` the agent installed can be reused), but worth knowing. The
+leftover commit and the review see such files like any other change.
 
 ## Isolation between previews
 
@@ -57,12 +87,14 @@ Each ticket is its own compose project (`-p union-t12`):
 - its own containers (`union-t12-db-1`) and network: the app still reaches `db:5432`, but ticket 12's `db` and
   ticket 15's are different containers on different networks;
 - its own named volumes (`pgdata` becomes `union-t12_pgdata`): separate data, deleted by `down -v`;
+- its own source: relative mounts point into its own workspace volume;
 - no host ports, so no clash between tickets or with a database running on the machine.
 
 What would still share a database, and how it is handled:
 
-- external volumes or networks (`external: true`): refused;
-- absolute host paths for data: refused (relative paths are per checkout, so fine);
+- external volumes or networks (`external: true`): refused (the workspace volume is the only external one, and
+  Union adds it);
+- absolute host paths for data: refused;
 - `container_name`: removed (it would block the second start, not share data);
 - a database outside the compose file (`DATABASE_URL` pointing at a shared server): a configuration choice Union
   cannot block; the settings warn about it and suggest `{service.db.internal}`.
@@ -88,42 +120,39 @@ rarely change). The browser itself is installed on first use, at the repository'
 repository and the image only grows by the libraries. This lets the agent:
 
 - check its own UI changes: open the page, click through the feature, take screenshots and look at them;
-- write e2e tests that work, running one test, fixing it, running it again;
+- write e2e tests that work, running one test, fixing it, running it again, against its live working copy;
 - debug a failure: rerun one test, read the trace and the browser console, look at the failing step's screenshot;
 - run in the same setup as the gate, so "passes for the agent, fails in the gate" mostly goes away.
 
 The cost is the memory of a running Chromium (a few hundred MB, only while tests run).
 
 **E2E gate.** The project's e2e command (for example `npx playwright test`) is run by the worker like the check
-command (`gate.ts`): deterministic, the agent cannot skip it. It runs once the preview is up at the pushed commit;
-a failure goes back to the agent with the output, like a failing check. The Playwright report and failure
-screenshots are kept on the ticket (Log tab, and readable by the final review).
-
-**Which code the preview runs.** As designed, the pushed commit (host checkout): e2e verifies the work after the
-push, at the final review or as a gate before it, not inside the agent's edit loop. A later option: where the compose
-file mounts the source (`./:/app`), mount the ticket's workspace volume instead (Docker can mount a volume's
-sub-folder), so dev servers with hot reload show the agent's changes as it makes them. Services built with `build:`
-still use the checkout.
+command (`gate.ts`): deterministic, the agent cannot skip it. It runs after the agent's last turn, against the
+working copy that gets committed and pushed; a failure goes back to the agent with the output, like a failing check.
+The Playwright report and failure screenshots are kept on the ticket (Log tab, and readable by the final review).
 
 ## Lifecycle
 
 - At most N previews running (default 3).
-- A preview stops (`down -v`) when the ticket goes back into implementation, is done, cancelled or removed, and when
-  the worker shuts down. Restart re-checks out the latest pushed commit and runs `up --build` again.
+- A preview keeps running while the agent works (that is how it shows the changes live), and through restarts of the
+  agent's container (the volume stays).
+- It stops (`down -v`) when the ticket is done, cancelled or removed, and when the worker shuts down; removing the
+  ticket's workspace volume requires the preview to be down first. Restart runs `up --build` again from the
+  workspace.
 
 ## Phases
 
-1. **Run a preview**: Traefik, host checkout at the pushed commit, resolved and rewritten compose file, safety checks,
-   one exposed service, plain environment variables, Start/Stop, Preview log. About the size of the whole former
-   single-container plan.
-2. **Variables**: templates (service URLs, ticket id), the app env file, several exposed services.
+1. **Run a preview**: Traefik, the compose helper on the workspace volume, the resolved and rewritten compose file
+   (source mounts, no host ports, labels), safety checks, one exposed service, plain environment variables,
+   Start/Stop, Preview log.
+2. **Variables**: templates (service URLs, ticket id), the app env file as a compose config, several exposed
+   services.
 3. **End-to-end**: the network join, Chromium libraries in the image and the per-repository browser install, the e2e
    gate, the report kept on the ticket. About half a phase.
-4. **Comfort**: setup commands after start (migrations, seeding), auto-stop, the running cap; optionally the live
-   workspace mount for hot reload.
+4. **Comfort**: setup commands after start (migrations, seeding), auto-stop when idle, the running cap.
 
 ## Open questions
 
 - Setup after start (migrations, seeding): commands in the settings, or left to the compose file (an init service)?
 - Expose previews on the local network, or this machine only (default)?
-- The e2e gate: on every push, or only when the user starts a preview or reaches the final review?
+- The e2e gate: after every implementation run, or only when the user starts a preview or reaches the final review?

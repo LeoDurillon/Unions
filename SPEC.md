@@ -252,11 +252,13 @@ Full design: [`docs/plans/preview-environments.md`](docs/plans/preview-environme
 - A ticket's branch runs from the repository's own Docker Compose file (path set per project), so apps with a
   database or a queue work. Each ticket is its own compose project (`union-t<id>`): its own containers, network and
   volumes, no published host ports.
-- The worker checks out the pushed commit on the host, resolves the file with `docker compose config`, refuses
-  dangerous settings (privileged, host network, Docker socket, mounts outside the checkout, external volumes), and
-  writes a new file with Traefik labels on the exposed services: `http://<id>.localhost`, `http://api.<id>.localhost`.
-- Per-project environment variables (secrets kept server side) with templates such as `{service.api.url}`, written
-  to the compose env file and optionally to an app env file in the checkout.
+- It runs from the ticket's workspace volume (the agent's live working copy), through a short-lived helper
+  container that holds the Docker socket; the agent's container never does. The worker resolves the file with
+  `docker compose config`, refuses dangerous settings (privileged, host network, Docker socket, mounts leaving the
+  repository, external volumes), turns source mounts into mounts of the workspace volume, and writes a new file with
+  Traefik labels on the exposed services: `http://<id>.localhost`, `http://api.<id>.localhost`.
+- Per-project environment variables (secrets kept server side) with templates such as `{service.api.url}`, given to
+  compose and optionally as an app env file inside a service, never written into the workspace.
 - End-to-end tests: the agent's container joins the preview's network; Chromium's libraries are in the agent image,
   the browser is installed at the repository's Playwright version on first use; a project e2e command runs as a gate
   like the checks.
