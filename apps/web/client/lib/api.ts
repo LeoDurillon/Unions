@@ -191,8 +191,16 @@ export const api = {
     request('POST', `/api/tickets/${id}/comments/import`),
   importReviewNote: (id: number, url: string): Promise<unknown> =>
     request('POST', `/api/tickets/${id}/comments/import-note`, { url }),
-  pullRequests: (projectId: number, filter: PullRequestFilter): Promise<PullRequestList> =>
-    request('GET', `/api/projects/${projectId}/pull-requests?state=${filter}`),
+  /** `refresh`: ask GitHub now, not the list the server kept. */
+  pullRequests: (
+    projectId: number,
+    filter: PullRequestFilter,
+    refresh = false,
+  ): Promise<PullRequestList> =>
+    request(
+      'GET',
+      `/api/projects/${projectId}/pull-requests?state=${filter}${refresh ? '&refresh' : ''}`,
+    ),
   currentReviews: (projectId: number): Promise<CurrentReview[]> =>
     request('GET', `/api/projects/${projectId}/pull-requests/reviews`),
   addCurrentReview: (projectId: number, pull: PullRequestListItem): Promise<CurrentReview> =>

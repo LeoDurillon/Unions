@@ -204,7 +204,12 @@ export type PullRequestListItem = {
 export type CurrentReview = Omit<typeof schema.currentReviews.$inferSelect, 'files'>;
 
 /** The newest 100 pull requests of the filter, and how many there are in all. */
-export type PullRequestList = { total: number; pullRequests: PullRequestListItem[] };
+export type PullRequestList = {
+  total: number;
+  pullRequests: PullRequestListItem[];
+  /** When the list was read from GitHub: the server reuses it for a few minutes. */
+  fetchedAt: number;
+};
 
 /** A review summary or a conversation comment: about the whole pull request, not a line. */
 export type PullRequestNote = {

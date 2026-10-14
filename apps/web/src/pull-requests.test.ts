@@ -8,6 +8,7 @@ import type { PullRequestFilter, PullRequestList } from './api-types';
 import { createApp } from './app';
 import type { OnboardingGitHub } from './github-onboarding';
 import { toPullRequest, type RemotePullRequest } from './github-pull-requests';
+import { PULL_REQUEST_CACHE_MS, PullRequestCache } from './routes/pull-request-cache';
 
 function pull(number: number, state: RemotePullRequest['state']): RemotePullRequest {
   return {
@@ -107,4 +108,37 @@ test("GitHub's shape maps to ours: merged is its own state, deleted authors are 
       author: null,
     }),
   ).toMatchObject({ state: 'merged', draft: true, author: 'ghost', headBranch: 'h' });
+});
+
+test("GitHub's list is reused a few minutes; Refresh reads it again; ticket links stay current", async () => {
+  const first = (await (await list()).json()) as PullRequestList;
+  await list();
+  expect(asked).toEqual(['open']);
+
+  const ticket = createTicket(db, { projectId, title: 'Add search' });
+  db.update(schema.tickets).set({ prNumber: 7 }).where(eq(schema.tickets.id, ticket.id)).run();
+  const cached = (await (await list()).json()) as PullRequestList;
+  expect(asked).toEqual(['open']);
+  expect(cached.fetchedAt).toBe(first.fetchedAt);
+  expect(cached.pullRequests[0]?.ticketId).toBe(ticket.id);
+
+  const fresh = (await (await list('?state=open&refresh')).json()) as PullRequestList;
+  expect(asked).toEqual(['open', 'open']);
+  expect(fresh.fetchedAt).toBeGreaterThanOrEqual(first.fetchedAt);
+});
+
+test('the cache expires on its own', async () => {
+  let now = 0;
+  const cache = new PullRequestCache(() => now);
+  const read = (): Promise<{ total: number; pullRequests: [] }> => {
+    asked.push('open');
+    return Promise.resolve({ total: 0, pullRequests: [] });
+  };
+  await cache.get(1, 'open', read, false);
+  now = PULL_REQUEST_CACHE_MS - 1;
+  await cache.get(1, 'open', read, false);
+  expect(asked).toHaveLength(1);
+  now = PULL_REQUEST_CACHE_MS;
+  await cache.get(1, 'open', read, false);
+  expect(asked).toHaveLength(2);
 });

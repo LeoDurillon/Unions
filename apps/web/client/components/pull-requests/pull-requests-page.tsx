@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 
 import {
@@ -17,8 +17,17 @@ const FILTER_LABELS: Record<PullRequestFilter, string> = {
   closed: 'Closed',
   all: 'All',
 };
-/** GitHub is only asked again after this long, or on Refresh. */
-const STALE_MS = 60_000;
+/** The page asks the server again after this long; the server itself keeps GitHub's list a few minutes. */
+const STALE_MS = 300_000;
+/** Lists of the other filters and projects are kept this long after leaving them. */
+const KEEP_MS = 1_800_000;
+const MS_PER_MINUTE = 60_000;
+
+/** `just now`, `3 min ago`: how old the list GitHub gave is. */
+function age(fetchedAt: number, now: number): string {
+  const minutes = Math.floor((now - fetchedAt) / MS_PER_MINUTE);
+  return minutes < 1 ? 'just now' : `${minutes} min ago`;
+}
 
 function FilterToggle({
   filter,
@@ -52,12 +61,15 @@ function Toolbar({
   filter,
   onFilter,
   list,
+  receivedAt,
   fetching,
   onRefresh,
 }: {
   filter: PullRequestFilter;
   onFilter: (filter: PullRequestFilter) => void;
   list: PullRequestList | undefined;
+  /** When the page got the list: its age is told as of then (the server may have kept it a while). */
+  receivedAt: number;
   fetching: boolean;
   onRefresh: () => void;
 }): ReactElement {
@@ -71,11 +83,46 @@ function Toolbar({
           : ''}
       </span>
       <div className="flex-1" />
-      <Button disabled={fetching} onClick={onRefresh}>
+      {list ? (
+        <span className="text-xs text-zinc-500" title={new Date(list.fetchedAt).toLocaleString()}>
+          Read from GitHub {age(list.fetchedAt, receivedAt)}
+        </span>
+      ) : null}
+      <Button
+        disabled={fetching}
+        title="Ask GitHub again now, instead of the list read a few minutes ago"
+        onClick={onRefresh}
+      >
         {fetching ? 'Loading…' : 'Refresh'}
       </Button>
     </div>
   );
+}
+
+/** The list, as the server keeps it, and Refresh: GitHub read again now, put in its place. */
+function usePullRequestList(
+  projectId: number,
+  filter: PullRequestFilter,
+): {
+  query: ReturnType<typeof useQuery<PullRequestList>>;
+  refresh: ReturnType<typeof useMutation<PullRequestList, Error, void>>;
+} {
+  const queryClient = useQueryClient();
+  const queryKey = ['pull-requests', projectId, filter];
+  const query = useQuery({
+    queryKey,
+    queryFn: () => api.pullRequests(projectId, filter),
+    staleTime: STALE_MS,
+    gcTime: KEEP_MS,
+    retry: false,
+  });
+  const refresh = useMutation({
+    mutationFn: () => api.pullRequests(projectId, filter, true),
+    onSuccess: (fresh) => {
+      queryClient.setQueryData(queryKey, fresh);
+    },
+  });
+  return { query, refresh };
 }
 
 /** Every pull request of the project's repository, read from GitHub; linked ones open their ticket. */
@@ -87,12 +134,7 @@ export function PullRequestsPage({
   onOpenTicket: (id: number) => void;
 }): ReactElement {
   const [filter, setFilter] = useState<PullRequestFilter>('open');
-  const query = useQuery({
-    queryKey: ['pull-requests', project.id, filter],
-    queryFn: () => api.pullRequests(project.id, filter),
-    staleTime: STALE_MS,
-    retry: false,
-  });
+  const { query, refresh } = usePullRequestList(project.id, filter);
   const reviews = useCurrentReviews(project.id);
   const { add } = useCurrentReviewMutations(project.id);
   const inReview = new Set(reviews.data?.map((review) => review.prNumber));
@@ -104,14 +146,15 @@ export function PullRequestsPage({
         filter={filter}
         onFilter={setFilter}
         list={list}
-        fetching={query.isFetching}
+        receivedAt={query.dataUpdatedAt}
+        fetching={query.isFetching || refresh.isPending}
         onRefresh={() => {
-          void query.refetch();
+          refresh.mutate();
         }}
       />
       <div className="min-h-0 flex-1 overflow-y-auto">
         <div className="px-4 pt-3">
-          <ErrorText error={query.error ?? add.error} />
+          <ErrorText error={query.error ?? refresh.error ?? add.error} />
         </div>
         {list && shown === 0 ? (
           <p className="px-4 text-sm text-zinc-500">No pull requests.</p>
