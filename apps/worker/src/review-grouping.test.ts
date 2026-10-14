@@ -174,7 +174,7 @@ test('the parser keeps only changed files, each at least once, and never an empt
       ],
       unrelated: [{ path: 'ui/button.tsx', reason: 'already grouped' }],
     }),
-    ['api/activate.ts', 'ui/button.tsx', 'package.json'],
+    ['api/activate.ts', 'ui/button.tsx', 'package.json'].map((file) => ({ path: file, patch: '' })),
   );
   expect(result?.groups.map((entry) => [entry.key, entry.files])).toEqual([
     ['tooltip', ['ui/button.tsx']],
@@ -182,7 +182,7 @@ test('the parser keeps only changed files, each at least once, and never an empt
   ]);
   expect(result?.unrelated).toEqual([{ path: 'package.json', reason: 'Not placed by the agent' }]);
   expect(result?.missing).toEqual([
-    { spec: 'Keep the publication log', note: 'No changed file placed under it' },
+    { spec: 'Keep the publication log', note: 'No change placed under it' },
   ]);
   expect(parseGrouping('```json\n{"comments": []}\n```', [])).toBeNull();
 });

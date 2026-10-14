@@ -69,9 +69,15 @@ behavior; this file covers how to work in the repo.
     (`routes/review-groupings.ts`, `grouping-targets.ts`; `@union/core` `review-groupings.ts`). The worker's
     `ReviewGroupingRunner` (`review-grouping.ts`, same slots and checkout as the agent review, PR containers
     `union-g<id>`) runs the `review_groups` agent; `review-grouping-result.ts` keeps only changed files, puts the ones
-    left out under "not in the spec" and empty groups under "missing". Only the newest grouping is kept; it is
-    outdated when the review's head commit moved. The file panel's "By spec" toggle (`spec-groups.tsx`, independent
-    of List/Tree) shows the files under their groups.
+    left out under "not in the spec" and empty groups under "missing". Groups place hunks: the host writes the diff's
+    hunks to `.git/union-review-hunks.md` in the checkout (`review-grouping-format.ts`), the agent names whole files
+    or hunks by their new-side start line, and the parser maps each line to the stored hunk around it (`hunkAt` in
+    the browser-safe `@union/core/diff-hunks`; keys like `-12+14`), so `SpecGroup.hunks` lists the files a part takes
+    only in part and every hunk is placed at least once. Only the newest grouping is kept; it is outdated when the
+    review's head commit moved. The file panel's "By spec" toggle (`spec-groups.tsx`, independent of List/Tree) shows
+    the files under their groups; a file opened under a part shows only that part's hunks (`hunk-focus.tsx`,
+    `lib/spec-hunks.ts`, "Show all" to see the rest) with each hunk header tagged with its parts, except on an
+    outdated grouping.
   - Previews: project settings → Preview (`routes/preview-settings.ts`, `config.preview`: compose file, service,
     port, plain variables) and the ticket Overview's Preview section (`preview-section.tsx`, `routes/preview.ts`,
     state in the `previews` table). Start, stop and logs are commands; the worker owns Docker.

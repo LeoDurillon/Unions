@@ -7,6 +7,7 @@ import { useDiffFile, type useCommentMutations } from '../../lib/use-review';
 import { ErrorText } from '../ui';
 import { hasThread, OutdatedComments, Thread } from './comment-thread';
 import { FileDiff, type DiffView } from './file-diff';
+import { useHunkFocus } from './hunk-focus';
 
 type Mutations = ReturnType<typeof useCommentMutations>;
 
@@ -17,29 +18,35 @@ export function OpenFile({
   view,
   comments,
   mutations,
+  part,
 }: {
   target: ReviewTarget;
   fileId: number;
   view: DiffView;
   comments: CommentView[];
   mutations: Mutations;
+  /** The part of the spec the file was picked under (By spec): only its hunks are shown. */
+  part: string | null;
 }): ReactElement {
   const file = useDiffFile(target, fileId);
   const [selection, setSelection] = useState<Selection | null>(null);
+  const forFile = comments.filter((comment) => comment.path === file.data?.path);
+  const focus = useHunkFocus(target, part, file.data, forFile);
   if (!file.data) {
     return <ErrorText error={file.error} />;
   }
   const { path } = file.data;
-  const forFile = comments.filter((comment) => comment.path === path);
   const outdated = forFile.filter((comment) => comment.outdated);
   return (
     <div className="space-y-3">
       <h3 className="font-mono text-sm font-semibold">{path}</h3>
+      {focus.bar}
       <OutdatedComments comments={outdated} mutations={mutations} />
       <FileDiff
         path={path}
         view={view}
-        patch={file.data.patch}
+        patch={focus.patch}
+        hunkTags={focus.tags}
         comments={forFile}
         selection={selection}
         onSelect={setSelection}

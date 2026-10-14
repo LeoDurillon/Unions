@@ -7,6 +7,7 @@ import {
   Code,
   commentsAt,
   Gutter,
+  HunkTags,
   ROW_TONE,
   SELECTED_TONE,
   SIGN,
@@ -125,6 +126,7 @@ function SplitRowView({ row, props }: { row: SplitRow; props: DiffViewProps }): 
       <tr className={ROW_TONE[row.line.kind]}>
         <td colSpan={4} className="px-2 whitespace-pre">
           {row.line.text}
+          <HunkTags line={row.line} tags={props.hunkTags} />
         </td>
       </tr>
     );

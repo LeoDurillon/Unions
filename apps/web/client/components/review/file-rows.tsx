@@ -12,6 +12,8 @@ export type RowOptions = {
   selected: number | null;
   onSelect: (id: number) => void;
   layout: Layout;
+  /** A short note per path, after its name ("2 hunks" under a part that takes only some). */
+  notes?: Map<string, string>;
 };
 
 /** Files as a flat list of paths, or as a folder tree. */
@@ -21,9 +23,18 @@ export function FileRows({
   selected,
   onSelect,
   layout,
+  notes,
 }: RowOptions & { files: DiffFileSummary[] }): ReactElement {
   if (layout === 'tree') {
-    return <FileTree files={files} drafts={drafts} selected={selected} onSelect={onSelect} />;
+    return (
+      <FileTree
+        files={files}
+        drafts={drafts}
+        selected={selected}
+        onSelect={onSelect}
+        notes={notes}
+      />
+    );
   }
   return (
     <ul className="space-y-0.5">
@@ -33,6 +44,7 @@ export function FileRows({
             file={file}
             label={file.path}
             drafts={drafts.get(file.path) ?? 0}
+            note={notes?.get(file.path)}
             active={file.id === selected}
             onSelect={onSelect}
           />

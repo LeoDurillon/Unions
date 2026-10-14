@@ -15,13 +15,22 @@ export type SpecGroup = {
   spec: string;
   /** What the files do for it. */
   summary: string;
+  /** Every file with a change for this part. */
   files: string[];
+  /**
+   * The files only some of whose hunks serve this part, with those hunks' keys (`hunkKey`); a file
+   * not listed here serves it whole. Absent in groupings made before hunks were placed.
+   */
+  hunks?: Record<string, string[]>;
 };
 
-/** What the agent made of the change: its groups, the files no group covers, the parts no change implements. */
+/** A file, or (with `hunks`) some of its hunks, that no part of the specification asked for. */
+export type UnrelatedChange = { path: string; reason: string; hunks?: string[] };
+
+/** What the agent made of the change: its groups, the changes no group covers, the parts no change implements. */
 export type GroupingResult = {
   groups: SpecGroup[];
-  unrelated: { path: string; reason: string }[];
+  unrelated: UnrelatedChange[];
   missing: { spec: string; note: string }[];
 };
 

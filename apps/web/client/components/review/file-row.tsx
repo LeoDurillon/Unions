@@ -31,11 +31,13 @@ export function FileRow({
   drafts,
   active,
   depth = 0,
+  note,
   onSelect,
 }: {
   file: DiffFileSummary;
   label: string;
   drafts: number;
+  note?: string;
   active: boolean;
   depth?: number;
   onSelect: (id: number) => void;
@@ -55,6 +57,7 @@ export function FileRow({
         {STATUS_MARK[file.status]}
       </span>
       <span className="min-w-0 flex-1 truncate font-mono">{label}</span>
+      {note ? <span className="shrink-0 text-[10px] text-zinc-500">{note}</span> : null}
       {drafts > 0 ? (
         <span className="rounded-full bg-indigo-600 px-1.5 text-[10px] text-white">{drafts}</span>
       ) : null}

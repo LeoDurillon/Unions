@@ -4,7 +4,7 @@ import type { CommentView, DiffFileSummary } from '../../../src/api-types';
 import type { ReviewTarget } from '../../lib/review-target';
 import { useReviewGrouping } from '../../lib/use-review-grouping';
 import { draftCounts } from './file-row';
-import { FileRows, type Layout } from './file-rows';
+import { FileRows, type RowOptions, type Layout } from './file-rows';
 import { SpecGroups } from './spec-groups';
 
 const STORAGE_KEY = 'union.review.files';
@@ -107,19 +107,49 @@ function LayoutToggle({
   );
 }
 
+/** The files matched by the review ignore rules, collapsed unless one of them is open. */
+function IgnoredFiles({
+  files,
+  rows,
+}: {
+  files: DiffFileSummary[];
+  rows: RowOptions;
+}): ReactElement | null {
+  if (files.length === 0) {
+    return null;
+  }
+  return (
+    <details
+      open={files.some((file) => file.id === rows.selected)}
+      className="text-xs text-zinc-500"
+    >
+      <summary className="cursor-pointer px-2">
+        {files.length} ignored file{files.length === 1 ? '' : 's'}
+      </summary>
+      <div className="mt-1 opacity-70">
+        <FileRows files={files} {...rows} />
+      </div>
+    </details>
+  );
+}
+
 /** The touched files, as a list or a tree; ignored ones (lock files, project patterns) are listed apart, collapsed. */
 export function FileList({
   files,
   comments,
   selected,
   onSelect,
+  part = null,
   target,
   allowBySpec = true,
 }: {
   files: DiffFileSummary[];
   comments: CommentView[];
   selected: number | null;
-  onSelect: (id: number) => void;
+  /** `part`: the part of the spec the file was picked under (By spec), else null. */
+  onSelect: (id: number, part: string | null) => void;
+  /** The part the open file was picked under: only its rows show it open. */
+  part?: string | null;
   /** Whose grouping by spec to show: its files under their groups when "By spec" is on. */
   target: ReviewTarget;
   /** False on a single commit: the grouping is made for the whole change. */
@@ -132,8 +162,14 @@ export function FileList({
   const drafts = draftCounts(comments);
   const shown = files.filter((file) => !file.ignored);
   const ignored = files.filter((file) => file.ignored);
-  const openIgnored = ignored.some((file) => file.id === selected);
-  const rows = { drafts, selected, onSelect, layout };
+  const rows = {
+    drafts,
+    selected,
+    onSelect: (id: number) => {
+      onSelect(id, null);
+    },
+    layout,
+  };
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-2 px-2">
@@ -146,20 +182,11 @@ export function FileList({
         </div>
       </div>
       {grouped && bySpec ? (
-        <SpecGroups files={shown} grouping={grouping} rows={rows} />
+        <SpecGroups files={shown} grouping={grouping} rows={rows} part={part} onPick={onSelect} />
       ) : (
         <FileRows files={shown} {...rows} />
       )}
-      {ignored.length > 0 ? (
-        <details open={openIgnored} className="text-xs text-zinc-500">
-          <summary className="cursor-pointer px-2">
-            {ignored.length} ignored file{ignored.length === 1 ? '' : 's'}
-          </summary>
-          <div className="mt-1 opacity-70">
-            <FileRows files={ignored} {...rows} />
-          </div>
-        </details>
-      ) : null}
+      <IgnoredFiles files={ignored} rows={rows} />
     </div>
   );
 }

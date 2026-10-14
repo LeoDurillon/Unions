@@ -40,8 +40,9 @@ export function DiffBody({
   /** A pull request's commit picker, above the files. */
   picker: ReactNode;
 }): ReactElement {
-  const [picked, setPicked] = useState<number | null>(null);
-  const fileId = openFileId(files, picked);
+  const [picked, setPicked] = useState<{ id: number; part: string | null } | null>(null);
+  const fileId = openFileId(files, picked?.id ?? null);
+  const part = picked?.id === fileId ? picked.part : null;
   return (
     <div className="flex min-h-0 flex-1">
       <aside className="w-80 shrink-0 space-y-2 overflow-y-auto border-r border-zinc-200 p-2 dark:border-zinc-800">
@@ -50,7 +51,10 @@ export function DiffBody({
           files={files}
           comments={comments}
           selected={fileId}
-          onSelect={setPicked}
+          onSelect={(id, under) => {
+            setPicked({ id, part: under });
+          }}
+          part={part}
           target={target}
         />
       </aside>
@@ -61,12 +65,13 @@ export function DiffBody({
         <GeneralComments comments={comments} mutations={mutations} />
         {fileId === null ? null : (
           <OpenFile
-            key={fileId}
+            key={`${fileId}-${part ?? ''}`}
             target={target}
             fileId={fileId}
             view={view}
             comments={comments}
             mutations={mutations}
+            part={part}
           />
         )}
       </main>

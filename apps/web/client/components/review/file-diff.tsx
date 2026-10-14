@@ -7,6 +7,7 @@ import {
   Code,
   commentsAt,
   Gutter,
+  HunkTags,
   ROW_TONE,
   SELECTED_TONE,
   SIGN,
@@ -50,11 +51,13 @@ function Row({
   tokens,
   selected,
   onPick,
+  hunkTags,
 }: {
   line: DiffLine;
   tokens: Token[] | undefined;
   selected: boolean;
   onPick: (extend: boolean) => void;
+  hunkTags: Map<string, string[]> | undefined;
 }): ReactElement {
   const anchor = anchorOf(line);
   const oldNumber = line.kind === 'del' || line.kind === 'context' ? line.oldLine : null;
@@ -67,6 +70,7 @@ function Row({
       <td className="whitespace-pre px-2">
         <span className="select-none text-zinc-400">{SIGN[line.kind]} </span>
         <Code line={line} tokens={tokens} />
+        <HunkTags line={line} tags={hunkTags} />
       </td>
     </tr>
   );
@@ -79,6 +83,7 @@ function UnifiedDiff({
   selection,
   onSelect,
   renderBelow,
+  hunkTags,
 }: DiffViewProps & { lines: { line: DiffLine; key: string }[] }): ReactElement {
   return (
     <table className="w-full border-collapse">
@@ -97,6 +102,7 @@ function UnifiedDiff({
               <Row
                 line={line}
                 tokens={tokens.get(line)}
+                hunkTags={hunkTags}
                 selected={anchor !== null && isSelected(selection, anchor.side, anchor.number)}
                 onPick={(extend) => {
                   if (anchor) {

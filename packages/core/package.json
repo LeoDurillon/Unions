@@ -7,6 +7,7 @@
     "./states": "./src/states.ts",
     "./attachment-limits": "./src/attachment-limits.ts",
     "./diff": "./src/diff.ts",
+    "./diff-hunks": "./src/diff-hunks.ts",
     "./notion-markdown": "./src/notion-markdown.ts",
     "./event-rules": "./src/event-rule-types.ts",
     "./preview": "./src/preview-config.ts",

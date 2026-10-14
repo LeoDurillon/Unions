@@ -4,6 +4,7 @@ import type { ReactElement, ReactNode } from 'react';
 import type { CommentView } from '../../../src/api-types';
 import type { Selection, Side } from '../../lib/diff-selection';
 import type { Token } from '../../lib/highlight';
+import { headerKey } from '../../lib/spec-hunks';
 
 export const ROW_TONE = {
   add: 'bg-green-50 dark:bg-green-950/40',
@@ -22,6 +23,8 @@ export type DiffViewProps = {
   selection: Selection | null;
   onSelect: (selection: Selection) => void;
   renderBelow: (side: Side, line: number, comments: CommentView[]) => ReactNode;
+  /** By hunk key, the parts of the spec each hunk serves: shown on its header (By spec). */
+  hunkTags?: Map<string, string[]>;
 };
 
 /** The comments that end on this line of this side. */
@@ -66,6 +69,26 @@ export function Code({ line, tokens }: { line: DiffLine; tokens: Token[] | undef
   return tokens.map((token) => (
     <span key={token.start} className={token.className}>
       {token.text}
+    </span>
+  ));
+}
+
+/** The parts of the spec a hunk serves, after its header. */
+export function HunkTags({
+  line,
+  tags,
+}: {
+  line: DiffLine;
+  tags: Map<string, string[]> | undefined;
+}): ReactNode {
+  const key = line.kind === 'hunk' && tags ? headerKey(line.text) : null;
+  const names = key === null ? [] : (tags?.get(key) ?? []);
+  return names.map((name) => (
+    <span
+      key={name}
+      className="ml-2 rounded bg-indigo-100 px-1.5 font-sans text-[10px] text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200"
+    >
+      {name}
     </span>
   ));
 }

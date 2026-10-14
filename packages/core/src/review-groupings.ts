@@ -7,7 +7,12 @@ import * as schema from './tables';
 import { emitEvent } from './tickets';
 
 export type ReviewGrouping = typeof schema.reviewGroupings.$inferSelect;
-export type { GroupingResult, SpecGroup, SpecSource } from './schema-review-groupings';
+export type {
+  GroupingResult,
+  SpecGroup,
+  SpecSource,
+  UnrelatedChange,
+} from './schema-review-groupings';
 export { SPEC_SOURCES } from './schema-review-groupings';
 
 export type GroupingOutcome =

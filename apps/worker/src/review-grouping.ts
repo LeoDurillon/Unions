@@ -16,8 +16,10 @@ import {
 import { runAgent, type AgentFn } from './agent';
 import type { AgentReviewDeps } from './agent-review';
 import { openTarget, type ReviewTarget } from './agent-review-target';
+import { mustRunIn } from './container-exec';
 import { REPO_DIR, type TicketContainer } from './provision';
-import { GROUPING_FORMAT, parseGrouping } from './review-grouping-result';
+import { GROUPING_FORMAT, HUNK_INDEX, hunkIndex } from './review-grouping-format';
+import { parseGrouping } from './review-grouping-result';
 
 const ANSWER_TAIL_CHARS = 2000;
 
@@ -49,6 +51,8 @@ Its changed files:
 
 ${target.paths.map((path) => `- ${path}`).join('\n')}
 
+Every hunk of the diff is listed, file by file, in \`${HUNK_INDEX}\`: read it, and name hunks by the line it gives them.
+
 ## Your answer
 
 ${GROUPING_FORMAT}`;
@@ -61,7 +65,12 @@ async function groupChange(
 ): Promise<GroupingOutcome> {
   const { db, runtime } = deps;
   const target = await openTarget(deps, grouping, groupingContainer(grouping.id));
+  const files = target.paths.map((path) => ({ path, patch: target.patchOf(path) ?? '' }));
+  const index = `${REPO_DIR}/${HUNK_INDEX}`;
   try {
+    await mustRunIn(runtime, target.container, ['sh', '-c', `cat > ${index}`], {
+      stdin: hunkIndex(files),
+    });
     if (signal.aborted) {
       return { status: 'cancelled' };
     }
@@ -79,7 +88,7 @@ async function groupChange(
       const prefix = outcome.kind === 'rate_limited' ? 'Usage limit reached: ' : '';
       return { status: 'failed', error: `${prefix}${outcome.message}` };
     }
-    const result = parseGrouping(outcome.text, target.paths);
+    const result = parseGrouping(outcome.text, files);
     if (!result) {
       return {
         status: 'failed',
@@ -88,6 +97,8 @@ async function groupChange(
     }
     return { status: 'succeeded', headSha: target.headSha, result };
   } finally {
+    // A ticket's container stays: its workspace is left as the agent found it.
+    await mustRunIn(runtime, target.container, ['rm', '-f', index]).catch(() => '');
     await target.close();
   }
 }

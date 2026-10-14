@@ -8,6 +8,7 @@ type Props = {
   drafts: Map<string, number>;
   selected: number | null;
   onSelect: (id: number) => void;
+  notes?: Map<string, string>;
 };
 
 function DirRow({
@@ -61,6 +62,7 @@ function Nodes({
                 file={file}
                 label={node.name}
                 drafts={props.drafts.get(file.path) ?? 0}
+                note={props.notes?.get(file.path)}
                 active={file.id === props.selected}
                 depth={depth}
                 onSelect={props.onSelect}
