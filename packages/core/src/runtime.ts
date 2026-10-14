@@ -17,6 +17,18 @@ export type ExecOptions = {
 
 export type ExecResult = { exitCode: number; stderr: string };
 
+/** A short-lived container the worker runs a command in, removed when it ends (`docker run --rm`). */
+export type HelperSpec = {
+  image: string;
+  command: string[];
+  /** `source` is a volume name or a host path (the Docker socket). */
+  mounts?: { source: string; target: string }[];
+  cwd?: string;
+  env?: Record<string, string>;
+  stdin?: string;
+  signal?: AbortSignal;
+};
+
 export type ContainerRuntime = {
   /** Creates volumes and a stopped container; idempotent. */
   create(spec: TicketContainerSpec): Promise<void>;
@@ -33,4 +45,7 @@ export type ContainerRuntime = {
   copyOut(name: string, containerPath: string, hostPath: string): Promise<void>;
   /** Writes a file inside the container (used to seed credentials into the HOME volume). */
   writeFile(name: string, containerPath: string, content: string, mode?: string): Promise<void>;
+  /** Runs a helper container; streams its output (stdout and stderr) line by line. */
+  runHelper(spec: HelperSpec): AsyncGenerator<string, ExecResult>;
+  networkExists(name: string): Promise<boolean>;
 };

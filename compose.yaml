@@ -5,9 +5,11 @@
 # The worker reaches the host Docker daemon through its socket: agent containers (union-t*) run next
 # to these ones, not inside them.
 #
+# Ticket previews are served by the `proxy` service (Traefik) at http://<ticket>.localhost:8080.
+#
 # Overrides (shell or .env): UNION_UID / UNION_GID (default 1000, your host user), DOCKER_GID (group
 # of /var/run/docker.sock: `stat -c %g /var/run/docker.sock`), UNION_WEB_PORT (default 5173),
-# GITHUB_TOKEN (fallback for projects without their own token).
+# UNION_PREVIEW_PORT (default 8080), GITHUB_TOKEN (fallback for projects without their own token).
 name: union-next
 
 x-app: &app
@@ -57,6 +59,9 @@ services:
       # The directory is mounted (not the file) so token refreshes on the host stay visible.
       UNION_CLAUDE_CREDENTIALS: /home/bun/.claude-host/.credentials.json
       GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      # The ready check asks the proxy over the stack's network; people use the published port.
+      UNION_PREVIEW_PROXY: http://proxy:80
+      UNION_PREVIEW_PORT: ${UNION_PREVIEW_PORT:-8080}
     volumes:
       - .:/app
       - /var/run/docker.sock:/var/run/docker.sock
@@ -66,3 +71,24 @@ services:
         condition: service_completed_successfully
       agent-image:
         condition: service_completed_successfully
+
+  # Serves ticket previews: each preview's exposed service is labelled with its host
+  # (<ticket>.localhost) and joins the `union-preview` network, where this proxy finds it.
+  proxy:
+    image: traefik:v3.6.2
+    command:
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.network=union-preview
+      - --entrypoints.web.address=:80
+    ports:
+      - '${UNION_PREVIEW_PORT:-8080}:80'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - default
+      - preview
+
+networks:
+  preview:
+    name: union-preview

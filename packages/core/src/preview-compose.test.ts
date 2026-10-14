@@ -1,0 +1,194 @@
+import { expect, test } from 'bun:test';
+
+import {
+  exposedServiceProblem,
+  previewCompose,
+  tidyCompose,
+  type PreviewTarget,
+} from './preview-compose';
+import { composeProblems, type ComposeJson } from './preview-compose-check';
+
+/** What `docker compose config --format json` printed for a web app and its database. */
+function resolved(): ComposeJson {
+  return {
+    name: 'repo',
+    networks: { default: { name: 'repo_default', ipam: {} } },
+    services: {
+      db: {
+        image: 'postgres:16-alpine',
+        environment: { POSTGRES_PASSWORD: 'x' },
+        networks: { default: null },
+        volumes: [{ type: 'volume', source: 'pgdata', target: '/var/lib/postgresql/data' }],
+      },
+      web: {
+        image: 'nginx:1.27-alpine',
+        container_name: 'fixed-name',
+        environment: { GREETING: 'hi' },
+        labels: { 'traefik.http.routers.evil.rule': 'Host(`3.localhost`)', team: 'front' },
+        networks: { default: null },
+        ports: [{ target: 80, published: '8081' }],
+        volumes: [
+          {
+            type: 'bind',
+            source: '/workspace/repo/site',
+            target: '/usr/share/nginx/html',
+            read_only: true,
+          },
+        ],
+      },
+    },
+    volumes: { pgdata: { name: 'repo_pgdata' } },
+  };
+}
+
+const TARGET: PreviewTarget = {
+  project: 'union-t12',
+  workspaceVolume: 'union-t12-ws',
+  host: '12.localhost',
+  service: 'web',
+  port: 80,
+  env: { API_URL: 'http://api:8080' },
+};
+
+function withService(service: Record<string, unknown>): ComposeJson {
+  return { services: { app: { image: 'node:22', ...service } } };
+}
+
+test('a plain web app and its database can run as a preview', () => {
+  expect(composeProblems(resolved())).toEqual([]);
+  expect(composeProblems({ services: {} })).toEqual(['The compose file has no services']);
+});
+
+test('anything giving a container power over the host is refused', () => {
+  expect(composeProblems(withService({ privileged: true }))).toEqual([
+    'app: privileged containers are not allowed',
+  ]);
+  expect(composeProblems(withService({ network_mode: 'host' }))).toHaveLength(1);
+  expect(composeProblems(withService({ network_mode: 'service:db' }))).toEqual([]);
+  expect(composeProblems(withService({ pid: 'host', cap_add: ['SYS_ADMIN'] }))).toHaveLength(2);
+  expect(composeProblems(withService({ devices: ['/dev/kvm'] }))).toHaveLength(1);
+  expect(
+    composeProblems(withService({ build: { context: '/workspace/repo', network: 'host' } })),
+  ).toEqual(['app: builds with host access are not allowed']);
+});
+
+test('only files of the repository may be mounted, built from or read', () => {
+  const mount = (source: string): ComposeJson =>
+    withService({ volumes: [{ type: 'bind', source, target: '/x' }] });
+  expect(composeProblems(mount('/workspace/repo/src'))).toEqual([]);
+  expect(composeProblems(mount('/workspace/repo'))).toEqual([]);
+  expect(composeProblems(mount('/workspace/attachments'))).toEqual([
+    'app: mounts /workspace/attachments, outside the repository',
+  ]);
+  expect(composeProblems(mount('/workspace/repo/../attachments'))).toHaveLength(1);
+  expect(composeProblems(mount('/var/run/docker.sock'))).toHaveLength(1);
+  expect(composeProblems(withService({ build: { context: '/home/me' } }))).toHaveLength(1);
+  expect(
+    composeProblems(withService({ env_file: [{ path: '/workspace/attachments/.env' }] })),
+  ).toEqual(['app: reads an env file outside the repository']);
+});
+
+test('volumes and networks shared between previews are refused', () => {
+  expect(composeProblems({ ...withService({}), volumes: { data: { external: true } } })).toEqual([
+    'volume "data" is external: previews would share it',
+  ]);
+  expect(
+    composeProblems({
+      ...withService({}),
+      volumes: { data: { driver_opts: { type: 'none', o: 'bind', device: '/' } } },
+    }),
+  ).toHaveLength(1);
+  expect(
+    composeProblems({ ...withService({}), networks: { shared: { external: true } } }),
+  ).toHaveLength(1);
+  expect(
+    composeProblems(
+      withService({ volumes: [{ type: 'volume', source: 'nope', target: '/data' }] }),
+    ),
+  ).toEqual(['app: volume "nope" is not declared in the file']);
+});
+
+test("the preview's file: its own project, no fixed names or host ports, mounts from the workspace", () => {
+  const file = previewCompose(resolved(), TARGET);
+  expect(file.name).toBe('union-t12');
+  const services = file.services as Record<string, Record<string, unknown>>;
+  const web = services.web ?? {};
+  expect(web.container_name).toBeUndefined();
+  expect(web.ports).toBeUndefined();
+  expect(web.volumes).toEqual([
+    {
+      type: 'volume',
+      source: 'union_workspace',
+      target: '/usr/share/nginx/html',
+      read_only: true,
+      volume: { subpath: 'repo/site' },
+    },
+  ]);
+  expect(web.environment).toEqual({ GREETING: 'hi', API_URL: 'http://api:8080' });
+  expect(web.networks).toEqual({ default: null, union_preview: null });
+  expect(web.labels).toEqual({
+    team: 'front',
+    'traefik.enable': 'true',
+    'traefik.docker.network': 'union-preview',
+    'traefik.http.routers.union-t12.rule': 'Host(`12.localhost`)',
+    'traefik.http.routers.union-t12.entrypoints': 'web',
+    'traefik.http.services.union-t12.loadbalancer.server.port': '80',
+  });
+  // The database keeps its volume and stays off the proxy's network.
+  expect(services.db?.volumes).toEqual([
+    { type: 'volume', source: 'pgdata', target: '/var/lib/postgresql/data' },
+  ]);
+  expect(services.db?.networks).toEqual({ default: null });
+  expect(file.volumes).toMatchObject({
+    union_workspace: { external: true, name: 'union-t12-ws' },
+  });
+  expect(file.networks).toMatchObject({
+    union_preview: { external: true, name: 'union-preview' },
+  });
+});
+
+test('the exposed service must exist and have its own network', () => {
+  expect(exposedServiceProblem(resolved(), 'web')).toBeNull();
+  expect(exposedServiceProblem(resolved(), 'api')).toBe(
+    'The compose file has no service "api" (it has: db, web)',
+  );
+  expect(exposedServiceProblem(withService({ network_mode: 'service:db' }), 'app')).toContain(
+    'shares another',
+  );
+});
+
+test("Union's own file passes the checks for its ticket only, and keeps them otherwise", () => {
+  const file = previewCompose(resolved(), TARGET);
+  expect(composeProblems(file, { workspaceVolume: 'union-t12-ws' })).toEqual([]);
+  // Another ticket's workspace: refused as any external volume.
+  expect(composeProblems(file, { workspaceVolume: 'union-t13-ws' })).toEqual([
+    'volume "union_workspace" is external: previews would share it',
+  ]);
+  // In the repository's own file, Union's names are refused.
+  expect(composeProblems(file)).toContain('"union_workspace" is a name Union uses');
+  // An edit stays checked.
+  const edited = { ...file, services: { web: { image: 'x', privileged: true } } };
+  expect(composeProblems(edited, { workspaceVolume: 'union-t12-ws' })).toEqual([
+    'web: privileged containers are not allowed',
+  ]);
+});
+
+test('the settings Docker prints as unset are left out of the file people read', () => {
+  expect(
+    tidyCompose({
+      networks: { default: { name: 'x_default', ipam: {} } },
+      services: {
+        db: {
+          command: null,
+          entrypoint: null,
+          environment: {},
+          labels: {},
+          networks: { default: null },
+        },
+      },
+    }),
+  ).toEqual({
+    networks: { default: { name: 'x_default' } },
+    services: { db: { networks: { default: null } } },
+  });
+});

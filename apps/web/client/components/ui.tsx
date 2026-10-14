@@ -114,11 +114,14 @@ export function Dialog({
   open,
   onClose,
   title,
+  wide = false,
   children,
 }: {
   open: boolean;
   onClose: () => void;
   title: string;
+  /** For files and long text: most of the screen's width. */
+  wide?: boolean;
   children: ReactNode;
 }): ReactElement {
   const ref = useRef<HTMLDialogElement>(null);
@@ -135,7 +138,7 @@ export function Dialog({
     <dialog
       ref={ref}
       onClose={onClose}
-      className="m-auto w-full max-w-lg rounded-xl bg-white p-0 text-zinc-900 shadow-xl dark:bg-zinc-900 dark:text-zinc-100"
+      className={`m-auto w-full ${wide ? 'max-w-4xl' : 'max-w-lg'} rounded-xl bg-white p-0 text-zinc-900 shadow-xl dark:bg-zinc-900 dark:text-zinc-100`}
     >
       <div className="space-y-4 p-6">
         <header className="flex items-start justify-between gap-4">

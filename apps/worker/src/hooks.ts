@@ -8,6 +8,7 @@ import { postPullRequestReview } from './github/pr-review';
 import type { InvestigationRunner } from './investigate';
 import { removeContainers } from './janitor';
 import type { PrDescriptionRunner } from './pr-description-run';
+import type { PreviewManager } from './preview/manager';
 
 /** What the commands hand off to the running worker: all asynchronous, so draining stays synchronous. */
 export function workerHooks(deps: {
@@ -16,12 +17,13 @@ export function workerHooks(deps: {
   investigations: InvestigationRunner;
   agentReviews: AgentReviewRunner;
   prDescriptions: PrDescriptionRunner;
+  previews: PreviewManager;
   apiFor: (project: Project) => GitHubApi | null;
 }): CommandHooks {
-  const { db, runtime, investigations, agentReviews, prDescriptions, apiFor } = deps;
+  const { db, runtime, investigations, agentReviews, prDescriptions, previews, apiFor } = deps;
   return {
     removeContainers: (containers) => {
-      void removeContainers(db, runtime, containers);
+      void removeContainers(db, runtime, containers, (name) => previews.takeDownFor(name));
     },
     cancelInvestigation: (id) => {
       investigations.cancel(id);
@@ -37,6 +39,9 @@ export function workerHooks(deps: {
     },
     sendPrDescription: (id) => {
       void sendPrDescription(db, apiFor, id);
+    },
+    preview: (ticketId, action) => {
+      previews.run(ticketId, action);
     },
   };
 }

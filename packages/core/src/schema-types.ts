@@ -2,6 +2,18 @@
 import type { DiffStatus } from './diff';
 import type { BoardStatus } from './states';
 
+/**
+ * How a ticket's preview runs: the repository's compose file, the service the proxy serves, and
+ * variables given to every service (plain values: they reach the browser with the settings).
+ */
+export type PreviewConfig = {
+  /** Path of the compose file in the repository. */
+  composeFile: string;
+  service: string;
+  port: number;
+  env: Record<string, string>;
+};
+
 export type ProjectConfig = {
   baseBranch: string;
   /** Project Status option names per board column. Defaults: Todo, In Progress, In Review, Done. */
@@ -21,6 +33,7 @@ export type ProjectConfig = {
   notionDataSourceId?: string;
   /** Markdown sent to every agent run on this project, after the shared instructions. */
   instructions?: string;
+  preview?: PreviewConfig;
 };
 
 /** One earlier question of an investigation and the answer it got. */

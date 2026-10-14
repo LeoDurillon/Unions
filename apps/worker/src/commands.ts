@@ -31,6 +31,17 @@ export type CommandHooks = {
   cancelPrDescription: (id: number) => void;
   /** Writes a rewritten PR description, as the user left it, to GitHub. */
   sendPrDescription: (id: number) => void;
+  /** Starts, stops, reads the logs of, or generates the compose file of a ticket's preview. */
+  preview: (ticketId: number, action: PreviewAction) => void;
+};
+
+export type PreviewAction = 'start' | 'stop' | 'logs' | 'generate';
+
+const PREVIEW_ACTIONS: Record<string, PreviewAction> = {
+  preview_start: 'start',
+  preview_stop: 'stop',
+  preview_logs: 'logs',
+  preview_generate: 'generate',
 };
 
 function ignore(): void {
@@ -44,6 +55,7 @@ const NO_HOOKS: CommandHooks = {
   submitPullRequestReview: ignore,
   cancelPrDescription: ignore,
   sendPrDescription: ignore,
+  preview: ignore,
 };
 
 function isContainerRef(value: unknown): value is ContainerRef {
@@ -212,6 +224,11 @@ function execute(db: Db, command: Command, hooks: CommandHooks): void {
   }
   if (Object.hasOwn(CANCELS, command.type)) {
     cancelRun(db, command, hooks);
+    return;
+  }
+  const preview = PREVIEW_ACTIONS[command.type];
+  if (preview) {
+    hooks.preview(requireTicketId(command), preview);
     return;
   }
   switch (command.type) {

@@ -7,7 +7,7 @@ import { DeleteSection } from './delete-section';
 import { GitHubAccessSection } from './github-access-section';
 import { InstructionsSection } from './instructions-section';
 import { EventsSection, NotionSection } from './notion-section';
-import { PullRequestSection } from './pull-request-section';
+import { PreviewSettingsSection, PullRequestSection } from './pull-request-section';
 import { ReviewSection } from './review-section';
 
 export const PANES = [
@@ -16,6 +16,7 @@ export const PANES = [
   { id: 'checks', label: 'Checks' },
   { id: 'pull-requests', label: 'Pull requests' },
   { id: 'review', label: 'Review' },
+  { id: 'preview', label: 'Preview' },
   { id: 'notion', label: 'Notion' },
   { id: 'events', label: 'Events' },
   { id: 'danger', label: 'Danger zone' },
@@ -43,6 +44,7 @@ export function PaneBody({
     checks: <ChecksSection project={project} />,
     'pull-requests': <PullRequestSection project={project} />,
     review: <ReviewSection project={project} />,
+    preview: <PreviewSettingsSection project={project} />,
     notion: <NotionSection project={project} />,
     events: <EventsSection project={project} />,
     danger: <DeleteSection project={project} onDeleted={onDeleted} />,

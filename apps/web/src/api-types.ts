@@ -1,6 +1,7 @@
 import type {
   BoardColumn,
   PrDescription,
+  Preview,
   Project,
   ReviewComment,
   Run,
@@ -277,5 +278,16 @@ export type PrDescriptionView = {
   /** The branch was pushed after Union last wrote the description. */
   outdated: boolean;
   /** Why a rewrite cannot start now; null when it can. */
+  refusal: string | null;
+};
+
+/** A ticket's preview, as its panel shows it. */
+export type PreviewView = {
+  preview: Preview | null;
+  /** The project has preview settings. */
+  configured: boolean;
+  /** The repository's compose file the settings name; null without settings. */
+  composeFile: string | null;
+  /** Why it cannot start now; null when it can. */
   refusal: string | null;
 };

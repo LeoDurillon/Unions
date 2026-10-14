@@ -204,6 +204,20 @@
       "when": 1791922441276,
       "tag": "0028_worthless_vertigo",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "6",
+      "when": 1791959464813,
+      "tag": "0029_chief_songbird",
+      "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "6",
+      "when": 1791960916564,
+      "tag": "0030_minor_wrecking_crew",
+      "breakpoints": true
     }
   ]
 }

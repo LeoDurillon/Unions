@@ -54,6 +54,9 @@ behavior; this file covers how to work in the repo.
     (badge "suggested", Keep button); keeping or editing one makes it the user's (`author: 'user'`), and a new
     successful run replaces only the agent's untouched drafts. Nothing is sent: the drafts go out with the usual
     send. Its prompt and model are the `review_comments` agent in Agent settings; `final_review` is unrelated.
+  - Previews: project settings → Preview (`routes/preview-settings.ts`, `config.preview`: compose file, service,
+    port, plain variables) and the ticket Overview's Preview section (`preview-section.tsx`, `routes/preview.ts`,
+    state in the `previews` table). Start, stop and logs are commands; the worker owns Docker.
   - PR description rewrite: the PR tab's Description section (`pull-request/pr-description.tsx`,
     `routes/pr-description.ts`, `@union/core` `pr-descriptions.ts`) queues a `pr_descriptions` row. The agent's draft
     is the user's to edit, send or discard; sending is the `update_pr_description` command. "Outdated" means a
@@ -103,6 +106,19 @@ behavior; this file covers how to work in the repo.
     and the branch. `github/pr-description-send.ts` writes the user's version only if GitHub's description is still
     the one the agent read (else `conflict`), so an edit made on GitHub is never overwritten unseen. The first
     description (`pr-description.ts`, when the PR is opened) and the rewrite both use the `pr_description` agent.
+  - `preview/`: ticket previews (phase 1 of `docs/plans/preview-environments.md`). `PreviewManager` runs the
+    `preview_start`/`preview_stop`/`preview_logs` commands, one at a time per ticket. Every `docker compose` call runs
+    in a throwaway helper container (`runtime.runHelper`, `docker:*-cli` image) holding the Docker socket and the
+    ticket's workspace volume; the agent's container never holds the socket. The repository's compose file is
+    resolved (`compose config --format json`), checked (`composeProblems` in `@union/core`: no privileged or
+    host-namespace settings, no mounts or builds outside `/workspace/repo`, no external volumes or networks), and
+    rewritten (`previewCompose`: project `union-t<id>`, no `container_name` or host ports, repository mounts become
+    workspace-volume sub-path mounts, project variables in every service, Traefik labels on the exposed service),
+    then given to `up` on stdin. The `proxy` service of `compose.yaml` (Traefik, network `union-preview`) serves it at
+    `http://<id>.localhost:8080`. Previews outlive worker restarts; a ticket's removal takes its preview down before
+    its volumes (`janitor.ts`). `compose-file.ts` keeps the generated file (`previews.compose_yaml`, `preview_generate`
+    generates it alone) and runs the ticket's own edited file instead when there is one (`previews.override`, checked
+    with `composeProblems(file, { workspaceVolume })`, project name enforced).
   - `review.ts`: the final review (fresh session, read-only tools plus git reads, one git command per call because
     permission rules cannot match `&&`). Changes asked at the review go to the implementer through the `thenRun`
     chain in `states.ts`; `revision.ts` hands it the review's feedback. `runResumable` (agent.ts) restarts in a fresh

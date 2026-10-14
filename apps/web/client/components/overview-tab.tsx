@@ -4,6 +4,7 @@ import type { TicketDetail } from '../../src/api-types';
 import { isBlocked, STEP_TITLES } from '../lib/labels';
 import { useTicketCommands } from '../lib/use-ticket-commands';
 import { Markdown } from './markdown';
+import { PreviewSection } from './preview-section';
 import { RemoveTicket } from './remove-ticket';
 import { TicketAttachments } from './ticket-attachments';
 import { TicketLinks } from './ticket-links';
@@ -117,6 +118,7 @@ export function OverviewTab({
       )}
       <TicketLinks detail={detail} onOpen={onOpenTicket} />
       <TicketAttachments ticketId={ticket.id} />
+      <PreviewSection ticketId={ticket.id} />
       <ErrorText error={command.error} />
       <div className="flex gap-2">
         {kind === 'backlog' ? (

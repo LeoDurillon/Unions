@@ -1,6 +1,12 @@
 import { spawn } from 'node:child_process';
 
-import type { ContainerRuntime, ExecOptions, ExecResult, TicketContainerSpec } from './runtime';
+import type {
+  ContainerRuntime,
+  ExecOptions,
+  ExecResult,
+  HelperSpec,
+  TicketContainerSpec,
+} from './runtime';
 
 const AGENT_HOME = '/home/node';
 const WORKSPACE = '/workspace';
@@ -32,6 +38,42 @@ async function ok(args: string[], stdin?: string): Promise<string> {
     throw new Error(`docker ${args.slice(0, 2).join(' ')} failed: ${r.stderr.trim()}`);
   }
   return r.stdout;
+}
+
+/** Runs `docker <args>`, yielding stdout line by line; returns the exit code and stderr. */
+async function* stream(
+  args: string[],
+  stdin: string | undefined,
+  signal: AbortSignal | undefined,
+): AsyncGenerator<string, ExecResult> {
+  const child = spawn('docker', args, { stdio: ['pipe', 'pipe', 'pipe'], signal });
+  child.stdin.end(stdin ?? '');
+  let stderr = '';
+  child.stderr.on('data', (chunk: Buffer) => {
+    stderr += chunk.toString('utf8');
+  });
+  const exited = new Promise<number>((resolve) => {
+    child.on('error', () => {
+      resolve(1);
+    });
+    child.on('close', (code) => {
+      resolve(code ?? 1);
+    });
+  });
+  let pending = '';
+  const stdout: AsyncIterable<Buffer | string> = child.stdout;
+  for await (const chunk of stdout) {
+    pending += typeof chunk === 'string' ? chunk : chunk.toString('utf8');
+    const lines = pending.split('\n');
+    pending = lines.pop() ?? '';
+    for (const line of lines) {
+      yield line;
+    }
+  }
+  if (pending) {
+    yield pending;
+  }
+  return { exitCode: await exited, stderr };
 }
 
 export class DockerCli implements ContainerRuntime {
@@ -81,7 +123,7 @@ export class DockerCli implements ContainerRuntime {
     return r.code === 0 && r.stdout.trim() === 'true';
   }
 
-  async *exec(
+  exec(
     name: string,
     command: string[],
     options: ExecOptions = {},
@@ -95,39 +137,36 @@ export class DockerCli implements ContainerRuntime {
       name,
       ...command,
     ];
-    const child = spawn('docker', args, {
-      stdio: ['pipe', 'pipe', 'pipe'],
-      signal: options.signal,
-    });
-    child.stdin.end(options.stdin ?? '');
+    return stream(args, options.stdin, options.signal);
+  }
 
-    let stderr = '';
-    child.stderr.on('data', (chunk: Buffer) => {
-      stderr += chunk.toString('utf8');
-    });
-    const exited = new Promise<number>((resolve) => {
-      child.on('error', () => {
-        resolve(1);
-      });
-      child.on('close', (code) => {
-        resolve(code ?? 1);
-      });
-    });
+  runHelper(spec: HelperSpec): AsyncGenerator<string, ExecResult> {
+    const env = Object.entries(spec.env ?? {}).flatMap(([k, v]) => ['-e', `${k}=${v}`]);
+    const mounts = (spec.mounts ?? []).flatMap((mount) => [
+      '-v',
+      `${mount.source}:${mount.target}`,
+    ]);
+    const args = [
+      'run',
+      '--rm',
+      '-i',
+      ...mounts,
+      ...env,
+      ...(spec.cwd ? ['-w', spec.cwd] : []),
+      spec.image,
+      // Compose reports its progress on stderr: one stream keeps the lines in order.
+      'sh',
+      '-c',
+      'exec "$@" 2>&1',
+      'sh',
+      ...spec.command,
+    ];
+    return stream(args, spec.stdin, spec.signal);
+  }
 
-    let pending = '';
-    const stdout: AsyncIterable<Buffer | string> = child.stdout;
-    for await (const chunk of stdout) {
-      pending += typeof chunk === 'string' ? chunk : chunk.toString('utf8');
-      const lines = pending.split('\n');
-      pending = lines.pop() ?? '';
-      for (const line of lines) {
-        yield line;
-      }
-    }
-    if (pending) {
-      yield pending;
-    }
-    return { exitCode: await exited, stderr };
+  async networkExists(name: string): Promise<boolean> {
+    const inspected = await run(['network', 'inspect', name]);
+    return inspected.code === 0;
   }
 
   async copyIn(name: string, hostDir: string, containerDir: string): Promise<void> {

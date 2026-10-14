@@ -17,12 +17,20 @@ export * from './notion-api';
 export * from './notion-error';
 export * from './notion-id';
 export * from './pr-descriptions';
+export * from './preview-compose';
+export {
+  composeProblems,
+  isRecord,
+  PREVIEW_REPO_DIR,
+  type ComposeJson,
+} from './preview-compose-check';
+export * from './previews';
 export * from './project-url';
 export * from './refused-commits';
 export type { ResumeState } from './schema-refused-commits';
 export type * from './runtime';
 export * as schema from './tables';
-export type { PullRequestFile } from './schema-types';
+export type { PreviewConfig, PullRequestFile } from './schema-types';
 export * from './states';
 export * from './ticket-links';
 export * from './tickets';

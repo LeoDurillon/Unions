@@ -11,6 +11,8 @@ import { EventDispatcher } from './event-dispatcher';
 import type { GitHubApi } from './github/api';
 import { InvestigationRunner } from './investigate';
 import { PrDescriptionRunner } from './pr-description-run';
+import { previewSettings } from './preview/compose';
+import { PreviewManager } from './preview/manager';
 import type { ProvisionConfig } from './provision';
 import type { RunSlots } from './slots';
 
@@ -22,6 +24,7 @@ export type SideRuns = {
   investigations: InvestigationRunner;
   agentReviews: AgentReviewRunner;
   prDescriptions: PrDescriptionRunner;
+  previews: PreviewManager;
   tick: () => void;
   stop: () => void;
   idle: () => Promise<void>;
@@ -38,15 +41,18 @@ export async function startSideRuns(deps: {
   const investigations = new InvestigationRunner(deps);
   const agentReviews = new AgentReviewRunner(deps);
   const prDescriptions = new PrDescriptionRunner(deps);
+  const previews = new PreviewManager({ ...deps, settings: previewSettings() });
   const events = new EventDispatcher(deps.db, new FetchNotionApi());
   await investigations.recover();
   await agentReviews.recover();
   prDescriptions.recover();
+  previews.recover();
   backfillNotionPages(deps.db);
   return {
     investigations,
     agentReviews,
     prDescriptions,
+    previews,
     tick: () => {
       investigations.tick();
       agentReviews.tick();
@@ -63,6 +69,7 @@ export async function startSideRuns(deps: {
         investigations.idle(),
         agentReviews.idle(),
         prDescriptions.idle(),
+        previews.idle(),
         events.idle(),
       ]);
     },

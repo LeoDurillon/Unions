@@ -1,6 +1,6 @@
 # Plan: preview environments
 
-Status: designed, not started. Replaces the single-container design first written in `SPEC.md` (one image, one
+Status: phase 1 implemented (branch `preview-container-feature`); phases 2 to 4 not started. Replaces the single-container design first written in `SPEC.md` (one image, one
 start command, one port): that one could not run apps needing a database or a queue.
 
 ## Idea
@@ -139,6 +139,28 @@ The Playwright report and failure screenshots are kept on the ticket (Log tab, a
 - It stops (`down -v`) when the ticket is done, cancelled or removed, and when the worker shuts down; removing the
   ticket's workspace volume requires the preview to be down first. Restart runs `up --build` again from the
   workspace.
+
+## Phase 1 as built
+
+Differences from the design above, decided while building it:
+
+- **The service and port are typed in** the settings; a wrong name fails the start with the list of services the
+  compose file has (listing them in the settings needs a worker round trip: phase 2).
+- **Previews outlive worker restarts and Done**: their containers do not depend on the worker (under `bun --watch`
+  every save restarts it), and trying the work after Done is the main use. A start or stop the worker was running
+  when it stopped is marked failed at its next start. A ticket's removal takes its preview down first.
+- **The proxy listens on 8080** by default (`UNION_PREVIEW_PORT`): port 80 is often taken or privileged.
+- **Logs are read on demand** (`preview_logs`, "Read again"), not followed: following would fill the event log. The
+  build and start output goes to the ticket's Log tab, 25 lines per event.
+- **A failed start takes down what it started**, after keeping the services' last output.
+- **Variables are plain values** stored in the project's settings (the browser sees them); secrets are phase 2.
+- **The generated compose file can be read and edited** (ticket Overview → Preview → Compose file). Union saves
+  the file it generates (as YAML, without the settings Docker prints as unset) at each Start, or on "Generate"
+  without starting anything. An edit is saved as the ticket's own file: Start then runs it instead of generating
+  one, so changes to the repository's compose file are not used until "Use the generated file again". The own file
+  goes through `docker compose config` and the same checks (Union's workspace volume and preview network allowed
+  when they are this ticket's), keeps the ticket's project name, and has its repository mounts turned into
+  workspace mounts; host ports in it are published.
 
 ## Phases
 
