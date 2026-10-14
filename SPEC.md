@@ -260,8 +260,9 @@ Full design: [`docs/plans/preview-environments.md`](docs/plans/preview-environme
 - Per-project environment variables (secrets kept server side) with templates such as `{service.api.url}`, given to
   compose and optionally as an app env file inside a service, never written into the workspace.
 - End-to-end tests: the agent's container joins the preview's network; Chromium's libraries are in the agent image,
-  the browser is installed at the repository's Playwright version on first use; a project e2e command runs as a gate
-  like the checks.
+  the browser is installed at the repository's Playwright version on first use. The project's e2e command runs only
+  when the user asks, from the ticket ("Run e2e tests", one run at a time: they take a lot of memory); a failure can
+  be sent to the agent as a revision.
 
 ## MCP servers for agents (planned)
 
