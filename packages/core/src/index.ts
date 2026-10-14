@@ -18,6 +18,8 @@ export * from './notion-error';
 export * from './notion-id';
 export * from './pr-descriptions';
 export * from './preview-compose';
+export * from './preview-config';
+export * from './preview-secrets';
 export {
   composeProblems,
   isRecord,
@@ -30,7 +32,7 @@ export * from './refused-commits';
 export type { ResumeState } from './schema-refused-commits';
 export type * from './runtime';
 export * as schema from './tables';
-export type { PreviewConfig, PullRequestFile } from './schema-types';
+export type { PreviewConfig, PreviewService, PullRequestFile } from './schema-types';
 export * from './states';
 export * from './ticket-links';
 export * from './tickets';

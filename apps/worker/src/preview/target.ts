@@ -1,18 +1,23 @@
 import path from 'node:path';
 
 import {
+  exposedServices,
   getTicket,
   PREVIEW_REPO_DIR,
-  previewHost,
+  previewAddress,
   previewProject,
+  previewSecretValues,
+  previewServiceHost,
+  renderPreviewTemplate,
   schema,
   type ContainerRuntime,
   type Db,
+  type ExposedService,
   type PreviewConfig,
 } from '@union/core';
 import { eq } from 'drizzle-orm';
 
-import { previewUrl, type PreviewSettings } from './compose';
+import type { PreviewSettings } from './compose';
 
 const REASON_LINES = 20;
 
@@ -28,13 +33,20 @@ export type PreviewDeps = {
 /** Why a preview cannot start or stopped; its message is shown on the ticket. */
 export class PreviewError extends Error {}
 
-/** A ticket's preview: its compose project, settings, workspace and address. */
+/**
+ * A ticket's preview: its compose project, settings, workspace, the services the proxy serves and
+ * their addresses, and its variables (`plain` with their templates filled in; `secrets` the values,
+ * which only the files Docker reads hold).
+ */
 export type Target = {
   ticketId: number;
   project: string;
   config: PreviewConfig;
   workspaceVolume: string;
-  url: string;
+  exposed: ExposedService[];
+  urls: { service: string; url: string }[];
+  plain: Record<string, string>;
+  secrets: Record<string, string>;
 };
 
 export function loadTarget(deps: PreviewDeps, ticketId: number): Target {
@@ -51,12 +63,33 @@ export function loadTarget(deps: PreviewDeps, ticketId: number): Target {
   if (!ticket.workspaceVolume) {
     throw new PreviewError('The ticket has no workspace yet: run the implementation first');
   }
+  const services = exposedServices(config);
+  if (services.length === 0) {
+    throw new PreviewError('The preview settings expose no service (project settings → Preview)');
+  }
+  const context = { ticketId, publicPort: deps.settings.publicPort, exposed: services };
+  const exposed = services.map((service) => ({
+    service: service.name,
+    port: service.port,
+    host: previewServiceHost(ticketId, service.prefix),
+  }));
   return {
     ticketId,
     project: previewProject(ticketId),
     config,
     workspaceVolume: ticket.workspaceVolume,
-    url: previewUrl(previewHost(ticketId), deps.settings),
+    exposed,
+    urls: exposed.map(({ service, host }) => ({
+      service,
+      url: previewAddress(host, deps.settings.publicPort),
+    })),
+    plain: Object.fromEntries(
+      Object.entries(config.env).map(([key, value]) => [
+        key,
+        renderPreviewTemplate(value, context),
+      ]),
+    ),
+    secrets: previewSecretValues(deps.db, ticket.projectId),
   };
 }
 

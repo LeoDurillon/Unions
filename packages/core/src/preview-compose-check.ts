@@ -5,6 +5,8 @@ export const PREVIEW_REPO_DIR = '/workspace/repo';
 /** The keys Union adds to a compose file; the repository's own file may not use them. */
 export const PREVIEW_NETWORK_KEY = 'union_preview';
 export const PREVIEW_WORKSPACE_KEY = 'union_workspace';
+/** The config holding the variables given as a file. */
+export const PREVIEW_ENV_KEY = 'union_env';
 /** The Docker network Traefik routes previews on (created by Union's compose stack). */
 export const PREVIEW_NETWORK = 'union-preview';
 
@@ -188,8 +190,9 @@ function reservedProblems(config: ComposeJson): string[] {
   const used = new Set([
     ...Object.keys(isRecord(config.volumes) ? config.volumes : {}),
     ...Object.keys(isRecord(config.networks) ? config.networks : {}),
+    ...Object.keys(isRecord(config.configs) ? config.configs : {}),
   ]);
-  return [PREVIEW_NETWORK_KEY, PREVIEW_WORKSPACE_KEY]
+  return [PREVIEW_NETWORK_KEY, PREVIEW_WORKSPACE_KEY, PREVIEW_ENV_KEY]
     .filter((key) => used.has(key))
     .map((key) => `"${key}" is a name Union uses`);
 }

@@ -7,6 +7,7 @@ import {
   migrateDb,
   schema,
   setComposeOverride,
+  setPreviewSecret,
   updatePreview,
   type ContainerRuntime,
   type Db,
@@ -18,6 +19,9 @@ import { eq } from 'drizzle-orm';
 import { previewSettings } from './compose';
 import { generatePreviewFile } from './compose-file';
 import { startPreview, stopPreview, type PreviewDeps } from './run';
+
+/** `${DB_PASSWORD}`, spelled out: a placeholder written as is reads like a forgotten template. */
+const REFERENCE = ['$', '{DB_PASSWORD}'].join('');
 
 const RESOLVED = {
   name: 'union-t1',
@@ -38,6 +42,7 @@ let calls: HelperSpec[];
 let resolved: unknown;
 let upExit: number;
 let answer: number;
+let asked: string[];
 
 /** The compose helper: `config` prints the resolved file, `up` and `down` succeed unless told not to. */
 const runtime = {
@@ -63,7 +68,10 @@ function deps(): PreviewDeps {
     settings: previewSettings({}),
     readyTimeoutMs: 50,
     readyIntervalMs: 5,
-    fetchFn: () => Promise.resolve(new Response('hello', { status: answer })),
+    fetchFn: (_url, init) => {
+      asked.push(new Headers(init.headers).get('host') ?? '');
+      return Promise.resolve(new Response('hello', { status: answer }));
+    },
   };
 }
 
@@ -100,6 +108,7 @@ beforeEach(() => {
   resolved = RESOLVED;
   upExit = 0;
   answer = 200;
+  asked = [];
 });
 
 test('a preview starts from the workspace, rewritten, and runs once the service answers', async () => {
@@ -220,4 +229,56 @@ test("the ticket's own file runs instead, checked, under the ticket's project, h
   await startPreview(deps(), ticketId);
   expect(getPreview(db, ticketId)?.error).toContain('Your compose file cannot run as a preview');
   expect(commands().some((command) => command.includes(' up '))).toBe(false);
+});
+
+test('several services, templates, secrets and an env file: real values run, none is kept', async () => {
+  db.update(schema.projects)
+    .set({
+      config: {
+        baseBranch: 'main',
+        preview: {
+          composeFile: 'compose.yaml',
+          services: [
+            { name: 'web', port: 80, prefix: '' },
+            { name: 'api', port: 8080, prefix: 'api' },
+          ],
+          env: { API_URL: '{service.api.url}', PRICE: 'costs $5' },
+          envFile: { service: 'api', path: '/etc/app.env' },
+        },
+      },
+    })
+    .run();
+  setPreviewSecret(db, 1, 'DB_PASSWORD', 'pa$word');
+  resolved = {
+    services: {
+      ...RESOLVED.services,
+      api: { image: 'node:22', networks: { default: null } },
+    },
+  };
+  await startPreview(deps(), ticketId);
+  const row = getPreview(db, ticketId);
+  expect(row?.status).toBe('running');
+  expect(row?.urls).toEqual([
+    { service: 'web', url: 'http://1.localhost:8080' },
+    { service: 'api', url: 'http://api.1.localhost:8080' },
+  ]);
+  expect(asked.toSorted()).toEqual(['1.localhost', 'api.1.localhost']);
+
+  const [runConfig, shownConfig, up] = calls;
+  expect(runConfig?.env).toMatchObject({ DB_PASSWORD: 'pa$word' });
+  expect(shownConfig?.env).toMatchObject({ DB_PASSWORD: REFERENCE });
+  const file = JSON.parse(up?.stdin ?? '{}') as {
+    services: Record<string, Record<string, unknown>>;
+    configs: Record<string, { content: string }>;
+  };
+  expect(file.services.web?.environment).toEqual({
+    API_URL: 'http://api.1.localhost:8080',
+    PRICE: 'costs $$5',
+    DB_PASSWORD: 'pa$$word',
+  });
+  expect(file.services.api?.configs).toEqual([{ source: 'union_env', target: '/etc/app.env' }]);
+  expect(file.configs.union_env?.content).toContain('DB_PASSWORD=pa$$word');
+  // The file kept for the panel names the secret, never its value.
+  expect(row?.composeYaml).toContain(REFERENCE);
+  expect(row?.composeYaml).not.toContain('pa$');
 });

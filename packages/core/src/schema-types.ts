@@ -2,16 +2,25 @@
 import type { DiffStatus } from './diff';
 import type { BoardStatus } from './states';
 
+/** A service the proxy serves: at `<id>.localhost` when `prefix` is empty, else `<prefix>.<id>.localhost`. */
+export type PreviewService = { name: string; port: number; prefix: string };
+
 /**
- * How a ticket's preview runs: the repository's compose file, the service the proxy serves, and
- * variables given to every service (plain values: they reach the browser with the settings).
+ * How a ticket's preview runs: the repository's compose file, the services the proxy serves, and
+ * variables given to every service. `env` holds plain values (they reach the browser with the
+ * settings) that may use templates (`{service.api.url}`); secret values live in `preview_secrets`.
  */
 export type PreviewConfig = {
   /** Path of the compose file in the repository. */
   composeFile: string;
-  service: string;
-  port: number;
+  /** The exposed services; the first is the one "Open" goes to. */
+  services?: PreviewService[];
   env: Record<string, string>;
+  /** The variables also given as a file, at `path` inside `service`. */
+  envFile?: { service: string; path: string };
+  /** Phase 1 settings, read as one exposed service. */
+  service?: string;
+  port?: number;
 };
 
 export type ProjectConfig = {

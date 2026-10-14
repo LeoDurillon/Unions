@@ -8,6 +8,7 @@
     "./attachment-limits": "./src/attachment-limits.ts",
     "./diff": "./src/diff.ts",
     "./event-rules": "./src/event-rule-types.ts",
+    "./preview": "./src/preview-config.ts",
     "./github-client": "./src/github-client.ts",
     "./github-text": "./src/github-text.ts",
     "./investigation-defaults": "./src/investigation-defaults.ts"

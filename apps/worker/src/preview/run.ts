@@ -3,7 +3,6 @@ import {
   emitEvent,
   getPreview,
   PREVIEW_NETWORK,
-  previewHost,
   previewProject,
   updatePreview,
   type ComposeJson,
@@ -100,7 +99,8 @@ async function startTarget(deps: PreviewDeps, target: Target): Promise<void> {
   }
   updatePreview(deps.db, target.ticketId, {
     status: 'starting',
-    url: target.url,
+    url: target.urls[0]?.url ?? null,
+    urls: target.urls,
     error: null,
     startedAt: Date.now(),
   });
@@ -110,16 +110,22 @@ async function startTarget(deps: PreviewDeps, target: Target): Promise<void> {
     );
   }
   await up(deps, target, await fileToRun(deps, target));
-  const ready = await waitReady({
-    proxyUrl: deps.settings.proxyUrl,
-    host: previewHost(target.ticketId),
-    timeoutMs: deps.readyTimeoutMs ?? READY_TIMEOUT_MS,
-    intervalMs: deps.readyIntervalMs ?? READY_INTERVAL_MS,
-    fetchFn: deps.fetchFn,
-  });
-  if (!ready) {
+  // All at once: each service gets the whole wait, not what the previous one left.
+  const answered = await Promise.all(
+    target.exposed.map((exposed) =>
+      waitReady({
+        proxyUrl: deps.settings.proxyUrl,
+        host: exposed.host,
+        timeoutMs: deps.readyTimeoutMs ?? READY_TIMEOUT_MS,
+        intervalMs: deps.readyIntervalMs ?? READY_INTERVAL_MS,
+        fetchFn: deps.fetchFn,
+      }),
+    ),
+  );
+  const silent = target.exposed.filter((_exposed, index) => answered[index] !== true);
+  if (silent.length > 0) {
     throw new PreviewError(
-      `"${target.config.service}" did not answer on port ${target.config.port}`,
+      silent.map(({ service, port }) => `"${service}" did not answer on port ${port}`).join('\n'),
     );
   }
 }

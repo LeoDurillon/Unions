@@ -1,6 +1,6 @@
 import type { PreviewConfig } from '@union/core';
 
-import type { PreviewView, PublicProject } from '../../src/api-types';
+import type { PreviewSettingsView, PreviewView, PublicProject } from '../../src/api-types';
 import { request } from './api';
 
 function base(ticketId: number): string {
@@ -18,6 +18,15 @@ export const previewApi = {
   /** The ticket's own compose file; null uses the generated one again. */
   saveOwnFile: (ticketId: number, yaml: string | null): Promise<PreviewView> =>
     request('PUT', `${base(ticketId)}/compose`, { yaml }),
+  settings: (projectId: number): Promise<PreviewSettingsView> =>
+    request('GET', `/api/projects/${projectId}/preview`),
+  /** Written, never read back: the settings only list the names. */
+  setSecret: (projectId: number, name: string, value: string): Promise<PreviewSettingsView> =>
+    request('PUT', `/api/projects/${projectId}/preview/secrets/${encodeURIComponent(name)}`, {
+      value,
+    }),
+  deleteSecret: (projectId: number, name: string): Promise<PreviewSettingsView> =>
+    request('DELETE', `/api/projects/${projectId}/preview/secrets/${encodeURIComponent(name)}`),
   /** Null removes the project's preview settings. */
   saveSettings: (projectId: number, preview: PreviewConfig | null): Promise<PublicProject> =>
     request('PUT', `/api/projects/${projectId}/preview`, { preview }),

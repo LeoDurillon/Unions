@@ -18,17 +18,28 @@ const STATUS: Record<Preview['status'], { label: string; tone: Tone }> = {
 
 type Act = (call: (ticketId: number) => Promise<PreviewView>) => void;
 
-function OpenLink({ preview }: { preview: Preview | null }): ReactElement | null {
-  return preview?.status === 'running' && preview.url ? (
-    <a
-      className="text-sm text-indigo-600 hover:underline dark:text-indigo-400"
-      href={preview.url}
-      target="_blank"
-      rel="noreferrer"
-    >
-      Open {preview.url}
-    </a>
-  ) : null;
+/** Every exposed service's address; previews from before several services were possible have one. */
+function OpenLinks({ preview }: { preview: Preview | null }): ReactElement | null {
+  if (preview?.status !== 'running') {
+    return null;
+  }
+  const urls = preview.urls ?? (preview.url ? [{ service: '', url: preview.url }] : []);
+  return (
+    <>
+      {urls.map(({ service, url }) => (
+        <a
+          key={url}
+          className="text-sm text-indigo-600 hover:underline dark:text-indigo-400"
+          href={url}
+          target="_blank"
+          rel="noreferrer"
+          title={service === '' ? undefined : `The ${service} service`}
+        >
+          Open {url}
+        </a>
+      ))}
+    </>
+  );
 }
 
 function Controls({
@@ -46,7 +57,7 @@ function Controls({
   const running = status === 'running';
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <OpenLink preview={view.preview} />
+      <OpenLinks preview={view.preview} />
       <Button
         variant={running ? 'secondary' : 'primary'}
         disabled={busy || view.refusal !== null}

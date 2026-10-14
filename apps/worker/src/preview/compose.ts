@@ -5,7 +5,6 @@ const COMPOSE_IMAGE = 'docker:29.0.0-cli';
 const SOCKET = '/var/run/docker.sock';
 const DEFAULT_PROXY_PORT = 8080;
 const DEFAULT_MAX_PREVIEWS = 3;
-const HTTP_PORT = 80;
 /** Lines of output kept for the panel and the failure reason. */
 export const TAIL_LINES = 200;
 
@@ -28,13 +27,6 @@ export function previewSettings(
     proxyUrl: env.UNION_PREVIEW_PROXY ?? `http://localhost:${publicPort}`,
     maxRunning: Number(env.UNION_MAX_PREVIEWS ?? DEFAULT_MAX_PREVIEWS),
   };
-}
-
-/** The address a person opens: `http://12.localhost`, with the port unless it is 80. */
-export function previewUrl(host: string, settings: PreviewSettings): string {
-  return settings.publicPort === HTTP_PORT
-    ? `http://${host}`
-    : `http://${host}:${settings.publicPort}`;
 }
 
 export type ComposeRun = { exitCode: number; tail: string[] };

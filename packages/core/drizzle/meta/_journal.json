@@ -218,6 +218,13 @@
       "when": 1791960916564,
       "tag": "0030_minor_wrecking_crew",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "6",
+      "when": 1791961713624,
+      "tag": "0031_quiet_shinobi_shaw",
+      "breakpoints": true
     }
   ]
 }

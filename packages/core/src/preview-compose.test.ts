@@ -1,6 +1,7 @@
 import { expect, test } from 'bun:test';
 
 import {
+  envFileProblem,
   exposedServiceProblem,
   previewCompose,
   tidyCompose,
@@ -44,9 +45,7 @@ function resolved(): ComposeJson {
 const TARGET: PreviewTarget = {
   project: 'union-t12',
   workspaceVolume: 'union-t12-ws',
-  host: '12.localhost',
-  service: 'web',
-  port: 80,
+  exposed: [{ service: 'web', port: 80, host: '12.localhost' }],
   env: { API_URL: 'http://api:8080' },
 };
 
@@ -130,9 +129,9 @@ test("the preview's file: its own project, no fixed names or host ports, mounts 
     team: 'front',
     'traefik.enable': 'true',
     'traefik.docker.network': 'union-preview',
-    'traefik.http.routers.union-t12.rule': 'Host(`12.localhost`)',
-    'traefik.http.routers.union-t12.entrypoints': 'web',
-    'traefik.http.services.union-t12.loadbalancer.server.port': '80',
+    'traefik.http.routers.union-t12-web.rule': 'Host(`12.localhost`)',
+    'traefik.http.routers.union-t12-web.entrypoints': 'web',
+    'traefik.http.services.union-t12-web.loadbalancer.server.port': '80',
   });
   // The database keeps its volume and stays off the proxy's network.
   expect(services.db?.volumes).toEqual([
@@ -191,4 +190,39 @@ test('the settings Docker prints as unset are left out of the file people read',
     networks: { default: { name: 'x_default' } },
     services: { db: { networks: { default: null } } },
   });
+});
+
+test('each exposed service gets its own route; the variables can also be a file in one service', () => {
+  const file = previewCompose(resolved(), {
+    ...TARGET,
+    exposed: [
+      { service: 'web', port: 80, host: '12.localhost' },
+      { service: 'db', port: 5432, host: 'db.12.localhost' },
+    ],
+    envFile: { service: 'db', path: '/etc/app/.env', content: 'API_URL=http://api:8080\n' },
+  });
+  const services = file.services as Record<string, Record<string, unknown>>;
+  expect(services.db?.labels).toMatchObject({
+    'traefik.http.routers.union-t12-db.rule': 'Host(`db.12.localhost`)',
+    'traefik.http.services.union-t12-db.loadbalancer.server.port': '5432',
+  });
+  expect(services.db?.networks).toEqual({ default: null, union_preview: null });
+  expect(services.db?.configs).toEqual([{ source: 'union_env', target: '/etc/app/.env' }]);
+  expect(services.web?.configs).toBeUndefined();
+  expect(file.configs).toEqual({ union_env: { content: 'API_URL=http://api:8080\n' } });
+  expect(composeProblems(file, { workspaceVolume: 'union-t12-ws' })).toEqual([]);
+  // The repository's own file may not take the name.
+  expect(composeProblems({ ...withService({}), configs: { union_env: { content: '' } } })).toEqual([
+    '"union_env" is a name Union uses',
+  ]);
+});
+
+test('the env file may not land in a folder mounted from the workspace', () => {
+  const file = previewCompose(resolved(), TARGET);
+  expect(envFileProblem(file, { service: 'db', path: '/etc/app/.env' })).toBeNull();
+  expect(envFileProblem(file, { service: 'web', path: '/usr/share/nginx/html/.env' })).toContain(
+    'would be written into the workspace (mounted at /usr/share/nginx/html)',
+  );
+  expect(envFileProblem(file, { service: 'web', path: '.env' })).toContain('must be absolute');
+  expect(envFileProblem(file, { service: 'api', path: '/x' })).toContain('not in the compose file');
 });

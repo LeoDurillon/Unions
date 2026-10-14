@@ -1,10 +1,18 @@
 import { beforeEach, expect, test } from 'bun:test';
 
-import { createDb, createTicket, migrateDb, schema, updatePreview, type Db } from '@union/core';
+import {
+  createDb,
+  createTicket,
+  migrateDb,
+  saveGeneratedCompose,
+  schema,
+  updatePreview,
+  type Db,
+} from '@union/core';
 import { eq } from 'drizzle-orm';
 import type { Hono } from 'hono';
 
-import type { PreviewView, PublicProject } from './api-types';
+import type { PreviewSettingsView, PreviewView, PublicProject } from './api-types';
 import { createApp } from './app';
 
 let db: Db;
@@ -22,9 +30,11 @@ function call(method: string, path: string, body?: unknown): Response | Promise<
 
 const SETTINGS = {
   composeFile: 'deploy/compose.yaml',
-  service: 'web',
-  port: 3000,
-  env: { API_URL: 'http://api:8080' },
+  services: [
+    { name: 'web', port: 3000, prefix: '' },
+    { name: 'api', port: 8080, prefix: 'api' },
+  ],
+  env: { API_URL: '{service.api.url}' },
 };
 
 function put(preview: unknown): Response | Promise<Response> {
@@ -45,8 +55,23 @@ beforeEach(() => {
 
 test('preview settings are checked, saved and cleared', async () => {
   expect((await put({ ...SETTINGS, composeFile: '../outside.yaml' })).status).toBe(400);
-  expect((await put({ ...SETTINGS, port: 0 })).status).toBe(400);
+  expect(
+    (await put({ ...SETTINGS, services: [{ name: 'web', port: 0, prefix: '' }] })).status,
+  ).toBe(400);
   expect((await put({ ...SETTINGS, env: { 'BAD-NAME': 'x' } })).status).toBe(400);
+  expect((await put({ ...SETTINGS, env: { URL: '{service.db.url}' } })).status).toBe(400);
+  expect((await put({ ...SETTINGS, services: [] })).status).toBe(400);
+  expect(
+    (
+      await put({
+        ...SETTINGS,
+        services: [...SETTINGS.services, { name: 'db', port: 1, prefix: '' }],
+      })
+    ).status,
+  ).toBe(400);
+  expect((await put({ ...SETTINGS, envFile: { service: 'web', path: 'relative' } })).status).toBe(
+    400,
+  );
   const saved = (await (await put(SETTINGS)).json()) as PublicProject;
   expect(saved.config.preview).toEqual(SETTINGS);
   const cleared = (await (await put(null)).json()) as PublicProject;
@@ -90,4 +115,29 @@ test("the ticket's own compose file is saved, refused when empty, and dropped", 
     await call('PUT', `${base}/compose`, { yaml: null })
   ).json()) as PreviewView;
   expect(dropped.preview).toMatchObject({ override: null, overrideAt: null });
+});
+
+test('secrets are written, listed by name only, and never clash with a plain variable', async () => {
+  const base = `/api/projects/${projectId}/preview`;
+  await put(SETTINGS);
+  const saved = (await (
+    await call('PUT', `${base}/secrets/DB_PASSWORD`, { value: 'hunter2' })
+  ).json()) as PreviewSettingsView;
+  expect(saved.secretNames).toEqual(['DB_PASSWORD']);
+  const read = await (await call('GET', base)).text();
+  expect(read).toContain('DB_PASSWORD');
+  expect(read).not.toContain('hunter2');
+  expect((await call('PUT', `${base}/secrets/API_URL`, { value: 'x' })).status).toBe(400);
+  expect((await put({ ...SETTINGS, env: { DB_PASSWORD: 'x' } })).status).toBe(400);
+  expect((await call('DELETE', `${base}/secrets/DB_PASSWORD`)).status).toBe(200);
+  expect((await call('DELETE', `${base}/secrets/DB_PASSWORD`)).status).toBe(404);
+});
+
+test("the settings list the services of the project's latest generated compose file", async () => {
+  const base = `/api/projects/${projectId}/preview`;
+  const empty = (await (await call('GET', base)).json()) as PreviewSettingsView;
+  expect(empty.composeServices).toBeNull();
+  saveGeneratedCompose(db, ticketId, { yaml: 'services:\n  web: {}\n  db: {}\n' });
+  const listed = (await (await call('GET', base)).json()) as PreviewSettingsView;
+  expect(listed.composeServices).toMatchObject({ names: ['web', 'db'], ticketId });
 });

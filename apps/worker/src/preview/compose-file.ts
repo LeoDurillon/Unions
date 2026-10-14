@@ -1,10 +1,10 @@
 import {
   composeProblems,
+  envFileProblem,
   exposedServiceProblem,
   getPreview,
   isRecord,
   previewCompose,
-  previewHost,
   saveGeneratedCompose,
   tidyCompose,
   withWorkspaceMounts,
@@ -20,6 +20,7 @@ import {
   type PreviewDeps,
   type Target,
 } from './target';
+import { configEnvironment, runVariables, shownVariables, unmaskSecrets } from './variables';
 
 const TRAILING_SPACES = / +$/gmu;
 
@@ -35,6 +36,7 @@ async function resolve(
   deps: PreviewDeps,
   target: Target,
   source: { file: string } | { yaml: string },
+  env: Record<string, string>,
 ): Promise<ComposeJson> {
   const output = await compose(deps.runtime, deps.settings, {
     args:
@@ -53,7 +55,7 @@ async function resolve(
           ],
     workspaceVolume: target.workspaceVolume,
     stdin: 'yaml' in source ? source.yaml : undefined,
-    env: target.config.env,
+    env,
   });
   if (output.exitCode !== 0) {
     throw new PreviewError(`The compose file could not be read:\n${lastLines(output.tail)}`);
@@ -69,29 +71,59 @@ async function resolve(
   throw new PreviewError('docker compose config did not print a compose file');
 }
 
-function refuse(problems: string[], whose: string): void {
+function refuse(problems: string[], heading: string): void {
   if (problems.length > 0) {
-    throw new PreviewError(`${whose} cannot run as a preview:\n- ${problems.join('\n- ')}`);
+    throw new PreviewError(`${heading}:\n- ${problems.join('\n- ')}`);
   }
 }
 
-/** The file Union writes from the repository's compose file, after the checks; kept for the panel. */
+function exposedProblems(resolved: ComposeJson, target: Target): string[] {
+  return target.exposed.flatMap(({ service }) => {
+    const problem = exposedServiceProblem(resolved, service);
+    return problem ? [problem] : [];
+  });
+}
+
+/** The file from the repository's: to run (`shown` false) or to show, secrets as references. */
+async function buildFile(deps: PreviewDeps, target: Target, shown: boolean): Promise<ComposeJson> {
+  const resolved = await resolve(
+    deps,
+    target,
+    { file: target.config.composeFile },
+    configEnvironment(target, shown),
+  );
+  refuse(
+    [...composeProblems(resolved), ...exposedProblems(resolved, target)],
+    'The compose file cannot run as a preview',
+  );
+  const written = shown ? shownVariables(target) : runVariables(target);
+  const { envFile } = target.config;
+  const file = tidyCompose(
+    previewCompose(resolved, {
+      project: target.project,
+      workspaceVolume: target.workspaceVolume,
+      exposed: target.exposed,
+      env: written.env,
+      envFile: envFile ? { ...envFile, content: written.content } : undefined,
+    }),
+  );
+  const envFileIssue = envFile ? envFileProblem(file, envFile) : null;
+  refuse(envFileIssue ? [envFileIssue] : [], 'The variables cannot be given as a file');
+  return file;
+}
+
+/**
+ * The file Union writes from the repository's compose file, after the checks. The one kept for the
+ * panel shows each secret as `${NAME}`: with secrets it is built a second time that way.
+ */
 export async function generatedFile(deps: PreviewDeps, target: Target): Promise<ComposeJson> {
   try {
-    const resolved = await resolve(deps, target, { file: target.config.composeFile });
-    const exposed = exposedServiceProblem(resolved, target.config.service);
-    refuse([...composeProblems(resolved), ...(exposed ? [exposed] : [])], 'The compose file');
-    const file = tidyCompose(
-      previewCompose(resolved, {
-        project: target.project,
-        workspaceVolume: target.workspaceVolume,
-        host: previewHost(target.ticketId),
-        service: target.config.service,
-        port: target.config.port,
-        env: target.config.env,
-      }),
-    );
-    saveGeneratedCompose(deps.db, target.ticketId, { yaml: toYaml(file) });
+    const file = await buildFile(deps, target, false);
+    const names = Object.keys(target.secrets);
+    const shown = names.length === 0 ? file : await buildFile(deps, target, true);
+    saveGeneratedCompose(deps.db, target.ticketId, {
+      yaml: unmaskSecrets(toYaml(shown), names),
+    });
     return file;
   } catch (error) {
     saveGeneratedCompose(deps.db, target.ticketId, {
@@ -106,9 +138,13 @@ export async function generatedFile(deps: PreviewDeps, target: Target): Promise<
  * project name (isolation, Stop) and the workspace mounts; the rest is the user's, host ports included.
  */
 async function ownFile(deps: PreviewDeps, target: Target, yaml: string): Promise<ComposeJson> {
-  const resolved = await resolve(deps, target, { yaml });
+  // Its secrets are `${NAME}` references: compose fills them in here.
+  const resolved = await resolve(deps, target, { yaml }, configEnvironment(target, false));
   const file = { ...withWorkspaceMounts(resolved, target.workspaceVolume), name: target.project };
-  refuse(composeProblems(file, { workspaceVolume: target.workspaceVolume }), 'Your compose file');
+  refuse(
+    composeProblems(file, { workspaceVolume: target.workspaceVolume }),
+    'Your compose file cannot run as a preview',
+  );
   return file;
 }
 

@@ -2,6 +2,7 @@ import path from 'node:path';
 
 import {
   isRecord,
+  PREVIEW_ENV_KEY,
   PREVIEW_NETWORK,
   PREVIEW_NETWORK_KEY,
   PREVIEW_REPO_DIR,
@@ -9,19 +10,24 @@ import {
   type ComposeJson,
 } from './preview-compose-check';
 
-export { PREVIEW_NETWORK } from './preview-compose-check';
+export { PREVIEW_ENV_KEY, PREVIEW_NETWORK } from './preview-compose-check';
 
-/** What a ticket's preview is: its compose project, its workspace, and the service the proxy serves. */
+/** A service the proxy serves, at `host` (`12.localhost`, `api.12.localhost`). */
+export type ExposedService = { service: string; port: number; host: string };
+
+/**
+ * What a ticket's preview is: its compose project, its workspace, the services the proxy serves,
+ * and the project's variables, written as they go into the file (`$` escaped, or `${NAME}` for a
+ * secret in the file people read).
+ */
 export type PreviewTarget = {
   /** Compose project name: `union-t<id>`. */
   project: string;
   workspaceVolume: string;
-  /** Host the proxy routes to the exposed service: `<id>.localhost`. */
-  host: string;
-  service: string;
-  port: number;
-  /** The project's variables, given to every service. */
+  exposed: ExposedService[];
   env: Record<string, string>;
+  /** The variables as a file inside one service (`content` already written). */
+  envFile?: { service: string; path: string; content: string };
 };
 
 /** The services a resolved compose file defines, in its order. */
@@ -51,15 +57,20 @@ function withoutTraefik(labels: unknown): Record<string, unknown> {
   );
 }
 
-function routing(target: PreviewTarget): Record<string, string> {
-  const router = target.project;
+function routing(project: string, exposed: ExposedService): Record<string, string> {
+  const router = `${project}-${exposed.service}`;
   return {
     'traefik.enable': 'true',
     'traefik.docker.network': PREVIEW_NETWORK,
-    [`traefik.http.routers.${router}.rule`]: `Host(\`${target.host}\`)`,
+    [`traefik.http.routers.${router}.rule`]: `Host(\`${exposed.host}\`)`,
     [`traefik.http.routers.${router}.entrypoints`]: 'web',
-    [`traefik.http.services.${router}.loadbalancer.server.port`]: String(target.port),
+    [`traefik.http.services.${router}.loadbalancer.server.port`]: String(exposed.port),
   };
+}
+
+function withEnvFile(service: Record<string, unknown>, target: string): unknown[] {
+  const configs: unknown[] = Array.isArray(service.configs) ? service.configs : [];
+  return [...configs, { source: PREVIEW_ENV_KEY, target }];
 }
 
 function rewriteService(
@@ -68,7 +79,7 @@ function rewriteService(
   target: PreviewTarget,
 ): Record<string, unknown> {
   const { container_name: _name, ports: _ports, ...rest } = service;
-  const exposed = name === target.service;
+  const exposed = target.exposed.find((candidate) => candidate.service === name);
   const environment = {
     ...(isRecord(service.environment) ? service.environment : {}),
     ...target.env,
@@ -77,8 +88,14 @@ function rewriteService(
   return {
     ...rest,
     environment,
-    labels: { ...withoutTraefik(service.labels), ...(exposed ? routing(target) : {}) },
+    labels: {
+      ...withoutTraefik(service.labels),
+      ...(exposed ? routing(target.project, exposed) : {}),
+    },
     ...(exposed ? { networks: { ...networks, [PREVIEW_NETWORK_KEY]: null } } : {}),
+    ...(target.envFile?.service === name
+      ? { configs: withEnvFile(service, target.envFile.path) }
+      : {}),
   };
 }
 
@@ -115,7 +132,8 @@ export function withWorkspaceMounts(config: ComposeJson, workspaceVolume: string
  * The file the preview runs, written from the resolved one (after `composeProblems` found nothing):
  * the ticket's own compose project, no fixed container names or host ports (the proxy routes the
  * traffic), the repository's mounts taken from the workspace volume, the project's variables in every
- * service, and the exposed service labelled for Traefik on the preview network.
+ * service (and as a file in one, if asked), and the exposed services labelled for Traefik on the
+ * preview network.
  */
 export function previewCompose(config: ComposeJson, target: PreviewTarget): ComposeJson {
   const services = isRecord(config.services) ? config.services : {};
@@ -132,6 +150,14 @@ export function previewCompose(config: ComposeJson, target: PreviewTarget): Comp
       ...(isRecord(config.networks) ? config.networks : {}),
       [PREVIEW_NETWORK_KEY]: { external: true, name: PREVIEW_NETWORK },
     },
+    ...(target.envFile
+      ? {
+          configs: {
+            ...(isRecord(config.configs) ? config.configs : {}),
+            [PREVIEW_ENV_KEY]: { content: target.envFile.content },
+          },
+        }
+      : {}),
   };
   return withWorkspaceMounts(rewritten, target.workspaceVolume);
 }
@@ -186,5 +212,40 @@ export function exposedServiceProblem(config: unknown, service: string): string 
     isRecord(config) && isRecord(config.services) ? config.services[service] : undefined;
   return isRecord(settings) && typeof settings.network_mode === 'string'
     ? `"${service}" shares another container's network: the proxy cannot reach it`
+    : null;
+}
+
+function insideFolder(file: string, folder: string): boolean {
+  const normalized = path.posix.normalize(file);
+  return normalized === folder || normalized.startsWith(`${folder.replace(/\/$/u, '')}/`);
+}
+
+/**
+ * Why the variables cannot be given as a file at `path` in `service` of the file to run; null when
+ * they can. Docker copies the file into the container, so inside a folder mounted from the workspace
+ * it would land in the agent's working copy, secrets included, where it could be read or committed.
+ */
+export function envFileProblem(
+  file: ComposeJson,
+  envFile: { service: string; path: string },
+): string | null {
+  const services = isRecord(file.services) ? file.services : {};
+  const service = services[envFile.service];
+  if (!isRecord(service)) {
+    return `The env file's service "${envFile.service}" is not in the compose file`;
+  }
+  if (!path.posix.isAbsolute(envFile.path)) {
+    return `The env file's path must be absolute inside the service (got "${envFile.path}")`;
+  }
+  const mounts: unknown[] = Array.isArray(service.volumes) ? service.volumes : [];
+  const workspace = mounts.find(
+    (mount: unknown) =>
+      isRecord(mount) &&
+      mount.source === PREVIEW_WORKSPACE_KEY &&
+      typeof mount.target === 'string' &&
+      insideFolder(envFile.path, mount.target),
+  );
+  return isRecord(workspace)
+    ? `The env file ${envFile.path} would be written into the workspace (mounted at ${String(workspace.target)}), where the agent could read or commit it: give a path outside it, or read the variables from the environment`
     : null;
 }

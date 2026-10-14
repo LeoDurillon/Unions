@@ -1,6 +1,6 @@
-import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { integer, primaryKey, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
-import { now, tickets } from './schema';
+import { now, projects, tickets } from './schema';
 
 export const PREVIEW_STATUSES = ['starting', 'running', 'stopping', 'stopped', 'failed'] as const;
 
@@ -13,7 +13,10 @@ export const previews = sqliteTable('previews', {
     .primaryKey()
     .references(() => tickets.id, { onDelete: 'cascade' }),
   status: text('status', { enum: PREVIEW_STATUSES }).notNull(),
+  /** The first exposed service's address ("Open"). */
   url: text('url'),
+  /** Every exposed service's address, in the settings' order. */
+  urls: text('urls', { mode: 'json' }).$type<{ service: string; url: string }[]>(),
   error: text('error'),
   /** The last lines of the services' output, read on demand (`preview_logs`). */
   logTail: text('log_tail'),
@@ -29,3 +32,20 @@ export const previews = sqliteTable('previews', {
   startedAt: integer('started_at'),
   updatedAt: integer('updated_at').notNull().default(now),
 });
+
+/**
+ * A project's secret preview variables. The values never leave the server: the settings show the
+ * names, the file shown for a preview reads `${NAME}`, and only the worker fills them in.
+ */
+export const previewSecrets = sqliteTable(
+  'preview_secrets',
+  {
+    projectId: integer('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    value: text('value').notNull(),
+    updatedAt: integer('updated_at').notNull().default(now),
+  },
+  (t) => [primaryKey({ columns: [t.projectId, t.name] })],
+);

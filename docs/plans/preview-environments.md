@@ -1,6 +1,6 @@
 # Plan: preview environments
 
-Status: phase 1 implemented (branch `preview-container-feature`); phases 2 to 4 not started. Replaces the single-container design first written in `SPEC.md` (one image, one
+Status: phases 1 and 2 implemented (branch `preview-container-feature`); phases 3 and 4 not started. Replaces the single-container design first written in `SPEC.md` (one image, one
 start command, one port): that one could not run apps needing a database or a queue.
 
 ## Idea
@@ -161,6 +161,25 @@ Differences from the design above, decided while building it:
   goes through `docker compose config` and the same checks (Union's workspace volume and preview network allowed
   when they are this ticket's), keeps the ticket's project name, and has its repository mounts turned into
   workspace mounts; host ports in it are published.
+
+## Phase 2 as built
+
+- **Several exposed services**: the settings list them (name, port, host prefix: none → `<id>.localhost`, `api` →
+  `api.<id>.localhost`; the first is what "Open" goes to). Phase 1 settings (one `service` and `port`) are read as
+  one service with no prefix (`exposedServices`). Each gets its own Traefik router `union-t<id>-<service>`; the start
+  waits for all of them, and every address is kept (`previews.urls`).
+- **Templates** in variable values, checked on save (`@union/core/preview`): `{service.X.url}` and
+  `{service.X.internal}` for exposed services, `{service.X.host}` for any, `{ticket.id}`, `{preview.host}`,
+  `{preview.url}`.
+- **Secrets** live in `preview_secrets`, written from the settings and never read back (the settings list names). The
+  file Docker runs holds the values; the file kept for the panel is built a second time with each secret as
+  `${NAME}` (compose prints it `$${NAME}`, turned back into a reference), so an edit saved from it gets the value
+  from the worker's environment when it runs. Values Union writes into a compose file keep `$` as `$$`.
+- **Variables as a file**: a top-level config with inline `content`, given to one service at an absolute path.
+  Compose copies it into the container; a path inside a folder mounted from the workspace is refused, since the copy
+  would land in the agent's working copy.
+- **The services of the compose file** are listed in the settings from the latest file generated for one of the
+  project's tickets (no worker round trip): chips add them to the exposed services.
 
 ## Phases
 

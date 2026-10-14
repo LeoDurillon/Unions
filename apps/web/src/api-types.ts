@@ -291,3 +291,10 @@ export type PreviewView = {
   /** Why it cannot start now; null when it can. */
   refusal: string | null;
 };
+
+/** What the Preview settings show besides the settings: secret names (never values), and services. */
+export type PreviewSettingsView = {
+  secretNames: string[];
+  /** The services of the latest compose file generated for one of the project's tickets. */
+  composeServices: { names: string[]; ticketId: number; at: number } | null;
+};

@@ -118,7 +118,10 @@ behavior; this file covers how to work in the repo.
     `http://<id>.localhost:8080`. Previews outlive worker restarts; a ticket's removal takes its preview down before
     its volumes (`janitor.ts`). `compose-file.ts` keeps the generated file (`previews.compose_yaml`, `preview_generate`
     generates it alone) and runs the ticket's own edited file instead when there is one (`previews.override`, checked
-    with `composeProblems(file, { workspaceVolume })`, project name enforced).
+    with `composeProblems(file, { workspaceVolume })`, project name enforced). Variables: `target.ts` fills in the
+    settings' templates (`@union/core/preview`) and reads the secrets (`preview_secrets`, worker only);
+    `variables.ts` writes them into the file Docker runs (`$` escaped) or, as `${NAME}`, into the file kept for the
+    panel, which never holds a secret value.
   - `review.ts`: the final review (fresh session, read-only tools plus git reads, one git command per call because
     permission rules cannot match `&&`). Changes asked at the review go to the implementer through the `thenRun`
     chain in `states.ts`; `revision.ts` hands it the review's feedback. `runResumable` (agent.ts) restarts in a fresh
