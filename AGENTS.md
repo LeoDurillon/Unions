@@ -149,6 +149,12 @@ behavior; this file covers how to work in the repo.
     replaces `/workspace/attachments` in the container (outside the repo) with the ticket's current files, and
     `prompts.ts` lists them for every step but the rebase. `pushBranch` refuses a branch whose history holds a
     file not allowed in the repository (matched by git blob id, `PrivateFilesError`).
+  - Project files (project settings → Files, `routes/project-files.ts`, `project_files`): uploads streamed to
+    `attachments/p<project>/<id>` (up to `UNION_MAX_PROJECT_FILE_MB`, 2048 by default), never readable from the
+    browser. `project-files-sync.ts` puts them at their paths in the ticket's repository on provisioning (every step)
+    and before each preview start, through a compose helper on the workspace volume (`copyIntoVolume`); unchanged
+    files (sha256) are left alone, removed ones deleted, and every path goes in `.git/info/exclude`. Pushes refuse
+    them like private attachments (`privatePushFiles`), and `prompts.ts` lists them for the agents.
   - Leftover commits always carry the agent's own message, never one of Union's: taken from the report's
     `Refused commit: …` line, else asked for in one more turn of the agent's session (which may commit them
     itself); no message fails the run.

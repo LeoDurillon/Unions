@@ -15,6 +15,7 @@ import {
 } from '../http';
 import { removeTicketFiles } from './attachments';
 import { requireNotionId } from './notion';
+import { removeProjectFiles } from './project-files';
 
 const NO_CONTENT = 204;
 
@@ -255,5 +256,6 @@ export async function deleteProject(db: Db, c: Context): Promise<Response> {
     tx.delete(schema.projects).where(eq(schema.projects.id, project.id)).run();
   });
   await removeTicketFiles(ticketIds);
+  await removeProjectFiles(project.id);
   return c.body(null, NO_CONTENT);
 }

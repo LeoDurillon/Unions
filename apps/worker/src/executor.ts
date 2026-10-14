@@ -3,6 +3,7 @@ import {
   type Db,
   effortFor,
   listAttachments,
+  listProjectFiles,
   modelFor,
   parentOf,
   type Project,
@@ -53,6 +54,7 @@ export function createExecutor(
         approved: approvedBefore(db, ticket.id, step),
         revision: context.revision,
         attachments: listAttachments(db, ticket.id),
+        projectFiles: listProjectFiles(db, ticket.projectId),
       });
       const run = {
         container: container.name,

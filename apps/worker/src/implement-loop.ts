@@ -4,6 +4,7 @@ import {
   effortFor,
   getPreview,
   listAttachments,
+  listProjectFiles,
   modelFor,
   parentOf,
   type Project,
@@ -72,6 +73,7 @@ function freshPrompt({ deps, context, project }: Workspace): string {
     approved: approvedBefore(deps.db, ticket.id, 'implement'),
     revision: null,
     attachments: listAttachments(deps.db, ticket.id),
+    projectFiles: listProjectFiles(deps.db, ticket.projectId),
   });
   return revision ? `${prompt}\n\n${feedbackPrompt(revision.feedback)}` : prompt;
 }

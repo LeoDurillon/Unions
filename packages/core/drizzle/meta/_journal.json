@@ -239,6 +239,13 @@
       "when": 1791968835712,
       "tag": "0033_omniscient_whiplash",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "6",
+      "when": 1791980536879,
+      "tag": "0034_daffy_hawkeye",
+      "breakpoints": true
     }
   ]
 }

@@ -6,7 +6,7 @@ import {
   emitEvent,
   getTicket,
   parentOf,
-  privateAttachments,
+  privatePushFiles,
   schema,
   ticketLabel,
   type ContainerRuntime,
@@ -33,7 +33,7 @@ export type PublishResult = {
 /** A file the branch must not contain: its git blob id, and its name for the error. */
 export type PrivateFile = { name: string; blobId: string };
 
-/** The push was stopped before reaching GitHub, because of a private attachment. */
+/** The push was stopped before reaching GitHub, because of a private attachment or project file. */
 export class PrivateFilesError extends Error {}
 
 async function hasObject(bare: string, id: string): Promise<boolean> {
@@ -58,7 +58,7 @@ export async function assertNoPrivateFiles(bare: string, files: PrivateFile[]): 
   }
   if (found.length > 0) {
     throw new PrivateFilesError(
-      `The branch contains the attached file${found.length === 1 ? '' : 's'} ${found.join(', ')}, not allowed in the repository: it was not pushed. Ask for a revision that removes it from the branch's history, or allow the file in the repository from the ticket's Overview tab.`,
+      `The branch contains the file${found.length === 1 ? '' : 's'} ${found.join(', ')}, not allowed in the repository: it was not pushed. Ask for a revision that removes it from the branch's history; an attached file can also be allowed in the repository from the ticket's Overview tab.`,
     );
   }
 }
@@ -190,7 +190,7 @@ export async function publishBranch(input: {
     const remote = await projectRemote(db, input.config.gitBaseUrl, project);
     await pushBranch(input.runtime, input.container, remote, {
       branch,
-      privateFiles: privateAttachments(db, ticket.id),
+      privateFiles: privatePushFiles(db, ticket),
     });
     emitEvent(db, { type: 'branch_pushed', ticketId: ticket.id, payload: { branch } });
     // Re-read: the user may have linked a PR while the agent was working. A linked PR is kept.

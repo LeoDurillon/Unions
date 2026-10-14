@@ -1,6 +1,6 @@
 import {
   emitEvent,
-  privateAttachments,
+  privatePushFiles,
   schema,
   type Db,
   type Project,
@@ -55,7 +55,7 @@ export async function verifyAndPush(
     await pushBranch(deps.runtime, container, await remoteOf(deps, project), {
       branch,
       lease: pushed,
-      privateFiles: privateAttachments(deps.db, rebase.context.ticket.id),
+      privateFiles: privatePushFiles(deps.db, rebase.context.ticket),
     });
   } catch (error) {
     if (error instanceof PrivateFilesError) {

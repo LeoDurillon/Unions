@@ -104,6 +104,11 @@ test('every run hands the ticket container the host login as it is now', async (
       yield* [];
       return { exitCode: 0, stderr: '' };
     },
+    // No project files: the workspace check finds nothing to do.
+    *runHelper(): Generator<string, ExecResult> {
+      yield* [];
+      return { exitCode: 0, stderr: '' };
+    },
   } as unknown as ContainerRuntime;
   const config = { image: 'i', gitBaseUrl: 'x', credentialsPath };
 

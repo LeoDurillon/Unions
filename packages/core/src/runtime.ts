@@ -43,6 +43,15 @@ export type ContainerRuntime = {
   exec(name: string, command: string[], options?: ExecOptions): AsyncGenerator<string, ExecResult>;
   /** Copies a host directory's contents into the container and gives them to the agent user. */
   copyIn(name: string, hostDir: string, containerDir: string): Promise<void>;
+  /**
+   * Copies host files into a volume, each to its path there (folders must exist), through a
+   * container of `image` that is created for it and never started.
+   */
+  copyIntoVolume(
+    volume: string,
+    image: string,
+    files: { hostPath: string; volumePath: string }[],
+  ): Promise<void>;
   /** Copies one file out of the container to a host path. */
   copyOut(name: string, containerPath: string, hostPath: string): Promise<void>;
   /** Writes a file inside the container (used to seed credentials into the HOME volume). */

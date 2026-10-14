@@ -53,6 +53,7 @@ export class PreviewError extends Error {
  */
 export type Target = {
   ticketId: number;
+  projectId: number;
   project: string;
   config: PreviewConfig;
   workspaceVolume: string;
@@ -88,6 +89,7 @@ export function loadTarget(deps: PreviewDeps, ticketId: number): Target {
   }));
   return {
     ticketId,
+    projectId: ticket.projectId,
     project: previewProject(ticketId),
     config,
     workspaceVolume: ticket.workspaceVolume,

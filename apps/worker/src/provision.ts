@@ -8,6 +8,7 @@ import { eq } from 'drizzle-orm';
 import { syncAttachments } from './attachments-sync';
 import { projectGitToken } from './credentials';
 import { rejoinRunningPreview } from './preview/network';
+import { syncProjectFiles } from './project-files-sync';
 import { resolveTicketBase } from './ticket-base';
 
 export const AGENT_HOME = '/home/node';
@@ -136,7 +137,8 @@ export async function cloneInto(
 }
 
 /**
- * Idempotent: creates the container, seeds credentials, clones the repo, puts the ticket's files in,
+ * Idempotent: creates the container, seeds credentials, clones the repo, puts the ticket's and the
+ * project's files in,
  * leaves it running.
  */
 export async function ensureTicketContainer(
@@ -167,6 +169,7 @@ export async function ensureTicketContainer(
     await cloneInto(runtime, names.name, source, base ?? project.config.baseBranch);
   }
   await syncAttachments(db, runtime, names.name, ticket.id);
+  await syncProjectFiles(db, runtime, project.id, { volume: names.workspaceVolume });
   await rejoinRunningPreview(db, runtime, ticket.id);
   db.update(schema.tickets)
     .set({

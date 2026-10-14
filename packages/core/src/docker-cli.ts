@@ -212,6 +212,23 @@ export class DockerCli implements ContainerRuntime {
     await ok(['exec', '-u', 'root', name, 'chown', '-R', 'node:node', containerDir]);
   }
 
+  async copyIntoVolume(
+    volume: string,
+    image: string,
+    files: { hostPath: string; volumePath: string }[],
+  ): Promise<void> {
+    const name = `union-copy-${crypto.randomUUID()}`;
+    await ok(['create', '--name', name, '-v', `${volume}:/volume`, image, 'true']);
+    try {
+      for (const file of files) {
+        // oxlint-disable-next-line no-await-in-loop -- one docker cp at a time into the same container
+        await ok(['cp', file.hostPath, `${name}:/volume/${file.volumePath}`]);
+      }
+    } finally {
+      await run(['rm', '-f', name]);
+    }
+  }
+
   async copyOut(name: string, containerPath: string, hostPath: string): Promise<void> {
     await ok(['cp', `${name}:${containerPath}`, hostPath]);
   }

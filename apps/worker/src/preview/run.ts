@@ -11,6 +11,7 @@ import {
   type Db,
 } from '@union/core';
 
+import { syncProjectFiles } from '../project-files-sync';
 import { compose, createMountFolders } from './compose';
 import { fileToRun } from './compose-file';
 import { joinPreview, leavePreview } from './network';
@@ -123,6 +124,10 @@ async function startTarget(deps: PreviewDeps, target: Target): Promise<void> {
       true,
     );
   }
+  await syncProjectFiles(deps.db, deps.runtime, target.projectId, {
+    volume: target.workspaceVolume,
+    image: deps.settings.image,
+  });
   await up(deps, target, await fileToRun(deps, target));
   // All at once: each service gets the whole wait, not what the previous one left.
   const answered = await Promise.all(

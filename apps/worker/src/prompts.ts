@@ -3,6 +3,7 @@ import {
   formatBytes,
   PLANNING_STEPS,
   type Attachment,
+  type ProjectFile,
   ticketLabel,
   type PlanningStep,
   type Step,
@@ -26,6 +27,8 @@ export type PromptInput = {
   revision: { previous: string; feedback: string } | null;
   /** The files the user attached to the ticket (none for the rebase, which only replays commits). */
   attachments?: Attachment[];
+  /** The files the project puts in every workspace (none for the rebase). */
+  projectFiles?: ProjectFile[];
 };
 
 function parentSection(parent: Ticket): string {
@@ -51,6 +54,17 @@ Use them to understand and reproduce what the ticket describes. When you change 
 Files marked "private" must not leave this workspace: do not copy them into the repository or commit them, and do not quote their contents in commits, reports or the pull request description. A push that contains one is refused. Build a minimal test fixture of your own when you need one. Files marked "may be added to the repository" can be used as test fixtures.`;
 }
 
+/** The project's files, already in the repository but kept out of git. */
+export function projectFilesSection(files: ProjectFile[]): string {
+  return `# Project files
+
+The project puts these files in every workspace, at these paths in the repository. Git ignores them (\`.git/info/exclude\`).
+
+${files.map((file) => `- \`${file.path}\` (${formatBytes(file.size)})`).join('\n')}
+
+Use them for the project's local setup (a database dump, a local configuration). Never commit them, copy them elsewhere in the repository, or quote their contents in commits, reports or the pull request description: a push that contains one is refused.`;
+}
+
 export function buildPrompt({
   ticket,
   parent,
@@ -59,6 +73,7 @@ export function buildPrompt({
   approved,
   revision,
   attachments = [],
+  projectFiles = [],
 }: PromptInput): string {
   const parts = [shared, `# Task\n\n## ${ticket.title}\n\n${ticket.body}`];
   if (parent) {
@@ -66,6 +81,9 @@ export function buildPrompt({
   }
   if (attachments.length > 0) {
     parts.push(attachmentsSection(attachments));
+  }
+  if (projectFiles.length > 0) {
+    parts.push(projectFilesSection(projectFiles));
   }
   for (const output of approved) {
     parts.push(`# Approved: ${output.step}\n\n${output.content}`);

@@ -65,7 +65,7 @@ test('a branch holding a private attachment is refused before the push', async (
     await git(['rm', '--quiet', 'fixture.csv']);
     await git(['-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '--quiet', '-m', 'three']);
     expect(assertNoPrivateFiles(dir, [privateFile])).rejects.toThrow(
-      'The branch contains the attached file `orders.csv`',
+      'The branch contains the file `orders.csv`',
     );
   } finally {
     await rm(dir, { recursive: true, force: true });

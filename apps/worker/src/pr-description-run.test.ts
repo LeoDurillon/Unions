@@ -45,6 +45,11 @@ const runtime = {
     yield* [];
     return { exitCode: 0, stderr: '' };
   },
+  // No project files: the workspace check finds nothing to do.
+  *runHelper(): Generator<string, ExecResult> {
+    yield* [];
+    return { exitCode: 0, stderr: '' };
+  },
 } as unknown as ContainerRuntime;
 
 const agent: AgentFn = (_runtime, run) => {
