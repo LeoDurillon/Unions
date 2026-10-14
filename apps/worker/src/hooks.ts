@@ -1,26 +1,26 @@
 import type { ContainerRuntime, Db, Project } from '@union/core';
 
-import type { AgentReviewRunner } from './agent-review';
 import type { CommandHooks } from './commands';
 import type { GitHubApi } from './github/api';
 import { sendPrDescription } from './github/pr-description-send';
 import { postPullRequestReview } from './github/pr-review';
-import type { InvestigationRunner } from './investigate';
 import { removeContainers } from './janitor';
-import type { PrDescriptionRunner } from './pr-description-run';
-import type { PreviewManager } from './preview/manager';
+import type { SideRuns } from './side-runs';
 
 /** What the commands hand off to the running worker: all asynchronous, so draining stays synchronous. */
-export function workerHooks(deps: {
-  db: Db;
-  runtime: ContainerRuntime;
-  investigations: InvestigationRunner;
-  agentReviews: AgentReviewRunner;
-  prDescriptions: PrDescriptionRunner;
-  previews: PreviewManager;
-  apiFor: (project: Project) => GitHubApi | null;
-}): CommandHooks {
-  const { db, runtime, investigations, agentReviews, prDescriptions, previews, apiFor } = deps;
+export function workerHooks(
+  deps: Pick<
+    SideRuns,
+    'investigations' | 'agentReviews' | 'reviewGroupings' | 'prDescriptions' | 'previews'
+  > & {
+    db: Db;
+    runtime: ContainerRuntime;
+    apiFor: (project: Project) => GitHubApi | null;
+  },
+): CommandHooks {
+  const { db, runtime, investigations, agentReviews, reviewGroupings, prDescriptions, previews } =
+    deps;
+  const { apiFor } = deps;
   return {
     removeContainers: (containers) => {
       void removeContainers(db, runtime, containers, (name) => previews.takeDownFor(name));
@@ -30,6 +30,9 @@ export function workerHooks(deps: {
     },
     cancelAgentReview: (id) => {
       agentReviews.cancel(id);
+    },
+    cancelReviewGrouping: (id) => {
+      reviewGroupings.cancel(id);
     },
     submitPullRequestReview: (reviewId, summary) => {
       void postPullRequestReview(db, apiFor, reviewId, summary);

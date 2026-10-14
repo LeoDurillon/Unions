@@ -2,6 +2,7 @@ import { emitEvent, recordE2e, recoverPreviews } from '@union/core';
 
 import type { PreviewAction } from '../commands';
 import { runRequestedE2e } from '../e2e';
+import { previewSettings } from './compose';
 import { generatePreviewFile } from './compose-file';
 import { IdleWatcher, readProxyMetrics } from './idle';
 import { refreshPreviewLogs, startPreview, stopPreview, takeDown, type PreviewDeps } from './run';
@@ -128,4 +129,9 @@ export class PreviewManager {
     })();
     this.busy.set(ticketId, done);
   }
+}
+
+/** The worker's manager, with the settings from its environment. */
+export function createPreviewManager(deps: Omit<PreviewDeps, 'settings'>): PreviewManager {
+  return new PreviewManager({ ...deps, settings: previewSettings() });
 }

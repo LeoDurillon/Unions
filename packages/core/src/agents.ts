@@ -23,6 +23,7 @@ export const AGENT_IDS = [
   'implement',
   'final_review',
   'review_comments',
+  'review_groups',
   'pr_description',
   'rebase',
 ] as const;
@@ -64,6 +65,12 @@ Read the diff from the base branch, and the surrounding code wherever a change d
 Comment only on what matters: bugs, wrong behaviour, missing edge cases, security, data loss, races, misleading names, risky changes without tests.
 No praise, no summary of the change, no style remarks a formatter or linter would catch. At most 15 comments: fewer, sharper comments are better.
 Each comment says what is wrong and suggests the fix, in a few sentences.`,
+  review_groups: `Group the change's files by the parts of the specification they implement, so a reviewer can check each part of the spec in turn.
+Read the specification first and split it into its parts (requirements, behaviours, acceptance criteria), in its own order and words.
+Then read the diff from the base branch, and the surrounding code wherever a change's purpose is unclear.
+Put each changed file under every part it serves; a file serving no part goes to "unrelated" with a short reason.
+List the parts no change implements as "missing": that is what the reviewer most needs to know.
+Do not judge the code's quality: only say what implements what.`,
   pr_description: `Write the pull request's description for a reviewer who has not seen the work.
 Describe the change as the branch has it now: read the diff from the base branch, not only what you remember.
 Say what changed and why, the main changes, and how it was verified. Mention what a reviewer should look at closely.
@@ -97,9 +104,15 @@ export function isAgentId(value: string): value is AgentId {
 const MODEL_BY_AGENT: Record<RunAgent, AgentModel> = {
   ...MODEL_BY_STEP,
   review_comments: 'opus',
+  review_groups: 'sonnet',
   pr_description: MODEL_BY_STEP.implement,
 };
-const RUN_AGENTS: readonly RunAgent[] = [...STEPS, 'review_comments', 'pr_description'];
+const RUN_AGENTS: readonly RunAgent[] = [
+  ...STEPS,
+  'review_comments',
+  'review_groups',
+  'pr_description',
+];
 
 /** Agents with a model of their own: the pipeline steps and the reviewer (not `shared`). */
 function stepOf(agent: AgentId): RunAgent | null {

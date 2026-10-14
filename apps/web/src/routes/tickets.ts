@@ -8,6 +8,7 @@ import {
   STEPS,
   transition,
   type Db,
+  type NotionApi,
   type Step,
 } from '@union/core';
 import { and, eq, isNull } from 'drizzle-orm';
@@ -179,7 +180,7 @@ async function editOutput(db: Db, c: Context): Promise<Response> {
   return c.json(saveOutput(db, id, step, content), CREATED);
 }
 
-export function ticketRoutes(db: Db, github: OnboardingGitHub): Hono {
+export function ticketRoutes(db: Db, github: OnboardingGitHub, notion: NotionApi): Hono {
   const routes = new Hono();
   routes.get('/', (c) => listTickets(db, c));
   routes.get('/:id', (c) => ticketDetail(db, c));
@@ -188,7 +189,7 @@ export function ticketRoutes(db: Db, github: OnboardingGitHub): Hono {
   routes.put('/:id/parent', (c) => changeParent(db, c));
   routes.put('/:id/pull-request', (c) => linkPullRequest(db, github, c));
   routes.delete('/:id/pull-request', (c) => unlinkPullRequest(db, c));
-  routes.route('/', ticketSubroutes(db, github));
+  routes.route('/', ticketSubroutes(db, github, notion));
   routes.route('/', reviewRoutes(db, github));
   return routes;
 }

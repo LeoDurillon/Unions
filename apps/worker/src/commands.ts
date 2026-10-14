@@ -1,5 +1,6 @@
 import {
   cancelQueuedAgentReview,
+  cancelQueuedGrouping,
   cancelQueuedInvestigation,
   cancelQueuedPrDescription,
   createTicket,
@@ -25,6 +26,8 @@ export type CommandHooks = {
   cancelInvestigation: (id: number) => void;
   /** Stops a running agent review. */
   cancelAgentReview: (id: number) => void;
+  /** Stops a running grouping of a review by spec. */
+  cancelReviewGrouping: (id: number) => void;
   /** Posts a current review's drafts and summary on its pull request. */
   submitPullRequestReview: (reviewId: number, summary: string) => void;
   /** Stops a running rewrite of a PR description. */
@@ -53,6 +56,7 @@ const NO_HOOKS: CommandHooks = {
   removeContainers: ignore,
   cancelInvestigation: ignore,
   cancelAgentReview: ignore,
+  cancelReviewGrouping: ignore,
   submitPullRequestReview: ignore,
   cancelPrDescription: ignore,
   sendPrDescription: ignore,
@@ -117,6 +121,13 @@ const CANCELS: Record<
     queued: cancelQueuedAgentReview,
     running: (hooks, id) => {
       hooks.cancelAgentReview(id);
+    },
+  },
+  cancel_review_grouping: {
+    key: 'groupingId',
+    queued: cancelQueuedGrouping,
+    running: (hooks, id) => {
+      hooks.cancelReviewGrouping(id);
     },
   },
   cancel_pr_description: {

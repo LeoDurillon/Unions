@@ -1,4 +1,4 @@
-import { parseProjectUrl, schema, type Db } from '@union/core';
+import { parseProjectUrl, schema, type Db, type NotionApi } from '@union/core';
 import { Hono } from 'hono';
 
 import { toPublicProject } from '../api-types';
@@ -43,7 +43,7 @@ function credentialsOf(
   return { githubToken: optionalText(body, 'token') ?? null, githubInstallationId: null };
 }
 
-export function projectRoutes(db: Db, github: OnboardingGitHub): Hono {
+export function projectRoutes(db: Db, github: OnboardingGitHub, notion: NotionApi): Hono {
   const routes = new Hono();
 
   routes.get('/', (c) =>
@@ -101,7 +101,7 @@ export function projectRoutes(db: Db, github: OnboardingGitHub): Hono {
   routes.patch('/:id', (c) => updateProject(db, c));
   routes.delete('/:id', (c) => deleteProject(db, c));
   routes.route('/:projectId/investigations', investigationRoutes(db));
-  routes.route('/:projectId/pull-requests', pullRequestRoutes(db, github));
+  routes.route('/:projectId/pull-requests', pullRequestRoutes(db, github, notion));
 
   return routes;
 }

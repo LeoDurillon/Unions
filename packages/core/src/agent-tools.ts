@@ -14,7 +14,7 @@ const READ_GIT = ['diff', 'log', 'show', 'status'] as const;
  * An agent that runs on its own: every pipeline step, the reviewer writing draft comments, and the
  * writer of pull request descriptions.
  */
-export type RunAgent = Step | 'review_comments' | 'pr_description';
+export type RunAgent = Step | 'review_comments' | 'review_groups' | 'pr_description';
 
 /** Reading a change with git, in both the plain and the `git -C <repo>` form agents often use. */
 const REVIEW_TOOLS = [
@@ -32,6 +32,7 @@ export const DEFAULT_TOOLS: Record<RunAgent, readonly string[]> = {
   implement: ['Read', 'Edit', 'Write', 'Grep', 'Glob', 'Bash'],
   final_review: REVIEW_TOOLS,
   review_comments: REVIEW_TOOLS,
+  review_groups: REVIEW_TOOLS,
   pr_description: REVIEW_TOOLS,
   // Added to the implementer's tools for a rebase (see `toolsFor`).
   rebase: ['Bash(git rebase*)', 'Bash(git merge-base*)', 'Bash(git add*)', 'Bash(git status*)'],

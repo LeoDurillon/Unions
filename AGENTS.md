@@ -57,6 +57,15 @@ behavior; this file covers how to work in the repo.
     (badge "suggested", Keep button); keeping or editing one makes it the user's (`author: 'user'`), and a new
     successful run replaces only the agent's untouched drafts. Nothing is sent: the drafts go out with the usual
     send. Its prompt and model are the `review_comments` agent in Agent settings; `final_review` is unrelated.
+  - Grouping by spec: "Group by spec" on either review page (`group-by-spec-dialog.tsx`) reads a specification
+    (`routes/spec-sources.ts`: the PR description without Union's links, the ticket's text, a GitHub issue, any
+    Notion page the integration can read), lets the user edit it, and queues a `review_groupings` row
+    (`routes/review-groupings.ts`, `grouping-targets.ts`; `@union/core` `review-groupings.ts`). The worker's
+    `ReviewGroupingRunner` (`review-grouping.ts`, same slots and checkout as the agent review, PR containers
+    `union-g<id>`) runs the `review_groups` agent; `review-grouping-result.ts` keeps only changed files, puts the ones
+    left out under "not in the spec" and empty groups under "missing". Only the newest grouping is kept; it is
+    outdated when the review's head commit moved. The file panel's "By spec" toggle (`spec-groups.tsx`, independent
+    of List/Tree) shows the files under their groups.
   - Previews: project settings → Preview (`routes/preview-settings.ts`, `config.preview`: compose file, service,
     port, plain variables) and the ticket Overview's Preview section (`preview-section.tsx`, `routes/preview.ts`,
     state in the `previews` table). Start, stop and logs are commands; the worker owns Docker.

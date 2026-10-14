@@ -51,7 +51,7 @@ async function reviewChange(
   signal: AbortSignal,
 ): Promise<AgentReviewOutcome> {
   const { db, runtime } = deps;
-  const target = await openTarget(deps, review);
+  const target = await openTarget(deps, review, agentReviewContainer(review.id));
   try {
     if (signal.aborted) {
       return { status: 'cancelled' };

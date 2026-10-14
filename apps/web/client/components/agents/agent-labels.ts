@@ -35,6 +35,11 @@ export const AGENT_LABELS: Record<AgentId, { title: string; description: string 
     description:
       'Leaves line comments on a change when you click "Review with agent" in a review. They arrive as drafts you keep, edit or delete before sending.',
   },
+  review_groups: {
+    title: 'Group by spec',
+    description:
+      "Groups a review's changed files by the parts of a specification they implement, on request from the review page.",
+  },
   pr_description: {
     title: 'PR description',
     description:

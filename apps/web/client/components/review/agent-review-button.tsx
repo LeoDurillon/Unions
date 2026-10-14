@@ -4,6 +4,7 @@ import type { AgentReviewView } from '../../../src/api-types';
 import type { ReviewTarget } from '../../lib/review-target';
 import { isActive, useAgentReview } from '../../lib/use-agent-review';
 import { Button, ErrorText } from '../ui';
+import { GroupBySpecButton } from './group-by-spec-button';
 
 /** What the last run left: its error, or how many suggestions it added. */
 function LastRun({ review }: { review: AgentReviewView | null | undefined }): ReactElement | null {
@@ -64,5 +65,21 @@ export function AgentReviewButton({ target }: { target: ReviewTarget }): ReactEl
         {latest?.status === 'succeeded' ? 'Review again with agent' : 'Review with agent'}
       </Button>
     </div>
+  );
+}
+
+/** The agent's two helpers on the review page: grouping the change by spec, and reviewing it. */
+export function AgentButtons({
+  target,
+  hasPullRequest,
+}: {
+  target: ReviewTarget;
+  hasPullRequest: boolean;
+}): ReactElement {
+  return (
+    <>
+      <GroupBySpecButton target={target} hasPullRequest={hasPullRequest} />
+      <AgentReviewButton target={target} />
+    </>
   );
 }

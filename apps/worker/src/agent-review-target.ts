@@ -3,7 +3,6 @@ import {
   getTicket,
   schema,
   ticketBase,
-  type AgentReview,
   type ContainerRuntime,
   type Db,
 } from '@union/core';
@@ -31,6 +30,8 @@ export type ReviewTarget = {
   /** The commit the drafts are written on: the diff the user reviews. */
   headSha: string;
   patchOf: (path: string) => string | undefined;
+  /** Every changed file's path, as the review page lists them. */
+  paths: string[];
   /** What is reviewed, for the prompt. */
   about: string;
   log: (event: unknown) => void;
@@ -77,6 +78,7 @@ async function ticketTarget(deps: TargetDeps, ticketId: number): Promise<ReviewT
     base,
     headSha: snapshot.headSha,
     patchOf: patches(files),
+    paths: files.map((file) => file.path),
     about: `The ticket's branch \`${ticket.branch}\`. The ticket:\n\n# ${ticket.title}\n\n${ticket.body}`,
     log: (event) => {
       emitEvent(db, { type: 'agent_event', ticketId, payload: event });
@@ -101,8 +103,8 @@ export function agentReviewContainer(id: number): TicketContainer {
 /** A throwaway container with the pull request checked out at the commit its files were read at. */
 async function pullRequestTarget(
   deps: TargetDeps,
-  agentReview: AgentReview,
   reviewId: number,
+  names: TicketContainer,
 ): Promise<ReviewTarget> {
   const { db, runtime, config } = deps;
   const review = db
@@ -114,7 +116,6 @@ async function pullRequestTarget(
     throw new Error("Open the pull request's review first: its files are not read yet");
   }
   const project = loadProject(db, review.projectId);
-  const names = agentReviewContainer(agentReview.id);
   const close = (): Promise<void> =>
     runtime.remove(names.name, { home: names.homeVolume, workspace: names.workspaceVolume });
   try {
@@ -138,6 +139,7 @@ async function pullRequestTarget(
     base: `origin/${review.baseBranch}`,
     headSha: review.headSha,
     patchOf: patches(review.files),
+    paths: review.files.map((file) => file.path),
     about: `Pull request #${review.prNumber} by ${review.author}, from \`${review.headBranch}\` into \`${review.baseBranch}\`: ${review.title}`,
     log: () => {
       // A pull request review has no log view.
@@ -146,13 +148,23 @@ async function pullRequestTarget(
   };
 }
 
-/** Checks the change out for the agent: the ticket's branch, or the pull request. */
-export function openTarget(deps: TargetDeps, review: AgentReview): Promise<ReviewTarget> {
-  if (review.ticketId !== null) {
-    return ticketTarget(deps, review.ticketId);
+/** A run on a review's change: a ticket's, or a pull request's (`reviewId`), never both. */
+export type ReviewRun = { id: number; ticketId: number | null; reviewId: number | null };
+
+/**
+ * Checks the change out for the agent: the ticket's branch, or the pull request in a throwaway
+ * container named `names` (each kind of run has its own names, ids of different tables collide).
+ */
+export function openTarget(
+  deps: TargetDeps,
+  run: ReviewRun,
+  names: TicketContainer,
+): Promise<ReviewTarget> {
+  if (run.ticketId !== null) {
+    return ticketTarget(deps, run.ticketId);
   }
-  if (review.reviewId === null) {
-    throw new Error(`Agent review ${review.id} has no ticket and no pull request`);
+  if (run.reviewId === null) {
+    throw new Error(`Run ${run.id} has no ticket and no pull request`);
   }
-  return pullRequestTarget(deps, review, review.reviewId);
+  return pullRequestTarget(deps, run.reviewId, names);
 }

@@ -1,6 +1,6 @@
 # Plan: group a review's changes by spec
 
-Status: planned, not started. Decisions taken (end of file).
+Status: steps 1 to 3 built (branch `review-spec-groups`); step 4 (hunks) later. Decisions taken (end of file).
 
 ## Idea
 

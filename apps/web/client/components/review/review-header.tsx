@@ -4,7 +4,7 @@ import type { DiffResponse } from '../../../src/api-types';
 import type { ReviewCopy, ReviewTarget } from '../../lib/review-target';
 import type { useCommentMutations } from '../../lib/use-review';
 import { Button } from '../ui';
-import { AgentReviewButton } from './agent-review-button';
+import { AgentButtons } from './agent-review-button';
 import type { DiffView } from './file-diff';
 import { ImportComments } from './import-comments';
 import { SendReview } from './send-review';
@@ -17,6 +17,11 @@ const SHORT_SHA = 7;
 /** The server says why sending is refused (a merged pull request, a ticket not waiting on you). */
 function withRefusal(copy: ReviewCopy, diff: DiffResponse | undefined): ReviewCopy {
   return { ...copy, blocked: diff?.sendRefusal ?? copy.blocked };
+}
+
+/** A PR description can be read: the pull request under review, or the ticket's linked one. */
+function hasPullRequest(target: ReviewTarget, diff: DiffResponse | undefined): boolean {
+  return target.kind === 'pull-request' || Boolean(diff?.pullRequest);
 }
 
 /** Back, what is reviewed and at which commit, the GitHub import (tickets), the layout switch and Send. */
@@ -62,7 +67,7 @@ export function ReviewHeader({
       {target.kind === 'ticket' && diff?.pullRequest ? (
         <ImportComments ticketId={target.ticketId} pullRequest={diff.pullRequest} />
       ) : null}
-      <AgentReviewButton target={target} />
+      <AgentButtons target={target} hasPullRequest={hasPullRequest(target, diff)} />
       <ViewToggle view={view} onChange={onView} />
       <SendReview
         copy={withRefusal(copy, diff)}

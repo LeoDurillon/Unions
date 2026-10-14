@@ -1,4 +1,4 @@
-import { projectGitHubAuth, schema, type Db } from '@union/core';
+import { projectGitHubAuth, schema, type Db, type NotionApi } from '@union/core';
 import { and, eq, isNotNull } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
 
@@ -63,9 +63,9 @@ async function list(db: Db, github: OnboardingGitHub, c: Context): Promise<Respo
  * `/api/projects/:projectId/pull-requests`: the repository's pull requests, read from GitHub, and
  * under `/reviews` the ones the user put under review.
  */
-export function pullRequestRoutes(db: Db, github: OnboardingGitHub): Hono {
+export function pullRequestRoutes(db: Db, github: OnboardingGitHub, notion: NotionApi): Hono {
   const routes = new Hono();
   routes.get('/', (c) => list(db, github, c));
-  routes.route('/reviews', currentReviewRoutes(db, github));
+  routes.route('/reviews', currentReviewRoutes(db, github, notion));
   return routes;
 }

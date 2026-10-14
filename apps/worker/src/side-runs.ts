@@ -11,18 +11,20 @@ import { EventDispatcher } from './event-dispatcher';
 import type { GitHubApi } from './github/api';
 import { InvestigationRunner } from './investigate';
 import { PrDescriptionRunner } from './pr-description-run';
-import { previewSettings } from './preview/compose';
-import { PreviewManager } from './preview/manager';
+import { createPreviewManager, type PreviewManager } from './preview/manager';
 import type { ProvisionConfig } from './provision';
+import { ReviewGroupingRunner } from './review-grouping';
 import type { RunSlots } from './slots';
 
 /**
- * The work outside the ticket pipeline: investigations, agent reviews and PR description rewrites
+ * The work outside the ticket pipeline: investigations, agent reviews, groupings by spec and PR
+ * description rewrites
  * (taking their slots from it), the event rules, and stopping previews nobody visits.
  */
 export type SideRuns = {
   investigations: InvestigationRunner;
   agentReviews: AgentReviewRunner;
+  reviewGroupings: ReviewGroupingRunner;
   prDescriptions: PrDescriptionRunner;
   previews: PreviewManager;
   tick: () => void;
@@ -41,22 +43,26 @@ export async function startSideRuns(deps: {
   const investigations = new InvestigationRunner(deps);
   const agentReviews = new AgentReviewRunner(deps);
   const prDescriptions = new PrDescriptionRunner(deps);
-  const previews = new PreviewManager({ ...deps, settings: previewSettings() });
+  const previews = createPreviewManager(deps);
+  const reviewGroupings = new ReviewGroupingRunner(deps);
   const events = new EventDispatcher(deps.db, new FetchNotionApi());
   const idlePreviews = previews.idleWatcher();
   await investigations.recover();
   await agentReviews.recover();
+  await reviewGroupings.recover();
   prDescriptions.recover();
   previews.recover();
   backfillNotionPages(deps.db);
   return {
     investigations,
     agentReviews,
+    reviewGroupings,
     prDescriptions,
     previews,
     tick: () => {
       investigations.tick();
       agentReviews.tick();
+      reviewGroupings.tick();
       prDescriptions.tick();
       events.tick();
       idlePreviews.tick();
@@ -64,12 +70,14 @@ export async function startSideRuns(deps: {
     stop: () => {
       investigations.stop();
       agentReviews.stop();
+      reviewGroupings.stop();
       prDescriptions.stop();
     },
     idle: async () => {
       await Promise.all([
         investigations.idle(),
         agentReviews.idle(),
+        reviewGroupings.idle(),
         prDescriptions.idle(),
         previews.idle(),
         events.idle(),

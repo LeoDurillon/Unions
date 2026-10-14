@@ -6,4 +6,5 @@ export * from './schema-pr-descriptions';
 export * from './schema-previews';
 export * from './schema-project-files';
 export * from './schema-refused-commits';
+export * from './schema-review-groupings';
 export * from './schema-reviews';

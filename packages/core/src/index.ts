@@ -22,6 +22,7 @@ export * from './preview-compose';
 export * from './preview-config';
 export * from './preview-secrets';
 export * from './project-files';
+export * from './review-groupings';
 export * from './notion-markdown';
 export {
   composeProblems,

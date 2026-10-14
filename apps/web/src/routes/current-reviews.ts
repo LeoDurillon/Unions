@@ -1,9 +1,10 @@
-import { schema, type Db } from '@union/core';
+import { schema, type Db, type NotionApi } from '@union/core';
 import { and, desc, eq, getTableColumns } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
 
 import type { OnboardingGitHub } from '../github-onboarding';
 import { CONFLICT, CREATED, fail, NOT_FOUND, readObject, requireId, requireText } from '../http';
+import { pullRequestGroupingRoutes } from './grouping-targets';
 import { prReviewRoutes } from './pr-review';
 
 /** Everything but the files, which only the review page needs. */
@@ -64,7 +65,7 @@ function remove(db: Db, c: Context): Response {
 }
 
 /** `/api/projects/:projectId/pull-requests/reviews`: pull requests the user reviews without a ticket. */
-export function currentReviewRoutes(db: Db, github: OnboardingGitHub): Hono {
+export function currentReviewRoutes(db: Db, github: OnboardingGitHub, notion: NotionApi): Hono {
   const routes = new Hono();
   routes.get('/', (c) =>
     c.json(
@@ -78,6 +79,7 @@ export function currentReviewRoutes(db: Db, github: OnboardingGitHub): Hono {
   );
   routes.post('/', (c) => add(db, c));
   routes.delete('/:number', (c) => remove(db, c));
+  routes.route('/:number/groupings', pullRequestGroupingRoutes(db, github, notion));
   routes.route('/:number', prReviewRoutes(db, github));
   return routes;
 }

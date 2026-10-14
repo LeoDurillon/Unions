@@ -79,7 +79,13 @@ function DiffBody({
   return (
     <div className="flex min-h-0 flex-1">
       <aside className="w-80 shrink-0 overflow-y-auto border-r border-zinc-200 p-2 dark:border-zinc-800">
-        <FileList files={files} comments={comments} selected={fileId} onSelect={setPicked} />
+        <FileList
+          files={files}
+          comments={comments}
+          selected={fileId}
+          onSelect={setPicked}
+          target={target}
+        />
       </aside>
       <main className="min-w-0 flex-1 overflow-y-auto p-4">
         {banner}
