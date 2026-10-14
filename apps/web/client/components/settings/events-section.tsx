@@ -8,6 +8,7 @@ import { eventRulesApi, type RuleDraft } from '../../lib/event-rules-api';
 import { Button, ErrorText } from '../ui';
 import { NEW_RULE, RuleEditor } from './rule-editor';
 import { DeliveryList, RuleRow } from './rule-list';
+import { SetUpFirst } from './set-up-first';
 
 function NotionColumns({
   projectId,
@@ -170,22 +171,22 @@ function Rules({
   );
 }
 
+/** The data source must be connected: the rules write to the pages tickets were imported from. */
+function useRules(project: PublicProject): ReturnType<typeof useQuery<EventRulesResponse>> {
+  return useQuery({
+    queryKey: ['event-rules', project.id],
+    queryFn: () => eventRulesApi.list(project.id),
+  });
+}
+
 /**
  * Event rules: when something happens to a ticket imported from Notion, set a property of its
  * Notion page. They apply from their creation on, never to what happened before.
  */
-export function EventsSection({ project }: { project: PublicProject }): ReactElement {
-  const rules = useQuery({
-    queryKey: ['event-rules', project.id],
-    queryFn: () => eventRulesApi.list(project.id),
-  });
+export function EventRulesSection({ project }: { project: PublicProject }): ReactElement {
+  const rules = useRules(project);
   if (rules.data && !rules.data.hasNotion) {
-    return (
-      <p className="text-sm text-zinc-500">
-        Connect the project to Notion first (Notion tab): the rules update the Notion pages tickets
-        were imported from.
-      </p>
-    );
+    return <SetUpFirst section="notion" what="Connect the project to Notion" />;
   }
   return (
     <section className="space-y-4">
@@ -195,6 +196,17 @@ export function EventsSection({ project }: { project: PublicProject }): ReactEle
       </p>
       <ErrorText error={rules.error} />
       <Rules projectId={project.id} data={rules.data} />
+    </section>
+  );
+}
+
+/** What the rules did lately: each write to Notion, and why one failed. */
+export function EventActivitySection({ project }: { project: PublicProject }): ReactElement {
+  return (
+    <section className="space-y-4">
+      <p className="text-sm text-zinc-500">
+        The latest updates the event rules made to Notion pages, newest first.
+      </p>
       <DeliveryList projectId={project.id} />
     </section>
   );

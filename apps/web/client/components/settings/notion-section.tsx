@@ -8,9 +8,6 @@ import { TokenInput } from '../onboarding/connect-step';
 import { NotionHelp } from '../onboarding/notion-step';
 import { Badge, Button, ErrorText, Field, inputClass } from '../ui';
 
-// Its own tab, beside this one: the event rules write to the Notion pages.
-export { EventsSection } from './events-section';
-
 /** Verifies before saving, so a typo never replaces a working connection. */
 async function connect(project: PublicProject, token: string, dataSource: string): Promise<string> {
   const verified = await api.notion.verify(token, dataSource);

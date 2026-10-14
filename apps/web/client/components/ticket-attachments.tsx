@@ -9,6 +9,7 @@ import { useState, type ReactElement } from 'react';
 
 import { attachmentsApi, attachmentUrl } from '../lib/attachments-api';
 import { ATTACHMENTS_HINT, FilePicker, FileRow } from './attachments';
+import { DetailRow } from './detail-row';
 import { ErrorText } from './ui';
 
 type Change = Partial<Pick<Attachment, 'note' | 'allowInRepo'>>;
@@ -41,6 +42,48 @@ function useAttachmentMutations(ticketId: number): {
   return { upload, update, remove };
 }
 
+type Mutations = ReturnType<typeof useAttachmentMutations>;
+
+function FileList({
+  attachments,
+  disabled,
+  update,
+  remove,
+}: {
+  attachments: Attachment[];
+  disabled: boolean;
+  update: Mutations['update'];
+  remove: Mutations['remove'];
+}): ReactElement {
+  if (attachments.length === 0) {
+    return <span className="mr-2 text-zinc-500">None.</span>;
+  }
+  return (
+    <ul className="space-y-2">
+      {attachments.map((attachment) => (
+        <FileRow
+          key={attachment.id}
+          name={attachment.name}
+          href={attachmentUrl(attachment)}
+          size={attachment.size}
+          note={attachment.note}
+          allowInRepo={attachment.allowInRepo}
+          disabled={disabled}
+          onNote={(note) => {
+            update.mutate({ attachment, change: { note } });
+          }}
+          onAllow={(allowInRepo) => {
+            update.mutate({ attachment, change: { allowInRepo } });
+          }}
+          onRemove={() => {
+            remove.mutate(attachment);
+          }}
+        />
+      ))}
+    </ul>
+  );
+}
+
 /** The ticket's files, in its Overview tab: added, described and removed at any time. */
 export function TicketAttachments({ ticketId }: { ticketId: number }): ReactElement {
   const query = useQuery({
@@ -52,51 +95,29 @@ export function TicketAttachments({ ticketId }: { ticketId: number }): ReactElem
   const attachments = query.data ?? [];
   const busy = upload.isPending || update.isPending || remove.isPending;
   return (
-    <section className="space-y-2" aria-label="Files">
-      <h3 className="text-sm font-medium">Files</h3>
-      {attachments.length > 0 ? (
-        <ul className="space-y-2">
-          {attachments.map((attachment) => (
-            <FileRow
-              key={attachment.id}
-              name={attachment.name}
-              href={attachmentUrl(attachment)}
-              size={attachment.size}
-              note={attachment.note}
-              allowInRepo={attachment.allowInRepo}
-              disabled={busy}
-              onNote={(note) => {
-                update.mutate({ attachment, change: { note } });
-              }}
-              onAllow={(allowInRepo) => {
-                update.mutate({ attachment, change: { allowInRepo } });
-              }}
-              onRemove={() => {
-                remove.mutate(attachment);
-              }}
-            />
-          ))}
-        </ul>
-      ) : null}
-      <FilePicker
-        label={upload.isPending ? 'Uploading…' : 'Add files'}
-        disabled={upload.isPending}
-        onFiles={(files, refused) => {
-          setProblems(refused);
-          if (files.length > 0) {
-            upload.mutate(files);
-          }
-        }}
-      />
-      {problems.map((problem) => (
-        <p key={problem} className="text-sm text-red-600 dark:text-red-400">
-          {problem}
-        </p>
-      ))}
-      <ErrorText error={query.error ?? upload.error ?? update.error ?? remove.error} />
-      <p className="text-xs text-zinc-500">
-        {ATTACHMENTS_HINT} Files added or changed here reach the agents at the next step.
-      </p>
-    </section>
+    <DetailRow
+      label="Files"
+      hint={`${ATTACHMENTS_HINT} Files added or changed here reach the agents at the next step.`}
+    >
+      <div className="space-y-2" aria-label="Files">
+        <FileList attachments={attachments} disabled={busy} update={update} remove={remove} />
+        <FilePicker
+          label={upload.isPending ? 'Uploading…' : 'Add files'}
+          disabled={upload.isPending}
+          onFiles={(files, refused) => {
+            setProblems(refused);
+            if (files.length > 0) {
+              upload.mutate(files);
+            }
+          }}
+        />
+        {problems.map((problem) => (
+          <p key={problem} className="text-sm text-red-600 dark:text-red-400">
+            {problem}
+          </p>
+        ))}
+        <ErrorText error={query.error ?? upload.error ?? update.error ?? remove.error} />
+      </div>
+    </DetailRow>
   );
 }

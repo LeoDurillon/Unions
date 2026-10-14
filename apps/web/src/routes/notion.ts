@@ -1,4 +1,12 @@
-import { NotionError, parseNotionId, schema, type Db, type NotionApi } from '@union/core';
+import {
+  mentionedUrls,
+  NotionError,
+  notionMarkdown,
+  parseNotionId,
+  schema,
+  type Db,
+  type NotionApi,
+} from '@union/core';
 import { eq } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
 import { HTTPException } from 'hono/http-exception';
@@ -65,6 +73,31 @@ function notionOf(db: Db, projectId: number): { token: string; dataSourceId: str
   return { token: notionToken, dataSourceId: notionDataSourceId };
 }
 
+const MAX_TITLED_MENTIONS = 10;
+
+/** The titles of the pages a markdown mentions (a few, best effort: a link without one still works). */
+async function mentionTitles(
+  notion: NotionApi,
+  token: string,
+  markdown: string,
+): Promise<Record<string, string>> {
+  const found = await Promise.all(
+    mentionedUrls(markdown)
+      .slice(0, MAX_TITLED_MENTIONS)
+      .map(async (url) => {
+        const id = parseNotionId(url);
+        const title = id
+          ? await notion.page(token, id).then(
+              (page) => page.title,
+              () => '',
+            )
+          : '';
+        return [url, title] as const;
+      }),
+  );
+  return Object.fromEntries(found.filter(([, title]) => title !== ''));
+}
+
 /** Fetches a page of the project's data source as a ticket preview; other pages are refused. */
 async function importPage(db: Db, notion: NotionApi, c: Context): Promise<Response> {
   const body = await readObject(c.req.raw);
@@ -75,9 +108,10 @@ async function importPage(db: Db, notion: NotionApi, c: Context): Promise<Respon
     throw fail(CONFLICT, "This page is not a row of the project's Notion data source");
   }
   const { markdown, truncated } = await guarded(() => notion.pageMarkdown(token, pageId));
+  const titles = await mentionTitles(notion, token, markdown);
   const result: NotionImport = {
     title: page.title || 'Untitled Notion page',
-    body: `${markdown.trim()}\n\n---\nImported from Notion: ${page.url}`,
+    body: `${notionMarkdown(markdown, titles).trim()}\n\n---\nImported from Notion: ${page.url}`,
     url: page.url,
     truncated,
     pageId: page.id,

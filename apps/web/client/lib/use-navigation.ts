@@ -1,7 +1,9 @@
 import { useState } from 'react';
 
+import { closeSettings } from './settings-sections';
+
 export type Page = 'board' | 'agents' | 'github-app';
-export type Overlay = 'wizard' | 'settings' | 'ticket' | null;
+export type Overlay = 'wizard' | 'ticket' | null;
 
 /** Which page is shown and which overlay is open; `show`/`goTo` return click handlers. */
 export function useNavigation(): {
@@ -16,7 +18,9 @@ export function useNavigation(): {
   const show = (next: Overlay) => (): void => {
     setOverlay(next);
   };
+  // The project settings page is the board's: going anywhere else (or back to the board) leaves it.
   const goTo = (next: Page) => (): void => {
+    closeSettings();
     setPage(next);
   };
   return { page, overlay, show, goTo, close: show(null) };

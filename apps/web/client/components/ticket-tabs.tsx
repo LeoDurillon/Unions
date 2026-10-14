@@ -5,11 +5,12 @@ import type { TicketDetail } from '../../src/api-types';
 import { currentStep, STEP_TITLES } from '../lib/labels';
 import { LogTab } from './log-tab';
 import { OverviewTab } from './overview-tab';
+import { PreviewTab } from './preview-tab';
 import { PullRequestTab } from './pull-request-tab';
 import { StepTab } from './step-tab';
 
-/** The panel's top tabs: the ticket, the agents' work, and its pull request. */
-export type Section = 'overview' | 'worker' | 'pull-request';
+/** The panel's top tabs: the ticket, its preview, the agents' work, and its pull request. */
+export type Section = 'overview' | 'preview' | 'worker' | 'pull-request';
 /** The Worker tab's own tabs: one per step, then the log. */
 export type WorkerTab = 'log' | Step;
 
@@ -25,6 +26,7 @@ function sectionsFor(detail: TicketDetail): TabEntry<Section>[] {
   const { prNumber } = detail.ticket;
   return [
     { id: 'overview', label: 'Overview', enabled: true },
+    { id: 'preview', label: 'Preview', enabled: true },
     { id: 'worker', label: 'Worker', enabled: true },
     { id: 'pull-request', label: prNumber === null ? 'PR' : `PR #${prNumber}`, enabled: true },
   ];
@@ -149,6 +151,7 @@ export function PanelBody({
   onWorkerTab,
   onOpenTicket,
   onRemoved,
+  onSection,
 }: {
   detail: TicketDetail;
   section: Section;
@@ -156,9 +159,22 @@ export function PanelBody({
   onWorkerTab: (tab: WorkerTab) => void;
   onOpenTicket: (id: number) => void;
   onRemoved: () => void;
+  onSection: (section: Section) => void;
 }): ReactElement {
   if (section === 'overview') {
-    return <OverviewTab detail={detail} onOpenTicket={onOpenTicket} onRemoved={onRemoved} />;
+    return (
+      <OverviewTab
+        detail={detail}
+        onOpenTicket={onOpenTicket}
+        onRemoved={onRemoved}
+        onOpenPreview={() => {
+          onSection('preview');
+        }}
+      />
+    );
+  }
+  if (section === 'preview') {
+    return <PreviewTab detail={detail} />;
   }
   if (section === 'pull-request') {
     return <PullRequestTab detail={detail} />;

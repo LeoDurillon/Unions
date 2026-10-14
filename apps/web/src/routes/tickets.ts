@@ -1,10 +1,8 @@
 import {
-  createTicket,
   getTicket,
   InvalidTransition,
   latestOutput,
   latestRefusal,
-  parseNotionId,
   saveOutput,
   schema,
   STEPS,
@@ -30,20 +28,12 @@ import {
   CREATED,
   fail,
   NOT_FOUND,
-  optionalText,
   readObject,
   requireId,
   requireText,
 } from '../http';
 import { reviewRoutes } from './review';
-import {
-  assertStartable,
-  changeParent,
-  childrenOf,
-  findTicket,
-  linkParent,
-  summarize,
-} from './ticket-links';
+import { assertStartable, changeParent, childrenOf, findTicket, summarize } from './ticket-links';
 import { linkPullRequest, unlinkPullRequest } from './ticket-pull-request';
 import { ticketSubroutes } from './ticket-subroutes';
 
@@ -78,37 +68,6 @@ function listTickets(db: Db, c: Context): Response {
   const filtered = projectId ? rows.filter((row) => row.projectId === Number(projectId)) : rows;
   const byId = new Map(rows.map((row) => [row.id, row]));
   return c.json(filtered.map((row) => summarize(row, (id) => byId.get(id))));
-}
-
-async function addTicket(db: Db, c: Context): Promise<Response> {
-  const body = await readObject(c.req.raw);
-  const projectId = Number(body.projectId);
-  const known = db
-    .select()
-    .from(schema.projects)
-    .all()
-    .some((row) => row.id === projectId);
-  if (!known) {
-    throw fail(BAD_REQUEST, 'Unknown project');
-  }
-  const parentId = typeof body.parentId === 'number' ? body.parentId : null;
-  // Checked first: a new ticket can only fail the link through its parent's project.
-  if (parentId !== null && findTicket(db)(parentId)?.projectId !== projectId) {
-    throw fail(BAD_REQUEST, 'The parent must be a ticket of the same project');
-  }
-  const notionPage = optionalText(body, 'notionPageId');
-  const notionPageId = notionPage === undefined ? null : parseNotionId(notionPage);
-  if (notionPage !== undefined && notionPageId === null) {
-    throw fail(BAD_REQUEST, 'That is not a Notion page ID');
-  }
-  const ticket = createTicket(db, {
-    projectId,
-    title: requireText(body, 'title'),
-    body: optionalText(body, 'body') ?? '',
-    ...(notionPageId ? { notionPageId } : {}),
-  });
-  const linked = parentId === null ? ticket : linkParent(db, ticket.id, parentId);
-  return c.json(summarize(linked, findTicket(db)), CREATED);
 }
 
 function ticketDetail(db: Db, c: Context): Response {
@@ -223,7 +182,6 @@ async function editOutput(db: Db, c: Context): Promise<Response> {
 export function ticketRoutes(db: Db, github: OnboardingGitHub): Hono {
   const routes = new Hono();
   routes.get('/', (c) => listTickets(db, c));
-  routes.post('/', (c) => addTicket(db, c));
   routes.get('/:id', (c) => ticketDetail(db, c));
   routes.post('/:id/commands', (c) => queueCommand(db, c));
   routes.put('/:id/steps/:step/output', (c) => editOutput(db, c));

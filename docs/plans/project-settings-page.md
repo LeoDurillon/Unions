@@ -1,6 +1,8 @@
 # Plan: project settings as a page
 
-Status: proposed, not started. Two decisions open (end of file).
+Status: steps 1 to 4 built (the deep link from a ticket's Preview section only); step 5 (one way to save) and
+step 6 (a shared "Union settings" area) not started. The layout below is as built, with the sections added since
+(Files, compose additions, profiles, agent services).
 
 ## Why
 
@@ -32,6 +34,7 @@ A page like Agent settings: a side menu on the left, a readable column on the ri
 
 - **Project**
   - General: GitHub access, base branch
+  - Files: the project files put in every workspace
 - **Agents**
   - Instructions
   - Checks: install command, check command, iteration limit
@@ -39,12 +42,13 @@ A page like Agent settings: a side menu on the left, a readable column on the ri
   - Pull requests: draft PR toggle
   - Review: ignored files
 - **Previews**
-  - Services: compose file, services to open, host prefixes
-  - Variables: plain variables with templates, secrets, env file
-  - End-to-end tests (preview phase 3)
+  - Services: compose file, compose additions, profiles, services to open, services for the agent
+  - Variables: plain variables with templates, secrets, env file (needs Services first)
+  - End-to-end tests (needs Services first)
 - **Notion**
   - Connection
-  - Event rules: the rules, and recent activity
+  - Event rules (needs the connection first)
+  - Rule activity: the recent writes to Notion
 - **Danger zone**, at the bottom, set apart
 
 ## Steps
@@ -66,8 +70,17 @@ A page like Agent settings: a side menu on the left, a readable column on the ri
 Steps 1 to 3 are mostly moving components, with no backend change. Step 5 touches every section and is the only
 one with design decisions.
 
+## As built
+
+- `?settings=<section>` (`lib/settings-sections.ts`, over `lib/url-state.ts`, which `?ticket=` uses too):
+  `openSettings(section)` from anywhere opens the page and closes an open ticket; going to another page or project
+  closes it. `components/main-area.tsx` shows `settings/settings-page.tsx` instead of the board.
+- Two registries (`project-section-body.tsx`, `integration-section-body.tsx`) replace the pane registry and its
+  re-exports. The three preview pages share `preview-form.tsx`: each starts from the saved settings and saves the
+  whole configuration, so the other pages' fields go back unchanged.
+- Not done from step 4: links from a failed rule delivery (Log tab) and from the setup wizard's last step.
+
 ## Decisions open
 
-- **When**: the Preview sections live on the `preview-container-feature` branch. Do it after that branch merges, or
-  on it, so the same files do not move twice.
-- **Step 6** (a shared "Union settings" area): now, or later.
+- **Step 5** (one Save per page, unsaved-changes warning): when.
+- **Step 6** (a shared "Union settings" area): decided later.

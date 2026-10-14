@@ -3,11 +3,9 @@ import type { ReactElement } from 'react';
 import type { TicketDetail } from '../../src/api-types';
 import { isBlocked, STEP_TITLES } from '../lib/labels';
 import { useTicketCommands } from '../lib/use-ticket-commands';
-import { Markdown } from './markdown';
-import { PreviewSection } from './preview-section';
 import { RemoveTicket } from './remove-ticket';
-import { TicketAttachments } from './ticket-attachments';
-import { TicketLinks } from './ticket-links';
+import { TicketDescription } from './ticket-description';
+import { TicketDetails } from './ticket-details';
 import { Badge, Button, ErrorText } from './ui';
 
 const MS_PER_SECOND = 1000;
@@ -54,60 +52,17 @@ function RunTable({ runs }: { runs: TicketDetail['runs'] }): ReactElement | null
   );
 }
 
-function IssueLine({ detail }: { detail: TicketDetail }): ReactElement {
-  const { ticket, project } = detail;
-  const issueUrl =
-    ticket.issueNumber === null
-      ? null
-      : `https://github.com/${project.owner}/${project.repo}/issues/${ticket.issueNumber}`;
-  return (
-    <p className="text-sm text-zinc-500">
-      {project.owner}/{project.repo} ·{' '}
-      {issueUrl ? (
-        <a
-          className="text-indigo-600 underline dark:text-indigo-400"
-          href={issueUrl}
-          target="_blank"
-          rel="noreferrer"
-        >
-          issue #{ticket.issueNumber}
-        </a>
-      ) : (
-        'GitHub issue not created yet'
-      )}
-      {ticket.notionPageId ? (
-        <>
-          {' · '}
-          <a
-            className="text-indigo-600 underline dark:text-indigo-400"
-            href={`https://www.notion.so/${ticket.notionPageId.replaceAll('-', '')}`}
-            target="_blank"
-            rel="noreferrer"
-          >
-            Notion page
-          </a>
-        </>
-      ) : null}
-    </p>
-  );
-}
-
-/** Where a revision can be asked from the ticket (e2e failures, like review comments). */
-function canRevise(phase: TicketDetail['ticket']['phase']): boolean {
-  return (
-    phase.kind === 'done' || (phase.kind === 'awaiting_approval' && phase.step === 'final_review')
-  );
-}
-
 export function OverviewTab({
   detail,
   onOpenTicket,
   onRemoved,
+  onOpenPreview,
 }: {
   detail: TicketDetail;
   onOpenTicket: (id: number) => void;
   /** After a cancelled ticket is removed: the panel closes. */
   onRemoved: () => void;
+  onOpenPreview: () => void;
 }): ReactElement {
   const { ticket, runs } = detail;
   const blocked = isBlocked(ticket);
@@ -117,15 +72,8 @@ export function OverviewTab({
 
   return (
     <div className="space-y-4">
-      <IssueLine detail={detail} />
-      {ticket.body ? (
-        <Markdown>{ticket.body}</Markdown>
-      ) : (
-        <p className="text-sm text-zinc-500">No description.</p>
-      )}
-      <TicketLinks detail={detail} onOpen={onOpenTicket} />
-      <TicketAttachments ticketId={ticket.id} />
-      <PreviewSection ticketId={ticket.id} canRevise={canRevise(ticket.phase)} />
+      <TicketDetails detail={detail} onOpenTicket={onOpenTicket} onOpenPreview={onOpenPreview} />
+      <TicketDescription ticket={ticket} />
       <ErrorText error={command.error} />
       <div className="flex gap-2">
         {kind === 'backlog' ? (

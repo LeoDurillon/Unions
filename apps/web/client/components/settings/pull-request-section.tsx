@@ -5,10 +5,6 @@ import type { PublicProject } from '../../../src/api-types';
 import { api } from '../../lib/api';
 import { ErrorText } from '../ui';
 
-// The settings panes' module is at its import limit: the Preview pane comes through here.
-export { FilesSection } from './files-section';
-export { PreviewSettingsSection } from './preview-settings-section';
-
 /** Whether the worker opens a draft PR after the implementation, or the user links one by hand. */
 export function PullRequestSection({ project }: { project: PublicProject }): ReactElement {
   const queryClient = useQueryClient();

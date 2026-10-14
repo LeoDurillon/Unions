@@ -117,6 +117,7 @@ export function TicketPanel({
             onWorkerTab={setWorkerTab}
             onOpenTicket={onOpenTicket}
             onRemoved={onClose}
+            onSection={setSection}
           />
         ) : null}
       </div>

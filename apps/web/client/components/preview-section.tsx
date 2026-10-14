@@ -5,11 +5,12 @@ import { useState, type ReactElement } from 'react';
 import type { PreviewView } from '../../src/api-types';
 import type { Tone } from '../lib/labels';
 import { previewApi } from '../lib/preview-api';
+import { openSettings } from '../lib/settings-sections';
 import { PreviewComposeDialog } from './preview-compose-dialog';
 import { PreviewE2e } from './preview-e2e';
 import { Badge, Button, ErrorText } from './ui';
 
-const STATUS: Record<Preview['status'], { label: string; tone: Tone }> = {
+export const PREVIEW_STATUS: Record<Preview['status'], { label: string; tone: Tone }> = {
   starting: { label: 'Starting…', tone: 'blue' },
   running: { label: 'Running', tone: 'green' },
   stopping: { label: 'Stopping…', tone: 'blue' },
@@ -121,6 +122,54 @@ function LogTail({
   );
 }
 
+/** Opens the project's preview settings (closing the ticket). */
+function SettingsLink({
+  className,
+  children,
+}: {
+  className: string;
+  children: string;
+}): ReactElement {
+  return (
+    <button
+      type="button"
+      className={className}
+      onClick={() => {
+        openSettings('preview-services');
+      }}
+    >
+      {children}
+    </button>
+  );
+}
+
+function Heading({ preview }: { preview: Preview | null }): ReactElement {
+  return (
+    <h3 className="flex items-center gap-2 text-sm font-semibold">
+      Preview
+      {preview ? (
+        <Badge tone={PREVIEW_STATUS[preview.status].tone}>
+          {PREVIEW_STATUS[preview.status].label}
+        </Badge>
+      ) : null}
+      <SettingsLink className="ml-auto text-xs font-normal text-zinc-500 hover:underline">
+        Settings
+      </SettingsLink>
+    </h3>
+  );
+}
+
+function NotSetUp(): ReactElement {
+  return (
+    <p className="text-xs text-zinc-500">
+      Previews are not set up for this project.{' '}
+      <SettingsLink className="text-indigo-600 hover:underline dark:text-indigo-400">
+        Set up previews
+      </SettingsLink>
+    </p>
+  );
+}
+
 /**
  * The ticket's preview: its compose environment run from the workspace, opened through the proxy.
  * Start and stop are commands the worker runs; the panel follows the live events.
@@ -144,8 +193,11 @@ export function PreviewSection({
   });
   const [composeOpen, setComposeOpen] = useState(false);
   const view = query.data;
-  if (!view?.configured) {
+  if (!view) {
     return null;
+  }
+  if (!view.configured) {
+    return <NotSetUp />;
   }
   const { preview } = view;
   const act: Act = (call) => {
@@ -153,12 +205,7 @@ export function PreviewSection({
   };
   return (
     <section className="space-y-2 rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
-      <h3 className="flex items-center gap-2 text-sm font-semibold">
-        Preview
-        {preview ? (
-          <Badge tone={STATUS[preview.status].tone}>{STATUS[preview.status].label}</Badge>
-        ) : null}
-      </h3>
+      <Heading preview={preview} />
       <Controls
         view={view}
         act={act}

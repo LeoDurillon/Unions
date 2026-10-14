@@ -85,17 +85,22 @@ async function store(ticketId: number, name: string, bytes: Uint8Array): Promise
   await rename(temporary, path.join(dir, name));
 }
 
-async function upload(db: Db, c: Context): Promise<Response> {
-  const ticketId = ticketIdOf(db, c);
-  const form = await c.req.parseBody();
-  const { file } = form;
-  if (!(file instanceof File)) {
-    throw fail(BAD_REQUEST, 'Expected a "file" field');
-  }
-  checkSize(db, ticketId, file.size);
+/** A new file of the ticket: checked against the limits, stored, recorded. */
+export async function addAttachment(
+  db: Db,
+  ticketId: number,
+  file: {
+    name: string;
+    bytes: Uint8Array;
+    contentType: string;
+    note?: string;
+    allowInRepo?: boolean;
+  },
+): Promise<Attachment> {
+  const { bytes } = file;
+  checkSize(db, ticketId, bytes.byteLength);
   const taken = new Set(listAttachments(db, ticketId).map((row) => row.name));
   const name = uniqueFileName(safeFileName(file.name), taken);
-  const bytes = new Uint8Array(await file.arrayBuffer());
   await store(ticketId, name, bytes);
   try {
     const attachment = db
@@ -104,19 +109,37 @@ async function upload(db: Db, c: Context): Promise<Response> {
         ticketId,
         name,
         size: bytes.byteLength,
-        contentType: file.type === '' ? 'application/octet-stream' : file.type,
-        note: noteOf(form.note),
-        allowInRepo: form.allowInRepo === 'true',
+        contentType: file.contentType === '' ? 'application/octet-stream' : file.contentType,
+        note: file.note ?? '',
+        allowInRepo: file.allowInRepo ?? false,
         blobId: gitBlobId(bytes),
       })
       .returning()
       .get();
     emitEvent(db, { type: 'attachment_added', ticketId, payload: { id: attachment.id, name } });
-    return c.json(attachment, CREATED);
+    return attachment;
   } catch (error) {
     await rm(path.join(ticketAttachmentsDir(ticketId), name), { force: true });
     throw error;
   }
+}
+
+async function upload(db: Db, c: Context): Promise<Response> {
+  const ticketId = ticketIdOf(db, c);
+  const form = await c.req.parseBody();
+  const { file } = form;
+  if (!(file instanceof File)) {
+    throw fail(BAD_REQUEST, 'Expected a "file" field');
+  }
+  checkSize(db, ticketId, file.size);
+  const attachment = await addAttachment(db, ticketId, {
+    name: file.name,
+    bytes: new Uint8Array(await file.arrayBuffer()),
+    contentType: file.type,
+    note: noteOf(form.note),
+    allowInRepo: form.allowInRepo === 'true',
+  });
+  return c.json(attachment, CREATED);
 }
 
 async function update(db: Db, c: Context): Promise<Response> {
@@ -158,10 +181,23 @@ async function remove(db: Db, c: Context): Promise<Response> {
   return c.body(null, NO_CONTENT);
 }
 
-/** Always a download, never rendered: the file is whatever the user uploaded. */
+/** Shown in the page (`?inline`) only for raster images: nothing that can run script. */
+const INLINE_IMAGES = new Set(['image/png', 'image/jpeg', 'image/gif', 'image/webp']);
+
+/** A download, never rendered, except a raster image asked for inline (a description's image). */
 function download(db: Db, c: Context): Response {
   const attachment = attachmentOf(db, c);
   const file = Bun.file(path.join(ticketAttachmentsDir(attachment.ticketId), attachment.name));
+  if (c.req.query('inline') !== undefined && INLINE_IMAGES.has(attachment.contentType)) {
+    return new Response(file, {
+      headers: {
+        'content-type': attachment.contentType,
+        'content-disposition': 'inline',
+        'x-content-type-options': 'nosniff',
+        'content-security-policy': "default-src 'none'",
+      },
+    });
+  }
   return new Response(file, {
     headers: {
       'content-type': 'application/octet-stream',

@@ -3,8 +3,6 @@ import type { ReactElement } from 'react';
 
 import { Field, inputClass } from '../ui';
 
-export { PreviewSecrets } from './preview-secrets';
-
 export function TextField({
   label,
   hint,

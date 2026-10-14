@@ -1,10 +1,8 @@
 import { useState, type ReactElement } from 'react';
 
 import type { PublicProject } from '../../src/api-types';
-import type { Page } from '../lib/use-navigation';
-import { AgentsPage } from './agents/agents-page';
+import { openSettings } from '../lib/settings-sections';
 import { Board, BoardView } from './board';
-import { GitHubAppPage } from './github-app/github-app-page';
 import { InvestigationsPage } from './investigations/investigations-page';
 import { ProjectBar, type ProjectView } from './project-bar';
 import { CurrentReviewsPage } from './pull-requests/current-reviews-page';
@@ -43,12 +41,10 @@ export function Workspace({
   project,
   onOpenTicket,
   onNewTicket,
-  onSettings,
 }: {
   project: PublicProject | null;
   onOpenTicket: (id: number) => void;
   onNewTicket: () => void;
-  onSettings: () => void;
 }): ReactElement {
   const [view, setView] = useState<ProjectView>('board');
   return (
@@ -58,41 +54,13 @@ export function Workspace({
         view={view}
         onView={setView}
         onNewTicket={onNewTicket}
-        onSettings={onSettings}
+        onSettings={() => {
+          openSettings();
+        }}
       />
       <main className="min-h-0 flex-1">
         <ProjectBody project={project} view={view} onOpenTicket={onOpenTicket} />
       </main>
     </div>
-  );
-}
-
-/** Right-hand side of the app: a global page, or the current project. */
-export function MainArea({
-  page,
-  project,
-  onOpenTicket,
-  onNewTicket,
-  onSettings,
-}: {
-  page: Page;
-  project: PublicProject | null;
-  onOpenTicket: (id: number) => void;
-  onNewTicket: () => void;
-  onSettings: () => void;
-}): ReactElement {
-  if (page === 'agents') {
-    return <AgentsPage />;
-  }
-  if (page === 'github-app') {
-    return <GitHubAppPage />;
-  }
-  return (
-    <Workspace
-      project={project}
-      onOpenTicket={onOpenTicket}
-      onNewTicket={onNewTicket}
-      onSettings={onSettings}
-    />
   );
 }

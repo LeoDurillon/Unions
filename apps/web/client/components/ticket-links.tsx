@@ -4,6 +4,7 @@ import type { ReactElement } from 'react';
 import type { TicketDetail, TicketRef } from '../../src/api-types';
 import { api } from '../lib/api';
 import { refLabel } from '../lib/labels';
+import { DetailRow } from './detail-row';
 import { ParentPicker } from './parent-picker';
 import { Badge, ErrorText } from './ui';
 
@@ -74,8 +75,7 @@ export function TicketLinks({
   const editable = ticket.phase.kind === 'backlog';
   return (
     <div className="space-y-2 text-sm">
-      <div className="flex items-start gap-2">
-        <span className="w-24 shrink-0 text-zinc-500">Depends on</span>
+      <DetailRow label="Depends on">
         {editable ? (
           <div className="min-w-0 flex-1 space-y-1">
             <ParentPicker
@@ -98,11 +98,10 @@ export function TicketLinks({
         ) : (
           <ParentLine detail={detail} onOpen={onOpen} />
         )}
-      </div>
+      </DetailRow>
       <ErrorText error={change.error} />
       {children.length > 0 ? (
-        <div className="flex items-start gap-2">
-          <span className="w-24 shrink-0 text-zinc-500">Needed by</span>
+        <DetailRow label="Needed by">
           <ul className="space-y-1">
             {children.map((child) => (
               <li key={child.id}>
@@ -110,7 +109,7 @@ export function TicketLinks({
               </li>
             ))}
           </ul>
-        </div>
+        </DetailRow>
       ) : null}
     </div>
   );

@@ -1,10 +1,10 @@
 import type { ReactElement } from 'react';
 
 import { AppDialogs } from './components/app-dialogs';
+import { MainArea } from './components/main-area';
 import { Sidebar } from './components/sidebar';
 import { TicketPanel } from './components/ticket-panel';
 import { WizardHost } from './components/wizard-host';
-import { MainArea } from './components/workspace';
 import { useActiveProject } from './lib/use-active-project';
 import { useLiveInvalidation } from './lib/use-live-invalidation';
 import { useNavigation } from './lib/use-navigation';
@@ -36,7 +36,6 @@ export function App(): ReactElement {
         project={project}
         onOpenTicket={openTicket}
         onNewTicket={show('ticket')}
-        onSettings={show('settings')}
       />
       <WizardHost
         firstRun={!loading && projects.length === 0}

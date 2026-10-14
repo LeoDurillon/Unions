@@ -4,7 +4,6 @@ import type { PublicProject } from '../../src/api-types';
 import type { Overlay } from '../lib/use-navigation';
 import { GitHubIssueImportPanel } from './github-issue-import';
 import { NotionImportPanel } from './notion-import';
-import { SettingsDialog } from './settings/settings-dialog';
 import { TicketForm } from './ticket-form';
 import { Dialog } from './ui';
 
@@ -113,7 +112,7 @@ export function TicketDialog({
   );
 }
 
-/** The dialogs opened from the project bar: project settings and New ticket. */
+/** The dialog opened from the project bar: New ticket. */
 export function AppDialogs({
   overlay,
   project,
@@ -126,14 +125,11 @@ export function AppDialogs({
   onTicketCreated: (id: number) => void;
 }): ReactElement {
   return (
-    <>
-      <SettingsDialog project={project} open={overlay === 'settings'} onClose={onClose} />
-      <TicketDialog
-        open={overlay === 'ticket'}
-        project={project}
-        onClose={onClose}
-        onCreated={onTicketCreated}
-      />
-    </>
+    <TicketDialog
+      open={overlay === 'ticket'}
+      project={project}
+      onClose={onClose}
+      onCreated={onTicketCreated}
+    />
   );
 }

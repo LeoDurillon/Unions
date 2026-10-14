@@ -68,6 +68,24 @@ dialog::backdrop {
 .markdown summary {
   @apply cursor-pointer font-medium;
 }
+.markdown h1 {
+  @apply text-lg;
+}
+.markdown a {
+  @apply break-words text-indigo-600 underline dark:text-indigo-400;
+}
+.markdown blockquote {
+  @apply my-2 rounded-r-md border-l-4 border-zinc-300 bg-zinc-50 px-3 py-1 dark:border-zinc-700 dark:bg-zinc-900;
+}
+.markdown img {
+  @apply my-2 max-w-full rounded-md border border-zinc-200 dark:border-zinc-800;
+}
+.markdown .contains-task-list {
+  @apply list-none pl-1;
+}
+.markdown .contains-task-list .contains-task-list {
+  @apply pl-5;
+}
 
 /* Syntax highlighting in the review diff (highlight.js classes from lowlight), GitHub-like. */
 .hljs-comment,
