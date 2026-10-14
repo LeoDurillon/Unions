@@ -8,9 +8,11 @@ and linked.
 - [Ticket groups](ticket-groups.md): the board shows groups of one or more tickets. Decisions to confirm.
 - [Split a PR into a stack](pr-stack-split.md): an agent splits a ready-for-review PR into stacked PRs. Needs groups.
 - [Restack](restack.md): rebase and retarget a stack after a revision or a merge.
-- [MCP servers for agents](mcp-servers.md): designed in SPEC.md; step 1 needs two checks first.
+- [MCP servers for agents](mcp-servers.md): paused; checks done, claude.ai connectors preferred for Figma.
 - [Preview environments](preview-environments.md): compose-based previews with e2e tests (built, phases 1 to 4).
 - [Project settings as a page](project-settings-page.md): grouped side menu instead of the nine-tab modal (steps 1 to 4 built).
+- [Group a review's changes by spec](review-spec-groups.md): an agent groups the changed files by the parts of
+  the spec they implement (PR description, ticket, issue or Notion page), on request; a toggle in the file panel.
 
 ## Ideas
 

@@ -354,9 +354,11 @@ Narrowing: the token is in a container only during runs that selected the server
 agents that did not, never in the image, and never in the browser. It is still readable by the agent during those
 runs; that is the accepted risk.
 
-To verify before building: that `claude mcp login --no-browser` takes the pasted URL from a pipe (else run it under
-a pseudo-terminal), and that an `mcpOAuth` entry copied into another container is used without signing in again
-(and where in `.credentials.json` it is keyed).
+Checked on 2026-10-14 (details in [`docs/plans/mcp-servers.md`](docs/plans/mcp-servers.md)): the login refuses a
+pipe and works under a pseudo-terminal; and claude.ai connectors (Figma among them, once connected in claude.ai)
+already reach agent containers through the Claude login alone, without any token copied. The plan now prefers
+connectors for OAuth servers and keeps this flow as a fallback. Paused until a Figma account with MCP access is
+available to test with.
 
 ### Order of work
 
