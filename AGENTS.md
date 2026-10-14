@@ -122,8 +122,9 @@ behavior; this file covers how to work in the repo.
     settings' `--profile`s, reads every profile and service (`--profile '*'`, kept as `previews.compose_catalog`),
     and `profiles:` is dropped from the file that runs. Variables: `target.ts` fills in the
     settings' templates (`@union/core/preview`) and reads the secrets (`preview_secrets`, worker only);
-    `variables.ts` writes them into the file Docker runs (`$` escaped) or, as `${NAME}`, into the file kept for the
-    panel, which never holds a secret value. `network.ts` puts the ticket's container on its preview's networks
+    `variables.ts` writes them to Union's env file (`/union/preview.env`, written in the compose helper through
+    `HelperSpec.files`, never in the workspace), which every service reads (`env_file`); the file kept for the panel
+    lists them in a comment and shows secrets interpolated by the repository's file as `${NAME}`, never a value. `network.ts` puts the ticket's container on its preview's networks
     (after a start, on provisioning) and takes it off before `down`.
   - `e2e.ts`: the end-to-end tests (`config.preview.e2eCommand`), run only when the user asks (`preview_e2e`, one at a
     time across tickets in `PreviewManager`; never from the implementation loop, which runs the checks only): starts

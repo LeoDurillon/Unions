@@ -47,7 +47,7 @@ const TARGET: PreviewTarget = {
   project: 'union-t12',
   workspaceVolume: 'union-t12-ws',
   exposed: [{ service: 'web', port: 80, host: '12.localhost' }],
-  env: { API_URL: 'http://api:8080' },
+  variables: ['API_URL', 'GREETING'],
 };
 
 function withService(service: Record<string, unknown>): ComposeJson {
@@ -124,7 +124,10 @@ test("the preview's file: its own project, no fixed names or host ports, mounts 
       volume: { subpath: 'repo/site' },
     },
   ]);
-  expect(web.environment).toEqual({ GREETING: 'hi', API_URL: 'http://api:8080' });
+  // The project's variables come from Union's env file, which wins: the service's own GREETING goes.
+  expect(web.environment).toEqual({});
+  expect(web.env_file).toEqual(['/union/preview.env']);
+  expect(services.db?.environment).toEqual({ POSTGRES_PASSWORD: 'x' });
   expect(web.networks).toEqual({ default: null, union_preview: null });
   expect(web.labels).toEqual({
     team: 'front',
@@ -269,4 +272,17 @@ test("a mount of the workspace may only reach its repository, never the ticket's
     1,
   );
   expect(composeProblems(workspaceMountOf({}), union)).toHaveLength(1);
+});
+
+test("only Union's own file may read its env file; a repository file may not", () => {
+  const file = previewCompose(resolved(), TARGET);
+  expect(composeProblems(file, { workspaceVolume: 'union-t12-ws' })).toEqual([]);
+  expect(composeProblems(withService({ env_file: ['/union/preview.env'] }))).toEqual([
+    'app: reads an env file outside the repository',
+  ]);
+  // Without variables, no env file is given.
+  const bare = previewCompose(resolved(), { ...TARGET, variables: [] });
+  const services = bare.services as Record<string, Record<string, unknown>>;
+  expect(services.web?.env_file).toBeUndefined();
+  expect(services.web?.environment).toEqual({ GREETING: 'hi' });
 });

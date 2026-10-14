@@ -27,6 +27,8 @@ export type HelperSpec = {
   env?: Record<string, string>;
   stdin?: string;
   signal?: AbortSignal;
+  /** Files written inside the helper before the command runs (not in any volume). */
+  files?: { path: string; content: string }[];
 };
 
 export type ContainerRuntime = {

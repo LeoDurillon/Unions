@@ -67,6 +67,8 @@ export async function compose(
     onLine?: (line: string) => void;
     /** Keep every line: a resolved compose file is hundreds of lines long. */
     keepAll?: boolean;
+    /** Written in the helper first: Union's env file, which the file to run reads. */
+    files?: { path: string; content: string }[];
   },
 ): Promise<ComposeRun> {
   const mounts = [
@@ -81,6 +83,7 @@ export async function compose(
     env: run.env,
     stdin: run.stdin,
     signal: run.signal,
+    files: run.files,
   });
   const tail: string[] = [];
   const all: string[] = [];

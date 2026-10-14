@@ -2,6 +2,7 @@ import path from 'node:path';
 
 import {
   isRecord,
+  PREVIEW_ENV_FILE,
   PREVIEW_ENV_KEY,
   PREVIEW_NETWORK,
   PREVIEW_NETWORK_KEY,
@@ -10,22 +11,22 @@ import {
   type ComposeJson,
 } from './preview-compose-check';
 
-export { PREVIEW_ENV_KEY, PREVIEW_NETWORK } from './preview-compose-check';
+export { PREVIEW_ENV_FILE, PREVIEW_ENV_KEY, PREVIEW_NETWORK } from './preview-compose-check';
 
 /** A service the proxy serves, at `host` (`12.localhost`, `api.12.localhost`). */
 export type ExposedService = { service: string; port: number; host: string };
 
 /**
  * What a ticket's preview is: its compose project, its workspace, the services the proxy serves,
- * and the project's variables, written as they go into the file (`$` escaped, or `${NAME}` for a
- * secret in the file people read).
+ * and the names of the project's variables, which every service reads from Union's env file.
  */
 export type PreviewTarget = {
   /** Compose project name: `union-t<id>`. */
   project: string;
   workspaceVolume: string;
   exposed: ExposedService[];
-  env: Record<string, string>;
+  /** The project's variables: given by `PREVIEW_ENV_FILE`, so the file does not repeat them. */
+  variables: string[];
   /** The variables as a file inside one service (`content` already written). */
   envFile?: { service: string; path: string; content: string };
 };
@@ -81,14 +82,17 @@ function rewriteService(
   // `profiles` too: the profiles were applied when the file was resolved, the file runs whole.
   const { container_name: _name, ports: _ports, profiles: _profiles, ...rest } = service;
   const exposed = target.exposed.find((candidate) => candidate.service === name);
-  const environment = {
-    ...(isRecord(service.environment) ? service.environment : {}),
-    ...target.env,
-  };
+  // A service's own `environment` wins over its env file: the project's variables leave it.
+  const environment = Object.fromEntries(
+    Object.entries(isRecord(service.environment) ? service.environment : {}).filter(
+      ([key]) => !target.variables.includes(key),
+    ),
+  );
   const networks = isRecord(service.networks) ? service.networks : { default: null };
   return {
     ...rest,
     environment,
+    ...(target.variables.length > 0 ? { env_file: [PREVIEW_ENV_FILE] } : {}),
     labels: {
       ...withoutTraefik(service.labels),
       ...(exposed ? routing(target.project, exposed) : {}),

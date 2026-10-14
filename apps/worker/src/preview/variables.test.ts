@@ -3,6 +3,9 @@ import { expect, test } from 'bun:test';
 import type { Target } from './target';
 import {
   configEnvironment,
+  envFileValue,
+  unionEnvFile,
+  variablesComment,
   escapeDollars,
   runVariables,
   shownVariables,
@@ -35,4 +38,19 @@ test('the file people read never holds a secret value, only a reference compose 
   expect(
     unmaskSecrets(`POSTGRES_PASSWORD: $${REFERENCE}\nX: $${OTHER_REFERENCE}`, ['DB_PASSWORD']),
   ).toBe(`POSTGRES_PASSWORD: ${REFERENCE}\nX: $${OTHER_REFERENCE}`);
+});
+
+test("Union's env file keeps values literal, and the comment hides the secrets", () => {
+  expect(envFileValue('costs $5')).toBe("'costs $5'");
+  expect(envFileValue("it's")).toBe('"it\'s"');
+  expect(envFileValue('a "b" $c\nd')).toBe(String.raw`"a \"b\" $$c\nd"`);
+  expect(unionEnvFile(TARGET)).toEqual([
+    {
+      path: '/union/preview.env',
+      content: "API_URL='http://api:8080'\nPRICE='costs $5'\nDB_PASSWORD='pa$word'\n",
+    },
+  ]);
+  expect(unionEnvFile({ plain: {}, secrets: {} } as unknown as Target)).toEqual([]);
+  expect(variablesComment(TARGET)).toContain('#   DB_PASSWORD=(secret)');
+  expect(variablesComment(TARGET)).not.toContain('pa$');
 });

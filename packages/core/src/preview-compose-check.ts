@@ -7,6 +7,11 @@ export const PREVIEW_NETWORK_KEY = 'union_preview';
 export const PREVIEW_WORKSPACE_KEY = 'union_workspace';
 /** The config holding the variables given as a file. */
 export const PREVIEW_ENV_KEY = 'union_env';
+/**
+ * Where the worker writes the project's variables for compose to give every service (`env_file`):
+ * inside the helper container that runs compose, never in the workspace.
+ */
+export const PREVIEW_ENV_FILE = '/union/preview.env';
 /** The Docker network Traefik routes previews on (created by Union's compose stack). */
 export const PREVIEW_NETWORK = 'union-preview';
 
@@ -109,11 +114,15 @@ function workspaceMountProblems(name: string, mount: Record<string, unknown>): s
 }
 
 /** `env_file` is read by the compose CLI at start: only files of the repository. */
-function envFileProblems(name: string, envFile: unknown): string[] {
+function envFileProblems(name: string, envFile: unknown, union?: UnionKeys): string[] {
   const files = Array.isArray(envFile) ? envFile : [envFile];
   return files.flatMap((file: unknown) => {
     const filePath = isRecord(file) ? file.path : file;
     if (filePath === undefined || filePath === null) {
+      return [];
+    }
+    // Union's own variables file, in a file Union wrote (or the user's edit of it).
+    if (union && filePath === PREVIEW_ENV_FILE) {
       return [];
     }
     return typeof filePath === 'string' && insideRepo(filePath)
@@ -237,7 +246,7 @@ export function composeProblems(config: unknown, union?: UnionKeys): string[] {
     problems.push(
       ...serviceSettings(name, service),
       ...buildProblems(name, service.build),
-      ...envFileProblems(name, service.env_file),
+      ...envFileProblems(name, service.env_file, union),
     );
     const mounts = Array.isArray(service.volumes) ? service.volumes : [];
     problems.push(...mounts.flatMap((mount: unknown) => mountProblems(name, mount, volumes)));

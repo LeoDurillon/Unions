@@ -22,6 +22,7 @@ import {
   type PreviewDeps,
   type Target,
 } from './target';
+import { unionEnvFile } from './variables';
 
 export { PreviewError, type PreviewDeps } from './target';
 
@@ -73,6 +74,7 @@ async function up(deps: PreviewDeps, target: Target, file: ComposeJson): Promise
     ],
     workspaceVolume: target.workspaceVolume,
     stdin: JSON.stringify(file),
+    files: unionEnvFile(target),
     onLine: log.push,
   });
   log.flush();

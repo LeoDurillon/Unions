@@ -156,7 +156,10 @@ test('a preview starts from the workspace, rewritten, and runs once the service 
   const file = JSON.parse(up?.stdin ?? '{}') as { services: { web: Record<string, unknown> } };
   expect(file.services.web.ports).toBeUndefined();
   expect(file.services.web.container_name).toBeUndefined();
-  expect(file.services.web.environment).toEqual({ MODE: 'preview' });
+  // The variables come from Union's env file, written in the helper, not repeated in the file.
+  expect(file.services.web.environment).toBeUndefined();
+  expect(file.services.web.env_file).toEqual(['/union/preview.env']);
+  expect(up?.files).toEqual([{ path: '/union/preview.env', content: "MODE='preview'\n" }]);
 });
 
 test('a compose file asking for host access never reaches Docker', async () => {
@@ -264,7 +267,8 @@ test("the ticket's own file runs instead, checked, under the ticket's project, h
   expect(commands().some((command) => command.includes(' up '))).toBe(false);
 });
 
-test('several services, templates, secrets and an env file: real values run, none is kept', async () => {
+test('several services, waited for; real values go through the env file, none is kept', async () => {
+  // Two exposed services, a template, a `$`, a secret and the variables as a file.
   db.update(schema.projects)
     .set({
       config: {
@@ -283,37 +287,37 @@ test('several services, templates, secrets and an env file: real values run, non
     .run();
   setPreviewSecret(db, 1, 'DB_PASSWORD', 'pa$word');
   resolved = {
-    services: {
-      ...RESOLVED.services,
-      api: { image: 'node:22', networks: { default: null } },
-    },
+    services: { ...RESOLVED.services, api: { image: 'node:22', networks: { default: null } } },
   };
   await startPreview(deps(), ticketId);
-  const row = getPreview(db, ticketId);
-  expect(row?.status).toBe('running');
-  expect(row?.urls).toEqual([
-    { service: 'web', url: 'http://1.localhost:8080' },
-    { service: 'api', url: 'http://api.1.localhost:8080' },
-  ]);
+  expect(getPreview(db, ticketId)).toMatchObject({
+    status: 'running',
+    urls: [
+      { service: 'web', url: 'http://1.localhost:8080' },
+      { service: 'api', url: 'http://api.1.localhost:8080' },
+    ],
+  });
   expect(asked.toSorted()).toEqual(['1.localhost', 'api.1.localhost']);
-
   const [, runConfig, shownConfig, up] = calls;
   expect(runConfig?.env).toMatchObject({ DB_PASSWORD: 'pa$word' });
   expect(shownConfig?.env).toMatchObject({ DB_PASSWORD: REFERENCE });
   const file = JSON.parse(up?.stdin ?? '{}') as {
     services: Record<string, Record<string, unknown>>;
-    configs: Record<string, { content: string }>;
   };
-  expect(file.services.web?.environment).toEqual({
-    API_URL: 'http://api.1.localhost:8080',
-    PRICE: 'costs $$5',
-    DB_PASSWORD: 'pa$$word',
-  });
+  expect(file.services.web?.env_file).toEqual(['/union/preview.env']);
+  expect(up?.files).toEqual([
+    {
+      path: '/union/preview.env',
+      content: "API_URL='http://api.1.localhost:8080'\nPRICE='costs $5'\nDB_PASSWORD='pa$word'\n",
+    },
+  ]);
+  // The variables as a file in `api` (its content is tested with the variables).
   expect(file.services.api?.configs).toEqual([{ source: 'union_env', target: '/etc/app.env' }]);
-  expect(file.configs.union_env?.content).toContain('DB_PASSWORD=pa$$word');
-  // The file kept for the panel names the secret, never its value.
-  expect(row?.composeYaml).toContain(REFERENCE);
-  expect(row?.composeYaml).not.toContain('pa$');
+  // The file kept for the panel lists the variables, the secret hidden.
+  const shown = getPreview(db, ticketId)?.composeYaml ?? '';
+  expect(shown).toContain('#   API_URL=http://api.1.localhost:8080');
+  expect(shown).toContain('#   DB_PASSWORD=(secret)');
+  expect(shown).not.toContain('pa$');
 });
 
 test('the profiles chosen are enabled, and their services run whole', async () => {

@@ -178,6 +178,12 @@ Differences from the design above, decided while building it:
 - **Variables as a file**: a top-level config with inline `content`, given to one service at an absolute path.
   Compose copies it into the container; a path inside a folder mounted from the workspace is refused, since the copy
   would land in the agent's working copy.
+- **An env file instead of repeated variables**: every service gets `env_file: [/union/preview.env]` rather than the
+  whole list in its `environment`. The worker writes that file inside the helper that runs compose (never the
+  workspace), for `up` and for reading the user's own file; values are single-quoted (literal, `$` included), or
+  double-quoted and escaped when they hold a quote or a line break. A service's own `environment` wins over its env
+  file in compose, so the project's variables are removed from it, keeping "the project's value wins". The file shown
+  starts with a comment listing the variables, secrets as `(secret)`.
 - **Profiles**: the settings choose the compose profiles to enable (`--profile` when the file is resolved, the
   repository's and the user's own); `profiles:` is then dropped from the file that runs, or `up` would leave those
   services out again. Each generation also reads the file with every profile (`--profile '*'`) and keeps its

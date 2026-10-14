@@ -1,3 +1,5 @@
+import { PREVIEW_ENV_FILE } from '@union/core';
+
 import type { Target } from './target';
 
 /** The project's variables as they go into a compose file, and as the env file's content. */
@@ -64,4 +66,41 @@ export function unmaskSecrets(yaml: string, names: string[]): string {
     (text, name) => text.replaceAll(`$${secretReference(name)}`, () => secretReference(name)),
     yaml,
   );
+}
+
+/**
+ * A value as Union's env file holds it. Single quotes keep it literal (`$` included); a value with a
+ * single quote or a line break is double-quoted, its `$` escaped as compose expects there.
+ */
+export function envFileValue(value: string): string {
+  if (!value.includes("'") && !value.includes('\n')) {
+    return `'${value}'`;
+  }
+  const escaped = value
+    .replaceAll('\\', () => String.raw`\\`)
+    .replaceAll('"', () => String.raw`\"`)
+    .replaceAll('\n', () => String.raw`\n`);
+  return `"${escapeDollars(escaped)}"`;
+}
+
+/** Union's env file (`PREVIEW_ENV_FILE`), written in the helper that runs compose; none without variables. */
+export function unionEnvFile(target: Target): { path: string; content: string }[] {
+  const variables = { ...target.plain, ...target.secrets };
+  const lines = Object.entries(variables).map(([key, value]) => `${key}=${envFileValue(value)}\n`);
+  return lines.length === 0 ? [] : [{ path: PREVIEW_ENV_FILE, content: lines.join('') }];
+}
+
+/** The comment the file people read starts with: what Union's env file gives, secrets hidden. */
+export function variablesComment(target: Target): string {
+  const plain = Object.entries(target.plain).map(([key, value]) => `#   ${key}=${value}`);
+  const secrets = Object.keys(target.secrets).map((name) => `#   ${name}=(secret)`);
+  if (plain.length + secrets.length === 0) {
+    return '';
+  }
+  return [
+    `# Every service reads the project's variables from ${PREVIEW_ENV_FILE}, which Union writes at each start:`,
+    ...plain,
+    ...secrets,
+    '',
+  ].join('\n');
 }

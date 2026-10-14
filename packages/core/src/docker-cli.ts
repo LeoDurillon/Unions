@@ -141,6 +141,16 @@ export class DockerCli implements ContainerRuntime {
   }
 
   runHelper(spec: HelperSpec): AsyncGenerator<string, ExecResult> {
+    // Each file's content travels in a variable of its own and is written by the shell: the
+    // helper has no volume to hold it, and stdin may already carry the compose file.
+    const files = spec.files ?? [];
+    const contents = files.flatMap((file, index) => ['-e', `UNION_FILE_${index}=${file.content}`]);
+    const writes = files
+      .map(
+        (file, index) =>
+          `mkdir -p "$(dirname '${file.path}')" && printf '%s' "$UNION_FILE_${index}" > '${file.path}' && `,
+      )
+      .join('');
     const env = Object.entries(spec.env ?? {}).flatMap(([k, v]) => ['-e', `${k}=${v}`]);
     const mounts = (spec.mounts ?? []).flatMap((mount) => [
       '-v',
@@ -151,13 +161,14 @@ export class DockerCli implements ContainerRuntime {
       '--rm',
       '-i',
       ...mounts,
+      ...contents,
       ...env,
       ...(spec.cwd ? ['-w', spec.cwd] : []),
       spec.image,
       // Compose reports its progress on stderr: one stream keeps the lines in order.
       'sh',
       '-c',
-      'exec "$@" 2>&1',
+      `${writes}exec "$@" 2>&1`,
       'sh',
       ...spec.command,
     ];

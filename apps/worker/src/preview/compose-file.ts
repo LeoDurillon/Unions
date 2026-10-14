@@ -23,7 +23,14 @@ import {
   type PreviewDeps,
   type Target,
 } from './target';
-import { configEnvironment, runVariables, shownVariables, unmaskSecrets } from './variables';
+import {
+  configEnvironment,
+  runVariables,
+  shownVariables,
+  unionEnvFile,
+  unmaskSecrets,
+  variablesComment,
+} from './variables';
 
 const TRAILING_SPACES = / +$/gmu;
 
@@ -70,6 +77,8 @@ async function resolve(
     stdin: 'yaml' in source ? source.yaml : undefined,
     env,
     keepAll: true,
+    // The user's own file reads Union's env file: it must exist when compose reads the file.
+    files: 'yaml' in source ? unionEnvFile(target) : undefined,
   });
   if (output.exitCode !== 0) {
     throw new PreviewError(`The compose file could not be read:\n${lastLines(output.tail)}`);
@@ -128,7 +137,7 @@ async function buildFile(
       project: target.project,
       workspaceVolume: target.workspaceVolume,
       exposed: target.exposed,
-      env: written.env,
+      variables: Object.keys({ ...target.plain, ...target.secrets }),
       envFile: envFile ? { ...envFile, content: written.content } : undefined,
     }),
   );
@@ -151,7 +160,7 @@ export async function generatedFile(deps: PreviewDeps, target: Target): Promise<
     saveGeneratedCompose(
       deps.db,
       target.ticketId,
-      { yaml: unmaskSecrets(toYaml(shown), names) },
+      { yaml: variablesComment(target) + unmaskSecrets(toYaml(shown), names) },
       summary,
     );
     return file;
