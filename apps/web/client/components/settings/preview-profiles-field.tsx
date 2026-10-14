@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react';
+import { useState, type ReactElement } from 'react';
 
 import { inputClass } from '../ui';
 
@@ -15,7 +15,10 @@ export function PreviewProfilesField({
   known: string[];
   onChange: (profiles: string[]) => void;
 }): ReactElement {
-  const others = selected.filter((profile) => !known.includes(profile));
+  // The text as typed: rebuilding it from the parsed list would eat a comma or a space as it is typed.
+  const [othersText, setOthersText] = useState(() =>
+    selected.filter((profile) => !known.includes(profile)).join(', '),
+  );
   return (
     <fieldset className="space-y-2">
       <legend className="text-sm font-medium">Profiles</legend>
@@ -45,9 +48,10 @@ export function PreviewProfilesField({
       <input
         aria-label="Other profiles"
         className={`${inputClass} font-mono`}
-        value={others.join(', ')}
+        value={othersText}
         placeholder={known.length > 0 ? 'Other profiles, comma-separated' : 'storage, jobs'}
         onChange={(event) => {
+          setOthersText(event.target.value);
           const typed = event.target.value
             .split(',')
             .map((name) => name.trim())
