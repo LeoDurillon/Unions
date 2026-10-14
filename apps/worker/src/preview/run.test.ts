@@ -43,10 +43,22 @@ let resolved: unknown;
 let upExit: number;
 let answer: number;
 let asked: string[];
+/** `join <network>` / `leave <network>`, in the order they happened, among the compose calls. */
+let network: string[];
 
 /** The compose helper: `config` prints the resolved file, `up` and `down` succeed unless told not to. */
 const runtime = {
   networkExists: () => Promise.resolve(true),
+  projectNetworks: (project: string) => Promise.resolve([`${project}_default`, 'union-preview']),
+  connectNetwork: (name: string, container: string) => {
+    network.push(`join ${name} ${container}`);
+    return Promise.resolve();
+  },
+  disconnectNetwork: (name: string, container: string) => {
+    network.push(`leave ${name} ${container}`);
+    calls.push({ image: '', command: ['', '', '', '', 'leave', name] });
+    return Promise.resolve();
+  },
   async *runHelper(spec: HelperSpec): AsyncGenerator<string, ExecResult> {
     calls.push(spec);
     await Promise.resolve();
@@ -109,6 +121,7 @@ beforeEach(() => {
   upExit = 0;
   answer = 200;
   asked = [];
+  network = [];
 });
 
 test('a preview starts from the workspace, rewritten, and runs once the service answers', async () => {
@@ -120,11 +133,15 @@ test('a preview starts from the workspace, rewritten, and runs once the service 
     logTail: 'web-1  | ready',
   });
   expect(commands()).toEqual([
+    // Every profile, for what the settings offer; then the file with the profiles enabled.
+    '-p union-t1 --profile * -f compose.yaml config --format json',
     '-p union-t1 -f compose.yaml config --format json',
     '-p union-t1 --project-directory /workspace/repo -f - up -d --build --remove-orphans',
     '-p union-t1 logs --no-color --tail 200',
   ]);
-  const [config, up] = calls;
+  // The agent's container joins the preview's own network, not the proxy's shared one.
+  expect(network).toEqual(['join union-t1_default union-t1']);
+  const [, config, up] = calls;
   expect(config?.env).toEqual({ MODE: 'preview' });
   expect(config?.mounts).toContainEqual({ source: 'union-t1-ws', target: '/workspace' });
   const file = JSON.parse(up?.stdin ?? '{}') as { services: { web: Record<string, unknown> } };
@@ -146,7 +163,10 @@ test('a failed start keeps the reason and the output, and takes down what it sta
   await startPreview(deps(), ticketId);
   expect(getPreview(db, ticketId)).toMatchObject({ status: 'failed', logTail: 'web-1  | ready' });
   expect(getPreview(db, ticketId)?.error).toContain('docker compose up failed');
-  expect(commands().at(-1)).toBe('-p union-t1 down -v --remove-orphans');
+  expect(commands().slice(-2)).toEqual([
+    'leave union-t1_default',
+    '-p union-t1 down -v --remove-orphans',
+  ]);
 
   calls = [];
   upExit = 0;
@@ -176,7 +196,8 @@ test('stopping takes the compose project down with its volumes', async () => {
   calls = [];
   await stopPreview(deps(), ticketId);
   expect(getPreview(db, ticketId)?.status).toBe('stopped');
-  expect(commands()).toEqual(['-p union-t1 down -v --remove-orphans']);
+  // Docker refuses to remove a network a container is still on: the agent leaves first.
+  expect(commands()).toEqual(['leave union-t1_default', '-p union-t1 down -v --remove-orphans']);
 });
 
 test('the file a start ran is kept as YAML; generating alone starts nothing', async () => {
@@ -186,7 +207,10 @@ test('the file a start ran is kept as YAML; generating alone starts nothing', as
   expect(row?.composeYaml).toContain('name: union-t1');
   expect(row?.composeYaml).toContain('subpath: repo/site');
   expect(row?.composeError).toBeNull();
-  expect(commands()).toEqual(['-p union-t1 -f compose.yaml config --format json']);
+  expect(commands()).toEqual([
+    '-p union-t1 --profile * -f compose.yaml config --format json',
+    '-p union-t1 -f compose.yaml config --format json',
+  ]);
 
   resolved = { services: { web: { image: 'x', privileged: true, networks: { default: null } } } };
   await generatePreviewFile(deps(), ticketId);
@@ -264,7 +288,7 @@ test('several services, templates, secrets and an env file: real values run, non
   ]);
   expect(asked.toSorted()).toEqual(['1.localhost', 'api.1.localhost']);
 
-  const [runConfig, shownConfig, up] = calls;
+  const [, runConfig, shownConfig, up] = calls;
   expect(runConfig?.env).toMatchObject({ DB_PASSWORD: 'pa$word' });
   expect(shownConfig?.env).toMatchObject({ DB_PASSWORD: REFERENCE });
   const file = JSON.parse(up?.stdin ?? '{}') as {
@@ -281,4 +305,17 @@ test('several services, templates, secrets and an env file: real values run, non
   // The file kept for the panel names the secret, never its value.
   expect(row?.composeYaml).toContain(REFERENCE);
   expect(row?.composeYaml).not.toContain('pa$');
+});
+
+test('the profiles chosen are enabled, and their services run whole', async () => {
+  const config = { composeFile: 'compose.yaml', service: 'web', port: 80, env: {} };
+  db.update(schema.projects)
+    .set({ config: { baseBranch: 'main', preview: { ...config, profiles: ['storage'] } } })
+    .run();
+  const s3 = { image: 'minio/minio', profiles: ['storage'], networks: { default: null } };
+  resolved = { services: { ...RESOLVED.services, s3 } };
+  await startPreview(deps(), ticketId);
+  expect(commands()[1]).toBe('-p union-t1 --profile storage -f compose.yaml config --format json');
+  // `up` would leave out again a service still naming a profile.
+  expect(calls[2]?.stdin).not.toContain('"profiles"');
 });

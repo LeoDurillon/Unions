@@ -9,6 +9,7 @@ export * from './event-deliveries';
 export * from './event-rule-types';
 export * from './event-rules';
 export * from './docker-cli';
+export * from './e2e-screenshots';
 export * from './github-auth';
 export * from './github-text';
 export * from './investigation-tickets';

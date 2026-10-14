@@ -104,6 +104,17 @@ function envFile(value: unknown): PreviewConfig['envFile'] {
   return { service: serviceName, path };
 }
 
+function profileList(value: unknown): string[] {
+  const list = (Array.isArray(value) ? value : []).map((item: unknown) =>
+    typeof item === 'string' ? item.trim() : '',
+  );
+  const wrong = list.find((profile) => !SERVICE_NAME.test(profile));
+  if (wrong !== undefined) {
+    throw fail(BAD_REQUEST, `"${wrong}" is not a profile name`);
+  }
+  return [...new Set(list)];
+}
+
 /** The settings as sent, checked; null clears them. */
 function previewConfig(
   body: Record<string, unknown>,
@@ -115,20 +126,25 @@ function previewConfig(
   const input = isRecord(body.preview) ? body.preview : {};
   const exposed = services(input.services);
   const file = envFile(input.envFile);
+  const e2eCommand = typeof input.e2eCommand === 'string' ? input.e2eCommand.trim() : '';
+  const profiles = profileList(input.profiles);
   return {
     composeFile: composeFile(input.composeFile),
     services: exposed,
     env: environment(input.env, exposed, secrets),
     ...(file ? { envFile: file } : {}),
+    ...(e2eCommand === '' ? {} : { e2eCommand }),
+    ...(profiles.length === 0 ? {} : { profiles }),
   };
 }
 
-/** The services of the latest compose file generated for one of the project's tickets. */
+/** What the latest compose file generated for one of the project's tickets holds: its catalog. */
 function composeServices(db: Db, projectId: number): PreviewSettingsView['composeServices'] {
   const row = db
     .select({
       ticketId: schema.previews.ticketId,
       yaml: schema.previews.composeYaml,
+      catalog: schema.previews.composeCatalog,
       at: schema.previews.composeAt,
     })
     .from(schema.previews)
@@ -136,13 +152,22 @@ function composeServices(db: Db, projectId: number): PreviewSettingsView['compos
     .where(eq(schema.tickets.projectId, projectId))
     .orderBy(desc(schema.previews.composeAt))
     .all()
-    .find((candidate) => candidate.yaml !== null);
-  if (!row?.yaml || row.at === null) {
+    .find((candidate) => candidate.catalog !== null || candidate.yaml !== null);
+  if (!row || row.at === null) {
     return null;
   }
-  const parsed: unknown = Bun.YAML.parse(row.yaml);
+  if (row.catalog) {
+    return {
+      names: row.catalog.services,
+      profiles: row.catalog.profiles,
+      ticketId: row.ticketId,
+      at: row.at,
+    };
+  }
+  // Generated before the catalog was kept: the services of the file itself.
+  const parsed: unknown = Bun.YAML.parse(row.yaml ?? '');
   const found = isRecord(parsed) && isRecord(parsed.services) ? Object.keys(parsed.services) : [];
-  return { names: found, ticketId: row.ticketId, at: row.at };
+  return { names: found, profiles: [], ticketId: row.ticketId, at: row.at };
 }
 
 function settingsView(db: Db, project: Project): PreviewSettingsView {

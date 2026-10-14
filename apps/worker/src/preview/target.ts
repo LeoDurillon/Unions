@@ -17,6 +17,7 @@ import {
 } from '@union/core';
 import { eq } from 'drizzle-orm';
 
+import type { ProvisionConfig } from '../provision';
 import type { PreviewSettings } from './compose';
 
 const REASON_LINES = 20;
@@ -25,13 +26,25 @@ export type PreviewDeps = {
   db: Db;
   runtime: ContainerRuntime;
   settings: PreviewSettings;
+  /** For the e2e runs the user asks for, which start the ticket's container. */
+  config?: ProvisionConfig;
   readyTimeoutMs?: number;
   readyIntervalMs?: number;
   fetchFn?: (url: string, init: RequestInit) => Promise<Response>;
 };
 
-/** Why a preview cannot start or stopped; its message is shown on the ticket. */
-export class PreviewError extends Error {}
+/**
+ * Why a preview cannot start or stopped; its message is shown on the ticket. `unavailable`: it
+ * cannot run now, whatever the ticket's code (no proxy, too many running).
+ */
+export class PreviewError extends Error {
+  constructor(
+    message: string,
+    readonly unavailable = false,
+  ) {
+    super(message);
+  }
+}
 
 /**
  * A ticket's preview: its compose project, settings, workspace, the services the proxy serves and

@@ -7,6 +7,7 @@ import { eq } from 'drizzle-orm';
 
 import { syncAttachments } from './attachments-sync';
 import { projectGitToken } from './credentials';
+import { rejoinRunningPreview } from './preview/network';
 import { resolveTicketBase } from './ticket-base';
 
 export const AGENT_HOME = '/home/node';
@@ -166,6 +167,7 @@ export async function ensureTicketContainer(
     await cloneInto(runtime, names.name, source, base ?? project.config.baseBranch);
   }
   await syncAttachments(db, runtime, names.name, ticket.id);
+  await rejoinRunningPreview(db, runtime, ticket.id);
   db.update(schema.tickets)
     .set({
       containerName: names.name,

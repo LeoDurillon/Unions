@@ -288,6 +288,10 @@ export type PreviewView = {
   configured: boolean;
   /** The repository's compose file the settings name; null without settings. */
   composeFile: string | null;
+  /** The project's end-to-end command; null: no e2e tests to run. */
+  e2eCommand: string | null;
+  /** Why the e2e tests cannot run now; null when they can. */
+  e2eRefusal: string | null;
   /** Why it cannot start now; null when it can. */
   refusal: string | null;
 };
@@ -295,6 +299,9 @@ export type PreviewView = {
 /** What the Preview settings show besides the settings: secret names (never values), and services. */
 export type PreviewSettingsView = {
   secretNames: string[];
-  /** The services of the latest compose file generated for one of the project's tickets. */
-  composeServices: { names: string[]; ticketId: number; at: number } | null;
+  /**
+   * The services (all profiles included) and the profiles of the latest compose file generated for
+   * one of the project's tickets.
+   */
+  composeServices: { names: string[]; profiles: string[]; ticketId: number; at: number } | null;
 };

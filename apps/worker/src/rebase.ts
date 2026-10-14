@@ -1,7 +1,7 @@
 import { getTicket, schema, ticketBase, type Db, type Project } from '@union/core';
 import { eq } from 'drizzle-orm';
 
-import { install, type ImplementDeps } from './implement-loop';
+import { install, type ImplementDeps } from './implement-checks';
 import { ensureTicketContainer } from './provision';
 import { runRebaseAgent, type Pushed, type Rebase } from './rebase-agent';
 import { fetchIntoContainer } from './rebase-fetch';

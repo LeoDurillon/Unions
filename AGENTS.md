@@ -118,10 +118,18 @@ behavior; this file covers how to work in the repo.
     `http://<id>.localhost:8080`. Previews outlive worker restarts; a ticket's removal takes its preview down before
     its volumes (`janitor.ts`). `compose-file.ts` keeps the generated file (`previews.compose_yaml`, `preview_generate`
     generates it alone) and runs the ticket's own edited file instead when there is one (`previews.override`, checked
-    with `composeProblems(file, { workspaceVolume })`, project name enforced). Variables: `target.ts` fills in the
+    with `composeProblems(file, { workspaceVolume })`, project name enforced). Profiles: `catalog.ts` passes the
+    settings' `--profile`s, reads every profile and service (`--profile '*'`, kept as `previews.compose_catalog`),
+    and `profiles:` is dropped from the file that runs. Variables: `target.ts` fills in the
     settings' templates (`@union/core/preview`) and reads the secrets (`preview_secrets`, worker only);
     `variables.ts` writes them into the file Docker runs (`$` escaped) or, as `${NAME}`, into the file kept for the
-    panel, which never holds a secret value.
+    panel, which never holds a secret value. `network.ts` puts the ticket's container on its preview's networks
+    (after a start, on provisioning) and takes it off before `down`.
+  - `e2e.ts`: the end-to-end tests (`config.preview.e2eCommand`), run only when the user asks (`preview_e2e`, one at a
+    time across tickets in `PreviewManager`; never from the implementation loop, which runs the checks only): starts
+    the ticket's container and preview, installs the browser at the repository's Playwright version, runs the command
+    with `BASE_URL`, keeps the result on the preview (`previews.e2e_*`) and up to 5 failure screenshots as private
+    ticket files (`replaceE2eScreenshots`). The panel sends a failure to the agent as a normal revision.
   - `review.ts`: the final review (fresh session, read-only tools plus git reads, one git command per call because
     permission rules cannot match `&&`). Changes asked at the review go to the implementer through the `thenRun`
     chain in `states.ts`; `revision.ts` hands it the review's feedback. `runResumable` (agent.ts) restarts in a fresh

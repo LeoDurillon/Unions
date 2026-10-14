@@ -66,11 +66,31 @@ function refusal(db: Db, ticket: Ticket): string | null {
     : null;
 }
 
+/** Why the e2e tests cannot run now: the agent shares the container, one run per ticket at a time. */
+function e2eRefusal(db: Db, ticket: Ticket): string | null {
+  if (!previewConfig(db, ticket)?.e2eCommand) {
+    return 'Set an end-to-end command in the project settings (Preview) first.';
+  }
+  if (ticket.phase.kind === 'running') {
+    return 'Wait for the current run to finish: the tests run in the same container.';
+  }
+  // The preview's own reasons (no workspace, starting, a command pending) hold too.
+  const busy = refusal(db, ticket);
+  if (busy !== null) {
+    return busy;
+  }
+  return getPreview(db, ticket.id)?.e2eStatus === 'running'
+    ? 'The end-to-end tests are already running.'
+    : null;
+}
+
 function view(db: Db, ticket: Ticket): PreviewView {
   return {
     preview: getPreview(db, ticket.id),
     configured: configured(db, ticket),
     composeFile: previewConfig(db, ticket)?.composeFile ?? null,
+    e2eCommand: previewConfig(db, ticket)?.e2eCommand ?? null,
+    e2eRefusal: e2eRefusal(db, ticket),
     refusal: refusal(db, ticket),
   };
 }
@@ -119,6 +139,7 @@ export function previewRoutes(db: Db): Hono {
         : null,
     ),
   );
+  routes.post('/e2e', (c) => command(db, c, 'preview_e2e', (ticket) => e2eRefusal(db, ticket)));
   routes.post('/generate', (c) =>
     command(db, c, 'preview_generate', (ticket) => refusal(db, ticket)),
   );

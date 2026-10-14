@@ -35,13 +35,14 @@ export type CommandHooks = {
   preview: (ticketId: number, action: PreviewAction) => void;
 };
 
-export type PreviewAction = 'start' | 'stop' | 'logs' | 'generate';
+export type PreviewAction = 'start' | 'stop' | 'logs' | 'generate' | 'e2e';
 
 const PREVIEW_ACTIONS: Record<string, PreviewAction> = {
   preview_start: 'start',
   preview_stop: 'stop',
   preview_logs: 'logs',
   preview_generate: 'generate',
+  preview_e2e: 'e2e',
 };
 
 function ignore(): void {

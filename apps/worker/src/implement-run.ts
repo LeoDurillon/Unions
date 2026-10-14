@@ -3,13 +3,8 @@ import { eq } from 'drizzle-orm';
 
 import { branchName } from './branch';
 import { runGate } from './gate';
-import {
-  implementLoop,
-  install,
-  type ImplementDeps,
-  type Loop,
-  type Workspace,
-} from './implement-loop';
+import { install } from './implement-checks';
+import { implementLoop, type ImplementDeps, type Loop, type Workspace } from './implement-loop';
 import { ensureTicketContainer } from './provision';
 import {
   outcomeOf,

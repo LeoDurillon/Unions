@@ -63,11 +63,29 @@ export function saveGeneratedCompose(
   db: Db,
   ticketId: number,
   result: { yaml: string } | { error: string },
+  catalog?: Preview['composeCatalog'],
 ): Preview {
   return patchPreview(db, ticketId, {
     composeYaml: 'yaml' in result ? result.yaml : null,
     composeError: 'error' in result ? result.error : null,
     composeAt: Date.now(),
+    ...(catalog ? { composeCatalog: catalog } : {}),
+  });
+}
+
+/** The state or result of the e2e run the user asked for; the preview's own status is kept. */
+export function recordE2e(
+  db: Db,
+  ticketId: number,
+  values: Pick<Preview, 'e2eStatus'> &
+    Partial<Pick<Preview, 'e2eOutput' | 'e2eExitCode' | 'e2eScreenshots'>>,
+): Preview {
+  return patchPreview(db, ticketId, {
+    e2eOutput: null,
+    e2eExitCode: null,
+    e2eScreenshots: null,
+    ...values,
+    e2eAt: Date.now(),
   });
 }
 
@@ -88,6 +106,17 @@ export function activePreviews(db: Db): Preview[] {
  * are left as they are: their containers do not depend on the worker.
  */
 export function recoverPreviews(db: Db): void {
+  const testing = db
+    .select()
+    .from(schema.previews)
+    .where(eq(schema.previews.e2eStatus, 'running'))
+    .all();
+  for (const row of testing) {
+    recordE2e(db, row.ticketId, {
+      e2eStatus: 'skipped',
+      e2eOutput: 'The worker stopped during the run: run the tests again',
+    });
+  }
   for (const row of activePreviews(db).filter((preview) => preview.status !== 'running')) {
     updatePreview(db, row.ticketId, {
       status: 'failed',

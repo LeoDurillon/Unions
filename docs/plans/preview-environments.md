@@ -1,6 +1,6 @@
 # Plan: preview environments
 
-Status: phases 1 and 2 implemented (branch `preview-container-feature`); phases 3 and 4 not started. Replaces the single-container design first written in `SPEC.md` (one image, one
+Status: phases 1 to 3 implemented (branch `preview-container-feature`); phase 4 not started. Replaces the single-container design first written in `SPEC.md` (one image, one
 start command, one port): that one could not run apps needing a database or a queue.
 
 ## Idea
@@ -178,8 +178,39 @@ Differences from the design above, decided while building it:
 - **Variables as a file**: a top-level config with inline `content`, given to one service at an absolute path.
   Compose copies it into the container; a path inside a folder mounted from the workspace is refused, since the copy
   would land in the agent's working copy.
+- **Profiles**: the settings choose the compose profiles to enable (`--profile` when the file is resolved, the
+  repository's and the user's own); `profiles:` is then dropped from the file that runs, or `up` would leave those
+  services out again. Each generation also reads the file with every profile (`--profile '*'`) and keeps its
+  catalog (`previews.compose_catalog`: every profile and service), which the settings offer as boxes and chips. An
+  exposed service missing because its profile is not enabled says which profile to enable.
 - **The services of the compose file** are listed in the settings from the latest file generated for one of the
   project's tickets (no worker round trip): chips add them to the exposed services.
+
+## Phase 3 as built
+
+- **The e2e command is optional** (Preview settings → End-to-end tests).
+- **It runs when the user asks**, from the ticket's Preview section ("Run e2e tests"), never on its own: a browser
+  and a whole environment take a lot of memory. The implementation loop runs the checks only. Runs are one at a
+  time across tickets (a second request records why it did not run), and refused while a step runs on the ticket
+  (the agent shares the container). The worker starts the ticket's container for it, starts or updates the preview
+  (`up -d --build` rebuilds only what changed), and stops the container again unless a step started meanwhile.
+- **Results** stay on the preview (`previews.e2e_*`): passing, failing (output, exit code) or not run (why). Up to 5
+  failure screenshots (`test-results/**/*.png`, under 5 MB) become private ticket files named `e2e-<test>.png`,
+  replaced by each run (a green run removes them): the agents and the final review read them. A failing run offers
+  **"Send the failure to the agent"** at the final review or once done: a normal revision with the output as its
+  feedback, like review comments.
+- **Red or not run**: a preview the ticket's code breaks (refused compose file, failed build, a service that never
+  answers) counts as failing. One that cannot run now (proxy down, running cap reached) is "not run", with the reason.
+- **Network**: the ticket's container joins the preview's own networks (not the proxy's shared one) when the preview
+  starts and whenever the container is provisioned while it runs, and leaves them before the preview goes down
+  (Docker refuses to remove a network a container is still on). The command gets `BASE_URL` and `PREVIEW_URL`: the
+  first exposed service from inside the environment (`http://web:3000`).
+- **Browser**: the agent image installs Chromium's system libraries (`playwright install-deps chromium`, pinned). A
+  run installs the browser with the repository's own `node_modules/.bin/playwright`, into the home volume, once.
+  While the preview runs, the agent's prompt says where it answers, and to run only the e2e tests its work touches.
+
+Limit: ticket containers created before the image change keep the old image (no browser libraries) until they are
+recreated.
 
 ## Phases
 
@@ -196,4 +227,5 @@ Differences from the design above, decided while building it:
 
 - Setup after start (migrations, seeding): commands in the settings, or left to the compose file (an init service)?
 - Expose previews on the local network, or this machine only (default)?
-- The e2e gate: after every implementation run, or only when the user starts a preview or reaches the final review?
+- ~~The e2e gate: after every implementation run, or only when the user starts a preview or reaches the final review?~~
+  Only when the user asks, from the ticket (phase 3): e2e runs take a lot of memory.

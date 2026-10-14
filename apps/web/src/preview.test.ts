@@ -74,6 +74,15 @@ test('preview settings are checked, saved and cleared', async () => {
   );
   const saved = (await (await put(SETTINGS)).json()) as PublicProject;
   expect(saved.config.preview).toEqual(SETTINGS);
+  const withE2e = (await (
+    await put({ ...SETTINGS, e2eCommand: '  npx playwright test ' })
+  ).json()) as PublicProject;
+  expect(withE2e.config.preview?.e2eCommand).toBe('npx playwright test');
+  const withProfiles = (await (
+    await put({ ...SETTINGS, profiles: ['storage', ' storage ', 'jobs'] })
+  ).json()) as PublicProject;
+  expect(withProfiles.config.preview?.profiles).toEqual(['storage', 'jobs']);
+  expect((await put({ ...SETTINGS, profiles: ['bad profile'] })).status).toBe(400);
   const cleared = (await (await put(null)).json()) as PublicProject;
   expect(cleared.config.preview).toBeUndefined();
   expect(cleared.config.baseBranch).toBe('main');
@@ -139,5 +148,47 @@ test("the settings list the services of the project's latest generated compose f
   expect(empty.composeServices).toBeNull();
   saveGeneratedCompose(db, ticketId, { yaml: 'services:\n  web: {}\n  db: {}\n' });
   const listed = (await (await call('GET', base)).json()) as PreviewSettingsView;
-  expect(listed.composeServices).toMatchObject({ names: ['web', 'db'], ticketId });
+  expect(listed.composeServices).toMatchObject({ names: ['web', 'db'], profiles: [], ticketId });
+  saveGeneratedCompose(
+    db,
+    ticketId,
+    { yaml: 'services: {}' },
+    {
+      profiles: ['storage'],
+      services: ['web', 'db', 's3'],
+    },
+  );
+  const catalog = (await (await call('GET', base)).json()) as PreviewSettingsView;
+  expect(catalog.composeServices).toMatchObject({
+    names: ['web', 'db', 's3'],
+    profiles: ['storage'],
+  });
+});
+
+test('the e2e tests run on request, never during a run, one request at a time', async () => {
+  const base = `/api/tickets/${ticketId}/preview`;
+  const view = async (): Promise<PreviewView> =>
+    (await (await call('GET', base)).json()) as PreviewView;
+  await put(SETTINGS);
+  db.update(schema.tickets)
+    .set({ workspaceVolume: 'union-t1-ws' })
+    .where(eq(schema.tickets.id, ticketId))
+    .run();
+  expect((await view()).e2eRefusal).toContain('end-to-end command');
+  await put({ ...SETTINGS, e2eCommand: 'npx playwright test' });
+  expect(await view()).toMatchObject({ e2eCommand: 'npx playwright test', e2eRefusal: null });
+  db.update(schema.tickets)
+    .set({ phase: { kind: 'running', step: 'implement' } })
+    .where(eq(schema.tickets.id, ticketId))
+    .run();
+  expect((await call('POST', `${base}/e2e`)).status).toBe(409);
+  db.update(schema.tickets)
+    .set({ phase: { kind: 'done' } })
+    .where(eq(schema.tickets.id, ticketId))
+    .run();
+  expect((await call('POST', `${base}/e2e`)).status).toBe(202);
+  expect((await call('POST', `${base}/e2e`)).status).toBe(409);
+  expect(db.select().from(schema.commands).all()).toMatchObject([
+    { type: 'preview_e2e', ticketId },
+  ]);
 });

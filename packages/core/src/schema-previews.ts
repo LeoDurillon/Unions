@@ -4,6 +4,9 @@ import { now, projects, tickets } from './schema';
 
 export const PREVIEW_STATUSES = ['starting', 'running', 'stopping', 'stopped', 'failed'] as const;
 
+/** The last end-to-end run the user asked for: `skipped` means it could not run (the reason in its output). */
+export const E2E_STATUSES = ['running', 'green', 'red', 'skipped'] as const;
+
 /**
  * A ticket's preview: its compose project (`union-t<id>`) run from the ticket's workspace, served by
  * the proxy at `url`. One row per ticket, kept after a stop so the panel shows how it ended.
@@ -26,10 +29,21 @@ export const previews = sqliteTable('previews', {
   /** Why the last generation failed (the file was refused or could not be read). */
   composeError: text('compose_error'),
   composeAt: integer('compose_at'),
+  /** Every profile and every service of the compose file, whatever the profiles enabled: what the settings offer. */
+  composeCatalog: text('compose_catalog', { mode: 'json' }).$type<{
+    profiles: string[];
+    services: string[];
+  }>(),
   /** The user's own version of it: when set, Start runs it instead of generating one. */
   override: text('override'),
   overrideAt: integer('override_at'),
   startedAt: integer('started_at'),
+  e2eStatus: text('e2e_status', { enum: E2E_STATUSES }),
+  /** The last lines the e2e command printed, or why it did not run. */
+  e2eOutput: text('e2e_output'),
+  e2eExitCode: integer('e2e_exit_code'),
+  e2eScreenshots: integer('e2e_screenshots'),
+  e2eAt: integer('e2e_at'),
   updatedAt: integer('updated_at').notNull().default(now),
 });
 

@@ -1,12 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { PreviewConfig } from '@union/core';
-import { exposedServices, PREVIEW_TEMPLATES } from '@union/core/preview';
+import { exposedServices, PREVIEW_TEMPLATES, type PreviewConfig } from '@union/core/preview';
 import { useState, type ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
 import { envLines, parseEnvLines } from '../../lib/env-lines';
 import { previewApi } from '../../lib/preview-api';
 import { Button, ErrorText, Field, inputClass } from '../ui';
+import { PreviewProfilesField } from './preview-profiles-field';
 import { PreviewSecrets } from './preview-secrets';
 import { PreviewServicesField, serviceRows, type ServiceRow } from './preview-services-field';
 
@@ -16,16 +16,33 @@ type Form = {
   env: string;
   envFileService: string;
   envFilePath: string;
+  e2eCommand: string;
+  profiles: string[];
+};
+
+const EMPTY: Form = {
+  composeFile: 'compose.yaml',
+  rows: [{ name: '', port: '', prefix: '' }],
+  env: '',
+  envFileService: '',
+  envFilePath: '',
+  e2eCommand: '',
+  profiles: [],
 };
 
 function initial(project: PublicProject): Form {
   const { preview } = project.config;
+  if (!preview) {
+    return EMPTY;
+  }
   return {
-    composeFile: preview?.composeFile ?? 'compose.yaml',
-    rows: preview ? serviceRows(exposedServices(preview)) : [{ name: '', port: '', prefix: '' }],
-    env: envLines(preview?.env ?? {}),
-    envFileService: preview?.envFile?.service ?? '',
-    envFilePath: preview?.envFile?.path ?? '',
+    composeFile: preview.composeFile,
+    rows: serviceRows(exposedServices(preview)),
+    env: envLines(preview.env),
+    envFileService: preview.envFile?.service ?? '',
+    envFilePath: preview.envFile?.path ?? '',
+    e2eCommand: preview.e2eCommand ?? '',
+    profiles: preview.profiles ?? [],
   };
 }
 
@@ -137,6 +154,8 @@ function settingsOf(form: Form): PreviewConfig {
     ...(form.envFileService.trim() === ''
       ? {}
       : { envFile: { service: form.envFileService, path: form.envFilePath } }),
+    ...(form.e2eCommand.trim() === '' ? {} : { e2eCommand: form.e2eCommand }),
+    ...(form.profiles.length === 0 ? {} : { profiles: form.profiles }),
   };
 }
 
@@ -209,6 +228,13 @@ export function PreviewSettingsSection({ project }: { project: PublicProject }):
           setForm({ ...form, composeFile });
         }}
       />
+      <PreviewProfilesField
+        selected={form.profiles}
+        known={settings.data?.composeServices?.profiles ?? []}
+        onChange={(profiles) => {
+          setForm({ ...form, profiles });
+        }}
+      />
       <PreviewServicesField
         rows={form.rows}
         found={settings.data?.composeServices ?? null}
@@ -223,6 +249,15 @@ export function PreviewSettingsSection({ project }: { project: PublicProject }):
         }}
       />
       <EnvFileFields form={form} onChange={setForm} />
+      <TextField
+        label="End-to-end tests"
+        hint="Optional. Runs in the ticket's container after the checks pass, against its preview (BASE_URL is the first service, from inside the environment); a failure goes back to the agent like a failing check."
+        value={form.e2eCommand}
+        placeholder="npx playwright test"
+        onChange={(e2eCommand) => {
+          setForm({ ...form, e2eCommand });
+        }}
+      />
       <ErrorText error={save.error} />
       <SaveButtons project={project} save={save} />
       <PreviewSecrets projectId={project.id} names={settings.data?.secretNames ?? []} />

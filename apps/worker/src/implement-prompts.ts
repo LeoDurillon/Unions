@@ -1,3 +1,6 @@
+import type { PreviewConfig } from '@union/core';
+
+import { baseUrl } from './e2e';
 import type { GateResult } from './gate';
 import type { PublishResult } from './publish';
 
@@ -6,6 +9,21 @@ export function gateHint(command: string | undefined): string {
   return command
     ? `\n\nWhen you finish, the checks run with \`${command}\`. Run them yourself before finishing.`
     : '';
+}
+
+/**
+ * Appended when the ticket's preview is running as the agent starts: where it answers from the
+ * agent's container, and how to run the end-to-end tests the work touches.
+ */
+export function previewHint(preview: PreviewConfig | undefined, running: boolean): string {
+  const url = preview ? baseUrl(preview) : null;
+  if (!running || !url) {
+    return '';
+  }
+  const tests = preview?.e2eCommand
+    ? ` The project's end-to-end tests run with \`${preview.e2eCommand}\`: run only the ones your work touches (they take a lot of memory); the user runs the whole suite from the ticket.`
+    : '';
+  return `\n\nA preview of your work is running, reachable from here at ${url} (the BASE_URL variable): its services are on your network by their names, and it shows your changes as you make them where the source is mounted. The browser's system libraries are installed; run \`npx playwright install chromium\` once if Playwright asks for a browser.${tests}`;
 }
 
 /** Sent into the resumed session when the user asks for changes. */

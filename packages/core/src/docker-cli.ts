@@ -164,6 +164,32 @@ export class DockerCli implements ContainerRuntime {
     return stream(args, spec.stdin, spec.signal);
   }
 
+  async projectNetworks(project: string): Promise<string[]> {
+    const listed = await ok([
+      'network',
+      'ls',
+      '--filter',
+      `label=com.docker.compose.project=${project}`,
+      '--format',
+      '{{.Name}}',
+    ]);
+    return listed.split('\n').filter((line) => line.trim() !== '');
+  }
+
+  async connectNetwork(network: string, container: string): Promise<void> {
+    const joined = await run(['network', 'connect', network, container]);
+    if (joined.code !== 0 && !/already exists|already attached/iu.test(joined.stderr)) {
+      throw new Error(`docker network connect failed: ${joined.stderr.trim()}`);
+    }
+  }
+
+  async disconnectNetwork(network: string, container: string): Promise<void> {
+    const left = await run(['network', 'disconnect', network, container]);
+    if (left.code !== 0 && !/is not connected|not found|No such/iu.test(left.stderr)) {
+      throw new Error(`docker network disconnect failed: ${left.stderr.trim()}`);
+    }
+  }
+
   async networkExists(name: string): Promise<boolean> {
     const inspected = await run(['network', 'inspect', name]);
     return inspected.code === 0;

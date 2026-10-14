@@ -48,4 +48,9 @@ export type ContainerRuntime = {
   /** Runs a helper container; streams its output (stdout and stderr) line by line. */
   runHelper(spec: HelperSpec): AsyncGenerator<string, ExecResult>;
   networkExists(name: string): Promise<boolean>;
+  /** The networks of a compose project (by its label), for an outside container to join. */
+  projectNetworks(project: string): Promise<string[]>;
+  /** Joins or leaves a network; already joined or already left is not an error. */
+  connectNetwork(network: string, container: string): Promise<void>;
+  disconnectNetwork(network: string, container: string): Promise<void>;
 };

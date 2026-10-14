@@ -11,6 +11,7 @@ import {
 
 import { compose } from './compose';
 import { fileToRun } from './compose-file';
+import { joinPreview, leavePreview } from './network';
 import { waitReady } from './ready';
 import {
   lastLines,
@@ -74,16 +75,17 @@ async function up(deps: PreviewDeps, target: Target, file: ComposeJson): Promise
 }
 
 /** The last lines the services printed; empty when they cannot be read. */
-export async function serviceLogs(deps: PreviewDeps, project: string): Promise<string> {
+export async function serviceLogs(deps: PreviewDeps, ticketId: number): Promise<string> {
   const output = await compose(deps.runtime, deps.settings, {
-    args: ['-p', project, 'logs', '--no-color', '--tail', '200'],
+    args: ['-p', previewProject(ticketId), 'logs', '--no-color', '--tail', '200'],
   });
   return output.tail.join('\n');
 }
 
-export async function takeDown(deps: PreviewDeps, project: string): Promise<void> {
+export async function takeDown(deps: PreviewDeps, ticketId: number): Promise<void> {
+  await leavePreview(deps.runtime, ticketId);
   const output = await compose(deps.runtime, deps.settings, {
-    args: ['-p', project, 'down', '-v', '--remove-orphans'],
+    args: ['-p', previewProject(ticketId), 'down', '-v', '--remove-orphans'],
   });
   if (output.exitCode !== 0) {
     throw new PreviewError(`docker compose down failed:\n${lastLines(output.tail)}`);
@@ -95,6 +97,7 @@ async function startTarget(deps: PreviewDeps, target: Target): Promise<void> {
   if (others.length >= deps.settings.maxRunning) {
     throw new PreviewError(
       `${others.length} previews are running already (the limit): stop one first`,
+      true,
     );
   }
   updatePreview(deps.db, target.ticketId, {
@@ -107,6 +110,7 @@ async function startTarget(deps: PreviewDeps, target: Target): Promise<void> {
   if (!(await deps.runtime.networkExists(PREVIEW_NETWORK))) {
     throw new PreviewError(
       "The preview proxy is not running: it starts with Union's compose stack (bun run compose)",
+      true,
     );
   }
   await up(deps, target, await fileToRun(deps, target));
@@ -131,47 +135,59 @@ async function startTarget(deps: PreviewDeps, target: Target): Promise<void> {
 }
 
 /** After a failed start: the services' last output, then nothing left running. */
-async function cleanUp(deps: PreviewDeps, project: string): Promise<string> {
+async function cleanUp(deps: PreviewDeps, ticketId: number): Promise<string> {
   let logTail = '';
   try {
-    logTail = await serviceLogs(deps, project);
-    await takeDown(deps, project);
+    logTail = await serviceLogs(deps, ticketId);
+    await takeDown(deps, ticketId);
   } catch {
     // Best effort: the failure being reported matters more.
   }
   return logTail;
 }
 
+/** How a start ended; `unavailable`: the preview cannot run now, whatever the code (no settings, cap). */
+export type StartOutcome = { ok: true } | { ok: false; error: string; unavailable: boolean };
+
 /**
- * Starts the ticket's preview from its workspace. On any failure the reason and the services'
- * last output are kept, and what was started is taken down: a failed preview holds nothing.
+ * Starts (or updates) the ticket's preview from its workspace, and puts the ticket's container on
+ * its networks. On any failure the reason and the services' last output are kept, and what was
+ * started is taken down: a failed preview holds nothing.
  */
-export async function startPreview(deps: PreviewDeps, ticketId: number): Promise<void> {
-  let project: string | null = null;
+export async function startPreview(deps: PreviewDeps, ticketId: number): Promise<StartOutcome> {
+  let loaded = false;
   try {
     const target = loadTarget(deps, ticketId);
-    ({ project } = target);
+    loaded = true;
     await startTarget(deps, target);
+    await joinPreview(deps.runtime, ticketId);
     updatePreview(deps.db, ticketId, {
       status: 'running',
-      logTail: await serviceLogs(deps, target.project),
+      logTail: await serviceLogs(deps, ticketId),
       logAt: Date.now(),
     });
+    return { ok: true };
   } catch (error) {
-    const logTail = project ? await cleanUp(deps, project) : '';
+    const logTail = loaded ? await cleanUp(deps, ticketId) : '';
+    const message = error instanceof Error ? error.message : String(error);
     updatePreview(deps.db, ticketId, {
       status: 'failed',
-      error: error instanceof Error ? error.message : String(error),
+      error: message,
       logTail: logTail === '' ? null : logTail,
       logAt: Date.now(),
     });
+    return {
+      ok: false,
+      error: message,
+      unavailable: !loaded || (error instanceof PreviewError && error.unavailable),
+    };
   }
 }
 
 export async function stopPreview(deps: PreviewDeps, ticketId: number): Promise<void> {
   updatePreview(deps.db, ticketId, { status: 'stopping' });
   try {
-    await takeDown(deps, previewProject(ticketId));
+    await takeDown(deps, ticketId);
     updatePreview(deps.db, ticketId, { status: 'stopped', error: null });
   } catch (error) {
     updatePreview(deps.db, ticketId, {
@@ -189,7 +205,7 @@ export async function refreshPreviewLogs(deps: PreviewDeps, ticketId: number): P
   }
   updatePreview(deps.db, ticketId, {
     status: row.status,
-    logTail: await serviceLogs(deps, previewProject(ticketId)),
+    logTail: await serviceLogs(deps, ticketId),
     logAt: Date.now(),
   });
 }

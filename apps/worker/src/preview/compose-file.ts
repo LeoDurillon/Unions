@@ -6,11 +6,14 @@ import {
   isRecord,
   previewCompose,
   saveGeneratedCompose,
+  composeServices,
   tidyCompose,
+  withoutProfiles,
   withWorkspaceMounts,
   type ComposeJson,
 } from '@union/core';
 
+import { catalogSummary, profileArgs, profileHint, readCatalog, type Catalog } from './catalog';
 import { compose } from './compose';
 import {
   lastLines,
@@ -41,10 +44,20 @@ async function resolve(
   const output = await compose(deps.runtime, deps.settings, {
     args:
       'file' in source
-        ? ['-p', target.project, '-f', source.file, 'config', '--format', 'json']
+        ? [
+            '-p',
+            target.project,
+            ...profileArgs(target),
+            '-f',
+            source.file,
+            'config',
+            '--format',
+            'json',
+          ]
         : [
             '-p',
             target.project,
+            ...profileArgs(target),
             '--project-directory',
             projectDirectory(target),
             '-f',
@@ -77,15 +90,27 @@ function refuse(problems: string[], heading: string): void {
   }
 }
 
-function exposedProblems(resolved: ComposeJson, target: Target): string[] {
+function exposedProblems(resolved: ComposeJson, target: Target, catalog: Catalog): string[] {
   return target.exposed.flatMap(({ service }) => {
     const problem = exposedServiceProblem(resolved, service);
-    return problem ? [problem] : [];
+    if (!problem) {
+      return [];
+    }
+    return [
+      composeServices(resolved).includes(service)
+        ? problem
+        : (profileHint(catalog, service) ?? problem),
+    ];
   });
 }
 
 /** The file from the repository's: to run (`shown` false) or to show, secrets as references. */
-async function buildFile(deps: PreviewDeps, target: Target, shown: boolean): Promise<ComposeJson> {
+async function buildFile(
+  deps: PreviewDeps,
+  target: Target,
+  shown: boolean,
+  catalog: Catalog,
+): Promise<ComposeJson> {
   const resolved = await resolve(
     deps,
     target,
@@ -93,7 +118,7 @@ async function buildFile(deps: PreviewDeps, target: Target, shown: boolean): Pro
     configEnvironment(target, shown),
   );
   refuse(
-    [...composeProblems(resolved), ...exposedProblems(resolved, target)],
+    [...composeProblems(resolved), ...exposedProblems(resolved, target, catalog)],
     'The compose file cannot run as a preview',
   );
   const written = shown ? shownVariables(target) : runVariables(target);
@@ -117,18 +142,26 @@ async function buildFile(deps: PreviewDeps, target: Target, shown: boolean): Pro
  * panel shows each secret as `${NAME}`: with secrets it is built a second time that way.
  */
 export async function generatedFile(deps: PreviewDeps, target: Target): Promise<ComposeJson> {
+  const catalog = await readCatalog(deps, target);
+  const summary = catalogSummary(catalog);
   try {
-    const file = await buildFile(deps, target, false);
+    const file = await buildFile(deps, target, false, catalog);
     const names = Object.keys(target.secrets);
-    const shown = names.length === 0 ? file : await buildFile(deps, target, true);
-    saveGeneratedCompose(deps.db, target.ticketId, {
-      yaml: unmaskSecrets(toYaml(shown), names),
-    });
+    const shown = names.length === 0 ? file : await buildFile(deps, target, true, catalog);
+    saveGeneratedCompose(
+      deps.db,
+      target.ticketId,
+      { yaml: unmaskSecrets(toYaml(shown), names) },
+      summary,
+    );
     return file;
   } catch (error) {
-    saveGeneratedCompose(deps.db, target.ticketId, {
-      error: error instanceof Error ? error.message : String(error),
-    });
+    saveGeneratedCompose(
+      deps.db,
+      target.ticketId,
+      { error: error instanceof Error ? error.message : String(error) },
+      summary,
+    );
     throw error;
   }
 }
@@ -140,7 +173,10 @@ export async function generatedFile(deps: PreviewDeps, target: Target): Promise<
 async function ownFile(deps: PreviewDeps, target: Target, yaml: string): Promise<ComposeJson> {
   // Its secrets are `${NAME}` references: compose fills them in here.
   const resolved = await resolve(deps, target, { yaml }, configEnvironment(target, false));
-  const file = { ...withWorkspaceMounts(resolved, target.workspaceVolume), name: target.project };
+  const file = {
+    ...withoutProfiles(withWorkspaceMounts(resolved, target.workspaceVolume)),
+    name: target.project,
+  };
   refuse(
     composeProblems(file, { workspaceVolume: target.workspaceVolume }),
     'Your compose file cannot run as a preview',

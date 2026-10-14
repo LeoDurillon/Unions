@@ -2,6 +2,7 @@ import {
   type ContainerRuntime,
   type Db,
   effortFor,
+  getPreview,
   listAttachments,
   modelFor,
   parentOf,
@@ -13,9 +14,9 @@ import {
 
 import { runResumable, type AgentFn, type AgentOutcome, type AgentRun } from './agent';
 import { approvedBefore } from './approved';
-import { runGate, runInstall, type GateResult } from './gate';
 import type { GitHubApi } from './github/api';
-import { feedbackPrompt, gateFailurePrompt, gateHint } from './implement-prompts';
+import { check, type Checked } from './implement-checks';
+import { feedbackPrompt, gateHint, previewHint } from './implement-prompts';
 import { askSession, COMMIT_HOOK_HINT, commitLeftovers, type Refused } from './leftovers';
 import { attachmentsSection, buildPrompt } from './prompts';
 import { REPO_DIR, type ProvisionConfig } from './provision';
@@ -43,7 +44,7 @@ export type ImplementDeps = {
 
 export type Loop = {
   outcome: AgentOutcome;
-  gate: GateResult | null;
+  gate: Checked['gate'];
   iterations: number;
   /** The repository's hook refused the changes the agent left uncommitted: the run pauses. */
   refused?: Refused;
@@ -65,6 +66,7 @@ function freshPrompt({ deps, context, project }: Workspace): string {
     instructions:
       resolveAgent(deps.db, 'implement').prompt +
       gateHint(project.config.gateCommand) +
+      previewHint(project.config.preview, getPreview(deps.db, ticket.id)?.status === 'running') +
       COMMIT_HOOK_HINT,
     approved: approvedBefore(deps.db, ticket.id, 'implement'),
     revision: null,
@@ -88,11 +90,10 @@ function firstPrompt(workspace: Workspace): string {
 /** Agent turn, then checks; on red checks the same session gets the failure, up to the limit. */
 export async function implementLoop(workspace: Workspace): Promise<Loop> {
   const { deps, context, project, container } = workspace;
-  const { gateCommand, maxIterations } = project.config;
-  const max = maxIterations ?? DEFAULT_MAX_ITERATIONS;
+  const max = project.config.maxIterations ?? DEFAULT_MAX_ITERATIONS;
   let prompt = firstPrompt(workspace);
   let sessionId = context.resumeSessionId;
-  let gate: GateResult | null = null;
+  let gate: Checked['gate'] = null;
   const run = (): AgentRun => ({
     container,
     cwd: REPO_DIR,
@@ -118,23 +119,11 @@ export async function implementLoop(workspace: Workspace): Promise<Loop> {
     if (leftovers.kind === 'refused') {
       return { outcome, gate: null, iterations: iteration, refused: leftovers };
     }
-    gate = gateCommand ? await runGate(deps.runtime, container, gateCommand, context.signal) : null;
-    if (!gate || gate.green || !gateCommand || iteration >= max) {
+    const checked = await check(workspace);
+    ({ gate } = checked);
+    if (checked.retry === null || iteration >= max) {
       return { outcome, gate, iterations: iteration };
     }
-    context.log({ type: 'union_gate', green: false, exitCode: gate.exitCode, iteration });
-    prompt = gateFailurePrompt(gateCommand, gate);
+    prompt = checked.retry;
   }
-}
-
-export function install(workspace: Workspace): Promise<string | null> {
-  const { installCommand } = workspace.project.config;
-  return installCommand
-    ? runInstall(
-        workspace.deps.runtime,
-        workspace.container,
-        installCommand,
-        workspace.context.signal,
-      )
-    : Promise.resolve(null);
 }

@@ -12,6 +12,8 @@ export const previewApi = {
   start: (ticketId: number): Promise<PreviewView> => request('POST', `${base(ticketId)}/start`),
   stop: (ticketId: number): Promise<PreviewView> => request('POST', `${base(ticketId)}/stop`),
   logs: (ticketId: number): Promise<PreviewView> => request('POST', `${base(ticketId)}/logs`),
+  /** The worker runs the project's e2e command against the ticket's preview. */
+  e2e: (ticketId: number): Promise<PreviewView> => request('POST', `${base(ticketId)}/e2e`),
   /** The worker generates the compose file without starting anything. */
   generate: (ticketId: number): Promise<PreviewView> =>
     request('POST', `${base(ticketId)}/generate`),

@@ -6,6 +6,7 @@ import type { PreviewView } from '../../src/api-types';
 import type { Tone } from '../lib/labels';
 import { previewApi } from '../lib/preview-api';
 import { PreviewComposeDialog } from './preview-compose-dialog';
+import { PreviewE2e } from './preview-e2e';
 import { Badge, Button, ErrorText } from './ui';
 
 const STATUS: Record<Preview['status'], { label: string; tone: Tone }> = {
@@ -124,7 +125,14 @@ function LogTail({
  * The ticket's preview: its compose environment run from the workspace, opened through the proxy.
  * Start and stop are commands the worker runs; the panel follows the live events.
  */
-export function PreviewSection({ ticketId }: { ticketId: number }): ReactElement | null {
+export function PreviewSection({
+  ticketId,
+  canRevise,
+}: {
+  ticketId: number;
+  /** A failure can go to the agent: at the final review, or once done. */
+  canRevise: boolean;
+}): ReactElement | null {
   const queryClient = useQueryClient();
   const queryKey = ['ticket', ticketId, 'preview'];
   const query = useQuery({ queryKey, queryFn: () => previewApi.get(ticketId) });
@@ -174,6 +182,7 @@ export function PreviewSection({ ticketId }: { ticketId: number }): ReactElement
       ) : null}
       <ErrorText error={query.error ?? mutation.error} />
       {preview ? <LogTail preview={preview} act={act} busy={mutation.isPending} /> : null}
+      <PreviewE2e ticketId={ticketId} view={view} canRevise={canRevise} />
     </section>
   );
 }

@@ -92,6 +92,13 @@ function IssueLine({ detail }: { detail: TicketDetail }): ReactElement {
   );
 }
 
+/** Where a revision can be asked from the ticket (e2e failures, like review comments). */
+function canRevise(phase: TicketDetail['ticket']['phase']): boolean {
+  return (
+    phase.kind === 'done' || (phase.kind === 'awaiting_approval' && phase.step === 'final_review')
+  );
+}
+
 export function OverviewTab({
   detail,
   onOpenTicket,
@@ -118,7 +125,7 @@ export function OverviewTab({
       )}
       <TicketLinks detail={detail} onOpen={onOpenTicket} />
       <TicketAttachments ticketId={ticket.id} />
-      <PreviewSection ticketId={ticket.id} />
+      <PreviewSection ticketId={ticket.id} canRevise={canRevise(ticket.phase)} />
       <ErrorText error={command.error} />
       <div className="flex gap-2">
         {kind === 'backlog' ? (

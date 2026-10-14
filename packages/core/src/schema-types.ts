@@ -16,8 +16,15 @@ export type PreviewConfig = {
   /** The exposed services; the first is the one "Open" goes to. */
   services?: PreviewService[];
   env: Record<string, string>;
+  /** Compose profiles to enable (`--profile`): services in other profiles are left out. */
+  profiles?: string[];
   /** The variables also given as a file, at `path` inside `service`. */
   envFile?: { service: string; path: string };
+  /**
+   * End-to-end tests run against the preview after the implementation's checks pass (`npx playwright
+   * test`); a failure goes back to the agent like a failing check. Unset: no e2e gate.
+   */
+  e2eCommand?: string;
   /** Phase 1 settings, read as one exposed service. */
   service?: string;
   port?: number;

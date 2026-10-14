@@ -78,7 +78,8 @@ function rewriteService(
   service: Record<string, unknown>,
   target: PreviewTarget,
 ): Record<string, unknown> {
-  const { container_name: _name, ports: _ports, ...rest } = service;
+  // `profiles` too: the profiles were applied when the file was resolved, the file runs whole.
+  const { container_name: _name, ports: _ports, profiles: _profiles, ...rest } = service;
   const exposed = target.exposed.find((candidate) => candidate.service === name);
   const environment = {
     ...(isRecord(service.environment) ? service.environment : {}),
@@ -248,4 +249,21 @@ export function envFileProblem(
   return isRecord(workspace)
     ? `The env file ${envFile.path} would be written into the workspace (mounted at ${String(workspace.target)}), where the agent could read or commit it: give a path outside it, or read the variables from the environment`
     : null;
+}
+
+/**
+ * The same file without its services' `profiles`: the selection was applied when it was resolved,
+ * and `up` would leave out again any service that still names one.
+ */
+export function withoutProfiles(config: ComposeJson): ComposeJson {
+  return {
+    ...config,
+    services: mapValues(config.services, (service) => {
+      if (!isRecord(service)) {
+        return service;
+      }
+      const { profiles: _profiles, ...rest } = service;
+      return rest;
+    }),
+  };
 }

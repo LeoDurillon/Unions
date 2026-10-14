@@ -4,6 +4,8 @@
  */
 import type { PreviewConfig, PreviewService } from './schema-types';
 
+export type { PreviewConfig, PreviewService } from './schema-types';
+
 /** What a variable's value can use, as `{name}`; `X` is a service name. */
 export const PREVIEW_TEMPLATES = [
   { name: 'service.X.url', description: "An exposed service's address, from your browser" },
