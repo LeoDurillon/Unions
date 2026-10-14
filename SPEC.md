@@ -247,46 +247,19 @@ board as In review.
 
 ## Preview environments (planned)
 
-Once a ticket reaches final review (and after it is Done), its panel shows **Start preview**. The worker starts
-the app from the ticket's branch in dev mode, and a reverse proxy serves it at `http://<ticket id>.localhost`
-(for example `http://12.localhost`). Browsers resolve `*.localhost` to the local machine, so no DNS setup is needed.
+Full design: [`docs/plans/preview-environments.md`](docs/plans/preview-environments.md). In short:
 
-### Startup is configured per project
-
-New section in the project settings, stored in `projects.config.preview`:
-
-| Field     | Example                             | Meaning                                                            |
-| --------- | ----------------------------------- | ------------------------------------------------------------------ |
-| `image`   | `oven/bun:1.4.1`, `node:22`         | Image the app runs in (default: the agent image)                   |
-| `install` | `bun install`                       | Run once per start, before the start command (optional)            |
-| `start`   | `bun run dev --host 0.0.0.0`        | Long-running command that serves the app; must listen on all hosts |
-| `port`    | `5173`                              | Port the app listens on inside the container; the proxy targets it |
-| `env`     | `{ "DATABASE_URL": "file:dev.db" }` | Extra environment variables (no GitHub or Claude credentials)      |
-
-Without a `start` command the button is hidden and the panel explains how to configure it.
-
-### Runtime
-
-- **Preview container:** `union-t<id>-preview`, separate from the agent container so it can run while the agent
-  is stopped and be stopped on its own. It mounts the ticket's workspace volume (the checked-out branch), runs
-  `install` then `start`, and joins the proxy network. It holds no GitHub or Claude credentials.
-- **Reverse proxy:** a Traefik container in the compose stack, listening on port 80 (configurable, for example
-  8080 → `http://12.localhost:8080`). The worker labels each preview container with its host rule, so routes appear
-  and disappear with the containers; WebSockets (Vite HMR) pass through.
-- **Commands:** `preview_start`, `preview_stop` and `preview_restart` go through `commands` like everything else;
-  only the worker touches Docker. State is stored on the ticket (`stopped`, `starting`, `running`, `failed`) and
-  streamed as events. The preview's stdout/stderr feed a **Preview log** tab.
-- **Lifecycle:** at most N previews run at once (default 3). A preview stops when the ticket is revised back into
-  implementation, archived or deleted, and when the worker shuts down. Restart re-runs `install` and `start`.
-- **Ready check:** `starting` becomes `running` once the port answers HTTP, or `failed` after a timeout, with the
-  log tail shown in the panel.
-
-### Open questions
-
-- Apps that need extra services (database, queue): a compose file in the repository started per ticket, or out of
-  scope for the first version?
-- Several exposed ports (separate frontend and API): route `api.<id>.localhost` to a second port, or keep one port?
-- Expose the preview on the local network, or only on this machine (default: this machine only)?
+- A ticket's branch runs from the repository's own Docker Compose file (path set per project), so apps with a
+  database or a queue work. Each ticket is its own compose project (`union-t<id>`): its own containers, network and
+  volumes, no published host ports.
+- The worker checks out the pushed commit on the host, resolves the file with `docker compose config`, refuses
+  dangerous settings (privileged, host network, Docker socket, mounts outside the checkout, external volumes), and
+  writes a new file with Traefik labels on the exposed services: `http://<id>.localhost`, `http://api.<id>.localhost`.
+- Per-project environment variables (secrets kept server side) with templates such as `{service.api.url}`, written
+  to the compose env file and optionally to an app env file in the checkout.
+- End-to-end tests: the agent's container joins the preview's network; Chromium's libraries are in the agent image,
+  the browser is installed at the repository's Playwright version on first use; a project e2e command runs as a gate
+  like the checks.
 
 ## MCP servers for agents (planned)
 

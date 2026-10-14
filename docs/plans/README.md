@@ -9,7 +9,7 @@ and linked.
 - [Split a PR into a stack](pr-stack-split.md): an agent splits a ready-for-review PR into stacked PRs. Needs groups.
 - [Restack](restack.md): rebase and retarget a stack after a revision or a merge.
 - [MCP servers for agents](mcp-servers.md): designed in SPEC.md; step 1 needs two checks first.
-- [Preview environments](preview-environments.md): designed in SPEC.md; three open questions.
+- [Preview environments](preview-environments.md): compose-based previews with e2e tests; three open questions.
 
 ## Ideas
 
