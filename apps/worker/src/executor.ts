@@ -5,7 +5,6 @@ import {
   listAttachments,
   listProjectFiles,
   modelFor,
-  parentOf,
   type Project,
   resolveAgent,
   sharedPrompt,
@@ -16,7 +15,7 @@ import { runAgent, runResumable } from './agent';
 import { runCodeStep } from './agent-services-step';
 import { approvedBefore } from './approved';
 import type { GitHubApi } from './github/api';
-import { buildPrompt, isPlanningStep } from './prompts';
+import { buildPrompt, isPlanningStep, parentContext } from './prompts';
 import { ensureTicketContainer, REPO_DIR, type ProvisionConfig } from './provision';
 import { runReviewStep } from './review';
 import type { StepContext, StepExecutor, StepResult } from './scheduler';
@@ -48,7 +47,7 @@ export function createExecutor(
       // start over from the same prompt.
       const prompt = buildPrompt({
         ticket,
-        parent: parentOf(db, ticket),
+        ...parentContext(db, ticket),
         shared: sharedPrompt(db, ticket.projectId),
         instructions: agent.prompt,
         approved: approvedBefore(db, ticket.id, step),

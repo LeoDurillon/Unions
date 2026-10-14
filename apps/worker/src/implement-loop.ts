@@ -6,7 +6,6 @@ import {
   listAttachments,
   listProjectFiles,
   modelFor,
-  parentOf,
   type Project,
   resolveAgent,
   sharedPrompt,
@@ -19,7 +18,7 @@ import type { GitHubApi } from './github/api';
 import { check, type Checked } from './implement-checks';
 import { agentServicesHint, feedbackPrompt, gateHint, previewHint } from './implement-prompts';
 import { askSession, COMMIT_HOOK_HINT, commitLeftovers, type Refused } from './leftovers';
-import { attachmentsSection, buildPrompt } from './prompts';
+import { attachmentsSection, buildPrompt, parentContext } from './prompts';
 import { REPO_DIR, type ProvisionConfig } from './provision';
 import type { StepContext } from './scheduler';
 
@@ -62,7 +61,7 @@ function freshPrompt({ deps, context, project }: Workspace): string {
   const { ticket, revision } = context;
   const prompt = buildPrompt({
     ticket,
-    parent: parentOf(deps.db, ticket),
+    ...parentContext(deps.db, ticket),
     shared: sharedPrompt(deps.db, ticket.projectId),
     instructions:
       resolveAgent(deps.db, 'implement').prompt +

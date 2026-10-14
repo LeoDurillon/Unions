@@ -1,15 +1,18 @@
 import {
   emitEvent,
   getTicket,
+  parentOf,
   ticketBase,
   type Investigation,
   type InvestigationOutcome,
   type Project,
+  type Ticket,
 } from '@union/core';
 
 import { runAgent, type AgentFn, type AgentOutcome } from './agent';
 import { runIn } from './container-exec';
 import type { InvestigationDeps } from './investigate';
+import { parentSection } from './prompts';
 import { ensureTicketContainer, REPO_DIR } from './provision';
 
 /**
@@ -50,6 +53,8 @@ export const TICKET_INVESTIGATION_DENIED = [
 export function ticketWhere(
   ticket: { title: string; body: string; branch: string | null },
   base: string,
+  /** The "Builds on" section of a ticket with a parent, as its steps get it; empty without one. */
+  buildsOn = '',
 ): string {
   const branch = ticket.branch
     ? `on the ticket's branch \`${ticket.branch}\` as its agent left it (uncommitted work included). Compare it with its base with \`git diff ${base}...HEAD\` and \`git status\``
@@ -60,7 +65,7 @@ The ticket:
 
 # ${ticket.title}
 
-${ticket.body}`;
+${ticket.body}${buildsOn === '' ? '' : `\n\n${buildsOn}`}`;
 }
 
 /** HEAD and the status of the work tree: what an investigation must leave as it found it. */
@@ -85,6 +90,17 @@ function toOutcome(outcome: AgentOutcome, cancelled: boolean): InvestigationOutc
   }
   const prefix = outcome.kind === 'rate_limited' ? 'Usage limit reached: ' : '';
   return { status: 'failed', error: `${prefix}${outcome.message}` };
+}
+
+/** Where the agent stands, with the ticket's parent (heading one level down, under the ticket). */
+function whereOnTicket(deps: InvestigationDeps, ticket: Ticket, project: Project): string {
+  const parent = parentOf(deps.db, ticket);
+  const base = project.config.baseBranch;
+  return ticketWhere(
+    ticket,
+    ticketBase(project, ticket),
+    parent ? `#${parentSection(parent, ticket, base)}` : '',
+  );
 }
 
 const CHANGED_WARNING =
@@ -127,7 +143,7 @@ export async function runOnTicket(
       container: name,
       cwd: REPO_DIR,
       model: investigation.model,
-      prompt: prompt(ticketWhere(ticket, ticketBase(project, ticket))),
+      prompt: prompt(whereOnTicket(deps, ticket, project)),
       tools: investigation.tools,
       denied: TICKET_INVESTIGATION_DENIED,
       signal,

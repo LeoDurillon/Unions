@@ -3,12 +3,16 @@ import {
   formatBytes,
   PLANNING_STEPS,
   type Attachment,
+  type Db,
+  parentOf,
+  schema,
   type ProjectFile,
   ticketLabel,
   type PlanningStep,
   type Step,
   type Ticket,
 } from '@union/core';
+import { eq } from 'drizzle-orm';
 
 export function isPlanningStep(step: Step): step is PlanningStep {
   return PLANNING_STEPS.some((planning) => planning === step);
@@ -18,6 +22,8 @@ export type PromptInput = {
   ticket: Ticket;
   /** The done ticket this one builds on: its changes are already in the checkout. */
   parent?: Ticket | null;
+  /** The project's base branch, to point at the parent's changes. */
+  projectBase?: string;
   /** Instructions every agent receives first: the "shared" agent's, then the project's own. */
   shared: string;
   /** This step's own instructions (editable per agent). */
@@ -31,8 +37,26 @@ export type PromptInput = {
   projectFiles?: ProjectFile[];
 };
 
-function parentSection(parent: Ticket): string {
-  return `# Builds on\n\nThis ticket builds on ${ticketLabel(parent)} "${parent.title}", which is done. Its changes are already in the code you are working on: build on them, do not redo them.\n\n${parent.body}`;
+/** How to see what the parent changed, from the branches the workspace was cloned with. */
+export function parentChanges(parent: Ticket, ticket: Ticket, projectBase: string): string {
+  if (parent.branch === null) {
+    return '';
+  }
+  if (ticket.baseBranch === parent.branch) {
+    const range = `origin/${parent.baseBranch ?? projectBase}`;
+    return `Your branch starts from its branch \`${parent.branch}\`. To see what it changed: \`git log --oneline ${range}..origin/${parent.branch}\` and \`git diff ${range}...origin/${parent.branch}\`.`;
+  }
+  if (parent.prNumber !== null) {
+    const base = ticket.baseBranch ?? projectBase;
+    return `It was merged into \`${base}\` through pull request #${parent.prNumber}. To see what it changed, find its commit with \`git log --oneline --grep '#${parent.prNumber}' origin/${base}\`, then \`git show <commit>\`.`;
+  }
+  return `Its branch was \`${parent.branch}\`: if it is still there, \`git log --oneline origin/${projectBase}..origin/${parent.branch}\` shows what it changed.`;
+}
+
+/** The done ticket this one builds on: its text, and where to look at its changes. */
+export function parentSection(parent: Ticket, ticket: Ticket, projectBase: string): string {
+  const changes = parentChanges(parent, ticket, projectBase);
+  return `# Builds on\n\nThis ticket builds on ${ticketLabel(parent)} "${parent.title}", which is done. Its changes are already in the code you are working on: build on them, do not redo them.${changes === '' ? '' : ` ${changes}`}\n\n${parent.body}`;
 }
 
 function attachmentLine(attachment: Attachment): string {
@@ -68,6 +92,7 @@ Use them for the project's local setup (a database dump, a local configuration).
 export function buildPrompt({
   ticket,
   parent,
+  projectBase = 'main',
   shared,
   instructions,
   approved,
@@ -77,7 +102,7 @@ export function buildPrompt({
 }: PromptInput): string {
   const parts = [shared, `# Task\n\n## ${ticket.title}\n\n${ticket.body}`];
   if (parent) {
-    parts.push(parentSection(parent));
+    parts.push(parentSection(parent, ticket, projectBase));
   }
   if (attachments.length > 0) {
     parts.push(attachmentsSection(attachments));
@@ -95,4 +120,17 @@ export function buildPrompt({
     );
   }
   return parts.join('\n\n');
+}
+
+/** The ticket's parent and the project's base branch, for the prompt's "Builds on" section. */
+export function parentContext(
+  db: Db,
+  ticket: Ticket,
+): { parent: Ticket | null; projectBase: string } {
+  const project = db
+    .select({ config: schema.projects.config })
+    .from(schema.projects)
+    .where(eq(schema.projects.id, ticket.projectId))
+    .get();
+  return { parent: parentOf(db, ticket), projectBase: project?.config.baseBranch ?? 'main' };
 }

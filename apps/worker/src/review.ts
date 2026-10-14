@@ -5,7 +5,6 @@ import {
   listProjectFiles,
   getTicket,
   modelFor,
-  parentOf,
   type Project,
   resolveAgent,
   schema,
@@ -17,7 +16,7 @@ import { eq } from 'drizzle-orm';
 
 import { approvedBefore } from './approved';
 import type { ImplementDeps } from './implement-loop';
-import { buildPrompt } from './prompts';
+import { buildPrompt, parentContext } from './prompts';
 import { ensureTicketContainer, REPO_DIR } from './provision';
 import type { StepContext, StepResult } from './scheduler';
 import { ensureBranch } from './workspace-git';
@@ -60,7 +59,7 @@ export async function runReviewStep(
       effort: effortFor(db, 'final_review'),
       prompt: buildPrompt({
         ticket,
-        parent: parentOf(db, ticket),
+        ...parentContext(db, ticket),
         shared: sharedPrompt(db, ticket.projectId),
         instructions: resolveAgent(db, 'final_review').prompt + reviewContext(base, ticket.branch),
         approved: approvedBefore(db, ticket.id, 'final_review'),

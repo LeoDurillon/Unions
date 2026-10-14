@@ -2,7 +2,6 @@ import {
   type Db,
   effortFor,
   modelFor,
-  parentOf,
   resolveAgent,
   schema,
   sharedPrompt,
@@ -16,7 +15,7 @@ import type { GateResult } from './gate';
 import { IMPLEMENT_DENIED, type Workspace } from './implement-loop';
 import { gateHint } from './implement-prompts';
 import { askSession, COMMIT_HOOK_HINT, type Ask } from './leftovers';
-import { buildPrompt } from './prompts';
+import { buildPrompt, parentContext } from './prompts';
 import { REPO_DIR } from './provision';
 
 const SHORT_SHA = 7;
@@ -81,7 +80,7 @@ export function runRebaseAgent(rebase: Rebase): Promise<AgentOutcome> {
   const session = implementerSession(db, context.ticket.id);
   const fresh = buildPrompt({
     ticket: context.ticket,
-    parent: parentOf(db, context.ticket),
+    ...parentContext(db, context.ticket),
     shared: sharedPrompt(db, context.ticket.projectId),
     instructions: instructions(db, rebase),
     approved: approvedBefore(db, context.ticket.id, 'final_review'),

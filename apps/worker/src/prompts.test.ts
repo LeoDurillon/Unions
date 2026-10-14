@@ -2,7 +2,7 @@ import { expect, test } from 'bun:test';
 
 import type { Attachment, Ticket } from '@union/core';
 
-import { buildPrompt, isPlanningStep } from './prompts';
+import { buildPrompt, isPlanningStep, parentChanges } from './prompts';
 
 const ticket = { title: 'Add search', body: 'Typos should match.' } as Ticket;
 
@@ -80,4 +80,41 @@ test('attached files are listed with where they are and what may not be committe
   expect(
     buildPrompt({ ticket, shared: 's', instructions: 'i', approved: [], revision: null }),
   ).not.toContain('# Attached files');
+});
+
+const parent = {
+  id: 4,
+  issueNumber: 12,
+  title: 'Add the index',
+  body: 'Index the names.',
+  branch: 'union/ticket-4',
+  baseBranch: null,
+  prNumber: 30,
+} as Ticket;
+
+test('a stacked child points at its parent branch, compared with the parent base', () => {
+  const child = { ...ticket, baseBranch: 'union/ticket-4' } as Ticket;
+  const prompt = buildPrompt({
+    ticket: child,
+    parent,
+    projectBase: 'dev',
+    shared: 's',
+    instructions: 'i',
+    approved: [],
+    revision: null,
+  });
+  expect(prompt).toContain('# Builds on');
+  expect(prompt).toContain('Index the names.');
+  expect(prompt).toContain('git diff origin/dev...origin/union/ticket-4');
+});
+
+test('a child of a merged parent finds its commit through the pull request number', () => {
+  const child = { ...ticket, baseBranch: null } as Ticket;
+  expect(parentChanges(parent, child, 'dev')).toContain(
+    "git log --oneline --grep '#30' origin/dev",
+  );
+});
+
+test('a parent without a branch gets no pointer', () => {
+  expect(parentChanges({ ...parent, branch: null }, ticket, 'dev')).toBe('');
 });
