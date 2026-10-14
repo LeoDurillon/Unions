@@ -10,6 +10,7 @@ and linked.
 - [Restack](restack.md): rebase and retarget a stack after a revision or a merge.
 - [MCP servers for agents](mcp-servers.md): designed in SPEC.md; step 1 needs two checks first.
 - [Preview environments](preview-environments.md): compose-based previews with e2e tests; three open questions.
+- [Project settings as a page](project-settings-page.md): grouped side menu instead of the nine-tab modal.
 
 ## Ideas
 
