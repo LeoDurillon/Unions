@@ -12,6 +12,8 @@ export const PREVIEW_ENV_KEY = 'union_env';
  * inside the helper container that runs compose, never in the workspace.
  */
 export const PREVIEW_ENV_FILE = '/union/preview.env';
+/** Where the compose helper gets the settings' compose additions (`composeAdditions`). */
+export const PREVIEW_ADDITIONS_FILE = '/union/compose.additions.yml';
 /** The Docker network Traefik routes previews on (created by Union's compose stack). */
 export const PREVIEW_NETWORK = 'union-preview';
 

@@ -120,7 +120,7 @@ behavior; this file covers how to work in the repo.
     generates it alone) and runs the ticket's own edited file instead when there is one (`previews.override`, checked
     with `composeProblems(file, { workspaceVolume })`, project name enforced). Profiles: `catalog.ts` passes the
     settings' `--profile`s, reads every profile and service (`--profile '*'`, kept as `previews.compose_catalog`),
-    and `profiles:` is dropped from the file that runs. Variables: `target.ts` fills in the
+    and `profiles:` is dropped from the file that runs. Compose additions (`config.preview.composeAdditions`, YAML in the settings): written in the helper at `/union/compose.additions.yml` and given as a second `-f` whenever the repository's file is read (`composeFileArgs` in `catalog.ts`), so the merged file is what gets checked and rewritten; never written to the workspace. Variables: `target.ts` fills in the
     settings' templates (`@union/core/preview`) and reads the secrets (`preview_secrets`, worker only);
     `variables.ts` writes them to Union's env file (`/union/preview.env`, written in the compose helper through
     `HelperSpec.files`, never in the workspace), which every service reads (`env_file`); the file kept for the panel

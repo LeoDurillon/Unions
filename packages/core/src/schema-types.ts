@@ -13,6 +13,12 @@ export type PreviewService = { name: string; port: number; prefix: string };
 export type PreviewConfig = {
   /** Path of the compose file in the repository. */
   composeFile: string;
+  /**
+   * Compose YAML merged over the repository's file (a second `-f`): services and changes Union
+   * adds without touching the repository (a database restore, a seed). Kept in the settings, never
+   * written to the workspace.
+   */
+  composeAdditions?: string;
   /** The exposed services; the first is the one "Open" goes to. */
   services?: PreviewService[];
   env: Record<string, string>;
@@ -26,8 +32,8 @@ export type PreviewConfig = {
   /** The variables also given as a file, at `path` inside `service`. */
   envFile?: { service: string; path: string };
   /**
-   * End-to-end tests run against the preview after the implementation's checks pass (`npx playwright
-   * test`); a failure goes back to the agent like a failing check. Unset: no e2e gate.
+   * End-to-end tests run against the preview when the user asks (`npx playwright test`). Unset: no
+   * e2e tests.
    */
   e2eCommand?: string;
   /** Phase 1 settings, read as one exposed service. */

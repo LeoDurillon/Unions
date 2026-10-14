@@ -25,6 +25,7 @@ export * from './project-files';
 export {
   composeProblems,
   isRecord,
+  PREVIEW_ADDITIONS_FILE,
   PREVIEW_REPO_DIR,
   type ComposeJson,
 } from './preview-compose-check';

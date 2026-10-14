@@ -1,4 +1,4 @@
-import { isRecord } from '@union/core';
+import { isRecord, PREVIEW_ADDITIONS_FILE } from '@union/core';
 
 import { compose, printedJson } from './compose';
 import type { PreviewDeps, Target } from './target';
@@ -9,6 +9,21 @@ export type Catalog = { services: Record<string, string[]> };
 /** `--profile <name>` for each profile the settings enable. */
 export function profileArgs(target: Target): string[] {
   return (target.config.profiles ?? []).flatMap((profile) => ['--profile', profile]);
+}
+
+/** The repository's compose file, then the settings' additions merged over it, when there are some. */
+export function composeFileArgs(target: Target): string[] {
+  return [
+    '-f',
+    target.config.composeFile,
+    ...(target.config.composeAdditions ? ['-f', PREVIEW_ADDITIONS_FILE] : []),
+  ];
+}
+
+/** The additions, written in the compose helper (never in the workspace) for `composeFileArgs`. */
+export function additionsFiles(target: Target): { path: string; content: string }[] {
+  const additions = target.config.composeAdditions;
+  return additions ? [{ path: PREVIEW_ADDITIONS_FILE, content: additions }] : [];
 }
 
 /**
@@ -23,8 +38,7 @@ export async function readCatalog(deps: PreviewDeps, target: Target): Promise<Ca
       target.project,
       '--profile',
       '*',
-      '-f',
-      target.config.composeFile,
+      ...composeFileArgs(target),
       'config',
       '--format',
       'json',
@@ -32,6 +46,7 @@ export async function readCatalog(deps: PreviewDeps, target: Target): Promise<Ca
     workspaceVolume: target.workspaceVolume,
     env: { ...target.plain, ...target.secrets },
     keepAll: true,
+    files: additionsFiles(target),
   });
   const parsed = printedJson(output.lines);
   const services = isRecord(parsed) && isRecord(parsed.services) ? parsed.services : {};

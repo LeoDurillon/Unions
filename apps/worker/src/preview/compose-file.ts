@@ -13,7 +13,15 @@ import {
   type ComposeJson,
 } from '@union/core';
 
-import { catalogSummary, profileArgs, profileHint, readCatalog, type Catalog } from './catalog';
+import {
+  additionsFiles,
+  catalogSummary,
+  composeFileArgs,
+  profileArgs,
+  profileHint,
+  readCatalog,
+  type Catalog,
+} from './catalog';
 import { compose, printedJson } from './compose';
 import {
   lastLines,
@@ -39,24 +47,23 @@ function toYaml(file: ComposeJson): string {
 }
 
 /**
- * A compose file as Docker resolves it (`config --format json`), from the repository (`file`) or
- * given on stdin (`yaml`), with the project's variables for its `${VAR}`.
+ * A compose file as Docker resolves it (`config --format json`): the repository's with the settings'
+ * additions merged over it, or one given on stdin (`yaml`), with the project's variables for its `${VAR}`.
  */
 async function resolve(
   deps: PreviewDeps,
   target: Target,
-  source: { file: string } | { yaml: string },
+  source: { repository: true } | { yaml: string },
   env: Record<string, string>,
 ): Promise<ComposeJson> {
   const output = await compose(deps.runtime, deps.settings, {
     args:
-      'file' in source
+      'repository' in source
         ? [
             '-p',
             target.project,
             ...profileArgs(target),
-            '-f',
-            source.file,
+            ...composeFileArgs(target),
             'config',
             '--format',
             'json',
@@ -78,7 +85,7 @@ async function resolve(
     env,
     keepAll: true,
     // The user's own file reads Union's env file: it must exist when compose reads the file.
-    files: 'yaml' in source ? unionEnvFile(target) : undefined,
+    files: 'yaml' in source ? unionEnvFile(target) : additionsFiles(target),
   });
   if (output.exitCode !== 0) {
     throw new PreviewError(`The compose file could not be read:\n${lastLines(output.tail)}`);
@@ -123,7 +130,7 @@ async function buildFile(
   const resolved = await resolve(
     deps,
     target,
-    { file: target.config.composeFile },
+    { repository: true },
     configEnvironment(target, shown),
   );
   refuse(

@@ -1,17 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { exposedServices, PREVIEW_TEMPLATES, type PreviewConfig } from '@union/core/preview';
+import { exposedServices, type PreviewConfig } from '@union/core/preview';
 import { useState, type ReactElement } from 'react';
 
 import type { PreviewSettingsView, PublicProject } from '../../../src/api-types';
 import { envLines, parseEnvLines } from '../../lib/env-lines';
 import { previewApi } from '../../lib/preview-api';
-import { Button, ErrorText, Field, inputClass } from '../ui';
+import { Button, ErrorText } from '../ui';
 import { PreviewChoicesField } from './preview-choices-field';
-import { PreviewSecrets } from './preview-secrets';
+import { AdditionsField, PreviewSecrets, TextField, Variables } from './preview-fields';
 import { PreviewServicesField, serviceRows, type ServiceRow } from './preview-services-field';
 
 type Form = {
   composeFile: string;
+  additions: string;
   rows: ServiceRow[];
   env: string;
   envFileService: string;
@@ -23,6 +24,7 @@ type Form = {
 
 const EMPTY: Form = {
   composeFile: 'compose.yaml',
+  additions: '',
   rows: [{ name: '', port: '', prefix: '' }],
   env: '',
   envFileService: '',
@@ -39,6 +41,7 @@ function initial(project: PublicProject): Form {
   }
   return {
     composeFile: preview.composeFile,
+    additions: preview.composeAdditions ?? '',
     rows: serviceRows(exposedServices(preview)),
     env: envLines(preview.env),
     envFileService: preview.envFile?.service ?? '',
@@ -47,71 +50,6 @@ function initial(project: PublicProject): Form {
     profiles: preview.profiles ?? [],
     agentServices: preview.agentServices ?? [],
   };
-}
-
-function TextField({
-  label,
-  hint,
-  value,
-  placeholder,
-  onChange,
-}: {
-  label: string;
-  hint: string;
-  value: string;
-  placeholder: string;
-  onChange: (value: string) => void;
-}): ReactElement {
-  return (
-    <Field label={label} hint={hint}>
-      <input
-        className={`${inputClass} font-mono`}
-        value={value}
-        placeholder={placeholder}
-        onChange={(event) => {
-          onChange(event.target.value);
-        }}
-      />
-    </Field>
-  );
-}
-
-const ENV_HINT = `KEY=value, one per line: given to every service and to \${VAR} in the compose file. Plain values: anyone with access to Union sees them here; use a secret for passwords.`;
-
-function Variables({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (value: string) => void;
-}): ReactElement {
-  return (
-    <Field label="Variables" hint={ENV_HINT}>
-      <textarea
-        className={`${inputClass} h-32 font-mono text-xs`}
-        value={value}
-        placeholder="API_URL={service.api.url}"
-        onChange={(event) => {
-          onChange(event.target.value);
-        }}
-      />
-      <span className="flex flex-wrap gap-1">
-        {PREVIEW_TEMPLATES.map((template) => (
-          <button
-            key={template.name}
-            type="button"
-            title={template.description}
-            className="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-xs hover:bg-indigo-100 dark:bg-zinc-800 dark:hover:bg-indigo-950"
-            onClick={() => {
-              onChange(`${value}{${template.name}}`);
-            }}
-          >
-            {`{${template.name}}`}
-          </button>
-        ))}
-      </span>
-    </Field>
-  );
 }
 
 function EnvFileFields({
@@ -148,6 +86,7 @@ function EnvFileFields({
 function settingsOf(form: Form): PreviewConfig {
   return {
     composeFile: form.composeFile,
+    ...(form.additions.trim() === '' ? {} : { composeAdditions: form.additions }),
     services: form.rows.map((row) => ({
       name: row.name,
       port: Number(row.port),
@@ -280,6 +219,13 @@ export function PreviewSettingsSection({ project }: { project: PublicProject }):
           setForm({ ...form, composeFile });
         }}
       />
+      <AdditionsField
+        composeFile={form.composeFile}
+        value={form.additions}
+        onChange={(additions) => {
+          setForm({ ...form, additions });
+        }}
+      />
       <ComposeChoices
         form={form}
         found={settings.data?.composeServices ?? null}
@@ -294,7 +240,7 @@ export function PreviewSettingsSection({ project }: { project: PublicProject }):
       <EnvFileFields form={form} onChange={setForm} />
       <TextField
         label="End-to-end tests"
-        hint="Optional. Runs in the ticket's container after the checks pass, against its preview (BASE_URL is the first service, from inside the environment); a failure goes back to the agent like a failing check."
+        hint="Optional. Run on request from a ticket's Preview section, in its container against its preview (BASE_URL is the first service, from inside the environment)."
         value={form.e2eCommand}
         placeholder="npx playwright test"
         onChange={(e2eCommand) => {

@@ -22,6 +22,7 @@ const VARIABLE_NAME = /^[A-Za-z_][A-Za-z0-9_]*$/u;
 const PREFIX = /^(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)?$/u;
 const MAX_PORT = 65_535;
 const MAX_SECRET_CHARS = 10_000;
+const MAX_ADDITIONS_CHARS = 100_000;
 
 function loadProject(db: Db, c: Context): Project {
   const id = requireId(c.req.param('projectId'), 'project id');
@@ -39,6 +40,31 @@ function composeFile(value: unknown): string {
     throw fail(BAD_REQUEST, 'Give the compose file as a path inside the repository');
   }
   return file;
+}
+
+/** Compose YAML merged over the repository's file: a mapping, like any compose file. */
+function composeAdditions(value: unknown): string {
+  const text = typeof value === 'string' ? value.trimEnd() : '';
+  if (text.trim() === '') {
+    return '';
+  }
+  if (text.length > MAX_ADDITIONS_CHARS) {
+    throw fail(
+      BAD_REQUEST,
+      `The compose additions can be at most ${MAX_ADDITIONS_CHARS} characters`,
+    );
+  }
+  let parsed: unknown = null;
+  try {
+    parsed = Bun.YAML.parse(text);
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    throw fail(BAD_REQUEST, `The compose additions are not valid YAML: ${reason}`);
+  }
+  if (!isRecord(parsed)) {
+    throw fail(BAD_REQUEST, 'The compose additions must be a compose file (services: …)');
+  }
+  return `${text}\n`;
 }
 
 function service(value: unknown): PreviewService {
@@ -140,8 +166,10 @@ function previewConfig(
   const e2eCommand = typeof input.e2eCommand === 'string' ? input.e2eCommand.trim() : '';
   const profiles = profileList(input.profiles);
   const agentServices = serviceList(input.agentServices);
+  const additions = composeAdditions(input.composeAdditions);
   return {
     composeFile: composeFile(input.composeFile),
+    ...(additions === '' ? {} : { composeAdditions: additions }),
     services: exposed,
     env: environment(input.env, exposed, secrets),
     ...(file ? { envFile: file } : {}),

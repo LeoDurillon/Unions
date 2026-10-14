@@ -93,6 +93,22 @@ test('preview settings are checked, saved and cleared', async () => {
   expect(cleared.config.baseBranch).toBe('main');
 });
 
+test('compose additions are saved when they are a compose file, refused otherwise', async () => {
+  const saved = await put({
+    ...SETTINGS,
+    composeAdditions: 'services:\n  seed:\n    image: postgres  \n\n',
+  });
+  expect(saved.status).toBe(200);
+  const project = db.select().from(schema.projects).get();
+  expect(project?.config.preview?.composeAdditions).toBe(
+    'services:\n  seed:\n    image: postgres\n',
+  );
+  expect((await put({ ...SETTINGS, composeAdditions: 'services: [unclosed' })).status).toBe(400);
+  expect((await put({ ...SETTINGS, composeAdditions: '- a list' })).status).toBe(400);
+  await put({ ...SETTINGS, composeAdditions: '   ' });
+  expect(db.select().from(schema.projects).get()?.config.preview?.composeAdditions).toBeUndefined();
+});
+
 test('a preview starts once configured and the ticket has a workspace, one command at a time', async () => {
   const base = `/api/tickets/${ticketId}/preview`;
   const view = async (): Promise<PreviewView> =>

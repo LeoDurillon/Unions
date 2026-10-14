@@ -93,3 +93,32 @@ test('a resolved file of hundreds of lines, after compose warnings, is read whol
   expect(lines.length).toBeGreaterThan(200);
   expect(Object.keys((await readCatalog(deps, target)).services)).toHaveLength(60);
 });
+
+test("the settings' compose additions are merged over the repository's file, from the helper", async () => {
+  const calls: HelperSpec[] = [];
+  const runtime = {
+    async *runHelper(spec: HelperSpec): AsyncGenerator<string, ExecResult> {
+      calls.push(spec);
+      await Promise.resolve();
+      yield JSON.stringify({ services: { web: {}, seed: {} } });
+      return { exitCode: 0, stderr: '' };
+    },
+  } as unknown as ContainerRuntime;
+  const deps = { runtime, settings: previewSettings({}) } as unknown as PreviewDeps;
+  const additions = 'services:\n  seed:\n    image: postgres\n';
+  const target = {
+    project: 'union-t1',
+    workspaceVolume: 'union-t1-ws',
+    config: { composeFile: 'dev/compose.yaml', composeAdditions: additions },
+    plain: {},
+    secrets: {},
+  } as unknown as Target;
+  expect(await readCatalog(deps, target)).toEqual({ services: { web: [], seed: [] } });
+  expect(calls[0]?.command.slice(8, 12)).toEqual([
+    '-f',
+    'dev/compose.yaml',
+    '-f',
+    '/union/compose.additions.yml',
+  ]);
+  expect(calls[0]?.files).toEqual([{ path: '/union/compose.additions.yml', content: additions }]);
+});
