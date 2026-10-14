@@ -6,6 +6,7 @@ export default defineConfig({
     './src/schema.ts',
 
     './src/schema-attachments.ts',
+    './src/schema-diff-commits.ts',
     './src/schema-events.ts',
     './src/schema-pr-descriptions.ts',
     './src/schema-previews.ts',

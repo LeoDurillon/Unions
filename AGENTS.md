@@ -43,7 +43,11 @@ behavior; this file covers how to work in the repo.
     gitignore-style patterns) are flagged `ignored` and listed apart, never dropped. `@union/core/diff` parses diffs and
     is browser-safe. A pull request's review can show one commit at a time (`commit-picker.tsx`, `commit-diff.tsx`,
     `routes/pr-commits.ts`: the PR's commits and a commit's files against its first parent, read from GitHub and kept
-    by SHA in memory); that view is read only, comments are written on all the changes.
+    by SHA in memory); that view is read only, comments are written on all the changes. A ticket's review has the same
+    view from SQLite: `captureDiff` also keeps each commit of `base..HEAD` with its own files (`diff-commits.ts`,
+    `diff_commits`/`diff_commit_files`, newest 100) and, once the user has sent a review (`tickets.reviewed_sha`, the
+    snapshot's head then), the change since that head while it is still in the branch (`routes/ticket-commits.ts`,
+    `since-review`).
   - Project settings are a page, not a modal: `?settings=<section>` (`lib/settings-sections.ts` lists the sections
     and their groups; `openSettings(section)` links to one from anywhere), `components/settings/settings-page.tsx`
     with a grouped side menu.

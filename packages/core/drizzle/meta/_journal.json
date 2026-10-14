@@ -260,6 +260,13 @@
       "when": 1791996573959,
       "tag": "0036_youthful_rattler",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "6",
+      "when": 1792009805672,
+      "tag": "0037_flippant_crusher_hogan",
+      "breakpoints": true
     }
   ]
 }

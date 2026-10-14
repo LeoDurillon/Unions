@@ -78,6 +78,8 @@ export const tickets = sqliteTable(
     branch: text('branch'),
     /** Branch the ticket was cloned from and is compared with (the parent's branch); null: the project's. */
     baseBranch: text('base_branch'),
+    /** The diff snapshot's head when the user last sent a review: "since last review" starts there. */
+    reviewedSha: text('reviewed_sha'),
     prNumber: integer('pr_number'),
     /** The Notion page the ticket was imported from: events update its properties. */
     notionPageId: text('notion_page_id'),

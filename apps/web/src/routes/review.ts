@@ -172,6 +172,12 @@ async function sendReview(db: Db, c: Context): Promise<Response> {
       .values({ type: 'revise', ticketId: ticket.id, payload: { feedback } })
       .run();
     markSent(tx, owner(ticket));
+    // "Since last review" starts from the head this review was written on.
+    const reviewed = latestSnapshot(tx, ticket.id)?.headSha ?? null;
+    tx.update(schema.tickets)
+      .set({ reviewedSha: reviewed })
+      .where(eq(schema.tickets.id, ticket.id))
+      .run();
   });
   return c.json({ sent: drafts.length, feedback });
 }

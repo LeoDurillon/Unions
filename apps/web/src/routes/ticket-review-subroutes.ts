@@ -5,12 +5,17 @@ import type { OnboardingGitHub } from '../github-onboarding';
 import { ticketGroupingRoutes } from './grouping-targets';
 import { prDescriptionRoutes } from './pr-description';
 import { refusedCommit } from './refused-commit';
+import { ticketCommitRoutes } from './ticket-commits';
 
-/** A ticket's routes about its change: its refused commit, its PR description rewrite, its grouping by spec. */
+/**
+ * A ticket's routes about its change: its refused commit, its PR description rewrite, its grouping by
+ * spec, its commits.
+ */
 export function ticketReviewSubroutes(db: Db, github: OnboardingGitHub, notion: NotionApi): Hono {
   const routes = new Hono();
   routes.route('/:id/pr-description', prDescriptionRoutes(db));
   routes.get('/:id/refused-commit', (c) => refusedCommit(db, c));
   routes.route('/:id/groupings', ticketGroupingRoutes(db, github, notion));
+  routes.route('/:id/commits', ticketCommitRoutes(db));
   return routes;
 }

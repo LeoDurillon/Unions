@@ -148,6 +148,8 @@ test('sending is only possible when the ticket waits on the user after code was 
   expect(command?.type).toBe('revise');
   expect(JSON.stringify(command?.payload)).toContain('Guard NaN.');
   expect(JSON.stringify(command?.payload)).toContain('Almost there.');
+  // The next snapshot shows what changed since this head.
+  expect(db.select().from(schema.tickets).get()?.reviewedSha).toBe('sha1');
   const comments = (await (await call('GET', '/comments')).json()) as CommentView[];
   expect(comments[0]?.status).toBe('sent');
   expect((await call('PATCH', `/comments/${comments[0]?.id ?? 0}`, { body: 'x' })).status).toBe(
