@@ -2,6 +2,7 @@ import {
   activePreviews,
   emitEvent,
   getPreview,
+  getTicket,
   PREVIEW_NETWORK,
   previewProject,
   updatePreview,
@@ -193,10 +194,34 @@ export async function startPreview(deps: PreviewDeps, ticketId: number): Promise
   }
 }
 
+/**
+ * While a step runs with the agent's services (a database for its tests), stopping the preview
+ * removes only what the proxy serves: the agent keeps its services until the step ends.
+ */
+async function stopExposedOnly(deps: PreviewDeps, ticketId: number): Promise<boolean> {
+  const target = loadTarget(deps, ticketId);
+  const keep = target.config.agentServices ?? [];
+  if (keep.length === 0 || getTicket(deps.db, ticketId).phase.kind !== 'running') {
+    return false;
+  }
+  const exposed = target.exposed
+    .map(({ service }) => service)
+    .filter((name) => !keep.includes(name));
+  const output = await compose(deps.runtime, deps.settings, {
+    args: ['-p', target.project, 'rm', '--stop', '--force', ...exposed],
+  });
+  if (output.exitCode !== 0) {
+    throw new PreviewError(`docker compose rm failed:\n${lastLines(output.tail)}`);
+  }
+  return true;
+}
+
 export async function stopPreview(deps: PreviewDeps, ticketId: number): Promise<void> {
   updatePreview(deps.db, ticketId, { status: 'stopping' });
   try {
-    await takeDown(deps, ticketId);
+    if (!(await stopExposedOnly(deps, ticketId))) {
+      await takeDown(deps, ticketId);
+    }
     updatePreview(deps.db, ticketId, { status: 'stopped', error: null });
   } catch (error) {
     updatePreview(deps.db, ticketId, {

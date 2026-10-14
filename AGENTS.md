@@ -126,6 +126,12 @@ behavior; this file covers how to work in the repo.
     `HelperSpec.files`, never in the workspace), which every service reads (`env_file`); the file kept for the panel
     lists them in a comment and shows secrets interpolated by the repository's file as `${NAME}`, never a value. `network.ts` puts the ticket's container on its preview's networks
     (after a start, on provisioning) and takes it off before `down`.
+  - `agent-services-step.ts` and `preview/background.ts`: the services a project starts for the agent
+    (`config.preview.agentServices`, a database for its tests). Around implementation and rebase steps the worker
+    runs `up -d <services>` in the ticket's compose project (shared with the preview), joins the ticket's container to
+    it, gives every command run in that container the plain variables (`withEnvironment`, never the secrets), and
+    `stop`s the services after the step (data kept) unless the preview runs. A preview stopped during such a step
+    removes only the services the proxy serves.
   - `e2e.ts`: the end-to-end tests (`config.preview.e2eCommand`), run only when the user asks (`preview_e2e`, one at a
     time across tickets in `PreviewManager`; never from the implementation loop, which runs the checks only): starts
     the ticket's container and preview, installs the browser at the repository's Playwright version, runs the command

@@ -1,19 +1,25 @@
-import { useState, type ReactElement } from 'react';
+import { useState, type ReactElement, type ReactNode } from 'react';
 
 import { inputClass } from '../ui';
 
 /**
- * The compose profiles to enable: a box per profile the file has (once a ticket's file was
- * generated), and a field for others. Services in profiles left out do not run.
+ * A choice among names the compose file has (profiles, services): a box per name known once a
+ * ticket's file was generated, and a field for others.
  */
-export function PreviewProfilesField({
+export function PreviewChoicesField({
+  label,
+  hint,
+  example,
   selected,
   known,
   onChange,
 }: {
+  label: string;
+  hint: ReactNode;
+  example: string;
   selected: string[];
   known: string[];
-  onChange: (profiles: string[]) => void;
+  onChange: (names: string[]) => void;
 }): ReactElement {
   // The text as typed: rebuilding it from the parsed list would eat a comma or a space as it is typed.
   const [othersText, setOthersText] = useState(() =>
@@ -21,10 +27,8 @@ export function PreviewProfilesField({
   );
   return (
     <fieldset className="space-y-2">
-      <legend className="text-sm font-medium">Profiles</legend>
-      <p className="text-xs text-zinc-500">
-        Services with a <code>profiles:</code> entry run only when one of their profiles is enabled.
-      </p>
+      <legend className="text-sm font-medium">{label}</legend>
+      <p className="text-xs text-zinc-500">{hint}</p>
       {known.length > 0 ? (
         <span className="flex flex-wrap gap-x-4 gap-y-1">
           {known.map((profile) => (
@@ -46,10 +50,10 @@ export function PreviewProfilesField({
         </span>
       ) : null}
       <input
-        aria-label="Other profiles"
+        aria-label={`Other: ${label}`}
         className={`${inputClass} font-mono`}
         value={othersText}
-        placeholder={known.length > 0 ? 'Other profiles, comma-separated' : 'storage, jobs'}
+        placeholder={known.length > 0 ? 'Others, comma-separated' : example}
         onChange={(event) => {
           setOthersText(event.target.value);
           const typed = event.target.value

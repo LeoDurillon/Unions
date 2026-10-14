@@ -2,11 +2,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { exposedServices, PREVIEW_TEMPLATES, type PreviewConfig } from '@union/core/preview';
 import { useState, type ReactElement } from 'react';
 
-import type { PublicProject } from '../../../src/api-types';
+import type { PreviewSettingsView, PublicProject } from '../../../src/api-types';
 import { envLines, parseEnvLines } from '../../lib/env-lines';
 import { previewApi } from '../../lib/preview-api';
 import { Button, ErrorText, Field, inputClass } from '../ui';
-import { PreviewProfilesField } from './preview-profiles-field';
+import { PreviewChoicesField } from './preview-choices-field';
 import { PreviewSecrets } from './preview-secrets';
 import { PreviewServicesField, serviceRows, type ServiceRow } from './preview-services-field';
 
@@ -18,6 +18,7 @@ type Form = {
   envFilePath: string;
   e2eCommand: string;
   profiles: string[];
+  agentServices: string[];
 };
 
 const EMPTY: Form = {
@@ -28,6 +29,7 @@ const EMPTY: Form = {
   envFilePath: '',
   e2eCommand: '',
   profiles: [],
+  agentServices: [],
 };
 
 function initial(project: PublicProject): Form {
@@ -43,6 +45,7 @@ function initial(project: PublicProject): Form {
     envFilePath: preview.envFile?.path ?? '',
     e2eCommand: preview.e2eCommand ?? '',
     profiles: preview.profiles ?? [],
+    agentServices: preview.agentServices ?? [],
   };
 }
 
@@ -156,6 +159,7 @@ function settingsOf(form: Form): PreviewConfig {
       : { envFile: { service: form.envFileService, path: form.envFilePath } }),
     ...(form.e2eCommand.trim() === '' ? {} : { e2eCommand: form.e2eCommand }),
     ...(form.profiles.length === 0 ? {} : { profiles: form.profiles }),
+    ...(form.agentServices.length === 0 ? {} : { agentServices: form.agentServices }),
   };
 }
 
@@ -203,6 +207,54 @@ function SaveButtons({
   );
 }
 
+/** What the compose file offers: the profiles to enable, the services to open and to start for the agent. */
+function ComposeChoices({
+  form,
+  found,
+  onChange: setForm,
+}: {
+  form: Form;
+  found: PreviewSettingsView['composeServices'];
+  onChange: (form: Form) => void;
+}): ReactElement {
+  return (
+    <>
+      <PreviewChoicesField
+        label="Profiles"
+        hint={
+          <>
+            Services with a <code>profiles:</code> entry run only when one of their profiles is
+            enabled.
+          </>
+        }
+        example="storage, jobs"
+        selected={form.profiles}
+        known={found?.profiles ?? []}
+        onChange={(profiles) => {
+          setForm({ ...form, profiles });
+        }}
+      />
+      <PreviewServicesField
+        rows={form.rows}
+        found={found}
+        onChange={(rows) => {
+          setForm({ ...form, rows });
+        }}
+      />
+      <PreviewChoicesField
+        label="Start for the agent"
+        hint="Services that run while the agent implements or rebases (a database for its tests), in the ticket's environment; stopped after each run, their data kept. Its commands get the plain variables."
+        example="db, redis"
+        selected={form.agentServices}
+        known={found?.names ?? []}
+        onChange={(agentServices) => {
+          setForm({ ...form, agentServices });
+        }}
+      />
+    </>
+  );
+}
+
 /** How the project's tickets run as previews: its compose file, the served services, its variables. */
 export function PreviewSettingsSection({ project }: { project: PublicProject }): ReactElement {
   const [form, setForm] = useState(() => initial(project));
@@ -228,19 +280,10 @@ export function PreviewSettingsSection({ project }: { project: PublicProject }):
           setForm({ ...form, composeFile });
         }}
       />
-      <PreviewProfilesField
-        selected={form.profiles}
-        known={settings.data?.composeServices?.profiles ?? []}
-        onChange={(profiles) => {
-          setForm({ ...form, profiles });
-        }}
-      />
-      <PreviewServicesField
-        rows={form.rows}
+      <ComposeChoices
+        form={form}
         found={settings.data?.composeServices ?? null}
-        onChange={(rows) => {
-          setForm({ ...form, rows });
-        }}
+        onChange={setForm}
       />
       <Variables
         value={form.env}

@@ -83,6 +83,11 @@ test('preview settings are checked, saved and cleared', async () => {
   ).json()) as PublicProject;
   expect(withProfiles.config.preview?.profiles).toEqual(['storage', 'jobs']);
   expect((await put({ ...SETTINGS, profiles: ['bad profile'] })).status).toBe(400);
+  const withAgent = (await (
+    await put({ ...SETTINGS, agentServices: ['db', 'db', 'redis'] })
+  ).json()) as PublicProject;
+  expect(withAgent.config.preview?.agentServices).toEqual(['db', 'redis']);
+  expect((await put({ ...SETTINGS, agentServices: ['not a service'] })).status).toBe(400);
   const cleared = (await (await put(null)).json()) as PublicProject;
   expect(cleared.config.preview).toBeUndefined();
   expect(cleared.config.baseBranch).toBe('main');

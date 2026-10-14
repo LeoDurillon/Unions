@@ -218,6 +218,27 @@ Differences from the design above, decided while building it:
 Limit: ticket containers created before the image change keep the old image (no browser libraries) until they are
 recreated.
 
+## Background services for the agent
+
+Some services should run while the agent works, so it and the project's checks can use them: a database for
+integration tests, a cache, a mail catcher.
+
+- **Setting**: "Start for the agent" in the Preview settings, a choice among the compose file's services (offered from
+  the catalog, profiles included).
+- **Same compose project as the preview** (`union-t<id>`): one database per ticket, shared by the agent and the
+  preview, so the agent tests against the data the user sees. Same file resolution, checks, profiles and env file.
+- **Lifecycle**: before a step that runs code (implementation, rebase), the worker runs `up -d <services>` (compose
+  adds what they depend on) and the ticket's container joins their network; they answer by name (`db:5432`). After
+  the step they are stopped (`stop`: containers and data kept, memory freed while the ticket waits), unless the
+  preview is running, which uses them. Everything goes with the preview's `down -v`, or the ticket's removal.
+- **Stopping the preview while a step runs** stops only the services the proxy serves, so the agent keeps its
+  database.
+- **Variables for the agent**: every command the worker runs in the ticket's container during those steps (the
+  agent, the install and check commands) gets the project's plain variables (`DATABASE_URL`). Secrets are not given:
+  the agent can read and print its environment.
+- **Prompt**: the implementer is told which services run for it, and which variables it has.
+- **Failure**: if the services cannot start, the step still runs; the reason goes to the ticket's log.
+
 ## Phases
 
 1. **Run a preview**: Traefik, the compose helper on the workspace volume, the resolved and rewritten compose file

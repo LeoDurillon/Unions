@@ -18,6 +18,7 @@ import { eq } from 'drizzle-orm';
 
 import type { AgentOutcome, AgentRun } from './agent';
 import { implementLoop, type Workspace } from './implement-loop';
+import { agentServicesHint } from './implement-prompts';
 
 let root: string;
 let db: Db;
@@ -134,4 +135,22 @@ test('the agent is told where the preview answers only while it runs', async () 
   await implementLoop(space);
   expect(runs[0]?.prompt).toContain('reachable from here at http://web:3000');
   expect(runs[0]?.prompt).toContain('run only the ones your work touches');
+});
+
+test('the implementer is told which services run for it, and which variables it has', () => {
+  expect(
+    agentServicesHint({
+      composeFile: 'compose.yaml',
+      env: { DATABASE_URL: 'postgres://db:5432/app' },
+      agentServices: ['db', 'redis'],
+    }),
+  ).toContain('run for you, reachable by their names: db, redis');
+  expect(
+    agentServicesHint({
+      composeFile: 'compose.yaml',
+      env: { DATABASE_URL: 'x' },
+      agentServices: ['db'],
+    }),
+  ).toContain('in your environment: DATABASE_URL');
+  expect(agentServicesHint({ composeFile: 'compose.yaml', env: {} })).toBe('');
 });

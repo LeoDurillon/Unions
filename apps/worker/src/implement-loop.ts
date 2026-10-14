@@ -16,7 +16,7 @@ import { runResumable, type AgentFn, type AgentOutcome, type AgentRun } from './
 import { approvedBefore } from './approved';
 import type { GitHubApi } from './github/api';
 import { check, type Checked } from './implement-checks';
-import { feedbackPrompt, gateHint, previewHint } from './implement-prompts';
+import { agentServicesHint, feedbackPrompt, gateHint, previewHint } from './implement-prompts';
 import { askSession, COMMIT_HOOK_HINT, commitLeftovers, type Refused } from './leftovers';
 import { attachmentsSection, buildPrompt } from './prompts';
 import { REPO_DIR, type ProvisionConfig } from './provision';
@@ -67,6 +67,7 @@ function freshPrompt({ deps, context, project }: Workspace): string {
       resolveAgent(deps.db, 'implement').prompt +
       gateHint(project.config.gateCommand) +
       previewHint(project.config.preview, getPreview(deps.db, ticket.id)?.status === 'running') +
+      agentServicesHint(project.config.preview) +
       COMMIT_HOOK_HINT,
     approved: approvedBefore(deps.db, ticket.id, 'implement'),
     revision: null,

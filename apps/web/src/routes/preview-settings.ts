@@ -104,6 +104,17 @@ function envFile(value: unknown): PreviewConfig['envFile'] {
   return { service: serviceName, path };
 }
 
+function serviceList(value: unknown): string[] {
+  const list = (Array.isArray(value) ? value : []).map((item: unknown) =>
+    typeof item === 'string' ? item.trim() : '',
+  );
+  const wrong = list.find((name) => !SERVICE_NAME.test(name));
+  if (wrong !== undefined) {
+    throw fail(BAD_REQUEST, `"${wrong}" is not a service name`);
+  }
+  return [...new Set(list)];
+}
+
 function profileList(value: unknown): string[] {
   const list = (Array.isArray(value) ? value : []).map((item: unknown) =>
     typeof item === 'string' ? item.trim() : '',
@@ -128,6 +139,7 @@ function previewConfig(
   const file = envFile(input.envFile);
   const e2eCommand = typeof input.e2eCommand === 'string' ? input.e2eCommand.trim() : '';
   const profiles = profileList(input.profiles);
+  const agentServices = serviceList(input.agentServices);
   return {
     composeFile: composeFile(input.composeFile),
     services: exposed,
@@ -135,6 +147,7 @@ function previewConfig(
     ...(file ? { envFile: file } : {}),
     ...(e2eCommand === '' ? {} : { e2eCommand }),
     ...(profiles.length === 0 ? {} : { profiles }),
+    ...(agentServices.length === 0 ? {} : { agentServices }),
   };
 }
 

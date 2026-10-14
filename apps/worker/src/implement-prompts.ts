@@ -26,6 +26,23 @@ export function previewHint(preview: PreviewConfig | undefined, running: boolean
   return `\n\nA preview of your work is running, reachable from here at ${url} (the BASE_URL variable): its services are on your network by their names, and it shows your changes as you make them where the source is mounted. The browser's system libraries are installed; run \`npx playwright install chromium\` once if Playwright asks for a browser.${tests}`;
 }
 
+/**
+ * Appended when the project starts services for the agent: which ones run while it works, and the
+ * variables its commands get.
+ */
+export function agentServicesHint(preview: PreviewConfig | undefined): string {
+  const services = preview?.agentServices ?? [];
+  if (services.length === 0) {
+    return '';
+  }
+  const names = Object.keys(preview?.env ?? {});
+  const variables =
+    names.length > 0
+      ? ` The project's variables are in your environment: ${names.join(', ')}.`
+      : '';
+  return `\n\nWhile you work, these services of the project run for you, reachable by their names: ${services.join(', ')}. Use them for the tests that need them; their data is kept between your runs.${variables}`;
+}
+
 /** Sent into the resumed session when the user asks for changes. */
 export function feedbackPrompt(feedback: string): string {
   return `# Feedback from the user\n\n${feedback}\n\nAddress it in the code, run the checks, commit, and finish with an updated report.`;

@@ -16,6 +16,11 @@ export type PreviewConfig = {
   /** The exposed services; the first is the one "Open" goes to. */
   services?: PreviewService[];
   env: Record<string, string>;
+  /**
+   * Services started for the agent during the steps that run code (a database for its tests), in
+   * the same compose project as the preview; stopped after each step.
+   */
+  agentServices?: string[];
   /** Compose profiles to enable (`--profile`): services in other profiles are left out. */
   profiles?: string[];
   /** The variables also given as a file, at `path` inside `service`. */
