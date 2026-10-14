@@ -21,7 +21,10 @@ export function useAnswers(content: string): Answers {
   return { segments, answers, pending: fillAnswers(content, answers), setAnswer };
 }
 
-/** The output with an input box in place of each `Answer:` line. */
+/** An answer box's height, in lines, before it grows with what is typed. */
+const MIN_ROWS = 2;
+
+/** The output with a text box in place of each `Answer:` line; answers can take several lines. */
 export function AnswerForm({ segments, answers, setAnswer }: Answers): ReactElement {
   const answered = answers.filter((answer) => answer.trim() !== '').length;
   return (
@@ -35,10 +38,11 @@ export function AnswerForm({ segments, answers, setAnswer }: Answers): ReactElem
           <Markdown key={segment.key}>{segment.text}</Markdown>
         ) : (
           <div key={segment.key} className="pl-6">
-            <input
-              className={inputClass}
+            <textarea
+              className={`${inputClass} resize-y`}
               aria-label={`Answer ${segment.slot + 1}`}
               placeholder="Your answer…"
+              rows={Math.max(MIN_ROWS, (answers[segment.slot] ?? '').split('\n').length)}
               value={answers[segment.slot] ?? ''}
               onChange={(event) => {
                 setAnswer(segment.slot, event.target.value);
