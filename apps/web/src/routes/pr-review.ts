@@ -1,5 +1,5 @@
-import { isIgnoredPath, projectGitHubAuth, schema, type Db } from '@union/core';
-import { and, eq } from 'drizzle-orm';
+import { isIgnoredPath, schema, type Db } from '@union/core';
+import { eq } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
 
 import type { DiffResponse, DiscussionResponse } from '../api-types';
@@ -7,6 +7,7 @@ import type { OnboardingGitHub } from '../github-onboarding';
 import { ACCEPTED, BAD_REQUEST, CONFLICT, fail, NOT_FOUND, readObject, requireId } from '../http';
 import { cancelAgentReview, getAgentReview, startAgentReview } from './agent-review';
 import { guarded } from './github-errors';
+import { authOf, load } from './pr-review-load';
 import {
   addComment,
   deleteComment,
@@ -19,27 +20,6 @@ import {
 } from './review-comments';
 
 type Review = typeof schema.currentReviews.$inferSelect;
-type Project = typeof schema.projects.$inferSelect;
-
-function load(db: Db, c: Context): { review: Review; project: Project } {
-  const projectId = requireId(c.req.param('projectId'), 'project id');
-  const number = requireId(c.req.param('number'), 'pull request number');
-  const project = db.select().from(schema.projects).where(eq(schema.projects.id, projectId)).get();
-  const review = db
-    .select()
-    .from(schema.currentReviews)
-    .where(
-      and(
-        eq(schema.currentReviews.projectId, projectId),
-        eq(schema.currentReviews.prNumber, number),
-      ),
-    )
-    .get();
-  if (!project || !review) {
-    throw fail(NOT_FOUND, `#${number} is not among the current reviews`);
-  }
-  return { review, project };
-}
 
 function owner(review: Review): CommentOwner {
   return { kind: 'review', id: review.id };
@@ -52,17 +32,6 @@ function commentDiff(review: Review): CommentDiff | null {
     return null;
   }
   return { headSha, patchOf: (path) => files.find((file) => file.path === path)?.patch };
-}
-
-function authOf(db: Db, project: Project): NonNullable<ReturnType<typeof projectGitHubAuth>> {
-  const auth = projectGitHubAuth(db, project, process.env.GITHUB_TOKEN);
-  if (!auth) {
-    throw fail(
-      CONFLICT,
-      'This project has no GitHub credentials: set a token or a GitHub App in the project settings',
-    );
-  }
-  return auth;
 }
 
 /** The pull request's description and discussion, read from GitHub (the Description and Comments tabs). */

@@ -1,4 +1,4 @@
-import type { GitHubAppCredentials, GitHubAuth } from '@union/core';
+import type { GitHubAppCredentials, GitHubAuth, PullRequestFile } from '@union/core';
 import { githubAppClient, githubClient, type ClientOptions } from '@union/core/github-client';
 import type { Octokit } from 'octokit';
 
@@ -9,10 +9,12 @@ import type {
   PullRequestInfo,
   GitHubIssue,
   PullRequestDiscussion,
+  ReviewCommit,
   PullRequestFilter,
   RepoOption,
   Viewer,
 } from './api-types';
+import { fetchCommitFiles, fetchReviewCommits } from './github-commits';
 import { fetchDiscussion } from './github-discussion';
 import { fetchPullRequestFiles, type PullRequestFiles } from './github-pull-request-files';
 import { fetchPullRequests, type RemotePullRequest } from './github-pull-requests';
@@ -56,6 +58,18 @@ export type OnboardingGitHub = {
     repo: { owner: string; repo: string },
     number: number,
   ): Promise<PullRequestFiles | null>;
+  /** The pull request's commits, oldest first; null when there is no such PR. */
+  listReviewCommits(
+    auth: GitHubAuth,
+    repo: { owner: string; repo: string },
+    number: number,
+  ): Promise<ReviewCommit[] | null>;
+  /** A commit's changed files against its first parent; null when there is no such commit. */
+  getCommitFiles(
+    auth: GitHubAuth,
+    repo: { owner: string; repo: string },
+    sha: string,
+  ): Promise<PullRequestFile[] | null>;
   /** One issue of the repository; null when there is none with that number. */
   getIssue(
     auth: GitHubAuth,
@@ -158,6 +172,18 @@ async function installationRepos(
   };
 }
 
+/** The call's answer, or null when GitHub says the thing does not exist. */
+async function orNull<T>(call: () => Promise<T>): Promise<T | null> {
+  try {
+    return await call();
+  } catch (error) {
+    if (isNotFound(error)) {
+      return null;
+    }
+    throw error;
+  }
+}
+
 export class OctokitOnboarding implements OnboardingGitHub {
   constructor(private readonly options: ClientOptions = {}) {}
 
@@ -234,16 +260,13 @@ export class OctokitOnboarding implements OnboardingGitHub {
     return data.createProjectV2.projectV2;
   }
 
-  async getPullRequest(
+  getPullRequest(
     auth: GitHubAuth,
     repo: { owner: string; repo: string },
     number: number,
   ): Promise<PullRequestInfo | null> {
-    try {
-      const { data } = await this.client(auth).rest.pulls.get({
-        ...repo,
-        pull_number: number,
-      });
+    return orNull(async () => {
+      const { data } = await this.client(auth).rest.pulls.get({ ...repo, pull_number: number });
       return {
         number: data.number,
         url: data.html_url,
@@ -252,65 +275,55 @@ export class OctokitOnboarding implements OnboardingGitHub {
         state: data.state === 'closed' ? 'closed' : 'open',
         merged: data.merged,
       };
-    } catch (error) {
-      if (isNotFound(error)) {
-        return null;
-      }
-      throw error;
-    }
+    });
   }
 
-  async getDiscussion(
+  getDiscussion(
     auth: GitHubAuth,
     repo: { owner: string; repo: string },
     number: number,
   ): Promise<PullRequestDiscussion | null> {
-    try {
-      return await fetchDiscussion(this.client(auth), repo, number);
-    } catch (error) {
-      if (isNotFound(error)) {
-        return null;
-      }
-      throw error;
-    }
+    return orNull(() => fetchDiscussion(this.client(auth), repo, number));
   }
 
-  async listPullRequests(
+  listPullRequests(
     auth: GitHubAuth,
     repo: { owner: string; repo: string },
     filter: PullRequestFilter,
   ): Promise<{ total: number; pullRequests: RemotePullRequest[] } | null> {
-    try {
-      return await fetchPullRequests(this.client(auth), repo, filter);
-    } catch (error) {
-      if (isNotFound(error)) {
-        return null;
-      }
-      throw error;
-    }
+    return orNull(() => fetchPullRequests(this.client(auth), repo, filter));
   }
 
-  async getPullRequestFiles(
+  getPullRequestFiles(
     auth: GitHubAuth,
     repo: { owner: string; repo: string },
     number: number,
   ): Promise<PullRequestFiles | null> {
-    try {
-      return await fetchPullRequestFiles(this.client(auth), repo, number);
-    } catch (error) {
-      if (isNotFound(error)) {
-        return null;
-      }
-      throw error;
-    }
+    return orNull(() => fetchPullRequestFiles(this.client(auth), repo, number));
   }
 
-  async getIssue(
+  listReviewCommits(
+    auth: GitHubAuth,
+    repo: { owner: string; repo: string },
+    number: number,
+  ): Promise<ReviewCommit[] | null> {
+    return orNull(() => fetchReviewCommits(this.client(auth), repo, number));
+  }
+
+  getCommitFiles(
+    auth: GitHubAuth,
+    repo: { owner: string; repo: string },
+    sha: string,
+  ): Promise<PullRequestFile[] | null> {
+    return orNull(() => fetchCommitFiles(this.client(auth), repo, sha));
+  }
+
+  getIssue(
     auth: GitHubAuth,
     repo: { owner: string; repo: string },
     number: number,
   ): Promise<GitHubIssue | null> {
-    try {
+    return orNull(async () => {
       const { data } = await this.client(auth).rest.issues.get({ ...repo, issue_number: number });
       return {
         number: data.number,
@@ -321,11 +334,6 @@ export class OctokitOnboarding implements OnboardingGitHub {
         state: data.state === 'closed' ? 'closed' : 'open',
         pullRequest: data.pull_request !== undefined,
       };
-    } catch (error) {
-      if (isNotFound(error)) {
-        return null;
-      }
-      throw error;
-    }
+    });
   }
 }

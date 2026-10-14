@@ -114,6 +114,7 @@ export function FileList({
   selected,
   onSelect,
   target,
+  allowBySpec = true,
 }: {
   files: DiffFileSummary[];
   comments: CommentView[];
@@ -121,11 +122,13 @@ export function FileList({
   onSelect: (id: number) => void;
   /** Whose grouping by spec to show: its files under their groups when "By spec" is on. */
   target: ReviewTarget;
+  /** False on a single commit: the grouping is made for the whole change. */
+  allowBySpec?: boolean;
 }): ReactElement {
   const grouping = useReviewGrouping(target).grouping.data ?? null;
   const [layout, setLayout] = useLayout();
   const [bySpec, setBySpec] = useBySpec();
-  const grouped = grouping?.status === 'succeeded' && grouping.result !== null;
+  const grouped = allowBySpec && grouping?.status === 'succeeded' && grouping.result !== null;
   const drafts = draftCounts(comments);
   const shown = files.filter((file) => !file.ignored);
   const ignored = files.filter((file) => file.ignored);

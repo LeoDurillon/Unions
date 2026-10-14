@@ -5,6 +5,7 @@ import { Hono, type Context } from 'hono';
 import type { OnboardingGitHub } from '../github-onboarding';
 import { CONFLICT, CREATED, fail, NOT_FOUND, readObject, requireId, requireText } from '../http';
 import { pullRequestGroupingRoutes } from './grouping-targets';
+import { prCommitRoutes } from './pr-commits';
 import { prReviewRoutes } from './pr-review';
 
 /** Everything but the files, which only the review page needs. */
@@ -80,6 +81,7 @@ export function currentReviewRoutes(db: Db, github: OnboardingGitHub, notion: No
   routes.post('/', (c) => add(db, c));
   routes.delete('/:number', (c) => remove(db, c));
   routes.route('/:number/groupings', pullRequestGroupingRoutes(db, github, notion));
+  routes.route('/:number/commits', prCommitRoutes(db, github));
   routes.route('/:number', prReviewRoutes(db, github));
   return routes;
 }

@@ -141,6 +141,31 @@ export type DiffResponse = {
   pullRequest: number | null;
 };
 
+/** A commit of the change under review (a pull request's, a ticket's), to read it one commit at a time. */
+export type ReviewCommit = {
+  sha: string;
+  /** The message's first line; `body` is the rest. */
+  title: string;
+  body: string;
+  author: string;
+  date: string | null;
+  /** More than one: a merge commit, shown against its first parent. */
+  parents: number;
+};
+
+/** The commits, oldest first, and (tickets) the change since the head the user last sent a review on. */
+export type CommitsResponse = {
+  commits: ReviewCommit[];
+  /** `sha` is the reviewed head; null before a first review, or once a rebase dropped it. */
+  sinceReview: { sha: string; commits: number } | null;
+};
+
+/** Where the commit view's diffs are read: a commit's SHA, or the change since the last review. */
+export const SINCE_REVIEW = 'since-review';
+
+/** One commit's files against its first parent (or the change since the last review), read only. */
+export type CommitDiffResponse = { sha: string; files: DiffFileSummary[] };
+
 export type CommentView = ReviewComment & { outdated: boolean };
 
 /** The latest run of the review agent on a ticket's diff or a pull request. */
