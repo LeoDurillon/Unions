@@ -15,6 +15,7 @@ import { eq } from 'drizzle-orm';
 
 import { runAgent, type AgentFn, type AgentOutcome } from './agent';
 import { projectGitToken } from './credentials';
+import { runOnTicket } from './investigate-ticket';
 import { TicketDrafter } from './investigation-ticket';
 import {
   cloneInto,
@@ -54,12 +55,20 @@ The follow-up question:
 `;
 }
 
-/** The user's prompt (after the earlier exchanges, if any), then where the agent stands and what to hand back. */
-export function investigationPrompt(investigation: Investigation, project: Project): string {
-  const where =
-    investigation.scope === 'repository'
-      ? `The repository ${project.owner}/${project.repo} is checked out at ${REPO_DIR} on its \`${project.config.baseBranch}\` branch. Read the code to answer; do not change it.`
-      : `No repository is checked out: this is a general question for the team working on ${project.owner}/${project.repo}. Answer from your knowledge and the tools you have.`;
+/**
+ * The user's prompt (after the earlier exchanges, if any), then where the agent stands and what to
+ * hand back. `ticketWhere` says where a `ticket` investigation stands.
+ */
+export function investigationPrompt(
+  investigation: Investigation,
+  project: Project,
+  ticketWhere = '',
+): string {
+  const where = {
+    ticket: ticketWhere,
+    repository: `The repository ${project.owner}/${project.repo} is checked out at ${REPO_DIR} on its \`${project.config.baseBranch}\` branch. Read the code to answer; do not change it.`,
+    global: `No repository is checked out: this is a general question for the team working on ${project.owner}/${project.repo}. Answer from your knowledge and the tools you have.`,
+  }[investigation.scope];
   const own = projectInstructions(project);
   return `${earlierExchanges(investigation)}${investigation.prompt}
 
@@ -88,7 +97,8 @@ function toOutcome(outcome: AgentOutcome, cancelled: boolean): InvestigationOutc
 }
 
 /**
- * Runs queued investigations, each in a throwaway container (`union-i<id>`) removed once it is done.
+ * Runs queued investigations, each in a throwaway container (`union-i<id>`) removed once it is done,
+ * except a ticket's, which runs in the ticket's own container.
  * They share the run slots with the ticket pipeline.
  */
 export class InvestigationRunner {
@@ -174,6 +184,14 @@ export class InvestigationRunner {
       .get();
     if (!project) {
       return { status: 'failed', error: `Project ${investigation.projectId} not found` };
+    }
+    if (investigation.scope === 'ticket') {
+      return runOnTicket(this.deps, {
+        investigation,
+        project,
+        prompt: (where) => investigationPrompt(investigation, project, where),
+        signal,
+      });
     }
     const names = investigationContainer(investigation.id);
     try {

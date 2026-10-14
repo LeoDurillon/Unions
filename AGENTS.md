@@ -99,7 +99,9 @@ behavior; this file covers how to work in the repo.
     with the rebase prompt, checks the result and the project's checks, then force-pushes with a lease; any failure
     puts the branch back as it was. `github/pull-request.ts` keeps `tickets.behind_by` current during the pull.
   - `investigate.ts`: `InvestigationRunner` runs queued investigations in throwaway `union-i<id>` containers
-    (removed after each run), sharing the scheduler's `RunSlots` (`slots.ts`); cancellation arrives through the
+    (removed after each run; a `ticket` investigation runs in the ticket's own container instead, `investigate-ticket.ts`:
+    never during a step, writing tools always denied, `git status` and HEAD compared before and after, the container
+    stopped after unless a step started; the ticket panel's Investigate opens the form with `?investigate=<id>`), sharing the scheduler's `RunSlots` (`slots.ts`); cancellation arrives through the
     `cancel_investigation` command hook. It also drives `TicketDrafter` (`investigation-ticket.ts`), which writes
     the tickets asked from investigations, in `union-i<id>-ticket` containers.
   - `event-dispatcher.ts`: follows the `events` log (cursor in `event_cursors`), queues one `event_deliveries` row

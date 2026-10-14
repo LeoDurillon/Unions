@@ -3,6 +3,7 @@ import { asc, eq } from 'drizzle-orm';
 import type { Db } from './db';
 import { getInvestigation, InvestigationError, type Investigation } from './investigations';
 import * as schema from './schema';
+import { setParent } from './ticket-links';
 import { createTicket, emitEvent } from './tickets';
 
 /**
@@ -55,6 +56,25 @@ export function claimTicketDraft(db: Db): Investigation | null {
 export type TicketDraft = { title: string; body: string };
 
 /** Creates the drafted ticket in the backlog and links it to the investigation; or records the failure. */
+/**
+ * A ticket written from an investigation on a ticket builds on that ticket: it depends on it, so it
+ * starts once that one is done, from its branch. Not on a cancelled one (it would never start), nor
+ * a removed one.
+ */
+function linkToInvestigated(db: Db, investigation: Investigation, ticketId: number): void {
+  if (investigation.scope !== 'ticket' || investigation.onTicketId === null) {
+    return;
+  }
+  const investigated = db
+    .select()
+    .from(schema.tickets)
+    .where(eq(schema.tickets.id, investigation.onTicketId))
+    .get();
+  if (investigated && investigated.phase.kind !== 'cancelled') {
+    setParent(db, ticketId, investigated.id);
+  }
+}
+
 export function finishTicketDraft(
   db: Db,
   id: number,
@@ -72,6 +92,9 @@ export function finishTicketDraft(
     'draft' in outcome
       ? createTicket(db, { projectId: investigation.projectId, ...outcome.draft }).id
       : null;
+  if (ticketId !== null) {
+    linkToInvestigated(db, investigation, ticketId);
+  }
   db.transaction((tx) => {
     tx.update(schema.investigations)
       .set(

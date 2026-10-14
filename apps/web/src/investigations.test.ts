@@ -144,3 +144,23 @@ test('a ticket is asked from an answered investigation, once at a time', async (
   });
   expect((await send('POST', `${base()}/${id}/ticket`, {})).status).toBe(409);
 });
+
+test("a ticket investigation names the project's ticket it runs on", async () => {
+  const ticket = db
+    .insert(schema.tickets)
+    .values({ projectId, title: 'Campaign', body: '' })
+    .returning()
+    .get();
+  const response = await send('POST', base(), {
+    ...valid(),
+    scope: 'ticket',
+    onTicketId: ticket.id,
+  });
+  expect(response.status).toBe(201);
+  expect(await response.json()).toMatchObject({ scope: 'ticket', onTicketId: ticket.id });
+  expect((await send('POST', base(), { ...valid(), scope: 'ticket' })).status).toBe(400);
+  const repository = (await (
+    await send('POST', base(), { ...valid(), onTicketId: ticket.id })
+  ).json()) as Investigation;
+  expect(repository.onTicketId).toBeNull();
+});

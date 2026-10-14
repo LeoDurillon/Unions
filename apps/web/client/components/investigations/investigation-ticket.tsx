@@ -25,6 +25,9 @@ function Ask({
         <span className="block text-xs text-zinc-500">
           Optional. An agent writes the ticket from the whole investigation and this, in the
           language you wrote in; it lands in the Backlog.
+          {investigation.scope === 'ticket' && investigation.onTicketId !== null
+            ? ' It depends on the ticket investigated: it starts once that one is done, from its branch.'
+            : ''}
         </span>
         <textarea
           className={`${inputClass} min-h-20`}

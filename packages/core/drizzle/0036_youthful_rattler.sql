@@ -1,0 +1,1 @@
+ALTER TABLE `investigations` ADD `on_ticket_id` integer REFERENCES tickets(id) ON DELETE SET NULL;

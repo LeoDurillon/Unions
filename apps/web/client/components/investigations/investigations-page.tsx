@@ -4,6 +4,7 @@ import { useState, type ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
 import { api } from '../../lib/api';
+import { clearInvestigateTicket } from '../../lib/investigate-ticket';
 import { Badge, Button, ErrorText } from '../ui';
 import { InvestigationDetail } from './investigation-detail';
 import { InvestigationForm } from './investigation-form';
@@ -51,16 +52,29 @@ function Detail({
   selection,
   onSelect,
   onOpenTicket,
+  initialTicket,
 }: {
   project: PublicProject;
   investigations: Investigation[];
+  initialTicket: number | null;
   selection: Selection;
   onSelect: (selection: Selection) => void;
   onOpenTicket: (id: number) => void;
 }): ReactElement {
   const current = investigations.find((investigation) => investigation.id === selection);
   if (!current) {
-    return <InvestigationForm project={project} onCreated={onSelect} />;
+    return (
+      <InvestigationForm
+        project={project}
+        initialTicket={initialTicket}
+        onCreated={(id) => {
+          if (initialTicket !== null) {
+            clearInvestigateTicket();
+          }
+          onSelect(id);
+        }}
+      />
+    );
   }
   return (
     <InvestigationDetail
@@ -74,12 +88,53 @@ function Detail({
   );
 }
 
+/** The investigations, newest first, under a note on what they are. */
+function Listing({
+  investigations,
+  error,
+  loaded,
+  selection,
+  onSelect,
+}: {
+  investigations: Investigation[];
+  error: Error | null;
+  loaded: boolean;
+  selection: Selection;
+  onSelect: (selection: Selection) => void;
+}): ReactElement {
+  return (
+    <>
+      <p className="px-1 text-xs text-zinc-500">
+        Run an agent on your own prompt, about the repository, a ticket&apos;s workspace or a
+        general subject. Nothing is posted to GitHub.
+      </p>
+      <ErrorText error={error} />
+      <ul className="space-y-0.5">
+        {investigations.map((investigation) => (
+          <InvestigationItem
+            key={investigation.id}
+            investigation={investigation}
+            selected={investigation.id === selection}
+            onSelect={onSelect}
+          />
+        ))}
+      </ul>
+      {loaded && investigations.length === 0 ? (
+        <p className="px-3 text-sm text-zinc-500">No investigation yet.</p>
+      ) : null}
+    </>
+  );
+}
+
 /** Ad-hoc agent runs on a custom prompt for the project; no GitHub issue is created. */
 export function InvestigationsPage({
   project,
+  initialTicket = null,
   onOpenTicket,
 }: {
   project: PublicProject;
+  /** Asked from a ticket: the new investigation's form runs on it. */
+  initialTicket?: number | null;
   onOpenTicket: (id: number) => void;
 }): ReactElement {
   const query = useQuery({
@@ -102,24 +157,13 @@ export function InvestigationsPage({
         >
           + New investigation
         </Button>
-        <p className="px-1 text-xs text-zinc-500">
-          Run an agent on your own prompt, about the repository or a general subject. Nothing is
-          posted to GitHub.
-        </p>
-        <ErrorText error={query.error} />
-        <ul className="space-y-0.5">
-          {investigations.map((investigation) => (
-            <InvestigationItem
-              key={investigation.id}
-              investigation={investigation}
-              selected={investigation.id === selection}
-              onSelect={setSelection}
-            />
-          ))}
-        </ul>
-        {query.isSuccess && investigations.length === 0 ? (
-          <p className="px-3 text-sm text-zinc-500">No investigation yet.</p>
-        ) : null}
+        <Listing
+          investigations={investigations}
+          error={query.error}
+          loaded={query.isSuccess}
+          selection={selection}
+          onSelect={setSelection}
+        />
       </nav>
       <div className="min-w-0 flex-1 overflow-y-auto">
         <div className="mx-auto max-w-3xl p-4">
@@ -127,6 +171,7 @@ export function InvestigationsPage({
             project={project}
             investigations={investigations}
             selection={selection}
+            initialTicket={initialTicket}
             onSelect={setSelection}
             onOpenTicket={onOpenTicket}
           />

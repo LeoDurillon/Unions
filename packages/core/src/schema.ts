@@ -225,7 +225,7 @@ export const agentTools = sqliteTable('agent_tools', {
   createdAt: integer('created_at').notNull().default(now),
 });
 
-export const INVESTIGATION_SCOPES = ['global', 'repository'] as const;
+export const INVESTIGATION_SCOPES = ['global', 'repository', 'ticket'] as const;
 export const INVESTIGATION_STATUSES = [
   'queued',
   'running',
@@ -236,7 +236,8 @@ export const INVESTIGATION_STATUSES = [
 
 /**
  * One agent run on a custom prompt, outside the ticket pipeline: nothing is mirrored to GitHub.
- * `repository` runs on a fresh clone of the project's repository, `global` without any code.
+ * `repository` runs on a fresh clone of the project's repository, `global` without any code,
+ * `ticket` in the ticket's own container (`onTicketId`), on its workspace as the agent left it.
  */
 export const investigations = sqliteTable(
   'investigations',
@@ -254,6 +255,10 @@ export const investigations = sqliteTable(
       .notNull()
       .default(sql`'[]'`),
     scope: text('scope', { enum: INVESTIGATION_SCOPES }).notNull(),
+    /** The ticket a `ticket` investigation runs on (null once that ticket is removed). */
+    onTicketId: integer('on_ticket_id').references((): AnySQLiteColumn => tickets.id, {
+      onDelete: 'set null',
+    }),
     model: text('model').$type<AgentModel>().notNull(),
     tools: text('tools', { mode: 'json' }).$type<string[]>().notNull(),
     status: text('status', { enum: INVESTIGATION_STATUSES }).notNull().default('queued'),

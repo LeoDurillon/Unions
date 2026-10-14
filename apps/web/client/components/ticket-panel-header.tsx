@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../src/api-types';
+import { investigateTicket } from '../lib/investigate-ticket';
 import { describePhase } from '../lib/labels';
 import { Badge, Button } from './ui';
 
@@ -24,6 +25,17 @@ export function TicketPanelHeader({
         {phase ? <Badge tone={phase.tone}>{phase.label}</Badge> : null}
       </div>
       <div className="flex shrink-0 items-center gap-2">
+        {detail ? (
+          <Button
+            className="whitespace-nowrap"
+            title="Run an investigation in this ticket's workspace, as its agent left it"
+            onClick={() => {
+              investigateTicket(detail.ticket.id);
+            }}
+          >
+            Investigate
+          </Button>
+        ) : null}
         {detail?.ticket.branch ? (
           <Button className="whitespace-nowrap" onClick={onReview}>
             Review changes

@@ -253,6 +253,13 @@
       "when": 1791994227176,
       "tag": "0035_safe_santa_claus",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "6",
+      "when": 1791996573959,
+      "tag": "0036_youthful_rattler",
+      "breakpoints": true
     }
   ]
 }

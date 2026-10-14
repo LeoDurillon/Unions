@@ -102,6 +102,7 @@ export const api = {
       title: string;
       prompt: string;
       scope: InvestigationScope;
+      onTicketId?: number | null;
       model: AgentModel;
       tools: string[];
     },

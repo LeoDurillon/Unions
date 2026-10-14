@@ -25,9 +25,38 @@ export type NewInvestigation = {
   title: string;
   prompt: string;
   scope: InvestigationScope;
+  /** The ticket, for the `ticket` scope. */
+  onTicketId?: number | null;
   model: string;
   tools: readonly string[];
 };
+
+/**
+ * A `ticket` investigation runs in the ticket's container: it needs a ticket of the project, and
+ * waits for none of its steps (the agent works in that same workspace).
+ */
+function checkTicket(
+  db: Db,
+  projectId: number,
+  scope: InvestigationScope,
+  ticketId: number | null,
+): void {
+  if (scope !== 'ticket') {
+    return;
+  }
+  const ticket =
+    ticketId === null
+      ? undefined
+      : db.select().from(schema.tickets).where(eq(schema.tickets.id, ticketId)).get();
+  if (ticket?.projectId !== projectId) {
+    throw new InvestigationError('Pick a ticket of this project to investigate');
+  }
+  if (ticket.phase.kind === 'running') {
+    throw new InvestigationError(
+      "The ticket is running a step: ask once it is done, the agent works in the ticket's workspace",
+    );
+  }
+}
 
 function requireText(value: string, label: string): string {
   const text = value.trim();
@@ -60,11 +89,14 @@ export function createInvestigation(db: Db, input: NewInvestigation): Investigat
   if (!isAgentModel(input.model)) {
     throw new InvestigationError(`Unknown model "${input.model}"`);
   }
+  const onTicketId = input.scope === 'ticket' ? (input.onTicketId ?? null) : null;
+  checkTicket(db, input.projectId, input.scope, onTicketId);
   const values = {
     projectId: input.projectId,
     title: requireText(input.title, 'title'),
     prompt: requireText(input.prompt, 'prompt'),
     scope: input.scope,
+    onTicketId,
     model: input.model,
     tools: validateTools(db, input.tools),
   };
@@ -85,6 +117,7 @@ export function rerunInvestigation(db: Db, id: number): Investigation {
   if (current.status === 'queued' || current.status === 'running') {
     throw new InvestigationError('The investigation has not finished yet');
   }
+  checkTicket(db, current.projectId, current.scope, current.onTicketId);
   return db.transaction((tx) => {
     const row = tx
       .update(schema.investigations)
@@ -106,6 +139,7 @@ export function askFollowUp(db: Db, id: number, prompt: string): Investigation {
   if (current.status !== 'succeeded' || current.result === null) {
     throw new InvestigationError('Only an answered investigation can take a follow-up');
   }
+  checkTicket(db, current.projectId, current.scope, current.onTicketId);
   const history = [...current.history, { prompt: current.prompt, answer: current.result }];
   const values = { prompt: requireText(prompt, 'follow-up'), history, status: 'queued' as const };
   return db.transaction((tx) => {

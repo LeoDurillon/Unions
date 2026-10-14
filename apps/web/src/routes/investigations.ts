@@ -75,13 +75,14 @@ async function create(db: Db, c: Context): Promise<Response> {
   const body = await readObject(c.req.raw);
   const { scope, model } = body;
   if (!isInvestigationScope(scope)) {
-    throw fail(BAD_REQUEST, '"scope" must be "global" or "repository"');
+    throw fail(BAD_REQUEST, '"scope" must be "global", "repository" or "ticket"');
   }
   const input = {
     projectId: projectOf(db, c),
     title: requireText(body, 'title'),
     prompt: requireText(body, 'prompt'),
     scope,
+    onTicketId: typeof body.onTicketId === 'number' ? body.onTicketId : null,
     model: typeof model === 'string' ? model : '',
     tools: toolsOf(body),
   };

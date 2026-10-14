@@ -15,6 +15,11 @@ export const SCOPE_LABELS: Record<InvestigationScope, { title: string; descripti
     title: 'Repository',
     description: 'The agent reads a fresh clone of the project’s repository.',
   },
+  ticket: {
+    title: 'A ticket',
+    description:
+      "In the ticket's own workspace, as its agent left it: its branch, uncommitted work, running services. Read only.",
+  },
   global: {
     title: 'Global subject',
     description: 'No code checked out: a general question, answered with the agent’s tools.',
