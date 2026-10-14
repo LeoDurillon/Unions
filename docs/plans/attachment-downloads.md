@@ -1,6 +1,8 @@
 # Idea: download attachments from GitHub issues and Notion pages on import
 
-Status: deferred when ticket attachments were built (`f2ee922`). Not started.
+Status: partly built. Images of a Notion page are downloaded when the ticket is created and kept as private ticket
+files (`notion-images.ts`, `141257a`). Left: the Notion page's file blocks (PDFs and other files), and GitHub issue
+attachments (`user-attachments` links, which need the project's credentials for private repositories).
 
 Ticket attachments exist: files uploaded in the Overview tab are stored under `attachments/t<ticket>/` and copied to
 `/workspace/attachments` before every step. Importing a GitHub issue or a Notion page does not bring the files

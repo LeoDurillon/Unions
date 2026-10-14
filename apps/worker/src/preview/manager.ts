@@ -3,6 +3,7 @@ import { emitEvent, recordE2e, recoverPreviews } from '@union/core';
 import type { PreviewAction } from '../commands';
 import { runRequestedE2e } from '../e2e';
 import { generatePreviewFile } from './compose-file';
+import { IdleWatcher, readProxyMetrics } from './idle';
 import { refreshPreviewLogs, startPreview, stopPreview, takeDown, type PreviewDeps } from './run';
 
 const ACTIONS: Record<
@@ -60,6 +61,35 @@ export class PreviewManager {
       } finally {
         this.e2eTicket = null;
       }
+    });
+  }
+
+  /** The ticket whose e2e tests run now, if any. */
+  testing(): number | null {
+    return this.e2eTicket;
+  }
+
+  /** What stops the previews nobody visits, through this manager. */
+  idleWatcher(): IdleWatcher {
+    return new IdleWatcher({
+      db: this.deps.db,
+      readMetrics: () => readProxyMetrics(),
+      stopIdle: (ticketId, minutes) => {
+        this.stopIdle(ticketId, minutes);
+      },
+      testing: () => this.testing(),
+    });
+  }
+
+  /** Stops a preview nobody visited for `minutes`, and says so in the ticket's log. */
+  stopIdle(ticketId: number, minutes: number): void {
+    this.track(ticketId, async () => {
+      await stopPreview(this.deps, ticketId);
+      emitEvent(this.deps.db, {
+        type: 'preview_idle_stopped',
+        ticketId,
+        payload: { minutes, message: `Preview stopped: nobody opened it for ${minutes} minutes` },
+      });
     });
   }
 

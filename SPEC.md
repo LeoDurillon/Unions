@@ -245,9 +245,9 @@ open), leading to `running` on the `rebase` step with `thenRun: final_review`, s
 on `final_review`; a retry keeps that chain. `rebase` is a `Step` but not a pipeline step (`STEPS`); it shows on the
 board as In review.
 
-## Preview environments (planned)
+## Preview environments
 
-Full design: [`docs/plans/preview-environments.md`](docs/plans/preview-environments.md). In short:
+Built (phases 1 to 4). Full design and what was built: [`docs/plans/preview-environments.md`](docs/plans/preview-environments.md). In short:
 
 - A ticket's branch runs from the repository's own Docker Compose file (path set per project), so apps with a
   database or a queue work. Each ticket is its own compose project (`union-t<id>`): its own containers, network and
@@ -263,6 +263,18 @@ Full design: [`docs/plans/preview-environments.md`](docs/plans/preview-environme
   the browser is installed at the repository's Playwright version on first use. The project's e2e command runs only
   when the user asks, from the ticket ("Run e2e tests", one run at a time: they take a lot of memory); a failure can
   be sent to the agent as a revision.
+- Compose additions (project settings → Previews → Services): YAML merged over the repository's file as a second
+  `-f`, for what Union adds without changing the repository (a database restore, migrations, a seed). Kept in the
+  settings, written only in the compose helper.
+- Project files (project settings → Project → Files): files put at a path in every ticket's repository before each
+  step and preview start, kept out of git (`.git/info/exclude`) and refused in pushes, never readable from the
+  browser. A database dump for the additions' restore, a local config.
+- Services for the agent: chosen compose services run in the ticket's project while it implements or rebases (a
+  database for its tests), stopped after.
+- Served to this machine only (the proxy's port is published on `127.0.0.1`). A running preview nobody visited for
+  the project's idle time (60 minutes by default, 0: never) stops, except while the agent runs a step on the ticket
+  or its e2e tests run; visits are the proxy's request counts. At most `UNION_MAX_PREVIEWS` previews run (3), and
+  optionally fewer per project (Previews → Limits).
 
 ## MCP servers for agents (planned)
 

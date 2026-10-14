@@ -27,20 +27,23 @@ function OpenLinks({ preview }: { preview: Preview | null }): ReactElement | nul
   }
   const urls = preview.urls ?? (preview.url ? [{ service: '', url: preview.url }] : []);
   return (
-    <>
+    <ul className="space-y-1 text-sm">
       {urls.map(({ service, url }) => (
-        <a
-          key={url}
-          className="text-sm text-indigo-600 hover:underline dark:text-indigo-400"
-          href={url}
-          target="_blank"
-          rel="noreferrer"
-          title={service === '' ? undefined : `The ${service} service`}
-        >
-          Open {url}
-        </a>
+        <li key={url} className="flex items-baseline gap-2">
+          {service === '' ? null : (
+            <span className="w-24 shrink-0 truncate text-zinc-500">{service}</span>
+          )}
+          <a
+            className="min-w-0 truncate text-indigo-600 hover:underline dark:text-indigo-400"
+            href={url}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {url} ↗
+          </a>
+        </li>
       ))}
-    </>
+    </ul>
   );
 }
 
@@ -58,31 +61,33 @@ function Controls({
   const status = view.preview?.status;
   const running = status === 'running';
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="space-y-2">
       <OpenLinks preview={view.preview} />
-      <Button
-        variant={running ? 'secondary' : 'primary'}
-        disabled={busy || view.refusal !== null}
-        title={view.refusal ?? undefined}
-        onClick={() => {
-          act(previewApi.start);
-        }}
-      >
-        {running ? 'Restart' : 'Start preview'}
-      </Button>
-      {running || status === 'failed' ? (
+      <div className="flex flex-wrap items-center gap-2">
         <Button
-          disabled={busy}
+          variant={running ? 'secondary' : 'primary'}
+          disabled={busy || view.refusal !== null}
+          title={view.refusal ?? undefined}
           onClick={() => {
-            act(previewApi.stop);
+            act(previewApi.start);
           }}
         >
-          Stop
+          {running ? 'Restart' : 'Start preview'}
         </Button>
-      ) : null}
-      <Button onClick={onCompose}>
-        {view.preview?.override ? 'Compose file (yours)' : 'Compose file'}
-      </Button>
+        {running || status === 'failed' ? (
+          <Button
+            disabled={busy}
+            onClick={() => {
+              act(previewApi.stop);
+            }}
+          >
+            Stop
+          </Button>
+        ) : null}
+        <Button onClick={onCompose}>
+          {view.preview?.override ? 'Compose file (yours)' : 'Compose file'}
+        </Button>
+      </div>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 # Plan: preview environments
 
-Status: phases 1 to 3 implemented (branch `preview-container-feature`); phase 4 not started. Replaces the single-container design first written in `SPEC.md` (one image, one
+Status: built, phases 1 to 4, merged into `main`. Replaces the single-container design first written in `SPEC.md` (one image, one
 start command, one port): that one could not run apps needing a database or a queue.
 
 ## Idea
@@ -239,6 +239,21 @@ integration tests, a cache, a mail catcher.
 - **Prompt**: the implementer is told which services run for it, and which variables it has.
 - **Failure**: if the services cannot start, the step still runs; the reason goes to the ticket's log.
 
+## Phase 4 as built
+
+- **Setup after start** (migrations, seeding): compose additions in the settings, merged over the repository's file
+  (one-shot services with `depends_on` conditions), and project files for what they read (a database dump). No
+  setup-command list: the additions cover it with standard compose.
+- **Reach**: this machine only. The proxy's port is published on `127.0.0.1`; previews run unreviewed branches.
+- **Idle stop**: Traefik's Prometheus metrics (`traefik_router_requests_total` per router, on an entrypoint only the
+  worker reaches, `UNION_PREVIEW_METRICS`) count each preview's requests. Every minute the worker's `IdleWatcher`
+  (`preview/idle.ts`) compares the counts; a running preview with no new request for the project's
+  `idleStopMinutes` (60 by default, 0: never) stops through the preview manager, logged as `preview_idle_stopped`.
+  Never while the ticket is in a step (the agent may use the preview) or its e2e tests run. The clock starts again
+  at each visit, each start and each worker start; without metrics nothing stops.
+- **Cap**: `UNION_MAX_PREVIEWS` (3) for the machine, and an optional per-project `maxRunning`
+  (Previews → Limits).
+
 ## Phases
 
 1. **Run a preview**: Traefik, the compose helper on the workspace volume, the resolved and rewritten compose file
@@ -252,7 +267,7 @@ integration tests, a cache, a mail catcher.
 
 ## Open questions
 
-- Setup after start (migrations, seeding): commands in the settings, or left to the compose file (an init service)?
-- Expose previews on the local network, or this machine only (default)?
+- ~~Setup after start: commands in the settings, or an init service?~~ Compose additions with init services (phase 4).
+- ~~Expose previews on the local network, or this machine only?~~ This machine only (phase 4).
 - ~~The e2e gate: after every implementation run, or only when the user starts a preview or reaches the final review?~~
   Only when the user asks, from the ticket (phase 3): e2e runs take a lot of memory.

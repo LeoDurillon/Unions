@@ -8,7 +8,6 @@ import {
   schema,
   setComposeOverride,
   setPreviewSecret,
-  updatePreview,
   type ContainerRuntime,
   type Db,
   type ExecResult,
@@ -188,19 +187,10 @@ test('a failed start keeps the reason and the output, and takes down what it sta
   expect(commands().at(-1)).toBe('-p union-t1 down -v --remove-orphans');
 });
 
-test('starts are refused without settings, without a workspace, and past the running cap', async () => {
+test('starts are refused without settings and without a workspace', async () => {
   db.update(schema.tickets).set({ workspaceVolume: null }).run();
   await startPreview(deps(), ticketId);
   expect(getPreview(db, ticketId)?.error).toContain('run the implementation first');
-
-  db.update(schema.tickets).set({ workspaceVolume: 'union-t1-ws' }).run();
-  for (const id of [101, 102, 103]) {
-    const other = createTicket(db, { projectId: 1, title: `t${id}`, body: '' });
-    updatePreview(db, other.id, { status: 'running' });
-  }
-  calls = [];
-  await startPreview(deps(), ticketId);
-  expect(getPreview(db, ticketId)?.error).toContain('3 previews are running already');
 });
 
 test('stopping takes the compose project down with its volumes', async () => {

@@ -36,6 +36,13 @@ export type PreviewConfig = {
    * e2e tests.
    */
   e2eCommand?: string;
+  /**
+   * Minutes without a visit after which a running preview stops (60 when unset; 0: never). Never
+   * while the agent runs a step on the ticket or its e2e tests run.
+   */
+  idleStopMinutes?: number;
+  /** At most this many of the project's previews running at once (`UNION_MAX_PREVIEWS` caps all). */
+  maxRunning?: number;
   /** Phase 1 settings, read as one exposed service. */
   service?: string;
   port?: number;

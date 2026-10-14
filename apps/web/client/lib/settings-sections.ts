@@ -29,6 +29,7 @@ export const SETTINGS_GROUPS = [
       { id: 'preview-services', label: 'Services' },
       { id: 'preview-variables', label: 'Variables' },
       { id: 'preview-e2e', label: 'End-to-end tests' },
+      { id: 'preview-limits', label: 'Limits' },
     ],
   },
   {

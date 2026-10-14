@@ -9,7 +9,7 @@ and linked.
 - [Split a PR into a stack](pr-stack-split.md): an agent splits a ready-for-review PR into stacked PRs. Needs groups.
 - [Restack](restack.md): rebase and retarget a stack after a revision or a merge.
 - [MCP servers for agents](mcp-servers.md): designed in SPEC.md; step 1 needs two checks first.
-- [Preview environments](preview-environments.md): compose-based previews with e2e tests; three open questions.
+- [Preview environments](preview-environments.md): compose-based previews with e2e tests (built, phases 1 to 4).
 - [Project settings as a page](project-settings-page.md): grouped side menu instead of the nine-tab modal (steps 1 to 4 built).
 
 ## Ideas
@@ -18,7 +18,7 @@ and linked.
 - [Show older merged tickets](board-older-merged.md)
 - [Exclude merged PRs from the ticket view](exclude-merged-prs.md) (scope to clarify)
 - [Revise with guidance after a failed rebase](rebase-revise-with-guidance.md)
-- [Download attachments from GitHub and Notion on import](attachment-downloads.md)
+- [Download attachments from GitHub and Notion on import](attachment-downloads.md) (Notion images done)
 - [Events v2](events-v2.md): replay, more actions, filters, group triggers
 - [Names in the event rule preview](rule-preview-people.md) (small)
 

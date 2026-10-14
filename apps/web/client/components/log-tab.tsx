@@ -66,6 +66,9 @@ function ruleEntries(event: EventRow): Entry[] {
 }
 
 function entriesFor(event: EventRow): Entry[] {
+  if (event.type === 'preview_idle_stopped') {
+    return [{ key: `${event.seq}`, kind: 'result', text: payloadText(event.payload, 'message') }];
+  }
   if (event.type === 'event_rule_applied') {
     return ruleEntries(event);
   }

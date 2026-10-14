@@ -18,7 +18,7 @@ import type { RunSlots } from './slots';
 
 /**
  * The work outside the ticket pipeline: investigations, agent reviews and PR description rewrites
- * (taking their slots from it), and the event rules.
+ * (taking their slots from it), the event rules, and stopping previews nobody visits.
  */
 export type SideRuns = {
   investigations: InvestigationRunner;
@@ -43,6 +43,7 @@ export async function startSideRuns(deps: {
   const prDescriptions = new PrDescriptionRunner(deps);
   const previews = new PreviewManager({ ...deps, settings: previewSettings() });
   const events = new EventDispatcher(deps.db, new FetchNotionApi());
+  const idlePreviews = previews.idleWatcher();
   await investigations.recover();
   await agentReviews.recover();
   prDescriptions.recover();
@@ -58,6 +59,7 @@ export async function startSideRuns(deps: {
       agentReviews.tick();
       prDescriptions.tick();
       events.tick();
+      idlePreviews.tick();
     },
     stop: () => {
       investigations.stop();

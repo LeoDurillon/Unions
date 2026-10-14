@@ -23,6 +23,25 @@ const PREFIX = /^(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)?$/u;
 const MAX_PORT = 65_535;
 const MAX_SECRET_CHARS = 10_000;
 const MAX_ADDITIONS_CHARS = 100_000;
+const MAX_IDLE_MINUTES = 10_080;
+const MAX_PROJECT_PREVIEWS = 20;
+
+/** A whole number in [min, max], or undefined when not given. */
+function optionalCount(
+  value: unknown,
+  min: number,
+  max: number,
+  message: string,
+): number | undefined {
+  if (value === undefined || value === null || value === '') {
+    return undefined;
+  }
+  const count = Number(value);
+  if (!Number.isInteger(count) || count < min || count > max) {
+    throw fail(BAD_REQUEST, message);
+  }
+  return count;
+}
 
 function loadProject(db: Db, c: Context): Project {
   const id = requireId(c.req.param('projectId'), 'project id');
@@ -167,6 +186,18 @@ function previewConfig(
   const profiles = profileList(input.profiles);
   const agentServices = serviceList(input.agentServices);
   const additions = composeAdditions(input.composeAdditions);
+  const idleStopMinutes = optionalCount(
+    input.idleStopMinutes,
+    0,
+    MAX_IDLE_MINUTES,
+    `Stop after 0 (never) to ${MAX_IDLE_MINUTES} minutes without a visit`,
+  );
+  const maxRunning = optionalCount(
+    input.maxRunning,
+    1,
+    MAX_PROJECT_PREVIEWS,
+    `Allow 1 to ${MAX_PROJECT_PREVIEWS} previews at once`,
+  );
   return {
     composeFile: composeFile(input.composeFile),
     ...(additions === '' ? {} : { composeAdditions: additions }),
@@ -176,6 +207,8 @@ function previewConfig(
     ...(e2eCommand === '' ? {} : { e2eCommand }),
     ...(profiles.length === 0 ? {} : { profiles }),
     ...(agentServices.length === 0 ? {} : { agentServices }),
+    ...(idleStopMinutes === undefined ? {} : { idleStopMinutes }),
+    ...(maxRunning === undefined ? {} : { maxRunning }),
   };
 }
 

@@ -6,6 +6,7 @@ import { DeleteSection } from './delete-section';
 import { EventActivitySection, EventRulesSection } from './events-section';
 import { NotionSection } from './notion-section';
 import { PreviewE2ePage } from './preview-e2e-page';
+import { PreviewLimitsPage } from './preview-limits-page';
 import { PreviewServicesPage } from './preview-services-page';
 import { PreviewVariablesPage } from './preview-variables-page';
 
@@ -13,6 +14,7 @@ export type IntegrationSection =
   | 'preview-services'
   | 'preview-variables'
   | 'preview-e2e'
+  | 'preview-limits'
   | 'notion'
   | 'event-rules'
   | 'event-activity'
@@ -30,6 +32,7 @@ export function IntegrationSectionBody({
     'preview-services': () => <PreviewServicesPage project={project} />,
     'preview-variables': () => <PreviewVariablesPage project={project} />,
     'preview-e2e': () => <PreviewE2ePage project={project} />,
+    'preview-limits': () => <PreviewLimitsPage project={project} />,
     notion: () => <NotionSection project={project} />,
     'event-rules': () => <EventRulesSection project={project} />,
     'event-activity': () => <EventActivitySection project={project} />,

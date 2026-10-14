@@ -135,6 +135,9 @@ behavior; this file covers how to work in the repo.
     it, gives every command run in that container the plain variables (`withEnvironment`, never the secrets), and
     `stop`s the services after the step (data kept) unless the preview runs. A preview stopped during such a step
     removes only the services the proxy serves.
+  - `preview/idle.ts`: stops running previews nobody visited for the project's `idleStopMinutes` (60 by default),
+    from Traefik's per-router request counts (`UNION_PREVIEW_METRICS`, an entrypoint only the worker reaches); never
+    while the ticket is in a step or its e2e tests run. The proxy publishes its port on `127.0.0.1` only.
   - `e2e.ts`: the end-to-end tests (`config.preview.e2eCommand`), run only when the user asks (`preview_e2e`, one at a
     time across tickets in `PreviewManager`; never from the implementation loop, which runs the checks only): starts
     the ticket's container and preview, installs the browser at the repository's Playwright version, runs the command

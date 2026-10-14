@@ -22,6 +22,9 @@ export type Form = {
   e2eCommand: string;
   profiles: string[];
   agentServices: string[];
+  /** As typed: empty means the default. */
+  idleStopMinutes: string;
+  maxRunning: string;
 };
 
 const EMPTY: Form = {
@@ -34,6 +37,8 @@ const EMPTY: Form = {
   e2eCommand: '',
   profiles: [],
   agentServices: [],
+  idleStopMinutes: '',
+  maxRunning: '',
 };
 
 function initial(project: PublicProject): Form {
@@ -51,6 +56,8 @@ function initial(project: PublicProject): Form {
     e2eCommand: preview.e2eCommand ?? '',
     profiles: preview.profiles ?? [],
     agentServices: preview.agentServices ?? [],
+    idleStopMinutes: preview.idleStopMinutes === undefined ? '' : String(preview.idleStopMinutes),
+    maxRunning: preview.maxRunning === undefined ? '' : String(preview.maxRunning),
   };
 }
 
@@ -70,6 +77,10 @@ function settingsOf(form: Form): PreviewConfig {
     ...(form.e2eCommand.trim() === '' ? {} : { e2eCommand: form.e2eCommand }),
     ...(form.profiles.length === 0 ? {} : { profiles: form.profiles }),
     ...(form.agentServices.length === 0 ? {} : { agentServices: form.agentServices }),
+    ...(form.idleStopMinutes.trim() === ''
+      ? {}
+      : { idleStopMinutes: Number(form.idleStopMinutes) }),
+    ...(form.maxRunning.trim() === '' ? {} : { maxRunning: Number(form.maxRunning) }),
   };
 }
 

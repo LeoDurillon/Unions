@@ -109,6 +109,19 @@ test('compose additions are saved when they are a compose file, refused otherwis
   expect(db.select().from(schema.projects).get()?.config.preview?.composeAdditions).toBeUndefined();
 });
 
+test('the idle time and the project cap are whole numbers in range, or left unset', async () => {
+  expect((await put({ ...SETTINGS, idleStopMinutes: 0, maxRunning: 2 })).status).toBe(200);
+  expect(db.select().from(schema.projects).get()?.config.preview).toMatchObject({
+    idleStopMinutes: 0,
+    maxRunning: 2,
+  });
+  expect((await put({ ...SETTINGS, idleStopMinutes: -5 })).status).toBe(400);
+  expect((await put({ ...SETTINGS, maxRunning: 1.5 })).status).toBe(400);
+  expect((await put({ ...SETTINGS, maxRunning: 0 })).status).toBe(400);
+  await put(SETTINGS);
+  expect(db.select().from(schema.projects).get()?.config.preview?.idleStopMinutes).toBeUndefined();
+});
+
 test('a preview starts once configured and the ticket has a workspace, one command at a time', async () => {
   const base = `/api/tickets/${ticketId}/preview`;
   const view = async (): Promise<PreviewView> =>

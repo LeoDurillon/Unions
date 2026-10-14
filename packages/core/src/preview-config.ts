@@ -4,6 +4,9 @@
  */
 import type { PreviewConfig, PreviewService } from './schema-types';
 
+/** Minutes without a visit before a running preview stops, when the settings do not say. */
+export const DEFAULT_IDLE_STOP_MINUTES = 60;
+
 export type { PreviewConfig, PreviewService } from './schema-types';
 
 /** What a variable's value can use, as `{name}`; `X` is a service name. */

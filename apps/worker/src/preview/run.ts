@@ -111,6 +111,16 @@ async function startTarget(deps: PreviewDeps, target: Target): Promise<void> {
       true,
     );
   }
+  const projectCap = target.config.maxRunning;
+  const sameProject = others.filter(
+    (row) => getTicket(deps.db, row.ticketId).projectId === target.projectId,
+  );
+  if (projectCap !== undefined && sameProject.length >= projectCap) {
+    throw new PreviewError(
+      `${sameProject.length} of the project's previews are running already (its limit, project settings → Previews → Limits): stop one first`,
+      true,
+    );
+  }
   updatePreview(deps.db, target.ticketId, {
     status: 'starting',
     url: target.urls[0]?.url ?? null,
