@@ -14,7 +14,7 @@ import {
 } from '@union/core';
 
 import { catalogSummary, profileArgs, profileHint, readCatalog, type Catalog } from './catalog';
-import { compose } from './compose';
+import { compose, printedJson } from './compose';
 import {
   lastLines,
   loadTarget,
@@ -69,19 +69,19 @@ async function resolve(
     workspaceVolume: target.workspaceVolume,
     stdin: 'yaml' in source ? source.yaml : undefined,
     env,
+    keepAll: true,
   });
   if (output.exitCode !== 0) {
     throw new PreviewError(`The compose file could not be read:\n${lastLines(output.tail)}`);
   }
-  try {
-    const parsed: unknown = JSON.parse(output.tail.join('\n'));
-    if (isRecord(parsed)) {
-      return parsed;
-    }
-  } catch {
-    // Reported below.
+  const parsed = printedJson(output.lines);
+  if (isRecord(parsed)) {
+    return parsed;
   }
-  throw new PreviewError('docker compose config did not print a compose file');
+  throw new PreviewError(
+    `docker compose config did not print a compose file:
+${lastLines(output.tail)}`,
+  );
 }
 
 function refuse(problems: string[], heading: string): void {

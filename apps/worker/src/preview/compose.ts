@@ -29,7 +29,26 @@ export function previewSettings(
   };
 }
 
-export type ComposeRun = { exitCode: number; tail: string[] };
+/** `tail`: the last lines, for logs and reasons; `lines`: all of them, when asked (`keepAll`). */
+export type ComposeRun = { exitCode: number; tail: string[]; lines: string[] };
+
+const JSON_START = /^\s*[{[]/u;
+
+/**
+ * The JSON a command printed (`config --format json`), from its first `{`: compose prints its
+ * warnings on the same stream, before it. Null when there is none, or it does not parse.
+ */
+export function printedJson(lines: string[]): unknown {
+  const start = lines.findIndex((line) => JSON_START.test(line));
+  if (start === -1) {
+    return null;
+  }
+  try {
+    return JSON.parse(lines.slice(start).join('\n'));
+  } catch {
+    return null;
+  }
+}
 
 /**
  * `docker compose <args>` in a helper container holding the Docker socket, and the ticket's workspace
@@ -46,6 +65,8 @@ export async function compose(
     env?: Record<string, string>;
     signal?: AbortSignal;
     onLine?: (line: string) => void;
+    /** Keep every line: a resolved compose file is hundreds of lines long. */
+    keepAll?: boolean;
   },
 ): Promise<ComposeRun> {
   const mounts = [
@@ -62,15 +83,63 @@ export async function compose(
     signal: run.signal,
   });
   const tail: string[] = [];
+  const all: string[] = [];
   for (;;) {
     const next = await lines.next();
     if (next.done) {
-      return { exitCode: next.value.exitCode, tail };
+      return { exitCode: next.value.exitCode, tail, lines: all };
+    }
+    if (run.keepAll === true) {
+      all.push(next.value);
     }
     tail.push(next.value);
     if (tail.length > TAIL_LINES) {
       tail.shift();
     }
     run.onLine?.(next.value);
+  }
+}
+
+/** The agent's user in its image (`node`): what owns the workspace. */
+const AGENT_UID = '1000:1000';
+const CREATE_MISSING = `for dir; do [ -e "$dir" ] || { mkdir -p "$dir" && chown ${AGENT_UID} "$dir"; }; done`;
+
+/**
+ * Creates the workspace folders a file mounts that do not exist yet (a cache folder such as
+ * `.npm`), as compose does for a missing bind-mount source: Docker refuses a missing volume
+ * sub-path. They go to the agent's user, so the agent can still write there.
+ */
+export async function createMountFolders(
+  runtime: ContainerRuntime,
+  settings: PreviewSettings,
+  workspaceVolume: string,
+  subpaths: string[],
+): Promise<void> {
+  if (subpaths.length === 0) {
+    return;
+  }
+  const lines = runtime.runHelper({
+    image: settings.image,
+    command: [
+      'sh',
+      '-c',
+      CREATE_MISSING,
+      'sh',
+      ...subpaths.map((subpath) => `/workspace/${subpath}`),
+    ],
+    mounts: [{ source: workspaceVolume, target: '/workspace' }],
+  });
+  const output: string[] = [];
+  for (;;) {
+    const next = await lines.next();
+    if (next.done) {
+      if (next.value.exitCode !== 0) {
+        throw new Error(
+          `Could not create the folders the compose file mounts:\n${output.join('\n')}`,
+        );
+      }
+      return;
+    }
+    output.push(next.value);
   }
 }

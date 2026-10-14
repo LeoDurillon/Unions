@@ -5,11 +5,12 @@ import {
   PREVIEW_NETWORK,
   previewProject,
   updatePreview,
+  workspaceSubpaths,
   type ComposeJson,
   type Db,
 } from '@union/core';
 
-import { compose } from './compose';
+import { compose, createMountFolders } from './compose';
 import { fileToRun } from './compose-file';
 import { joinPreview, leavePreview } from './network';
 import { waitReady } from './ready';
@@ -50,6 +51,12 @@ function outputLog(db: Db, ticketId: number): { push: (line: string) => void; fl
 }
 
 async function up(deps: PreviewDeps, target: Target, file: ComposeJson): Promise<void> {
+  await createMountFolders(
+    deps.runtime,
+    deps.settings,
+    target.workspaceVolume,
+    workspaceSubpaths(file),
+  );
   const log = outputLog(deps.db, target.ticketId);
   const output = await compose(deps.runtime, deps.settings, {
     args: [

@@ -64,3 +64,32 @@ test('the catalog reads the file with every profile enabled', async () => {
     'json',
   ]);
 });
+
+test('a resolved file of hundreds of lines, after compose warnings, is read whole', async () => {
+  const big = {
+    services: Object.fromEntries(
+      Array.from({ length: 60 }, (_, index) => [`svc${index}`, { profiles: ['p'] }]),
+    ),
+  };
+  const lines = [
+    'WARN[0000] The "X" variable is not set. Defaulting to a blank string.',
+    ...JSON.stringify(big, null, 2).split('\n'),
+  ];
+  const runtime = {
+    async *runHelper(): AsyncGenerator<string, ExecResult> {
+      await Promise.resolve();
+      yield* lines;
+      return { exitCode: 0, stderr: '' };
+    },
+  } as unknown as ContainerRuntime;
+  const deps = { runtime, settings: previewSettings({}) } as unknown as PreviewDeps;
+  const target = {
+    project: 'union-t1',
+    workspaceVolume: 'union-t1-ws',
+    config: { composeFile: 'compose.yaml' },
+    plain: {},
+    secrets: {},
+  } as unknown as Target;
+  expect(lines.length).toBeGreaterThan(200);
+  expect(Object.keys((await readCatalog(deps, target)).services)).toHaveLength(60);
+});

@@ -1,6 +1,7 @@
 import { expect, test } from 'bun:test';
 
 import {
+  workspaceSubpaths,
   envFileProblem,
   exposedServiceProblem,
   previewCompose,
@@ -225,4 +226,47 @@ test('the env file may not land in a folder mounted from the workspace', () => {
   );
   expect(envFileProblem(file, { service: 'web', path: '.env' })).toContain('must be absolute');
   expect(envFileProblem(file, { service: 'api', path: '/x' })).toContain('not in the compose file');
+});
+
+test('the workspace folders a file mounts are listed, for the missing ones to be created', () => {
+  const file = previewCompose(resolved(), TARGET);
+  expect(workspaceSubpaths(file)).toEqual(['repo/site']);
+  const twice = {
+    services: {
+      a: {
+        volumes: [{ type: 'volume', source: 'union_workspace', volume: { subpath: 'repo/x' } }],
+      },
+      b: {
+        volumes: [
+          { type: 'volume', source: 'union_workspace', volume: { subpath: 'repo/x' } },
+          { type: 'volume', source: 'pgdata', target: '/data' },
+        ],
+      },
+    },
+  };
+  expect(workspaceSubpaths(twice)).toEqual(['repo/x']);
+});
+
+function workspaceMountOf(volume: Record<string, unknown>): ComposeJson {
+  return {
+    services: {
+      app: {
+        image: 'x',
+        volumes: [{ type: 'volume', source: 'union_workspace', target: '/x', volume }],
+      },
+    },
+    volumes: { union_workspace: { external: true, name: 'union-t12-ws' } },
+  };
+}
+
+test("a mount of the workspace may only reach its repository, never the ticket's files", () => {
+  const union = { workspaceVolume: 'union-t12-ws' };
+  expect(composeProblems(workspaceMountOf({ subpath: 'repo/src' }), union)).toEqual([]);
+  expect(composeProblems(workspaceMountOf({ subpath: 'attachments' }), union)).toEqual([
+    'app: mounts the workspace outside its repository ("attachments")',
+  ]);
+  expect(composeProblems(workspaceMountOf({ subpath: 'repo/../attachments' }), union)).toHaveLength(
+    1,
+  );
+  expect(composeProblems(workspaceMountOf({}), union)).toHaveLength(1);
 });

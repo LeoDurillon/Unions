@@ -93,7 +93,19 @@ function mountProblems(name: string, mount: unknown, volumes: Set<string>): stri
   if (type === 'volume' && source !== '' && !volumes.has(source)) {
     return [`${name}: volume "${source}" is not declared in the file`];
   }
-  return [];
+  return source === PREVIEW_WORKSPACE_KEY ? workspaceMountProblems(name, mount) : [];
+}
+
+/**
+ * The workspace volume also holds the ticket's attachments, some private: a mount of it (in Union's
+ * file, or the user's edit of it) may only reach the repository.
+ */
+function workspaceMountProblems(name: string, mount: Record<string, unknown>): string[] {
+  const options = isRecord(mount.volume) ? mount.volume : {};
+  const subpath = typeof options.subpath === 'string' ? path.posix.normalize(options.subpath) : '';
+  return subpath === 'repo' || subpath.startsWith('repo/')
+    ? []
+    : [`${name}: mounts the workspace outside its repository ("${subpath || '/'}")`];
 }
 
 /** `env_file` is read by the compose CLI at start: only files of the repository. */

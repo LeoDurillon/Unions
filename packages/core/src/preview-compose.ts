@@ -267,3 +267,25 @@ export function withoutProfiles(config: ComposeJson): ComposeJson {
     }),
   };
 }
+
+/**
+ * The folders of the workspace a file mounts (`repo/dev/.npm`), for the worker to create when
+ * missing: compose creates a missing bind-mount source, but Docker refuses a volume sub-path that
+ * does not exist, and the repository's bind mounts became sub-path mounts.
+ */
+export function workspaceSubpaths(config: ComposeJson): string[] {
+  const services = isRecord(config.services) ? Object.values(config.services) : [];
+  const subpaths = services.flatMap((service) => {
+    const mounts: unknown[] =
+      isRecord(service) && Array.isArray(service.volumes) ? service.volumes : [];
+    return mounts.flatMap((mount) => {
+      const options = isRecord(mount) && isRecord(mount.volume) ? mount.volume : {};
+      return isRecord(mount) &&
+        mount.source === PREVIEW_WORKSPACE_KEY &&
+        typeof options.subpath === 'string'
+        ? [options.subpath]
+        : [];
+    });
+  });
+  return [...new Set(subpaths)];
+}

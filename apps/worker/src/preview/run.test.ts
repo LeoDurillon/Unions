@@ -43,6 +43,7 @@ let resolved: unknown;
 let upExit: number;
 let answer: number;
 let asked: string[];
+let folders: string[];
 /** `join <network>` / `leave <network>`, in the order they happened, among the compose calls. */
 let network: string[];
 
@@ -60,6 +61,11 @@ const runtime = {
     return Promise.resolve();
   },
   async *runHelper(spec: HelperSpec): AsyncGenerator<string, ExecResult> {
+    // The folders a file mounts are made by a plain helper, not a compose call.
+    if (spec.command[0] !== 'docker') {
+      folders.push(...spec.command.slice(4));
+      return { exitCode: 0, stderr: '' };
+    }
     calls.push(spec);
     await Promise.resolve();
     const command = spec.command.join(' ');
@@ -122,6 +128,7 @@ beforeEach(() => {
   answer = 200;
   asked = [];
   network = [];
+  folders = [];
 });
 
 test('a preview starts from the workspace, rewritten, and runs once the service answers', async () => {
@@ -139,6 +146,8 @@ test('a preview starts from the workspace, rewritten, and runs once the service 
     '-p union-t1 --project-directory /workspace/repo -f - up -d --build --remove-orphans',
     '-p union-t1 logs --no-color --tail 200',
   ]);
+  // The repository folder it mounts is made if missing, as compose would for a bind mount.
+  expect(folders).toEqual(['/workspace/repo/site']);
   // The agent's container joins the preview's own network, not the proxy's shared one.
   expect(network).toEqual(['join union-t1_default union-t1']);
   const [, config, up] = calls;

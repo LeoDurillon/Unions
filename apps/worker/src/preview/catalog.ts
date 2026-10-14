@@ -1,6 +1,6 @@
 import { isRecord } from '@union/core';
 
-import { compose } from './compose';
+import { compose, printedJson } from './compose';
 import type { PreviewDeps, Target } from './target';
 
 /** Every service of the compose file and the profiles it belongs to (none: always enabled). */
@@ -31,25 +31,19 @@ export async function readCatalog(deps: PreviewDeps, target: Target): Promise<Ca
     ],
     workspaceVolume: target.workspaceVolume,
     env: { ...target.plain, ...target.secrets },
+    keepAll: true,
   });
-  try {
-    const parsed: unknown = JSON.parse(output.tail.join('\n'));
-    const services = isRecord(parsed) && isRecord(parsed.services) ? parsed.services : {};
-    return {
-      services: Object.fromEntries(
-        Object.entries(services).map(([name, service]) => {
-          const profiles =
-            isRecord(service) && Array.isArray(service.profiles) ? service.profiles : [];
-          return [
-            name,
-            profiles.filter((profile): profile is string => typeof profile === 'string'),
-          ];
-        }),
-      ),
-    };
-  } catch {
-    return { services: {} };
-  }
+  const parsed = printedJson(output.lines);
+  const services = isRecord(parsed) && isRecord(parsed.services) ? parsed.services : {};
+  return {
+    services: Object.fromEntries(
+      Object.entries(services).map(([name, service]) => {
+        const profiles =
+          isRecord(service) && Array.isArray(service.profiles) ? service.profiles : [];
+        return [name, profiles.filter((profile): profile is string => typeof profile === 'string')];
+      }),
+    ),
+  };
 }
 
 /** What the settings show: the profiles, and every service. */
