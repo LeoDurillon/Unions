@@ -76,7 +76,7 @@ export); do not edit. Tests are left out.
 - `pull-request.ts`: Keeps the pull request's state (`pr_state`), when it was merged (`pr_merged_at`) or closed without a merge (`pr_closed_at`, polled still: it can be reopened) a…
 - `queries.ts`: The GraphQL queries the worker sends to GitHub's project board API.
 - `render.ts`: Issue body as sent to GitHub: the ticket description plus a marker that identifies our ticket.
-- `status.ts`: Option to set for a board column.
+- `status.ts`: Maps board columns to the GitHub Project's Status options, and back.
 - `sync.ts`: Mirrors tickets to GitHub.
 
 ## preview/

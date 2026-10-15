@@ -11,9 +11,9 @@ import {
 } from '@union/core';
 import { eq } from 'drizzle-orm';
 
-import type { RemoteItem } from './api';
+import type { ProjectInfo, RemoteItem } from './api';
 import { stripTicketMarker } from './render';
-import { boardStatusFor } from './status';
+import { boardStatusFor, showsStatus } from './status';
 
 type Project = typeof schema.projects.$inferSelect;
 
@@ -44,9 +44,20 @@ function pullFields(db: Db, ticket: Ticket, item: RemoteItem): void {
  * Only "move to In Progress" is honoured from GitHub, and not while the parent is unfinished; any
  * other remote move is reverted.
  */
-function pullStatus(db: Db, project: Project, ticket: Ticket, item: RemoteItem): void {
-  const remote = boardStatusFor(project.config.statusOptions, item.status);
-  if (remote === null || remote === ticket.githubSyncedStatus) {
+function pullStatus(
+  db: Db,
+  project: Project,
+  ticket: Ticket,
+  remoteItem: { item: RemoteItem; info: ProjectInfo },
+): void {
+  const { item, info } = remoteItem;
+  const names = project.config.statusOptions;
+  const remote = boardStatusFor(names, item.status);
+  if (
+    remote === null ||
+    remote === ticket.githubSyncedStatus ||
+    showsStatus(names, ticket.githubSyncedStatus, item.status, info)
+  ) {
     return;
   }
   const starts = remote === 'in_progress' && ticket.phase.kind === 'backlog';
@@ -71,7 +82,12 @@ function pullStatus(db: Db, project: Project, ticket: Ticket, item: RemoteItem):
   setSynced(db, ticket.id, null);
 }
 
-export function applyRemoteItem(db: Db, project: Project, ticket: Ticket, item: RemoteItem): void {
-  pullFields(db, ticket, item);
-  pullStatus(db, project, getTicket(db, ticket.id), item);
+export function applyRemoteItem(
+  db: Db,
+  project: Project,
+  ticket: Ticket,
+  remoteItem: { item: RemoteItem; info: ProjectInfo },
+): void {
+  pullFields(db, ticket, remoteItem.item);
+  pullStatus(db, project, getTicket(db, ticket.id), remoteItem);
 }

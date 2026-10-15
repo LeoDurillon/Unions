@@ -276,6 +276,7 @@ export class GitHubSync {
   }
 
   private async pullProject(project: Project): Promise<void> {
+    const info = await this.projectInfo(project);
     const items = await this.api.listProjectItems(project.githubProjectNodeId);
     const repoName = `${project.owner}/${project.repo}`.toLowerCase();
     const byNumber = new Map(
@@ -291,7 +292,7 @@ export class GitHubSync {
     for (const ticket of tickets) {
       const item = ticket.issueNumber === null ? undefined : byNumber.get(ticket.issueNumber);
       if (item) {
-        applyRemoteItem(this.db, project, ticket, item);
+        applyRemoteItem(this.db, project, ticket, { item, info });
       }
       await this.guarded(ticket.id, () =>
         refreshPullRequest(this.db, this.api, repoOf(project), ticket),

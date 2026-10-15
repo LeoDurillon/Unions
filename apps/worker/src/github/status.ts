@@ -1,3 +1,4 @@
+// Maps board columns to the GitHub Project's Status options, and back.
 import { BOARD_STATUSES, type BoardStatus } from '@union/core';
 
 import type { ProjectInfo } from './api';
@@ -30,14 +31,41 @@ export function optionFor(
   status: BoardStatus,
   info: ProjectInfo,
 ): { name: string; id: string } {
-  const all = configured(names);
-  const option =
-    findOption(info, all[status]) ??
-    (status === 'in_review' ? findOption(info, all.in_progress) : undefined);
+  const option = fallbackOption(names, status, info);
   if (!option) {
-    throw new Error(`Project has no Status option "${all[status]}" for column ${status}`);
+    throw new Error(
+      `Project has no Status option "${configured(names)[status]}" for column ${status}`,
+    );
   }
   return option;
+}
+
+function fallbackOption(
+  names: OptionNames,
+  status: BoardStatus,
+  info: ProjectInfo,
+): { name: string; id: string } | undefined {
+  const all = configured(names);
+  return (
+    findOption(info, all[status]) ??
+    (status === 'in_review' ? findOption(info, all.in_progress) : undefined)
+  );
+}
+
+/**
+ * Whether `optionName` is the option `optionFor` writes for `status`: an in_review ticket shows as
+ * "In Progress" on a board without "In Review", and that is not a move made on GitHub.
+ */
+export function showsStatus(
+  names: OptionNames,
+  status: BoardStatus | null,
+  optionName: string | null,
+  info: ProjectInfo,
+): boolean {
+  if (status === null || optionName === null) {
+    return false;
+  }
+  return fallbackOption(names, status, info)?.name.toLowerCase() === optionName.toLowerCase();
 }
 
 export function boardStatusFor(names: OptionNames, optionName: string | null): BoardStatus | null {

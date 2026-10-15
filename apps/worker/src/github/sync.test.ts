@@ -67,6 +67,10 @@ test('phase changes move the card; in_review falls back to In Progress', async (
   await sync.push();
   expect(api.issueByNumber(1).status).toBe('In Progress');
   expect(getTicket(db, ticketId).githubSyncedStatus).toBe('in_review');
+
+  await sync.pull();
+  expect(eventTypes()).not.toContain('github_status_reverted');
+  expect(getTicket(db, ticketId).githubSyncedStatus).toBe('in_review');
 });
 
 test('one comment per step: edited on new versions, approval and feedback', async () => {
