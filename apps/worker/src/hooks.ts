@@ -11,7 +11,12 @@ import type { SideRuns } from './side-runs';
 export function workerHooks(
   deps: Pick<
     SideRuns,
-    'investigations' | 'agentReviews' | 'reviewGroupings' | 'prDescriptions' | 'previews'
+    | 'investigations'
+    | 'agentReviews'
+    | 'reviewGroupings'
+    | 'prDescriptions'
+    | 'containerRuns'
+    | 'previews'
   > & {
     db: Db;
     runtime: ContainerRuntime;
@@ -20,7 +25,7 @@ export function workerHooks(
 ): CommandHooks {
   const { db, runtime, investigations, agentReviews, reviewGroupings, prDescriptions, previews } =
     deps;
-  const { apiFor } = deps;
+  const { apiFor, containerRuns } = deps;
   return {
     removeContainers: (containers) => {
       void removeContainers(db, runtime, containers, (name) => previews.takeDownFor(name));
@@ -39,6 +44,9 @@ export function workerHooks(
     },
     cancelPrDescription: (id) => {
       prDescriptions.cancel(id);
+    },
+    cancelContainerRun: (id) => {
+      containerRuns.cancel(id);
     },
     sendPrDescription: (id) => {
       void sendPrDescription(db, apiFor, id);

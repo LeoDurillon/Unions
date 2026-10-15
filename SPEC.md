@@ -280,6 +280,10 @@ Built (phases 1 to 4). Full design and what was built: [`docs/plans/preview-envi
   the project's idle time (60 minutes by default, 0: never) stops, except while the agent runs a step on the ticket
   or its e2e tests run; visits are the proxy's request counts. At most `UNION_MAX_PREVIEWS` previews run (3), and
   optionally fewer per project (Previews → Limits).
+- Commands: from the Preview tab the user runs a command in the ticket's workspace (its container, in the checkout,
+  as the agent, with the preview's address while it runs) and reads the end of its output, live. Never during a
+  step, one at a time per ticket, 10 minutes by default (30 at most), cancellable. Giving the output to the
+  implementer and saved scripts are the next phases (`docs/plans/container-commands.md`).
 
 ## MCP servers for agents (planned)
 

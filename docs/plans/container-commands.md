@@ -1,6 +1,8 @@
 # Plan: run a command in a ticket's container and give its output to the implementer
 
-Status: planned, not started. Decisions taken (end of file).
+Status: phase 1 built (branch `container-commands`): commands typed in the Preview tab run in the workspace, with
+their output. Phases 2 (giving the output to the implementer) and 3 (saved scripts) not started. Decisions taken
+(end of file).
 
 ## Idea
 

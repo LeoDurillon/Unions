@@ -233,6 +233,9 @@ test('the cancel command cancels a queued run itself and hands a running one to 
     cancelPrDescription: () => {
       // Not under test.
     },
+    cancelContainerRun: () => {
+      // Not under test.
+    },
     sendPrDescription: () => {
       // Not under test.
     },

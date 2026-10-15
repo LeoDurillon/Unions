@@ -1,5 +1,6 @@
 import type {
   BoardColumn,
+  ContainerRun,
   PrDescription,
   Preview,
   Project,
@@ -359,3 +360,6 @@ export type ConnectorsResponse = {
     finishedAt: number | null;
   } | null;
 };
+
+/** The commands run in a ticket's workspace, newest first; `refusal`: why none can run now. */
+export type ContainerRunsView = { runs: ContainerRun[]; refusal: string | null };

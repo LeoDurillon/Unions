@@ -1,5 +1,6 @@
 import {
   cancelQueuedAgentReview,
+  cancelQueuedContainerRun,
   cancelQueuedGrouping,
   cancelQueuedInvestigation,
   cancelQueuedPrDescription,
@@ -32,6 +33,8 @@ export type CommandHooks = {
   submitPullRequestReview: (reviewId: number, summary: string) => void;
   /** Stops a running rewrite of a PR description. */
   cancelPrDescription: (id: number) => void;
+  /** Stops a command running in a ticket's workspace. */
+  cancelContainerRun: (id: number) => void;
   /** Writes a rewritten PR description, as the user left it, to GitHub. */
   sendPrDescription: (id: number) => void;
   /** Starts, stops, reads the logs of, or generates the compose file of a ticket's preview. */
@@ -59,6 +62,7 @@ const NO_HOOKS: CommandHooks = {
   cancelReviewGrouping: ignore,
   submitPullRequestReview: ignore,
   cancelPrDescription: ignore,
+  cancelContainerRun: ignore,
   sendPrDescription: ignore,
   preview: ignore,
 };
@@ -135,6 +139,13 @@ const CANCELS: Record<
     queued: cancelQueuedPrDescription,
     running: (hooks, id) => {
       hooks.cancelPrDescription(id);
+    },
+  },
+  cancel_container_run: {
+    key: 'containerRunId',
+    queued: cancelQueuedContainerRun,
+    running: (hooks, id) => {
+      hooks.cancelContainerRun(id);
     },
   },
 };

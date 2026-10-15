@@ -169,6 +169,12 @@ behavior; this file covers how to work in the repo.
     the ticket's container and preview, installs the browser at the repository's Playwright version, runs the command
     with `BASE_URL`, keeps the result on the preview (`previews.e2e_*`) and up to 5 failure screenshots as private
     ticket files (`replaceE2eScreenshots`). The panel sends a failure to the agent as a normal revision.
+  - `container-run.ts`: commands the user runs in a ticket's workspace (Preview tab → Commands, `container_runs`,
+    `routes/container-runs.ts`). Refused during a step and while another runs on the ticket; up to 3 across tickets.
+    Runs `setsid -w sh -c` in the checkout as `node` (with `PREVIEW_URL`/`BASE_URL` while the preview runs), keeps
+    the last 500 lines (64 KB, colours stripped) and writes them once a second. Stopping `docker exec` does not stop
+    the command, so a cancel or a timeout kills its process group (id in `/tmp/union-run-<id>.pid`); the container
+    stops after unless a step started.
   - `review.ts`: the final review (fresh session, read-only tools plus git reads, one git command per call because
     permission rules cannot match `&&`). Changes asked at the review go to the implementer through the `thenRun`
     chain in `states.ts`; `revision.ts` hands it the review's feedback. `runResumable` (agent.ts) restarts in a fresh
