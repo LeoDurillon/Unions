@@ -60,7 +60,8 @@ function ComposeChoices({
 
 /** What runs as a ticket's preview: the compose file, what Union adds to it, and what is served. */
 export function PreviewServicesPage({ project }: { project: PublicProject }): ReactElement {
-  const [form, setForm, save] = usePreviewForm(project);
+  const preview = usePreviewForm(project);
+  const { value: form, set: setForm } = preview;
   const settings = useQuery({
     queryKey: ['preview-settings', project.id],
     queryFn: () => previewApi.settings(project.id),
@@ -94,7 +95,7 @@ export function PreviewServicesPage({ project }: { project: PublicProject }): Re
         found={settings.data?.composeServices ?? null}
         onChange={setForm}
       />
-      <PreviewSave project={project} save={save} canTurnOff />
+      <PreviewSave project={project} form={preview} canTurnOff />
     </section>
   );
 }

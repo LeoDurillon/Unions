@@ -1,9 +1,10 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState, type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
 import { api } from '../../lib/api';
-import { Button, ErrorText, Field, inputClass } from '../ui';
+import { useSettingsForm } from '../../lib/use-settings-form';
+import { Field, inputClass } from '../ui';
+import { SaveBar } from './save-bar';
 
 const DEFAULT_ITERATIONS = 3;
 
@@ -71,20 +72,17 @@ function IterationField({
 
 /** How the implementation agent's work is installed and checked inside the ticket's container. */
 export function ChecksSection({ project }: { project: PublicProject }): ReactElement {
-  const queryClient = useQueryClient();
-  const [checks, setChecks] = useState(() => initial(project));
-  const save = useMutation({
-    mutationFn: () =>
+  const form = useSettingsForm(
+    () => initial(project),
+    (checks) =>
       api.updateProject(project.id, { ...checks, maxIterations: Number(checks.maxIterations) }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['projects'] }),
-  });
+  );
+  const checks = form.value;
   const change =
     (key: keyof Checks) =>
     (value: string): void => {
-      setChecks((previous) => ({ ...previous, [key]: value }));
-      save.reset();
+      form.set({ ...checks, [key]: value });
     };
-  const dirty = JSON.stringify(checks) !== JSON.stringify(initial(project));
 
   return (
     <section className="space-y-3">
@@ -108,16 +106,7 @@ export function ChecksSection({ project }: { project: PublicProject }): ReactEle
         onChange={change('gateCommand')}
       />
       <IterationField value={checks.maxIterations} onChange={change('maxIterations')} />
-      <ErrorText error={save.error} />
-      <Button
-        disabled={!dirty || save.isPending}
-        onClick={() => {
-          save.mutate();
-        }}
-      >
-        Save checks
-      </Button>
-      {save.isSuccess ? <p className="text-sm text-green-700 dark:text-green-400">Saved.</p> : null}
+      <SaveBar state={form} />
     </section>
   );
 }

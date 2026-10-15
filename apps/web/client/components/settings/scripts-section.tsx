@@ -1,18 +1,20 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { ProjectScript } from '@union/core';
 import { useState, type ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
 import { api } from '../../lib/api';
-import { Button, ErrorText } from '../ui';
+import { useLeaveGuard } from '../../lib/leave-guard';
+import { useSettingsForm, type SettingsForm } from '../../lib/use-settings-form';
+import { Button } from '../ui';
+import { SaveBar } from './save-bar';
 import { draftOf, ScriptCard, ScriptForm, scriptOf, type ScriptDraft } from './script-row';
 
 const EMPTY: ScriptDraft = { name: '', command: '', minutes: '' };
 
-/** The script open in the form: a saved one by its place in the list, or a new one (null). */
+/** The script open in the form: one of the list by its place, or a new one (null). */
 type Editing = { index: number | null; draft: ScriptDraft };
 
-/** The list as saved, with the open script put in its place (or added), or taken out. */
+/** The list with the open script put in its place (or added), or taken out. */
 function listWith(
   scripts: readonly ProjectScript[],
   editing: Editing,
@@ -29,57 +31,60 @@ function listWith(
   });
 }
 
-/** The saved scripts, the one open in the form, and saving the list (which closes the form). */
-function useScriptEditing(project: PublicProject): {
-  scripts: ProjectScript[];
+/** Whether the open script differs from what it started as. */
+function changed(editing: Editing | null, scripts: readonly ProjectScript[]): boolean {
+  if (editing === null) {
+    return false;
+  }
+  const original = scripts[editing.index ?? -1];
+  const start = original ? draftOf(original) : EMPTY;
+  return JSON.stringify(editing.draft) !== JSON.stringify(start);
+}
+
+/** The script open in the form; Done and Remove change the page's list, its Save writes it. */
+function useScriptEditing(form: SettingsForm<ProjectScript[]>): {
   editing: Editing | null;
   open: (next: Editing | null) => void;
-  form: (current: Editing) => ReactElement;
-  error: Error | null;
+  editor: (current: Editing) => ReactElement;
 } {
-  const queryClient = useQueryClient();
-  const scripts = project.config.scripts ?? [];
   const [editing, setEditing] = useState<Editing | null>(null);
-  const save = useMutation({
-    mutationFn: (next: ProjectScript[]) => api.updateProject(project.id, { scripts: next }),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['projects'] });
-      setEditing(null);
-    },
-  });
-  const open = (next: Editing | null): void => {
-    setEditing(next);
-    save.reset();
+  useLeaveGuard(changed(editing, form.value));
+  const apply = (current: Editing, remove: boolean): void => {
+    form.set(listWith(form.value, current, remove));
+    setEditing(null);
   };
-  const form = (current: Editing): ReactElement => (
+  const editor = (current: Editing): ReactElement => (
     <ScriptForm
       key={current.index ?? 'new'}
       draft={current.draft}
-      pending={save.isPending}
       onChange={(draft) => {
         setEditing({ ...current, draft });
       }}
-      onSave={() => {
-        save.mutate(listWith(scripts, current, false));
+      onDone={() => {
+        apply(current, false);
       }}
       onCancel={() => {
-        open(null);
+        setEditing(null);
       }}
       onRemove={
         current.index === null
           ? undefined
           : () => {
-              save.mutate(listWith(scripts, current, true));
+              apply(current, true);
             }
       }
     />
   );
-  return { scripts, editing, open, form, error: save.error };
+  return { editing, open: setEditing, editor };
 }
 
 /** Commands saved by name, run from a ticket's Preview tab in its workspace; one edited at a time. */
 export function ScriptsSection({ project }: { project: PublicProject }): ReactElement {
-  const { scripts, editing, open, form, error } = useScriptEditing(project);
+  const form = useSettingsForm(
+    () => project.config.scripts ?? [],
+    (scripts) => api.updateProject(project.id, { scripts }),
+  );
+  const { editing, open, editor } = useScriptEditing(form);
   return (
     <section className="space-y-3">
       <h3 className="text-sm font-semibold">Scripts</h3>
@@ -89,9 +94,9 @@ export function ScriptsSection({ project }: { project: PublicProject }): ReactEl
         Their output can go to the agent. The timeout is 10 minutes unless set (30 at most).
       </p>
       <ul className="space-y-2">
-        {scripts.map((script, index) =>
+        {form.value.map((script, index) =>
           editing?.index === index ? (
-            form(editing)
+            editor(editing)
           ) : (
             <ScriptCard
               key={script.name}
@@ -103,9 +108,8 @@ export function ScriptsSection({ project }: { project: PublicProject }): ReactEl
             />
           ),
         )}
-        {editing?.index === null ? form(editing) : null}
+        {editing?.index === null ? editor(editing) : null}
       </ul>
-      <ErrorText error={error} />
       {editing === null ? (
         <Button
           onClick={() => {
@@ -115,6 +119,10 @@ export function ScriptsSection({ project }: { project: PublicProject }): ReactEl
           Add a script
         </Button>
       ) : null}
+      <SaveBar
+        state={form}
+        invalid={editing === null ? null : 'Finish or cancel the script you are editing.'}
+      />
     </section>
   );
 }

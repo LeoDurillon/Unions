@@ -1,19 +1,17 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
 import { api } from '../../lib/api';
-import { ErrorText } from '../ui';
+import { useSettingsForm } from '../../lib/use-settings-form';
+import { SaveBar } from './save-bar';
 
 /** Whether the worker opens a draft PR after the implementation, or the user links one by hand. */
 export function PullRequestSection({ project }: { project: PublicProject }): ReactElement {
-  const queryClient = useQueryClient();
-  const automatic = project.config.createPullRequest !== false;
-  const save = useMutation({
-    mutationFn: (createPullRequest: boolean) =>
-      api.updateProject(project.id, { createPullRequest }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['projects'] }),
-  });
+  const form = useSettingsForm(
+    () => project.config.createPullRequest !== false,
+    (createPullRequest) => api.updateProject(project.id, { createPullRequest }),
+  );
+  const automatic = form.value;
 
   return (
     <section className="space-y-3">
@@ -23,9 +21,8 @@ export function PullRequestSection({ project }: { project: PublicProject }): Rea
           type="checkbox"
           className="mt-1 size-4 accent-indigo-600"
           checked={automatic}
-          disabled={save.isPending}
           onChange={(event) => {
-            save.mutate(event.target.checked);
+            form.set(event.target.checked);
           }}
         />
         <div>
@@ -43,7 +40,7 @@ export function PullRequestSection({ project }: { project: PublicProject }): Rea
           ? 'A pull request you link by hand on a ticket is always kept: no second one is opened.'
           : 'The branch is still pushed, but no pull request is opened. Link one from the ticket’s Overview tab, by number or URL.'}
       </p>
-      <ErrorText error={save.error} />
+      <SaveBar state={form} />
     </section>
   );
 }

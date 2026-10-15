@@ -15,7 +15,7 @@ and linked.
 - [Restack](restack.md): rebase and retarget a stack after a revision or a merge.
 - [MCP servers for agents](mcp-servers.md): claude.ai connectors built (Figma); HTTP and stdio servers left.
 - [Preview environments](preview-environments.md): compose-based previews with e2e tests (built, phases 1 to 4).
-- [Project settings as a page](project-settings-page.md): grouped side menu instead of the nine-tab modal (steps 1 to 4 built).
+- [Project settings as a page](project-settings-page.md): grouped side menu instead of the nine-tab modal (steps 1 to 5 built).
 - [Group a review's changes by spec](review-spec-groups.md) (built, hunks included): an agent groups the changed files by the parts of
   the spec they implement (PR description, ticket, issue or Notion page), on request; a toggle in the file panel.
 
@@ -25,7 +25,7 @@ Loose ends found while building, not planned yet (2026-10-15):
 
 - Ticket 7 (PR #1603) builds on the branch of #1582, which was closed: the user may want to retarget it to the base
   branch (Overview → base branch).
-- Project settings as a page: steps 5 and 6 of [the plan](project-settings-page.md).
+- Project settings as a page: step 6 of [the plan](project-settings-page.md), and the two links left from step 4.
 - The check and e2e timeouts stop `docker exec` but leave the command running in the container; the Commands runner
   kills its process group (`container-run.ts`), the gate and e2e should too.
 - The web UI on 5173 is reachable from the local network (compose publishes it on all addresses); restrict it to

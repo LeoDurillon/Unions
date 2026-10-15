@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from 'react';
 
 /** Fired after Union changes the URL itself: `pushState` does not fire `popstate`. */
-const NAVIGATED = 'union:navigate';
+export const NAVIGATED = 'union:navigate';
 
 export function readParam(name: string): string | null {
   return new URLSearchParams(globalThis.location.search).get(name);

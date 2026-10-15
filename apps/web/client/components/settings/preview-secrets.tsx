@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 
 import type { PreviewSettingsView } from '../../../src/api-types';
+import { useLeaveGuard } from '../../lib/leave-guard';
 import { previewApi } from '../../lib/preview-api';
 import { Button, ErrorText, inputClass } from '../ui';
 
@@ -50,6 +51,7 @@ function SecretForm({
 }): ReactElement {
   const [name, setName] = useState('');
   const [value, setValue] = useState('');
+  useLeaveGuard(name.trim() !== '' || value !== '');
   return (
     <div className="grid grid-cols-[12rem_1fr_auto] gap-2">
       <input
@@ -114,7 +116,7 @@ export function PreviewSecrets({
       <legend className="text-sm font-medium">Secret variables</legend>
       <p className="text-xs text-zinc-500">
         Given to the services like the others, but never shown again once saved: write a new value
-        to change one.
+        to change one. Saved and removed one at a time, apart from the page&apos;s Save.
       </p>
       <SecretList projectId={projectId} names={names} save={save} />
       <SecretForm projectId={projectId} busy={mutation.isPending} save={save} />

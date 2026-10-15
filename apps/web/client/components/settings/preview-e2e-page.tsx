@@ -7,7 +7,8 @@ import { SetUpFirst } from './set-up-first';
 
 /** The command a ticket's Preview section runs on request against its preview. */
 export function PreviewE2ePage({ project }: { project: PublicProject }): ReactElement {
-  const [form, setForm, save] = usePreviewForm(project);
+  const preview = usePreviewForm(project);
+  const { value: form, set: setForm } = preview;
   if (!project.config.preview) {
     return (
       <SetUpFirst section="preview-services" what="Choose the compose file and its services" />
@@ -24,7 +25,7 @@ export function PreviewE2ePage({ project }: { project: PublicProject }): ReactEl
           setForm({ ...form, e2eCommand });
         }}
       />
-      <PreviewSave project={project} save={save} />
+      <PreviewSave project={project} form={preview} />
     </section>
   );
 }

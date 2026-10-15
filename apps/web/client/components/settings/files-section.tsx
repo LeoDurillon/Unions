@@ -4,6 +4,7 @@ import { useState, type ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
 import type { ProjectFileView } from '../../../src/routes/project-files';
+import { useLeaveGuard } from '../../lib/leave-guard';
 import { projectFilesApi } from '../../lib/project-files-api';
 import { Button, ErrorText, inputClass } from '../ui';
 
@@ -56,6 +57,7 @@ function UploadForm({ projectId }: { projectId: number }): ReactElement {
   const [path, setPath] = useState('');
   // A new key empties the picker once the file is sent.
   const [sent, setSent] = useState(0);
+  useLeaveGuard(file !== null);
   const upload = useMutation({
     mutationFn: (picked: File) => projectFilesApi.upload(projectId, path.trim(), picked),
     onSuccess: async () => {

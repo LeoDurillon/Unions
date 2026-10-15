@@ -96,19 +96,17 @@ function ScriptFields({
   );
 }
 
-/** The script being written or edited; Remove only for a saved one (`onRemove`). */
+/** The script being written or edited; Done puts it in the list, Remove only for one already in it. */
 export function ScriptForm({
   draft,
-  pending,
   onChange,
-  onSave,
+  onDone,
   onCancel,
   onRemove,
 }: {
   draft: ScriptDraft;
-  pending: boolean;
   onChange: (draft: ScriptDraft) => void;
-  onSave: () => void;
+  onDone: () => void;
   onCancel: () => void;
   onRemove?: () => void;
 }): ReactElement {
@@ -117,14 +115,12 @@ export function ScriptForm({
     <li className="space-y-2 rounded-md border border-indigo-300 p-3 dark:border-indigo-800">
       <ScriptFields draft={draft} onChange={onChange} />
       <div className="flex gap-2">
-        <Button variant="primary" disabled={empty || pending} onClick={onSave}>
-          Save
+        <Button disabled={empty} onClick={onDone}>
+          Done
         </Button>
-        <Button disabled={pending} onClick={onCancel}>
-          Cancel
-        </Button>
+        <Button onClick={onCancel}>Cancel</Button>
         {onRemove ? (
-          <Button variant="danger" className="ml-auto" disabled={pending} onClick={onRemove}>
+          <Button variant="danger" className="ml-auto" onClick={onRemove}>
             Remove
           </Button>
         ) : null}

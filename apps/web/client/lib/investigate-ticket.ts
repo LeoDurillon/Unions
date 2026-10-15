@@ -1,8 +1,11 @@
+import { confirmLeave } from './leave-guard';
 import { setParams, useUrlParam } from './url-state';
 
 /** Opens Investigations with a new investigation on the ticket ready to write (`?investigate=<id>`). */
 export function investigateTicket(ticketId: number): void {
-  setParams({ investigate: String(ticketId), ticket: null, settings: null });
+  if (confirmLeave()) {
+    setParams({ investigate: String(ticketId), ticket: null, settings: null });
+  }
 }
 
 export function clearInvestigateTicket(): void {

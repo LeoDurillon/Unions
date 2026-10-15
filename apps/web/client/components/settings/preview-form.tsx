@@ -1,12 +1,14 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { exposedServices, type AgentVariables, type PreviewConfig } from '@union/core/preview';
-import { useState, type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
 import { envLines, parseEnvLines } from '../../lib/env-lines';
 import { previewApi } from '../../lib/preview-api';
+import { useSettingsForm, type SettingsForm } from '../../lib/use-settings-form';
 import { Button, ErrorText } from '../ui';
 import { serviceRows, type ServiceRow } from './preview-services-field';
+import { SaveBar } from './save-bar';
 
 /**
  * The preview settings as the pages edit them. Each page starts from what is saved and saves the
@@ -100,60 +102,61 @@ function settingsOf(form: Form): PreviewConfig {
   };
 }
 
-function useSave(
-  project: PublicProject,
-  form: Form,
-): ReturnType<typeof useMutation<unknown, Error, boolean>> {
+/** The page's form, from the saved settings; its Save writes the whole configuration. */
+export function usePreviewForm(project: PublicProject): SettingsForm<Form> {
+  return useSettingsForm(
+    () => initial(project),
+    (form) => previewApi.saveSettings(project.id, settingsOf(form)),
+  );
+}
+
+/** Applies at once: the form keeps what it holds, unsaved, so Save turns previews on again. */
+function TurnOff({
+  project,
+  form,
+}: {
+  project: PublicProject;
+  form: SettingsForm<Form>;
+}): ReactElement | null {
   const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (keep: boolean) =>
-      previewApi.saveSettings(project.id, keep ? settingsOf(form) : null),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['projects'] }),
+  const turnOff = useMutation({
+    mutationFn: () => previewApi.saveSettings(project.id, null),
+    onSuccess: async () => {
+      form.forgetSaved();
+      await queryClient.invalidateQueries({ queryKey: ['projects'] });
+    },
   });
+  if (!project.config.preview) {
+    return null;
+  }
+  return (
+    <>
+      <ErrorText error={turnOff.error} />
+      <Button
+        disabled={turnOff.isPending || form.saving}
+        onClick={() => {
+          turnOff.mutate();
+        }}
+      >
+        Turn previews off
+      </Button>
+    </>
+  );
 }
 
-/** The page's form, from the saved settings, and its Save (plus "Turn previews off" when asked). */
-export function usePreviewForm(
-  project: PublicProject,
-): [Form, (form: Form) => void, ReturnType<typeof useSave>] {
-  const [form, setForm] = useState(() => initial(project));
-  return [form, setForm, useSave(project, form)];
-}
-
+/** The page's Save bar, plus "Turn previews off" when asked. */
 export function PreviewSave({
   project,
-  save,
+  form,
   canTurnOff = false,
 }: {
   project: PublicProject;
-  save: ReturnType<typeof useSave>;
+  form: SettingsForm<Form>;
   canTurnOff?: boolean;
 }): ReactElement {
   return (
-    <div className="space-y-2">
-      <ErrorText error={save.error} />
-      <div className="flex items-center gap-2">
-        <Button
-          variant="primary"
-          disabled={save.isPending}
-          onClick={() => {
-            save.mutate(true);
-          }}
-        >
-          Save
-        </Button>
-        {canTurnOff && project.config.preview ? (
-          <Button
-            disabled={save.isPending}
-            onClick={() => {
-              save.mutate(false);
-            }}
-          >
-            Turn previews off
-          </Button>
-        ) : null}
-        {save.isSuccess ? <span className="text-xs text-zinc-500">Saved.</span> : null}
-      </div>
-    </div>
+    <SaveBar state={form} label={project.config.preview ? 'Save' : 'Save and turn previews on'}>
+      {canTurnOff ? <TurnOff project={project} form={form} /> : null}
+    </SaveBar>
   );
 }

@@ -8,7 +8,8 @@ import { SetUpFirst } from './set-up-first';
 
 /** How long a preview nobody visits keeps running, and how many of the project's run at once. */
 export function PreviewLimitsPage({ project }: { project: PublicProject }): ReactElement {
-  const [form, setForm, save] = usePreviewForm(project);
+  const preview = usePreviewForm(project);
+  const { value: form, set: setForm } = preview;
   if (!project.config.preview) {
     return (
       <SetUpFirst section="preview-services" what="Choose the compose file and its services" />
@@ -38,7 +39,7 @@ export function PreviewLimitsPage({ project }: { project: PublicProject }): Reac
           setForm({ ...form, maxRunning });
         }}
       />
-      <PreviewSave project={project} save={save} />
+      <PreviewSave project={project} form={preview} />
     </section>
   );
 }

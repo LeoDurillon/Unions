@@ -5,6 +5,7 @@ import { useState, type ReactElement } from 'react';
 import type { GitHubAccess, InstallationOption, PublicProject } from '../../../src/api-types';
 import { api } from '../../lib/api';
 import type { Tone } from '../../lib/labels';
+import { useLeaveGuard } from '../../lib/leave-guard';
 import { AccessMethodTabs, type AccessMethod } from '../github-app/access-method';
 import { InstallationPicker } from '../github-app/installation-picker';
 import { Scopes, TokenInput } from '../onboarding/connect-step';
@@ -41,6 +42,7 @@ function TokenForm({ project }: { project: PublicProject }): ReactElement {
     },
   });
   const saved = save.data?.missing.length === 0 ? save.data.login : null;
+  useLeaveGuard(token.trim() !== '');
   return (
     <div className="space-y-2">
       <TokenInput
@@ -80,6 +82,7 @@ function AppForm({ project }: { project: PublicProject }): ReactElement {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['projects'] }),
   });
   const otherOwner = choice !== null && choice.account !== project.owner;
+  useLeaveGuard(choice !== null && choice.id !== project.githubInstallationId);
   return (
     <div className="space-y-2">
       <InstallationPicker

@@ -1,9 +1,10 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState, type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
 import { api } from '../../lib/api';
-import { Button, ErrorText, inputClass } from '../ui';
+import { useSettingsForm } from '../../lib/use-settings-form';
+import { inputClass } from '../ui';
+import { SaveBar } from './save-bar';
 
 const PLACEHOLDER = `## Stack
 Bun workspace, Hono API in apps/web, React client in apps/web/client.
@@ -14,14 +15,10 @@ Bun workspace, Hono API in apps/web, React client in apps/web/client.
 
 /** The project's own instructions, sent to every agent run on it after the shared instructions. */
 export function InstructionsSection({ project }: { project: PublicProject }): ReactElement {
-  const queryClient = useQueryClient();
-  const saved = project.config.instructions ?? '';
-  const [text, setText] = useState(saved);
-  const save = useMutation({
-    mutationFn: () => api.updateProject(project.id, { instructions: text }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['projects'] }),
-  });
-  const dirty = text.trim() !== saved;
+  const form = useSettingsForm(
+    () => project.config.instructions ?? '',
+    (instructions) => api.updateProject(project.id, { instructions }),
+  );
 
   return (
     <section className="space-y-3">
@@ -34,23 +31,13 @@ export function InstructionsSection({ project }: { project: PublicProject }): Re
       <textarea
         aria-label="Project instructions"
         className={`${inputClass} min-h-72 font-mono text-xs`}
-        value={text}
+        value={form.value}
         placeholder={PLACEHOLDER}
         onChange={(event) => {
-          setText(event.target.value);
-          save.reset();
+          form.set(event.target.value);
         }}
       />
-      <ErrorText error={save.error} />
-      <Button
-        disabled={!dirty || save.isPending}
-        onClick={() => {
-          save.mutate();
-        }}
-      >
-        Save instructions
-      </Button>
-      {save.isSuccess ? <p className="text-sm text-green-700 dark:text-green-400">Saved.</p> : null}
+      <SaveBar state={form} />
     </section>
   );
 }

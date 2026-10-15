@@ -35,6 +35,13 @@
 - Project settings are a page, not a modal: `?settings=<section>` (`lib/settings-sections.ts` lists the sections
   and their groups; `openSettings(section)` links to one from anywhere), `components/settings/settings-page.tsx`
   with a grouped side menu.
+- One Save per settings page: a page's form is `useSettingsForm` (`lib/use-settings-form.ts`, unsaved = differs
+  from what was loaded or last saved there) and its Save bar is `components/settings/save-bar.tsx`, sticky at the
+  bottom. A form with changes registers with `useLeaveGuard` (`lib/leave-guard.ts`): `openSettings`,
+  `closeSettings` (which leaving to another page or project goes through), browser back/forward and reload ask
+  before throwing it away. What applies at once by nature keeps its own button and only guards what is typed:
+  credentials verified before they are stored (GitHub token or installation), secrets, file uploads, event rules
+  (records, each with its editor), Turn previews off, Disconnect, deleting the project.
 - Event rules (project settings → Event rules, `routes/event-rules.ts`): when something happens to a ticket, set a
   property of the Notion page it was imported from (`tickets.notion_page_id`, set by the import; older imports are
   linked from their "Imported from Notion:" line by `backfillNotionPages` at worker start). Rules point at

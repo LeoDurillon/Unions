@@ -1,3 +1,4 @@
+import { confirmLeave } from './leave-guard';
 import { readParam, setParams, useUrlParam } from './url-state';
 
 /** The project settings pages, in menu order, by group; the id is what `?settings=` holds. */
@@ -66,13 +67,25 @@ export function useSettingsSection(): SettingsSection | null {
   return isSection(value) ? value : null;
 }
 
-/** Opens the active project's settings at one section, closing an open ticket. */
+/**
+ * Opens the active project's settings at one section, closing an open ticket. Asks first when the
+ * page shown has unsaved changes.
+ */
 export function openSettings(section: SettingsSection = 'general'): void {
+  if (readParam('settings') === section || !confirmLeave()) {
+    return;
+  }
   setParams({ settings: section, ticket: null });
 }
 
-export function closeSettings(): void {
-  if (readParam('settings') !== null) {
-    setParams({ settings: null });
+/** Leaves the settings page, asking first if it has unsaved changes; false when the user stays. */
+export function closeSettings(): boolean {
+  if (readParam('settings') === null) {
+    return true;
   }
+  if (!confirmLeave()) {
+    return false;
+  }
+  setParams({ settings: null });
+  return true;
 }

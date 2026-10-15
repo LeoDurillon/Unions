@@ -11,6 +11,7 @@ import { useState, type ReactElement } from 'react';
 
 import type { RuleDraft } from '../../lib/event-rules-api';
 import { STEP_TITLES } from '../../lib/labels';
+import { useLeaveGuard } from '../../lib/leave-guard';
 import { Button, ErrorText, Field, inputClass } from '../ui';
 import { RulePreviewBox } from './rule-preview';
 import { ValueField } from './value-field';
@@ -201,6 +202,7 @@ export function RuleEditor({
   onCancel: () => void;
 }): ReactElement {
   const [rule, setRule] = useState(initial);
+  useLeaveGuard(JSON.stringify(rule) !== JSON.stringify(initial));
   return (
     <div className="space-y-3 rounded-lg border border-zinc-300 p-3 dark:border-zinc-700">
       <NameField

@@ -15,7 +15,7 @@ export function App(): ReactElement {
   useLiveInvalidation();
   const { projects, project, select, loading } = useActiveProject();
   const [ticketId, openTicket] = useSelectedTicket();
-  const { page, overlay, show, goTo, close } = useNavigation();
+  const { page, overlay, show, goTo, close, leave } = useNavigation();
 
   return (
     <div className="flex h-full">
@@ -23,8 +23,10 @@ export function App(): ReactElement {
         projects={projects}
         projectId={project?.id ?? null}
         onSelect={(id) => {
-          select(id);
-          goTo('board')();
+          if (leave()) {
+            select(id);
+            goTo('board')();
+          }
         }}
         onNewProject={show('wizard')}
         page={page}

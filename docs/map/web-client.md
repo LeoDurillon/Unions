@@ -142,7 +142,7 @@ export); do not edit. Tests are left out.
 ## components/settings/
 
 - `agent-variables-field.tsx`: Which of the preview's plain variables the agent's commands get (and the commands the user runs): a preview's database address would otherwise win over the one…
-- `branch-section.tsx`: The project settings section for the base branch, edited and saved on its own.
+- `branch-section.tsx`: The project settings section for the base branch, saved with the General page's Save.
 - `checks-section.tsx`: How the implementation agent's work is installed and checked inside the ticket's container.
 - `delete-section.tsx`: Typing the repository name to confirm keeps a stray click from deleting a project.
 - `events-section.tsx`: Event rules: when something happens to a ticket imported from Notion, set a property of its Notion page.
@@ -150,12 +150,12 @@ export); do not edit. Tests are left out.
 - `github-access-section.tsx`: The project settings section that shows and changes how the project reaches GitHub.
 - `instructions-section.tsx`: The project's own instructions, sent to every agent run on it after the shared instructions.
 - `integration-section-body.tsx`: Previews, Notion and the danger zone.
-- `notion-section.tsx`: The project settings section for the Notion connection and its event rules.
+- `notion-section.tsx`: The project settings section for the Notion connection, verified when saved.
 - `people-field.tsx`: A person property: a box per workspace member; the value is their Notion ids.
 - `preview-choices-field.tsx`: A choice among names the compose file has (profiles, services): a box per name known once a ticket's file was generated, and a field for others.
 - `preview-e2e-page.tsx`: The command a ticket's Preview section runs on request against its preview.
 - `preview-fields.tsx`: Compose YAML merged over the repository's file, for what Union adds without changing the repository: a restore or seed service, a health check, an extra depend…
-- `preview-form.tsx`: The page's form, from the saved settings, and its Save (plus "Turn previews off" when asked).
+- `preview-form.tsx`: The page's form, from the saved settings; its Save writes the whole configuration.
 - `preview-limits-page.tsx`: How long a preview nobody visits keeps running, and how many of the project's run at once.
 - `preview-secrets.tsx`: The project's secret variables: written here, never shown again.
 - `preview-services-field.tsx`: The services the proxy serves: name in the compose file, port, and host prefix.
@@ -167,6 +167,7 @@ export); do not edit. Tests are left out.
 - `rule-editor.tsx`: Edits a rule: its name, what triggers it, and the Notion property it sets.
 - `rule-list.tsx`: One rule: when, then, and its switches.
 - `rule-preview.tsx`: What the rule as edited would send for a ticket imported from Notion; nothing is sent.
+- `save-bar.tsx`: The settings page's one Save, kept in view at the bottom, with whether something is unsaved.
 - `script-row.tsx`: What the settings store; an empty timeout is left out (the default).
 - `scripts-section.tsx`: Commands saved by name, run from a ticket's Preview tab in its workspace; one edited at a time.
 - `set-up-first.tsx`: A settings page that needs another one done first, with the way there.
@@ -190,6 +191,7 @@ export); do not edit. Tests are left out.
 - `highlight.ts`: Tokens for every changed or context line of a patch.
 - `investigate-ticket.ts`: Opens Investigations with a new investigation on the ticket ready to write (`?investigate=<id>`).
 - `labels.ts`: The step the ticket is currently on, if any.
+- `leave-guard.ts`: Unsaved settings: the forms holding changes, and asking before a navigation throws them away.
 - `line-diff.ts`: The lines of `after` against `before`: kept, added or removed, in reading order.
 - `log-runs.ts`: Splits the log at each run header, so every run can fold on its own.
 - `pr-description-api.ts`: The browser's client for a ticket's pull request description endpoints.
@@ -217,6 +219,7 @@ export); do not edit. Tests are left out.
 - `use-review-grouping.ts`: The newest grouping by spec of the review, with starting and cancelling one.
 - `use-review.ts`: A pull request under review: its description and discussion, read from GitHub once per opening.
 - `use-selected-ticket.ts`: The open ticket lives in the URL (`?ticket=3`), so it survives reloads and back/forward.
+- `use-settings-form.ts`: A settings page's form: what is edited, whether it differs from what was saved, and its one Save.
 - `use-stored-number.ts`: A number remembered in localStorage; storage being unavailable only loses the memory.
 - `use-ticket-commands.ts`: The hook that sends commands for a ticket and refreshes what the page shows afterwards.
 - `verdict.ts`: The reviewer's verdict line (`VERDICT: APPROVED` / `VERDICT: CHANGES_REQUESTED`), if any.

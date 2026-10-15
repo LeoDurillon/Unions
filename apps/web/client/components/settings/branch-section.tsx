@@ -1,19 +1,17 @@
-// The project settings section for the base branch, edited and saved on its own.
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState, type ReactElement } from 'react';
+// The project settings section for the base branch, saved with the General page's Save.
+import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
 import { api } from '../../lib/api';
-import { Button, ErrorText, inputClass } from '../ui';
+import { useSettingsForm } from '../../lib/use-settings-form';
+import { inputClass } from '../ui';
+import { SaveBar } from './save-bar';
 
 export function BranchSection({ project }: { project: PublicProject }): ReactElement {
-  const queryClient = useQueryClient();
-  const [branch, setBranch] = useState(project.config.baseBranch);
-  const save = useMutation({
-    mutationFn: () => api.updateProject(project.id, { baseBranch: branch.trim() }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['projects'] }),
-  });
-  const unchanged = branch.trim() === project.config.baseBranch;
+  const form = useSettingsForm(
+    () => project.config.baseBranch,
+    (branch) => api.updateProject(project.id, { baseBranch: branch.trim() }),
+  );
 
   return (
     <section className="space-y-2">
@@ -21,27 +19,15 @@ export function BranchSection({ project }: { project: PublicProject }): ReactEle
       <p className="text-xs text-zinc-500">
         New tickets clone this branch. Tickets already started keep their clone.
       </p>
-      <div className="flex gap-2">
-        <input
-          className={inputClass}
-          value={branch}
-          aria-label="Base branch"
-          onChange={(event) => {
-            setBranch(event.target.value);
-            save.reset();
-          }}
-        />
-        <Button
-          disabled={unchanged || branch.trim() === '' || save.isPending}
-          onClick={() => {
-            save.mutate();
-          }}
-        >
-          Save
-        </Button>
-      </div>
-      <ErrorText error={save.error} />
-      {save.isSuccess ? <p className="text-sm text-green-700 dark:text-green-400">Saved.</p> : null}
+      <input
+        className={inputClass}
+        value={form.value}
+        aria-label="Base branch"
+        onChange={(event) => {
+          form.set(event.target.value);
+        }}
+      />
+      <SaveBar state={form} invalid={form.value.trim() === '' ? 'Name a branch.' : null} />
     </section>
   );
 }

@@ -1,10 +1,11 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { LOCK_FILES } from '@union/core/diff';
-import { useState, type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
 import { api } from '../../lib/api';
-import { Button, ErrorText, Field, inputClass } from '../ui';
+import { useSettingsForm } from '../../lib/use-settings-form';
+import { Field, inputClass } from '../ui';
+import { SaveBar } from './save-bar';
 
 function LockFilesToggle({
   checked,
@@ -36,51 +37,43 @@ function LockFilesToggle({
 
 /** Files the review page lists apart (collapsed), so the sidebar shows what needs reading. */
 export function ReviewSection({ project }: { project: PublicProject }): ReactElement {
-  const queryClient = useQueryClient();
-  const savedHide = project.config.hideLockFiles !== false;
-  const savedPatterns = (project.config.reviewIgnore ?? []).join('\n');
-  const [hideLockFiles, setHideLockFiles] = useState(savedHide);
-  const [patterns, setPatterns] = useState(savedPatterns);
-  const save = useMutation({
-    mutationFn: () =>
+  const form = useSettingsForm(
+    () => ({
+      hideLockFiles: project.config.hideLockFiles !== false,
+      patterns: (project.config.reviewIgnore ?? []).join('\n'),
+    }),
+    ({ hideLockFiles, patterns }) =>
       api.updateProject(project.id, {
         hideLockFiles,
         reviewIgnore: patterns.split('\n').filter((line) => line.trim() !== ''),
       }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['projects'] }),
-  });
-  const dirty = hideLockFiles !== savedHide || patterns.trim() !== savedPatterns.trim();
+  );
 
   return (
     <section className="space-y-4">
       <p className="text-xs text-zinc-500">
         Ignored files are listed apart and collapsed on the review page; you can still open them.
       </p>
-      <LockFilesToggle checked={hideLockFiles} onChange={setHideLockFiles} />
+      <LockFilesToggle
+        checked={form.value.hideLockFiles}
+        onChange={(hideLockFiles) => {
+          form.set({ ...form.value, hideLockFiles });
+        }}
+      />
       <Field
         label="Ignored paths"
         hint="One gitignore-style pattern per line: dist/, *.snap, /generated/**. Lines starting with # are comments."
       >
         <textarea
           className={`${inputClass} min-h-28 font-mono`}
-          value={patterns}
+          value={form.value.patterns}
           placeholder={'dist/\n*.snap'}
           onChange={(event) => {
-            setPatterns(event.target.value);
-            save.reset();
+            form.set({ ...form.value, patterns: event.target.value });
           }}
         />
       </Field>
-      <ErrorText error={save.error} />
-      <Button
-        disabled={!dirty || save.isPending}
-        onClick={() => {
-          save.mutate();
-        }}
-      >
-        Save
-      </Button>
-      {save.isSuccess ? <p className="text-sm text-green-700 dark:text-green-400">Saved.</p> : null}
+      <SaveBar state={form} />
     </section>
   );
 }

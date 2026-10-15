@@ -12,6 +12,8 @@ export function useNavigation(): {
   show: (next: Overlay) => () => void;
   goTo: (next: Page) => () => void;
   close: () => void;
+  /** Leaves the project settings page, unless the user keeps its unsaved changes. */
+  leave: () => boolean;
 } {
   const [overlay, setOverlay] = useState<Overlay>(null);
   const [page, setPage] = useState<Page>('board');
@@ -20,8 +22,9 @@ export function useNavigation(): {
   };
   // The project settings page is the board's: going anywhere else (or back to the board) leaves it.
   const goTo = (next: Page) => (): void => {
-    closeSettings();
-    setPage(next);
+    if (closeSettings()) {
+      setPage(next);
+    }
   };
-  return { page, overlay, show, goTo, close: show(null) };
+  return { page, overlay, show, goTo, close: show(null), leave: closeSettings };
 }

@@ -36,7 +36,14 @@ export function IntegrationSectionBody({
     notion: () => <NotionSection project={project} />,
     'event-rules': () => <EventRulesSection project={project} />,
     'event-activity': () => <EventActivitySection project={project} />,
-    danger: () => <DeleteSection project={project} onDeleted={closeSettings} />,
+    danger: () => (
+      <DeleteSection
+        project={project}
+        onDeleted={() => {
+          closeSettings();
+        }}
+      />
+    ),
   };
   return bodies[section]();
 }

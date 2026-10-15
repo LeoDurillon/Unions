@@ -1,13 +1,15 @@
-// The project settings section for the Notion connection and its event rules.
+// The project settings section for the Notion connection, verified when saved.
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState, type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
 import { api } from '../../lib/api';
 import { eventRulesApi } from '../../lib/event-rules-api';
+import { useSettingsForm } from '../../lib/use-settings-form';
 import { TokenInput } from '../onboarding/connect-step';
 import { NotionHelp } from '../onboarding/notion-step';
 import { Badge, Button, ErrorText, Field, inputClass } from '../ui';
+import { SaveBar } from './save-bar';
 
 /** Verifies before saving, so a typo never replaces a working connection. */
 async function connect(project: PublicProject, token: string, dataSource: string): Promise<string> {
@@ -21,48 +23,44 @@ async function connect(project: PublicProject, token: string, dataSource: string
   return verified.title || 'Untitled data source';
 }
 
-function NotionActions({
-  canSave,
-  saving,
-  connected,
-  disconnecting,
-  onSave,
-  onDisconnect,
-}: {
-  canSave: boolean;
-  saving: boolean;
-  connected: boolean;
-  disconnecting: boolean;
-  onSave: () => void;
-  onDisconnect: () => void;
-}): ReactElement {
+/** Applies at once: the integration secret is dropped and imports stop. */
+function Disconnect({ project }: { project: PublicProject }): ReactElement | null {
+  const queryClient = useQueryClient();
+  const disconnect = useMutation({
+    mutationFn: () => api.updateProject(project.id, { notionToken: '', notionDataSourceId: '' }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['projects'] }),
+  });
+  if (!project.hasNotion) {
+    return null;
+  }
   return (
-    <div className="flex gap-2">
-      <Button variant="primary" disabled={!canSave} onClick={onSave}>
-        {saving ? 'Verifying…' : 'Verify and save'}
+    <>
+      <ErrorText error={disconnect.error} />
+      <Button
+        disabled={disconnect.isPending}
+        onClick={() => {
+          disconnect.mutate();
+        }}
+      >
+        Disconnect
       </Button>
-      {connected ? (
-        <Button disabled={disconnecting} onClick={onDisconnect}>
-          Disconnect
-        </Button>
-      ) : null}
-    </div>
+    </>
   );
 }
 
+function invalidReason(token: string, dataSource: string): string | null {
+  if (token.trim() === '') {
+    return 'Paste the integration secret to verify the connection.';
+  }
+  return dataSource.trim() === '' ? 'Give the data source.' : null;
+}
+
 export function NotionSection({ project }: { project: PublicProject }): ReactElement {
-  const queryClient = useQueryClient();
-  const [token, setToken] = useState('');
-  const [dataSource, setDataSource] = useState(project.config.notionDataSourceId ?? '');
-  const refresh = (): Promise<void> => queryClient.invalidateQueries({ queryKey: ['projects'] });
-  const save = useMutation({
-    mutationFn: () => connect(project, token.trim(), dataSource.trim()),
-    onSuccess: refresh,
-  });
-  const disconnect = useMutation({
-    mutationFn: () => api.updateProject(project.id, { notionToken: '', notionDataSourceId: '' }),
-    onSuccess: refresh,
-  });
+  const form = useSettingsForm(
+    () => ({ token: '', dataSource: project.config.notionDataSourceId ?? '' }),
+    ({ token, dataSource }) => connect(project, token.trim(), dataSource.trim()),
+  );
+  const { token, dataSource } = form.value;
 
   return (
     <section className="space-y-4">
@@ -77,33 +75,26 @@ export function NotionSection({ project }: { project: PublicProject }): ReactEle
         label="Integration secret"
         hint={project.hasNotion ? 'Paste a new secret to replace the stored one.' : undefined}
       >
-        <TokenInput value={token} onChange={setToken} placeholder="ntn_…" />
+        <TokenInput
+          value={token}
+          onChange={(value) => {
+            form.set({ ...form.value, token: value });
+          }}
+          placeholder="ntn_…"
+        />
       </Field>
       <Field label="Data source ID or URL">
         <input
           className={`${inputClass} font-mono`}
           value={dataSource}
           onChange={(event) => {
-            setDataSource(event.target.value);
+            form.set({ ...form.value, dataSource: event.target.value });
           }}
         />
       </Field>
-      <ErrorText error={save.error ?? disconnect.error} />
-      {save.data ? (
-        <p className="text-sm text-green-700 dark:text-green-400">Connected to “{save.data}”.</p>
-      ) : null}
-      <NotionActions
-        canSave={token.trim() !== '' && dataSource.trim() !== '' && !save.isPending}
-        saving={save.isPending}
-        connected={project.hasNotion}
-        disconnecting={disconnect.isPending}
-        onSave={() => {
-          save.mutate();
-        }}
-        onDisconnect={() => {
-          disconnect.mutate();
-        }}
-      />
+      <SaveBar state={form} label="Verify and save" invalid={invalidReason(token, dataSource)}>
+        <Disconnect project={project} />
+      </SaveBar>
     </section>
   );
 }

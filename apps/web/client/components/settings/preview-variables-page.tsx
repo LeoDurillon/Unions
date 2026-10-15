@@ -41,7 +41,8 @@ function EnvFileFields({
 
 /** What every service of a preview gets: plain variables, secrets, and the variables as a file. */
 export function PreviewVariablesPage({ project }: { project: PublicProject }): ReactElement {
-  const [form, setForm, save] = usePreviewForm(project);
+  const preview = usePreviewForm(project);
+  const { value: form, set: setForm } = preview;
   const settings = useQuery({
     queryKey: ['preview-settings', project.id],
     queryFn: () => previewApi.settings(project.id),
@@ -60,8 +61,8 @@ export function PreviewVariablesPage({ project }: { project: PublicProject }): R
         }}
       />
       <EnvFileFields form={form} onChange={setForm} />
-      <PreviewSave project={project} save={save} />
       <PreviewSecrets projectId={project.id} names={settings.data?.secretNames ?? []} />
+      <PreviewSave project={project} form={preview} />
     </section>
   );
 }

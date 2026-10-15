@@ -1,7 +1,7 @@
 # Plan: project settings as a page
 
-Status: steps 1 to 4 built (the deep link from a ticket's Preview section only); step 5 (one way to save) and
-step 6 (a shared "Union settings" area) not started. The layout below is as built, with the sections added since
+Status: steps 1 to 5 built (from step 4, the deep link from a ticket's Preview section only); step 6 (a shared
+"Union settings" area) not started. The layout below is as built, with the sections added since
 (Files, compose additions, profiles, agent services).
 
 ## Why
@@ -79,8 +79,15 @@ one with design decisions.
   re-exports. The three preview pages share `preview-form.tsx`: each starts from the saved settings and saves the
   whole configuration, so the other pages' fields go back unchanged.
 - Not done from step 4: links from a failed rule delivery (Log tab) and from the setup wizard's last step.
+- Step 5: every page with fields has one sticky Save bar (`save-bar.tsx`: unsaved state, Discard, Save) over
+  `lib/use-settings-form.ts`; `lib/leave-guard.ts` asks before leaving a page with changes (menu, Back to the
+  board, another page or project, investigate, browser back/forward, reload). The draft PR toggle now waits for
+  Save. Scripts are edited in the page's list (Done, Remove) and the list is saved with the page; Save is refused
+  while one is open. The Notion connection's Save is "Verify and save". Left immediate, with a leave warning for
+  what is typed and not sent: the GitHub token and installation (verified before stored), preview secrets, file
+  uploads, event rules (each rule is a record with its own editor; its on/off switch applies at once), Turn
+  previews off, Disconnect, Delete project.
 
 ## Decisions open
 
-- **Step 5** (one Save per page, unsaved-changes warning): when.
 - **Step 6** (a shared "Union settings" area): decided later.
