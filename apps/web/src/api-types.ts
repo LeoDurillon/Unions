@@ -335,3 +335,24 @@ export type PreviewSettingsView = {
    */
   composeServices: { names: string[]; profiles: string[]; ticketId: number; at: number } | null;
 };
+
+/** One of the account's claude.ai connectors, and the tool rule that gives an agent all its tools. */
+export type ConnectorView = {
+  name: string;
+  url: string;
+  status: string;
+  connected: boolean;
+  checkedAt: number;
+  tool: string;
+};
+
+export type ConnectorsResponse = {
+  connectors: ConnectorView[];
+  /** The newest reading of the connectors; null before the first. */
+  check: {
+    status: 'queued' | 'running' | 'succeeded' | 'failed';
+    error: string | null;
+    createdAt: number;
+    finishedAt: number | null;
+  } | null;
+};

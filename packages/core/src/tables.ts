@@ -3,6 +3,7 @@ export * from './schema';
 export * from './schema-attachments';
 export * from './schema-diff-commits';
 export * from './schema-events';
+export * from './schema-mcp';
 export * from './schema-pr-descriptions';
 export * from './schema-previews';
 export * from './schema-project-files';

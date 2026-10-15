@@ -4,6 +4,7 @@ import type { ReactElement } from 'react';
 import { api } from '../../lib/api';
 import { ErrorText } from '../ui';
 import { AgentCard } from './agent-card';
+import { ConnectorList } from './connector-list';
 import { ToolList } from './tool-list';
 
 export function AgentsPage(): ReactElement {
@@ -21,6 +22,7 @@ export function AgentsPage(): ReactElement {
         <div className="mx-auto max-w-4xl space-y-4 p-4">
           <ErrorText error={agents.error} />
           <ToolList />
+          <ConnectorList />
           {(agents.data ?? []).map((config) => (
             <AgentCard
               key={`${config.agent}:${String(config.customized)}:${config.model ?? ''}:${(config.tools ?? []).join(',')}:${config.prompt}`}

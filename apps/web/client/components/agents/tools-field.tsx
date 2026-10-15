@@ -36,7 +36,9 @@ function ToolChip({
       />
       {on ? '✓ ' : ''}
       {tool.name}
-      {tool.source === 'custom' ? <span className="ml-1 text-zinc-400">·custom</span> : null}
+      {tool.source === 'built-in' ? null : (
+        <span className="ml-1 text-zinc-400">·{tool.source}</span>
+      )}
     </label>
   );
 }

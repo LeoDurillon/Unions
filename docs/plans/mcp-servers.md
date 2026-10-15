@@ -1,6 +1,12 @@
 # Plan: MCP servers for agents
 
-Status: paused (2026-10-14), not built. Designed in `SPEC.md` ("MCP servers for agents (planned)"), committed as
+Status: claude.ai connectors built (2026-10-15, branch `mcp-servers`): Agent settings → Connectors reads the
+account's connectors, an agent selects one like a tool, runs without one get `ENABLE_CLAUDEAI_MCP_SERVERS=false`.
+Checked for real: a fresh agent container lists `claude.ai Figma … ✔ Connected`; two real Figma runs on Sonnet
+(investigations 9 and 10). Figma's screenshots and assets come as links to `curl`, which agents are refused, so a run
+with Figma is told (`connectorHints`, `--append-system-prompt`) to call `get_screenshot` with
+`enableBase64Response: true`: the image then comes in the tool result, and run 10 described it. Next: the servers that
+are not connectors (below). Previously paused (2026-10-14). Designed in `SPEC.md` ("MCP servers for agents (planned)"), committed as
 `959eb59`; the checks below (2026-10-14) change the plan for OAuth servers. Waiting for a Figma account with access
 to its MCP server to test with.
 

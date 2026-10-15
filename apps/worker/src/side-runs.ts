@@ -1,25 +1,18 @@
-import {
-  backfillNotionPages,
-  FetchNotionApi,
-  type ContainerRuntime,
-  type Db,
-  type Project,
-} from '@union/core';
+import { backfillNotionPages, FetchNotionApi, type Project } from '@union/core';
 
 import { AgentReviewRunner } from './agent-review';
 import { EventDispatcher } from './event-dispatcher';
 import type { GitHubApi } from './github/api';
-import { InvestigationRunner } from './investigate';
+import { InvestigationRunner, type InvestigationDeps } from './investigate';
+import { ConnectorChecker } from './mcp-check';
 import { PrDescriptionRunner } from './pr-description-run';
 import { createPreviewManager, type PreviewManager } from './preview/manager';
-import type { ProvisionConfig } from './provision';
 import { ReviewGroupingRunner } from './review-grouping';
-import type { RunSlots } from './slots';
 
 /**
  * The work outside the ticket pipeline: investigations, agent reviews, groupings by spec and PR
- * description rewrites
- * (taking their slots from it), the event rules, and stopping previews nobody visits.
+ * description rewrites (taking their slots from it), the event rules, stopping previews nobody
+ * visits, and reading the account's claude.ai connectors.
  */
 export type SideRuns = {
   investigations: InvestigationRunner;
@@ -33,13 +26,9 @@ export type SideRuns = {
 };
 
 /** Fails what a stopped worker left running, then returns the runners. */
-export async function startSideRuns(deps: {
-  db: Db;
-  runtime: ContainerRuntime;
-  config: ProvisionConfig;
-  slots: RunSlots;
-  apiFor: (project: Project) => GitHubApi | null;
-}): Promise<SideRuns> {
+export async function startSideRuns(
+  deps: InvestigationDeps & { apiFor: (project: Project) => GitHubApi | null },
+): Promise<SideRuns> {
   const investigations = new InvestigationRunner(deps);
   const agentReviews = new AgentReviewRunner(deps);
   const prDescriptions = new PrDescriptionRunner(deps);
@@ -47,11 +36,13 @@ export async function startSideRuns(deps: {
   const reviewGroupings = new ReviewGroupingRunner(deps);
   const events = new EventDispatcher(deps.db, new FetchNotionApi());
   const idlePreviews = previews.idleWatcher();
+  const connectors = new ConnectorChecker(deps);
   await investigations.recover();
   await agentReviews.recover();
   await reviewGroupings.recover();
   prDescriptions.recover();
   previews.recover();
+  connectors.recover();
   backfillNotionPages(deps.db);
   return {
     investigations,
@@ -66,6 +57,7 @@ export async function startSideRuns(deps: {
       prDescriptions.tick();
       events.tick();
       idlePreviews.tick();
+      connectors.tick();
     },
     stop: () => {
       investigations.stop();
@@ -81,6 +73,7 @@ export async function startSideRuns(deps: {
         prDescriptions.idle(),
         previews.idle(),
         events.idle(),
+        connectors.idle(),
       ]);
     },
   };

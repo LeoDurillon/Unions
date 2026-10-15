@@ -1,5 +1,6 @@
 export * from './agent-reviews';
 export * from './agent-tools';
+export * from './mcp-connectors';
 export * from './attachments';
 export * from './agents';
 export * from './db';

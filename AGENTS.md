@@ -13,7 +13,9 @@ behavior; this file covers how to work in the repo.
   get `sharedPrompt` first: the shared instructions, then the project's own (`config.instructions`, project
   settings → Instructions; investigations get those too, via `projectInstructions`).
   `agent-tools.ts` holds each step's default allowed tools and the tool list agents pick from (Claude Code's tools,
-  the rules the defaults use, and the user's additions in `agent_tools`). Denied rules (`BASE_DENIED`,
+  the rules the defaults use, the account's claude.ai connectors from `mcp-connectors.ts`, and the user's additions
+  in `agent_tools`). A run loads the connectors only when its tools include one (`connectorEnv` in the worker's
+  `agent.ts`); the worker's `ConnectorChecker` (`mcp-check.ts`) reads them on request. Denied rules (`BASE_DENIED`,
   `IMPLEMENT_DENIED` in the worker) are not editable and always win over a selected tool.
   `investigations.ts`: one-off agent runs on a custom prompt (records, claim, finish, cancel, follow-ups); defaults
   in the browser-safe `investigation-defaults.ts`.

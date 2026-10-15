@@ -28,6 +28,7 @@ import {
   readObject,
   requireText,
 } from '../http';
+import { connectorRoutes } from './mcp-connectors';
 
 function agentOf(c: Context): AgentId {
   const agent = c.req.param('agent') ?? '';
@@ -108,6 +109,7 @@ export function agentRoutes(db: Db): Hono {
   const routes = new Hono();
   routes.get('/', (c) => c.json(listAgents(db)));
   routes.route('/tools', toolRoutes(db));
+  routes.route('/connectors', connectorRoutes(db));
   routes.put('/:agent', async (c) => {
     const agent = agentOf(c);
     const body = await readObject(c.req.raw);

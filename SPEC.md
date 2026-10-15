@@ -278,6 +278,14 @@ Built (phases 1 to 4). Full design and what was built: [`docs/plans/preview-envi
 
 ## MCP servers for agents (planned)
 
+**Built first: claude.ai connectors.** The account's claude.ai connectors (Figma…) reach every agent container
+through the Claude login alone: their tokens stay with Anthropic. Agent settings → Connectors reads them
+(`claude mcp list` in a throwaway `union-mcp-check` container, no model run) into `mcp_connectors`; each is offered
+in the tool list as `mcp__claude_ai_<Name>` (all its tools) and selected per agent or investigation like any tool. A
+run gets `ENABLE_CLAUDEAI_MCP_SERVERS=true` only when its tools include a connector, `false` otherwise, so runs
+without one no longer load the connectors' tools. The rest of this section (servers that are not connectors) is
+still planned.
+
 Agents can use MCP servers the user configures (an error tracker, docs, a database, a design tool such as Figma),
 chosen per agent like the tools. Today an agent container gets only the Claude login (`claudeAiOauth`): no
 `~/.claude.json`, so no MCP servers. Servers are passed on each run, never installed in the container.

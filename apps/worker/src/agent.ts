@@ -1,4 +1,9 @@
-import type { AgentEffort, ContainerRuntime } from '@union/core';
+import {
+  connectorHints,
+  isConnectorTool,
+  type AgentEffort,
+  type ContainerRuntime,
+} from '@union/core';
 
 export type AgentRun = {
   container: string;
@@ -82,7 +87,22 @@ export function claudeArgs(
   if (run.resumeSessionId) {
     args.push('--resume', run.resumeSessionId);
   }
+  const hints = connectorHints(run.tools);
+  if (hints !== null) {
+    args.push('--append-system-prompt', hints);
+  }
   return args;
+}
+
+/**
+ * The account's claude.ai connectors reach every container through the Claude login: a run loads
+ * them only when its tools include one, otherwise they would fill its context with tools it is
+ * refused.
+ */
+export function connectorEnv(tools: readonly string[]): Record<string, string> {
+  return {
+    ENABLE_CLAUDEAI_MCP_SERVERS: tools.some((tool) => isConnectorTool(tool)) ? 'true' : 'false',
+  };
 }
 
 function toOutcome(result: ResultEvent): AgentOutcome {
@@ -104,6 +124,7 @@ export async function runAgent(runtime: ContainerRuntime, run: AgentRun): Promis
   const stream = runtime.exec(run.container, claudeArgs(run), {
     cwd: run.cwd,
     stdin: run.prompt,
+    env: connectorEnv(run.tools),
     signal: run.signal,
   });
   const results: ResultEvent[] = [];

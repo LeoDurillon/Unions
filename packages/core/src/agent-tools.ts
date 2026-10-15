@@ -1,6 +1,7 @@
 import { asc, eq } from 'drizzle-orm';
 
 import type { Db } from './db';
+import { connectorTool, listConnectors } from './mcp-connectors';
 import * as schema from './schema';
 import type { Step } from './states';
 
@@ -56,8 +57,11 @@ export const BUILT_IN_TOOLS: readonly { name: string; description: string }[] = 
 export type ToolOption = {
   name: string;
   description: string | null;
-  /** `built-in`: Claude Code's tools and the rules the defaults use; `custom`: added by the user. */
-  source: 'built-in' | 'custom';
+  /**
+   * `built-in`: Claude Code's tools and the rules the defaults use; `custom`: added by the user;
+   * `connector`: all the tools of one of the account's claude.ai connectors.
+   */
+  source: 'built-in' | 'custom' | 'connector';
 };
 
 /** A tool the list refuses: bad syntax, duplicate, built-in, or still selected by an agent. */
@@ -85,7 +89,7 @@ function builtInOptions(): ToolOption[] {
   return options;
 }
 
-/** Everything an agent can be given: built-in tools, then the user's, oldest first. */
+/** Everything an agent can be given: built-in tools, the account's connectors, then the user's, oldest first. */
 export function listTools(db: Db): ToolOption[] {
   const custom = db
     .select()
@@ -93,7 +97,13 @@ export function listTools(db: Db): ToolOption[] {
     .orderBy(asc(schema.agentTools.createdAt))
     .all()
     .map((row): ToolOption => ({ name: row.name, description: row.description, source: 'custom' }));
-  return [...builtInOptions(), ...custom];
+  const connectors = listConnectors(db).map((connector): ToolOption => ({
+    name: connectorTool(connector.name),
+    description: `claude.ai connector ${connector.name} (${connector.status})`,
+    source: 'connector',
+  }));
+  const taken = new Set(connectors.map((tool) => tool.name));
+  return [...builtInOptions(), ...connectors, ...custom.filter((tool) => !taken.has(tool.name))];
 }
 
 export function addTool(db: Db, input: { name: string; description?: string | null }): ToolOption {

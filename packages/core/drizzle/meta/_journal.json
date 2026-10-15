@@ -267,6 +267,13 @@
       "when": 1792009805672,
       "tag": "0037_flippant_crusher_hogan",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "6",
+      "when": 1792056908076,
+      "tag": "0038_strange_monster_badoon",
+      "breakpoints": true
     }
   ]
 }
