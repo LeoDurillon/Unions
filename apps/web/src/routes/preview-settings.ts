@@ -1,6 +1,7 @@
 import {
   deletePreviewSecret,
   isRecord,
+  parseAgentEnvironment,
   previewSecretNames,
   schema,
   setPreviewSecret,
@@ -171,6 +172,18 @@ function profileList(value: unknown): string[] {
   return [...new Set(list)];
 }
 
+/** The variables the agent gets and the forwarding, stored only when not the default. */
+function agentEnvironment(
+  input: Record<string, unknown>,
+  names: string[],
+): Pick<PreviewConfig, 'agentVariables' | 'forwardPorts'> {
+  try {
+    return parseAgentEnvironment(input, names);
+  } catch (error) {
+    throw fail(BAD_REQUEST, error instanceof Error ? error.message : String(error));
+  }
+}
+
 /** The settings as sent, checked; null clears them. */
 function previewConfig(
   body: Record<string, unknown>,
@@ -185,6 +198,7 @@ function previewConfig(
   const e2eCommand = typeof input.e2eCommand === 'string' ? input.e2eCommand.trim() : '';
   const profiles = profileList(input.profiles);
   const agentServices = serviceList(input.agentServices);
+  const env = environment(input.env, exposed, secrets);
   const additions = composeAdditions(input.composeAdditions);
   const idleStopMinutes = optionalCount(
     input.idleStopMinutes,
@@ -202,11 +216,12 @@ function previewConfig(
     composeFile: composeFile(input.composeFile),
     ...(additions === '' ? {} : { composeAdditions: additions }),
     services: exposed,
-    env: environment(input.env, exposed, secrets),
+    env,
     ...(file ? { envFile: file } : {}),
     ...(e2eCommand === '' ? {} : { e2eCommand }),
     ...(profiles.length === 0 ? {} : { profiles }),
     ...(agentServices.length === 0 ? {} : { agentServices }),
+    ...agentEnvironment(input, Object.keys(env)),
     ...(idleStopMinutes === undefined ? {} : { idleStopMinutes }),
     ...(maxRunning === undefined ? {} : { maxRunning }),
   };

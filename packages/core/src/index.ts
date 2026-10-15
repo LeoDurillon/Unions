@@ -1,5 +1,6 @@
 export * from './agent-reviews';
 export * from './agent-tools';
+export * from './agent-environment';
 export * from './container-runs';
 export * from './mcp-connectors';
 export * from './attachments';
@@ -41,7 +42,13 @@ export * from './refused-commits';
 export type { ResumeState } from './schema-refused-commits';
 export type * from './runtime';
 export * as schema from './tables';
-export type { PreviewConfig, PreviewService, ProjectScript, PullRequestFile } from './schema-types';
+export type {
+  AgentVariables,
+  PreviewConfig,
+  PreviewService,
+  ProjectScript,
+  PullRequestFile,
+} from './schema-types';
 export * from './states';
 export * from './ticket-base';
 export * from './ticket-links';

@@ -1,4 +1,4 @@
-import type { ContainerRun, PreviewConfig } from '@union/core';
+import type { AgentSetup, ContainerRun, PreviewConfig } from '@union/core';
 
 import { baseUrl } from './e2e';
 import type { GateResult } from './gate';
@@ -30,17 +30,27 @@ export function previewHint(preview: PreviewConfig | undefined, running: boolean
  * Appended when the project starts services for the agent: which ones run while it works, and the
  * variables its commands get.
  */
-export function agentServicesHint(preview: PreviewConfig | undefined): string {
-  const services = preview?.agentServices ?? [];
-  if (services.length === 0) {
+export function agentServicesHint(setup: AgentSetup | null | undefined): string {
+  if (!setup || setup.services.length === 0) {
     return '';
   }
-  const names = Object.keys(preview?.env ?? {});
-  const variables =
-    names.length > 0
-      ? ` The project's variables are in your environment: ${names.join(', ')}.`
+  const ports = setup.forwards.map(
+    (forward) =>
+      `${forward.service} on localhost:${forward.port} (${forward.service}:${forward.targetPort})`,
+  );
+  const reach =
+    ports.length > 0
+      ? ` They are reachable on localhost, as on a developer's machine, and by name: ${ports.join(', ')}.`
+      : ' They are reachable by their names.';
+  const skipped =
+    setup.skipped.length > 0
+      ? ` Not reachable on localhost: ${setup.skipped.join('; ')}; use the service's name there.`
       : '';
-  return `\n\nWhile you work, these services of the project run for you, reachable by their names: ${services.join(', ')}. Use them for the tests that need them; their data is kept between your runs.${variables}`;
+  const variables =
+    setup.variables.length > 0
+      ? ` The project's variables are in your environment: ${setup.variables.join(', ')}.`
+      : " No project variable is set in your environment: the repository's own env files apply.";
+  return `\n\nWhile you work, these services of the project run for you: ${setup.services.join(', ')}.${reach}${skipped} Use them for the tests that need them; their data is kept between your runs.${variables}`;
 }
 
 /** Sent into the resumed session when the user asks for changes. */

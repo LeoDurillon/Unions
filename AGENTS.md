@@ -155,12 +155,23 @@ behavior; this file covers how to work in the repo.
     `HelperSpec.files`, never in the workspace), which every service reads (`env_file`); the file kept for the panel
     lists them in a comment and shows secrets interpolated by the repository's file as `${NAME}`, never a value. `network.ts` puts the ticket's container on its preview's networks
     (after a start, on provisioning) and takes it off before `down`.
-  - `agent-services-step.ts` and `preview/background.ts`: the services a project starts for the agent
-    (`config.preview.agentServices`, a database for its tests). Around implementation and rebase steps the worker
-    runs `up -d <services>` in the ticket's compose project (shared with the preview), joins the ticket's container to
-    it, gives every command run in that container the plain variables (`withEnvironment`, never the secrets), and
-    `stop`s the services after the step (data kept) unless the preview runs. A preview stopped during such a step
-    removes only the services the proxy serves.
+  - `services-run.ts`, `agent-services-step.ts` and `preview/background.ts`: the services a project starts for the
+    agent (`config.preview.agentServices`, a database for its tests). Around implementation and rebase steps, and
+    around a command from the Commands section (`startServicesRun`), the worker runs `up -d <services>` in the
+    ticket's compose project (shared with the preview), joins the ticket's container to it, gives every command run
+    in that container the plain variables the setting lets through (`config.preview.agentVariables`: all by default,
+    none, or chosen; `agentVariables` in core; never the secrets) through `withEnvironment`, and `stop`s the services
+    after (data kept) unless the preview runs or another run of the ticket uses them. A preview stopped during such
+    a step removes only the services the proxy serves.
+    Their published ports reach the container's `localhost` as on a laptop (unless `config.preview.forwardPorts` is
+    false, for repositories already using the services' names): `previewCompose` drops `ports` but keeps
+    them under `x-union-ports`, `agentForwards` (core) turns them into forwards (TCP, ranges, first service wins a
+    port), and `preview/forwarder.ts` runs a Node forwarder in the container (`setsid -f`, files under
+    `/tmp/union-forward.*`), listening on `127.0.0.1` and `::1`, connecting to the service per connection (a reset
+    while it is down). Starting it is idempotent (same ports: reused, so a ticket's agent review shares it); the
+    checks, the install command and a resumed refused commit call `deps.services.ensure()` first, which brings it
+    back if the agent killed it. Ports it cannot take are logged (`agent_ports_forwarded`) and named in the prompt
+    (`agentServicesHint`).
   - `preview/idle.ts`: stops running previews nobody visited for the project's `idleStopMinutes` (60 by default),
     from Traefik's per-router request counts (`UNION_PREVIEW_METRICS`, an entrypoint only the worker reaches); never
     while the ticket is in a step or its e2e tests run. The proxy publishes its port on `127.0.0.1` only.

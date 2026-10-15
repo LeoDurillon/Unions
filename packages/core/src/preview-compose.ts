@@ -1,5 +1,6 @@
 import path from 'node:path';
 
+import { PUBLISHED_PORTS_KEY } from './agent-environment';
 import {
   isRecord,
   PREVIEW_ENV_FILE,
@@ -80,7 +81,7 @@ function rewriteService(
   target: PreviewTarget,
 ): Record<string, unknown> {
   // `profiles` too: the profiles were applied when the file was resolved, the file runs whole.
-  const { container_name: _name, ports: _ports, profiles: _profiles, ...rest } = service;
+  const { container_name: _name, ports, profiles: _profiles, ...rest } = service;
   const exposed = target.exposed.find((candidate) => candidate.service === name);
   // A service's own `environment` wins over its env file: the project's variables leave it.
   const environment = Object.fromEntries(
@@ -91,6 +92,8 @@ function rewriteService(
   const networks = isRecord(service.networks) ? service.networks : { default: null };
   return {
     ...rest,
+    // Not published: the agent reaches them on its `localhost` (`agentForwards`).
+    ...(Array.isArray(ports) && ports.length > 0 ? { [PUBLISHED_PORTS_KEY]: ports } : {}),
     environment,
     ...(target.variables.length > 0 ? { env_file: [PREVIEW_ENV_FILE] } : {}),
     labels: {

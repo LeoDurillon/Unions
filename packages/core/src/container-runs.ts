@@ -241,3 +241,19 @@ export function markSentToAgent(db: Db, ids: number[]): void {
       .run();
   }
 }
+
+/** Whether a command of the ticket is queued or running (it may use the agent's services). */
+export function hasActiveContainerRun(db: Db, ticketId: number): boolean {
+  return (
+    db
+      .select({ id: schema.containerRuns.id })
+      .from(schema.containerRuns)
+      .where(
+        and(
+          eq(schema.containerRuns.ticketId, ticketId),
+          inArray(schema.containerRuns.status, ACTIVE),
+        ),
+      )
+      .get() !== undefined
+  );
+}

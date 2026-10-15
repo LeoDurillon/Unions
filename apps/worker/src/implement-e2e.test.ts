@@ -137,20 +137,39 @@ test('the agent is told where the preview answers only while it runs', async () 
   expect(runs[0]?.prompt).toContain('run only the ones your work touches');
 });
 
-test('the implementer is told which services run for it, and which variables it has', () => {
-  expect(
-    agentServicesHint({
-      composeFile: 'compose.yaml',
-      env: { DATABASE_URL: 'postgres://db:5432/app' },
-      agentServices: ['db', 'redis'],
-    }),
-  ).toContain('run for you, reachable by their names: db, redis');
-  expect(
-    agentServicesHint({
-      composeFile: 'compose.yaml',
-      env: { DATABASE_URL: 'x' },
-      agentServices: ['db'],
-    }),
-  ).toContain('in your environment: DATABASE_URL');
-  expect(agentServicesHint({ composeFile: 'compose.yaml', env: {} })).toBe('');
+test('the implementer is told which services run for it, where, and which variables it has', () => {
+  const setup = {
+    services: ['db', 'redis'],
+    forwards: [{ service: 'db', port: 5432, targetPort: 5432 }],
+    skipped: ['localhost:6379 (redis): EADDRINUSE'],
+    variables: ['DATABASE_URL'],
+    ensure: () => Promise.resolve(),
+  };
+  const hint = agentServicesHint(setup);
+  expect(hint).toContain('run for you: db, redis.');
+  expect(hint).toContain('db on localhost:5432 (db:5432)');
+  expect(hint).toContain('Not reachable on localhost: localhost:6379 (redis): EADDRINUSE');
+  expect(hint).toContain('in your environment: DATABASE_URL');
+  expect(agentServicesHint({ ...setup, forwards: [], skipped: [], variables: [] })).toContain(
+    "reachable by their names. Use them for the tests that need them; their data is kept between your runs. No project variable is set in your environment: the repository's own env files apply.",
+  );
+  expect(agentServicesHint(null)).toBe('');
+});
+
+test('the forwarder is brought back before every check, and the prompt names the ports', async () => {
+  const space = workspace();
+  let ensured = 0;
+  const services = {
+    services: ['db'],
+    forwards: [{ service: 'db', port: 5432, targetPort: 5432 }],
+    skipped: [],
+    variables: [],
+    ensure: () => {
+      ensured += 1;
+      return Promise.resolve();
+    },
+  };
+  await implementLoop({ ...space, deps: { ...space.deps, services } });
+  expect(ensured).toBe(1);
+  expect(runs[0]?.prompt).toContain('db on localhost:5432 (db:5432)');
 });

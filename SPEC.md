@@ -275,13 +275,19 @@ Built (phases 1 to 4). Full design and what was built: [`docs/plans/preview-envi
   step and preview start, kept out of git (`.git/info/exclude`) and refused in pushes, never readable from the
   browser. A database dump for the additions' restore, a local config.
 - Services for the agent: chosen compose services run in the ticket's project while it implements or rebases (a
-  database for its tests), stopped after.
+  database for its tests), and while the user runs a command from the ticket, stopped after. The ports they publish
+  in the compose file are forwarded to the ticket container's `localhost` (IPv4 and IPv6), so the repository's
+  laptop settings (`.env.test` with `localhost:5432`) work unchanged; the agent is told where each one answers. A
+  project whose settings already use the services' names turns it off (Previews → Services, "Reach them on
+  localhost"). Which
+  plain variables the agent's commands get is a setting (all by default, none, or chosen): a variable already set
+  wins over the repository's env files. Secrets never reach the agent.
 - Served to this machine only (the proxy's port is published on `127.0.0.1`). A running preview nobody visited for
   the project's idle time (60 minutes by default, 0: never) stops, except while the agent runs a step on the ticket
   or its e2e tests run; visits are the proxy's request counts. At most `UNION_MAX_PREVIEWS` previews run (3), and
   optionally fewer per project (Previews → Limits).
 - Commands: from the Preview tab the user runs a command in the ticket's workspace (its container, in the checkout,
-  as the agent, with the preview's address while it runs) and reads the end of its output, live. Never during a
+  as the agent, with its services, variables and `localhost` ports, and the preview's address while it runs) and reads the end of its output, live. Never during a
   step, one at a time per ticket, 10 minutes by default (30 at most), cancellable. A finished output can be kept
   for the implementer's next run, or sent now as a revision with a note (at the final review or once done); the
   implementer reads it as data in a "Command output from the user" section, once. Commands run often are saved by

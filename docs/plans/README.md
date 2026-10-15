@@ -7,6 +7,9 @@ and linked.
 
 - [Container commands](container-commands.md): run a command or saved script in a ticket's environment, send its
   output to the implementer. Phases 1 to 3 built (running, output, giving it to the agent, saved scripts); the preview service target left.
+- [Agent services on localhost](agent-service-ports.md): forward the agent services' published ports to the ticket
+  container's `localhost`, choose which variables the agent's commands get, give Commands the same environment.
+  Built (branch `agent-service-ports`).
 - [Ticket groups](ticket-groups.md): the board shows groups of one or more tickets. Decisions to confirm.
 - [Split a PR into a stack](pr-stack-split.md): an agent splits a ready-for-review PR into stacked PRs. Needs groups.
 - [Restack](restack.md): rebase and retarget a stack after a revision or a merge.

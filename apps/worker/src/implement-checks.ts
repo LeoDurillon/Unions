@@ -14,6 +14,8 @@ export type { ImplementDeps } from './implement-loop';
 export async function check(workspace: Workspace): Promise<Checked> {
   const { deps, context, project, container } = workspace;
   const { gateCommand } = project.config;
+  // The agent may have stopped the forwarder: the checks reach the services on localhost too.
+  await deps.services?.ensure();
   const gate = gateCommand
     ? await runGate(deps.runtime, container, gateCommand, context.signal)
     : null;
@@ -24,8 +26,9 @@ export async function check(workspace: Workspace): Promise<Checked> {
   return { gate, retry: null };
 }
 
-export function install(workspace: Workspace): Promise<string | null> {
+export async function install(workspace: Workspace): Promise<string | null> {
   const { installCommand } = workspace.project.config;
+  await workspace.deps.services?.ensure();
   return installCommand
     ? runInstall(
         workspace.deps.runtime,

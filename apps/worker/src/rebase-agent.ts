@@ -13,7 +13,7 @@ import { runResumable, type AgentOutcome, type AgentRun } from './agent';
 import { approvedBefore } from './approved';
 import type { GateResult } from './gate';
 import { IMPLEMENT_DENIED, type Workspace } from './implement-loop';
-import { gateHint } from './implement-prompts';
+import { agentServicesHint, gateHint } from './implement-prompts';
 import { askSession, COMMIT_HOOK_HINT, type Ask } from './leftovers';
 import { buildPrompt, parentContext } from './prompts';
 import { REPO_DIR } from './provision';
@@ -53,8 +53,8 @@ function implementerSession(db: Db, ticketId: number): string | null {
 }
 
 function instructions(db: Db, rebase: Rebase): string {
-  const { base, branch, project } = rebase;
-  return `${resolveAgent(db, 'rebase').prompt}\n\nThe base branch was fetched just now as \`origin/${base}\`; your branch is \`${branch}\`.${gateHint(project.config.gateCommand)}${COMMIT_HOOK_HINT}`;
+  const { base, branch, project, deps } = rebase;
+  return `${resolveAgent(db, 'rebase').prompt}\n\nThe base branch was fetched just now as \`origin/${base}\`; your branch is \`${branch}\`.${gateHint(project.config.gateCommand)}${agentServicesHint(deps.services)}${COMMIT_HOOK_HINT}`;
 }
 
 function agentRun(rebase: Rebase, prompt: string, session: string | null): AgentRun {

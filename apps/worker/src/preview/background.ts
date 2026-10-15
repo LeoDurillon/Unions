@@ -1,9 +1,12 @@
 import {
+  agentForwards,
+  agentVariables,
   emitEvent,
   getPreview,
   workspaceSubpaths,
   type ContainerRuntime,
   type ExecOptions,
+  type PortForward,
   type PreviewConfig,
 } from '@union/core';
 
@@ -47,19 +50,31 @@ export function withEnvironment(
 }
 
 /**
+ * The agent's services once started: the plain variables its commands get (by the project's
+ * setting), and the ports to forward to its `localhost` (`problems`: the ones that cannot be).
+ */
+export type StartedServices = {
+  env: Record<string, string>;
+  forwards: PortForward[];
+  problems: string[];
+};
+
+const NONE: StartedServices = { env: {}, forwards: [], problems: [] };
+
+/**
  * Starts the agent's services in the ticket's compose project (`up -d <services>`; compose adds
- * what they depend on) and puts the ticket's container on their network. Returns the plain
- * variables for the step's commands; never throws: a failure is logged, and the step runs without.
+ * what they depend on) and puts the ticket's container on their network. Never throws: a failure
+ * is logged, and the step runs without.
  */
 export async function startAgentServices(
   deps: PreviewDeps,
   ticketId: number,
-): Promise<Record<string, string>> {
+): Promise<StartedServices> {
   try {
     const target = loadTarget(deps, ticketId);
     const services = agentServices(target.config);
     if (services.length === 0) {
-      return {};
+      return NONE;
     }
     const file = await fileToRun(deps, target);
     await createMountFolders(
@@ -89,23 +104,32 @@ export async function startAgentServices(
     }
     await joinPreview(deps.runtime, ticketId);
     emitEvent(deps.db, { type: 'agent_services_started', ticketId, payload: { services } });
-    return target.plain;
+    return {
+      env: agentVariables(target.plain, target.config.agentVariables),
+      ...(target.config.forwardPorts === false
+        ? { forwards: [], problems: [] }
+        : agentForwards(file, services)),
+    };
   } catch (error) {
     emitEvent(deps.db, {
       type: 'agent_services_failed',
       ticketId,
       payload: { error: error instanceof Error ? error.message : String(error) },
     });
-    return {};
+    return NONE;
   }
 }
 
 /**
- * After the step: the services stop (containers and data kept, memory freed), unless the preview
- * runs, which uses them.
+ * After the run: the services stop (containers and data kept, memory freed), unless the preview
+ * runs, which uses them, or `inUse` says another run of the ticket still does.
  */
-export async function pauseAgentServices(deps: PreviewDeps, ticketId: number): Promise<void> {
-  if (getPreview(deps.db, ticketId)?.status === 'running') {
+export async function pauseAgentServices(
+  deps: PreviewDeps,
+  ticketId: number,
+  inUse = false,
+): Promise<void> {
+  if (inUse || getPreview(deps.db, ticketId)?.status === 'running') {
     return;
   }
   try {

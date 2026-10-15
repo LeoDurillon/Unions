@@ -18,6 +18,7 @@ import { eq } from 'drizzle-orm';
 import { runIn } from './container-exec';
 import { baseUrl } from './e2e';
 import { ensureTicketContainer, REPO_DIR, type ProvisionConfig } from './provision';
+import { startServicesRun } from './services-run';
 
 /** Commands running at the same time, across tickets (one per ticket, by the queue's rule). */
 const MAX_PARALLEL = 3;
@@ -105,10 +106,12 @@ async function execute(
     return { status: 'failed', exitCode: null, error, output: '' };
   }
   const { name } = await ensureTicketContainer(db, runtime, config, ticket);
+  // The same environment as the agent's: its services, on localhost, with its variables.
+  const services = await startServicesRun(deps, ticket.id);
   const pidFile = { UNION_PID_FILE: `/tmp/union-run-${run.id}.pid` };
   const timeout = AbortSignal.timeout(run.timeoutSec * MS_PER_SEC);
   try {
-    const exec = runtime.exec(name, ['setsid', '-w', 'sh', '-c', WRAPPER], {
+    const exec = services.runtime.exec(name, ['setsid', '-w', 'sh', '-c', WRAPPER], {
       cwd: REPO_DIR,
       env: {
         ...previewEnv(db, ticket.id, ticket.projectId),
@@ -122,7 +125,9 @@ async function execute(
   } finally {
     await runIn(runtime, name, ['sh', '-c', KILL], { env: pidFile }).catch(() => null);
     // A step the user started meanwhile works in the same container: it stops it itself.
-    if (getTicket(db, ticket.id).phase.kind !== 'running') {
+    const stepRuns = getTicket(db, ticket.id).phase.kind === 'running';
+    await services.release(stepRuns);
+    if (!stepRuns) {
       await runtime.stop(name);
     }
   }

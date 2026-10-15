@@ -88,6 +88,30 @@ test('preview settings are checked, saved and cleared', async () => {
   ).json()) as PublicProject;
   expect(withAgent.config.preview?.agentServices).toEqual(['db', 'redis']);
   expect((await put({ ...SETTINGS, agentServices: ['not a service'] })).status).toBe(400);
+  const chosen = { mode: 'chosen', names: ['API_URL', 'API_URL'] };
+  const withVariables = (await (
+    await put({ ...SETTINGS, agentVariables: chosen })
+  ).json()) as PublicProject;
+  expect(withVariables.config.preview?.agentVariables).toEqual({
+    mode: 'chosen',
+    names: ['API_URL'],
+  });
+  const none = (await (
+    await put({ ...SETTINGS, agentVariables: { mode: 'none' } })
+  ).json()) as PublicProject;
+  expect(none.config.preview?.agentVariables).toEqual({ mode: 'none' });
+  const all = (await (
+    await put({ ...SETTINGS, agentVariables: { mode: 'all' } })
+  ).json()) as PublicProject;
+  expect(all.config.preview?.agentVariables).toBeUndefined();
+  const unknownName = { mode: 'chosen', names: ['SECRET_KEY'] };
+  expect((await put({ ...SETTINGS, agentVariables: unknownName })).status).toBe(400);
+  expect((await put({ ...SETTINGS, agentVariables: { mode: 'some' } })).status).toBe(400);
+  const off = (await (await put({ ...SETTINGS, forwardPorts: false })).json()) as PublicProject;
+  expect(off.config.preview?.forwardPorts).toBe(false);
+  const on = (await (await put({ ...SETTINGS, forwardPorts: true })).json()) as PublicProject;
+  expect(on.config.preview?.forwardPorts).toBeUndefined();
+  expect((await put({ ...SETTINGS, forwardPorts: 'no' })).status).toBe(400);
   const cleared = (await (await put(null)).json()) as PublicProject;
   expect(cleared.config.preview).toBeUndefined();
   expect(cleared.config.baseBranch).toBe('main');

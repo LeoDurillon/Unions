@@ -5,6 +5,9 @@ import type { BoardStatus } from './states';
 /** A service the proxy serves: at `<id>.localhost` when `prefix` is empty, else `<prefix>.<id>.localhost`. */
 export type PreviewService = { name: string; port: number; prefix: string };
 
+/** `all`: every plain variable; `none`: none (the repository's env files apply); `chosen`: `names`. */
+export type AgentVariables = { mode: 'all' | 'none' | 'chosen'; names?: string[] };
+
 /**
  * How a ticket's preview runs: the repository's compose file, the services the proxy serves, and
  * variables given to every service. `env` holds plain values (they reach the browser with the
@@ -27,6 +30,13 @@ export type PreviewConfig = {
    * the same compose project as the preview; stopped after each step.
    */
   agentServices?: string[];
+  /** Which plain variables the agent's commands get (all when unset). Secrets never reach them. */
+  agentVariables?: AgentVariables;
+  /**
+   * The agent services' published ports on the agent's `localhost` (on when unset). Off for
+   * repositories whose dev settings already use the services' names (`db:5432`).
+   */
+  forwardPorts?: boolean;
   /** Compose profiles to enable (`--profile`): services in other profiles are left out. */
   profiles?: string[];
   /** The variables also given as a file, at `path` inside `service`. */

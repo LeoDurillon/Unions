@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { exposedServices, type PreviewConfig } from '@union/core/preview';
+import { exposedServices, type AgentVariables, type PreviewConfig } from '@union/core/preview';
 import { useState, type ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
@@ -22,6 +22,8 @@ export type Form = {
   e2eCommand: string;
   profiles: string[];
   agentServices: string[];
+  agentVariables: AgentVariables;
+  forwardPorts: boolean;
   /** As typed: empty means the default. */
   idleStopMinutes: string;
   maxRunning: string;
@@ -37,9 +39,21 @@ const EMPTY: Form = {
   e2eCommand: '',
   profiles: [],
   agentServices: [],
+  agentVariables: { mode: 'all' },
+  forwardPorts: true,
   idleStopMinutes: '',
   maxRunning: '',
 };
+
+function agentChoices(
+  preview: PreviewConfig,
+): Pick<Form, 'agentServices' | 'agentVariables' | 'forwardPorts'> {
+  return {
+    agentServices: preview.agentServices ?? [],
+    agentVariables: preview.agentVariables ?? { mode: 'all' },
+    forwardPorts: preview.forwardPorts !== false,
+  };
+}
 
 function initial(project: PublicProject): Form {
   const { preview } = project.config;
@@ -55,7 +69,7 @@ function initial(project: PublicProject): Form {
     envFilePath: preview.envFile?.path ?? '',
     e2eCommand: preview.e2eCommand ?? '',
     profiles: preview.profiles ?? [],
-    agentServices: preview.agentServices ?? [],
+    ...agentChoices(preview),
     idleStopMinutes: preview.idleStopMinutes === undefined ? '' : String(preview.idleStopMinutes),
     maxRunning: preview.maxRunning === undefined ? '' : String(preview.maxRunning),
   };
@@ -77,6 +91,8 @@ function settingsOf(form: Form): PreviewConfig {
     ...(form.e2eCommand.trim() === '' ? {} : { e2eCommand: form.e2eCommand }),
     ...(form.profiles.length === 0 ? {} : { profiles: form.profiles }),
     ...(form.agentServices.length === 0 ? {} : { agentServices: form.agentServices }),
+    ...(form.agentVariables.mode === 'all' ? {} : { agentVariables: form.agentVariables }),
+    ...(form.forwardPorts ? {} : { forwardPorts: false }),
     ...(form.idleStopMinutes.trim() === ''
       ? {}
       : { idleStopMinutes: Number(form.idleStopMinutes) }),

@@ -14,7 +14,9 @@ import {
   type Db,
   type ExecOptions,
   type ExecResult,
+  type HelperSpec,
 } from '@union/core';
+import { eq } from 'drizzle-orm';
 
 import { ContainerRunner } from './container-run';
 
@@ -24,6 +26,13 @@ let root: string;
 let db: Db;
 let ticketId: number;
 let execs: Exec[];
+let helpers: string[];
+const RESOLVED = {
+  services: {
+    web: { image: 'node' },
+    db: { image: 'postgres', ports: [{ target: 5432, published: '5432', protocol: 'tcp' }] },
+  },
+};
 let stops: number;
 /** What the user's command does: its lines and exit code, or it waits until it is stopped. */
 let behaviour: { lines: string[]; exitCode: number } | 'hang';
@@ -61,8 +70,12 @@ const runtime = {
     yield* lines;
     return { exitCode, stderr: '' } satisfies ExecResult;
   },
-  *runHelper(): Generator<string, ExecResult> {
-    yield* [];
+  *runHelper(spec: HelperSpec): Generator<string, ExecResult> {
+    const args = spec.command.join(' ');
+    helpers.push(args);
+    if (args.includes(' config ')) {
+      yield JSON.stringify(RESOLVED);
+    }
     return { exitCode: 0, stderr: '' };
   },
 } as unknown as ContainerRuntime;
@@ -108,6 +121,7 @@ beforeEach(async () => {
     .set({ phase: { kind: 'done' } })
     .run();
   execs = [];
+  helpers = [];
   stops = 0;
 });
 
@@ -171,4 +185,41 @@ test('a timeout fails the run with the reason', async () => {
     status: 'failed',
     error: 'Stopped after 1 s (the timeout)',
   });
+});
+
+test("with agent services, a command gets the agent's environment: services, localhost, variables", async () => {
+  const project = db.select().from(schema.projects).get();
+  const preview = project?.config.preview;
+  if (!project || !preview) {
+    throw new Error('no project');
+  }
+  const agent = {
+    ...preview,
+    env: { DATABASE_URL: 'postgres://db/app', S3_URL: 'http://s3' },
+    agentServices: ['db'],
+    agentVariables: { mode: 'chosen' as const, names: ['S3_URL'] },
+  };
+  db.update(schema.projects)
+    .set({ config: { ...project.config, preview: agent } })
+    .where(eq(schema.projects.id, project.id))
+    .run();
+  behaviour = { lines: ['ok'], exitCode: 0 };
+  queueContainerRun(db, { ticketId, command: 'pnpm test:e2e' });
+  const workers = runner();
+  workers.tick();
+  await workers.idle();
+  expect(helpers.some((args) => args.endsWith('up -d db'))).toBe(true);
+  const forwarder = execs.find((exec) => exec.command.join(' ').includes('union-forward'));
+  expect(JSON.parse(forwarder?.options.env?.UNION_FORWARDS ?? '[]')).toEqual([
+    { service: 'db', port: 5432, targetPort: 5432 },
+  ]);
+  const command = execs.find((exec) => exec.command[0] === 'setsid');
+  expect(command?.options.env).toMatchObject({
+    S3_URL: 'http://s3',
+    UNION_COMMAND: 'pnpm test:e2e',
+  });
+  expect(command?.options.env?.DATABASE_URL).toBeUndefined();
+  // After the run the services stop with the container.
+  expect(helpers.at(-1)).toContain('stop');
+  expect(stops).toBe(1);
 });

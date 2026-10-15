@@ -43,6 +43,7 @@ export async function verifyAndPush(
     return { refused: leftovers };
   }
   const { gateCommand } = project.config;
+  await deps.services?.ensure();
   const gate = gateCommand
     ? await runGate(deps.runtime, container, gateCommand, rebase.context.signal)
     : null;

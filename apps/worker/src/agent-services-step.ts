@@ -1,57 +1,23 @@
-import { getTicket, schema, type Db } from '@union/core';
-import { eq } from 'drizzle-orm';
+import { hasActiveContainerRun } from '@union/core';
 
 import { runImplementStep } from './implement';
 import type { ImplementDeps } from './implement-checks';
-import {
-  agentServices,
-  pauseAgentServices,
-  startAgentServices,
-  withEnvironment,
-} from './preview/background';
-import { previewSettings } from './preview/compose';
-import { containerNames, ensureTicketContainer } from './provision';
 import { runRebaseStep } from './rebase';
 import type { StepContext, StepResult } from './scheduler';
+import { startServicesRun } from './services-run';
 
-function previewOf(db: Db, projectId: number): ReturnType<typeof agentServices> {
-  const project = db.select().from(schema.projects).where(eq(schema.projects.id, projectId)).get();
-  return agentServices(project?.config.preview);
-}
-
-/**
- * A step that runs code (implementation, rebase), with the services the project starts for the
- * agent running beside it, and the project's plain variables in its commands' environment. The
- * container is provisioned first: compose reads the file from its workspace.
- */
+/** A step that runs code (implementation, rebase), with the project's agent services beside it. */
 export async function withAgentServices(
   deps: ImplementDeps,
   context: StepContext,
   run: (stepDeps: ImplementDeps) => Promise<StepResult>,
 ): Promise<StepResult> {
-  if (previewOf(deps.db, context.ticket.projectId).length === 0) {
-    return run(deps);
-  }
-  await ensureTicketContainer(
-    deps.db,
-    deps.runtime,
-    deps.config,
-    getTicket(deps.db, context.ticket.id),
-  );
-  const previewDeps = {
-    db: deps.db,
-    runtime: deps.runtime,
-    config: deps.config,
-    settings: previewSettings(),
-  };
-  const env = await startAgentServices(previewDeps, context.ticket.id);
+  const services = await startServicesRun(deps, context.ticket.id);
   try {
-    return await run({
-      ...deps,
-      runtime: withEnvironment(deps.runtime, containerNames(context.ticket.id).name, env),
-    });
+    return await run({ ...deps, runtime: services.runtime, services: services.setup });
   } finally {
-    await pauseAgentServices(previewDeps, context.ticket.id);
+    // A command the user runs meanwhile (queued during the step) may still need them.
+    await services.release(hasActiveContainerRun(deps.db, context.ticket.id));
   }
 }
 

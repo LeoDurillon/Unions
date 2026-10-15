@@ -23,7 +23,11 @@ import type { PreviewDeps } from './target';
 const RESOLVED = {
   services: {
     web: { image: 'nginx', networks: { default: null } },
-    db: { image: 'postgres', networks: { default: null } },
+    db: {
+      image: 'postgres',
+      networks: { default: null },
+      ports: [{ target: 5432, published: '5432', protocol: 'tcp' }],
+    },
   },
 };
 
@@ -109,14 +113,48 @@ test("the step's commands in the ticket's container get the variables; others do
 });
 
 test("only the agent's services start, and the step gets the plain variables, not the secrets", async () => {
-  const env = await startAgentServices(deps(), ticketId);
-  expect(env).toEqual({ DATABASE_URL: 'postgres://db:5432/app' });
+  const started = await startAgentServices(deps(), ticketId);
+  expect(started).toEqual({
+    env: { DATABASE_URL: 'postgres://db:5432/app' },
+    forwards: [{ service: 'db', port: 5432, targetPort: 5432 }],
+    problems: [],
+  });
   expect(composeCalls.at(-1)).toBe('-p union-t1 --project-directory /workspace/repo -f - up -d db');
+});
+
+test('the agent gets only the variables the setting lets through', async () => {
+  const project = db.select().from(schema.projects).get();
+  const preview = project?.config.preview;
+  if (!project || !preview) {
+    throw new Error('no project');
+  }
+  db.update(schema.projects)
+    .set({
+      config: { ...project.config, preview: { ...preview, agentVariables: { mode: 'none' } } },
+    })
+    .run();
+  expect((await startAgentServices(deps(), ticketId)).env).toEqual({});
+});
+
+test('with forwarding off, no port goes to localhost', async () => {
+  const project = db.select().from(schema.projects).get();
+  const preview = project?.config.preview;
+  if (!project || !preview) {
+    throw new Error('no project');
+  }
+  db.update(schema.projects)
+    .set({ config: { ...project.config, preview: { ...preview, forwardPorts: false } } })
+    .run();
+  expect((await startAgentServices(deps(), ticketId)).forwards).toEqual([]);
 });
 
 test('services that cannot start leave the step without them, and say why in the log', async () => {
   upExit = 1;
-  expect(await startAgentServices(deps(), ticketId)).toEqual({});
+  expect(await startAgentServices(deps(), ticketId)).toEqual({
+    env: {},
+    forwards: [],
+    problems: [],
+  });
   const failed = db
     .select()
     .from(schema.events)
@@ -129,6 +167,8 @@ test('after the step the services stop, unless the preview uses them', async () 
   await pauseAgentServices(deps(), ticketId);
   expect(composeCalls).toEqual(['-p union-t1 stop']);
   composeCalls = [];
+  await pauseAgentServices(deps(), ticketId, true);
+  expect(composeCalls).toEqual([]);
   updatePreview(db, ticketId, { status: 'running' });
   await pauseAgentServices(deps(), ticketId);
   expect(composeCalls).toEqual([]);

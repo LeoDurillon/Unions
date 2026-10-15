@@ -3,6 +3,7 @@ import type { ReactElement } from 'react';
 
 import type { PreviewSettingsView, PublicProject } from '../../../src/api-types';
 import { previewApi } from '../../lib/preview-api';
+import { AgentEnvironment } from './agent-variables-field';
 import { PreviewChoicesField } from './preview-choices-field';
 import { AdditionsField, TextField } from './preview-fields';
 import { PreviewSave, usePreviewForm, type Form } from './preview-form';
@@ -44,7 +45,7 @@ function ComposeChoices({
       />
       <PreviewChoicesField
         label="Start for the agent"
-        hint="Services that run while the agent implements or rebases (a database for its tests), in the ticket's environment; stopped after each run, their data kept. Its commands get the plain variables."
+        hint="Services that run while the agent implements or rebases (a database for its tests), and while you run a command from a ticket, in the ticket's environment; stopped after each run, their data kept."
         example="db, redis"
         selected={form.agentServices}
         known={found?.names ?? []}
@@ -52,6 +53,7 @@ function ComposeChoices({
           setForm({ ...form, agentServices });
         }}
       />
+      {form.agentServices.length > 0 ? <AgentEnvironment form={form} onChange={setForm} /> : null}
     </>
   );
 }

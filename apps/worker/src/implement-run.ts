@@ -76,6 +76,7 @@ export async function resume(workspace: Prepared): Promise<StepResult | Implemen
     return paused;
   }
   const { gateCommand } = project.config;
+  await deps.services?.ensure();
   const gate = gateCommand
     ? await runGate(deps.runtime, container, gateCommand, context.signal)
     : null;

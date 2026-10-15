@@ -1,4 +1,5 @@
 import {
+  type AgentSetup,
   type ContainerRuntime,
   type Db,
   effortFor,
@@ -48,6 +49,8 @@ export type ImplementDeps = {
   config: ProvisionConfig;
   github: (project: Project) => GitHubApi | null;
   agent: AgentFn;
+  /** The agent's services for this step, when the project starts some. */
+  services?: AgentSetup | null;
 };
 
 export type Loop = {
@@ -75,7 +78,7 @@ function freshPrompt({ deps, context, project }: Workspace): string {
       resolveAgent(deps.db, 'implement').prompt +
       gateHint(project.config.gateCommand) +
       previewHint(project.config.preview, getPreview(deps.db, ticket.id)?.status === 'running') +
-      agentServicesHint(project.config.preview) +
+      agentServicesHint(deps.services) +
       COMMIT_HOOK_HINT,
     approved: approvedBefore(deps.db, ticket.id, 'implement'),
     revision: null,
