@@ -1,3 +1,4 @@
+// The header of the ticket panel: its title, phase badge and the review and close buttons.
 import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../src/api-types';

@@ -1,3 +1,4 @@
+// Builds the web server's Hono app: error handling and the API routes, wired to the database and GitHub.
 import { FetchNotionApi, type Db, type NotionApi } from '@union/core';
 import { Hono, type Context } from 'hono';
 import { HTTPException } from 'hono/http-exception';

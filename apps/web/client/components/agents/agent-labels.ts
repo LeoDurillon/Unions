@@ -1,3 +1,4 @@
+// The titles and descriptions the agents page shows for each agent, model and effort level.
 import type { AgentEffort, AgentId, AgentModel } from '@union/core';
 
 export const AGENT_LABELS: Record<AgentId, { title: string; description: string }> = {

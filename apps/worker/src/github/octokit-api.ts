@@ -1,3 +1,4 @@
+// The GitHub API implemented with Octokit: issues, pull requests and the project board.
 import type { ProjectLocator } from '@union/core';
 import { RequestError, type Octokit } from 'octokit';
 

@@ -1,3 +1,4 @@
+// The browser's client for a project's uploaded files.
 import type { ProjectFileView } from '../../src/routes/project-files';
 import { ApiError, errorMessage, request } from './api';
 

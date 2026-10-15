@@ -1,3 +1,4 @@
+// A draggable ticket card for the board, with its phase and pull request badges.
 import { useDraggable } from '@dnd-kit/core';
 import type { ReactElement } from 'react';
 

@@ -1,3 +1,4 @@
+// The `db:restore` script: replaces the database with a backup file, refusing while it is in use.
 import path from 'node:path';
 
 import { DEFAULT_DB_PATH } from '@union/core';

@@ -1,3 +1,4 @@
+// Applies a change read from GitHub to the matching ticket in the database.
 import {
   blockingParent,
   boardStatus,

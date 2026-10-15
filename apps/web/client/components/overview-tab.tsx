@@ -1,3 +1,4 @@
+// The ticket panel's overview tab: run status, details, and the buttons that act on the ticket.
 import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../src/api-types';

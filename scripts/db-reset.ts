@@ -1,3 +1,4 @@
+// The `db:reset` script: backs up and empties the database, refusing while it is in use.
 import path from 'node:path';
 
 import { DEFAULT_DB_PATH, DockerCli } from '@union/core';

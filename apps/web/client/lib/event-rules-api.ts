@@ -1,3 +1,4 @@
+// The browser's client for the event rules endpoints.
 import type { EventRule, NotionSchema, NotionUser } from '@union/core';
 import type { EventAction, EventTrigger } from '@union/core/event-rules';
 

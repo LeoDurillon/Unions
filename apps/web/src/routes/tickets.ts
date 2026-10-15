@@ -1,3 +1,4 @@
+// The API routes for tickets: listing, creating, editing outputs and moving them between steps.
 import {
   describeTicketBase,
   getTicket,

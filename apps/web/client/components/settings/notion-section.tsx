@@ -1,3 +1,4 @@
+// The project settings section for the Notion connection and its event rules.
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 

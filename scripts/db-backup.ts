@@ -1,3 +1,4 @@
+// The `db:backup` script: copies the SQLite database to a backup file.
 import path from 'node:path';
 
 import { DEFAULT_DB_PATH } from '@union/core';

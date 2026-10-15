@@ -1,3 +1,4 @@
+// The agents page: a card per agent, plus the lists of tools and MCP connectors.
 import { useQuery } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 

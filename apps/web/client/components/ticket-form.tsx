@@ -1,3 +1,4 @@
+// The form that creates a ticket, with its parent and attached files.
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 import { useState, type ReactElement, type SubmitEvent } from 'react';
 

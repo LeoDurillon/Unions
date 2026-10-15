@@ -1,3 +1,4 @@
+// The onboarding step that picks the repository from a paged list.
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 

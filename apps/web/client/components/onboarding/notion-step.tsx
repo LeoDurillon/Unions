@@ -1,3 +1,4 @@
+// The onboarding step that connects a Notion data source with its token.
 import { useMutation } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 

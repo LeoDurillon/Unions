@@ -1,3 +1,4 @@
+// HTTP status codes and small helpers the web routes use to read requests and fail.
 import { HTTPException } from 'hono/http-exception';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
 

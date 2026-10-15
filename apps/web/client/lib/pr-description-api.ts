@@ -1,3 +1,4 @@
+// The browser's client for a ticket's pull request description endpoints.
 import type { PrDescriptionView } from '../../src/api-types';
 import { request } from './api';
 

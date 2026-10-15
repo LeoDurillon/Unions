@@ -1,3 +1,4 @@
+// The onboarding step that picks the GitHub project the board mirrors.
 import { useQuery } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 

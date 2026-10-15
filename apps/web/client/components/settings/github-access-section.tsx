@@ -1,3 +1,4 @@
+// The project settings section that shows and changes how the project reaches GitHub.
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 

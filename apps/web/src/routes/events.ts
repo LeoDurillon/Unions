@@ -1,3 +1,4 @@
+// The API route that streams new events to the browser as server-sent events.
 import { schema, type Db } from '@union/core';
 import { and, asc, eq, gt, max, type SQL } from 'drizzle-orm';
 import { Hono } from 'hono';

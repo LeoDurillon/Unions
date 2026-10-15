@@ -1,3 +1,4 @@
+// The labels and badge tones the investigations pages show for each status and scope.
 import type { InvestigationScope, InvestigationStatus } from '@union/core';
 
 import type { Tone } from '../../lib/labels';

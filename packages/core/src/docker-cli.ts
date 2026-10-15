@@ -1,3 +1,4 @@
+// The container runtime that drives the `docker` command line to run ticket containers.
 import { spawn } from 'node:child_process';
 
 import type {

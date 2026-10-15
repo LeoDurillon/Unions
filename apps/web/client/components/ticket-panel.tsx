@@ -1,3 +1,4 @@
+// The side panel for the selected ticket: header, section tabs and the body of the current tab.
 import { useQuery } from '@tanstack/react-query';
 import type { Step } from '@union/core/states';
 import { useState, type ReactElement, type ReactNode } from 'react';

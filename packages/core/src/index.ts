@@ -1,3 +1,4 @@
+// The package's public API: re-exports every core module.
 export * from './agent-reviews';
 export * from './agent-tools';
 export * from './agent-environment';

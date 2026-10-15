@@ -1,3 +1,4 @@
+// The web server's entry point: opens the database, migrates it and serves the API and the client.
 import path from 'node:path';
 
 import { serveStatic } from '@hono/bun';

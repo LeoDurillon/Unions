@@ -1,3 +1,4 @@
+// The API routes for projects: creating, reading and updating them.
 import { parseProjectUrl, schema, type Db, type NotionApi } from '@union/core';
 import { Hono } from 'hono';
 

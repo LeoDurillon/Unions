@@ -1,3 +1,4 @@
+// The worker's entry point: opens the database and starts the scheduler and the GitHub loop.
 import { DockerCli, migrateDb, openDb } from '@union/core';
 
 import { drainCommands } from './commands';

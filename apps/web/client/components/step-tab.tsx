@@ -1,3 +1,4 @@
+// The ticket panel tab for one step: its output, verdict, answer form and review bar.
 import type { Step, StepOutput } from '@union/core';
 import { useState, type ReactElement, type ReactNode } from 'react';
 

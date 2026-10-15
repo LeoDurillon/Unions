@@ -1,3 +1,4 @@
+// The onboarding step that connects GitHub, by access token or by app installation.
 import { useMutation } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 

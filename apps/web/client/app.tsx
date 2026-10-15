@@ -1,3 +1,4 @@
+// The root layout of the web app: sidebar, main area, ticket panel, dialogs and the project wizard.
 import type { ReactElement } from 'react';
 
 import { AppDialogs } from './components/app-dialogs';

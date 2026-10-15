@@ -1,3 +1,4 @@
+// The hook that sends commands for a ticket and refreshes what the page shows afterwards.
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 import type { Step } from '@union/core';
 

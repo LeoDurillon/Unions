@@ -1,3 +1,4 @@
+// The GraphQL queries the worker sends to GitHub's project board API.
 export const PROJECT_INFO = /* GraphQL */ `
   query ProjectInfo($id: ID!) {
     node(id: $id) {

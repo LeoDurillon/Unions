@@ -1,3 +1,4 @@
+// Tickets: reading, creating and labelling them, the event log they write to, and dispatching state-machine actions.
 import { desc, eq } from 'drizzle-orm';
 
 import type { Db } from './db';

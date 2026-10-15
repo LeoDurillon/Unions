@@ -1,3 +1,4 @@
+// The project settings section for the base branch, edited and saved on its own.
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 

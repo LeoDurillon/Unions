@@ -19,9 +19,12 @@
     "typecheck": "tsc --noEmit",
     "lint": "oxlint --type-aware --deny-warnings",
     "lint:fix": "oxlint --type-aware --fix",
+    "lint:changed": "bun scripts/lint-changed.ts",
+    "map": "bun scripts/repo-map.ts",
+    "map:check": "bun scripts/repo-map.ts --check",
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check",
-    "check": "bun run fmt:check && bun run lint && bun run typecheck && bun test",
+    "check": "bun run fmt:check && bun run map:check && bun run lint && bun run typecheck && bun test",
     "db:backup": "bun scripts/db-backup.ts",
     "db:restore": "bun scripts/db-restore.ts",
     "db:reset": "bun scripts/db-reset.ts"

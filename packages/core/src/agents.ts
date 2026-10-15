@@ -1,3 +1,4 @@
+// The agents' default prompts, models, efforts and tools, the user's overrides, and how a run resolves them.
 import { eq } from 'drizzle-orm';
 
 import { DEFAULT_TOOLS, validateTools, type RunAgent } from './agent-tools';
