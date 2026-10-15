@@ -89,3 +89,25 @@ test("a deleted parent branch (merged) falls back to the project's base", async 
 test('a ticket without a parent uses the project base', async () => {
   expect(await resolveTicketBase(db, getTicket(db, parent), source)).toBeNull();
 });
+
+test("a parent whose pull request was merged or closed leaves the child on the project's base", async () => {
+  for (const prState of ['merged', 'closed'] as const) {
+    setParentBranch('12-parent');
+    db.update(schema.tickets)
+      .set({ prNumber: 7, prState })
+      .where(eq(schema.tickets.id, parent))
+      .run();
+    // The branch is still on GitHub: the pull request's state decides.
+    expect(await resolveTicketBase(db, getTicket(db, child), source)).toBeNull();
+    expect(getTicket(db, child).baseBranch).toBeNull();
+  }
+  const ended = db
+    .select()
+    .from(schema.events)
+    .all()
+    .filter((event) => event.type === 'parent_pull_request_ended');
+  expect(ended.map((event) => event.payload)).toMatchObject([
+    { prState: 'merged' },
+    { prState: 'closed' },
+  ]);
+});

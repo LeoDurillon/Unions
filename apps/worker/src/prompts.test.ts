@@ -2,7 +2,7 @@ import { expect, test } from 'bun:test';
 
 import type { Attachment, Ticket } from '@union/core';
 
-import { buildPrompt, isPlanningStep, parentChanges } from './prompts';
+import { buildPrompt, isPlanningStep, parentChanges, parentSection } from './prompts';
 
 const ticket = { title: 'Add search', body: 'Typos should match.' } as Ticket;
 
@@ -117,4 +117,13 @@ test('a child of a merged parent finds its commit through the pull request numbe
 
 test('a parent without a branch gets no pointer', () => {
   expect(parentChanges({ ...parent, branch: null }, ticket, 'dev')).toBe('');
+});
+
+test("a child of a closed parent is told the parent's changes are not in its code", () => {
+  const closed = { ...parent, prState: 'closed' } as Ticket;
+  const section = parentSection(closed, { ...ticket, baseBranch: null }, 'dev');
+  expect(section).toContain('#30 was closed without being merged');
+  expect(section).toContain('NOT in the code');
+  expect(section).not.toContain('already in the code');
+  expect(section).toContain('Index the names.');
 });

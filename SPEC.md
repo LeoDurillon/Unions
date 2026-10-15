@@ -129,7 +129,9 @@ ticket's Overview while it is in the backlog (`tickets.parent_ticket_id`; cycles
   In Progress made on GitHub is reverted (`start_blocked` event). The board shows "Waiting for parent" and the card
   cannot be dragged.
 - **Branch:** at the child's first clone the worker picks its base (`resolveTicketBase`): the parent's branch while
-  it exists on GitHub, else the project's base branch (a parent merged with its branch deleted is already in it).
+  its pull request is open and the branch exists on GitHub, else the project's base branch. A parent whose PR is
+  merged is already in it; one whose PR is closed is dropped, and the child's "Builds on" section says its changes
+  are not in the code (`parent_pull_request_ended` event). The PR state is the one the worker last polled.
   The choice is stored in `tickets.base_branch` and used everywhere the project's base was: clone, the ticket
   branch's starting point, the review's `git diff <base>...HEAD`, the diff snapshot, and the PR base. A stacked PR
   says "Builds on #<parent PR>, which it targets: merge that one first."

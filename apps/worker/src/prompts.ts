@@ -46,6 +46,9 @@ export function parentChanges(parent: Ticket, ticket: Ticket, projectBase: strin
     const range = `origin/${parent.baseBranch ?? projectBase}`;
     return `Your branch starts from its branch \`${parent.branch}\`. To see what it changed: \`git log --oneline ${range}..origin/${parent.branch}\` and \`git diff ${range}...origin/${parent.branch}\`.`;
   }
+  if (parent.prState === 'closed') {
+    return '';
+  }
   if (parent.prNumber !== null) {
     const base = ticket.baseBranch ?? projectBase;
     return `It was merged into \`${base}\` through pull request #${parent.prNumber}. To see what it changed, find its commit with \`git log --oneline --grep '#${parent.prNumber}' origin/${base}\`, then \`git show <commit>\`.`;
@@ -55,6 +58,11 @@ export function parentChanges(parent: Ticket, ticket: Ticket, projectBase: strin
 
 /** The done ticket this one builds on: its text, and where to look at its changes. */
 export function parentSection(parent: Ticket, ticket: Ticket, projectBase: string): string {
+  if (parent.prState === 'closed' && ticket.baseBranch !== parent.branch) {
+    const pull =
+      parent.prNumber === null ? 'Its pull request' : `Its pull request #${parent.prNumber}`;
+    return `# Builds on\n\nThis ticket was written after ${ticketLabel(parent)} "${parent.title}". ${pull} was closed without being merged: its changes are NOT in the code you are working on, which starts from \`${projectBase}\`. Do what this ticket needs on its own; the parent's text is only context.\n\n${parent.body}`;
+  }
   const changes = parentChanges(parent, ticket, projectBase);
   return `# Builds on\n\nThis ticket builds on ${ticketLabel(parent)} "${parent.title}", which is done. Its changes are already in the code you are working on: build on them, do not redo them.${changes === '' ? '' : ` ${changes}`}\n\n${parent.body}`;
 }
