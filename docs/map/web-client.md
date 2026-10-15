@@ -26,8 +26,10 @@ export); do not edit. Tests are left out.
 - `attachments.tsx`: One file: its name (a download link once uploaded), size, note, and whether it may be committed.
 - `base-branch-row.tsx`: The branch the ticket starts from and why; before it starts, it can be chosen over the parent's and the project's (Automatic goes back to them).
 - `board.tsx`: The columns, filling the screen down to the bottom edge.
+- `choice.tsx`: The app's choice inputs: chips for a multi-select, a switch for on / off, a segmented control for one of a few.
 - `container-commands.tsx`: Commands the user runs in the ticket's workspace: its container, in the checkout, as the agent (with the preview's address while it runs), typed or saved in th…
 - `detail-row.tsx`: One line of a ticket's details: a label column, then the value.
+- `dropzone.tsx`: A file input as a dashed box: drop files on it, or click (or press Enter on it) to browse.
 - `github-issue-import.tsx`: Fetches an issue of the project's repository, previews it, and creates the ticket on it.
 - `log-tab.tsx`: Replays the ticket's whole agent log, then follows it live.
 - `main-area.tsx`: Right-hand side of the app: a global page, the project's settings (`?settings=`), or the project.
@@ -98,9 +100,11 @@ export); do not edit. Tests are left out.
 ## components/pull-request/
 
 - `branch-status.tsx`: How far the PR's branch is behind its base (polled from GitHub by the worker) and the Rebase button.
+- `comment-body.tsx`: A GitHub comment's text in compact markdown, folded behind a fade when it renders tall.
 - `description-draft.tsx`: The rewritten description, editable, with what it changes on GitHub a click away.
 - `discussion.tsx`: The pull request's GitHub discussion, and what of it goes to the implementer.
 - `note-card.tsx`: A review summary or a conversation comment, with its Add to review action when there is one.
+- `note-filter.tsx`: Whose reviews and comments the discussion shows: everyone's, people's only, or bots' only.
 - `pr-description.tsx`: The PR's description, rewritten by the agent when the work changed after the PR was opened.
 
 ## components/pull-requests/
@@ -134,7 +138,7 @@ export); do not edit. Tests are left out.
 - `open-file.tsx`: One file of the review: its diff, the threads under their lines, and the outdated comments.
 - `review-header.tsx`: Back, what is reviewed and at which commit, the GitHub import (tickets), the layout switch and Send.
 - `review-page.tsx`: Full-page review of a ticket's branch or of a pull request: touched files on the left, one file at a time on the right.
-- `send-review.tsx`: Sends the drafts and an optional overall note to the implementer.
+- `send-review.tsx`: Sends the drafts and an optional overall note to the implementer, from a panel under the button.
 - `spec-groups.tsx`: The files under the parts of the specification they implement (a file can be under several, with only some of its hunks), then the changes no part covers, then…
 - `split-diff.tsx`: Old file on the left, new on the right; removed and added runs face each other.
 - `view-toggle.tsx`: Unified / Split switch for the review diff.

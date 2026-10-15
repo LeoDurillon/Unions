@@ -1,12 +1,12 @@
-import { githubText } from '@union/core/github-text';
+import { githubTitle } from '@union/core/github-text';
 import { useState, type ReactElement } from 'react';
 
 import type { PullRequestNote, PullRequestThread } from '../../../src/api-types';
-import { Markdown } from '../markdown';
 import { Badge, Button } from '../ui';
+import { CommentBody } from './comment-body';
 
-/** Longer bodies (bot reports, walkthroughs) start folded. */
-const FOLD_AT = 600;
+const CARD =
+  'space-y-2 rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm dark:border-zinc-800 dark:bg-zinc-900';
 
 const STATE_LABELS: Record<string, { label: string; tone: 'green' | 'red' | 'neutral' }> = {
   APPROVED: { label: 'approved', tone: 'green' },
@@ -15,36 +15,13 @@ const STATE_LABELS: Record<string, { label: string; tone: 'green' | 'red' | 'neu
   DISMISSED: { label: 'dismissed', tone: 'neutral' },
 };
 
-function Body({ text }: { text: string }): ReactElement {
-  const [open, setOpen] = useState(false);
-  const long = text.length > FOLD_AT;
-  return (
-    <div>
-      <div className={long && !open ? 'max-h-40 overflow-hidden' : ''}>
-        <Markdown>{githubText(text)}</Markdown>
-      </div>
-      {long ? (
-        <button
-          type="button"
-          className="text-xs text-indigo-600 hover:underline dark:text-indigo-400"
-          onClick={() => {
-            setOpen(!open);
-          }}
-        >
-          {open ? 'Show less' : 'Show all'}
-        </button>
-      ) : null}
-    </div>
-  );
-}
-
 function When({ at, url }: { at: string; url: string }): ReactElement {
   return (
     <a
       href={url}
       target="_blank"
       rel="noreferrer"
-      className="ml-auto text-zinc-500 hover:underline"
+      className="ml-auto shrink-0 text-zinc-500 hover:underline"
     >
       {new Date(at).toLocaleString()}
     </a>
@@ -70,7 +47,41 @@ function NoteAction({
   ) : null;
 }
 
-/** A review summary or a conversation comment, with its Add to review action when there is one. */
+/** Who wrote the note and what it is; folded, also its first line. Clicking it folds or unfolds. */
+function NoteSummary({
+  note,
+  open,
+  onToggle,
+}: {
+  note: PullRequestNote;
+  open: boolean;
+  onToggle: () => void;
+}): ReactElement {
+  const state = note.state ? STATE_LABELS[note.state] : undefined;
+  return (
+    <button
+      type="button"
+      aria-expanded={open}
+      onClick={onToggle}
+      className="flex min-w-0 flex-1 items-center gap-2 text-left"
+    >
+      <span aria-hidden className="w-2 text-zinc-400">
+        {open ? '▾' : '▸'}
+      </span>
+      <span className="shrink-0 font-medium">@{note.author}</span>
+      {note.bot ? <Badge tone="neutral">bot</Badge> : null}
+      {note.kind === 'review' ? (
+        <Badge tone={state?.tone ?? 'neutral'}>{state?.label ?? 'review'}</Badge>
+      ) : null}
+      {open ? null : <span className="truncate text-zinc-500">{githubTitle(note.body)}</span>}
+    </button>
+  );
+}
+
+/**
+ * A review summary or a conversation comment, with its Add to review action when there is one.
+ * A bot's starts folded to one line.
+ */
 export function NoteCard({
   note,
   imported = false,
@@ -83,19 +94,26 @@ export function NoteCard({
   /** Without it the note is read only (a pull request reviewed without a ticket). */
   onImport?: () => void;
 }): ReactElement {
-  const state = note.state ? STATE_LABELS[note.state] : undefined;
+  const [open, setOpen] = useState(!note.bot);
   return (
-    <article className="space-y-2 rounded-md border border-zinc-200 p-3 text-sm dark:border-zinc-800">
-      <header className="flex flex-wrap items-center gap-2 text-xs">
-        <span className="font-medium">@{note.author}</span>
-        {note.bot ? <Badge tone="neutral">bot</Badge> : null}
-        {note.kind === 'review' ? (
-          <Badge tone={state?.tone ?? 'neutral'}>{state?.label ?? 'review'}</Badge>
-        ) : null}
+    <article className={CARD}>
+      <header className="flex items-center gap-2 text-xs">
+        <NoteSummary
+          note={note}
+          open={open}
+          onToggle={() => {
+            setOpen(!open);
+          }}
+        />
+        {imported && !open ? <Badge tone="blue">in the review</Badge> : null}
         <When at={note.createdAt} url={note.url} />
       </header>
-      <Body text={note.body} />
-      <NoteAction imported={imported} pending={pending} onImport={onImport} />
+      {open ? (
+        <>
+          <CommentBody text={note.body} />
+          <NoteAction imported={imported} pending={pending} onImport={onImport} />
+        </>
+      ) : null}
     </article>
   );
 }
@@ -117,7 +135,7 @@ export function ThreadCard({
 }): ReactElement {
   const [first] = thread.comments;
   return (
-    <article className="space-y-2 rounded-md border border-zinc-200 p-3 text-sm dark:border-zinc-800">
+    <article className={CARD}>
       <header className="flex flex-wrap items-center gap-2 text-xs">
         <span className="font-mono">{place(thread)}</span>
         {thread.resolved ? <Badge tone="green">resolved</Badge> : null}
@@ -128,7 +146,7 @@ export function ThreadCard({
       {thread.comments.map((comment) => (
         <div key={comment.url} className="space-y-1">
           <p className="text-xs font-medium">@{comment.author}</p>
-          <Body text={comment.body} />
+          <CommentBody text={comment.body} />
         </div>
       ))}
     </article>

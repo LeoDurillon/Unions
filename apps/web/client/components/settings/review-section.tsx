@@ -4,6 +4,7 @@ import type { ReactElement } from 'react';
 import type { PublicProject } from '../../../src/api-types';
 import { api } from '../../lib/api';
 import { useSettingsForm } from '../../lib/use-settings-form';
+import { Switch } from '../choice';
 import { Field, inputClass } from '../ui';
 import { SaveBar } from './save-bar';
 
@@ -15,23 +16,9 @@ function LockFilesToggle({
   onChange: (value: boolean) => void;
 }): ReactElement {
   return (
-    <div className="flex items-start gap-3">
-      <input
-        id="hide-lock-files"
-        type="checkbox"
-        className="mt-1 size-4 accent-indigo-600"
-        checked={checked}
-        onChange={(event) => {
-          onChange(event.target.checked);
-        }}
-      />
-      <div>
-        <label htmlFor="hide-lock-files" className="block text-sm font-medium">
-          Ignore lock files
-        </label>
-        <p className="text-xs text-zinc-500">{LOCK_FILES.join(', ')}</p>
-      </div>
-    </div>
+    <Switch checked={checked} onChange={onChange} hint={LOCK_FILES.join(', ')}>
+      <span className="font-medium">Ignore lock files</span>
+    </Switch>
   );
 }
 

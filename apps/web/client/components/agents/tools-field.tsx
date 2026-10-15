@@ -2,12 +2,8 @@ import type { ToolOption } from '@union/core';
 import type { ReactElement } from 'react';
 
 import { useAgentTools } from '../../lib/use-agent-tools';
+import { CheckChip, ChipGroup } from '../choice';
 import { ErrorText } from '../ui';
-
-const CHIP_ON =
-  'border-indigo-500 bg-indigo-50 text-indigo-900 dark:bg-indigo-950/50 dark:text-indigo-200';
-const CHIP_OFF =
-  'border-zinc-300 text-zinc-600 hover:border-zinc-500 dark:border-zinc-700 dark:text-zinc-400';
 
 function ToolChip({
   tool,
@@ -21,25 +17,20 @@ function ToolChip({
   onToggle: (name: string, on: boolean) => void;
 }): ReactElement {
   return (
-    <label
+    <CheckChip
+      mono
+      checked={on}
+      label={label}
       title={tool.description ?? undefined}
-      className={`relative cursor-pointer rounded-full border px-2.5 py-0.5 font-mono text-xs transition has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-indigo-500 ${on ? CHIP_ON : CHIP_OFF}`}
+      onChange={(checked) => {
+        onToggle(tool.name, checked);
+      }}
     >
-      <input
-        type="checkbox"
-        className="sr-only"
-        aria-label={label}
-        checked={on}
-        onChange={(event) => {
-          onToggle(tool.name, event.target.checked);
-        }}
-      />
-      {on ? '✓ ' : ''}
       {tool.name}
       {tool.source === 'built-in' ? null : (
         <span className="ml-1 text-zinc-400">·{tool.source}</span>
       )}
-    </label>
+    </CheckChip>
   );
 }
 
@@ -81,7 +72,7 @@ export function ToolsField({
         )}
       </legend>
       <ErrorText error={tools.error} />
-      <div className="flex flex-wrap gap-1.5">
+      <ChipGroup>
         {options.map((tool) => (
           <ToolChip
             key={tool.name}
@@ -91,7 +82,7 @@ export function ToolsField({
             onToggle={toggle}
           />
         ))}
-      </div>
+      </ChipGroup>
       {value.length === 0 ? (
         <p className="text-xs text-red-600 dark:text-red-400">Select at least one tool.</p>
       ) : null}

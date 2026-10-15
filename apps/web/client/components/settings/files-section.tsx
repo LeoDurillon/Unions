@@ -6,6 +6,7 @@ import type { PublicProject } from '../../../src/api-types';
 import type { ProjectFileView } from '../../../src/routes/project-files';
 import { useLeaveGuard } from '../../lib/leave-guard';
 import { projectFilesApi } from '../../lib/project-files-api';
+import { Dropzone } from '../dropzone';
 import { Button, ErrorText, inputClass } from '../ui';
 
 function FileList({
@@ -55,34 +56,30 @@ function UploadForm({ projectId }: { projectId: number }): ReactElement {
   const queryClient = useQueryClient();
   const [file, setFile] = useState<File | null>(null);
   const [path, setPath] = useState('');
-  // A new key empties the picker once the file is sent.
-  const [sent, setSent] = useState(0);
   useLeaveGuard(file !== null);
   const upload = useMutation({
     mutationFn: (picked: File) => projectFilesApi.upload(projectId, path.trim(), picked),
     onSuccess: async () => {
       setFile(null);
       setPath('');
-      setSent((count) => count + 1);
       await queryClient.invalidateQueries({ queryKey: ['project-files', projectId] });
     },
   });
   return (
     <div className="space-y-2">
-      <div className="grid grid-cols-[1fr_1fr_auto] gap-2">
-        <input
-          aria-label="File"
-          type="file"
-          className="text-xs"
-          key={sent}
-          onChange={(event) => {
-            const picked = event.target.files?.[0] ?? null;
+      <Dropzone
+        label="Choose a file"
+        hint={file ? `${file.name} (${formatBytes(file.size)})` : undefined}
+        onFiles={([picked]) => {
+          if (picked) {
             setFile(picked);
-            if (picked && path.trim() === '') {
+            if (path.trim() === '') {
               setPath(picked.name);
             }
-          }}
-        />
+          }
+        }}
+      />
+      <div className="grid grid-cols-[1fr_auto] gap-2">
         <input
           aria-label="Path in the repository"
           className={`${inputClass} font-mono`}

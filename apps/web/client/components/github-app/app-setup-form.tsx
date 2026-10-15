@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 
 import { api } from '../../lib/api';
+import { Dropzone } from '../dropzone';
 import { Button, ErrorText, Field, inputClass } from '../ui';
 
 /** GitHub pre-fills the app form from these: no webhook, only what the worker needs. */
@@ -88,13 +89,11 @@ function PemInput({
           onChange(event.target.value);
         }}
       />
-      <input
-        type="file"
+      <Dropzone
+        label="Or load the .pem file"
         accept=".pem"
-        aria-label="Private key file"
-        className="text-xs"
-        onChange={(event) => {
-          void readFile(event.target.files?.[0], onChange);
+        onFiles={([picked]) => {
+          void readFile(picked, onChange);
         }}
       />
     </div>

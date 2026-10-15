@@ -6,6 +6,7 @@ import type { SpecText } from '../../../src/routes/spec-sources';
 import { reviewGroupingApi } from '../../lib/review-grouping-api';
 import { reviewBase, type ReviewTarget } from '../../lib/review-target';
 import { useReviewGrouping } from '../../lib/use-review-grouping';
+import { Segmented } from '../choice';
 import { Button, Dialog, ErrorText, inputClass } from '../ui';
 
 const LABELS: Record<SpecSource, string> = {
@@ -40,22 +41,17 @@ function SourcePicker({
   onPick: (kind: SpecSource) => void;
 }): ReactElement {
   return (
-    <fieldset className="flex flex-wrap gap-3 text-sm">
-      <legend className="mb-1 text-sm font-medium">Specification</legend>
-      {sources.map((source) => (
-        <label key={source} className="flex items-center gap-1.5">
-          <input
-            type="radio"
-            name="spec-source"
-            checked={kind === source}
-            onChange={() => {
-              onPick(source);
-            }}
-          />
-          {LABELS[source]}
-        </label>
-      ))}
-    </fieldset>
+    <div className="space-y-1">
+      <p aria-hidden className="text-sm font-medium">
+        Specification
+      </p>
+      <Segmented
+        legend="Specification"
+        options={sources.map((source) => ({ value: source, label: LABELS[source] }))}
+        value={kind}
+        onChange={onPick}
+      />
+    </div>
   );
 }
 

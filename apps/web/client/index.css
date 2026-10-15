@@ -87,6 +87,31 @@ dialog::backdrop {
   @apply pl-5;
 }
 
+/* Comments in a list (a pull request's discussion): headings read as bold lines, not titles. */
+.markdown-compact h1,
+.markdown-compact h2,
+.markdown-compact h3,
+.markdown-compact h4,
+.markdown-compact h5,
+.markdown-compact h6 {
+  @apply mt-3 mb-1 text-sm font-semibold;
+}
+.markdown-compact p,
+.markdown-compact ul,
+.markdown-compact ol,
+.markdown-compact table,
+.markdown-compact pre,
+.markdown-compact blockquote,
+.markdown-compact details {
+  @apply my-1.5;
+}
+.markdown-compact > :first-child {
+  @apply mt-0;
+}
+.markdown-compact hr {
+  @apply my-2 border-zinc-200 dark:border-zinc-800;
+}
+
 /* Syntax highlighting in the review diff (highlight.js classes from lowlight), GitHub-like. */
 .hljs-comment,
 .hljs-quote {

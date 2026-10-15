@@ -1,4 +1,4 @@
-import { useState, type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 import type { CommentView, DiscussionResponse } from '../../../src/api-types';
 import {
@@ -11,6 +11,7 @@ import { CommentCard } from '../review/comment-card';
 import { ImportComments } from '../review/import-comments';
 import { ErrorText } from '../ui';
 import { NoteCard, ThreadCard } from './note-card';
+import { filterNotes, NoteFilterControl, useNoteFilter } from './note-filter';
 
 type Mutations = ReturnType<typeof useCommentMutations>;
 type ImportNote = ReturnType<typeof useImportMutations>['importNote'];
@@ -51,17 +52,19 @@ function ImportedDrafts({
 
 function Notes({
   discussion,
-  hideBots,
   importNote,
 }: {
   discussion: DiscussionResponse;
-  hideBots: boolean;
   importNote: ImportNote;
 }): ReactElement {
-  const notes = discussion.notes.filter((note) => !(hideBots && note.bot));
+  const [filter, setFilter] = useNoteFilter();
+  const notes = filterNotes(discussion.notes, filter);
   return (
     <section className="space-y-2">
-      <h3 className="text-sm font-semibold">Reviews and comments ({notes.length})</h3>
+      <div className="flex items-center justify-between gap-2">
+        <h3 className="text-sm font-semibold">Reviews and comments</h3>
+        <NoteFilterControl notes={discussion.notes} value={filter} onChange={setFilter} />
+      </div>
       <ErrorText error={importNote.error} />
       {notes.length === 0 ? <p className="text-sm text-zinc-500">None.</p> : null}
       {notes.map((note) => (
@@ -114,7 +117,6 @@ export function Discussion({ ticketId }: { ticketId: number }): ReactElement {
   const comments = useComments(target);
   const mutations = useCommentMutations(target);
   const { importNote } = useImportMutations(ticketId);
-  const [hideBots, setHideBots] = useState(false);
   if (!discussion.data) {
     return discussion.error ? (
       <ErrorText error={discussion.error} />
@@ -125,17 +127,7 @@ export function Discussion({ ticketId }: { ticketId: number }): ReactElement {
   return (
     <div className="space-y-6">
       <ImportedDrafts comments={comments.data ?? []} mutations={mutations} />
-      <label className="flex items-center gap-2 text-sm text-zinc-500">
-        <input
-          type="checkbox"
-          checked={hideBots}
-          onChange={(event) => {
-            setHideBots(event.target.checked);
-          }}
-        />
-        Hide bots
-      </label>
-      <Notes discussion={discussion.data} hideBots={hideBots} importNote={importNote} />
+      <Notes discussion={discussion.data} importNote={importNote} />
       <Threads ticketId={ticketId} discussion={discussion.data} />
     </div>
   );

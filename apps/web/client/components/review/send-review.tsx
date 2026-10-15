@@ -1,4 +1,4 @@
-import { useState, type ReactElement } from 'react';
+import { useEffect, useRef, useState, type ReactElement, type RefObject } from 'react';
 
 import type { ReviewCopy } from '../../lib/review-target';
 import { Button, ErrorText, inputClass } from '../ui';
@@ -22,10 +22,19 @@ function SendPanel({
   error,
   onSend,
   onCancel,
-}: Omit<SendProps, 'canSend'> & { onCancel: () => void }): ReactElement {
+  anchor,
+}: Omit<SendProps, 'canSend'> & {
+  onCancel: () => void;
+  /** The button and the panel: a click outside both closes it. */
+  anchor: RefObject<HTMLElement | null>;
+}): ReactElement {
   const [summary, setSummary] = useState('');
+  useDismiss(anchor, onCancel);
   return (
-    <div className="w-[28rem] space-y-2 rounded-lg border border-zinc-300 bg-white p-3 shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
+    <section
+      aria-label="Send review"
+      className="absolute top-full right-0 z-30 mt-2 w-[28rem] max-w-[calc(100vw-2rem)] space-y-2 rounded-lg border border-zinc-300 bg-white p-3 shadow-lg dark:border-zinc-700 dark:bg-zinc-900"
+    >
       <p className="text-sm">
         {drafts} comment{drafts === 1 ? '' : 's'} {copy.destination}
       </p>
@@ -58,35 +67,53 @@ function SendPanel({
         </Button>
         <Button onClick={onCancel}>Cancel</Button>
       </div>
-    </div>
+    </section>
   );
 }
 
-/** Sends the drafts and an optional overall note to the implementer. */
+/** Calls `onClose` on Escape, or on a click outside `ref`'s element. */
+function useDismiss(ref: RefObject<HTMLElement | null>, onClose: () => void): void {
+  useEffect(() => {
+    const click = (event: MouseEvent): void => {
+      if (event.target instanceof Node && !ref.current?.contains(event.target)) {
+        onClose();
+      }
+    };
+    const key = (event: KeyboardEvent): void => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+    document.addEventListener('mousedown', click);
+    document.addEventListener('keydown', key);
+    return (): void => {
+      document.removeEventListener('mousedown', click);
+      document.removeEventListener('keydown', key);
+    };
+  }, [ref, onClose]);
+}
+
+/** Sends the drafts and an optional overall note to the implementer, from a panel under the button. */
 export function SendReview({ canSend, ...props }: SendProps): ReactElement {
   const [open, setOpen] = useState(false);
-  if (open) {
-    return (
-      <SendPanel
-        {...props}
-        onCancel={() => {
-          setOpen(false);
-        }}
-      />
-    );
-  }
+  const anchor = useRef<HTMLDivElement>(null);
+  const close = (): void => {
+    setOpen(false);
+  };
   return (
-    <div className="flex items-center gap-3">
+    <div ref={anchor} className="relative flex items-center gap-3">
       {canSend ? null : <span className="text-xs text-zinc-500">{props.copy.blocked}</span>}
       <Button
         variant="primary"
         disabled={!canSend}
+        aria-expanded={open}
         onClick={() => {
-          setOpen(true);
+          setOpen(!open);
         }}
       >
         Send review ({props.drafts})
       </Button>
+      {open ? <SendPanel {...props} anchor={anchor} onCancel={close} /> : null}
     </div>
   );
 }

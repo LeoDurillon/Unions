@@ -17,3 +17,33 @@ export function githubText(body: string): string {
     .replace(BLANK_RUNS, '\n\n')
     .trim();
 }
+
+const TITLE_MAX = 120;
+const IMAGE = /!\[[^\]]*\]\([^)]*\)/gu;
+const LINK = /\[(?<text>[^\]]*)\]\([^)]*\)/gu;
+const ALERT = /^\[!\w+\]$/u;
+const LINE_MARKS = /^(?:[#>\s]|[-*+]\s|\d+\.\s)+/u;
+const INLINE_MARKS = /\*\*|__|`/gu;
+const RULE = /^[-=*_|:\s]+$/u;
+
+function titleOf(line: string): string {
+  return line
+    .replace(IMAGE, '')
+    .replace(LINK, '$<text>')
+    .replace(LINE_MARKS, '')
+    .replace(INLINE_MARKS, '')
+    .trim();
+}
+
+/**
+ * A comment in one line, for a folded card: its first line with words (an alert marker such as
+ * `[!NOTE]`, a rule or an image alone does not count), without markdown marks, cut at 120 characters.
+ */
+export function githubTitle(body: string): string {
+  const title =
+    githubText(body)
+      .split('\n')
+      .map((line) => titleOf(line))
+      .find((line) => line !== '' && !ALERT.test(line) && !RULE.test(line)) ?? '';
+  return title.length > TITLE_MAX ? `${title.slice(0, TITLE_MAX - 1)}…` : title;
+}

@@ -1,13 +1,14 @@
 import { useState, type ReactElement } from 'react';
 
+import { Segmented, type SegmentOption } from '../choice';
 import type { DiffView } from './file-diff';
 
 export type { DiffView } from './file-diff';
 
 const STORAGE_KEY = 'union.review.view';
-const VIEWS: { view: DiffView; label: string }[] = [
-  { view: 'unified', label: 'Unified' },
-  { view: 'split', label: 'Split' },
+const VIEWS: SegmentOption<DiffView>[] = [
+  { value: 'unified', label: 'Unified' },
+  { value: 'split', label: 'Split' },
 ];
 
 function stored(): DiffView {
@@ -40,22 +41,5 @@ export function ViewToggle({
   view: DiffView;
   onChange: (view: DiffView) => void;
 }): ReactElement {
-  return (
-    <fieldset className="flex rounded-md border border-zinc-300 p-0.5 dark:border-zinc-700">
-      <legend className="sr-only">Diff layout</legend>
-      {VIEWS.map((entry) => (
-        <button
-          key={entry.view}
-          type="button"
-          aria-pressed={entry.view === view}
-          onClick={() => {
-            onChange(entry.view);
-          }}
-          className={`rounded px-2.5 py-1 text-xs transition ${entry.view === view ? 'bg-indigo-100 font-medium dark:bg-indigo-950' : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100'}`}
-        >
-          {entry.label}
-        </button>
-      ))}
-    </fieldset>
-  );
+  return <Segmented legend="Diff layout" options={VIEWS} value={view} onChange={onChange} />;
 }

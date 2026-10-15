@@ -2,12 +2,13 @@ import type { AgentVariables } from '@union/core/preview';
 import type { ReactElement } from 'react';
 
 import { parseEnvLines } from '../../lib/env-lines';
+import { CheckChip, ChipGroup, Segmented, Switch, toggled, type SegmentOption } from '../choice';
 import type { Form } from './preview-form';
 
-const MODES: { mode: AgentVariables['mode']; label: string }[] = [
-  { mode: 'all', label: 'All plain variables' },
-  { mode: 'none', label: "None: the repository's env files apply" },
-  { mode: 'chosen', label: 'Only these' },
+const MODES: SegmentOption<AgentVariables['mode']>[] = [
+  { value: 'all', label: 'All plain variables' },
+  { value: 'none', label: 'None', title: "The repository's env files apply" },
+  { value: 'chosen', label: 'Only these' },
 ];
 
 function ChosenNames({
@@ -23,25 +24,20 @@ function ChosenNames({
     return <p className="text-xs text-zinc-500">No plain variable yet (Previews → Variables).</p>;
   }
   return (
-    <span className="flex flex-wrap gap-x-4 gap-y-1">
+    <ChipGroup>
       {names.map((name) => (
-        <label key={name} className="flex items-center gap-1.5 font-mono text-sm">
-          <input
-            type="checkbox"
-            checked={chosen.includes(name)}
-            onChange={(event) => {
-              onChange({
-                mode: 'chosen',
-                names: event.target.checked
-                  ? [...chosen, name]
-                  : chosen.filter((other) => other !== name),
-              });
-            }}
-          />
+        <CheckChip
+          key={name}
+          mono
+          checked={chosen.includes(name)}
+          onChange={(on) => {
+            onChange({ mode: 'chosen', names: toggled(chosen, name, on) });
+          }}
+        >
           {name}
-        </label>
+        </CheckChip>
       ))}
-    </span>
+    </ChipGroup>
   );
 }
 
@@ -67,25 +63,14 @@ export function AgentVariablesField({
         Variables already set win over the repository&apos;s env files (<code>.env.test</code>):
         give none, or only some, so the tests use their own database. Secrets are never given.
       </p>
-      <div className="flex flex-wrap gap-x-4 gap-y-1">
-        {MODES.map((option) => (
-          <label key={option.mode} className="flex items-center gap-1.5 text-sm">
-            <input
-              type="radio"
-              name="agent-variables"
-              checked={value.mode === option.mode}
-              onChange={() => {
-                onChange(
-                  option.mode === 'chosen'
-                    ? { mode: 'chosen', names: chosen }
-                    : { mode: option.mode },
-                );
-              }}
-            />
-            {option.label}
-          </label>
-        ))}
-      </div>
+      <Segmented
+        legend="Variables for the agent's commands"
+        options={MODES}
+        value={value.mode}
+        onChange={(mode) => {
+          onChange(mode === 'chosen' ? { mode, names: chosen } : { mode });
+        }}
+      />
       {value.mode === 'chosen' ? (
         <ChosenNames chosen={chosen} names={names} onChange={onChange} />
       ) : null}
@@ -103,16 +88,9 @@ export function ForwardPortsField({
 }): ReactElement {
   return (
     <div className="space-y-1">
-      <label className="flex items-center gap-1.5 text-sm font-medium">
-        <input
-          type="checkbox"
-          checked={value}
-          onChange={(event) => {
-            onChange(event.target.checked);
-          }}
-        />
-        Reach them on localhost
-      </label>
+      <Switch checked={value} onChange={onChange}>
+        <span className="font-medium">Reach them on localhost</span>
+      </Switch>
       <p className="text-xs text-zinc-500">
         The ports these services publish in the compose file (<code>5432:5432</code>) answer on{' '}
         <code>localhost</code> in the ticket&apos;s environment, as on a developer&apos;s machine.

@@ -2,6 +2,7 @@ import type { ReactElement } from 'react';
 
 import { joinChoices, splitChoices } from '../../lib/choice-values';
 import { useNotionUsers } from '../../lib/use-notion-users';
+import { CheckChip, ChipGroup, toggled } from '../choice';
 import { ErrorText } from '../ui';
 
 const CAPABILITY_HINT =
@@ -30,26 +31,19 @@ export function PeopleField({
       <legend className="text-sm font-medium">People</legend>
       {users.isPending ? <p className="text-sm text-zinc-500">Reading the members…</p> : null}
       <ErrorText error={users.error} />
-      <span className="flex flex-wrap gap-x-4 gap-y-1">
+      <ChipGroup>
         {boxes.map((member) => (
-          <label key={member.id} className="flex items-center gap-1.5 text-sm">
-            <input
-              type="checkbox"
-              checked={picked.includes(member.id)}
-              onChange={(event) => {
-                onChange(
-                  joinChoices(
-                    event.target.checked
-                      ? [...picked, member.id]
-                      : picked.filter((id) => id !== member.id),
-                  ),
-                );
-              }}
-            />
+          <CheckChip
+            key={member.id}
+            checked={picked.includes(member.id)}
+            onChange={(on) => {
+              onChange(joinChoices(toggled(picked, member.id, on)));
+            }}
+          >
             {member.name}
-          </label>
+          </CheckChip>
         ))}
-      </span>
+      </ChipGroup>
       {users.isError || (users.isSuccess && members.length === 0) ? (
         <p className="text-xs text-amber-700 dark:text-amber-400">{CAPABILITY_HINT}</p>
       ) : (

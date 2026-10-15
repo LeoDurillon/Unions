@@ -3,6 +3,7 @@ import { TEMPLATE_VARIABLES } from '@union/core/event-rules';
 import { useState, type ReactElement } from 'react';
 
 import { joinChoices, partitionChoices } from '../../lib/choice-values';
+import { CheckChip, ChipGroup, toggled } from '../choice';
 import { Field, inputClass } from '../ui';
 import { PeopleField } from './people-field';
 
@@ -124,25 +125,19 @@ function MultiChoiceField({
   return (
     <fieldset className="space-y-1">
       <legend className="text-sm font-medium">Values</legend>
-      <span className="flex flex-wrap gap-x-4 gap-y-1">
+      <ChipGroup>
         {property.options.map((option) => (
-          <label key={option} className="flex items-center gap-1.5 text-sm">
-            <input
-              type="checkbox"
-              checked={picked.includes(option)}
-              onChange={(event) => {
-                update(
-                  event.target.checked
-                    ? [...picked, option]
-                    : picked.filter((name) => name !== option),
-                  otherText,
-                );
-              }}
-            />
+          <CheckChip
+            key={option}
+            checked={picked.includes(option)}
+            onChange={(on) => {
+              update(toggled(picked, option, on), otherText);
+            }}
+          >
             {option}
-          </label>
+          </CheckChip>
         ))}
-      </span>
+      </ChipGroup>
       <TemplateInput
         value={otherText}
         placeholder="Other values"

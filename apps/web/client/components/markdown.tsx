@@ -35,16 +35,19 @@ const COMPONENTS = { img: Image };
 export function Markdown({
   children,
   files,
+  compact = false,
 }: {
   children: string;
   files?: Record<string, string>;
+  /** Headings no bigger than bold text and tighter spacing: for comments inside a list. */
+  compact?: boolean;
 }): ReactElement {
   const transform = (url: string): string =>
     url.startsWith(ATTACHMENT)
       ? (files?.[url.slice(ATTACHMENT.length)] ?? '')
       : defaultUrlTransform(url);
   return (
-    <div className="markdown">
+    <div className={compact ? 'markdown markdown-compact' : 'markdown'}>
       <ReactMarkdown remarkPlugins={[remarkGfm]} urlTransform={transform} components={COMPONENTS}>
         {children}
       </ReactMarkdown>

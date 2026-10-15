@@ -2,6 +2,8 @@ import { formatBytes } from '@union/core/attachment-limits';
 import { useState, type ReactElement, type ReactNode } from 'react';
 
 import { fileProblem, type PendingFile } from '../lib/attachments-api';
+import { Switch } from './choice';
+import { Dropzone } from './dropzone';
 import { Button, inputClass } from './ui';
 
 export const ATTACHMENTS_HINT =
@@ -80,17 +82,14 @@ export function FileRow({
         </Button>
       </div>
       <NoteInput name={name} note={note} disabled={disabled} onNote={onNote} />
-      <label className="flex items-center gap-2 text-xs text-zinc-600 dark:text-zinc-400">
-        <input
-          type="checkbox"
-          checked={allowInRepo}
-          disabled={disabled}
-          onChange={(event) => {
-            onAllow(event.target.checked);
-          }}
-        />
-        Allowed in the repository (for example as a test fixture); otherwise private
-      </label>
+      <Switch
+        checked={allowInRepo}
+        disabled={disabled}
+        onChange={onAllow}
+        hint="For example as a test fixture; otherwise private"
+      >
+        <span className="text-xs text-zinc-600 dark:text-zinc-400">Allowed in the repository</span>
+      </Switch>
     </li>
   );
 }
@@ -106,27 +105,17 @@ export function FilePicker({
   onFiles: (files: File[], problems: string[]) => void;
 }): ReactElement {
   return (
-    <label
-      className={`inline-block rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium dark:border-zinc-700 ${disabled ? 'opacity-60' : 'cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}
-    >
-      {label}
-      <input
-        type="file"
-        multiple
-        className="sr-only"
-        disabled={disabled}
-        onChange={(event) => {
-          const picked = [...(event.target.files ?? [])];
-          // Cleared, so picking the same file again fires a change.
-          event.target.value = '';
-          const problems = picked.flatMap((file) => fileProblem(file) ?? []);
-          onFiles(
-            picked.filter((file) => fileProblem(file) === null),
-            problems,
-          );
-        }}
-      />
-    </label>
+    <Dropzone
+      multiple
+      label={label}
+      disabled={disabled}
+      onFiles={(picked) => {
+        onFiles(
+          picked.filter((file) => fileProblem(file) === null),
+          picked.flatMap((file) => fileProblem(file) ?? []),
+        );
+      }}
+    />
   );
 }
 

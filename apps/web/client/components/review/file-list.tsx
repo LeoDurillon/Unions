@@ -3,15 +3,16 @@ import { useState, type ReactElement } from 'react';
 import type { CommentView, DiffFileSummary } from '../../../src/api-types';
 import type { ReviewTarget } from '../../lib/review-target';
 import { useReviewGrouping } from '../../lib/use-review-grouping';
+import { Segmented, type SegmentOption } from '../choice';
 import { draftCounts } from './file-row';
 import { FileRows, type RowOptions, type Layout } from './file-rows';
 import { SpecGroups } from './spec-groups';
 
 const STORAGE_KEY = 'union.review.files';
 const BY_SPEC_KEY = 'union.review.bySpec';
-const LAYOUTS: { layout: Layout; label: string }[] = [
-  { layout: 'list', label: 'List' },
-  { layout: 'tree', label: 'Tree' },
+const LAYOUTS: SegmentOption<Layout>[] = [
+  { value: 'list', label: 'List' },
+  { value: 'tree', label: 'Tree' },
 ];
 
 function stored(): Layout {
@@ -77,33 +78,6 @@ function BySpecToggle({
     >
       By spec
     </button>
-  );
-}
-
-function LayoutToggle({
-  layout,
-  onChange,
-}: {
-  layout: Layout;
-  onChange: (layout: Layout) => void;
-}): ReactElement {
-  return (
-    <fieldset className="flex rounded-md border border-zinc-300 p-0.5 dark:border-zinc-700">
-      <legend className="sr-only">File list layout</legend>
-      {LAYOUTS.map((entry) => (
-        <button
-          key={entry.layout}
-          type="button"
-          aria-pressed={entry.layout === layout}
-          onClick={() => {
-            onChange(entry.layout);
-          }}
-          className={`rounded px-2 py-0.5 text-xs transition ${entry.layout === layout ? 'bg-indigo-100 font-medium dark:bg-indigo-950' : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100'}`}
-        >
-          {entry.label}
-        </button>
-      ))}
-    </fieldset>
   );
 }
 
@@ -178,7 +152,12 @@ export function FileList({
         </span>
         <div className="flex items-center gap-1">
           {grouped ? <BySpecToggle on={bySpec} onChange={setBySpec} /> : null}
-          <LayoutToggle layout={layout} onChange={setLayout} />
+          <Segmented
+            legend="File list layout"
+            options={LAYOUTS}
+            value={layout}
+            onChange={setLayout}
+          />
         </div>
       </div>
       {grouped && bySpec ? (

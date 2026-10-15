@@ -1,5 +1,6 @@
 import { useState, type ReactElement, type ReactNode } from 'react';
 
+import { CheckChip, ChipGroup, toggled } from '../choice';
 import { inputClass } from '../ui';
 
 /**
@@ -30,24 +31,20 @@ export function PreviewChoicesField({
       <legend className="text-sm font-medium">{label}</legend>
       <p className="text-xs text-zinc-500">{hint}</p>
       {known.length > 0 ? (
-        <span className="flex flex-wrap gap-x-4 gap-y-1">
+        <ChipGroup>
           {known.map((profile) => (
-            <label key={profile} className="flex items-center gap-1.5 font-mono text-sm">
-              <input
-                type="checkbox"
-                checked={selected.includes(profile)}
-                onChange={(event) => {
-                  onChange(
-                    event.target.checked
-                      ? [...selected, profile]
-                      : selected.filter((name) => name !== profile),
-                  );
-                }}
-              />
+            <CheckChip
+              key={profile}
+              mono
+              checked={selected.includes(profile)}
+              onChange={(on) => {
+                onChange(toggled(selected, profile, on));
+              }}
+            >
               {profile}
-            </label>
+            </CheckChip>
           ))}
-        </span>
+        </ChipGroup>
       ) : null}
       <input
         aria-label={`Other: ${label}`}
