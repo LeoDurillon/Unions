@@ -47,8 +47,19 @@ Numbered questions the user must decide (data model, behaviour, edge cases, scop
 Output one section starting with "## Summary".`,
   technical: `Propose the technical implementation: packages and files touched, new files, data model changes, API changes, UI components, ordered implementation steps, risks.
 Output one section starting with "## Technical implementation".`,
-  test_plan: `Write the test plan as a table with columns: ID (T1, T2...), level, file path, scenario, expected result.
-One test per distinct state. Cover the acceptance criteria and the edge cases.
+  test_plan: `Write the smallest test plan that would catch a wrong implementation of this task.
+Plan a test only if it fails when an acceptance criterion or a decision in the summary is broken,
+or when a risk named in the technical implementation happens. For each test ask: would a real bug
+get through without it? If not, drop it.
+Do not plan:
+- tests of private helpers whose behaviour is already tested through the public code using them;
+- one test per input variant when one case proves the rule: merge them into one row;
+- tests that only check mocks are called in some order, unless that order is the requirement;
+- "existing tests still pass" rows: the checks run anyway;
+- trivial cases (empty input, defaults) unless the task changes them.
+Test at the level the project already tests this behaviour. No e2e test unless the summary asks for one.
+Aim for 5 to 15 tests; a plan above 15 explains why in one line under the table.
+Columns: ID (T1, T2...), level, file path, scenario, expected result, guards (the criterion or risk it protects).
 Output one section starting with "## Test plan".`,
   implement: `Implement the task as described by the approved summary, technical implementation and test plan.
 Work in small steps. Run the project's own checks (tests, lint, typecheck) and fix failures before finishing.
