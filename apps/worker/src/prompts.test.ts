@@ -127,3 +127,10 @@ test("a child of a closed parent is told the parent's changes are not in its cod
   expect(section).not.toContain('already in the code');
   expect(section).toContain('Index the names.');
 });
+
+test("a child started from a branch the user chose is not told the parent's changes are there", () => {
+  const child = { ...ticket, baseBranch: 'release', chosenBaseBranch: 'release' };
+  const section = parentSection(parent, child, 'dev');
+  expect(section).toContain('The user chose to start it from `release`');
+  expect(section).not.toContain('already in the code');
+});

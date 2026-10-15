@@ -19,6 +19,7 @@ import { fetchDiscussion } from './github-discussion';
 import { fetchPullRequestFiles, type PullRequestFiles } from './github-pull-request-files';
 import { fetchPullRequests, type RemotePullRequest } from './github-pull-requests';
 import { CREATE_PROJECT, OWNER_PROJECTS } from './github-queries';
+import { fetchBranch, fetchBranchNames, fetchIssue } from './github-repo';
 
 /**
  * GitHub calls the web server makes itself, because the UI needs the answer right away: the setup
@@ -58,6 +59,14 @@ export type OnboardingGitHub = {
     repo: { owner: string; repo: string },
     number: number,
   ): Promise<PullRequestFiles | null>;
+  /** The repository's branch names, by name; null when the repository is not reachable. */
+  listBranches(auth: GitHubAuth, repo: { owner: string; repo: string }): Promise<string[] | null>;
+  /** Whether the branch exists on GitHub. */
+  hasBranch(
+    auth: GitHubAuth,
+    repo: { owner: string; repo: string },
+    branch: string,
+  ): Promise<boolean>;
   /** The pull request's commits, oldest first; null when there is no such PR. */
   listReviewCommits(
     auth: GitHubAuth,
@@ -302,6 +311,18 @@ export class OctokitOnboarding implements OnboardingGitHub {
     return orNull(() => fetchPullRequestFiles(this.client(auth), repo, number));
   }
 
+  listBranches(auth: GitHubAuth, repo: { owner: string; repo: string }): Promise<string[] | null> {
+    return orNull(() => fetchBranchNames(this.client(auth), repo));
+  }
+
+  async hasBranch(
+    auth: GitHubAuth,
+    repo: { owner: string; repo: string },
+    branch: string,
+  ): Promise<boolean> {
+    return (await orNull(() => fetchBranch(this.client(auth), repo, branch))) !== null;
+  }
+
   listReviewCommits(
     auth: GitHubAuth,
     repo: { owner: string; repo: string },
@@ -323,17 +344,6 @@ export class OctokitOnboarding implements OnboardingGitHub {
     repo: { owner: string; repo: string },
     number: number,
   ): Promise<GitHubIssue | null> {
-    return orNull(async () => {
-      const { data } = await this.client(auth).rest.issues.get({ ...repo, issue_number: number });
-      return {
-        number: data.number,
-        nodeId: data.node_id,
-        title: data.title,
-        body: data.body ?? '',
-        url: data.html_url,
-        state: data.state === 'closed' ? 'closed' : 'open',
-        pullRequest: data.pull_request !== undefined,
-      };
-    });
+    return orNull(() => fetchIssue(this.client(auth), repo, number));
   }
 }

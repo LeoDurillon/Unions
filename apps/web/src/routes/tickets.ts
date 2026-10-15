@@ -1,4 +1,5 @@
 import {
+  describeTicketBase,
   getTicket,
   InvalidTransition,
   latestOutput,
@@ -82,10 +83,12 @@ function ticketDetail(db: Db, c: Context): Response {
   if (!project) {
     throw fail(NOT_FOUND, 'Project not found');
   }
+  const parent = ticket.parentTicketId === null ? null : findTicket(db)(ticket.parentTicketId);
   const detail: TicketDetail = {
     ticket,
     project: toPublicProject(project),
     children: childrenOf(db, id),
+    base: describeTicketBase(ticket, parent ?? null, project.config.baseBranch),
     outputs: db
       .select()
       .from(schema.stepOutputs)

@@ -281,6 +281,13 @@
       "when": 1792068374342,
       "tag": "0039_round_mercury",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "6",
+      "when": 1792071093882,
+      "tag": "0040_flashy_lady_bullseye",
+      "breakpoints": true
     }
   ]
 }

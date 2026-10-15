@@ -2,6 +2,7 @@ import {
   type ContainerRuntime,
   type Db,
   effortFor,
+  getTicket,
   listAttachments,
   listProjectFiles,
   modelFor,
@@ -45,9 +46,11 @@ export function createExecutor(
     try {
       // The planning prompt carries the previous version and the feedback, so a lost session can
       // start over from the same prompt.
+      // Re-read: the first clone has just set the ticket's base branch.
+      const cloned = getTicket(db, ticket.id);
       const prompt = buildPrompt({
-        ticket,
-        ...parentContext(db, ticket),
+        ticket: cloned,
+        ...parentContext(db, cloned),
         shared: sharedPrompt(db, ticket.projectId),
         instructions: agent.prompt,
         approved: approvedBefore(db, ticket.id, step),

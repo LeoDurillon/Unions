@@ -58,6 +58,10 @@ export function parentChanges(parent: Ticket, ticket: Ticket, projectBase: strin
 
 /** The done ticket this one builds on: its text, and where to look at its changes. */
 export function parentSection(parent: Ticket, ticket: Ticket, projectBase: string): string {
+  const chosen = ticket.chosenBaseBranch;
+  if (chosen !== null && ticket.baseBranch === chosen && chosen !== parent.branch) {
+    return `# Builds on\n\nThis ticket was written after ${ticketLabel(parent)} "${parent.title}". The user chose to start it from \`${chosen}\` instead of the parent's branch: the parent's changes are in your code only if \`${chosen}\` contains them. Check before relying on them.\n\n${parent.body}`;
+  }
   if (parent.prState === 'closed' && ticket.baseBranch !== parent.branch) {
     const pull =
       parent.prNumber === null ? 'Its pull request' : `Its pull request #${parent.prNumber}`;

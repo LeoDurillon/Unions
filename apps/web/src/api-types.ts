@@ -7,6 +7,7 @@ import type {
   Run,
   StepOutput,
   Ticket,
+  TicketBaseView,
   schema,
 } from '@union/core';
 
@@ -49,6 +50,8 @@ export type TicketDetail = {
   project: PublicProject;
   /** Tickets that build on this one. */
   children: TicketRef[];
+  /** The branch it starts from and why (before it starts: the one it would take now). */
+  base: TicketBaseView;
   outputs: StepOutput[];
   runs: Run[];
 };

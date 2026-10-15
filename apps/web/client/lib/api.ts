@@ -162,6 +162,12 @@ export const api = {
   }): Promise<TicketSummary> => request('POST', '/api/tickets', input),
   setParent: (id: number, parentId: number | null): Promise<TicketSummary> =>
     request('PUT', `/api/tickets/${id}/parent`, { parentId }),
+  /** The branches of the ticket's repository, to choose the one it starts from. */
+  branches: (id: number): Promise<{ branches: string[]; projectBase: string }> =>
+    request('GET', `/api/tickets/${id}/branches`),
+  /** Null goes back to the automatic choice (the parent's branch, else the project's). */
+  setBaseBranch: (id: number, branch: string | null): Promise<TicketSummary> =>
+    request('PUT', `/api/tickets/${id}/base-branch`, { branch }),
   /** `extra`: the feedback of a revision, or the decision on a refused commit. */
   command: (id: number, type: CommandType, extra: CommandExtra = {}): Promise<unknown> =>
     request('POST', `/api/tickets/${id}/commands`, { type, ...extra }),

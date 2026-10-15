@@ -76,8 +76,10 @@ export const tickets = sqliteTable(
     projectItemId: text('project_item_id'),
     phase: text('phase', { mode: 'json' }).$type<Phase>().notNull().default({ kind: 'backlog' }),
     branch: text('branch'),
-    /** Branch the ticket was cloned from and is compared with (the parent's branch); null: the project's. */
+    /** Branch the ticket was cloned from and is compared with (chosen, or the parent's); null: the project's. */
     baseBranch: text('base_branch'),
+    /** The branch the user chose to start from, over the parent's and the project's; null: automatic. */
+    chosenBaseBranch: text('chosen_base_branch'),
     /** The diff snapshot's head when the user last sent a review: "since last review" starts there. */
     reviewedSha: text('reviewed_sha'),
     prNumber: integer('pr_number'),

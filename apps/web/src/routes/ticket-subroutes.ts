@@ -5,14 +5,15 @@ import type { OnboardingGitHub } from '../github-onboarding';
 import { attachmentRoutes } from './attachments';
 import { issueImportRoutes } from './issue-import';
 import { previewRoutes } from './preview';
+import { ticketBaseRoutes } from './ticket-base';
 import { addTicket } from './ticket-create';
 import { removeCancelledTicket } from './ticket-removal';
 import { ticketReviewSubroutes } from './ticket-review-subroutes';
 
 /**
  * The routes under `/api/tickets` that have their own module: creation, the issue import, a ticket's files,
- * its refused commit, the rewrite of its PR description, its grouping by spec, its preview, its
- * removal once cancelled.
+ * its refused commit, the rewrite of its PR description, its grouping by spec, its preview, its base
+ * branch, its removal once cancelled.
  */
 export function ticketSubroutes(db: Db, github: OnboardingGitHub, notion: NotionApi): Hono {
   const routes = new Hono();
@@ -20,6 +21,7 @@ export function ticketSubroutes(db: Db, github: OnboardingGitHub, notion: Notion
   routes.route('/github-issue', issueImportRoutes(db, github));
   routes.route('/:id/attachments', attachmentRoutes(db));
   routes.route('/:id/preview', previewRoutes(db));
+  routes.route('/', ticketBaseRoutes(db, github));
   routes.route('/', ticketReviewSubroutes(db, github, notion));
   routes.delete('/:id', (c) => removeCancelledTicket(db, c));
   return routes;

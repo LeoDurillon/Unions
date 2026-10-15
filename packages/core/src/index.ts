@@ -41,5 +41,6 @@ export type * from './runtime';
 export * as schema from './tables';
 export type { PreviewConfig, PreviewService, PullRequestFile } from './schema-types';
 export * from './states';
+export * from './ticket-base';
 export * from './ticket-links';
 export * from './tickets';

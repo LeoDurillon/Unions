@@ -1,0 +1,1 @@
+ALTER TABLE `tickets` ADD `chosen_base_branch` text;

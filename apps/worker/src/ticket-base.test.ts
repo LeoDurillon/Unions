@@ -111,3 +111,24 @@ test("a parent whose pull request was merged or closed leaves the child on the p
     { prState: 'closed' },
   ]);
 });
+
+test("the branch the user chose wins over the parent's; a chosen branch gone falls back", async () => {
+  setParentBranch('12-parent');
+  await run(['git', '-C', repo, 'branch', 'release']);
+  db.update(schema.tickets)
+    .set({ chosenBaseBranch: 'release' })
+    .where(eq(schema.tickets.id, child))
+    .run();
+  expect(await resolveTicketBase(db, getTicket(db, child), source)).toBe('release');
+  db.update(schema.tickets)
+    .set({ chosenBaseBranch: 'gone' })
+    .where(eq(schema.tickets.id, child))
+    .run();
+  expect(await resolveTicketBase(db, getTicket(db, child), source)).toBe('12-parent');
+  const types = db
+    .select()
+    .from(schema.events)
+    .all()
+    .map((event) => event.type);
+  expect(types).toContain('chosen_base_missing');
+});
