@@ -1,6 +1,7 @@
 import { and, eq } from 'drizzle-orm';
 
 import type { Db } from './db';
+import { isEvent, type EventPayloads, type StoredEvent } from './event-catalog';
 import {
   BOARD_LABELS,
   isTrigger,
@@ -12,7 +13,7 @@ import {
   type TemplateVariable,
 } from './event-rule-types';
 import type { NotionDataSource, NotionProperty } from './notion-api';
-import { boardStatus, type Phase } from './states';
+import { boardStatus } from './states';
 import * as schema from './tables';
 import type { Ticket } from './tickets';
 
@@ -177,9 +178,10 @@ const STEP_NAMES: Record<string, string> = {
 };
 
 /** The step a phase change is about, if any. */
-function stepOf(payload: unknown): string {
-  const to = typeof payload === 'object' && payload !== null && 'to' in payload ? payload.to : null;
-  const step = typeof to === 'object' && to !== null && 'step' in to ? String(to.step) : '';
+/** The step a phase change moved into (one that waits or failed); empty for other events. */
+function stepOf(event: StoredEvent | null): string {
+  const to = event === null ? undefined : phaseChange(event)?.to;
+  const step = to && 'step' in to ? to.step : '';
   return STEP_NAMES[step] ?? step;
 }
 
@@ -187,7 +189,7 @@ function stepOf(payload: unknown): string {
 export function templateValues(
   project: { owner: string; repo: string },
   ticket: Ticket,
-  event: { payload: unknown },
+  event: StoredEvent | null,
   now = new Date(),
 ): Partial<Record<TemplateVariable, string>> {
   const repo = `https://github.com/${project.owner}/${project.repo}`;
@@ -201,7 +203,7 @@ export function templateValues(
     'issue.number': issueNumber === null ? '' : String(issueNumber),
     'issue.url': issueNumber === null ? '' : `${repo}/issues/${issueNumber}`,
     'board.status': BOARD_LABELS[boardStatus(ticket.phase)],
-    step: stepOf(event.payload),
+    step: stepOf(event),
     'date.today': now.toISOString().slice(0, DATE_LENGTH),
     'date.now': now.toISOString(),
   };
@@ -218,19 +220,11 @@ export function ruleValue(
   return 'error' in shaped ? shaped : { text, value: shaped.value };
 }
 
-type LoggedEvent = { type: string; payload: unknown };
-type PhaseChange = { from?: Phase; to?: Phase; board?: string };
-
-/** `phase_changed` payloads are written by `dispatch`, always as `{ from, to, board }`. */
-function isPhaseChange(payload: unknown): payload is PhaseChange {
-  return typeof payload === 'object' && payload !== null;
+function phaseChange(event: StoredEvent): EventPayloads['phase_changed'] | null {
+  return isEvent(event, 'phase_changed') ? event.payload : null;
 }
 
-function phaseChange(event: LoggedEvent): PhaseChange | null {
-  return event.type === 'phase_changed' && isPhaseChange(event.payload) ? event.payload : null;
-}
-
-type Matcher = (trigger: EventTrigger, event: LoggedEvent) => boolean;
+type Matcher = (trigger: EventTrigger, event: StoredEvent) => boolean;
 
 const MATCHERS: Record<EventTrigger['kind'], Matcher> = {
   pull_request_linked: (_trigger, event) =>
@@ -245,7 +239,7 @@ const MATCHERS: Record<EventTrigger['kind'], Matcher> = {
     return (
       trigger.kind === 'board_status' &&
       change?.board === trigger.status &&
-      (change.from === undefined || boardStatus(change.from) !== trigger.status)
+      boardStatus(change.from) !== trigger.status
     );
   },
   awaiting_approval: (trigger, event) => {
@@ -256,10 +250,10 @@ const MATCHERS: Record<EventTrigger['kind'], Matcher> = {
       (trigger.step === null || to.step === trigger.step)
     );
   },
-  step_failed: (_trigger, event) => phaseChange(event)?.to?.kind === 'failed',
+  step_failed: (_trigger, event) => phaseChange(event)?.to.kind === 'failed',
 };
 
 /** Whether `event` is what `trigger` waits for. */
-export function triggerMatches(trigger: EventTrigger, event: LoggedEvent): boolean {
+export function triggerMatches(trigger: EventTrigger, event: StoredEvent): boolean {
   return MATCHERS[trigger.kind](trigger, event);
 }

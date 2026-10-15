@@ -87,8 +87,13 @@ test('a stopped worker fails the rewrite it was running and returns a send to it
 
 test('the description is outdated once the branch is pushed after it was written', () => {
   expect(prDescriptionOutdated(db, ticketId)).toBe(false);
-  const at = (type: string, time: number): void => {
-    emitEvent(db, { type, ticketId, payload: {} });
+  const at = (type: 'branch_pushed' | 'pull_request_opened', time: number): void => {
+    emitEvent(
+      db,
+      type === 'branch_pushed'
+        ? { type, ticketId, payload: { branch: 'b' } }
+        : { type, ticketId, payload: { number: 1, url: '' } },
+    );
     db.update(schema.events).set({ at: time }).where(eq(schema.events.type, type)).run();
   };
   at('branch_pushed', 1000);

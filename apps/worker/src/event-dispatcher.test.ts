@@ -60,7 +60,11 @@ beforeEach(() => {
 function openPullRequest(notionPageId?: string): void {
   const ticket = createTicket(db, { projectId, title: 'Search', notionPageId });
   db.update(schema.tickets).set({ prNumber: 7 }).where(eq(schema.tickets.id, ticket.id)).run();
-  emitEvent(db, { type: 'pull_request_opened', ticketId: ticket.id, payload: { number: 7 } });
+  emitEvent(db, {
+    type: 'pull_request_opened',
+    ticketId: ticket.id,
+    payload: { number: 7, url: '' },
+  });
 }
 
 async function dispatch(): Promise<void> {

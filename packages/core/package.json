@@ -9,6 +9,7 @@
     "./diff": "./src/diff.ts",
     "./diff-hunks": "./src/diff-hunks.ts",
     "./notion-markdown": "./src/notion-markdown.ts",
+    "./event-catalog": "./src/event-catalog.ts",
     "./event-rules": "./src/event-rule-types.ts",
     "./preview": "./src/preview-config.ts",
     "./github-client": "./src/github-client.ts",

@@ -1,4 +1,4 @@
-import { STEPS } from '@union/core/states';
+import { isEvent, type EventPayloads } from '@union/core/event-catalog';
 import { useEffect, useRef, useState, type ReactElement } from 'react';
 
 import type { EventRow } from '../../src/api-types';
@@ -20,70 +20,54 @@ const KIND_CLASS: Record<Entry['kind'], string> = {
   error: 'text-red-600 dark:text-red-400',
 };
 
-function stepTitle(payload: unknown): string {
-  const step =
-    typeof payload === 'object' && payload !== null && 'step' in payload ? payload.step : null;
-  const known = STEPS.find((candidate) => candidate === step);
-  return known ? STEP_TITLES[known] : '';
-}
+type AgentReviewChange = EventPayloads['agent_review_changed'];
 
 /** The review agent's runs on the ticket: a header when it starts, a line when it ends. */
-function agentReviewEntries(event: EventRow): Entry[] {
-  const payload = typeof event.payload === 'object' && event.payload !== null ? event.payload : {};
-  const status = 'status' in payload ? payload.status : null;
-  const key = `${event.seq}`;
+function agentReviewEntries(key: string, { status, comments, error }: AgentReviewChange): Entry[] {
   if (status === 'running') {
     return [{ key, kind: 'run', text: 'Review comments · agent review' }];
   }
   if (status === 'succeeded') {
-    const count = 'comments' in payload ? Number(payload.comments) : 0;
+    const count = comments ?? 0;
     return [
       { key, kind: 'result', text: `${count} suggestion${count === 1 ? '' : 's'} added as drafts` },
     ];
   }
   if (status === 'failed') {
-    const error = 'error' in payload ? String(payload.error) : '';
-    return [{ key, kind: 'error', text: `Agent review failed: ${error}` }];
+    return [{ key, kind: 'error', text: `Agent review failed: ${error ?? ''}` }];
   }
   return [];
 }
 
-function payloadText(payload: unknown, key: string): string {
-  if (typeof payload !== 'object' || payload === null || !(key in payload)) {
-    return '';
-  }
-  const value: unknown = Reflect.get(payload, key);
-  return typeof value === 'string' ? value : '';
-}
-
 /** An event rule applied to the ticket: what it set, or why not. */
-function ruleEntries(event: EventRow): Entry[] {
-  const status = payloadText(event.payload, 'status');
-  const detail = payloadText(event.payload, 'detail');
-  const error = payloadText(event.payload, 'error');
+function ruleEntries(
+  key: string,
+  { status, detail, error }: EventPayloads['event_rule_applied'],
+): Entry[] {
   const text = `Event rule ${status}${detail ? `: ${detail}` : ''}${error ? ` (${error})` : ''}`;
-  return [{ key: `${event.seq}`, kind: status === 'failed' ? 'error' : 'result', text }];
+  return [{ key, kind: status === 'failed' ? 'error' : 'result', text }];
 }
 
 function entriesFor(event: EventRow): Entry[] {
-  if (event.type === 'preview_idle_stopped') {
-    return [{ key: `${event.seq}`, kind: 'result', text: payloadText(event.payload, 'message') }];
+  const key = `${event.seq}`;
+  if (isEvent(event, 'preview_idle_stopped')) {
+    return [{ key, kind: 'result', text: event.payload.message }];
   }
-  if (event.type === 'event_rule_applied') {
-    return ruleEntries(event);
+  if (isEvent(event, 'event_rule_applied')) {
+    return ruleEntries(key, event.payload);
   }
-  if (event.type === 'agent_review_changed') {
-    return agentReviewEntries(event);
+  if (isEvent(event, 'agent_review_changed')) {
+    return agentReviewEntries(key, event.payload);
   }
-  if (event.type === 'run_started') {
-    const text = `Run #${event.runId ?? '?'} · ${stepTitle(event.payload)}`;
-    return [{ key: `${event.seq}`, kind: 'run', text }];
+  if (isEvent(event, 'run_started')) {
+    const text = `Run #${event.runId ?? '?'} · ${STEP_TITLES[event.payload.step]}`;
+    return [{ key, kind: 'run', text }];
   }
-  if (event.type === 'investigation_started') {
+  if (isEvent(event, 'investigation_started')) {
     const time = new Date(event.at).toLocaleString();
-    return [{ key: `${event.seq}`, kind: 'run', text: `Run started ${time}` }];
+    return [{ key, kind: 'run', text: `Run started ${time}` }];
   }
-  if (event.type !== 'agent_event') {
+  if (!isEvent(event, 'agent_event')) {
     return [];
   }
   return summarizeAgentEvent(event.payload).map((line, index) => ({

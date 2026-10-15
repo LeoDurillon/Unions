@@ -104,11 +104,16 @@ export function finishTicketDraft(
       )
       .where(eq(schema.investigations.id, id))
       .run();
-    emitEvent(tx, {
-      type: ticketId === null ? 'investigation_ticket_failed' : 'investigation_ticket_created',
-      investigationId: id,
-      payload: ticketId === null ? outcome : { ticketId },
-    });
+    emitEvent(
+      tx,
+      ticketId === null
+        ? {
+            type: 'investigation_ticket_failed',
+            investigationId: id,
+            payload: { error: 'error' in outcome ? outcome.error : '' },
+          }
+        : { type: 'investigation_ticket_created', investigationId: id, payload: { ticketId } },
+    );
   });
 }
 

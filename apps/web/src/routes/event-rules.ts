@@ -141,7 +141,7 @@ function previewOf(
   if (!ticket.notionPageId || !property) {
     return { ok: false, error: 'This ticket was not imported from Notion' };
   }
-  const value = ruleValue(property, action, templateValues(project, ticket, { payload: {} }));
+  const value = ruleValue(property, action, templateValues(project, ticket, null));
   return 'error' in value
     ? { ok: false, error: value.error }
     : { ok: true, property: property.name, pageId: ticket.notionPageId, ...value };

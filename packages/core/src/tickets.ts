@@ -2,6 +2,7 @@
 import { desc, eq } from 'drizzle-orm';
 
 import type { Db } from './db';
+import type { NewEvent } from './event-catalog';
 import * as schema from './schema';
 import type { reviewComments } from './schema-reviews';
 import { boardStatus, transition, type Action, type Phase, type Step } from './states';
@@ -16,14 +17,6 @@ export type ReviewComment = typeof reviewComments.$inferSelect;
 export type StepOutput = typeof schema.stepOutputs.$inferSelect;
 type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
 type Executor = Db | Tx;
-
-export type NewEvent = {
-  type: string;
-  ticketId?: number;
-  runId?: number;
-  investigationId?: number;
-  payload: unknown;
-};
 
 export function emitEvent(db: Executor, event: NewEvent): void {
   db.insert(schema.events)

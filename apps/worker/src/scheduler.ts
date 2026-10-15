@@ -94,7 +94,11 @@ export class Scheduler {
       if (name) {
         // Stopping fails when the container is gone or already stopped: nothing to do then.
         await stopContainer(name).catch((error: unknown) => {
-          emitEvent(this.db, { type: 'container_stop_failed', ticketId, payload: String(error) });
+          emitEvent(this.db, {
+            type: 'container_stop_failed',
+            ticketId,
+            payload: { error: String(error) },
+          });
         });
       }
     }

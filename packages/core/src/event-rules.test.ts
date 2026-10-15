@@ -156,13 +156,21 @@ test('triggers match the events Union logs', () => {
 
 test('events after a rule is made queue one delivery each; earlier ones never do', () => {
   const ticket = createTicket(db, { projectId, title: 'Search', notionPageId: 'page-1' });
-  emitEvent(db, { type: 'pull_request_opened', ticketId: ticket.id, payload: { number: 1 } });
+  emitEvent(db, {
+    type: 'pull_request_opened',
+    ticketId: ticket.id,
+    payload: { number: 1, url: '' },
+  });
   // The first read starts at the end of the log.
   expect(queueDeliveries(db)).toBe(0);
   const rule = prRule();
   db.update(schema.tickets).set({ prNumber: 7 }).where(eq(schema.tickets.id, ticket.id)).run();
-  emitEvent(db, { type: 'pull_request_opened', ticketId: ticket.id, payload: { number: 7 } });
-  emitEvent(db, { type: 'branch_pushed', ticketId: ticket.id, payload: {} });
+  emitEvent(db, {
+    type: 'pull_request_opened',
+    ticketId: ticket.id,
+    payload: { number: 7, url: '' },
+  });
+  emitEvent(db, { type: 'branch_pushed', ticketId: ticket.id, payload: { branch: 'b' } });
   expect(queueDeliveries(db)).toBe(1);
   expect(queueDeliveries(db)).toBe(0);
 
@@ -187,7 +195,11 @@ test('temporary failures are tried again later, then given up', () => {
   const ticket = createTicket(db, { projectId, title: 't' });
   queueDeliveries(db);
   prRule();
-  emitEvent(db, { type: 'pull_request_opened', ticketId: ticket.id, payload: {} });
+  emitEvent(db, {
+    type: 'pull_request_opened',
+    ticketId: ticket.id,
+    payload: { number: 1, url: '' },
+  });
   queueDeliveries(db);
   for (let attempt = 1; attempt <= 5; attempt++) {
     const due = nextDelivery(db, Number.MAX_SAFE_INTEGER);

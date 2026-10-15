@@ -101,14 +101,13 @@ function finish(
       })
       .where(eq(schema.currentReviews.id, review.id))
       .run();
-    emitEvent(tx, {
-      type: 'url' in outcome ? 'pr_review_posted' : 'pr_review_failed',
-      payload: {
-        reviewId: review.id,
-        number: review.prNumber,
-        ...('url' in outcome ? { url: outcome.url } : { error: outcome.error }),
-      },
-    });
+    const posted = { reviewId: review.id, number: review.prNumber };
+    emitEvent(
+      tx,
+      'url' in outcome
+        ? { type: 'pr_review_posted', payload: { ...posted, url: outcome.url } }
+        : { type: 'pr_review_failed', payload: { ...posted, error: outcome.error } },
+    );
   });
 }
 

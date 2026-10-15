@@ -18,3 +18,6 @@ in the browser-safe `investigation-defaults.ts`.
 Drizzle schema and migrations, the pure ticket state machine (`states.ts`), ticket dependencies
 (`ticket-links.ts`: `setParent`, `ticketBase`; the start gate `blockingParent` is in `tickets.ts`), the
 `ContainerRuntime` interface and its Docker CLI implementation.
+The event log (`events`) is typed: `event-payloads.ts` gives the payload of every event type, and `emitEvent`
+takes a `NewEvent` from `event-catalog.ts`, so a new event type is added there first. Read one back with
+`isEvent(row, '<type>')` (browser-safe, `@union/core/event-catalog`), not by probing its payload by hand.

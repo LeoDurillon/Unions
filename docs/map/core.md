@@ -18,7 +18,9 @@ export); do not edit. Tests are left out.
 - `diff.ts`: Unified diff parsing (output of `git diff`).
 - `docker-cli.ts`: The container runtime that drives the `docker` command line to run ticket containers.
 - `e2e-screenshots.ts`: Replaces the ticket's e2e screenshots with `files` (none: just removes them).
+- `event-catalog.ts`: The event log's types: a typed event to write, and a guard that narrows an event read back.
 - `event-deliveries.ts`: Reads the events logged since the last call and queues one delivery per matching enabled rule of the ticket's project.
+- `event-payloads.ts`: What each type of event in the log carries, keyed by its `type`: the one place to add an event.
 - `event-rule-types.ts`: Event rules: when something happens to a ticket, do something elsewhere.
 - `event-rules.ts`: A rule the checks refuse: an unknown trigger or variable, a missing or unsupported property.
 - `github-auth.ts`: A project's installation wins over its token; `fallbackToken` (the `GITHUB_TOKEN` environment variable) covers projects with neither.
