@@ -1,9 +1,10 @@
-import type { ContainerRun } from '@union/core';
+import type { ContainerRun, ProjectScript } from '@union/core';
 import { useState, type ReactElement, type ReactNode } from 'react';
 
 import type { Tone } from '../lib/labels';
-import { useContainerRuns } from '../lib/use-container-runs';
+import { useContainerRuns, type RunInput } from '../lib/use-container-runs';
 import { RunAgentActions } from './run-agent-actions';
+import { ScriptButtons } from './script-buttons';
 import { Badge, Button, ErrorText, inputClass } from './ui';
 
 const STATUS: Record<ContainerRun['status'], { label: string; tone: Tone }> = {
@@ -51,6 +52,7 @@ function RunItem({
     <li className="space-y-1 text-xs">
       <div className="flex flex-wrap items-start gap-2">
         <Badge tone={STATUS[run.status].tone}>{statusLabel(run)}</Badge>
+        {run.scriptName === null ? null : <Badge tone="neutral">{run.scriptName}</Badge>}
         <code className="max-h-24 min-w-0 flex-1 overflow-auto pt-0.5 whitespace-pre-wrap">
           $ {run.command}
         </code>
@@ -86,7 +88,7 @@ function CommandForm({
 }: {
   blocked: string | null;
   pending: boolean;
-  onRun: (command: string) => void;
+  onRun: (input: RunInput) => void;
 }): ReactElement {
   const [command, setCommand] = useState('');
   return (
@@ -95,7 +97,7 @@ function CommandForm({
       onSubmit={(event) => {
         event.preventDefault();
         if (blocked === null && !pending) {
-          onRun(command);
+          onRun({ command });
         }
       }}
     >
@@ -127,16 +129,30 @@ function CommandForm({
   );
 }
 
+/** Runs a run again: by its script while the project still has it (with its current command). */
+function againInput(run: ContainerRun, scripts: readonly ProjectScript[]): RunInput {
+  return run.scriptName !== null && scripts.some((script) => script.name === run.scriptName)
+    ? { scriptName: run.scriptName }
+    : { command: run.command };
+}
+
 /**
  * Commands the user runs in the ticket's workspace: its container, in the checkout, as the agent
- * (with the preview's address while it runs). Never during a step; one at a time.
+ * (with the preview's address while it runs), typed or saved in the project settings. Never during
+ * a step; one at a time.
  */
-export function ContainerCommands({ ticketId }: { ticketId: number }): ReactElement {
+export function ContainerCommands({
+  ticketId,
+  scripts,
+}: {
+  ticketId: number;
+  scripts: readonly ProjectScript[];
+}): ReactElement {
   const { runs, run, cancel, keep, send, active } = useContainerRuns(ticketId);
   const blocked = runs.data?.refusal ?? (active ? 'A command is already running' : null);
-  const submit = (text: string): void => {
-    if (text.trim() !== '') {
-      run.mutate(text);
+  const submit = (input: RunInput): void => {
+    if (!('command' in input) || input.command.trim() !== '') {
+      run.mutate(input);
     }
   };
   return (
@@ -144,8 +160,10 @@ export function ContainerCommands({ ticketId }: { ticketId: number }): ReactElem
       <h3 className="text-sm font-medium">Commands</h3>
       <p className="text-xs text-zinc-500">
         Runs in the ticket&apos;s workspace, in the repository, as the agent does (no GitHub
-        credentials), with <code>PREVIEW_URL</code> while the preview runs. 10 minutes at most.
+        credentials), with <code>PREVIEW_URL</code> while the preview runs. A typed command stops
+        after 10 minutes.
       </p>
+      <ScriptButtons scripts={scripts} blocked={blocked} pending={run.isPending} onRun={submit} />
       <CommandForm blocked={blocked} pending={run.isPending} onRun={submit} />
       <ErrorText error={runs.error ?? run.error ?? cancel.error ?? keep.error ?? send.error} />
       <ul className="space-y-3">
@@ -158,7 +176,7 @@ export function ContainerCommands({ ticketId }: { ticketId: number }): ReactElem
               cancel.mutate(item.id);
             }}
             onAgain={() => {
-              submit(item.command);
+              submit(againInput(item, scripts));
             }}
           >
             <RunAgentActions

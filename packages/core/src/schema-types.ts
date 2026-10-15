@@ -48,6 +48,14 @@ export type PreviewConfig = {
   port?: number;
 };
 
+/** A command saved in the project settings, run in a ticket's workspace from its Preview tab. */
+export type ProjectScript = {
+  name: string;
+  command: string;
+  /** Seconds before it is stopped (600 when unset). */
+  timeoutSec?: number;
+};
+
 export type ProjectConfig = {
   baseBranch: string;
   /** Project Status option names per board column. Defaults: Todo, In Progress, In Review, Done. */
@@ -67,6 +75,8 @@ export type ProjectConfig = {
   notionDataSourceId?: string;
   /** Markdown sent to every agent run on this project, after the shared instructions. */
   instructions?: string;
+  /** Commands the user runs by name in a ticket's workspace. */
+  scripts?: ProjectScript[];
   preview?: PreviewConfig;
 };
 

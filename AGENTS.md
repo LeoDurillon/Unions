@@ -177,7 +177,9 @@ behavior; this file covers how to work in the repo.
     stops after unless a step started. A finished run's output can go to the implementer (`for_agent`): kept for its
     next run, or sent now (`sendToAgent`: a `revise` command with the user's note, only when the revision goes back to
     the implementer). `implementLoop` adds the pending outputs to the first turn's prompt (`commandOutputPrompt`, 5
-    newest, fenced so their backticks cannot close the block) and marks them `sent` once that turn ran.
+    newest, fenced so their backticks cannot close the block) and marks them `sent` once that turn ran. Saved scripts
+    (`config.scripts`, checked by core `parseScripts`) run by name: the route resolves `{ scriptName }` with
+    `scriptRun`, and the run stores the command as it was and `script_name`.
   - `review.ts`: the final review (fresh session, read-only tools plus git reads, one git command per call because
     permission rules cannot match `&&`). Changes asked at the review go to the implementer through the `thenRun`
     chain in `states.ts`; `revision.ts` hands it the review's feedback. `runResumable` (agent.ts) restarts in a fresh

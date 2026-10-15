@@ -8,12 +8,14 @@ import { GitHubAccessSection } from './github-access-section';
 import { InstructionsSection } from './instructions-section';
 import { PullRequestSection } from './pull-request-section';
 import { ReviewSection } from './review-section';
+import { ScriptsSection } from './scripts-section';
 
 export const PROJECT_SECTIONS = [
   'general',
   'files',
   'instructions',
   'checks',
+  'scripts',
   'pull-requests',
   'review',
 ] as const;
@@ -37,6 +39,7 @@ export function ProjectSectionBody({
     files: () => <FilesSection project={project} />,
     instructions: () => <InstructionsSection project={project} />,
     checks: () => <ChecksSection project={project} />,
+    scripts: () => <ScriptsSection project={project} />,
     'pull-requests': () => <PullRequestSection project={project} />,
     review: () => <ReviewSection project={project} />,
   };

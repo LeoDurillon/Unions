@@ -4,6 +4,7 @@ import type {
   AgentModel,
   Investigation,
   InvestigationScope,
+  ProjectScript,
   ToolOption,
 } from '@union/core';
 
@@ -146,6 +147,7 @@ export const api = {
       notionToken?: string;
       notionDataSourceId?: string;
       instructions?: string;
+      scripts?: ProjectScript[];
     },
   ): Promise<PublicProject> => request('PATCH', `/api/projects/${id}`, change),
   deleteProject: (id: number): Promise<unknown> => request('DELETE', `/api/projects/${id}`),

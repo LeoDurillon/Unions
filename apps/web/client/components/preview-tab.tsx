@@ -13,11 +13,11 @@ function canRevise(phase: TicketDetail['ticket']['phase']): boolean {
 
 /** The ticket's Preview tab: the environment, its output, its end-to-end tests, and commands. */
 export function PreviewTab({ detail }: { detail: TicketDetail }): ReactElement {
-  const { ticket } = detail;
+  const { ticket, project } = detail;
   return (
     <div className="space-y-4">
       <PreviewSection ticketId={ticket.id} canRevise={canRevise(ticket.phase)} />
-      <ContainerCommands ticketId={ticket.id} />
+      <ContainerCommands ticketId={ticket.id} scripts={project.config.scripts ?? []} />
     </div>
   );
 }

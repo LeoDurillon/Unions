@@ -1,4 +1,13 @@
-import { forgetNotionSchema, schema, type Db, type Project, type ProjectConfig } from '@union/core';
+import {
+  forgetNotionSchema,
+  parseScripts,
+  schema,
+  ScriptsError,
+  type Db,
+  type Project,
+  type ProjectConfig,
+  type ProjectScript,
+} from '@union/core';
 import { and, eq, inArray, isNull } from 'drizzle-orm';
 import type { Context } from 'hono';
 
@@ -135,6 +144,22 @@ function instructionsChange(
   return instructions.trim() === '' ? undefined : instructions.trim();
 }
 
+/** A present key replaces the saved scripts (an empty list removes them). */
+function scriptsChange(
+  body: Record<string, unknown>,
+  current: ProjectScript[] | undefined,
+): ProjectScript[] | undefined {
+  if (!('scripts' in body)) {
+    return current;
+  }
+  try {
+    const scripts = parseScripts(body.scripts);
+    return scripts.length === 0 ? undefined : scripts;
+  } catch (error) {
+    throw error instanceof ScriptsError ? fail(BAD_REQUEST, error.message) : error;
+  }
+}
+
 function configChange(project: Project, body: Record<string, unknown>): ProjectConfig {
   const { config } = project;
   return {
@@ -148,6 +173,7 @@ function configChange(project: Project, body: Record<string, unknown>): ProjectC
     gateCommand: commandChange(body, 'gateCommand', config.gateCommand),
     maxIterations: iterationsChange(body, config.maxIterations),
     instructions: instructionsChange(body, config.instructions),
+    scripts: scriptsChange(body, config.scripts),
   };
 }
 
@@ -179,6 +205,7 @@ const UPDATABLE = [
   'notionToken',
   'notionDataSourceId',
   'instructions',
+  'scripts',
   ...CHECK_FIELDS,
 ];
 

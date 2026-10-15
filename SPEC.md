@@ -284,8 +284,9 @@ Built (phases 1 to 4). Full design and what was built: [`docs/plans/preview-envi
   as the agent, with the preview's address while it runs) and reads the end of its output, live. Never during a
   step, one at a time per ticket, 10 minutes by default (30 at most), cancellable. A finished output can be kept
   for the implementer's next run, or sent now as a revision with a note (at the final review or once done); the
-  implementer reads it as data in a "Command output from the user" section, once. Saved scripts are the next phase
-  (`docs/plans/container-commands.md`).
+  implementer reads it as data in a "Command output from the user" section, once. Commands run often are saved by
+  name in Project settings → Scripts (`config.scripts`: name, command, optional timeout) and run with one button;
+  the run keeps the script's name. Running in a preview service is planned (`docs/plans/container-commands.md`).
 
 ## MCP servers for agents (planned)
 

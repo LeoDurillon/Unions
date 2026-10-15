@@ -1,0 +1,1 @@
+ALTER TABLE `container_runs` ADD `script_name` text;

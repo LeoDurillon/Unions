@@ -13,7 +13,7 @@ export class ContainerRunError extends Error {}
 
 export const DEFAULT_RUN_TIMEOUT_SEC = 600;
 export const MAX_RUN_TIMEOUT_SEC = 1800;
-const MAX_COMMAND_CHARS = 4000;
+export const MAX_COMMAND_CHARS = 4000;
 /** The output kept: its last lines, at most this many and this many characters. */
 export const MAX_OUTPUT_LINES = 500;
 export const MAX_OUTPUT_CHARS = 65_536;
@@ -46,7 +46,7 @@ function timeoutOf(timeoutSec: number | undefined): number {
  */
 export function queueContainerRun(
   db: Db,
-  input: { ticketId: number; command: string; timeoutSec?: number },
+  input: { ticketId: number; command: string; timeoutSec?: number; scriptName?: string },
 ): ContainerRun {
   const command = input.command.trim();
   if (command === '' || command.length > MAX_COMMAND_CHARS) {
@@ -76,7 +76,7 @@ export function queueContainerRun(
     }
     return tx
       .insert(schema.containerRuns)
-      .values({ ticketId: input.ticketId, command, timeoutSec })
+      .values({ ticketId: input.ticketId, command, timeoutSec, scriptName: input.scriptName })
       .returning()
       .get();
   });

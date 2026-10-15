@@ -24,6 +24,8 @@ export const containerRuns = sqliteTable(
       .notNull()
       .references(() => tickets.id, { onDelete: 'cascade' }),
     command: text('command').notNull(),
+    /** The saved script it ran, by name (its command as it was then is `command`). */
+    scriptName: text('script_name'),
     status: text('status', { enum: CONTAINER_RUN_STATUSES }).notNull().default('queued'),
     exitCode: integer('exit_code'),
     /** Why it did not run to its end: a timeout, the worker stopping, a container that would not start. */

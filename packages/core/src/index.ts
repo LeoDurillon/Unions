@@ -25,6 +25,7 @@ export * from './preview-compose';
 export * from './preview-config';
 export * from './preview-secrets';
 export * from './project-files';
+export * from './project-scripts';
 export * from './review-groupings';
 export * from './notion-markdown';
 export {
@@ -40,7 +41,7 @@ export * from './refused-commits';
 export type { ResumeState } from './schema-refused-commits';
 export type * from './runtime';
 export * as schema from './tables';
-export type { PreviewConfig, PreviewService, PullRequestFile } from './schema-types';
+export type { PreviewConfig, PreviewService, ProjectScript, PullRequestFile } from './schema-types';
 export * from './states';
 export * from './ticket-base';
 export * from './ticket-links';

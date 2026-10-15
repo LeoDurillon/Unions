@@ -14,6 +14,7 @@ export const SETTINGS_GROUPS = [
     sections: [
       { id: 'instructions', label: 'Instructions' },
       { id: 'checks', label: 'Checks' },
+      { id: 'scripts', label: 'Scripts' },
     ],
   },
   {

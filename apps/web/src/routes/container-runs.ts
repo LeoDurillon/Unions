@@ -7,9 +7,11 @@ import {
   queueContainerRun,
   revisesImplementer,
   schema,
+  scriptRun,
   sendToAgent,
   type ContainerRun,
   type Db,
+  type ProjectConfig,
   type Ticket,
 } from '@union/core';
 import { and, eq, isNull } from 'drizzle-orm';
@@ -81,11 +83,29 @@ function timeoutOf(body: Record<string, unknown>): number | undefined {
   return timeoutSec;
 }
 
+function projectConfig(db: Db, ticket: Ticket): ProjectConfig {
+  const project = db
+    .select({ config: schema.projects.config })
+    .from(schema.projects)
+    .where(eq(schema.projects.id, ticket.projectId))
+    .get();
+  return project?.config ?? { baseBranch: '' };
+}
+
+/** `{ command, timeoutSec? }`, or `{ scriptName }`: a saved script, with its own timeout. */
 async function run(db: Db, c: Context): Promise<Response> {
   const ticket = loadTicket(db, c);
   const body = await readObject(c.req.raw);
+  if (typeof body.scriptName === 'string') {
+    const name = body.scriptName;
+    checked(() => {
+      const script = scriptRun(projectConfig(db, ticket), name);
+      return queueContainerRun(db, { ticketId: ticket.id, ...script });
+    });
+    return c.json(view(db, ticket), CREATED);
+  }
   if (typeof body.command !== 'string') {
-    throw fail(BAD_REQUEST, '"command" must be a string');
+    throw fail(BAD_REQUEST, '"command" or "scriptName" must be a string');
   }
   const input = { ticketId: ticket.id, command: body.command, timeoutSec: timeoutOf(body) };
   checked(() => queueContainerRun(db, input));

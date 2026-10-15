@@ -1,9 +1,9 @@
 # Plan: run a command in a ticket's container and give its output to the implementer
 
-Status: phases 1 and 2 built (branch `container-commands`): commands typed in the Preview tab run in the workspace,
-with their output, which can go to the implementer (kept for its next run, or sent now as a revision). Phase 3 (saved
-scripts) not started. The e2e "Send to agent" still builds its own revision text (moving it is left). Decisions taken
-(end of file).
+Status: phases 1 to 3 built (branch `container-commands`): commands typed in the Preview tab, or saved as scripts in
+Project settings, run in the workspace, with their output, which can go to the implementer (kept for its next run, or
+sent now as a revision). Scripts have no `target` yet (phase 4 adds it). Phase 4 (preview service) not started. The
+e2e "Send to agent" still builds its own revision text (moving it is left). Decisions taken (end of file).
 
 ## Idea
 

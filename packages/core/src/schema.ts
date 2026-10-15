@@ -11,7 +11,12 @@ import {
 import type { InvestigationExchange, ProjectConfig } from './schema-types';
 import type { AgentEffort, AgentModel, BoardStatus, Phase, Step } from './states';
 
-export type { InvestigationExchange, ProjectConfig, PullRequestFile } from './schema-types';
+export type {
+  InvestigationExchange,
+  ProjectConfig,
+  ProjectScript,
+  PullRequestFile,
+} from './schema-types';
 
 export const now = sql`(unixepoch('subsec') * 1000)`;
 const timestamps = {

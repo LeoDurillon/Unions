@@ -3,6 +3,9 @@ import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tan
 import type { ContainerRunsView } from '../../src/api-types';
 import { request } from './api';
 
+/** A command typed in the box, or a saved script by name. */
+export type RunInput = { command: string } | { scriptName: string };
+
 const RUN_POLL_MS = 1000;
 
 function running(data: ContainerRunsView | undefined): boolean {
@@ -12,7 +15,7 @@ function running(data: ContainerRunsView | undefined): boolean {
 /** The commands run in the ticket's workspace (polled while one is on), and running or stopping one. */
 export function useContainerRuns(ticketId: number): {
   runs: UseQueryResult<ContainerRunsView>;
-  run: ReturnType<typeof useMutation<ContainerRunsView, Error, string>>;
+  run: ReturnType<typeof useMutation<ContainerRunsView, Error, RunInput>>;
   cancel: ReturnType<typeof useMutation<ContainerRunsView, Error, number>>;
   keep: ReturnType<typeof useMutation<ContainerRunsView, Error, { runId: number; keep: boolean }>>;
   send: ReturnType<typeof useMutation<ContainerRunsView, Error, { runId: number; note: string }>>;
@@ -30,7 +33,7 @@ export function useContainerRuns(ticketId: number): {
     queryClient.setQueryData(key, data);
   };
   const run = useMutation({
-    mutationFn: (command: string): Promise<ContainerRunsView> => request('POST', path, { command }),
+    mutationFn: (input: RunInput): Promise<ContainerRunsView> => request('POST', path, input),
     onSuccess: update,
   });
   const cancel = useMutation({

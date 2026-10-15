@@ -98,3 +98,21 @@ test('an output is kept for the next run; sending it now needs a ticket the impl
   // The revision is still waiting for the worker: nothing else is queued meanwhile.
   expect((await post(`/${id}/send`, { note: 'again' })).status).toBe(409);
 });
+
+test('a saved script runs by name, with its command and timeout', async () => {
+  db.update(schema.projects)
+    .set({
+      config: {
+        baseBranch: 'main',
+        scripts: [{ name: 'Import', command: 'npm run import', timeoutSec: 900 }],
+      },
+    })
+    .run();
+  expect((await post('', { scriptName: 'Missing' })).status).toBe(409);
+  const created = await post('', { scriptName: 'Import' });
+  expect(created.status).toBe(201);
+  const { runs } = (await created.json()) as ContainerRunsView;
+  expect(runs).toMatchObject([
+    { command: 'npm run import', scriptName: 'Import', timeoutSec: 900, status: 'queued' },
+  ]);
+});

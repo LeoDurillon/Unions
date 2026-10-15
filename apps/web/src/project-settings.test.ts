@@ -157,3 +157,26 @@ test('delete is refused while an agent runs on one of the tickets', async () => 
   expect((await send('DELETE', `/api/projects/${projectId}`)).status).toBe(409);
   expect(stored()).toBeDefined();
 });
+
+test('scripts are replaced as a list, checked, and removed with an empty one', async () => {
+  const scripts = [
+    { name: ' Import ', command: 'npm run import\n', timeoutSec: 900 },
+    { name: 'Migrations', command: 'npx prisma migrate status' },
+  ];
+  expect((await send('PATCH', `/api/projects/${projectId}`, { scripts })).status).toBe(200);
+  expect(stored()?.config.scripts).toEqual([
+    { name: 'Import', command: 'npm run import', timeoutSec: 900 },
+    { name: 'Migrations', command: 'npx prisma migrate status' },
+  ]);
+
+  const twice = [scripts[1], { name: 'migrations', command: 'ls' }];
+  const refused = await send('PATCH', `/api/projects/${projectId}`, { scripts: twice });
+  expect(refused.status).toBe(400);
+  expect(await refused.text()).toContain('Two scripts are named');
+  const long = [{ name: 'Slow', command: 'ls', timeoutSec: 99_999 }];
+  expect((await send('PATCH', `/api/projects/${projectId}`, { scripts: long })).status).toBe(400);
+  expect((await send('PATCH', `/api/projects/${projectId}`, { scripts: 'ls' })).status).toBe(400);
+
+  await send('PATCH', `/api/projects/${projectId}`, { scripts: [] });
+  expect(stored()?.config.scripts).toBeUndefined();
+});
