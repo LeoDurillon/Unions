@@ -31,6 +31,11 @@ export const containerRuns = sqliteTable(
     /** Stdout and stderr together, colours stripped: the last lines only, rewritten while it runs. */
     output: text('output').notNull().default(''),
     timeoutSec: integer('timeout_sec').notNull(),
+    /**
+     * For the implementer: `next_run` while its next run should read the output, `sent` once it
+     * did; null when the user kept it to themselves.
+     */
+    forAgent: text('for_agent', { enum: ['next_run', 'sent'] }),
     createdAt: integer('created_at').notNull().default(now),
     startedAt: integer('started_at'),
     finishedAt: integer('finished_at'),

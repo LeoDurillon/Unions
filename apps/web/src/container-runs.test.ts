@@ -1,6 +1,14 @@
 import { beforeEach, expect, test } from 'bun:test';
 
-import { claimContainerRun, createDb, createTicket, migrateDb, schema, type Db } from '@union/core';
+import {
+  claimContainerRun,
+  createDb,
+  createTicket,
+  finishContainerRun,
+  migrateDb,
+  schema,
+  type Db,
+} from '@union/core';
 import { eq } from 'drizzle-orm';
 import type { Hono } from 'hono';
 
@@ -62,4 +70,31 @@ test('a cancel is handed to the worker as a command, only while the run is on', 
     { type: 'cancel_container_run', ticketId, payload: { containerRunId: run?.id } },
   ]);
   expect((await post('/999/cancel')).status).toBe(404);
+});
+
+async function finishedRun(): Promise<number> {
+  const { runs } = (await (await post('', { command: 'npm test' })).json()) as ContainerRunsView;
+  const id = runs[0]?.id ?? 0;
+  claimContainerRun(db);
+  finishContainerRun(db, id, { status: 'failed', exitCode: 1, error: null, output: 'FAIL' });
+  return id;
+}
+
+test('an output is kept for the next run; sending it now needs a ticket the implementer can take back', async () => {
+  const id = await finishedRun();
+  const kept = (await (await post(`/${id}/keep`, { keep: true })).json()) as ContainerRunsView;
+  expect(kept.runs[0]?.forAgent).toBe('next_run');
+  expect(kept.canSend).toBe(false);
+  expect((await post(`/${id}/keep`, { keep: 'yes' })).status).toBe(400);
+  expect((await post(`/${id}/send`, { note: 'fix it' })).status).toBe(409);
+  db.update(schema.tickets)
+    .set({ phase: { kind: 'done' } })
+    .where(eq(schema.tickets.id, ticketId))
+    .run();
+  expect((await post(`/${id}/send`, {})).status).toBe(202);
+  const [revise] = db.select().from(schema.commands).all();
+  expect(revise?.type).toBe('revise');
+  expect(JSON.stringify(revise?.payload)).toContain('output of the command');
+  // The revision is still waiting for the worker: nothing else is queued meanwhile.
+  expect((await post(`/${id}/send`, { note: 'again' })).status).toBe(409);
 });

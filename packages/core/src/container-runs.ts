@@ -1,7 +1,9 @@
 import { and, asc, desc, eq, inArray } from 'drizzle-orm';
 
 import type { Db } from './db';
+import { commands } from './schema';
 import * as schema from './schema-container-runs';
+import { transition, type Phase } from './states';
 import { getTicket } from './tickets';
 
 export type ContainerRun = typeof schema.containerRuns.$inferSelect;
@@ -157,4 +159,85 @@ export function recoverContainerRuns(db: Db): void {
     .set({ status: 'failed', error: 'The worker stopped during the run', finishedAt: Date.now() })
     .where(eq(schema.containerRuns.status, 'running'))
     .run();
+}
+
+function finishedRun(db: Db, id: number): ContainerRun {
+  const run = getContainerRun(db, id);
+  if (!run) {
+    throw new ContainerRunError('Run not found');
+  }
+  if (run.status === 'queued' || run.status === 'running') {
+    throw new ContainerRunError('The command has not finished yet');
+  }
+  return run;
+}
+
+/**
+ * Keeps a finished run's output for the implementer's next run (or takes it back). One it already
+ * read stays read.
+ */
+export function keepForAgent(db: Db, id: number, keep: boolean): ContainerRun {
+  const run = finishedRun(db, id);
+  if (run.forAgent === 'sent') {
+    throw new ContainerRunError('The agent already read this output');
+  }
+  return db
+    .update(schema.containerRuns)
+    .set({ forAgent: keep ? 'next_run' : null })
+    .where(eq(schema.containerRuns.id, id))
+    .returning()
+    .get();
+}
+
+/** Whether a revision now goes to the implementer (final review, done, a refused commit of its own). */
+export function revisesImplementer(phase: Phase): boolean {
+  try {
+    const next = transition(phase, { type: 'revise' });
+    return next.kind === 'running' && next.step === 'implement';
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Sends a finished run's output to the implementer now: kept for its next run, and a revision
+ * queued with the user's note (the worker runs it like any revision).
+ */
+export function sendToAgent(db: Db, id: number, note: string): ContainerRun {
+  return db.transaction((tx) => {
+    const run = finishedRun(tx, id);
+    if (!revisesImplementer(getTicket(tx, run.ticketId).phase)) {
+      throw new ContainerRunError('The ticket cannot go back to the implementer now');
+    }
+    const kept = keepForAgent(tx, id, true);
+    tx.insert(commands)
+      .values({ type: 'revise', ticketId: run.ticketId, payload: { feedback: note } })
+      .run();
+    return kept;
+  });
+}
+
+/** The outputs the implementer's next run reads, oldest first. */
+export function pendingForAgent(db: Db, ticketId: number): ContainerRun[] {
+  return db
+    .select()
+    .from(schema.containerRuns)
+    .where(
+      and(
+        eq(schema.containerRuns.ticketId, ticketId),
+        eq(schema.containerRuns.forAgent, 'next_run'),
+      ),
+    )
+    .orderBy(asc(schema.containerRuns.id))
+    .all();
+}
+
+/** The implementer read them: they are not given again. */
+export function markSentToAgent(db: Db, ids: number[]): void {
+  if (ids.length > 0) {
+    db.update(schema.containerRuns)
+      .set({ forAgent: 'sent' })
+      .where(inArray(schema.containerRuns.id, ids))
+      .run();
+  }
 }

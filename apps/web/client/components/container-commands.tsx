@@ -1,8 +1,9 @@
 import type { ContainerRun } from '@union/core';
-import { useState, type ReactElement } from 'react';
+import { useState, type ReactElement, type ReactNode } from 'react';
 
 import type { Tone } from '../lib/labels';
 import { useContainerRuns } from '../lib/use-container-runs';
+import { RunAgentActions } from './run-agent-actions';
 import { Badge, Button, ErrorText, inputClass } from './ui';
 
 const STATUS: Record<ContainerRun['status'], { label: string; tone: Tone }> = {
@@ -36,11 +37,14 @@ function RunItem({
   latest,
   onCancel,
   onAgain,
+  children,
 }: {
   run: ContainerRun;
   latest: boolean;
   onCancel: () => void;
   onAgain: () => void;
+  /** What can be done with the output. */
+  children?: ReactNode;
 }): ReactElement {
   const on = run.status === 'queued' || run.status === 'running';
   return (
@@ -66,6 +70,7 @@ function RunItem({
           </pre>
         </details>
       )}
+      {children}
     </li>
   );
 }
@@ -127,7 +132,7 @@ function CommandForm({
  * (with the preview's address while it runs). Never during a step; one at a time.
  */
 export function ContainerCommands({ ticketId }: { ticketId: number }): ReactElement {
-  const { runs, run, cancel, active } = useContainerRuns(ticketId);
+  const { runs, run, cancel, keep, send, active } = useContainerRuns(ticketId);
   const blocked = runs.data?.refusal ?? (active ? 'A command is already running' : null);
   const submit = (text: string): void => {
     if (text.trim() !== '') {
@@ -142,7 +147,7 @@ export function ContainerCommands({ ticketId }: { ticketId: number }): ReactElem
         credentials), with <code>PREVIEW_URL</code> while the preview runs. 10 minutes at most.
       </p>
       <CommandForm blocked={blocked} pending={run.isPending} onRun={submit} />
-      <ErrorText error={runs.error ?? run.error ?? cancel.error} />
+      <ErrorText error={runs.error ?? run.error ?? cancel.error ?? keep.error ?? send.error} />
       <ul className="space-y-3">
         {(runs.data?.runs ?? []).map((item, index) => (
           <RunItem
@@ -155,7 +160,19 @@ export function ContainerCommands({ ticketId }: { ticketId: number }): ReactElem
             onAgain={() => {
               submit(item.command);
             }}
-          />
+          >
+            <RunAgentActions
+              run={item}
+              canSend={runs.data?.canSend ?? false}
+              pending={keep.isPending || send.isPending}
+              onKeep={(value) => {
+                keep.mutate({ runId: item.id, keep: value });
+              }}
+              onSend={(note) => {
+                send.mutate({ runId: item.id, note });
+              }}
+            />
+          </RunItem>
         ))}
       </ul>
     </section>

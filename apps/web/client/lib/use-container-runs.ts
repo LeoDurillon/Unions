@@ -14,6 +14,8 @@ export function useContainerRuns(ticketId: number): {
   runs: UseQueryResult<ContainerRunsView>;
   run: ReturnType<typeof useMutation<ContainerRunsView, Error, string>>;
   cancel: ReturnType<typeof useMutation<ContainerRunsView, Error, number>>;
+  keep: ReturnType<typeof useMutation<ContainerRunsView, Error, { runId: number; keep: boolean }>>;
+  send: ReturnType<typeof useMutation<ContainerRunsView, Error, { runId: number; note: string }>>;
   active: boolean;
 } {
   const queryClient = useQueryClient();
@@ -36,5 +38,17 @@ export function useContainerRuns(ticketId: number): {
       request('POST', `${path}/${runId}/cancel`),
     onSuccess: update,
   });
-  return { runs, run, cancel, active: running(runs.data) };
+  const keep = useMutation({
+    mutationFn: (input: { runId: number; keep: boolean }): Promise<ContainerRunsView> =>
+      request('POST', `${path}/${input.runId}/keep`, { keep: input.keep }),
+    onSuccess: update,
+  });
+  // The revision moves the ticket: its panel reads it again.
+  const send = useMutation({
+    mutationFn: (input: { runId: number; note: string }): Promise<ContainerRunsView> =>
+      request('POST', `${path}/${input.runId}/send`, { note: input.note }),
+    onSuccess: update,
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['ticket', ticketId] }),
+  });
+  return { runs, run, cancel, keep, send, active: running(runs.data) };
 }

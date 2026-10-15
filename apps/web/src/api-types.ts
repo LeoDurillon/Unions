@@ -361,5 +361,8 @@ export type ConnectorsResponse = {
   } | null;
 };
 
-/** The commands run in a ticket's workspace, newest first; `refusal`: why none can run now. */
-export type ContainerRunsView = { runs: ContainerRun[]; refusal: string | null };
+/**
+ * The commands run in a ticket's workspace, newest first; `refusal`: why none can run now;
+ * `canSend`: whether an output can go to the implementer now, as a revision.
+ */
+export type ContainerRunsView = { runs: ContainerRun[]; refusal: string | null; canSend: boolean };

@@ -3,7 +3,11 @@ import { beforeEach, expect, test } from 'bun:test';
 import {
   createDb,
   createTicket,
+  finishContainerRun,
+  getContainerRun,
+  keepForAgent,
   migrateDb,
+  queueContainerRun,
   resolveAgent,
   saveAgent,
   schema,
@@ -253,4 +257,31 @@ test('with automatic pull requests off, the report says how to link one', () => 
   });
   expect(report).toContain('automatic creation is off');
   expect(report).toContain('PR tab');
+});
+
+test('the outputs the user gave go with the first turn, and count as read once it ran', async () => {
+  const { runtime } = fakeRuntime(() => ({ exitCode: 0, lines: [] }));
+  const ws = workspace(runtime, [{ kind: 'rate_limited', message: 'limit' }, ok(1)], {
+    previous: 'old report',
+    feedback: 'Fix the import.',
+  });
+  const run = queueContainerRun(db, { ticketId: ws.context.ticket.id, command: 'npm run import' });
+  finishContainerRun(db, run.id, {
+    status: 'failed',
+    exitCode: 1,
+    error: null,
+    output: 'Error: ``` lot 12 has no shape',
+  });
+  keepForAgent(db, run.id, true);
+  await implementLoop(ws);
+  // Rate limited: the output waits for the next run.
+  expect(runs[0]?.prompt).toContain('# Command output from the user');
+  expect(getContainerRun(db, run.id)?.forAgent).toBe('next_run');
+  await implementLoop(ws);
+  const prompt = runs[1]?.prompt ?? '';
+  expect(prompt).toContain('Fix the import.');
+  expect(prompt).toContain('```sh\nnpm run import\n```');
+  // The output's own backticks cannot close its fence.
+  expect(prompt).toContain('````\nError: ``` lot 12 has no shape\n````');
+  expect(getContainerRun(db, run.id)?.forAgent).toBe('sent');
 });

@@ -1,0 +1,1 @@
+ALTER TABLE `container_runs` ADD `for_agent` text;

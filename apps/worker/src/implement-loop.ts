@@ -5,7 +5,9 @@ import {
   getPreview,
   listAttachments,
   listProjectFiles,
+  markSentToAgent,
   modelFor,
+  pendingForAgent,
   type Project,
   resolveAgent,
   sharedPrompt,
@@ -16,7 +18,13 @@ import { runResumable, type AgentFn, type AgentOutcome, type AgentRun } from './
 import { approvedBefore } from './approved';
 import type { GitHubApi } from './github/api';
 import { check, type Checked } from './implement-checks';
-import { agentServicesHint, feedbackPrompt, gateHint, previewHint } from './implement-prompts';
+import {
+  agentServicesHint,
+  commandOutputPrompt,
+  feedbackPrompt,
+  gateHint,
+  previewHint,
+} from './implement-prompts';
 import { askSession, COMMIT_HOOK_HINT, commitLeftovers, type Refused } from './leftovers';
 import { attachmentsSection, buildPrompt, parentContext } from './prompts';
 import { REPO_DIR, type ProvisionConfig } from './provision';
@@ -89,11 +97,21 @@ function firstPrompt(workspace: Workspace): string {
     : `${feedbackPrompt(revision.feedback)}\n\n${attachmentsSection(attachments)}`;
 }
 
-/** Agent turn, then checks; on red checks the same session gets the failure, up to the limit. */
+/** The prompt plus the outputs the user gave the agent, when there are any. */
+function withOutputs(prompt: string, outputs: string): string {
+  return outputs === '' ? prompt : `${prompt}\n\n${outputs}`;
+}
+
+/**
+ * Agent turn, then checks; on red checks the same session gets the failure, up to the limit. The
+ * command outputs the user gave the agent go with the first turn, and count as read once it ran.
+ */
 export async function implementLoop(workspace: Workspace): Promise<Loop> {
   const { deps, context, project, container } = workspace;
   const max = project.config.maxIterations ?? DEFAULT_MAX_ITERATIONS;
-  let prompt = firstPrompt(workspace);
+  const given = pendingForAgent(deps.db, context.ticket.id);
+  const outputs = commandOutputPrompt(given);
+  let prompt = withOutputs(firstPrompt(workspace), outputs);
   let sessionId = context.resumeSessionId;
   let gate: Checked['gate'] = null;
   const run = (): AgentRun => ({
@@ -109,9 +127,16 @@ export async function implementLoop(workspace: Workspace): Promise<Loop> {
     onEvent: context.log,
   });
   for (let iteration = 1; ; iteration++) {
-    const outcome = await runResumable(deps.agent, deps.runtime, run(), freshPrompt(workspace));
+    const fresh = withOutputs(freshPrompt(workspace), iteration === 1 ? outputs : '');
+    const outcome = await runResumable(deps.agent, deps.runtime, run(), fresh);
     if (outcome.kind !== 'ok') {
       return { outcome, gate, iterations: iteration };
+    }
+    if (iteration === 1) {
+      markSentToAgent(
+        deps.db,
+        given.map((output) => output.id),
+      );
     }
     ({ sessionId } = outcome);
     const leftovers = await commitLeftovers(deps.runtime, container, {
