@@ -44,6 +44,25 @@ file has no summary.
 - Database scripts (`db:backup`, `db:restore`, `db:reset`) and migrations: `docs/architecture/database.md`. After
   editing the schema: `cd packages/core && bunx drizzle-kit generate`; never rewrite a migration a dev server ran.
 
+## Working on the live instance
+
+The user's Union runs from this checkout: the compose stack (`web` on 5173, `worker`) runs `bun --watch` on these
+files and uses `union.sqlite` here, which holds the user's real projects.
+
+- Saving a worker or core file reloads the worker and restarts the agent runs in progress. Run `bun run active`
+  first (exit 1 when something runs) and wait, or ask, when it reports runs.
+- After edits to several core files, or a new migration: `bun run active`, then `docker compose restart web worker`
+  (`--watch` can keep a half-edited import graph).
+- Never write to `union.sqlite` by hand, nor reset or restore it, unless the user asks. Read it with `bun:sqlite`
+  (`new Database(path, { readonly: true })`; there is no `sqlite3` CLI). Change settings through the API, and check
+  the diff after.
+- Ask first before anything that acts on GitHub for a real project (push, PR, comment, review, Project status), and
+  before anything that uses the user's Claude usage (starting a ticket step, an investigation, an agent review).
+- Tests against real Docker use ticket id 9001 and clean up after (`docs/architecture/testing.md`); UI checks block
+  every write (`scripts/ui-check/`).
+- Never print, copy or write secrets (tokens, the GitHub App key, Claude credentials, preview secrets).
+- Commit only when asked.
+
 ## Rules
 
 - Bun and TypeScript only. Use `bun`, `bun test`, `bun:sqlite`, `Bun.sleep`. No Node-only tooling, no `ts-node`.
@@ -104,7 +123,8 @@ The limits that most often force a rewrite are: 60 lines per function, 300 lines
 - Unit-test pure logic (state machine, prompt building, parsing) with `bun test`, files next to the source as
   `*.test.ts`.
 - For anything touching Docker or SSE, verify against a real process and say so in your report if you could not.
-  Clean up containers and volumes named `union-*` that you create.
+  Clean up containers and volumes named `union-*` that you create. How: `docs/architecture/testing.md` (real Docker
+  with ticket 9001, UI checks with `scripts/ui-check/`).
 - Do not claim something works without running it. If a check was skipped, say which.
 
 ## Git

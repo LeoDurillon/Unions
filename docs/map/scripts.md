@@ -5,6 +5,7 @@ export); do not edit. Tests are left out.
 
 ## ./
 
+- `active.ts`: Says whether anything runs on the live instance; exits 1 if so (before editing worker/core files or restarting).
 - `db-backup.ts`: The `db:backup` script: copies the SQLite database to a backup file.
 - `db-in-use.ts`: Who has the database open: host processes and the compose web/worker services.
 - `db-reset.ts`: The `db:reset` script: backs up and empties the database, refusing while it is in use.
@@ -13,3 +14,8 @@ export); do not edit. Tests are left out.
 - `lint-changed.ts`: Lints only the TypeScript files changed since the last commit, and new ones: seconds instead of the whole repository while working.
 - `repo-map-lib.ts`: What `bun run map` writes: one line per source file, its own summary, grouped by folder.
 - `repo-map.ts`: Writes `docs/map/<area>.md`, one line per source file; `--check` fails when one is out of date.
+
+## ui-check/
+
+- `browser.ts`: Opens the running app in a headless browser for UI checks, with API writes blocked or stubbed, and recorded.
+- `example.ts`: A UI check to copy: opens a ticket's Preview tab with its commands stubbed, and prints what it would send.

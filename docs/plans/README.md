@@ -19,6 +19,21 @@ and linked.
 - [Group a review's changes by spec](review-spec-groups.md) (built, hunks included): an agent groups the changed files by the parts of
   the spec they implement (PR description, ticket, issue or Notion page), on request; a toggle in the file panel.
 
+## Open items
+
+Loose ends found while building, not planned yet (2026-10-15):
+
+- Ticket 7 (PR #1603) builds on the branch of #1582, which was closed: the user may want to retarget it to the base
+  branch (Overview → base branch).
+- Project settings as a page: steps 5 and 6 of [the plan](project-settings-page.md).
+- The check and e2e timeouts stop `docker exec` but leave the command running in the container; the Commands runner
+  kills its process group (`container-run.ts`), the gate and e2e should too.
+- The web UI on 5173 is reachable from the local network (compose publishes it on all addresses); restrict it to
+  `127.0.0.1` if that is not wanted.
+- Container commands phase 4: run in a preview service, with its secrets masked ([plan](container-commands.md)).
+- The e2e "Send to agent" still builds its own revision text; it could use the command-output path.
+- `SPEC.md` is 33 KB: split per area like `AGENTS.md` (`docs/architecture/`).
+
 ## Ideas
 
 - [Prefill steps on GitHub issue import](issue-import-prefill.md)

@@ -21,6 +21,7 @@
     "lint:fix": "oxlint --type-aware --fix",
     "lint:changed": "bun scripts/lint-changed.ts",
     "map": "bun scripts/repo-map.ts",
+    "active": "bun scripts/active.ts",
     "map:check": "bun scripts/repo-map.ts --check",
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check",
@@ -35,6 +36,7 @@
     "oxfmt": "catalog:development",
     "oxlint": "catalog:development",
     "oxlint-tsgolint": "catalog:development",
+    "playwright-core": "catalog:development",
     "typescript": "catalog:development"
   },
   "catalogs": {
@@ -43,6 +45,7 @@
       "oxfmt": "0.72.0",
       "oxlint": "1.87.0",
       "oxlint-tsgolint": "7.0.2004",
+      "playwright-core": "1.56.1",
       "typescript": "7.0.2"
     },
     "ui": {
