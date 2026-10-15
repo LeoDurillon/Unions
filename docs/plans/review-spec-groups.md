@@ -1,6 +1,7 @@
 # Plan: group a review's changes by spec
 
-Status: steps 1 to 3 built (branch `review-spec-groups`); step 4 (hunks) later. Decisions taken (end of file).
+Status: built, steps 1 to 4 (step 4, grouping by hunk, in `ab3dcb3`); merged into `main`. Not yet tried on a real
+ticket. Decisions taken (end of file).
 
 ## Idea
 

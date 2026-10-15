@@ -1,6 +1,6 @@
 # Plan: MCP servers for agents
 
-Status: claude.ai connectors built (2026-10-15, branch `mcp-servers`): Agent settings → Connectors reads the
+Status: claude.ai connectors built and merged into `main` (2026-10-15, `139f122`): Agent settings → Connectors reads the
 account's connectors, an agent selects one like a tool, runs without one get `ENABLE_CLAUDEAI_MCP_SERVERS=false`.
 Checked for real: a fresh agent container lists `claude.ai Figma … ✔ Connected`; two real Figma runs on Sonnet
 (investigations 9 and 10). Figma's screenshots and assets come as links to `curl`, which agents are refused, so a run
