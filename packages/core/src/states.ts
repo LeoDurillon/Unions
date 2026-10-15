@@ -232,28 +232,30 @@ export function boardStatus(phase: Phase): BoardStatus {
   }
 }
 
-/** The board's columns: the GitHub Project's, plus Merged, which only Union shows. */
+/** The board's columns: the GitHub Project's, plus Merged / Closed, which only Union shows. */
 export type BoardColumn = BoardStatus | 'merged';
 
-/** How long a ticket stays in the Merged column after its pull request was merged: 21 days. */
+/** How long a ticket stays in Merged / Closed after its pull request was merged or closed: 21 days. */
 export const MERGED_VISIBLE_MS = 1_814_400_000;
 
-/** A ticket whose pull request is merged is in Merged, whatever its phase; else its phase's column. */
-export function boardColumn(ticket: {
-  phase: Phase;
+type PrEnd = {
   prState: 'open' | 'closed' | 'merged' | null;
-}): BoardColumn {
-  return ticket.prState === 'merged' ? 'merged' : boardStatus(ticket.phase);
+  prMergedAt: number | null;
+  prClosedAt: number | null;
+};
+
+/**
+ * A ticket whose pull request is merged or closed is in Merged / Closed, whatever its phase; else
+ * its phase's column.
+ */
+export function boardColumn(ticket: { phase: Phase; prState: PrEnd['prState'] }): BoardColumn {
+  return ticket.prState === 'merged' || ticket.prState === 'closed'
+    ? 'merged'
+    : boardStatus(ticket.phase);
 }
 
-/** Merged three weeks ago or more: off the board. Until the merge date is known, it stays. */
-export function leftBoard(
-  ticket: { prState: 'open' | 'closed' | 'merged' | null; prMergedAt: number | null },
-  now: number,
-): boolean {
-  return (
-    ticket.prState === 'merged' &&
-    ticket.prMergedAt !== null &&
-    now - ticket.prMergedAt >= MERGED_VISIBLE_MS
-  );
+/** Merged or closed three weeks ago or more: off the board. Until the date is known, it stays. */
+export function leftBoard(ticket: PrEnd, now: number): boolean {
+  const endedAt = ticket.prState === 'merged' ? ticket.prMergedAt : ticket.prClosedAt;
+  return ticket.prState !== 'open' && endedAt !== null && now - endedAt >= MERGED_VISIBLE_MS;
 }

@@ -71,6 +71,10 @@ function toRemoteItem(node: ItemNode): RemoteItem | null {
   };
 }
 
+function timeOf(date: string | null): number | null {
+  return date === null ? null : Date.parse(date);
+}
+
 export class OctokitGitHubApi implements GitHubApi {
   /** A token client or an installation client (`githubClient` in `@union/core/github-client`). */
   constructor(private readonly octokit: Octokit) {}
@@ -238,13 +242,17 @@ export class OctokitGitHubApi implements GitHubApi {
       return null;
     }
     if (pull.data.state !== 'open') {
-      const mergedAt = pull.data.merged_at === null ? null : Date.parse(pull.data.merged_at);
       return pull.data.merged
-        ? { state: 'merged', behindBy: null, mergedAt }
-        : { state: 'closed', behindBy: null, mergedAt: null };
+        ? { state: 'merged', behindBy: null, mergedAt: timeOf(pull.data.merged_at), closedAt: null }
+        : {
+            state: 'closed',
+            behindBy: null,
+            mergedAt: null,
+            closedAt: timeOf(pull.data.closed_at),
+          };
     }
     if (!behind) {
-      return { state: 'open', behindBy: null, mergedAt: null };
+      return { state: 'open', behindBy: null, mergedAt: null, closedAt: null };
     }
     const { base, head } = pull.data;
     const { data } = await this.octokit.rest.repos.compareCommitsWithBasehead({
@@ -252,7 +260,7 @@ export class OctokitGitHubApi implements GitHubApi {
       basehead: `${base.ref}...${head.sha}`,
       per_page: 1,
     });
-    return { state: 'open', behindBy: data.behind_by, mergedAt: null };
+    return { state: 'open', behindBy: data.behind_by, mergedAt: null, closedAt: null };
   }
 
   async createPullRequestReview(

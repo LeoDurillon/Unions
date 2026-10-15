@@ -5,6 +5,34 @@ import type { TicketSummary } from '../../src/api-types';
 import { describePhase, isBlocked, refLabel } from '../lib/labels';
 import { Badge } from './ui';
 
+/** How the ticket's pull request ended, for the Merged / Closed column; null while it has not. */
+function PrEnd({ prState }: { prState: TicketSummary['prState'] }): ReactElement {
+  return prState === 'merged' ? (
+    <Badge tone="blue">Merged</Badge>
+  ) : (
+    <Badge tone="red">Closed</Badge>
+  );
+}
+
+/** The card's status line: how the pull request ended, else whether it waits, else its phase. */
+function CardStatus({ ticket }: { ticket: TicketSummary }): ReactElement {
+  if (ticket.board === 'merged') {
+    return <PrEnd prState={ticket.prState} />;
+  }
+  if (isBlocked(ticket)) {
+    return <Badge tone="amber">Waiting for parent</Badge>;
+  }
+  const phase = describePhase(ticket.phase);
+  return (
+    <>
+      <Badge tone={phase.tone}>{phase.status}</Badge>
+      {phase.step === null ? null : (
+        <span className="text-xs whitespace-nowrap text-zinc-500">{phase.step}</span>
+      )}
+    </>
+  );
+}
+
 export function TicketCard({
   ticket,
   onOpen,
@@ -18,7 +46,6 @@ export function TicketCard({
     id: ticket.id,
     disabled: !draggable,
   });
-  const phase = describePhase(ticket.phase);
   const style = transform
     ? { transform: `translate(${transform.x}px, ${transform.y}px)` }
     : undefined;
@@ -47,14 +74,7 @@ export function TicketCard({
         </p>
       ) : null}
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-        {blocked ? (
-          <Badge tone="amber">Waiting for parent</Badge>
-        ) : (
-          <Badge tone={phase.tone}>{phase.status}</Badge>
-        )}
-        {!blocked && phase.step !== null ? (
-          <span className="text-xs whitespace-nowrap text-zinc-500">{phase.step}</span>
-        ) : null}
+        <CardStatus ticket={ticket} />
         <span className="ml-auto text-xs whitespace-nowrap text-zinc-500">
           {ticket.issueNumber === null ? 'not on GitHub yet' : `#${ticket.issueNumber}`}
         </span>

@@ -15,7 +15,7 @@ export const COLUMNS: { status: BoardColumn; title: string }[] = [
   { status: 'in_progress', title: 'In progress' },
   { status: 'in_review', title: 'In review' },
   { status: 'done', title: 'Done' },
-  { status: 'merged', title: 'Merged' },
+  { status: 'merged', title: 'Merged / Closed' },
 ];
 
 export type Tone = 'neutral' | 'blue' | 'amber' | 'red' | 'green';

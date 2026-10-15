@@ -64,8 +64,8 @@ function useStartOnDrop(): { start: (event: DragEndEvent) => void; error: Error 
 }
 
 /**
- * The columns, filling the screen down to the bottom edge. Merged keeps a ticket three weeks after
- * its pull request was merged.
+ * The columns, filling the screen down to the bottom edge. Merged / Closed keeps a ticket three weeks
+ * after its pull request was merged or closed.
  */
 export function BoardView({
   tickets,
@@ -75,7 +75,7 @@ export function BoardView({
   onStart,
 }: {
   tickets: TicketSummary[];
-  /** When the tickets were read: Merged drops those merged three weeks before. */
+  /** When the tickets were read: Merged / Closed drops those that ended three weeks before. */
   now: number;
   error: Error | null;
   onOpen: (id: number) => void;

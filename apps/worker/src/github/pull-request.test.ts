@@ -56,3 +56,22 @@ test('a pull request merged before the date was kept is asked once more, for it'
   await refreshPullRequest(db, api, REPO, getTicket(db, ticketId));
   expect(polls()).toBe(1);
 });
+
+test('a close keeps its date and is still asked about, since the pull request can be reopened', async () => {
+  const [pull] = api.pulls;
+  if (pull) {
+    pull.state = 'closed';
+    pull.closedAt = MERGED_AT;
+  }
+  await refreshPullRequest(db, api, REPO, getTicket(db, ticketId));
+  expect(getTicket(db, ticketId)).toMatchObject({
+    prState: 'closed',
+    prMergedAt: null,
+    prClosedAt: MERGED_AT,
+  });
+  if (pull) {
+    pull.state = 'open';
+  }
+  await refreshPullRequest(db, api, REPO, getTicket(db, ticketId));
+  expect(getTicket(db, ticketId)).toMatchObject({ prState: 'open', prClosedAt: null });
+});

@@ -172,21 +172,29 @@ test('the implementer can be sent back with guidance after a refused commit', ()
   expect(() => transition(paused, { type: 'approve' })).toThrow(InvalidTransition);
 });
 
-function merged(at: number | null): { prState: 'merged'; prMergedAt: number | null } {
-  return { prState: 'merged', prMergedAt: at };
+function ended(
+  prState: 'merged' | 'closed',
+  at: number | null,
+): { prState: 'merged' | 'closed'; prMergedAt: number | null; prClosedAt: number | null } {
+  return prState === 'merged'
+    ? { prState, prMergedAt: at, prClosedAt: null }
+    : { prState, prMergedAt: null, prClosedAt: at };
 }
 
-test('a merged pull request puts the ticket in Merged for three weeks', () => {
+test('a merged or closed pull request puts the ticket in Merged / Closed for three weeks', () => {
   const done: Phase = { kind: 'done' };
   expect(boardColumn({ phase: done, prState: 'open' })).toBe('done');
   expect(boardColumn({ phase: done, prState: 'merged' })).toBe('merged');
+  expect(boardColumn({ phase: done, prState: 'closed' })).toBe('merged');
   // Merged by hand before the final review ended: still merged.
   expect(
     boardColumn({ phase: { kind: 'awaiting_approval', step: 'final_review' }, prState: 'merged' }),
   ).toBe('merged');
   const now = 10 * MERGED_VISIBLE_MS;
-  expect(leftBoard(merged(now - MERGED_VISIBLE_MS + 1), now)).toBe(false);
-  expect(leftBoard(merged(now - MERGED_VISIBLE_MS), now)).toBe(true);
-  expect(leftBoard(merged(null), now)).toBe(false);
-  expect(leftBoard({ prState: 'closed', prMergedAt: null }, now)).toBe(false);
+  for (const state of ['merged', 'closed'] as const) {
+    expect(leftBoard(ended(state, now - MERGED_VISIBLE_MS + 1), now)).toBe(false);
+    expect(leftBoard(ended(state, now - MERGED_VISIBLE_MS), now)).toBe(true);
+    expect(leftBoard(ended(state, null), now)).toBe(false);
+  }
+  expect(leftBoard({ prState: 'open', prMergedAt: null, prClosedAt: null }, now)).toBe(false);
 });

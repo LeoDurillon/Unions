@@ -33,6 +33,8 @@ export type PullRequestStatus = {
   state: PullRequestState;
   behindBy: number | null;
   mergedAt: number | null;
+  /** When it was closed without being merged. */
+  closedAt: number | null;
 };
 
 /** One line comment of a pull request review, in GitHub's terms (LEFT: the old side). */

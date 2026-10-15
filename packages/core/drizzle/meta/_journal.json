@@ -274,6 +274,13 @@
       "when": 1792056908076,
       "tag": "0038_strange_monster_badoon",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "6",
+      "when": 1792068374342,
+      "tag": "0039_round_mercury",
+      "breakpoints": true
     }
   ]
 }

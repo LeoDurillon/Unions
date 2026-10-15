@@ -92,8 +92,10 @@ export const tickets = sqliteTable(
     behindBy: integer('behind_by'),
     /** The pull request's state on GitHub, polled by the worker; null until known (or no PR). */
     prState: text('pr_state', { enum: ['open', 'closed', 'merged'] }),
-    /** When GitHub merged the pull request; the board's Merged column shows it for three weeks. */
+    /** When GitHub merged the pull request; the board's Merged / Closed column shows it for three weeks. */
     prMergedAt: integer('pr_merged_at'),
+    /** When GitHub closed the pull request without merging it; null while it is open or merged. */
+    prClosedAt: integer('pr_closed_at'),
     containerName: text('container_name'),
     homeVolume: text('home_volume'),
     workspaceVolume: text('workspace_volume'),
