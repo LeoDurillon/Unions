@@ -31,7 +31,12 @@ file has no summary.
 
 - `bun install`
 - `bun test`: runs all tests.
-- `bun run check`: format check, lint, typecheck and tests. Run it before finishing; it must pass.
+- `bun run check`: format check, map check, lint, typecheck and tests, in that order. Run it before finishing; it
+  must pass.
+- `bun run map`: regenerates `docs/map/` after adding, removing or re-describing files; `bun run map:check` (part of
+  `check`) fails when a map is out of date or a source file has no top comment.
+- `bun run active`: says whether anything runs on the live instance (exit 1 if so); see "Working on the live
+  instance".
 - `bun run lint` (`lint:fix` to autofix), `bun run fmt` (`fmt:check` to verify), `bun run typecheck`.
 - `bun run dev`: web (Vite on 5173 + API on 3000) and worker together, with reload. `bun run dev:web` /
   `bun run dev:worker` run one side.
