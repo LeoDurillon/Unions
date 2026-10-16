@@ -41,7 +41,7 @@ Loose ends found while building, not planned yet (2026-10-15):
 - [Exclude merged PRs from the ticket view](exclude-merged-prs.md) (scope to clarify)
 - [Revise with guidance after a failed rebase](rebase-revise-with-guidance.md)
 - [Download attachments from GitHub and Notion on import](attachment-downloads.md) (Notion images done)
-- [Events v2](events-v2.md): replay, more actions, filters, group triggers
+- [Events v2](events-v2.md): more actions (GitHub comment, labels, webhook; planned), replay, filters, group triggers
 - [Names in the event rule preview](rule-preview-people.md) (small)
 
 ## Chores
