@@ -94,6 +94,54 @@ Not chosen for now: several actions per rule (`actions: EventAction[]`, for exam
 comment on GitHub in one rule). It needs one delivery per action (the unique key on `rule_id, event_seq` changes),
 retries per action, and an editor listing actions of mixed kinds. Worth it only if mixing kinds is wanted.
 
+## Pull request properties and GitHub Project fields
+
+Status: planned (2026-10-16), not started. Covers targets 2 and 3 of step 2 above, for the pull request. A rule can
+change several things of the ticket's pull request at once (labels, reviewers, assignees, title, description), and
+set GitHub Project fields on the issue's item or the PR's item (the rule picks).
+
+Two new action kinds, each a list of changes like the Notion action (one rule, one delivery):
+
+- `github_pull_request`, "Update the ticket's pull request": `changes: PullRequestChange[]`, one of each kind at
+  most:
+  - `{ kind: 'labels', add: string[], remove: string[] }`: label names; a label that does not exist yet is created by
+    GitHub on add.
+  - `{ kind: 'reviewers', users: string[] }`: request reviews (logins). Teams later (needs `read:org`).
+  - `{ kind: 'assignees', users: string[] }`: add assignees (logins).
+  - `{ kind: 'title', value: string }`: a template.
+  - `{ kind: 'description', value: string }`: a template, written as a section of the description between
+    `<!-- union-rule:<ruleId> -->` markers: added once, replaced on the next delivery, so a retry or a second
+    trigger never repeats it, and the rest of the description is kept.
+- `github_project_fields`, "Set fields of the ticket's GitHub Project item": `item: 'issue' | 'pull_request'`,
+  `values: { fieldId: string; fieldName: string; value: string }[]` (like the Notion values). Types: single
+  select (option name), text, number, date (templates allowed; single select by name). The project is the one Union
+  syncs (`githubProjectNodeId`). The PR item is added to the project on first use (`addProjectV2ItemById` returns
+  the existing item when there is one). **Status on the issue's item is refused**: Union's sync owns it.
+
+A rule on a ticket without a pull request is skipped ("The ticket has no pull request"), as for comments.
+
+### Steps
+
+1. **Core, browser-safe** (`event-actions.ts`, plus `event-github-actions.ts` for the checks: `event-actions.ts` is
+   near its import and length limits): the two kinds, labels, empty values, checks (at least one change, logins and
+   label names well formed, unknown variables, no Status on the issue item). Tests next to them.
+2. **Worker, pull request** (`event-actions/github-pull-request.ts`): `GitHubApi` gets `addLabels`, `removeLabel`,
+   `requestReviewers`, `addAssignees`, `updatePullRequestTitle` (`pullRequestBody` and `updatePullRequestBody`
+   exist); the fake gets them too. One delivery does the changes in order; a temporary error retries the whole
+   delivery (every change is idempotent), a refusal fails it and the detail says which changes were done. One per
+   tick, as comments.
+3. **Worker, Project fields** (`event-actions/github-project-fields.ts`): `GitHubApi.projectFields(projectNodeId)`
+   (id, name, type, options) generalizing `getProjectInfo`, `pullRequestNodeId`, and `setProjectField` by type. The
+   issue's item is `tickets.project_item_id`; the PR's is added. A field or option gone from the project fails the
+   delivery and names it.
+4. **Web**: `OnboardingGitHub` reads what the editor offers, live (no stored copy): the repo's labels, the
+   assignable users, the project's fields. Endpoints under `/api/projects/:projectId/github/…`. The save checks the
+   project fields against a live read (field still there, option exists). Preview for both kinds (what would change,
+   nothing sent).
+5. **UI**: a fields component per kind (`pull-request-fields.tsx` with a row per change, `project-field-row.tsx`
+   like `notion-value-row.tsx`), the rule's sentence in `rule-action-text.tsx`, and the preview.
+6. **Docs and maps**; a check against a real project changes its pull requests: ask before running it.
+
 ## Left for later
 
 - **Replay:** apply a new rule to past events (with a preview of what it would change, and a cap).
