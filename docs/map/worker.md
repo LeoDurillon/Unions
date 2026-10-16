@@ -63,6 +63,7 @@ export); do not edit. Tests are left out.
 
 ## event-actions/
 
+- `github-comment.ts`: The GitHub comment action of a rule: comments on the ticket's issue or pull request.
 - `notion.ts`: The Notion action of a rule: sets one property of the ticket's Notion page.
 - `target.ts`: What a kind of rule action needs to be done: one target per kind, picked by the event dispatcher.
 

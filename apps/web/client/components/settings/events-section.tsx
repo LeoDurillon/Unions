@@ -4,11 +4,10 @@ import { useState, type ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
 import type { EventRulesResponse } from '../../../src/event-api-types';
-import { eventRulesApi, type RuleDraft } from '../../lib/event-rules-api';
+import { eventRulesApi, newRule, type RuleDraft } from '../../lib/event-rules-api';
 import { Button, ErrorText } from '../ui';
-import { NEW_RULE, RuleEditor } from './rule-editor';
+import { RuleEditor } from './rule-editor';
 import { DeliveryList, RuleRow } from './rule-list';
-import { SetUpFirst } from './set-up-first';
 
 function NotionColumns({
   projectId,
@@ -131,12 +130,14 @@ function Rules({
   return (
     <>
       <ErrorText error={writes.remove.error} />
-      <NotionColumns projectId={projectId} notion={notion} onRefreshed={() => writes.refresh()} />
-      {editing !== null && notion ? (
+      {data?.hasNotion ? (
+        <NotionColumns projectId={projectId} notion={notion} onRefreshed={() => writes.refresh()} />
+      ) : null}
+      {editing === null ? null : (
         <RuleEditor
           projectId={projectId}
           notion={notion}
-          initial={editing === 'new' ? NEW_RULE : draftOf(editing)}
+          initial={editing === 'new' ? newRule(notion) : draftOf(editing)}
           saving={writes.save.isPending}
           error={writes.save.error}
           onSave={(rule) => {
@@ -147,7 +148,7 @@ function Rules({
             setEditing(null);
           }}
         />
-      ) : null}
+      )}
       <RuleItems
         projectId={projectId}
         rules={data?.rules ?? []}
@@ -158,8 +159,6 @@ function Rules({
       {editing === null ? (
         <Button
           variant="primary"
-          disabled={!notion}
-          title={notion ? undefined : 'Refresh from Notion first'}
           onClick={() => {
             setEditing('new');
           }}
@@ -171,7 +170,6 @@ function Rules({
   );
 }
 
-/** The data source must be connected: the rules write to the pages tickets were imported from. */
 function useRules(project: PublicProject): ReturnType<typeof useQuery<EventRulesResponse>> {
   return useQuery({
     queryKey: ['event-rules', project.id],
@@ -180,19 +178,17 @@ function useRules(project: PublicProject): ReturnType<typeof useQuery<EventRules
 }
 
 /**
- * Event rules: when something happens to a ticket imported from Notion, set a property of its
- * Notion page. They apply from their creation on, never to what happened before.
+ * Event rules: when something happens to a ticket, set a property of its Notion page or comment on
+ * its GitHub issue or pull request. They apply from their creation on, never to what happened before.
  */
 export function EventRulesSection({ project }: { project: PublicProject }): ReactElement {
   const rules = useRules(project);
-  if (rules.data && !rules.data.hasNotion) {
-    return <SetUpFirst section="notion" what="Connect the project to Notion" />;
-  }
   return (
     <section className="space-y-4">
       <p className="text-sm text-zinc-500">
-        When something happens to a ticket imported from Notion, set a property of its page. Rules
-        apply to what happens from their creation on.
+        When something happens to a ticket, set a property of its Notion page (tickets imported from
+        Notion) or comment on its GitHub issue or pull request. Rules apply to what happens from
+        their creation on.
       </p>
       <ErrorText error={rules.error} />
       <Rules projectId={project.id} data={rules.data} />
@@ -200,12 +196,12 @@ export function EventRulesSection({ project }: { project: PublicProject }): Reac
   );
 }
 
-/** What the rules did lately: each write to Notion, and why one failed. */
+/** What the rules did lately: each update or comment, and why one failed. */
 export function EventActivitySection({ project }: { project: PublicProject }): ReactElement {
   return (
     <section className="space-y-4">
       <p className="text-sm text-zinc-500">
-        The latest updates the event rules made to Notion pages, newest first.
+        The latest Notion updates and GitHub comments the event rules made, newest first.
       </p>
       <DeliveryList projectId={project.id} />
     </section>

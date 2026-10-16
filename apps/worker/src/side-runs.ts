@@ -36,7 +36,7 @@ export async function startSideRuns(
   const prDescriptions = new PrDescriptionRunner(deps);
   const previews = createPreviewManager(deps);
   const reviewGroupings = new ReviewGroupingRunner(deps);
-  const events = new EventDispatcher(deps.db, new FetchNotionApi());
+  const events = new EventDispatcher(deps.db, new FetchNotionApi(), deps.apiFor);
   const idlePreviews = previews.idleWatcher();
   const connectors = new ConnectorChecker(deps);
   const containerRuns = new ContainerRunner(deps);

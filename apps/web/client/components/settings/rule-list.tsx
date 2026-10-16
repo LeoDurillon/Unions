@@ -7,7 +7,7 @@ import type { DeliveryView } from '../../../src/event-api-types';
 import { eventRulesApi } from '../../lib/event-rules-api';
 import { STEP_TITLES } from '../../lib/labels';
 import { Badge, Button } from '../ui';
-import { PeopleNames } from './people-field';
+import { ActionText } from './rule-action-text';
 
 const DELIVERIES_POLL_MS = 10_000;
 const STATUS_TONES = {
@@ -43,7 +43,6 @@ export function RuleRow({
   onEdit: () => void;
   onDelete: () => void;
 }): ReactElement {
-  const property = notion?.properties.find((candidate) => candidate.id === rule.action.propertyId);
   return (
     <li className="flex items-start gap-3 rounded-md border border-zinc-200 p-2 dark:border-zinc-800">
       <div className="min-w-0 flex-1 space-y-0.5 text-sm">
@@ -51,18 +50,8 @@ export function RuleRow({
           {rule.name} {rule.enabled ? null : <Badge tone="neutral">off</Badge>}
         </p>
         <p className="text-zinc-500">
-          When: {triggerText(rule.trigger)} → set{' '}
-          {property ? (
-            <span className="font-medium">{property.name}</span>
-          ) : (
-            <span className="text-red-600 dark:text-red-400">a property no longer in Notion</span>
-          )}{' '}
-          to{' '}
-          {property?.type === 'people' ? (
-            <PeopleNames projectId={projectId} value={rule.action.value} />
-          ) : (
-            <code className="font-mono">{rule.action.value || '(empty)'}</code>
-          )}
+          When: {triggerText(rule.trigger)} →{' '}
+          <ActionText projectId={projectId} notion={notion} action={rule.action} />
         </p>
       </div>
       <Button onClick={onToggle}>{rule.enabled ? 'Turn off' : 'Turn on'}</Button>

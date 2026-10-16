@@ -2,19 +2,23 @@
 import { and, eq } from 'drizzle-orm';
 
 import type { Db } from './db';
+import {
+  checkGitHubComment,
+  isActionKind,
+  type ActionKind,
+  type ActionOf,
+  type EventAction,
+  type GitHubCommentAction,
+  type NotionPropertyAction,
+} from './event-actions';
 import { isEvent, type EventPayloads, type StoredEvent } from './event-catalog';
 import {
   BOARD_LABELS,
-  isActionKind,
   isTrigger,
   notionPropertyValue,
   renderTemplate,
   unknownVariables,
-  type ActionKind,
-  type ActionOf,
-  type EventAction,
   type EventTrigger,
-  type NotionPropertyAction,
   type TemplateVariable,
 } from './event-rule-types';
 import type { NotionDataSource, NotionProperty } from './notion-api';
@@ -110,8 +114,19 @@ type ActionChecks = {
   [K in ActionKind]: (db: Db, projectId: number, record: object) => ActionOf<K>;
 };
 
-/** Each kind's checks, against what the project holds (the Notion columns for a Notion action). */
-const ACTION_CHECKS: ActionChecks = { notion_property: checkedNotionAction };
+/** Each kind's checks; a Notion action is checked against the stored Notion columns. */
+function checkedGitHubComment(_db: Db, _projectId: number, record: object): GitHubCommentAction {
+  const checked = checkGitHubComment(record);
+  if ('error' in checked) {
+    throw new EventRuleError(checked.error);
+  }
+  return checked.action;
+}
+
+const ACTION_CHECKS: ActionChecks = {
+  notion_property: checkedNotionAction,
+  github_comment: checkedGitHubComment,
+};
 
 /** An action without a `kind` is a Notion one: rules saved before there were other kinds. */
 function checkedAction(db: Db, projectId: number, action: unknown): EventAction {

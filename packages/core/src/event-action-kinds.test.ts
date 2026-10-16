@@ -1,4 +1,4 @@
-// Tests how a rule's action kind is read: an unknown kind is refused, a missing one is Notion's.
+// Tests how a rule's action is read: its kind, a missing kind as Notion's, and a GitHub comment's checks.
 import { beforeEach, expect, test } from 'bun:test';
 
 import { createDb, migrateDb, type Db } from './db';
@@ -36,5 +36,27 @@ test('an action without a kind is a Notion action, as rules were before other ki
     kind: 'notion_property',
     propertyId: 'p%3Ar',
     value: '{pr.url}',
+  });
+});
+
+test('a GitHub comment says where it goes and what it says, with known variables', () => {
+  expect(check({ kind: 'github_comment', on: 'pull_request', body: ' Ready: {pr.url} ' })).toEqual({
+    kind: 'github_comment',
+    on: 'pull_request',
+    body: 'Ready: {pr.url}',
+  });
+  expect(() => check({ kind: 'github_comment', on: 'wiki', body: 'x' })).toThrow('Pick where');
+  expect(() => check({ kind: 'github_comment', on: 'issue', body: '  ' })).toThrow(
+    'Write the comment',
+  );
+  expect(() => check({ kind: 'github_comment', on: 'issue', body: '{pr.link}' })).toThrow(
+    'Unknown variable: {pr.link}',
+  );
+});
+
+test('a GitHub comment needs no Notion columns', () => {
+  db.delete(schema.notionDataSources).run();
+  expect(check({ kind: 'github_comment', on: 'issue', body: 'Done' })).toMatchObject({
+    kind: 'github_comment',
   });
 });

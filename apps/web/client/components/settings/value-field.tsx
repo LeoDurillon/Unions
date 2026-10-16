@@ -1,11 +1,11 @@
 import type { NotionProperty } from '@union/core';
-import { TEMPLATE_VARIABLES } from '@union/core/event-rules';
 import { useState, type ReactElement } from 'react';
 
 import { joinChoices, partitionChoices } from '../../lib/choice-values';
 import { CheckChip, ChipGroup, toggled } from '../choice';
 import { Field, inputClass } from '../ui';
 import { PeopleField } from './people-field';
+import { VariableChips } from './variable-chips';
 
 const OTHER = '\u0000other';
 
@@ -32,21 +32,11 @@ function TemplateInput({
           onChange(event.target.value);
         }}
       />
-      <span className="flex flex-wrap gap-1">
-        {TEMPLATE_VARIABLES.map((variable) => (
-          <button
-            key={variable.name}
-            type="button"
-            title={variable.description}
-            className="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-xs hover:bg-indigo-100 dark:bg-zinc-800 dark:hover:bg-indigo-950"
-            onClick={() => {
-              onChange(`${value}{${variable.name}}`);
-            }}
-          >
-            {`{${variable.name}}`}
-          </button>
-        ))}
-      </span>
+      <VariableChips
+        onPick={(variable) => {
+          onChange(`${value}${variable}`);
+        }}
+      />
     </>
   );
 }

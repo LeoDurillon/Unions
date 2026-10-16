@@ -9,6 +9,7 @@ import {
   type NotionApi,
 } from '@union/core';
 
+import { gitHubCommentTarget, type GitHubApiFor } from './event-actions/github-comment';
 import { notionTarget } from './event-actions/notion';
 import { deliverAction, type ActionTargets } from './event-actions/target';
 
@@ -21,11 +22,16 @@ export class EventDispatcher {
   private running: Promise<void> | null = null;
   private readonly targets: ActionTargets;
 
+  /** Without `apiFor`, GitHub actions fail for want of credentials (tests of Notion actions). */
   constructor(
     private readonly db: Db,
     notion: NotionApi,
+    apiFor: GitHubApiFor = () => null,
   ) {
-    this.targets = { notion_property: notionTarget(db, notion) };
+    this.targets = {
+      notion_property: notionTarget(db, notion),
+      github_comment: gitHubCommentTarget(db, apiFor),
+    };
   }
 
   tick(): void {

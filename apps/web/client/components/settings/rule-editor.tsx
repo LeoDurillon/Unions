@@ -3,7 +3,6 @@ import {
   BOARD_LABELS,
   TRIGGER_KINDS,
   TRIGGER_LABELS,
-  WRITABLE_NOTION_TYPES,
   type EventTrigger,
 } from '@union/core/event-rules';
 import { BOARD_STATUSES, PLANNING_STEPS } from '@union/core/states';
@@ -13,8 +12,8 @@ import type { RuleDraft } from '../../lib/event-rules-api';
 import { STEP_TITLES } from '../../lib/labels';
 import { useLeaveGuard } from '../../lib/leave-guard';
 import { Button, ErrorText, Field, inputClass } from '../ui';
+import { ActionFields } from './action-fields';
 import { RulePreviewBox } from './rule-preview';
-import { ValueField } from './value-field';
 
 const APPROVAL_STEPS = [...PLANNING_STEPS, 'implement', 'final_review'] as const;
 
@@ -109,52 +108,6 @@ function TriggerFields({
   );
 }
 
-function ActionFields({
-  projectId,
-  notion,
-  rule,
-  onChange,
-}: {
-  projectId: number;
-  notion: NotionSchema;
-  rule: RuleDraft;
-  onChange: (action: RuleDraft['action']) => void;
-}): ReactElement {
-  const writable = notion.properties.filter((property) =>
-    WRITABLE_NOTION_TYPES.some((type) => type === property.type),
-  );
-  const property = notion.properties.find((candidate) => candidate.id === rule.action.propertyId);
-  return (
-    <>
-      <Field label={`Then set this property of the ticket's Notion page (${notion.title})`}>
-        <select
-          className={inputClass}
-          value={rule.action.propertyId}
-          onChange={(event) => {
-            // Another property, another type: the value starts over.
-            onChange({ ...rule.action, propertyId: event.target.value, value: '' });
-          }}
-        >
-          <option value="">Pick a property…</option>
-          {writable.map((candidate) => (
-            <option key={candidate.id} value={candidate.id}>
-              {candidate.name} ({candidate.type.replace('_', ' ')})
-            </option>
-          ))}
-        </select>
-      </Field>
-      <ValueField
-        projectId={projectId}
-        property={property}
-        value={rule.action.value}
-        onChange={(value) => {
-          onChange({ ...rule.action, value });
-        }}
-      />
-    </>
-  );
-}
-
 function NameField({
   name,
   onChange,
@@ -176,14 +129,7 @@ function NameField({
   );
 }
 
-export const NEW_RULE: RuleDraft = {
-  name: '',
-  enabled: true,
-  trigger: { kind: 'pull_request_linked' },
-  action: { kind: 'notion_property', propertyId: '', value: '' },
-};
-
-/** Edits a rule: its name, what triggers it, and the Notion property it sets. */
+/** Edits a rule: its name, what triggers it, and what it does. */
 export function RuleEditor({
   projectId,
   notion,
@@ -194,7 +140,7 @@ export function RuleEditor({
   onCancel,
 }: {
   projectId: number;
-  notion: NotionSchema;
+  notion: NotionSchema | null;
   initial: RuleDraft;
   saving: boolean;
   error: Error | null;
@@ -220,7 +166,7 @@ export function RuleEditor({
       <ActionFields
         projectId={projectId}
         notion={notion}
-        rule={rule}
+        action={rule.action}
         onChange={(action) => {
           setRule({ ...rule, action });
         }}

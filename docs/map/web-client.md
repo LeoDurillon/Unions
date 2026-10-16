@@ -145,15 +145,18 @@ export); do not edit. Tests are left out.
 
 ## components/settings/
 
+- `action-fields.tsx`: What a rule does: the kind of action, then that kind's own fields.
 - `agent-variables-field.tsx`: Which of the preview's plain variables the agent's commands get (and the commands the user runs): a preview's database address would otherwise win over the one…
 - `branch-section.tsx`: The project settings section for the base branch, saved with the General page's Save.
 - `checks-section.tsx`: How the implementation agent's work is installed and checked inside the ticket's container.
 - `delete-section.tsx`: Typing the repository name to confirm keeps a stray click from deleting a project.
-- `events-section.tsx`: Event rules: when something happens to a ticket imported from Notion, set a property of its Notion page.
+- `events-section.tsx`: Event rules: when something happens to a ticket, set a property of its Notion page or comment on its GitHub issue or pull request.
 - `files-section.tsx`: Files every ticket's workspace gets at a path in the repository (a database dump for the preview's seed, a local config), kept out of git.
 - `github-access-section.tsx`: The project settings section that shows and changes how the project reaches GitHub.
+- `github-comment-fields.tsx`: A GitHub comment action's fields: the issue or the pull request, and the comment as a template.
 - `instructions-section.tsx`: The project's own instructions, sent to every agent run on it after the shared instructions.
 - `integration-section-body.tsx`: Previews, Notion and the danger zone.
+- `notion-action-fields.tsx`: A Notion action's fields: the property of the ticket's Notion page to set, and its value.
 - `notion-section.tsx`: The project settings section for the Notion connection, verified when saved.
 - `people-field.tsx`: A person property: a box per workspace member; the value is their Notion ids.
 - `preview-choices-field.tsx`: A choice among names the compose file has (profiles, services): a box per name known once a ticket's file was generated, and a field for others.
@@ -168,9 +171,10 @@ export); do not edit. Tests are left out.
 - `project-section-body.tsx`: The project's own settings, its agents' and its pull requests'.
 - `pull-request-section.tsx`: Whether the worker opens a draft PR after the implementation, or the user links one by hand.
 - `review-section.tsx`: Files the review page lists apart (collapsed), so the sidebar shows what needs reading.
-- `rule-editor.tsx`: Edits a rule: its name, what triggers it, and the Notion property it sets.
+- `rule-action-text.tsx`: What a rule does, in a sentence for its row: the Notion property it sets, or where it comments.
+- `rule-editor.tsx`: Edits a rule: its name, what triggers it, and what it does.
 - `rule-list.tsx`: One rule: when, then, and its switches.
-- `rule-preview.tsx`: What the rule as edited would send for a ticket imported from Notion; nothing is sent.
+- `rule-preview.tsx`: What the rule as edited would do for one of the project's tickets; nothing is sent.
 - `save-bar.tsx`: The settings page's one Save, kept in view at the bottom, with whether something is unsaved.
 - `script-row.tsx`: What the settings store; an empty timeout is left out (the default).
 - `scripts-section.tsx`: Commands saved by name, run from a ticket's Preview tab in its workspace; one edited at a time.
@@ -178,6 +182,7 @@ export); do not edit. Tests are left out.
 - `settings-nav.tsx`: The settings pages by group; the danger zone last, set apart.
 - `settings-page.tsx`: The project's settings: a menu of pages on the left, the open one on the right (`?settings=`).
 - `value-field.tsx`: The value a rule sets, shaped by the property's type.
+- `variable-chips.tsx`: The template variables as chips: clicking one adds it to the text being written.
 
 ## lib/
 
@@ -218,8 +223,8 @@ export); do not edit. Tests are left out.
 - `use-event-stream.ts`: Calls `onEvent` with every new event, from the browser's one shared stream (`event-hub.ts`).
 - `use-github-app.ts`: The global GitHub App's status; saving or removing it invalidates `['github-app']`.
 - `use-live-invalidation.ts`: Refetches board, ticket and investigation data whenever the worker records a change.
-- `use-navigation.ts`: Which page is shown and which overlay is open; `show`/`goTo` return click handlers.
 - `use-log.ts`: Polls a ticket's or an investigation's Log while it is shown: all of it first, then what is new.
+- `use-navigation.ts`: Which page is shown and which overlay is open; `show`/`goTo` return click handlers.
 - `use-notion-users.ts`: The Notion workspace members, read only when `enabled` (a person property is in view).
 - `use-review-grouping.ts`: The newest grouping by spec of the review, with starting and cancelling one.
 - `use-review.ts`: A pull request under review: its description and discussion, read from GitHub once per opening.

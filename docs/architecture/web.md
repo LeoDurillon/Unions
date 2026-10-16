@@ -42,9 +42,11 @@
   before throwing it away. What applies at once by nature keeps its own button and only guards what is typed:
   credentials verified before they are stored (GitHub token or installation), secrets, file uploads, event rules
   (records, each with its editor), Turn previews off, Disconnect, deleting the project.
-- Event rules (project settings → Event rules, `routes/event-rules.ts`): when something happens to a ticket, set a
-  property of the Notion page it was imported from (`tickets.notion_page_id`, set by the import; older imports are
-  linked from their "Imported from Notion:" line by `backfillNotionPages` at worker start). Rules point at
+- Event rules (project settings → Events → Rules, `routes/event-rules.ts`): when something happens to a ticket,
+  do one action. The kinds are in the browser-safe `@union/core/event-actions`: comment on the ticket's GitHub
+  issue or pull request (the rule picks which), or set a property of the Notion page it was imported from
+  (`tickets.notion_page_id`, set by the import; older imports are
+  linked from their "Imported from Notion:" line by `backfillNotionPages` at worker start). Notion rules point at
   properties by id in the stored copy of the data source's columns (`notion_data_sources`, read again on connect
   or "Refresh from Notion") and are checked against it on save. Triggers, variables and Notion value shapes are in
   the browser-safe `@union/core/event-rules`; matching and the delivery queue in `event-rules.ts` and

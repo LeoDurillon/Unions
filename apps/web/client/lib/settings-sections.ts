@@ -36,10 +36,13 @@ export const SETTINGS_GROUPS = [
   },
   {
     label: 'Notion',
+    sections: [{ id: 'notion', label: 'Connection' }],
+  },
+  {
+    label: 'Events',
     sections: [
-      { id: 'notion', label: 'Connection' },
-      { id: 'event-rules', label: 'Event rules' },
-      { id: 'event-activity', label: 'Rule activity' },
+      { id: 'event-rules', label: 'Rules' },
+      { id: 'event-activity', label: 'Activity' },
     ],
   },
   { label: null, sections: [{ id: 'danger', label: 'Danger zone' }] },

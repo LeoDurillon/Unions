@@ -192,6 +192,7 @@ test('event rules use the stored Notion columns; a ticket from an import preview
   });
   expect(await preview.json()).toEqual({
     ok: true,
+    kind: 'notion_property',
     property: 'PR',
     pageId: PAGE,
     text: 'https://github.com/o/r/pull/12',

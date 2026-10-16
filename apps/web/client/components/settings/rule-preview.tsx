@@ -1,6 +1,8 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
+import type { EventAction } from '@union/core/event-actions';
 import { useState, type ReactElement } from 'react';
 
+import type { TicketSummary } from '../../../src/api-types';
 import type { RulePreview } from '../../../src/event-api-types';
 import { api } from '../../lib/api';
 import { eventRulesApi, type RuleDraft } from '../../lib/event-rules-api';
@@ -13,6 +15,18 @@ function PreviewResult({ result }: { result: RulePreview | undefined }): ReactEl
   if (!result.ok) {
     return <p className="text-sm text-red-600 dark:text-red-400">{result.error}</p>;
   }
+  if (result.kind === 'github_comment') {
+    return (
+      <div className="space-y-1 text-sm">
+        <p>
+          Would comment on {result.on === 'issue' ? 'issue' : 'pull request'} #{result.number}:
+        </p>
+        <pre className="rounded bg-zinc-100 p-2 whitespace-pre-wrap dark:bg-zinc-800">
+          {result.text === '' ? '(empty: nothing would be sent)' : result.text}
+        </pre>
+      </div>
+    );
+  }
   return (
     <p className="text-sm">
       Would set <span className="font-medium">{result.property}</span> to{' '}
@@ -24,7 +38,24 @@ function PreviewResult({ result }: { result: RulePreview | undefined }): ReactEl
   );
 }
 
-/** What the rule as edited would send for a ticket imported from Notion; nothing is sent. */
+/** The tickets a rule's action can apply to, and how to say there are none. */
+function applicable(
+  tickets: TicketSummary[],
+  action: EventAction,
+): { tickets: TicketSummary[]; none: string } {
+  if (action.kind === 'notion_property') {
+    const linked = tickets.filter((ticket) => ticket.notionPageId !== null);
+    return { tickets: linked, none: 'No ticket imported from Notion to try it on yet.' };
+  }
+  if (action.on === 'issue') {
+    const withIssue = tickets.filter((ticket) => ticket.issueNumber !== null);
+    return { tickets: withIssue, none: 'No ticket with a GitHub issue to try it on yet.' };
+  }
+  const withPr = tickets.filter((ticket) => ticket.prNumber !== null);
+  return { tickets: withPr, none: 'No ticket with a pull request to try it on yet.' };
+}
+
+/** What the rule as edited would do for one of the project's tickets; nothing is sent. */
 export function RulePreviewBox({
   projectId,
   rule,
@@ -36,16 +67,14 @@ export function RulePreviewBox({
     queryKey: ['tickets', projectId],
     queryFn: () => api.tickets(projectId),
   });
-  const linked = (tickets.data ?? []).filter((ticket) => ticket.notionPageId !== null);
+  const { tickets: linked, none } = applicable(tickets.data ?? [], rule.action);
   const [ticketId, setTicketId] = useState<number | null>(null);
   const preview = useMutation({
     mutationFn: (id: number) => eventRulesApi.preview(projectId, rule, id),
   });
   const chosen = ticketId ?? linked[0]?.id ?? null;
   if (linked.length === 0) {
-    return (
-      <p className="text-xs text-zinc-500">No ticket imported from Notion to try it on yet.</p>
-    );
+    return <p className="text-xs text-zinc-500">{none}</p>;
   }
   return (
     <div className="space-y-2 rounded-md border border-zinc-200 p-2 dark:border-zinc-800">

@@ -1,6 +1,7 @@
 // The browser's client for the event rules endpoints.
 import type { EventRule, NotionSchema, NotionUser } from '@union/core';
-import type { EventAction, EventTrigger } from '@union/core/event-rules';
+import { emptyAction, type EventAction } from '@union/core/event-actions';
+import type { EventTrigger } from '@union/core/event-rules';
 
 import type { DeliveryView, EventRulesResponse, RulePreview } from '../../src/event-api-types';
 import { request } from './api';
@@ -11,6 +12,16 @@ export type RuleDraft = {
   trigger: EventTrigger;
   action: EventAction;
 };
+
+/** A new rule: it sets a Notion property when the Notion columns are read, else it comments. */
+export function newRule(notion: NotionSchema | null): RuleDraft {
+  return {
+    name: '',
+    enabled: true,
+    trigger: { kind: 'pull_request_linked' },
+    action: emptyAction(notion ? 'notion_property' : 'github_comment'),
+  };
+}
 
 function base(projectId: number): string {
   return `/api/projects/${projectId}`;

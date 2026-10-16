@@ -11,9 +11,11 @@ import {
   schema,
   storeNotionSchema,
   templateValues,
+  renderTemplate,
   type ActionKind,
   type ActionOf,
   type Db,
+  type GitHubCommentAction,
   type NotionApi,
   type NotionPropertyAction,
   type Project,
@@ -146,14 +148,38 @@ function notionPreview(
   const value = ruleValue(property, action, templateValues(project, ticket, null));
   return 'error' in value
     ? { ok: false, error: value.error }
-    : { ok: true, property: property.name, pageId: ticket.notionPageId, ...value };
+    : {
+        ok: true,
+        kind: 'notion_property',
+        property: property.name,
+        pageId: ticket.notionPageId,
+        ...value,
+      };
 }
 
 type Previews = {
   [K in ActionKind]: (db: Db, project: Project, ticket: Ticket, action: ActionOf<K>) => RulePreview;
 };
 
-const PREVIEWS: Previews = { notion_property: notionPreview };
+function gitHubCommentPreview(
+  _db: Db,
+  project: Project,
+  ticket: Ticket,
+  action: GitHubCommentAction,
+): RulePreview {
+  const number = action.on === 'issue' ? ticket.issueNumber : ticket.prNumber;
+  if (number === null) {
+    const missing = action.on === 'issue' ? 'issue' : 'pull request';
+    return { ok: false, error: `This ticket has no ${missing} yet` };
+  }
+  const text = renderTemplate(action.body, templateValues(project, ticket, null));
+  return { ok: true, kind: 'github_comment', on: action.on, number, text };
+}
+
+const PREVIEWS: Previews = {
+  notion_property: notionPreview,
+  github_comment: gitHubCommentPreview,
+};
 
 function previewOf<K extends ActionKind>(
   db: Db,

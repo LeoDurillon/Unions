@@ -1,4 +1,4 @@
-import type { EventRule, NotionSchema } from '@union/core';
+import type { CommentTarget, EventRule, NotionSchema } from '@union/core';
 
 /** The Events settings: the rules, and the Notion columns they can set (null until read). */
 export type EventRulesResponse = {
@@ -25,5 +25,13 @@ export type DeliveryView = {
 
 /** What a rule would send for a ticket, without sending it. */
 export type RulePreview =
-  | { ok: true; property: string; text: string; value: unknown; pageId: string }
+  | {
+      ok: true;
+      kind: 'notion_property';
+      property: string;
+      text: string;
+      value: unknown;
+      pageId: string;
+    }
+  | { ok: true; kind: 'github_comment'; on: CommentTarget; number: number; text: string }
   | { ok: false; error: string };

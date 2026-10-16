@@ -1,6 +1,7 @@
 import { index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
-import type { EventAction, EventTrigger } from './event-rule-types';
+import type { EventAction } from './event-actions';
+import type { EventTrigger } from './event-rule-types';
 import type { NotionProperty } from './notion-api';
 import { now, projects, tickets } from './schema';
 

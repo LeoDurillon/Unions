@@ -3,6 +3,7 @@ import { beforeEach, expect, test } from 'bun:test';
 import { eq } from 'drizzle-orm';
 
 import { createDb, migrateDb, type Db } from './db';
+import type { NotionPropertyAction } from './event-actions';
 import {
   backfillNotionPages,
   finishDelivery,
@@ -13,6 +14,7 @@ import {
 import { notionPropertyValue, renderTemplate } from './event-rule-types';
 import {
   EventRuleError,
+  type EventRule,
   ruleProperty,
   ruleValue,
   saveRule,
@@ -47,13 +49,20 @@ beforeEach(() => {
   storeNotionSchema(db, projectId, 'ds', { title: 'Roadmap', properties: PROPERTIES });
 });
 
-function prRule(value = '{pr.url}', propertyId = 'p%3Ar'): ReturnType<typeof saveRule> {
-  return saveRule(db, projectId, {
+function prRule(
+  value = '{pr.url}',
+  propertyId = 'p%3Ar',
+): EventRule & { action: NotionPropertyAction } {
+  const rule = saveRule(db, projectId, {
     name: 'PR link',
     enabled: true,
     trigger: { kind: 'pull_request_linked' },
     action: { kind: 'notion_property', propertyId, value },
   });
+  if (rule.action.kind !== 'notion_property') {
+    throw new Error('A Notion rule was saved as another kind');
+  }
+  return { ...rule, action: rule.action };
 }
 
 test('a rule is checked against the stored Notion schema before it is saved', () => {
