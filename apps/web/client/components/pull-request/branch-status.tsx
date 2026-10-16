@@ -4,8 +4,11 @@ import type { TicketDetail } from '../../../src/api-types';
 import { useTicketCommands } from '../../lib/use-ticket-commands';
 import { Button, ErrorText } from '../ui';
 
-/** Where a rebase can be asked: the ticket waits on its final review, or is done with the PR open. */
-function canRebase(detail: TicketDetail): boolean {
+/**
+ * Where the branch can be rewritten (a rebase, a simpler history): the ticket waits on its final
+ * review, or is done with the PR open.
+ */
+export function canRewrite(detail: TicketDetail): boolean {
   const { phase } = detail.ticket;
   return (
     phase.kind === 'done' || (phase.kind === 'awaiting_approval' && phase.step === 'final_review')
@@ -45,8 +48,8 @@ export function BranchStatus({ detail }: { detail: TicketDetail }): ReactElement
           <code>{ticket.branch}</code> is {commits} behind <code>{base}</code>.
         </span>
         <Button
-          disabled={!canRebase(detail) || command.isPending}
-          title={canRebase(detail) ? undefined : 'Available at the final review, or once done'}
+          disabled={!canRewrite(detail) || command.isPending}
+          title={canRewrite(detail) ? undefined : 'Available at the final review, or once done'}
           onClick={() => {
             command.mutate({ type: 'rebase' });
           }}

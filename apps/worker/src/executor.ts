@@ -20,8 +20,9 @@ import { buildPrompt, isPlanningStep, parentContext } from './prompts';
 import { ensureTicketContainer, REPO_DIR, type ProvisionConfig } from './provision';
 import { runReviewStep } from './review';
 import type { StepContext, StepExecutor, StepResult } from './scheduler';
+import { runSimplifyStep } from './simplify';
 
-/** Every pipeline step: planning, implementation and final review. */
+/** Every step: planning, implementation, final review, and the rebase and simplify asked on demand. */
 export function createExecutor(
   db: Db,
   runtime: ContainerRuntime,
@@ -36,6 +37,10 @@ export function createExecutor(
     }
     if (step === 'final_review') {
       return runReviewStep(deps, context);
+    }
+    // The code stays the same: no install, checks or services.
+    if (step === 'simplify') {
+      return runSimplifyStep(deps, context);
     }
     if (!isPlanningStep(step)) {
       return { kind: 'error', error: `Unknown step ${JSON.stringify(step)}` };

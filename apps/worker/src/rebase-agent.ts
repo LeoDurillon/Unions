@@ -35,7 +35,14 @@ export const REBASE_DENIED = IMPLEMENT_DENIED.filter(
 /** A rebase in progress: the workspace, its branch and base, and the commit to restore on failure. */
 export type Rebase = Workspace & { branch: string; base: string; before: string };
 
-/** The implementer's session (or the last rebase's, which continued it), resumed for the rebase. */
+/** A turn in the implementer's own session: the rebase, or the simplification of its history. */
+export type SessionTask = {
+  agent: 'rebase' | 'simplify';
+  instructions: string;
+  denied: readonly string[];
+};
+
+/** The implementer's session (or the last run that continued it), resumed for the task. */
 function implementerSession(db: Db, ticketId: number): string | null {
   const run = db
     .select()
@@ -44,7 +51,7 @@ function implementerSession(db: Db, ticketId: number): string | null {
       and(
         eq(schema.runs.ticketId, ticketId),
         eq(schema.runs.status, 'succeeded'),
-        inArray(schema.runs.step, ['implement', 'rebase']),
+        inArray(schema.runs.step, ['implement', 'rebase', 'simplify']),
       ),
     )
     .orderBy(desc(schema.runs.id))
@@ -52,29 +59,34 @@ function implementerSession(db: Db, ticketId: number): string | null {
   return run?.sessionId ?? null;
 }
 
-function instructions(db: Db, rebase: Rebase): string {
+function rebaseTask(db: Db, rebase: Rebase): SessionTask {
   const { base, branch, project, deps } = rebase;
-  return `${resolveAgent(db, 'rebase').prompt}\n\nThe base branch was fetched just now as \`origin/${base}\`; your branch is \`${branch}\`.${gateHint(project.config.gateCommand)}${agentServicesHint(deps.services)}${COMMIT_HOOK_HINT}`;
+  const instructions = `${resolveAgent(db, 'rebase').prompt}\n\nThe base branch was fetched just now as \`origin/${base}\`; your branch is \`${branch}\`.${gateHint(project.config.gateCommand)}${agentServicesHint(deps.services)}${COMMIT_HOOK_HINT}`;
+  return { agent: 'rebase', instructions, denied: REBASE_DENIED };
 }
 
-function agentRun(rebase: Rebase, prompt: string, session: string | null): AgentRun {
+function agentRun(
+  rebase: Rebase,
+  task: SessionTask,
+  { prompt, session }: { prompt: string; session: string | null },
+): AgentRun {
   const { deps, context, container } = rebase;
   return {
     container,
     cwd: REPO_DIR,
-    model: modelFor(deps.db, 'rebase'),
-    effort: effortFor(deps.db, 'rebase'),
+    model: modelFor(deps.db, task.agent),
+    effort: effortFor(deps.db, task.agent),
     prompt,
-    tools: toolsFor(deps.db, 'rebase'),
-    denied: REBASE_DENIED,
+    tools: toolsFor(deps.db, task.agent),
+    denied: task.denied,
     resumeSessionId: session,
     signal: context.signal,
     onEvent: context.log,
   };
 }
 
-/** Resumes the implementer's session with the rebase prompt; a fresh session gets the whole task first. */
-export function runRebaseAgent(rebase: Rebase): Promise<AgentOutcome> {
+/** Resumes the implementer's session with the task's prompt; a fresh session gets the whole task first. */
+export function runInImplementerSession(rebase: Rebase, task: SessionTask): Promise<AgentOutcome> {
   const { deps, context } = rebase;
   const { db } = deps;
   const session = implementerSession(db, context.ticket.id);
@@ -82,17 +94,31 @@ export function runRebaseAgent(rebase: Rebase): Promise<AgentOutcome> {
     ticket: context.ticket,
     ...parentContext(db, context.ticket),
     shared: sharedPrompt(db, context.ticket.projectId),
-    instructions: instructions(db, rebase),
+    instructions: task.instructions,
     approved: approvedBefore(db, context.ticket.id, 'final_review'),
     revision: null,
   });
-  const prompt = session ? instructions(db, rebase) : fresh;
-  return runResumable(deps.agent, deps.runtime, agentRun(rebase, prompt, session), fresh);
+  const prompt = session ? task.instructions : fresh;
+  return runResumable(deps.agent, deps.runtime, agentRun(rebase, task, { prompt, session }), fresh);
+}
+
+/** Resumes the implementer's session with the rebase prompt. */
+export function runRebaseAgent(rebase: Rebase): Promise<AgentOutcome> {
+  return runInImplementerSession(rebase, rebaseTask(rebase.deps.db, rebase));
+}
+
+/** Another turn in the task's session, for the commit message of changes it left. */
+export function askInSession(rebase: Rebase, task: SessionTask, session: string | null): Ask {
+  return askSession(
+    rebase.deps.agent,
+    rebase.deps.runtime,
+    agentRun(rebase, task, { prompt: '', session }),
+  );
 }
 
 /** Another turn in the rebase agent's session, for the commit message of changes it left. */
 export function askRebaseAgent(rebase: Rebase, session: string | null): Ask {
-  return askSession(rebase.deps.agent, rebase.deps.runtime, agentRun(rebase, '', session));
+  return askInSession(rebase, rebaseTask(rebase.deps.db, rebase), session);
 }
 
 /** What the host checked and pushed, under the agent's own report. */

@@ -30,7 +30,7 @@ export async function verifyAndPush(
   rebase: Rebase,
   { pushed, outcome }: { pushed: string; outcome: Pushed['outcome'] },
 ): Promise<{ error: string } | { refused: Refused } | { gate: GateResult | null }> {
-  const { deps, container, project, branch } = rebase;
+  const { deps, container, project } = rebase;
   const problem = await rebaseProblem(deps.runtime, container, rebase);
   if (problem) {
     return { error: problem };
@@ -52,21 +52,26 @@ export async function verifyAndPush(
       error: `The checks fail after the rebase (exit ${gate.exitCode}):\n\n\`\`\`\n${gate.tail}\n\`\`\``,
     };
   }
+  const refused = await forcePush(rebase, pushed);
+  return refused === null ? { gate } : { error: refused };
+}
+
+/** Force-pushes the rewritten branch, leased on the commit fetched from GitHub; why not, or null. */
+export async function forcePush(rebase: Rebase, lease: string): Promise<string | null> {
+  const { deps, container, project, branch } = rebase;
   try {
     await pushBranch(deps.runtime, container, await remoteOf(deps, project), {
       branch,
-      lease: pushed,
+      lease,
       privateFiles: privatePushFiles(deps.db, rebase.context.ticket),
     });
+    return null;
   } catch (error) {
     if (error instanceof PrivateFilesError) {
-      return { error: error.message };
+      return error.message;
     }
-    return {
-      error: `The push was refused (did someone push to \`${branch}\` meanwhile?): ${String(error)}`,
-    };
+    return `The push was refused (did someone push to \`${branch}\` meanwhile?): ${String(error)}`;
   }
-  return { gate };
 }
 
 /** After the push: the branch is current, the review diff is refreshed, and the report is the output. */

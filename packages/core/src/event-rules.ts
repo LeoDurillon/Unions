@@ -212,6 +212,7 @@ const STEP_NAMES: Record<string, string> = {
   implement: 'Implementation',
   final_review: 'Final review',
   rebase: 'Rebase',
+  simplify: 'Simplify history',
 };
 
 /** The step a phase change is about, if any. */

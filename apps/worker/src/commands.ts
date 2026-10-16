@@ -225,6 +225,13 @@ function revise(db: Db, command: Command): void {
   dispatch(db, ticketId, { type: 'revise' });
 }
 
+/** Commands that are a state-machine action as they are, with no payload. */
+const PLAIN_ACTIONS = ['start', 'retry', 'rebase', 'simplify', 'cancel'] as const;
+
+function isPlainAction(type: string): type is (typeof PLAIN_ACTIONS)[number] {
+  return PLAIN_ACTIONS.some((action) => action === type);
+}
+
 /** The user's answer to an output, or to a refused commit. */
 const DECISIONS = new Set(['approve', 'revise', 'commit_anyway', 'drop_leftovers']);
 
@@ -245,6 +252,10 @@ function execute(db: Db, command: Command, hooks: CommandHooks): void {
     decide(db, command);
     return;
   }
+  if (isPlainAction(command.type)) {
+    dispatch(db, requireTicketId(command), { type: command.type });
+    return;
+  }
   if (Object.hasOwn(CANCELS, command.type)) {
     cancelRun(db, command, hooks);
     return;
@@ -257,13 +268,6 @@ function execute(db: Db, command: Command, hooks: CommandHooks): void {
   switch (command.type) {
     case 'create_ticket': {
       createFromCommand(db, command);
-      return;
-    }
-    case 'start':
-    case 'retry':
-    case 'rebase':
-    case 'cancel': {
-      dispatch(db, requireTicketId(command), { type: command.type });
       return;
     }
     case 'submit_pr_review': {

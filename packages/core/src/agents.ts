@@ -15,8 +15,8 @@ import {
 } from './states';
 
 /**
- * `shared` is prepended to every agent's prompt; most others are pipeline steps. `rebase` is a prompt only: the
- * implementation agent runs it (resumed session, Implementation model).
+ * `shared` is prepended to every agent's prompt; most others are pipeline steps. `rebase` and `simplify` are
+ * prompts only: the implementation agent runs them (resumed session, Implementation model).
  */
 export const AGENT_IDS = [
   'shared',
@@ -27,6 +27,7 @@ export const AGENT_IDS = [
   'review_groups',
   'pr_description',
   'rebase',
+  'simplify',
 ] as const;
 export type AgentId = (typeof AGENT_IDS)[number];
 
@@ -92,6 +93,13 @@ Resolve conflicts keeping the intent of both sides. Run the project's checks and
 If a conflict cannot be resolved safely, run \`git rebase --abort\` and explain why.
 Never push.
 Output a short markdown report: the conflicts met and how they were resolved, the checks run and their result.`,
+  simplify: `Rewrite your branch's commits (since it left the base branch) into a history a reviewer can read commit by commit.
+One commit per logical change, in an order that builds up; fold fix-ups, reverts and "address review" commits into the commit they fix. A small change can be one commit.
+Write each message in the repository's style (look at \`git log\` on the base branch).
+Do not change any file: the branch must end with exactly the same content, and the host refuses the result otherwise. Do not move it onto a newer base.
+There is no editor or terminal: \`git rebase -i\` and \`git add -p\` cannot be used. For example: \`git reset --soft <fork point>\`, \`git reset\`, then \`git add <paths>\` and \`git commit -m\` for each commit; stage part of a file with \`git apply --cached\`.
+Never push.
+Output a short markdown report: the new commits' subject lines, and what was merged, split or reordered.`,
 };
 
 export type AgentConfig = {
@@ -103,7 +111,7 @@ export type AgentConfig = {
   prompt: string;
   defaultModel: AgentModel | null;
   defaultPrompt: string;
-  /** Allowed tools; null for the agents that do not run on their own (`shared`, `rebase`). */
+  /** Allowed tools; null for the agents that do not run on their own (`shared`, `rebase`, `simplify`). */
   tools: string[] | null;
   defaultTools: string[] | null;
   customized: boolean;
@@ -194,8 +202,8 @@ export function listAgents(db: Db): AgentConfig[] {
 
 /** The model a run of `step` uses: the user's choice, else the built-in one. */
 export function modelFor(db: Db, step: RunAgent): AgentModel {
-  // The rebase is the implementer's own session, so it keeps its model.
-  if (step === 'rebase') {
+  // The rebase and the simplification are the implementer's own session, so they keep its model.
+  if (step === 'rebase' || step === 'simplify') {
     return modelFor(db, 'implement');
   }
   return resolveAgent(db, step).model ?? MODEL_BY_AGENT[step];
@@ -203,15 +211,15 @@ export function modelFor(db: Db, step: RunAgent): AgentModel {
 
 /** The thinking effort a run of `step` uses; null: the CLI's default. */
 export function effortFor(db: Db, step: RunAgent): AgentEffort | null {
-  // Like its model, the rebase keeps the implementer's effort.
-  return resolveAgent(db, step === 'rebase' ? 'implement' : step).effort;
+  // Like their model, they keep the implementer's effort.
+  return resolveAgent(db, step === 'rebase' || step === 'simplify' ? 'implement' : step).effort;
 }
 
 /** The tools a run of `step` is allowed: the user's choice, else the step's defaults. */
 export function toolsFor(db: Db, step: RunAgent): string[] {
-  // The implementer's tools, plus the git commands a rebase needs.
-  if (step === 'rebase') {
-    return [...new Set([...toolsFor(db, 'implement'), ...DEFAULT_TOOLS.rebase])];
+  // The implementer's tools, plus the git commands a rebase or a simplification needs.
+  if (step === 'rebase' || step === 'simplify') {
+    return [...new Set([...toolsFor(db, 'implement'), ...DEFAULT_TOOLS[step]])];
   }
   return resolveAgent(db, step).tools ?? [...DEFAULT_TOOLS[step]];
 }

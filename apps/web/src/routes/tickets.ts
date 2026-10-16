@@ -155,6 +155,9 @@ async function queueCommand(db: Db, c: Context): Promise<Response> {
       'Nothing to rebase: the ticket has no open pull request (or it was not checked yet)',
     );
   }
+  if (type === 'simplify' && (ticket.branch === null || ticket.prState !== 'open')) {
+    throw fail(CONFLICT, 'Nothing to simplify: the ticket has no open pull request');
+  }
   if (hasPendingCommand(db, id)) {
     throw fail(CONFLICT, 'A command for this ticket is still being processed');
   }

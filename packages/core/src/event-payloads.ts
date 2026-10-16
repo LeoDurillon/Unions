@@ -45,7 +45,7 @@ type RunPayloads = {
 };
 
 type GitHubPayloads = {
-  branch_pushed: { branch: string; rebased?: true };
+  branch_pushed: { branch: string; rebased?: true; simplified?: true };
   publish_failed: { branch: string; error: string };
   pull_request_opened: { number: number; url: string };
   pull_request_linked: { number: number };

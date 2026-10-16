@@ -12,11 +12,18 @@
   check command (`gate.ts`), resuming the same session with the failure until green or `maxIterations`.
   `publish.ts` exports the branch as a git bundle, pushes it from the host with the project token and opens the
   draft PR, described by the implementer from the repository's PR template (`pr-description.ts`). The agent may
-  run shell commands but never push, switch branches or rewrite history.
+  run shell commands but never push, switch branches or rewrite history (the rebase and simplify steps do, checked by
+  the host).
 - `rebase.ts` (with `rebase-agent.ts`, `rebase-fetch.ts`, `rebase-git.ts`, `rebase-publish.ts`): the on-demand
   rebase step. The host fetches base and branch into the container as a bundle, resumes the implementer's session
   with the rebase prompt, checks the result and the project's checks, then force-pushes with a lease; any failure
   puts the branch back as it was. `github/pull-request.ts` keeps `tickets.behind_by` current during the pull.
+- `simplify.ts` (with `simplify-agent.ts`, `simplify-finish.ts`, `simplify-git.ts`, `simplify-push.ts`): the
+  on-demand history simplification. Same fetch and implementer session as the rebase (`runInImplementerSession` in
+  `rebase-agent.ts`), then the agent's leftovers are committed (`commitLeftovers`; a hook's refusal pauses the step
+  like the implementer's, and the user commits without hooks or keeps the old history, which restores the branch),
+  the host checks the fork point and the tree are unchanged, and force-pushes with a lease; no install, checks or
+  services. Any failure puts the branch back.
 - `investigate.ts`: `InvestigationRunner` runs queued investigations in throwaway `union-i<id>` containers
   (removed after each run; a `ticket` investigation runs in the ticket's own container instead, `investigate-ticket.ts`:
   never during a step, writing tools always denied, `git status` and HEAD compared before and after, the container

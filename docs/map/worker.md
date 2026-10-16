@@ -22,7 +22,7 @@ export); do not edit. Tests are left out.
 - `diff-snapshot.ts`: Replaces the ticket's diff snapshot with `base...HEAD` as it is now in the container, with each commit's own diff and the change since the head the user last r…
 - `e2e.ts`: The project's e2e command against the ticket's preview, after its checks passed.
 - `event-dispatcher.ts`: Follows the event log: writes the notifications, queues a delivery for each event a rule waits for, then does the due ones, a few per tick and one at a time.
-- `executor.ts`: Every pipeline step: planning, implementation and final review.
+- `executor.ts`: Every step: planning, implementation, final review, and the rebase and simplify asked on demand.
 - `gate.ts`: Runs the project's check command in the repository; a timeout counts as red.
 - `hooks.ts`: What the commands hand off to the running worker: all asynchronous, so draining stays synchronous.
 - `implement-checks.ts`: The checks after an agent turn; `retry` is what the session is sent when they are red.
@@ -45,7 +45,7 @@ export); do not edit. Tests are left out.
 - `prompts.ts`: How to see what the parent changed, from the branches the workspace was cloned with.
 - `provision.ts`: Only the Claude subscription credential is seeded: no MCP tokens, no history.
 - `publish.ts`: Push, then open the draft PR once.
-- `rebase-agent.ts`: Resumes the implementer's session with the rebase prompt; a fresh session gets the whole task first.
+- `rebase-agent.ts`: Resumes the implementer's session with the rebase prompt.
 - `rebase-fetch.ts`: Brings the base branch and the pushed branch, as they are on GitHub now, into the container: the host fetches them with the project's credentials and hands ove…
 - `rebase-git.ts`: Whether `ancestor` is already part of `ref`'s history.
 - `rebase-publish.ts`: The project's repository with its credentials, for the fetch and the push.
@@ -59,6 +59,11 @@ export); do not edit. Tests are left out.
 - `scheduler.ts`: Runs one agent step per ticket in `running` phase, within the shared run slots.
 - `services-run.ts`: Starts the project's agent services for a run in the ticket's container (provisioned first: compose reads the file from its workspace), forwards their ports to…
 - `side-runs.ts`: Fails what a stopped worker left running, then returns the runners.
+- `simplify-agent.ts`: The implementer's session asked to rewrite its commits, and the report the step leaves.
+- `simplify-finish.ts`: After the agent: its leftover commit (a hook may refuse it and pause the run), the checks on the new history, the push.
+- `simplify-git.ts`: The branch's history since it left its base, and why a rewritten one cannot be pushed.
+- `simplify-push.ts`: Pushes a simplified history, unless the agent left the one already on GitHub.
+- `simplify.ts`: Rewrites the ticket's commits into a simpler history with the implementer's own session, checks the code did not change and force-pushes it with a lease.
 - `slots.ts`: Agent runs allowed at the same time, shared by the ticket scheduler and the investigations.
 - `ticket-base.ts`: Chooses the branch a ticket is cloned from, before its first clone: the branch the user chose (over the parent's), else the parent's branch while its pull requ…
 - `workspace-git.ts`: Puts the repository on `branch`: the local branch if it exists, else the pushed one (a recreated container only has `origin/<branch>`), else a new branch from …

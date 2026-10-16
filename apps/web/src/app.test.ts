@@ -137,6 +137,30 @@ test('revise needs feedback and is only allowed while awaiting approval', async 
   expect(db.select().from(schema.commands).all()[0]?.payload).toEqual({ feedback: 'shorter' });
 });
 
+test('simplify needs an open pull request and the final review or done', async () => {
+  const project = await makeProject();
+  const ticket = await makeTicket(project.id);
+  const simplify = async (): Promise<number> => {
+    const response = await send('POST', `/api/tickets/${ticket.id}/commands`, { type: 'simplify' });
+    return response.status;
+  };
+  db.update(schema.tickets)
+    .set({ phase: { kind: 'awaiting_approval', step: 'final_review' }, branch: 'feature' })
+    .run();
+  expect(await simplify()).toBe(409);
+  db.update(schema.tickets).set({ prState: 'merged' }).run();
+  expect(await simplify()).toBe(409);
+  db.update(schema.tickets)
+    .set({ prState: 'open', phase: { kind: 'backlog' } })
+    .run();
+  expect(await simplify()).toBe(409);
+  db.update(schema.tickets)
+    .set({ phase: { kind: 'done' } })
+    .run();
+  expect(await simplify()).toBe(202);
+  expect(db.select().from(schema.commands).all()).toMatchObject([{ type: 'simplify' }]);
+});
+
 test('editing an output creates a new version, only for the step awaiting approval', async () => {
   const project = await makeProject();
   const ticket = await makeTicket(project.id);

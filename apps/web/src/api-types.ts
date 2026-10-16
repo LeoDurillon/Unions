@@ -64,6 +64,7 @@ export type CommandType =
   | 'revise'
   | 'retry'
   | 'rebase'
+  | 'simplify'
   | 'cancel'
   | 'commit_anyway'
   | 'drop_leftovers';
@@ -74,6 +75,7 @@ export const COMMAND_TYPES: readonly CommandType[] = [
   'revise',
   'retry',
   'rebase',
+  'simplify',
   'cancel',
   'commit_anyway',
   'drop_leftovers',

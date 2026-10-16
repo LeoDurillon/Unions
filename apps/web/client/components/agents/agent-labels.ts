@@ -51,6 +51,11 @@ export const AGENT_LABELS: Record<AgentId, { title: string; description: string 
     description:
       "Prompt the implementation agent gets when you click Rebase in a ticket's PR tab. It resumes its own session and uses the Implementation model and effort.",
   },
+  simplify: {
+    title: 'Simplify history',
+    description:
+      "Prompt the implementation agent gets when you click Simplify history in a ticket's PR tab: it rewrites the branch's commits, the code unchanged. It resumes its own session and uses the Implementation model and effort.",
+  },
 };
 
 export const MODEL_LABELS: Record<AgentModel, string> = {

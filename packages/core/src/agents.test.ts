@@ -112,12 +112,13 @@ test('the shared prompt is followed by the project instructions when the project
   );
 });
 
-test("an effort is saved per agent with a model; the rebase uses the implementer's", () => {
+test("an effort is saved per agent with a model; the rebase and simplify use the implementer's", () => {
   expect(effortFor(db, 'implement')).toBeNull();
   saveAgent(db, 'implement', { prompt: DEFAULT_PROMPTS.implement, model: 'opus', effort: 'xhigh' });
   saveAgent(db, 'shared', { prompt: 'Be brief.', model: null, effort: 'max' });
   expect(effortFor(db, 'implement')).toBe('xhigh');
   expect(effortFor(db, 'rebase')).toBe('xhigh');
+  expect(effortFor(db, 'simplify')).toBe('xhigh');
   expect(effortFor(db, 'intake')).toBeNull();
   // Agents without a model of their own never keep an effort.
   expect(resolveAgent(db, 'shared').effort).toBeNull();

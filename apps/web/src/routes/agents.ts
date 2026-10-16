@@ -40,7 +40,7 @@ function agentOf(c: Context): AgentId {
 }
 
 function modelOf(agent: AgentId, body: Record<string, unknown>): AgentModel | null {
-  if (agent === 'shared' || agent === 'rebase') {
+  if (agent === 'shared' || agent === 'rebase' || agent === 'simplify') {
     return null;
   }
   const { model } = body;

@@ -37,6 +37,15 @@ export const DEFAULT_TOOLS: Record<RunAgent, readonly string[]> = {
   pr_description: REVIEW_TOOLS,
   // Added to the implementer's tools for a rebase (see `toolsFor`).
   rebase: ['Bash(git rebase*)', 'Bash(git merge-base*)', 'Bash(git add*)', 'Bash(git status*)'],
+  // Added to the implementer's tools to rewrite its commits (see `toolsFor`).
+  simplify: [
+    'Bash(git reset*)',
+    'Bash(git rebase*)',
+    'Bash(git add*)',
+    'Bash(git apply*)',
+    'Bash(git commit*)',
+    'Bash(git status*)',
+  ],
 };
 
 /** Claude Code's own tools, always offered. */

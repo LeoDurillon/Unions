@@ -133,6 +133,60 @@ test('a rebase is refused before the final review and once cancelled', () => {
   }
 });
 
+test('a simplified history goes back to the final review, or to done, without a new review', () => {
+  const fromReview = transition(
+    { kind: 'awaiting_approval', step: 'final_review' },
+    { type: 'simplify' },
+  );
+  expect(fromReview).toEqual({ kind: 'running', step: 'simplify' });
+  expect(transition(fromReview, { type: 'run_finished' })).toEqual({
+    kind: 'awaiting_approval',
+    step: 'final_review',
+  });
+  const fromDone = transition({ kind: 'done' }, { type: 'simplify' });
+  expect(fromDone).toEqual({ kind: 'running', step: 'simplify', thenDone: true });
+  expect(transition(fromDone, { type: 'run_finished' })).toEqual({ kind: 'done' });
+  expect(boardStatus(fromDone)).toBe('in_review');
+});
+
+test('a failed or rate-limited simplification asked once done still returns to done', () => {
+  const running: Phase = { kind: 'running', step: 'simplify', thenDone: true };
+  const failed = transition(running, { type: 'run_failed', error: 'tree changed' });
+  expect(failed).toEqual({
+    kind: 'failed',
+    step: 'simplify',
+    error: 'tree changed',
+    thenDone: true,
+  });
+  expect(transition(failed, { type: 'retry' })).toEqual(running);
+  const limited = transition(running, { type: 'rate_limited', retryAt: null });
+  expect(transition(limited, { type: 'retry' })).toEqual(running);
+});
+
+test('a simplification paused on a refused commit still returns to done once decided', () => {
+  const running: Phase = { kind: 'running', step: 'simplify', thenDone: true };
+  const paused = transition(running, { type: 'commit_refused' });
+  expect(paused).toEqual({ kind: 'commit_refused', step: 'simplify', thenDone: true });
+  for (const type of ['commit_anyway', 'drop_leftovers'] as const) {
+    const resumed = transition(paused, { type });
+    expect(resumed).toMatchObject({ kind: 'running', step: 'simplify', thenDone: true });
+    expect(transition(resumed, { type: 'run_finished' })).toEqual({ kind: 'done' });
+  }
+  expect(() => transition(paused, { type: 'revise' })).toThrow(InvalidTransition);
+});
+
+test('a simplification is refused before the final review and while a step runs', () => {
+  for (const phase of [
+    { kind: 'awaiting_approval', step: 'implement' },
+    { kind: 'running', step: 'final_review' },
+    { kind: 'failed', step: 'rebase', error: 'conflict' },
+    { kind: 'backlog' },
+    { kind: 'cancelled' },
+  ] satisfies Phase[]) {
+    expect(() => transition(phase, { type: 'simplify' })).toThrow(InvalidTransition);
+  }
+});
+
 test('a done ticket can be sent back with a review: the implementer, then a new final review', () => {
   expect(transition({ kind: 'done' }, { type: 'revise' })).toEqual({
     kind: 'running',

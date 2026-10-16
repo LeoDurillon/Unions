@@ -31,14 +31,11 @@ export function contains(
   return succeeds(runtime, container, ['merge-base', '--is-ancestor', ancestor, ref]);
 }
 
-/**
- * Why the agent's rebase cannot be pushed, or null when it can: no rebase left half-done, still on
- * the ticket's branch, and the base branch is now part of it.
- */
-export async function rebaseProblem(
+/** Why the agent left the repository unusable: a rebase half-done, or another branch checked out. */
+export async function branchProblem(
   runtime: ContainerRuntime,
   container: string,
-  refs: { base: string; branch: string },
+  branch: string,
 ): Promise<string | null> {
   const unfinished = await runIn(runtime, container, [
     'sh',
@@ -49,8 +46,21 @@ export async function rebaseProblem(
     return 'The rebase was left unfinished.';
   }
   const current = await runIn(runtime, container, git(['symbolic-ref', '--short', 'HEAD']));
-  if (current.stdout.trim() !== refs.branch) {
-    return `The repository is no longer on \`${refs.branch}\`.`;
+  return current.stdout.trim() === branch ? null : `The repository is no longer on \`${branch}\`.`;
+}
+
+/**
+ * Why the agent's rebase cannot be pushed, or null when it can: no rebase left half-done, still on
+ * the ticket's branch, and the base branch is now part of it.
+ */
+export async function rebaseProblem(
+  runtime: ContainerRuntime,
+  container: string,
+  refs: { base: string; branch: string },
+): Promise<string | null> {
+  const problem = await branchProblem(runtime, container, refs.branch);
+  if (problem) {
+    return problem;
   }
   if (!(await contains(runtime, container, 'HEAD', `origin/${refs.base}`))) {
     return `The branch still does not contain \`origin/${refs.base}\`.`;

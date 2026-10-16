@@ -25,12 +25,13 @@ function loadProject(db: Db, projectId: number): Project {
   return project;
 }
 
-async function prepare(deps: ImplementDeps, context: StepContext): Promise<Rebase> {
+/** The ticket's container on its branch, and the commit to put back if the run fails. */
+export async function prepareBranch(deps: ImplementDeps, context: StepContext): Promise<Rebase> {
   const project = loadProject(deps.db, context.ticket.projectId);
   const { name } = await ensureTicketContainer(deps.db, deps.runtime, deps.config, context.ticket);
   const ticket = getTicket(deps.db, context.ticket.id);
   if (!ticket.branch) {
-    throw new Error('The ticket has no branch to rebase yet');
+    throw new Error('The ticket has no branch yet');
   }
   const base = ticketBase(project, ticket);
   await ensureBranch(deps.runtime, name, ticket.branch, base);
@@ -86,7 +87,7 @@ export async function runRebaseStep(
   deps: ImplementDeps,
   context: StepContext,
 ): Promise<StepResult> {
-  const prepared = await prepare(deps, context);
+  const prepared = await prepareBranch(deps, context);
   const refusal = context.resume ? pausedRebase(deps.db, context.ticket.id) : null;
   // A resumed rebase restores the branch as it was before the paused run, not the rebased one.
   const before = refusal?.resumeState.before ?? prepared.before;

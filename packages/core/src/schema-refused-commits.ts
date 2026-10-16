@@ -6,7 +6,10 @@ import { now, tickets } from './schema';
 export type ResumeState = {
   /** Agent rounds the implementation took. */
   iterations?: number;
-  /** Rebase: the branch's commit on GitHub (the push lease), and the commit to restore on failure. */
+  /**
+   * Rebase and simplify: the branch's commit on GitHub (the push lease), and the commit to restore on
+   * failure.
+   */
   lease?: string;
   before?: string;
 };
@@ -21,7 +24,7 @@ export const refusedCommits = sqliteTable('refused_commits', {
   ticketId: integer('ticket_id')
     .notNull()
     .references(() => tickets.id, { onDelete: 'cascade' }),
-  step: text('step', { enum: ['implement', 'rebase'] }).notNull(),
+  step: text('step', { enum: ['implement', 'rebase', 'simplify'] }).notNull(),
   files: text('files', { mode: 'json' }).$type<string[]>().notNull(),
   hookOutput: text('hook_output').notNull(),
   /** Shortened when very large; `diffHash` covers the whole diff. */

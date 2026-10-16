@@ -113,6 +113,7 @@ export); do not edit. Tests are left out.
 - `note-card.tsx`: A review summary or a conversation comment, with its Add to review action when there is one.
 - `note-filter.tsx`: Whose reviews and comments the discussion shows: everyone's, people's only, or bots' only.
 - `pr-description.tsx`: The PR's description, rewritten by the agent when the work changed after the PR was opened.
+- `simplify-history.tsx`: The Simplify history button: the implementation agent rewrites the branch&apos;s commits, the code unchanged.
 
 ## components/pull-requests/
 

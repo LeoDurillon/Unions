@@ -10,6 +10,7 @@ const STEP_TITLES: Record<Step, string> = {
   implement: 'Implementation',
   final_review: 'Final review',
   rebase: 'Rebase',
+  simplify: 'Simplify history',
 };
 
 const VALIDATION_LABELS = {

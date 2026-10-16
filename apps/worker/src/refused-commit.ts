@@ -15,7 +15,7 @@ type Ok = Extract<AgentOutcome, { kind: 'ok' }>;
 
 export type Pause = {
   ticketId: number;
-  step: 'implement' | 'rebase';
+  step: 'implement' | 'rebase' | 'simplify';
   refused: Refused;
   /** The agent's report. */
   report: string;

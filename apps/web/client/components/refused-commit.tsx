@@ -96,12 +96,14 @@ function SendBack({
 function DecisionButtons({
   busy,
   canCommit,
+  leaveOutLabel,
   onCommit,
   onLeaveOut,
   onSendBack,
 }: {
   busy: boolean;
   canCommit: boolean;
+  leaveOutLabel: string;
   onCommit: () => void;
   onLeaveOut: () => void;
   onSendBack: (() => void) | null;
@@ -112,7 +114,7 @@ function DecisionButtons({
         Commit without hooks and continue
       </Button>
       <Button disabled={busy} onClick={onLeaveOut}>
-        Leave these changes out and continue
+        {leaveOutLabel}
       </Button>
       {onSendBack ? (
         <Button disabled={busy} onClick={onSendBack}>
@@ -123,13 +125,13 @@ function DecisionButtons({
   );
 }
 
-function Decision({
-  refusal,
-  canSendBack,
-}: {
-  refusal: RefusedCommit;
-  canSendBack: boolean;
-}): ReactElement {
+/** Leaving the changes out of a simplified history would change the code: it keeps the old one. */
+const LEAVE_OUT_LABELS: Partial<Record<Step, string>> = {
+  simplify: 'Keep the old history',
+};
+
+function Decision({ refusal, step }: { refusal: RefusedCommit; step: Step }): ReactElement {
+  const canSendBack = step === 'implement';
   const { command } = useTicketCommands(refusal.ticketId);
   const [message, setMessage] = useState(refusal.message);
   const [sendingBack, setSendingBack] = useState(false);
@@ -149,6 +151,7 @@ function Decision({
       <DecisionButtons
         busy={command.isPending}
         canCommit={message.trim() !== ''}
+        leaveOutLabel={LEAVE_OUT_LABELS[step] ?? 'Leave these changes out and continue'}
         onCommit={() => {
           command.mutate({ type: 'commit_anyway', refusalId, message: message.trim() });
         }}
@@ -201,7 +204,7 @@ function RefusedCommitView({ ticketId, step }: { ticketId: number; step: Step })
       {refusal ? (
         <>
           <Details refusal={refusal} />
-          <Decision key={refusal.id} refusal={refusal} canSendBack={step === 'implement'} />
+          <Decision key={refusal.id} refusal={refusal} step={step} />
         </>
       ) : null}
     </section>
