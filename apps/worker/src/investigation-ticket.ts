@@ -2,8 +2,10 @@ import {
   claimTicketDraft,
   emitEvent,
   failInterruptedTicketDrafts,
+  FetchNotionApi,
   finishTicketDraft,
   schema,
+  type DraftedTicket,
   type Investigation,
   type Project,
   type TicketDraft,
@@ -12,6 +14,7 @@ import { eq } from 'drizzle-orm';
 
 import { runAgent } from './agent';
 import type { InvestigationDeps } from './investigate';
+import { withNotionPage } from './investigation-ticket-notion';
 import { seedCredentials, type TicketContainer } from './provision';
 
 /** The ticket is written from the conversation alone: no repository, no tools. */
@@ -117,9 +120,7 @@ export class TicketDrafter {
     }
   }
 
-  private async run(
-    investigation: Investigation,
-  ): Promise<{ draft: TicketDraft } | { error: string }> {
+  private async run(investigation: Investigation): Promise<DraftedTicket | { error: string }> {
     const { db, runtime, config } = this.deps;
     const project = db
       .select()
@@ -147,7 +148,13 @@ export class TicketDrafter {
       if (outcome.kind !== 'ok') {
         return { error: outcome.message };
       }
-      return { draft: parseTicketDraft(outcome.text, investigation) };
+      const draft = parseTicketDraft(outcome.text, investigation);
+      return await withNotionPage(
+        this.deps.notion ?? new FetchNotionApi(),
+        project,
+        investigation,
+        draft,
+      );
     } finally {
       await this.removeContainer(investigation.id);
     }

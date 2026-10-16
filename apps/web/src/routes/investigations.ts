@@ -112,10 +112,10 @@ export function investigationRoutes(db: Db): Hono {
   });
   routes.post('/:id/ticket', async (c) => {
     const { id } = investigationOf(db, c);
-    const { context } = await readObject(c.req.raw);
+    const { context, inNotion } = await readObject(c.req.raw);
     const text = typeof context === 'string' ? context : '';
     return c.json(
-      refusals(CONFLICT, () => requestTicket(db, id, text)),
+      refusals(CONFLICT, () => requestTicket(db, id, text, { inNotion: inNotion === true })),
       ACCEPTED,
     );
   });

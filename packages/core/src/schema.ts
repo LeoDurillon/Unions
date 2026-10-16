@@ -285,6 +285,9 @@ export const investigations = sqliteTable(
     ticketStatus: text('ticket_status', { enum: ['queued', 'running', 'failed'] }),
     /** What the user said the ticket should cover, on top of the investigation. */
     ticketContext: text('ticket_context'),
+    /** The asked ticket is also created as a page of the project's Notion data source. */
+    ticketInNotion: integer('ticket_in_notion', { mode: 'boolean' }).notNull().default(false),
+    /** Why the ticket failed, or (status null) why its Notion page could not be created. */
     ticketError: text('ticket_error'),
     ticketId: integer('ticket_id').references((): AnySQLiteColumn => tickets.id, {
       onDelete: 'set null',

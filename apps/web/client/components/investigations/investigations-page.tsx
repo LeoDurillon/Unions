@@ -80,6 +80,7 @@ function Detail({
     <InvestigationDetail
       key={`${current.id}-${current.status}`}
       investigation={current}
+      hasNotion={project.hasNotion}
       onDeleted={() => {
         onSelect('new');
       }}

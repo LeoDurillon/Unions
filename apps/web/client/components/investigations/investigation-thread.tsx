@@ -119,14 +119,20 @@ function FollowUpForm({ investigation }: { investigation: Investigation }): Reac
 /** What can follow an answer: a ticket written from the investigation, or another question. */
 export function NextSteps({
   investigation,
+  hasNotion,
   onOpenTicket,
 }: {
   investigation: Investigation;
+  hasNotion: boolean;
   onOpenTicket: (id: number) => void;
 }): ReactElement {
   return (
     <div className="space-y-4 border-t border-zinc-200 pt-4 dark:border-zinc-800">
-      <InvestigationTicket investigation={investigation} onOpenTicket={onOpenTicket} />
+      <InvestigationTicket
+        investigation={investigation}
+        hasNotion={hasNotion}
+        onOpenTicket={onOpenTicket}
+      />
       <FollowUpForm investigation={investigation} />
     </div>
   );

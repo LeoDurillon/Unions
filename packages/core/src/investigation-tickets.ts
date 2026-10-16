@@ -10,8 +10,16 @@ import { createTicket, emitEvent } from './tickets';
  * Asks for a ticket written from an answered investigation, with what the user wants it to cover.
  * The worker drafts it (`claimTicketDraft`), then creates it in the backlog.
  */
-export function requestTicket(db: Db, id: number, context: string): Investigation {
+export function requestTicket(
+  db: Db,
+  id: number,
+  context: string,
+  { inNotion = false }: { inNotion?: boolean } = {},
+): Investigation {
   const current = getInvestigation(db, id);
+  if (inNotion && !hasNotion(db, current.projectId)) {
+    throw new InvestigationError('The project is not connected to a Notion data source');
+  }
   if (current.status !== 'succeeded' || current.result === null) {
     throw new InvestigationError('Only an answered investigation can become a ticket');
   }
@@ -21,7 +29,12 @@ export function requestTicket(db: Db, id: number, context: string): Investigatio
   return db.transaction((tx) => {
     const row = tx
       .update(schema.investigations)
-      .set({ ticketStatus: 'queued', ticketContext: context.trim(), ticketError: null })
+      .set({
+        ticketStatus: 'queued',
+        ticketContext: context.trim(),
+        ticketInNotion: inNotion,
+        ticketError: null,
+      })
       .where(eq(schema.investigations.id, id))
       .returning()
       .get();
@@ -55,7 +68,14 @@ export function claimTicketDraft(db: Db): Investigation | null {
 
 export type TicketDraft = { title: string; body: string };
 
-/** Creates the drafted ticket in the backlog and links it to the investigation; or records the failure. */
+/** The drafted ticket, its Notion page when one was made, or why the page could not be made. */
+export type DraftedTicket = { draft: TicketDraft; notionPageId?: string; notionError?: string };
+
+function hasNotion(db: Db, projectId: number): boolean {
+  const project = db.select().from(schema.projects).where(eq(schema.projects.id, projectId)).get();
+  return Boolean(project?.notionToken) && Boolean(project?.config.notionDataSourceId);
+}
+
 /**
  * A ticket written from an investigation on a ticket builds on that ticket: it depends on it, so it
  * starts once that one is done, from its branch. Not on a cancelled one (it would never start), nor
@@ -75,10 +95,11 @@ function linkToInvestigated(db: Db, investigation: Investigation, ticketId: numb
   }
 }
 
+/** Creates the drafted ticket in the backlog and links it to the investigation; or records the failure. */
 export function finishTicketDraft(
   db: Db,
   id: number,
-  outcome: { draft: TicketDraft } | { error: string },
+  outcome: DraftedTicket | { error: string },
 ): void {
   const investigation = db
     .select()
@@ -90,7 +111,11 @@ export function finishTicketDraft(
   }
   const ticketId =
     'draft' in outcome
-      ? createTicket(db, { projectId: investigation.projectId, ...outcome.draft }).id
+      ? createTicket(db, {
+          projectId: investigation.projectId,
+          ...outcome.draft,
+          notionPageId: outcome.notionPageId,
+        }).id
       : null;
   if (ticketId !== null) {
     linkToInvestigated(db, investigation, ticketId);
@@ -100,7 +125,7 @@ export function finishTicketDraft(
       .set(
         ticketId === null
           ? { ticketStatus: 'failed', ticketError: 'error' in outcome ? outcome.error : null }
-          : { ticketStatus: null, ticketError: null, ticketId },
+          : { ticketStatus: null, ticketError: notionErrorOf(outcome), ticketId },
       )
       .where(eq(schema.investigations.id, id))
       .run();
@@ -115,6 +140,12 @@ export function finishTicketDraft(
         : { type: 'investigation_ticket_created', investigationId: id, payload: { ticketId } },
     );
   });
+}
+
+function notionErrorOf(outcome: DraftedTicket | { error: string }): string | null {
+  return 'notionError' in outcome && outcome.notionError !== undefined
+    ? `The ticket was created, but not in Notion: ${outcome.notionError}`
+    : null;
 }
 
 /** Ticket drafts left `running` by a worker that stopped mid-way fail; returns their investigations. */

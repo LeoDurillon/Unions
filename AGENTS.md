@@ -89,7 +89,8 @@ files and uses `union.sqlite` here, which holds the user's real projects.
   `projectGitHubAuth` and build clients with `@union/core/github-client`; never build an Octokit from a token by
   hand. Tokens and the App's key never reach the browser (`toPublicProject`). Details:
   `docs/architecture/integrations.md`.
-- Notion is read only, from the web server (`src/notion.ts` behind `NotionApi`); its secret never reaches the browser
+- Notion: the web server only reads (`src/notion.ts` behind `NotionApi`); writes (page properties from event rules,
+  pages for tickets written from investigations) happen in the worker. Its secret never reaches the browser
   (`hasNotion` only). Details: `docs/architecture/integrations.md`.
 - A ticket's base branch is `ticketBase(project, ticket)`: the parent's branch it was cloned from, else the project's.
   Never use `project.config.baseBranch` directly in the worker. Starting goes through `dispatch`, which refuses a

@@ -16,8 +16,10 @@ import {
   schema,
   type ContainerRuntime,
   type Db,
+  type NotionApi,
   type Project,
 } from '@union/core';
+import { eq } from 'drizzle-orm';
 
 import type { AgentFn, AgentRun } from './agent';
 import { InvestigationRunner } from './investigate';
@@ -73,13 +75,14 @@ beforeEach(async () => {
   answered('Dans auth.ts, ligne 40.');
 });
 
-function runner(agent: AgentFn): InvestigationRunner {
+function runner(agent: AgentFn, notion?: NotionApi): InvestigationRunner {
   return new InvestigationRunner({
     db,
     runtime,
     config: { image: 'img', gitBaseUrl: 'https://github.com', credentialsPath },
     slots: new RunSlots(2),
     agent,
+    notion,
   });
 }
 
@@ -145,4 +148,52 @@ test('a failed agent keeps the error and no ticket is made', async () => {
     ticketId: null,
   });
   expect(db.select().from(schema.tickets).all()).toEqual([]);
+});
+
+const writesTicket: AgentFn = () =>
+  Promise.resolve({ kind: 'ok', text: '# Fix login\n\nDetails.', sessionId: 's', costUsd: null });
+
+function connectNotion(): void {
+  db.update(schema.projects)
+    .set({ notionToken: 'secret', config: { baseBranch: 'main', notionDataSourceId: 'source' } })
+    .where(eq(schema.projects.id, project.id))
+    .run();
+}
+
+test('asked in Notion, the ticket is created as a page of the data source and linked to it', async () => {
+  connectNotion();
+  requestTicket(db, id, '', { inNotion: true });
+  const pages: unknown[] = [];
+  const notion = {
+    createPage: (token: string, dataSourceId: string, page: { title: string }) => {
+      pages.push({ token, dataSourceId, title: page.title });
+      return Promise.resolve({ id: 'page-1', title: page.title, url: '', dataSourceId });
+    },
+  } as unknown as NotionApi;
+  const investigations = runner(writesTicket, notion);
+  investigations.tick();
+  await investigations.idle();
+
+  expect(pages).toEqual([{ token: 'secret', dataSourceId: 'source', title: 'Fix login' }]);
+  const investigation = getInvestigation(db, id);
+  expect(investigation.ticketError).toBeNull();
+  expect(getTicket(db, investigation.ticketId ?? 0).notionPageId).toBe('page-1');
+});
+
+test('a Notion failure still creates the ticket, and says why it has no page', async () => {
+  connectNotion();
+  requestTicket(db, id, '', { inNotion: true });
+  const notion = {
+    createPage: () => Promise.reject(new Error('Notion: validation error')),
+  } as unknown as NotionApi;
+  const investigations = runner(writesTicket, notion);
+  investigations.tick();
+  await investigations.idle();
+
+  const investigation = getInvestigation(db, id);
+  expect(investigation.ticketStatus).toBeNull();
+  expect(investigation.ticketError).toBe(
+    'The ticket was created, but not in Notion: Notion: validation error',
+  );
+  expect(getTicket(db, investigation.ticketId ?? 0).notionPageId).toBeNull();
 });

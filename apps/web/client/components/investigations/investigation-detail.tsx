@@ -135,10 +135,13 @@ function Answer({ investigation }: { investigation: Investigation }): ReactEleme
 /** One investigation: its questions, the latest answer, the agent's live log and a follow-up form. */
 export function InvestigationDetail({
   investigation,
+  hasNotion,
   onDeleted,
   onOpenTicket,
 }: {
   investigation: Investigation;
+  /** The project has a Notion data source: the ticket can be created there too. */
+  hasNotion: boolean;
   onDeleted: () => void;
   onOpenTicket: (id: number) => void;
 }): ReactElement {
@@ -170,7 +173,11 @@ export function InvestigationDetail({
         <AgentLog source={{ investigation: investigation.id }} />
       )}
       {investigation.status === 'succeeded' ? (
-        <NextSteps investigation={investigation} onOpenTicket={onOpenTicket} />
+        <NextSteps
+          investigation={investigation}
+          hasNotion={hasNotion}
+          onOpenTicket={onOpenTicket}
+        />
       ) : null}
     </article>
   );

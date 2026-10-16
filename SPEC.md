@@ -201,6 +201,10 @@ A one-off agent run on a custom prompt, outside the ticket pipeline (project bar
   questions: a title, then the problem, what to change, acceptance criteria and the useful findings. It lands in the
   Backlog (its GitHub issue follows as for any ticket), and the investigation links to it (`ticket_id`); another one
   can be asked afterwards. `ticket_status` is `queued`, `running` or `failed` (with `ticket_error`) meanwhile.
+  When the project has a Notion data source, **Also create it in Notion** (`ticket_in_notion`) makes the worker add a
+  page with the ticket's title and description to that data source and link the ticket to it (`notion_page_id`, so
+  the Notion event rules apply). If Notion refuses, the ticket is still created and `ticket_error` says why it has no
+  page.
 - **Not yet:** resuming the agent's own session on a follow-up, choosing another branch.
 
 ## Rebase

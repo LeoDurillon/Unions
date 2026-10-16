@@ -112,9 +112,9 @@ export const api = {
     request('POST', `${investigationPath(investigation)}/rerun`),
   requestInvestigationTicket: (
     investigation: Investigation,
-    context: string,
+    ticket: { context: string; inNotion: boolean },
   ): Promise<Investigation> =>
-    request('POST', `${investigationPath(investigation)}/ticket`, { context }),
+    request('POST', `${investigationPath(investigation)}/ticket`, ticket),
   askFollowUp: (investigation: Investigation, prompt: string): Promise<Investigation> =>
     request('POST', `${investigationPath(investigation)}/follow-up`, { prompt }),
   cancelInvestigation: (investigation: Investigation): Promise<unknown> =>

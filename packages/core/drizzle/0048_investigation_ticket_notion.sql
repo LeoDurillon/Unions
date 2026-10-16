@@ -1,0 +1,1 @@
+ALTER TABLE `investigations` ADD `ticket_in_notion` integer DEFAULT false NOT NULL;

@@ -28,6 +28,12 @@ export type NotionApi = {
   users(token: string): Promise<NotionUser[]>;
   /** Sets page properties, keyed by property id, in Notion's property value shape. */
   updatePage(token: string, pageId: string, properties: Record<string, unknown>): Promise<void>;
+  /** Adds a page to the data source, with this title and markdown content. */
+  createPage(
+    token: string,
+    dataSourceId: string,
+    page: { title: string; markdown: string },
+  ): Promise<NotionPage>;
 };
 
 /** Rich text arrays to plain text; anything unexpected reads as empty. */
@@ -89,6 +95,22 @@ function propertiesOf(properties: unknown): NotionProperty[] {
   );
 }
 
+function pageOf(body: Record<string, unknown>): NotionPage {
+  const { parent } = body;
+  const dataSourceId =
+    isRecord(parent) &&
+    parent.type === 'data_source_id' &&
+    typeof parent.data_source_id === 'string'
+      ? parent.data_source_id
+      : null;
+  return {
+    id: String(body.id),
+    title: titleOf(body.properties),
+    url: typeof body.url === 'string' ? body.url : '',
+    dataSourceId,
+  };
+}
+
 export class FetchNotionApi implements NotionApi {
   private get(token: string, path: string): Promise<Record<string, unknown>> {
     return this.send(path, {
@@ -96,9 +118,14 @@ export class FetchNotionApi implements NotionApi {
     });
   }
 
-  private patch(token: string, path: string, payload: unknown): Promise<Record<string, unknown>> {
+  private write(
+    method: 'PATCH' | 'POST',
+    token: string,
+    path: string,
+    payload: unknown,
+  ): Promise<Record<string, unknown>> {
     return this.send(path, {
-      method: 'PATCH',
+      method,
       headers: {
         authorization: `Bearer ${token}`,
         'notion-version': NOTION_VERSION,
@@ -160,24 +187,25 @@ export class FetchNotionApi implements NotionApi {
     pageId: string,
     properties: Record<string, unknown>,
   ): Promise<void> {
-    await this.patch(token, `/pages/${pageId}`, { properties });
+    await this.write('PATCH', token, `/pages/${pageId}`, { properties });
+  }
+
+  async createPage(
+    token: string,
+    dataSourceId: string,
+    page: { title: string; markdown: string },
+  ): Promise<NotionPage> {
+    // The title column's id is `title` in every data source.
+    const body = await this.write('POST', token, '/pages', {
+      parent: { type: 'data_source_id', data_source_id: dataSourceId },
+      properties: { title: { title: [{ type: 'text', text: { content: page.title } }] } },
+      markdown: page.markdown,
+    });
+    return pageOf(body);
   }
 
   async page(token: string, pageId: string): Promise<NotionPage> {
-    const body = await this.get(token, `/pages/${pageId}`);
-    const { parent } = body;
-    const dataSourceId =
-      isRecord(parent) &&
-      parent.type === 'data_source_id' &&
-      typeof parent.data_source_id === 'string'
-        ? parent.data_source_id
-        : null;
-    return {
-      id: String(body.id),
-      title: titleOf(body.properties),
-      url: typeof body.url === 'string' ? body.url : '',
-      dataSourceId,
-    };
+    return pageOf(await this.get(token, `/pages/${pageId}`));
   }
 
   async pageMarkdown(

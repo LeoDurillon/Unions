@@ -3,19 +3,41 @@ import type { Investigation } from '@union/core';
 import { useState, type ReactElement } from 'react';
 
 import { api } from '../../lib/api';
+import { Switch } from '../choice';
 import { Button, ErrorText, inputClass } from '../ui';
+
+function NotionOption({
+  checked,
+  onChange,
+}: {
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+}): ReactElement {
+  return (
+    <Switch
+      checked={checked}
+      onChange={onChange}
+      hint="A page with the ticket's title and description, in the project's Notion data source; the ticket is linked to it."
+    >
+      Also create it in Notion
+    </Switch>
+  );
+}
 
 function Ask({
   investigation,
+  hasNotion,
   onCancel,
 }: {
   investigation: Investigation;
+  hasNotion: boolean;
   onCancel: () => void;
 }): ReactElement {
   const queryClient = useQueryClient();
   const [context, setContext] = useState('');
+  const [inNotion, setInNotion] = useState(false);
   const ask = useMutation({
-    mutationFn: () => api.requestInvestigationTicket(investigation, context),
+    mutationFn: () => api.requestInvestigationTicket(investigation, { context, inNotion }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['investigations'] }),
   });
   return (
@@ -38,6 +60,7 @@ function Ask({
           }}
         />
       </label>
+      {hasNotion ? <NotionOption checked={inNotion} onChange={setInNotion} /> : null}
       <ErrorText error={ask.error} />
       <div className="flex gap-2">
         <Button
@@ -55,12 +78,34 @@ function Ask({
   );
 }
 
+/** Why the ticket failed, or why it has no Notion page though it was asked there. */
+function TicketError({
+  status,
+  error,
+}: {
+  status: Investigation['ticketStatus'];
+  error: string | null;
+}): ReactElement | null {
+  if (status === 'failed') {
+    return (
+      <p className="text-sm text-red-700 dark:text-red-400">
+        The ticket could not be written: {error}
+      </p>
+    );
+  }
+  return error === null ? null : (
+    <p className="text-sm text-amber-700 dark:text-amber-400">{error}</p>
+  );
+}
+
 /** Turns the investigation into a backlog ticket written by an agent, and links to it once made. */
 export function InvestigationTicket({
   investigation,
+  hasNotion,
   onOpenTicket,
 }: {
   investigation: Investigation;
+  hasNotion: boolean;
   onOpenTicket: (id: number) => void;
 }): ReactElement {
   const [asking, setAsking] = useState(false);
@@ -72,6 +117,7 @@ export function InvestigationTicket({
     return (
       <Ask
         investigation={investigation}
+        hasNotion={hasNotion}
         onCancel={() => {
           setAsking(false);
         }}
@@ -80,11 +126,7 @@ export function InvestigationTicket({
   }
   return (
     <div className="space-y-2">
-      {ticketStatus === 'failed' ? (
-        <p className="text-sm text-red-700 dark:text-red-400">
-          The ticket could not be written: {ticketError}
-        </p>
-      ) : null}
+      <TicketError status={ticketStatus} error={ticketError} />
       <div className="flex flex-wrap items-center gap-2">
         {ticketId === null ? null : (
           <Button

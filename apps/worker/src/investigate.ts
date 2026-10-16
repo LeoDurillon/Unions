@@ -8,6 +8,7 @@ import {
   finishInvestigation,
   type Investigation,
   type InvestigationOutcome,
+  type NotionApi,
   type Project,
   projectInstructions,
   schema,
@@ -84,6 +85,8 @@ export type InvestigationDeps = {
   config: ProvisionConfig;
   slots: RunSlots;
   agent?: AgentFn;
+  /** Notion, for tickets written from investigations; tests substitute a fake. */
+  notion?: NotionApi;
 };
 
 function toOutcome(outcome: AgentOutcome, cancelled: boolean): InvestigationOutcome {

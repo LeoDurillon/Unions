@@ -33,6 +33,7 @@ export); do not edit. Tests are left out.
 - `index.ts`: The worker's entry point: opens the database and starts the scheduler and the GitHub loop.
 - `investigate-ticket.ts`: Where the agent stands, for the prompt: the ticket's branch in its own workspace.
 - `investigate.ts`: The user's prompt (after the earlier exchanges, if any), then where the agent stands and what to hand back.
+- `investigation-ticket-notion.ts`: Creates a ticket drafted from an investigation as a page of the project's Notion data source too.
 - `investigation-ticket.ts`: Everything the investigation found, what the user wants the ticket to cover, and the format.
 - `janitor.ts`: Removes the containers and volumes of deleted tickets; a failure is logged as an event, not thrown.
 - `leftovers.ts`: Stages every change and describes it, or null when the working tree is clean.

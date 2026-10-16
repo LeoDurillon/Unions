@@ -40,6 +40,7 @@ const notion: NotionApi = {
         })
       : Promise.reject(new NotionError('Not found', 404)),
   updatePage: () => Promise.resolve(),
+  createPage: () => Promise.reject(new NotionError('Not used', 400)),
   users: () => Promise.resolve([{ id: '0f1e2d3c-4b5a-4968-8778-695a4b3c2d1e', name: 'Ada' }]),
 };
 
