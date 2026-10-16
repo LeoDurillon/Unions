@@ -34,4 +34,5 @@ export type RulePreview =
       pageId: string;
     }
   | { ok: true; kind: 'github_comment'; on: CommentTarget; number: number; text: string }
+  | { ok: true; kind: 'union_notification'; title: string; text: string }
   | { ok: false; error: string };

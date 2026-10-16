@@ -4,11 +4,11 @@ import { and, eq } from 'drizzle-orm';
 import type { Db } from './db';
 import {
   checkGitHubComment,
+  checkUnionNotification,
   isActionKind,
   type ActionKind,
   type ActionOf,
   type EventAction,
-  type GitHubCommentAction,
   type NotionPropertyAction,
 } from './event-actions';
 import { isEvent, type EventPayloads, type StoredEvent } from './event-catalog';
@@ -114,18 +114,19 @@ type ActionChecks = {
   [K in ActionKind]: (db: Db, projectId: number, record: object) => ActionOf<K>;
 };
 
-/** Each kind's checks; a Notion action is checked against the stored Notion columns. */
-function checkedGitHubComment(_db: Db, _projectId: number, record: object): GitHubCommentAction {
-  const checked = checkGitHubComment(record);
+/** A check's result as the save sees it: the action, or the reason thrown. */
+function thrown<A>(checked: { action: A } | { error: string }): A {
   if ('error' in checked) {
     throw new EventRuleError(checked.error);
   }
   return checked.action;
 }
 
+/** Each kind's checks; a Notion action is checked against the stored Notion columns. */
 const ACTION_CHECKS: ActionChecks = {
   notion_property: checkedNotionAction,
-  github_comment: checkedGitHubComment,
+  github_comment: (_db, _projectId, record) => thrown(checkGitHubComment(record)),
+  union_notification: (_db, _projectId, record) => thrown(checkUnionNotification(record)),
 };
 
 /** An action without a `kind` is a Notion one: rules saved before there were other kinds. */

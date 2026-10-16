@@ -15,6 +15,19 @@ function PreviewResult({ result }: { result: RulePreview | undefined }): ReactEl
   if (!result.ok) {
     return <p className="text-sm text-red-600 dark:text-red-400">{result.error}</p>;
   }
+  if (result.kind === 'union_notification') {
+    return (
+      <div className="space-y-1 text-sm">
+        <p>Would notify you in Union:</p>
+        <div className="rounded bg-zinc-100 p-2 dark:bg-zinc-800">
+          <p className="font-semibold">{result.title}</p>
+          <p className="text-zinc-600 dark:text-zinc-400">
+            {result.text === '' ? '(empty: nothing would be sent)' : result.text}
+          </p>
+        </div>
+      </div>
+    );
+  }
   if (result.kind === 'github_comment') {
     return (
       <div className="space-y-1 text-sm">
@@ -46,6 +59,9 @@ function applicable(
   if (action.kind === 'notion_property') {
     const linked = tickets.filter((ticket) => ticket.notionPageId !== null);
     return { tickets: linked, none: 'No ticket imported from Notion to try it on yet.' };
+  }
+  if (action.kind === 'union_notification') {
+    return { tickets, none: 'No ticket to try it on yet.' };
   }
   if (action.on === 'issue') {
     const withIssue = tickets.filter((ticket) => ticket.issueNumber !== null);

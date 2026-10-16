@@ -1,4 +1,4 @@
-// Tests GitHub comment rules over the API: saved without Notion, and previewed for one ticket.
+// Tests GitHub comment and notification rules over the API: saved without Notion, and previewed for one ticket.
 import { beforeEach, expect, test } from 'bun:test';
 
 import { createDb, createTicket, migrateDb, schema, type Db, type NotionApi } from '@union/core';
@@ -55,5 +55,29 @@ test('a comment rule is saved without Notion and previews its comment on the pul
     on: 'pull_request',
     number: 12,
     text: 'Ready for QA: https://github.com/o/r/pull/12',
+  });
+});
+
+test('a notification rule previews what the bell would show, for any ticket', async () => {
+  const project = (await (
+    await call('POST', '/api/projects', { owner: 'o', repo: 'r', githubProjectNodeId: 'P' })
+  ).json()) as PublicProject;
+  const rule = {
+    name: 'Approval',
+    trigger: { kind: 'pull_request_ready' },
+    action: { kind: 'union_notification', message: '{ticket.title} is ready' },
+  };
+  const base = `/api/projects/${project.id}`;
+  expect((await call('POST', `${base}/event-rules`, rule)).status).toBe(201);
+  const ticket = createTicket(db, { projectId: project.id, title: 'Search' });
+  const response = await call('POST', `${base}/event-rules/preview`, {
+    ...rule,
+    ticketId: ticket.id,
+  });
+  expect(await response.json()).toEqual({
+    ok: true,
+    kind: 'union_notification',
+    title: 'Search',
+    text: 'Search is ready',
   });
 });

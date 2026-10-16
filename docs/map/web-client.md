@@ -178,7 +178,7 @@ export); do not edit. Tests are left out.
 - `project-section-body.tsx`: The project's own settings, its agents' and its pull requests'.
 - `pull-request-section.tsx`: Whether the worker opens a draft PR after the implementation, or the user links one by hand.
 - `review-section.tsx`: Files the review page lists apart (collapsed), so the sidebar shows what needs reading.
-- `rule-action-text.tsx`: What a rule does, in a sentence for its row: the Notion property it sets, or where it comments.
+- `rule-action-text.tsx`: What a rule does, in a sentence for its row: the Notion property it sets, where it comments, or what it notifies.
 - `rule-editor.tsx`: Edits a rule: its name, what triggers it, and what it does.
 - `rule-list.tsx`: One rule: when, then, and its switches.
 - `rule-preview.tsx`: What the rule as edited would do for one of the project's tickets; nothing is sent.
@@ -188,6 +188,7 @@ export); do not edit. Tests are left out.
 - `set-up-first.tsx`: A settings page that needs another one done first, with the way there.
 - `settings-nav.tsx`: The settings pages by group; the danger zone last, set apart.
 - `settings-page.tsx`: The project's settings: a menu of pages on the left, the open one on the right (`?settings=`).
+- `union-notification-fields.tsx`: A "Notify me in Union" action's field: the message, as a template, shown under the ticket's title.
 - `value-field.tsx`: The value a rule sets, shaped by the property's type.
 - `variable-chips.tsx`: The template variables as chips: clicking one adds it to the text being written.
 

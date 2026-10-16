@@ -1,4 +1,4 @@
-// What a rule does, in a sentence for its row: the Notion property it sets, or where it comments.
+// What a rule does, in a sentence for its row: the Notion property it sets, where it comments, or what it notifies.
 import type { NotionSchema } from '@union/core';
 import {
   COMMENT_TARGET_LABELS,
@@ -48,6 +48,13 @@ export function ActionText({
 }): ReactElement {
   if (action.kind === 'notion_property') {
     return <NotionText projectId={projectId} notion={notion} action={action} />;
+  }
+  if (action.kind === 'union_notification') {
+    return (
+      <>
+        notify you in Union: <code className="font-mono">{action.message}</code>
+      </>
+    );
   }
   return (
     <>

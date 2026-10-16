@@ -70,6 +70,6 @@ A `notifications` table: `id`, `project_id`, `ticket_id` or `investigation_id`, 
 
 ## Later
 
-- A "Notify me in Union" action kind for event rules, for custom moments ("ticket X moves to Done"), once the
-  built-in set is in use.
+- A "Notify me in Union" action kind for event rules, for custom moments ("ticket X moves to Done"). Built
+  (2026-10-16): action kind `union_notification`, notification kind `rule` with its `rule_id`.
 - Choosing which built-in moments notify, per project.

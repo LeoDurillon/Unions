@@ -1,4 +1,4 @@
-// Tests how a rule's action is read: its kind, a missing kind as Notion's, and a GitHub comment's checks.
+// Tests how a rule's action is read: its kind, a missing kind as Notion's, and the checks of a GitHub comment and a notification.
 import { beforeEach, expect, test } from 'bun:test';
 
 import { createDb, migrateDb, type Db } from './db';
@@ -59,4 +59,20 @@ test('a GitHub comment needs no Notion columns', () => {
   expect(check({ kind: 'github_comment', on: 'issue', body: 'Done' })).toMatchObject({
     kind: 'github_comment',
   });
+});
+
+test('a notification in Union holds a message with known variables, not too long', () => {
+  expect(check({ kind: 'union_notification', message: ' Ready: {pr.url} ' })).toEqual({
+    kind: 'union_notification',
+    message: 'Ready: {pr.url}',
+  });
+  expect(() => check({ kind: 'union_notification', message: ' ' })).toThrow(
+    'Write the notification',
+  );
+  expect(() => check({ kind: 'union_notification', message: 'x'.repeat(301) })).toThrow(
+    'at most 300',
+  );
+  expect(() => check({ kind: 'union_notification', message: '{nope}' })).toThrow(
+    'Unknown variable',
+  );
 });

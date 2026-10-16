@@ -17,7 +17,7 @@ and linked.
 - [Preview environments](preview-environments.md): compose-based previews with e2e tests (built, phases 1 to 4).
 - [Project settings as a page](project-settings-page.md): grouped side menu instead of the nine-tab modal (steps 1 to 5 built).
 - [Notifications in Union](notifications.md): an inbox of what needs you (approvals, failures, usage limit, merged
-  PRs, finished investigations), with an unread count and optional desktop notifications (built, steps 1 to 5).
+  PRs, finished investigations), with an unread count and optional desktop notifications (built, steps 1 to 5, and the "Notify me in Union" rule action).
 - [Group a review's changes by spec](review-spec-groups.md) (built, hunks included): an agent groups the changed files by the parts of
   the spec they implement (PR description, ticket, issue or Notion page), on request; a toggle in the file panel.
 

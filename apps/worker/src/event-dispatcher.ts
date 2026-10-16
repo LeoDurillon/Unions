@@ -12,6 +12,7 @@ import {
 import { gitHubCommentTarget, type GitHubApiFor } from './event-actions/github-comment';
 import { notionTarget } from './event-actions/notion';
 import { deliverAction, type ActionTargets } from './event-actions/target';
+import { unionNotificationTarget } from './event-actions/union-notification';
 import { writeNotifications } from './notifier';
 
 /**
@@ -32,6 +33,7 @@ export class EventDispatcher {
     this.targets = {
       notion_property: notionTarget(db, notion),
       github_comment: gitHubCommentTarget(db, apiFor),
+      union_notification: unionNotificationTarget(db),
     };
   }
 

@@ -1,5 +1,6 @@
 import {
   checkRule,
+  clipDetail,
   deleteRule,
   EventRuleError,
   getTicket,
@@ -21,6 +22,7 @@ import {
   type Project,
   type RuleInput,
   type Ticket,
+  type UnionNotificationAction,
 } from '@union/core';
 import { eq, inArray } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
@@ -176,9 +178,21 @@ function gitHubCommentPreview(
   return { ok: true, kind: 'github_comment', on: action.on, number, text };
 }
 
+/** The notification as the bell would show it: the ticket's title, the message filled in. */
+function unionNotificationPreview(
+  _db: Db,
+  project: Project,
+  ticket: Ticket,
+  action: UnionNotificationAction,
+): RulePreview {
+  const text = clipDetail(renderTemplate(action.message, templateValues(project, ticket, null)));
+  return { ok: true, kind: 'union_notification', title: ticket.title, text };
+}
+
 const PREVIEWS: Previews = {
   notion_property: notionPreview,
   github_comment: gitHubCommentPreview,
+  union_notification: unionNotificationPreview,
 };
 
 function previewOf<K extends ActionKind>(

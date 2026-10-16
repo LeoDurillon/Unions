@@ -14,4 +14,5 @@ export const KIND_LABELS: Record<NotificationKind, { label: string; tone: Tone }
   investigation_finished: { label: 'Answered', tone: 'green' },
   investigation_failed: { label: 'Failed', tone: 'red' },
   rule_failed: { label: 'Rule failed', tone: 'red' },
+  rule: { label: 'Rule', tone: 'blue' },
 };

@@ -12,6 +12,35 @@ import type { ReactElement } from 'react';
 import { Field, inputClass } from '../ui';
 import { GitHubCommentFields } from './github-comment-fields';
 import { NotionActionFields } from './notion-action-fields';
+import { UnionNotificationFields } from './union-notification-fields';
+
+/** The fields of the action's own kind. */
+function KindFields({
+  projectId,
+  notion,
+  action,
+  onChange,
+}: {
+  projectId: number;
+  notion: NotionSchema | null;
+  action: EventAction;
+  onChange: (action: EventAction) => void;
+}): ReactElement {
+  if (action.kind === 'notion_property') {
+    return (
+      <NotionActionFields
+        projectId={projectId}
+        notion={notion}
+        action={action}
+        onChange={onChange}
+      />
+    );
+  }
+  if (action.kind === 'union_notification') {
+    return <UnionNotificationFields action={action} onChange={onChange} />;
+  }
+  return <GitHubCommentFields action={action} onChange={onChange} />;
+}
 
 export function ActionFields({
   projectId,
@@ -44,16 +73,7 @@ export function ActionFields({
           ))}
         </select>
       </Field>
-      {action.kind === 'notion_property' ? (
-        <NotionActionFields
-          projectId={projectId}
-          notion={notion}
-          action={action}
-          onChange={onChange}
-        />
-      ) : (
-        <GitHubCommentFields action={action} onChange={onChange} />
-      )}
+      <KindFields projectId={projectId} notion={notion} action={action} onChange={onChange} />
     </>
   );
 }

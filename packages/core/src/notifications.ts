@@ -1,4 +1,5 @@
 // Which events of the log notify the user, and with what text; pure, the worker writes the rows.
+import { MAX_NOTIFICATION } from './event-actions';
 import { isEvent, type StoredEvent } from './event-catalog';
 import type { notifications } from './schema-notifications';
 import { STEP_TITLES, type Phase } from './states';
@@ -9,12 +10,10 @@ export type NotificationKind = Notification['kind'];
 /** What a notification says; the writer adds where it belongs. */
 export type NotificationDraft = Pick<Notification, 'kind' | 'title' | 'detail'>;
 
-/** An error message can be a whole log: the panel shows its start. */
-const MAX_DETAIL = 300;
-
-function clip(text: string): string {
+/** A notification's text, cut: an error message can be a whole log, the panel shows its start. */
+export function clipDetail(text: string): string {
   const line = text.trim();
-  return line.length > MAX_DETAIL ? `${line.slice(0, MAX_DETAIL - 1)}…` : line;
+  return line.length > MAX_NOTIFICATION ? `${line.slice(0, MAX_NOTIFICATION - 1)}…` : line;
 }
 
 type Moment = { kind: NotificationKind; detail: string };
@@ -88,5 +87,7 @@ export function notificationFor(
   subject: { title: string },
 ): NotificationDraft | null {
   const moment = momentOf(event);
-  return moment ? { kind: moment.kind, title: subject.title, detail: clip(moment.detail) } : null;
+  return moment
+    ? { kind: moment.kind, title: subject.title, detail: clipDetail(moment.detail) }
+    : null;
 }

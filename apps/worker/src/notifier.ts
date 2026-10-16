@@ -42,18 +42,18 @@ function subjectOf(tx: Tx, event: Event): Subject | null {
   return null;
 }
 
-/** Writes the notification once (per event) and logs `notification_created` for the browser. */
-function record(tx: Tx, event: Event, subject: Subject, draft: NotificationDraft): boolean {
+/**
+ * Writes the notification once (per event, or per rule and event) and logs `notification_created`
+ * for the browser. Returns whether it was new.
+ */
+export function recordNotification(
+  tx: Tx | Db,
+  values: typeof schema.notifications.$inferInsert,
+): boolean {
   // An event already notified (a write cut short before the cursor moved) inserts nothing.
   const [row] = tx
     .insert(schema.notifications)
-    .values({
-      ...draft,
-      projectId: subject.projectId,
-      ticketId: event.ticketId,
-      investigationId: event.investigationId,
-      eventSeq: event.seq,
-    })
+    .values(values)
     .onConflictDoNothing()
     .returning()
     .all();
@@ -73,6 +73,16 @@ function record(tx: Tx, event: Event, subject: Subject, draft: NotificationDraft
     },
   });
   return true;
+}
+
+function record(tx: Tx, event: Event, subject: Subject, draft: NotificationDraft): boolean {
+  return recordNotification(tx, {
+    ...draft,
+    projectId: subject.projectId,
+    ticketId: event.ticketId,
+    investigationId: event.investigationId,
+    eventSeq: event.seq,
+  });
 }
 
 /**

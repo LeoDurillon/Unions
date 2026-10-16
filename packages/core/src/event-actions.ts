@@ -10,6 +10,8 @@ type ActionFields = {
   notion_property: { propertyId: string; value: string };
   /** Comments on the ticket's issue or pull request; `body` is a template. */
   github_comment: { on: CommentTarget; body: string };
+  /** Notifies the user in Union (the bell, desktop notifications); `message` is a template. */
+  union_notification: { message: string };
 };
 
 export type ActionKind = keyof ActionFields;
@@ -21,15 +23,18 @@ export type EventAction = { [K in ActionKind]: ActionOf<K> }[ActionKind];
 
 export type NotionPropertyAction = ActionOf<'notion_property'>;
 export type GitHubCommentAction = ActionOf<'github_comment'>;
+export type UnionNotificationAction = ActionOf<'union_notification'>;
 
 export const ACTION_KINDS = [
   'notion_property',
   'github_comment',
+  'union_notification',
 ] as const satisfies readonly ActionKind[];
 
 export const ACTION_LABELS: Record<ActionKind, string> = {
   notion_property: "Set a property of the ticket's Notion page",
   github_comment: 'Comment on GitHub',
+  union_notification: 'Notify me in Union',
 };
 
 export const COMMENT_TARGETS = [
@@ -42,12 +47,16 @@ export const COMMENT_TARGET_LABELS: Record<CommentTarget, string> = {
   pull_request: "The ticket's pull request",
 };
 
+/** A notification's text is cut there once its variables are filled in. */
+export const MAX_NOTIFICATION = 300;
+
 /** GitHub refuses longer comments. */
 const MAX_COMMENT = 65_536;
 
 const EMPTY_ACTIONS: { [K in ActionKind]: ActionOf<K> } = {
   notion_property: { kind: 'notion_property', propertyId: '', value: '' },
   github_comment: { kind: 'github_comment', on: 'issue', body: '' },
+  union_notification: { kind: 'union_notification', message: '' },
 };
 
 /** A new action of `kind`, before the user fills it in. */
@@ -83,4 +92,22 @@ export function checkGitHubComment(
     return { error: `Unknown variable: {${unknown.join('}, {')}}` };
   }
   return { action: { kind: 'github_comment', on, body } };
+}
+
+/** A "Notify me in Union" action as sent by the settings page, or why it cannot be saved. */
+export function checkUnionNotification(
+  record: object,
+): { action: UnionNotificationAction } | { error: string } {
+  const message = 'message' in record ? String(record.message).trim() : '';
+  if (message === '') {
+    return { error: 'Write the notification' };
+  }
+  if (message.length > MAX_NOTIFICATION) {
+    return { error: `A notification holds at most ${MAX_NOTIFICATION} characters` };
+  }
+  const unknown = unknownVariables(message);
+  if (unknown.length > 0) {
+    return { error: `Unknown variable: {${unknown.join('}, {')}}` };
+  }
+  return { action: { kind: 'union_notification', message } };
 }
