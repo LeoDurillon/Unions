@@ -1,4 +1,9 @@
 // The kinds of event rule action and what each holds; browser-safe, for the settings page and the worker.
+import {
+  checkProjectFields,
+  type ProjectFieldValue,
+  type ProjectItemTarget,
+} from './event-project-fields-action';
 import { checkPullRequestChanges, type PullRequestChange } from './event-pull-request-action';
 import { unknownVariables } from './event-rule-types';
 
@@ -16,6 +21,8 @@ type ActionFields = {
   github_comment: { on: CommentTarget; body: string };
   /** Changes the ticket's pull request: labels, reviewers, assignees, title, a description section. */
   github_pull_request: { changes: PullRequestChange[] };
+  /** Sets fields of the ticket's GitHub Project item: its issue's, or its pull request's. */
+  github_project_fields: { item: ProjectItemTarget; values: ProjectFieldValue[] };
   /** Notifies the user in Union (the bell, desktop notifications); `message` is a template. */
   union_notification: { message: string };
 };
@@ -31,11 +38,13 @@ export type NotionPropertyAction = ActionOf<'notion_property'>;
 export type GitHubCommentAction = ActionOf<'github_comment'>;
 export type UnionNotificationAction = ActionOf<'union_notification'>;
 export type GitHubPullRequestAction = ActionOf<'github_pull_request'>;
+export type GitHubProjectFieldsAction = ActionOf<'github_project_fields'>;
 
 export const ACTION_KINDS = [
   'notion_property',
   'github_comment',
   'github_pull_request',
+  'github_project_fields',
   'union_notification',
 ] as const satisfies readonly ActionKind[];
 
@@ -43,6 +52,7 @@ export const ACTION_LABELS: Record<ActionKind, string> = {
   notion_property: "Set properties of the ticket's Notion page",
   github_comment: 'Comment on GitHub',
   github_pull_request: "Update the ticket's pull request",
+  github_project_fields: "Set fields of the ticket's GitHub Project item",
   union_notification: 'Notify me in Union',
 };
 
@@ -66,6 +76,11 @@ const EMPTY_ACTIONS: { [K in ActionKind]: ActionOf<K> } = {
   notion_property: { kind: 'notion_property', values: [{ propertyId: '', value: '' }] },
   github_comment: { kind: 'github_comment', on: 'issue', body: '' },
   github_pull_request: { kind: 'github_pull_request', changes: [] },
+  github_project_fields: {
+    kind: 'github_project_fields',
+    item: 'pull_request',
+    values: [{ fieldId: '', fieldName: '', fieldType: 'text', value: '' }],
+  },
   union_notification: { kind: 'union_notification', message: '' },
 };
 
@@ -130,4 +145,12 @@ export function checkGitHubPullRequest(
   return 'error' in checked
     ? checked
     : { action: { kind: 'github_pull_request', changes: checked.changes } };
+}
+
+/** A "Set fields of the ticket's GitHub Project item" action as sent by the settings page, or why it cannot be saved. */
+export function checkGitHubProjectFields(
+  record: object,
+): { action: GitHubProjectFieldsAction } | { error: string } {
+  const checked = checkProjectFields(record);
+  return 'error' in checked ? checked : { action: { kind: 'github_project_fields', ...checked } };
 }

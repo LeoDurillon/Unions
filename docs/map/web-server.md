@@ -15,7 +15,7 @@ export); do not edit. Tests are left out.
 - `github-pull-request-files.ts`: GitHub's file to ours; GitHub leaves `patch` out for binary and very large files.
 - `github-pull-requests.ts`: GitHub's shape to ours; a deleted account shows as "ghost", as on GitHub.
 - `github-queries.ts`: A pull request's line-comment threads, with their replies, page by page.
-- `github-repo-reads.ts`: The web's repository reads from GitHub: branches, an issue, and what a pull request rule picks from; null for what does not exist.
+- `github-repo-reads.ts`: The web's repository and Project reads from GitHub: branches, an issue, what a rule picks from (labels, users, Project fields); null for what does not exist.
 - `github-repo.ts`: The repository's branch names, the default first then by name.
 - `github-rule-choices.ts`: What a pull request rule can pick from the repository: its labels and the users who can be assigned or asked to review.
 - `http.ts`: HTTP status codes and small helpers the web routes use to read requests and fail.
@@ -63,7 +63,7 @@ export); do not edit. Tests are left out.
 - `review-groupings.ts`: Under a review's base (`/api/tickets/:id`, `/api/projects/:projectId/pull-requests/reviews/:number`): `/groupings` (the newest), `/groupings/source` (a specifi…
 - `review-import.ts`: The PR tab: threads, review summaries and comments, and which of them are already imported.
 - `review.ts`: Why a review cannot be sent now, or null when it can: the ticket waits on the user after code was written, or it is done with its branch kept and its pull requ…
-- `rule-choices.ts`: `GET /api/projects/:projectId/github/rule-choices`: the labels and users a pull request rule picks from, read from GitHub.
+- `rule-choices.ts`: What a rule picks from on GitHub, read live: the repo's labels and users (`github/rule-choices`), the Project's fields (`github/project-fields`).
 - `spec-sources.ts`: The text of a specification, from where the user points.
 - `ticket-base.ts`: The API routes that show and change the branch a ticket is based on.
 - `ticket-commits.ts`: `/api/tickets/:id/commits`: the commits stored with the ticket's diff snapshot, the change since the last review, and their files.

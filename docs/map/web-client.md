@@ -178,12 +178,14 @@ export); do not edit. Tests are left out.
 - `preview-services-field.tsx`: The services the proxy serves: name in the compose file, port, and host prefix.
 - `preview-services-page.tsx`: What runs as a ticket's preview: the compose file, what Union adds to it, and what is served.
 - `preview-variables-page.tsx`: What every service of a preview gets: plain variables, secrets, and the variables as a file.
+- `project-field-row.tsx`: One field a Project fields rule sets: which field of the GitHub Project, its value (an option or a template), and removing it.
+- `project-fields-fields.tsx`: A Project fields action's fields: the item (the issue's or the pull request's), then the fields to set, a row each.
 - `project-section-body.tsx`: The project's own settings, its agents' and its pull requests'.
 - `pull-request-change.tsx`: One change a pull request rule makes: labels, reviewers or assignees to pick, or a title or description template.
 - `pull-request-fields.tsx`: A pull request action's fields: the changes it makes, one box each, and adding the kinds not used yet.
 - `pull-request-section.tsx`: Whether the worker opens a draft PR after the implementation, or the user links one by hand.
 - `review-section.tsx`: Files the review page lists apart (collapsed), so the sidebar shows what needs reading.
-- `rule-action-text.tsx`: What a rule does, in a sentence for its row: the Notion properties it sets, what it changes on the pull request, where it comments, or what it notifies.
+- `rule-action-text.tsx`: What a rule does, in a sentence for its row: the Notion properties it sets, what it changes on the pull request or its Project item, where it comments, or what…
 - `rule-editor.tsx`: Edits a rule: its name, what triggers it, and what it does.
 - `rule-list.tsx`: One rule: when, then, and its switches.
 - `rule-preview.tsx`: What the rule as edited would do for one of the project's tickets; nothing is sent.

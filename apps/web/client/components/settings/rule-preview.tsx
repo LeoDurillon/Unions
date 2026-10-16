@@ -8,6 +8,46 @@ import { api } from '../../lib/api';
 import { eventRulesApi, type RuleDraft } from '../../lib/event-rules-api';
 import { Button, ErrorText, inputClass } from '../ui';
 
+type Shown<K extends string> = Extract<RulePreview, { ok: true; kind: K }>;
+
+function PullRequestPreview({ result }: { result: Shown<'github_pull_request'> }): ReactElement {
+  return (
+    <div className="space-y-1 text-sm">
+      <p>Would change pull request #{result.number}:</p>
+      <ul className="list-inside list-disc">
+        {result.changes.map((change) => (
+          <li key={change}>{change}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function ProjectFieldsPreview({
+  result,
+}: {
+  result: Shown<'github_project_fields'>;
+}): ReactElement {
+  return (
+    <div className="space-y-1 text-sm">
+      <p>
+        Would set on the Project item of {result.item === 'issue' ? 'issue' : 'pull request'} #
+        {result.number}:
+      </p>
+      <ul className="list-inside list-disc">
+        {result.fields.map((field) => (
+          <li key={field.name}>
+            <span className="font-medium">{field.name}</span> to{' '}
+            <code className="rounded bg-zinc-100 px-1 dark:bg-zinc-800">
+              {field.text === '' ? '(empty)' : field.text}
+            </code>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 function PreviewResult({ result }: { result: RulePreview | undefined }): ReactElement | null {
   if (result === undefined) {
     return null;
@@ -29,16 +69,10 @@ function PreviewResult({ result }: { result: RulePreview | undefined }): ReactEl
     );
   }
   if (result.kind === 'github_pull_request') {
-    return (
-      <div className="space-y-1 text-sm">
-        <p>Would change pull request #{result.number}:</p>
-        <ul className="list-inside list-disc">
-          {result.changes.map((change) => (
-            <li key={change}>{change}</li>
-          ))}
-        </ul>
-      </div>
-    );
+    return <PullRequestPreview result={result} />;
+  }
+  if (result.kind === 'github_project_fields') {
+    return <ProjectFieldsPreview result={result} />;
   }
   if (result.kind === 'github_comment') {
     return (
@@ -81,7 +115,10 @@ function applicable(
   if (action.kind === 'union_notification') {
     return { tickets, none: 'No ticket to try it on yet.' };
   }
-  if (action.kind === 'github_comment' && action.on === 'issue') {
+  if (
+    (action.kind === 'github_comment' && action.on === 'issue') ||
+    (action.kind === 'github_project_fields' && action.item === 'issue')
+  ) {
     const withIssue = tickets.filter((ticket) => ticket.issueNumber !== null);
     return { tickets: withIssue, none: 'No ticket with a GitHub issue to try it on yet.' };
   }

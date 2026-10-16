@@ -1,5 +1,5 @@
 // The browser's client for the event rules endpoints.
-import type { EventRule, NotionSchema, NotionUser } from '@union/core';
+import type { EventRule, NotionSchema, NotionUser, ProjectField } from '@union/core';
 import { emptyAction, type EventAction } from '@union/core/event-actions';
 import type { EventTrigger } from '@union/core/event-rules';
 
@@ -51,6 +51,9 @@ export const eventRulesApi = {
   /** The repository's labels and assignable users, for a pull request rule. */
   ruleChoices: (projectId: number): Promise<RuleChoices> =>
     request('GET', `${base(projectId)}/github/rule-choices`),
+  /** The fields of the project's GitHub Project a rule can set. */
+  projectFields: (projectId: number): Promise<ProjectField[]> =>
+    request('GET', `${base(projectId)}/github/project-fields`),
   /** The workspace members a person property can be set to. */
   notionUsers: (projectId: number): Promise<NotionUser[]> =>
     request('GET', `${base(projectId)}/notion/users`),

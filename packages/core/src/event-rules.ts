@@ -4,6 +4,7 @@ import { and, eq } from 'drizzle-orm';
 import type { Db } from './db';
 import {
   checkGitHubComment,
+  checkGitHubProjectFields,
   checkGitHubPullRequest,
   checkUnionNotification,
   isActionKind,
@@ -75,6 +76,7 @@ const ACTION_CHECKS: ActionChecks = {
   notion_property: checkedNotionAction,
   github_comment: (_db, _projectId, record) => thrown(checkGitHubComment(record)),
   github_pull_request: (_db, _projectId, record) => thrown(checkGitHubPullRequest(record)),
+  github_project_fields: (_db, _projectId, record) => thrown(checkGitHubProjectFields(record)),
   union_notification: (_db, _projectId, record) => thrown(checkUnionNotification(record)),
 };
 

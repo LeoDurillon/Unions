@@ -1,4 +1,4 @@
-import type { GitHubAppCredentials, GitHubAuth, PullRequestFile } from '@union/core';
+import type { GitHubAppCredentials, GitHubAuth, ProjectField, PullRequestFile } from '@union/core';
 import { githubAppClient, type ClientOptions } from '@union/core/github-client';
 import type { Octokit } from 'octokit';
 
@@ -90,6 +90,8 @@ export type OnboardingGitHub = {
     auth: GitHubAuth,
     repo: { owner: string; repo: string },
   ): Promise<RuleChoices | null>;
+  /** The fields of the GitHub Project a rule can set; null when the Project is not found. */
+  listProjectFields(auth: GitHubAuth, projectNodeId: string): Promise<ProjectField[] | null>;
   /** The app the credentials belong to (`GET /app`); rejects a wrong App ID or key. */
   verifyApp(app: GitHubAppCredentials): Promise<AppInfo>;
   listInstallations(app: GitHubAppCredentials): Promise<InstallationOption[]>;

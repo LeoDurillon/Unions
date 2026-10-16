@@ -96,8 +96,8 @@ retries per action, and an editor listing actions of mixed kinds. Worth it only 
 
 ## Pull request properties and GitHub Project fields
 
-Status: the pull request action is built (2026-10-16, branch `pull-request-rule-actions`); Project fields are not
-started. Covers targets 2 and 3 of step 2 above, for the pull request. A rule can
+Status: built (2026-10-16, branch `pull-request-rule-actions`): the pull request action, then the Project fields
+action. Covers targets 2 and 3 of step 2 above, for the pull request. A rule can
 change several things of the ticket's pull request at once (labels, reviewers, assignees, title, description), and
 set GitHub Project fields on the issue's item or the PR's item (the rule picks).
 
@@ -114,7 +114,7 @@ Two new action kinds, each a list of changes like the Notion action (one rule, o
     `<!-- union-rule:<ruleId> -->` markers: added once, replaced on the next delivery, so a retry or a second
     trigger never repeats it, and the rest of the description is kept.
 - `github_project_fields`, "Set fields of the ticket's GitHub Project item": `item: 'issue' | 'pull_request'`,
-  `values: { fieldId: string; fieldName: string; value: string }[]` (like the Notion values). Types: single
+  `values: { fieldId: string; fieldName: string; fieldType: string; value: string }[]` (like the Notion values). Types: single
   select (option name), text, number, date (templates allowed; single select by name). The project is the one Union
   syncs (`githubProjectNodeId`). The PR item is added to the project on first use (`addProjectV2ItemById` returns
   the existing item when there is one). **Status on the issue's item is refused**: Union's sync owns it.
@@ -136,8 +136,9 @@ A rule on a ticket without a pull request is skipped ("The ticket has no pull re
    issue's item is `tickets.project_item_id`; the PR's is added. A field or option gone from the project fails the
    delivery and names it.
 4. **Web**: `OnboardingGitHub` reads what the editor offers, live (no stored copy): the repo's labels, the
-   assignable users, the project's fields. Endpoints under `/api/projects/:projectId/github/…`. The save checks the
-   project fields against a live read (field still there, option exists). Preview for both kinds (what would change,
+   assignable users, the project's fields. Endpoints under `/api/projects/:projectId/github/…`. The rule keeps each
+   field's id, name and type, so the save checks the values' shape without GitHub; a field or option gone from the
+   Project fails the delivery, naming it. Preview for both kinds (what would change,
    nothing sent).
 5. **UI**: a fields component per kind (`pull-request-fields.tsx` with a row per change, `project-field-row.tsx`
    like `notion-value-row.tsx`), the rule's sentence in `rule-action-text.tsx`, and the preview.

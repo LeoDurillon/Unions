@@ -25,11 +25,13 @@ export); do not edit. Tests are left out.
 - `event-deliveries.ts`: Reads the events logged since the last call and queues one delivery per matching enabled rule of the ticket's project.
 - `event-notion-action.ts`: The Notion action of a rule: the properties it sets, checked against the stored Notion columns, and what it sends.
 - `event-payloads.ts`: What each type of event in the log carries, keyed by its `type`: the one place to add an event.
+- `event-project-fields-action.ts`: A rule's GitHub Project fields: on the ticket's issue item or its pull request's, their checks and the values sent; browser-safe.
 - `event-pull-request-action.ts`: A rule's changes to the ticket's pull request (labels, reviewers, assignees, title, a description section); browser-safe.
 - `event-rule-types.ts`: Event rules: when something happens to a ticket, do something elsewhere.
 - `event-rules.ts`: Event rules: checking and saving them, the stored Notion columns, and matching events and templates.
 - `github-auth.ts`: A project's installation wins over its token; `fallbackToken` (the `GITHUB_TOKEN` environment variable) covers projects with neither.
 - `github-client.ts`: One client per credential, kept for the process: an installation client mints its own short-lived token (one hour) and refreshes it before it expires, so it mu…
+- `github-project-fields.ts`: Reading a GitHub Project's fields (the ones a rule can set) and setting one on an item: queries and parsing, for the web and the worker.
 - `github-text.ts`: Browser-safe: the PR tab shows GitHub text with it, and the import stores it.
 - `index.ts`: The package's public API: re-exports every core module.
 - `investigation-defaults.ts`: What a new investigation runs with until the user picks otherwise.

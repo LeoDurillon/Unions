@@ -12,7 +12,8 @@ import type {
   RepoRef,
   ReviewLineComment,
 } from './api';
-import { isNotFound, OctokitPullRequestChanges } from './octokit-pull-request-changes';
+import { OctokitProjectFields } from './octokit-project-fields';
+import { isNotFound } from './octokit-pull-request-changes';
 import {
   ADD_TO_PROJECT,
   LIST_ITEMS,
@@ -70,7 +71,7 @@ function timeOf(date: string | null): number | null {
   return date === null ? null : Date.parse(date);
 }
 
-export class OctokitGitHubApi extends OctokitPullRequestChanges implements GitHubApi {
+export class OctokitGitHubApi extends OctokitProjectFields implements GitHubApi {
   async resolveProject(locator: ProjectLocator): Promise<string> {
     const variables = { login: locator.login, number: locator.number };
     const data =

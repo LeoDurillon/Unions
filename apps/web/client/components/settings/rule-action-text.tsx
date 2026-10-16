@@ -1,4 +1,4 @@
-// What a rule does, in a sentence for its row: the Notion properties it sets, what it changes on the pull request, where it comments, or what it notifies.
+// What a rule does, in a sentence for its row: the Notion properties it sets, what it changes on the pull request or its Project item, where it comments, or what it notifies.
 import type { NotionSchema } from '@union/core';
 import {
   COMMENT_TARGET_LABELS,
@@ -84,6 +84,16 @@ export function ActionText({
         {action.changes
           .map((change) => describeChange(change, change.kind === 'title' ? change.value : ''))
           .join('; ')}
+      </>
+    );
+  }
+  if (action.kind === 'github_project_fields') {
+    return (
+      <>
+        set on the {action.item === 'issue' ? "issue's" : "pull request's"} Project item:{' '}
+        {action.values
+          .map((entry) => `${entry.fieldName} to ${entry.value === '' ? '(empty)' : entry.value}`)
+          .join(', ')}
       </>
     );
   }

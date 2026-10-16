@@ -1,4 +1,4 @@
-import type { ProjectLocator } from '@union/core';
+import type { ProjectFieldInput, ProjectLocator, RemoteProjectField } from '@union/core';
 
 export type RepoRef = { owner: string; repo: string };
 
@@ -47,6 +47,14 @@ export type ReviewLineComment = {
   startLine?: number;
 };
 
+/** One field of a Project item to set; a null value clears it. */
+export type ProjectFieldChange = {
+  projectNodeId: string;
+  itemId: string;
+  fieldId: string;
+  value: ProjectFieldInput;
+};
+
 /** The only surface of GitHub the worker uses. Tests substitute an in-memory fake. */
 export type GitHubApi = {
   resolveProject(locator: ProjectLocator): Promise<string>;
@@ -79,6 +87,11 @@ export type GitHubApi = {
   removeLabel(repo: RepoRef, number: number, label: string): Promise<void>;
   requestReviewers(repo: RepoRef, number: number, users: string[]): Promise<void>;
   addAssignees(repo: RepoRef, number: number, users: string[]): Promise<void>;
+  /** The Project's fields a rule can set; throws when the Project is not found. */
+  projectFields(projectNodeId: string): Promise<RemoteProjectField[]>;
+  setProjectField(change: ProjectFieldChange): Promise<void>;
+  /** The pull request's node id, to add it to a Project. */
+  pullRequestNodeId(repo: RepoRef, number: number): Promise<string>;
   /** Un-drafts the pull request; does nothing if it is already ready. */
   markPullRequestReady(repo: RepoRef, number: number): Promise<void>;
   /**

@@ -10,6 +10,7 @@ import type {
   RepoRef,
   ReviewLineComment,
 } from './api';
+import { FakeProjectFields } from './fake-project-fields';
 
 type FakeIssue = {
   number: number;
@@ -28,9 +29,8 @@ const DEFAULT_INFO: ProjectInfo = {
 };
 const MS_PER_SECOND = 1000;
 
-/** In-memory GitHub for tests. `calls` records every method name, in order. */
-export class FakeGitHubApi implements GitHubApi {
-  readonly calls: string[] = [];
+/** In-memory GitHub for tests. `calls` records every method name, in order (`FakeProjectFields`). */
+export class FakeGitHubApi extends FakeProjectFields implements GitHubApi {
   readonly issues: FakeIssue[] = [];
   readonly pulls: (PullRequestRef & {
     head: string;
@@ -61,6 +61,7 @@ export class FakeGitHubApi implements GitHubApi {
   private readonly info: ProjectInfo;
 
   constructor(info?: ProjectInfo) {
+    super();
     this.info = info ?? DEFAULT_INFO;
   }
 

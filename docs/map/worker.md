@@ -71,6 +71,7 @@ export); do not edit. Tests are left out.
 ## event-actions/
 
 - `github-comment.ts`: The GitHub comment action of a rule: comments on the ticket's issue or pull request.
+- `github-project-fields.ts`: The GitHub Project fields action of a rule: sets fields of the ticket's issue item, or of its pull request's (added to the Project).
 - `github-pull-request.ts`: The pull request action of a rule: changes the ticket's pull request (labels, reviewers, assignees, title, a description section).
 - `github-retry.ts`: Which GitHub failures a rule action tries again later: rate limits, outages and network errors.
 - `notion.ts`: The Notion action of a rule: sets properties of the ticket's Notion page, in one request.
@@ -83,10 +84,12 @@ export); do not edit. Tests are left out.
 - `clients.ts`: Each project's API: its GitHub App installation or its token, `GITHUB_TOKEN` for projects with neither.
 - `dependency.ts`: Mirrors the ticket's parent as "blocked by" on its issue, once both issues exist.
 - `fake-api.ts`: In-memory GitHub for tests.
+- `fake-project-fields.ts`: The GitHub Project fields of the in-memory GitHub for tests: the fields, and what each item holds; the base of `FakeGitHubApi`.
 - `inbound.ts`: Applies a change read from GitHub to the matching ticket in the database.
 - `loop.ts`: Pushes every second and pulls every `pullIntervalMs`, one call at a time, until aborted.
 - `mirror.ts`: Runs one `GitHubSync` per project, each with the project's own credentials.
 - `octokit-api.ts`: The GitHub API implemented with Octokit: issues, pull requests and the project board.
+- `octokit-project-fields.ts`: The GitHub Project fields of the worker's GitHub client: reading them, setting one on an item, a pull request's node id.
 - `octokit-pull-request-changes.ts`: The pull request changes of the worker's GitHub client (title, labels, reviewers, assignees): the base of `OctokitGitHubApi`.
 - `pr-description-send.ts`: Writes the user's version of a rewritten description to the pull request, with Union's links added back, unless the description on GitHub changed since the age…
 - `pr-review.ts`: The review as GitHub gets it.

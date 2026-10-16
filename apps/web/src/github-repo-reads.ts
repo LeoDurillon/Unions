@@ -1,5 +1,11 @@
-// The web's repository reads from GitHub: branches, an issue, and what a pull request rule picks from; null for what does not exist.
-import type { GitHubAuth } from '@union/core';
+// The web's repository and Project reads from GitHub: branches, an issue, what a rule picks from (labels, users, Project fields); null for what does not exist.
+import {
+  parseProjectFields,
+  PROJECT_FIELDS,
+  type GitHubAuth,
+  type ProjectField,
+  type ProjectFieldsResponse,
+} from '@union/core';
 import { githubClient, type ClientOptions } from '@union/core/github-client';
 import type { Octokit } from 'octokit';
 
@@ -66,5 +72,13 @@ export class OctokitRepoReads {
 
   listRuleChoices(auth: GitHubAuth, repo: Repo): Promise<RuleChoices | null> {
     return orNull(() => fetchRuleChoices(this.client(auth), repo));
+  }
+
+  async listProjectFields(auth: GitHubAuth, projectNodeId: string): Promise<ProjectField[] | null> {
+    const data = await orNull(() =>
+      this.client(auth).graphql<ProjectFieldsResponse>(PROJECT_FIELDS, { id: projectNodeId }),
+    );
+    const fields = data ? parseProjectFields(data) : null;
+    return fields?.map(({ id, name, type, options }) => ({ id, name, type, options })) ?? null;
   }
 }

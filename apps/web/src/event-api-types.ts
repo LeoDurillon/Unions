@@ -1,4 +1,4 @@
-import type { CommentTarget, EventRule, NotionSchema } from '@union/core';
+import type { CommentTarget, EventRule, NotionSchema, ProjectItemTarget } from '@union/core';
 
 /** The Events settings: the rules, and the Notion columns they can set (null until read). */
 export type EventRulesResponse = {
@@ -36,6 +36,14 @@ export type RulePreview =
   | { ok: true; kind: 'union_notification'; title: string; text: string }
   /** `changes`: what each change would do, its templates filled in. */
   | { ok: true; kind: 'github_pull_request'; number: number; changes: string[] }
+  /** `number`: the issue's or the pull request's, as the rule's item says. */
+  | {
+      ok: true;
+      kind: 'github_project_fields';
+      item: ProjectItemTarget;
+      number: number;
+      fields: { name: string; text: string }[];
+    }
   | { ok: false; error: string };
 
 /** What a pull request rule can pick: the repository's label names and assignable logins. */

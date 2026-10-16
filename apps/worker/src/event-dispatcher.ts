@@ -10,6 +10,7 @@ import {
 } from '@union/core';
 
 import { gitHubCommentTarget, type GitHubApiFor } from './event-actions/github-comment';
+import { gitHubProjectFieldsTarget } from './event-actions/github-project-fields';
 import { gitHubPullRequestTarget } from './event-actions/github-pull-request';
 import { notionTarget } from './event-actions/notion';
 import { deliverAction, type ActionTargets } from './event-actions/target';
@@ -35,6 +36,7 @@ export class EventDispatcher {
       notion_property: notionTarget(db, notion),
       github_comment: gitHubCommentTarget(db, apiFor),
       github_pull_request: gitHubPullRequestTarget(db, apiFor),
+      github_project_fields: gitHubProjectFieldsTarget(db, apiFor),
       union_notification: unionNotificationTarget(db),
     };
   }

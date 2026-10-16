@@ -10,6 +10,7 @@ import {
   type ActionOf,
   type Db,
   type GitHubCommentAction,
+  type GitHubProjectFieldsAction,
   type GitHubPullRequestAction,
   type NotionPropertyAction,
   type Project,
@@ -96,10 +97,36 @@ function gitHubPullRequestPreview(
   return { ok: true, kind: 'github_pull_request', number: ticket.prNumber, changes };
 }
 
+/** The fields with their templates filled in; the options are checked when the rule runs. */
+function gitHubProjectFieldsPreview(
+  _db: Db,
+  project: Project,
+  ticket: Ticket,
+  action: GitHubProjectFieldsAction,
+): RulePreview {
+  const number = action.item === 'issue' ? ticket.issueNumber : ticket.prNumber;
+  if (number === null || (action.item === 'issue' && ticket.projectItemId === null)) {
+    return {
+      ok: false,
+      error:
+        action.item === 'issue'
+          ? "This ticket's issue is not on the GitHub Project"
+          : 'This ticket has no pull request yet',
+    };
+  }
+  const values = templateValues(project, ticket, null);
+  const fields = action.values.map((entry) => ({
+    name: entry.fieldName,
+    text: renderTemplate(entry.value, values),
+  }));
+  return { ok: true, kind: 'github_project_fields', item: action.item, number, fields };
+}
+
 const PREVIEWS: Previews = {
   notion_property: notionPreview,
   github_comment: gitHubCommentPreview,
   github_pull_request: gitHubPullRequestPreview,
+  github_project_fields: gitHubProjectFieldsPreview,
   union_notification: unionNotificationPreview,
 };
 
