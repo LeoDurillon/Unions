@@ -1,15 +1,16 @@
 import {
+  appendAgentLine,
   claimInvestigation,
+  type ContainerRuntime,
+  type Db,
   emitEvent,
   failInterruptedInvestigations,
   finishInvestigation,
-  projectInstructions,
-  schema,
-  type ContainerRuntime,
-  type Db,
   type Investigation,
   type InvestigationOutcome,
   type Project,
+  projectInstructions,
+  schema,
 } from '@union/core';
 import { eq } from 'drizzle-orm';
 
@@ -214,7 +215,7 @@ export class InvestigationRunner {
         tools: investigation.tools,
         signal,
         onEvent: (event) => {
-          emitEvent(db, { type: 'agent_event', investigationId: investigation.id, payload: event });
+          appendAgentLine(db, { investigationId: investigation.id, payload: event });
         },
       });
       return toOutcome(outcome, signal.aborted);

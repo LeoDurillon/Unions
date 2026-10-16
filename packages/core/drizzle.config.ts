@@ -4,6 +4,7 @@ export default defineConfig({
   dialect: 'sqlite',
   schema: [
     './src/schema.ts',
+    './src/schema-agent-log.ts',
 
     './src/schema-attachments.ts',
     './src/schema-container-runs.ts',

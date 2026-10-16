@@ -101,8 +101,8 @@ test('deleting the project is refused while an investigation runs', async () => 
 
 test('the event stream can follow one investigation', async () => {
   const { id } = await created();
-  emitEvent(db, { type: 'agent_event', investigationId: id, payload: { type: 'result' } });
-  emitEvent(db, { type: 'agent_event', ticketId: 7, payload: { type: 'result' } });
+  emitEvent(db, { type: 'investigation_started', investigationId: id, payload: {} });
+  emitEvent(db, { type: 'ticket_updated_from_github', ticketId: 7, payload: {} });
   const response = await send('GET', `/api/events?investigation=${id}&after=0`);
   const reader = response.body?.getReader();
   const chunk = await reader?.read();

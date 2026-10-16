@@ -1,6 +1,7 @@
 import { beforeEach, expect, test } from 'bun:test';
 
 import {
+  appendAgentLine,
   createDb,
   createTicket,
   emitEvent,
@@ -13,7 +14,7 @@ import {
 } from '@union/core';
 import type { Hono } from 'hono';
 
-import type { TicketDetail, TicketSummary } from './api-types';
+import type { LogPage, TicketDetail, TicketSummary } from './api-types';
 import { createApp } from './app';
 
 let db: Db;
@@ -185,22 +186,24 @@ test('events: cursor reports the latest seq and the stream filters by ticket and
   expect(text).not.toContain(`"ticketId":${first.id}`);
 });
 
-test('a log history is plain JSON for one ticket or investigation, oldest first', async () => {
+test("a ticket's Log is its events and agent lines in order, then what is new", async () => {
   const project = db
     .insert(schema.projects)
     .values({ owner: 'h', repo: 'h', githubProjectNodeId: 'P', config: { baseBranch: 'main' } })
     .returning()
     .get();
   const ticket = createTicket(db, { projectId: project.id, title: 'logged' });
-  emitEvent(db, { type: 'agent_event', ticketId: ticket.id, payload: { type: 'result' } });
+  appendAgentLine(db, { ticketId: ticket.id, payload: { type: 'result' } });
+  emitEvent(db, { type: 'ticket_updated_from_github', ticketId: ticket.id, payload: {} });
   createTicket(db, { projectId: project.id, title: 'other' });
 
-  const response = await app.request(`/api/events/history?ticket=${ticket.id}`);
-  const rows = (await response.json()) as { type: string; ticketId: number; seq: number }[];
-  expect(rows.map((row) => [row.type, row.ticketId])).toEqual([
-    ['ticket_created', ticket.id],
-    ['agent_event', ticket.id],
-  ]);
-  expect((rows[0]?.seq ?? 0) < (rows[1]?.seq ?? 0)).toBe(true);
-  expect((await app.request('/api/events/history')).status).toBe(400);
+  const read = async (after = ''): Promise<LogPage> =>
+    (await app.request(`/api/events/log?ticket=${ticket.id}${after}`)).json() as Promise<LogPage>;
+  const page = await read();
+  expect(page.entries.map((entry) => entry.source)).toEqual(['event', 'agent', 'event']);
+  appendAgentLine(db, { ticketId: ticket.id, payload: { type: 'assistant' } });
+  const next = await read(`&after=${page.cursor}`);
+  expect(next.entries.map((entry) => entry.source)).toEqual(['agent']);
+  expect((await app.request('/api/events/log')).status).toBe(400);
+  expect((await app.request(`/api/events/log?ticket=1&after=7`)).status).toBe(400);
 });

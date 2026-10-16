@@ -1,12 +1,13 @@
 import {
-  modelFor,
+  appendAgentLine,
+  type Db,
   dispatch,
   emitEvent,
   getTicket,
+  type LeftoverResolution,
+  modelFor,
   saveOutput,
   schema,
-  type Db,
-  type LeftoverResolution,
   type Step,
   type Ticket,
 } from '@union/core';
@@ -155,7 +156,7 @@ export class Scheduler {
     emitEvent(this.db, { type: 'run_started', ticketId, runId: run.id, payload: { step } });
 
     const log = (event: unknown): void => {
-      emitEvent(this.db, { type: 'agent_event', ticketId, runId: run.id, payload: event });
+      appendAgentLine(this.db, { ticketId, runId: run.id, payload: event });
     };
     const resumeSessionId = revision ? this.lastSessionId(ticketId, step) : null;
     const context: StepContext = {

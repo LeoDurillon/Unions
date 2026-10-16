@@ -35,8 +35,6 @@ type TicketPayloads = {
 type RunPayloads = {
   run_started: { step: Step };
   run_finished: { step: Step; status: Column<typeof tables.runs, 'status'> };
-  /** A raw `claude -p` stream-json event, or a `union_*` note the worker adds to it. */
-  agent_event: unknown;
   container_stop_failed: Failure;
   container_cleanup_failed: { container: string; error: string };
   agent_ports_forwarded: { forwards: PortForward[]; skipped: string[] };

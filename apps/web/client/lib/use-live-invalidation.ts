@@ -7,9 +7,6 @@ import { useEvents } from './use-event-stream';
 export function useLiveInvalidation(): void {
   const queryClient = useQueryClient();
   useEvents((event) => {
-    if (event.type === 'agent_event') {
-      return;
-    }
     if (event.investigationId !== null) {
       void queryClient.invalidateQueries({ queryKey: ['investigations'] });
       return;

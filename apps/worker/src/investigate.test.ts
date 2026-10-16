@@ -106,12 +106,8 @@ test('runs a global investigation in a throwaway container and saves the answer'
   });
   expect(calls[0]).toBe(`create union-i${id}`);
   expect(calls.at(-1)).toBe(`remove union-i${id} union-i${id}-home union-i${id}-ws`);
-  const logged = db
-    .select()
-    .from(schema.events)
-    .all()
-    .filter((event) => event.type === 'agent_event');
-  expect(logged.map((event) => [event.investigationId, event.ticketId])).toEqual([[id, null]]);
+  const logged = db.select().from(schema.agentLog).all();
+  expect(logged.map((line) => [line.investigationId, line.ticketId])).toEqual([[id, null]]);
 });
 
 test('a cancelled run ends cancelled and its container is removed', async () => {

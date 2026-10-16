@@ -1,10 +1,10 @@
 import {
-  emitEvent,
+  appendAgentLine,
+  type ContainerRuntime,
+  type Db,
   getTicket,
   schema,
   ticketBase,
-  type ContainerRuntime,
-  type Db,
 } from '@union/core';
 import { desc, eq } from 'drizzle-orm';
 
@@ -81,7 +81,7 @@ async function ticketTarget(deps: TargetDeps, ticketId: number): Promise<ReviewT
     paths: files.map((file) => file.path),
     about: `The ticket's branch \`${ticket.branch}\`. The ticket:\n\n# ${ticket.title}\n\n${ticket.body}`,
     log: (event) => {
-      emitEvent(db, { type: 'agent_event', ticketId, payload: event });
+      appendAgentLine(db, { ticketId, payload: event });
     },
     close: async () => {
       // A run the user started meanwhile works in the same container: it stops it itself.

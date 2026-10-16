@@ -192,7 +192,8 @@ A one-off agent run on a custom prompt, outside the ticket pipeline (project bar
   `investigations.history` and the run is queued again; the agent gets the earlier questions and answers in its
   prompt (each run is still a fresh container and session, and a repository investigation reads a fresh clone).
   Run again repeats the latest question.
-- **Log:** agent events carry `events.investigation_id`; `/api/events?investigation=<id>` streams one run's log.
+- **Log:** agent output is logged in `agent_log` with `investigation_id`; `/api/events/log?investigation=<id>`
+  returns the run's Log (its events and agent output, in order) from a cursor.
 - **Ticket:** **Create ticket** on an answered investigation asks for optional context (what the ticket must cover).
   The worker (`TicketDrafter`, driven by the investigation runner, sharing the run slots) writes it in a throwaway
   container `union-i<id>-ticket` from every question and answer plus that context, in the language of the user's

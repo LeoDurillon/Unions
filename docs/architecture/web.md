@@ -83,6 +83,7 @@
   (`lib/event-hub.ts`: the tab holding the Web Lock `union-events` reads `/api/events` and relays each event
   over a BroadcastChannel; browsers allow six connections per host, and a stream per tab or log used to leave
   clicks waiting). The board and ticket panel refetch on its events (`use-live-invalidation.ts`); the Log tabs
-  load `/api/events/history` once, then follow the stream. Events are sent unnamed: a new event type reaches
+  poll `/api/events/log` every second while open (`use-log.ts`): the ticket's or investigation's events and its
+  agents' output (`agent_log`) in one order, from a cursor. Agent output is not on the stream. Events are sent unnamed: a new event type reaches
   the client without being listed.
 - Dev: `bun run dev:web` (Vite on 5173 proxies `/api` to Hono on 3000). Production: build, then start (below).

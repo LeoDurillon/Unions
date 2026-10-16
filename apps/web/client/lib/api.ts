@@ -14,7 +14,7 @@ import type {
   CurrentReview,
   DiffResponse,
   DiscussionResponse,
-  EventRow,
+  LogPage,
   GitHubAppStatus,
   InstallationOption,
   IssueImport,
@@ -77,8 +77,8 @@ function investigationPath(investigation: Pick<Investigation, 'id' | 'projectId'
 
 export const api = {
   /** One ticket's or investigation's events so far, oldest first (`ticket=<id>` or `investigation=<id>`). */
-  eventHistory: (query: string): Promise<EventRow[]> =>
-    request('GET', `/api/events/history?${query}`),
+  eventLog: (query: string, after: string | null): Promise<LogPage> =>
+    request('GET', `/api/events/log?${query}${after === null ? '' : `&after=${after}`}`),
   agents: (): Promise<AgentConfig[]> => request('GET', '/api/agents'),
   saveAgent: (
     agent: string,

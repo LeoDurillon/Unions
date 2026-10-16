@@ -1,12 +1,11 @@
+import type { LogEntry } from '@union/core';
 import { isEvent, type EventPayloads } from '@union/core/event-catalog';
-import { useEffect, useRef, useState, type ReactElement } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
 
-import type { EventRow } from '../../src/api-types';
 import { summarizeAgentEvent, type LogLine } from '../lib/agent-events';
-import { api } from '../lib/api';
-import { subscribe } from '../lib/event-hub';
 import { STEP_TITLES } from '../lib/labels';
 import { groupRuns, type LogRun } from '../lib/log-runs';
+import { useLog } from '../lib/use-log';
 
 type Entry = { key: string; kind: LogLine['kind'] | 'run'; text: string };
 
@@ -48,7 +47,15 @@ function ruleEntries(
   return [{ key, kind: status === 'failed' ? 'error' : 'result', text }];
 }
 
-function entriesFor(event: EventRow): Entry[] {
+function entriesFor(entry: LogEntry): Entry[] {
+  if (entry.source === 'agent') {
+    return summarizeAgentEvent(entry.line.payload).map((line, index) => ({
+      key: `line-${entry.line.id}-${index}`,
+      kind: line.kind,
+      text: line.text,
+    }));
+  }
+  const { event } = entry;
   const key = `${event.seq}`;
   if (isEvent(event, 'preview_idle_stopped')) {
     return [{ key, kind: 'result', text: event.payload.message }];
@@ -67,14 +74,7 @@ function entriesFor(event: EventRow): Entry[] {
     const time = new Date(event.at).toLocaleString();
     return [{ key, kind: 'run', text: `Run started ${time}` }];
   }
-  if (!isEvent(event, 'agent_event')) {
-    return [];
-  }
-  return summarizeAgentEvent(event.payload).map((line, index) => ({
-    key: `${event.seq}-${index}`,
-    kind: line.kind,
-    text: line.text,
-  }));
+  return [];
 }
 
 /** Whose log: a ticket's or an investigation's. */
@@ -82,60 +82,6 @@ export type LogSource = { ticket: number } | { investigation: number };
 
 function queryOf(source: LogSource): string {
   return 'ticket' in source ? `ticket=${source.ticket}` : `investigation=${source.investigation}`;
-}
-
-function belongs(event: EventRow, source: LogSource): boolean {
-  return 'ticket' in source
-    ? event.ticketId === source.ticket
-    : event.investigationId === source.investigation;
-}
-
-/**
- * The log's history, loaded once, then its new events from the shared stream. Events arriving while
- * the history loads are kept and added after it, without repeats.
- */
-function useLogEntries(source: LogSource): { entries: Entry[]; error: Error | null } {
-  const [entries, setEntries] = useState<Entry[]>([]);
-  const [failure, setFailure] = useState<Error | null>(null);
-  const query = queryOf(source);
-  useEffect(() => {
-    let lastSeq: number | null = null;
-    const early: EventRow[] = [];
-    const unsubscribe = subscribe((event) => {
-      if (!belongs(event, source)) {
-        return;
-      }
-      if (lastSeq === null) {
-        early.push(event);
-      } else if (event.seq > lastSeq) {
-        lastSeq = event.seq;
-        setEntries((previous) => [...previous, ...entriesFor(event)]);
-      }
-    });
-    let cancelled = false;
-    const load = async (): Promise<void> => {
-      try {
-        const rows = await api.eventHistory(query);
-        if (cancelled) {
-          return;
-        }
-        const known = rows.at(-1)?.seq ?? 0;
-        const all = [...rows, ...early.filter((event) => event.seq > known)];
-        lastSeq = all.at(-1)?.seq ?? 0;
-        setEntries(all.flatMap((event) => entriesFor(event)));
-      } catch (error) {
-        setFailure(error instanceof Error ? error : new Error(String(error)));
-      }
-    };
-    void load();
-    return () => {
-      cancelled = true;
-      unsubscribe();
-    };
-    // `query` identifies the source.
-    // oxlint-disable-next-line react-hooks/exhaustive-deps
-  }, [query]);
-  return { entries, error: failure };
 }
 
 function Line({ entry }: { entry: Entry }): ReactElement {
@@ -186,7 +132,9 @@ function RunSection({
 
 /** Replays a whole agent log, then follows it live; every run but the last starts folded. */
 export function AgentLog({ source }: { source: LogSource }): ReactElement {
-  const { entries, error } = useLogEntries(source);
+  const log = useLog(queryOf(source));
+  const entries = useMemo(() => log.entries.flatMap((entry) => entriesFor(entry)), [log.entries]);
+  const { error } = log;
   // The runs the user opened or folded; the others follow the default.
   const [toggled, setToggled] = useState<ReadonlyMap<string, boolean>>(new Map());
   const runs = groupRuns(entries, (entry) => entry.kind === 'run');

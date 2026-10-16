@@ -10,6 +10,7 @@ export * from './db';
 export * from './diff';
 export * from './diff-hunks';
 export * from './diff-excerpt';
+export * from './agent-log';
 export * from './event-catalog';
 export * from './event-deliveries';
 export * from './event-rule-types';

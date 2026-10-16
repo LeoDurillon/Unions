@@ -1,12 +1,13 @@
 import {
+  appendAgentLine,
   emitEvent,
   getTicket,
-  parentOf,
-  ticketBase,
   type Investigation,
   type InvestigationOutcome,
+  parentOf,
   type Project,
   type Ticket,
+  ticketBase,
 } from '@union/core';
 
 import { runAgent, type AgentFn, type AgentOutcome } from './agent';
@@ -148,7 +149,7 @@ export async function runOnTicket(
       denied: TICKET_INVESTIGATION_DENIED,
       signal,
       onEvent: (event) => {
-        emitEvent(db, { type: 'agent_event', investigationId: investigation.id, payload: event });
+        appendAgentLine(db, { investigationId: investigation.id, payload: event });
       },
     });
     const result = toOutcome(outcome, signal.aborted);

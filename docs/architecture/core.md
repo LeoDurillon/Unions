@@ -21,3 +21,5 @@ Drizzle schema and migrations, the pure ticket state machine (`states.ts`), tick
 The event log (`events`) is typed: `event-payloads.ts` gives the payload of every event type, and `emitEvent`
 takes a `NewEvent` from `event-catalog.ts`, so a new event type is added there first. Read one back with
 `isEvent(row, '<type>')` (browser-safe, `@union/core/event-catalog`), not by probing its payload by hand.
+The agents' raw output is not an event: `appendAgentLine` writes it to `agent_log` (`agent-log.ts`), each line
+with the last `events.seq` at the time, and `readLog` merges both tables into one Log in that order.

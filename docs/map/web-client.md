@@ -219,6 +219,7 @@ export); do not edit. Tests are left out.
 - `use-github-app.ts`: The global GitHub App's status; saving or removing it invalidates `['github-app']`.
 - `use-live-invalidation.ts`: Refetches board, ticket and investigation data whenever the worker records a change.
 - `use-navigation.ts`: Which page is shown and which overlay is open; `show`/`goTo` return click handlers.
+- `use-log.ts`: Polls a ticket's or an investigation's Log while it is shown: all of it first, then what is new.
 - `use-notion-users.ts`: The Notion workspace members, read only when `enabled` (a person property is in view).
 - `use-review-grouping.ts`: The newest grouping by spec of the review, with starting and cancelling one.
 - `use-review.ts`: A pull request under review: its description and discussion, read from GitHub once per opening.

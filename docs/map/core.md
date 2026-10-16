@@ -6,6 +6,7 @@ export); do not edit. Tests are left out.
 ## ./
 
 - `agent-environment.ts`: The agent's environment settings as sent (`agentVariables`, `forwardPorts`), checked; only what differs from the defaults is kept.
+- `agent-log.ts`: Writes the agents' output to `agent_log`, and reads a Log: events and agent lines in one order.
 - `agent-reviews.ts`: Fails the reviews a stopped worker left running, and returns them.
 - `agent-tools.ts`: A tool the list refuses: bad syntax, duplicate, built-in, or still selected by an agent.
 - `agents.ts`: The agents' default prompts, models, efforts and tools, the user's overrides, and how a run resolves them.
@@ -47,6 +48,7 @@ export); do not edit. Tests are left out.
 - `refused-commits.ts`: The ticket's last refused commit: the one a `commit_refused` phase is waiting on.
 - `review-groupings.ts`: A grouping is already queued or running for this change.
 - `runtime.ts`: Everything the worker needs from Docker.
+- `schema-agent-log.ts`: The agents' raw output, line by line, kept apart from the event log.
 - `schema-attachments.ts`: Files the user attached to a ticket, stored on the host under the attachments folder and copied into the ticket's container for the agents.
 - `schema-container-runs.ts`: A command the user ran in a ticket's workspace (its container, in the checkout, as the agent), with the end of its output.
 - `schema-diff-commits.ts`: A ticket's commits at its diff snapshot, oldest first, each with its own files against its first parent.

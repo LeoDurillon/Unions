@@ -1,6 +1,7 @@
 // Re-exports every database table definition, exposed as `schema` from `@union/core`.
 /** Every table, as `schema` from `@union/core`; split in files only to keep each one short. */
 export * from './schema';
+export * from './schema-agent-log';
 export * from './schema-attachments';
 export * from './schema-container-runs';
 export * from './schema-diff-commits';

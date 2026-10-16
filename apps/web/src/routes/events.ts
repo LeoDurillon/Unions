@@ -1,5 +1,5 @@
 // The API route that streams new events to the browser as server-sent events.
-import { schema, type Db } from '@union/core';
+import { readLog, schema, type Db, type LogCursor, type LogOwner } from '@union/core';
 import { and, asc, eq, gt, max, type SQL } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { streamSSE } from 'hono/streaming';
@@ -33,6 +33,24 @@ function eventFilter(
   return investigation ? eq(schema.events.investigationId, Number(investigation)) : undefined;
 }
 
+const CURSOR = /^(?<seq>\d+)\.(?<line>\d+)$/u;
+
+/** `after=<seq>.<line>`, as the last read of a Log returned it; none reads the whole Log. */
+function logCursor(after: string | undefined): LogCursor | null {
+  if (after === undefined) {
+    return { seq: 0, line: 0 };
+  }
+  const groups = CURSOR.exec(after)?.groups;
+  return groups ? { seq: Number(groups.seq), line: Number(groups.line) } : null;
+}
+
+function logOwner(ticket: string | undefined, investigation: string | undefined): LogOwner | null {
+  if (ticket) {
+    return { ticketId: Number(ticket) };
+  }
+  return investigation ? { investigationId: Number(investigation) } : null;
+}
+
 export function eventRoutes(db: Db): Hono {
   const routes = new Hono();
 
@@ -46,17 +64,21 @@ export function eventRoutes(db: Db): Hono {
   });
 
   /**
-   * One ticket's or one investigation's events so far, oldest first, as plain JSON: the Log tabs
-   * load their history here and follow new events on the shared stream, so they hold no connection.
+   * One ticket's or one investigation's Log after `?after=`, oldest first: its events and its agents'
+   * output (`agent_log`) in one order, and the cursor to ask from next. The Log tabs poll it while
+   * open; agent output stays off the shared stream, so the board does not receive it.
    */
-  routes.get('/history', (c) => {
-    const filter = eventFilter(c.req.query('ticket'), c.req.query('investigation'));
-    if (!filter) {
-      return c.json({ error: 'Give ?ticket=<id> or ?investigation=<id>' }, BAD_REQUEST);
+  routes.get('/log', (c) => {
+    const owner = logOwner(c.req.query('ticket'), c.req.query('investigation'));
+    const after = logCursor(c.req.query('after'));
+    if (!owner || !after) {
+      return c.json(
+        { error: 'Give ?ticket=<id> or ?investigation=<id>, and ?after=<seq>.<line> or none' },
+        BAD_REQUEST,
+      );
     }
-    return c.json(
-      db.select().from(schema.events).where(filter).orderBy(asc(schema.events.seq)).all(),
-    );
+    const { entries, cursor } = readLog(db, owner, after);
+    return c.json({ entries, cursor: `${cursor.seq}.${cursor.line}` });
   });
 
   /**

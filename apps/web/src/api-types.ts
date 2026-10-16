@@ -1,6 +1,7 @@
 import type {
   BoardColumn,
   ContainerRun,
+  LogEntry,
   PrDescription,
   Preview,
   Project,
@@ -77,6 +78,9 @@ export const COMMAND_TYPES: readonly CommandType[] = [
   'commit_anyway',
   'drop_leftovers',
 ];
+
+/** A page of a ticket's or an investigation's Log: its events and agent lines, in order. */
+export type LogPage = { entries: LogEntry[]; cursor: string };
 
 export type EventRow = {
   seq: number;

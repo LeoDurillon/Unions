@@ -1,21 +1,21 @@
 import {
+  appendAgentLine,
   claimPrDescription,
+  type Db,
   effortFor,
-  emitEvent,
   finishPrDescription,
   getTicket,
   modelFor,
+  type PrDescription,
+  type PrDescriptionOutcome,
+  type Project,
   recoverPrDescriptions,
   resolveAgent,
   schema,
   sharedPrompt,
+  type Ticket,
   ticketBase,
   toolsFor,
-  type Db,
-  type PrDescription,
-  type PrDescriptionOutcome,
-  type Project,
-  type Ticket,
   withoutUnionLinks,
 } from '@union/core';
 import { eq } from 'drizzle-orm';
@@ -65,7 +65,7 @@ async function runRewrite(
   const { db, runtime } = deps;
   const { ticket, project, container, original } = run;
   const log = (event: unknown): void => {
-    emitEvent(db, { type: 'agent_event', ticketId: ticket.id, payload: event });
+    appendAgentLine(db, { ticketId: ticket.id, payload: event });
   };
   const base = ticketBase(project, ticket);
   await ensureBranch(runtime, container, ticket.branch ?? '', base);
