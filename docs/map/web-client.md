@@ -197,6 +197,7 @@ export); do not edit. Tests are left out.
 - `event-hub.ts`: Calls `listener` with every new event, in any tab's stream; returns the unsubscribe.
 - `event-rules-api.ts`: The browser's client for the event rules endpoints.
 - `file-tree.ts`: The files as a directory tree, for the review's file list.
+- `github-markdown.ts`: Renders GitHub comment text as GitHub does: its HTML (folds, images) sanitized, and `> [!NOTE]` alerts.
 - `highlight.ts`: Tokens for every changed or context line of a patch.
 - `investigate-ticket.ts`: Opens Investigations with a new investigation on the ticket ready to write (`?investigate=<id>`).
 - `labels.ts`: The step the ticket is currently on, if any.

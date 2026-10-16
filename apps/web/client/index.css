@@ -86,6 +86,50 @@ dialog::backdrop {
 .markdown .contains-task-list .contains-task-list {
   @apply pl-5;
 }
+.markdown .task-box {
+  @apply mr-1.5 inline-flex size-3.5 items-center justify-center rounded-sm border border-zinc-400 align-[-2px] text-[10px] leading-none dark:border-zinc-600;
+}
+.markdown .task-box-done {
+  @apply border-indigo-600 bg-indigo-600 text-white;
+}
+
+/* GitHub alerts (`> [!NOTE]`): a coloured bar and title by kind, as GitHub shows them. */
+.markdown .markdown-alert {
+  @apply bg-transparent py-1 dark:bg-transparent;
+}
+.markdown .markdown-alert-title {
+  @apply font-semibold;
+}
+.markdown .markdown-alert-note {
+  @apply border-blue-500;
+}
+.markdown .markdown-alert-note .markdown-alert-title {
+  @apply text-blue-700 dark:text-blue-400;
+}
+.markdown .markdown-alert-tip {
+  @apply border-green-600;
+}
+.markdown .markdown-alert-tip .markdown-alert-title {
+  @apply text-green-700 dark:text-green-400;
+}
+.markdown .markdown-alert-important {
+  @apply border-violet-500;
+}
+.markdown .markdown-alert-important .markdown-alert-title {
+  @apply text-violet-700 dark:text-violet-400;
+}
+.markdown .markdown-alert-warning {
+  @apply border-amber-500;
+}
+.markdown .markdown-alert-warning .markdown-alert-title {
+  @apply text-amber-700 dark:text-amber-400;
+}
+.markdown .markdown-alert-caution {
+  @apply border-red-500;
+}
+.markdown .markdown-alert-caution .markdown-alert-title {
+  @apply text-red-700 dark:text-red-400;
+}
 
 /* Comments in a list (a pull request's discussion): headings read as bold lines, not titles. */
 .markdown-compact h1,

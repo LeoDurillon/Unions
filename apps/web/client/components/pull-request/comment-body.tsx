@@ -1,5 +1,4 @@
 // A GitHub comment's text in compact markdown, folded behind a fade when it renders tall.
-import { githubText } from '@union/core/github-text';
 import { useEffect, useRef, useState, type ReactElement, type RefObject } from 'react';
 
 import { Markdown } from '../markdown';
@@ -36,7 +35,9 @@ export function CommentBody({ text }: { text: string }): ReactElement {
     <div>
       <div className={`relative ${folded ? FOLDED_CLASS : ''}`}>
         <div ref={content}>
-          <Markdown compact>{githubText(text)}</Markdown>
+          <Markdown compact github>
+            {text}
+          </Markdown>
         </div>
         {folded ? (
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-white dark:from-zinc-900" />

@@ -2,6 +2,8 @@ import { useState, type ComponentProps, type ReactElement } from 'react';
 import ReactMarkdown, { defaultUrlTransform } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
+import { GITHUB_REHYPE } from '../lib/github-markdown';
+
 const ATTACHMENT = 'attachment:';
 
 /** An image that cannot load says so (a Notion link expired) instead of leaving a hole. */
@@ -26,7 +28,22 @@ function Image({ src, alt }: ComponentProps<'img'>): ReactElement {
   );
 }
 
-const COMPONENTS = { img: Image };
+/** A task list's box (`- [x]`): shown as a mark, since checking it here would change nothing. */
+function TaskBox({ type, checked, ...props }: ComponentProps<'input'>): ReactElement {
+  if (type !== 'checkbox') {
+    return <input type={type} {...props} />;
+  }
+  return (
+    <>
+      <span aria-hidden className={`task-box ${checked ? 'task-box-done' : ''}`}>
+        {checked ? '✓' : ''}
+      </span>
+      <span className="sr-only">{checked ? 'Done: ' : 'Not done: '}</span>
+    </>
+  );
+}
+
+const COMPONENTS = { img: Image, input: TaskBox };
 
 /**
  * Markdown as the panel shows it. `files` maps a ticket file's name to its address, for the
@@ -36,11 +53,14 @@ export function Markdown({
   children,
   files,
   compact = false,
+  github = false,
 }: {
   children: string;
   files?: Record<string, string>;
   /** Headings no bigger than bold text and tighter spacing: for comments inside a list. */
   compact?: boolean;
+  /** Text from GitHub: its HTML (folds, images) is rendered, sanitized, and its alerts styled. */
+  github?: boolean;
 }): ReactElement {
   const transform = (url: string): string =>
     url.startsWith(ATTACHMENT)
@@ -48,7 +68,12 @@ export function Markdown({
       : defaultUrlTransform(url);
   return (
     <div className={compact ? 'markdown markdown-compact' : 'markdown'}>
-      <ReactMarkdown remarkPlugins={[remarkGfm]} urlTransform={transform} components={COMPONENTS}>
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        rehypePlugins={github ? GITHUB_REHYPE : undefined}
+        urlTransform={transform}
+        components={COMPONENTS}
+      >
         {children}
       </ReactMarkdown>
     </div>

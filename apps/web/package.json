@@ -22,6 +22,8 @@
     "react": "catalog:ui",
     "react-dom": "catalog:ui",
     "react-markdown": "catalog:ui",
+    "rehype-raw": "catalog:ui",
+    "rehype-sanitize": "catalog:ui",
     "remark-gfm": "catalog:ui",
     "tailwindcss": "catalog:ui"
   },

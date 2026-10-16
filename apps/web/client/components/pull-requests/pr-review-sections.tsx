@@ -24,11 +24,12 @@ function Description({ target }: { target: ReviewTarget }): ReactElement {
   if (!discussion.data) {
     return <Loading error={discussion.error} />;
   }
-  const text = githubText(discussion.data.description);
-  return text === '' ? (
+  const text = discussion.data.description;
+  // A template left as it was (only its HTML comments) counts as empty.
+  return githubText(text) === '' ? (
     <p className="text-sm text-zinc-500">No description.</p>
   ) : (
-    <Markdown>{text}</Markdown>
+    <Markdown github>{text}</Markdown>
   );
 }
 
