@@ -21,5 +21,10 @@ Drizzle schema and migrations, the pure ticket state machine (`states.ts`), tick
 The event log (`events`) is typed: `event-payloads.ts` gives the payload of every event type, and `emitEvent`
 takes a `NewEvent` from `event-catalog.ts`, so a new event type is added there first. Read one back with
 `isEvent(row, '<type>')` (browser-safe, `@union/core/event-catalog`), not by probing its payload by hand.
+Readers of the log (rule deliveries, notifications) keep their place in `event_cursors` through
+`event-cursors.ts` (`unreadEvents` starts a new reader at the end of the log). `notifications.ts` is the pure
+`notificationFor(event, subject)`: which events notify the user (a step waiting for approval, failed, refused or
+paused by the usage limit, a blocked start, a merged or closed PR, an investigation that ended, a failed rule) and
+with what text; `STEP_TITLES` (in `states.ts`) names the steps for it and for the UI.
 The agents' raw output is not an event: `appendAgentLine` writes it to `agent_log` (`agent-log.ts`), each line
 with the last `events.seq` at the time, and `readLog` merges both tables into one Log in that order.

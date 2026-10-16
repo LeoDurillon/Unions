@@ -14,6 +14,8 @@ type Listener = (event: EventRow) => void;
 
 const LOCK = 'union-events';
 const listeners = new Set<Listener>();
+/** Called only in the tab that holds the stream: what must happen once per browser. */
+const leadListeners = new Set<Listener>();
 let started = false;
 let lastSeq = 0;
 let channel: BroadcastChannel | null = null;
@@ -30,13 +32,15 @@ export function isEventRow(value: unknown): value is EventRow {
 }
 
 /** Hands an event to this tab's listeners once, in order (a seq already seen is dropped). */
-function deliver(event: EventRow): void {
+function deliver(event: EventRow, listening: Set<Listener>[]): void {
   if (event.seq <= lastSeq) {
     return;
   }
   lastSeq = event.seq;
-  for (const listener of listeners) {
-    listener(event);
+  for (const set of listening) {
+    for (const listener of set) {
+      listener(event);
+    }
   }
 }
 
@@ -46,7 +50,7 @@ function lead(): void {
   source.addEventListener('message', (message: MessageEvent<string>) => {
     const row: unknown = JSON.parse(message.data);
     if (isEventRow(row)) {
-      deliver(row);
+      deliver(row, [listeners, leadListeners]);
       // A BroadcastChannel has no target origin: the rule is for `window.postMessage`.
       // oxlint-disable-next-line unicorn/require-post-message-target-origin
       channel?.postMessage(row);
@@ -59,7 +63,7 @@ function start(): void {
   channel = typeof BroadcastChannel === 'undefined' ? null : new BroadcastChannel(LOCK);
   channel?.addEventListener('message', (message: MessageEvent<unknown>) => {
     if (isEventRow(message.data)) {
-      deliver(message.data);
+      deliver(message.data, [listeners]);
     }
   });
   if (!('locks' in navigator) || !channel) {
@@ -85,5 +89,20 @@ export function subscribe(listener: Listener): () => void {
   }
   return () => {
     listeners.delete(listener);
+  };
+}
+
+/**
+ * Calls `listener` with the events only while this tab holds the stream, so one tab in the browser
+ * acts on each (a desktop notification is shown once); returns the unsubscribe.
+ */
+export function subscribeAsLead(listener: Listener): () => void {
+  leadListeners.add(listener);
+  const stop = subscribe(() => {
+    // Subscribing starts the stream; the events come through `leadListeners`.
+  });
+  return () => {
+    leadListeners.delete(listener);
+    stop();
   };
 }

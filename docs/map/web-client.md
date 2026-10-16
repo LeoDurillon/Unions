@@ -50,7 +50,7 @@ export); do not edit. Tests are left out.
 - `review-bar.tsx`: Approve, ask for a revision, or edit the output by hand (for example to answer questions).
 - `run-agent-actions.tsx`: Giving a finished run's output to the implementer: kept for its next run, or sent now as a revision (when the ticket can go back to it) with a note.
 - `script-buttons.tsx`: The project's saved scripts, one button each; without any, where to save them.
-- `sidebar.tsx`: Project switcher and creation entry point, always visible on the left.
+- `sidebar.tsx`: Notifications, project switcher and creation entry point, always visible on the left.
 - `step-notices.tsx`: What stops the step and needs the user: a failed run, a usage limit, a refused commit.
 - `step-tab.tsx`: The ticket panel tab for one step: its output, verdict, answer form and review bar.
 - `ticket-attachments.tsx`: The ticket's files, in its Overview tab: added, described and removed at any time.
@@ -84,6 +84,13 @@ export); do not edit. Tests are left out.
 - `investigations-page.tsx`: Ad-hoc agent runs on a custom prompt for the project; no GitHub issue is created.
 - `scope-field.tsx`: Repository (with the clone's name), a ticket's workspace (with the ticket), or a global subject.
 - `ticket-picker.tsx`: The project's tickets that have a workspace to read (not cancelled), newest first.
+
+## components/notifications/
+
+- `notification-bell.tsx`: The sidebar's bell: the unread count, and the panel of notifications it opens.
+- `notification-item.tsx`: One notification in the panel: what it is about, what happened, where and when; unread ones stand out.
+- `notification-labels.ts`: The badge each kind of notification shows: a word for the moment and its tone.
+- `notification-panel.tsx`: The bell's panel: the notifications newest first, "Mark all read", older ones on request, and the desktop opt-in.
 
 ## components/onboarding/
 
@@ -192,6 +199,7 @@ export); do not edit. Tests are left out.
 - `api.ts`: What a GitHub call is made with: a token, or an installation of the stored GitHub App.
 - `attachments-api.ts`: Why the file cannot be attached, checked before sending it; null when it can.
 - `choice-values.ts`: A multi-select rule value is its option names joined by commas (Notion option names cannot hold one); the worker splits it the same way.
+- `desktop-notifications.ts`: Desktop notifications: off until the user turns them on, shown by the one tab that holds the event stream.
 - `diff-selection.ts`: A click starts a selection; a shift-click on the same side extends it to a block.
 - `env-lines.ts`: `KEY=value` lines (blank lines and `#` comments skipped) to variables.
 - `event-hub.ts`: Calls `listener` with every new event, in any tab's stream; returns the unsubscribe.
@@ -204,6 +212,9 @@ export); do not edit. Tests are left out.
 - `leave-guard.ts`: Unsaved settings: the forms holding changes, and asking before a navigation throws them away.
 - `line-diff.ts`: The lines of `after` against `before`: kept, added or removed, in reading order.
 - `log-runs.ts`: Splits the log at each run header, so every run can fold on its own.
+- `notifications-api.ts`: The browser's client for the notifications: a page of them, and marking them read.
+- `open-notification.ts`: Opens what a notification is about (its ticket or investigation, in its project) and marks it read.
+- `opened-investigation.ts`: The investigation opened from elsewhere (a notification), in the URL (`?investigation=<id>`).
 - `pr-description-api.ts`: The browser's client for a ticket's pull request description endpoints.
 - `preview-api.ts`: The browser's client for a ticket's preview endpoints.
 - `project-files-api.ts`: The browser's client for a project's uploaded files.
@@ -217,15 +228,17 @@ export); do not edit. Tests are left out.
 - `use-active-project.ts`: The project list plus the remembered selection, falling back to the first project.
 - `use-agent-review.ts`: The latest agent review of the target, with starting and cancelling it.
 - `use-agent-tools.ts`: The tools agents pick from: built-in ones and the ones the user added.
+- `use-app-state.ts`: What the root layout runs on: live refetching, the projects, the open ticket, navigation, and opening notifications.
 - `use-commits.ts`: The change's commits, oldest first, and (tickets) the change since the last review.
 - `use-connectors.ts`: The account's claude.ai connectors, and reading them again (polled while the worker checks).
 - `use-container-runs.ts`: The commands run in the ticket's workspace (polled while one is on), and running or stopping one.
 - `use-current-reviews.ts`: Adding and removing refresh the list (and the Pull requests tab, which marks what is in it).
 - `use-event-stream.ts`: Calls `onEvent` with every new event, from the browser's one shared stream (`event-hub.ts`).
 - `use-github-app.ts`: The global GitHub App's status; saving or removing it invalidates `['github-app']`.
-- `use-live-invalidation.ts`: Refetches board, ticket and investigation data whenever the worker records a change.
+- `use-live-invalidation.ts`: Refetches board, ticket, investigation and notification data whenever the worker records a change.
 - `use-log.ts`: Polls a ticket's or an investigation's Log while it is shown: all of it first, then what is new.
 - `use-navigation.ts`: Which page is shown and which overlay is open; `show`/`goTo` return click handlers.
+- `use-notifications.ts`: The notifications, page by page, with the unread count (also in the tab's title) and marking them read.
 - `use-notion-users.ts`: The Notion workspace members, read only when `enabled` (a person property is in view).
 - `use-review-grouping.ts`: The newest grouping by spec of the review, with starting and cancelling one.
 - `use-review.ts`: A pull request under review: its description and discussion, read from GitHub once per opening.

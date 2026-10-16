@@ -11,6 +11,7 @@ export default defineConfig({
     './src/schema-diff-commits.ts',
     './src/schema-events.ts',
     './src/schema-mcp.ts',
+    './src/schema-notifications.ts',
     './src/schema-pr-descriptions.ts',
     './src/schema-previews.ts',
     './src/schema-project-files.ts',

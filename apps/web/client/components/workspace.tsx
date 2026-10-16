@@ -2,6 +2,7 @@ import { useState, type ReactElement } from 'react';
 
 import type { PublicProject } from '../../src/api-types';
 import { clearInvestigateTicket, useInvestigateTicket } from '../lib/investigate-ticket';
+import { clearOpenedInvestigation, useOpenedInvestigation } from '../lib/opened-investigation';
 import { openSettings } from '../lib/settings-sections';
 import { Board, BoardView } from './board';
 import { InvestigationsPage } from './investigations/investigations-page';
@@ -17,12 +18,15 @@ function ProjectBody({
   project,
   view,
   askedTicket,
+  openedInvestigation,
   onOpenTicket,
 }: {
   project: PublicProject | null;
   view: ProjectView;
   /** A ticket a new investigation was asked about (`?investigate=`). */
   askedTicket: number | null;
+  /** An investigation opened from elsewhere (`?investigation=`). */
+  openedInvestigation: number | null;
   onOpenTicket: (id: number) => void;
 }): ReactElement {
   if (!project) {
@@ -31,9 +35,10 @@ function ProjectBody({
   if (view === 'investigations') {
     return (
       <InvestigationsPage
-        key={`${project.id}:${askedTicket ?? ''}`}
+        key={`${project.id}:${askedTicket ?? ''}:${openedInvestigation ?? ''}`}
         project={project}
         initialTicket={askedTicket}
+        initialInvestigation={openedInvestigation}
         onOpenTicket={onOpenTicket}
       />
     );
@@ -59,7 +64,8 @@ export function Workspace({
 }): ReactElement {
   const [chosen, setChosen] = useState<ProjectView>('board');
   const askedTicket = useInvestigateTicket();
-  const view = askedTicket === null ? chosen : 'investigations';
+  const openedInvestigation = useOpenedInvestigation();
+  const view = askedTicket === null && openedInvestigation === null ? chosen : 'investigations';
   return (
     <div className="flex min-w-0 flex-1 flex-col">
       <ProjectBar
@@ -68,6 +74,9 @@ export function Workspace({
         onView={(next) => {
           if (askedTicket !== null) {
             clearInvestigateTicket();
+          }
+          if (openedInvestigation !== null) {
+            clearOpenedInvestigation();
           }
           setChosen(next);
         }}
@@ -81,6 +90,7 @@ export function Workspace({
           project={project}
           view={view}
           askedTicket={askedTicket}
+          openedInvestigation={openedInvestigation}
           onOpenTicket={onOpenTicket}
         />
       </main>

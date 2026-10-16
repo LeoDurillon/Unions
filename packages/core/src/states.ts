@@ -69,6 +69,17 @@ export type Action =
   | { type: 'commit_anyway' }
   | { type: 'drop_leftovers' };
 
+/** Each step's name as the UI and the notifications show it. */
+export const STEP_TITLES: Record<Step, string> = {
+  intake: 'Intake',
+  summary: 'Summary',
+  technical: 'Technical',
+  test_plan: 'Test plan',
+  implement: 'Implementation',
+  final_review: 'Final review',
+  rebase: 'Rebase',
+};
+
 /** Every pipeline step, in order (`rebase` is not one). */
 export const STEPS: readonly Step[] = [...PLANNING_STEPS, 'implement', 'final_review'];
 const ORDER = STEPS;

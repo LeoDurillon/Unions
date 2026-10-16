@@ -16,6 +16,8 @@ and linked.
 - [MCP servers for agents](mcp-servers.md): claude.ai connectors built (Figma); HTTP and stdio servers left.
 - [Preview environments](preview-environments.md): compose-based previews with e2e tests (built, phases 1 to 4).
 - [Project settings as a page](project-settings-page.md): grouped side menu instead of the nine-tab modal (steps 1 to 5 built).
+- [Notifications in Union](notifications.md): an inbox of what needs you (approvals, failures, usage limit, merged
+  PRs, finished investigations), with an unread count and optional desktop notifications (built, steps 1 to 5).
 - [Group a review's changes by spec](review-spec-groups.md) (built, hunks included): an agent groups the changed files by the parts of
   the spec they implement (PR description, ticket, issue or Notion page), on request; a toggle in the file panel.
 
@@ -41,7 +43,8 @@ Loose ends found while building, not planned yet (2026-10-15):
 - [Exclude merged PRs from the ticket view](exclude-merged-prs.md) (scope to clarify)
 - [Revise with guidance after a failed rebase](rebase-revise-with-guidance.md)
 - [Download attachments from GitHub and Notion on import](attachment-downloads.md) (Notion images done)
-- [Events v2](events-v2.md): more actions (GitHub comment, labels, webhook; planned), replay, filters, group triggers
+- [Events v2](events-v2.md): more actions (GitHub comment built; labels, Project fields, Notion comment planned;
+  webhook deferred), replay, filters, group triggers
 - [Names in the event rule preview](rule-preview-people.md) (small)
 
 ## Chores

@@ -21,6 +21,7 @@ export); do not edit. Tests are left out.
 - `e2e-screenshots.ts`: Replaces the ticket's e2e screenshots with `files` (none: just removes them).
 - `event-actions.ts`: The kinds of event rule action and what each holds; browser-safe, for the settings page and the worker.
 - `event-catalog.ts`: The event log's types: a typed event to write, and a guard that narrows an event read back.
+- `event-cursors.ts`: Readers that follow the event log (the rule deliveries, the notifications) and how far each got.
 - `event-deliveries.ts`: Reads the events logged since the last call and queues one delivery per matching enabled rule of the ticket's project.
 - `event-payloads.ts`: What each type of event in the log carries, keyed by its `type`: the one place to add an event.
 - `event-rule-types.ts`: Event rules: when something happens to a ticket, do something elsewhere.
@@ -33,6 +34,7 @@ export); do not edit. Tests are left out.
 - `investigation-tickets.ts`: Asks for a ticket written from an answered investigation, with what the user wants it to cover.
 - `investigations.ts`: Newest first.
 - `mcp-connectors.ts`: The permission rule for all of a connector's tools.
+- `notifications.ts`: Which events of the log notify the user, and with what text; pure, the worker writes the rows.
 - `notion-api.ts`: A column of a data source: its id (stable across renames), name, type, and choices if any.
 - `notion-error.ts`: A Notion failure with the HTTP status to answer with (401 bad token, 404 not shared).
 - `notion-id.ts`: A whole ID: not touching other hex characters, so slugs like `Add-feed-<id>` cannot shift it.
@@ -55,6 +57,7 @@ export); do not edit. Tests are left out.
 - `schema-diff-commits.ts`: A ticket's commits at its diff snapshot, oldest first, each with its own files against its first parent.
 - `schema-events.ts`: The project's Notion data source as last read: rules point at its properties by id.
 - `schema-mcp.ts`: The claude.ai connectors of the Claude account the agents run with, as the last check read them (`claude mcp list` in a throwaway container).
+- `schema-notifications.ts`: What needs the user, drawn from the event log by the worker: one row per event that notifies, read in the bell's panel.
 - `schema-pr-descriptions.ts`: A pull request description the agent rewrote for a ticket whose work changed after the PR was opened.
 - `schema-previews.ts`: A ticket's preview: its compose project (`union-t<id>`) run from the ticket's workspace, served by the proxy at `url`.
 - `schema-project-files.ts`: Files the user gave the project (a database dump, a local config), put at `path` in every ticket's workspace and kept out of git there.

@@ -1,14 +1,7 @@
 import type { BoardColumn, Phase, Step } from '@union/core';
+import { STEP_TITLES } from '@union/core/states';
 
-export const STEP_TITLES: Record<Step, string> = {
-  intake: 'Intake',
-  summary: 'Summary',
-  technical: 'Technical',
-  test_plan: 'Test plan',
-  implement: 'Implementation',
-  final_review: 'Final review',
-  rebase: 'Rebase',
-};
+export { STEP_TITLES } from '@union/core/states';
 
 export const COLUMNS: { status: BoardColumn; title: string }[] = [
   { status: 'backlog', title: 'Backlog' },

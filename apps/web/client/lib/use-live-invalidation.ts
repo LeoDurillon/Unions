@@ -2,11 +2,16 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import { ticketReviewBase } from './review-target';
 import { useEvents } from './use-event-stream';
+import { NOTIFICATIONS_KEY } from './use-notifications';
 
-/** Refetches board, ticket and investigation data whenever the worker records a change. */
+/** Refetches board, ticket, investigation and notification data whenever the worker records a change. */
 export function useLiveInvalidation(): void {
   const queryClient = useQueryClient();
   useEvents((event) => {
+    if (event.type === 'notification_created') {
+      void queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_KEY });
+      return;
+    }
     if (event.investigationId !== null) {
       void queryClient.invalidateQueries({ queryKey: ['investigations'] });
       return;

@@ -122,9 +122,18 @@ type InvestigationPayloads = {
   investigation_ticket_failed: Failure;
 };
 
+type NotificationPayloads = {
+  /** Logged without a ticket or investigation, so it stays out of their logs; the ids are here. */
+  notification_created: Pick<
+    (typeof tables.notifications)['$inferSelect'],
+    'projectId' | 'ticketId' | 'investigationId' | 'kind' | 'title' | 'detail'
+  > & { notificationId: number };
+};
+
 export type EventPayloads = TicketPayloads &
   RunPayloads &
   GitHubPayloads &
   PreviewPayloads &
   ReviewPayloads &
-  InvestigationPayloads;
+  InvestigationPayloads &
+  NotificationPayloads;

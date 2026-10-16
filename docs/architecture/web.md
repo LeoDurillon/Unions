@@ -51,6 +51,15 @@
   or "Refresh from Notion") and are checked against it on save. Triggers, variables and Notion value shapes are in
   the browser-safe `@union/core/event-rules`; matching and the delivery queue in `event-rules.ts` and
   `event-deliveries.ts`. Rules apply only to events logged after their creation (no replay).
+- Notifications: the bell above the projects in the sidebar (`components/notifications/`) shows the unread count
+  (also in the tab title) and opens a panel of every project's notifications, newest first
+  (`routes/notifications.ts`: `GET /api/notifications?before=`, `POST /:id/read`, `POST /read-all`; marking read
+  is a plain record write; mounted with the event stream in `routes/live.ts`). The worker writes them; the list
+  refetches on `notification_created`. A click opens the ticket's panel or the investigation
+  (`?investigation=<id>`, `lib/opened-investigation.ts`) in its project and marks it read
+  (`lib/open-notification.ts`). Desktop notifications are off until turned on in the panel (stored in
+  localStorage; the browser asks permission): only the tab holding the shared stream shows them
+  (`subscribeAsLead` in `lib/event-hub.ts`), and only while Union is not in view.
 - Agent review comments: "Review with agent" on either review page queues an `agent_reviews` row
   (`routes/agent-review.ts`, `@union/core` `agent-reviews.ts`). Its findings become drafts with `author: 'agent'`
   (badge "suggested", Keep button); keeping or editing one makes it the user's (`author: 'user'`), and a new

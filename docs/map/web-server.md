@@ -39,7 +39,9 @@ export); do not edit. Tests are left out.
 - `grouping-targets.ts`: `/api/tickets/:id/groupings`.
 - `investigations.ts`: `/api/projects/:projectId/investigations`: one agent run on the user's prompt, with no GitHub issue.
 - `issue-import.ts`: `/api/tickets/github-issue`: a ticket from an existing issue of the project's repository.
+- `live.ts`: The routes the browser follows on its own: the event stream, and the notifications the stream announces.
 - `mcp-connectors.ts`: `/api/agents/connectors`: the account's claude.ai connectors as the last check read them, and `POST /check` to read them again (the worker does, in a throwaway…
+- `notifications.ts`: `/api/notifications`: what needs the user across every project (the worker writes them), and marking them read.
 - `notion.ts`: Notion failures become messages the UI shows next to the field.
 - `pr-commits.ts`: `<review>/commits`: the pull request's commits, and one commit's files and patches, to read the change one commit at a time.
 - `pr-description.ts`: `/api/tickets/:id/pr-description`: the agent rewrites the PR's description into a draft the user edits; sending it is a command (the worker writes to GitHub).

@@ -13,6 +13,7 @@ export * from './diff-excerpt';
 export * from './agent-log';
 export * from './event-actions';
 export * from './event-catalog';
+export * from './event-cursors';
 export * from './event-deliveries';
 export * from './event-rule-types';
 export * from './event-rules';
@@ -33,6 +34,7 @@ export * from './project-files';
 export * from './project-scripts';
 export * from './review-groupings';
 export * from './notion-markdown';
+export * from './notifications';
 export {
   composeProblems,
   isRecord,

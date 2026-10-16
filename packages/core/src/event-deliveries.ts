@@ -1,6 +1,7 @@
-import { and, asc, desc, eq, gt, inArray, isNotNull, isNull, like, lte } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNotNull, isNull, like, lte } from 'drizzle-orm';
 
 import type { Db } from './db';
+import { moveCursor, unreadEvents } from './event-cursors';
 import { triggerMatches } from './event-rules';
 import { parseNotionId } from './notion-id';
 import * as schema from './tables';
@@ -14,41 +15,13 @@ const BATCH = 500;
 export const MAX_ATTEMPTS = 5;
 const FIRST_RETRY_MS = 30_000;
 
-function cursorOf(db: Db): number | null {
-  const row = db
-    .select()
-    .from(schema.eventCursors)
-    .where(eq(schema.eventCursors.name, CURSOR))
-    .get();
-  return row?.seq ?? null;
-}
-
-function moveCursor(db: Pick<Db, 'insert'>, seq: number): void {
-  db.insert(schema.eventCursors)
-    .values({ name: CURSOR, seq })
-    .onConflictDoUpdate({ target: schema.eventCursors.name, set: { seq } })
-    .run();
-}
-
 /**
  * Reads the events logged since the last call and queues one delivery per matching enabled rule of
  * the ticket's project. A rule only applies to events after its creation; the first call starts at
  * the end of the log (nothing is replayed). Returns how many deliveries were queued.
  */
 export function queueDeliveries(db: Db): number {
-  const cursor = cursorOf(db);
-  if (cursor === null) {
-    const last = db.select().from(schema.events).orderBy(desc(schema.events.seq)).get();
-    moveCursor(db, last?.seq ?? 0);
-    return 0;
-  }
-  const events = db
-    .select()
-    .from(schema.events)
-    .where(gt(schema.events.seq, cursor))
-    .orderBy(asc(schema.events.seq))
-    .limit(BATCH)
-    .all();
+  const events = unreadEvents(db, CURSOR, BATCH);
   const last = events.at(-1);
   if (!last) {
     return 0;
@@ -83,7 +56,7 @@ export function queueDeliveries(db: Db): number {
         }
       }
     }
-    moveCursor(tx, last.seq);
+    moveCursor(tx, CURSOR, last.seq);
   });
   return queued;
 }

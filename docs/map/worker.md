@@ -21,7 +21,7 @@ export); do not edit. Tests are left out.
 - `diff-commits.ts`: `git log`'s records, oldest first, without their files.
 - `diff-snapshot.ts`: Replaces the ticket's diff snapshot with `base...HEAD` as it is now in the container, with each commit's own diff and the change since the head the user last r…
 - `e2e.ts`: The project's e2e command against the ticket's preview, after its checks passed.
-- `event-dispatcher.ts`: Applies the event rules: queues a delivery for each logged event a rule waits for, then does the due ones, a few per tick and one at a time.
+- `event-dispatcher.ts`: Follows the event log: writes the notifications, queues a delivery for each event a rule waits for, then does the due ones, a few per tick and one at a time.
 - `executor.ts`: Every pipeline step: planning, implementation and final review.
 - `gate.ts`: Runs the project's check command in the repository; a timeout counts as red.
 - `hooks.ts`: What the commands hand off to the running worker: all asynchronous, so draining stays synchronous.
@@ -37,6 +37,7 @@ export); do not edit. Tests are left out.
 - `janitor.ts`: Removes the containers and volumes of deleted tickets; a failure is logged as an event, not thrown.
 - `leftovers.ts`: Stages every change and describes it, or null when the working tree is clean.
 - `mcp-check.ts`: Reads the account's claude.ai connectors as an agent sees them (`claude mcp list`, which also checks each one can be reached; no model runs), in a throwaway co…
+- `notifier.ts`: Follows the event log and writes a notification for each event that needs the user, announcing it on the stream.
 - `pr-checkout.ts`: The host clones the base branch, fetches the pull request (forks included, through its `pull/<n>/head` ref) and checks out the commit its files were read at; t…
 - `pr-description-run.ts`: Runs queued rewrites of pull request descriptions, sharing the run slots with the ticket pipeline, the investigations and the agent reviews.
 - `pr-description.ts`: The template GitHub would use among the repository's files (paths relative to its root).

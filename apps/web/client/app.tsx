@@ -6,16 +6,12 @@ import { MainArea } from './components/main-area';
 import { Sidebar } from './components/sidebar';
 import { TicketPanel } from './components/ticket-panel';
 import { WizardHost } from './components/wizard-host';
-import { useActiveProject } from './lib/use-active-project';
-import { useLiveInvalidation } from './lib/use-live-invalidation';
-import { useNavigation } from './lib/use-navigation';
-import { useSelectedTicket } from './lib/use-selected-ticket';
+import { useAppState } from './lib/use-app-state';
 
 export function App(): ReactElement {
-  useLiveInvalidation();
-  const { projects, project, select, loading } = useActiveProject();
-  const [ticketId, openTicket] = useSelectedTicket();
-  const { page, overlay, show, goTo, close, leave } = useNavigation();
+  const { projects, project, select, loading, ticketId, openTicket, openNotification, ...nav } =
+    useAppState();
+  const { page, overlay, show, goTo, close, leave } = nav;
 
   return (
     <div className="flex h-full">
@@ -33,6 +29,7 @@ export function App(): ReactElement {
         onPage={(next) => {
           goTo(next)();
         }}
+        onOpenNotification={openNotification}
       />
       <MainArea
         page={page}

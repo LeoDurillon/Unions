@@ -1,4 +1,4 @@
-// Applies the event rules: queues a delivery for each logged event a rule waits for, then does the due ones, a few per tick and one at a time.
+// Follows the event log: writes the notifications, queues a delivery for each event a rule waits for, then does the due ones, a few per tick and one at a time.
 import {
   finishDelivery,
   nextDelivery,
@@ -12,11 +12,12 @@ import {
 import { gitHubCommentTarget, type GitHubApiFor } from './event-actions/github-comment';
 import { notionTarget } from './event-actions/notion';
 import { deliverAction, type ActionTargets } from './event-actions/target';
+import { writeNotifications } from './notifier';
 
 /**
- * Queues the deliveries of new events, then does the due ones, oldest first. Each kind of action
- * does at most its target's `perTick` per tick; the first delivery past its kind's limit waits for
- * the next tick.
+ * Writes the notifications of new events and queues their deliveries, then does the due ones,
+ * oldest first. Each kind of action does at most its target's `perTick` per tick; the first
+ * delivery past its kind's limit waits for the next tick.
  */
 export class EventDispatcher {
   private running: Promise<void> | null = null;
@@ -51,6 +52,7 @@ export class EventDispatcher {
   }
 
   private async work(): Promise<void> {
+    writeNotifications(this.db);
     queueDeliveries(this.db);
     const done = new Map<ActionKind, number>();
     for (;;) {

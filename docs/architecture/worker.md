@@ -30,6 +30,11 @@
   A target says when to retry (rate limits, 5xx and network errors); retries back off, up to 5 attempts; each outcome is logged as `event_rule_applied` (the
   ticket's Log tab). `github/pull-request.ts` logs `pull_request_merged`/`pull_request_closed`, and linking a PR by
   hand logs `pull_request_linked`, for the rules.
+- `notifier.ts`: `writeNotifications`, called at the start of each `EventDispatcher` tick, follows the log with its
+  own cursor (`event_cursors` name `notifications`, started at the end: the past never notifies) and writes one
+  `notifications` row per event that needs the user (`notificationFor` in core decides which, unique on
+  `event_seq`), then logs `notification_created` without a ticket or investigation id, so it stays out of their
+  logs and the browser hears of it on the shared stream.
 - `agent-review.ts`: `AgentReviewRunner` (started with the investigations in `side-runs.ts`, same slots) runs
   queued agent reviews: a ticket's in its own container on its branch (`agent-review-target.ts`), a pull request's
   in a throwaway `union-a<id>` container where the host cloned it at the reviewed commit (`pr-checkout.ts`, through

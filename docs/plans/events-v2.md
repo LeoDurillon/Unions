@@ -47,7 +47,8 @@ No behaviour change for existing rules; the dispatcher and rule tests keep passi
    the GitHub side ("PR merged → `deployed-to-staging`").
 3. **A GitHub Project field**: the worker already sets Status; other single-select, text or date fields follow the
    same path. Needs the Project's fields read and stored, as the Notion columns are.
-4. **Outgoing webhook** (Slack, Discord, Teams, any URL). A webhook URL is a credential, and `listRules` sends rule
+4. **Outgoing webhook** (Slack, Discord, Teams, any URL). Deferred (2026-10-16): no external service to connect
+   yet; [notifications in Union](notifications.md) come first. A webhook URL is a credential, and `listRules` sends rule
    actions to the browser, so it cannot live in the rule: a per-project destinations table, written by the web and
    read by the worker, with the browser seeing names only (like `toPublicProject` for tokens). Body as a text or
    JSON template.

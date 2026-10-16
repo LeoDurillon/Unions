@@ -3,8 +3,8 @@ import { Hono } from 'hono';
 
 import type { OnboardingGitHub } from '../github-onboarding';
 import { agentRoutes } from './agents';
-import { eventRoutes } from './events';
 import { githubRoutes } from './github';
+import { liveRoutes } from './live';
 import { notionRoutes } from './notion';
 import { projectSubroutes } from './project-subroutes';
 import { projectRoutes } from './projects';
@@ -20,6 +20,6 @@ export function apiRoutes(db: Db, github: OnboardingGitHub, notion: NotionApi): 
   api.route('/github', githubRoutes(db, github));
   api.route('/notion', notionRoutes(db, notion));
   api.route('/tickets', ticketRoutes(db, github, notion));
-  api.route('/events', eventRoutes(db));
+  api.route('/', liveRoutes(db));
   return api;
 }

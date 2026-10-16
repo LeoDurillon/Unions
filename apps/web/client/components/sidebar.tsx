@@ -1,7 +1,9 @@
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../src/api-types';
+import type { NotificationTarget } from '../lib/open-notification';
 import type { Page } from '../lib/use-navigation';
+import { NotificationBell } from './notifications/notification-bell';
 import { Button } from './ui';
 
 const ACTIVE = 'bg-indigo-100 font-medium text-indigo-900 dark:bg-indigo-950 dark:text-indigo-200';
@@ -41,7 +43,7 @@ function ProjectItem({
   );
 }
 
-/** Project switcher and creation entry point, always visible on the left. */
+/** Notifications, project switcher and creation entry point, always visible on the left. */
 export function Sidebar({
   projects,
   projectId,
@@ -49,6 +51,7 @@ export function Sidebar({
   onNewProject,
   page,
   onPage,
+  onOpenNotification,
 }: {
   projects: PublicProject[];
   projectId: number | null;
@@ -56,10 +59,12 @@ export function Sidebar({
   onNewProject: () => void;
   page: Page;
   onPage: (page: Page) => void;
+  onOpenNotification: (target: NotificationTarget) => void;
 }): ReactElement {
   return (
     <aside className="flex w-60 shrink-0 flex-col gap-3 border-r border-zinc-200 bg-zinc-100/60 p-3 dark:border-zinc-800 dark:bg-zinc-900/40">
       <h1 className="px-2 pt-1 text-base font-semibold">union</h1>
+      <NotificationBell projects={projects} onOpen={onOpenNotification} />
       <nav aria-label="Projects" className="min-h-0 flex-1 overflow-y-auto">
         <p className="px-3 pb-1 text-xs font-medium tracking-wide text-zinc-500 uppercase">
           Projects

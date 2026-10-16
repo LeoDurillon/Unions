@@ -130,18 +130,21 @@ function Listing({
 export function InvestigationsPage({
   project,
   initialTicket = null,
+  initialInvestigation = null,
   onOpenTicket,
 }: {
   project: PublicProject;
   /** Asked from a ticket: the new investigation's form runs on it. */
   initialTicket?: number | null;
+  /** Opened from a notification: shown first. */
+  initialInvestigation?: number | null;
   onOpenTicket: (id: number) => void;
 }): ReactElement {
   const query = useQuery({
     queryKey: ['investigations', project.id],
     queryFn: () => api.investigations(project.id),
   });
-  const [selection, setSelection] = useState<Selection>('new');
+  const [selection, setSelection] = useState<Selection>(initialInvestigation ?? 'new');
   const investigations = query.data ?? [];
   return (
     <div className="flex h-full min-h-0">
