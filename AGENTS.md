@@ -25,7 +25,8 @@ To find a file, read the map of its area in `docs/map/` (`core`, `web-server`, `
 one line per file, from the file's own top comment. Then search (`grep -rn`) and read only the lines you need.
 Every source file starts with a one-line `//` comment saying what it is for; write it for new files and keep it true
 when a file's purpose changes. `bun run map` regenerates the maps; `bun run check` fails when one is out of date or a
-file has no summary.
+file has no summary. Never edit a file under `docs/map/` by hand: change the source file's top comment (or add or
+remove the file), then run `bun run map` to update the maps.
 
 ## Commands
 
