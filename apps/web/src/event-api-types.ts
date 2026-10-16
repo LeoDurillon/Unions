@@ -28,10 +28,9 @@ export type RulePreview =
   | {
       ok: true;
       kind: 'notion_property';
-      property: string;
-      text: string;
-      value: unknown;
       pageId: string;
+      /** Each property the rule sets, with its value as the user reads it and as Notion takes it. */
+      properties: { name: string; text: string; value: unknown }[];
     }
   | { ok: true; kind: 'github_comment'; on: CommentTarget; number: number; text: string }
   | { ok: true; kind: 'union_notification'; title: string; text: string }

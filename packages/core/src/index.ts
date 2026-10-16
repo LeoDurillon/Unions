@@ -15,6 +15,7 @@ export * from './event-actions';
 export * from './event-catalog';
 export * from './event-cursors';
 export * from './event-deliveries';
+export * from './event-notion-action';
 export * from './event-rule-types';
 export * from './event-rules';
 export * from './docker-cli';

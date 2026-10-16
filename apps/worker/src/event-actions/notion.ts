@@ -1,16 +1,17 @@
-// The Notion action of a rule: sets one property of the ticket's Notion page.
+// The Notion action of a rule: sets properties of the ticket's Notion page, in one request.
 import {
   getTicket,
+  notionSchemaOf,
+  notionSets,
+  notionSetsText,
   NotionError,
-  ruleProperty,
-  ruleValue,
   schema,
   templateValues,
   type Db,
   type DeliveryOutcome,
   type NotionApi,
-  type NotionProperty,
   type NotionPropertyAction,
+  type NotionSet,
 } from '@union/core';
 import { eq } from 'drizzle-orm';
 
@@ -21,14 +22,9 @@ const SERVER_ERROR = 500;
 /** Notion allows about three requests a second. */
 const PER_TICK = 3;
 
-type Target = {
-  token: string;
-  pageId: string;
-  property: NotionProperty;
-  value: { text: string; value: unknown };
-};
+type Target = { token: string; pageId: string; sets: NotionSet[] };
 
-/** The page, property and value a delivery sets, or why it cannot be done. */
+/** The page and the values a delivery sets, or why it cannot be done. */
 function targetOf(
   db: Db,
   { delivery, rule, event }: Due,
@@ -46,22 +42,15 @@ function targetOf(
   if (!project?.notionToken) {
     return { status: 'failed', error: 'The project is not connected to Notion' };
   }
-  const property = ruleProperty(db, rule.projectId, action);
-  if (!property) {
-    return {
-      status: 'failed',
-      error:
-        'Its Notion property is no longer in the data source: refresh it in the Events settings',
-    };
+  const properties = notionSchemaOf(db, rule.projectId)?.properties ?? [];
+  const sets = notionSets(properties, action, templateValues(project, ticket, event));
+  if ('error' in sets) {
+    return { status: 'failed', error: sets.error };
   }
-  const value = ruleValue(property, action, templateValues(project, ticket, event));
-  if ('error' in value) {
-    return { status: 'failed', error: value.error };
-  }
-  return { token: project.notionToken, pageId: ticket.notionPageId, property, value };
+  return { token: project.notionToken, pageId: ticket.notionPageId, sets: sets.sets };
 }
 
-/** Sets the rule's Notion property on the ticket's page; says why when it cannot. */
+/** Sets the rule's Notion properties on the ticket's page; says why when it cannot. */
 async function deliver(
   db: Db,
   notion: NotionApi,
@@ -72,10 +61,10 @@ async function deliver(
   if ('status' in target) {
     return target;
   }
-  const { property, value } = target;
-  const detail = `${property.name} set to ${value.text === '' ? '(empty)' : `"${value.text}"`}`;
+  const detail = notionSetsText(target.sets);
+  const properties = Object.fromEntries(target.sets.map((set) => [set.property.id, set.value]));
   try {
-    await notion.updatePage(target.token, target.pageId, { [property.id]: value.value });
+    await notion.updatePage(target.token, target.pageId, properties);
     return { status: 'succeeded', detail };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

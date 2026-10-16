@@ -6,8 +6,8 @@ import {
   getTicket,
   listRules,
   notionSchemaOf,
+  notionSets,
   recentDeliveries,
-  ruleValue,
   saveRule,
   schema,
   storeNotionSchema,
@@ -141,21 +141,22 @@ function notionPreview(
   ticket: Ticket,
   action: NotionPropertyAction,
 ): RulePreview {
-  const property = notionSchemaOf(db, project.id)?.properties.find(
-    (candidate) => candidate.id === action.propertyId,
-  );
-  if (!ticket.notionPageId || !property) {
+  if (!ticket.notionPageId) {
     return { ok: false, error: 'This ticket was not imported from Notion' };
   }
-  const value = ruleValue(property, action, templateValues(project, ticket, null));
-  return 'error' in value
-    ? { ok: false, error: value.error }
+  const properties = notionSchemaOf(db, project.id)?.properties ?? [];
+  const sets = notionSets(properties, action, templateValues(project, ticket, null));
+  return 'error' in sets
+    ? { ok: false, error: sets.error }
     : {
         ok: true,
         kind: 'notion_property',
-        property: property.name,
         pageId: ticket.notionPageId,
-        ...value,
+        properties: sets.sets.map(({ property, text, value }) => ({
+          name: property.name,
+          text,
+          value,
+        })),
       };
 }
 

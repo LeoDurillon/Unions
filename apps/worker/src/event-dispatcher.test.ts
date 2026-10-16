@@ -43,7 +43,11 @@ beforeEach(() => {
     .get().id;
   storeNotionSchema(db, projectId, 'ds', {
     title: 'Roadmap',
-    properties: [{ id: 'p%3Ar', name: 'PR', type: 'url', options: [] }],
+    properties: [
+      { id: 'p%3Ar', name: 'PR', type: 'url', options: [] },
+      { id: 's%3At', name: 'Status', type: 'status', options: ['Todo', 'In review'] },
+      { id: 'n%3Ab', name: 'Number', type: 'number', options: [] },
+    ],
   });
   // The log is read from here on.
   queueDeliveries(db);
@@ -114,4 +118,55 @@ test('a rate limit is tried again later; a refusal fails at once', async () => {
     status: 'failed',
     error: 'Notion: PR is expected to be url.',
   });
+});
+
+/** The only rule: on a pull request, set these properties. */
+function onlyRule(values: { propertyId: string; value: string }[]): void {
+  db.delete(schema.eventRules).run();
+  saveRule(db, projectId, {
+    name: 'PR in Notion',
+    enabled: true,
+    trigger: { kind: 'pull_request_linked' },
+    action: { kind: 'notion_property', values },
+  });
+}
+
+test('a rule sets several properties of the page in one request', async () => {
+  onlyRule([
+    { propertyId: 'p%3Ar', value: '{pr.url}' },
+    { propertyId: 's%3At', value: 'In review' },
+    { propertyId: 'n%3Ab', value: '{pr.number}' },
+  ]);
+  openPullRequest('page-1');
+  await dispatch();
+  expect(updates).toEqual([
+    {
+      pageId: 'page-1',
+      properties: {
+        'p%3Ar': { url: 'https://github.com/acme/shop/pull/7' },
+        's%3At': { status: { name: 'In review' } },
+        'n%3Ab': { number: 7 },
+      },
+    },
+  ]);
+  expect(recentDeliveries(db, projectId)).toMatchObject([
+    {
+      status: 'succeeded',
+      detail:
+        'PR set to "https://github.com/acme/shop/pull/7", Status set to "In review", Number set to "7"',
+    },
+  ]);
+});
+
+test('one value that cannot be set fails the whole delivery, naming its property', async () => {
+  onlyRule([
+    { propertyId: 'p%3Ar', value: '{pr.url}' },
+    { propertyId: 'n%3Ab', value: '{pr.url}' },
+  ]);
+  openPullRequest('page-1');
+  await dispatch();
+  expect(updates).toEqual([]);
+  expect(recentDeliveries(db, projectId)).toMatchObject([
+    { status: 'failed', error: 'Number: "https://github.com/acme/shop/pull/7" is not a number' },
+  ]);
 });

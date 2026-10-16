@@ -11,12 +11,10 @@ import {
   queueDeliveries,
   recentDeliveries,
 } from './event-deliveries';
+import { EventRuleError, notionSets } from './event-notion-action';
 import { notionPropertyValue, renderTemplate } from './event-rule-types';
 import {
-  EventRuleError,
   type EventRule,
-  ruleProperty,
-  ruleValue,
   saveRule,
   storeNotionSchema,
   templateValues,
@@ -57,7 +55,7 @@ function prRule(
     name: 'PR link',
     enabled: true,
     trigger: { kind: 'pull_request_linked' },
-    action: { kind: 'notion_property', propertyId, value },
+    action: { kind: 'notion_property', values: [{ propertyId, value }] },
   });
   if (rule.action.kind !== 'notion_property') {
     throw new Error('A Notion rule was saved as another kind');
@@ -68,15 +66,14 @@ function prRule(
 test('a rule is checked against the stored Notion schema before it is saved', () => {
   expect(prRule().action).toEqual({
     kind: 'notion_property',
-    propertyId: 'p%3Ar',
-    value: '{pr.url}',
+    values: [{ propertyId: 'p%3Ar', value: '{pr.url}' }],
   });
   expect(() => prRule('{pr.link}')).toThrow('Unknown variable: {pr.link}');
   expect(() => prRule('x', 'gone')).toThrow('Pick a property');
   expect(() => prRule('x', 'f%3Ao')).toThrow('cannot be set by a rule');
   expect(() => prRule('Shipped', 's%3At')).toThrow('not a status of this property');
   expect(() => prRule('soon', 'n%3Ab')).toThrow(EventRuleError);
-  expect(prRule(ADA, 'd%3Ev').action.value).toBe(ADA);
+  expect(prRule(ADA, 'd%3Ev').action.values[0]?.value).toBe(ADA);
   expect(() => prRule('{pr.url}', 'd%3Ev')).toThrow('not variables');
   expect(() => prRule('Ada', 'd%3Ev')).toThrow('is not a Notion user');
   expect(
@@ -84,7 +81,7 @@ test('a rule is checked against the stored Notion schema before it is saved', ()
       name: 'Done',
       enabled: true,
       trigger: { kind: 'board_status', status: 'done' },
-      action: { kind: 'notion_property', propertyId: 's%3At', value: 'Done' },
+      action: { kind: 'notion_property', values: [{ propertyId: 's%3At', value: 'Done' }] },
     }).trigger,
   ).toEqual({ kind: 'board_status', status: 'done' });
 });
@@ -185,18 +182,21 @@ test('events after a rule is made queue one delivery each; earlier ones never do
 
   const due = nextDelivery(db);
   expect(due?.rule.id).toBe(rule.id);
-  const property = ruleProperty(db, projectId, rule.action);
-  const value =
-    due && property
-      ? ruleValue(
-          property,
-          rule.action,
-          templateValues({ owner: 'acme', repo: 'shop' }, getTicket(db, ticket.id), due.event),
-        )
-      : null;
-  expect(value).toEqual({
-    text: 'https://github.com/acme/shop/pull/7',
-    value: { url: 'https://github.com/acme/shop/pull/7' },
+  const sets = due
+    ? notionSets(
+        PROPERTIES,
+        rule.action,
+        templateValues({ owner: 'acme', repo: 'shop' }, getTicket(db, ticket.id), due.event),
+      )
+    : null;
+  expect(sets).toEqual({
+    sets: [
+      {
+        property: { id: 'p%3Ar', name: 'PR', type: 'url', options: [] },
+        text: 'https://github.com/acme/shop/pull/7',
+        value: { url: 'https://github.com/acme/shop/pull/7' },
+      },
+    ],
   });
 });
 

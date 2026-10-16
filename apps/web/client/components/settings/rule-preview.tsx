@@ -41,13 +41,19 @@ function PreviewResult({ result }: { result: RulePreview | undefined }): ReactEl
     );
   }
   return (
-    <p className="text-sm">
-      Would set <span className="font-medium">{result.property}</span> to{' '}
-      <code className="rounded bg-zinc-100 px-1 dark:bg-zinc-800">
-        {result.text === '' ? '(empty)' : result.text}
-      </code>{' '}
-      on the ticket&apos;s Notion page.
-    </p>
+    <div className="space-y-1 text-sm">
+      <p>Would set on the ticket&apos;s Notion page:</p>
+      <ul className="list-inside list-disc">
+        {result.properties.map((property) => (
+          <li key={property.name}>
+            <span className="font-medium">{property.name}</span> to{' '}
+            <code className="rounded bg-zinc-100 px-1 dark:bg-zinc-800">
+              {property.text === '' ? '(empty)' : property.text}
+            </code>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 

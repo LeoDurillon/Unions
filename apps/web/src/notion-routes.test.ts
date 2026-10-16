@@ -156,14 +156,14 @@ test('event rules use the stored Notion columns; a ticket from an import preview
   const rule = {
     name: 'PR link',
     trigger: { kind: 'pull_request_linked' },
-    action: { kind: 'notion_property', propertyId: 'p%3Ar', value: '{pr.link}' },
+    action: { kind: 'notion_property', values: [{ propertyId: 'p%3Ar', value: '{pr.link}' }] },
   };
   const refused = await call('POST', `${base}/event-rules`, rule);
   expect(refused.status).toBe(400);
-  expect(await refused.json()).toMatchObject({ error: 'Unknown variable: {pr.link}' });
+  expect(await refused.json()).toMatchObject({ error: 'PR: Unknown variable: {pr.link}' });
   const saved = await call('POST', `${base}/event-rules`, {
     ...rule,
-    action: { ...rule.action, value: '{pr.url}' },
+    action: { ...rule.action, values: [{ propertyId: 'p%3Ar', value: '{pr.url}' }] },
   });
   expect(saved.status).toBe(201);
   expect(await (await call('GET', `${base}/event-rules`)).json()).toMatchObject({
@@ -187,16 +187,27 @@ test('event rules use the stored Notion columns; a ticket from an import preview
   db.update(schema.tickets).set({ prNumber: 12 }).run();
   const preview = await call('POST', `${base}/event-rules/preview`, {
     ...rule,
-    action: { ...rule.action, value: '{pr.url}' },
+    action: {
+      kind: 'notion_property',
+      values: [
+        { propertyId: 'p%3Ar', value: '{pr.url}' },
+        { propertyId: 's%3At', value: 'Done' },
+      ],
+    },
     ticketId: ticket.id,
   });
   expect(await preview.json()).toEqual({
     ok: true,
     kind: 'notion_property',
-    property: 'PR',
     pageId: PAGE,
-    text: 'https://github.com/o/r/pull/12',
-    value: { url: 'https://github.com/o/r/pull/12' },
+    properties: [
+      {
+        name: 'PR',
+        text: 'https://github.com/o/r/pull/12',
+        value: { url: 'https://github.com/o/r/pull/12' },
+      },
+      { name: 'Status', text: 'Done', value: { status: { name: 'Done' } } },
+    ],
   });
 
   // Another data source: the stored columns no longer apply.

@@ -23,6 +23,7 @@ export); do not edit. Tests are left out.
 - `event-catalog.ts`: The event log's types: a typed event to write, and a guard that narrows an event read back.
 - `event-cursors.ts`: Readers that follow the event log (the rule deliveries, the notifications) and how far each got.
 - `event-deliveries.ts`: Reads the events logged since the last call and queues one delivery per matching enabled rule of the ticket's project.
+- `event-notion-action.ts`: The Notion action of a rule: the properties it sets, checked against the stored Notion columns, and what it sends.
 - `event-payloads.ts`: What each type of event in the log carries, keyed by its `type`: the one place to add an event.
 - `event-rule-types.ts`: Event rules: when something happens to a ticket, do something elsewhere.
 - `event-rules.ts`: Event rules: checking and saving them, the stored Notion columns, and matching events and templates.

@@ -61,6 +61,39 @@ Linear or Jira would first need their tickets imported into Union; a webhook cov
 Automated tests use the fake GitHub API (`apps/worker/src/github/fake-api.ts`). A check against a real project posts
 on its issues: ask before running it.
 
+## Several Notion properties in one rule
+
+Status: built (2026-10-16, branch `notion-multi-properties`). A Notion action used to set one property, so setting
+several on the same event took one rule each. The Notion action holds a list instead; one rule, one delivery, one
+Notion request.
+
+1. **Shape** (`packages/core/src/event-actions.ts`): `notion_property: { values: { propertyId: string; value:
+   string }[] }`, labelled "Set properties of the ticket's Notion page".
+2. **Existing rules**: a drizzle migration rewrites the stored `{ propertyId, value }` (and the oldest rows, without
+   a `kind`) into `values: [{ propertyId, value }]`, so the type has one shape and no reader normalizes. After it:
+   `bun run active`, then restart web and worker.
+3. **Checks** (`checkedNotionAction` in `event-rules.ts`): at least one entry, no property twice; each entry gets
+   today's checks (property in the data source, no variables for people, unknown variables, value shape), and the
+   error names the property (`Status: "Foo" is not a status…`). The Notion action's checks and values are in their own core
+   file, `event-notion-action.ts` (`event-rules.ts` is near 300 lines).
+4. **Worker** (`apps/worker/src/event-actions/notion.ts`): render every value, then one `notion.updatePage` with
+   all the properties: one request for the rate limit, applied together by Notion. One value that cannot be
+   rendered fails the whole delivery, naming the property (all or nothing: no half-set page). Detail:
+   `Status set to "Done", PR set to "https://…"`.
+5. **Preview** (`RulePreview` in `apps/web/src/event-api-types.ts`, `routes/event-rules.ts`): the Notion kind holds
+   `properties: { name, text, value }[]`; `rule-preview.tsx` shows one line per property.
+6. **UI**: `notion-action-fields.tsx` becomes a list of rows (property select, `ValueField`, remove) with "Add a
+   property"; a property used by one row is not offered in the others. The row in its own file
+   (`notion-value-row.tsx`); "Add a property" waits until every row has its property. `rule-action-text.tsx`
+   names two properties and counts the others ("and 1 more").
+7. **Tests**: `event-rules.test.ts` (several values, a duplicate, an empty list, the migrated shape); the worker's
+   Notion target (one `updatePage` with all the properties, a failure naming the bad property). Update the Events
+   part of `docs/architecture/` and the maps.
+
+Not chosen for now: several actions per rule (`actions: EventAction[]`, for example set Notion properties and
+comment on GitHub in one rule). It needs one delivery per action (the unique key on `rule_id, event_seq` changes),
+retries per action, and an editor listing actions of mixed kinds. Worth it only if mixing kinds is wanted.
+
 ## Left for later
 
 - **Replay:** apply a new rule to past events (with a preview of what it would change, and a cap).

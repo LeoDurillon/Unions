@@ -164,8 +164,9 @@ export); do not edit. Tests are left out.
 - `github-comment-fields.tsx`: A GitHub comment action's fields: the issue or the pull request, and the comment as a template.
 - `instructions-section.tsx`: The project's own instructions, sent to every agent run on it after the shared instructions.
 - `integration-section-body.tsx`: Previews, Notion and the danger zone.
-- `notion-action-fields.tsx`: A Notion action's fields: the property of the ticket's Notion page to set, and its value.
+- `notion-action-fields.tsx`: A Notion action's fields: the properties of the ticket's Notion page to set, a row each.
 - `notion-section.tsx`: The project settings section for the Notion connection, verified when saved.
+- `notion-value-row.tsx`: One property a Notion action sets: which property of the ticket's page, its value, and removing it.
 - `people-field.tsx`: A person property: a box per workspace member; the value is their Notion ids.
 - `preview-choices-field.tsx`: A choice among names the compose file has (profiles, services): a box per name known once a ticket's file was generated, and a field for others.
 - `preview-e2e-page.tsx`: The command a ticket's Preview section runs on request against its preview.
@@ -179,7 +180,7 @@ export); do not edit. Tests are left out.
 - `project-section-body.tsx`: The project's own settings, its agents' and its pull requests'.
 - `pull-request-section.tsx`: Whether the worker opens a draft PR after the implementation, or the user links one by hand.
 - `review-section.tsx`: Files the review page lists apart (collapsed), so the sidebar shows what needs reading.
-- `rule-action-text.tsx`: What a rule does, in a sentence for its row: the Notion property it sets, where it comments, or what it notifies.
+- `rule-action-text.tsx`: What a rule does, in a sentence for its row: the Notion properties it sets, where it comments, or what it notifies.
 - `rule-editor.tsx`: Edits a rule: its name, what triggers it, and what it does.
 - `rule-list.tsx`: One rule: when, then, and its switches.
 - `rule-preview.tsx`: What the rule as edited would do for one of the project's tickets; nothing is sent.

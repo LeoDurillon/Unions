@@ -71,7 +71,7 @@ export); do not edit. Tests are left out.
 ## event-actions/
 
 - `github-comment.ts`: The GitHub comment action of a rule: comments on the ticket's issue or pull request.
-- `notion.ts`: The Notion action of a rule: sets one property of the ticket's Notion page.
+- `notion.ts`: The Notion action of a rule: sets properties of the ticket's Notion page, in one request.
 - `target.ts`: What a kind of rule action needs to be done: one target per kind, picked by the event dispatcher.
 - `union-notification.ts`: The "Notify me in Union" action of a rule: a notification in the bell (and on the desktop, when on) about the ticket.
 

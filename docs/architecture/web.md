@@ -45,7 +45,8 @@
 - Event rules (project settings → Events → Rules, `routes/event-rules.ts`): when something happens to a ticket,
   do one action. The kinds are in the browser-safe `@union/core/event-actions`: comment on the ticket's GitHub
   issue or pull request (the rule picks which), notify the user in Union (a message template, shown under the
-  ticket's title in the bell, kind `rule`), or set a property of the Notion page it was imported from
+  ticket's title in the bell, kind `rule`), or set one or more properties of the Notion page it was
+  imported from (`values: [{ propertyId, value }]`, each property once; `event-notion-action.ts`)
   (`tickets.notion_page_id`, set by the import; older imports are
   linked from their "Imported from Notion:" line by `backfillNotionPages` at worker start). Notion rules point at
   properties by id in the stored copy of the data source's columns (`notion_data_sources`, read again on connect

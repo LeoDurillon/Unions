@@ -9,28 +9,21 @@ import {
   type ActionKind,
   type ActionOf,
   type EventAction,
-  type NotionPropertyAction,
 } from './event-actions';
 import { isEvent, type EventPayloads, type StoredEvent } from './event-catalog';
+import { checkedNotionAction, EventRuleError, type NotionSchema } from './event-notion-action';
 import {
   BOARD_LABELS,
   isTrigger,
-  notionPropertyValue,
-  renderTemplate,
-  unknownVariables,
   type EventTrigger,
   type TemplateVariable,
 } from './event-rule-types';
-import type { NotionDataSource, NotionProperty } from './notion-api';
+import type { NotionDataSource } from './notion-api';
 import { boardStatus } from './states';
 import * as schema from './tables';
 import type { Ticket } from './tickets';
 
 export type EventRule = typeof schema.eventRules.$inferSelect;
-export type NotionSchema = typeof schema.notionDataSources.$inferSelect;
-
-/** A rule the checks refuse: an unknown trigger or variable, a missing or unsupported property. */
-export class EventRuleError extends Error {}
 
 export type RuleInput = {
   name: string;
@@ -38,16 +31,6 @@ export type RuleInput = {
   trigger: unknown;
   action: unknown;
 };
-
-export function notionSchemaOf(db: Db, projectId: number): NotionSchema | null {
-  return (
-    db
-      .select()
-      .from(schema.notionDataSources)
-      .where(eq(schema.notionDataSources.projectId, projectId))
-      .get() ?? null
-  );
-}
 
 /** Keeps the data source's columns as Notion has them now (the rules point at them by id). */
 export function storeNotionSchema(
@@ -72,42 +55,6 @@ export function forgetNotionSchema(db: Db, projectId: number): void {
   db.delete(schema.notionDataSources)
     .where(eq(schema.notionDataSources.projectId, projectId))
     .run();
-}
-
-/** The property a rule sets, as last read from Notion; null once it is gone from the data source. */
-export function ruleProperty(
-  db: Db,
-  projectId: number,
-  action: NotionPropertyAction,
-): NotionProperty | null {
-  const source = notionSchemaOf(db, projectId);
-  return source?.properties.find((property) => property.id === action.propertyId) ?? null;
-}
-
-function checkedNotionAction(db: Db, projectId: number, record: object): NotionPropertyAction {
-  const propertyId = 'propertyId' in record ? String(record.propertyId) : '';
-  const value = 'value' in record ? String(record.value) : '';
-  const checked: NotionPropertyAction = { kind: 'notion_property', propertyId, value };
-  if (!notionSchemaOf(db, projectId)) {
-    throw new EventRuleError('Read the Notion data source first (Refresh from Notion)');
-  }
-  const property = ruleProperty(db, projectId, checked);
-  if (!property) {
-    throw new EventRuleError('Pick a property of the Notion data source');
-  }
-  if (property.type === 'people' && value.includes('{')) {
-    throw new EventRuleError('A person property takes people from the list, not variables');
-  }
-  const unknown = unknownVariables(value);
-  if (unknown.length > 0) {
-    throw new EventRuleError(`Unknown variable: {${unknown.join('}, {')}}`);
-  }
-  // A value without variables is checked now; one with variables, when it is filled in.
-  const shaped = notionPropertyValue(property, value.includes('{') ? '' : value);
-  if ('error' in shaped) {
-    throw new EventRuleError(shaped.error);
-  }
-  return checked;
 }
 
 type ActionChecks = {
@@ -245,17 +192,6 @@ export function templateValues(
     'date.today': now.toISOString().slice(0, DATE_LENGTH),
     'date.now': now.toISOString(),
   };
-}
-
-/** The Notion property value a rule sends for this ticket and event, or why it cannot. */
-export function ruleValue(
-  property: NotionProperty,
-  action: NotionPropertyAction,
-  values: Partial<Record<TemplateVariable, string>>,
-): { text: string; value: unknown } | { error: string } {
-  const text = renderTemplate(action.value, values);
-  const shaped = notionPropertyValue(property, text);
-  return 'error' in shaped ? shaped : { text, value: shaped.value };
 }
 
 function phaseChange(event: StoredEvent): EventPayloads['phase_changed'] | null {

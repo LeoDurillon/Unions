@@ -4,10 +4,13 @@ import { unknownVariables } from './event-rule-types';
 /** Where a GitHub comment goes: the ticket's issue, or its pull request. */
 export type CommentTarget = 'issue' | 'pull_request';
 
+/** One property of the ticket's Notion page and what it is set to; `value` is a template (`{pr.url}`). */
+export type NotionValue = { propertyId: string; value: string };
+
 /** What each kind of action holds beside its `kind`: one kind per place a rule acts on. */
 type ActionFields = {
-  /** Sets one property of the ticket's Notion page; `value` is a template (`{pr.url}`). */
-  notion_property: { propertyId: string; value: string };
+  /** Sets properties of the ticket's Notion page, all in one request. */
+  notion_property: { values: NotionValue[] };
   /** Comments on the ticket's issue or pull request; `body` is a template. */
   github_comment: { on: CommentTarget; body: string };
   /** Notifies the user in Union (the bell, desktop notifications); `message` is a template. */
@@ -32,7 +35,7 @@ export const ACTION_KINDS = [
 ] as const satisfies readonly ActionKind[];
 
 export const ACTION_LABELS: Record<ActionKind, string> = {
-  notion_property: "Set a property of the ticket's Notion page",
+  notion_property: "Set properties of the ticket's Notion page",
   github_comment: 'Comment on GitHub',
   union_notification: 'Notify me in Union',
 };
@@ -54,7 +57,7 @@ export const MAX_NOTIFICATION = 300;
 const MAX_COMMENT = 65_536;
 
 const EMPTY_ACTIONS: { [K in ActionKind]: ActionOf<K> } = {
-  notion_property: { kind: 'notion_property', propertyId: '', value: '' },
+  notion_property: { kind: 'notion_property', values: [{ propertyId: '', value: '' }] },
   github_comment: { kind: 'github_comment', on: 'issue', body: '' },
   union_notification: { kind: 'union_notification', message: '' },
 };
