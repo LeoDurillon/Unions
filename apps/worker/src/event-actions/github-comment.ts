@@ -11,30 +11,15 @@ import {
   type Ticket,
 } from '@union/core';
 import { eq } from 'drizzle-orm';
-import { RequestError } from 'octokit';
 
 import type { GitHubApi } from '../github/api';
+import { isTemporary } from './github-retry';
 import type { ActionTarget, Due } from './target';
 
-const FORBIDDEN = 403;
-const TOO_MANY_REQUESTS = 429;
-const SERVER_ERROR = 500;
 /** GitHub limits how fast content is created: one comment per tick at most. */
 const PER_TICK = 1;
 
 export type GitHubApiFor = (project: Project) => GitHubApi | null;
-
-/** Rate limits (403 or 429), GitHub outages and network failures pass: try again later. */
-function isTemporary(error: unknown): boolean {
-  if (!(error instanceof RequestError)) {
-    return true;
-  }
-  return (
-    error.status === TOO_MANY_REQUESTS ||
-    error.status >= SERVER_ERROR ||
-    (error.status === FORBIDDEN && /rate limit/iu.test(error.message))
-  );
-}
 
 /** The issue or pull request number the comment goes on, or why there is none. */
 function numberOf(ticket: Ticket, action: GitHubCommentAction): number | DeliveryOutcome {

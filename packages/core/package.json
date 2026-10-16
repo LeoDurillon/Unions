@@ -12,6 +12,7 @@
     "./event-actions": "./src/event-actions.ts",
     "./event-catalog": "./src/event-catalog.ts",
     "./event-rules": "./src/event-rule-types.ts",
+    "./event-pull-request": "./src/event-pull-request-action.ts",
     "./preview": "./src/preview-config.ts",
     "./github-client": "./src/github-client.ts",
     "./github-text": "./src/github-text.ts",

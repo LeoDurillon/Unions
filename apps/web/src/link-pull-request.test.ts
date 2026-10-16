@@ -51,6 +51,7 @@ const github: OnboardingGitHub = {
   getIssue: () => Promise.resolve(null),
   verifyApp: () => Promise.reject(new Error('unused')),
   listInstallations: () => Promise.reject(new Error('unused')),
+  listRuleChoices: () => Promise.reject(new Error('unused')),
 };
 
 let db: Db;

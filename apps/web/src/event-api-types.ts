@@ -34,4 +34,9 @@ export type RulePreview =
     }
   | { ok: true; kind: 'github_comment'; on: CommentTarget; number: number; text: string }
   | { ok: true; kind: 'union_notification'; title: string; text: string }
+  /** `changes`: what each change would do, its templates filled in. */
+  | { ok: true; kind: 'github_pull_request'; number: number; changes: string[] }
   | { ok: false; error: string };
+
+/** What a pull request rule can pick: the repository's label names and assignable logins. */
+export type RuleChoices = { labels: string[]; users: string[] };

@@ -33,7 +33,9 @@
 - `event-dispatcher.ts`: follows the `events` log (cursor in `event_cursors`), queues one `event_deliveries` row
   per matching rule and event (unique), and hands each due one to the target of its action's kind
   (`event-actions/`: `notion.ts` sets the rule's Notion properties in one `updatePage`, all or none, `github-comment.ts` comments on the issue or the PR with
-  the project's GitHub client, `union-notification.ts` writes a notification through the notifier's
+  the project's GitHub client, `github-pull-request.ts` makes a rule's changes to the PR in order (each can be
+  done again harmlessly: the description section sits between `<!-- union-rule:<id> -->` marks and is replaced, so
+  a retry redoes the whole delivery; a refusal fails it and says what was done before), `union-notification.ts` writes a notification through the notifier's
   `recordNotification`), one at a time and at most the target's `perTick` per tick (Notion 3, GitHub 1).
   A target says when to retry (rate limits, 5xx and network errors); retries back off, up to 5 attempts; each outcome is logged as `event_rule_applied` (the
   ticket's Log tab). `github/pull-request.ts` logs `pull_request_merged`/`pull_request_closed`, and linking a PR by

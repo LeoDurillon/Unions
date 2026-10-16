@@ -28,6 +28,18 @@ function PreviewResult({ result }: { result: RulePreview | undefined }): ReactEl
       </div>
     );
   }
+  if (result.kind === 'github_pull_request') {
+    return (
+      <div className="space-y-1 text-sm">
+        <p>Would change pull request #{result.number}:</p>
+        <ul className="list-inside list-disc">
+          {result.changes.map((change) => (
+            <li key={change}>{change}</li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
   if (result.kind === 'github_comment') {
     return (
       <div className="space-y-1 text-sm">
@@ -69,7 +81,7 @@ function applicable(
   if (action.kind === 'union_notification') {
     return { tickets, none: 'No ticket to try it on yet.' };
   }
-  if (action.on === 'issue') {
+  if (action.kind === 'github_comment' && action.on === 'issue') {
     const withIssue = tickets.filter((ticket) => ticket.issueNumber !== null);
     return { tickets: withIssue, none: 'No ticket with a GitHub issue to try it on yet.' };
   }

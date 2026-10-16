@@ -15,12 +15,15 @@ export); do not edit. Tests are left out.
 - `github-pull-request-files.ts`: GitHub's file to ours; GitHub leaves `patch` out for binary and very large files.
 - `github-pull-requests.ts`: GitHub's shape to ours; a deleted account shows as "ghost", as on GitHub.
 - `github-queries.ts`: A pull request's line-comment threads, with their replies, page by page.
+- `github-repo-reads.ts`: The web's repository reads from GitHub: branches, an issue, and what a pull request rule picks from; null for what does not exist.
 - `github-repo.ts`: The repository's branch names, the default first then by name.
+- `github-rule-choices.ts`: What a pull request rule can pick from the repository: its labels and the users who can be assigned or asked to review.
 - `http.ts`: HTTP status codes and small helpers the web routes use to read requests and fail.
 - `notion-images.ts`: Downloads the images a Notion page shows (their links expire within the hour) so they can be kept as the ticket's files: each kept one is referenced as `attach…
 - `pull-request-ref.ts`: A pull request of the repository: `12`, `#12` or its `/pull/12` URL.
 - `review-feedback.ts`: The review as the implementer receives it: overall note, the comments on the whole pull request, then each line comment under its file.
 - `review-import.ts`: The thread as one comment: who said what, the first comment then the replies.
+- `rule-previews.ts`: What a rule's action would do for one ticket, one preview per kind of action; nothing is sent.
 - `server.ts`: The web server's entry point: opens the database, migrates it and serves the API and the client.
 
 ## routes/
@@ -51,7 +54,7 @@ export); do not edit. Tests are left out.
 - `preview.ts`: `/api/tickets/:id/preview`: the ticket's preview and the commands that start, stop and read it (the worker runs them: the web never touches Docker).
 - `project-files.ts`: Deletes a removed project's files (its rows went with it, by cascade).
 - `project-settings.ts`: Updates the GitHub credentials, base branch and checks.
-- `project-subroutes.ts`: The routes under `/api/projects` that have their own module: event rules, preview settings, files.
+- `project-subroutes.ts`: The routes under `/api/projects` that have their own module: event rules and what they pick from, preview settings, files.
 - `projects.ts`: The API routes for projects: creating, reading and updating them.
 - `pull-request-cache.ts`: The pull request lists last read from GitHub, per project and filter, in this process: the page opens at once, and GitHub is asked at most every few minutes.
 - `pull-requests.ts`: `/api/projects/:projectId/pull-requests`: the repository's pull requests, read from GitHub (kept a few minutes; `?refresh` reads them again), and under `/revie…
@@ -60,6 +63,7 @@ export); do not edit. Tests are left out.
 - `review-groupings.ts`: Under a review's base (`/api/tickets/:id`, `/api/projects/:projectId/pull-requests/reviews/:number`): `/groupings` (the newest), `/groupings/source` (a specifi…
 - `review-import.ts`: The PR tab: threads, review summaries and comments, and which of them are already imported.
 - `review.ts`: Why a review cannot be sent now, or null when it can: the ticket waits on the user after code was written, or it is done with its branch kept and its pull requ…
+- `rule-choices.ts`: `GET /api/projects/:projectId/github/rule-choices`: the labels and users a pull request rule picks from, read from GitHub.
 - `spec-sources.ts`: The text of a specification, from where the user points.
 - `ticket-base.ts`: The API routes that show and change the branch a ticket is based on.
 - `ticket-commits.ts`: `/api/tickets/:id/commits`: the commits stored with the ticket's diff snapshot, the change since the last review, and their files.

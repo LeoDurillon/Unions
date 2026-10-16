@@ -1,4 +1,5 @@
 // The kinds of event rule action and what each holds; browser-safe, for the settings page and the worker.
+import { checkPullRequestChanges, type PullRequestChange } from './event-pull-request-action';
 import { unknownVariables } from './event-rule-types';
 
 /** Where a GitHub comment goes: the ticket's issue, or its pull request. */
@@ -13,6 +14,8 @@ type ActionFields = {
   notion_property: { values: NotionValue[] };
   /** Comments on the ticket's issue or pull request; `body` is a template. */
   github_comment: { on: CommentTarget; body: string };
+  /** Changes the ticket's pull request: labels, reviewers, assignees, title, a description section. */
+  github_pull_request: { changes: PullRequestChange[] };
   /** Notifies the user in Union (the bell, desktop notifications); `message` is a template. */
   union_notification: { message: string };
 };
@@ -27,16 +30,19 @@ export type EventAction = { [K in ActionKind]: ActionOf<K> }[ActionKind];
 export type NotionPropertyAction = ActionOf<'notion_property'>;
 export type GitHubCommentAction = ActionOf<'github_comment'>;
 export type UnionNotificationAction = ActionOf<'union_notification'>;
+export type GitHubPullRequestAction = ActionOf<'github_pull_request'>;
 
 export const ACTION_KINDS = [
   'notion_property',
   'github_comment',
+  'github_pull_request',
   'union_notification',
 ] as const satisfies readonly ActionKind[];
 
 export const ACTION_LABELS: Record<ActionKind, string> = {
   notion_property: "Set properties of the ticket's Notion page",
   github_comment: 'Comment on GitHub',
+  github_pull_request: "Update the ticket's pull request",
   union_notification: 'Notify me in Union',
 };
 
@@ -59,6 +65,7 @@ const MAX_COMMENT = 65_536;
 const EMPTY_ACTIONS: { [K in ActionKind]: ActionOf<K> } = {
   notion_property: { kind: 'notion_property', values: [{ propertyId: '', value: '' }] },
   github_comment: { kind: 'github_comment', on: 'issue', body: '' },
+  github_pull_request: { kind: 'github_pull_request', changes: [] },
   union_notification: { kind: 'union_notification', message: '' },
 };
 
@@ -113,4 +120,14 @@ export function checkUnionNotification(
     return { error: `Unknown variable: {${unknown.join('}, {')}}` };
   }
   return { action: { kind: 'union_notification', message } };
+}
+
+/** An "Update the ticket's pull request" action as sent by the settings page, or why it cannot be saved. */
+export function checkGitHubPullRequest(
+  record: object,
+): { action: GitHubPullRequestAction } | { error: string } {
+  const checked = checkPullRequestChanges(record);
+  return 'error' in checked
+    ? checked
+    : { action: { kind: 'github_pull_request', changes: checked.changes } };
 }

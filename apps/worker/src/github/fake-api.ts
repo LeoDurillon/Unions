@@ -38,6 +38,9 @@ export class FakeGitHubApi implements GitHubApi {
     title: string;
     body: string;
     draft: boolean;
+    labels?: string[];
+    reviewers?: string[];
+    assignees?: string[];
     /** Unset: open. */
     state?: PullRequestState;
     behindBy?: number;
@@ -185,6 +188,49 @@ export class FakeGitHubApi implements GitHubApi {
     if (pull) {
       pull.body = body;
     }
+    return Promise.resolve();
+  }
+
+  /** The pull request `number`; throws like GitHub's 404 when there is none. */
+  pullByNumber(number: number): FakeGitHubApi['pulls'][number] {
+    const pull = this.pulls.find((candidate) => candidate.number === number);
+    if (!pull) {
+      throw new Error(`No fake pull request #${number}`);
+    }
+    return pull;
+  }
+
+  updatePullRequestTitle(_repo: RepoRef, number: number, title: string): Promise<void> {
+    this.calls.push('updatePullRequestTitle');
+    this.pullByNumber(number).title = title;
+    return Promise.resolve();
+  }
+
+  addLabels(_repo: RepoRef, number: number, labels: string[]): Promise<void> {
+    this.calls.push('addLabels');
+    const pull = this.pullByNumber(number);
+    pull.labels = [...new Set([...(pull.labels ?? []), ...labels])];
+    return Promise.resolve();
+  }
+
+  removeLabel(_repo: RepoRef, number: number, label: string): Promise<void> {
+    this.calls.push('removeLabel');
+    const pull = this.pullByNumber(number);
+    pull.labels = (pull.labels ?? []).filter((name) => name !== label);
+    return Promise.resolve();
+  }
+
+  requestReviewers(_repo: RepoRef, number: number, users: string[]): Promise<void> {
+    this.calls.push('requestReviewers');
+    const pull = this.pullByNumber(number);
+    pull.reviewers = [...new Set([...(pull.reviewers ?? []), ...users])];
+    return Promise.resolve();
+  }
+
+  addAssignees(_repo: RepoRef, number: number, users: string[]): Promise<void> {
+    this.calls.push('addAssignees');
+    const pull = this.pullByNumber(number);
+    pull.assignees = [...new Set([...(pull.assignees ?? []), ...users])];
     return Promise.resolve();
   }
 

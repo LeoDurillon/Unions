@@ -71,6 +71,8 @@ export); do not edit. Tests are left out.
 ## event-actions/
 
 - `github-comment.ts`: The GitHub comment action of a rule: comments on the ticket's issue or pull request.
+- `github-pull-request.ts`: The pull request action of a rule: changes the ticket's pull request (labels, reviewers, assignees, title, a description section).
+- `github-retry.ts`: Which GitHub failures a rule action tries again later: rate limits, outages and network errors.
 - `notion.ts`: The Notion action of a rule: sets properties of the ticket's Notion page, in one request.
 - `target.ts`: What a kind of rule action needs to be done: one target per kind, picked by the event dispatcher.
 - `union-notification.ts`: The "Notify me in Union" action of a rule: a notification in the bell (and on the desktop, when on) about the ticket.
@@ -85,6 +87,7 @@ export); do not edit. Tests are left out.
 - `loop.ts`: Pushes every second and pulls every `pullIntervalMs`, one call at a time, until aborted.
 - `mirror.ts`: Runs one `GitHubSync` per project, each with the project's own credentials.
 - `octokit-api.ts`: The GitHub API implemented with Octokit: issues, pull requests and the project board.
+- `octokit-pull-request-changes.ts`: The pull request changes of the worker's GitHub client (title, labels, reviewers, assignees): the base of `OctokitGitHubApi`.
 - `pr-description-send.ts`: Writes the user's version of a rewritten description to the pull request, with Union's links added back, unless the description on GitHub changed since the age…
 - `pr-review.ts`: The review as GitHub gets it.
 - `pull-request.ts`: Keeps the pull request's state (`pr_state`), when it was merged (`pr_merged_at`) or closed without a merge (`pr_closed_at`, polled still: it can be reopened) a…

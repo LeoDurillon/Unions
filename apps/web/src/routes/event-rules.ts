@@ -1,34 +1,25 @@
 import {
   checkRule,
-  clipDetail,
   deleteRule,
   EventRuleError,
   getTicket,
   listRules,
   notionSchemaOf,
-  notionSets,
   recentDeliveries,
   saveRule,
   schema,
   storeNotionSchema,
-  templateValues,
-  renderTemplate,
-  type ActionKind,
-  type ActionOf,
   type Db,
-  type GitHubCommentAction,
   type NotionApi,
-  type NotionPropertyAction,
   type Project,
   type RuleInput,
-  type Ticket,
-  type UnionNotificationAction,
 } from '@union/core';
 import { eq, inArray } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
 
-import type { DeliveryView, EventRulesResponse, RulePreview } from '../event-api-types';
+import type { DeliveryView, EventRulesResponse } from '../event-api-types';
 import { BAD_REQUEST, CONFLICT, CREATED, fail, NOT_FOUND, readObject, requireId } from '../http';
+import { previewOf } from '../rule-previews';
 import { guarded } from './notion';
 
 function loadProject(db: Db, c: Context): Project {
@@ -133,76 +124,6 @@ async function preview(db: Db, c: Context): Promise<Response> {
   }
   const rule = checked(() => checkRule(db, project.id, ruleInput(body)));
   return c.json(previewOf(db, project, ticket, rule.action));
-}
-
-function notionPreview(
-  db: Db,
-  project: Project,
-  ticket: Ticket,
-  action: NotionPropertyAction,
-): RulePreview {
-  if (!ticket.notionPageId) {
-    return { ok: false, error: 'This ticket was not imported from Notion' };
-  }
-  const properties = notionSchemaOf(db, project.id)?.properties ?? [];
-  const sets = notionSets(properties, action, templateValues(project, ticket, null));
-  return 'error' in sets
-    ? { ok: false, error: sets.error }
-    : {
-        ok: true,
-        kind: 'notion_property',
-        pageId: ticket.notionPageId,
-        properties: sets.sets.map(({ property, text, value }) => ({
-          name: property.name,
-          text,
-          value,
-        })),
-      };
-}
-
-type Previews = {
-  [K in ActionKind]: (db: Db, project: Project, ticket: Ticket, action: ActionOf<K>) => RulePreview;
-};
-
-function gitHubCommentPreview(
-  _db: Db,
-  project: Project,
-  ticket: Ticket,
-  action: GitHubCommentAction,
-): RulePreview {
-  const number = action.on === 'issue' ? ticket.issueNumber : ticket.prNumber;
-  if (number === null) {
-    const missing = action.on === 'issue' ? 'issue' : 'pull request';
-    return { ok: false, error: `This ticket has no ${missing} yet` };
-  }
-  const text = renderTemplate(action.body, templateValues(project, ticket, null));
-  return { ok: true, kind: 'github_comment', on: action.on, number, text };
-}
-
-/** The notification as the bell would show it: the ticket's title, the message filled in. */
-function unionNotificationPreview(
-  _db: Db,
-  project: Project,
-  ticket: Ticket,
-  action: UnionNotificationAction,
-): RulePreview {
-  const text = clipDetail(renderTemplate(action.message, templateValues(project, ticket, null)));
-  return { ok: true, kind: 'union_notification', title: ticket.title, text };
-}
-
-const PREVIEWS: Previews = {
-  notion_property: notionPreview,
-  github_comment: gitHubCommentPreview,
-  union_notification: unionNotificationPreview,
-};
-
-function previewOf<K extends ActionKind>(
-  db: Db,
-  project: Project,
-  ticket: Ticket,
-  action: ActionOf<K>,
-): RulePreview {
-  return PREVIEWS[action.kind](db, project, ticket, action);
 }
 
 /** `/api/projects/:projectId/event-rules` and its deliveries, and the stored Notion columns. */

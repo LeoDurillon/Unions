@@ -96,7 +96,8 @@ retries per action, and an editor listing actions of mixed kinds. Worth it only 
 
 ## Pull request properties and GitHub Project fields
 
-Status: planned (2026-10-16), not started. Covers targets 2 and 3 of step 2 above, for the pull request. A rule can
+Status: the pull request action is built (2026-10-16, branch `pull-request-rule-actions`); Project fields are not
+started. Covers targets 2 and 3 of step 2 above, for the pull request. A rule can
 change several things of the ticket's pull request at once (labels, reviewers, assignees, title, description), and
 set GitHub Project fields on the issue's item or the PR's item (the rule picks).
 

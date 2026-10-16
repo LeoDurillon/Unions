@@ -44,7 +44,11 @@
   (records, each with its editor), Turn previews off, Disconnect, deleting the project.
 - Event rules (project settings → Events → Rules, `routes/event-rules.ts`): when something happens to a ticket,
   do one action. The kinds are in the browser-safe `@union/core/event-actions`: comment on the ticket's GitHub
-  issue or pull request (the rule picks which), notify the user in Union (a message template, shown under the
+  issue or pull request (the rule picks which), change the ticket's pull request (labels to add and remove,
+  reviewers, assignees, title, a description section; one of each, `event-pull-request-action.ts`, browser-safe as
+  `@union/core/event-pull-request`; the editor suggests the repo's labels and assignable users from
+  `GET /api/projects/:projectId/github/rule-choices`, read live through `OnboardingGitHub.listRuleChoices`), notify
+  the user in Union (a message template, shown under the
   ticket's title in the bell, kind `rule`), or set one or more properties of the Notion page it was
   imported from (`values: [{ propertyId, value }]`, each property once; `event-notion-action.ts`)
   (`tickets.notion_page_id`, set by the import; older imports are

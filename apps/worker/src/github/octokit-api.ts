@@ -1,6 +1,5 @@
 // The GitHub API implemented with Octokit: issues, pull requests and the project board.
 import type { ProjectLocator } from '@union/core';
-import { RequestError, type Octokit } from 'octokit';
 
 import type {
   GitHubApi,
@@ -13,6 +12,7 @@ import type {
   RepoRef,
   ReviewLineComment,
 } from './api';
+import { isNotFound, OctokitPullRequestChanges } from './octokit-pull-request-changes';
 import {
   ADD_TO_PROJECT,
   LIST_ITEMS,
@@ -22,12 +22,6 @@ import {
   RESOLVE_USER_PROJECT,
   SET_STATUS,
 } from './queries';
-
-const NOT_FOUND = 404;
-
-function isNotFound(error: unknown): boolean {
-  return error instanceof RequestError && error.status === NOT_FOUND;
-}
 
 type ProjectInfoResponse = {
   node: { field: { id: string; options: { id: string; name: string }[] } | null } | null;
@@ -76,10 +70,7 @@ function timeOf(date: string | null): number | null {
   return date === null ? null : Date.parse(date);
 }
 
-export class OctokitGitHubApi implements GitHubApi {
-  /** A token client or an installation client (`githubClient` in `@union/core/github-client`). */
-  constructor(private readonly octokit: Octokit) {}
-
+export class OctokitGitHubApi extends OctokitPullRequestChanges implements GitHubApi {
   async resolveProject(locator: ProjectLocator): Promise<string> {
     const variables = { login: locator.login, number: locator.number };
     const data =

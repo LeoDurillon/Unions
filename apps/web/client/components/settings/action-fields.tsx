@@ -12,6 +12,7 @@ import type { ReactElement } from 'react';
 import { Field, inputClass } from '../ui';
 import { GitHubCommentFields } from './github-comment-fields';
 import { NotionActionFields } from './notion-action-fields';
+import { PullRequestFields } from './pull-request-fields';
 import { UnionNotificationFields } from './union-notification-fields';
 
 /** The fields of the action's own kind. */
@@ -38,6 +39,9 @@ function KindFields({
   }
   if (action.kind === 'union_notification') {
     return <UnionNotificationFields action={action} onChange={onChange} />;
+  }
+  if (action.kind === 'github_pull_request') {
+    return <PullRequestFields projectId={projectId} action={action} onChange={onChange} />;
   }
   return <GitHubCommentFields action={action} onChange={onChange} />;
 }

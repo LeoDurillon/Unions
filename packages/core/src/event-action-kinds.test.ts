@@ -76,3 +76,13 @@ test('a notification in Union holds a message with known variables, not too long
     'Unknown variable',
   );
 });
+
+test('a pull request action keeps its checked changes, and needs no Notion columns', () => {
+  db.delete(schema.notionDataSources).run();
+  expect(
+    check({ kind: 'github_pull_request', changes: [{ kind: 'assignees', users: ['ada'] }] }),
+  ).toEqual({ kind: 'github_pull_request', changes: [{ kind: 'assignees', users: ['ada'] }] });
+  expect(() => check({ kind: 'github_pull_request', changes: [] })).toThrow(
+    'Pick what to change on the pull request',
+  );
+});

@@ -72,6 +72,13 @@ export type GitHubApi = {
   /** The pull request's description as GitHub has it ('' when empty). */
   pullRequestBody(repo: RepoRef, number: number): Promise<string>;
   updatePullRequestBody(repo: RepoRef, number: number, body: string): Promise<void>;
+  updatePullRequestTitle(repo: RepoRef, number: number, title: string): Promise<void>;
+  /** Adds labels to an issue or pull request; GitHub creates the ones the repository lacks. */
+  addLabels(repo: RepoRef, number: number, labels: string[]): Promise<void>;
+  /** Removes a label; does nothing if the issue or pull request does not have it. */
+  removeLabel(repo: RepoRef, number: number, label: string): Promise<void>;
+  requestReviewers(repo: RepoRef, number: number, users: string[]): Promise<void>;
+  addAssignees(repo: RepoRef, number: number, users: string[]): Promise<void>;
   /** Un-drafts the pull request; does nothing if it is already ready. */
   markPullRequestReady(repo: RepoRef, number: number): Promise<void>;
   /**

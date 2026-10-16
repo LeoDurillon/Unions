@@ -3,7 +3,12 @@ import type { EventRule, NotionSchema, NotionUser } from '@union/core';
 import { emptyAction, type EventAction } from '@union/core/event-actions';
 import type { EventTrigger } from '@union/core/event-rules';
 
-import type { DeliveryView, EventRulesResponse, RulePreview } from '../../src/event-api-types';
+import type {
+  DeliveryView,
+  EventRulesResponse,
+  RuleChoices,
+  RulePreview,
+} from '../../src/event-api-types';
 import { request } from './api';
 
 export type RuleDraft = {
@@ -43,6 +48,9 @@ export const eventRulesApi = {
   /** Reads the data source's columns from Notion again. */
   refreshNotion: (projectId: number): Promise<NotionSchema> =>
     request('POST', `${base(projectId)}/notion/schema`),
+  /** The repository's labels and assignable users, for a pull request rule. */
+  ruleChoices: (projectId: number): Promise<RuleChoices> =>
+    request('GET', `${base(projectId)}/github/rule-choices`),
   /** The workspace members a person property can be set to. */
   notionUsers: (projectId: number): Promise<NotionUser[]> =>
     request('GET', `${base(projectId)}/notion/users`),

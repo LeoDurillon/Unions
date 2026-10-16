@@ -1,4 +1,4 @@
-// What a rule does, in a sentence for its row: the Notion properties it sets, where it comments, or what it notifies.
+// What a rule does, in a sentence for its row: the Notion properties it sets, what it changes on the pull request, where it comments, or what it notifies.
 import type { NotionSchema } from '@union/core';
 import {
   COMMENT_TARGET_LABELS,
@@ -6,6 +6,7 @@ import {
   type NotionPropertyAction,
   type NotionValue,
 } from '@union/core/event-actions';
+import { describeChange } from '@union/core/event-pull-request';
 import type { ReactElement } from 'react';
 
 import { PeopleNames } from './people-field';
@@ -75,6 +76,16 @@ export function ActionText({
 }): ReactElement {
   if (action.kind === 'notion_property') {
     return <NotionText projectId={projectId} notion={notion} action={action} />;
+  }
+  if (action.kind === 'github_pull_request') {
+    return (
+      <>
+        update the pull request:{' '}
+        {action.changes
+          .map((change) => describeChange(change, change.kind === 'title' ? change.value : ''))
+          .join('; ')}
+      </>
+    );
   }
   if (action.kind === 'union_notification') {
     return (
