@@ -5,6 +5,7 @@ export); do not edit. Tests are left out.
 
 ## ./
 
+- `agent-idle.ts`: Stops a `claude` process that ended its turn, with no background task left, but does not exit.
 - `agent-review-findings.ts`: The last `json` block of the answer; null when there is none or it is not the expected shape.
 - `agent-review-target.ts`: Checks the change out for the agent: the ticket's branch, or the pull request in a throwaway container named `names` (each kind of run has its own names, ids o…
 - `agent-review.ts`: Runs queued agent reviews, sharing the run slots with the ticket pipeline and the investigations: a ticket's in its own container, a pull request's in a throwa…

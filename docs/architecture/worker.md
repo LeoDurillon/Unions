@@ -103,7 +103,11 @@
   session when a resumed one is gone (rebuilt HOME volume).
 - `provision.ts` creates a ticket's container, seeds credentials, and clones the repo on the host with the
   project's token, resetting `origin` to the token-free URL before copying it in; `agent.ts` runs
-  `claude -p` in it and parses stream-json; `prompts.ts` builds the step prompts.
+  `claude -p` in it and parses stream-json; `prompts.ts` builds the step prompts. The CLI can stay up after its
+  last `result`, so `agent-idle.ts` watches the events. Once the last one is a `result`, every background task
+  (`system/task_started`) has its `task_notification`, and 30 s pass with no new event, it sends TERM (then KILL
+  10 s later) to the processes whose environment holds the run's `UNION_AGENT_RUN` token. It logs
+  `union_agent_idle_stopped`, and the run then uses that last result.
 - Ticket attachments: the web stores uploads under `attachments/t<ticket>/` (gitignored, `UNION_ATTACHMENTS_DIR`
   overrides; rows in `ticket_attachments`, `routes/attachments.ts`). Before every step `attachments-sync.ts`
   replaces `/workspace/attachments` in the container (outside the repo) with the ticket's current files, and

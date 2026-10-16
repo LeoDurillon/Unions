@@ -3,7 +3,10 @@ import {
   isConnectorTool,
   type AgentEffort,
   type ContainerRuntime,
+  type ExecResult,
 } from '@union/core';
+
+import { IDLE_GRACE_MS, RUN_MARKER, watchIdle } from './agent-idle';
 
 export type AgentRun = {
   container: string;
@@ -18,6 +21,8 @@ export type AgentRun = {
   resumeSessionId?: string | null;
   signal?: AbortSignal;
   onEvent: (event: unknown) => void;
+  /** Quiet time after the final result before the process is stopped; `IDLE_GRACE_MS` by default. */
+  idleGraceMs?: number;
 };
 
 export type AgentOutcome =
@@ -119,31 +124,52 @@ function toOutcome(result: ResultEvent): AgentOutcome {
     : { kind: 'error', message: result.result };
 }
 
-/** Runs `claude -p` inside the ticket's container and streams its events to `onEvent`. */
-export async function runAgent(runtime: ContainerRuntime, run: AgentRun): Promise<AgentOutcome> {
-  const stream = runtime.exec(run.container, claudeArgs(run), {
-    cwd: run.cwd,
-    stdin: run.prompt,
-    env: connectorEnv(run.tools),
-    signal: run.signal,
-  });
-  const results: ResultEvent[] = [];
+/** Reads the agent's events to the end: its last result, and how the process exited. */
+async function readEvents(
+  stream: AsyncGenerator<string, ExecResult>,
+  onEvent: (event: unknown) => void,
+): Promise<{ result: ResultEvent | undefined; exit: ExecResult }> {
+  let result: ResultEvent | undefined = undefined;
   let next = await stream.next();
   while (!next.done) {
     const event = parseLine(next.value);
     if (event !== undefined) {
-      run.onEvent(event);
+      onEvent(event);
       if (isResultEvent(event)) {
-        results.push(event);
+        result = event;
       }
     }
     next = await stream.next();
   }
-  const result = results.at(-1);
+  return { result, exit: next.value };
+}
+
+/** Runs `claude -p` inside the ticket's container and streams its events to `onEvent`. */
+export async function runAgent(runtime: ContainerRuntime, run: AgentRun): Promise<AgentOutcome> {
+  const token = crypto.randomUUID();
+  const stream = runtime.exec(run.container, claudeArgs(run), {
+    cwd: run.cwd,
+    stdin: run.prompt,
+    env: { ...connectorEnv(run.tools), [RUN_MARKER]: token },
+    signal: run.signal,
+  });
+  // The CLI sometimes stays up after its last result: the turn is over, so it is stopped.
+  const idle = watchIdle(runtime, {
+    container: run.container,
+    token,
+    graceMs: run.idleGraceMs ?? IDLE_GRACE_MS,
+    onEvent: run.onEvent,
+  });
+  const { result, exit } = await readEvents(stream, (event) => {
+    run.onEvent(event);
+    idle.observe(event);
+  }).finally(() => {
+    idle.stop();
+  });
   if (result) {
     return toOutcome(result);
   }
-  const { exitCode, stderr } = next.value;
+  const { exitCode, stderr } = exit;
   const message = `claude exited with ${exitCode} and no result: ${stderr.trim()}`;
   return RATE_LIMIT.test(stderr) ? { kind: 'rate_limited', message } : { kind: 'error', message };
 }
