@@ -1,98 +1,32 @@
+// Applies the event rules: queues a delivery for each logged event a rule waits for, then does the due ones, a few per tick and one at a time.
 import {
   finishDelivery,
-  getTicket,
   nextDelivery,
-  NotionError,
   queueDeliveries,
-  ruleProperty,
-  ruleValue,
-  schema,
-  templateValues,
+  type ActionKind,
   type Db,
   type DeliveryOutcome,
   type NotionApi,
-  type NotionProperty,
 } from '@union/core';
-import { eq } from 'drizzle-orm';
 
-const TOO_MANY_REQUESTS = 429;
-const SERVER_ERROR = 500;
-/** Deliveries done per tick: Notion allows about three requests a second. */
-const PER_TICK = 3;
-
-type Due = NonNullable<ReturnType<typeof nextDelivery>>;
-
-type Target = {
-  token: string;
-  pageId: string;
-  property: NotionProperty;
-  value: { text: string; value: unknown };
-};
-
-/** The page, property and value a delivery sets, or why it cannot be done. */
-function targetOf(db: Db, { delivery, rule, event }: Due): Target | DeliveryOutcome {
-  const ticket = delivery.ticketId === null ? null : getTicket(db, delivery.ticketId);
-  if (!ticket?.notionPageId) {
-    return { status: 'skipped', detail: 'The ticket was not imported from Notion' };
-  }
-  const project = db
-    .select()
-    .from(schema.projects)
-    .where(eq(schema.projects.id, rule.projectId))
-    .get();
-  if (!project?.notionToken) {
-    return { status: 'failed', error: 'The project is not connected to Notion' };
-  }
-  const property = ruleProperty(db, rule.projectId, rule.action);
-  if (!property) {
-    return {
-      status: 'failed',
-      error:
-        'Its Notion property is no longer in the data source: refresh it in the Events settings',
-    };
-  }
-  const value = ruleValue(property, rule.action, templateValues(project, ticket, event));
-  if ('error' in value) {
-    return { status: 'failed', error: value.error };
-  }
-  return { token: project.notionToken, pageId: ticket.notionPageId, property, value };
-}
-
-/** Sets the rule's Notion property on the ticket's page; says why when it cannot. */
-async function deliver(db: Db, notion: NotionApi, due: Due): Promise<DeliveryOutcome> {
-  const target = targetOf(db, due);
-  if ('status' in target) {
-    return target;
-  }
-  const { property, value } = target;
-  const detail = `${property.name} set to ${value.text === '' ? '(empty)' : `"${value.text}"`}`;
-  try {
-    await notion.updatePage(target.token, target.pageId, { [property.id]: value.value });
-    return { status: 'succeeded', detail };
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    // Rate limits, Notion outages and network failures pass: try again later.
-    const temporary =
-      !(error instanceof NotionError) ||
-      error.status === TOO_MANY_REQUESTS ||
-      error.status >= SERVER_ERROR;
-    return temporary
-      ? { status: 'retry', error: message }
-      : { status: 'failed', error: message, detail: `Tried: ${detail}` };
-  }
-}
+import { notionTarget } from './event-actions/notion';
+import { deliverAction, type ActionTargets } from './event-actions/target';
 
 /**
- * Applies the event rules: queues a delivery for each logged event a rule waits for, then does the
- * due ones, a few per tick and one at a time.
+ * Queues the deliveries of new events, then does the due ones, oldest first. Each kind of action
+ * does at most its target's `perTick` per tick; the first delivery past its kind's limit waits for
+ * the next tick.
  */
 export class EventDispatcher {
   private running: Promise<void> | null = null;
+  private readonly targets: ActionTargets;
 
   constructor(
     private readonly db: Db,
-    private readonly notion: NotionApi,
-  ) {}
+    notion: NotionApi,
+  ) {
+    this.targets = { notion_property: notionTarget(db, notion) };
+  }
 
   tick(): void {
     this.running ??= this.workOnce();
@@ -112,12 +46,19 @@ export class EventDispatcher {
 
   private async work(): Promise<void> {
     queueDeliveries(this.db);
-    for (let done = 0; done < PER_TICK; done++) {
+    const done = new Map<ActionKind, number>();
+    for (;;) {
       const due = nextDelivery(this.db);
       if (!due) {
         return;
       }
-      const outcome = await deliver(this.db, this.notion, due).catch(
+      const { action } = due.rule;
+      const count = done.get(action.kind) ?? 0;
+      if (count >= this.targets[action.kind].perTick) {
+        return;
+      }
+      done.set(action.kind, count + 1);
+      const outcome = await deliverAction(this.targets, due, action).catch(
         (error: unknown): DeliveryOutcome => ({
           status: 'failed',
           error: error instanceof Error ? error.message : String(error),

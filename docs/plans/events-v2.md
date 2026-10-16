@@ -1,6 +1,7 @@
 # Idea: Events v2
 
-Status: ideas left out of Events v1 (`9bfae3b`). "More actions" is planned below; the rest is not started.
+Status: ideas left out of Events v1 (`9bfae3b`). "More actions" is planned below; its step 1 (one handler per
+action kind) is done for the core and the worker; the rest is not started.
 
 Events v1: rules on a project, triggered by ticket events, setting one property of the ticket's Notion page (tickets
 imported from Notion only), applied to events logged after the rule's creation.

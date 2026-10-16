@@ -11,9 +11,11 @@ import {
   schema,
   storeNotionSchema,
   templateValues,
+  type ActionKind,
+  type ActionOf,
   type Db,
-  type EventRule,
   type NotionApi,
+  type NotionPropertyAction,
   type Project,
   type RuleInput,
   type Ticket,
@@ -129,11 +131,11 @@ async function preview(db: Db, c: Context): Promise<Response> {
   return c.json(previewOf(db, project, ticket, rule.action));
 }
 
-function previewOf(
+function notionPreview(
   db: Db,
   project: Project,
   ticket: Ticket,
-  action: EventRule['action'],
+  action: NotionPropertyAction,
 ): RulePreview {
   const property = notionSchemaOf(db, project.id)?.properties.find(
     (candidate) => candidate.id === action.propertyId,
@@ -145,6 +147,21 @@ function previewOf(
   return 'error' in value
     ? { ok: false, error: value.error }
     : { ok: true, property: property.name, pageId: ticket.notionPageId, ...value };
+}
+
+type Previews = {
+  [K in ActionKind]: (db: Db, project: Project, ticket: Ticket, action: ActionOf<K>) => RulePreview;
+};
+
+const PREVIEWS: Previews = { notion_property: notionPreview };
+
+function previewOf<K extends ActionKind>(
+  db: Db,
+  project: Project,
+  ticket: Ticket,
+  action: ActionOf<K>,
+): RulePreview {
+  return PREVIEWS[action.kind](db, project, ticket, action);
 }
 
 /** `/api/projects/:projectId/event-rules` and its deliveries, and the stored Notion columns. */

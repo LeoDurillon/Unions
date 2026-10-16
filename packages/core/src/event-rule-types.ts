@@ -15,8 +15,26 @@ export type EventTrigger =
   | { kind: 'step_failed' }
   | { kind: 'ticket_created' };
 
-/** Sets one property of the ticket's Notion page; `value` is a template (`{pr.url}`). */
-export type EventAction = { kind: 'notion_property'; propertyId: string; value: string };
+/** What each kind of action holds beside its `kind`: one kind per place a rule acts on. */
+type ActionFields = {
+  /** Sets one property of the ticket's Notion page; `value` is a template (`{pr.url}`). */
+  notion_property: { propertyId: string; value: string };
+};
+
+export type ActionKind = keyof ActionFields;
+
+export type ActionOf<K extends ActionKind> = { kind: K } & ActionFields[K];
+
+/** What a rule does when its trigger matches. */
+export type EventAction = { [K in ActionKind]: ActionOf<K> }[ActionKind];
+
+export type NotionPropertyAction = ActionOf<'notion_property'>;
+
+export const ACTION_KINDS = ['notion_property'] as const satisfies readonly ActionKind[];
+
+export function isActionKind(value: unknown): value is ActionKind {
+  return ACTION_KINDS.some((kind) => kind === value);
+}
 
 export const TRIGGER_KINDS = [
   'pull_request_linked',

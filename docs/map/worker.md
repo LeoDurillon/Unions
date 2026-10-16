@@ -61,6 +61,11 @@ export); do not edit. Tests are left out.
 - `ticket-base.ts`: Chooses the branch a ticket is cloned from, before its first clone: the branch the user chose (over the parent's), else the parent's branch while its pull requ…
 - `workspace-git.ts`: Puts the repository on `branch`: the local branch if it exists, else the pushed one (a recreated container only has `origin/<branch>`), else a new branch from …
 
+## event-actions/
+
+- `notion.ts`: The Notion action of a rule: sets one property of the ticket's Notion page.
+- `target.ts`: What a kind of rule action needs to be done: one target per kind, picked by the event dispatcher.
+
 ## github/
 
 - `api.ts`: `mergedAt`: when GitHub merged it (epoch ms); null unless merged.

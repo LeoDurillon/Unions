@@ -24,8 +24,9 @@
   `cancel_investigation` command hook. It also drives `TicketDrafter` (`investigation-ticket.ts`), which writes
   the tickets asked from investigations, in `union-i<id>-ticket` containers.
 - `event-dispatcher.ts`: follows the `events` log (cursor in `event_cursors`), queues one `event_deliveries` row
-  per matching rule and event (unique), and writes to Notion a few per tick, one at a time. Rate limits, 5xx and
-  network errors are retried with backoff up to 5 attempts; each outcome is logged as `event_rule_applied` (the
+  per matching rule and event (unique), and hands each due one to the target of its action's kind
+  (`event-actions/`: `notion.ts` sets a Notion property), one at a time and at most the target's `perTick` per tick.
+  A target says when to retry (Notion: rate limits, 5xx and network errors); retries back off, up to 5 attempts; each outcome is logged as `event_rule_applied` (the
   ticket's Log tab). `github/pull-request.ts` logs `pull_request_merged`/`pull_request_closed`, and linking a PR by
   hand logs `pull_request_linked`, for the rules.
 - `agent-review.ts`: `AgentReviewRunner` (started with the investigations in `side-runs.ts`, same slots) runs

@@ -23,7 +23,7 @@ export); do not edit. Tests are left out.
 - `event-deliveries.ts`: Reads the events logged since the last call and queues one delivery per matching enabled rule of the ticket's project.
 - `event-payloads.ts`: What each type of event in the log carries, keyed by its `type`: the one place to add an event.
 - `event-rule-types.ts`: Event rules: when something happens to a ticket, do something elsewhere.
-- `event-rules.ts`: A rule the checks refuse: an unknown trigger or variable, a missing or unsupported property.
+- `event-rules.ts`: Event rules: checking and saving them, the stored Notion columns, and matching events and templates.
 - `github-auth.ts`: A project's installation wins over its token; `fallbackToken` (the `GITHUB_TOKEN` environment variable) covers projects with neither.
 - `github-client.ts`: One client per credential, kept for the process: an installation client mints its own short-lived token (one hour) and refreshes it before it expires, so it mu…
 - `github-text.ts`: Browser-safe: the PR tab shows GitHub text with it, and the import stores it.

@@ -1,15 +1,20 @@
+// Event rules: checking and saving them, the stored Notion columns, and matching events and templates.
 import { and, eq } from 'drizzle-orm';
 
 import type { Db } from './db';
 import { isEvent, type EventPayloads, type StoredEvent } from './event-catalog';
 import {
   BOARD_LABELS,
+  isActionKind,
   isTrigger,
   notionPropertyValue,
   renderTemplate,
   unknownVariables,
+  type ActionKind,
+  type ActionOf,
   type EventAction,
   type EventTrigger,
+  type NotionPropertyAction,
   type TemplateVariable,
 } from './event-rule-types';
 import type { NotionDataSource, NotionProperty } from './notion-api';
@@ -69,17 +74,16 @@ export function forgetNotionSchema(db: Db, projectId: number): void {
 export function ruleProperty(
   db: Db,
   projectId: number,
-  action: EventAction,
+  action: NotionPropertyAction,
 ): NotionProperty | null {
   const source = notionSchemaOf(db, projectId);
   return source?.properties.find((property) => property.id === action.propertyId) ?? null;
 }
 
-function checkedAction(db: Db, projectId: number, action: unknown): EventAction {
-  const record = typeof action === 'object' && action !== null ? action : {};
+function checkedNotionAction(db: Db, projectId: number, record: object): NotionPropertyAction {
   const propertyId = 'propertyId' in record ? String(record.propertyId) : '';
   const value = 'value' in record ? String(record.value) : '';
-  const checked: EventAction = { kind: 'notion_property', propertyId, value };
+  const checked: NotionPropertyAction = { kind: 'notion_property', propertyId, value };
   if (!notionSchemaOf(db, projectId)) {
     throw new EventRuleError('Read the Notion data source first (Refresh from Notion)');
   }
@@ -100,6 +104,23 @@ function checkedAction(db: Db, projectId: number, action: unknown): EventAction 
     throw new EventRuleError(shaped.error);
   }
   return checked;
+}
+
+type ActionChecks = {
+  [K in ActionKind]: (db: Db, projectId: number, record: object) => ActionOf<K>;
+};
+
+/** Each kind's checks, against what the project holds (the Notion columns for a Notion action). */
+const ACTION_CHECKS: ActionChecks = { notion_property: checkedNotionAction };
+
+/** An action without a `kind` is a Notion one: rules saved before there were other kinds. */
+function checkedAction(db: Db, projectId: number, action: unknown): EventAction {
+  const record = typeof action === 'object' && action !== null ? action : {};
+  const kind = 'kind' in record ? record.kind : 'notion_property';
+  if (!isActionKind(kind)) {
+    throw new EventRuleError('Pick what the rule does');
+  }
+  return ACTION_CHECKS[kind](db, projectId, record);
 }
 
 /** The rule as it would be saved, after the checks against the stored Notion schema. */
@@ -212,7 +233,7 @@ export function templateValues(
 /** The Notion property value a rule sends for this ticket and event, or why it cannot. */
 export function ruleValue(
   property: NotionProperty,
-  action: EventAction,
+  action: NotionPropertyAction,
   values: Partial<Record<TemplateVariable, string>>,
 ): { text: string; value: unknown } | { error: string } {
   const text = renderTemplate(action.value, values);
