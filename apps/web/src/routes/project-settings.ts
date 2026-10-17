@@ -25,6 +25,7 @@ import {
 import { removeTicketFiles } from './attachments';
 import { requireNotionId } from './notion';
 import { removeProjectFiles } from './project-files';
+import { FLOW_FIELDS, flowsChange } from './project-flows';
 
 const NO_CONTENT = 204;
 
@@ -174,6 +175,7 @@ function configChange(project: Project, body: Record<string, unknown>): ProjectC
     maxIterations: iterationsChange(body, config.maxIterations),
     instructions: instructionsChange(body, config.instructions),
     scripts: scriptsChange(body, config.scripts),
+    ...flowsChange(body, config),
   };
 }
 
@@ -207,6 +209,7 @@ const UPDATABLE = [
   'instructions',
   'scripts',
   ...CHECK_FIELDS,
+  ...FLOW_FIELDS,
 ];
 
 /** Updates the GitHub credentials, base branch and checks. Omitted fields are left as they are. */

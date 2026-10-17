@@ -30,7 +30,7 @@ export function flowSteps(flow: Flow): string {
 }
 
 /** A custom flow's planning steps, one chip each; the implementation and the review always run. */
-function PlanningChips({
+export function PlanningChips({
   flow,
   onChange,
 }: {

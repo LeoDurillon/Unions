@@ -2,6 +2,7 @@ import type {
   AgentConfig,
   AgentEffort,
   AgentModel,
+  FlowPreset,
   Investigation,
   InvestigationScope,
   PipelineStep,
@@ -149,6 +150,9 @@ export const api = {
       notionDataSourceId?: string;
       instructions?: string;
       scripts?: ProjectScript[];
+      /** Null: back to the built-in presets. */
+      flows?: FlowPreset[] | null;
+      defaultFlow?: string;
     },
   ): Promise<PublicProject> => request('PATCH', `/api/projects/${id}`, change),
   deleteProject: (id: number): Promise<unknown> => request('DELETE', `/api/projects/${id}`),

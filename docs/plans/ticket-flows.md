@@ -1,6 +1,6 @@
 # Ticket flows: choose the steps a ticket runs
 
-Status: steps 1 to 3 built (branch `ticket-flows`, 2026-10-17). The three decisions below were confirmed.
+Status: steps 1 to 4 built (branch `ticket-flows`, 2026-10-17). The three decisions below were confirmed.
 
 ## Why
 
@@ -107,7 +107,7 @@ session when there is no planning session to resume). `github/sync.ts` already p
    run (agent included) waits for step 3, since no flow can be chosen before.
 3. Web: API fields, flow picker in the New ticket dialog (for all three sources) and Overview, tabs filtered, card
    badge. Built.
-4. Project settings: Flows section (presets, default).
+4. Project settings: Flows section (presets, default). Built (Agents → Flows).
 5. `SPEC.md` (Flow, Decisions) and `docs/architecture/*` updated.
 
 ## Later

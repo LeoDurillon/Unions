@@ -17,7 +17,9 @@
   (`routes/ticket-flow.ts` checks it). The default preset is sent as null, so the ticket follows the project's
   default until it starts. The Overview's Flow row (`flow-row.tsx`) changes it in Backlog
   (`PUT /api/tickets/:id/flow`, `chooseFlow` in core; 409 once started). The Worker tab shows only the flow's steps
-  (and any with output), and a card names a flow that is not the full pipeline.
+  (and any with output), and a card names a flow that is not the full pipeline. Project settings → Agents → Flows
+  (`settings/flows-section.tsx`) edits the presets and the default, saved as `flows` and `defaultFlow` through
+  `PATCH /api/projects/:id` (checked by `flowSettingsChange` in core); the built-in presets are saved as none.
 - Code review: after each implementation run the worker stores the branch diff (`diff-snapshot.ts`,
   `diff_snapshots`/`diff_files`, newest only). The web reads it from SQLite (`routes/review.ts`), never from Docker or
   GitHub; `components/review/` renders one file at a time, unified or split (`lib/split-rows.ts` pairs the lines),

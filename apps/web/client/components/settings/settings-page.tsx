@@ -3,12 +3,33 @@ import type { ReactElement } from 'react';
 import type { PublicProject } from '../../../src/api-types';
 import { closeSettings, sectionLabel, type SettingsSection } from '../../lib/settings-sections';
 import { Button } from '../ui';
+import { AGENT_SECTIONS, AgentSectionBody, type AgentSection } from './agent-section-body';
 import { IntegrationSectionBody } from './integration-section-body';
 import { PROJECT_SECTIONS, ProjectSectionBody, type ProjectSection } from './project-section-body';
 import { SettingsNav } from './settings-nav';
 
 function isProjectSection(section: SettingsSection): section is ProjectSection {
   return PROJECT_SECTIONS.some((id) => id === section);
+}
+
+function isAgentSection(section: SettingsSection): section is AgentSection {
+  return AGENT_SECTIONS.some((id) => id === section);
+}
+
+function SectionBody({
+  section,
+  project,
+}: {
+  section: SettingsSection;
+  project: PublicProject;
+}): ReactElement {
+  if (isProjectSection(section)) {
+    return <ProjectSectionBody section={section} project={project} />;
+  }
+  if (isAgentSection(section)) {
+    return <AgentSectionBody section={section} project={project} />;
+  }
+  return <IntegrationSectionBody section={section} project={project} />;
 }
 
 /** The project's settings: a menu of pages on the left, the open one on the right (`?settings=`). */
@@ -42,11 +63,7 @@ export function ProjectSettingsPage({
         </aside>
         <div className="min-h-0 flex-1 overflow-y-auto">
           <div key={`${project.id}:${section}`} className="mx-auto max-w-3xl p-6">
-            {isProjectSection(section) ? (
-              <ProjectSectionBody section={section} project={project} />
-            ) : (
-              <IntegrationSectionBody section={section} project={project} />
-            )}
+            <SectionBody section={section} project={project} />
           </div>
         </div>
       </div>

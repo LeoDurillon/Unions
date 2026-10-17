@@ -172,12 +172,15 @@ export); do not edit. Tests are left out.
 ## components/settings/
 
 - `action-fields.tsx`: What a rule does: the kind of action, then that kind's own fields.
+- `agent-section-body.tsx`: The Agents group of the project settings: instructions, checks, scripts and flows.
 - `agent-variables-field.tsx`: Which of the preview's plain variables the agent's commands get (and the commands the user runs): a preview's database address would otherwise win over the one…
 - `branch-section.tsx`: The project settings section for the base branch, saved with the General page's Save.
 - `checks-section.tsx`: How the implementation agent's work is installed and checked inside the ticket's container.
 - `delete-section.tsx`: Typing the repository name to confirm keeps a stray click from deleting a project.
 - `events-section.tsx`: Event rules: when something happens to a ticket, set a property of its Notion page or comment on its GitHub issue or pull request.
 - `files-section.tsx`: Files every ticket's workspace gets at a path in the repository (a database dump for the preview's seed, a local config), kept out of git.
+- `flow-preset-row.tsx`: One flow preset in the settings: its name, its planning steps, whether new tickets get it, and Remove.
+- `flows-section.tsx`: The project's flow presets: the steps a ticket can run, and the one new tickets get.
 - `github-access-section.tsx`: The project settings section that shows and changes how the project reaches GitHub.
 - `github-comment-fields.tsx`: A GitHub comment action's fields: the issue or the pull request, and the comment as a template.
 - `instructions-section.tsx`: The project's own instructions, sent to every agent run on it after the shared instructions.
@@ -198,7 +201,7 @@ export); do not edit. Tests are left out.
 - `preview-variables-page.tsx`: What every service of a preview gets: plain variables, secrets, and the variables as a file.
 - `project-field-row.tsx`: One field a Project fields rule sets: which field of the GitHub Project, its value (an option or a template), and removing it.
 - `project-fields-fields.tsx`: A Project fields action's fields: the item (the issue's or the pull request's), then the fields to set, a row each.
-- `project-section-body.tsx`: The project's own settings, its agents' and its pull requests'.
+- `project-section-body.tsx`: The project's own settings and its pull requests'.
 - `pull-request-change.tsx`: One change a pull request rule makes: labels, reviewers or assignees to pick, or a title or description template.
 - `pull-request-fields.tsx`: A pull request action's fields: the changes it makes, one box each, and adding the kinds not used yet.
 - `pull-request-section.tsx`: Whether the worker opens a draft PR after the implementation, or the user links one by hand.

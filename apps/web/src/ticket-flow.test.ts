@@ -53,3 +53,21 @@ test('steps that are no flow are refused', async () => {
   expect(response.status).toBe(400);
   expect(await response.text()).toContain('pipeline order');
 });
+
+test("the project's own flows and default are saved, and a ticket that chose none starts on it", async () => {
+  const typo = { id: 'typo', name: 'Typo', steps: ['implement', 'final_review'] };
+  const saved = await send('PATCH', `/api/projects/${projectId}`, {
+    flows: [typo],
+    defaultFlow: 'typo',
+  });
+  expect(saved.status).toBe(200);
+  const refused = await send('PATCH', `/api/projects/${projectId}`, { defaultFlow: 'full' });
+  expect(refused.status).toBe(400);
+
+  const created = await send('POST', '/api/tickets', { projectId, title: 'Typo' });
+  const ticket = (await created.json()) as TicketSummary;
+  expect(dispatch(db, ticket.id, { type: 'start' })).toEqual({
+    kind: 'running',
+    step: 'implement',
+  });
+});
