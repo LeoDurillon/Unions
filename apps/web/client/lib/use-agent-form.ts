@@ -12,7 +12,7 @@ export type AgentEdits = {
   tools: string[] | null;
 };
 
-function sameTools(a: string[] | null, b: string[] | null): boolean {
+export function sameTools(a: string[] | null, b: string[] | null): boolean {
   return a?.join('\n') === b?.join('\n');
 }
 

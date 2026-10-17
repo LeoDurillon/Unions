@@ -233,7 +233,8 @@ export); do not edit. Tests are left out.
 
 ## components/union-settings/
 
-- `union-section-body.tsx`: The open Union settings page: an agent's, or the tools', connectors' or GitHub App's.
+- `models-page.tsx`: Every agent's model and effort in a table, with one Save.
+- `union-section-body.tsx`: The open Union settings page: an agent's, or the models', tools', connectors' or GitHub App's.
 - `union-section-labels.ts`: The names the Union settings menu shows: each agent's title, then the other pages'.
 - `union-settings-page.tsx`: The settings every project shares: a page per agent, the tools, the GitHub App (`?union=`).
 
@@ -279,7 +280,7 @@ export); do not edit. Tests are left out.
 - `spec-hunks.ts`: The hunks of `path` that serve the part; null when the file serves it whole, or the part is unknown.
 - `split-rows.ts`: Pairs a patch's lines for side-by-side display: a context line faces itself, and each run of removed lines faces the added lines that follow it, row by row; th…
 - `token-counts.ts`: A call's tokens as the Log shows them, from its `result` event: input with its cached share, output with its thinking.
-- `union-settings-groups.ts`: The Union settings pages, in menu order, by group: one page per agent, the tools, the GitHub App.
+- `union-settings-groups.ts`: The Union settings pages, in menu order, by group: one page per agent, the models, the tools, the GitHub App.
 - `union-settings-sections.ts`: The Union settings page open in the URL (`?union=implement`), and opening or leaving it.
 - `url-state.ts`: Sets or removes (`null`) query parameters as one history entry, and tells every reader.
 - `usage-format.ts`: How the Usage tables write a total: input with its cached share, output, API-equivalent cost, peak context.
@@ -297,6 +298,7 @@ export); do not edit. Tests are left out.
 - `use-github-app.ts`: The global GitHub App's status; saving or removing it invalidates `['github-app']`.
 - `use-live-invalidation.ts`: Refetches board, ticket, investigation and notification data whenever the worker records a change.
 - `use-log.ts`: Polls a ticket's or an investigation's Log while it is shown: all of it first, then what is new.
+- `use-models-form.ts`: The Models page's form: every agent's model and effort, each changed one saved with its prompt and tools as they are.
 - `use-navigation.ts`: Which page is shown (`?page=previews`, `?union=` for the Union settings, else the board) and which overlay is open.
 - `use-notifications.ts`: The notifications, page by page, with the unread count (also in the tab's title) and marking them read.
 - `use-notion-users.ts`: The Notion workspace members, read only when `enabled` (a person property is in view).

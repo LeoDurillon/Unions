@@ -1,6 +1,6 @@
 # Union settings as a page
 
-Status: step 1 built (branch `union-settings`, 2026-10-17); step 2 (the Models page) not started. Step 6 of
+Status: built, steps 1 and 2 (branch `union-settings`, 2026-10-17). Step 6 of
 [Project settings as a page](project-settings-page.md).
 
 ## Why
@@ -66,8 +66,8 @@ the same fields as the agent page. Rebase and Simplify history show "uses Implem
 Save bar; Save calls `api.saveAgent` for each changed row, with that agent's saved prompt and tools unchanged. The
 agent pages keep their model and effort fields.
 
-Open: whether a save of several rows should be one request (a new `PUT /api/agents` taking a list) so it cannot
-half-apply.
+Decided: one `PUT /api/agents/:agent` per changed row, sent together, no new route. A failed one shows its error and
+the agents are read again, so the table shows what was saved; Save again sends what is left.
 
 ## As built (step 1)
 
@@ -81,3 +81,11 @@ half-apply.
 - Checked with UI checks (writes blocked): every entry, a deep link after a reload, the leave warning, Save sending
   one `PUT /api/agents/:agent`, `?page=previews` kept on reload, the project settings menu, and the Instructions
   link to Shared instructions with back.
+
+## As built (step 2)
+
+- `components/union-settings/models-page.tsx` over `lib/use-models-form.ts`. The model and effort fields take an
+  `ariaLabel` that replaces their visible label in the table (`Technical model`, `Technical effort`).
+- Rows follow the agents' order from the API. Rebase and Simplify history show Implementation's choice as edited.
+- Checked with a UI check (writes blocked): the eleven rows, Rebase following an edited Implementation model, Save
+  sending only the two changed rows, each with its saved prompt and its tools (null when they are the defaults).

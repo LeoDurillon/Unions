@@ -1,6 +1,6 @@
-// The Union settings pages, in menu order, by group: one page per agent, the tools, the GitHub App.
+// The Union settings pages, in menu order, by group: one page per agent, the models, the tools, the GitHub App.
 export const UNION_SETTINGS_GROUPS = [
-  { label: 'General', sections: ['shared'] },
+  { label: 'General', sections: ['shared', 'models'] },
   { label: 'Planning', sections: ['intake', 'summary', 'technical', 'test_plan'] },
   { label: 'Implementation', sections: ['implement', 'final_review'] },
   { label: 'Pull requests', sections: ['pr_description', 'rebase', 'simplify'] },

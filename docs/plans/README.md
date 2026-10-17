@@ -23,7 +23,7 @@ and linked.
 - [Preview environments](preview-environments.md): compose-based previews with e2e tests (built, phases 1 to 4).
 - [Project settings as a page](project-settings-page.md): grouped side menu instead of the nine-tab modal (steps 1 to 5 built).
 - [Union settings as a page](union-settings-page.md): Agent settings and GitHub App in the same shell, one page per
-  agent, then a Models page. Step 1 built (branch `union-settings`).
+  agent, and a Models page. Built (branch `union-settings`).
 - [Notifications in Union](notifications.md): an inbox of what needs you (approvals, failures, usage limit, merged
   PRs, finished investigations), with an unread count and optional desktop notifications (built, steps 1 to 5, and the "Notify me in Union" rule action).
 - [Group a review's changes by spec](review-spec-groups.md) (built, hunks included): an agent groups the changed files by the parts of
