@@ -1,0 +1,1 @@
+ALTER TABLE `step_outputs` ADD `head_sha` text;

@@ -22,7 +22,11 @@
    agents and the refactor pass are not built yet.
 5. `final_review`: a fresh review agent (read-only plus `git diff/log/show/status`) compares the branch with the approved
    plan and starts its review with `VERDICT: APPROVED` or `VERDICT: CHANGES_REQUESTED`. It does not re-run the
-   checks; it states the last result from the implementation report. The user decides: **Approve** marks the PR
+   checks; it states the last result from the implementation report. Only bugs, missing acceptance criteria,
+   missing planned tests and risky changes request changes; other remarks go under "Optional". A review of a branch
+   reviewed before is given the earlier review, what the user sent the implementer since, and the commits since
+   the one it read: it says which earlier findings are fixed or still open, and does not raise again a point the
+   user declined. The user decides: **Approve** marks the PR
    ready for review and moves the ticket to Done; **Request changes** (or **Send findings to the implementer**,
    which pre-fills the request with the review's findings) resumes the implementer, whose output is accepted
    automatically and followed by a new review, without an approval in between. Nothing loops on its own.

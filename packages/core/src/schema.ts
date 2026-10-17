@@ -152,6 +152,8 @@ export const stepOutputs = sqliteTable(
       .notNull()
       .default('pending'),
     feedback: text('feedback'),
+    /** The commit a final review read, so the next review can look at what changed since. */
+    headSha: text('head_sha'),
     createdAt: integer('created_at').notNull().default(now),
   },
   (t) => [uniqueIndex('step_outputs_idx').on(t.ticketId, t.step, t.version)],

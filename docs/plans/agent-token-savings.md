@@ -1,6 +1,6 @@
 # Plan: spend fewer tokens per ticket
 
-Status: planned (2026-10-17), not started.
+Status: step 1 built (2026-10-17, branch `token-savings`); steps 2 to 5 planned.
 
 ## Problem
 
@@ -27,8 +27,8 @@ new findings, which sends the implementer back once more.
 
 - When the ticket has an earlier `final_review` output, add to the prompt: that review, the feedback sent to the
   implementer after it, and the commits since (`git diff <reviewed commit>..HEAD`).
-- Record the commit a review read. Check first whether the diff snapshot (`schema-diff-commits.ts` and its snapshot)
-  already has the head; else store it with the review's output (a migration).
+- Record the commit a review read: `step_outputs.head_sha` (migration 0057; the diff snapshot keeps only the
+  newest head, so it could not tell).
 - Tell a re-review to say which earlier findings are fixed, and to request changes only for findings still open or
   problems in the new commits.
 - Change the default prompt's bar: `CHANGES_REQUESTED` only for bugs, missing acceptance criteria or missing planned

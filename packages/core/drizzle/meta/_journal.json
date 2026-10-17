@@ -400,6 +400,13 @@
       "when": 1792253235878,
       "tag": "0056_lesson_suggestions",
       "breakpoints": true
+    },
+    {
+      "idx": 57,
+      "version": "6",
+      "when": 1792256053736,
+      "tag": "0057_step_output_head",
+      "breakpoints": true
     }
   ]
 }

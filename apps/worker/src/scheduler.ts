@@ -32,7 +32,8 @@ export type StepContext = {
 
 export type StepResult =
   // `clean`: a rebase git did alone, no agent changed code, so the final review still stands.
-  | { kind: 'ok'; output: string; sessionId?: string; clean?: true }
+  // `headSha`: the commit a final review read.
+  | { kind: 'ok'; output: string; sessionId?: string; clean?: true; headSha?: string }
   // The repository's hook refused the agent's leftover changes: the run pauses with its report.
   | { kind: 'commit_refused'; output: string; sessionId?: string }
   | { kind: 'rate_limited'; retryAt: number | null }
@@ -202,6 +203,13 @@ export class Scheduler {
     result: Extract<StepResult, { kind: 'ok' | 'commit_refused' }>,
   ): void {
     const saved = saveOutput(this.db, ticketId, step, result.output);
+    if (result.kind === 'ok' && result.headSha) {
+      this.db
+        .update(schema.stepOutputs)
+        .set({ headSha: result.headSha })
+        .where(eq(schema.stepOutputs.id, saved.id))
+        .run();
+    }
     const { phase } = getTicket(this.db, ticketId);
     // In a chain (fix requested at the final review) the next step runs right away, so this
     // output counts as accepted: the reviewer reads it as the approved implementation. A simplified

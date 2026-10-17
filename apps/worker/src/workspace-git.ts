@@ -73,3 +73,23 @@ export async function exportBranch(
   await runtime.copyOut(container, BUNDLE_PATH, hostPath);
   await runIn(runtime, container, ['rm', '-f', BUNDLE_PATH]);
 }
+
+/** The commit checked out in the repository. */
+export async function headCommit(runtime: ContainerRuntime, container: string): Promise<string> {
+  const head = await mustRunIn(runtime, container, git(['rev-parse', 'HEAD']));
+  return head.trim();
+}
+
+/** Whether `commit` is in HEAD's history (false once a rebase rewrote it, or when it is gone). */
+export async function inHistory(
+  runtime: ContainerRuntime,
+  container: string,
+  commit: string,
+): Promise<boolean> {
+  const result = await runIn(
+    runtime,
+    container,
+    git(['merge-base', '--is-ancestor', commit, 'HEAD']),
+  );
+  return result.exitCode === 0;
+}

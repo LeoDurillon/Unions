@@ -152,7 +152,10 @@
   (`config.scripts`, checked by core `parseScripts`) run by name: the route resolves `{ scriptName }` with
   `scriptRun`, and the run stores the command as it was and `script_name`.
 - `review.ts`: the final review (fresh session, read-only tools plus git reads, one git command per call because
-  permission rules cannot match `&&`). Changes asked at the review go to the implementer through the `thenRun`
+  permission rules cannot match `&&`). It records the commit it read (`step_outputs.head_sha`); a review of a
+  branch reviewed before also gets the earlier review, the feedback sent since and the range of commits since
+  (`review-previous.ts`; the full diff when a rebase rewrote that commit away), and is told to check the earlier
+  findings and request changes only for open or new blocking ones. Changes asked at the review go to the implementer through the `thenRun`
   chain in `states.ts`; `revision.ts` hands it the review's feedback. `runResumable` (agent.ts) restarts in a fresh
   session when a resumed one is gone (rebuilt HOME volume).
 - `provision.ts` creates a ticket's container, seeds credentials, and clones the repo on the host with the

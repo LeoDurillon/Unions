@@ -18,12 +18,31 @@ import { approvedBefore } from './approved';
 import type { ImplementDeps } from './implement-loop';
 import { buildPrompt, parentContext } from './prompts';
 import { ensureTicketContainer, REPO_DIR } from './provision';
+import { previousReview, previousReviewSection, type ReviewedCommit } from './review-previous';
 import type { StepContext, StepResult } from './scheduler';
-import { ensureBranch } from './workspace-git';
+import { ensureBranch, headCommit, inHistory } from './workspace-git';
 
 /** Reading the change needs git; the default review tools allow the read-only git commands. */
 export function reviewContext(base: string, branch: string): string {
   return `\n\nThe ticket branch \`${branch}\` is checked out and you are in the repository root. Compare it with the base branch with \`git diff ${base}...HEAD\` and \`git log ${base}..HEAD\`. Run one git command per call: no \`&&\`, no \`cd\`.`;
+}
+
+/** The earlier review's findings and what changed since, for a branch reviewed before; else empty. */
+async function earlierReview(
+  deps: ImplementDeps,
+  container: string,
+  ticketId: number,
+): Promise<string> {
+  const previous = previousReview(deps.db, ticketId);
+  if (!previous) {
+    return '';
+  }
+  let reviewed: ReviewedCommit = 'unknown';
+  if (previous.headSha !== null) {
+    const kept = await inHistory(deps.runtime, container, previous.headSha);
+    reviewed = kept ? 'in_history' : 'rewritten';
+  }
+  return `\n\n${previousReviewSection(previous, reviewed)}`;
 }
 
 function loadProject(db: Db, projectId: number): Project {
@@ -52,6 +71,8 @@ export async function runReviewStep(
   const base = ticketBase(project, getTicket(db, ticket.id));
   try {
     await ensureBranch(runtime, name, ticket.branch, base);
+    const headSha = await headCommit(runtime, name);
+    const earlier = await earlierReview(deps, name, ticket.id);
     const outcome = await deps.agent(runtime, {
       container: name,
       cwd: REPO_DIR,
@@ -61,7 +82,8 @@ export async function runReviewStep(
         ticket,
         ...parentContext(db, ticket),
         shared: stepSharedPrompt(db, ticket.projectId, 'final_review'),
-        instructions: resolveAgent(db, 'final_review').prompt + reviewContext(base, ticket.branch),
+        instructions:
+          resolveAgent(db, 'final_review').prompt + reviewContext(base, ticket.branch) + earlier,
         approved: approvedBefore(db, ticket.id, 'final_review'),
         revision: null,
         step: 'final_review',
@@ -73,7 +95,7 @@ export async function runReviewStep(
       onEvent: context.log,
     });
     if (outcome.kind === 'ok') {
-      return { kind: 'ok', output: outcome.text, sessionId: outcome.sessionId };
+      return { kind: 'ok', output: outcome.text, sessionId: outcome.sessionId, headSha };
     }
     return outcome.kind === 'rate_limited'
       ? { kind: 'rate_limited', retryAt: null }

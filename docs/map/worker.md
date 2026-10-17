@@ -62,6 +62,7 @@ export); do not edit. Tests are left out.
 - `review-grouping-format.ts`: Every changed file's hunks, one line each: what the agent cites in `hunks` and `lines`.
 - `review-grouping-result.ts`: The agent's grouping, checked against the change: only changed files and their real hunks, every hunk at least once (the ones it left out are unrelated), no em…
 - `review-grouping.ts`: Runs the groupings the user asked for, on the same run slots as the pipeline and the agent reviews: a ticket's in its own container, a pull request's in a thro…
+- `review-previous.ts`: What a final review is told of the one before it: its findings, the feedback sent since, and the commits since.
 - `review.ts`: Reading the change needs git; the default review tools allow the read-only git commands.
 - `revision.ts`: The feedback a run of `step` must address, if the user asked for changes.
 - `run-workspace.ts`: Where a user's command runs: the ticket's container with the agent's services, or the pull request's own.

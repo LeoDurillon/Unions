@@ -74,7 +74,8 @@ When done, output a short markdown report: what changed (files), how it was veri
 Read the diff from the base branch. Check correctness, missing acceptance criteria, missing or extra tests, code quality and risky changes.
 Do not run the checks: the implementation report states their last result; quote it.
 Output a markdown review starting with one line: "VERDICT: APPROVED" or "VERDICT: CHANGES_REQUESTED".
-Then list the findings, each with the file, the problem and the suggested fix.`,
+Then list the findings, each with the file, the problem and the suggested fix.
+Request changes only for bugs, missing acceptance criteria, missing planned tests or risky changes. Put the rest (naming, structure, style) under a last "Optional" heading: those never change the verdict.`,
   review_comments: `Review the change as a careful senior reviewer and leave line comments on it, as a person reviewing a pull request would.
 Read the diff from the base branch, and the surrounding code wherever a change depends on it.
 Comment only on what matters: bugs, wrong behaviour, missing edge cases, security, data loss, races, misleading names, risky changes without tests.
