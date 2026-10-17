@@ -7,8 +7,24 @@ import {
   leftBoard,
   MERGED_VISIBLE_MS,
   transition,
+  type Flow,
   type Phase,
 } from './states';
+
+/** The steps a ticket on `flow` runs, approving each one. */
+function walk(flow: Flow): string[] {
+  let p: Phase = transition({ kind: 'backlog' }, { type: 'start' }, flow);
+  const seen: string[] = [];
+  while (p.kind !== 'done') {
+    if (p.kind === 'running') {
+      seen.push(p.step);
+      p = transition(p, { type: 'run_finished' }, flow);
+    } else {
+      p = transition(p, { type: 'approve' }, flow);
+    }
+  }
+  return seen;
+}
 
 test('happy path walks every step then ends done', () => {
   let p: Phase = { kind: 'backlog' };
@@ -287,4 +303,23 @@ test('a merged or closed pull request puts the ticket in Merged / Closed for thr
     expect(leftBoard(ended(state, null), now)).toBe(false);
   }
   expect(leftBoard({ prState: 'open', prMergedAt: null, prClosedAt: null }, now)).toBe(false);
+});
+
+test('a flow runs only its steps, in order', () => {
+  expect(walk(['implement', 'final_review'])).toEqual(['implement', 'final_review']);
+  expect(walk(['technical', 'implement', 'final_review'])).toEqual([
+    'technical',
+    'implement',
+    'final_review',
+  ]);
+});
+
+test('changes asked at the final review of a short flow go back to the implementer', () => {
+  const flow: Flow = ['implement', 'final_review'];
+  const review: Phase = { kind: 'awaiting_approval', step: 'final_review' };
+  expect(transition(review, { type: 'revise' }, flow)).toEqual({
+    kind: 'running',
+    step: 'implement',
+    thenRun: 'final_review',
+  });
 });

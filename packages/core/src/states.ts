@@ -7,7 +7,10 @@ export type PlanningStep = (typeof PLANNING_STEPS)[number];
  * rebase the agent worked on, the review runs again; a clean rebase (no agent) or a simplified
  * history leaves the reviewed code as it was, so the ticket goes back to where it was.
  */
-export type Step = PlanningStep | 'implement' | 'final_review' | 'rebase' | 'simplify';
+export type Step = PipelineStep | 'rebase' | 'simplify';
+export type PipelineStep = PlanningStep | 'implement' | 'final_review';
+/** The pipeline steps a ticket runs, in pipeline order (`flows.ts` checks and resolves it). */
+export type Flow = readonly PipelineStep[];
 
 /** Models an agent can run on: the aliases `claude --model` accepts. */
 export const AGENT_MODELS = ['haiku', 'sonnet', 'opus'] as const;
@@ -93,7 +96,8 @@ export const STEP_TITLES: Record<Step, string> = {
 
 /** Every pipeline step, in order (`rebase` and `simplify` are not). */
 export const STEPS: readonly Step[] = [...PLANNING_STEPS, 'implement', 'final_review'];
-const ORDER = STEPS;
+/** Every pipeline step: the flow of a ticket that chose none before this was built. */
+export const FULL_FLOW: Flow = [...PLANNING_STEPS, 'implement', 'final_review'];
 
 /** A run of `step`; a rebase always chains into a new final review, since the code changed. */
 function running(step: Step): Phase {
@@ -102,8 +106,10 @@ function running(step: Step): Phase {
     : { kind: 'running', step };
 }
 
-export function nextStep(step: Step): Step | null {
-  return ORDER[ORDER.indexOf(step) + 1] ?? null;
+/** The flow's first step after `step` in pipeline order; null at its end. */
+export function nextStep(step: Step, flow: Flow = FULL_FLOW): Step | null {
+  const at = STEPS.indexOf(step);
+  return flow.find((later) => STEPS.indexOf(later) > at) ?? null;
 }
 
 export class InvalidTransition extends Error {
@@ -118,8 +124,9 @@ function assertNever(value: never): never {
 
 type PhaseOf<K extends Phase['kind']> = Extract<Phase, { kind: K }>;
 
-function fromBacklog(action: Action): Phase | null {
-  return action.type === 'start' ? { kind: 'running', step: 'intake' } : null;
+// Every valid flow has `implement`: the fallback only covers an empty one.
+function fromBacklog(action: Action, flow: Flow): Phase | null {
+  return action.type === 'start' ? { kind: 'running', step: flow[0] ?? 'implement' } : null;
 }
 
 /** No agent changed the code, so the final review still stands: back to it, or to done. */
@@ -176,7 +183,11 @@ function fromCommitRefused(phase: PhaseOf<'commit_refused'>, action: Action): Ph
   return null;
 }
 
-function fromAwaitingApproval(phase: PhaseOf<'awaiting_approval'>, action: Action): Phase | null {
+function fromAwaitingApproval(
+  phase: PhaseOf<'awaiting_approval'>,
+  action: Action,
+  flow: Flow,
+): Phase | null {
   if (action.type === 'revise') {
     // Changes asked at the final review are made by the implementer, then the review runs again.
     return phase.step === 'final_review'
@@ -184,7 +195,7 @@ function fromAwaitingApproval(phase: PhaseOf<'awaiting_approval'>, action: Actio
       : { kind: 'running', step: phase.step };
   }
   if (action.type === 'approve') {
-    const next = nextStep(phase.step);
+    const next = nextStep(phase.step, flow);
     return next ? { kind: 'running', step: next } : { kind: 'done' };
   }
   if (action.type === 'rebase' && phase.step === 'final_review') {
@@ -221,16 +232,16 @@ function fromStalled(phase: PhaseOf<'failed' | 'rate_limited'>, action: Action):
   return next.kind === 'running' ? { ...next, ...thenDoneOf(phase) } : next;
 }
 
-function applyAction(phase: Phase, action: Action): Phase | null {
+function applyAction(phase: Phase, action: Action, flow: Flow): Phase | null {
   switch (phase.kind) {
     case 'backlog': {
-      return fromBacklog(action);
+      return fromBacklog(action, flow);
     }
     case 'running': {
       return fromRunning(phase, action);
     }
     case 'awaiting_approval': {
-      return fromAwaitingApproval(phase, action);
+      return fromAwaitingApproval(phase, action, flow);
     }
     case 'commit_refused': {
       return fromCommitRefused(phase, action);
@@ -251,12 +262,13 @@ function applyAction(phase: Phase, action: Action): Phase | null {
   }
 }
 
-export function transition(phase: Phase, action: Action): Phase {
+/** `flow` decides where `start` and `approve` lead; the other actions never leave it. */
+export function transition(phase: Phase, action: Action, flow: Flow = FULL_FLOW): Phase {
   const terminal = phase.kind === 'done' || phase.kind === 'cancelled';
   if (action.type === 'cancel' && !terminal) {
     return { kind: 'cancelled' };
   }
-  const next = applyAction(phase, action);
+  const next = applyAction(phase, action, flow);
   if (!next) {
     throw new InvalidTransition(phase, action);
   }

@@ -28,6 +28,7 @@ export * from './event-pull-request-action';
 export * from './event-rule-types';
 export * from './event-rules';
 export * from './docker-cli';
+export * from './flows';
 export * from './e2e-screenshots';
 export * from './github-auth';
 export * from './github-project-fields';

@@ -3,9 +3,18 @@ import { desc, eq } from 'drizzle-orm';
 
 import type { Db } from './db';
 import type { NewEvent } from './event-catalog';
+import { resolveFlow } from './flows';
 import * as schema from './schema';
 import type { reviewComments } from './schema-reviews';
-import { boardStatus, transition, type Action, type Phase, type Step } from './states';
+import {
+  boardStatus,
+  FULL_FLOW,
+  transition,
+  type Action,
+  type Flow,
+  type Phase,
+  type Step,
+} from './states';
 
 export type Ticket = typeof schema.tickets.$inferSelect;
 export type Project = typeof schema.projects.$inferSelect;
@@ -96,7 +105,23 @@ export function blockingParent(db: Executor, ticket: Ticket): Ticket | null {
   return parent.phase.kind === 'done' ? null : parent;
 }
 
-/** Applies a state-machine action, persists the new phase, and emits `phase_changed`. */
+/** The flow the action follows: on start, the one the ticket keeps from then on. */
+function flowFor(db: Executor, ticket: Ticket, action: Action): Flow {
+  if (action.type !== 'start') {
+    return ticket.flow ?? FULL_FLOW;
+  }
+  const project = db
+    .select()
+    .from(schema.projects)
+    .where(eq(schema.projects.id, ticket.projectId))
+    .get();
+  return project ? resolveFlow(ticket, project.config) : (ticket.flow ?? FULL_FLOW);
+}
+
+/**
+ * Applies a state-machine action, persists the new phase, and emits `phase_changed`. Starting also
+ * fixes the ticket's flow, so a preset edited later leaves it as it was.
+ */
 export function dispatch(db: Db, ticketId: number, action: Action): Phase {
   return db.transaction((tx) => {
     const ticket = getTicket(tx, ticketId);
@@ -104,8 +129,13 @@ export function dispatch(db: Db, ticketId: number, action: Action): Phase {
     if (parent) {
       throw new StartBlocked(parent);
     }
-    const next = transition(ticket.phase, action);
-    tx.update(schema.tickets).set({ phase: next }).where(eq(schema.tickets.id, ticketId)).run();
+    const flow = flowFor(tx, ticket, action);
+    const next = transition(ticket.phase, action, flow);
+    const started = action.type === 'start' ? { flow: [...flow] } : {};
+    tx.update(schema.tickets)
+      .set({ phase: next, ...started })
+      .where(eq(schema.tickets.id, ticketId))
+      .run();
     emitEvent(tx, {
       type: 'phase_changed',
       ticketId,

@@ -1,5 +1,7 @@
 import { beforeEach, expect, test } from 'bun:test';
 
+import { eq } from 'drizzle-orm';
+
 import { createDb, migrateDb, type Db } from './db';
 import * as schema from './schema';
 import {
@@ -13,6 +15,7 @@ import {
 
 let db: Db;
 let ticketId: number;
+let projectId: number;
 
 beforeEach(() => {
   db = createDb(':memory:');
@@ -27,7 +30,8 @@ beforeEach(() => {
     })
     .returning()
     .get();
-  ticketId = createTicket(db, { projectId: project.id, title: 't' }).id;
+  projectId = project.id;
+  ticketId = createTicket(db, { projectId, title: 't' }).id;
 });
 
 test('dispatch persists the phase and emits phase_changed', () => {
@@ -74,4 +78,23 @@ test('validation is rejected unless the ticket awaits approval', () => {
   expect(() => {
     recordValidation(db, ticketId, { status: 'approved' });
   }).toThrow();
+});
+
+test("starting fixes the ticket's flow, which its next approvals follow", () => {
+  db.update(schema.projects)
+    .set({ config: { baseBranch: 'main', defaultFlow: 'quick' } })
+    .where(eq(schema.projects.id, projectId))
+    .run();
+  expect(dispatch(db, ticketId, { type: 'start' })).toEqual({ kind: 'running', step: 'implement' });
+  expect(getTicket(db, ticketId).flow).toEqual(['implement', 'final_review']);
+  // A preset changed after the start leaves the ticket's flow as it was.
+  db.update(schema.projects)
+    .set({ config: { baseBranch: 'main' } })
+    .where(eq(schema.projects.id, projectId))
+    .run();
+  dispatch(db, ticketId, { type: 'run_finished' });
+  expect(dispatch(db, ticketId, { type: 'approve' })).toEqual({
+    kind: 'running',
+    step: 'final_review',
+  });
 });

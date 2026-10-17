@@ -20,6 +20,12 @@ sitting on the one whose head branch it targets, bottom first.
 Drizzle schema and migrations, the pure ticket state machine (`states.ts`), ticket dependencies
 (`ticket-links.ts`: `setParent`, `ticketBase`; the start gate `blockingParent` is in `tickets.ts`), the
 `ContainerRuntime` interface and its Docker CLI implementation.
+A ticket's **flow** (`flows.ts`, browser-safe) is the pipeline steps it runs, in order, always ending with
+`implement` and `final_review` (`flowProblems`). `transition(phase, action, flow)` follows it on `start` and
+`approve` (the full pipeline when omitted); `dispatch` resolves it on start (`resolveFlow`: the ticket's own, else
+the project's `defaultFlow` preset among `projectPresets`) and stores it in `tickets.flow`, so editing a preset
+later leaves started tickets alone. A ticket started before flows existed has `flow` null: the full pipeline.
+`flowNote` is the `# Flow` section the implementer and the final review get when planning steps were skipped.
 The event log (`events`) is typed: `event-payloads.ts` gives the payload of every event type, and `emitEvent`
 takes a `NewEvent` from `event-catalog.ts`, so a new event type is added there first. Read one back with
 `isEvent(row, '<type>')` (browser-safe, `@union/core/event-catalog`), not by probing its payload by hand.

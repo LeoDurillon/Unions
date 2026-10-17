@@ -37,6 +37,7 @@ export); do not edit. Tests are left out.
 - `event-pull-request-action.ts`: A rule's changes to the ticket's pull request (labels, reviewers, assignees, title, a description section); browser-safe.
 - `event-rule-types.ts`: Event rules: when something happens to a ticket, do something elsewhere.
 - `event-rules.ts`: Event rules: checking and saving them, the stored Notion columns, and matching events and templates.
+- `flows.ts`: Ticket flows: the steps a ticket runs, the presets a project offers, and what agents are told of skipped steps.
 - `github-auth.ts`: A project's installation wins over its token; `fallbackToken` (the `GITHUB_TOKEN` environment variable) covers projects with neither.
 - `github-client.ts`: One client per credential, kept for the process: an installation client mints its own short-lived token (one hour) and refreshes it before it expires, so it mu…
 - `github-project-fields.ts`: Reading a GitHub Project's fields (the ones a rule can set) and setting one on an item: queries and parsing, for the web and the worker.

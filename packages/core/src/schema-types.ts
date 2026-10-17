@@ -1,5 +1,6 @@
 // Plain types stored in JSON columns, kept apart so schema.ts holds the tables.
 import type { DiffStatus } from './diff';
+import type { FlowPreset } from './flows';
 import type { BoardStatus } from './states';
 
 /** A service the proxy serves: at `<id>.localhost` when `prefix` is empty, else `<prefix>.<id>.localhost`. */
@@ -88,6 +89,10 @@ export type ProjectConfig = {
   /** Commands the user runs by name in a ticket's workspace. */
   scripts?: ProjectScript[];
   preview?: PreviewConfig;
+  /** The flows a ticket can pick; absent: the built-in presets (`flows.ts`). */
+  flows?: FlowPreset[];
+  /** The preset a ticket that chose none starts with; absent or unknown: Full. */
+  defaultFlow?: string;
 };
 
 /** One earlier question of an investigation and the answer it got. */

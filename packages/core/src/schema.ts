@@ -9,7 +9,7 @@ import {
 } from 'drizzle-orm/sqlite-core';
 
 import type { InvestigationExchange, ProjectConfig } from './schema-types';
-import type { AgentEffort, AgentModel, BoardStatus, Phase, Step } from './states';
+import type { AgentEffort, AgentModel, BoardStatus, Phase, PipelineStep, Step } from './states';
 
 export type {
   InvestigationExchange,
@@ -80,6 +80,8 @@ export const tickets = sqliteTable(
     issueNodeId: text('issue_node_id'),
     projectItemId: text('project_item_id'),
     phase: text('phase', { mode: 'json' }).$type<Phase>().notNull().default({ kind: 'backlog' }),
+    /** The steps the ticket runs, fixed on start; null: not chosen (before start), or every step. */
+    flow: text('flow', { mode: 'json' }).$type<PipelineStep[]>(),
     branch: text('branch'),
     /** Branch the ticket was cloned from and is compared with (chosen, or the parent's); null: the project's. */
     baseBranch: text('base_branch'),
