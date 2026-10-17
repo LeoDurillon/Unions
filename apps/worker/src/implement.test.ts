@@ -294,3 +294,11 @@ test('the outputs the user gave go with the first turn, and count as read once i
     'sent',
   ]);
 });
+
+test('the implementer of a ticket that skipped planning is told to work from the ticket', async () => {
+  const { runtime } = fakeRuntime(() => ({ exitCode: 0, lines: [] }));
+  const quick = workspace(runtime, [ok(1)]);
+  quick.context.ticket = { ...quick.context.ticket, flow: ['implement', 'final_review'] };
+  await implementLoop(quick);
+  expect(runs[0]?.prompt).toContain('# Flow');
+});

@@ -64,6 +64,7 @@ export async function runReviewStep(
         instructions: resolveAgent(db, 'final_review').prompt + reviewContext(base, ticket.branch),
         approved: approvedBefore(db, ticket.id, 'final_review'),
         revision: null,
+        step: 'final_review',
         attachments: listAttachments(db, ticket.id),
         projectFiles: listProjectFiles(db, ticket.projectId),
       }),

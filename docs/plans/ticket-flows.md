@@ -1,6 +1,6 @@
 # Ticket flows: choose the steps a ticket runs
 
-Status: step 1 built (branch `ticket-flows`, 2026-10-17). The three decisions below were confirmed.
+Status: steps 1 and 2 built (branch `ticket-flows`, 2026-10-17). The three decisions below were confirmed.
 
 ## Why
 
@@ -103,8 +103,8 @@ session when there is no planning session to resume). `github/sync.ts` already p
 ## Steps
 
 1. Core: `flows.ts`, `transition(…, flow)`, `dispatch`, schema + migration, `flowNote`; tests. Built.
-2. Worker: pass the flow note into `buildPrompt` for `implement` and `final_review`; check a Quick ticket end to end
-   against real Docker (ticket 9001).
+2. Worker: pass the flow note into `buildPrompt` for `implement` and `final_review`. Built. A real Quick ticket
+   run (agent included) waits for step 3, since no flow can be chosen before.
 3. Web: API fields, flow picker in the form and Overview, tabs filtered, card badge.
 4. Project settings: Flows section (presets, default).
 5. `SPEC.md` (Flow, Decisions) and `docs/architecture/*` updated.

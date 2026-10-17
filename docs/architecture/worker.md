@@ -134,7 +134,9 @@
   session when a resumed one is gone (rebuilt HOME volume).
 - `provision.ts` creates a ticket's container, seeds credentials, and clones the repo on the host with the
   project's token, resetting `origin` to the token-free URL before copying it in; `agent.ts` runs
-  `claude -p` in it and parses stream-json; `prompts.ts` builds the step prompts. The CLI can stay up after its
+  `claude -p` in it and parses stream-json; `prompts.ts` builds the step prompts (for the implementer's fresh
+  session and the final review, with the `# Flow` note after the job when the ticket's flow skipped planning
+  steps; a short flow needs nothing else, since the implement step clones and branches on its own). The CLI can stay up after its
   last `result`, so `agent-idle.ts` watches the events. Once the last one is a `result`, every background task
   (`system/task_started`) has its `task_notification`, and 30 s pass with no new event, it sends TERM (then KILL
   10 s later) to the processes whose environment holds the run's `UNION_AGENT_RUN` token. It logs

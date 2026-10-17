@@ -82,6 +82,7 @@ function freshPrompt({ deps, context, project }: Workspace): string {
       COMMIT_HOOK_HINT,
     approved: approvedBefore(deps.db, ticket.id, 'implement'),
     revision: null,
+    step: 'implement',
     attachments: listAttachments(deps.db, ticket.id),
     projectFiles: listProjectFiles(deps.db, ticket.projectId),
   });

@@ -1,6 +1,8 @@
 import {
   CONTAINER_ATTACHMENTS_DIR,
+  flowNote,
   formatBytes,
+  FULL_FLOW,
   PLANNING_STEPS,
   type Attachment,
   type Db,
@@ -35,6 +37,8 @@ export type PromptInput = {
   attachments?: Attachment[];
   /** The files the project puts in every workspace (none for the rebase). */
   projectFiles?: ProjectFile[];
+  /** The step the prompt is for: the implementer and the final review are told what the flow skipped. */
+  step?: Step;
 };
 
 /** How to see what the parent changed, from the branches the workspace was cloned with. */
@@ -111,6 +115,7 @@ export function buildPrompt({
   revision,
   attachments = [],
   projectFiles = [],
+  step,
 }: PromptInput): string {
   const parts = [shared, `# Task\n\n## ${ticket.title}\n\n${ticket.body}`];
   if (parent) {
@@ -126,6 +131,11 @@ export function buildPrompt({
     parts.push(`# Approved: ${output.step}\n\n${output.content}`);
   }
   parts.push(`# Your job\n\n${instructions}`);
+  // After the job: it overrides what the instructions say of the skipped steps' outputs.
+  const note = step ? flowNote(ticket.flow ?? FULL_FLOW, step) : '';
+  if (note !== '') {
+    parts.push(note);
+  }
   if (revision) {
     parts.push(
       `# Revision\n\nYour previous version:\n\n${revision.previous}\n\nUser feedback:\n\n${revision.feedback}\n\nRewrite the section addressing the feedback.`,

@@ -134,3 +134,13 @@ test("a child started from a branch the user chose is not told the parent's chan
   expect(section).toContain('The user chose to start it from `release`');
   expect(section).not.toContain('already in the code');
 });
+
+test('the implementer of a ticket that skipped planning is told so after its job', () => {
+  const quick = { ...ticket, flow: ['implement', 'final_review'] } as Ticket;
+  const input = { shared: 'S', instructions: 'Do it.', approved: [], revision: null };
+  const prompt = buildPrompt({ ticket: quick, ...input, step: 'implement' });
+  expect(prompt.indexOf('# Flow')).toBeGreaterThan(prompt.indexOf('# Your job'));
+  expect(prompt).toContain('There is no test plan');
+  expect(buildPrompt({ ticket: quick, ...input, step: 'rebase' })).not.toContain('# Flow');
+  expect(buildPrompt({ ticket, ...input, step: 'implement' })).not.toContain('# Flow');
+});
