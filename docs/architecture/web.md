@@ -138,6 +138,10 @@
   on its way (`previewPoll`), says whose code runs and whether it gets the secrets, offers the update to the
   reviewed commit, and "Add to review" (`pull-requests/review-e2e-actions.tsx`, `review-run-actions.tsx`). Current
   reviews shows "preview running" on a review or a stack (`previewStatus` in the list).
+- Running previews: a global page (sidebar → Previews, `previews/running-previews-page.tsx`) lists every project's
+  previews that hold containers (starting, running, stopping), tickets' and pull requests' alike, from
+  `GET /api/previews` (`routes/running-previews.ts`, polled every 5 s); the sidebar entry shows their count. Stop
+  queues `preview_stop` for the preview's owner (`POST /api/previews/:id/stop`); a ticket's row opens the ticket.
 - PR description rewrite: the PR tab's Description section (`pull-request/pr-description.tsx`,
   `routes/pr-description.ts`, `@union/core` `pr-descriptions.ts`) queues a `pr_descriptions` row. The agent's draft
   is the user's to edit, send or discard; sending is the `update_pr_description` command. "Outdated" means a

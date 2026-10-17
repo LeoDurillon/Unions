@@ -1,14 +1,16 @@
-// The routes the browser follows on its own: the event stream, and the notifications the stream announces.
+// The routes the browser follows on its own: the event stream, the notifications it announces, the running previews.
 import type { Db } from '@union/core';
 import { Hono } from 'hono';
 
 import { eventRoutes } from './events';
 import { notificationRoutes } from './notifications';
+import { runningPreviewRoutes } from './running-previews';
 
-/** `/events` and `/notifications`, under `/api`. */
+/** `/events`, `/notifications` and the running `/previews` (the sidebar counts them), under `/api`. */
 export function liveRoutes(db: Db): Hono {
   const routes = new Hono();
   routes.route('/events', eventRoutes(db));
   routes.route('/notifications', notificationRoutes(db));
+  routes.route('/previews', runningPreviewRoutes(db));
   return routes;
 }

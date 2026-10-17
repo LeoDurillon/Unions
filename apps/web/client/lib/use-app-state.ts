@@ -11,6 +11,8 @@ export type AppState = ReturnType<typeof useActiveProject> &
     ticketId: number | null;
     openTicket: (id: number | null) => void;
     openNotification: (target: NotificationTarget) => void;
+    /** A ticket of any project, from a page listing several projects' (the running previews). */
+    openProjectTicket: (projectId: number, ticketId: number) => void;
   };
 
 /** Also shows the desktop notifications, when the user turned them on. */
@@ -26,5 +28,12 @@ export function useAppState(): AppState {
     openTicket,
   });
   useDesktopNotifications(openNotification);
-  return { ...projects, ...navigation, ticketId, openTicket, openNotification };
+  const openProjectTicket = (projectId: number, id: number): void => {
+    if (navigation.leave()) {
+      projects.select(projectId);
+      navigation.goTo('board')();
+      openTicket(id);
+    }
+  };
+  return { ...projects, ...navigation, ticketId, openTicket, openNotification, openProjectTicket };
 }

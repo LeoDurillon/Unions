@@ -11,7 +11,7 @@ import { useAppState } from './lib/use-app-state';
 export function App(): ReactElement {
   const { projects, project, select, loading, ticketId, openTicket, openNotification, ...nav } =
     useAppState();
-  const { page, overlay, show, goTo, close, leave } = nav;
+  const { page, overlay, show, goTo, close, leave, openProjectTicket } = nav;
 
   return (
     <div className="flex h-full">
@@ -35,6 +35,7 @@ export function App(): ReactElement {
         page={page}
         project={project}
         onOpenTicket={openTicket}
+        onOpenProjectTicket={openProjectTicket}
         onNewTicket={show('ticket')}
       />
       <WizardHost

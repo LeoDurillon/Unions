@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 import { closeSettings } from './settings-sections';
 
-export type Page = 'board' | 'agents' | 'github-app';
+export type Page = 'board' | 'agents' | 'github-app' | 'previews';
 export type Overlay = 'wizard' | 'ticket' | null;
 
 /** Which page is shown and which overlay is open; `show`/`goTo` return click handlers. */

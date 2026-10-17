@@ -4,6 +4,7 @@ import type { PublicProject } from '../../src/api-types';
 import type { NotificationTarget } from '../lib/open-notification';
 import type { Page } from '../lib/use-navigation';
 import { NotificationBell } from './notifications/notification-bell';
+import { PreviewsButton } from './previews/previews-button';
 import { Button } from './ui';
 
 const ACTIVE = 'bg-indigo-100 font-medium text-indigo-900 dark:bg-indigo-950 dark:text-indigo-200';
@@ -43,7 +44,28 @@ function ProjectItem({
   );
 }
 
-/** Notifications, project switcher and creation entry point, always visible on the left. */
+/** The global pages below the projects. */
+function PageLinks({ page, onPage }: { page: Page; onPage: (page: Page) => void }): ReactElement {
+  return (
+    <div className="flex flex-col gap-0.5">
+      {SETTINGS_PAGES.map((entry) => (
+        <button
+          key={entry.page}
+          type="button"
+          aria-current={page === entry.page ? 'page' : undefined}
+          onClick={() => {
+            onPage(entry.page);
+          }}
+          className={`rounded-md px-3 py-2 text-left text-sm transition ${page === entry.page ? ACTIVE : IDLE}`}
+        >
+          {entry.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** Notifications, running previews, project switcher and creation entry point, always visible on the left. */
 export function Sidebar({
   projects,
   projectId,
@@ -65,6 +87,12 @@ export function Sidebar({
     <aside className="flex w-60 shrink-0 flex-col gap-3 border-r border-zinc-200 bg-zinc-100/60 p-3 dark:border-zinc-800 dark:bg-zinc-900/40">
       <h1 className="px-2 pt-1 text-base font-semibold">union</h1>
       <NotificationBell projects={projects} onOpen={onOpenNotification} />
+      <PreviewsButton
+        active={page === 'previews'}
+        onOpen={() => {
+          onPage('previews');
+        }}
+      />
       <nav aria-label="Projects" className="min-h-0 flex-1 overflow-y-auto">
         <p className="px-3 pb-1 text-xs font-medium tracking-wide text-zinc-500 uppercase">
           Projects
@@ -84,21 +112,7 @@ export function Sidebar({
         ) : null}
       </nav>
       <Button onClick={onNewProject}>+ Add project</Button>
-      <div className="flex flex-col gap-0.5">
-        {SETTINGS_PAGES.map((entry) => (
-          <button
-            key={entry.page}
-            type="button"
-            aria-current={page === entry.page ? 'page' : undefined}
-            onClick={() => {
-              onPage(entry.page);
-            }}
-            className={`rounded-md px-3 py-2 text-left text-sm transition ${page === entry.page ? ACTIVE : IDLE}`}
-          >
-            {entry.label}
-          </button>
-        ))}
-      </div>
+      <PageLinks page={page} onPage={onPage} />
     </aside>
   );
 }

@@ -30,6 +30,7 @@ export); do not edit. Tests are left out.
 - `review-output-comment.ts`: A command's or the e2e tests' output as a review comment: what ran, how it ended, the last lines in a code block.
 - `review-preview-types.ts`: What a pull request under review's Preview tab reads: its preview, its checkout and its commands.
 - `rule-previews.ts`: What a rule's action would do for one ticket, one preview per kind of action; nothing is sent.
+- `running-previews-types.ts`: The previews running across projects, as the Previews page and the sidebar's count read them.
 - `server.ts`: The web server's entry point: opens the database, migrates it and serves the API and the client.
 - `services.ts`: The outside services the API routes may call: GitHub (the wizard's and the PR tab's reads, its CI), Notion.
 
@@ -49,7 +50,7 @@ export); do not edit. Tests are left out.
 - `grouping-targets.ts`: `/api/tickets/:id/groupings`.
 - `investigations.ts`: `/api/projects/:projectId/investigations`: one agent run on the user's prompt, with no GitHub issue.
 - `issue-import.ts`: `/api/tickets/github-issue`: a ticket from an existing issue of the project's repository.
-- `live.ts`: The routes the browser follows on its own: the event stream, and the notifications the stream announces.
+- `live.ts`: The routes the browser follows on its own: the event stream, the notifications it announces, the running previews.
 - `mcp-connectors.ts`: `/api/agents/connectors`: the account's claude.ai connectors as the last check read them, and `POST /check` to read them again (the worker does, in a throwaway…
 - `notifications.ts`: `/api/notifications`: what needs the user across every project (the worker writes them), and marking them read.
 - `notion.ts`: Notion failures become messages the UI shows next to the field.
@@ -80,6 +81,7 @@ export); do not edit. Tests are left out.
 - `review.ts`: Why a review cannot be sent now, or null when it can: the ticket waits on the user after code was written, or it is done with its branch kept and its pull requ…
 - `rule-choices.ts`: What a rule picks from on GitHub, read live: the repo's labels and users (`github/rule-choices`), the Project's fields (`github/project-fields`).
 - `run-input.ts`: A command run as the user asks for it, for a ticket's workspace or a pull request's: the body read, checked and queued.
+- `running-previews.ts`: `/api/previews`: every preview holding containers, whatever its project, and stopping one (the worker does).
 - `spec-sources.ts`: The text of a specification, from where the user points.
 - `ticket-base.ts`: The API routes that show and change the branch a ticket is based on.
 - `ticket-commits.ts`: `/api/tickets/:id/commits`: the commits stored with the ticket's diff snapshot, the change since the last review, and their files.

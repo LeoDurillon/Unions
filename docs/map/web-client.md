@@ -53,7 +53,7 @@ export); do not edit. Tests are left out.
 - `run-agent-actions.tsx`: Giving a finished run's output to the implementer: kept for its next run, or sent now as a revision (when the ticket can go back to it) with a note.
 - `run-table.tsx`: The ticket's runs in the Overview tab: step, model, status and time, with what their agent calls used.
 - `script-buttons.tsx`: The project's saved scripts, one button each; without any, where to save them.
-- `sidebar.tsx`: Notifications, project switcher and creation entry point, always visible on the left.
+- `sidebar.tsx`: Notifications, running previews, project switcher and creation entry point, always visible on the left.
 - `step-notices.tsx`: What stops the step and needs the user: a failed run, a usage limit, a refused commit.
 - `step-tab.tsx`: The ticket panel tab for one step: its output, verdict, answer form and review bar.
 - `ticket-attachments.tsx`: The ticket's files, in its Overview tab: added, described and removed at any time.
@@ -109,6 +109,11 @@ export); do not edit. Tests are left out.
 - `stepper.tsx`: Numbered progress bar across the top of the wizard.
 - `steps.ts`: One view per entry of `STEPS`, in the same order.
 - `wizard.tsx`: Step-by-step project setup, shown over the board (the first thing a new user sees).
+
+## components/previews/
+
+- `previews-button.tsx`: The sidebar's Previews entry: how many previews hold containers now, across projects.
+- `running-previews-page.tsx`: Every preview holding containers, across projects: where it answers, whose it is, and Stop.
 
 ## components/pull-request/
 
@@ -291,6 +296,7 @@ export); do not edit. Tests are left out.
 - `use-review-preview.ts`: A pull request's preview as its Preview tab reads it (its checkout, its screenshots), and adding an output to the review.
 - `use-review.ts`: A pull request under review: its description and discussion, read from GitHub once per opening.
 - `use-run-agent.ts`: What a ticket's command output can do with the implementer: wait for its next run, or go now as a revision.
+- `use-running-previews.ts`: The previews running across projects (read again every few seconds: a pull request's send no events), and stopping one.
 - `use-selected-ticket.ts`: The open ticket lives in the URL (`?ticket=3`), so it survives reloads and back/forward.
 - `use-settings-form.ts`: A settings page's form: what is edited, whether it differs from what was saved, and its one Save.
 - `use-stored-number.ts`: A number remembered in localStorage; storage being unavailable only loses the memory.

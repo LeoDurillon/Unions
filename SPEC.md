@@ -375,6 +375,8 @@ Built (phases 1 to 4). Full design and what was built: [`docs/plans/preview-envi
   localhost"). Which
   plain variables the agent's commands get is a setting (all by default, none, or chosen): a variable already set
   wins over the repository's env files. Secrets never reach the agent.
+- **Previews** (in the sidebar, with the number running): every project's previews that hold containers, tickets'
+  and pull requests' under review, with their links and **Stop**; a ticket's opens its panel.
 - Served to this machine only (the proxy's port is published on `127.0.0.1`). A running preview nobody visited for
   the project's idle time (60 minutes by default, 0: never) stops, except while the agent runs a step on the ticket
   or its e2e tests run; visits are the proxy's request counts. At most `UNION_MAX_PREVIEWS` previews run (3), and
