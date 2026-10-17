@@ -90,8 +90,8 @@ So: possible. Full logs only for GitHub Actions; other CI gives its summary, ann
 
 ## Later
 
-- **A badge on the ticket card** (green, red, running): the worker reads the rollup in the same poll as `pr_state`
-  (`github/pull-request.ts`), stored on the ticket, and an event `pull_request_checks_changed`.
+- **A badge on the ticket card** (green, red, running): built (2026-10-17, `ticket-card.tsx`), from the state the
+  worker stores for the notifications below.
 - **Event rules and notifications**: built (2026-10-17, branch `pr-checks-notify`): the worker polls the rollup
   with the PR's state (`github/pull-request-checks.ts`, `tickets.pr_checks_state` / `pr_checks_sha`, migration
   0058), logs `pull_request_checks_failed` when they turn red, which notifies ("Checks failed") and triggers rules.

@@ -36,4 +36,5 @@ call) in the same poll as the PR's state, keeps it on the ticket (`pr_checks_sta
 `pull_request_checks_failed` when they turn red: on a commit already seen without red checks (a re-run that fails
 again counts), or on a new head. The first read of a ticket's checks says nothing. The event notifies in Union
 ("Checks failed") and is the rule trigger "Its pull request's CI checks fail". Without the Checks permission the
-state stays unknown and nothing notifies.
+state stays unknown and nothing notifies. The same state is a badge on the ticket's board card while the PR is open
+(Checks running, passed or failed).

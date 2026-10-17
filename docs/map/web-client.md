@@ -57,7 +57,7 @@ export); do not edit. Tests are left out.
 - `step-notices.tsx`: What stops the step and needs the user: a failed run, a usage limit, a refused commit.
 - `step-tab.tsx`: The ticket panel tab for one step: its output, verdict, answer form and review bar.
 - `ticket-attachments.tsx`: The ticket's files, in its Overview tab: added, described and removed at any time.
-- `ticket-card.tsx`: A draggable ticket card for the board, with its phase and pull request badges.
+- `ticket-card.tsx`: A draggable ticket card for the board, with its phase, pull request and CI checks badges.
 - `ticket-description.tsx`: The ticket's description, folded when long.
 - `ticket-details.tsx`: What the ticket is attached to: where it comes from, what it depends on, its files, its preview.
 - `ticket-e2e-actions.tsx`: What a ticket's failing end-to-end run can become: a revision the implementer gets, like a failing check.

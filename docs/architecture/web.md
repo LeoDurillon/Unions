@@ -12,6 +12,8 @@
   A ticket whose PR is merged or closed (`pr_state`, polled by the worker) is in the Union-only Merged / Closed column
   (`boardColumn`), its card tagged Merged or Closed, for 21 days after `pr_merged_at` or `pr_closed_at`, then leaves the
   board (`leftBoard`); the GitHub Project still sees it as Done. A closed PR is still polled: reopened, the ticket goes back.
+  While the PR is open, its card shows the CI checks of its head (`pr_checks_state`, polled by the worker): Checks
+  running, passed or failed, the commit in its tooltip; nothing while they are not known.
 - Flows: the New ticket dialog picks the ticket's flow above its three sources (`flow-picker.tsx`: the project's
   presets, or Custom with a chip per planning step), sent as `flow` to `POST /api/tickets` and the issue import
   (`routes/ticket-flow.ts` checks it). The default preset is sent as null, so the ticket follows the project's

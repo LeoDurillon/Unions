@@ -1,12 +1,34 @@
-// A draggable ticket card for the board, with its phase and pull request badges.
+// A draggable ticket card for the board, with its phase, pull request and CI checks badges.
 import { useDraggable } from '@dnd-kit/core';
 import { flowName, resolveFlow } from '@union/core/flows';
 import { FULL_FLOW } from '@union/core/states';
 import type { ReactElement } from 'react';
 
 import type { PublicProject, TicketSummary } from '../../src/api-types';
-import { describePhase, isBlocked, refLabel } from '../lib/labels';
+import { describePhase, isBlocked, refLabel, type Tone } from '../lib/labels';
 import { Badge } from './ui';
+
+const SHORT_SHA = 7;
+
+const CHECKS: Record<NonNullable<TicketSummary['prChecksState']>, { label: string; tone: Tone }> = {
+  pending: { label: 'Checks running', tone: 'amber' },
+  success: { label: 'Checks passed', tone: 'green' },
+  failure: { label: 'Checks failed', tone: 'red' },
+};
+
+/** The CI checks of the open pull request's head commit; nothing when they are not known. */
+function ChecksBadge({ ticket }: { ticket: TicketSummary }): ReactElement | null {
+  if (ticket.prState !== 'open' || ticket.prChecksState === null) {
+    return null;
+  }
+  const { label, tone } = CHECKS[ticket.prChecksState];
+  const sha = ticket.prChecksSha?.slice(0, SHORT_SHA);
+  return (
+    <Badge tone={tone} title={sha ? `CI checks on ${sha}` : undefined}>
+      {label}
+    </Badge>
+  );
+}
 
 /** How the ticket's pull request ended, for the Merged / Closed column; null while it has not. */
 function PrEnd({ prState }: { prState: TicketSummary['prState'] }): ReactElement {
@@ -95,6 +117,7 @@ export function TicketCard({
       ) : null}
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
         <CardStatus ticket={ticket} />
+        <ChecksBadge ticket={ticket} />
         {config ? <FlowBadge ticket={ticket} config={config} /> : null}
         <span className="ml-auto text-xs whitespace-nowrap text-zinc-500">
           {ticket.issueNumber === null ? 'not on GitHub yet' : `#${ticket.issueNumber}`}
