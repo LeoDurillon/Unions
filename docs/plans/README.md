@@ -33,7 +33,7 @@ and linked.
   when the checks fail after a clean rebase, and the final review runs again only when the agent changed code.
   Built (2026-10-17).
 - [Ticket flows](ticket-flows.md): pick the steps a ticket runs (Full, Standard, Quick presets, or custom), so a
-  small fix skips planning. Steps 1 to 4 built (branch `ticket-flows`); SPEC update left.
+  small fix skips planning. Built (branch `ticket-flows`); a real Quick ticket run is left.
 
 ## Open items
 

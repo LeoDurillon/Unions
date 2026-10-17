@@ -7,7 +7,8 @@ Everything the agent does is mirrored to the GitHub issue.
 ## Decisions
 
 - One repo per project (one board per GitHub Project).
-- Planning runs first; implementation starts only after the test plan is approved.
+- Planning runs first; implementation starts only after the last planning step the ticket runs is approved. A
+  ticket's flow says which planning steps it runs; implementation and final review always run (see Ticket flows).
 - One GitHub comment per step, edited in place on revision.
 - Parallel tickets, capped by a concurrency limit (Max usage limits).
 - Fresh codebase. The earlier POCs (`claude-auto`, `Union`) are context only.
@@ -36,10 +37,11 @@ Everything the agent does is mirrored to the GitHub issue.
    instead of creating one, and its title and description keep following GitHub.
 2. Move to In Progress → the worker creates volumes + container, clones the repo into the workspace volume.
    A ticket that depends on another one cannot start before it is done (see Ticket dependencies).
-3. Planning steps, each a tab on the ticket: `intake` (Haiku) → `summary` (Sonnet) → `technical` (Opus) → `test_plan` (Sonnet).
+3. Planning steps, each a tab on the ticket: `intake` (Haiku) → `summary` (Sonnet) → `technical` (Opus) → `test_plan` (Sonnet),
+   or only those the ticket's flow keeps (none for a Quick ticket).
    After each, the user clicks **Approve** or **Revise** (with feedback). Revise resumes the agent session.
    Each step's output is posted/edited as one issue comment.
-4. After the test plan is approved: `implement` loop (agent turn → checks → back to the agent on red, up to the
+4. After the last planning step is approved (at once for a flow without planning): `implement` loop (agent turn → checks → back to the agent on red, up to the
    project's iteration limit), then the host pushes the branch and opens a draft PR (`Closes #n`). Before opening
    it, one more turn in the implementer's session writes the PR description: it fills in the repository's pull
    request template when there is one (`.github/`, root or `docs/`, any case, else the first file of
@@ -131,6 +133,24 @@ Everything the agent does is mirrored to the GitHub issue.
 | parent ticket | the child issue is "blocked by" the parent issue (issue dependencies)                       |
 
 GitHub is the source of truth for title, description and status; the local DB owns run state.
+
+## Ticket flows
+
+Built. Design and steps: [`docs/plans/ticket-flows.md`](docs/plans/ticket-flows.md). In short:
+
+- A flow is the pipeline steps a ticket runs, in order: any of the four planning steps, then always `implement` and
+  `final_review` (the final review's approval is what marks the PR ready, and every rebase and revision leads back
+  to it). Skipped steps never run, so they cost nothing; they have no tab, no issue comment, no approval.
+- Presets per project (project settings → Agents → Flows): built-in Full (every step), Standard (`technical`,
+  then implementation and review) and Quick (implementation and review), or the project's own list; one is the
+  default for new tickets.
+- The New ticket dialog picks the flow for any source (written, GitHub issue, Notion page): a preset, or Custom
+  with the planning steps chosen one by one. The Overview's Flow row changes it while the ticket is in Backlog.
+  A ticket that chose none follows the project's default until it starts.
+- Starting fixes the flow on the ticket (`tickets.flow`), so editing presets later never changes a running ticket;
+  tickets started before flows existed run every step. The state machine follows it on `start` and `approve`.
+- The implementer and the final review get a `# Flow` note naming the skipped planning steps: work from the ticket
+  itself, and without a test plan, add (or judge) the tests the change needs.
 
 ## Ticket dependencies
 
