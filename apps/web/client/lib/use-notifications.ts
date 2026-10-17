@@ -1,4 +1,4 @@
-// The notifications, page by page, with the unread count (also in the tab's title) and marking them read.
+// The notifications, page by page, with the unread count (also in the tab's title) marking them read and clearing them.
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { Notification } from '@union/core';
 import { useEffect } from 'react';
@@ -21,6 +21,7 @@ export type Notifications = {
   loadOlder: () => void;
   markRead: (id: number) => void;
   markAllRead: () => void;
+  clearAll: () => void;
 };
 
 export function useNotifications(): Notifications {
@@ -35,6 +36,7 @@ export function useNotifications(): Notifications {
     queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_KEY });
   const read = useMutation({ mutationFn: notificationsApi.markRead, onSuccess: refresh });
   const readAll = useMutation({ mutationFn: notificationsApi.markAllRead, onSuccess: refresh });
+  const clear = useMutation({ mutationFn: notificationsApi.clearAll, onSuccess: refresh });
   const pages = query.data?.pages ?? [];
   const unread = pages[0]?.unread ?? 0;
   useEffect(() => {
@@ -43,7 +45,7 @@ export function useNotifications(): Notifications {
   return {
     items: pages.flatMap((page) => page.items),
     unread,
-    error: query.error ?? read.error ?? readAll.error,
+    error: query.error ?? read.error ?? readAll.error ?? clear.error,
     hasOlder: query.hasNextPage,
     loadOlder: () => {
       void query.fetchNextPage();
@@ -53,6 +55,9 @@ export function useNotifications(): Notifications {
     },
     markAllRead: () => {
       readAll.mutate();
+    },
+    clearAll: () => {
+      clear.mutate();
     },
   };
 }

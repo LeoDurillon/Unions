@@ -1,4 +1,4 @@
-// The bell's panel: the notifications newest first, "Mark all read", older ones on request, and the desktop opt-in.
+// The bell's panel: the notifications newest first, "Mark all read", "Clear", older ones on request, and the desktop opt-in.
 import type { Notification } from '@union/core';
 import { useEffect, type ReactElement, type RefObject } from 'react';
 
@@ -66,6 +66,16 @@ function PanelHeader({ notifications }: { notifications: Notifications }): React
         }}
       >
         Mark all read
+      </Button>
+      <Button
+        disabled={notifications.items.length === 0}
+        onClick={() => {
+          if (globalThis.confirm('Clear every notification? They cannot be brought back.')) {
+            notifications.clearAll();
+          }
+        }}
+      >
+        Clear
       </Button>
     </div>
   );

@@ -96,7 +96,7 @@ export); do not edit. Tests are left out.
 - `notification-bell.tsx`: The sidebar's bell: the unread count, and the panel of notifications it opens.
 - `notification-item.tsx`: One notification in the panel: what it is about, what happened, where and when; unread ones stand out.
 - `notification-labels.ts`: The badge each kind of notification shows: a word for the moment and its tone.
-- `notification-panel.tsx`: The bell's panel: the notifications newest first, "Mark all read", older ones on request, and the desktop opt-in.
+- `notification-panel.tsx`: The bell's panel: the notifications newest first, "Mark all read", "Clear", older ones on request, and the desktop opt-in.
 
 ## components/onboarding/
 
@@ -270,7 +270,7 @@ export); do not edit. Tests are left out.
 - `leave-guard.ts`: Unsaved settings: the forms holding changes, and asking before a navigation throws them away.
 - `line-diff.ts`: The lines of `after` against `before`: kept, added or removed, in reading order.
 - `log-runs.ts`: Splits the log at each run header, so every run can fold on its own.
-- `notifications-api.ts`: The browser's client for the notifications: a page of them, and marking them read.
+- `notifications-api.ts`: The browser's client for the notifications: a page of them, marking them read and clearing them.
 - `open-notification.ts`: Opens what a notification is about (its ticket or investigation, in its project) and marks it read.
 - `opened-investigation.ts`: The investigation opened from elsewhere (a notification), in the URL (`?investigation=<id>`).
 - `pr-description-api.ts`: The browser's client for a ticket's pull request description endpoints.
@@ -307,7 +307,7 @@ export); do not edit. Tests are left out.
 - `use-memory.ts`: The Memory page's data: lessons and feedback, saving them with the on/off switch, curating feedback, and the lesson writer's runs.
 - `use-models-form.ts`: The Models page's form: every agent's model and effort, each changed one saved with its prompt and tools as they are.
 - `use-navigation.ts`: Which page is shown (`?page=previews`, `?union=` for the Union settings, else the board) and which overlay is open.
-- `use-notifications.ts`: The notifications, page by page, with the unread count (also in the tab's title) and marking them read.
+- `use-notifications.ts`: The notifications, page by page, with the unread count (also in the tab's title) marking them read and clearing them.
 - `use-notion-users.ts`: The Notion workspace members, read only when `enabled` (a person property is in view).
 - `use-pr-checks.ts`: The pull request's CI checks (read again every 30 s while some still run), and giving picks of them to the implementer.
 - `use-preview.ts`: A ticket's or a pull request's preview as its section reads it, and the commands that act on it.

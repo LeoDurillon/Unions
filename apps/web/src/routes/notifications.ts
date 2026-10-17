@@ -1,4 +1,4 @@
-// `/api/notifications`: what needs the user across every project (the worker writes them), and marking them read.
+// `/api/notifications`: what needs the user across every project (the worker writes them), marking them read and clearing them.
 import { schema, type Db, type Notification } from '@union/core';
 import { and, count, desc, eq, isNull, lt } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
@@ -66,10 +66,17 @@ function markAllRead(db: Db, c: Context): Response {
   return c.json({ marked: marked.length });
 }
 
-/** `/api/notifications`: what needs the user across every project, and marking them read. */
+/** Deletes every notification: the worker's cursor is past their events, so none comes back. */
+function clearAll(db: Db, c: Context): Response {
+  const cleared = db.delete(schema.notifications).returning({ id: schema.notifications.id }).all();
+  return c.json({ cleared: cleared.length });
+}
+
+/** `/api/notifications`: what needs the user across every project, marking them read and clearing them. */
 export function notificationRoutes(db: Db): Hono {
   const routes = new Hono();
   routes.get('/', (c) => list(db, c));
+  routes.delete('/', (c) => clearAll(db, c));
   routes.post('/read-all', (c) => markAllRead(db, c));
   routes.post('/:id/read', (c) => markRead(db, c));
   return routes;

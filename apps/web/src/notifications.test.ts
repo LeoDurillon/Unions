@@ -72,6 +72,14 @@ test('one is marked read, then all; marking again keeps the first time', async (
   expect(after.items.find((item) => item.id === b)?.readAt).toBeNumber();
 });
 
+test('clearing deletes every notification', async () => {
+  notify(1);
+  notify(2);
+  const response = await app.request('/api/notifications', { method: 'DELETE' });
+  expect(await response.json()).toEqual({ cleared: 2 });
+  expect(await page()).toEqual({ items: [], unread: 0 });
+});
+
 test('unknown or malformed ids are refused', async () => {
   expect((await post('/999/read')).status).toBe(404);
   expect((await post('/abc/read')).status).toBe(400);

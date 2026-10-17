@@ -96,8 +96,9 @@
   `event-deliveries.ts`. Rules apply only to events logged after their creation (no replay).
 - Notifications: the bell above the projects in the sidebar (`components/notifications/`) shows the unread count
   (also in the tab title) and opens a panel of every project's notifications, newest first
-  (`routes/notifications.ts`: `GET /api/notifications?before=`, `POST /:id/read`, `POST /read-all`; marking read
-  is a plain record write; mounted with the event stream in `routes/live.ts`). The worker writes them; the list
+  (`routes/notifications.ts`: `GET /api/notifications?before=`, `POST /:id/read`, `POST /read-all`, `DELETE /` to
+  clear them all after a confirm; marking read and clearing are plain record writes (the worker's cursor is past
+  the cleared events, so they do not come back); mounted with the event stream in `routes/live.ts`). The worker writes them; the list
   refetches on `notification_created`. A click opens the ticket's panel or the investigation
   (`?investigation=<id>`, `lib/opened-investigation.ts`) in its project and marks it read
   (`lib/open-notification.ts`). Desktop notifications are off until turned on in the panel (stored in

@@ -53,7 +53,7 @@ export); do not edit. Tests are left out.
 - `live.ts`: The routes the browser follows on its own: the event stream, the notifications it announces, the running previews.
 - `mcp-connectors.ts`: `/api/agents/connectors`: the account's claude.ai connectors as the last check read them, and `POST /check` to read them again (the worker does, in a throwaway…
 - `memory.ts`: `/api/projects/:projectId/lessons`, `/feedback` and `/lesson-suggestion`: the project's memory (the worker runs the lesson writer).
-- `notifications.ts`: `/api/notifications`: what needs the user across every project (the worker writes them), and marking them read.
+- `notifications.ts`: `/api/notifications`: what needs the user across every project (the worker writes them), marking them read and clearing them.
 - `notion.ts`: Notion failures become messages the UI shows next to the field.
 - `pr-agent-review.ts`: A pull request under review's agent review: one pull request, or the stack it is in, checked and queued for the worker.
 - `pr-checks.ts`: `/api/tickets/:id/pr-checks`: the pull request's CI checks read from GitHub, and the failed ones (with related jobs and bot comments) given to the implementer.

@@ -1,4 +1,4 @@
-// The browser's client for the notifications: a page of them, and marking them read.
+// The browser's client for the notifications: a page of them, marking them read and clearing them.
 import type { NotificationPage } from '../../src/routes/notifications';
 import { request } from './api';
 
@@ -10,4 +10,5 @@ export const notificationsApi = {
     request('GET', before === null ? BASE : `${BASE}?before=${before}`),
   markRead: (id: number): Promise<unknown> => request('POST', `${BASE}/${id}/read`),
   markAllRead: (): Promise<unknown> => request('POST', `${BASE}/read-all`),
+  clearAll: (): Promise<unknown> => request('DELETE', BASE),
 };
