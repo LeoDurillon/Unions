@@ -190,9 +190,9 @@ reviews** tab, per project (`current_reviews`, a snapshot of its title, author a
 GitHub call), where it can be removed.
 
 **Open review** opens the same review page as a ticket's (file list, highlighted unified or split diff, comments on
-a line or a block of lines), with three tabs: **Description** (the pull request's description) and **Comments** (its
-review summaries, conversation comments and line threads, read only), both read from GitHub once per opening, then
-**Diff**. The pull request's head commit and files are read from GitHub when the page opens and
+a line or a block of lines), with four tabs: **Description** (the pull request's description) and **Comments** (its
+review summaries, conversation comments and line threads, read only), both read from GitHub once per opening,
+**Preview** (see "Previews of pull requests under review" under Preview environments), then **Diff**. The pull request's head commit and files are read from GitHub when the page opens and
 kept on the review (`current_reviews.files`, `head_sha`): comments are checked against those lines, and those
 written on an earlier head read as outdated. **Send review** offers **Comment**, **Approve** and **Request changes**;
 each queues a `submit_pr_review` command with that verdict, and the worker posts one review of that kind on the pull
@@ -386,6 +386,31 @@ Built (phases 1 to 4). Full design and what was built: [`docs/plans/preview-envi
   implementer reads it as data in a "Command output from the user" section, once. Commands run often are saved by
   name in Project settings → Scripts (`config.scripts`: name, command, optional timeout) and run with one button;
   the run keeps the script's name. Running in a preview service is planned (`docs/plans/container-commands.md`).
+
+### Previews of pull requests under review
+
+Design and steps: [`docs/plans/review-previews.md`](docs/plans/review-previews.md). A pull request in Current reviews
+gets what a ticket's Preview tab has, on its review page's **Preview** tab, without a ticket. No agent runs (no
+Claude usage) and nothing is written to GitHub: the worker only fetches the pull request.
+
+- Its own container `union-r<review id>` (volumes `-home`, `-ws`), made on the first start, test run or command: the
+  host clones the base branch, fetches `pull/<n>/head` (forks included) and checks out the commit the review reads
+  (`current_reviews.head_sha`), not the branch's tip, so the diff on screen and the running code are the same. It
+  never gets the Claude credential nor a GitHub token, and is stopped once nothing runs in it. Its preview is
+  compose project `union-r<id>` at `http://r<id>.localhost` (`{ticket.id}` renders `r<id>`, `{pr.number}` the pull
+  request's number), under the same checks, cap and idle stop as a ticket's.
+- Secrets: a fork's pull request never gets the project's secret variables. Another gets them only when its commit is
+  on its head branch in the repository itself, which the worker checks at each checkout
+  (`current_reviews.checkout_in_repo`); the tab says whose code runs and which case applies.
+- When the review is reloaded at a newer head, the tab shows the checkout behind it; **Update to the reviewed commit**
+  (after a confirmation) takes the preview down with its data, replaces the checkout and starts it again if it ran.
+- End-to-end tests and Commands run in that container (the plain variables the settings allow, the preview's address
+  while it runs; no agent services, never the secrets). A review's failure screenshots are kept with its preview
+  (`preview_screenshots`, files under `attachments/r<id>/e2e/`). An output, or the last e2e result, can be **added to
+  the review** as a general draft comment (what ran, how it ended, its last lines), sent with the rest of the review.
+- A review's preview and runs have no events: the tab polls while one is on its way. Current reviews marks a review
+  or a stack whose preview runs. Removing a review (or its stack) drops its pending commands, has the worker take its
+  preview down and remove its container and volumes, and deletes its files.
 
 ## MCP servers for agents (planned)
 

@@ -34,7 +34,7 @@ and linked.
   Built (2026-10-17).
 - [Previews of pull requests under review](review-previews.md): a review's own preview at the reviewed commit
   (`union-r<id>`, `r<id>.localhost`), with its e2e tests and Commands, in a container of its own; no agent, no
-  GitHub writes, never the project's secrets for a fork. Steps 1 to 5 built (branch `review-previews`); SPEC.md left.
+  GitHub writes, never the project's secrets for a fork. Built (branch `review-previews`).
 - [Ticket flows](ticket-flows.md): pick the steps a ticket runs (Full, Standard, Quick presets, or custom), so a
   small fix skips planning. Built (branch `ticket-flows`); a real Quick ticket run is left.
 

@@ -1,6 +1,6 @@
 # Plan: previews of pull requests under review
 
-Status: steps 1 to 5 built (branch `review-previews`): the owner in core and the database, a review's container, preview, e2e tests and commands in the worker, their web routes, and the review page's Preview tab; step 6 (SPEC.md) left.
+Status: built (branch `review-previews`, steps 1 to 6). Summarized in `SPEC.md` (Preview environments → Previews of pull requests under review).
 
 ## Idea
 
@@ -151,7 +151,7 @@ The Commands section of the ticket's Preview tab, on the review's Preview tab:
    owner (the components take the API base, like `ReviewTarget`); the author line and the fork note on Start; the
    commit notice and "Update to the reviewed commit"; "Add to review" in place of "Send to agent". A dot on the
    review in Current reviews while its preview runs. UI check with `scripts/ui-check/` (writes blocked).
-6. **Docs.** `SPEC.md` (Preview environments, Current reviews), `docs/architecture/{core,worker,web,database}.md`,
+6. **Docs.** (Built: `SPEC.md`; the architecture files were kept current at each step.) `SPEC.md` (Preview environments, Current reviews), `docs/architecture/{core,worker,web,database}.md`,
    this file's status, `docs/plans/README.md`.
 
 ## Risks
