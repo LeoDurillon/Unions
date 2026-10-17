@@ -4,6 +4,7 @@ import type { Context } from 'hono';
 import { BAD_REQUEST, CREATED, fail, optionalText, readObject, requireText } from '../http';
 import { fetchNotionImages } from '../notion-images';
 import { addAttachment } from './attachments';
+import { flowOf } from './ticket-flow';
 import { findTicket, linkParent, summarize } from './ticket-links';
 
 function notionPageOf(body: Record<string, unknown>): string | null {
@@ -37,6 +38,7 @@ export async function addTicket(db: Db, c: Context): Promise<Response> {
     throw fail(BAD_REQUEST, 'The parent must be a ticket of the same project');
   }
   const notionPageId = notionPageOf(body);
+  const flow = flowOf(body) ?? null;
   const text = optionalText(body, 'body') ?? '';
   const { markdown, images } = notionPageId
     ? await fetchNotionImages(text)
@@ -45,6 +47,7 @@ export async function addTicket(db: Db, c: Context): Promise<Response> {
     projectId,
     title: requireText(body, 'title'),
     body: markdown,
+    flow,
     ...(notionPageId ? { notionPageId } : {}),
   });
   for (const image of images) {

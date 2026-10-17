@@ -1,8 +1,10 @@
 // A draggable ticket card for the board, with its phase and pull request badges.
 import { useDraggable } from '@dnd-kit/core';
+import { flowName, resolveFlow } from '@union/core/flows';
+import { FULL_FLOW } from '@union/core/states';
 import type { ReactElement } from 'react';
 
-import type { TicketSummary } from '../../src/api-types';
+import type { PublicProject, TicketSummary } from '../../src/api-types';
 import { describePhase, isBlocked, refLabel } from '../lib/labels';
 import { Badge } from './ui';
 
@@ -34,11 +36,28 @@ function CardStatus({ ticket }: { ticket: TicketSummary }): ReactElement {
   );
 }
 
+/** The flow's name when it is not the full pipeline: a short flow is worth seeing on the board. */
+function FlowBadge({
+  ticket,
+  config,
+}: {
+  ticket: TicketSummary;
+  config: PublicProject['config'];
+}): ReactElement | null {
+  const flow = resolveFlow(ticket, config);
+  if (flow.length === FULL_FLOW.length) {
+    return null;
+  }
+  return <Badge tone="neutral">{flowName(flow, config)}</Badge>;
+}
+
 export function TicketCard({
   ticket,
+  config,
   onOpen,
 }: {
   ticket: TicketSummary;
+  config?: PublicProject['config'];
   onOpen: (id: number) => void;
 }): ReactElement {
   const blocked = isBlocked(ticket);
@@ -76,6 +95,7 @@ export function TicketCard({
       ) : null}
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
         <CardStatus ticket={ticket} />
+        {config ? <FlowBadge ticket={ticket} config={config} /> : null}
         <span className="ml-auto text-xs whitespace-nowrap text-zinc-500">
           {ticket.issueNumber === null ? 'not on GitHub yet' : `#${ticket.issueNumber}`}
         </span>

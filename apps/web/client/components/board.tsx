@@ -11,7 +11,7 @@ import type { BoardColumn } from '@union/core';
 import { leftBoard } from '@union/core/states';
 import type { ReactElement } from 'react';
 
-import type { TicketSummary } from '../../src/api-types';
+import type { PublicProject, TicketSummary } from '../../src/api-types';
 import { api } from '../lib/api';
 import { COLUMNS } from '../lib/labels';
 import { TicketCard } from './ticket-card';
@@ -19,15 +19,19 @@ import { ErrorText } from './ui';
 
 const DRAG_DISTANCE_PX = 6;
 
+type Config = PublicProject['config'];
+
 function Column({
   status,
   title,
   tickets,
+  config,
   onOpen,
 }: {
   status: BoardColumn;
   title: string;
   tickets: TicketSummary[];
+  config?: Config;
   onOpen: (id: number) => void;
 }): ReactElement {
   const { setNodeRef, isOver } = useDroppable({ id: status });
@@ -42,7 +46,7 @@ function Column({
       </h2>
       <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto">
         {tickets.map((ticket) => (
-          <TicketCard key={ticket.id} ticket={ticket} onOpen={onOpen} />
+          <TicketCard key={ticket.id} ticket={ticket} config={config} onOpen={onOpen} />
         ))}
       </div>
     </section>
@@ -71,10 +75,13 @@ export function BoardView({
   tickets,
   now,
   error,
+  config,
   onOpen,
   onStart,
 }: {
   tickets: TicketSummary[];
+  /** The project's flows, to name a ticket's on its card. */
+  config?: Config;
   /** When the tickets were read: Merged / Closed drops those that ended three weeks before. */
   now: number;
   error: Error | null;
@@ -99,6 +106,7 @@ export function BoardView({
               status={status}
               title={title}
               tickets={shown.filter((ticket) => ticket.board === status)}
+              config={config}
               onOpen={onOpen}
             />
           ))}
@@ -109,15 +117,15 @@ export function BoardView({
 }
 
 export function Board({
-  projectId,
+  project,
   onOpen,
 }: {
-  projectId: number;
+  project: PublicProject;
   onOpen: (id: number) => void;
 }): ReactElement {
   const tickets = useQuery({
-    queryKey: ['tickets', projectId],
-    queryFn: () => api.tickets(projectId),
+    queryKey: ['tickets', project.id],
+    queryFn: () => api.tickets(project.id),
   });
   const { start, error } = useStartOnDrop();
   return (
@@ -125,6 +133,7 @@ export function Board({
       tickets={tickets.data ?? []}
       now={tickets.dataUpdatedAt}
       error={error ?? tickets.error}
+      config={project.config}
       onOpen={onOpen}
       onStart={start}
     />

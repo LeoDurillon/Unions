@@ -1,4 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
+import type { PipelineStep } from '@union/core/states';
 import { useState, type ReactElement } from 'react';
 
 import type { NotionImport } from '../../src/api-types';
@@ -74,10 +75,12 @@ function PageInput({
 /** Fetches a page of the project's Notion data source, previews it, and creates the ticket. */
 export function NotionImportPanel({
   projectId,
+  flow,
   onCreated,
   onEdit,
 }: {
   projectId: number;
+  flow: PipelineStep[] | null;
   onCreated: (ticketId: number) => void;
   onEdit: (title: string, body: string) => void;
 }): ReactElement {
@@ -92,6 +95,7 @@ export function NotionImportPanel({
         title: found.title,
         body: found.body,
         notionPageId: found.pageId,
+        flow,
       }),
     onSuccess: (ticket) => {
       onCreated(ticket.id);

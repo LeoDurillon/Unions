@@ -1,3 +1,4 @@
+import { resolveFlow } from '@union/core/flows';
 import { STEPS, type Step } from '@union/core/states';
 import type { ReactElement } from 'react';
 
@@ -34,10 +35,14 @@ function sectionsFor(detail: TicketDetail): TabEntry<Section>[] {
 
 function workerTabsFor(detail: TicketDetail): TabEntry<WorkerTab>[] {
   const active = currentStep(detail.ticket.phase);
-  const steps = STEPS.map((step) => ({
+  const flow = resolveFlow(detail.ticket, detail.project.config);
+  const ran = (step: Step): boolean => detail.outputs.some((output) => output.step === step);
+  // A step the flow skips has no tab, unless it has output from before.
+  const inFlow = STEPS.filter((step) => flow.some((kept) => kept === step) || ran(step));
+  const steps = inFlow.map((step) => ({
     id: step,
     label: STEP_TITLES[step],
-    enabled: step === active || detail.outputs.some((output) => output.step === step),
+    enabled: step === active || ran(step),
   }));
   // Rebase and simplify are not pipeline steps: their tab appears once one ran or runs.
   const onDemand = (['rebase', 'simplify'] as const)

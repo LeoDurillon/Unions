@@ -30,6 +30,8 @@ export); do not edit. Tests are left out.
 - `container-commands.tsx`: Commands the user runs in the ticket's workspace: its container, in the checkout, as the agent (with the preview's address while it runs), typed or saved in th…
 - `detail-row.tsx`: One line of a ticket's details: a label column, then the value.
 - `dropzone.tsx`: A file input as a dashed box: drop files on it, or click (or press Enter on it) to browse.
+- `flow-picker.tsx`: Picks the steps a ticket runs: one of the project's presets, or planning steps chosen one by one.
+- `flow-row.tsx`: The ticket's flow in its details: chosen while in Backlog, shown as fixed once it started.
 - `github-issue-import.tsx`: Fetches an issue of the project's repository, previews it, and creates the ticket on it.
 - `log-tab.tsx`: Replays the ticket's whole agent log, then follows it live.
 - `main-area.tsx`: Right-hand side of the app: a global page, the project's settings (`?settings=`), or the project.

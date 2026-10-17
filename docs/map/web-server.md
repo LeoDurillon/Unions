@@ -75,11 +75,12 @@ export); do not edit. Tests are left out.
 - `ticket-base.ts`: The API routes that show and change the branch a ticket is based on.
 - `ticket-commits.ts`: `/api/tickets/:id/commits`: the commits stored with the ticket's diff snapshot, the change since the last review, and their files.
 - `ticket-create.ts`: `POST /api/tickets`.
+- `ticket-flow.ts`: The steps a ticket runs: read from a request, and `PUT /api/tickets/:id/flow` while it is in Backlog.
 - `ticket-links.ts`: `find` resolves the parent: a map over a listing, or a lookup in the database.
 - `ticket-pull-request.ts`: Looks the pull request up on GitHub (read only), then links it to the ticket.
 - `ticket-removal.ts`: Removes a cancelled ticket from Union: its runs, outputs, reviews and files go with it, and the worker is asked to remove its container (the web never calls Do…
 - `ticket-review-subroutes.ts`: A ticket's routes about its change: its refused commit, its PR description rewrite, its grouping by spec, its commits, its pull request's CI checks.
 - `ticket-subroutes.ts`: The routes under `/api/tickets` that have their own module: creation, the issue import, a ticket's files, its refused commit, the rewrite of its PR description…
-- `ticket-workspace.ts`: The routes about a ticket's workspace: the branch it starts from, the commands run in it, and what its agents used.
+- `ticket-workspace.ts`: The routes about a ticket's workspace: the branch it starts from, the steps it runs, the commands run in it, and what its agents used.
 - `tickets.ts`: The API routes for tickets: listing, creating, editing outputs and moving them between steps.
 - `usage.ts`: `/api/tickets/:id/usage`: what the ticket's agent calls used, per run, written by the worker as each call ends.

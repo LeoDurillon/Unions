@@ -7,6 +7,7 @@ import type { OnboardingGitHub } from '../github-onboarding';
 import { BAD_REQUEST, CONFLICT, CREATED, fail, NOT_FOUND, readObject, requireText } from '../http';
 import { parseIssueRef } from '../pull-request-ref';
 import { guarded } from './github-errors';
+import { flowOf } from './ticket-flow';
 import { findTicket, summarize } from './ticket-links';
 
 /** The project and the issue the body names, read from GitHub; pull requests are refused. */
@@ -67,7 +68,8 @@ async function preview(db: Db, github: OnboardingGitHub, c: Context): Promise<Re
 
 /** A ticket on the issue itself: GitHub keeps owning its title and description. */
 async function create(db: Db, github: OnboardingGitHub, c: Context): Promise<Response> {
-  const { project, issue } = await fetchIssue(db, github, await readObject(c.req.raw));
+  const body = await readObject(c.req.raw);
+  const { project, issue } = await fetchIssue(db, github, body);
   const existing = ticketOf(db, project.id, issue.number);
   if (existing !== null) {
     throw fail(CONFLICT, `#${issue.number} is already ticket ${existing}`);
@@ -77,6 +79,7 @@ async function create(db: Db, github: OnboardingGitHub, c: Context): Promise<Res
     title: issue.title,
     body: issue.body,
     issue: { number: issue.number, nodeId: issue.nodeId },
+    flow: flowOf(body) ?? null,
   });
   return c.json(summarize(ticket, findTicket(db)), CREATED);
 }

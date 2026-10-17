@@ -12,6 +12,12 @@
   A ticket whose PR is merged or closed (`pr_state`, polled by the worker) is in the Union-only Merged / Closed column
   (`boardColumn`), its card tagged Merged or Closed, for 21 days after `pr_merged_at` or `pr_closed_at`, then leaves the
   board (`leftBoard`); the GitHub Project still sees it as Done. A closed PR is still polled: reopened, the ticket goes back.
+- Flows: the New ticket dialog picks the ticket's flow above its three sources (`flow-picker.tsx`: the project's
+  presets, or Custom with a chip per planning step), sent as `flow` to `POST /api/tickets` and the issue import
+  (`routes/ticket-flow.ts` checks it). The default preset is sent as null, so the ticket follows the project's
+  default until it starts. The Overview's Flow row (`flow-row.tsx`) changes it in Backlog
+  (`PUT /api/tickets/:id/flow`, `chooseFlow` in core; 409 once started). The Worker tab shows only the flow's steps
+  (and any with output), and a card names a flow that is not the full pipeline.
 - Code review: after each implementation run the worker stores the branch diff (`diff-snapshot.ts`,
   `diff_snapshots`/`diff_files`, newest only). The web reads it from SQLite (`routes/review.ts`), never from Docker or
   GitHub; `components/review/` renders one file at a time, unified or split (`lib/split-rows.ts` pairs the lines),

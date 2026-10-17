@@ -3,6 +3,7 @@ import type { ReactElement } from 'react';
 import type { TicketDetail } from '../../src/api-types';
 import { BaseBranchRow } from './base-branch-row';
 import { DetailRow } from './detail-row';
+import { FlowRow } from './flow-row';
 import { PreviewSummary } from './preview-summary';
 import { TicketAttachments } from './ticket-attachments';
 import { TicketLinks } from './ticket-links';
@@ -61,6 +62,7 @@ export function TicketDetails({
       <SourceRow detail={detail} />
       <TicketLinks detail={detail} onOpen={onOpenTicket} />
       <BaseBranchRow detail={detail} />
+      <FlowRow detail={detail} />
       <TicketAttachments ticketId={ticket.id} />
       <PreviewSummary ticketId={ticket.id} onOpenTab={onOpenPreview} />
     </div>

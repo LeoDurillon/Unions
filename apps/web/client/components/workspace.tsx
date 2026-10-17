@@ -49,7 +49,7 @@ function ProjectBody({
   if (view === 'pull-requests') {
     return <PullRequestsPage key={project.id} project={project} onOpenTicket={onOpenTicket} />;
   }
-  return <Board projectId={project.id} onOpen={onOpenTicket} />;
+  return <Board project={project} onOpen={onOpenTicket} />;
 }
 
 /** Project bar plus the board, investigations or pull requests (or the empty board behind the first-run wizard). */

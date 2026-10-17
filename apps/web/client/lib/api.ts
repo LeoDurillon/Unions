@@ -4,6 +4,7 @@ import type {
   AgentModel,
   Investigation,
   InvestigationScope,
+  PipelineStep,
   ProjectScript,
   ToolOption,
 } from '@union/core';
@@ -161,7 +162,12 @@ export const api = {
     parentId?: number | null;
     /** The Notion page it is imported from. */
     notionPageId?: string;
+    /** Null: the project's default flow. */
+    flow?: PipelineStep[] | null;
   }): Promise<TicketSummary> => request('POST', '/api/tickets', input),
+  /** Only before the ticket starts; null goes back to the project's default. */
+  setFlow: (id: number, flow: PipelineStep[] | null): Promise<TicketSummary> =>
+    request('PUT', `/api/tickets/${id}/flow`, { flow }),
   setParent: (id: number, parentId: number | null): Promise<TicketSummary> =>
     request('PUT', `/api/tickets/${id}/parent`, { parentId }),
   /** The branches of the ticket's repository, to choose the one it starts from. */
@@ -254,8 +260,12 @@ export const api = {
   githubIssue: {
     preview: (projectId: number, issue: string): Promise<IssueImport> =>
       request('POST', '/api/tickets/github-issue/preview', { projectId, issue }),
-    importIssue: (projectId: number, issue: string): Promise<TicketSummary> =>
-      request('POST', '/api/tickets/github-issue', { projectId, issue }),
+    importIssue: (
+      projectId: number,
+      issue: string,
+      flow: PipelineStep[] | null,
+    ): Promise<TicketSummary> =>
+      request('POST', '/api/tickets/github-issue', { projectId, issue, flow }),
   },
   notion: {
     verify: (

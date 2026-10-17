@@ -1,5 +1,6 @@
 // The form that creates a ticket, with its parent and attached files.
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
+import type { PipelineStep } from '@union/core/states';
 import { useState, type ReactElement, type SubmitEvent } from 'react';
 
 import { api } from '../lib/api';
@@ -56,7 +57,13 @@ function submitLabel(pending: boolean, created: boolean): string {
   return created ? 'Upload the files and open the ticket' : 'Create ticket';
 }
 
-type NewTicket = { projectId: number; title: string; body: string; parentId: number | null };
+type NewTicket = {
+  projectId: number;
+  title: string;
+  body: string;
+  parentId: number | null;
+  flow: PipelineStep[] | null;
+};
 
 /** Creates the ticket, then uploads its files; a retry after a failed upload reuses the ticket. */
 function useCreateTicket(
@@ -86,11 +93,14 @@ function useCreateTicket(
 
 export function TicketForm({
   projectId,
+  flow,
   onCreated,
   initialTitle = '',
   initialBody = '',
 }: {
   projectId: number;
+  /** Chosen above the form, for every way of creating the ticket. */
+  flow: PipelineStep[] | null;
   onCreated: (ticketId: number) => void;
   initialTitle?: string;
   initialBody?: string;
@@ -100,7 +110,7 @@ export function TicketForm({
   const [parentId, setParentId] = useState<number | null>(null);
   const [files, setFiles] = useState<PendingFile[]>([]);
   const { create, created } = useCreateTicket(
-    { projectId, title, body, parentId },
+    { projectId, title, body, parentId, flow },
     { files, setFiles },
     onCreated,
   );

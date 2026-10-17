@@ -13,6 +13,7 @@ import {
   type Action,
   type Flow,
   type Phase,
+  type PipelineStep,
   type Step,
 } from './states';
 
@@ -60,6 +61,8 @@ export function createTicket(
     issue?: { number: number; nodeId: string };
     /** The Notion page it was imported from. */
     notionPageId?: string;
+    /** The steps it runs, checked by the caller; absent: the project's default at start. */
+    flow?: PipelineStep[] | null;
   },
 ): Ticket {
   return db.transaction((tx) => {
@@ -72,6 +75,7 @@ export function createTicket(
         issueNumber: input.issue?.number ?? null,
         issueNodeId: input.issue?.nodeId ?? null,
         notionPageId: input.notionPageId ?? null,
+        flow: input.flow ?? null,
       })
       .returning()
       .get();

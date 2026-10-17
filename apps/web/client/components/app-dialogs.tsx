@@ -1,7 +1,9 @@
+import type { PipelineStep } from '@union/core/states';
 import { useState, type ReactElement } from 'react';
 
 import type { PublicProject } from '../../src/api-types';
 import type { Overlay } from '../lib/use-navigation';
+import { FlowPicker } from './flow-picker';
 import { GitHubIssueImportPanel } from './github-issue-import';
 import { NotionImportPanel } from './notion-import';
 import { TicketForm } from './ticket-form';
@@ -61,28 +63,44 @@ function TicketBody({
   const [tab, setTab] = useState<Source>('write');
   const tabs = sourcesFor(project);
   const [draft, setDraft] = useState<Draft>({ title: '', body: '', key: 0 });
+  const [flow, setFlow] = useState<PipelineStep[] | null>(null);
+  const picker = (
+    // Not a `Field`: its label would wrap the picker's own labels.
+    <div className="space-y-1">
+      <span className="text-sm font-medium">Flow</span>
+      <FlowPicker config={project.config} value={flow} onChange={setFlow} />
+    </div>
+  );
   const form = (
     <TicketForm
       key={draft.key}
       projectId={project.id}
+      flow={flow}
       initialTitle={draft.title}
       initialBody={draft.body}
       onCreated={onCreated}
     />
   );
   if (tabs.length === 1) {
-    return form;
+    return (
+      <div className="space-y-4">
+        {picker}
+        {form}
+      </div>
+    );
   }
   return (
     <div className="space-y-4">
       <TicketTabs tabs={tabs} tab={tab} onChange={setTab} />
+      {picker}
       {tab === 'write' ? form : null}
       {tab === 'github' ? (
-        <GitHubIssueImportPanel projectId={project.id} onCreated={onCreated} />
+        <GitHubIssueImportPanel projectId={project.id} flow={flow} onCreated={onCreated} />
       ) : null}
       {tab === 'notion' ? (
         <NotionImportPanel
           projectId={project.id}
+          flow={flow}
           onCreated={onCreated}
           onEdit={(title, body) => {
             setDraft((previous) => ({ title, body, key: previous.key + 1 }));

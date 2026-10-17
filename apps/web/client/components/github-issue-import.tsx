@@ -1,4 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
+import type { PipelineStep } from '@union/core/states';
 import { useState, type ReactElement } from 'react';
 
 import type { IssueImport } from '../../src/api-types';
@@ -64,9 +65,11 @@ function Preview({
 /** Fetches an issue of the project's repository, previews it, and creates the ticket on it. */
 export function GitHubIssueImportPanel({
   projectId,
+  flow,
   onCreated,
 }: {
   projectId: number;
+  flow: PipelineStep[] | null;
   onCreated: (ticketId: number) => void;
 }): ReactElement {
   const [issue, setIssue] = useState('');
@@ -74,7 +77,7 @@ export function GitHubIssueImportPanel({
     mutationFn: () => api.githubIssue.preview(projectId, issue.trim()),
   });
   const create = useMutation({
-    mutationFn: () => api.githubIssue.importIssue(projectId, issue.trim()),
+    mutationFn: () => api.githubIssue.importIssue(projectId, issue.trim(), flow),
     onSuccess: (ticket) => {
       onCreated(ticket.id);
     },

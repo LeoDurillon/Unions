@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test';
 
-import { flowNote, flowProblems, resolveFlow } from './flows';
+import { flowName, flowNote, flowProblems, resolveFlow } from './flows';
 import { FULL_FLOW } from './states';
 
 test('a flow lists known steps once, in order, with the implementation and the final review', () => {
@@ -39,4 +39,10 @@ test('the implementer and the final review are told which planning steps were sk
   expect(flowNote(standard, 'implement')).not.toContain('no test plan');
   expect(flowNote(FULL_FLOW, 'implement')).toBe('');
   expect(flowNote(quick, 'rebase')).toBe('');
+});
+
+test("a flow is named after the project's preset with the same steps, else Custom", () => {
+  const config = { baseBranch: 'main' };
+  expect(flowName(['implement', 'final_review'], config)).toBe('Quick');
+  expect(flowName(['summary', 'implement', 'final_review'], config)).toBe('Custom');
 });

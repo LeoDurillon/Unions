@@ -85,5 +85,6 @@ export); do not edit. Tests are left out.
 - `states.ts`: Ticket state machine.
 - `tables.ts`: Re-exports every database table definition, exposed as `schema` from `@union/core`.
 - `ticket-base.ts`: The branch the ticket starts from and why; before it starts, the one it would take now.
+- `ticket-flow.ts`: Choosing the steps a ticket runs: only before it starts, since the start fixes them.
 - `ticket-links.ts`: A parent link the rules refuse: wrong project, a cycle, or a ticket that already started.
 - `tickets.ts`: Tickets: reading, creating and labelling them, the event log they write to, and dispatching state-machine actions.

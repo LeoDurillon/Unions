@@ -18,6 +18,7 @@ type TicketPayloads = {
   ticket_removed: { ticketId: number; title: string };
   ticket_parent_changed: { parentId: number | null };
   ticket_base_chosen: { branch: string | null };
+  ticket_flow_chosen: { flow: Column<typeof tables.tickets, 'flow'> };
   ticket_updated_from_github: Nothing;
   phase_changed: { from: Phase; to: Phase; action: Action['type']; board: BoardStatus };
   step_output: { step: Step; version: number };

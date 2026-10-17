@@ -60,6 +60,15 @@ export function projectPresets(config: ProjectConfig): readonly FlowPreset[] {
   return config.flows ?? BUILT_IN_PRESETS;
 }
 
+export function sameFlow(a: Flow, b: Flow): boolean {
+  return a.length === b.length && a.every((step, index) => step === b[index]);
+}
+
+/** The name of the project's preset with these steps, else "Custom". */
+export function flowName(flow: Flow, config: ProjectConfig): string {
+  return projectPresets(config).find((preset) => sameFlow(preset.steps, flow))?.name ?? 'Custom';
+}
+
 /** The flow a ticket starts with: its own, else the project's default preset, else every step. */
 export function resolveFlow(ticket: { flow: Flow | null }, config: ProjectConfig): Flow {
   if (ticket.flow !== null) {
