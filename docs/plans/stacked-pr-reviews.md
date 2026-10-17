@@ -1,14 +1,15 @@
 # Plan: stacked pull requests in the Pull requests and Current reviews tabs
 
-Status: built (branch `stacked-pr-reviews`), steps 1 to 4. Not built: the stack's size warning in the dialog
-(current reviews do not keep their size). Steps 1 to 3 are web only (no worker change, no migration); step 4,
-reviewing the stack with the agent, needs a migration and worker changes.
+Status: built, steps 1 to 4 (branch `stacked-pr-reviews`, last commit `03e3dbf`). What is left is listed under
+"Not built yet" at the end. Steps 1 to 3 are web only; step 4 added two migrations (`0050`, `0051`) and worker
+changes.
 
 ## Idea
 
 A stack of pull requests (each one targets the branch of the one below) shows as one item in the Pull requests and
-Current reviews tabs. Opening it opens one review page with a tab per pull request: the user reviews them one at a
-time, in order, without going back to the list.
+Current reviews tabs. Opening it opens one review page where a segmented control picks the pull request: the user
+reviews them one at a time, in order, without going back to the list. The agent can review the whole stack in one
+run, against several specs linked to its pull requests.
 
 ## What Union already has
 
@@ -66,17 +67,19 @@ export function pullRequestStacks<T extends StackMember>(pulls: T[]): T[][];
 ## Review page
 
 ```
-← Back   Stack: Add schema → API → UI                [Unified|Split]  Post on GitHub
- [#12 Add schema (2)]  [#13 API]  [#14 UI (1)]        ← one tab per PR, its draft count
+← Back   Review: #13 API                  Group by spec  Review with agent  [Unified|Split]  Post on GitHub
+ Stack of 3   [ #12 2 | #13 | #14 1 failed ]          ← segmented control, bottom first: draft count, posting state
  Description | Comments | Diff                        ← today's tabs, for the picked PR
 ```
 
-- A new `review/stack-tabs.tsx` above `ReviewPage`; the picked PR sets `target`.
+- `stack-tabs.tsx` under the header: the stack's PRs as a segmented control (the same `Segmented` as the
+  discussion's All / People / Bots filter), the title on hover; it wraps on a long stack. The header names the
+  picked PR. (The first design had one tab per PR with its title; built as above instead.)
 - `<ReviewPage key={number} …>`: switching PRs resets the section tab and the open file.
 - Diffs, comments and posting do not change: each PR is its own review row with its own drafts.
 - **Post on GitHub** posts the picked PR's review only. The banner and `posting` follow the picked PR.
-- Draft counts come from each PR's comments query (`useComments`, cached per target).
-- A stack of one shows no PR tabs: the page is today's.
+- Draft counts come from each PR's comments query (`useDraftCounts`, sharing `useComments`' cache).
+- A stack of one shows no PR picker: the page is today's.
 
 ## Review with agent: several specs, the whole stack
 
@@ -130,7 +133,7 @@ export function pullRequestStacks<T extends StackMember>(pulls: T[]): T[][];
 - **Prompt:** the members bottom first, each with its title, branches, the command for its own change
   (`git diff <its base ref>...refs/union/pr-<n>`) and the specs linked to it; then each spec's text once, numbered.
   The agent is asked to review each PR against its specs, then the stack as a whole.
-- **Findings:** each comment gains `"pr": <n>` (required in a stack run). They are split per PR and turned into drafts
+- **Findings:** each comment gains `"pr": <n>` (asked for in a stack run; not enforced yet, see below). They are split per PR and turned into drafts
   with that PR's `patchOf`, as `toDrafts` does now; a comment on a line outside its PR's diff becomes a general
   comment of that PR. A comment whose `pr` is not in the stack goes to the top PR as a general comment, with the
   number the agent gave. The summary goes to the top PR. `MAX_COMMENTS` applies per PR.
@@ -138,24 +141,48 @@ export function pullRequestStacks<T extends StackMember>(pulls: T[]): T[][];
 
 ### Limits
 
-- One run reads every member's diff: a big stack is slow and uses a lot of the user's usage. The dialog shows the
-  stack's total size; above a threshold (to pick when building, about 3,000 changed lines), it suggests reviewing PR
-  by PR.
+- One run reads every member's diff: a big stack is slow and uses a lot of the user's usage. The dialog should show
+  the stack's total size and, above a threshold (about 3,000 changed lines), suggest reviewing PR by PR: not built
+  yet, see below.
 - Specs are copied into the prompt whole: a long Notion page is trimmed in the dialog by the user, as for Group by
   spec.
 
 ## Delivery
 
-Four commits, each passing `bun run check`:
+Built on branch `stacked-pr-reviews`, each commit passing `bun run check`:
 
-1. Built (branch `stacked-pr-reviews`): `pr-stacks.ts` and its tests, `isCrossRepository` in the query and list type, branches written back in
-   `pr-review.ts`.
-2. Pull requests tab: the stack row (collapsed until opened), Add stack to reviews, `POST /reviews/stack`. Built (branch `stacked-pr-reviews`).
-3. Built (branch `stacked-pr-reviews`): Current reviews tab: stack rows; review page: `stack-tabs.tsx`. Update
-   `docs/architecture/web.md`.
-4. Built (branch `stacked-pr-reviews`): Review with agent: specs for any agent review (migration, dialog, prompt), then the stack run (members, stack
-   checkout, findings per PR). Update `docs/architecture/web.md` and `worker.md`. Can be split in two: specs first,
-   stack run second.
+1. `f5ff20e`: `pr-stacks.ts` and its tests, `isCrossRepository` in the query and list type, branches written back
+   in `pr-review.ts`.
+2. `7ff2a84`: Pull requests tab: stacks first, the stack row (closed until opened), Add stack to reviews,
+   `POST /reviews/stack`.
+3. `d00ee0c`: Current reviews tab: stack rows, Remove stack in one transaction (`POST /reviews/stack/remove`); the
+   review page's PR picker.
+4. `03e3dbf`: Review with agent: specs for any agent review, the stack run (members, stack checkout, findings per
+   PR), the PR picker as a segmented control. One commit: the two halves touch the same files.
+
+## Not built yet
+
+Promised for v1, to do before merging (recommended order: 2, 3, then 1):
+
+1. **Size warning in the dialog.** Current reviews do not keep their size: store additions and deletions when a PR
+   is added or its files are read (a migration), then show the stack's total and suggest PR by PR above about
+   3,000 changed lines.
+2. **A member no longer open.** The stack start refuses PRs not under review and PRs GitHub no longer has, but a PR
+   merged or closed after its files were read still goes into the run. Check each member's state when starting
+   (`getPullRequestFiles` already reads the PR: return its state too) and refuse by number.
+3. **`"pr"` required in a stack run.** A comment without it goes to the top PR as a general comment. Either refuse
+   the answer when comments lack it (the run fails, nothing lost from the previous run), or keep the fallback and
+   say so in the comment; recommended: keep the fallback, prefix "Not tied to a pull request:".
+
+Known limit, not planned:
+
+- Current reviews do not store whether a PR comes from a fork: a fork's PR whose branch name is one of ours can be
+  grouped into a stack it is not in. Fixing it takes a `cross_repository` column filled when the PR is added.
+
+Not tested:
+
+- A real agent run on a real stack (it uses the user's Claude usage). Only a faked agent went through the stack
+  prompt: how reliably the agent tags each comment with its PR is unknown. Try a stack of two or three first.
 
 ## Not in v1
 
@@ -166,18 +193,19 @@ Four commits, each passing `bun run check`:
 
 ## Decisions
 
-1. **Remove** acts on the whole stack in v1. A merged bottom PR leaves on its own: GitHub retargets the next one and
-   the stored branches follow. Removing one PR (from its tab on the review page) can come later: the route exists.
+1. **Remove** acts on the whole stack in v1, in one transaction. A merged bottom PR leaves on its own: GitHub
+   retargets the next one and the stored branches follow. Removing one PR (from the review page's picker) can come
+   later: the route exists.
 2. **Ticket-linked PRs** stay out of Current reviews, even in a stack: one review page, one way to send. A linked PR
    in the middle splits the stack there (see Current reviews tab).
 3. **A new PR on top** of a stack under review needs no "Add to this stack": the grouping follows the branches, so
    the usual Add puts it in the stack; its row says which stack it joins.
 
-## Open questions for step 4 (with recommendations)
+## Step 4 questions (answered as recommended)
 
-1. Several specs for Group by spec too? Recommended: later. Its groups are parts of one spec; with several, each
+1. Several specs for Group by spec too? Later (not built). Its groups are parts of one spec; with several, each
    part needs its spec's name, and the panel gets longer. The shared picker makes it easy afterwards.
-2. Ticket stacks (tickets with a parent): same stack run? Recommended: not in v1, like the tabs. Their checkout is the
+2. Ticket stacks (tickets with a parent): same stack run? Not in v1, like the PR picker. Their checkout is the
    ticket containers, not throwaway clones.
-3. A stack run while some members already have the user's own drafts: keep them (recommended, as today: a run only
-   replaces the agent's drafts the user did not keep).
+3. A stack run while some members already have the user's own drafts: kept (as before: a run only replaces the
+   agent's drafts the user did not keep).
