@@ -59,11 +59,14 @@ function RowAction({
 export function PullRequestItem({
   pull,
   inReview,
+  joins,
   onOpenTicket,
   onAddReview,
 }: {
   pull: PullRequestListItem;
   inReview: boolean;
+  /** The bottom pull request of the stack under review that adding this one would join. */
+  joins: number | null;
   onOpenTicket: (id: number) => void;
   onAddReview: () => void;
 }): ReactElement {
@@ -90,6 +93,7 @@ export function PullRequestItem({
             {pull.headBranch} → {pull.baseBranch}
           </span>
           {review ? <Badge tone={review.tone}>{review.label}</Badge> : null}
+          {joins === null ? null : <span>joins the stack of #{joins} in reviews</span>}
         </p>
       </div>
       <span className="shrink-0 font-mono text-xs">

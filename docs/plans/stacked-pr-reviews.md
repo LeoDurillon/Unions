@@ -37,11 +37,12 @@ export function pullRequestStacks<T extends StackMember>(pulls: T[]): T[][];
 
 ## Pull requests tab
 
+- Stacks come first, under a "Stacks" heading, then a gap and the other pull requests under "Pull requests".
 - A stack of two or more is one row: "Stack of 3 · #12 Add schema", with its members indented below in order
   (`#13 → #12`, `#14 → #13`), each with its state, review badge and size.
 - Each member keeps its own action: Open ticket when linked.
 - The stack row offers **Add stack to reviews**: adds every member without a ticket, in one request
-  (`POST /reviews` accepts a list), so a stack is never half added. Members already in reviews are skipped, not
+  (`POST /reviews/stack` takes the list), so a stack is never half added. Members already in reviews are skipped, not
   refused (the single add answers 409 for them); when some are in, the button says how many it adds: "Add 1 to
   reviews".
 - A PR whose base is the head of a PR already in reviews joins that stack through the usual Add to reviews: no
@@ -146,9 +147,9 @@ export function pullRequestStacks<T extends StackMember>(pulls: T[]): T[][];
 
 Four commits, each passing `bun run check`:
 
-1. `pr-stacks.ts` and its tests, `isCrossRepository` in the query and list type, branches written back in
+1. Built (branch `stacked-pr-reviews`): `pr-stacks.ts` and its tests, `isCrossRepository` in the query and list type, branches written back in
    `pr-review.ts`.
-2. Pull requests tab: the stack row, Add stack to reviews, the list form of `POST /reviews`.
+2. Pull requests tab: the stack row (collapsed until opened), Add stack to reviews, `POST /reviews/stack`. Built (branch `stacked-pr-reviews`).
 3. Current reviews tab: stack rows; review page: `stack-tabs.tsx`. Update `docs/architecture/web.md`.
 4. Review with agent: specs for any agent review (migration, dialog, prompt), then the stack run (members, stack
    checkout, findings per PR). Update `docs/architecture/web.md` and `worker.md`. Can be split in two: specs first,

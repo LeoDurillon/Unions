@@ -36,6 +36,11 @@
   `diff_commits`/`diff_commit_files`, newest 100) and, once the user has sent a review (`tickets.reviewed_sha`, the
   snapshot's head then), the change since that head while it is still in the branch (`routes/ticket-commits.ts`,
   `since-review`).
+  Stacked pull requests (one targets the head branch of another; `@union/core/pr-stacks`) are one row in the Pull
+  requests tab when it lists open ones, listed first under "Stacks", apart from the others (`pull-requests/stack-item.tsx`, `lib/pull-request-stacks.ts`), opened to list
+  their members. "Add stack to reviews" posts `…/pull-requests/reviews/stack` (one transaction, members already
+  under review skipped); a pull request on one under review says which stack it joins. `routes/pr-review.ts` keeps a
+  review's branches as GitHub has them each time it reads the files, so a retargeted PR leaves its stack.
 - Project settings are a page, not a modal: `?settings=<section>` (`lib/settings-sections.ts` lists the sections
   and their groups; `openSettings(section)` links to one from anywhere), `components/settings/settings-page.tsx`
   with a grouped side menu.

@@ -69,3 +69,21 @@ test('each project has its own reviews; bad input and unknown projects are refus
   expect((await send('POST', '', { ...pull(8), number: 'x' })).status).toBe(400);
   expect((await app.request('/api/projects/999/pull-requests/reviews')).status).toBe(404);
 });
+
+test('a stack is added at once; those already under review are skipped', async () => {
+  await send('POST', '', pull(12));
+  const response = await send('POST', '/stack', { pullRequests: [pull(12), pull(13), pull(14)] });
+  expect(response.status).toBe(201);
+  const added = (await response.json()) as CurrentReview[];
+  expect(added.map((review) => review.prNumber)).toEqual([13, 14]);
+  const again = (await (await send('POST', '/stack', { pullRequests: [pull(13)] })).json()) as [];
+  expect(again).toEqual([]);
+});
+
+test('a stack with one bad pull request adds nothing', async () => {
+  const bad = await send('POST', '/stack', { pullRequests: [pull(20), { ...pull(21), url: '' }] });
+  expect(bad.status).toBe(400);
+  expect((await send('POST', '/stack', { pullRequests: [] })).status).toBe(400);
+  expect((await send('POST', '/stack', { pullRequests: ['x'] })).status).toBe(400);
+  expect(await (await send('GET', '')).json()).toEqual([]);
+});

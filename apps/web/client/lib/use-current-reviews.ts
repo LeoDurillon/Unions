@@ -20,6 +20,7 @@ export function useCurrentReviews(projectId: number): UseQueryResult<CurrentRevi
 /** Adding and removing refresh the list (and the Pull requests tab, which marks what is in it). */
 export function useCurrentReviewMutations(projectId: number): {
   add: ReturnType<typeof useMutation<CurrentReview, Error, PullRequestListItem>>;
+  addStack: ReturnType<typeof useMutation<CurrentReview[], Error, PullRequestListItem[]>>;
   remove: ReturnType<typeof useMutation<unknown, Error, number>>;
 } {
   const queryClient = useQueryClient();
@@ -28,6 +29,10 @@ export function useCurrentReviewMutations(projectId: number): {
   return {
     add: useMutation({
       mutationFn: (pull: PullRequestListItem) => api.addCurrentReview(projectId, pull),
+      onSuccess: refresh,
+    }),
+    addStack: useMutation({
+      mutationFn: (pulls: PullRequestListItem[]) => api.addCurrentReviewStack(projectId, pulls),
       onSuccess: refresh,
     }),
     remove: useMutation({

@@ -8,9 +8,8 @@ import {
   type PullRequestList,
 } from '../../../src/api-types';
 import { api } from '../../lib/api';
-import { useCurrentReviewMutations, useCurrentReviews } from '../../lib/use-current-reviews';
 import { Button, ErrorText } from '../ui';
-import { PullRequestItem } from './pull-request-item';
+import { PullRequestRows } from './pull-request-rows';
 
 const FILTER_LABELS: Record<PullRequestFilter, string> = {
   open: 'Open',
@@ -125,7 +124,7 @@ function usePullRequestList(
   return { query, refresh };
 }
 
-/** Every pull request of the project's repository, read from GitHub; linked ones open their ticket. */
+/** Every pull request of the project's repository, read from GitHub, open stacks as one row; linked ones open their ticket. */
 export function PullRequestsPage({
   project,
   onOpenTicket,
@@ -135,9 +134,6 @@ export function PullRequestsPage({
 }): ReactElement {
   const [filter, setFilter] = useState<PullRequestFilter>('open');
   const { query, refresh } = usePullRequestList(project.id, filter);
-  const reviews = useCurrentReviews(project.id);
-  const { add } = useCurrentReviewMutations(project.id);
-  const inReview = new Set(reviews.data?.map((review) => review.prNumber));
   const list = query.data;
   const shown = list?.pullRequests.length ?? 0;
   return (
@@ -154,24 +150,19 @@ export function PullRequestsPage({
       />
       <div className="min-h-0 flex-1 overflow-y-auto">
         <div className="px-4 pt-3">
-          <ErrorText error={query.error ?? refresh.error ?? add.error} />
+          <ErrorText error={query.error ?? refresh.error} />
         </div>
         {list && shown === 0 ? (
           <p className="px-4 text-sm text-zinc-500">No pull requests.</p>
         ) : null}
-        <ul>
-          {list?.pullRequests.map((pull) => (
-            <PullRequestItem
-              key={pull.number}
-              pull={pull}
-              inReview={inReview.has(pull.number)}
-              onOpenTicket={onOpenTicket}
-              onAddReview={() => {
-                add.mutate(pull);
-              }}
-            />
-          ))}
-        </ul>
+        {list ? (
+          <PullRequestRows
+            projectId={project.id}
+            pulls={list.pullRequests}
+            grouped={filter === 'open'}
+            onOpenTicket={onOpenTicket}
+          />
+        ) : null}
       </div>
     </div>
   );

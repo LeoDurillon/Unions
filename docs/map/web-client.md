@@ -124,7 +124,9 @@ export); do not edit. Tests are left out.
 - `current-reviews-page.tsx`: Pull requests put under review from the Pull requests tab, without a ticket.
 - `pr-review-sections.tsx`: The tabs a pull request review shows before its diff.
 - `pull-request-item.tsx`: One pull request: state, title, who and when, branches, review, size, and what can be done with it.
-- `pull-requests-page.tsx`: Every pull request of the project's repository, read from GitHub; linked ones open their ticket.
+- `pull-request-rows.tsx`: The Pull requests tab's list: stacks first, then the other pull requests, and adding them to the current reviews.
+- `pull-requests-page.tsx`: Every pull request of the project's repository, read from GitHub, open stacks as one row; linked ones open their ticket.
+- `stack-item.tsx`: A stack of pull requests as one row: its bottom's title, its size, adding it to the reviews; its members below when opened.
 
 ## components/review/
 
@@ -230,6 +232,7 @@ export); do not edit. Tests are left out.
 - `pr-description-api.ts`: The browser's client for a ticket's pull request description endpoints.
 - `preview-api.ts`: The browser's client for a ticket's preview endpoints.
 - `project-files-api.ts`: The browser's client for a project's uploaded files.
+- `pull-request-stacks.ts`: The Pull requests tab's stacks and other pull requests, and the stack under review a pull request would join.
 - `refused-commit-api.ts`: The ticket's last refused commit, or null.
 - `review-grouping-api.ts`: `base` is the review's API root (`reviewBase`).
 - `review-target.ts`: Where the target's diff, comments and send live; also the root of its query keys.

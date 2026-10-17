@@ -3,7 +3,16 @@ import { and, desc, eq, getTableColumns } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
 
 import type { OnboardingGitHub } from '../github-onboarding';
-import { CONFLICT, CREATED, fail, NOT_FOUND, readObject, requireId, requireText } from '../http';
+import {
+  BAD_REQUEST,
+  CONFLICT,
+  CREATED,
+  fail,
+  NOT_FOUND,
+  readObject,
+  requireId,
+  requireText,
+} from '../http';
 import { pullRequestGroupingRoutes } from './grouping-targets';
 import { prCommitRoutes } from './pr-commits';
 import { prReviewRoutes } from './pr-review';
@@ -20,20 +29,32 @@ function projectOf(db: Db, c: Context): number {
   return id;
 }
 
-/** Adds a pull request from the Pull requests tab; the client sends what it listed. */
-async function add(db: Db, c: Context): Promise<Response> {
-  const projectId = projectOf(db, c);
-  const body = await readObject(c.req.raw);
-  const prNumber = requireId(String(body.number), 'pull request number');
-  const values = {
+/** The most a stack adds at once: the Pull requests tab lists 100. */
+const MAX_STACK = 100;
+
+type NewReview = typeof schema.currentReviews.$inferInsert;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/** A pull request as the client listed it, as a row to insert. */
+function reviewValues(projectId: number, body: Record<string, unknown>): NewReview {
+  return {
     projectId,
-    prNumber,
+    prNumber: requireId(String(body.number), 'pull request number'),
     title: requireText(body, 'title'),
     url: requireText(body, 'url'),
     author: requireText(body, 'author'),
     headBranch: requireText(body, 'headBranch'),
     baseBranch: requireText(body, 'baseBranch'),
   };
+}
+
+/** Adds a pull request from the Pull requests tab; the client sends what it listed. */
+async function add(db: Db, c: Context): Promise<Response> {
+  const projectId = projectOf(db, c);
+  const values = reviewValues(projectId, await readObject(c.req.raw));
   const [row] = db
     .insert(schema.currentReviews)
     .values(values)
@@ -41,9 +62,34 @@ async function add(db: Db, c: Context): Promise<Response> {
     .returning()
     .all();
   if (!row) {
-    throw fail(CONFLICT, `#${prNumber} is already among the current reviews`);
+    throw fail(CONFLICT, `#${values.prNumber} is already among the current reviews`);
   }
   return c.json(row, CREATED);
+}
+
+/**
+ * Adds a stack's pull requests at once, so it is never half added. Those already under review are
+ * skipped: the answer lists only the added ones.
+ */
+async function addStack(db: Db, c: Context): Promise<Response> {
+  const projectId = projectOf(db, c);
+  const { pullRequests } = await readObject(c.req.raw);
+  if (!Array.isArray(pullRequests) || pullRequests.length === 0) {
+    throw fail(BAD_REQUEST, 'Expected a non-empty pullRequests list');
+  }
+  if (pullRequests.length > MAX_STACK) {
+    throw fail(BAD_REQUEST, `A stack adds at most ${MAX_STACK} pull requests`);
+  }
+  const rows = pullRequests.map((pull: unknown) => {
+    if (!isRecord(pull)) {
+      throw fail(BAD_REQUEST, 'Each pull request must be an object');
+    }
+    return reviewValues(projectId, pull);
+  });
+  const added = db.transaction((tx) =>
+    tx.insert(schema.currentReviews).values(rows).onConflictDoNothing().returning().all(),
+  );
+  return c.json(added, CREATED);
 }
 
 function remove(db: Db, c: Context): Response {
@@ -79,6 +125,7 @@ export function currentReviewRoutes(db: Db, github: OnboardingGitHub, notion: No
     ),
   );
   routes.post('/', (c) => add(db, c));
+  routes.post('/stack', (c) => addStack(db, c));
   routes.delete('/:number', (c) => remove(db, c));
   routes.route('/:number/groupings', pullRequestGroupingRoutes(db, github, notion));
   routes.route('/:number/commits', prCommitRoutes(db, github));
