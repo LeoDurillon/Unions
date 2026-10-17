@@ -53,7 +53,7 @@
   one row each (`review-stack-item.tsx`; Remove posts `…/reviews/stack/remove`: every member in one transaction, or none). Opening one opens its bottom PR in the review
   page with its PRs as a segmented control under the header (`stack-review.tsx`, `stack-tabs.tsx`: draft count and posting state per
   PR, `useDraftCounts` sharing `useComments`' cache); `ReviewPage` is keyed by the PR, so switching starts on its
-  first section with no file open. Each PR keeps its own drafts and its own Post on GitHub.
+  first section with no file open. Each PR keeps its own drafts and its own Send review (Comment, Approve or Request changes).
 - Project settings are a page, not a modal: `?settings=<section>` (`lib/settings-sections.ts` lists the sections
   and their groups; `openSettings(section)` links to one from anywhere), `components/settings/settings-page.tsx`
   with a grouped side menu.

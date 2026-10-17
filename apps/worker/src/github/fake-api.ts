@@ -3,12 +3,12 @@ import type {
   IssueRef,
   ProjectInfo,
   PullRequestRef,
+  PullRequestReview,
   PullRequestState,
   PullRequestStatus,
   RemoteComment,
   RemoteItem,
   RepoRef,
-  ReviewLineComment,
 } from './api';
 import { FakeProjectFields } from './fake-project-fields';
 
@@ -49,12 +49,7 @@ export class FakeGitHubApi extends FakeProjectFields implements GitHubApi {
     closedAt?: number;
   })[] = [];
   /** Reviews posted, in order. */
-  readonly reviews: {
-    number: number;
-    commitId: string | null;
-    body: string;
-    comments: ReviewLineComment[];
-  }[] = [];
+  readonly reviews: ({ number: number } & PullRequestReview)[] = [];
   private clock = 0;
   private commentSeq = 0;
 
@@ -264,7 +259,7 @@ export class FakeGitHubApi extends FakeProjectFields implements GitHubApi {
   createPullRequestReview(
     _repo: RepoRef,
     number: number,
-    review: { commitId: string | null; body: string; comments: ReviewLineComment[] },
+    review: PullRequestReview,
   ): Promise<string> {
     this.calls.push('createPullRequestReview');
     this.reviews.push({ number, ...review });

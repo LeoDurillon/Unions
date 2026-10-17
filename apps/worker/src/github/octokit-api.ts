@@ -1,16 +1,16 @@
 // The GitHub API implemented with Octokit: issues, pull requests and the project board.
-import type { ProjectLocator } from '@union/core';
+import type { ProjectLocator, ReviewVerdict } from '@union/core';
 
 import type {
   GitHubApi,
   IssueRef,
   ProjectInfo,
   PullRequestRef,
+  PullRequestReview,
   PullRequestStatus,
   RemoteComment,
   RemoteItem,
   RepoRef,
-  ReviewLineComment,
 } from './api';
 import { OctokitProjectFields } from './octokit-project-fields';
 import { isNotFound } from './octokit-pull-request-changes';
@@ -23,6 +23,12 @@ import {
   RESOLVE_USER_PROJECT,
   SET_STATUS,
 } from './queries';
+
+const REVIEW_EVENTS: Record<ReviewVerdict, 'COMMENT' | 'APPROVE' | 'REQUEST_CHANGES'> = {
+  comment: 'COMMENT',
+  approve: 'APPROVE',
+  request_changes: 'REQUEST_CHANGES',
+};
 
 type ProjectInfoResponse = {
   node: { field: { id: string; options: { id: string; name: string }[] } | null } | null;
@@ -259,14 +265,14 @@ export class OctokitGitHubApi extends OctokitProjectFields implements GitHubApi 
   async createPullRequestReview(
     repo: RepoRef,
     number: number,
-    review: { commitId: string | null; body: string; comments: ReviewLineComment[] },
+    review: PullRequestReview,
   ): Promise<string> {
     const { data } = await this.octokit.rest.pulls.createReview({
       ...repo,
       pull_number: number,
       ...(review.commitId ? { commit_id: review.commitId } : {}),
       body: review.body,
-      event: 'COMMENT',
+      event: REVIEW_EVENTS[review.verdict],
       comments: review.comments.map((comment) => ({
         path: comment.path,
         body: comment.body,

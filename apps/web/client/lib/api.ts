@@ -7,6 +7,7 @@ import type {
   InvestigationScope,
   PipelineStep,
   ProjectScript,
+  ReviewVerdict,
   ToolOption,
 } from '@union/core';
 
@@ -202,8 +203,9 @@ export const api = {
     request('PATCH', `${base}/comments/${commentId}`, { body }),
   deleteComment: (base: string, commentId: number): Promise<unknown> =>
     request('DELETE', `${base}/comments/${commentId}`),
-  sendReview: (base: string, summary: string): Promise<unknown> =>
-    request('POST', `${base}/review`, { summary }),
+  /** A ticket's review takes no verdict: it goes to the implementer. */
+  sendReview: (base: string, summary: string, verdict?: ReviewVerdict): Promise<unknown> =>
+    request('POST', `${base}/review`, verdict ? { summary, verdict } : { summary }),
   reviewDiscussion: (base: string): Promise<DiscussionResponse> =>
     request('GET', `${base}/discussion`),
   importReviewComments: (id: number): Promise<ReviewImportResult> =>

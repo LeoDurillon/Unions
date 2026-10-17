@@ -5,6 +5,7 @@ import {
   useQueryClient,
   type UseQueryResult,
 } from '@tanstack/react-query';
+import type { ReviewVerdict } from '@union/core';
 
 import type {
   CommentView,
@@ -15,6 +16,9 @@ import type {
 import { agentReviewApi } from './agent-review-api';
 import { api } from './api';
 import { reviewBase, ticketReviewBase, type ReviewTarget } from './review-target';
+
+/** A pull request's review carries a verdict; a ticket's goes to the implementer without one. */
+type SendInput = { summary: string; verdict?: ReviewVerdict | undefined };
 
 /** While a pull request review is being posted, its comments are polled to see them turn sent. */
 const POSTING_POLL_MS = 2000;
@@ -110,7 +114,7 @@ export function useCommentMutations(target: ReviewTarget): {
   edit: ReturnType<typeof useMutation<unknown, Error, { id: number; body: string }>>;
   remove: ReturnType<typeof useMutation<unknown, Error, number>>;
   keep: ReturnType<typeof useMutation<unknown, Error, number>>;
-  send: ReturnType<typeof useMutation<unknown, Error, string>>;
+  send: ReturnType<typeof useMutation<unknown, Error, SendInput>>;
 } {
   const queryClient = useQueryClient();
   const base = reviewBase(target);
@@ -140,7 +144,7 @@ export function useCommentMutations(target: ReviewTarget): {
       onSuccess: refresh,
     }),
     send: useMutation({
-      mutationFn: (summary: string) => api.sendReview(base, summary),
+      mutationFn: ({ summary, verdict }: SendInput) => api.sendReview(base, summary, verdict),
       onSuccess: async () => {
         await refresh();
         if (target.kind === 'ticket') {

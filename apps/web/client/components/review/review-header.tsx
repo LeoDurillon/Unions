@@ -76,8 +76,11 @@ export function ReviewHeader({
         canSend={diff?.canSend ?? false}
         pending={mutations.send.isPending}
         error={mutations.send.error}
-        onSend={(summary) => {
-          mutations.send.mutate(summary, { onSuccess: copy.closeOnSend ? onClose : undefined });
+        onSend={(summary, verdict) => {
+          mutations.send.mutate(
+            { summary, verdict },
+            { onSuccess: copy.closeOnSend ? onClose : undefined },
+          );
         }}
       />
     </header>

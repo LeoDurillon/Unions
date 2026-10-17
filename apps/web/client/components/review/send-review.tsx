@@ -1,3 +1,4 @@
+import type { ReviewVerdict } from '@union/core';
 import { useEffect, useRef, useState, type ReactElement, type RefObject } from 'react';
 
 import type { ReviewCopy } from '../../lib/review-target';
@@ -11,8 +12,62 @@ type SendProps = {
   canSend: boolean;
   pending: boolean;
   error: Error | null;
-  onSend: (summary: string) => void;
+  /** No verdict for a ticket's review (`copy.verdicts` false). */
+  onSend: (summary: string, verdict?: ReviewVerdict) => void;
 };
+
+/** GitHub's three kinds of review, in its order; an approval needs no text. */
+const VERDICT_BUTTONS: { verdict: ReviewVerdict; label: string; needsText: boolean }[] = [
+  { verdict: 'comment', label: 'Comment', needsText: true },
+  { verdict: 'approve', label: 'Approve', needsText: false },
+  { verdict: 'request_changes', label: 'Request changes', needsText: true },
+];
+
+/** One send button for a ticket's review; Comment, Approve and Request changes for a pull request's. */
+function SendButtons({
+  copy,
+  empty,
+  pending,
+  onSend,
+}: {
+  copy: ReviewCopy;
+  /** No draft and no overall note. */
+  empty: boolean;
+  pending: boolean;
+  onSend: (verdict?: ReviewVerdict) => void;
+}): ReactElement {
+  const [sent, setSent] = useState<ReviewVerdict | null>(null);
+  if (!copy.verdicts) {
+    return (
+      <Button
+        variant="primary"
+        disabled={pending || empty}
+        onClick={() => {
+          onSend();
+        }}
+      >
+        {pending ? 'Sending…' : copy.action}
+      </Button>
+    );
+  }
+  return (
+    <>
+      {VERDICT_BUTTONS.map(({ verdict, label, needsText }) => (
+        <Button
+          key={verdict}
+          variant={verdict === 'comment' ? 'primary' : 'secondary'}
+          disabled={pending || (needsText && empty)}
+          onClick={() => {
+            setSent(verdict);
+            onSend(verdict);
+          }}
+        >
+          {pending && sent === verdict ? 'Posting…' : label}
+        </Button>
+      ))}
+    </>
+  );
+}
 
 function SendPanel({
   copy,
@@ -55,16 +110,15 @@ function SendPanel({
         }}
       />
       <ErrorText error={error} />
-      <div className="flex gap-2">
-        <Button
-          variant="primary"
-          disabled={pending || (drafts === 0 && summary.trim() === '')}
-          onClick={() => {
-            onSend(summary);
+      <div className="flex flex-wrap gap-2">
+        <SendButtons
+          copy={copy}
+          empty={drafts === 0 && summary.trim() === ''}
+          pending={pending}
+          onSend={(verdict) => {
+            onSend(summary, verdict);
           }}
-        >
-          {pending ? 'Sending…' : copy.action}
-        </Button>
+        />
         <Button onClick={onCancel}>Cancel</Button>
       </div>
     </section>

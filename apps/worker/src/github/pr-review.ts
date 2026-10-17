@@ -1,7 +1,14 @@
-import { emitEvent, schema, type Db, type Project, type ReviewComment } from '@union/core';
+import {
+  emitEvent,
+  schema,
+  type Db,
+  type Project,
+  type ReviewComment,
+  type ReviewVerdict,
+} from '@union/core';
 import { and, eq, inArray } from 'drizzle-orm';
 
-import type { GitHubApi, ReviewLineComment } from './api';
+import type { GitHubApi, PullRequestReview, ReviewLineComment } from './api';
 
 type Review = typeof schema.currentReviews.$inferSelect;
 
@@ -34,7 +41,8 @@ export function buildReview(
   review: Pick<Review, 'headSha'>,
   drafts: ReviewComment[],
   summary: string,
-): { commitId: string | null; body: string; comments: ReviewLineComment[] } {
+  verdict: ReviewVerdict,
+): PullRequestReview {
   const current = drafts.filter(
     (draft) => draft.kind === 'line' && draft.headSha === review.headSha,
   );
@@ -52,6 +60,7 @@ export function buildReview(
     commitId: review.headSha,
     body: parts.join('\n\n'),
     comments: current.map((draft) => lineComment(draft)),
+    verdict,
   };
 }
 
@@ -112,14 +121,14 @@ function finish(
 }
 
 /**
- * Posts the review's drafts and summary on GitHub as one "Comment" review, then marks the drafts
- * sent. A failure is kept on the review (`submit_status` failed) and the drafts stay drafts.
+ * Posts the review's drafts and summary on GitHub as one review with the user's verdict, then marks
+ * the drafts sent. A failure is kept on the review (`submit_status` failed) and the drafts stay drafts.
  */
 export async function postPullRequestReview(
   db: Db,
   apiFor: (project: Project) => GitHubApi | null,
   reviewId: number,
-  summary: string,
+  submitted: { summary: string; verdict: ReviewVerdict },
 ): Promise<void> {
   const { review, project } = load(db, reviewId);
   try {
@@ -132,7 +141,7 @@ export async function postPullRequestReview(
     const url = await api.createPullRequestReview(
       repo,
       review.prNumber,
-      buildReview(review, posted, summary),
+      buildReview(review, posted, submitted.summary, submitted.verdict),
     );
     finish(db, review, { url, posted: posted.map((draft) => draft.id) });
   } catch (error) {

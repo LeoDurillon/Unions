@@ -75,10 +75,13 @@ test('drafts on the reviewed commit become line comments, older ones are quoted'
   draft({ side: 'old', startLine: 10, endLine: 12, body: 'Why remove these?' });
   draft({ path: 'src/b.ts', startLine: 7, body: 'Typo.', headSha: 'h1' });
 
-  await postPullRequestReview(db, () => api, reviewId, 'Looks good overall.');
+  await postPullRequestReview(db, () => api, reviewId, {
+    summary: 'Looks good overall.',
+    verdict: 'comment',
+  });
 
   const [posted] = api.reviews;
-  expect(posted).toMatchObject({ number: 42, commitId: 'h2' });
+  expect(posted).toMatchObject({ number: 42, commitId: 'h2', verdict: 'comment' });
   expect(posted?.comments).toEqual([
     { path: 'src/a.ts', body: 'Rename this.', side: 'RIGHT', line: 3 },
     { path: 'src/a.ts', body: 'Why remove these?', side: 'LEFT', line: 12, startLine: 10 },
@@ -113,11 +116,24 @@ test('comments on the whole pull request follow the summary in the body', async 
     })
     .run();
 
-  await postPullRequestReview(db, () => api, reviewId, 'Summary.');
+  await postPullRequestReview(db, () => api, reviewId, { summary: 'Summary.', verdict: 'comment' });
 
   const [posted] = api.reviews;
   expect(posted?.comments).toHaveLength(1);
   expect(posted?.body).toBe('Summary.\n\nThe cache is never invalidated.');
+});
+
+test('the verdict goes with the review: an approval may say nothing', async () => {
+  await postPullRequestReview(db, () => api, reviewId, { summary: '', verdict: 'approve' });
+  draft({ startLine: 3, body: 'Rename this.' });
+  await postPullRequestReview(db, () => api, reviewId, { summary: '', verdict: 'request_changes' });
+
+  expect(
+    api.reviews.map((posted) => [posted.verdict, posted.body, posted.comments.length]),
+  ).toEqual([
+    ['approve', '', 0],
+    ['request_changes', '', 1],
+  ]);
 });
 
 test('a failure keeps the drafts and the error on the review', async () => {
@@ -126,7 +142,7 @@ test('a failure keeps the drafts and the error on the review', async () => {
     createPullRequestReview: () => Promise.reject(new Error('Validation Failed: line not in diff')),
   } as unknown as GitHubApi;
 
-  await postPullRequestReview(db, () => failing, reviewId, '');
+  await postPullRequestReview(db, () => failing, reviewId, { summary: '', verdict: 'comment' });
 
   expect(statuses()).toEqual(['draft']);
   expect(review()).toMatchObject({
@@ -144,7 +160,7 @@ test('a comment added while the review is posted stays a draft', async () => {
     },
   } as unknown as GitHubApi;
 
-  await postPullRequestReview(db, () => slow, reviewId, '');
+  await postPullRequestReview(db, () => slow, reviewId, { summary: '', verdict: 'comment' });
 
   const rows = db.select().from(schema.reviewComments).all();
   expect(rows.map((row) => [row.body, row.status])).toEqual([

@@ -39,8 +39,8 @@ export function workerHooks(
     cancelReviewGrouping: (id) => {
       reviewGroupings.cancel(id);
     },
-    submitPullRequestReview: (reviewId, summary) => {
-      void postPullRequestReview(db, apiFor, reviewId, summary);
+    submitPullRequestReview: (reviewId, submitted) => {
+      void postPullRequestReview(db, apiFor, reviewId, submitted);
     },
     cancelPrDescription: (id) => {
       prDescriptions.cancel(id);

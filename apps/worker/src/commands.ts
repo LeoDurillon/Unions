@@ -8,11 +8,13 @@ import {
   decideRefusal,
   dispatch,
   getTicket,
+  isReviewVerdict,
   transition,
   emitEvent,
   recordValidation,
   schema,
   type Db,
+  type ReviewVerdict,
 } from '@union/core';
 import { eq, isNull } from 'drizzle-orm';
 
@@ -29,8 +31,11 @@ export type CommandHooks = {
   cancelAgentReview: (id: number) => void;
   /** Stops a running grouping of a review by spec. */
   cancelReviewGrouping: (id: number) => void;
-  /** Posts a current review's drafts and summary on its pull request. */
-  submitPullRequestReview: (reviewId: number, summary: string) => void;
+  /** Posts a current review's drafts and summary on its pull request, with the user's verdict. */
+  submitPullRequestReview: (
+    reviewId: number,
+    submitted: { summary: string; verdict: ReviewVerdict },
+  ) => void;
   /** Stops a running rewrite of a PR description. */
   cancelPrDescription: (id: number) => void;
   /** Stops a command running in a ticket's workspace. */
@@ -190,7 +195,12 @@ function submitReview(command: Command, hooks: CommandHooks): void {
   if (typeof reviewId !== 'number') {
     throw new TypeError('submit_pr_review needs a numeric "reviewId"');
   }
-  hooks.submitPullRequestReview(reviewId, typeof summary === 'string' ? summary : '');
+  const verdict = field(command.payload, 'verdict');
+  hooks.submitPullRequestReview(reviewId, {
+    summary: typeof summary === 'string' ? summary : '',
+    // Commands queued before verdicts existed carry none: they were comments.
+    verdict: isReviewVerdict(verdict) ? verdict : 'comment',
+  });
 }
 
 /**

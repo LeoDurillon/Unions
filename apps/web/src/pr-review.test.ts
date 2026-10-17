@@ -139,10 +139,23 @@ test('submitting queues one command for the worker and refuses a second while it
 
   expect((await send('POST', '/42/review', { summary: ' LGTM ' })).status).toBe(202);
   const [command] = db.select().from(schema.commands).all();
-  expect(command).toMatchObject({ type: 'submit_pr_review', payload: { summary: 'LGTM' } });
+  expect(command).toMatchObject({
+    type: 'submit_pr_review',
+    payload: { summary: 'LGTM', verdict: 'comment' },
+  });
   expect(db.select().from(schema.currentReviews).get()?.submitStatus).toBe('sending');
   expect((await send('POST', '/42/review', { summary: 'again' })).status).toBe(409);
   expect((await send('GET', '/7/diff')).status).toBe(404);
+});
+
+test('an approval may be sent empty; a request for changes needs something to say', async () => {
+  await send('GET', '/42/diff');
+  expect((await send('POST', '/42/review', { verdict: 'merge' })).status).toBe(400);
+  expect((await send('POST', '/42/review', { verdict: 'request_changes' })).status).toBe(400);
+
+  expect((await send('POST', '/42/review', { verdict: 'approve' })).status).toBe(202);
+  const [command] = db.select().from(schema.commands).all();
+  expect(command?.payload).toMatchObject({ summary: '', verdict: 'approve' });
 });
 
 test('the description and the discussion come from GitHub for the other tabs', async () => {

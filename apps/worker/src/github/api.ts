@@ -1,4 +1,9 @@
-import type { ProjectFieldInput, ProjectLocator, RemoteProjectField } from '@union/core';
+import type {
+  ProjectFieldInput,
+  ProjectLocator,
+  RemoteProjectField,
+  ReviewVerdict,
+} from '@union/core';
 
 export type RepoRef = { owner: string; repo: string };
 
@@ -45,6 +50,14 @@ export type ReviewLineComment = {
   line: number;
   /** Set for a comment on several lines. */
   startLine?: number;
+};
+
+/** A review to post: an overall note and line comments, anchored at `commitId`, with its verdict. */
+export type PullRequestReview = {
+  commitId: string | null;
+  body: string;
+  comments: ReviewLineComment[];
+  verdict: ReviewVerdict;
 };
 
 /** One field of a Project item to set; a null value clears it. */
@@ -103,11 +116,11 @@ export type GitHubApi = {
     number: number,
     behind: boolean,
   ): Promise<PullRequestStatus | null>;
-  /** Posts a "Comment" review: an overall note and line comments, anchored at `commitId`. */
+  /** Posts a review ("Comment", "Approve" or "Request changes"); returns its URL. */
   createPullRequestReview(
     repo: RepoRef,
     number: number,
-    review: { commitId: string | null; body: string; comments: ReviewLineComment[] },
+    review: PullRequestReview,
   ): Promise<string>;
   /** Numbers of the issues of `repo` the issue is marked as blocked by. */
   listBlockedBy(repo: RepoRef, issueNumber: number): Promise<number[]>;

@@ -1,4 +1,11 @@
-import { isIgnoredPath, schema, type Db } from '@union/core';
+import {
+  isIgnoredPath,
+  isReviewVerdict,
+  schema,
+  verdictNeedsText,
+  type Db,
+  type ReviewVerdict,
+} from '@union/core';
 import { eq } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
 
@@ -83,15 +90,31 @@ function getFile(db: Db, c: Context): Response {
   return c.json({ id: file.id, path: file.path, patch: file.patch });
 }
 
-/** Queues the drafts and an optional summary for the worker to post on GitHub as one review. */
+/** A comment when none is given. */
+function verdictOf(body: Record<string, unknown>): ReviewVerdict {
+  if (body.verdict === undefined) {
+    return 'comment';
+  }
+  if (!isReviewVerdict(body.verdict)) {
+    throw fail(BAD_REQUEST, 'verdict must be comment, approve or request_changes');
+  }
+  return body.verdict;
+}
+
+/**
+ * Queues the drafts and an optional summary for the worker to post on GitHub as one review: a
+ * comment, an approval (which may be empty) or a request for changes.
+ */
 async function submit(db: Db, c: Context): Promise<Response> {
   const { review } = load(db, c);
   const body = await readObject(c.req.raw);
   const summary = typeof body.summary === 'string' ? body.summary.trim() : '';
+  const verdict = verdictOf(body);
   if (review.submitStatus === 'sending') {
     throw fail(CONFLICT, 'This review is already being posted');
   }
-  if (draftsOf(db, owner(review)).length === 0 && summary === '') {
+  const empty = draftsOf(db, owner(review)).length === 0 && summary === '';
+  if (empty && verdictNeedsText(verdict)) {
     throw fail(BAD_REQUEST, 'Add at least one comment or an overall note');
   }
   const command = db.transaction((tx) => {
@@ -101,7 +124,7 @@ async function submit(db: Db, c: Context): Promise<Response> {
       .run();
     return tx
       .insert(schema.commands)
-      .values({ type: 'submit_pr_review', payload: { reviewId: review.id, summary } })
+      .values({ type: 'submit_pr_review', payload: { reviewId: review.id, summary, verdict } })
       .returning()
       .get();
   });

@@ -24,6 +24,8 @@ export type ReviewCopy = {
   blocked: string;
   empty: string;
   closeOnSend: boolean;
+  /** Sending can approve or request changes (GitHub), besides commenting. */
+  verdicts: boolean;
 };
 
 export function reviewCopy(target: ReviewTarget): ReviewCopy {
@@ -35,13 +37,15 @@ export function reviewCopy(target: ReviewTarget): ReviewCopy {
         'Sending opens when the ticket waits on you at the implementation or the final review, or once it is done.',
       empty: 'No changes yet: the diff appears after the implementation runs.',
       closeOnSend: true,
+      verdicts: false,
     };
   }
   return {
     destination: `will be posted on #${target.number} as one GitHub review.`,
-    action: 'Post on GitHub',
+    action: 'Comment',
     blocked: 'The review is being posted on GitHub.',
     empty: 'This pull request changes no files.',
     closeOnSend: false,
+    verdicts: true,
   };
 }
