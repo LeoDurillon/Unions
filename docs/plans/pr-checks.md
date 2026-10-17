@@ -1,6 +1,6 @@
 # Plan: the pull request's CI checks, and sending failures to the implementer
 
-Status: in progress (2026-10-16). Step 1 built (core: `ci-output-text.ts`, `ci-outputs.ts`, `agent-inputs.ts`,
+Status: in progress (2026-10-17). Steps 1 and 2 built (core: `ci-output-text.ts`, `ci-outputs.ts`, `agent-inputs.ts`,
 table `ci_outputs`, migration 0049). Step 0 done: the GitHub App now has the permissions (below), and the reads work on
 SenovaFR/Senova. Decisions taken: the log is fetched when the user keeps or sends; failed checks only; one revision
 per send.
@@ -117,3 +117,18 @@ So: possible. Full logs only for GitHub Actions; other CI gives its summary, ann
   taken back (null); keeping the same check on the same commit again replaces its text.
 - `agent-inputs.ts`: `pendingAgentInputs` / `markAgentInputsSent` read and mark command and CI outputs together;
   the worker switches to them in step 3.
+
+## Step 2 as built
+
+- `CiGitHub` (`apps/web/src/github-checks.ts`, Octokit `OctokitCi`): `listChecks` (the head's check runs, its commit
+  statuses, the PR's bot comments: newest edit first, 20 at most), `readCheckRun` (output and annotations),
+  `readJobLog` (null past retention), `readComment`. Parsing in `github-check-parse.ts`: cancelled, skipped, neutral
+  and stale runs are `skipped`, not failed. `createApp` takes it as a fourth argument; the routes get
+  `ApiServices` (`services.ts`).
+- `/api/tickets/:id/pr-checks` (`routes/pr-checks.ts`): `GET` the checks, what was given, `canSend`; `POST /preview`,
+  `/keep`, `/send` with `{ picks: [{ kind: 'check' | 'job' | 'comment', id }], note? }` (1 to 10 picks, each checked
+  against the current listing: a check must have failed, a job must be an Actions job of the head, a comment one of
+  the bot comments); `POST /given/:outputId/drop`. GitHub's 403 is answered naming the permissions.
+- Checked on the live instance (read only): ticket 10 (PR #1615) lists 26 checks (1 failed, 2 skipped) and 4 bot
+  comments; a preview of the failed check and the "Evaluation Tool Report" comment gives the four unused exports
+  with their paths. Nothing stored.

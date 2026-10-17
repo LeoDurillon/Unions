@@ -10,7 +10,6 @@ import {
   STEPS,
   transition,
   type Db,
-  type NotionApi,
   type Step,
 } from '@union/core';
 import { and, eq, isNull } from 'drizzle-orm';
@@ -23,7 +22,6 @@ import {
   type TicketDetail,
   type TicketSummary,
 } from '../api-types';
-import type { OnboardingGitHub } from '../github-onboarding';
 import {
   ACCEPTED,
   BAD_REQUEST,
@@ -35,6 +33,7 @@ import {
   requireId,
   requireText,
 } from '../http';
+import type { ApiServices } from '../services';
 import { reviewRoutes } from './review';
 import { assertStartable, changeParent, childrenOf, findTicket, summarize } from './ticket-links';
 import { linkPullRequest, unlinkPullRequest } from './ticket-pull-request';
@@ -187,7 +186,8 @@ async function editOutput(db: Db, c: Context): Promise<Response> {
   return c.json(saveOutput(db, id, step, content), CREATED);
 }
 
-export function ticketRoutes(db: Db, github: OnboardingGitHub, notion: NotionApi): Hono {
+export function ticketRoutes(db: Db, services: ApiServices): Hono {
+  const { github } = services;
   const routes = new Hono();
   routes.get('/', (c) => listTickets(db, c));
   routes.get('/:id', (c) => ticketDetail(db, c));
@@ -196,7 +196,7 @@ export function ticketRoutes(db: Db, github: OnboardingGitHub, notion: NotionApi
   routes.put('/:id/parent', (c) => changeParent(db, c));
   routes.put('/:id/pull-request', (c) => linkPullRequest(db, github, c));
   routes.delete('/:id/pull-request', (c) => unlinkPullRequest(db, c));
-  routes.route('/', ticketSubroutes(db, github, notion));
+  routes.route('/', ticketSubroutes(db, services));
   routes.route('/', reviewRoutes(db, github));
   return routes;
 }

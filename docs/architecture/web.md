@@ -19,7 +19,11 @@
   sent; sending formats them (`review-feedback.ts`) into a normal `revise` command. The ticket panel's PR tab
   (`pull-request-tab.tsx`, `pull-request/`) shows the linked PR's discussion (`OnboardingGitHub.getDiscussion`,
   `github-discussion.ts`); `routes/review-import.ts` and `review-import.ts` import threads (line drafts) and single
-  review summaries or comments (`general` drafts). A pull request under review (Current reviews tab) uses the same
+  review summaries or comments (`general` drafts). The PR's CI checks (`routes/pr-checks.ts`,
+  `/api/tickets/:id/pr-checks`) are read through `CiGitHub` (`github-checks.ts`, beside `OnboardingGitHub` in
+  `ApiServices`): the head commit's check runs and statuses and the PR's bot comments; a pick (a failed check, another
+  Actions job, a bot comment) is read again and turned into the implementer's text (`ci-picks.ts`, core
+  `ci-output-text.ts`), previewed, kept in `ci_outputs` or sent as a `revise` command. A pull request under review (Current reviews tab) uses the same
   page and comment code: `review_comments` rows belong to a ticket or to a `current_reviews` row
   (`routes/review-comments.ts`, `routes/pr-review.ts`), and the client reviews a `ReviewTarget`
   (`lib/review-target.ts`), whose base URL serves the diff, the comments and the send. Files matching the project's

@@ -7,7 +7,11 @@ export); do not edit. Tests are left out.
 
 - `api-types.ts`: Where the commit view's diffs are read: a commit's SHA, or the change since the last review.
 - `app.ts`: Builds the web server's Hono app: error handling and the API routes, wired to the database and GitHub.
+- `ci-api-types.ts`: The pull request's CI checks as the PR tab shows them, and what the user gave the implementer from them.
+- `ci-picks.ts`: The user's picks among the pull request's CI, checked against its current checks, then read from GitHub into the text the implementer gets.
 - `event-api-types.ts`: The Events settings: the rules, and the Notion columns they can set (null until read).
+- `github-check-parse.ts`: GitHub's check runs, commit statuses and comments to the PR tab's shape: states, workflow runs, bot comments.
+- `github-checks.ts`: The web's reads of a pull request's CI: its checks and bot comments, and what a pick gives the agent (a check's annotations, a job's log, a comment).
 - `github-commits.ts`: The pull request's commits, oldest first (GitHub lists up to 250).
 - `github-credentials.ts`: A GitHub installation id from the body, when one is given.
 - `github-discussion.ts`: GitHub's shape to ours: LEFT is the old side.
@@ -25,6 +29,7 @@ export); do not edit. Tests are left out.
 - `review-import.ts`: The thread as one comment: who said what, the first comment then the replies.
 - `rule-previews.ts`: What a rule's action would do for one ticket, one preview per kind of action; nothing is sent.
 - `server.ts`: The web server's entry point: opens the database, migrates it and serves the API and the client.
+- `services.ts`: The outside services the API routes may call: GitHub (the wizard's and the PR tab's reads, its CI), Notion.
 
 ## routes/
 
@@ -46,6 +51,7 @@ export); do not edit. Tests are left out.
 - `mcp-connectors.ts`: `/api/agents/connectors`: the account's claude.ai connectors as the last check read them, and `POST /check` to read them again (the worker does, in a throwaway…
 - `notifications.ts`: `/api/notifications`: what needs the user across every project (the worker writes them), and marking them read.
 - `notion.ts`: Notion failures become messages the UI shows next to the field.
+- `pr-checks.ts`: `/api/tickets/:id/pr-checks`: the pull request's CI checks read from GitHub, and the failed ones (with related jobs and bot comments) given to the implementer.
 - `pr-commits.ts`: `<review>/commits`: the pull request's commits, and one commit's files and patches, to read the change one commit at a time.
 - `pr-description.ts`: `/api/tickets/:id/pr-description`: the agent rewrites the PR's description into a draft the user edits; sending it is a command (the worker writes to GitHub).
 - `pr-review-load.ts`: Loads the review and project a pull request route refers to, and the GitHub auth to act on them.
@@ -71,7 +77,7 @@ export); do not edit. Tests are left out.
 - `ticket-links.ts`: `find` resolves the parent: a map over a listing, or a lookup in the database.
 - `ticket-pull-request.ts`: Looks the pull request up on GitHub (read only), then links it to the ticket.
 - `ticket-removal.ts`: Removes a cancelled ticket from Union: its runs, outputs, reviews and files go with it, and the worker is asked to remove its container (the web never calls Do…
-- `ticket-review-subroutes.ts`: A ticket's routes about its change: its refused commit, its PR description rewrite, its grouping by spec, its commits.
+- `ticket-review-subroutes.ts`: A ticket's routes about its change: its refused commit, its PR description rewrite, its grouping by spec, its commits, its pull request's CI checks.
 - `ticket-subroutes.ts`: The routes under `/api/tickets` that have their own module: creation, the issue import, a ticket's files, its refused commit, the rewrite of its PR description…
 - `ticket-workspace.ts`: The routes about a ticket's workspace: the branch it starts from, and commands run in it.
 - `tickets.ts`: The API routes for tickets: listing, creating, editing outputs and moving them between steps.
