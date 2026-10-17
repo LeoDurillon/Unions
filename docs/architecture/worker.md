@@ -14,10 +14,16 @@
   draft PR, described by the implementer from the repository's PR template (`pr-description.ts`). The agent may
   run shell commands but never push, switch branches or rewrite history (the rebase and simplify steps do, checked by
   the host).
-- `rebase.ts` (with `rebase-agent.ts`, `rebase-fetch.ts`, `rebase-git.ts`, `rebase-publish.ts`): the on-demand
-  rebase step. The host fetches base and branch into the container as a bundle, resumes the implementer's session
-  with the rebase prompt, checks the result and the project's checks, then force-pushes with a lease; any failure
-  puts the branch back as it was. `github/pull-request.ts` keeps `tickets.behind_by` current during the pull.
+- `rebase.ts` (with `rebase-attempt.ts`, `rebase-host.ts`, `rebase-clean.ts`, `rebase-agent.ts`, `rebase-fetch.ts`,
+  `rebase-git.ts`, `rebase-publish.ts`): the on-demand rebase step. The host fetches base and branch into the
+  container as a bundle, then runs `git rebase` itself (`tryHostRebase`). Already up to date: nothing is pushed.
+  Clean: the project's checks, then a force-push with a lease, with no agent; the result is `ok` with `clean`, which
+  the scheduler dispatches as `rebased_clean`, so the ticket goes back to its final review (or to Done) without a
+  new one. Stopped on a conflict (aborted), or clean with failing checks (the rebased branch kept): the
+  implementer's session is resumed with the rebase prompt and a note saying which, then the result and the checks
+  are verified and pushed, and the final review runs again. Each path writes a `union_note` line to the Log. Any
+  failure puts the branch back as it was. A clean rebase saves no session, so `implementerSession` skips runs
+  without one. `github/pull-request.ts` keeps `tickets.behind_by` current during the pull.
 - `simplify.ts` (with `simplify-agent.ts`, `simplify-finish.ts`, `simplify-git.ts`, `simplify-push.ts`): the
   on-demand history simplification. Same fetch and implementer session as the rebase (`runInImplementerSession` in
   `rebase-agent.ts`), then the agent's leftovers are committed (`commitLeftovers`; a hook's refusal pauses the step

@@ -27,6 +27,7 @@ let root: string;
 let db: Db;
 let ticketId: number;
 let agentCalls: number;
+let prompts: string[];
 
 async function git(cwd: string, ...args: string[]): Promise<string> {
   const proc = Bun.spawn(['git', ...args], {
@@ -139,13 +140,21 @@ beforeEach(async () => {
     .where(eq(schema.tickets.id, ticketId))
     .run();
   agentCalls = 0;
+  prompts = [];
+  // Main also adds b.txt: git's own rebase stops, so the agent is needed.
+  await commit(seed, 'b.txt', 'upstream edit\n');
+  await git(seed, 'push', '--quiet', 'origin', 'main');
 });
 
-/** The agent does what the prompt asks, in the workspace: rebase onto origin/main. */
-const rebases: AgentFn = async () => {
+/** The agent does what the prompt asks, in the workspace: rebase onto origin/main, resolve b.txt. */
+const rebases: AgentFn = async (_runtime, agentRun) => {
   agentCalls += 1;
-  await git(container(), 'rebase', '--quiet', 'origin/main');
-  return { kind: 'ok', text: 'Rebased cleanly.', sessionId: 's2' };
+  prompts.push(agentRun.prompt);
+  await git(container(), 'rebase', 'origin/main').catch(() => '');
+  await writeFile(path.join(container(), 'b.txt'), 'upstream edit\nfeature\n');
+  await git(container(), 'add', 'b.txt');
+  await git(container(), '-c', 'core.editor=true', 'rebase', '--continue');
+  return { kind: 'ok', text: 'Resolved b.txt.', sessionId: 's2' };
 };
 
 function run(agent: AgentFn, resume: StepContext['resume'] = null): Promise<StepResult> {
@@ -180,11 +189,21 @@ function run(agent: AgentFn, resume: StepContext['resume'] = null): Promise<Step
   );
 }
 
-test('the branch is rebased onto the fresh base, force-pushed and diffed again', async () => {
+test('a conflict is left to the agent: rebased, force-pushed and diffed again', async () => {
   const before = await git(origin(), 'rev-parse', 'feature');
-  const result = await run(rebases);
+  const workspaceBefore = await git(container(), 'rev-parse', 'HEAD');
+  let startedOn = '';
+  const result = await run(async (...args) => {
+    startedOn = await git(container(), 'rev-parse', 'HEAD');
+    return rebases(...args);
+  });
   expect(result).toMatchObject({ kind: 'ok', sessionId: 's2' });
-  expect(result.kind === 'ok' && result.output).toContain('Rebased cleanly.');
+  expect(result.kind === 'ok' && result.clean).toBeFalsy();
+  expect(result.kind === 'ok' && result.output).toContain('Resolved b.txt.');
+  expect(agentCalls).toBe(1);
+  // git's rebase was aborted: the agent starts from the branch as it was, told where it stopped.
+  expect(startedOn).toBe(workspaceBefore);
+  expect(prompts[0]).toContain('stopped, with conflicts in `b.txt`');
 
   const after = await git(origin(), 'rev-parse', 'feature');
   expect(after).not.toBe(before);
@@ -204,10 +223,7 @@ test('the branch is rebased onto the fresh base, force-pushed and diffed again',
 });
 
 test('a rebase left half-done is undone: the branch is as it was and nothing is pushed', async () => {
-  // A conflicting change on main: the agent's rebase stops on it and is left there.
-  const seed = path.join(root, 'seed');
-  await commit(seed, 'b.txt', 'upstream edit\n');
-  await git(seed, 'push', '--quiet', 'origin', 'main');
+  // The agent's rebase stops on the conflict and is left there.
   const before = await git(container(), 'rev-parse', 'HEAD');
   const pushedBefore = await git(origin(), 'rev-parse', 'feature');
   const stops: AgentFn = async () => {

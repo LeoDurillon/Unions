@@ -173,6 +173,29 @@ test('a chained run is accepted automatically and the next step sees it as appro
   expect(latestOutput(db, ticketId, 'final_review')).toMatchObject({ validation: 'pending' });
 });
 
+const cleanRebase: StepExecutor = () =>
+  Promise.resolve({ kind: 'ok', output: 'rebased', clean: true });
+
+test('a clean rebase skips the new final review: back to it, or to done', async () => {
+  const scheduler = new Scheduler(db, cleanRebase, 1);
+  saveOutput(db, ticketId, 'final_review', 'the review');
+  const rebasing = { kind: 'running', step: 'rebase', thenRun: 'final_review' } as const;
+  db.update(schema.tickets).set({ phase: rebasing }).run();
+  scheduler.tick();
+  await scheduler.idle();
+  expect(getTicket(db, ticketId).phase).toEqual({
+    kind: 'awaiting_approval',
+    step: 'final_review',
+  });
+  expect(latestOutput(db, ticketId, 'final_review')?.content).toBe('the review');
+  db.update(schema.tickets)
+    .set({ phase: { ...rebasing, thenDone: true } })
+    .run();
+  scheduler.tick();
+  await scheduler.idle();
+  expect(getTicket(db, ticketId).phase).toEqual({ kind: 'done' });
+});
+
 test('a refused commit pauses the run; the decision resumes it, or the agent is sent back', async () => {
   const seen: { resume: unknown; revision: unknown }[] = [];
   const results: StepResult[] = [

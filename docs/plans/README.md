@@ -29,6 +29,9 @@ and linked.
 - [Token usage of each run](run-token-usage.md): input, cache, output and thinking tokens per agent call and model,
   with turns, peak context and API-equivalent cost, in the Log, the Overview tab and investigations. Built
   (branch `run-token-usage`).
+- [Rebase without an agent](rebase-without-agent.md): the host rebases first; the agent runs only on a conflict or
+  when the checks fail after a clean rebase, and the final review runs again only when the agent changed code.
+  Built (2026-10-17).
 
 ## Open items
 

@@ -89,6 +89,7 @@ Describe the change as the branch has it now: read the diff from the base branch
 Say what changed and why, the main changes, and how it was verified. Mention what a reviewer should look at closely.
 Keep it short and factual: no marketing, no list of every file.`,
   rebase: `Rebase your branch onto the latest base branch (\`origin/<base branch>\`, already fetched for you).
+You are called because the host's own \`git rebase\` stopped on conflicts, or went through but broke the project's checks: the note below says which.
 Resolve conflicts keeping the intent of both sides. Run the project's checks and fix anything the rebase broke.
 If a conflict cannot be resolved safely, run \`git rebase --abort\` and explain why.
 Never push.

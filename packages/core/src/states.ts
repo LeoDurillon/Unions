@@ -4,8 +4,8 @@ export const PLANNING_STEPS = ['intake', 'summary', 'technical', 'test_plan'] as
 export type PlanningStep = (typeof PLANNING_STEPS)[number];
 /**
  * `rebase` and `simplify` are outside the pipeline, run on demand once the branch exists: after a
- * rebase the review runs again; a simplified history keeps the same code, so the ticket goes back
- * to where it was.
+ * rebase the agent worked on, the review runs again; a clean rebase (no agent) or a simplified
+ * history leaves the reviewed code as it was, so the ticket goes back to where it was.
  */
 export type Step = PlanningStep | 'implement' | 'final_review' | 'rebase' | 'simplify';
 
@@ -48,7 +48,7 @@ export type Phase =
   | { kind: 'backlog' }
   // an agent run is in flight; `thenRun` chains a step without stopping for approval; `resume`
   // finishes a run paused on a refused commit, without the agent
-  // `thenDone`: a history simplification asked once done goes back to done
+  // `thenDone`: a simplification or clean rebase asked once done goes back to done
   | { kind: 'running'; step: Step; thenRun?: Step; resume?: LeftoverResolution; thenDone?: true }
   | { kind: 'awaiting_approval'; step: Step } // output written, waiting for the user
   // the repository's hook refused the changes the agent left uncommitted; the user decides
@@ -61,6 +61,8 @@ export type Phase =
 export type Action =
   | { type: 'start' } // moved to In Progress
   | { type: 'run_finished' }
+  // The host rebased the branch with no conflict and the checks passed: no agent changed code.
+  | { type: 'rebased_clean' }
   | { type: 'run_failed'; error: string }
   | { type: 'rate_limited'; retryAt: number | null }
   | { type: 'approve' }
@@ -120,8 +122,8 @@ function fromBacklog(action: Action): Phase | null {
   return action.type === 'start' ? { kind: 'running', step: 'intake' } : null;
 }
 
-/** The code did not change, so the final review still stands: back to it, or to done. */
-function afterSimplify(phase: { thenDone?: true }): Phase {
+/** No agent changed the code, so the final review still stands: back to it, or to done. */
+function backToReview(phase: { thenDone?: true }): Phase {
   return phase.thenDone ? { kind: 'done' } : { kind: 'awaiting_approval', step: 'final_review' };
 }
 
@@ -132,11 +134,14 @@ function thenDoneOf(phase: { thenDone?: true }): { thenDone?: true } {
 function fromRunning(phase: PhaseOf<'running'>, action: Action): Phase | null {
   if (action.type === 'run_finished') {
     if (phase.step === 'simplify') {
-      return afterSimplify(phase);
+      return backToReview(phase);
     }
     return phase.thenRun
       ? { kind: 'running', step: phase.thenRun }
       : { kind: 'awaiting_approval', step: phase.step };
+  }
+  if (action.type === 'rebased_clean' && phase.step === 'rebase') {
+    return backToReview(phase);
   }
   if (action.type === 'run_failed') {
     return { kind: 'failed', step: phase.step, error: action.error, ...thenDoneOf(phase) };
@@ -192,12 +197,13 @@ function fromAwaitingApproval(phase: PhaseOf<'awaiting_approval'>, action: Actio
 }
 
 /**
- * Done keeps its branch and pull request: a rebase, or changes asked in a review afterwards, send it
- * back through the implementer, then the final review. A simplified history comes back to done.
+ * Done keeps its branch and pull request: a rebase the agent worked on, or changes asked in a review
+ * afterwards, send it back through the final review. A clean rebase or a simplified history comes
+ * back to done.
  */
 function fromDone(action: Action): Phase | null {
   if (action.type === 'rebase') {
-    return running('rebase');
+    return { kind: 'running', step: 'rebase', thenRun: 'final_review', thenDone: true };
   }
   if (action.type === 'simplify') {
     return { kind: 'running', step: 'simplify', thenDone: true };

@@ -74,8 +74,8 @@ export async function forcePush(rebase: Rebase, lease: string): Promise<string |
   }
 }
 
-/** After the push: the branch is current, the review diff is refreshed, and the report is the output. */
-export async function published(rebase: Rebase, { outcome, gate }: Pushed): Promise<StepResult> {
+/** After the push: the branch is current and the review diff is refreshed; returns the new head. */
+export async function afterPush(rebase: Rebase): Promise<string> {
   const { deps, context, container, branch, base } = rebase;
   const ticketId = context.ticket.id;
   emitEvent(deps.db, { type: 'branch_pushed', ticketId, payload: { branch, rebased: true } });
@@ -85,10 +85,15 @@ export async function published(rebase: Rebase, { outcome, gate }: Pushed): Prom
       context.log({ type: 'union_diff_failed', error: String(error) });
     },
   );
+  return headCommit(deps.runtime, container);
+}
+
+/** After the agent's rebase was pushed: its report, under what the host checked, is the output. */
+export async function published(rebase: Rebase, { outcome, gate }: Pushed): Promise<StepResult> {
   const output = renderRebaseReport({
     agentReport: outcome.text,
     rebase,
-    after: await headCommit(deps.runtime, container),
+    after: await afterPush(rebase),
     gateCommand: rebase.project.config.gateCommand,
     gate,
   });

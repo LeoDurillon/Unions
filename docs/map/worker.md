@@ -47,11 +47,14 @@ export); do not edit. Tests are left out.
 - `prompts.ts`: How to see what the parent changed, from the branches the workspace was cloned with.
 - `provision.ts`: Only the Claude subscription credential is seeded: no MCP tokens, no history.
 - `publish.ts`: Push, then open the draft PR once.
-- `rebase-agent.ts`: Resumes the implementer's session with the rebase prompt.
+- `rebase-agent.ts`: Resumes the implementer's session with the rebase prompt and why the host's rebase needs it.
+- `rebase-attempt.ts`: One rebase attempt: git's own rebase first, the implementer's session only when it stops or breaks the checks.
+- `rebase-clean.ts`: A rebase git did alone: the branch already up to date, or rebased with no conflict, checked and pushed.
 - `rebase-fetch.ts`: Brings the base branch and the pushed branch, as they are on GitHub now, into the container: the host fetches them with the project's credentials and hands ove…
 - `rebase-git.ts`: Whether `ancestor` is already part of `ref`'s history.
+- `rebase-host.ts`: The host's own `git rebase` onto the base, tried before any agent: up to date, clean, or stopped.
 - `rebase-publish.ts`: The project's repository with its credentials, for the fetch and the push.
-- `rebase.ts`: Rebases the ticket's branch onto its base with the implementer's own session, checks it and force-pushes it with a lease.
+- `rebase.ts`: Rebases the ticket's branch onto its base (git alone when there is no conflict, else the implementer's own session), checks it and force-pushes it with a lease.
 - `refused-commit.ts`: Records the refusal and stops the run there: the user decides what to do with the changes.
 - `review-grouping-format.ts`: Every changed file's hunks, one line each: what the agent cites in `hunks` and `lines`.
 - `review-grouping-result.ts`: The agent's grouping, checked against the change: only changed files and their real hunks, every hunk at least once (the ones it left out are unrelated), no em…

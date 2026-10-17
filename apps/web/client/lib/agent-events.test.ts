@@ -70,3 +70,10 @@ test('a result line gives the call’s tokens', () => {
   );
   expect(line?.tokens).toMatchObject({ cacheRead: 3_932_530, output: 5687, turns: 10 });
 });
+
+test("the worker's own notes show as one line", () => {
+  expect(summarizeAgentEvent({ type: 'union_note', text: 'rebased with no conflict' })).toEqual([
+    { kind: 'init', text: 'rebased with no conflict' },
+  ]);
+  expect(summarizeAgentEvent({ type: 'union_note' })).toEqual([]);
+});

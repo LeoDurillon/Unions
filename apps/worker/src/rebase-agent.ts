@@ -7,7 +7,7 @@ import {
   sharedPrompt,
   toolsFor,
 } from '@union/core';
-import { and, desc, eq, inArray } from 'drizzle-orm';
+import { and, desc, eq, inArray, isNotNull } from 'drizzle-orm';
 
 import { runResumable, type AgentOutcome, type AgentRun } from './agent';
 import { approvedBefore } from './approved';
@@ -42,7 +42,10 @@ export type SessionTask = {
   denied: readonly string[];
 };
 
-/** The implementer's session (or the last run that continued it), resumed for the task. */
+/**
+ * The implementer's session (or the last run that continued it), resumed for the task. A clean
+ * rebase ran no agent and saved no session: it is skipped.
+ */
 function implementerSession(db: Db, ticketId: number): string | null {
   const run = db
     .select()
@@ -51,6 +54,7 @@ function implementerSession(db: Db, ticketId: number): string | null {
       and(
         eq(schema.runs.ticketId, ticketId),
         eq(schema.runs.status, 'succeeded'),
+        isNotNull(schema.runs.sessionId),
         inArray(schema.runs.step, ['implement', 'rebase', 'simplify']),
       ),
     )
@@ -59,9 +63,10 @@ function implementerSession(db: Db, ticketId: number): string | null {
   return run?.sessionId ?? null;
 }
 
-function rebaseTask(db: Db, rebase: Rebase): SessionTask {
+/** The rebase prompt; `why` says what the host's own rebase left for the agent. */
+function rebaseTask(db: Db, rebase: Rebase, why = ''): SessionTask {
   const { base, branch, project, deps } = rebase;
-  const instructions = `${resolveAgent(db, 'rebase').prompt}\n\nThe base branch was fetched just now as \`origin/${base}\`; your branch is \`${branch}\`.${gateHint(project.config.gateCommand)}${agentServicesHint(deps.services)}${COMMIT_HOOK_HINT}`;
+  const instructions = `${resolveAgent(db, 'rebase').prompt}\n\nThe base branch was fetched just now as \`origin/${base}\`; your branch is \`${branch}\`.${why}${gateHint(project.config.gateCommand)}${agentServicesHint(deps.services)}${COMMIT_HOOK_HINT}`;
   return { agent: 'rebase', instructions, denied: REBASE_DENIED };
 }
 
@@ -102,9 +107,9 @@ export function runInImplementerSession(rebase: Rebase, task: SessionTask): Prom
   return runResumable(deps.agent, deps.runtime, agentRun(rebase, task, { prompt, session }), fresh);
 }
 
-/** Resumes the implementer's session with the rebase prompt. */
-export function runRebaseAgent(rebase: Rebase): Promise<AgentOutcome> {
-  return runInImplementerSession(rebase, rebaseTask(rebase.deps.db, rebase));
+/** Resumes the implementer's session with the rebase prompt and why the host's rebase needs it. */
+export function runRebaseAgent(rebase: Rebase, why: string): Promise<AgentOutcome> {
+  return runInImplementerSession(rebase, rebaseTask(rebase.deps.db, rebase, why));
 }
 
 /** Another turn in the task's session, for the commit message of changes it left. */
@@ -130,14 +135,35 @@ export function renderRebaseReport(input: {
   gate: GateResult | null;
 }): string {
   const { rebase, after, gateCommand, gate } = input;
-  const checks =
-    gate && gateCommand
-      ? `**Checks** (\`${gateCommand}\`): passing.`
-      : '**Checks:** none configured.';
   return [
     input.agentReport.trim(),
     '---',
-    `**Rebased** \`${rebase.branch}\` onto \`origin/${rebase.base}\` (${rebase.before.slice(0, SHORT_SHA)} → ${after.slice(0, SHORT_SHA)}) and force-pushed.`,
-    checks,
+    `**Rebased** \`${rebase.branch}\` onto \`origin/${rebase.base}\` (${moved(rebase.before, after)}) and force-pushed.`,
+    checksLine(gateCommand, gate),
+  ].join('\n\n');
+}
+
+function moved(before: string, after: string): string {
+  return `${before.slice(0, SHORT_SHA)} → ${after.slice(0, SHORT_SHA)}`;
+}
+
+function checksLine(gateCommand: string | undefined, gate: GateResult | null): string {
+  return gate && gateCommand
+    ? `**Checks** (\`${gateCommand}\`): passing.`
+    : '**Checks:** none configured.';
+}
+
+/** The report of a rebase git did alone: no conflict, so no agent ran and the review still applies. */
+export function renderCleanReport(input: {
+  rebase: Pick<Rebase, 'base' | 'branch' | 'before'>;
+  after: string;
+  gateCommand: string | undefined;
+  gate: GateResult | null;
+}): string {
+  const { rebase, after, gateCommand, gate } = input;
+  return [
+    `**Rebased** \`${rebase.branch}\` onto \`origin/${rebase.base}\` (${moved(rebase.before, after)}) with no conflict, and force-pushed. No agent ran.`,
+    checksLine(gateCommand, gate),
+    'The code reviewed before did not change: the final review still applies.',
   ].join('\n\n');
 }

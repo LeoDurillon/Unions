@@ -58,9 +58,9 @@ export function BranchStatus({ detail }: { detail: TicketDetail }): ReactElement
         </Button>
       </div>
       <p className="text-xs text-zinc-500">
-        The implementation agent rebases the branch and resolves conflicts, the checks run, then the
-        branch is force-pushed and the final review runs again. On failure the branch is left as it
-        was.
+        Git rebases the branch and the checks run, then it is force-pushed. The implementation agent
+        is called only for conflicts or failing checks, and then the final review runs again. On
+        failure the branch is left as it was.
       </p>
       <ErrorText error={command.error} />
     </div>

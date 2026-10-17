@@ -104,6 +104,10 @@ export function summarizeAgentEvent(payload: unknown): LogLine[] {
     case 'result': {
       return [fromResult(payload)];
     }
+    // A line the worker writes itself, such as which way a rebase went.
+    case 'union_note': {
+      return typeof payload.text === 'string' ? [{ kind: 'init', text: payload.text }] : [];
+    }
     default: {
       return [];
     }

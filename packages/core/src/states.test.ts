@@ -98,12 +98,48 @@ test('a rebase from the final review or from done chains into a new final review
   expect(
     transition({ kind: 'awaiting_approval', step: 'final_review' }, { type: 'rebase' }),
   ).toEqual(rebasing);
-  expect(transition({ kind: 'done' }, { type: 'rebase' })).toEqual(rebasing);
-  expect(transition(rebasing, { type: 'run_finished' })).toEqual({
-    kind: 'running',
+  const fromDone = transition({ kind: 'done' }, { type: 'rebase' });
+  expect(fromDone).toEqual({ ...rebasing, thenDone: true });
+  for (const phase of [rebasing, fromDone]) {
+    expect(transition(phase, { type: 'run_finished' })).toEqual({
+      kind: 'running',
+      step: 'final_review',
+    });
+  }
+  expect(boardStatus(rebasing)).toBe('in_review');
+});
+
+test('a clean rebase goes back to the final review, or to done, without a new review', () => {
+  const rebasing: Phase = { kind: 'running', step: 'rebase', thenRun: 'final_review' };
+  expect(transition(rebasing, { type: 'rebased_clean' })).toEqual({
+    kind: 'awaiting_approval',
     step: 'final_review',
   });
-  expect(boardStatus(rebasing)).toBe('in_review');
+  expect(transition({ ...rebasing, thenDone: true }, { type: 'rebased_clean' })).toEqual({
+    kind: 'done',
+  });
+  for (const phase of [
+    { kind: 'running', step: 'implement' },
+    { kind: 'running', step: 'simplify' },
+    { kind: 'awaiting_approval', step: 'final_review' },
+  ] satisfies Phase[]) {
+    expect(() => transition(phase, { type: 'rebased_clean' })).toThrow(InvalidTransition);
+  }
+});
+
+test('a rebase asked once done still goes back to done after a retry or a rate limit', () => {
+  const rebasing: Phase = {
+    kind: 'running',
+    step: 'rebase',
+    thenRun: 'final_review',
+    thenDone: true,
+  };
+  const failed = transition(rebasing, { type: 'run_failed', error: 'boom' });
+  expect(transition(failed, { type: 'retry' })).toEqual(rebasing);
+  const limited = transition(rebasing, { type: 'rate_limited', retryAt: null });
+  expect(transition(limited, { type: 'retry' })).toEqual(rebasing);
+  const paused = transition(rebasing, { type: 'commit_refused' });
+  expect(transition(paused, { type: 'commit_anyway' })).toEqual({ ...rebasing, resume: 'commit' });
 });
 
 test('a failed rebase is retried as a rebase that still chains into the review', () => {

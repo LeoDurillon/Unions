@@ -31,11 +31,21 @@ export type StepContext = {
 };
 
 export type StepResult =
-  | { kind: 'ok'; output: string; sessionId?: string }
+  // `clean`: a rebase git did alone, no agent changed code, so the final review still stands.
+  | { kind: 'ok'; output: string; sessionId?: string; clean?: true }
   // The repository's hook refused the agent's leftover changes: the run pauses with its report.
   | { kind: 'commit_refused'; output: string; sessionId?: string }
   | { kind: 'rate_limited'; retryAt: number | null }
   | { kind: 'error'; error: string };
+
+function finishedAction(
+  result: Extract<StepResult, { kind: 'ok' | 'commit_refused' }>,
+): 'run_finished' | 'rebased_clean' | 'commit_refused' {
+  if (result.kind === 'commit_refused') {
+    return 'commit_refused';
+  }
+  return result.clean ? 'rebased_clean' : 'run_finished';
+}
 
 export type StepExecutor = (context: StepContext) => Promise<StepResult>;
 
@@ -230,9 +240,7 @@ export class Scheduler {
 
     if (result.kind === 'ok' || result.kind === 'commit_refused') {
       this.saveResult(ticketId, step, result);
-      dispatch(this.db, ticketId, {
-        type: result.kind === 'ok' ? 'run_finished' : 'commit_refused',
-      });
+      dispatch(this.db, ticketId, { type: finishedAction(result) });
     } else if (result.kind === 'rate_limited') {
       dispatch(this.db, ticketId, { type: 'rate_limited', retryAt: result.retryAt });
     } else {
