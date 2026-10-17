@@ -93,6 +93,19 @@
   `HelperSpec.files`, never in the workspace), which every service reads (`env_file`); the file kept for the panel
   lists them in a comment and shows secrets interpolated by the repository's file as `${NAME}`, never a value. `network.ts` puts the ticket's container on its preview's networks
   (after a start, on provisioning) and takes it off before `down`.
+- Previews of pull requests under review (`docs/plans/review-previews.md`): the preview code takes a
+  `WorkspaceOwner` (`{ ticketId }` or `{ reviewId }`). A review's preview runs as `union-r<id>` at
+  `r<id>.localhost`, from the workspace of its own container `union-r<id>` (`review-checkout.ts`): created on its
+  first start, the pull request cloned on the host at `review.headSha` like an agent review's checkout, never given
+  the Claude credential nor a token, stopped once the checkout is in. `current_reviews.checkout_sha` is the commit
+  checked out; `checkout_in_repo` says it is on the head branch of the repository itself (fetched from `origin`
+  during the clone): a fork's commit is not, and `target.ts` gives the secret variables only when it is and the
+  review is not marked `from_fork`. `review_checkout_update` (`preview/review-preview.ts`) takes the preview down
+  (`down -v`), empties `repo/` in a root helper, checks the review's current head out, and starts the preview again
+  if it ran. Preview commands for a review have `ticket_id` null and `{ reviewId }` in their payload. A review's
+  preview emits no events (its page polls); the idle watcher reads `union-r<id>-*` routers too, and
+  `takeDownFor('union-r<id>')` takes it down before its container's volumes go. E2E tests of a review are refused
+  until step 3.
 - `services-run.ts`, `agent-services-step.ts` and `preview/background.ts`: the services a project starts for the
   agent (`config.preview.agentServices`, a database for its tests). Around implementation and rebase steps, and
   around a command from the Commands section (`startServicesRun`), the worker runs `up -d <services>` in the

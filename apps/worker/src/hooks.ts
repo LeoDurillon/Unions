@@ -51,8 +51,8 @@ export function workerHooks(
     sendPrDescription: (id) => {
       void sendPrDescription(db, apiFor, id);
     },
-    preview: (ticketId, action) => {
-      previews.run(ticketId, action);
+    preview: (owner, action) => {
+      previews.run(owner, action);
     },
   };
 }

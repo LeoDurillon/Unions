@@ -33,6 +33,13 @@ export const currentReviews = sqliteTable(
     /** The pull request's files as last fetched for review, and the head commit they are at. */
     files: text('files', { mode: 'json' }).$type<PullRequestFile[]>(),
     headSha: text('head_sha'),
+    /**
+     * The commit checked out in the review's own container (`union-r<id>`, for its preview, tests and
+     * commands); null while it has none. `checkoutInRepo`: that commit is on a branch of the
+     * repository itself, not only in a fork: only then does the preview get the project's secrets.
+     */
+    checkoutSha: text('checkout_sha'),
+    checkoutInRepo: integer('checkout_in_repo', { mode: 'boolean' }).notNull().default(false),
     /** `sending` while the worker posts the review to GitHub; `failed` with `submitError` when it could not. */
     submitStatus: text('submit_status', { enum: ['sending', 'failed'] }),
     submitError: text('submit_error'),

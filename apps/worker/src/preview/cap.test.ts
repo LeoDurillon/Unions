@@ -75,7 +75,7 @@ test("past Union's running cap, a start is refused", async () => {
     );
   }
   const ticketId = ticketWithWorkspace(projectId, 'd');
-  await startPreview(deps(), ticketId);
+  await startPreview(deps(), { ticketId });
   expect(getPreview(db, { ticketId })?.error).toContain('3 previews are running already');
 });
 
@@ -97,10 +97,10 @@ test("the project's own cap counts only its previews", async () => {
     },
   );
   const first = ticketWithWorkspace(projectId, 'first');
-  await startPreview(deps(), first);
+  await startPreview(deps(), { ticketId: first });
   expect(getPreview(db, { ticketId: first })?.status).toBe('running');
   const second = ticketWithWorkspace(projectId, 'second');
-  await startPreview(deps(), second);
+  await startPreview(deps(), { ticketId: second });
   expect(getPreview(db, { ticketId: second })?.error).toContain(
     "1 of the project's previews are running already",
   );

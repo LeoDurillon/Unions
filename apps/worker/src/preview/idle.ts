@@ -1,29 +1,33 @@
 import {
   activePreviews,
-  isTicketPreview,
   DEFAULT_IDLE_STOP_MINUTES,
   getTicket,
+  ownerKey,
+  previewOwner,
   schema,
   type Db,
   type Preview,
+  type WorkspaceOwner,
 } from '@union/core';
 import { eq } from 'drizzle-orm';
 
 const MS_PER_MINUTE = 60_000;
 const CHECK_EVERY_MS = MS_PER_MINUTE;
 const METRICS_TIMEOUT_MS = 5000;
-/** `traefik_router_requests_total{…,router="union-t12-api@docker",…} 42` */
+/** `traefik_router_requests_total{…,router="union-t12-api@docker",…} 42` (`union-r3-…`: a review's) */
 const ROUTER_LINE =
-  /^traefik_router_requests_total\{[^}]*router="union-t(?<ticket>\d+)-[^"]*"[^}]*\}\s+(?<count>[\d.e+]+)/u;
+  /^traefik_router_requests_total\{[^}]*router="union-(?<owner>[tr]\d+)-[^"]*"[^}]*\}\s+(?<count>[\d.e+]+)/u;
 
-/** Requests the proxy served per ticket (all its exposed services), from Traefik's metrics. */
-export function requestsByTicket(metrics: string): Map<number, number> {
-  const totals = new Map<number, number>();
+/**
+ * Requests the proxy served per preview (all its exposed services), from Traefik's metrics, by
+ * owner key (`t12`, `r3`).
+ */
+export function requestsByOwner(metrics: string): Map<string, number> {
+  const totals = new Map<string, number>();
   for (const line of metrics.split('\n')) {
     const groups = ROUTER_LINE.exec(line)?.groups;
-    if (groups?.ticket !== undefined && groups.count !== undefined) {
-      const ticket = Number(groups.ticket);
-      totals.set(ticket, (totals.get(ticket) ?? 0) + Number(groups.count));
+    if (groups?.owner !== undefined && groups.count !== undefined) {
+      totals.set(groups.owner, (totals.get(groups.owner) ?? 0) + Number(groups.count));
     }
   }
   return totals;
@@ -49,13 +53,11 @@ export type IdleDeps = {
   db: Db;
   readMetrics: () => Promise<string | null>;
   /** Stops a preview that had no visit for `minutes` (through the manager: never during a start). */
-  stopIdle: (ticketId: number, minutes: number) => void;
-  /** The ticket whose e2e tests run now, if any. */
-  testing: () => number | null;
+  stopIdle: (owner: WorkspaceOwner, minutes: number) => void;
+  /** The owner key (`t12`, `r3`) whose e2e tests run now, if any. */
+  testing: () => string | null;
   now?: () => number;
 };
-
-type TicketPreview = Preview & { ticketId: number };
 
 function idleMinutes(db: Db, preview: Preview): number {
   const project = db
@@ -70,10 +72,10 @@ function idleMinutes(db: Db, preview: Preview): number {
  * Stops running previews nobody visited for the project's idle time. A visit is a request the proxy
  * served to one of the preview's services; the clock starts again at each one, at each start, and
  * at each worker start (it cannot know what happened before). A preview whose ticket is in a step,
- * or whose e2e tests run, is in use whatever the visits.
+ * or whose e2e tests run, is in use whatever the visits. Keyed by owner key (`t12`, `r3`).
  */
 export class IdleWatcher {
-  private readonly seen = new Map<number, { total: number; at: number }>();
+  private readonly seen = new Map<string, { total: number; at: number }>();
   private lastCheck = 0;
   private checking = false;
 
@@ -97,14 +99,15 @@ export class IdleWatcher {
     }
   }
 
-  private inUse(preview: TicketPreview, total: number, now: number): boolean {
-    const last = this.seen.get(preview.ticketId);
-    const busy =
-      getTicket(this.deps.db, preview.ticketId).phase.kind === 'running' ||
-      this.deps.testing() === preview.ticketId;
+  private inUse(preview: Preview, key: string, total: number, now: number): boolean {
+    const last = this.seen.get(key);
+    const stepping =
+      preview.ticketId !== null &&
+      getTicket(this.deps.db, preview.ticketId).phase.kind === 'running';
+    const busy = stepping || this.deps.testing() === key;
     const restarted = last !== undefined && (preview.startedAt ?? 0) > last.at;
     if (!last || last.total !== total || busy || restarted) {
-      this.seen.set(preview.ticketId, { total, at: now });
+      this.seen.set(key, { total, at: now });
       return true;
     }
     return false;
@@ -115,26 +118,25 @@ export class IdleWatcher {
     if (metrics === null) {
       return;
     }
-    const totals = requestsByTicket(metrics);
-    // Only tickets' previews so far: a review's has no router names this reads yet.
+    const totals = requestsByOwner(metrics);
     const running = activePreviews(this.deps.db)
-      .filter((row) => isTicketPreview(row))
-      .filter((row) => row.status === 'running');
-    for (const id of this.seen.keys()) {
-      if (!running.some((row) => row.ticketId === id)) {
-        this.seen.delete(id);
+      .filter((row) => row.status === 'running')
+      .map((row) => ({ row, owner: previewOwner(row), key: ownerKey(previewOwner(row)) }));
+    for (const key of this.seen.keys()) {
+      if (!running.some((preview) => preview.key === key)) {
+        this.seen.delete(key);
       }
     }
-    for (const preview of running) {
-      const minutes = idleMinutes(this.deps.db, preview);
-      const since = this.seen.get(preview.ticketId)?.at ?? now;
+    for (const { row, owner, key } of running) {
+      const minutes = idleMinutes(this.deps.db, row);
+      const since = this.seen.get(key)?.at ?? now;
       if (
-        !this.inUse(preview, totals.get(preview.ticketId) ?? 0, now) &&
+        !this.inUse(row, key, totals.get(key) ?? 0, now) &&
         minutes > 0 &&
         now - since >= minutes * MS_PER_MINUTE
       ) {
-        this.seen.delete(preview.ticketId);
-        this.deps.stopIdle(preview.ticketId, minutes);
+        this.seen.delete(key);
+        this.deps.stopIdle(owner, minutes);
       }
     }
   }

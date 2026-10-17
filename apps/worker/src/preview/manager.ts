@@ -1,31 +1,52 @@
-import { emitEvent, recordE2e, recoverPreviews } from '@union/core';
+import {
+  emitEvent,
+  ownerKey,
+  recordE2e,
+  recoverPreviews,
+  ticketOwnerId,
+  type WorkspaceOwner,
+} from '@union/core';
 
 import type { PreviewAction } from '../commands';
 import { runRequestedE2e } from '../e2e';
 import { previewSettings } from './compose';
 import { generatePreviewFile } from './compose-file';
 import { IdleWatcher, readProxyMetrics } from './idle';
+import { startReviewPreview, updateReviewPreview } from './review-preview';
 import { refreshPreviewLogs, startPreview, stopPreview, takeDown, type PreviewDeps } from './run';
 
-const ACTIONS: Record<
-  Exclude<PreviewAction, 'e2e'>,
-  (deps: PreviewDeps, ticketId: number) => Promise<unknown>
-> = {
-  start: startPreview,
+type Action = (deps: PreviewDeps, owner: WorkspaceOwner) => Promise<unknown>;
+
+/** A pull request's start checks it out first; only a pull request's checkout can be updated. */
+const ACTIONS: Record<Exclude<PreviewAction, 'e2e'>, Action> = {
+  start: (deps, owner) =>
+    'reviewId' in owner ? startReviewPreview(deps, owner.reviewId) : startPreview(deps, owner),
   stop: stopPreview,
   logs: refreshPreviewLogs,
   generate: generatePreviewFile,
+  update: (deps, owner) =>
+    'reviewId' in owner ? updateReviewPreview(deps, owner.reviewId) : Promise.resolve(),
 };
 
-/** Container names of ticket previews' owners: a ticket's own container is `union-t<id>`. */
-const TICKET_CONTAINER = /^union-t(?<id>\d+)$/u;
+/** Container names of previews' owners: a ticket's own is `union-t<id>`, a pull request's `union-r<id>`. */
+const OWNER_CONTAINER = /^union-(?<kind>[tr])(?<id>\d+)$/u;
+
+function containerOwner(name: string): WorkspaceOwner | null {
+  const groups = OWNER_CONTAINER.exec(name)?.groups;
+  if (groups?.id === undefined) {
+    return null;
+  }
+  const id = Number(groups.id);
+  return groups.kind === 't' ? { ticketId: id } : { reviewId: id };
+}
 
 /**
  * Runs the preview commands, one at a time per ticket (a start and a stop never overlap). Previews
  * do not depend on the worker: they keep running when it restarts.
  */
 export class PreviewManager {
-  private readonly busy = new Map<number, Promise<void>>();
+  /** By owner key (`t12`, `r3`). */
+  private readonly busy = new Map<string, Promise<void>>();
 
   constructor(private readonly deps: PreviewDeps) {}
 
@@ -36,31 +57,34 @@ export class PreviewManager {
   /** The ticket whose e2e tests are running: one at a time, a browser takes a lot of memory. */
   private e2eTicket: number | null = null;
 
-  run(ticketId: number, action: PreviewAction): void {
+  run(owner: WorkspaceOwner, action: PreviewAction): void {
     if (action === 'e2e') {
-      this.e2e(ticketId);
+      this.e2e(owner);
       return;
     }
-    this.track(ticketId, () => ACTIONS[action](this.deps, ticketId));
+    this.track(owner, () => ACTIONS[action](this.deps, owner));
   }
 
-  private e2e(ticketId: number): void {
+  private e2eRefusal(owner: WorkspaceOwner): string | null {
+    if (!('ticketId' in owner)) {
+      return "A pull request's end-to-end tests are not supported yet";
+    }
+    if (this.e2eTicket !== null) {
+      return `Ticket ${this.e2eTicket}'s end-to-end tests are running: one run at a time, they take a lot of memory`;
+    }
+    return this.deps.config ? null : 'The worker cannot start ticket containers here';
+  }
+
+  private e2e(owner: WorkspaceOwner): void {
     const { config } = this.deps;
-    if (this.e2eTicket !== null || !config) {
-      recordE2e(
-        this.deps.db,
-        { ticketId },
-        {
-          e2eStatus: 'skipped',
-          e2eOutput: config
-            ? `Ticket ${this.e2eTicket}'s end-to-end tests are running: one run at a time, they take a lot of memory`
-            : 'The worker cannot start ticket containers here',
-        },
-      );
+    const refusal = this.e2eRefusal(owner);
+    if (refusal !== null || !config || !('ticketId' in owner)) {
+      recordE2e(this.deps.db, owner, { e2eStatus: 'skipped', e2eOutput: refusal });
       return;
     }
+    const { ticketId } = owner;
     this.e2eTicket = ticketId;
-    this.track(ticketId, async () => {
+    this.track(owner, async () => {
       try {
         await runRequestedE2e({ ...this.deps, config }, ticketId);
       } finally {
@@ -69,9 +93,9 @@ export class PreviewManager {
     });
   }
 
-  /** The ticket whose e2e tests run now, if any. */
-  testing(): number | null {
-    return this.e2eTicket;
+  /** The owner key (`t12`) whose e2e tests run now, if any. */
+  testing(): string | null {
+    return this.e2eTicket === null ? null : ownerKey({ ticketId: this.e2eTicket });
   }
 
   /** What stops the previews nobody visits, through this manager. */
@@ -79,32 +103,35 @@ export class PreviewManager {
     return new IdleWatcher({
       db: this.deps.db,
       readMetrics: () => readProxyMetrics(),
-      stopIdle: (ticketId, minutes) => {
-        this.stopIdle(ticketId, minutes);
+      stopIdle: (owner, minutes) => {
+        this.stopIdle(owner, minutes);
       },
       testing: () => this.testing(),
     });
   }
 
-  /** Stops a preview nobody visited for `minutes`, and says so in the ticket's log. */
-  stopIdle(ticketId: number, minutes: number): void {
-    this.track(ticketId, async () => {
-      await stopPreview(this.deps, ticketId);
-      emitEvent(this.deps.db, {
-        type: 'preview_idle_stopped',
-        ticketId,
-        payload: { minutes, message: `Preview stopped: nobody opened it for ${minutes} minutes` },
-      });
+  /** Stops a preview nobody visited for `minutes`, and says so in the ticket's log (a ticket's). */
+  stopIdle(owner: WorkspaceOwner, minutes: number): void {
+    this.track(owner, async () => {
+      await stopPreview(this.deps, owner);
+      const ticketId = ticketOwnerId(owner);
+      if (ticketId !== null) {
+        emitEvent(this.deps.db, {
+          type: 'preview_idle_stopped',
+          ticketId,
+          payload: { minutes, message: `Preview stopped: nobody opened it for ${minutes} minutes` },
+        });
+      }
     });
   }
 
-  /** Before a ticket's volumes are removed: its preview uses the workspace volume. */
+  /** Before a ticket's or a pull request's volumes are removed: its preview uses the workspace volume. */
   async takeDownFor(containerName: string): Promise<void> {
-    const id = TICKET_CONTAINER.exec(containerName)?.groups?.id;
-    if (id !== undefined) {
-      await this.busy.get(Number(id));
+    const owner = containerOwner(containerName);
+    if (owner !== null) {
+      await this.busy.get(ownerKey(owner));
       try {
-        await takeDown(this.deps, Number(id));
+        await takeDown(this.deps, owner);
       } catch {
         // Nothing was running: the volume can go.
       }
@@ -115,23 +142,27 @@ export class PreviewManager {
     await Promise.all(this.busy.values());
   }
 
-  private track(ticketId: number, work: () => Promise<unknown>): void {
-    if (this.busy.has(ticketId)) {
-      emitEvent(this.deps.db, {
-        type: 'preview_busy',
-        ticketId,
-        payload: { message: 'The preview is busy: try again once it is done' },
-      });
+  private track(owner: WorkspaceOwner, work: () => Promise<unknown>): void {
+    const key = ownerKey(owner);
+    if (this.busy.has(key)) {
+      const ticketId = ticketOwnerId(owner);
+      if (ticketId !== null) {
+        emitEvent(this.deps.db, {
+          type: 'preview_busy',
+          ticketId,
+          payload: { message: 'The preview is busy: try again once it is done' },
+        });
+      }
       return;
     }
     const done = (async (): Promise<void> => {
       try {
         await work();
       } finally {
-        this.busy.delete(ticketId);
+        this.busy.delete(key);
       }
     })();
-    this.busy.set(ticketId, done);
+    this.busy.set(key, done);
   }
 }
 

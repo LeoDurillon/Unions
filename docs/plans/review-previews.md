@@ -1,6 +1,6 @@
 # Plan: previews of pull requests under review
 
-Status: step 1 built (branch `review-previews`): the owner in core and the database; steps 2 to 6 left.
+Status: steps 1 and 2 built (branch `review-previews`): the owner in core and the database, and a review's container and preview in the worker; steps 3 to 6 left.
 
 ## Idea
 
@@ -50,12 +50,15 @@ The preview mounts its workspace volume like a ticket's; the compose file is che
 
 **It runs the reviewed commit, not the branch's tip.** The diff on screen, the running code and the tested code are
 the same. When the review is reloaded at a newer head, the tab says the checkout is at `abc1234` while the review
-reads `def5678`; "Update to the reviewed commit" fetches it and checks it out in the container (`git checkout
---detach`, local changes made by Commands discarded after a confirmation), then restarts the preview if it runs.
-The services' named volumes, and so the data, stay unless the user picks "Restart with fresh data" (`down -v`).
+reads `def5678`; "Update to the reviewed commit" takes the preview down (`down -v`, its data with it, as a ticket's
+Stop does), empties the checkout (what Commands wrote there goes, after a confirmation), checks the new commit out
+and starts the preview again if it ran. (Built in step 2; a clone on the host, as for the first checkout: the
+container holds no token to fetch with.)
 
 **Secrets: never for a fork.** A ticket's code is the agent's; a pull request's may be anyone's. The review stores
-`fromFork` when it is added (the list already knows it, `api-types.ts`). A fork's preview starts with the plain
+`fromFork` when it is added (the list already knows it, `api-types.ts`). The worker checks it again at each checkout: the
+commit must be on the head branch of the repository itself (`current_reviews.checkout_in_repo`, fetched from
+`origin` in the host's clone), else the secrets are left out whatever the client said. A fork's preview starts with the plain
 variables only: the secret variables are left unset, there is no way to give them. The start button says whose code
 runs ("Runs the code of @author on this machine"), and for a fork, that the secrets are left out. A pull request from
 a branch of the repository itself gets them like a ticket (its author can push to the repository already). Commands
@@ -123,7 +126,9 @@ The Commands section of the ticket's Preview tab, on the review's Preview tab:
    `previewProject`/`previewHost`/`previewServiceHost` from an owner; `{pr.number}`; events only for a ticket
    owner. Tests: helpers for both owners, templates, the migrations on a copy of a database with previews and runs.
    Restart `web` and `worker` after it (migrations, several core files).
-2. **Worker: the review's container and preview.** `ensureReviewContainer` (checkout at `headSha`, project files, no
+2. **Worker: the review's container and preview.** (Built: `review-checkout.ts`, `preview/review-preview.ts`,
+   migration `0055_review_checkout`; tested against real Docker with review 9001 and a local repository standing in
+   for GitHub: start, the update to a new commit, a commit only in `pull/7/head` without the secrets.) `ensureReviewContainer` (checkout at `headSha`, project files, no
    credentials) and the update to a newer commit; `loadTarget` for a review; `PreviewManager` keyed by owner; idle
    regex; `takeDownFor`; secrets left out for a fork (`from_fork` is what the client listed when the review was
    added: the worker checks the pull request's head repository again before a start with secrets). Test against real Docker with a throwaway review row (its

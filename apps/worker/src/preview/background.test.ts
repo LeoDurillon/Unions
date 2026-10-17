@@ -179,13 +179,13 @@ test("stopping the preview during a step keeps the agent's services", async () =
     .set({ phase: { kind: 'running', step: 'implement' } })
     .where(eq(schema.tickets.id, ticketId))
     .run();
-  await stopPreview(deps(), ticketId);
+  await stopPreview(deps(), { ticketId });
   expect(composeCalls).toEqual(['-p union-t1 rm --stop --force web']);
   db.update(schema.tickets)
     .set({ phase: { kind: 'done' } })
     .where(eq(schema.tickets.id, ticketId))
     .run();
   composeCalls = [];
-  await stopPreview(deps(), ticketId);
+  await stopPreview(deps(), { ticketId });
   expect(composeCalls).toEqual(['-p union-t1 down -v --remove-orphans']);
 });

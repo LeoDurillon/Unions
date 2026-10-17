@@ -1,28 +1,37 @@
 import { beforeEach, expect, test } from 'bun:test';
 
-import { createDb, createTicket, migrateDb, schema, updatePreview, type Db } from '@union/core';
+import {
+  createDb,
+  createTicket,
+  migrateDb,
+  schema,
+  updatePreview,
+  type Db,
+  type WorkspaceOwner,
+} from '@union/core';
 import { eq } from 'drizzle-orm';
 
-import { IdleWatcher, readProxyMetrics, requestsByTicket } from './idle';
+import { IdleWatcher, readProxyMetrics, requestsByOwner } from './idle';
 
 const MINUTE = 60_000;
 
 let db: Db;
 let ticketId: number;
 let metrics: string | null;
-let stopped: { ticketId: number; minutes: number }[];
-let testing: number | null;
+let stopped: { owner: WorkspaceOwner; minutes: number }[];
+let testing: string | null;
 
-function line(ticket: number, service: string, count: number): string {
-  return `traefik_router_requests_total{code="200",method="GET",protocol="http",router="union-t${ticket}-${service}@docker",service="union-t${ticket}-${service}@docker"} ${count}`;
+function line(ticket: number | string, service: string, count: number): string {
+  const key = typeof ticket === 'number' ? `t${ticket}` : ticket;
+  return `traefik_router_requests_total{code="200",method="GET",protocol="http",router="union-${key}-${service}@docker",service="union-${key}-${service}@docker"} ${count}`;
 }
 
 function watcher(): IdleWatcher {
   return new IdleWatcher({
     db,
     readMetrics: () => Promise.resolve(metrics),
-    stopIdle: (id, minutes) => {
-      stopped.push({ ticketId: id, minutes });
+    stopIdle: (owner, minutes) => {
+      stopped.push({ owner, minutes });
     },
     testing: () => testing,
   });
@@ -50,13 +59,18 @@ beforeEach(() => {
   testing = null;
 });
 
-test("each ticket's requests are summed over its services", () => {
-  const text = [line(3, 'web', 2), line(3, 'api', 5), line(12, 'web', 1), 'traefik_other 9'].join(
-    '\n',
-  );
-  expect([...requestsByTicket(text)]).toEqual([
-    [3, 7],
-    [12, 1],
+test("each preview's requests are summed over its services, a review's apart from a ticket's", () => {
+  const text = [
+    line(3, 'web', 2),
+    line(3, 'api', 5),
+    line(12, 'web', 1),
+    line('r3', 'web', 4),
+    'traefik_other 9',
+  ].join('\n');
+  expect([...requestsByOwner(text)]).toEqual([
+    ['t3', 7],
+    ['t12', 1],
+    ['r3', 4],
   ]);
 });
 
@@ -70,7 +84,7 @@ test('a preview nobody visits stops after the idle time; a visit starts the cloc
   await idle.check(58 * MINUTE);
   expect(stopped).toEqual([]);
   await idle.check(59 * MINUTE);
-  expect(stopped).toEqual([{ ticketId, minutes: 30 }]);
+  expect(stopped).toEqual([{ owner: { ticketId }, minutes: 30 }]);
 });
 
 test('never while the agent runs a step or its e2e tests run, nor with 0 minutes', async () => {
@@ -85,7 +99,7 @@ test('never while the agent runs a step or its e2e tests run, nor with 0 minutes
     .set({ phase: { kind: 'done' } })
     .where(eq(schema.tickets.id, ticketId))
     .run();
-  testing = ticketId;
+  testing = `t${ticketId}`;
   await idle.check(80 * MINUTE);
   testing = null;
   expect(stopped).toEqual([]);
@@ -99,6 +113,36 @@ test('never while the agent runs a step or its e2e tests run, nor with 0 minutes
     .run();
   await idle.check(500 * MINUTE);
   expect(stopped).toEqual([]);
+});
+
+test("a pull request's preview stops on its own visits, and not while its e2e tests run", async () => {
+  const { projectId } = db.select().from(schema.tickets).get() ?? { projectId: 0 };
+  const reviewId = db
+    .insert(schema.currentReviews)
+    .values({
+      projectId,
+      prNumber: 7,
+      title: 'PR',
+      url: 'u',
+      author: 'a',
+      headBranch: 'b',
+      baseBranch: 'main',
+    })
+    .returning()
+    .get().id;
+  updatePreview(db, { reviewId }, { status: 'running', startedAt: 0 });
+  metrics = [line(ticketId, 'web', 5), line(`r${reviewId}`, 'web', 1)].join('\n');
+  const idle = watcher();
+  await idle.check(0);
+  testing = `r${reviewId}`;
+  metrics = [line(ticketId, 'web', 6), line(`r${reviewId}`, 'web', 1)].join('\n');
+  await idle.check(29 * MINUTE);
+  await idle.check(31 * MINUTE);
+  expect(stopped).toEqual([]);
+  testing = null;
+  metrics = [line(ticketId, 'web', 7), line(`r${reviewId}`, 'web', 1)].join('\n');
+  await idle.check(62 * MINUTE);
+  expect(stopped).toEqual([{ owner: { reviewId }, minutes: 30 }]);
 });
 
 test("without the proxy's metrics nothing stops", async () => {

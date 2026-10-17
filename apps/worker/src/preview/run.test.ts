@@ -131,7 +131,7 @@ beforeEach(() => {
 });
 
 test('a preview starts from the workspace, rewritten, and runs once the service answers', async () => {
-  await startPreview(deps(), ticketId);
+  await startPreview(deps(), { ticketId });
   expect(getPreview(db, { ticketId })).toMatchObject({
     status: 'running',
     url: 'http://1.localhost:8080',
@@ -163,7 +163,7 @@ test('a preview starts from the workspace, rewritten, and runs once the service 
 
 test('a compose file asking for host access never reaches Docker', async () => {
   resolved = { services: { web: { image: 'x', privileged: true, networks: { default: null } } } };
-  await startPreview(deps(), ticketId);
+  await startPreview(deps(), { ticketId });
   expect(getPreview(db, { ticketId })?.status).toBe('failed');
   expect(getPreview(db, { ticketId })?.error).toContain('privileged containers are not allowed');
   expect(commands().some((command) => command.includes(' up '))).toBe(false);
@@ -171,7 +171,7 @@ test('a compose file asking for host access never reaches Docker', async () => {
 
 test('a failed start keeps the reason and the output, and takes down what it started', async () => {
   upExit = 1;
-  await startPreview(deps(), ticketId);
+  await startPreview(deps(), { ticketId });
   expect(getPreview(db, { ticketId })).toMatchObject({
     status: 'failed',
     logTail: 'web-1  | ready',
@@ -185,28 +185,28 @@ test('a failed start keeps the reason and the output, and takes down what it sta
   calls = [];
   upExit = 0;
   answer = 502;
-  await startPreview(deps(), ticketId);
+  await startPreview(deps(), { ticketId });
   expect(getPreview(db, { ticketId })?.error).toBe('"web" did not answer on port 80');
   expect(commands().at(-1)).toBe('-p union-t1 down -v --remove-orphans');
 });
 
 test('starts are refused without settings and without a workspace', async () => {
   db.update(schema.tickets).set({ workspaceVolume: null }).run();
-  await startPreview(deps(), ticketId);
+  await startPreview(deps(), { ticketId });
   expect(getPreview(db, { ticketId })?.error).toContain('run the implementation first');
 });
 
 test('stopping takes the compose project down with its volumes', async () => {
-  await startPreview(deps(), ticketId);
+  await startPreview(deps(), { ticketId });
   calls = [];
-  await stopPreview(deps(), ticketId);
+  await stopPreview(deps(), { ticketId });
   expect(getPreview(db, { ticketId })?.status).toBe('stopped');
   // Docker refuses to remove a network a container is still on: the agent leaves first.
   expect(commands()).toEqual(['leave union-t1_default', '-p union-t1 down -v --remove-orphans']);
 });
 
 test('the file a start ran is kept as YAML; generating alone starts nothing', async () => {
-  await generatePreviewFile(deps(), ticketId);
+  await generatePreviewFile(deps(), { ticketId });
   const row = getPreview(db, { ticketId });
   expect(row?.status).toBe('stopped');
   expect(row?.composeYaml).toContain('name: union-t1');
@@ -218,7 +218,7 @@ test('the file a start ran is kept as YAML; generating alone starts nothing', as
   ]);
 
   resolved = { services: { web: { image: 'x', privileged: true, networks: { default: null } } } };
-  await generatePreviewFile(deps(), ticketId);
+  await generatePreviewFile(deps(), { ticketId });
   expect(getPreview(db, { ticketId })?.composeError).toContain('privileged');
   expect(getPreview(db, { ticketId })?.composeYaml).toBeNull();
 });
@@ -236,7 +236,7 @@ test("the ticket's own file runs instead, checked, under the ticket's project, h
     },
     volumes: { union_workspace: { external: true, name: 'union-t1-ws' } },
   };
-  await startPreview(deps(), ticketId);
+  await startPreview(deps(), { ticketId });
   expect(getPreview(db, { ticketId })?.status).toBe('running');
   const [config, up] = calls;
   expect(config?.stdin).toBe('services: {}');
@@ -255,7 +255,7 @@ test("the ticket's own file runs instead, checked, under the ticket's project, h
 
   calls = [];
   resolved = { services: { web: { image: 'x', privileged: true } } };
-  await startPreview(deps(), ticketId);
+  await startPreview(deps(), { ticketId });
   expect(getPreview(db, { ticketId })?.error).toContain(
     'Your compose file cannot run as a preview',
   );
@@ -284,7 +284,7 @@ test('several services, waited for; real values go through the env file, none is
   resolved = {
     services: { ...RESOLVED.services, api: { image: 'node:22', networks: { default: null } } },
   };
-  await startPreview(deps(), ticketId);
+  await startPreview(deps(), { ticketId });
   expect(getPreview(db, { ticketId })).toMatchObject({
     status: 'running',
     urls: [
@@ -322,7 +322,7 @@ test('the profiles chosen are enabled, and their services run whole', async () =
     .run();
   const s3 = { image: 'minio/minio', profiles: ['storage'], networks: { default: null } };
   resolved = { services: { ...RESOLVED.services, s3 } };
-  await startPreview(deps(), ticketId);
+  await startPreview(deps(), { ticketId });
   expect(commands()[1]).toBe('-p union-t1 --profile storage -f compose.yaml config --format json');
   // `up` would leave out again a service still naming a profile.
   expect(calls[2]?.stdin).not.toContain('"profiles"');

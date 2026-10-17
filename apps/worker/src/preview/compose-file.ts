@@ -11,6 +11,7 @@ import {
   withoutProfiles,
   withWorkspaceMounts,
   type ComposeJson,
+  type WorkspaceOwner,
 } from '@union/core';
 
 import {
@@ -166,7 +167,7 @@ export async function generatedFile(deps: PreviewDeps, target: Target): Promise<
     const shown = names.length === 0 ? file : await buildFile(deps, target, true, catalog);
     saveGeneratedCompose(
       deps.db,
-      { ticketId: target.ticketId },
+      target.owner,
       { yaml: variablesComment(target) + unmaskSecrets(toYaml(shown), names) },
       summary,
     );
@@ -174,7 +175,7 @@ export async function generatedFile(deps: PreviewDeps, target: Target): Promise<
   } catch (error) {
     saveGeneratedCompose(
       deps.db,
-      { ticketId: target.ticketId },
+      target.owner,
       { error: error instanceof Error ? error.message : String(error) },
       summary,
     );
@@ -202,29 +203,25 @@ async function ownFile(deps: PreviewDeps, target: Target, yaml: string): Promise
 
 /** What Start runs: the user's file when the ticket has one, else a freshly generated one. */
 export function fileToRun(deps: PreviewDeps, target: Target): Promise<ComposeJson> {
-  const override = getPreview(deps.db, { ticketId: target.ticketId })?.override;
+  const override = getPreview(deps.db, target.owner)?.override;
   return override ? ownFile(deps, target, override) : generatedFile(deps, target);
 }
 
 /** The ticket's preview target; null when it has none (the reason is saved for the panel). */
-function targetOrReason(deps: PreviewDeps, ticketId: number): Target | null {
+function targetOrReason(deps: PreviewDeps, owner: WorkspaceOwner): Target | null {
   try {
-    return loadTarget(deps, ticketId);
+    return loadTarget(deps, owner);
   } catch (error) {
-    saveGeneratedCompose(
-      deps.db,
-      { ticketId },
-      {
-        error: error instanceof Error ? error.message : String(error),
-      },
-    );
+    saveGeneratedCompose(deps.db, owner, {
+      error: error instanceof Error ? error.message : String(error),
+    });
     return null;
   }
 }
 
 /** Generates the file without starting anything, for the panel to show (the reason, if refused). */
-export async function generatePreviewFile(deps: PreviewDeps, ticketId: number): Promise<void> {
-  const target = targetOrReason(deps, ticketId);
+export async function generatePreviewFile(deps: PreviewDeps, owner: WorkspaceOwner): Promise<void> {
+  const target = targetOrReason(deps, owner);
   if (!target) {
     return;
   }

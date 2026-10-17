@@ -56,6 +56,7 @@ export); do not edit. Tests are left out.
 - `rebase-publish.ts`: The project's repository with its credentials, for the fetch and the push.
 - `rebase.ts`: Rebases the ticket's branch onto its base (git alone when there is no conflict, else the implementer's own session), checks it and force-pushes it with a lease.
 - `refused-commit.ts`: Records the refusal and stops the run there: the user decides what to do with the changes.
+- `review-checkout.ts`: A pull request's own container (`union-r<id>`): its checkout at the reviewed commit, for its preview, tests and commands.
 - `review-grouping-format.ts`: Every changed file's hunks, one line each: what the agent cites in `hunks` and `lines`.
 - `review-grouping-result.ts`: The agent's grouping, checked against the change: only changed files and their real hunks, every hunk at least once (the ones it left out are unrelated), no em…
 - `review-grouping.ts`: Runs the groupings the user asked for, on the same run slots as the pipeline and the agent reviews: a ticket's in its own container, a pull request's in a thro…
@@ -113,8 +114,9 @@ export); do not edit. Tests are left out.
 - `forwarder.ts`: Makes the agent services reachable on the container's `localhost` (`agentForwards`).
 - `idle.ts`: Stops running previews nobody visited for the project's idle time.
 - `manager.ts`: Runs the preview commands, one at a time per ticket (a start and a stop never overlap).
-- `network.ts`: Puts the ticket's container on its preview's networks, so the agent and the e2e command reach the services by name (`http://web:3000`): `<id>.localhost` would …
+- `network.ts`: Puts the owner's container on its preview's networks, so the agent and the e2e command reach the services by name (`http://web:3000`): `<id>.localhost` would b…
 - `ready.ts`: What Traefik answers before the service's route exists.
+- `review-preview.ts`: A pull request's preview: its checkout made before a start, and moved to a newer reviewed commit on request.
 - `run.ts`: The last lines the services printed; empty when they cannot be read.
 - `target.ts`: Why a preview cannot start or stopped; its message is shown on the ticket.
 - `variables.ts`: For the file Docker runs: every value, secrets included, escaped.

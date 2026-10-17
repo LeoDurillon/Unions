@@ -71,7 +71,7 @@ export async function startAgentServices(
   ticketId: number,
 ): Promise<StartedServices> {
   try {
-    const target = loadTarget(deps, ticketId);
+    const target = loadTarget(deps, { ticketId });
     const services = agentServices(target.config);
     if (services.length === 0) {
       return NONE;
@@ -102,7 +102,7 @@ export async function startAgentServices(
     if (output.exitCode !== 0) {
       throw new Error(lastLines(output.tail));
     }
-    await joinPreview(deps.runtime, ticketId);
+    await joinPreview(deps.runtime, { ticketId });
     emitEvent(deps.db, { type: 'agent_services_started', ticketId, payload: { services } });
     return {
       env: agentVariables(target.plain, target.config.agentVariables),
@@ -133,7 +133,7 @@ export async function pauseAgentServices(
     return;
   }
   try {
-    const target = loadTarget(deps, ticketId);
+    const target = loadTarget(deps, { ticketId });
     const services = agentServices(target.config);
     if (services.length === 0) {
       return;

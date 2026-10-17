@@ -15,6 +15,7 @@ import {
   schema,
   type Db,
   type ReviewVerdict,
+  type WorkspaceOwner,
 } from '@union/core';
 import { eq, isNull } from 'drizzle-orm';
 
@@ -42,11 +43,14 @@ export type CommandHooks = {
   cancelContainerRun: (id: number) => void;
   /** Writes a rewritten PR description, as the user left it, to GitHub. */
   sendPrDescription: (id: number) => void;
-  /** Starts, stops, reads the logs of, or generates the compose file of a ticket's preview. */
-  preview: (ticketId: number, action: PreviewAction) => void;
+  /**
+   * Starts, stops, reads the logs of, or generates the compose file of a ticket's or a pull
+   * request's preview; `update` moves a pull request's checkout to the commit its review reads.
+   */
+  preview: (owner: WorkspaceOwner, action: PreviewAction) => void;
 };
 
-export type PreviewAction = 'start' | 'stop' | 'logs' | 'generate' | 'e2e';
+export type PreviewAction = 'start' | 'stop' | 'logs' | 'generate' | 'e2e' | 'update';
 
 const PREVIEW_ACTIONS: Record<string, PreviewAction> = {
   preview_start: 'start',
@@ -54,6 +58,7 @@ const PREVIEW_ACTIONS: Record<string, PreviewAction> = {
   preview_logs: 'logs',
   preview_generate: 'generate',
   preview_e2e: 'e2e',
+  review_checkout_update: 'update',
 };
 
 function ignore(): void {
@@ -107,6 +112,18 @@ function requireTicketId(command: Command): number {
     throw new Error(`Command ${command.type} needs a ticketId`);
   }
   return command.ticketId;
+}
+
+/** A ticket's preview command carries its ticket; a pull request's, `{ reviewId }` in its payload. */
+function previewOwnerOf(command: Command): WorkspaceOwner {
+  if (command.ticketId !== null) {
+    return { ticketId: command.ticketId };
+  }
+  const reviewId = field(command.payload, 'reviewId');
+  if (typeof reviewId !== 'number') {
+    throw new TypeError(`${command.type} needs a ticketId or a numeric "reviewId"`);
+  }
+  return { reviewId };
 }
 
 /** For each cancel command: the id it carries, the cancel of a queued run, and the stop of a running one. */
@@ -272,7 +289,7 @@ function execute(db: Db, command: Command, hooks: CommandHooks): void {
   }
   const preview = PREVIEW_ACTIONS[command.type];
   if (preview) {
-    hooks.preview(requireTicketId(command), preview);
+    hooks.preview(previewOwnerOf(command), preview);
     return;
   }
   switch (command.type) {

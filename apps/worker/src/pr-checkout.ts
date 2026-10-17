@@ -11,6 +11,9 @@ const SHORT_SHA = 7;
 /** A pull request to check out, at the commit its files were read at. */
 export type PullAt = { number: number; headSha: string };
 
+/** Reads the host's clone (its `origin` still holds the token) before it is copied in. */
+export type Inspect = (dir: string) => Promise<void>;
+
 /** Where a pull request's reviewed commit is kept in the checkout. */
 export function pullRef(number: number): string {
   return `refs/union/pr-${number}`;
@@ -26,7 +29,7 @@ export async function clonePullRequests(
   runtime: ContainerRuntime,
   container: string,
   source: CloneSource,
-  { base, pulls }: { base: string; pulls: PullAt[] },
+  { base, pulls, inspect }: { base: string; pulls: PullAt[]; inspect?: Inspect },
 ): Promise<void> {
   const tmp = await mkdtemp(path.join(tmpdir(), 'union-pr-'));
   try {
@@ -48,6 +51,7 @@ export async function clonePullRequests(
     if (top) {
       await hostGit(['-C', tmp, 'checkout', '--quiet', '--detach', top.headSha], source.secret);
     }
+    await inspect?.(tmp);
     await hostGit(['-C', tmp, 'remote', 'set-url', 'origin', source.publicUrl], source.secret);
     await runtime.copyIn(container, tmp, REPO_DIR);
   } finally {
@@ -60,7 +64,8 @@ export function clonePullRequest(
   runtime: ContainerRuntime,
   container: string,
   source: CloneSource,
-  pr: { base: string } & PullAt,
+  pr: { base: string; inspect?: Inspect } & PullAt,
 ): Promise<void> {
-  return clonePullRequests(runtime, container, source, { base: pr.base, pulls: [pr] });
+  const { base, inspect } = pr;
+  return clonePullRequests(runtime, container, source, { base, pulls: [pr], inspect });
 }

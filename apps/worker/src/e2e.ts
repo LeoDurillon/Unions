@@ -115,7 +115,7 @@ export async function runE2e(run: E2eRun): Promise<E2eResult | null> {
   }
   const started = await startPreview(
     { db: run.db, runtime: run.runtime, settings: previewSettings(), ...run.previewOverrides },
-    run.ticketId,
+    { ticketId: run.ticketId },
   );
   if (!started.ok) {
     return started.unavailable

@@ -209,8 +209,8 @@ test('one e2e run at a time across tickets: a second request says why it did not
     fetchFn: () => Promise.resolve(new Response('ok')),
   });
   const other = createTicket(db, { projectId: 1, title: 'Search', body: '' }).id;
-  manager.run(ticketId, 'e2e');
-  manager.run(other, 'e2e');
+  manager.run({ ticketId }, 'e2e');
+  manager.run({ ticketId: other }, 'e2e');
   expect(getPreview(db, { ticketId: other })).toMatchObject({ e2eStatus: 'skipped' });
   expect(getPreview(db, { ticketId: other })?.e2eOutput).toContain('one run at a time');
   gate.resolve(null);
