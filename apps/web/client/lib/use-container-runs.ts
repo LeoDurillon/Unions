@@ -1,57 +1,47 @@
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 
 import type { ContainerRunsView } from '../../src/api-types';
+import type { ReviewRunsView } from '../../src/review-preview-types';
 import { request } from './api';
+import { runsKey, runsPath, type PreviewTarget } from './preview-target';
 
 /** A command typed in the box, or a saved script by name. */
 export type RunInput = { command: string } | { scriptName: string };
 
+/** A ticket's runs (with whether one can go to the implementer), or a pull request's. */
+export type RunsView = ContainerRunsView | ReviewRunsView;
+
 const RUN_POLL_MS = 1000;
 
-function running(data: ContainerRunsView | undefined): boolean {
+function running(data: RunsView | undefined): boolean {
   return (data?.runs ?? []).some((run) => run.status === 'queued' || run.status === 'running');
 }
 
-/** The commands run in the ticket's workspace (polled while one is on), and running or stopping one. */
-export function useContainerRuns(ticketId: number): {
-  runs: UseQueryResult<ContainerRunsView>;
-  run: ReturnType<typeof useMutation<ContainerRunsView, Error, RunInput>>;
-  cancel: ReturnType<typeof useMutation<ContainerRunsView, Error, number>>;
-  keep: ReturnType<typeof useMutation<ContainerRunsView, Error, { runId: number; keep: boolean }>>;
-  send: ReturnType<typeof useMutation<ContainerRunsView, Error, { runId: number; note: string }>>;
+/** The commands run in the target's workspace (polled while one is on), and running or stopping one. */
+export function useContainerRuns(target: PreviewTarget): {
+  runs: UseQueryResult<RunsView>;
+  run: ReturnType<typeof useMutation<RunsView, Error, RunInput>>;
+  cancel: ReturnType<typeof useMutation<RunsView, Error, number>>;
   active: boolean;
 } {
   const queryClient = useQueryClient();
-  const key = ['ticket', ticketId, 'container-runs'];
-  const path = `/api/tickets/${ticketId}/container-runs`;
+  const key = runsKey(target);
+  const path = runsPath(target);
   const runs = useQuery({
     queryKey: key,
-    queryFn: (): Promise<ContainerRunsView> => request('GET', path),
+    queryFn: (): Promise<RunsView> => request('GET', path),
     refetchInterval: (query) => (running(query.state.data) ? RUN_POLL_MS : false),
   });
-  const update = (data: ContainerRunsView): void => {
+  const update = (data: RunsView): void => {
     queryClient.setQueryData(key, data);
   };
   const run = useMutation({
-    mutationFn: (input: RunInput): Promise<ContainerRunsView> => request('POST', path, input),
+    mutationFn: (input: RunInput): Promise<RunsView> => request('POST', path, input),
     onSuccess: update,
   });
   const cancel = useMutation({
-    mutationFn: (runId: number): Promise<ContainerRunsView> =>
-      request('POST', `${path}/${runId}/cancel`),
+    mutationFn: (runId: number): Promise<RunsView> => request('POST', `${path}/${runId}/cancel`),
     onSuccess: update,
   });
-  const keep = useMutation({
-    mutationFn: (input: { runId: number; keep: boolean }): Promise<ContainerRunsView> =>
-      request('POST', `${path}/${input.runId}/keep`, { keep: input.keep }),
-    onSuccess: update,
-  });
-  // The revision moves the ticket: its panel reads it again.
-  const send = useMutation({
-    mutationFn: (input: { runId: number; note: string }): Promise<ContainerRunsView> =>
-      request('POST', `${path}/${input.runId}/send`, { note: input.note }),
-    onSuccess: update,
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ['ticket', ticketId] }),
-  });
-  return { runs, run, cancel, keep, send, active: running(runs.data) };
+  return { runs, run, cancel, active: running(runs.data) };
 }

@@ -99,6 +99,7 @@ export function previewView(db: Db, subject: PreviewSubject): PreviewView {
     e2eCommand: config?.e2eCommand ?? null,
     e2eRefusal: e2eRefusal(db, subject),
     refusal: previewRefusal(db, subject),
+    pending: pendingPreviewCommand(db, subject.owner),
   };
 }
 

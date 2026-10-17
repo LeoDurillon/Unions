@@ -130,6 +130,14 @@
   and "Add to review" (`POST …/e2e/review`, `…/runs/:id/review`), which writes the output as a general draft comment
   (`review-output-comment.ts`). Removing a review or a stack (`routes/review-removal.ts`) drops its pending
   commands, queues `remove_containers` for `union-r<id>` and deletes its files (`attachments/r<id>/`).
+  In the client, the ticket's Preview tab and a review's (`pull-requests/review-preview-tab.tsx`, the review
+  page's last section) share `preview-section.tsx`, `preview-e2e.tsx`, `preview-compose-dialog.tsx` and
+  `container-commands.tsx`, given a `PreviewTarget` (`lib/preview-target.ts`: the same targets as a review page's,
+  its paths and query keys). A ticket's keeps its event-driven refresh and its "send to the agent" actions
+  (`ticket-e2e-actions.tsx`, `ticket-run-actions.tsx`); a review's polls while a command is pending or a change is
+  on its way (`previewPoll`), says whose code runs and whether it gets the secrets, offers the update to the
+  reviewed commit, and "Add to review" (`pull-requests/review-e2e-actions.tsx`, `review-run-actions.tsx`). Current
+  reviews shows "preview running" on a review or a stack (`previewStatus` in the list).
 - PR description rewrite: the PR tab's Description section (`pull-request/pr-description.tsx`,
   `routes/pr-description.ts`, `@union/core` `pr-descriptions.ts`) queues a `pr_descriptions` row. The agent's draft
   is the user's to edit, send or discard; sending is the `update_pr_description` command. "Outdated" means a

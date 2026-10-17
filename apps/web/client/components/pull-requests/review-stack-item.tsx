@@ -19,6 +19,7 @@ export function ReviewStackItem({
   const [bottom] = stack;
   const posting = stack.some((review) => review.submitStatus === 'sending');
   const failed = stack.some((review) => review.submitStatus === 'failed');
+  const previewing = stack.some((review) => review.previewStatus === 'running');
   return (
     <li className="flex items-start gap-3 border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
       <Badge tone="neutral">stack of {stack.length}</Badge>
@@ -29,6 +30,7 @@ export function ReviewStackItem({
           <span className="truncate font-mono">→ {bottom?.baseBranch}</span>
           {posting ? <Badge tone="blue">posting…</Badge> : null}
           {failed ? <Badge tone="red">posting failed</Badge> : null}
+          {previewing ? <Badge tone="green">preview running</Badge> : null}
         </p>
       </div>
       <Button variant="primary" onClick={onOpen}>

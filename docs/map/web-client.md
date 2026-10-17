@@ -27,7 +27,7 @@ export); do not edit. Tests are left out.
 - `base-branch-row.tsx`: The branch the ticket starts from and why; before it starts, it can be chosen over the parent's and the project's (Automatic goes back to them).
 - `board.tsx`: The columns, filling the screen down to the bottom edge.
 - `choice.tsx`: The app's choice inputs: chips for a multi-select, a switch for on / off, a segmented control for one of a few.
-- `container-commands.tsx`: Commands the user runs in the ticket's workspace: its container, in the checkout, as the agent (with the preview's address while it runs), typed or saved in th…
+- `container-commands.tsx`: Commands the user runs in a workspace (a ticket's container as the agent, or a pull request's own checkout), with the preview's address while it runs, typed or…
 - `detail-row.tsx`: One line of a ticket's details: a label column, then the value.
 - `dropzone.tsx`: A file input as a dashed box: drop files on it, or click (or press Enter on it) to browse.
 - `flow-picker.tsx`: Picks the steps a ticket runs: one of the project's presets, or planning steps chosen one by one.
@@ -39,9 +39,9 @@ export); do not edit. Tests are left out.
 - `notion-import.tsx`: Fetches a page of the project's Notion data source, previews it, and creates the ticket.
 - `overview-tab.tsx`: The ticket panel's overview tab: run status, details, and the buttons that act on the ticket.
 - `parent-picker.tsx`: Select the ticket this one builds on, among the project's other tickets.
-- `preview-compose-dialog.tsx`: The compose file a preview runs, to read and to edit for this ticket.
-- `preview-e2e.tsx`: The project's end-to-end tests against the ticket's preview, run when the user asks (a browser and a whole environment take a lot of memory): never on their ow…
-- `preview-section.tsx`: The ticket's preview: its compose environment run from the workspace, opened through the proxy.
+- `preview-compose-dialog.tsx`: The compose file a preview runs, to read and to edit for this ticket or pull request.
+- `preview-e2e.tsx`: The project's end-to-end tests against the preview, run when the user asks (a browser and a whole environment take a lot of memory): never on their own.
+- `preview-section.tsx`: A ticket's or a pull request's preview: its compose environment run from the workspace, opened through the proxy.
 - `preview-summary.tsx`: The preview in one line of the Overview: its state, where it answers, the way to its tab.
 - `preview-tab.tsx`: The ticket's Preview tab: the environment, its output, its end-to-end tests, and commands.
 - `project-bar.tsx`: Slim bar above the project: which project is open, its tabs, and the actions.
@@ -60,10 +60,12 @@ export); do not edit. Tests are left out.
 - `ticket-card.tsx`: A draggable ticket card for the board, with its phase and pull request badges.
 - `ticket-description.tsx`: The ticket's description, folded when long.
 - `ticket-details.tsx`: What the ticket is attached to: where it comes from, what it depends on, its files, its preview.
+- `ticket-e2e-actions.tsx`: What a ticket's failing end-to-end run can become: a revision the implementer gets, like a failing check.
 - `ticket-form.tsx`: The form that creates a ticket, with its parent and attached files.
 - `ticket-links.tsx`: "Depends on" (editable until the ticket starts) and the tickets that build on this one.
 - `ticket-panel-header.tsx`: The header of the ticket panel: its title, phase badge and the review and close buttons.
 - `ticket-panel.tsx`: The side panel for the selected ticket: header, section tabs and the body of the current tab.
+- `ticket-run-actions.tsx`: What a ticket's command output can become: kept for the implementer's next run, or sent now as a revision.
 - `ticket-tabs.tsx`: Where the Worker tab opens when no step runs: the furthest step with output, else the log.
 - `ui.tsx`: One line: a pill wrapped over two lines reads as a blob; too long, it ends in an ellipsis.
 - `verdict-badge.tsx`: The reviewer's verdict at the top of the final review.
@@ -131,6 +133,9 @@ export); do not edit. Tests are left out.
 - `pull-request-item.tsx`: One pull request: state, title, who and when, branches, review, size, and what can be done with it.
 - `pull-request-rows.tsx`: The Pull requests tab's list: stacks first, then the other pull requests, and adding them to the current reviews.
 - `pull-requests-page.tsx`: Every pull request of the project's repository, read from GitHub, open stacks as one row; linked ones open their ticket.
+- `review-e2e-actions.tsx`: What a pull request's end-to-end result can become: a draft comment on the review; its failure screenshots.
+- `review-preview-tab.tsx`: A pull request under review's Preview tab: its own checkout's preview, end-to-end tests and commands.
+- `review-run-actions.tsx`: What a command's output in a pull request's checkout can become: a draft comment on the review.
 - `review-stack-item.tsx`: A stack of pull requests under review as one row: its bottom's title, its pull requests, opening and removing it whole.
 - `stack-item.tsx`: A stack of pull requests as one row: its bottom's title, its size, adding it to the reviews; its members below when opened.
 - `stack-review.tsx`: A pull request under review opened full page; one of a stack gets a tab per pull request of it, to switch between them.
@@ -251,6 +256,7 @@ export); do not edit. Tests are left out.
 - `opened-investigation.ts`: The investigation opened from elsewhere (a notification), in the URL (`?investigation=<id>`).
 - `pr-description-api.ts`: The browser's client for a ticket's pull request description endpoints.
 - `preview-api.ts`: The browser's client for a ticket's preview endpoints.
+- `preview-target.ts`: Where a ticket's or a pull request's preview and commands live in the API, and their query keys.
 - `project-files-api.ts`: The browser's client for a project's uploaded files.
 - `pull-request-stacks.ts`: Stacks in the Pull requests and Current reviews tabs, and the stack under review a pull request would join.
 - `refused-commit-api.ts`: The ticket's last refused commit, or null.
@@ -269,7 +275,7 @@ export); do not edit. Tests are left out.
 - `use-app-state.ts`: What the root layout runs on: live refetching, the projects, the open ticket, navigation, and opening notifications.
 - `use-commits.ts`: The change's commits, oldest first, and (tickets) the change since the last review.
 - `use-connectors.ts`: The account's claude.ai connectors, and reading them again (polled while the worker checks).
-- `use-container-runs.ts`: The commands run in the ticket's workspace (polled while one is on), and running or stopping one.
+- `use-container-runs.ts`: The commands run in the target's workspace (polled while one is on), and running or stopping one.
 - `use-current-reviews.ts`: Adding and removing refresh the list (and the Pull requests tab, which marks what is in it).
 - `use-default-specs.ts`: The specs a Review with agent starts from when its last run gives none: the ticket's text, the PR's description, or each description of a stack.
 - `use-event-stream.ts`: Calls `onEvent` with every new event, from the browser's one shared stream (`event-hub.ts`).
@@ -280,8 +286,11 @@ export); do not edit. Tests are left out.
 - `use-notifications.ts`: The notifications, page by page, with the unread count (also in the tab's title) and marking them read.
 - `use-notion-users.ts`: The Notion workspace members, read only when `enabled` (a person property is in view).
 - `use-pr-checks.ts`: The pull request's CI checks (read again every 30 s while some still run), and giving picks of them to the implementer.
+- `use-preview.ts`: A ticket's or a pull request's preview as its section reads it, and the commands that act on it.
 - `use-review-grouping.ts`: The newest grouping by spec of the review, with starting and cancelling one.
+- `use-review-preview.ts`: A pull request's preview as its Preview tab reads it (its checkout, its screenshots), and adding an output to the review.
 - `use-review.ts`: A pull request under review: its description and discussion, read from GitHub once per opening.
+- `use-run-agent.ts`: What a ticket's command output can do with the implementer: wait for its next run, or go now as a revision.
 - `use-selected-ticket.ts`: The open ticket lives in the URL (`?ticket=3`), so it survives reloads and back/forward.
 - `use-settings-form.ts`: A settings page's form: what is edited, whether it differs from what was saved, and its one Save.
 - `use-stored-number.ts`: A number remembered in localStorage; storage being unavailable only loses the memory.

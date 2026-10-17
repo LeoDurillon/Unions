@@ -1,11 +1,11 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { Preview } from '@union/core';
-import { useState, type ReactElement } from 'react';
+import { useState, type ReactElement, type ReactNode } from 'react';
 
 import type { PreviewView } from '../../src/api-types';
 import type { Tone } from '../lib/labels';
-import { previewApi } from '../lib/preview-api';
+import type { PreviewTarget } from '../lib/preview-target';
 import { openSettings } from '../lib/settings-sections';
+import { usePreview, type PreviewCalls } from '../lib/use-preview';
 import { PreviewComposeDialog } from './preview-compose-dialog';
 import { PreviewE2e } from './preview-e2e';
 import { Badge, Button, ErrorText } from './ui';
@@ -18,7 +18,8 @@ export const PREVIEW_STATUS: Record<Preview['status'], { label: string; tone: To
   failed: { label: 'Failed', tone: 'red' },
 };
 
-type Act = (call: (ticketId: number) => Promise<PreviewView>) => void;
+type Calls = PreviewCalls;
+type Act = (call: () => Promise<PreviewView>) => void;
 
 /** Every exposed service's address; previews from before several services were possible have one. */
 function OpenLinks({ preview }: { preview: Preview | null }): ReactElement | null {
@@ -49,11 +50,13 @@ function OpenLinks({ preview }: { preview: Preview | null }): ReactElement | nul
 
 function Controls({
   view,
+  calls,
   act,
   busy,
   onCompose,
 }: {
   view: PreviewView;
+  calls: Calls;
   act: Act;
   busy: boolean;
   onCompose: () => void;
@@ -69,7 +72,7 @@ function Controls({
           disabled={busy || view.refusal !== null}
           title={view.refusal ?? undefined}
           onClick={() => {
-            act(previewApi.start);
+            act(calls.start);
           }}
         >
           {running ? 'Restart' : 'Start preview'}
@@ -78,7 +81,7 @@ function Controls({
           <Button
             disabled={busy}
             onClick={() => {
-              act(previewApi.stop);
+              act(calls.stop);
             }}
           >
             Stop
@@ -94,10 +97,12 @@ function Controls({
 
 function LogTail({
   preview,
+  calls,
   act,
   busy,
 }: {
   preview: Preview;
+  calls: Calls;
   act: Act;
   busy: boolean;
 }): ReactElement | null {
@@ -117,7 +122,7 @@ function LogTail({
         <Button
           disabled={busy}
           onClick={() => {
-            act(previewApi.logs);
+            act(calls.logs);
           }}
         >
           Read again
@@ -176,26 +181,21 @@ function NotSetUp(): ReactElement {
 }
 
 /**
- * The ticket's preview: its compose environment run from the workspace, opened through the proxy.
- * Start and stop are commands the worker runs; the panel follows the live events.
+ * A ticket's or a pull request's preview: its compose environment run from the workspace, opened
+ * through the proxy. Start and stop are commands the worker runs; a ticket's panel follows the live
+ * events, a pull request's polls while one is on its way. `notice` goes above the controls;
+ * `canRevise`: a ticket's failing tests can go back to the agent.
  */
 export function PreviewSection({
-  ticketId,
-  canRevise,
+  target,
+  notice,
+  canRevise = false,
 }: {
-  ticketId: number;
-  /** A failure can go to the agent: at the final review, or once done. */
-  canRevise: boolean;
+  target: PreviewTarget;
+  notice?: ReactNode;
+  canRevise?: boolean;
 }): ReactElement | null {
-  const queryClient = useQueryClient();
-  const queryKey = ['ticket', ticketId, 'preview'];
-  const query = useQuery({ queryKey, queryFn: () => previewApi.get(ticketId) });
-  const mutation = useMutation({
-    mutationFn: (call: (id: number) => Promise<PreviewView>) => call(ticketId),
-    onSuccess: (view) => {
-      queryClient.setQueryData(queryKey, view);
-    },
-  });
+  const { query, calls, act, busy, error } = usePreview(target);
   const [composeOpen, setComposeOpen] = useState(false);
   const view = query.data;
   if (!view) {
@@ -205,22 +205,21 @@ export function PreviewSection({
     return <NotSetUp />;
   }
   const { preview } = view;
-  const act: Act = (call) => {
-    mutation.mutate(call);
-  };
   return (
     <section className="space-y-2 rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
       <Heading preview={preview} />
+      {notice}
       <Controls
         view={view}
+        calls={calls}
         act={act}
-        busy={mutation.isPending}
+        busy={busy}
         onCompose={() => {
           setComposeOpen(true);
         }}
       />
       <PreviewComposeDialog
-        ticketId={ticketId}
+        target={target}
         view={view}
         open={composeOpen}
         onClose={() => {
@@ -232,9 +231,9 @@ export function PreviewSection({
           {preview.error}
         </pre>
       ) : null}
-      <ErrorText error={query.error ?? mutation.error} />
-      {preview ? <LogTail preview={preview} act={act} busy={mutation.isPending} /> : null}
-      <PreviewE2e ticketId={ticketId} view={view} canRevise={canRevise} />
+      <ErrorText error={error} />
+      {preview ? <LogTail preview={preview} calls={calls} act={act} busy={busy} /> : null}
+      <PreviewE2e target={target} view={view} canRevise={canRevise} />
     </section>
   );
 }

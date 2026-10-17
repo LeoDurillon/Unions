@@ -168,8 +168,9 @@ export function currentReviewRoutes(db: Db, github: OnboardingGitHub, notion: No
   routes.get('/', (c) =>
     c.json(
       db
-        .select(LISTED)
+        .select({ ...LISTED, previewStatus: schema.previews.status })
         .from(schema.currentReviews)
+        .leftJoin(schema.previews, eq(schema.previews.reviewId, schema.currentReviews.id))
         .where(eq(schema.currentReviews.projectId, projectOf(db, c)))
         .orderBy(desc(schema.currentReviews.id))
         .all(),

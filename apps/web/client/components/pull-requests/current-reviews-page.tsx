@@ -40,6 +40,7 @@ function ReviewItem({
           </span>
           {review.submitStatus === 'sending' ? <Badge tone="blue">posting…</Badge> : null}
           {review.submitStatus === 'failed' ? <Badge tone="red">posting failed</Badge> : null}
+          {review.previewStatus === 'running' ? <Badge tone="green">preview running</Badge> : null}
         </p>
       </div>
       <Button variant="primary" onClick={onOpen}>
@@ -126,6 +127,7 @@ export function CurrentReviewsPage({ project }: { project: PublicProject }): Rea
     return (
       <StackReview
         projectId={project.id}
+        scripts={project.config.scripts ?? []}
         review={open}
         stack={stack}
         onPick={setOpened}

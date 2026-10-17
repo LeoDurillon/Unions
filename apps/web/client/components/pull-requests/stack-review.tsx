@@ -1,10 +1,12 @@
 // A pull request under review opened full page; one of a stack gets a tab per pull request of it, to switch between them.
+import type { ProjectScript } from '@union/core';
 import type { ReactElement } from 'react';
 
 import type { CurrentReview } from '../../../src/api-types';
 import { ReviewStackContext } from '../../lib/review-stack';
 import { ReviewPage } from '../review/review-page';
 import { prReviewSections } from './pr-review-sections';
+import { reviewPreviewSection } from './review-preview-tab';
 import { StackTabs } from './stack-tabs';
 
 /** Where the last posting stands: on its way, or failed with GitHub's reason. */
@@ -29,12 +31,15 @@ function PostingBanner({ review }: { review: CurrentReview }): ReactElement | nu
 /** `review` is reviewed; `stack` (bottom first, `review` in it) gives the tabs when it has others. */
 export function StackReview({
   projectId,
+  scripts,
   review,
   stack,
   onPick,
   onClose,
 }: {
   projectId: number;
+  /** The project's saved scripts, for the Preview tab's commands. */
+  scripts: readonly ProjectScript[];
   review: CurrentReview;
   stack: CurrentReview[];
   onPick: (number: number) => void;
@@ -52,7 +57,7 @@ export function StackReview({
         key={review.prNumber}
         target={target}
         title={`#${review.prNumber} ${review.title}`}
-        sections={prReviewSections(target)}
+        sections={[...prReviewSections(target), reviewPreviewSection(target, scripts)]}
         stackTabs={
           stack.length > 1 ? (
             <StackTabs

@@ -243,7 +243,10 @@ export type PullRequestListItem = {
 };
 
 /** A pull request put under review from the Pull requests tab (as listed: without its files). */
-export type CurrentReview = Omit<typeof schema.currentReviews.$inferSelect, 'files'>;
+export type CurrentReview = Omit<typeof schema.currentReviews.$inferSelect, 'files'> & {
+  /** Its preview's state; null when it never had one. */
+  previewStatus: Preview['status'] | null;
+};
 
 /** The newest 100 pull requests of the filter, and how many there are in all. */
 export type PullRequestList = {
@@ -341,6 +344,8 @@ export type PreviewView = {
   e2eRefusal: string | null;
   /** Why it cannot start now; null when it can. */
   refusal: string | null;
+  /** A command of it waits for the worker: a page without events polls until it is handled. */
+  pending: boolean;
 };
 
 /** What the Preview settings show besides the settings: secret names (never values), and services. */

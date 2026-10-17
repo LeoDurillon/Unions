@@ -3,9 +3,10 @@ import type { Preview } from '@union/core';
 import type { ReactElement } from 'react';
 
 import type { PreviewView } from '../../src/api-types';
-import { api } from '../lib/api';
 import type { Tone } from '../lib/labels';
-import { previewApi } from '../lib/preview-api';
+import { previewCalls, previewKey, type PreviewTarget } from '../lib/preview-target';
+import { ReviewE2eActions } from './pull-requests/review-e2e-actions';
+import { TicketE2eActions } from './ticket-e2e-actions';
 import { Badge, Button, ErrorText } from './ui';
 
 const STATUS: Record<NonNullable<Preview['e2eStatus']>, { label: string; tone: Tone }> = {
@@ -15,16 +16,13 @@ const STATUS: Record<NonNullable<Preview['e2eStatus']>, { label: string; tone: T
   skipped: { label: 'Not run', tone: 'neutral' },
 };
 
-/** The revision a red run becomes: what failed, as the agent gets a failing check. */
-function failureFeedback(command: string, preview: Preview): string {
-  const shots =
-    (preview.e2eScreenshots ?? 0) > 0
-      ? '\n\nScreenshots of the failures are in the attachments folder (e2e-*.png).'
-      : '';
-  return `The end-to-end tests failed: \`${command}\` exited with ${preview.e2eExitCode ?? '?'}. Last lines:\n\n\`\`\`\n${preview.e2eOutput ?? ''}\n\`\`\`${shots}\n\nFix the cause; run the failing tests against the preview before finishing.`;
-}
-
-function LastRun({ preview }: { preview: Preview }): ReactElement | null {
+function LastRun({
+  preview,
+  shotsWhere,
+}: {
+  preview: Preview;
+  shotsWhere: string;
+}): ReactElement | null {
   if (!preview.e2eStatus) {
     return null;
   }
@@ -39,7 +37,7 @@ function LastRun({ preview }: { preview: Preview }): ReactElement | null {
         ) : null}
         {shots > 0 ? (
           <span className="text-zinc-500">
-            {shots} failure screenshot(s) in the ticket&apos;s files
+            {shots} failure screenshot(s) {shotsWhere}
           </span>
         ) : null}
       </p>
@@ -56,35 +54,30 @@ function LastRun({ preview }: { preview: Preview }): ReactElement | null {
 }
 
 /**
- * The project's end-to-end tests against the ticket's preview, run when the user asks (a browser
- * and a whole environment take a lot of memory): never on their own. A failure can go to the agent
- * as a revision.
+ * The project's end-to-end tests against the preview, run when the user asks (a browser and a
+ * whole environment take a lot of memory): never on their own. A ticket's failure can go to the
+ * agent as a revision, a pull request's result to the review as a comment.
  */
 export function PreviewE2e({
-  ticketId,
+  target,
   view,
   canRevise,
 }: {
-  ticketId: number;
+  target: PreviewTarget;
   view: PreviewView;
   canRevise: boolean;
 }): ReactElement | null {
   const queryClient = useQueryClient();
   const run = useMutation({
-    mutationFn: () => previewApi.e2e(ticketId),
+    mutationFn: previewCalls(target).e2e,
     onSuccess: (next) => {
-      queryClient.setQueryData(['ticket', ticketId, 'preview'], next);
+      queryClient.setQueryData(previewKey(target), next);
     },
-  });
-  const revise = useMutation({
-    mutationFn: (feedback: string) => api.command(ticketId, 'revise', { feedback }),
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ['ticket', ticketId] }),
   });
   const { preview, e2eCommand } = view;
   if (!e2eCommand) {
     return null;
   }
-  const red = preview?.e2eStatus === 'red' ? preview : null;
   return (
     <div className="space-y-2 border-t border-zinc-200 pt-2 dark:border-zinc-800">
       <div className="flex flex-wrap items-center gap-2">
@@ -99,20 +92,24 @@ export function PreviewE2e({
         >
           Run e2e tests
         </Button>
-        {red && canRevise ? (
-          <Button
-            variant="primary"
-            disabled={revise.isPending}
-            onClick={() => {
-              revise.mutate(failureFeedback(e2eCommand, red));
-            }}
-          >
-            Send the failure to the agent
-          </Button>
-        ) : null}
+        {target.kind === 'ticket' ? (
+          <TicketE2eActions
+            ticketId={target.ticketId}
+            command={e2eCommand}
+            preview={preview}
+            canRevise={canRevise}
+          />
+        ) : (
+          <ReviewE2eActions target={target} />
+        )}
       </div>
-      {preview ? <LastRun preview={preview} /> : null}
-      <ErrorText error={run.error ?? revise.error} />
+      {preview ? (
+        <LastRun
+          preview={preview}
+          shotsWhere={target.kind === 'ticket' ? "in the ticket's files" : 'linked above'}
+        />
+      ) : null}
+      <ErrorText error={run.error} />
     </div>
   );
 }

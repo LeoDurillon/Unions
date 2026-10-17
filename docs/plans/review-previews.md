@@ -1,6 +1,6 @@
 # Plan: previews of pull requests under review
 
-Status: steps 1 to 4 built (branch `review-previews`): the owner in core and the database, a review's container, preview, e2e tests and commands in the worker, and their web routes; steps 5 and 6 left.
+Status: steps 1 to 5 built (branch `review-previews`): the owner in core and the database, a review's container, preview, e2e tests and commands in the worker, their web routes, and the review page's Preview tab; step 6 (SPEC.md) left.
 
 ## Idea
 
@@ -144,7 +144,10 @@ The Commands section of the ticket's Preview tab, on the review's Preview tab:
    saved for a review too, the same route as a ticket's, so it is not read only.)
    The shared preview and run modules; the review's routes; "Add to review" as a draft comment; removing a review
    or a stack queues the container removal. Route tests.
-5. **Client: Preview tab on the review page.** The ticket's preview section, e2e section and Commands, given an
+5. **Client: Preview tab on the review page.** (Built: `pull-requests/review-preview-tab.tsx` and the shared
+   preview components on a `PreviewTarget`; checked in a browser against a copy of the live database with
+   writes blocked: a real review's tab and Start, then stubbed fork, behind checkout, failed e2e run and finished
+   command, whose Update and Add to review calls went to the right routes; the ticket's tab unchanged.) The ticket's preview section, e2e section and Commands, given an
    owner (the components take the API base, like `ReviewTarget`); the author line and the fork note on Start; the
    commit notice and "Update to the reviewed commit"; "Add to review" in place of "Send to agent". A dot on the
    review in Current reviews while its preview runs. UI check with `scripts/ui-check/` (writes blocked).

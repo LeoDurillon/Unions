@@ -2,9 +2,11 @@ import type { ContainerRun, ProjectScript } from '@union/core';
 import { useState, type ReactElement, type ReactNode } from 'react';
 
 import type { Tone } from '../lib/labels';
-import { useContainerRuns, type RunInput } from '../lib/use-container-runs';
-import { RunAgentActions } from './run-agent-actions';
+import type { PreviewTarget } from '../lib/preview-target';
+import { useContainerRuns, type RunInput, type RunsView } from '../lib/use-container-runs';
+import { AddRunToReview } from './pull-requests/review-run-actions';
 import { ScriptButtons } from './script-buttons';
+import { TicketRunActions } from './ticket-run-actions';
 import { Badge, Button, ErrorText, inputClass } from './ui';
 
 const STATUS: Record<ContainerRun['status'], { label: string; tone: Tone }> = {
@@ -129,6 +131,26 @@ function CommandForm({
   );
 }
 
+function RunActions({
+  target,
+  run,
+  view,
+}: {
+  target: PreviewTarget;
+  run: ContainerRun;
+  view: RunsView;
+}): ReactElement {
+  return target.kind === 'ticket' ? (
+    <TicketRunActions
+      ticketId={target.ticketId}
+      run={run}
+      canSend={'canSend' in view && view.canSend}
+    />
+  ) : (
+    <AddRunToReview target={target} run={run} />
+  );
+}
+
 /** Runs a run again: by its script while the project still has it (with its current command). */
 function againInput(run: ContainerRun, scripts: readonly ProjectScript[]): RunInput {
   return run.scriptName !== null && scripts.some((script) => script.name === run.scriptName)
@@ -137,37 +159,37 @@ function againInput(run: ContainerRun, scripts: readonly ProjectScript[]): RunIn
 }
 
 /**
- * Commands the user runs in the ticket's workspace: its container, in the checkout, as the agent
- * (with the preview's address while it runs), typed or saved in the project settings. Never during
- * a step; one at a time.
+ * Commands the user runs in a workspace (a ticket's container as the agent, or a pull request's own
+ * checkout), with the preview's address while it runs, typed or saved in the project settings; one
+ * at a time. `intro` says where they run. A ticket's output can go to the implementer, a pull
+ * request's to the review as a comment.
  */
 export function ContainerCommands({
-  ticketId,
+  target,
   scripts,
+  intro,
 }: {
-  ticketId: number;
+  target: PreviewTarget;
   scripts: readonly ProjectScript[];
+  intro: ReactNode;
 }): ReactElement {
-  const { runs, run, cancel, keep, send, active } = useContainerRuns(ticketId);
+  const { runs, run, cancel, active } = useContainerRuns(target);
   const blocked = runs.data?.refusal ?? (active ? 'A command is already running' : null);
   const submit = (input: RunInput): void => {
     if (!('command' in input) || input.command.trim() !== '') {
       run.mutate(input);
     }
   };
+  const view = runs.data;
   return (
     <section className="space-y-2 border-t border-zinc-200 pt-3 dark:border-zinc-800">
       <h3 className="text-sm font-medium">Commands</h3>
-      <p className="text-xs text-zinc-500">
-        Runs in the ticket&apos;s workspace, in the repository, as the agent does (no GitHub
-        credentials), with <code>PREVIEW_URL</code> while the preview runs. A typed command stops
-        after 10 minutes.
-      </p>
+      <p className="text-xs text-zinc-500">{intro}</p>
       <ScriptButtons scripts={scripts} blocked={blocked} pending={run.isPending} onRun={submit} />
       <CommandForm blocked={blocked} pending={run.isPending} onRun={submit} />
-      <ErrorText error={runs.error ?? run.error ?? cancel.error ?? keep.error ?? send.error} />
+      <ErrorText error={runs.error ?? run.error ?? cancel.error} />
       <ul className="space-y-3">
-        {(runs.data?.runs ?? []).map((item, index) => (
+        {(view?.runs ?? []).map((item, index) => (
           <RunItem
             key={item.id}
             run={item}
@@ -179,17 +201,7 @@ export function ContainerCommands({
               submit(againInput(item, scripts));
             }}
           >
-            <RunAgentActions
-              run={item}
-              canSend={runs.data?.canSend ?? false}
-              pending={keep.isPending || send.isPending}
-              onKeep={(value) => {
-                keep.mutate({ runId: item.id, keep: value });
-              }}
-              onSend={(note) => {
-                send.mutate({ runId: item.id, note });
-              }}
-            />
+            {view ? <RunActions target={target} run={item} view={view} /> : null}
           </RunItem>
         ))}
       </ul>

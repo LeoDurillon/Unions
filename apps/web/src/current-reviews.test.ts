@@ -1,6 +1,6 @@
 import { beforeEach, expect, test } from 'bun:test';
 
-import { createDb, migrateDb, schema, type Db } from '@union/core';
+import { createDb, migrateDb, schema, updatePreview, type Db } from '@union/core';
 import type { Hono } from 'hono';
 
 import type { CurrentReview } from './api-types';
@@ -108,5 +108,20 @@ test('a pull request from a fork is marked so', async () => {
   expect(list.map((review) => [review.prNumber, review.fromFork])).toEqual([
     [9, false],
     [7, true],
+  ]);
+});
+
+test("each review lists its preview's state", async () => {
+  await send('POST', '', pull(7));
+  await send('POST', '', pull(9));
+  const [nine] = (await (await send('GET', '')).json()) as CurrentReview[];
+  if (!nine) {
+    throw new Error('no review');
+  }
+  updatePreview(db, { reviewId: nine.id }, { status: 'running' });
+  const list = (await (await send('GET', '')).json()) as CurrentReview[];
+  expect(list.map((review) => [review.prNumber, review.previewStatus])).toEqual([
+    [9, 'running'],
+    [7, null],
   ]);
 });

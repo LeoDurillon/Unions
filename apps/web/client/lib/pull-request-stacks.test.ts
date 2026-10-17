@@ -41,6 +41,7 @@ function review(prNumber: number, headBranch: string, baseBranch: string): Curre
     headSha: null,
     checkoutSha: null,
     checkoutInRepo: false,
+    previewStatus: null,
     submitStatus: null,
     submitError: null,
     createdAt: 0,
