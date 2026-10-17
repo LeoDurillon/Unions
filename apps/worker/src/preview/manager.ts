@@ -47,12 +47,16 @@ export class PreviewManager {
   private e2e(ticketId: number): void {
     const { config } = this.deps;
     if (this.e2eTicket !== null || !config) {
-      recordE2e(this.deps.db, ticketId, {
-        e2eStatus: 'skipped',
-        e2eOutput: config
-          ? `Ticket ${this.e2eTicket}'s end-to-end tests are running: one run at a time, they take a lot of memory`
-          : 'The worker cannot start ticket containers here',
-      });
+      recordE2e(
+        this.deps.db,
+        { ticketId },
+        {
+          e2eStatus: 'skipped',
+          e2eOutput: config
+            ? `Ticket ${this.e2eTicket}'s end-to-end tests are running: one run at a time, they take a lot of memory`
+            : 'The worker cannot start ticket containers here',
+        },
+      );
       return;
     }
     this.e2eTicket = ticketId;

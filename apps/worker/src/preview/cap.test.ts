@@ -68,11 +68,15 @@ beforeEach(() => {
 
 test("past Union's running cap, a start is refused", async () => {
   for (const title of ['a', 'b', 'c']) {
-    updatePreview(db, createTicket(db, { projectId, title, body: '' }).id, { status: 'running' });
+    updatePreview(
+      db,
+      { ticketId: createTicket(db, { projectId, title, body: '' }).id },
+      { status: 'running' },
+    );
   }
   const ticketId = ticketWithWorkspace(projectId, 'd');
   await startPreview(deps(), ticketId);
-  expect(getPreview(db, ticketId)?.error).toContain('3 previews are running already');
+  expect(getPreview(db, { ticketId })?.error).toContain('3 previews are running already');
 });
 
 test("the project's own cap counts only its previews", async () => {
@@ -85,15 +89,19 @@ test("the project's own cap counts only its previews", async () => {
     .values({ owner: 'o', repo: 'other', config: { baseBranch: 'main' } })
     .returning()
     .get().id;
-  updatePreview(db, createTicket(db, { projectId: elsewhere, title: 'x', body: '' }).id, {
-    status: 'running',
-  });
+  updatePreview(
+    db,
+    { ticketId: createTicket(db, { projectId: elsewhere, title: 'x', body: '' }).id },
+    {
+      status: 'running',
+    },
+  );
   const first = ticketWithWorkspace(projectId, 'first');
   await startPreview(deps(), first);
-  expect(getPreview(db, first)?.status).toBe('running');
+  expect(getPreview(db, { ticketId: first })?.status).toBe('running');
   const second = ticketWithWorkspace(projectId, 'second');
   await startPreview(deps(), second);
-  expect(getPreview(db, second)?.error).toContain(
+  expect(getPreview(db, { ticketId: second })?.error).toContain(
     "1 of the project's previews are running already",
   );
 });

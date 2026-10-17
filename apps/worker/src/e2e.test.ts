@@ -163,7 +163,7 @@ test('a red run keeps its failure screenshots as ticket files; a green one clear
 test('a preview that cannot run now skips the tests; one the code broke counts as red', async () => {
   for (const id of [101, 102, 103]) {
     const other = createTicket(db, { projectId: 1, title: `t${id}`, body: '' });
-    updatePreview(db, other.id, { status: 'running' });
+    updatePreview(db, { ticketId: other.id }, { status: 'running' });
   }
   expect(await e2e()).toMatchObject({ status: 'skipped' });
 
@@ -190,7 +190,7 @@ test('a run the user asks for is kept on the preview, and the container stops af
     },
     ticketId,
   );
-  expect(getPreview(db, ticketId)).toMatchObject({
+  expect(getPreview(db, { ticketId })).toMatchObject({
     e2eStatus: 'red',
     e2eExitCode: 1,
     e2eOutput: '1 failed: checkout › pays',
@@ -211,9 +211,9 @@ test('one e2e run at a time across tickets: a second request says why it did not
   const other = createTicket(db, { projectId: 1, title: 'Search', body: '' }).id;
   manager.run(ticketId, 'e2e');
   manager.run(other, 'e2e');
-  expect(getPreview(db, other)).toMatchObject({ e2eStatus: 'skipped' });
-  expect(getPreview(db, other)?.e2eOutput).toContain('one run at a time');
+  expect(getPreview(db, { ticketId: other })).toMatchObject({ e2eStatus: 'skipped' });
+  expect(getPreview(db, { ticketId: other })?.e2eOutput).toContain('one run at a time');
   gate.resolve(null);
   await manager.idle();
-  expect(getPreview(db, ticketId)?.e2eStatus).toBe('green');
+  expect(getPreview(db, { ticketId })?.e2eStatus).toBe('green');
 });

@@ -37,6 +37,7 @@ function review(prNumber: number, headBranch: string, baseBranch: string): Curre
     author: 'alice',
     headBranch,
     baseBranch,
+    fromFork: false,
     headSha: null,
     submitStatus: null,
     submitError: null,

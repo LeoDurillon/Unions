@@ -48,6 +48,7 @@ function reviewValues(projectId: number, body: Record<string, unknown>): NewRevi
     author: requireText(body, 'author'),
     headBranch: requireText(body, 'headBranch'),
     baseBranch: requireText(body, 'baseBranch'),
+    fromFork: body.crossRepository === true,
   };
 }
 

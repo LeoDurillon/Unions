@@ -129,7 +129,7 @@ export async function pauseAgentServices(
   ticketId: number,
   inUse = false,
 ): Promise<void> {
-  if (inUse || getPreview(deps.db, ticketId)?.status === 'running') {
+  if (inUse || getPreview(deps.db, { ticketId })?.status === 'running') {
     return;
   }
   try {

@@ -77,7 +77,10 @@ function freshPrompt({ deps, context, project }: Workspace): string {
     instructions:
       resolveAgent(deps.db, 'implement').prompt +
       gateHint(project.config.gateCommand) +
-      previewHint(project.config.preview, getPreview(deps.db, ticket.id)?.status === 'running') +
+      previewHint(
+        project.config.preview,
+        getPreview(deps.db, { ticketId: ticket.id })?.status === 'running',
+      ) +
       agentServicesHint(deps.services) +
       COMMIT_HOOK_HINT,
     approved: approvedBefore(deps.db, ticket.id, 'implement'),

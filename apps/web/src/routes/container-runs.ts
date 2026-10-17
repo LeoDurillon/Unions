@@ -48,7 +48,7 @@ function refusal(ticket: Ticket): string | null {
 
 function view(db: Db, ticket: Ticket): ContainerRunsView {
   return {
-    runs: listContainerRuns(db, ticket.id),
+    runs: listContainerRuns(db, { ticketId: ticket.id }),
     refusal: refusal(ticket),
     canSend: revisesImplementer(ticket.phase),
   };
@@ -100,14 +100,18 @@ async function run(db: Db, c: Context): Promise<Response> {
     const name = body.scriptName;
     checked(() => {
       const script = scriptRun(projectConfig(db, ticket), name);
-      return queueContainerRun(db, { ticketId: ticket.id, ...script });
+      return queueContainerRun(db, { owner: { ticketId: ticket.id }, ...script });
     });
     return c.json(view(db, ticket), CREATED);
   }
   if (typeof body.command !== 'string') {
     throw fail(BAD_REQUEST, '"command" or "scriptName" must be a string');
   }
-  const input = { ticketId: ticket.id, command: body.command, timeoutSec: timeoutOf(body) };
+  const input = {
+    owner: { ticketId: ticket.id },
+    command: body.command,
+    timeoutSec: timeoutOf(body),
+  };
   checked(() => queueContainerRun(db, input));
   return c.json(view(db, ticket), CREATED);
 }

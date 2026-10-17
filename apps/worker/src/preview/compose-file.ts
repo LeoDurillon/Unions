@@ -166,7 +166,7 @@ export async function generatedFile(deps: PreviewDeps, target: Target): Promise<
     const shown = names.length === 0 ? file : await buildFile(deps, target, true, catalog);
     saveGeneratedCompose(
       deps.db,
-      target.ticketId,
+      { ticketId: target.ticketId },
       { yaml: variablesComment(target) + unmaskSecrets(toYaml(shown), names) },
       summary,
     );
@@ -174,7 +174,7 @@ export async function generatedFile(deps: PreviewDeps, target: Target): Promise<
   } catch (error) {
     saveGeneratedCompose(
       deps.db,
-      target.ticketId,
+      { ticketId: target.ticketId },
       { error: error instanceof Error ? error.message : String(error) },
       summary,
     );
@@ -202,7 +202,7 @@ async function ownFile(deps: PreviewDeps, target: Target, yaml: string): Promise
 
 /** What Start runs: the user's file when the ticket has one, else a freshly generated one. */
 export function fileToRun(deps: PreviewDeps, target: Target): Promise<ComposeJson> {
-  const override = getPreview(deps.db, target.ticketId)?.override;
+  const override = getPreview(deps.db, { ticketId: target.ticketId })?.override;
   return override ? ownFile(deps, target, override) : generatedFile(deps, target);
 }
 
@@ -211,9 +211,13 @@ function targetOrReason(deps: PreviewDeps, ticketId: number): Target | null {
   try {
     return loadTarget(deps, ticketId);
   } catch (error) {
-    saveGeneratedCompose(deps.db, ticketId, {
-      error: error instanceof Error ? error.message : String(error),
-    });
+    saveGeneratedCompose(
+      deps.db,
+      { ticketId },
+      {
+        error: error instanceof Error ? error.message : String(error),
+      },
+    );
     return null;
   }
 }

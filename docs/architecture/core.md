@@ -40,3 +40,10 @@ When the line is a call's `result`, it also records what the call consumed in `a
 (`agent-usage-record.ts`). The result's `modelUsage` and cost add up over a resumed session, so a call's share is
 its result minus the session's previous one in the same Log (`agent-usage.ts`, pure); its peak context comes from
 its own `assistant` lines since then. `backfillUsage` (`bun run usage:backfill`) replays the past results.
+A preview and a container run belong to a **workspace owner** (`workspace-owner.ts`, browser-safe): a ticket
+(`{ ticketId }`) or a pull request under review (`{ reviewId }`); their rows set exactly one of `ticket_id` and
+`review_id` (a check constraint). `previews.ts` and `container-runs.ts` take the owner; names come from
+`ownerKey` (`union-t12`, `union-r3`) and hosts from `ownerHostId` (`12.localhost`, `r3.localhost`). Only a
+ticket's preview changes are events (`preview_changed`); a review's page polls. `previews.project_id` is the
+owner's project (the per-project cap). The worker and the web still act on tickets' previews and commands only:
+reviews' come with `docs/plans/review-previews.md`, steps 2 to 5.

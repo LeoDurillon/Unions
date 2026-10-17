@@ -74,7 +74,7 @@ test('sending queues one revision with the note, only when the implementer can t
 });
 
 test('the next run reads command and CI outputs together, once', () => {
-  const run = queueContainerRun(db, { ticketId, command: 'bun test' });
+  const run = queueContainerRun(db, { owner: { ticketId }, command: 'bun test' });
   finishContainerRun(db, run.id, { status: 'failed', exitCode: 1, error: null, output: 'red' });
   keepForAgent(db, run.id, true);
   keepCiOutputs(db, ticketId, [CHECK]);

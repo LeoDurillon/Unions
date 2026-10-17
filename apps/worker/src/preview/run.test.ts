@@ -132,7 +132,7 @@ beforeEach(() => {
 
 test('a preview starts from the workspace, rewritten, and runs once the service answers', async () => {
   await startPreview(deps(), ticketId);
-  expect(getPreview(db, ticketId)).toMatchObject({
+  expect(getPreview(db, { ticketId })).toMatchObject({
     status: 'running',
     url: 'http://1.localhost:8080',
     error: null,
@@ -164,16 +164,19 @@ test('a preview starts from the workspace, rewritten, and runs once the service 
 test('a compose file asking for host access never reaches Docker', async () => {
   resolved = { services: { web: { image: 'x', privileged: true, networks: { default: null } } } };
   await startPreview(deps(), ticketId);
-  expect(getPreview(db, ticketId)?.status).toBe('failed');
-  expect(getPreview(db, ticketId)?.error).toContain('privileged containers are not allowed');
+  expect(getPreview(db, { ticketId })?.status).toBe('failed');
+  expect(getPreview(db, { ticketId })?.error).toContain('privileged containers are not allowed');
   expect(commands().some((command) => command.includes(' up '))).toBe(false);
 });
 
 test('a failed start keeps the reason and the output, and takes down what it started', async () => {
   upExit = 1;
   await startPreview(deps(), ticketId);
-  expect(getPreview(db, ticketId)).toMatchObject({ status: 'failed', logTail: 'web-1  | ready' });
-  expect(getPreview(db, ticketId)?.error).toContain('docker compose up failed');
+  expect(getPreview(db, { ticketId })).toMatchObject({
+    status: 'failed',
+    logTail: 'web-1  | ready',
+  });
+  expect(getPreview(db, { ticketId })?.error).toContain('docker compose up failed');
   expect(commands().slice(-2)).toEqual([
     'leave union-t1_default',
     '-p union-t1 down -v --remove-orphans',
@@ -183,28 +186,28 @@ test('a failed start keeps the reason and the output, and takes down what it sta
   upExit = 0;
   answer = 502;
   await startPreview(deps(), ticketId);
-  expect(getPreview(db, ticketId)?.error).toBe('"web" did not answer on port 80');
+  expect(getPreview(db, { ticketId })?.error).toBe('"web" did not answer on port 80');
   expect(commands().at(-1)).toBe('-p union-t1 down -v --remove-orphans');
 });
 
 test('starts are refused without settings and without a workspace', async () => {
   db.update(schema.tickets).set({ workspaceVolume: null }).run();
   await startPreview(deps(), ticketId);
-  expect(getPreview(db, ticketId)?.error).toContain('run the implementation first');
+  expect(getPreview(db, { ticketId })?.error).toContain('run the implementation first');
 });
 
 test('stopping takes the compose project down with its volumes', async () => {
   await startPreview(deps(), ticketId);
   calls = [];
   await stopPreview(deps(), ticketId);
-  expect(getPreview(db, ticketId)?.status).toBe('stopped');
+  expect(getPreview(db, { ticketId })?.status).toBe('stopped');
   // Docker refuses to remove a network a container is still on: the agent leaves first.
   expect(commands()).toEqual(['leave union-t1_default', '-p union-t1 down -v --remove-orphans']);
 });
 
 test('the file a start ran is kept as YAML; generating alone starts nothing', async () => {
   await generatePreviewFile(deps(), ticketId);
-  const row = getPreview(db, ticketId);
+  const row = getPreview(db, { ticketId });
   expect(row?.status).toBe('stopped');
   expect(row?.composeYaml).toContain('name: union-t1');
   expect(row?.composeYaml).toContain('subpath: repo/site');
@@ -216,12 +219,12 @@ test('the file a start ran is kept as YAML; generating alone starts nothing', as
 
   resolved = { services: { web: { image: 'x', privileged: true, networks: { default: null } } } };
   await generatePreviewFile(deps(), ticketId);
-  expect(getPreview(db, ticketId)?.composeError).toContain('privileged');
-  expect(getPreview(db, ticketId)?.composeYaml).toBeNull();
+  expect(getPreview(db, { ticketId })?.composeError).toContain('privileged');
+  expect(getPreview(db, { ticketId })?.composeYaml).toBeNull();
 });
 
 test("the ticket's own file runs instead, checked, under the ticket's project, host ports kept", async () => {
-  setComposeOverride(db, ticketId, 'services: {}');
+  setComposeOverride(db, { ticketId }, 'services: {}');
   resolved = {
     name: 'mine',
     services: {
@@ -234,7 +237,7 @@ test("the ticket's own file runs instead, checked, under the ticket's project, h
     volumes: { union_workspace: { external: true, name: 'union-t1-ws' } },
   };
   await startPreview(deps(), ticketId);
-  expect(getPreview(db, ticketId)?.status).toBe('running');
+  expect(getPreview(db, { ticketId })?.status).toBe('running');
   const [config, up] = calls;
   expect(config?.stdin).toBe('services: {}');
   expect(config?.command.slice(4).join(' ')).toBe(
@@ -253,7 +256,9 @@ test("the ticket's own file runs instead, checked, under the ticket's project, h
   calls = [];
   resolved = { services: { web: { image: 'x', privileged: true } } };
   await startPreview(deps(), ticketId);
-  expect(getPreview(db, ticketId)?.error).toContain('Your compose file cannot run as a preview');
+  expect(getPreview(db, { ticketId })?.error).toContain(
+    'Your compose file cannot run as a preview',
+  );
   expect(commands().some((command) => command.includes(' up '))).toBe(false);
 });
 
@@ -280,7 +285,7 @@ test('several services, waited for; real values go through the env file, none is
     services: { ...RESOLVED.services, api: { image: 'node:22', networks: { default: null } } },
   };
   await startPreview(deps(), ticketId);
-  expect(getPreview(db, ticketId)).toMatchObject({
+  expect(getPreview(db, { ticketId })).toMatchObject({
     status: 'running',
     urls: [
       { service: 'web', url: 'http://1.localhost:8080' },
@@ -304,7 +309,7 @@ test('several services, waited for; real values go through the env file, none is
   // The variables as a file in `api` (its content is tested with the variables).
   expect(file.services.api?.configs).toEqual([{ source: 'union_env', target: '/etc/app.env' }]);
   // The file kept for the panel lists the variables, the secret hidden.
-  const shown = getPreview(db, ticketId)?.composeYaml ?? '';
+  const shown = getPreview(db, { ticketId })?.composeYaml ?? '';
   expect(shown).toContain('#   API_URL=http://api.1.localhost:8080');
   expect(shown).toContain('#   DB_PASSWORD=(secret)');
   expect(shown).not.toContain('pa$');

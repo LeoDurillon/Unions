@@ -100,3 +100,13 @@ test('a stack is removed whole, or not at all when one of it is not under review
   expect(after.map((review) => review.prNumber)).toEqual([14]);
   expect((await send('POST', '/stack/remove', { numbers: [] })).status).toBe(400);
 });
+
+test('a pull request from a fork is marked so', async () => {
+  await send('POST', '', { ...pull(7), crossRepository: true });
+  await send('POST', '', pull(9));
+  const list = (await (await send('GET', '')).json()) as CurrentReview[];
+  expect(list.map((review) => [review.prNumber, review.fromFork])).toEqual([
+    [9, false],
+    [7, true],
+  ]);
+});

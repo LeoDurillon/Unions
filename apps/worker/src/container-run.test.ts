@@ -9,6 +9,7 @@ import {
   getContainerRun,
   migrateDb,
   queueContainerRun,
+  updatePreview,
   schema,
   type ContainerRuntime,
   type Db,
@@ -131,7 +132,7 @@ afterEach(async () => {
 
 test('a command runs in the checkout, in its own process group, then the container stops', async () => {
   behaviour = { lines: ['\u001B[32mok\u001B[0m 3 tests'], exitCode: 0 };
-  const run = queueContainerRun(db, { ticketId, command: 'npm test' });
+  const run = queueContainerRun(db, { owner: { ticketId }, command: 'npm test' });
   const workers = runner();
   workers.tick();
   await workers.idle();
@@ -151,9 +152,9 @@ test('a command runs in the checkout, in its own process group, then the contain
 });
 
 test("a failing command keeps its exit code; with the preview running, it gets the preview's address", async () => {
-  db.insert(schema.previews).values({ ticketId, status: 'running' }).run();
+  updatePreview(db, { ticketId }, { status: 'running' });
   behaviour = { lines: ['boom'], exitCode: 2 };
-  const run = queueContainerRun(db, { ticketId, command: 'npm run import' });
+  const run = queueContainerRun(db, { owner: { ticketId }, command: 'npm run import' });
   const workers = runner();
   workers.tick();
   await workers.idle();
@@ -164,7 +165,7 @@ test("a failing command keeps its exit code; with the preview running, it gets t
 
 test('a cancel stops the command and kills its process group', async () => {
   behaviour = 'hang';
-  const run = queueContainerRun(db, { ticketId, command: 'sleep 100' });
+  const run = queueContainerRun(db, { owner: { ticketId }, command: 'sleep 100' });
   const workers = runner();
   workers.tick();
   await Bun.sleep(10);
@@ -177,7 +178,7 @@ test('a cancel stops the command and kills its process group', async () => {
 
 test('a timeout fails the run with the reason', async () => {
   behaviour = 'hang';
-  const run = queueContainerRun(db, { ticketId, command: 'sleep 100', timeoutSec: 1 });
+  const run = queueContainerRun(db, { owner: { ticketId }, command: 'sleep 100', timeoutSec: 1 });
   const workers = runner();
   workers.tick();
   await workers.idle();
@@ -204,7 +205,7 @@ test("with agent services, a command gets the agent's environment: services, loc
     .where(eq(schema.projects.id, project.id))
     .run();
   behaviour = { lines: ['ok'], exitCode: 0 };
-  queueContainerRun(db, { ticketId, command: 'pnpm test:e2e' });
+  queueContainerRun(db, { owner: { ticketId }, command: 'pnpm test:e2e' });
   const workers = runner();
   workers.tick();
   await workers.idle();

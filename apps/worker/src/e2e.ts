@@ -162,16 +162,20 @@ export async function runRequestedE2e(
   ticketId: number,
 ): Promise<void> {
   const { db, runtime } = deps;
-  recordE2e(db, ticketId, { e2eStatus: 'running' });
+  recordE2e(db, { ticketId }, { e2eStatus: 'running' });
   let container: string | null = null;
   try {
     const ticket = getTicket(db, ticketId);
     const preview = previewConfigOf(db, ticket.projectId);
     if (!preview?.e2eCommand) {
-      recordE2e(db, ticketId, {
-        e2eStatus: 'skipped',
-        e2eOutput: 'The project has no e2e command',
-      });
+      recordE2e(
+        db,
+        { ticketId },
+        {
+          e2eStatus: 'skipped',
+          e2eOutput: 'The project has no e2e command',
+        },
+      );
       return;
     }
     ({ name: container } = await ensureTicketContainer(db, runtime, deps.config, ticket));
@@ -185,7 +189,7 @@ export async function runRequestedE2e(
     });
     recordE2e(
       db,
-      ticketId,
+      { ticketId },
       result === null || result.status === 'skipped'
         ? { e2eStatus: 'skipped', e2eOutput: result?.reason ?? 'Nothing to run' }
         : {
@@ -196,10 +200,14 @@ export async function runRequestedE2e(
           },
     );
   } catch (error) {
-    recordE2e(db, ticketId, {
-      e2eStatus: 'skipped',
-      e2eOutput: error instanceof Error ? error.message : String(error),
-    });
+    recordE2e(
+      db,
+      { ticketId },
+      {
+        e2eStatus: 'skipped',
+        e2eOutput: error instanceof Error ? error.message : String(error),
+      },
+    );
   } finally {
     if (container && getTicket(db, ticketId).phase.kind !== 'running') {
       await runtime.stop(container).catch(() => null);

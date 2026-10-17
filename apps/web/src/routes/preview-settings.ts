@@ -241,7 +241,10 @@ function composeServices(db: Db, projectId: number): PreviewSettingsView['compos
     .where(eq(schema.tickets.projectId, projectId))
     .orderBy(desc(schema.previews.composeAt))
     .all()
-    .find((candidate) => candidate.catalog !== null || candidate.yaml !== null);
+    .find(
+      (candidate): candidate is typeof candidate & { ticketId: number } =>
+        candidate.ticketId !== null && (candidate.catalog !== null || candidate.yaml !== null),
+    );
   if (!row || row.at === null) {
     return null;
   }

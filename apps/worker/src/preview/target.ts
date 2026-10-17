@@ -81,16 +81,21 @@ export function loadTarget(deps: PreviewDeps, ticketId: number): Target {
   if (services.length === 0) {
     throw new PreviewError('The preview settings expose no service (project settings → Preview)');
   }
-  const context = { ticketId, publicPort: deps.settings.publicPort, exposed: services };
+  const context = {
+    owner: { ticketId },
+    prNumber: null,
+    publicPort: deps.settings.publicPort,
+    exposed: services,
+  };
   const exposed = services.map((service) => ({
     service: service.name,
     port: service.port,
-    host: previewServiceHost(ticketId, service.prefix),
+    host: previewServiceHost({ ticketId }, service.prefix),
   }));
   return {
     ticketId,
     projectId: ticket.projectId,
-    project: previewProject(ticketId),
+    project: previewProject({ ticketId }),
     config,
     workspaceVolume: ticket.workspaceVolume,
     exposed,

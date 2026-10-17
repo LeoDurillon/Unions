@@ -20,7 +20,7 @@ export); do not edit. Tests are left out.
 - `attachments.ts`: Where the agents find a ticket's files: next to the repository, so `git add -A` never sees them.
 - `ci-output-text.ts`: The text the implementer gets from CI: a failed check (its failed step's log, annotations, summary), another job's log, a bot's comment; browser-safe.
 - `ci-outputs.ts`: CI output given to the implementer: kept for its next run, or sent now as a revision with the user's note.
-- `container-runs.ts`: The ticket's latest runs, newest first.
+- `container-runs.ts`: The owner's latest runs, newest first.
 - `db.ts`: Fresh handle, never cached: tests use `createDb(':memory:')`.
 - `diff-excerpt.ts`: The text of `start..end` on one side of a file's patch; null when none of those lines is in it.
 - `diff-hunks.ts`: A file's patch as hunks: the grouping by spec places hunks, the review page shows some of them.
@@ -71,13 +71,13 @@ export); do not edit. Tests are left out.
 - `schema-agent-usage.ts`: What each agent call consumed, per model: written from its `result` line in `agent_log`.
 - `schema-attachments.ts`: Files the user attached to a ticket, stored on the host under the attachments folder and copied into the ticket's container for the agents.
 - `schema-ci-outputs.ts`: CI output the user gave the implementer from the pull request's checks: a failed check, another job's log, a bot's comment.
-- `schema-container-runs.ts`: A command the user ran in a ticket's workspace (its container, in the checkout, as the agent), with the end of its output.
+- `schema-container-runs.ts`: A command the user ran in a workspace: a ticket's (its container, in the checkout, as the agent) or a pull request's under review (exactly one of `ticket_id` a…
 - `schema-diff-commits.ts`: A ticket's commits at its diff snapshot, oldest first, each with its own files against its first parent.
 - `schema-events.ts`: The project's Notion data source as last read: rules point at its properties by id.
 - `schema-mcp.ts`: The claude.ai connectors of the Claude account the agents run with, as the last check read them (`claude mcp list` in a throwaway container).
 - `schema-notifications.ts`: What needs the user, drawn from the event log by the worker: one row per event that notifies, read in the bell's panel.
 - `schema-pr-descriptions.ts`: A pull request description the agent rewrote for a ticket whose work changed after the PR was opened.
-- `schema-previews.ts`: A ticket's preview: its compose project (`union-t<id>`) run from the ticket's workspace, served by the proxy at `url`.
+- `schema-previews.ts`: A preview: its compose project (`union-t<id>` for a ticket, `union-r<id>` for a pull request under review) run from its owner's workspace, served by the proxy …
 - `schema-project-files.ts`: Files the user gave the project (a database dump, a local config), put at `path` in every ticket's workspace and kept out of git there.
 - `schema-refused-commits.ts`: Changes the agent left uncommitted that the repository's hook refused to commit.
 - `schema-review-groupings.ts`: The agent's grouping of a review's changed files by the parts of a specification, run when the user asks: for a ticket's branch or a pull request under review …
@@ -90,3 +90,4 @@ export); do not edit. Tests are left out.
 - `ticket-flow.ts`: Choosing the steps a ticket runs: only before it starts, since the start fixes them.
 - `ticket-links.ts`: A parent link the rules refuse: wrong project, a cycle, or a ticket that already started.
 - `tickets.ts`: Tickets: reading, creating and labelling them, the event log they write to, and dispatching state-machine actions.
+- `workspace-owner.ts`: Whose workspace a preview or a command runs in: a ticket's, or a pull request's under review; browser-safe.

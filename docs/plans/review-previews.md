@@ -1,6 +1,6 @@
 # Plan: previews of pull requests under review
 
-Status: planned (2026-10-17), not built.
+Status: step 1 built (branch `review-previews`): the owner in core and the database; steps 2 to 6 left.
 
 ## Idea
 
@@ -30,7 +30,7 @@ the agent review already does.
 **A preview has an owner: a ticket or a review.** `previews` is rebuilt with its own `id`, a unique nullable
 `ticket_id`, a unique nullable `review_id` (cascade on delete of either) and a `project_id` (the per-project cap
 counts it without reading the ticket). Exactly one owner is set. The core helpers (`getPreview`, `updatePreview`,
-`recordE2e`, `saveGeneratedCompose`, `setComposeOverride`) take a `PreviewOwner` (`{ ticketId } | { reviewId }`).
+`recordE2e`, `saveGeneratedCompose`, `setComposeOverride`) take a `WorkspaceOwner` (`WorkspaceOwner`, `{ ticketId } | { reviewId }`, in `workspace-owner.ts`).
 `container_runs` gets the same: `ticket_id` becomes nullable, `review_id` is added, one of them set. A ticket's
 preview, tests and commands behave as today.
 
@@ -116,14 +116,17 @@ The Commands section of the ticket's Preview tab, on the review's Preview tab:
 
 ## Steps
 
-1. **Core: owners.** Migrations rebuilding `previews` (copy rows, `project_id` from their tickets) and
-   `container_runs`; `preview_screenshots`; `current_reviews.from_fork`; helpers on `PreviewOwner`;
+1. **Core: owners.** (Built: migration `0054_review_previews`, tested on a copy of the live database; the worker
+   fails a review-owned command run and the idle watcher reads tickets' previews only, until steps 2 and 3.)
+   Migrations rebuilding `previews` (copy rows, `project_id` from their tickets) and
+   `container_runs`; `preview_screenshots`; `current_reviews.from_fork`; helpers on `WorkspaceOwner`;
    `previewProject`/`previewHost`/`previewServiceHost` from an owner; `{pr.number}`; events only for a ticket
    owner. Tests: helpers for both owners, templates, the migrations on a copy of a database with previews and runs.
    Restart `web` and `worker` after it (migrations, several core files).
 2. **Worker: the review's container and preview.** `ensureReviewContainer` (checkout at `headSha`, project files, no
    credentials) and the update to a newer commit; `loadTarget` for a review; `PreviewManager` keyed by owner; idle
-   regex; `takeDownFor`; secrets left out for a fork. Test against real Docker with a throwaway review row (its
+   regex; `takeDownFor`; secrets left out for a fork (`from_fork` is what the client listed when the review was
+   added: the worker checks the pull request's head repository again before a start with secrets). Test against real Docker with a throwaway review row (its
    container and volumes removed after), as for ticket 9001.
 3. **Worker: e2e and Commands for a review.** `runRequestedE2e` and the container-run queue on an owner; network
    join by container name; screenshots in `preview_screenshots`. Real Docker test: a command and an e2e command

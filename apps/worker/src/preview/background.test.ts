@@ -169,7 +169,7 @@ test('after the step the services stop, unless the preview uses them', async () 
   composeCalls = [];
   await pauseAgentServices(deps(), ticketId, true);
   expect(composeCalls).toEqual([]);
-  updatePreview(db, ticketId, { status: 'running' });
+  updatePreview(db, { ticketId }, { status: 'running' });
   await pauseAgentServices(deps(), ticketId);
   expect(composeCalls).toEqual([]);
 });

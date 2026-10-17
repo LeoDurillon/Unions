@@ -166,7 +166,7 @@ test('a preview starts once configured and the ticket has a workspace, one comma
   expect((await call('POST', `${base}/logs`)).status).toBe(409);
 
   db.update(schema.commands).set({ handledAt: Date.now() }).run();
-  updatePreview(db, ticketId, { status: 'running', url: 'http://1.localhost:8080' });
+  updatePreview(db, { ticketId }, { status: 'running', url: 'http://1.localhost:8080' });
   expect((await view()).preview).toMatchObject({ status: 'running' });
   expect((await call('POST', `${base}/logs`)).status).toBe(202);
 });
@@ -204,12 +204,12 @@ test("the settings list the services of the project's latest generated compose f
   const base = `/api/projects/${projectId}/preview`;
   const empty = (await (await call('GET', base)).json()) as PreviewSettingsView;
   expect(empty.composeServices).toBeNull();
-  saveGeneratedCompose(db, ticketId, { yaml: 'services:\n  web: {}\n  db: {}\n' });
+  saveGeneratedCompose(db, { ticketId }, { yaml: 'services:\n  web: {}\n  db: {}\n' });
   const listed = (await (await call('GET', base)).json()) as PreviewSettingsView;
   expect(listed.composeServices).toMatchObject({ names: ['web', 'db'], profiles: [], ticketId });
   saveGeneratedCompose(
     db,
-    ticketId,
+    { ticketId },
     { yaml: 'services: {}' },
     {
       profiles: ['storage'],

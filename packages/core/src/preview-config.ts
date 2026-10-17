@@ -3,6 +3,7 @@
  * checks as the worker.
  */
 import type { PreviewConfig, PreviewService } from './schema-types';
+import { ownerHostId, type WorkspaceOwner } from './workspace-owner';
 
 /** Minutes without a visit before a running preview stops, when the settings do not say. */
 export const DEFAULT_IDLE_STOP_MINUTES = 60;
@@ -14,7 +15,8 @@ export const PREVIEW_TEMPLATES = [
   { name: 'service.X.url', description: "An exposed service's address, from your browser" },
   { name: 'service.X.internal', description: "An exposed service's address, from another service" },
   { name: 'service.X.host', description: "A service's host name inside the environment" },
-  { name: 'ticket.id', description: 'The ticket number' },
+  { name: 'ticket.id', description: 'The ticket number (r3 for a pull request under review)' },
+  { name: 'pr.number', description: "The pull request's number under review (empty for a ticket)" },
   { name: 'preview.host', description: 'The preview host (12.localhost)' },
   { name: 'preview.url', description: "The first exposed service's address" },
 ] as const;
@@ -33,8 +35,9 @@ export function exposedServices(config: PreviewConfig): PreviewService[] {
     : [];
 }
 
-export function previewServiceHost(ticketId: number, prefix: string): string {
-  return prefix === '' ? `${ticketId}.localhost` : `${prefix}.${ticketId}.localhost`;
+export function previewServiceHost(owner: WorkspaceOwner, prefix: string): string {
+  const id = ownerHostId(owner);
+  return prefix === '' ? `${id}.localhost` : `${prefix}.${id}.localhost`;
 }
 
 export function previewAddress(host: string, publicPort: number): string {
@@ -43,7 +46,9 @@ export function previewAddress(host: string, publicPort: number): string {
 
 /** What the templates of one preview read. */
 export type TemplateContext = {
-  ticketId: number;
+  owner: WorkspaceOwner;
+  /** The pull request under review; null for a ticket. */
+  prNumber: number | null;
   publicPort: number;
   exposed: PreviewService[];
 };
@@ -58,7 +63,7 @@ function serviceValue(context: TemplateContext, service: string, part: string): 
   }
   return part === 'internal'
     ? `http://${service}:${exposed.port}`
-    : previewAddress(previewServiceHost(context.ticketId, exposed.prefix), context.publicPort);
+    : previewAddress(previewServiceHost(context.owner, exposed.prefix), context.publicPort);
 }
 
 function templateValue(context: TemplateContext, name: string): string | null {
@@ -68,10 +73,11 @@ function templateValue(context: TemplateContext, name: string): string | null {
   }
   const [first] = context.exposed;
   const values: Record<string, string | null> = {
-    'ticket.id': String(context.ticketId),
-    'preview.host': previewServiceHost(context.ticketId, ''),
+    'ticket.id': ownerHostId(context.owner),
+    'pr.number': context.prNumber === null ? '' : String(context.prNumber),
+    'preview.host': previewServiceHost(context.owner, ''),
     'preview.url': first
-      ? previewAddress(previewServiceHost(context.ticketId, first.prefix), context.publicPort)
+      ? previewAddress(previewServiceHost(context.owner, first.prefix), context.publicPort)
       : null,
   };
   return values[name] ?? null;
@@ -79,7 +85,12 @@ function templateValue(context: TemplateContext, name: string): string | null {
 
 /** The `{names}` of a value that are not templates, or name a service that is not exposed. */
 export function templateProblems(value: string, exposed: PreviewService[]): string[] {
-  const context: TemplateContext = { ticketId: 1, publicPort: HTTP_PORT, exposed };
+  const context: TemplateContext = {
+    owner: { ticketId: 1 },
+    prNumber: 1,
+    publicPort: HTTP_PORT,
+    exposed,
+  };
   return [...value.matchAll(TEMPLATE)]
     .map((match) => match.groups?.name ?? '')
     .filter((name) => templateValue(context, name) === null)

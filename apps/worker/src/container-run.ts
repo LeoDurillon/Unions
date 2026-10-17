@@ -43,7 +43,8 @@ export type ContainerRunDeps = { db: Db; runtime: ContainerRuntime; config: Prov
 function previewEnv(db: Db, ticketId: number, projectId: number): Record<string, string> {
   const preview = db.select().from(schema.projects).where(eq(schema.projects.id, projectId)).get()
     ?.config.preview;
-  const url = preview && getPreview(db, ticketId)?.status === 'running' ? baseUrl(preview) : null;
+  const url =
+    preview && getPreview(db, { ticketId })?.status === 'running' ? baseUrl(preview) : null;
   return url ? { BASE_URL: url, PREVIEW_URL: url } : {};
 }
 
@@ -100,6 +101,10 @@ async function execute(
   cancel: AbortSignal,
 ): Promise<ContainerRunOutcome> {
   const { db, runtime, config } = deps;
+  if (run.ticketId === null) {
+    const error = "Commands in a pull request's checkout are not supported yet";
+    return { status: 'failed', exitCode: null, error, output: '' };
+  }
   const ticket = getTicket(db, run.ticketId);
   if (ticket.phase.kind === 'running') {
     const error = 'A step started in this workspace: run it once it ends';

@@ -1,6 +1,15 @@
-import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { sql } from 'drizzle-orm';
+import {
+  check,
+  index,
+  integer,
+  sqliteTable,
+  text,
+  type AnySQLiteColumn,
+} from 'drizzle-orm/sqlite-core';
 
 import { now, tickets } from './schema';
+import { currentReviews } from './schema-reviews';
 
 export const CONTAINER_RUN_STATUSES = [
   'queued',
@@ -13,16 +22,18 @@ export const CONTAINER_RUN_STATUSES = [
 ] as const;
 
 /**
- * A command the user ran in a ticket's workspace (its container, in the checkout, as the agent),
- * with the end of its output. The worker runs it; the web only queues it.
+ * A command the user ran in a workspace: a ticket's (its container, in the checkout, as the agent)
+ * or a pull request's under review (exactly one of `ticket_id` and `review_id`), with the end of
+ * its output. The worker runs it; the web only queues it.
  */
 export const containerRuns = sqliteTable(
   'container_runs',
   {
     id: integer('id').primaryKey({ autoIncrement: true }),
-    ticketId: integer('ticket_id')
-      .notNull()
-      .references(() => tickets.id, { onDelete: 'cascade' }),
+    ticketId: integer('ticket_id').references(() => tickets.id, { onDelete: 'cascade' }),
+    reviewId: integer('review_id').references((): AnySQLiteColumn => currentReviews.id, {
+      onDelete: 'cascade',
+    }),
     command: text('command').notNull(),
     /** The saved script it ran, by name (its command as it was then is `command`). */
     scriptName: text('script_name'),
@@ -35,12 +46,16 @@ export const containerRuns = sqliteTable(
     timeoutSec: integer('timeout_sec').notNull(),
     /**
      * For the implementer: `next_run` while its next run should read the output, `sent` once it
-     * did; null when the user kept it to themselves.
+     * did; null when the user kept it to themselves, and always for a pull request's.
      */
     forAgent: text('for_agent', { enum: ['next_run', 'sent'] }),
     createdAt: integer('created_at').notNull().default(now),
     startedAt: integer('started_at'),
     finishedAt: integer('finished_at'),
   },
-  (t) => [index('container_runs_ticket_idx').on(t.ticketId, t.id)],
+  (t) => [
+    index('container_runs_ticket_idx').on(t.ticketId, t.id),
+    index('container_runs_review_idx').on(t.reviewId, t.id),
+    check('container_runs_one_owner', sql`(${t.ticketId} IS NULL) <> (${t.reviewId} IS NULL)`),
+  ],
 );

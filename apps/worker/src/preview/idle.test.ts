@@ -44,7 +44,7 @@ beforeEach(() => {
     .returning()
     .get().id;
   ticketId = createTicket(db, { projectId, title: 't' }).id;
-  updatePreview(db, ticketId, { status: 'running', startedAt: 0 });
+  updatePreview(db, { ticketId }, { status: 'running', startedAt: 0 });
   metrics = line(ticketId, 'web', 5);
   stopped = [];
   testing = null;

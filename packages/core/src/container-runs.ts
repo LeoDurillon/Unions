@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, inArray } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, type SQL } from 'drizzle-orm';
 
 import { stripAnsi } from './ansi';
 import type { Db } from './db';
@@ -6,6 +6,7 @@ import { commands } from './schema';
 import * as schema from './schema-container-runs';
 import { transition, type Phase } from './states';
 import { getTicket } from './tickets';
+import { ownerColumns, type WorkspaceOwner } from './workspace-owner';
 
 export type ContainerRun = typeof schema.containerRuns.$inferSelect;
 
@@ -39,13 +40,31 @@ function timeoutOf(timeoutSec: number | undefined): number {
   return timeoutSec;
 }
 
+function ownedBy(owner: WorkspaceOwner): SQL {
+  return 'ticketId' in owner
+    ? eq(schema.containerRuns.ticketId, owner.ticketId)
+    : eq(schema.containerRuns.reviewId, owner.reviewId);
+}
+
+/** A ticket's workspace is the agent's while a step runs, and gone once the ticket is cancelled. */
+function ticketRefusal(db: Db, owner: WorkspaceOwner): string | null {
+  if (!('ticketId' in owner)) {
+    return null;
+  }
+  const { phase } = getTicket(db, owner.ticketId);
+  if (phase.kind === 'running') {
+    return 'A step is running in this workspace: run it once it ends';
+  }
+  return phase.kind === 'cancelled' ? 'The ticket is cancelled: its workspace is gone' : null;
+}
+
 /**
- * Queues a command in the ticket's workspace. Refused while a step runs (the agent works there) and
- * while another command of the ticket is queued or running.
+ * Queues a command in the owner's workspace: a ticket's, refused while a step runs (the agent works
+ * there), or a pull request's under review. Refused while another command of it is queued or running.
  */
 export function queueContainerRun(
   db: Db,
-  input: { ticketId: number; command: string; timeoutSec?: number; scriptName?: string },
+  input: { owner: WorkspaceOwner; command: string; timeoutSec?: number; scriptName?: string },
 ): ContainerRun {
   const command = input.command.trim();
   if (command === '' || command.length > MAX_COMMAND_CHARS) {
@@ -53,29 +72,16 @@ export function queueContainerRun(
   }
   const timeoutSec = timeoutOf(input.timeoutSec);
   return db.transaction((tx) => {
-    const { phase } = getTicket(tx, input.ticketId);
-    if (phase.kind === 'running') {
-      throw new ContainerRunError('A step is running in this workspace: run it once it ends');
+    const refusal = ticketRefusal(tx, input.owner);
+    if (refusal !== null) {
+      throw new ContainerRunError(refusal);
     }
-    if (phase.kind === 'cancelled') {
-      throw new ContainerRunError('The ticket is cancelled: its workspace is gone');
-    }
-    const active = tx
-      .select({ id: schema.containerRuns.id })
-      .from(schema.containerRuns)
-      .where(
-        and(
-          eq(schema.containerRuns.ticketId, input.ticketId),
-          inArray(schema.containerRuns.status, ACTIVE),
-        ),
-      )
-      .get();
-    if (active) {
+    if (hasActiveContainerRun(tx, input.owner)) {
       throw new ContainerRunError('A command is already running in this workspace');
     }
     return tx
       .insert(schema.containerRuns)
-      .values({ ticketId: input.ticketId, command, timeoutSec, scriptName: input.scriptName })
+      .values({ ...ownerColumns(input.owner), command, timeoutSec, scriptName: input.scriptName })
       .returning()
       .get();
   });
@@ -87,12 +93,12 @@ export function getContainerRun(db: Db, id: number): ContainerRun | null {
   );
 }
 
-/** The ticket's latest runs, newest first. */
-export function listContainerRuns(db: Db, ticketId: number): ContainerRun[] {
+/** The owner's latest runs, newest first. */
+export function listContainerRuns(db: Db, owner: WorkspaceOwner): ContainerRun[] {
   return db
     .select()
     .from(schema.containerRuns)
-    .where(eq(schema.containerRuns.ticketId, ticketId))
+    .where(ownedBy(owner))
     .orderBy(desc(schema.containerRuns.id))
     .limit(RUNS_LISTED)
     .all();
@@ -177,6 +183,9 @@ function finishedRun(db: Db, id: number): ContainerRun {
  */
 export function keepForAgent(db: Db, id: number, keep: boolean): ContainerRun {
   const run = finishedRun(db, id);
+  if (run.ticketId === null) {
+    throw new ContainerRunError('A pull request under review has no agent to read it');
+  }
   if (run.forAgent === 'sent') {
     throw new ContainerRunError('The agent already read this output');
   }
@@ -204,13 +213,16 @@ export function revisesImplementer(phase: Phase): boolean {
  */
 export function sendToAgent(db: Db, id: number, note: string): ContainerRun {
   return db.transaction((tx) => {
-    const run = finishedRun(tx, id);
-    if (!revisesImplementer(getTicket(tx, run.ticketId).phase)) {
+    const { ticketId } = finishedRun(tx, id);
+    if (ticketId === null) {
+      throw new ContainerRunError('A pull request under review has no agent to read it');
+    }
+    if (!revisesImplementer(getTicket(tx, ticketId).phase)) {
       throw new ContainerRunError('The ticket cannot go back to the implementer now');
     }
     const kept = keepForAgent(tx, id, true);
     tx.insert(commands)
-      .values({ type: 'revise', ticketId: run.ticketId, payload: { feedback: note } })
+      .values({ type: 'revise', ticketId, payload: { feedback: note } })
       .run();
     return kept;
   });
@@ -241,18 +253,13 @@ export function markSentToAgent(db: Db, ids: number[]): void {
   }
 }
 
-/** Whether a command of the ticket is queued or running (it may use the agent's services). */
-export function hasActiveContainerRun(db: Db, ticketId: number): boolean {
+/** Whether a command of the owner is queued or running (a ticket's may use the agent's services). */
+export function hasActiveContainerRun(db: Db, owner: WorkspaceOwner): boolean {
   return (
     db
       .select({ id: schema.containerRuns.id })
       .from(schema.containerRuns)
-      .where(
-        and(
-          eq(schema.containerRuns.ticketId, ticketId),
-          inArray(schema.containerRuns.status, ACTIVE),
-        ),
-      )
+      .where(and(ownedBy(owner), inArray(schema.containerRuns.status, ACTIVE)))
       .get() !== undefined
   );
 }

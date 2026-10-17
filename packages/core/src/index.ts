@@ -74,3 +74,4 @@ export * from './states';
 export * from './ticket-base';
 export * from './ticket-links';
 export * from './tickets';
+export * from './workspace-owner';

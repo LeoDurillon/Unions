@@ -27,6 +27,8 @@ export const currentReviews = sqliteTable(
     url: text('url').notNull(),
     author: text('author').notNull(),
     headBranch: text('head_branch').notNull(),
+    /** Its head branch is in a fork: its preview never gets the project's secret variables. */
+    fromFork: integer('from_fork', { mode: 'boolean' }).notNull().default(false),
     baseBranch: text('base_branch').notNull(),
     /** The pull request's files as last fetched for review, and the head commit they are at. */
     files: text('files', { mode: 'json' }).$type<PullRequestFile[]>(),

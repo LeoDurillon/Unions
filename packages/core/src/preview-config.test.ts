@@ -11,7 +11,12 @@ const SERVICES = [
   { name: 'web', port: 3000, prefix: '' },
   { name: 'api', port: 8080, prefix: 'api' },
 ];
-const CONTEXT: TemplateContext = { ticketId: 12, publicPort: 8080, exposed: SERVICES };
+const CONTEXT: TemplateContext = {
+  owner: { ticketId: 12 },
+  prNumber: null,
+  publicPort: 8080,
+  exposed: SERVICES,
+};
 
 test('phase 1 settings read as one exposed service on the main host', () => {
   expect(exposedServices({ composeFile: 'c.yaml', env: {}, service: 'web', port: 80 })).toEqual([
@@ -34,6 +39,15 @@ test('templates fill in addresses from the browser and from inside the environme
   expect(renderPreviewTemplate('{service.web.url}', { ...CONTEXT, publicPort: 80 })).toBe(
     'http://12.localhost',
   );
+});
+
+test("a pull request under review's templates use its review id and its number", () => {
+  const review: TemplateContext = { ...CONTEXT, owner: { reviewId: 3 }, prNumber: 1582 };
+  expect(renderPreviewTemplate('db_{ticket.id} #{pr.number} {service.api.url}', review)).toBe(
+    'db_r3 #1582 http://api.r3.localhost:8080',
+  );
+  expect(renderPreviewTemplate('#{pr.number}', CONTEXT)).toBe('#');
+  expect(templateProblems('{pr.number}', SERVICES)).toEqual([]);
 });
 
 test('unknown templates and services not exposed are reported', () => {

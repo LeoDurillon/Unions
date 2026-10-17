@@ -60,7 +60,7 @@ function refusal(db: Db, ticket: Ticket): string | null {
   if (!ticket.workspaceVolume) {
     return 'The ticket has no workspace yet: run the implementation first.';
   }
-  const status = getPreview(db, ticket.id)?.status;
+  const status = getPreview(db, { ticketId: ticket.id })?.status;
   return status === 'starting' || status === 'stopping' || pending(db, ticket.id)
     ? 'The preview is already starting or stopping.'
     : null;
@@ -79,14 +79,14 @@ function e2eRefusal(db: Db, ticket: Ticket): string | null {
   if (busy !== null) {
     return busy;
   }
-  return getPreview(db, ticket.id)?.e2eStatus === 'running'
+  return getPreview(db, { ticketId: ticket.id })?.e2eStatus === 'running'
     ? 'The end-to-end tests are already running.'
     : null;
 }
 
 function view(db: Db, ticket: Ticket): PreviewView {
   return {
-    preview: getPreview(db, ticket.id),
+    preview: getPreview(db, { ticketId: ticket.id }),
     configured: configured(db, ticket),
     composeFile: previewConfig(db, ticket)?.composeFile ?? null,
     e2eCommand: previewConfig(db, ticket)?.e2eCommand ?? null,
@@ -120,7 +120,7 @@ async function saveOwnFile(db: Db, c: Context): Promise<Response> {
   if (typeof yaml === 'string' && yaml.length > MAX_COMPOSE_CHARS) {
     throw fail(BAD_REQUEST, 'The compose file is too long');
   }
-  setComposeOverride(db, ticket.id, yaml);
+  setComposeOverride(db, { ticketId: ticket.id }, yaml);
   return c.json(view(db, ticket));
 }
 
@@ -134,7 +134,7 @@ export function previewRoutes(db: Db): Hono {
   routes.post('/start', (c) => command(db, c, 'preview_start', (ticket) => refusal(db, ticket)));
   routes.post('/stop', (c) =>
     command(db, c, 'preview_stop', (ticket) =>
-      pending(db, ticket.id) || getPreview(db, ticket.id) === null
+      pending(db, ticket.id) || getPreview(db, { ticketId: ticket.id }) === null
         ? 'There is no preview to stop.'
         : null,
     ),
@@ -146,7 +146,9 @@ export function previewRoutes(db: Db): Hono {
   routes.put('/compose', (c) => saveOwnFile(db, c));
   routes.post('/logs', (c) =>
     command(db, c, 'preview_logs', (ticket) =>
-      getPreview(db, ticket.id)?.status === 'running' ? null : 'The preview is not running.',
+      getPreview(db, { ticketId: ticket.id })?.status === 'running'
+        ? null
+        : 'The preview is not running.',
     ),
   );
   return routes;

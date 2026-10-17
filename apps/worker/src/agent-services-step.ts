@@ -17,7 +17,7 @@ export async function withAgentServices(
     return await run({ ...deps, runtime: services.runtime, services: services.setup });
   } finally {
     // A command the user runs meanwhile (queued during the step) may still need them.
-    await services.release(hasActiveContainerRun(deps.db, context.ticket.id));
+    await services.release(hasActiveContainerRun(deps.db, { ticketId: context.ticket.id }));
   }
 }
 

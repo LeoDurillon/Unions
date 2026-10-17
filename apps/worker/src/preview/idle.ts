@@ -1,5 +1,6 @@
 import {
   activePreviews,
+  isTicketPreview,
   DEFAULT_IDLE_STOP_MINUTES,
   getTicket,
   schema,
@@ -54,12 +55,13 @@ export type IdleDeps = {
   now?: () => number;
 };
 
+type TicketPreview = Preview & { ticketId: number };
+
 function idleMinutes(db: Db, preview: Preview): number {
-  const ticket = getTicket(db, preview.ticketId);
   const project = db
     .select()
     .from(schema.projects)
-    .where(eq(schema.projects.id, ticket.projectId))
+    .where(eq(schema.projects.id, preview.projectId))
     .get();
   return project?.config.preview?.idleStopMinutes ?? DEFAULT_IDLE_STOP_MINUTES;
 }
@@ -95,7 +97,7 @@ export class IdleWatcher {
     }
   }
 
-  private inUse(preview: Preview, total: number, now: number): boolean {
+  private inUse(preview: TicketPreview, total: number, now: number): boolean {
     const last = this.seen.get(preview.ticketId);
     const busy =
       getTicket(this.deps.db, preview.ticketId).phase.kind === 'running' ||
@@ -114,7 +116,10 @@ export class IdleWatcher {
       return;
     }
     const totals = requestsByTicket(metrics);
-    const running = activePreviews(this.deps.db).filter((row) => row.status === 'running');
+    // Only tickets' previews so far: a review's has no router names this reads yet.
+    const running = activePreviews(this.deps.db)
+      .filter((row) => isTicketPreview(row))
+      .filter((row) => row.status === 'running');
     for (const id of this.seen.keys()) {
       if (!running.some((row) => row.ticketId === id)) {
         this.seen.delete(id);

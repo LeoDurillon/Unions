@@ -12,7 +12,7 @@ function agentContainer(ticketId: number): string {
 }
 
 async function previewNetworks(runtime: ContainerRuntime, ticketId: number): Promise<string[]> {
-  const networks = await runtime.projectNetworks(previewProject(ticketId));
+  const networks = await runtime.projectNetworks(previewProject({ ticketId }));
   // The proxy's network is shared by every preview: the agent stays off it.
   return networks.filter((network) => network !== PREVIEW_NETWORK);
 }
@@ -45,7 +45,7 @@ export async function rejoinRunningPreview(
   runtime: ContainerRuntime,
   ticketId: number,
 ): Promise<void> {
-  if (getPreview(db, ticketId)?.status === 'running') {
+  if (getPreview(db, { ticketId })?.status === 'running') {
     await joinPreview(runtime, ticketId);
   }
 }

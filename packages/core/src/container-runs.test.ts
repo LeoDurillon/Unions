@@ -21,7 +21,7 @@ import {
   sendToAgent,
 } from './container-runs';
 import { createDb, migrateDb, type Db } from './db';
-import * as schema from './schema';
+import * as schema from './tables';
 import { createTicket, getTicket, type Ticket } from './tickets';
 
 let db: Db;
@@ -43,36 +43,45 @@ function setPhase(phase: Ticket['phase']): void {
 }
 
 test('one command at a time per workspace, never during a step', () => {
-  const run = queueContainerRun(db, { ticketId, command: '  npm test  ' });
+  const run = queueContainerRun(db, { owner: { ticketId }, command: '  npm test  ' });
   expect(run).toMatchObject({ command: 'npm test', status: 'queued', timeoutSec: 600 });
-  expect(() => queueContainerRun(db, { ticketId, command: 'ls' })).toThrow(ContainerRunError);
+  expect(() => queueContainerRun(db, { owner: { ticketId }, command: 'ls' })).toThrow(
+    ContainerRunError,
+  );
   finishContainerRun(db, run.id, { status: 'succeeded', exitCode: 0, error: null, output: '' });
   setPhase({ kind: 'running', step: 'implement' });
-  expect(() => queueContainerRun(db, { ticketId, command: 'ls' })).toThrow('A step is running');
+  expect(() => queueContainerRun(db, { owner: { ticketId }, command: 'ls' })).toThrow(
+    'A step is running',
+  );
   setPhase({ kind: 'cancelled' });
-  expect(() => queueContainerRun(db, { ticketId, command: 'ls' })).toThrow('cancelled');
+  expect(() => queueContainerRun(db, { owner: { ticketId }, command: 'ls' })).toThrow('cancelled');
 });
 
 test('empty commands and timeouts out of range are refused', () => {
-  expect(() => queueContainerRun(db, { ticketId, command: '  ' })).toThrow(ContainerRunError);
-  expect(() => queueContainerRun(db, { ticketId, command: 'ls', timeoutSec: 0 })).toThrow(
-    'timeout',
+  expect(() => queueContainerRun(db, { owner: { ticketId }, command: '  ' })).toThrow(
+    ContainerRunError,
   );
-  expect(() => queueContainerRun(db, { ticketId, command: 'ls', timeoutSec: 1801 })).toThrow(
-    'timeout',
-  );
+  expect(() =>
+    queueContainerRun(db, { owner: { ticketId }, command: 'ls', timeoutSec: 0 }),
+  ).toThrow('timeout');
+  expect(() =>
+    queueContainerRun(db, { owner: { ticketId }, command: 'ls', timeoutSec: 1801 }),
+  ).toThrow('timeout');
 });
 
 test('claimed oldest first; a queued run cancels here, a running one does not', () => {
-  const run = queueContainerRun(db, { ticketId, command: 'ls' });
+  const run = queueContainerRun(db, { owner: { ticketId }, command: 'ls' });
   expect(claimContainerRun(db)).toMatchObject({ id: run.id, status: 'running' });
   expect(claimContainerRun(db)).toBeNull();
   expect(cancelQueuedContainerRun(db, run.id)).toBe(false);
   recoverContainerRuns(db);
   expect(getContainerRun(db, run.id)).toMatchObject({ status: 'failed' });
-  const next = queueContainerRun(db, { ticketId, command: 'pwd' });
+  const next = queueContainerRun(db, { owner: { ticketId }, command: 'pwd' });
   expect(cancelQueuedContainerRun(db, next.id)).toBe(true);
-  expect(listContainerRuns(db, ticketId).map((row) => row.status)).toEqual(['cancelled', 'failed']);
+  expect(listContainerRuns(db, { ticketId }).map((row) => row.status)).toEqual([
+    'cancelled',
+    'failed',
+  ]);
 });
 
 test('the output keeps its last lines, colours stripped, within the size limit', () => {
@@ -87,13 +96,13 @@ test('the output keeps its last lines, colours stripped, within the size limit',
 });
 
 function finished(command = 'npm test'): number {
-  const run = queueContainerRun(db, { ticketId, command });
+  const run = queueContainerRun(db, { owner: { ticketId }, command });
   finishContainerRun(db, run.id, { status: 'failed', exitCode: 1, error: null, output: 'FAIL' });
   return run.id;
 }
 
 test('a finished output is kept for the next run, taken back, and stays read once read', () => {
-  const running = queueContainerRun(db, { ticketId, command: 'ls' });
+  const running = queueContainerRun(db, { owner: { ticketId }, command: 'ls' });
   expect(() => keepForAgent(db, running.id, true)).toThrow('not finished');
   finishContainerRun(db, running.id, { status: 'succeeded', exitCode: 0, error: null, output: '' });
   const id = finished();
@@ -118,4 +127,44 @@ test('sending now queues a revision, only when it goes back to the implementer',
   ]);
   setPhase({ kind: 'done' });
   expect(revisesImplementer(getTicket(db, ticketId).phase)).toBe(true);
+});
+
+test("a pull request's commands queue on their own, one at a time, and never reach an agent", () => {
+  const { projectId } = getTicket(db, ticketId);
+  const reviewId = db
+    .insert(schema.currentReviews)
+    .values({
+      projectId,
+      prNumber: 7,
+      title: 'PR',
+      url: 'u',
+      author: 'alice',
+      headBranch: 'b',
+      baseBranch: 'main',
+    })
+    .returning()
+    .get().id;
+  setPhase({ kind: 'running', step: 'implement' });
+  const run = queueContainerRun(db, { owner: { reviewId }, command: 'ls' });
+  expect(run).toMatchObject({ ticketId: null, reviewId });
+  expect(() => queueContainerRun(db, { owner: { reviewId }, command: 'pwd' })).toThrow(
+    'already running',
+  );
+  expect(listContainerRuns(db, { reviewId }).map((row) => row.id)).toEqual([run.id]);
+  expect(listContainerRuns(db, { ticketId })).toEqual([]);
+  finishContainerRun(db, run.id, { status: 'succeeded', exitCode: 0, error: null, output: '' });
+  expect(() => keepForAgent(db, run.id, true)).toThrow('no agent');
+  expect(() => sendToAgent(db, run.id, 'look')).toThrow('no agent');
+  // Exactly one owner.
+  const insert = (values: { ticketId?: number; reviewId?: number }): void => {
+    db.insert(schema.containerRuns)
+      .values({ ...values, command: 'ls', timeoutSec: 1 })
+      .run();
+  };
+  expect(() => {
+    insert({ ticketId, reviewId });
+  }).toThrow();
+  expect(() => {
+    insert({});
+  }).toThrow();
 });

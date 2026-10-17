@@ -130,7 +130,7 @@ test('the implementation never runs the e2e tests on its own, even with an e2e c
 
 test('the agent is told where the preview answers only while it runs', async () => {
   const space = workspace();
-  updatePreview(db, space.context.ticket.id, { status: 'running' });
+  updatePreview(db, { ticketId: space.context.ticket.id }, { status: 'running' });
   await implementLoop(space);
   expect(runs[0]?.prompt).toContain('reachable from here at http://web:3000');
   expect(runs[0]?.prompt).toContain('run only the ones your work touches');

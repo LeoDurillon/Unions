@@ -265,7 +265,10 @@ test('the outputs the user gave go with the first turn, and count as read once i
     previous: 'old report',
     feedback: 'Fix the import.',
   });
-  const run = queueContainerRun(db, { ticketId: ws.context.ticket.id, command: 'npm run import' });
+  const run = queueContainerRun(db, {
+    owner: { ticketId: ws.context.ticket.id },
+    command: 'npm run import',
+  });
   finishContainerRun(db, run.id, {
     status: 'failed',
     exitCode: 1,
