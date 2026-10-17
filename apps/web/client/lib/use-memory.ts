@@ -1,4 +1,4 @@
-// The Memory page's data: the project's lessons and feedback, saving the lessons, and curating one feedback.
+// The Memory page's data: the project's lessons and feedback, saving them with the on/off switch, and curating one feedback.
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 import type { FeedbackItem, Lesson } from '@union/core';
 import type { LessonsSave } from '@union/core/lesson-input';
@@ -31,11 +31,24 @@ export function useFeedback(projectId: number): UseQueryResult<FeedbackItem[]> {
   });
 }
 
-/** Writes every lesson (and curates their feedback), then reads both lists again. */
-export function useSaveLessons(projectId: number): (save: LessonsSave) => Promise<void> {
+/** What the Memory page saves: whether the lessons are sent, and every lesson. */
+export type MemorySave = LessonsSave & { enabled: boolean };
+
+/**
+ * Turns memory on or off when that changed, writes every lesson (and curates their feedback), then
+ * reads both lists again.
+ */
+export function useSaveMemory(project: {
+  id: number;
+  config: { memory?: boolean };
+}): (save: MemorySave) => Promise<void> {
   const queryClient = useQueryClient();
-  return async (save) => {
-    await request('PUT', memoryPath(projectId, 'lessons'), save);
+  const projectId = project.id;
+  return async ({ enabled, lessons, curated }) => {
+    if (enabled !== (project.config.memory !== false)) {
+      await request('PATCH', `/api/projects/${projectId}`, { memory: enabled });
+    }
+    await request('PUT', memoryPath(projectId, 'lessons'), { lessons, curated });
     await queryClient.invalidateQueries({ queryKey: feedbackKey(projectId) });
     await queryClient.invalidateQueries({ queryKey: lessonsKey(projectId) });
   };

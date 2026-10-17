@@ -1,5 +1,7 @@
 import { beforeEach, expect, test } from 'bun:test';
 
+import { eq } from 'drizzle-orm';
+
 import { saveAgent } from './agents';
 import { createDb, migrateDb, type Db } from './db';
 import { parseLessonsSave } from './lesson-input';
@@ -95,6 +97,12 @@ test("a step's prompt gets its own lessons after the project instructions, none 
     'Be brief.\n\n# Lessons from past tickets\n\nThe user wrote these rules from their feedback on earlier tickets of this project. Follow them.\n\n- Use bun.\n- Run the checks.',
   );
   expect(stepSharedPrompt(db, otherId, 'implement')).toBe('Be brief.');
+  db.update(schema.projects)
+    .set({ config: { baseBranch: 'main', memory: false } })
+    .where(eq(schema.projects.id, projectId))
+    .run();
+  expect(stepSharedPrompt(db, projectId, 'implement')).toBe('Be brief.');
+  expect(listLessons(db, projectId)).toHaveLength(3);
 });
 
 test('a save is checked: known steps, non-empty one-line rules, feedback ids', () => {

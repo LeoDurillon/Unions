@@ -86,6 +86,8 @@ export type ProjectConfig = {
   notionDataSourceId?: string;
   /** Markdown sent to every agent run on this project, after the shared instructions. */
   instructions?: string;
+  /** Send the project's lessons to its agents (default true); false keeps them, unsent. */
+  memory?: boolean;
   /** Commands the user runs by name in a ticket's workspace. */
   scripts?: ProjectScript[];
   preview?: PreviewConfig;

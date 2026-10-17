@@ -1,14 +1,20 @@
 // Project settings → Memory: the lessons each agent step gets, and the feedback they are made from.
 import type { FeedbackItem, Lesson } from '@union/core';
-import { MAX_LESSON_LENGTH, type LessonsSave } from '@union/core/lesson-input';
+import { MAX_LESSON_LENGTH, type LessonInput } from '@union/core/lesson-input';
 import { FULL_FLOW, type PipelineStep } from '@union/core/states';
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
-import { useCurateFeedback, useFeedback, useLessons, useSaveLessons } from '../../lib/use-memory';
+import {
+  useCurateFeedback,
+  useFeedback,
+  useLessons,
+  useSaveMemory,
+  type MemorySave,
+} from '../../lib/use-memory';
 import { useSettingsForm, type SettingsForm } from '../../lib/use-settings-form';
 import { FeedbackInbox, type FeedbackActions } from './feedback-inbox';
-import { LessonList } from './lesson-list';
+import { LessonsPanel } from './lessons-panel';
 import { SaveBar } from './save-bar';
 
 function stepOf(section: string): PipelineStep {
@@ -16,7 +22,7 @@ function stepOf(section: string): PipelineStep {
 }
 
 /** A lesson's first draft: the feedback's first line, on the step it was given on. */
-function draftFrom(item: FeedbackItem): LessonsSave['lessons'][number] {
+function draftFrom(item: FeedbackItem): LessonInput {
   const firstLine = item.text.trim().split('\n')[0] ?? '';
   return { section: stepOf(item.section), rule: firstLine.slice(0, MAX_LESSON_LENGTH) };
 }
@@ -24,7 +30,7 @@ function draftFrom(item: FeedbackItem): LessonsSave['lessons'][number] {
 /** Make a lesson adds to the form (curated on Save); Dismiss and Back to new apply at once. */
 function useFeedbackActions(
   projectId: number,
-  form: SettingsForm<LessonsSave>,
+  form: SettingsForm<MemorySave>,
   fresh: ReadonlySet<number>,
 ): FeedbackActions {
   const curate = useCurateFeedback(projectId);
@@ -32,6 +38,7 @@ function useFeedbackActions(
     pending: form.value.curated.filter((id) => fresh.has(id)),
     makeLesson: (item) => {
       form.set({
+        ...form.value,
         lessons: [...form.value.lessons, draftFrom(item)],
         curated: [...form.value.curated, item.id],
       });
@@ -54,9 +61,10 @@ function MemoryForm({
   feedback: readonly FeedbackItem[];
 }): ReactElement {
   const fresh = new Set(feedback.filter((item) => item.curatedAt === null).map((item) => item.id));
-  const write = useSaveLessons(project.id);
-  const form = useSettingsForm<LessonsSave>(
+  const write = useSaveMemory(project);
+  const form = useSettingsForm<MemorySave>(
     () => ({
+      enabled: project.config.memory !== false,
       lessons: lessons.map(({ section, rule }) => ({ section: stepOf(section), rule })),
       curated: [],
     }),
@@ -66,19 +74,12 @@ function MemoryForm({
   const empty = form.value.lessons.some((lesson) => lesson.rule.trim() === '');
   return (
     <section className="space-y-6">
-      <div className="space-y-3">
-        <h3 className="text-sm font-semibold">Lessons</h3>
-        <p className="text-xs text-zinc-500">
-          Rules learned from your feedback, sent to every run of their step on this project, after
-          the project instructions. Applies from the next agent run.
-        </p>
-        <LessonList
-          lessons={form.value.lessons}
-          onChange={(next) => {
-            form.set({ ...form.value, lessons: next });
-          }}
-        />
-      </div>
+      <LessonsPanel
+        value={form.value}
+        onChange={(value) => {
+          form.set({ ...form.value, ...value });
+        }}
+      />
       <div className="space-y-3">
         <h3 className="text-sm font-semibold">Feedback</h3>
         <p className="text-xs text-zinc-500">

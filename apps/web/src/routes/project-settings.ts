@@ -174,6 +174,7 @@ function configChange(project: Project, body: Record<string, unknown>): ProjectC
     gateCommand: commandChange(body, 'gateCommand', config.gateCommand),
     maxIterations: iterationsChange(body, config.maxIterations),
     instructions: instructionsChange(body, config.instructions),
+    memory: booleanChange(body, 'memory', config.memory),
     scripts: scriptsChange(body, config.scripts),
     ...flowsChange(body, config),
   };
@@ -207,6 +208,7 @@ const UPDATABLE = [
   'notionToken',
   'notionDataSourceId',
   'instructions',
+  'memory',
   'scripts',
   ...CHECK_FIELDS,
   ...FLOW_FIELDS,

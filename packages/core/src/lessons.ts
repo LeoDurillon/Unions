@@ -107,8 +107,21 @@ export function setFeedbackCurated(
   return updated.length > 0;
 }
 
-/** The lessons for `step` as a prompt section; empty when there are none. */
+/** Whether the project sends its lessons to its agents: on unless turned off. */
+function memoryOn(db: Db, projectId: number): boolean {
+  const project = db
+    .select({ config: schema.projects.config })
+    .from(schema.projects)
+    .where(eq(schema.projects.id, projectId))
+    .get();
+  return project?.config.memory !== false;
+}
+
+/** The lessons for `step` as a prompt section; empty when there are none or memory is off. */
 export function lessonsPrompt(db: Db, projectId: number, step: Step): string {
+  if (!memoryOn(db, projectId)) {
+    return '';
+  }
   const rules = listLessons(db, projectId)
     .filter((lesson) => lesson.section === step)
     .map((lesson) => `- ${lesson.rule}`);

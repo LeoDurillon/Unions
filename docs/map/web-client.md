@@ -196,7 +196,9 @@ export); do not edit. Tests are left out.
 - `github-comment-fields.tsx`: A GitHub comment action's fields: the issue or the pull request, and the comment as a template.
 - `instructions-section.tsx`: The project's own instructions, sent to every agent run on it after the shared instructions.
 - `integration-section-body.tsx`: Previews, Notion and the danger zone.
-- `lesson-list.tsx`: The project's lessons by agent step: a one-line rule each, edited, reordered and removed in the page's form.
+- `lesson-card.tsx`: One lesson as a card: its whole rule, wrapped; the pencil opens a multiline field to edit it.
+- `lesson-list.tsx`: The project's lessons by agent step, as cards: edited one at a time, reordered and removed in the page's form.
+- `lessons-panel.tsx`: The Memory page's lessons part: whether they are sent to the agents, then the lessons by step.
 - `memory-section.tsx`: Project settings → Memory: the lessons each agent step gets, and the feedback they are made from.
 - `name-picker.tsx`: Picks names (labels, GitHub logins): the picked ones as chips, and a box that suggests the others and takes new ones.
 - `notion-action-fields.tsx`: A Notion action's fields: the properties of the ticket's Notion page to set, a row each.
@@ -301,7 +303,7 @@ export); do not edit. Tests are left out.
 - `use-github-app.ts`: The global GitHub App's status; saving or removing it invalidates `['github-app']`.
 - `use-live-invalidation.ts`: Refetches board, ticket, investigation and notification data whenever the worker records a change.
 - `use-log.ts`: Polls a ticket's or an investigation's Log while it is shown: all of it first, then what is new.
-- `use-memory.ts`: The Memory page's data: the project's lessons and feedback, saving the lessons, and curating one feedback.
+- `use-memory.ts`: The Memory page's data: the project's lessons and feedback, saving them with the on/off switch, and curating one feedback.
 - `use-models-form.ts`: The Models page's form: every agent's model and effort, each changed one saved with its prompt and tools as they are.
 - `use-navigation.ts`: Which page is shown (`?page=previews`, `?union=` for the Union settings, else the board) and which overlay is open.
 - `use-notifications.ts`: The notifications, page by page, with the unread count (also in the tab's title) and marking them read.

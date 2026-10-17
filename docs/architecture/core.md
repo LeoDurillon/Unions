@@ -8,7 +8,8 @@ on every run (`resolveAgent`, `modelFor`, `effortFor`, `toolsFor`; the effort be
 leaves the CLI's default). Change a default there, not in the worker. Ticket agents
 get `sharedPrompt` first: the shared instructions, then the project's own (`config.instructions`, project
 settings → Instructions; investigations get those too, via `projectInstructions`). The pipeline steps get
-`stepSharedPrompt` instead (`lessons.ts`): the same, then the step's lessons (project settings → Memory).
+`stepSharedPrompt` instead (`lessons.ts`): the same, then the step's lessons (project settings → Memory), unless
+`config.memory` is false.
 `agent-tools.ts` holds each step's default allowed tools and the tool list agents pick from (Claude Code's tools,
 the rules the defaults use, the account's claude.ai connectors from `mcp-connectors.ts`, and the user's additions
 in `agent_tools`). A run loads the connectors only when its tools include one (`connectorEnv` in the worker's

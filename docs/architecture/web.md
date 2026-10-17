@@ -57,7 +57,7 @@
 - Project settings are a page, not a modal: `?settings=<section>` (`lib/settings-sections.ts` lists the sections
   and their groups; `openSettings(section)` links to one from anywhere), `components/settings/settings-page.tsx`
   with a grouped side menu.
-- Project settings → Agents → Memory (`settings/memory-section.tsx`, `lesson-list.tsx`, `feedback-inbox.tsx`,
+- Project settings → Agents → Memory (`settings/memory-section.tsx`, `lesson-list.tsx`, `lesson-card.tsx`, `feedback-inbox.tsx`,
   `lib/use-memory.ts`; `routes/memory.ts`): the lessons per step, saved whole with the page's Save
   (`PUT /api/projects/:id/lessons`, checked by `parseLessonsSave` in core, which also curates the feedback the new
   ones were made from), and the feedback (`GET …/feedback`; Dismiss and Back to new `PATCH …/feedback/:id` at once).

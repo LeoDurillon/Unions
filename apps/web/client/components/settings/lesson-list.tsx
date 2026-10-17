@@ -1,15 +1,16 @@
-// The project's lessons by agent step: a one-line rule each, edited, reordered and removed in the page's form.
-import { MAX_LESSON_LENGTH, type LessonInput } from '@union/core/lesson-input';
+// The project's lessons by agent step, as cards: edited one at a time, reordered and removed in the page's form.
+import type { LessonInput } from '@union/core/lesson-input';
 import { FULL_FLOW, type PipelineStep } from '@union/core/states';
-import type { ReactElement } from 'react';
+import { useState, type ReactElement } from 'react';
 
 import { STEP_TITLES } from '../../lib/labels';
-import { Button, inputClass } from '../ui';
+import { Button } from '../ui';
+import { LessonCard, type LessonCardProps } from './lesson-card';
 
 type Change = (lessons: LessonInput[]) => void;
 
-const ICON_BUTTON =
-  'rounded px-1.5 text-sm text-zinc-500 hover:bg-zinc-200 disabled:opacity-30 dark:hover:bg-zinc-800';
+/** Which lesson shows its field, by its place in the whole list; null: none. */
+type Editing = { at: number | null; open: (at: number | null) => void };
 
 /** The list with lesson `at` swapped with the previous (-1) or next (1) lesson of its step. */
 function moved(lessons: readonly LessonInput[], at: number, direction: -1 | 1): LessonInput[] {
@@ -29,96 +30,68 @@ function moved(lessons: readonly LessonInput[], at: number, direction: -1 | 1): 
   });
 }
 
-function IconButton({
-  label,
-  disabled = false,
-  onClick,
-  children,
-}: {
-  label: string;
-  disabled?: boolean;
-  onClick: () => void;
-  children: string;
-}): ReactElement {
-  return (
-    <button
-      type="button"
-      aria-label={label}
-      className={ICON_BUTTON}
-      disabled={disabled}
-      onClick={onClick}
-    >
-      {children}
-    </button>
-  );
+function without(lessons: readonly LessonInput[], at: number): LessonInput[] {
+  return lessons.filter((_lesson, index) => index !== at);
 }
 
-function LessonRow({
-  lessons,
-  at,
-  onChange,
-}: {
-  lessons: readonly LessonInput[];
-  at: number;
-  onChange: Change;
-}): ReactElement {
-  const lesson = lessons[at];
-  const same = lessons.flatMap((other, index) =>
-    other.section === lesson?.section ? [index] : [],
-  );
-  const place = same.indexOf(at);
-  return (
-    <li className="flex items-center gap-1">
-      <input
-        aria-label={`Lesson ${place + 1}`}
-        className={`${inputClass} text-sm`}
-        maxLength={MAX_LESSON_LENGTH}
-        value={lesson?.rule ?? ''}
-        placeholder="One rule, as you would tell the agent"
-        onChange={(event) => {
-          onChange(lessons.map((l, i) => (i === at ? { ...l, rule: event.target.value } : l)));
-        }}
-      />
-      <IconButton
-        label="Move up"
-        disabled={place === 0}
-        onClick={() => {
-          onChange(moved(lessons, at, -1));
-        }}
-      >
-        ↑
-      </IconButton>
-      <IconButton
-        label="Move down"
-        disabled={place === same.length - 1}
-        onClick={() => {
-          onChange(moved(lessons, at, 1));
-        }}
-      >
-        ↓
-      </IconButton>
-      <IconButton
-        label="Remove lesson"
-        onClick={() => {
-          onChange(lessons.filter((_lesson, index) => index !== at));
-        }}
-      >
-        ✕
-      </IconButton>
-    </li>
-  );
+type CardActions = Pick<LessonCardProps, 'onEdit' | 'onDone' | 'onRule' | 'onMove' | 'onRemove'>;
+
+/** What lesson `at`'s card does to the list and to which card is edited. */
+function cardActions(
+  lessons: readonly LessonInput[],
+  at: number,
+  onChange: Change,
+  editing: Editing,
+): CardActions {
+  const close = (next: LessonInput[]): void => {
+    onChange(next);
+    editing.open(null);
+  };
+  return {
+    onEdit: () => {
+      editing.open(at);
+    },
+    onDone: () => {
+      if (lessons[at]?.rule.trim() === '') {
+        onChange(without(lessons, at));
+      }
+      editing.open(null);
+    },
+    onRule: (rule) => {
+      onChange(lessons.map((lesson, index) => (index === at ? { ...lesson, rule } : lesson)));
+    },
+    onMove: (direction) => {
+      close(moved(lessons, at, direction));
+    },
+    onRemove: () => {
+      close(without(lessons, at));
+    },
+  };
 }
 
 function StepLessons({
   step,
   lessons,
   onChange,
+  editing,
 }: {
   step: PipelineStep;
   lessons: readonly LessonInput[];
   onChange: Change;
+  editing: Editing;
 }): ReactElement {
   const indexes = lessons.flatMap((lesson, index) => (lesson.section === step ? [index] : []));
+  const card = (at: number, place: number): ReactElement => (
+    <LessonCard
+      key={at}
+      place={place}
+      rule={lessons[at]?.rule ?? ''}
+      editing={editing.at === at}
+      first={place === 0}
+      last={place === indexes.length - 1}
+      {...cardActions(lessons, at, onChange, editing)}
+    />
+  );
   return (
     <div className="space-y-2 rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
       <div className="flex items-center justify-between">
@@ -127,6 +100,7 @@ function StepLessons({
           className="px-2 py-1 text-xs"
           onClick={() => {
             onChange([...lessons, { section: step, rule: '' }]);
+            editing.open(lessons.length);
           }}
         >
           Add a lesson
@@ -135,11 +109,7 @@ function StepLessons({
       {indexes.length === 0 ? (
         <p className="text-xs text-zinc-500">No lessons.</p>
       ) : (
-        <ul className="space-y-1.5">
-          {indexes.map((at) => (
-            <LessonRow key={at} lessons={lessons} at={at} onChange={onChange} />
-          ))}
-        </ul>
+        <ul className="space-y-1.5">{indexes.map((at, place) => card(at, place))}</ul>
       )}
     </div>
   );
@@ -153,10 +123,17 @@ export function LessonList({
   lessons: readonly LessonInput[];
   onChange: Change;
 }): ReactElement {
+  const [editingAt, setEditingAt] = useState<number | null>(null);
   return (
     <div className="space-y-3">
       {FULL_FLOW.map((step) => (
-        <StepLessons key={step} step={step} lessons={lessons} onChange={onChange} />
+        <StepLessons
+          key={step}
+          step={step}
+          lessons={lessons}
+          onChange={onChange}
+          editing={{ at: editingAt, open: setEditingAt }}
+        />
       ))}
     </div>
   );

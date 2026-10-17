@@ -64,3 +64,19 @@ test('feedback is listed, dismissed and restored', async () => {
   expect(listFeedback(db, projectId)[0]?.curatedAt).toBeNull();
   expect((await send('PATCH', '/feedback/999', { curated: true })).status).toBe(404);
 });
+
+test('memory is turned off and on with the project settings', async () => {
+  const off = await app.request(`/api/projects/${projectId}`, {
+    method: 'PATCH',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ memory: false }),
+  });
+  expect(off.status).toBe(200);
+  expect(await off.json()).toMatchObject({ config: { memory: false } });
+  const refused = await app.request(`/api/projects/${projectId}`, {
+    method: 'PATCH',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ memory: 'no' }),
+  });
+  expect(refused.status).toBe(400);
+});
