@@ -12,6 +12,7 @@ import {
   AgentToolError,
   type Db,
   type Investigation,
+  usageOf,
 } from '@union/core';
 import { eq } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
@@ -101,6 +102,9 @@ export function investigationRoutes(db: Db): Hono {
   routes.get('/', (c) => c.json(listInvestigations(db, projectOf(db, c))));
   routes.post('/', (c) => create(db, c));
   routes.get('/:id', (c) => c.json(investigationOf(db, c)));
+  routes.get('/:id/usage', (c) =>
+    c.json(usageOf(db, { investigationId: investigationOf(db, c).id })),
+  );
   routes.post('/:id/rerun', (c) => {
     const { id } = investigationOf(db, c);
     return c.json(refusals(CONFLICT, () => rerunInvestigation(db, id)));

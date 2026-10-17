@@ -80,5 +80,6 @@ export); do not edit. Tests are left out.
 - `ticket-removal.ts`: Removes a cancelled ticket from Union: its runs, outputs, reviews and files go with it, and the worker is asked to remove its container (the web never calls Do…
 - `ticket-review-subroutes.ts`: A ticket's routes about its change: its refused commit, its PR description rewrite, its grouping by spec, its commits, its pull request's CI checks.
 - `ticket-subroutes.ts`: The routes under `/api/tickets` that have their own module: creation, the issue import, a ticket's files, its refused commit, the rewrite of its PR description…
-- `ticket-workspace.ts`: The routes about a ticket's workspace: the branch it starts from, and commands run in it.
+- `ticket-workspace.ts`: The routes about a ticket's workspace: the branch it starts from, the commands run in it, and what its agents used.
 - `tickets.ts`: The API routes for tickets: listing, creating, editing outputs and moving them between steps.
+- `usage.ts`: `/api/tickets/:id/usage`: what the ticket's agent calls used, per run, written by the worker as each call ends.

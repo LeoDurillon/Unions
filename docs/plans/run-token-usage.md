@@ -1,6 +1,6 @@
 # Plan: token usage of each run
 
-Status: steps 1 to 4 built (not committed); the live database is backfilled. Decisions taken (end of file).
+Status: steps 1 to 5 built; the live database is backfilled. Left: step 6 (`worker.md`, `SPEC.md`). Decisions taken (end of file).
 
 ## Idea
 
@@ -101,11 +101,12 @@ not counted.
    `finished in 40s · 6 turns · 286k in (82% cached) · 4.0k out (1.3k thinking)`, and each run's header (shown
    folded too) their sum, with `2 calls ·` in front when the run made several. No cost in the Log: the result's
    cost adds up over the session; the Overview table shows each call's share from `agent_usage`.
-2. **Overview tab, "Usage" section** (collapsed by default, new component `usage-section.tsx` plus a hook):
-   one row per run (step, iteration, status, model, input, cached %, output, turns, duration, cost), side runs
-   below, and the ticket's total. A row opens to its calls and models (Opus and the subagents' Haiku).
-3. **Investigation detail**: the same table for its runs, under the answer.
-4. **Peak context warning**: in the Usage table, amber when the peak passed 80% of `context_window`.
+2. **Overview tab** (built): the run table gets In, Out and Cost (API) columns; a row opens to its calls (turns,
+   time, peak context) and their models (the main one, then the subagents'). Below the runs, one row for the side
+   runs (agent review, grouping, PR description), then the ticket's total.
+3. **Investigation detail** (built): a Usage tab beside Answer and Log, one row per call (the first answer, then
+   each follow-up).
+4. **Peak context warning** (built): in the opened row, amber when the peak passed 80% of `context_window`.
 
 Cost is labelled "API-equivalent (not billed on Max)", smaller than the tokens.
 

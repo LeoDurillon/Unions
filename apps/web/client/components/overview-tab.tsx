@@ -2,56 +2,13 @@
 import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../src/api-types';
-import { isBlocked, STEP_TITLES } from '../lib/labels';
+import { isBlocked } from '../lib/labels';
 import { useTicketCommands } from '../lib/use-ticket-commands';
 import { RemoveTicket } from './remove-ticket';
+import { RunTable } from './run-table';
 import { TicketDescription } from './ticket-description';
 import { TicketDetails } from './ticket-details';
-import { Badge, Button, ErrorText } from './ui';
-
-const MS_PER_SECOND = 1000;
-const RUN_TONE = {
-  running: 'blue',
-  succeeded: 'green',
-  failed: 'red',
-  rate_limited: 'red',
-} as const;
-
-function RunTable({ runs }: { runs: TicketDetail['runs'] }): ReactElement | null {
-  if (runs.length === 0) {
-    return null;
-  }
-  return (
-    <table className="w-full text-left text-xs">
-      <thead className="text-zinc-500">
-        <tr>
-          <th className="py-1">Run</th>
-          <th>Step</th>
-          <th>Model</th>
-          <th>Status</th>
-          <th>Time</th>
-        </tr>
-      </thead>
-      <tbody>
-        {runs.map((run) => (
-          <tr key={run.id} className="border-t border-zinc-200 dark:border-zinc-800">
-            <td className="py-1">#{run.id}</td>
-            <td>{STEP_TITLES[run.step]}</td>
-            <td>{run.model}</td>
-            <td>
-              <Badge tone={RUN_TONE[run.status]}>{run.status}</Badge>
-            </td>
-            <td>
-              {run.finishedAt === null
-                ? '…'
-                : `${Math.round((run.finishedAt - run.startedAt) / MS_PER_SECOND)}s`}
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  );
-}
+import { Button, ErrorText } from './ui';
 
 export function OverviewTab({
   detail,
@@ -102,7 +59,7 @@ export function OverviewTab({
           </Button>
         )}
       </div>
-      <RunTable runs={runs} />
+      <RunTable ticketId={ticket.id} runs={runs} />
     </div>
   );
 }

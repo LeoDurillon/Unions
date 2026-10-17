@@ -128,5 +128,8 @@
   poll `/api/events/log` every second while open (`use-log.ts`): the ticket's or investigation's events and its
   agents' output (`agent_log`) in one order, from a cursor. Agent output is not on the stream. Events are sent unnamed: a new event type reaches
   the client without being listed. A call's `result` line shows its tokens, and each run's header their sum
-  (`token-counts.ts`, reading the result with the browser-safe `@union/core/agent-usage`).
+  (`token-counts.ts`, reading the result with the browser-safe `@union/core/agent-usage`). The Overview's run table
+  and an investigation's Usage tab read `agent_usage` (`GET /api/tickets/:id/usage`,
+  `…/investigations/:id/usage`, `usageOf` in core): input, output and API-equivalent cost per run (or per call), a
+  row opening to its calls and models with their peak context (`components/usage/`).
 - Dev: `bun run dev:web` (Vite on 5173 proxies `/api` to Hono on 3000). Production: build, then start (below).

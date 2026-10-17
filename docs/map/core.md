@@ -12,6 +12,7 @@ export); do not edit. Tests are left out.
 - `agent-reviews.ts`: The reviews a stack run covers, bottom first; empty for a run on one change.
 - `agent-tools.ts`: A tool the list refuses: bad syntax, duplicate, built-in, or still selected by an agent.
 - `agent-usage-record.ts`: Records an agent call's usage from its `result` line in `agent_log`, live or replayed from the past.
+- `agent-usage-totals.ts`: What a ticket's or an investigation's agent calls used, per run and per call, summed for the Usage tables.
 - `agent-usage.ts`: Reads what a `claude -p` call consumed from its stream-json events: tokens per model, and its peak context.
 - `agents.ts`: The agents' default prompts, models, efforts and tools, the user's overrides, and how a run resolves them.
 - `ansi.ts`: Strips terminal colour codes from command and CI output; browser-safe.

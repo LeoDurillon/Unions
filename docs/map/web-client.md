@@ -49,6 +49,7 @@ export); do not edit. Tests are left out.
 - `remove-ticket.tsx`: A cancelled ticket can leave Union; a second click confirms, since nothing brings it back.
 - `review-bar.tsx`: Approve, ask for a revision, or edit the output by hand (for example to answer questions).
 - `run-agent-actions.tsx`: Giving a finished run's output to the implementer: kept for its next run, or sent now as a revision (when the ticket can go back to it) with a note.
+- `run-table.tsx`: The ticket's runs in the Overview tab: step, model, status and time, with what their agent calls used.
 - `script-buttons.tsx`: The project's saved scripts, one button each; without any, where to save them.
 - `sidebar.tsx`: Notifications, project switcher and creation entry point, always visible on the left.
 - `step-notices.tsx`: What stops the step and needs the user: a failed run, a usage limit, a refused commit.
@@ -79,6 +80,7 @@ export); do not edit. Tests are left out.
 - `investigation-detail.tsx`: One investigation: its questions, the latest answer, the agent's live log and a follow-up form.
 - `investigation-form.tsx`: A new investigation: what to look into, where, and with which model and tools.
 - `investigation-labels.ts`: The labels and badge tones the investigations pages show for each status and scope.
+- `investigation-tabs.tsx`: An investigation's tabs: its latest answer, the agent's live log, and what its agent calls used.
 - `investigation-thread.tsx`: The questions asked before the latest one, each followed by its answer, oldest first.
 - `investigation-ticket.tsx`: Turns the investigation into a backlog ticket written by an agent, and links to it once made.
 - `investigations-page.tsx`: Ad-hoc agent runs on a custom prompt for the project; no GitHub issue is created.
@@ -213,6 +215,11 @@ export); do not edit. Tests are left out.
 - `value-field.tsx`: The value a rule sets, shaped by the property's type.
 - `variable-chips.tsx`: The template variables as chips: clicking one adds it to the text being written.
 
+## components/usage/
+
+- `call-details.tsx`: The agent calls of one row of a Usage table: each call's turns, time and peak context, then its models.
+- `usage-table.tsx`: A table of runs with what their agent calls used (input, output, API-equivalent cost); a row opens to its calls.
+
 ## lib/
 
 - `agent-events.ts`: Condenses one raw `claude -p` stream-json event into zero or more log lines.
@@ -250,6 +257,7 @@ export); do not edit. Tests are left out.
 - `split-rows.ts`: Pairs a patch's lines for side-by-side display: a context line faces itself, and each run of removed lines faces the added lines that follow it, row by row; th…
 - `token-counts.ts`: A call's tokens as the Log shows them, from its `result` event: input with its cached share, output with its thinking.
 - `url-state.ts`: Sets or removes (`null`) query parameters as one history entry, and tells every reader.
+- `usage-format.ts`: How the Usage tables write a total: input with its cached share, output, API-equivalent cost, peak context.
 - `use-active-project.ts`: The project list plus the remembered selection, falling back to the first project.
 - `use-agent-review.ts`: The latest agent review of the target, with starting and cancelling it.
 - `use-agent-tools.ts`: The tools agents pick from: built-in ones and the ones the user added.
@@ -273,4 +281,5 @@ export); do not edit. Tests are left out.
 - `use-settings-form.ts`: A settings page's form: what is edited, whether it differs from what was saved, and its one Save.
 - `use-stored-number.ts`: A number remembered in localStorage; storage being unavailable only loses the memory.
 - `use-ticket-commands.ts`: The hook that sends commands for a ticket and refreshes what the page shows afterwards.
+- `use-usage.ts`: What a ticket's or an investigation's agent calls used; refetched with the ticket or the investigations.
 - `verdict.ts`: The reviewer's verdict line (`VERDICT: APPROVED` / `VERDICT: CHANGES_REQUESTED`), if any.
