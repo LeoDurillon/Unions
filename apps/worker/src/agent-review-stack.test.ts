@@ -167,6 +167,7 @@ test("a stack's pull requests are checked out together and each gets the comment
       { pr: 12, path: 'a.ts', side: 'new', startLine: 1, body: 'Name it schema_v1?' },
       { pr: 13, path: 'a.ts', side: 'new', startLine: 1, body: 'Undoes the schema line.' },
       { pr: 99, path: 'b.ts', side: 'new', startLine: 3, body: 'Elsewhere.' },
+      { path: 'a.ts', side: 'new', startLine: 1, body: 'No number.' },
     ],
   })}\n\`\`\``;
 
@@ -198,10 +199,11 @@ test("a stack's pull requests are checked out together and each gets the comment
   expect(draftsOf(top)).toEqual([
     'general: The split is sound.',
     'line: Undoes the schema line.',
-    'general: **b.ts**, line 3:\n\nAbout #99: Elsewhere.',
+    'general: Not tied to a pull request of the stack (the agent named #99): **b.ts**, line 3:\n\nElsewhere.',
+    'general: Not tied to a pull request: **a.ts**, line 1:\n\nNo number.',
   ]);
   expect(latestAgentReview(db, { kind: 'review', id: top })).toMatchObject({
     status: 'succeeded',
-    comments: 4,
+    comments: 5,
   });
 });

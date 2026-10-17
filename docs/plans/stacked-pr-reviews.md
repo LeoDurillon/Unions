@@ -1,7 +1,7 @@
 # Plan: stacked pull requests in the Pull requests and Current reviews tabs
 
-Status: built, steps 1 to 4 (branch `stacked-pr-reviews`, last commit `03e3dbf`). What is left is listed under
-"Not built yet" at the end. Steps 1 to 3 are web only; step 4 added two migrations (`0050`, `0051`) and worker
+Status: built, steps 1 to 4 (branch `stacked-pr-reviews`, last commit `03e3dbf`), and v1 items 2 and 3 of "Not
+built yet" (2026-10-17). The size warning (item 1) is left. Steps 1 to 3 are web only; step 4 added two migrations (`0050`, `0051`) and worker
 changes.
 
 ## Idea
@@ -119,9 +119,9 @@ export function pullRequestStacks<T extends StackMember>(pulls: T[]): T[][];
 
 - `POST <review>/agent-review` accepts `{ specs, stack?: number[] }`. Specs are read with `readSpec` when added in
   the dialog (as Group by spec does), and the edited text is what is sent.
-- For a stack, the route reads the files of members whose diff was never opened (the same read as `pr-review.ts`),
-  so every member has its `headSha` and patches before the worker starts. A member that is not open any more is
-  refused by name.
+- For a stack, the route reads every member's files again (the same read as `pr-review.ts`), so every member has
+  its current `headSha` and patches before the worker starts. A member merged or closed on GitHub is refused by
+  number (409), as is one no longer under review.
 - `group-by-spec-dialog.tsx`'s source picker and spec editor move to a shared `spec-picker.tsx`; the new
   `agent-review-dialog.tsx` lists specs with their PR boxes. Group by spec keeps one spec in v1.
 
@@ -133,10 +133,10 @@ export function pullRequestStacks<T extends StackMember>(pulls: T[]): T[][];
 - **Prompt:** the members bottom first, each with its title, branches, the command for its own change
   (`git diff <its base ref>...refs/union/pr-<n>`) and the specs linked to it; then each spec's text once, numbered.
   The agent is asked to review each PR against its specs, then the stack as a whole.
-- **Findings:** each comment gains `"pr": <n>` (asked for in a stack run; not enforced yet, see below). They are split per PR and turned into drafts
+- **Findings:** each comment gains `"pr": <n>` (asked for in a stack run, not enforced). They are split per PR and turned into drafts
   with that PR's `patchOf`, as `toDrafts` does now; a comment on a line outside its PR's diff becomes a general
-  comment of that PR. A comment whose `pr` is not in the stack goes to the top PR as a general comment, with the
-  number the agent gave. The summary goes to the top PR. `MAX_COMMENTS` applies per PR.
+  comment of that PR. A comment without `pr`, or whose `pr` is not in the stack, goes to the top PR as a general
+  comment that starts with "Not tied to a pull request" (and the number the agent gave, if any). The summary goes to the top PR. `MAX_COMMENTS` applies per PR.
 - **Finish:** `finishAgentReview` replaces the agent's unkept drafts of each member, in one transaction.
 
 ### Limits
@@ -162,17 +162,15 @@ Built on branch `stacked-pr-reviews`, each commit passing `bun run check`:
 
 ## Not built yet
 
-Promised for v1, to do before merging (recommended order: 2, 3, then 1):
+Promised for v1, to do before merging:
 
 1. **Size warning in the dialog.** Current reviews do not keep their size: store additions and deletions when a PR
    is added or its files are read (a migration), then show the stack's total and suggest PR by PR above about
    3,000 changed lines.
-2. **A member no longer open.** The stack start refuses PRs not under review and PRs GitHub no longer has, but a PR
-   merged or closed after its files were read still goes into the run. Check each member's state when starting
-   (`getPullRequestFiles` already reads the PR: return its state too) and refuse by number.
-3. **`"pr"` required in a stack run.** A comment without it goes to the top PR as a general comment. Either refuse
-   the answer when comments lack it (the run fails, nothing lost from the previous run), or keep the fallback and
-   say so in the comment; recommended: keep the fallback, prefix "Not tied to a pull request:".
+2. **A member no longer open.** Built (2026-10-17): the stack start reads every member's files again, the state
+   with them, and refuses those merged or closed by number.
+3. **`"pr"` required in a stack run.** Built (2026-10-17), with the fallback kept: a comment without `pr`, or with
+   one not in the stack, goes to the top PR as a general comment prefixed "Not tied to a pull request".
 
 Known limit, not planned:
 

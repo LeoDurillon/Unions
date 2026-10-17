@@ -18,7 +18,7 @@ and linked.
 - [Restack](restack.md): rebase and retarget a stack after a revision or a merge.
 - [Stacked PRs in Pull requests and Current reviews](stacked-pr-reviews.md): a stack shows as one item, its review
   page picks a PR in a segmented control, and the agent reviews the whole stack against several specs linked to its
-  PRs. Built, steps 1 to 4 (branch `stacked-pr-reviews`); three v1 items left (size warning, closed members, `"pr"`).
+  PRs. Built, steps 1 to 4 (branch `stacked-pr-reviews`); one v1 item left (the size warning).
 - [MCP servers for agents](mcp-servers.md): claude.ai connectors built (Figma); HTTP and stdio servers left.
 - [Preview environments](preview-environments.md): compose-based previews with e2e tests (built, phases 1 to 4).
 - [Project settings as a page](project-settings-page.md): grouped side menu instead of the nine-tab modal (steps 1 to 5 built).

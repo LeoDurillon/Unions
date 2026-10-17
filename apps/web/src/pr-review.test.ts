@@ -20,6 +20,7 @@ let app: Hono;
 let projectId: number;
 let head: string;
 let base: string;
+let merged: number[];
 
 const github = {
   getDiscussion: () =>
@@ -41,6 +42,7 @@ const github = {
   // #42 is `tidy` into `base`; any other is on `tidy`, as a stack on #42 would be.
   getPullRequestFiles: (_auth: unknown, _repo: unknown, number: number) =>
     Promise.resolve({
+      state: merged.includes(number) ? 'merged' : 'open',
       headSha: head,
       headBranch: number === 42 ? 'tidy' : `tidy-${number}`,
       baseBranch: number === 42 ? base : 'tidy',
@@ -60,6 +62,7 @@ beforeEach(async () => {
   app = createApp(db, github);
   head = 'h1';
   base = 'main';
+  merged = [];
   projectId = db
     .insert(schema.projects)
     .values({ owner: 'acme', repo: 'shop', githubToken: 'tok', config: { baseBranch: 'main' } })
@@ -153,7 +156,7 @@ test('the description and the discussion come from GitHub for the other tabs', a
   expect((await send('GET', '/7/discussion')).status).toBe(404);
 });
 
-test('a stack is reviewed in one run: its pull requests checked, unread files read first', async () => {
+test('a stack is reviewed in one run: its pull requests checked, their files read again', async () => {
   await send('POST', '', {
     number: 43,
     title: 'On tidy',
@@ -182,7 +185,15 @@ test('a stack is reviewed in one run: its pull requests checked, unread files re
       .status,
   ).toBe(400);
 
-  // Neither diff was opened: both are read from GitHub before the run is queued.
+  // A member merged since its files were read is refused by number; nothing is queued.
+  merged = [43];
+  const refused = await send('POST', '/43/agent-review', { specs: [spec], stack: [42, 43] });
+  expect(refused.status).toBe(409);
+  expect(await refused.text()).toContain('#43 is merged');
+  expect((await (await send('GET', '/43/agent-review')).json()) as unknown).toBeNull();
+  merged = [];
+
+  // Every diff is read from GitHub before the run is queued.
   const started = await send('POST', '/43/agent-review', { specs: [spec], stack: [43, 42] });
   expect(started.status).toBe(202);
   expect(await started.json()).toMatchObject({ status: 'queued', stack: [42, 43], specs: [spec] });

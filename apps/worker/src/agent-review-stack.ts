@@ -11,12 +11,7 @@ import {
 } from '@union/core';
 import { inArray } from 'drizzle-orm';
 
-import {
-  STACK_FINDINGS_FORMAT,
-  toDrafts,
-  type Finding,
-  type Findings,
-} from './agent-review-findings';
+import { STACK_FINDINGS_FORMAT, toDrafts, type Findings } from './agent-review-findings';
 import { loadProject, patches, throwawayCheckout, type TargetDeps } from './agent-review-target';
 import { clonePullRequests, pullRef } from './pr-checkout';
 import type { TicketContainer } from './provision';
@@ -135,17 +130,23 @@ ${STACK_FINDINGS_FORMAT}`;
 /** No diff to place stray comments on: they become general comments. */
 const NO_PATCHES = new Map<string, string>();
 
-/** Comments whose pull request is not in the stack: kept on the top one, as general comments. */
+const UNTIED = 'Not tied to a pull request';
+
+/**
+ * Comments without a pull request of the stack: kept on the top one as general comments, labelled
+ * so the user moves or drops them before posting.
+ */
 function strayDrafts(findings: Findings, numbers: Set<number>): AgentDraft[] {
-  const strays: Finding[] = [];
-  for (const comment of findings.comments) {
-    if (comment.pr === null) {
-      strays.push(comment);
-    } else if (!numbers.has(comment.pr)) {
-      strays.push({ ...comment, body: `About #${comment.pr}: ${comment.body}` });
-    }
+  const strays = findings.comments.filter(
+    (comment) => comment.pr === null || !numbers.has(comment.pr),
+  );
+  const drafts = toDrafts({ summary: '', comments: strays }, (path) => NO_PATCHES.get(path));
+  for (const [index, draft] of drafts.entries()) {
+    const pr = strays[index]?.pr ?? null;
+    const label = pr === null ? UNTIED : `${UNTIED} of the stack (the agent named #${pr})`;
+    draft.body = `${label}: ${draft.body}`;
   }
-  return toDrafts({ summary: '', comments: strays }, (path) => NO_PATCHES.get(path));
+  return drafts;
 }
 
 /**

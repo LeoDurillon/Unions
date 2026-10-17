@@ -102,7 +102,8 @@
   and a request with no `specs` keeps the old prompt. In a stack (`lib/review-stack.ts`, provided by
   `stack-review.tsx`) it reviews the whole stack by default: each PR's description linked to its own PR, an added
   spec linked to all until unticked. `routes/pr-agent-review.ts` checks the PRs are one stack under review, reads
-  the files of those never opened (`readReviewFiles`), and queues one run with its members
+  every member's files again (`readReviewFiles`), refuses (409) members merged or closed on GitHub by number, and
+  queues one run with its members
   (`agent_review_members`); every PR's tab shows that run (`latestAgentReview` counts the stacks a review is in).
 - Grouping by spec: "Group by spec" on either review page (`group-by-spec-dialog.tsx`) reads a specification
   (`routes/spec-sources.ts`: the PR description without Union's links, the ticket's text, a GitHub issue, any

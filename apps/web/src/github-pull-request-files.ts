@@ -3,6 +3,7 @@ import type { Octokit } from 'octokit';
 
 /** The files of a pull request at its head commit, ready to review. */
 export type PullRequestFiles = {
+  state: 'open' | 'closed' | 'merged';
   headSha: string;
   headBranch: string;
   baseBranch: string;
@@ -38,6 +39,13 @@ export function toPullRequestFile(raw: RawFile, index: number): PullRequestFile 
   };
 }
 
+function stateOf(data: { state: string; merged: boolean }): PullRequestFiles['state'] {
+  if (data.merged) {
+    return 'merged';
+  }
+  return data.state === 'open' ? 'open' : 'closed';
+}
+
 /** The pull request's head commit, branches and changed files (GitHub lists up to 3000). */
 export async function fetchPullRequestFiles(
   octokit: Octokit,
@@ -51,6 +59,7 @@ export async function fetchPullRequestFiles(
     per_page: 100,
   });
   return {
+    state: stateOf(data),
     headSha: data.head.sha,
     headBranch: data.head.ref,
     baseBranch: data.base.ref,

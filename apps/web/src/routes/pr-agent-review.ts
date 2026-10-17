@@ -5,7 +5,7 @@ import { and, eq, inArray } from 'drizzle-orm';
 import type { Context, Hono } from 'hono';
 
 import type { OnboardingGitHub } from '../github-onboarding';
-import { BAD_REQUEST, fail, NOT_FOUND } from '../http';
+import { BAD_REQUEST, CONFLICT, fail, NOT_FOUND } from '../http';
 import {
   cancelAgentReview,
   getAgentReview,
@@ -56,26 +56,41 @@ function checkSpecs(specs: AgentReviewSpec[] | null, numbers: number[]): void {
 }
 
 /**
- * Queues one run on every pull request of the stack. Those whose diff was never opened have their
- * files read from GitHub first: the agent's comments are placed on them.
+ * Every member's files read from GitHub again: the agent's comments are placed on them, and a pull
+ * request merged or closed since its files were read is refused by number.
  */
+async function readStack(
+  deps: { db: Db; github: OnboardingGitHub },
+  project: Project,
+  stack: Review[],
+): Promise<void> {
+  const states = await Promise.all(
+    stack.map(async (review) => {
+      const { state } = await readReviewFiles(deps.db, deps.github, project, review);
+      return { number: review.prNumber, state };
+    }),
+  );
+  const closed = states.filter((member) => member.state !== 'open');
+  if (closed.length > 0) {
+    const list = closed.map((member) => `#${member.number} is ${member.state}`).join(', ');
+    throw fail(CONFLICT, `${list}: a stack run takes open pull requests only`);
+  }
+}
+
+/** Queues one run on every pull request of the stack. */
 async function startStack(
   c: Context,
   deps: { db: Db; github: OnboardingGitHub },
   opened: { review: Review; project: Project },
   body: { specs: AgentReviewSpec[] | null; stack: number[] },
 ): Promise<Response> {
-  const { db, github } = deps;
+  const { db } = deps;
   if (!body.stack.includes(opened.review.prNumber)) {
     throw fail(BAD_REQUEST, `The stack must include #${opened.review.prNumber}`);
   }
   checkSpecs(body.specs, body.stack);
   const stack = stackReviews(db, opened.project, body.stack);
-  for (const review of stack) {
-    if (!review.files || !review.headSha) {
-      await readReviewFiles(db, github, opened.project, review);
-    }
-  }
+  await readStack(deps, opened.project, stack);
   const [bottom] = stack;
   const sending = stack.find((review) => review.submitStatus === 'sending');
   return startAgentReview(c, db, {
