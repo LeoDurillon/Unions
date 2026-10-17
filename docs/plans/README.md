@@ -1,6 +1,6 @@
 # Plans and ideas
 
-Features discussed but not built yet. Each file says its status; designs already in `SPEC.md` are summarized there
+Features discussed but not built yet. Each file says its status; designs already in the spec (`docs/spec/`) are summarized there
 and linked.
 
 ## Planned in detail
@@ -54,7 +54,6 @@ Loose ends found while building, not planned yet (2026-10-15):
   `127.0.0.1` if that is not wanted.
 - Container commands phase 4: run in a preview service, with its secrets masked ([plan](container-commands.md)).
 - The e2e "Send to agent" still builds its own revision text; it could use the command-output path.
-- `SPEC.md` is 33 KB: split per area like `AGENTS.md` (`docs/architecture/`).
 
 ## Ideas
 

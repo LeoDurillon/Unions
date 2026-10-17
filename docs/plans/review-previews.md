@@ -1,6 +1,6 @@
 # Plan: previews of pull requests under review
 
-Status: built (branch `review-previews`, steps 1 to 6). Summarized in `SPEC.md` (Preview environments → Previews of pull requests under review).
+Status: built (branch `review-previews`, steps 1 to 6). Summarized in `docs/spec/preview-environments.md` (Previews of pull requests under review).
 
 ## Idea
 

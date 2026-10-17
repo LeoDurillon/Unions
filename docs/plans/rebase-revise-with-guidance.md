@@ -1,6 +1,6 @@
 # Idea: revise with guidance after a failed rebase
 
-Status: specified in `SPEC.md` (Rebase section, marked "Not yet"). Not built.
+Status: specified in `docs/spec/rebase.md` (Failure section, marked "Not yet"). Not built.
 
 Today a failed rebase puts the branch back as it was and the ticket in `failed` at the `rebase` step; the user can
 retry. The missing part: a **Revise** action that sends the rebase back to the agent with guidance first, for example

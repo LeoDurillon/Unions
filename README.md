@@ -27,7 +27,7 @@ run in parallel.
 The app runs on your machine only. Credentials (GitHub token or App key, Notion secret) stay in a local SQLite
 database and never reach the agent containers: the host does every clone, push and GitHub call.
 
-See [SPEC.md](SPEC.md) for the design and [AGENTS.md](AGENTS.md) for working on the code.
+See [docs/spec/](docs/spec/README.md) for the design and [AGENTS.md](AGENTS.md) for working on the code.
 
 ## Requirements
 
