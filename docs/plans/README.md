@@ -13,9 +13,8 @@ and linked.
 - [CI checks of the pull request](pr-checks.md): list the PR's checks in the ticket's Pull request tab, and give the
   failed ones (log of the failed step, annotations, other jobs' logs, bot comments) to the implementer. Built,
   steps 1 to 5 (branch `pr-checks`).
-- [Ticket groups](ticket-groups.md): the board shows groups of one or more tickets. Decisions to confirm.
-- [Split a PR into a stack](pr-stack-split.md): an agent splits a ready-for-review PR into stacked PRs. Needs groups.
-- [Restack](restack.md): rebase and retarget a stack after a revision or a merge.
+- [Split a PR into a stack](pr-stack.md): a ticket's PR cut into stacked PRs, one per part of the spec, still one
+  ticket; revise, rebase and merge keep the stack in order. Split after the fact first, then slices from the plan.
 - [Stacked PRs in Pull requests and Current reviews](stacked-pr-reviews.md): a stack shows as one item, its review
   page picks a PR in a segmented control, and the agent reviews the whole stack against several specs linked to its
   PRs. Built, steps 1 to 4 (branch `stacked-pr-reviews`); one v1 item left (the size warning).

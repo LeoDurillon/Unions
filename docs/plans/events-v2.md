@@ -148,6 +148,5 @@ A rule on a ticket without a pull request is skipped ("The ticket has no pull re
 
 - **Replay:** apply a new rule to past events (with a preview of what it would change, and a cap).
 - **Filters:** conditions on a rule (for example only tickets with a label, or only some board columns).
-- **Group triggers** once [ticket groups](ticket-groups.md) exist: "every PR of the group is merged".
 - **Person properties from variables:** today a person property takes fixed people; mapping a GitHub user to a Notion
   user would allow "whoever opened the PR".

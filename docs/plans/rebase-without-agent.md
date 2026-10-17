@@ -109,5 +109,5 @@ project setting could force the review after every rebase.
 
 ## Not in this plan
 
-- The same "host first" idea for Restack ([restack.md](restack.md)), which rebases several branches.
+- The same "host first" idea for Restack ([pr-stack.md](pr-stack.md)), which rebases several branches.
 - Revise with guidance after a failed rebase ([rebase-revise-with-guidance.md](rebase-revise-with-guidance.md)).
