@@ -3,7 +3,7 @@ import type { AgentConfig } from '@union/core';
 import type { ReactElement } from 'react';
 
 import { api } from '../../lib/api';
-import { useModelsForm, type ModelChoice } from '../../lib/use-models-form';
+import { modelRows, useModelsForm, type ModelChoice } from '../../lib/use-models-form';
 import { AGENT_LABELS, EFFORT_LABELS, MODEL_LABELS } from '../agents/agent-labels';
 import { EffortField } from '../agents/effort-field';
 import { ModelField } from '../agents/model-field';
@@ -66,8 +66,7 @@ function ModelRow({
 
 function ModelsForm({ configs }: { configs: AgentConfig[] }): ReactElement {
   const form = useModelsForm(configs);
-  // Shared instructions run with every agent and have no model of their own.
-  const rows = configs.filter((config) => config.agent !== 'shared');
+  const rows = modelRows(configs);
   return (
     <section className="space-y-3">
       <header>

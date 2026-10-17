@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test';
 
-import { isUnionSection, UNION_SETTINGS_GROUPS } from '../../lib/union-settings-groups';
+import { isUnionSection, menuIndex, UNION_SETTINGS_GROUPS } from '../../lib/union-settings-groups';
 import { AGENT_LABELS } from '../agents/agent-labels';
 import { unionSectionLabel } from './union-section-labels';
 
@@ -21,4 +21,9 @@ test('an unknown or missing section is not one', () => {
 test('agents are named by their title, the other pages by their own name', () => {
   expect(unionSectionLabel('test_plan')).toBe('Test plan');
   expect(unionSectionLabel('github-app')).toBe('GitHub App');
+});
+
+test('the menu order puts PR description before Review comments', () => {
+  expect(menuIndex('pr_description')).toBeLessThan(menuIndex('review_comments'));
+  expect(menuIndex('unknown')).toBe(-1);
 });

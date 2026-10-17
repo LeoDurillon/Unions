@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import type { AgentConfig, AgentEffort, AgentModel } from '@union/core';
 
 import { api } from './api';
+import { menuIndex } from './union-settings-groups';
 import { sameTools } from './use-agent-form';
 import { useSettingsForm, type SettingsForm } from './use-settings-form';
 
@@ -18,6 +19,13 @@ function choicesOf(configs: readonly AgentConfig[]): ModelChoices {
     }
   }
   return choices;
+}
+
+/** The table's rows, in menu order; Shared instructions run with every agent and have no model. */
+export function modelRows(configs: readonly AgentConfig[]): AgentConfig[] {
+  return configs
+    .filter((config) => config.agent !== 'shared')
+    .toSorted((a, b) => menuIndex(a.agent) - menuIndex(b.agent));
 }
 
 function changed(config: AgentConfig, choice: ModelChoice | undefined): choice is ModelChoice {

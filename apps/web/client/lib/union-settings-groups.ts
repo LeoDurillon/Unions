@@ -19,3 +19,8 @@ const SECTIONS: readonly string[] = UNION_SETTINGS_GROUPS.flatMap(
 export function isUnionSection(value: string | null): value is UnionSection {
   return SECTIONS.some((section) => section === value);
 }
+
+/** Where a page comes in the menu, top to bottom. */
+export function menuIndex(section: string): number {
+  return SECTIONS.indexOf(section);
+}

@@ -86,6 +86,6 @@ the agents are read again, so the table shows what was saved; Save again sends w
 
 - `components/union-settings/models-page.tsx` over `lib/use-models-form.ts`. The model and effort fields take an
   `ariaLabel` that replaces their visible label in the table (`Technical model`, `Technical effort`).
-- Rows follow the agents' order from the API. Rebase and Simplify history show Implementation's choice as edited.
+- Rows follow the menu's order (`menuIndex`). Rebase and Simplify history show Implementation's choice as edited.
 - Checked with a UI check (writes blocked): the eleven rows, Rebase following an edited Implementation model, Save
   sending only the two changed rows, each with its saved prompt and its tools (null when they are the defaults).
