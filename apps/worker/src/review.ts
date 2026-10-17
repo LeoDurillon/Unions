@@ -8,7 +8,7 @@ import {
   type Project,
   resolveAgent,
   schema,
-  sharedPrompt,
+  stepSharedPrompt,
   ticketBase,
   toolsFor,
 } from '@union/core';
@@ -60,7 +60,7 @@ export async function runReviewStep(
       prompt: buildPrompt({
         ticket,
         ...parentContext(db, ticket),
-        shared: sharedPrompt(db, ticket.projectId),
+        shared: stepSharedPrompt(db, ticket.projectId, 'final_review'),
         instructions: resolveAgent(db, 'final_review').prompt + reviewContext(base, ticket.branch),
         approved: approvedBefore(db, ticket.id, 'final_review'),
         revision: null,

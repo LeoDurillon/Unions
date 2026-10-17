@@ -47,6 +47,8 @@ export); do not edit. Tests are left out.
 - `investigation-defaults.ts`: What a new investigation runs with until the user picks otherwise.
 - `investigation-tickets.ts`: Asks for a ticket written from an answered investigation, with what the user wants it to cover.
 - `investigations.ts`: Newest first.
+- `lesson-input.ts`: The lessons a Memory page save sends, checked: a known step and a one-line rule each, within the limits (browser-safe).
+- `lessons.ts`: The project's memory: lessons (rules per agent step, sent to that step's runs) and the feedback they are curated from.
 - `mcp-connectors.ts`: The permission rule for all of a connector's tools.
 - `notifications.ts`: Which events of the log notify the user, and with what text; pure, the worker writes the rows.
 - `notion-api.ts`: A column of a data source: its id (stable across renames), name, type, and choices if any.

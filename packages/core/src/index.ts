@@ -37,6 +37,8 @@ export * from './github-project-fields';
 export * from './github-text';
 export * from './investigation-tickets';
 export * from './investigations';
+export * from './lesson-input';
+export * from './lessons';
 export * from './notion-api';
 export * from './notion-error';
 export * from './notion-id';

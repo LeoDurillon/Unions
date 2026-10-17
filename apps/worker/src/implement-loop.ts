@@ -11,7 +11,7 @@ import {
   pendingAgentInputs,
   type Project,
   resolveAgent,
-  sharedPrompt,
+  stepSharedPrompt,
   toolsFor,
 } from '@union/core';
 
@@ -73,7 +73,7 @@ function freshPrompt({ deps, context, project }: Workspace): string {
   const prompt = buildPrompt({
     ticket,
     ...parentContext(deps.db, ticket),
-    shared: sharedPrompt(deps.db, ticket.projectId),
+    shared: stepSharedPrompt(deps.db, ticket.projectId, 'implement'),
     instructions:
       resolveAgent(deps.db, 'implement').prompt +
       gateHint(project.config.gateCommand) +

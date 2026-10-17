@@ -30,6 +30,7 @@
 
 - `feedback_events`: every Revise / final-review feedback (replaces `inbox.jsonl`).
 - `lessons`: curated rules per project and agent section, injected into prompts at runtime, editable in the UI.
+- Both are shown and edited in project settings → Memory: see [Memory](memory.md).
 
 ## Token usage
 

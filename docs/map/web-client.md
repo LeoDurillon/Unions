@@ -182,12 +182,13 @@ export); do not edit. Tests are left out.
 ## components/settings/
 
 - `action-fields.tsx`: What a rule does: the kind of action, then that kind's own fields.
-- `agent-section-body.tsx`: The Agents group of the project settings: instructions, checks, scripts and flows.
+- `agent-section-body.tsx`: The Agents group of the project settings: instructions, memory, checks, scripts and flows.
 - `agent-variables-field.tsx`: Which of the preview's plain variables the agent's commands get (and the commands the user runs): a preview's database address would otherwise win over the one…
 - `branch-section.tsx`: The project settings section for the base branch, saved with the General page's Save.
 - `checks-section.tsx`: How the implementation agent's work is installed and checked inside the ticket's container.
 - `delete-section.tsx`: Typing the repository name to confirm keeps a stray click from deleting a project.
 - `events-section.tsx`: Event rules: when something happens to a ticket, set a property of its Notion page or comment on its GitHub issue or pull request.
+- `feedback-inbox.tsx`: The feedback given on Revise and final reviews: each made a lesson or dismissed; the curated ones on request.
 - `files-section.tsx`: Files every ticket's workspace gets at a path in the repository (a database dump for the preview's seed, a local config), kept out of git.
 - `flow-preset-row.tsx`: One flow preset in the settings: its name, its planning steps, whether new tickets get it, and Remove.
 - `flows-section.tsx`: The project's flow presets: the steps a ticket can run, and the one new tickets get.
@@ -195,6 +196,8 @@ export); do not edit. Tests are left out.
 - `github-comment-fields.tsx`: A GitHub comment action's fields: the issue or the pull request, and the comment as a template.
 - `instructions-section.tsx`: The project's own instructions, sent to every agent run on it after the shared instructions.
 - `integration-section-body.tsx`: Previews, Notion and the danger zone.
+- `lesson-list.tsx`: The project's lessons by agent step: a one-line rule each, edited, reordered and removed in the page's form.
+- `memory-section.tsx`: Project settings → Memory: the lessons each agent step gets, and the feedback they are made from.
 - `name-picker.tsx`: Picks names (labels, GitHub logins): the picked ones as chips, and a box that suggests the others and takes new ones.
 - `notion-action-fields.tsx`: A Notion action's fields: the properties of the ticket's Notion page to set, a row each.
 - `notion-section.tsx`: The project settings section for the Notion connection, verified when saved.
@@ -298,6 +301,7 @@ export); do not edit. Tests are left out.
 - `use-github-app.ts`: The global GitHub App's status; saving or removing it invalidates `['github-app']`.
 - `use-live-invalidation.ts`: Refetches board, ticket, investigation and notification data whenever the worker records a change.
 - `use-log.ts`: Polls a ticket's or an investigation's Log while it is shown: all of it first, then what is new.
+- `use-memory.ts`: The Memory page's data: the project's lessons and feedback, saving the lessons, and curating one feedback.
 - `use-models-form.ts`: The Models page's form: every agent's model and effort, each changed one saved with its prompt and tools as they are.
 - `use-navigation.ts`: Which page is shown (`?page=previews`, `?union=` for the Union settings, else the board) and which overlay is open.
 - `use-notifications.ts`: The notifications, page by page, with the unread count (also in the tab's title) and marking them read.

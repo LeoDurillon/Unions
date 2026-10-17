@@ -8,7 +8,7 @@ import {
   modelFor,
   type Project,
   resolveAgent,
-  sharedPrompt,
+  stepSharedPrompt,
   toolsFor,
 } from '@union/core';
 
@@ -56,7 +56,7 @@ export function createExecutor(
       const prompt = buildPrompt({
         ticket: cloned,
         ...parentContext(db, cloned),
-        shared: sharedPrompt(db, ticket.projectId),
+        shared: stepSharedPrompt(db, ticket.projectId, step),
         instructions: agent.prompt,
         approved: approvedBefore(db, ticket.id, step),
         revision: context.revision,

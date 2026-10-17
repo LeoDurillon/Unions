@@ -12,6 +12,7 @@ Everything the agent does is mirrored to the GitHub issue.
 - [Ticket dependencies](ticket-dependencies.md): a ticket's parent, the start gate and stacked branches.
 - [Pull requests](pull-requests.md): the Pull requests tab, Current reviews, posting a review, CI checks.
 - [Project instructions](project-instructions.md): free text sent to every agent run of a project.
+- [Memory](memory.md): lessons per agent step, curated from the user's feedback.
 - [Investigations](investigations.md): one-off agent runs on a custom prompt.
 - [Rebase](rebase.md): bringing a ticket's branch onto the latest base.
 - [Simplify history](simplify-history.md): rewriting a branch's commits for review.
