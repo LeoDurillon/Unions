@@ -5,7 +5,7 @@ import { api } from '../../lib/api';
 import { Dropzone } from '../dropzone';
 import { Button, ErrorText, Field, inputClass } from '../ui';
 
-/** GitHub pre-fills the app form from these: no webhook, only what the worker needs. */
+/** GitHub pre-fills the app form from these: no webhook, only what Union needs (CI reads for the PR tab). */
 const APP_PARAMS = new URLSearchParams({
   url: 'http://localhost:5173',
   public: 'false',
@@ -14,6 +14,9 @@ const APP_PARAMS = new URLSearchParams({
   issues: 'write',
   pull_requests: 'write',
   metadata: 'read',
+  checks: 'read',
+  statuses: 'read',
+  actions: 'read',
   organization_projects: 'write',
 });
 
@@ -55,7 +58,8 @@ function CreateAppHelp(): ReactElement {
           </a>
         </span>
         <span className="block">
-          Permissions are pre-filled: Contents, Issues and Pull requests read and write, Projects
+          Permissions are pre-filled: Contents, Issues and Pull requests read and write, Checks,
+          Commit statuses and Actions read only (a pull request&apos;s CI checks), Projects
           (organization) read and write, no webhook.
         </span>
       </li>

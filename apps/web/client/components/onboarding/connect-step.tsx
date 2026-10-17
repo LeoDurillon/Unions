@@ -68,7 +68,7 @@ function TokenConnect({ draft, patch }: StepProps): ReactElement {
     <div className="space-y-4">
       <Field
         label="Personal access token"
-        hint="Needs the repo and project scopes (classic) or the matching repository and project permissions (fine-grained)."
+        hint="Needs the repo and project scopes (classic) or the matching repository and project permissions (fine-grained; reading CI checks also needs Checks, Commit statuses and Actions)."
       >
         <TokenInput
           value={draft.token}

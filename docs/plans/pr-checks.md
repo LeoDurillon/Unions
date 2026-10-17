@@ -1,7 +1,7 @@
 # Plan: the pull request's CI checks, and sending failures to the implementer
 
-Status: in progress (2026-10-17). Steps 1 to 4 built (core: `ci-output-text.ts`, `ci-outputs.ts`, `agent-inputs.ts`,
-table `ci_outputs`, migration 0049). Step 0 done: the GitHub App now has the permissions (below), and the reads work on
+Status: built (2026-10-17), steps 1 to 5, branch `pr-checks` (core: `ci-output-text.ts`, `ci-outputs.ts`,
+`agent-inputs.ts`, table `ci_outputs`, migration 0049; each step below "as built"). Step 0 done: the GitHub App now has the permissions (below), and the reads work on
 SenovaFR/Senova. Decisions taken: the log is fetched when the user keeps or sends; failed checks only; one revision
 per send.
 
@@ -152,3 +152,11 @@ So: possible. Full logs only for GitHub Actions; other CI gives its summary, ann
 - UI check on the live app (writes blocked): ticket 10 shows "1 failed, 23 passed, 2 skipped on 2d1d788", the failed
   check with 3 other jobs, 4 bot comments; picking the failed check and the report comment sends the expected
   preview, keep and send bodies.
+
+## Step 5 as built
+
+- `SPEC.md` (Pull requests → CI checks), `docs/architecture/web.md`, `docs/architecture/integrations.md` (the
+  web's CI reads, the App's permissions), the plans index.
+- The GitHub App form is pre-filled with Checks, Commit statuses and Actions read (`app-setup-form.tsx`), and the
+  token hint names them for fine-grained tokens. Existing installations accept them on GitHub (done for SenovaFR on
+  2026-10-16).

@@ -10,7 +10,8 @@
   review import), a reviewed pull request's files and commits, and listing the repository's pull requests (project bar → Pull requests,
   `routes/pull-requests.ts`; the Current reviews tab's records are local, under `/pull-requests/reviews`,
   `routes/current-reviews.ts`), all read only (`src/github-onboarding.ts`, behind the `OnboardingGitHub` interface
-  so tests use a fake). Posting a pull request review is a write: it goes through the `submit_pr_review` command
+  so tests use a fake), and a linked pull request's CI checks (PR tab: check runs, statuses, bot comments, the
+  annotations and job logs of a pick; `src/github-checks.ts` behind `CiGitHub`). Posting a pull request review is a write: it goes through the `submit_pr_review` command
   and the worker (`github/pr-review.ts`).
 - Notion writes happen in the worker only: event rules set properties of a ticket's page (`updatePage`), and a
   ticket written from an investigation can be created as a page of the project's data source (`createPage`, with
@@ -29,3 +30,9 @@
   (`timeoutMs`, `retries`: 30 s per attempt; the web server 20 s and one retry): Octokit queues token minting and
   GraphQL per process, so one stuck request used to block every later call until a restart. Never build an Octokit
   from a project's token by hand.
+- Permissions: the GitHub App's form is pre-filled (`app-setup-form.tsx`) with Contents, Issues and Pull requests
+  read and write, Metadata read, Checks, Commit statuses and Actions read (the PR tab's CI checks: check runs and
+  annotations, commit statuses, job logs), organization Projects read and write. An existing installation must
+  accept added permissions on GitHub (Settings → GitHub Apps → the request) before they apply; until then the CI
+  reads answer 403, which `routes/pr-checks.ts` turns into a message naming them. A classic token needs `repo` and
+  `project`.

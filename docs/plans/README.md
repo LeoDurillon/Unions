@@ -11,7 +11,8 @@ and linked.
   container's `localhost`, choose which variables the agent's commands get, give Commands the same environment.
   Built (branch `agent-service-ports`).
 - [CI checks of the pull request](pr-checks.md): list the PR's checks in the ticket's Pull request tab, and give the
-  failed ones (log of the failed step, annotations) to the implementer. Not started.
+  failed ones (log of the failed step, annotations, other jobs' logs, bot comments) to the implementer. Built,
+  steps 1 to 5 (branch `pr-checks`).
 - [Ticket groups](ticket-groups.md): the board shows groups of one or more tickets. Decisions to confirm.
 - [Split a PR into a stack](pr-stack-split.md): an agent splits a ready-for-review PR into stacked PRs. Needs groups.
 - [Restack](restack.md): rebase and retarget a stack after a revision or a merge.
