@@ -62,7 +62,7 @@ test('bot comments only, the last edited first, trimmed, capped', () => {
   const comments = [
     comment(1, 'Bot', '2026-10-16T10:00:00Z'),
     comment(2, 'User', '2026-10-16T12:00:00Z'),
-    comment(3, 'Bot', '2026-10-16T11:00:00Z'),
+    { ...comment(3, 'Bot', '2026-10-16T11:00:00Z'), body: '<!-- summary\n-->\nreport 3' },
   ];
   expect(toBotComments(comments).map((one) => [one.id, one.excerpt])).toEqual([
     [3, 'report 3'],

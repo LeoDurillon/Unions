@@ -168,8 +168,8 @@ head as a line comment, and the others quoted in the body with their code (GitHu
 current diff). The posted drafts turn sent; a failure leaves them drafts and shows GitHub's reason
 (`submit_status`). Approving or requesting changes is not offered yet.
 
-**CI checks** of a ticket's pull request (`docs/plans/pr-checks.md`; the PR tab's list is not built yet): the web
-reads the head commit's check runs and commit statuses and the PR's bot comments. The user picks failed checks, other
+**CI checks** of a ticket's pull request (`docs/plans/pr-checks.md`), in the PR tab under the branch status, while
+the PR is not merged (read when the tab opens, every 30 s while a check runs, and on Refresh): the web reads the head commit's check runs and commit statuses and the PR's bot comments. The user picks failed checks, other
 GitHub Actions jobs of the head (their findings may be there) and bot comments; each is read again into text (a
 failed check's link, annotations and failed step's log; a job's log without the scripts its steps echo; a comment's
 body), previewed, then kept for the implementer's next run or sent now as one revision with a note (at the final

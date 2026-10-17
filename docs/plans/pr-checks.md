@@ -1,6 +1,6 @@
 # Plan: the pull request's CI checks, and sending failures to the implementer
 
-Status: in progress (2026-10-17). Steps 1 to 3 built (core: `ci-output-text.ts`, `ci-outputs.ts`, `agent-inputs.ts`,
+Status: in progress (2026-10-17). Steps 1 to 4 built (core: `ci-output-text.ts`, `ci-outputs.ts`, `agent-inputs.ts`,
 table `ci_outputs`, migration 0049). Step 0 done: the GitHub App now has the permissions (below), and the reads work on
 SenovaFR/Senova. Decisions taken: the log is fetched when the user keeps or sends; failed checks only; one revision
 per send.
@@ -140,3 +140,15 @@ So: possible. Full logs only for GitHub Actions; other CI gives its summary, ann
 - `implement-prompts.ts`: `ciOutputPrompt` ("Failed CI checks": the commits the checks ran on, a note that the branch
   may have moved on, the newest 6 blocks) and `givenOutputsPrompt` (command outputs first, then CI).
 - Not run with a real agent (it uses the Claude subscription): the loop is tested with a fake agent.
+
+## Step 4 as built
+
+- `pull-request/ci-checks.tsx` in the PR tab (after the branch status, not for a merged PR): a header with the counts
+  and the commit, failed checks with a box each and their workflow run's other jobs under "Other jobs…", running
+  checks, "Passed and skipped" folded, the bot comments (open when something failed; HTML comments left out of the
+  excerpt). `ci-pick-actions.tsx`: Preview (the agent's text per pick), Keep for next run, Send to agent… with the
+  note form of command outputs. `ci-given.tsx`: what was given, its state, its commit (marked when earlier), Take
+  back. `lib/use-pr-checks.ts` polls every 30 s while a check runs.
+- UI check on the live app (writes blocked): ticket 10 shows "1 failed, 23 passed, 2 skipped on 2d1d788", the failed
+  check with 3 other jobs, 4 bot comments; picking the failed check and the report comment sends the expected
+  preview, keep and send bodies.

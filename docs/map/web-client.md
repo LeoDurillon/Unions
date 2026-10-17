@@ -44,7 +44,7 @@ export); do not edit. Tests are left out.
 - `preview-tab.tsx`: The ticket's Preview tab: the environment, its output, its end-to-end tests, and commands.
 - `project-bar.tsx`: Slim bar above the project: which project is open, its tabs, and the actions.
 - `pull-request-row.tsx`: The ticket's pull request: shown with an Unlink button, or a field to link one by number or URL.
-- `pull-request-tab.tsx`: The ticket's pull request: link it, keep its description current, then read its GitHub discussion and pick what goes to the agent.
+- `pull-request-tab.tsx`: The ticket's pull request: link it, its CI checks, keep its description current, then read its GitHub discussion and pick what goes to the agent.
 - `refused-commit.tsx`: Shown on the step paused on a refused commit: the changes, the hook's output, the decision.
 - `remove-ticket.tsx`: A cancelled ticket can leave Union; a second click confirms, since nothing brings it back.
 - `review-bar.tsx`: Approve, ask for a revision, or edit the output by hand (for example to answer questions).
@@ -107,6 +107,10 @@ export); do not edit. Tests are left out.
 ## components/pull-request/
 
 - `branch-status.tsx`: How far the PR's branch is behind its base (polled from GitHub by the worker) and the Rebase button.
+- `ci-check-rows.tsx`: One line per CI check or bot comment of the pull request, with a box to pick it for the implementer.
+- `ci-checks.tsx`: The pull request's CI checks on its last commit, and its bot comments: the failed ones and what explains them can be given to the implementer.
+- `ci-given.tsx`: The CI output given to the implementer: waiting for its next run (it can be taken back) or read.
+- `ci-pick-actions.tsx`: What to do with the picked checks, jobs and comments: read the text the agent would get, keep it for its next run, or send it now.
 - `comment-body.tsx`: A GitHub comment's text in compact markdown, folded behind a fade when it renders tall.
 - `description-draft.tsx`: The rewritten description, editable, with what it changes on GitHub a click away.
 - `discussion.tsx`: The pull request's GitHub discussion, and what of it goes to the implementer.
@@ -248,6 +252,7 @@ export); do not edit. Tests are left out.
 - `use-navigation.ts`: Which page is shown and which overlay is open; `show`/`goTo` return click handlers.
 - `use-notifications.ts`: The notifications, page by page, with the unread count (also in the tab's title) and marking them read.
 - `use-notion-users.ts`: The Notion workspace members, read only when `enabled` (a person property is in view).
+- `use-pr-checks.ts`: The pull request's CI checks (read again every 30 s while some still run), and giving picks of them to the implementer.
 - `use-review-grouping.ts`: The newest grouping by spec of the review, with starting and cancelling one.
 - `use-review.ts`: A pull request under review: its description and discussion, read from GitHub once per opening.
 - `use-selected-ticket.ts`: The open ticket lives in the URL (`?ticket=3`), so it survives reloads and back/forward.

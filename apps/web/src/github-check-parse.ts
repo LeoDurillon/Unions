@@ -33,6 +33,8 @@ const SKIPPED = new Set(['cancelled', 'skipped', 'neutral', 'stale']);
 const WORKFLOW_RUN = /\/actions\/runs\/(?<run>\d+)\/job\/\d+/u;
 export const MAX_BOT_COMMENTS = 20;
 const EXCERPT_CHARS = 200;
+/** Bots hide markers in HTML comments; they read as noise in an excerpt. */
+const HTML_COMMENT = /<!--[\s\S]*?-->/gu;
 
 /** Cancelled, skipped and neutral runs are not failures the agent could fix. */
 export function checkRunState(status: string, conclusion: string | null): CheckState {
@@ -99,6 +101,6 @@ export function toBotComments(comments: readonly RawComment[]): BotComment[] {
       author: comment.user?.login ?? 'ghost',
       url: comment.html_url,
       updatedAt: comment.updated_at,
-      excerpt: (comment.body ?? '').trim().slice(0, EXCERPT_CHARS),
+      excerpt: (comment.body ?? '').replaceAll(HTML_COMMENT, '').trim().slice(0, EXCERPT_CHARS),
     }));
 }

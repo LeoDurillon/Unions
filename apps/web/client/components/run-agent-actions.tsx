@@ -12,7 +12,7 @@ function AgentState({ forAgent }: { forAgent: ContainerRun['forAgent'] }): React
 }
 
 /** The note that goes with the output as the revision's feedback (a default one when empty). */
-function SendForm({
+export function SendForm({
   pending,
   onSend,
   onClose,
