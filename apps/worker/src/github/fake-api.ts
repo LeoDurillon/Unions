@@ -262,6 +262,15 @@ export class FakeGitHubApi extends FakeProjectFields implements GitHubApi {
     return Promise.resolve({ state, behindBy, mergedAt, closedAt });
   }
 
+  /** Jobs run again, in order. */
+  readonly reruns: number[] = [];
+
+  rerunJob(_repo: RepoRef, jobId: number): Promise<void> {
+    this.calls.push('rerunJob');
+    this.reruns.push(jobId);
+    return Promise.resolve();
+  }
+
   pullRequestChecks(_repo: RepoRef, number: number): Promise<PullRequestChecks | null> {
     this.calls.push('pullRequestChecks');
     const pull = this.pulls.find((candidate) => candidate.number === number);

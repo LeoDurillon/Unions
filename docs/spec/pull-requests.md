@@ -38,3 +38,9 @@ again counts), or on a new head. The first read of a ticket's checks says nothin
 ("Checks failed") and is the rule trigger "Its pull request's CI checks fail". Without the Checks permission the
 state stays unknown and nothing notifies. The same state is a badge on the ticket's board card while the PR is open
 (Checks running, passed or failed).
+
+**Re-run** on a failed GitHub Actions job (PR tab): the web checks the job against the current listing and queues
+`rerun_ci_job`; the worker asks GitHub to run it again with the jobs that depend on it (`github/ci-rerun.ts`) and
+logs `ci_job_rerun`, or `ci_job_rerun_failed`, which notifies ("Re-run failed", naming the permission on a 403). The
+button reads "Re-run asked" until GitHub lists the new run (the tab reads the checks every 10 s meanwhile, 2 minutes
+at most). The GitHub App needs Actions read and write; other CI is re-run where it runs.

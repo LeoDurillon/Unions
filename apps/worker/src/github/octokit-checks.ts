@@ -1,4 +1,4 @@
-// The CI checks of the worker's GitHub client: a pull request's head commit and the overall state of its checks, in one GraphQL call.
+// The CI checks of the worker's GitHub client: a pull request's head commit and the overall state of its checks, and re-running an Actions job.
 import type { ChecksState, PullRequestChecks, RepoRef } from './api';
 import { OctokitPullRequestChanges } from './octokit-pull-request-changes';
 
@@ -72,5 +72,9 @@ export class OctokitChecks extends OctokitPullRequestChanges {
       }
       throw error;
     }
+  }
+
+  async rerunJob(repo: RepoRef, jobId: number): Promise<void> {
+    await this.octokit.rest.actions.reRunJobForWorkflowRun({ ...repo, job_id: jobId });
   }
 }

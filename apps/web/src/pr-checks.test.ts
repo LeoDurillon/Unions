@@ -194,6 +194,18 @@ test('sending queues one revision with the note, refused when the implementer ca
   expect((await post('/send', { picks: PICKS })).status).toBe(409);
 });
 
+test('a failed Actions job is queued for the worker to run again, once while it waits', async () => {
+  expect((await post('/rerun', { checkId: 'run:11' })).status).toBe(202);
+  expect(db.select().from(schema.commands).all()).toMatchObject([
+    { type: 'rerun_ci_job', ticketId, payload: { jobId: 11, name: 'Fail on findings' } },
+  ]);
+  expect((await post('/rerun', { checkId: 'run:11' })).status).toBe(409);
+  // Passed, not an Actions job, not on the pull request.
+  for (const checkId of ['run:12', 'status:deploy', 'run:99']) {
+    expect((await post('/rerun', { checkId })).status).toBe(409);
+  }
+});
+
 test('without a pull request, or when GitHub refuses, the reason is said', async () => {
   forbidden = true;
   const refused = await app.request(`/api/tickets/${ticketId}/pr-checks`);

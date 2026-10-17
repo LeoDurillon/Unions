@@ -1,9 +1,10 @@
-// One line per CI check or bot comment of the pull request, with a box to pick it for the implementer.
+// One line per CI check or bot comment of the pull request, with a box to pick it for the implementer and, on a failed Actions job, Re-run.
 import type { ReactElement } from 'react';
 
 import type { BotComment, CiPick, PullRequestCheck } from '../../../src/ci-api-types';
 import type { Tone } from '../../lib/labels';
-import { Badge } from '../ui';
+import type { CiRerun } from '../../lib/use-ci-rerun';
+import { Badge, Button } from '../ui';
 
 const STATE_TONES: Record<PullRequestCheck['state'], Tone> = {
   failed: 'red',
@@ -61,14 +62,48 @@ function Name({ name, url }: { name: string; url: string | null }): ReactElement
   );
 }
 
+/** GitHub runs a failed Actions job again; other CI is re-run where it runs. */
+function RerunButton({
+  check,
+  rerun,
+}: {
+  check: PullRequestCheck;
+  rerun: CiRerun;
+}): ReactElement | null {
+  if (check.state !== 'failed' || check.workflowRunId === null) {
+    return null;
+  }
+  const asked = rerun.isAsked(check.id);
+  let label = 'Re-run';
+  if (asked) {
+    label = 'Re-run asked';
+  } else if (rerun.sending === check.id) {
+    label = 'Asking…';
+  }
+  return (
+    <Button
+      className="shrink-0 px-2 py-0.5 text-xs"
+      disabled={asked || rerun.sending !== null}
+      title="Run this job again on GitHub, with the jobs that depend on it"
+      onClick={() => {
+        rerun.ask(check.id);
+      }}
+    >
+      {label}
+    </Button>
+  );
+}
+
 /** A check: picked as a failure when it failed, as another job's log for `asJob`. */
 export function CheckRow({
   check,
   picking,
+  rerun,
   asJob = false,
 }: {
   check: PullRequestCheck;
   picking?: Picking;
+  rerun?: CiRerun;
   asJob?: boolean;
 }): ReactElement {
   const pick: CiPick = asJob
@@ -83,6 +118,7 @@ export function CheckRow({
         <span className="truncate text-xs text-zinc-500">{check.summary}</span>
       ) : null}
       <span className="ml-auto shrink-0 text-xs text-zinc-500">{duration(check.durationMs)}</span>
+      {rerun ? <RerunButton check={check} rerun={rerun} /> : null}
     </li>
   );
 }

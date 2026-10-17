@@ -16,7 +16,7 @@ const APP_PARAMS = new URLSearchParams({
   metadata: 'read',
   checks: 'read',
   statuses: 'read',
-  actions: 'read',
+  actions: 'write',
   organization_projects: 'write',
 });
 
@@ -58,9 +58,10 @@ function CreateAppHelp(): ReactElement {
           </a>
         </span>
         <span className="block">
-          Permissions are pre-filled: Contents, Issues and Pull requests read and write, Checks,
-          Commit statuses and Actions read only (a pull request&apos;s CI checks), Projects
-          (organization) read and write, no webhook.
+          Permissions are pre-filled: Contents, Issues and Pull requests read and write, Checks and
+          Commit statuses read only (a pull request&apos;s CI checks), Actions read and write (its
+          job logs, and re-running a failed job), Projects (organization) read and write, no
+          webhook.
         </span>
       </li>
       <li>On the app page, note the App ID and generate a private key (.pem file).</li>

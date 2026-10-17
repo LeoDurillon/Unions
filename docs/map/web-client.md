@@ -118,7 +118,7 @@ export); do not edit. Tests are left out.
 ## components/pull-request/
 
 - `branch-status.tsx`: How far the PR's branch is behind its base (polled from GitHub by the worker) and the Rebase button.
-- `ci-check-rows.tsx`: One line per CI check or bot comment of the pull request, with a box to pick it for the implementer.
+- `ci-check-rows.tsx`: One line per CI check or bot comment of the pull request, with a box to pick it for the implementer and, on a failed Actions job, Re-run.
 - `ci-checks.tsx`: The pull request's CI checks on its last commit, and its bot comments: the failed ones and what explains them can be given to the implementer.
 - `ci-given.tsx`: The CI output given to the implementer: waiting for its next run (it can be taken back) or read.
 - `ci-pick-actions.tsx`: What to do with the picked checks, jobs and comments: read the text the agent would get, keep it for its next run, or send it now.
@@ -295,6 +295,7 @@ export); do not edit. Tests are left out.
 - `use-agent-review.ts`: The latest agent review of the target, with starting and cancelling it.
 - `use-agent-tools.ts`: The tools agents pick from: built-in ones and the ones the user added.
 - `use-app-state.ts`: What the root layout runs on: live refetching, the projects, the open ticket, navigation, and opening notifications.
+- `use-ci-rerun.ts`: Asks the worker to run a failed GitHub Actions job again, and remembers it was asked until GitHub shows the new run.
 - `use-commits.ts`: The change's commits, oldest first, and (tickets) the change since the last review.
 - `use-connectors.ts`: The account's claude.ai connectors, and reading them again (polled while the worker checks).
 - `use-container-runs.ts`: The commands run in the target's workspace (polled while one is on), and running or stopping one.

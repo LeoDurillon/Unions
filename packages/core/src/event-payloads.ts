@@ -63,6 +63,9 @@ type GitHubPayloads = {
   >;
   /** The head commit's checks went red: once each time they turn so on a commit. */
   pull_request_checks_failed: PullRequestNumber & { sha: string };
+  /** The user asked GitHub to run a failed Actions job (`jobId`, its check run id) again. */
+  ci_job_rerun: { jobId: number; name: string };
+  ci_job_rerun_failed: { jobId: number; name: string; error: string };
   github_sync_error: Failure;
   github_issue_created: { issueNumber: number };
   github_status_reverted: { remote: BoardStatus; local: BoardStatus };

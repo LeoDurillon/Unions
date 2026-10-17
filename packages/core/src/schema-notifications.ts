@@ -14,6 +14,7 @@ export const NOTIFICATION_KINDS = [
   'pull_request_merged',
   'pull_request_closed',
   'pull_request_checks_failed',
+  'ci_rerun_failed',
   'investigation_finished',
   'investigation_failed',
   'rule_failed',

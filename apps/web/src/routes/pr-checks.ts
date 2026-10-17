@@ -1,4 +1,4 @@
-// `/api/tickets/:id/pr-checks`: the pull request's CI checks read from GitHub, and the failed ones (with related jobs and bot comments) given to the implementer.
+// `/api/tickets/:id/pr-checks`: the pull request's CI checks read from GitHub, the failed ones (with related jobs and bot comments) given to the implementer, a failed Actions job run again.
 import {
   CiOutputError,
   dropCiOutput,
@@ -18,6 +18,7 @@ import { Hono, type Context } from 'hono';
 
 import type { CiGivenView, CiPreview, PrChecksView, PullRequestChecks } from '../ci-api-types';
 import { parsePicks, readPicks, type CiSource } from '../ci-picks';
+import { queueRerun } from '../ci-rerun';
 import type { CiGitHub } from '../github-checks';
 import { ACCEPTED, BAD_GATEWAY, CONFLICT, fail, NOT_FOUND, readObject, requireId } from '../http';
 import { guarded } from './github-errors';
@@ -150,7 +151,13 @@ async function send(db: Db, loaded: Loaded, c: Context): Promise<Response> {
   return c.json(given(db, ticket), ACCEPTED);
 }
 
-/** `/api/tickets/:id/pr-checks`: read from GitHub, never written to it. */
+async function rerun(db: Db, loaded: Loaded, c: Context): Promise<Response> {
+  const body = await readObject(c.req.raw);
+  queueRerun(db, loaded.ticket.id, await listing(loaded), body.checkId);
+  return c.json({}, ACCEPTED);
+}
+
+/** `/api/tickets/:id/pr-checks`: read from GitHub; a re-run is the worker's write. */
 export function prChecksRoutes(db: Db, ci: CiGitHub): Hono {
   const routes = new Hono();
   routes.get('/', async (c) => c.json(await view(db, load(db, ci, c))));
@@ -166,6 +173,7 @@ export function prChecksRoutes(db: Db, ci: CiGitHub): Hono {
     return c.json(given(db, loaded.ticket));
   });
   routes.post('/send', (c) => send(db, load(db, ci, c), c));
+  routes.post('/rerun', (c) => rerun(db, load(db, ci, c), c));
   routes.post('/given/:outputId/drop', (c) => {
     const ticket = loadTicket(db, c);
     checked(() => dropCiOutput(db, ticket.id, requireId(c.req.param('outputId'), 'output id')));

@@ -97,7 +97,8 @@ So: possible. Full logs only for GitHub Actions; other CI gives its summary, ann
   0058), logs `pull_request_checks_failed` when they turn red, which notifies ("Checks failed") and triggers rules.
 - **Fix on its own**: send failed checks to the implementer without asking, with a limit per ticket. Uses Claude
   usage unprompted: off by default, per project.
-- **Re-run a failed job** (`POST …/actions/jobs/{id}/rerun`): a GitHub write, so a worker command.
+- **Re-run a failed job** (`POST …/actions/jobs/{id}/rerun`): built (2026-10-17), the `rerun_ci_job` command
+  (`apps/web/src/ci-rerun.ts`, `apps/worker/src/github/ci-rerun.ts`, `lib/use-ci-rerun.ts`). Needs Actions write.
 
 ## Decisions (2026-10-16)
 

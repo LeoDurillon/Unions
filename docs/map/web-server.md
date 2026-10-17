@@ -9,6 +9,7 @@ export); do not edit. Tests are left out.
 - `app.ts`: Builds the web server's Hono app: error handling and the API routes, wired to the database and GitHub.
 - `ci-api-types.ts`: The pull request's CI checks as the PR tab shows them, and what the user gave the implementer from them.
 - `ci-picks.ts`: The user's picks among the pull request's CI, checked against its current checks, then read from GitHub into the text the implementer gets.
+- `ci-rerun.ts`: Which check of the pull request can be run again (a failed GitHub Actions job), and the command that asks the worker to.
 - `event-api-types.ts`: The Events settings: the rules, and the Notion columns they can set (null until read).
 - `github-check-parse.ts`: GitHub's check runs, commit statuses and comments to the PR tab's shape: states, workflow runs, bot comments.
 - `github-checks.ts`: The web's reads of a pull request's CI: its checks and bot comments, and what a pick gives the agent (a check's annotations, a job's log, a comment).
@@ -56,7 +57,7 @@ export); do not edit. Tests are left out.
 - `notifications.ts`: `/api/notifications`: what needs the user across every project (the worker writes them), marking them read and clearing them.
 - `notion.ts`: Notion failures become messages the UI shows next to the field.
 - `pr-agent-review.ts`: A pull request under review's agent review: one pull request, or the stack it is in, checked and queued for the worker.
-- `pr-checks.ts`: `/api/tickets/:id/pr-checks`: the pull request's CI checks read from GitHub, and the failed ones (with related jobs and bot comments) given to the implementer.
+- `pr-checks.ts`: `/api/tickets/:id/pr-checks`: the pull request's CI checks read from GitHub, the failed ones (with related jobs and bot comments) given to the implementer, a f…
 - `pr-commits.ts`: `<review>/commits`: the pull request's commits, and one commit's files and patches, to read the change one commit at a time.
 - `pr-description.ts`: `/api/tickets/:id/pr-description`: the agent rewrites the PR's description into a draft the user edits; sending it is a command (the worker writes to GitHub).
 - `pr-review-load.ts`: Loads the review and project a pull request route refers to, the GitHub auth to act on them, and the review's files from GitHub.

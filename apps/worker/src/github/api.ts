@@ -123,6 +123,8 @@ export type GitHubApi = {
   ): Promise<PullRequestStatus | null>;
   /** The CI checks of the pull request's head commit; null when the pull request is gone. */
   pullRequestChecks(repo: RepoRef, number: number): Promise<PullRequestChecks | null>;
+  /** Runs a GitHub Actions job (its check run id) again, with the jobs that depend on it. */
+  rerunJob(repo: RepoRef, jobId: number): Promise<void>;
   /** Posts a review ("Comment", "Approve" or "Request changes"); returns its URL. */
   createPullRequestReview(
     repo: RepoRef,

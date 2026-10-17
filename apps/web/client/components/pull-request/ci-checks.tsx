@@ -2,6 +2,7 @@
 import { useState, type ReactElement } from 'react';
 
 import type { CiPick, PrChecksView, PullRequestCheck } from '../../../src/ci-api-types';
+import { useCiRerun, type CiRerun } from '../../lib/use-ci-rerun';
 import { usePrChecks } from '../../lib/use-pr-checks';
 import { Button, ErrorText } from '../ui';
 import { BotCommentRow, CheckRow, pickKey, RelatedJobs, type Picking } from './ci-check-rows';
@@ -41,7 +42,15 @@ function counts(checks: readonly PullRequestCheck[]): string {
   return parts.filter((part) => !part.startsWith('0 ')).join(', ') || 'no checks';
 }
 
-function CheckLists({ view, picking }: { view: PrChecksView; picking: Picking }): ReactElement {
+function CheckLists({
+  view,
+  picking,
+  rerun,
+}: {
+  view: PrChecksView;
+  picking: Picking;
+  rerun: CiRerun;
+}): ReactElement {
   const failed = view.checks.filter((check) => check.state === 'failed');
   const pending = view.checks.filter((check) => check.state === 'pending');
   const rest = view.checks.filter((check) => check.state === 'passed' || check.state === 'skipped');
@@ -50,7 +59,7 @@ function CheckLists({ view, picking }: { view: PrChecksView; picking: Picking })
       <ul className="space-y-1">
         {failed.map((check) => (
           <div key={check.id} className="space-y-1">
-            <CheckRow check={check} picking={picking} />
+            <CheckRow check={check} picking={picking} rerun={rerun} />
             <RelatedJobs check={check} checks={view.checks} picking={picking} />
           </div>
         ))}
@@ -91,6 +100,7 @@ function CheckLists({ view, picking }: { view: PrChecksView; picking: Picking })
 export function CiChecks({ ticketId }: { ticketId: number }): ReactElement {
   const { checks, preview, keep, send, drop } = usePrChecks(ticketId);
   const picking = usePicking();
+  const rerun = useCiRerun(ticketId, checks.refetch);
   const view = checks.data;
   const handleDone = (): void => {
     picking.clear();
@@ -115,9 +125,10 @@ export function CiChecks({ ticketId }: { ticketId: number }): ReactElement {
         </Button>
       </div>
       <ErrorText error={checks.error} />
+      <ErrorText error={rerun.error} />
       {view ? (
         <>
-          <CheckLists view={view} picking={picking} />
+          <CheckLists view={view} picking={picking} rerun={rerun} />
           <CiPickActions
             picks={picking.picks}
             canSend={view.canSend}

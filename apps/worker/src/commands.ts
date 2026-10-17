@@ -19,6 +19,8 @@ import {
 } from '@union/core';
 import { eq, isNull } from 'drizzle-orm';
 
+import { ciJobOf, type CiJob } from './github/ci-rerun';
+
 type Command = typeof schema.commands.$inferSelect;
 
 export type ContainerRef = { name: string; home: string; workspace: string };
@@ -43,6 +45,8 @@ export type CommandHooks = {
   cancelContainerRun: (id: number) => void;
   /** Writes a rewritten PR description, as the user left it, to GitHub. */
   sendPrDescription: (id: number) => void;
+  /** Asks GitHub to run a failed Actions job of the ticket's pull request again. */
+  rerunCiJob: (ticketId: number, job: CiJob) => void;
   /**
    * Starts, stops, reads the logs of, or generates the compose file of a ticket's or a pull
    * request's preview; `update` moves a pull request's checkout to the commit its review reads.
@@ -74,6 +78,7 @@ const NO_HOOKS: CommandHooks = {
   cancelPrDescription: ignore,
   cancelContainerRun: ignore,
   sendPrDescription: ignore,
+  rerunCiJob: ignore,
   preview: ignore,
 };
 
@@ -303,6 +308,10 @@ function execute(db: Db, command: Command, hooks: CommandHooks): void {
     }
     case 'update_pr_description': {
       hooks.sendPrDescription(numberField(command, 'prDescriptionId'));
+      return;
+    }
+    case 'rerun_ci_job': {
+      hooks.rerunCiJob(requireTicketId(command), ciJobOf(command.payload));
       return;
     }
     case 'remove_containers': {

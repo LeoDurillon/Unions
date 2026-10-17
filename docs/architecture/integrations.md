@@ -31,9 +31,9 @@
   GraphQL per process, so one stuck request used to block every later call until a restart. Never build an Octokit
   from a project's token by hand.
 - Permissions: the GitHub App's form is pre-filled (`app-setup-form.tsx`) with Contents, Issues and Pull requests
-  read and write, Metadata read, Checks, Commit statuses and Actions read (the PR tab's CI checks: check runs and
-  annotations, commit statuses, job logs; the worker's poll of the PR's checks rollup, which reads as unknown
-  without them), organization Projects read and write. An existing installation must
+  read and write, Metadata read, Checks and Commit statuses read, Actions read and write (the PR tab's CI checks:
+  check runs and annotations, commit statuses, job logs; the worker's poll of the PR's checks rollup, which reads as
+  unknown without them; write only to re-run a failed job), organization Projects read and write. An existing installation must
   accept added permissions on GitHub (Settings → GitHub Apps → the request) before they apply; until then the CI
   reads answer 403, which `routes/pr-checks.ts` turns into a message naming them. A classic token needs `repo` and
   `project`.

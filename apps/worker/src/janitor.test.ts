@@ -39,6 +39,9 @@ test('remove_containers hands every container to the hook', () => {
     sendPrDescription: () => {
       // Not under test.
     },
+    rerunCiJob: () => {
+      // Not under test.
+    },
     preview: () => {
       // Not under test.
     },

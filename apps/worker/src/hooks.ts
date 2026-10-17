@@ -2,6 +2,7 @@ import type { ContainerRuntime, Db, Project } from '@union/core';
 
 import type { CommandHooks } from './commands';
 import type { GitHubApi } from './github/api';
+import { rerunCiJob } from './github/ci-rerun';
 import { sendPrDescription } from './github/pr-description-send';
 import { postPullRequestReview } from './github/pr-review';
 import { removeContainers } from './janitor';
@@ -50,6 +51,9 @@ export function workerHooks(
     },
     sendPrDescription: (id) => {
       void sendPrDescription(db, apiFor, id);
+    },
+    rerunCiJob: (ticketId, job) => {
+      void rerunCiJob(db, apiFor, ticketId, job);
     },
     preview: (owner, action) => {
       previews.run(owner, action);

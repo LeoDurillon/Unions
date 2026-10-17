@@ -62,6 +62,12 @@ test('blocked starts, ended pull requests and failed rules notify', () => {
       ticket,
     )?.detail,
   ).toBe('The CI checks of #7 failed on 2d1d788.');
+  expect(
+    notificationFor(
+      { type: 'ci_job_rerun_failed', payload: { jobId: 3, name: 'test', error: '403' } },
+      ticket,
+    ),
+  ).toMatchObject({ kind: 'ci_rerun_failed', detail: 'GitHub did not re-run test: 403' });
   const failed = notificationFor(
     {
       type: 'event_rule_applied',

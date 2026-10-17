@@ -75,6 +75,12 @@ function momentOf(event: StoredEvent): Moment | null {
       detail: `The CI checks of #${event.payload.number} failed on ${event.payload.sha.slice(0, SHORT_SHA)}.`,
     };
   }
+  if (isEvent(event, 'ci_job_rerun_failed')) {
+    return {
+      kind: 'ci_rerun_failed',
+      detail: `GitHub did not re-run ${event.payload.name}: ${event.payload.error}`,
+    };
+  }
   if (isEvent(event, 'investigation_finished')) {
     return investigationMoment(event.payload.status);
   }

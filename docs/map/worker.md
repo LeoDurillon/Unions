@@ -92,6 +92,7 @@ export); do not edit. Tests are left out.
 ## github/
 
 - `api.ts`: `mergedAt`: when GitHub merged it (epoch ms); null unless merged.
+- `ci-rerun.ts`: Runs a failed GitHub Actions job of a ticket's pull request again, and logs whether GitHub took it.
 - `clients.ts`: Each project's API: its GitHub App installation or its token, `GITHUB_TOKEN` for projects with neither.
 - `dependency.ts`: Mirrors the ticket's parent as "blocked by" on its issue, once both issues exist.
 - `fake-api.ts`: In-memory GitHub for tests.
@@ -100,7 +101,7 @@ export); do not edit. Tests are left out.
 - `loop.ts`: Pushes every second and pulls every `pullIntervalMs`, one call at a time, until aborted.
 - `mirror.ts`: Runs one `GitHubSync` per project, each with the project's own credentials.
 - `octokit-api.ts`: The GitHub API implemented with Octokit: issues, pull requests and the project board.
-- `octokit-checks.ts`: The CI checks of the worker's GitHub client: a pull request's head commit and the overall state of its checks, in one GraphQL call.
+- `octokit-checks.ts`: The CI checks of the worker's GitHub client: a pull request's head commit and the overall state of its checks, and re-running an Actions job.
 - `octokit-project-fields.ts`: The GitHub Project fields of the worker's GitHub client: reading them, setting one on an item, a pull request's node id.
 - `octokit-pull-request-changes.ts`: The pull request changes of the worker's GitHub client (title, labels, reviewers, assignees): the base of `OctokitGitHubApi`.
 - `pr-description-send.ts`: Writes the user's version of a rewritten description to the pull request, with Union's links added back, unless the description on GitHub changed since the age…
