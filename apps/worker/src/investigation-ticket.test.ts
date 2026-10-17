@@ -119,7 +119,6 @@ test('the ticket is written in a throwaway container and lands in the backlog', 
       kind: 'ok',
       text: '# Corriger la requête N+1\n\nDétails.',
       sessionId: 's',
-      costUsd: null,
     });
   };
   const investigations = runner(writes);
@@ -151,7 +150,7 @@ test('a failed agent keeps the error and no ticket is made', async () => {
 });
 
 const writesTicket: AgentFn = () =>
-  Promise.resolve({ kind: 'ok', text: '# Fix login\n\nDetails.', sessionId: 's', costUsd: null });
+  Promise.resolve({ kind: 'ok', text: '# Fix login\n\nDetails.', sessionId: 's' });
 
 function connectNotion(): void {
   db.update(schema.projects)

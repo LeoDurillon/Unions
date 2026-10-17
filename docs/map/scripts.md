@@ -14,6 +14,7 @@ export); do not edit. Tests are left out.
 - `lint-changed.ts`: Lints only the TypeScript files changed since the last commit, and new ones: seconds instead of the whole repository while working.
 - `repo-map-lib.ts`: What `bun run map` writes: one line per source file, its own summary, grouped by folder.
 - `repo-map.ts`: Writes `docs/map/<area>.md`, one line per source file; `--check` fails when one is out of date.
+- `usage-backfill.ts`: The `usage:backfill` script: records the token usage of the agent calls already in the log (`DB_PATH`, else the default database).
 
 ## ui-check/
 

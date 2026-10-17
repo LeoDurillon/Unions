@@ -1,6 +1,10 @@
+import { callTokensOf, tokensText, type CallTokens } from './token-counts';
+
 export type LogLine = {
   kind: 'init' | 'text' | 'tool' | 'tool_result' | 'result' | 'error';
   text: string;
+  /** On a call's result: what it used, for its run's total. */
+  tokens?: CallTokens;
 };
 
 const MAX_TEXT = 600;
@@ -60,10 +64,15 @@ function fromResult(event: Record<string, unknown>): LogLine {
       ? ` in ${Math.round(event.duration_ms / MS_PER_SECOND)}s`
       : '';
   const failed = event.is_error === true;
-  return {
+  const tokens = callTokensOf(event);
+  const used = tokens ? tokensText(tokens) : '';
+  const line: LogLine = {
     kind: failed ? 'error' : 'result',
-    text: failed ? `failed${seconds}: ${asText(event.result)}` : `finished${seconds}`,
+    text: failed
+      ? `failed${seconds}: ${asText(event.result)}`
+      : `finished${seconds}${used ? ` · ${used}` : ''}`,
   };
+  return tokens ? { ...line, tokens } : line;
 }
 
 /** Condenses one raw `claude -p` stream-json event into zero or more log lines. */

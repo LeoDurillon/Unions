@@ -148,7 +148,7 @@ function agentDoing(change: (fork: string) => Promise<unknown>): AgentFn {
   return async (_runtime, agentRun) => {
     prompts.push(agentRun.prompt);
     await change(await git(container(), 'merge-base', 'HEAD', 'origin/main'));
-    return { kind: 'ok', text: 'Folded the typo fix.', sessionId: 's3', costUsd: null };
+    return { kind: 'ok', text: 'Folded the typo fix.', sessionId: 's3' };
   };
 }
 
@@ -239,10 +239,10 @@ test("changes left uncommitted are committed with the agent's message, then refu
   const pushed = await git(origin(), 'rev-parse', 'feature');
   const leaves: AgentFn = async (_runtime, agentRun) => {
     if (agentRun.prompt.startsWith('You left changes uncommitted')) {
-      return { kind: 'ok', text: 'Refused commit: Tidy', sessionId: 's3', costUsd: null };
+      return { kind: 'ok', text: 'Refused commit: Tidy', sessionId: 's3' };
     }
     await writeFile(path.join(container(), 'b.txt'), 'stray\n');
-    return { kind: 'ok', text: 'Done.', sessionId: 's3', costUsd: null };
+    return { kind: 'ok', text: 'Done.', sessionId: 's3' };
   };
   const result = await run(leaves);
   expect(result.kind === 'error' && result.error).toContain('exactly the same files');
@@ -269,7 +269,7 @@ const refused: AgentFn = async (_runtime, agentRun) => {
   const hook = path.join(container(), '.git', 'hooks', 'pre-commit');
   await writeFile(hook, '#!/bin/sh\necho "lint: 2 warnings"\nexit 1\n');
   await chmod(hook, 0o755);
-  return { kind: 'ok', text: 'Refused commit: Test search', sessionId: 's3', costUsd: null };
+  return { kind: 'ok', text: 'Refused commit: Test search', sessionId: 's3' };
 };
 
 test('a commit a hook refuses pauses it unpushed; committing without hooks pushes it', async () => {

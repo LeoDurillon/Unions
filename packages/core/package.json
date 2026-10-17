@@ -5,6 +5,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./states": "./src/states.ts",
+    "./agent-usage": "./src/agent-usage.ts",
     "./attachment-limits": "./src/attachment-limits.ts",
     "./diff": "./src/diff.ts",
     "./diff-hunks": "./src/diff-hunks.ts",

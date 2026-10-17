@@ -5,6 +5,7 @@ export default defineConfig({
   schema: [
     './src/schema.ts',
     './src/schema-agent-log.ts',
+    './src/schema-agent-usage.ts',
 
     './src/schema-attachments.ts',
     './src/schema-ci-outputs.ts',

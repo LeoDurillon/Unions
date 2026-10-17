@@ -28,7 +28,8 @@
     "check": "bun run fmt:check && bun run map:check && bun run lint && bun run typecheck && bun test",
     "db:backup": "bun scripts/db-backup.ts",
     "db:restore": "bun scripts/db-restore.ts",
-    "db:reset": "bun scripts/db-reset.ts"
+    "db:reset": "bun scripts/db-reset.ts",
+    "usage:backfill": "bun scripts/usage-backfill.ts"
   },
   "devDependencies": {
     "@types/bun": "catalog:development",

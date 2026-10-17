@@ -69,7 +69,7 @@ const runtime = {
 
 const agent: AgentFn = (_runtime, run) => {
   runs.push(run);
-  return Promise.resolve({ kind: 'ok', text: 'The bug is in x.ts', sessionId: 's', costUsd: null });
+  return Promise.resolve({ kind: 'ok', text: 'The bug is in x.ts', sessionId: 's' });
 };
 
 async function runQueued(): Promise<void> {

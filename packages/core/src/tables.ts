@@ -2,6 +2,7 @@
 /** Every table, as `schema` from `@union/core`; split in files only to keep each one short. */
 export * from './schema';
 export * from './schema-agent-log';
+export * from './schema-agent-usage';
 export * from './schema-attachments';
 export * from './schema-ci-outputs';
 export * from './schema-container-runs';

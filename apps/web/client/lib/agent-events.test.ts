@@ -49,3 +49,24 @@ test('unknown or malformed payloads yield nothing', () => {
   expect(summarizeAgentEvent({ type: 'rate_limit_event' })).toEqual([]);
   expect(summarizeAgentEvent({ type: 'assistant', message: 'oops' })).toEqual([]);
 });
+
+test('a result line gives the call’s tokens', () => {
+  const [line] = summarizeAgentEvent({
+    type: 'result',
+    is_error: false,
+    session_id: 's1',
+    duration_ms: 132_085,
+    num_turns: 10,
+    usage: {
+      input_tokens: 20,
+      cache_creation_input_tokens: 13_712,
+      cache_read_input_tokens: 3_932_530,
+      output_tokens: 5687,
+      output_tokens_details: { thinking_tokens: 1209 },
+    },
+  });
+  expect(line?.text).toBe(
+    'finished in 132s · 10 turns · 3.9M in (100% cached) · 5.7k out (1.2k thinking)',
+  );
+  expect(line?.tokens).toMatchObject({ cacheRead: 3_932_530, output: 5687, turns: 10 });
+});

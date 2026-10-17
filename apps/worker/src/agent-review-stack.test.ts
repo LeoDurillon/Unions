@@ -66,7 +66,7 @@ const runtime = {
 
 const agent: AgentFn = (_runtime, run) => {
   runs.push(run);
-  return Promise.resolve({ kind: 'ok', text: reply, sessionId: 's', costUsd: null });
+  return Promise.resolve({ kind: 'ok', text: reply, sessionId: 's' });
 };
 
 const patch = (line: string): string => `@@ -1,1 +1,1 @@\n-old\n+${line}`;

@@ -54,7 +54,7 @@ const runtime = {
 
 const agent: AgentFn = (_runtime, run) => {
   runs.push(run);
-  return Promise.resolve({ kind: 'ok', text: reply, sessionId: 's', costUsd: null });
+  return Promise.resolve({ kind: 'ok', text: reply, sessionId: 's' });
 };
 
 async function rewrite(): Promise<void> {

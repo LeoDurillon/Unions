@@ -127,5 +127,6 @@
   clicks waiting). The board and ticket panel refetch on its events (`use-live-invalidation.ts`); the Log tabs
   poll `/api/events/log` every second while open (`use-log.ts`): the ticket's or investigation's events and its
   agents' output (`agent_log`) in one order, from a cursor. Agent output is not on the stream. Events are sent unnamed: a new event type reaches
-  the client without being listed.
+  the client without being listed. A call's `result` line shows its tokens, and each run's header their sum
+  (`token-counts.ts`, reading the result with the browser-safe `@union/core/agent-usage`).
 - Dev: `bun run dev:web` (Vite on 5173 proxies `/api` to Hono on 3000). Production: build, then start (below).

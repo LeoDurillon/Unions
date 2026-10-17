@@ -88,7 +88,7 @@ function queue(scope: Investigation['scope'] = 'global'): Investigation {
 const answer: AgentFn = (_runtime, run) => {
   runs.push(run);
   run.onEvent({ type: 'system', subtype: 'init' });
-  return Promise.resolve({ kind: 'ok', text: '## Answer', sessionId: 's', costUsd: null });
+  return Promise.resolve({ kind: 'ok', text: '## Answer', sessionId: 's' });
 };
 
 test('runs a global investigation in a throwaway container and saves the answer', async () => {

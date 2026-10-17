@@ -65,7 +65,7 @@ export function pendingRefusal(db: Db, ticketId: number, step: Pause['step']): R
 
 /** The agent's answer as the paused run left it, so the run finishes as if it had just ended. */
 export function outcomeOf(refusal: RefusedCommit): Ok {
-  return { kind: 'ok', text: refusal.report, sessionId: refusal.sessionId ?? '', costUsd: null };
+  return { kind: 'ok', text: refusal.report, sessionId: refusal.sessionId ?? '' };
 }
 
 export function resolutionNote(refusal: RefusedCommit): string {

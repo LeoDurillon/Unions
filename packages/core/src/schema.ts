@@ -128,7 +128,6 @@ export const runs = sqliteTable('runs', {
   model: text('model').notNull(),
   status: text('status', { enum: ['running', 'succeeded', 'failed', 'rate_limited'] }).notNull(),
   sessionId: text('session_id'),
-  costUsd: integer('cost_micro_usd'), // API-equivalent, not billed on Max
   error: text('error'),
   startedAt: integer('started_at').notNull().default(now),
   finishedAt: integer('finished_at'),

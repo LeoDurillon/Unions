@@ -30,3 +30,7 @@ paused by the usage limit, a blocked start, a merged or closed PR, an investigat
 with what text; `STEP_TITLES` (in `states.ts`) names the steps for it and for the UI.
 The agents' raw output is not an event: `appendAgentLine` writes it to `agent_log` (`agent-log.ts`), each line
 with the last `events.seq` at the time, and `readLog` merges both tables into one Log in that order.
+When the line is a call's `result`, it also records what the call consumed in `agent_usage`, a row per model
+(`agent-usage-record.ts`). The result's `modelUsage` and cost add up over a resumed session, so a call's share is
+its result minus the session's previous one in the same Log (`agent-usage.ts`, pure); its peak context comes from
+its own `assistant` lines since then. `backfillUsage` (`bun run usage:backfill`) replays the past results.

@@ -91,7 +91,6 @@ test('the implementer writes the description in its own session; a failed turn k
       kind: 'ok',
       text: ' ## Description\n\nAjoute la recherche. ',
       sessionId: 's',
-      costUsd: null,
     });
   };
   const { signal } = new AbortController();

@@ -145,7 +145,7 @@ beforeEach(async () => {
 const rebases: AgentFn = async () => {
   agentCalls += 1;
   await git(container(), 'rebase', '--quiet', 'origin/main');
-  return { kind: 'ok', text: 'Rebased cleanly.', sessionId: 's2', costUsd: null };
+  return { kind: 'ok', text: 'Rebased cleanly.', sessionId: 's2' };
 };
 
 function run(agent: AgentFn, resume: StepContext['resume'] = null): Promise<StepResult> {
@@ -212,7 +212,7 @@ test('a rebase left half-done is undone: the branch is as it was and nothing is 
   const pushedBefore = await git(origin(), 'rev-parse', 'feature');
   const stops: AgentFn = async () => {
     await git(container(), 'rebase', 'origin/main').catch(() => '');
-    return { kind: 'ok', text: 'Conflict in b.txt.', sessionId: 's2', costUsd: null };
+    return { kind: 'ok', text: 'Conflict in b.txt.', sessionId: 's2' };
   };
 
   const result = await run(stops);
@@ -254,7 +254,7 @@ test('a refused leftover commit pauses the rebase unpushed; the decision pushes 
   await chmod(hook, 0o755);
   const leavesAChange: AgentFn = async (...args) => {
     if (args[1].prompt.startsWith('You left changes uncommitted')) {
-      return { kind: 'ok', text: 'Refused commit: 🎨 tidy b', sessionId: 's2', costUsd: null };
+      return { kind: 'ok', text: 'Refused commit: 🎨 tidy b', sessionId: 's2' };
     }
     const outcome = await rebases(...args);
     await writeFile(path.join(container(), 'b.txt'), 'feature, tidied\n');

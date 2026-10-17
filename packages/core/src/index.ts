@@ -15,6 +15,8 @@ export * from './diff';
 export * from './diff-hunks';
 export * from './diff-excerpt';
 export * from './agent-log';
+export * from './agent-usage';
+export { backfillUsage } from './agent-usage-record';
 export * from './event-actions';
 export * from './event-catalog';
 export * from './event-cursors';

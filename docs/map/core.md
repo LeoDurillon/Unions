@@ -11,6 +11,8 @@ export); do not edit. Tests are left out.
 - `agent-review-specs.ts`: The specifications an agent review is given: read from the request, and written into the agent's prompt.
 - `agent-reviews.ts`: The reviews a stack run covers, bottom first; empty for a run on one change.
 - `agent-tools.ts`: A tool the list refuses: bad syntax, duplicate, built-in, or still selected by an agent.
+- `agent-usage-record.ts`: Records an agent call's usage from its `result` line in `agent_log`, live or replayed from the past.
+- `agent-usage.ts`: Reads what a `claude -p` call consumed from its stream-json events: tokens per model, and its peak context.
 - `agents.ts`: The agents' default prompts, models, efforts and tools, the user's overrides, and how a run resolves them.
 - `ansi.ts`: Strips terminal colour codes from command and CI output; browser-safe.
 - `attachment-limits.ts`: Upload limits, shared by the server and the browser (which checks them before sending).
@@ -62,6 +64,7 @@ export); do not edit. Tests are left out.
 - `review-groupings.ts`: A grouping is already queued or running for this change.
 - `runtime.ts`: Everything the worker needs from Docker.
 - `schema-agent-log.ts`: The agents' raw output, line by line, kept apart from the event log.
+- `schema-agent-usage.ts`: What each agent call consumed, per model: written from its `result` line in `agent_log`.
 - `schema-attachments.ts`: Files the user attached to a ticket, stored on the host under the attachments folder and copied into the ticket's container for the agents.
 - `schema-ci-outputs.ts`: CI output the user gave the implementer from the pull request's checks: a failed check, another job's log, a bot's comment.
 - `schema-container-runs.ts`: A command the user ran in a ticket's workspace (its container, in the checkout, as the agent), with the end of its output.

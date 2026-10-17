@@ -248,6 +248,7 @@ export); do not edit. Tests are left out.
 - `settings-sections.ts`: The project settings page open in the URL (`?settings=preview-services`), or null.
 - `spec-hunks.ts`: The hunks of `path` that serve the part; null when the file serves it whole, or the part is unknown.
 - `split-rows.ts`: Pairs a patch's lines for side-by-side display: a context line faces itself, and each run of removed lines faces the added lines that follow it, row by row; th…
+- `token-counts.ts`: A call's tokens as the Log shows them, from its `result` event: input with its cached share, output with its thinking.
 - `url-state.ts`: Sets or removes (`null`) query parameters as one history entry, and tells every reader.
 - `use-active-project.ts`: The project list plus the remembered selection, falling back to the first project.
 - `use-agent-review.ts`: The latest agent review of the target, with starting and cancelling it.

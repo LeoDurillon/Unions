@@ -2,6 +2,8 @@
 
 <!-- Moved from AGENTS.md: read the file for the area you change; keep it current when behavior changes. -->
 
+- `bun run usage:backfill`: records the token usage (`agent_usage`) of the agent calls already in `agent_log`;
+  idempotent. `DB_PATH` points it at another file (a backup copy).
 - `bun run db:backup [file]`: consistent copy of the database (`VACUUM INTO`, safe while running) into
   `backups/` (gitignored). `bun run db:restore <file> [--force]`: refuses while web or worker has the database open
   (host processes or compose services), saves the current database to `backups/union-before-restore-*`, then

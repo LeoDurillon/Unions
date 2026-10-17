@@ -71,7 +71,7 @@ test('a process that stays up after its last result is stopped and its result us
     },
     idleGraceMs: 10,
   });
-  expect(outcome).toEqual({ kind: 'ok', text: 'Done.', sessionId: 's', costUsd: null });
+  expect(outcome).toEqual({ kind: 'ok', text: 'Done.', sessionId: 's' });
   expect(logged).toContainEqual({ type: 'union_agent_idle_stopped', idleMs: 10 });
   expect(calls.map((call) => call.command[0])).toEqual(['claude', 'sh']);
 });

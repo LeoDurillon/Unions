@@ -5,9 +5,10 @@ import { useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
 import { summarizeAgentEvent, type LogLine } from '../lib/agent-events';
 import { STEP_TITLES } from '../lib/labels';
 import { groupRuns, type LogRun } from '../lib/log-runs';
+import { sumTokens, tokensText, type CallTokens } from '../lib/token-counts';
 import { useLog } from '../lib/use-log';
 
-type Entry = { key: string; kind: LogLine['kind'] | 'run'; text: string };
+type Entry = { key: string; kind: LogLine['kind'] | 'run'; text: string; tokens?: CallTokens };
 
 const KIND_CLASS: Record<Entry['kind'], string> = {
   run: 'font-semibold',
@@ -49,11 +50,9 @@ function ruleEntries(
 
 function entriesFor(entry: LogEntry): Entry[] {
   if (entry.source === 'agent') {
-    return summarizeAgentEvent(entry.line.payload).map((line, index) => ({
-      key: `line-${entry.line.id}-${index}`,
-      kind: line.kind,
-      text: line.text,
-    }));
+    return summarizeAgentEvent(entry.line.payload).map((line, index) =>
+      Object.assign(line, { key: `line-${entry.line.id}-${index}` }),
+    );
   }
   const { event } = entry;
   const key = `${event.seq}`;
@@ -88,6 +87,16 @@ function Line({ entry }: { entry: Entry }): ReactElement {
   return <p className={`whitespace-pre-wrap ${KIND_CLASS[entry.kind]}`}>{entry.text}</p>;
 }
 
+/** What the run's agent calls used, summed: `2 calls · 12 turns · 4.1M in…`. */
+function runTotal(run: LogRun<Entry>): string {
+  const calls = run.lines.flatMap((entry) => (entry.tokens ? [entry.tokens] : []));
+  const used = tokensText(sumTokens(calls));
+  if (calls.length < 2) {
+    return used;
+  }
+  return `${calls.length} calls${used ? ` · ${used}` : ''}`;
+}
+
 /** One run, folded unless it is the last one or the user opened it. */
 function RunSection({
   run,
@@ -98,6 +107,7 @@ function RunSection({
   open: boolean;
   onToggle: (open: boolean) => void;
 }): ReactElement {
+  const total = runTotal(run);
   return (
     <details
       open={open}
@@ -117,6 +127,7 @@ function RunSection({
         )}
         <span className="text-zinc-500">
           {run.lines.length} line{run.lines.length === 1 ? '' : 's'}
+          {total ? ` · ${total}` : ''}
         </span>
       </summary>
       {open ? (

@@ -53,7 +53,6 @@ const ok = (n: number): AgentOutcome => ({
   kind: 'ok',
   text: `report ${n}`,
   sessionId: `session-${n}`,
-  costUsd: null,
 });
 
 function workspace(): Workspace {

@@ -1,6 +1,7 @@
 // Writes the agents' output to `agent_log`, and reads a Log: events and agent lines in one order.
 import { and, asc, eq, gt, sql, type SQL } from 'drizzle-orm';
 
+import { recordUsage } from './agent-usage-record';
 import type { Db } from './db';
 import * as schema from './tables';
 
@@ -17,20 +18,28 @@ export type LogEntry =
   | { source: 'event'; event: EventRecord }
   | { source: 'agent'; line: AgentLine };
 
-/** Logs one line of an agent's output, after the last event logged so far. */
+/**
+ * Logs one line of an agent's output, after the last event logged so far. A call's `result` also
+ * records what the call consumed (`agent_usage`).
+ */
 export function appendAgentLine(
   db: Db,
   line: { ticketId?: number; runId?: number; investigationId?: number; payload: unknown },
 ): void {
-  db.insert(schema.agentLog)
-    .values({
-      afterSeq: sql`(SELECT coalesce(max(${schema.events.seq}), 0) FROM ${schema.events})`,
-      ticketId: line.ticketId ?? null,
-      runId: line.runId ?? null,
-      investigationId: line.investigationId ?? null,
-      payload: line.payload,
-    })
-    .run();
+  db.transaction((tx) => {
+    const written = tx
+      .insert(schema.agentLog)
+      .values({
+        afterSeq: sql`(SELECT coalesce(max(${schema.events.seq}), 0) FROM ${schema.events})`,
+        ticketId: line.ticketId ?? null,
+        runId: line.runId ?? null,
+        investigationId: line.investigationId ?? null,
+        payload: line.payload,
+      })
+      .returning()
+      .get();
+    recordUsage(tx, written);
+  });
 }
 
 function eventsOf(owner: LogOwner): SQL {

@@ -26,7 +26,7 @@ export type AgentRun = {
 };
 
 export type AgentOutcome =
-  | { kind: 'ok'; text: string; sessionId: string; costUsd: number | null }
+  | { kind: 'ok'; text: string; sessionId: string }
   | { kind: 'rate_limited'; message: string }
   | { kind: 'error'; message: string };
 
@@ -44,7 +44,6 @@ type ResultEvent = {
   result: string;
   session_id: string;
   is_error: boolean;
-  total_cost_usd?: number;
 };
 
 function isResultEvent(value: unknown): value is ResultEvent {
@@ -116,7 +115,6 @@ function toOutcome(result: ResultEvent): AgentOutcome {
       kind: 'ok',
       text: result.result.trim(),
       sessionId: result.session_id,
-      costUsd: result.total_cost_usd ?? null,
     };
   }
   return RATE_LIMIT.test(result.result)

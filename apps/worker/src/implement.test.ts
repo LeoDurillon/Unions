@@ -107,7 +107,6 @@ const ok = (n: number): AgentOutcome => ({
   kind: 'ok',
   text: `report ${n}`,
   sessionId: `session-${n}`,
-  costUsd: null,
 });
 const isGate = (command: string[]): boolean => command[0] === 'sh';
 
@@ -165,7 +164,6 @@ test('uncommitted changes are committed by the host with the message the agent g
     kind: 'ok',
     text: 'Refused commit: ✨ add search',
     sessionId: 'session-1',
-    costUsd: null,
   };
   await implementLoop(workspace(runtime, [ok(1), message]));
   expect(runs[1]).toMatchObject({ resumeSessionId: 'session-1' });
