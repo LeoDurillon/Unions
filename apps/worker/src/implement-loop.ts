@@ -6,9 +6,9 @@ import {
   getPreview,
   listAttachments,
   listProjectFiles,
-  markSentToAgent,
+  markAgentInputsSent,
   modelFor,
-  pendingForAgent,
+  pendingAgentInputs,
   type Project,
   resolveAgent,
   sharedPrompt,
@@ -21,8 +21,8 @@ import type { GitHubApi } from './github/api';
 import { check, type Checked } from './implement-checks';
 import {
   agentServicesHint,
-  commandOutputPrompt,
   feedbackPrompt,
+  givenOutputsPrompt,
   gateHint,
   previewHint,
 } from './implement-prompts';
@@ -107,13 +107,13 @@ function withOutputs(prompt: string, outputs: string): string {
 
 /**
  * Agent turn, then checks; on red checks the same session gets the failure, up to the limit. The
- * command outputs the user gave the agent go with the first turn, and count as read once it ran.
+ * command and CI outputs the user gave the agent go with the first turn, and count as read once it ran.
  */
 export async function implementLoop(workspace: Workspace): Promise<Loop> {
   const { deps, context, project, container } = workspace;
   const max = project.config.maxIterations ?? DEFAULT_MAX_ITERATIONS;
-  const given = pendingForAgent(deps.db, context.ticket.id);
-  const outputs = commandOutputPrompt(given);
+  const given = pendingAgentInputs(deps.db, context.ticket.id);
+  const outputs = givenOutputsPrompt(given);
   let prompt = withOutputs(firstPrompt(workspace), outputs);
   let sessionId = context.resumeSessionId;
   let gate: Checked['gate'] = null;
@@ -136,10 +136,7 @@ export async function implementLoop(workspace: Workspace): Promise<Loop> {
       return { outcome, gate, iterations: iteration };
     }
     if (iteration === 1) {
-      markSentToAgent(
-        deps.db,
-        given.map((output) => output.id),
-      );
+      markAgentInputsSent(deps.db, given);
     }
     ({ sessionId } = outcome);
     const leftovers = await commitLeftovers(deps.runtime, container, {

@@ -1,6 +1,6 @@
 # Plan: the pull request's CI checks, and sending failures to the implementer
 
-Status: in progress (2026-10-17). Steps 1 and 2 built (core: `ci-output-text.ts`, `ci-outputs.ts`, `agent-inputs.ts`,
+Status: in progress (2026-10-17). Steps 1 to 3 built (core: `ci-output-text.ts`, `ci-outputs.ts`, `agent-inputs.ts`,
 table `ci_outputs`, migration 0049). Step 0 done: the GitHub App now has the permissions (below), and the reads work on
 SenovaFR/Senova. Decisions taken: the log is fetched when the user keeps or sends; failed checks only; one revision
 per send.
@@ -132,3 +132,11 @@ So: possible. Full logs only for GitHub Actions; other CI gives its summary, ann
 - Checked on the live instance (read only): ticket 10 (PR #1615) lists 26 checks (1 failed, 2 skipped) and 4 bot
   comments; a preview of the failed check and the "Evaluation Tool Report" comment gives the four unused exports
   with their paths. Nothing stored.
+
+## Step 3 as built
+
+- `implement-loop.ts` reads `pendingAgentInputs` and marks both kinds read after the first turn ran
+  (`markAgentInputsSent`); a rate-limited or failed first turn leaves them waiting.
+- `implement-prompts.ts`: `ciOutputPrompt` ("Failed CI checks": the commits the checks ran on, a note that the branch
+  may have moved on, the newest 6 blocks) and `givenOutputsPrompt` (command outputs first, then CI).
+- Not run with a real agent (it uses the Claude subscription): the loop is tested with a fake agent.

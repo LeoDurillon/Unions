@@ -5,7 +5,9 @@ import {
   createTicket,
   finishContainerRun,
   getContainerRun,
+  keepCiOutputs,
   keepForAgent,
+  listCiOutputs,
   migrateDb,
   queueContainerRun,
   resolveAgent,
@@ -273,6 +275,8 @@ test('the outputs the user gave go with the first turn, and count as read once i
     output: 'Error: ``` lot 12 has no shape',
   });
   keepForAgent(db, run.id, true);
+  const check = { headSha: 'abc1234def', kind: 'check' as const, name: 'Tests', url: null };
+  keepCiOutputs(db, ws.context.ticket.id, [{ ...check, text: '## Failed check: Tests (failure)' }]);
   await implementLoop(ws);
   // Rate limited: the output waits for the next run.
   expect(runs[0]?.prompt).toContain('# Command output from the user');
@@ -284,4 +288,11 @@ test('the outputs the user gave go with the first turn, and count as read once i
   // The output's own backticks cannot close its fence.
   expect(prompt).toContain('````\nError: ``` lot 12 has no shape\n````');
   expect(getContainerRun(db, run.id)?.forAgent).toBe('sent');
+  // CI output after the command output, read once too.
+  const ci = prompt.indexOf('# Failed CI checks');
+  expect(ci).toBeGreaterThan(prompt.indexOf('# Command output from the user'));
+  expect(prompt.slice(ci)).toContain('commit abc1234;');
+  expect(listCiOutputs(db, ws.context.ticket.id).map((output) => output.forAgent)).toEqual([
+    'sent',
+  ]);
 });
