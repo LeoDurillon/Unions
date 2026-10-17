@@ -1,6 +1,6 @@
 # Plan: previews of pull requests under review
 
-Status: steps 1 to 3 built (branch `review-previews`): the owner in core and the database, and a review's container, preview, e2e tests and commands in the worker; steps 4 to 6 left.
+Status: steps 1 to 4 built (branch `review-previews`): the owner in core and the database, a review's container, preview, e2e tests and commands in the worker, and their web routes; steps 5 and 6 left.
 
 ## Idea
 
@@ -139,8 +139,11 @@ The Commands section of the ticket's Preview tab, on the review's Preview tab:
    script that reached the preview by name and left a screenshot.) `runRequestedE2e` and the container-run queue on an owner; network
    join by container name; screenshots in `preview_screenshots`. Real Docker test: a command and an e2e command
    (a script that fails and writes a PNG under `test-results`) on the throwaway review.
-4. **Web: routes and removal.** The shared preview and run modules; the review's routes; "Add to review" as a draft
-   comment; removing a review or a stack queues the container removal. Route tests.
+4. **Web: routes and removal.** (Built: `routes/preview-subject.ts` shared with the ticket's routes,
+   `routes/review-preview.ts`, `routes/review-runs.ts`, `routes/review-removal.ts`; the user's compose file can be
+   saved for a review too, the same route as a ticket's, so it is not read only.)
+   The shared preview and run modules; the review's routes; "Add to review" as a draft comment; removing a review
+   or a stack queues the container removal. Route tests.
 5. **Client: Preview tab on the review page.** The ticket's preview section, e2e section and Commands, given an
    owner (the components take the API base, like `ReviewTarget`); the author line and the fork note on Start; the
    commit notice and "Update to the reviewed commit"; "Add to review" in place of "Send to agent". A dot on the

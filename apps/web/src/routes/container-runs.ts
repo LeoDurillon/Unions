@@ -1,13 +1,10 @@
 import {
-  ContainerRunError,
   getContainerRun,
   getTicket,
   keepForAgent,
   listContainerRuns,
-  queueContainerRun,
   revisesImplementer,
   schema,
-  scriptRun,
   sendToAgent,
   type ContainerRun,
   type Db,
@@ -28,6 +25,7 @@ import {
   readObject,
   requireId,
 } from '../http';
+import { checked, queueFromBody } from './run-input';
 
 function loadTicket(db: Db, c: Context): Ticket {
   const id = requireId(c.req.param('id'), 'ticket id');
@@ -63,26 +61,6 @@ function loadRun(db: Db, c: Context, ticket: Ticket): ContainerRun {
   return row;
 }
 
-/** The rules' refusals are the user's to resolve: they answer 409 with the reason. */
-function checked<T>(work: () => T): T {
-  try {
-    return work();
-  } catch (error) {
-    throw error instanceof ContainerRunError ? fail(CONFLICT, error.message) : error;
-  }
-}
-
-function timeoutOf(body: Record<string, unknown>): number | undefined {
-  const { timeoutSec } = body;
-  if (timeoutSec === undefined || timeoutSec === null) {
-    return undefined;
-  }
-  if (typeof timeoutSec !== 'number') {
-    throw fail(BAD_REQUEST, '"timeoutSec" must be a number of seconds');
-  }
-  return timeoutSec;
-}
-
 function projectConfig(db: Db, ticket: Ticket): ProjectConfig {
   const project = db
     .select({ config: schema.projects.config })
@@ -96,23 +74,7 @@ function projectConfig(db: Db, ticket: Ticket): ProjectConfig {
 async function run(db: Db, c: Context): Promise<Response> {
   const ticket = loadTicket(db, c);
   const body = await readObject(c.req.raw);
-  if (typeof body.scriptName === 'string') {
-    const name = body.scriptName;
-    checked(() => {
-      const script = scriptRun(projectConfig(db, ticket), name);
-      return queueContainerRun(db, { owner: { ticketId: ticket.id }, ...script });
-    });
-    return c.json(view(db, ticket), CREATED);
-  }
-  if (typeof body.command !== 'string') {
-    throw fail(BAD_REQUEST, '"command" or "scriptName" must be a string');
-  }
-  const input = {
-    owner: { ticketId: ticket.id },
-    command: body.command,
-    timeoutSec: timeoutOf(body),
-  };
-  checked(() => queueContainerRun(db, input));
+  queueFromBody(db, { ticketId: ticket.id }, projectConfig(db, ticket), body);
   return c.json(view(db, ticket), CREATED);
 }
 

@@ -1,20 +1,18 @@
-import {
-  getPreview,
-  getTicket,
-  schema,
-  setComposeOverride,
-  type Db,
-  type PreviewConfig,
-  type Ticket,
-} from '@union/core';
-import { and, eq, isNull, like } from 'drizzle-orm';
+import { getTicket, setComposeOverride, type Db, type Ticket } from '@union/core';
 import { Hono, type Context } from 'hono';
 
 import type { PreviewView } from '../api-types';
-import { ACCEPTED, BAD_REQUEST, CONFLICT, fail, NOT_FOUND, readObject, requireId } from '../http';
-
-/** A compose file, not a dump: Union's own are a few kilobytes. */
-const MAX_COMPOSE_CHARS = 200_000;
+import { ACCEPTED, CONFLICT, fail, NOT_FOUND, requireId } from '../http';
+import {
+  e2eRefusal,
+  logsRefusal,
+  previewRefusal,
+  previewView,
+  queuePreviewCommand,
+  readOwnFile,
+  stopRefusal,
+  type PreviewSubject,
+} from './preview-subject';
 
 function loadTicket(db: Db, c: Context): Ticket {
   try {
@@ -24,103 +22,44 @@ function loadTicket(db: Db, c: Context): Ticket {
   }
 }
 
-function previewConfig(db: Db, ticket: Ticket): PreviewConfig | undefined {
-  const project = db
-    .select()
-    .from(schema.projects)
-    .where(eq(schema.projects.id, ticket.projectId))
-    .get();
-  return project?.config.preview;
-}
-
-function configured(db: Db, ticket: Ticket): boolean {
-  return previewConfig(db, ticket) !== undefined;
-}
-
-/** A preview command the worker has not handled yet. */
-function pending(db: Db, ticketId: number): boolean {
-  const row = db
-    .select({ id: schema.commands.id })
-    .from(schema.commands)
-    .where(
-      and(
-        eq(schema.commands.ticketId, ticketId),
-        like(schema.commands.type, 'preview_%'),
-        isNull(schema.commands.handledAt),
-      ),
-    )
-    .get();
-  return row !== undefined;
-}
-
-function refusal(db: Db, ticket: Ticket): string | null {
-  if (!configured(db, ticket)) {
-    return 'Set up previews in the project settings (Preview) first.';
-  }
-  if (!ticket.workspaceVolume) {
-    return 'The ticket has no workspace yet: run the implementation first.';
-  }
-  const status = getPreview(db, { ticketId: ticket.id })?.status;
-  return status === 'starting' || status === 'stopping' || pending(db, ticket.id)
-    ? 'The preview is already starting or stopping.'
-    : null;
-}
-
-/** Why the e2e tests cannot run now: the agent shares the container, one run per ticket at a time. */
-function e2eRefusal(db: Db, ticket: Ticket): string | null {
-  if (!previewConfig(db, ticket)?.e2eCommand) {
-    return 'Set an end-to-end command in the project settings (Preview) first.';
-  }
-  if (ticket.phase.kind === 'running') {
-    return 'Wait for the current run to finish: the tests run in the same container.';
-  }
-  // The preview's own reasons (no workspace, starting, a command pending) hold too.
-  const busy = refusal(db, ticket);
-  if (busy !== null) {
-    return busy;
-  }
-  return getPreview(db, { ticketId: ticket.id })?.e2eStatus === 'running'
-    ? 'The end-to-end tests are already running.'
-    : null;
+/** The ticket's workspace exists once its first implementation ran; the agent shares the container. */
+function subjectOf(ticket: Ticket): PreviewSubject {
+  return {
+    owner: { ticketId: ticket.id },
+    projectId: ticket.projectId,
+    noWorkspace: ticket.workspaceVolume
+      ? null
+      : 'The ticket has no workspace yet: run the implementation first.',
+    e2eBusy:
+      ticket.phase.kind === 'running'
+        ? 'Wait for the current run to finish: the tests run in the same container.'
+        : null,
+  };
 }
 
 function view(db: Db, ticket: Ticket): PreviewView {
-  return {
-    preview: getPreview(db, { ticketId: ticket.id }),
-    configured: configured(db, ticket),
-    composeFile: previewConfig(db, ticket)?.composeFile ?? null,
-    e2eCommand: previewConfig(db, ticket)?.e2eCommand ?? null,
-    e2eRefusal: e2eRefusal(db, ticket),
-    refusal: refusal(db, ticket),
-  };
+  return previewView(db, subjectOf(ticket));
 }
 
 function command(
   db: Db,
   c: Context,
   type: string,
-  check: (ticket: Ticket) => string | null,
+  check: (subject: PreviewSubject) => string | null,
 ): Response {
   const ticket = loadTicket(db, c);
-  const reason = check(ticket);
+  const reason = check(subjectOf(ticket));
   if (reason !== null) {
     throw fail(CONFLICT, reason);
   }
-  db.insert(schema.commands).values({ type, ticketId: ticket.id }).run();
+  queuePreviewCommand(db, { ticketId: ticket.id }, type);
   return c.json(view(db, ticket), ACCEPTED);
 }
 
 /** The user's own compose file for the ticket (YAML), or null for the generated one again. */
 async function saveOwnFile(db: Db, c: Context): Promise<Response> {
   const ticket = loadTicket(db, c);
-  const { yaml } = await readObject(c.req.raw);
-  if (yaml !== null && (typeof yaml !== 'string' || yaml.trim() === '')) {
-    throw fail(BAD_REQUEST, 'Give the compose file, or null to use the generated one');
-  }
-  if (typeof yaml === 'string' && yaml.length > MAX_COMPOSE_CHARS) {
-    throw fail(BAD_REQUEST, 'The compose file is too long');
-  }
-  setComposeOverride(db, { ticketId: ticket.id }, yaml);
+  setComposeOverride(db, { ticketId: ticket.id }, await readOwnFile(c));
   return c.json(view(db, ticket));
 }
 
@@ -131,25 +70,11 @@ async function saveOwnFile(db: Db, c: Context): Promise<Response> {
 export function previewRoutes(db: Db): Hono {
   const routes = new Hono();
   routes.get('/', (c) => c.json(view(db, loadTicket(db, c))));
-  routes.post('/start', (c) => command(db, c, 'preview_start', (ticket) => refusal(db, ticket)));
-  routes.post('/stop', (c) =>
-    command(db, c, 'preview_stop', (ticket) =>
-      pending(db, ticket.id) || getPreview(db, { ticketId: ticket.id }) === null
-        ? 'There is no preview to stop.'
-        : null,
-    ),
-  );
-  routes.post('/e2e', (c) => command(db, c, 'preview_e2e', (ticket) => e2eRefusal(db, ticket)));
-  routes.post('/generate', (c) =>
-    command(db, c, 'preview_generate', (ticket) => refusal(db, ticket)),
-  );
+  routes.post('/start', (c) => command(db, c, 'preview_start', (s) => previewRefusal(db, s)));
+  routes.post('/stop', (c) => command(db, c, 'preview_stop', (s) => stopRefusal(db, s.owner)));
+  routes.post('/e2e', (c) => command(db, c, 'preview_e2e', (s) => e2eRefusal(db, s)));
+  routes.post('/generate', (c) => command(db, c, 'preview_generate', (s) => previewRefusal(db, s)));
   routes.put('/compose', (c) => saveOwnFile(db, c));
-  routes.post('/logs', (c) =>
-    command(db, c, 'preview_logs', (ticket) =>
-      getPreview(db, { ticketId: ticket.id })?.status === 'running'
-        ? null
-        : 'The preview is not running.',
-    ),
-  );
+  routes.post('/logs', (c) => command(db, c, 'preview_logs', (s) => logsRefusal(db, s.owner)));
   return routes;
 }

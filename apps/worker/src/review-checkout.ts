@@ -1,5 +1,5 @@
 // A pull request's own container (`union-r<id>`): its checkout at the reviewed commit, for its preview, tests and commands.
-import { schema, type Db } from '@union/core';
+import { ownerContainerNames, schema, type Db } from '@union/core';
 import { eq } from 'drizzle-orm';
 
 import { loadProject, type TargetDeps } from './agent-review-target';
@@ -10,11 +10,7 @@ import { cloneSource, hostGit, type TicketContainer } from './provision';
 export type Review = typeof schema.currentReviews.$inferSelect;
 
 export function reviewContainerNames(reviewId: number): TicketContainer {
-  return {
-    name: `union-r${reviewId}`,
-    homeVolume: `union-r${reviewId}-home`,
-    workspaceVolume: `union-r${reviewId}-ws`,
-  };
+  return ownerContainerNames({ reviewId });
 }
 
 export function loadReview(db: Db, reviewId: number): Review {

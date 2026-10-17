@@ -27,6 +27,8 @@ export); do not edit. Tests are left out.
 - `pull-request-ref.ts`: A pull request of the repository: `12`, `#12` or its `/pull/12` URL.
 - `review-feedback.ts`: The review as the implementer receives it: overall note, the comments on the whole pull request, then each line comment under its file.
 - `review-import.ts`: The thread as one comment: who said what, the first comment then the replies.
+- `review-output-comment.ts`: A command's or the e2e tests' output as a review comment: what ran, how it ended, the last lines in a code block.
+- `review-preview-types.ts`: What a pull request under review's Preview tab reads: its preview, its checkout and its commands.
 - `rule-previews.ts`: What a rule's action would do for one ticket, one preview per kind of action; nothing is sent.
 - `server.ts`: The web server's entry point: opens the database, migrates it and serves the API and the client.
 - `services.ts`: The outside services the API routes may call: GitHub (the wizard's and the PR tab's reads, its CI), Notion.
@@ -58,6 +60,7 @@ export); do not edit. Tests are left out.
 - `pr-review-load.ts`: Loads the review and project a pull request route refers to, the GitHub auth to act on them, and the review's files from GitHub.
 - `pr-review.ts`: `/api/projects/:projectId/pull-requests/reviews/:number`: the description and discussion, the diff, the comments, and posting them.
 - `preview-settings.ts`: `/api/projects/:projectId/preview`: how the project's tickets run as previews, and its secret variables, whose values are written here and never read back.
+- `preview-subject.ts`: What a preview's routes share for a ticket and for a pull request under review: the view, the refusals, the commands.
 - `preview.ts`: `/api/tickets/:id/preview`: the ticket's preview and the commands that start, stop and read it (the worker runs them: the web never touches Docker).
 - `project-files.ts`: Deletes a removed project's files (its rows went with it, by cascade).
 - `project-flows.ts`: The flow presets part of a project settings change, refused with a 400 when they do not hold.
@@ -70,8 +73,13 @@ export); do not edit. Tests are left out.
 - `review-comments.ts`: The owner's drafts, oldest first.
 - `review-groupings.ts`: Under a review's base (`/api/tickets/:id`, `/api/projects/:projectId/pull-requests/reviews/:number`): `/groupings` (the newest), `/groupings/source` (a specifi…
 - `review-import.ts`: The PR tab: threads, review summaries and comments, and which of them are already imported.
+- `review-preview.ts`: `<review>/preview`: a pull request's preview, its checkout and its e2e result, as commands the worker runs.
+- `review-removal.ts`: What goes with a removed pull request under review: its commands not handled yet, its container and volumes, its files.
+- `review-runs.ts`: `<review>/runs`: commands the user runs in a pull request's own checkout, and their output added to the review.
+- `review-workspace.ts`: The routes under a pull request under review that act on its own checkout: its preview and its commands.
 - `review.ts`: Why a review cannot be sent now, or null when it can: the ticket waits on the user after code was written, or it is done with its branch kept and its pull requ…
 - `rule-choices.ts`: What a rule picks from on GitHub, read live: the repo's labels and users (`github/rule-choices`), the Project's fields (`github/project-fields`).
+- `run-input.ts`: A command run as the user asks for it, for a ticket's workspace or a pull request's: the body read, checked and queued.
 - `spec-sources.ts`: The text of a specification, from where the user points.
 - `ticket-base.ts`: The API routes that show and change the branch a ticket is based on.
 - `ticket-commits.ts`: `/api/tickets/:id/commits`: the commits stored with the ticket's diff snapshot, the change since the last review, and their files.

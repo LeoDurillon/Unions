@@ -37,3 +37,13 @@ export function ownerOf(row: OwnerColumns): WorkspaceOwner {
 export function ticketOwnerId(owner: WorkspaceOwner): number | null {
   return 'ticketId' in owner ? owner.ticketId : null;
 }
+
+/** The owner's own container and its volumes: `union-t12` (`-home`, `-ws`), `union-r3`. */
+export function ownerContainerNames(owner: WorkspaceOwner): {
+  name: string;
+  homeVolume: string;
+  workspaceVolume: string;
+} {
+  const name = `union-${ownerKey(owner)}`;
+  return { name, homeVolume: `${name}-home`, workspaceVolume: `${name}-ws` };
+}

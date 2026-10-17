@@ -16,6 +16,8 @@ import {
 import { pullRequestGroupingRoutes } from './grouping-targets';
 import { prCommitRoutes } from './pr-commits';
 import { prReviewRoutes } from './pr-review';
+import { forgetReviews, removeReviewFiles } from './review-removal';
+import { reviewWorkspaceRoutes } from './review-workspace';
 
 /** Everything but the files, which only the review page needs. */
 const { files: _files, ...LISTED } = getTableColumns(schema.currentReviews);
@@ -93,22 +95,30 @@ async function addStack(db: Db, c: Context): Promise<Response> {
   return c.json(added, CREATED);
 }
 
-function remove(db: Db, c: Context): Response {
+/** Removes a review, and what it holds (its container and volumes, through the worker; its files). */
+async function remove(db: Db, c: Context): Promise<Response> {
   const projectId = projectOf(db, c);
   const prNumber = requireId(c.req.param('number'), 'pull request number');
-  const [removed] = db
-    .delete(schema.currentReviews)
-    .where(
-      and(
-        eq(schema.currentReviews.projectId, projectId),
-        eq(schema.currentReviews.prNumber, prNumber),
-      ),
-    )
-    .returning()
-    .all();
+  const removed = db.transaction((tx) => {
+    const [row] = tx
+      .delete(schema.currentReviews)
+      .where(
+        and(
+          eq(schema.currentReviews.projectId, projectId),
+          eq(schema.currentReviews.prNumber, prNumber),
+        ),
+      )
+      .returning()
+      .all();
+    if (row) {
+      forgetReviews(tx, [row.id]);
+    }
+    return row;
+  });
   if (!removed) {
     throw fail(NOT_FOUND, `#${prNumber} is not among the current reviews`);
   }
+  await removeReviewFiles([removed.id]);
   return c.json({ number: prNumber });
 }
 
@@ -142,8 +152,13 @@ async function removeStack(db: Db, c: Context): Promise<Response> {
         `${missing.map((number) => `#${number}`).join(', ')} not among the current reviews`,
       );
     }
+    forgetReviews(
+      tx,
+      rows.map((row) => row.id),
+    );
     return rows;
   });
+  await removeReviewFiles(removed.map((row) => row.id));
   return c.json({ numbers: removed.map((row) => row.prNumber) });
 }
 
@@ -166,6 +181,7 @@ export function currentReviewRoutes(db: Db, github: OnboardingGitHub, notion: No
   routes.delete('/:number', (c) => remove(db, c));
   routes.route('/:number/groupings', pullRequestGroupingRoutes(db, github, notion));
   routes.route('/:number/commits', prCommitRoutes(db, github));
+  routes.route('/:number', reviewWorkspaceRoutes(db));
   routes.route('/:number', prReviewRoutes(db, github));
   return routes;
 }

@@ -122,7 +122,14 @@
   outdated grouping.
 - Previews: project settings → Preview (`routes/preview-settings.ts`, `config.preview`: compose file, service,
   port, plain variables) and the ticket Overview's Preview section (`preview-section.tsx`, `routes/preview.ts`,
-  state in the `previews` table). Start, stop and logs are commands; the worker owns Docker.
+  state in the `previews` table). Start, stop and logs are commands; the worker owns Docker. What a ticket's and a
+  pull request's preview routes share (the view, the refusals, a pending command, queueing one, the user's compose
+  file) is `routes/preview-subject.ts`. A pull request under review's own preview and commands live under
+  `…/reviews/:number/preview` and `…/runs` (`routes/review-preview.ts`, `routes/review-runs.ts`): its commands carry
+  `{ reviewId }` in their payload (`ticket_id` null), plus `update` (`review_checkout_update`), the e2e screenshots,
+  and "Add to review" (`POST …/e2e/review`, `…/runs/:id/review`), which writes the output as a general draft comment
+  (`review-output-comment.ts`). Removing a review or a stack (`routes/review-removal.ts`) drops its pending
+  commands, queues `remove_containers` for `union-r<id>` and deletes its files (`attachments/r<id>/`).
 - PR description rewrite: the PR tab's Description section (`pull-request/pr-description.tsx`,
   `routes/pr-description.ts`, `@union/core` `pr-descriptions.ts`) queues a `pr_descriptions` row. The agent's draft
   is the user's to edit, send or discard; sending is the `update_pr_description` command. "Outdated" means a
