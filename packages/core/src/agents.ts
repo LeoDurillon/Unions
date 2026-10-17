@@ -3,6 +3,7 @@ import { eq } from 'drizzle-orm';
 
 import { DEFAULT_TOOLS, validateTools, type RunAgent } from './agent-tools';
 import type { Db } from './db';
+import { LESSON_WRITER_PROMPT } from './lesson-writer';
 import * as schema from './schema';
 import {
   isAgentEffort,
@@ -28,6 +29,7 @@ export const AGENT_IDS = [
   'pr_description',
   'rebase',
   'simplify',
+  'lesson_writer',
 ] as const;
 export type AgentId = (typeof AGENT_IDS)[number];
 
@@ -101,6 +103,7 @@ Do not change any file: the branch must end with exactly the same content, and t
 There is no editor or terminal: \`git rebase -i\` and \`git add -p\` cannot be used. For example: \`git reset --soft <fork point>\`, \`git reset\`, then \`git add <paths>\` and \`git commit -m\` for each commit; stage part of a file with \`git apply --cached\`.
 Never push.
 Output a short markdown report: the new commits' subject lines, and what was merged, split or reordered.`,
+  lesson_writer: LESSON_WRITER_PROMPT,
 };
 
 export type AgentConfig = {
@@ -127,12 +130,14 @@ const MODEL_BY_AGENT: Record<RunAgent, AgentModel> = {
   review_comments: 'opus',
   review_groups: 'sonnet',
   pr_description: MODEL_BY_STEP.implement,
+  lesson_writer: 'haiku',
 };
 const RUN_AGENTS: readonly RunAgent[] = [
   ...STEPS,
   'review_comments',
   'review_groups',
   'pr_description',
+  'lesson_writer',
 ];
 
 /** Agents with a model of their own: the pipeline steps and the reviewer (not `shared`). */

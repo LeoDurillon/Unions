@@ -1,6 +1,6 @@
-// The Memory page's data: the project's lessons and feedback, saving them with the on/off switch, and curating one feedback.
+// The Memory page's data: lessons and feedback, saving them with the on/off switch, curating feedback, and the lesson writer's runs.
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
-import type { FeedbackItem, Lesson } from '@union/core';
+import type { FeedbackItem, Lesson, LessonSuggestion } from '@union/core';
 import type { LessonsSave } from '@union/core/lesson-input';
 
 import { request } from './api';
@@ -64,4 +64,47 @@ export function useCurateFeedback(
       request('PATCH', `${memoryPath(projectId, 'feedback')}/${id}`, { curated }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: feedbackKey(projectId) }),
   });
+}
+
+const SUGGESTION_POLL_MS = 2000;
+
+function suggestionKey(projectId: number): readonly unknown[] {
+  return ['lesson-suggestion', projectId];
+}
+
+function suggestionPath(projectId: number): string {
+  return `/api/projects/${projectId}/lesson-suggestion`;
+}
+
+/** The lesson writer's latest run on the project (null when none or dismissed), polled while it works. */
+export function useLessonSuggestion(projectId: number): UseQueryResult<LessonSuggestion | null> {
+  return useQuery({
+    queryKey: suggestionKey(projectId),
+    queryFn: (): Promise<LessonSuggestion | null> => request('GET', suggestionPath(projectId)),
+    refetchInterval: (query) => {
+      const status = query.state.data?.status;
+      return status === 'queued' || status === 'running' ? SUGGESTION_POLL_MS : false;
+    },
+  });
+}
+
+/** Queues the lesson writer on some feedback (it uses the user's Claude usage), or dismisses its result. */
+export function useLessonWriter(projectId: number): {
+  suggest: ReturnType<typeof useMutation<unknown, Error, number[]>>;
+  dismiss: ReturnType<typeof useMutation<unknown, Error, number>>;
+} {
+  const queryClient = useQueryClient();
+  const refresh = (): Promise<void> =>
+    queryClient.invalidateQueries({ queryKey: suggestionKey(projectId) });
+  const suggest = useMutation({
+    mutationFn: (feedbackIds: number[]): Promise<unknown> =>
+      request('POST', suggestionPath(projectId), { feedbackIds }),
+    onSuccess: refresh,
+  });
+  const dismiss = useMutation({
+    mutationFn: (id: number): Promise<unknown> =>
+      request('POST', `${suggestionPath(projectId)}/${id}/dismiss`),
+    onSuccess: refresh,
+  });
+  return { suggest, dismiss };
 }

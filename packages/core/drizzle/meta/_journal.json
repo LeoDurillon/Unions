@@ -393,6 +393,13 @@
       "when": 1792243920308,
       "tag": "0055_review_checkout",
       "breakpoints": true
+    },
+    {
+      "idx": 56,
+      "version": "6",
+      "when": 1792253235878,
+      "tag": "0056_lesson_suggestions",
+      "breakpoints": true
     }
   ]
 }

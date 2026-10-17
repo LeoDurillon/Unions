@@ -8,6 +8,7 @@ export * from './schema-ci-outputs';
 export * from './schema-container-runs';
 export * from './schema-diff-commits';
 export * from './schema-events';
+export * from './schema-lesson-suggestions';
 export * from './schema-mcp';
 export * from './schema-notifications';
 export * from './schema-pr-descriptions';

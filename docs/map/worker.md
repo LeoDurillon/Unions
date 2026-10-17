@@ -39,6 +39,7 @@ export); do not edit. Tests are left out.
 - `investigation-ticket.ts`: Everything the investigation found, what the user wants the ticket to cover, and the format.
 - `janitor.ts`: Removes the containers and volumes of deleted tickets; a failure is logged as an event, not thrown.
 - `leftovers.ts`: Stages every change and describes it, or null when the working tree is clean.
+- `lesson-writer-run.ts`: Runs the lesson writer the Memory page asks for, in a throwaway container with only the Claude login.
 - `mcp-check.ts`: Reads the account's claude.ai connectors as an agent sees them (`claude mcp list`, which also checks each one can be reached; no model runs), in a throwaway co…
 - `notifier.ts`: Follows the event log and writes a notification for each event that needs the user, announcing it on the stream.
 - `pr-checkout.ts`: Where a pull request's reviewed commit is kept in the checkout.
@@ -73,6 +74,7 @@ export); do not edit. Tests are left out.
 - `simplify-push.ts`: Pushes a simplified history, unless the agent left the one already on GitHub.
 - `simplify.ts`: Rewrites the ticket's commits into a simpler history with the implementer's own session, checks the code did not change and force-pushes it with a lease.
 - `slots.ts`: Agent runs allowed at the same time, shared by the ticket scheduler and the investigations.
+- `throwaway-runs.ts`: The side runs that need no repository, each in a throwaway container: reading the account's connectors, and the lesson writer.
 - `ticket-base.ts`: Chooses the branch a ticket is cloned from, before its first clone: the branch the user chose (over the parent's), else the parent's branch while its pull requ…
 - `workspace-git.ts`: Puts the repository on `branch`: the local branch if it exists, else the pushed one (a recreated container only has `origin/<branch>`), else a new branch from …
 

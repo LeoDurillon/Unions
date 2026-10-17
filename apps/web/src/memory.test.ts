@@ -80,3 +80,19 @@ test('memory is turned off and on with the project settings', async () => {
   });
   expect(refused.status).toBe(400);
 });
+
+test('the lesson writer is queued on feedback, one run at a time, and its result dismissed', async () => {
+  const feedbackId = insertFeedback('Use dayjs.');
+  const queued = await send('POST', '/lesson-suggestion', { feedbackIds: [feedbackId] });
+  expect(queued.status).toBe(202);
+  expect(await queued.json()).toMatchObject({ status: 'queued', feedbackIds: [feedbackId] });
+  expect((await send('POST', '/lesson-suggestion', { feedbackIds: [feedbackId] })).status).toBe(
+    409,
+  );
+  expect((await send('POST', '/lesson-suggestion', { feedbackIds: 'all' })).status).toBe(400);
+  const latest = await app.request(`/api/projects/${projectId}/lesson-suggestion`);
+  const row: unknown = await latest.json();
+  expect(row).toMatchObject({ status: 'queued' });
+  const id = typeof row === 'object' && row !== null && 'id' in row ? row.id : null;
+  expect((await send('POST', `/lesson-suggestion/${String(id)}/dismiss`, {})).status).toBe(404);
+});

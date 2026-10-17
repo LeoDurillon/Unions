@@ -188,7 +188,7 @@ export); do not edit. Tests are left out.
 - `checks-section.tsx`: How the implementation agent's work is installed and checked inside the ticket's container.
 - `delete-section.tsx`: Typing the repository name to confirm keeps a stray click from deleting a project.
 - `events-section.tsx`: Event rules: when something happens to a ticket, set a property of its Notion page or comment on its GitHub issue or pull request.
-- `feedback-inbox.tsx`: The feedback given on Revise and final reviews: each made a lesson or dismissed; the curated ones on request.
+- `feedback-inbox.tsx`: The feedback given on Revise and final reviews: made a lesson, given to the lesson writer, or dismissed; the curated ones on request.
 - `files-section.tsx`: Files every ticket's workspace gets at a path in the repository (a database dump for the preview's seed, a local config), kept out of git.
 - `flow-preset-row.tsx`: One flow preset in the settings: its name, its planning steps, whether new tickets get it, and Remove.
 - `flows-section.tsx`: The project's flow presets: the steps a ticket can run, and the one new tickets get.
@@ -198,6 +198,7 @@ export); do not edit. Tests are left out.
 - `integration-section-body.tsx`: Previews, Notion and the danger zone.
 - `lesson-card.tsx`: One lesson as a card: its whole rule, wrapped; the pencil opens a multiline field to edit it.
 - `lesson-list.tsx`: The project's lessons by agent step, as cards: edited one at a time, reordered and removed in the page's form.
+- `lesson-suggestions.tsx`: The lesson writer's latest run on the Memory page: working, failed, or its proposals to accept one by one or all.
 - `lessons-panel.tsx`: The Memory page's lessons part: whether they are sent to the agents, then the lessons by step.
 - `memory-section.tsx`: Project settings → Memory: the lessons each agent step gets, and the feedback they are made from.
 - `name-picker.tsx`: Picks names (labels, GitHub logins): the picked ones as chips, and a box that suggests the others and takes new ones.
@@ -303,7 +304,7 @@ export); do not edit. Tests are left out.
 - `use-github-app.ts`: The global GitHub App's status; saving or removing it invalidates `['github-app']`.
 - `use-live-invalidation.ts`: Refetches board, ticket, investigation and notification data whenever the worker records a change.
 - `use-log.ts`: Polls a ticket's or an investigation's Log while it is shown: all of it first, then what is new.
-- `use-memory.ts`: The Memory page's data: the project's lessons and feedback, saving them with the on/off switch, and curating one feedback.
+- `use-memory.ts`: The Memory page's data: lessons and feedback, saving them with the on/off switch, curating feedback, and the lesson writer's runs.
 - `use-models-form.ts`: The Models page's form: every agent's model and effort, each changed one saved with its prompt and tools as they are.
 - `use-navigation.ts`: Which page is shown (`?page=previews`, `?union=` for the Union settings, else the board) and which overlay is open.
 - `use-notifications.ts`: The notifications, page by page, with the unread count (also in the tab's title) and marking them read.

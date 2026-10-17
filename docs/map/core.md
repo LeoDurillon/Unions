@@ -48,6 +48,8 @@ export); do not edit. Tests are left out.
 - `investigation-tickets.ts`: Asks for a ticket written from an answered investigation, with what the user wants it to cover.
 - `investigations.ts`: Newest first.
 - `lesson-input.ts`: The lessons a Memory page save sends, checked: a known step and a one-line rule each, within the limits (browser-safe).
+- `lesson-suggestions.ts`: The lesson writer's queue: a run asked from the Memory page, claimed by the worker, then accepted or dismissed.
+- `lesson-writer.ts`: The lesson writer: its default prompt, the prompt it gets for some feedback, and its answer read back as lessons.
 - `lessons.ts`: The project's memory: lessons (rules per agent step, sent to that step's runs) and the feedback they are curated from.
 - `mcp-connectors.ts`: The permission rule for all of a connector's tools.
 - `notifications.ts`: Which events of the log notify the user, and with what text; pure, the worker writes the rows.
@@ -77,6 +79,7 @@ export); do not edit. Tests are left out.
 - `schema-container-runs.ts`: A command the user ran in a workspace: a ticket's (its container, in the checkout, as the agent) or a pull request's under review (exactly one of `ticket_id` a…
 - `schema-diff-commits.ts`: A ticket's commits at its diff snapshot, oldest first, each with its own files against its first parent.
 - `schema-events.ts`: The project's Notion data source as last read: rules point at its properties by id.
+- `schema-lesson-suggestions.ts`: The lesson writer's runs: the feedback the user gave it and the lessons it proposed.
 - `schema-mcp.ts`: The claude.ai connectors of the Claude account the agents run with, as the last check read them (`claude mcp list` in a throwaway container).
 - `schema-notifications.ts`: What needs the user, drawn from the event log by the worker: one row per event that notifies, read in the bell's panel.
 - `schema-pr-descriptions.ts`: A pull request description the agent rewrote for a ticket whose work changed after the PR was opened.

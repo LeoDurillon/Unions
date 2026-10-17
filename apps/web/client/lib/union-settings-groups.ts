@@ -5,6 +5,7 @@ export const UNION_SETTINGS_GROUPS = [
   { label: 'Implementation', sections: ['implement', 'final_review'] },
   { label: 'Pull requests', sections: ['pr_description', 'rebase', 'simplify'] },
   { label: 'Review', sections: ['review_comments', 'review_groups'] },
+  { label: 'Memory', sections: ['lesson_writer'] },
   { label: 'Tools', sections: ['tools', 'connectors'] },
   { label: 'GitHub', sections: ['github-app'] },
 ] as const;

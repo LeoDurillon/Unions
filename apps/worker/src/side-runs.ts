@@ -5,14 +5,14 @@ import { ContainerRunner } from './container-run';
 import { EventDispatcher } from './event-dispatcher';
 import type { GitHubApi } from './github/api';
 import { InvestigationRunner, type InvestigationDeps } from './investigate';
-import { ConnectorChecker } from './mcp-check';
 import { PrDescriptionRunner } from './pr-description-run';
 import { createPreviewManager, type PreviewManager } from './preview/manager';
 import { ReviewGroupingRunner } from './review-grouping';
+import { ThrowawayRuns } from './throwaway-runs';
 
 /**
  * The work outside the ticket pipeline: investigations, agent reviews, groupings by spec and PR
- * description rewrites (taking their slots from it), the event rules, stopping previews nobody
+ * description rewrites and the lesson writer (taking their slots from it), the event rules, stopping previews nobody
  * visits, reading the account's claude.ai connectors, and the commands users run in workspaces.
  */
 export type SideRuns = {
@@ -38,14 +38,14 @@ export async function startSideRuns(
   const reviewGroupings = new ReviewGroupingRunner(deps);
   const events = new EventDispatcher(deps.db, new FetchNotionApi(), deps.apiFor);
   const idlePreviews = previews.idleWatcher();
-  const connectors = new ConnectorChecker(deps);
+  const throwaway = new ThrowawayRuns(deps);
   const containerRuns = new ContainerRunner(deps);
   await investigations.recover();
   await agentReviews.recover();
   await reviewGroupings.recover();
   prDescriptions.recover();
   previews.recover();
-  connectors.recover();
+  throwaway.recover();
   containerRuns.recover();
   backfillNotionPages(deps.db);
   return {
@@ -62,7 +62,7 @@ export async function startSideRuns(
       prDescriptions.tick();
       events.tick();
       idlePreviews.tick();
-      connectors.tick();
+      throwaway.tick();
       containerRuns.tick();
     },
     stop: () => {
@@ -70,6 +70,7 @@ export async function startSideRuns(
       agentReviews.stop();
       reviewGroupings.stop();
       prDescriptions.stop();
+      throwaway.stop();
       containerRuns.stop();
     },
     idle: async () => {
@@ -80,7 +81,7 @@ export async function startSideRuns(
         prDescriptions.idle(),
         previews.idle(),
         events.idle(),
-        connectors.idle(),
+        throwaway.idle(),
         containerRuns.idle(),
       ]);
     },

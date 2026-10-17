@@ -51,6 +51,11 @@ export const AGENT_LABELS: Record<AgentId, { title: string; description: string 
     description:
       "Prompt the implementation agent gets when you click Rebase in a ticket's PR tab. It resumes its own session and uses the Implementation model and effort.",
   },
+  lesson_writer: {
+    title: 'Lesson writer',
+    description:
+      "Proposes lessons from the feedback when you click Suggest lessons on a project's Memory page. It reads only the feedback and the lessons already kept (no repository, no tools); you accept or drop each proposal.",
+  },
   simplify: {
     title: 'Simplify history',
     description:

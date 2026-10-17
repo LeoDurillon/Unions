@@ -3,7 +3,7 @@ import type { LessonInput } from '@union/core/lesson-input';
 import type { ReactElement } from 'react';
 
 import { Switch } from '../choice';
-import { LessonList } from './lesson-list';
+import { LessonList, type Editing } from './lesson-list';
 
 type Value = { enabled: boolean; lessons: LessonInput[] };
 
@@ -11,9 +11,11 @@ type Value = { enabled: boolean; lessons: LessonInput[] };
 export function LessonsPanel({
   value,
   onChange,
+  editing,
 }: {
   value: Value;
   onChange: (value: Partial<Value>) => void;
+  editing: Editing;
 }): ReactElement {
   return (
     <div className="space-y-3">
@@ -41,6 +43,7 @@ export function LessonsPanel({
           onChange={(lessons) => {
             onChange({ lessons });
           }}
+          editing={editing}
         />
       </div>
     </div>

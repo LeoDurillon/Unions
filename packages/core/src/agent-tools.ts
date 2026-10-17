@@ -12,10 +12,15 @@ const READ_ONLY = ['Read', 'Grep', 'Glob'] as const;
 const READ_GIT = ['diff', 'log', 'show', 'status'] as const;
 
 /**
- * An agent that runs on its own: every pipeline step, the reviewer writing draft comments, and the
- * writer of pull request descriptions.
+ * An agent that runs on its own: every pipeline step, the reviewer writing draft comments, the
+ * writer of pull request descriptions and the lesson writer.
  */
-export type RunAgent = Step | 'review_comments' | 'review_groups' | 'pr_description';
+export type RunAgent =
+  | Step
+  | 'review_comments'
+  | 'review_groups'
+  | 'pr_description'
+  | 'lesson_writer';
 
 /** Reading a change with git, in both the plain and the `git -C <repo>` form agents often use. */
 const REVIEW_TOOLS = [
@@ -35,6 +40,8 @@ export const DEFAULT_TOOLS: Record<RunAgent, readonly string[]> = {
   review_comments: REVIEW_TOOLS,
   review_groups: REVIEW_TOOLS,
   pr_description: REVIEW_TOOLS,
+  // Its container holds no repository: the feedback is all in its prompt.
+  lesson_writer: READ_ONLY,
   // Added to the implementer's tools for a rebase (see `toolsFor`).
   rebase: ['Bash(git rebase*)', 'Bash(git merge-base*)', 'Bash(git add*)', 'Bash(git status*)'],
   // Added to the implementer's tools to rewrite its commits (see `toolsFor`).

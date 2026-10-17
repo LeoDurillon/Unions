@@ -12,6 +12,7 @@ export default defineConfig({
     './src/schema-container-runs.ts',
     './src/schema-diff-commits.ts',
     './src/schema-events.ts',
+    './src/schema-lesson-suggestions.ts',
     './src/schema-mcp.ts',
     './src/schema-notifications.ts',
     './src/schema-pr-descriptions.ts',

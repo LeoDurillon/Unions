@@ -73,6 +73,10 @@
   and the branch. `github/pr-description-send.ts` writes the user's version only if GitHub's description is still
   the one the agent read (else `conflict`), so an edit made on GitHub is never overwritten unseen. The first
   description (`pr-description.ts`, when the PR is opened) and the rewrite both use the `pr_description` agent.
+- `throwaway-runs.ts`: the side runs that need no repository, in a throwaway container with only the Claude login:
+  the connector check (`mcp-check.ts`) and the lesson writer (`lesson-writer-run.ts`, same slots as the agents),
+  which turns feedback the user picked into proposed lessons (`lesson_suggestions`; prompt and parsing in core
+  `lesson-writer.ts`).
 - `preview/`: ticket previews (phase 1 of `docs/plans/preview-environments.md`). `PreviewManager` runs the
   `preview_start`/`preview_stop`/`preview_logs` commands, one at a time per ticket. Every `docker compose` call runs
   in a throwaway helper container (`runtime.runHelper`, `docker:*-cli` image) holding the Docker socket and the

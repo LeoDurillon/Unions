@@ -1,4 +1,4 @@
-// The feedback given on Revise and final reviews: each made a lesson or dismissed; the curated ones on request.
+// The feedback given on Revise and final reviews: made a lesson, given to the lesson writer, or dismissed; the curated ones on request.
 import type { FeedbackItem } from '@union/core';
 import { useState, type ReactElement } from 'react';
 
@@ -6,16 +6,26 @@ import { STEP_TITLES } from '../../lib/labels';
 import { closeSettings } from '../../lib/settings-sections';
 import { setParams } from '../../lib/url-state';
 import { Badge, Button, ErrorText } from '../ui';
+import { LessonSuggestions, type AcceptLessons } from './lesson-suggestions';
 
-/** What the page does with one feedback: start a lesson from it, or curate it at once. */
+/** What the page does with feedback: start a lesson from it, ask the lesson writer, or curate it at once. */
 export type FeedbackActions = {
+  projectId: number;
   /** Feedback already used by an unsaved lesson. */
   pending: readonly number[];
   makeLesson: (item: FeedbackItem) => void;
+  onAccept: AcceptLessons;
   setCurated: (id: number, curated: boolean) => void;
+  /** Asks the lesson writer for lessons from these feedback (it uses the user's Claude usage). */
+  suggest: (ids: number[]) => void;
+  /** The lesson writer is working: one run at a time. */
+  writing: boolean;
   busy: boolean;
   error: Error | null;
 };
+
+const WRITER_HINT =
+  'The lesson writer (Haiku unless changed in Union settings) proposes lessons you accept or drop. It uses your Claude usage.';
 
 function stepTitle(section: string): string {
   return Object.entries(STEP_TITLES).find(([step]) => step === section)?.[1] ?? section;
@@ -78,6 +88,16 @@ function ItemActions({
       </Button>
       <Button
         className="px-2 py-1 text-xs"
+        title={WRITER_HINT}
+        disabled={actions.writing}
+        onClick={() => {
+          actions.suggest([item.id]);
+        }}
+      >
+        Suggest with agent
+      </Button>
+      <Button
+        className="px-2 py-1 text-xs"
         disabled={actions.busy}
         onClick={() => {
           actions.setCurated(item.id, true);
@@ -128,14 +148,25 @@ export function FeedbackInbox({
   actions: FeedbackActions;
 }): ReactElement {
   const [showCurated, setShowCurated] = useState(false);
+  const { onAccept } = actions;
   const fresh = feedback.filter((item) => item.curatedAt === null);
   const shown = showCurated ? feedback : fresh;
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-xs text-zinc-500">
           {fresh.length} new of {feedback.length}
         </p>
+        <Button
+          className="px-2 py-1 text-xs"
+          title={WRITER_HINT}
+          disabled={actions.writing || fresh.length === 0}
+          onClick={() => {
+            actions.suggest(fresh.map((item) => item.id));
+          }}
+        >
+          Suggest lessons from new feedback
+        </Button>
         <label className="flex items-center gap-1.5 text-xs">
           <input
             type="checkbox"
@@ -148,6 +179,7 @@ export function FeedbackInbox({
         </label>
       </div>
       <ErrorText error={actions.error} />
+      <LessonSuggestions projectId={actions.projectId} onAccept={onAccept} />
       {shown.length === 0 ? (
         <p className="text-xs text-zinc-500">
           Nothing new: feedback lands here when you click Revise.

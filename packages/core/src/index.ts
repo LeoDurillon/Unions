@@ -38,6 +38,8 @@ export * from './github-text';
 export * from './investigation-tickets';
 export * from './investigations';
 export * from './lesson-input';
+export * from './lesson-suggestions';
+export * from './lesson-writer';
 export * from './lessons';
 export * from './notion-api';
 export * from './notion-error';

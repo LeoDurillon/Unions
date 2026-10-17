@@ -65,10 +65,11 @@ function CheckIcon(): ReactElement {
 /** The rule in a field that grows with it; Enter or Escape closes it (a rule is one paragraph). */
 function RuleField({ props }: { props: LessonCardProps }): ReactElement {
   const field = useRef<HTMLTextAreaElement>(null);
-  // Opened by a click on the pencil: typing goes to it, after the text already there.
+  // Opened by the pencil or by Make a lesson: shown, and typing goes to it after the text already there.
   useEffect(() => {
     const element = field.current;
-    element?.focus();
+    element?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    element?.focus({ preventScroll: true });
     element?.setSelectionRange(element.value.length, element.value.length);
   }, []);
   return (

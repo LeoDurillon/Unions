@@ -2,11 +2,13 @@
 import type { FeedbackItem, Lesson } from '@union/core';
 import { MAX_LESSON_LENGTH, type LessonInput } from '@union/core/lesson-input';
 import { FULL_FLOW, type PipelineStep } from '@union/core/states';
-import type { ReactElement } from 'react';
+import { useState, type ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
 import {
   useCurateFeedback,
+  useLessonSuggestion,
+  useLessonWriter,
   useFeedback,
   useLessons,
   useSaveMemory,
@@ -27,27 +29,44 @@ function draftFrom(item: FeedbackItem): LessonInput {
   return { section: stepOf(item.section), rule: firstLine.slice(0, MAX_LESSON_LENGTH) };
 }
 
-/** Make a lesson adds to the form (curated on Save); Dismiss and Back to new apply at once. */
+/**
+ * Make a lesson and the writer's accepted proposals add to the form (their feedback curated on
+ * Save); Dismiss, Back to new and asking the writer apply at once.
+ */
 function useFeedbackActions(
   projectId: number,
   form: SettingsForm<MemorySave>,
   fresh: ReadonlySet<number>,
+  openLesson: (at: number) => void,
 ): FeedbackActions {
   const curate = useCurateFeedback(projectId);
+  const { suggest } = useLessonWriter(projectId);
+  const run = useLessonSuggestion(projectId).data;
+  const add = (lessons: LessonInput[], feedbackIds: readonly number[]): void => {
+    const curated = form.value.curated.filter((id) => !feedbackIds.includes(id));
+    form.set({
+      ...form.value,
+      lessons: [...form.value.lessons, ...lessons],
+      curated: [...curated, ...feedbackIds],
+    });
+  };
   return {
+    projectId,
     pending: form.value.curated.filter((id) => fresh.has(id)),
     makeLesson: (item) => {
-      form.set({
-        ...form.value,
-        lessons: [...form.value.lessons, draftFrom(item)],
-        curated: [...form.value.curated, item.id],
-      });
+      add([draftFrom(item)], [item.id]);
+      openLesson(form.value.lessons.length);
     },
+    onAccept: add,
     setCurated: (id, curated) => {
       curate.mutate({ id, curated });
     },
+    suggest: (ids) => {
+      suggest.mutate(ids);
+    },
+    writing: suggest.isPending || run?.status === 'queued' || run?.status === 'running',
     busy: curate.isPending,
-    error: curate.error,
+    error: curate.error ?? suggest.error,
   };
 }
 
@@ -70,7 +89,8 @@ function MemoryForm({
     }),
     (save) => write({ ...save, curated: save.curated.filter((id) => fresh.has(id)) }),
   );
-  const actions = useFeedbackActions(project.id, form, fresh);
+  const [editingAt, setEditingAt] = useState<number | null>(null);
+  const actions = useFeedbackActions(project.id, form, fresh, setEditingAt);
   const empty = form.value.lessons.some((lesson) => lesson.rule.trim() === '');
   return (
     <section className="space-y-6">
@@ -79,6 +99,7 @@ function MemoryForm({
         onChange={(value) => {
           form.set({ ...form.value, ...value });
         }}
+        editing={{ at: editingAt, open: setEditingAt }}
       />
       <div className="space-y-3">
         <h3 className="text-sm font-semibold">Feedback</h3>
