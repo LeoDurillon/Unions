@@ -1,7 +1,8 @@
 # Plan: split a ticket's pull request into a stack
 
-Status: planned, not started; decisions taken (2026-10-17). Replaces the ticket groups, split and restack plans: a stack stays one
-ticket. Part A (split an existing PR) first, then part B (slices declared by the plan).
+Status: planned, not started; decisions taken, risks to revise before building (side note at the end)
+(2026-10-17). Replaces the ticket groups, split and restack plans: a stack stays one ticket. Part A (split an
+existing PR) first, then part B (slices declared by the plan).
 
 ## Goal
 
@@ -174,3 +175,39 @@ Taken (2026-10-17):
 5. Checks on each slice tip: a project setting, off by default.
 6. Restack after a merge is a button in v1; automatic later.
 7. A closed (unmerged) slice: Restack offers to fold its commits into the next slice or to drop them.
+
+## Side note: risks to revise before building
+
+Found after the plan was written (2026-10-17). The plan above is unchanged; each point needs a decision before the
+step it touches.
+
+1. **Out-of-order merge.** The plan assumes the top PR merges last. If it is merged first, it lands on the slice
+   below, not the base, yet `tickets.pr_state` reads merged: the card goes to Merged, the issue closes and "PR
+   merged" rules fire (Notion Done) with nothing in `main`. Possible fix: a ticket is merged only when every slice is
+   merged into the project's base (from `ticket_slices`); a slice merged into another slice's branch is an error.
+2. **Readers of the PR's base.** With the top slice as the ticket's PR, its base is the slice below: `behind_by`
+   (`compare/<PR base>...<head>`) reads 0 and hides Rebase, CI checks show the top slice only, while the review diff
+   (`base...HEAD`) shows the whole stack. Possible fix: list every reader of the PR's base and state in step 1 and
+   make each use the bottom slice or the whole stack on purpose.
+3. **Slices that do not stand alone.** The tree check proves only the final code; slice 2 can rely on a type added
+   in slice 3, and with per-slice checks off by default a broken slice 1 can merge into `main`. Possible fix (reverses
+   decision 5): checks on every slice tip for the split, on by default; optional for restacks after a revision.
+4. **Partial features in `main`.** Merging the bottom first can ship a CRUD with no page. Possible fix: the
+   `split_plan` prompt requires each slice to be safe to ship alone (a feature flag if needed) and says how.
+5. **Half-pushed stack.** Pushing slice branches one by one can stop at a rejected lease. Possible fix: one
+   `git push --atomic` with a `--force-with-lease` per branch.
+6. **Pushes from outside Union.** Today only the ticket's branch is checked for commits the workspace lacks; someone
+   can push to `<branch>-s1`. Possible fix: the same check on every slice branch.
+7. **Squash merge with branch deletion.** GitHub retargets the next PR to the base, but it still holds the merged
+   slice's original commits: until Restack, its diff repeats them and merging it conflicts or duplicates them.
+   Possible fix: restack automatically after a merge when it is clean (reverses decision 6), or warn on the PR.
+8. **Fixups on the wrong commit.** `fixup! <subject>` matches messages, which can repeat ("Add tests"). Possible fix:
+   `fixup! <sha>`, refusing unknown or ambiguous targets.
+9. **Reviews reset above a revision.** A fix in slice 1 rewrites slices 2 and 3: their GitHub threads go outdated
+   and reviewers see a force-push. Inherent to stacks; the PR tab should say which slices a revision touched.
+10. **Usage.** A split is two agent runs on the largest diffs, more with per-slice checks and retries. Try it first on
+    a medium PR.
+11. **Child tickets.** A child builds on the ticket's branch, which every restack rewrites: the existing rebase
+    problem, more often.
+12. **Size.** Three new steps and GitHub state to keep in sync with `ticket_slices`. Part A is only safe to use on
+    a real repository once steps 1 to 5 are all built (a split without merge handling is risky).
