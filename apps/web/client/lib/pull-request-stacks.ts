@@ -1,4 +1,4 @@
-// The Pull requests tab's stacks and other pull requests, and the stack under review a pull request would join.
+// Stacks in the Pull requests and Current reviews tabs, and the stack under review a pull request would join.
 import { pullRequestStacks } from '@union/core/pr-stacks';
 
 import type { CurrentReview, PullRequestListItem } from '../../src/api-types';
@@ -18,19 +18,25 @@ export function splitStacks(pulls: PullRequestListItem[], grouped: boolean): Spl
   };
 }
 
-/** For each head branch under review, the bottom pull request of its stack there. */
-export function reviewStackBottoms(reviews: CurrentReview[]): Map<string, number> {
+/** The current reviews grouped by stack, bottom first, by their branches as last read. */
+export function reviewStacks(reviews: CurrentReview[]): CurrentReview[][] {
   const members = reviews.map((review) => ({
+    review,
     number: review.prNumber,
     headBranch: review.headBranch,
     baseBranch: review.baseBranch,
   }));
+  return pullRequestStacks(members).map((stack) => stack.map((member) => member.review));
+}
+
+/** For each head branch under review, the bottom pull request of its stack there. */
+export function reviewStackBottoms(reviews: CurrentReview[]): Map<string, number> {
   const bottoms = new Map<string, number>();
-  for (const stack of pullRequestStacks(members)) {
+  for (const stack of reviewStacks(reviews)) {
     const [bottom] = stack;
     for (const member of stack) {
       if (bottom) {
-        bottoms.set(member.headBranch, bottom.number);
+        bottoms.set(member.headBranch, bottom.prNumber);
       }
     }
   }

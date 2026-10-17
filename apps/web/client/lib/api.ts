@@ -219,6 +219,8 @@ export const api = {
     pullRequests: PullRequestListItem[],
   ): Promise<CurrentReview[]> =>
     request('POST', `/api/projects/${projectId}/pull-requests/reviews/stack`, { pullRequests }),
+  removeCurrentReviewStack: (projectId: number, numbers: number[]): Promise<unknown> =>
+    request('POST', `/api/projects/${projectId}/pull-requests/reviews/stack/remove`, { numbers }),
   removeCurrentReview: (projectId: number, number: number): Promise<unknown> =>
     request('DELETE', `/api/projects/${projectId}/pull-requests/reviews/${number}`),
   discussion: (id: number): Promise<DiscussionResponse> =>

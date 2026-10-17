@@ -150,7 +150,8 @@ Four commits, each passing `bun run check`:
 1. Built (branch `stacked-pr-reviews`): `pr-stacks.ts` and its tests, `isCrossRepository` in the query and list type, branches written back in
    `pr-review.ts`.
 2. Pull requests tab: the stack row (collapsed until opened), Add stack to reviews, `POST /reviews/stack`. Built (branch `stacked-pr-reviews`).
-3. Current reviews tab: stack rows; review page: `stack-tabs.tsx`. Update `docs/architecture/web.md`.
+3. Built (branch `stacked-pr-reviews`): Current reviews tab: stack rows; review page: `stack-tabs.tsx`. Update
+   `docs/architecture/web.md`.
 4. Review with agent: specs for any agent review (migration, dialog, prompt), then the stack run (members, stack
    checkout, findings per PR). Update `docs/architecture/web.md` and `worker.md`. Can be split in two: specs first,
    stack run second.

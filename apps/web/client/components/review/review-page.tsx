@@ -95,13 +95,14 @@ function SectionBody({
 /**
  * Full-page review of a ticket's branch or of a pull request: touched files on the left, one file at
  * a time on the right. `sections` add tabs before the diff, and it opens on the first; `banner` shows
- * above the content (a pull request review's posting status).
+ * above the content (a pull request review's posting status); `stackTabs` go under the header.
  */
 export function ReviewPage({
   target,
   title,
   onClose,
   sections = NO_SECTIONS,
+  stackTabs,
   banner,
   posting = false,
 }: {
@@ -109,6 +110,8 @@ export function ReviewPage({
   title: string;
   onClose: () => void;
   sections?: ReviewSection[];
+  /** The tabs of the stack the pull request is in, under the header. */
+  stackTabs?: ReactNode;
   banner?: ReactNode;
   /** The review is being posted: its comments are polled until they turn sent. */
   posting?: boolean;
@@ -134,6 +137,7 @@ export function ReviewPage({
         mutations={mutations}
         onClose={onClose}
       />
+      {stackTabs}
       {sections.length > 0 ? (
         <SectionTabs sections={[...sections, DIFF_TAB]} current={tab} onChange={setTab} />
       ) : null}

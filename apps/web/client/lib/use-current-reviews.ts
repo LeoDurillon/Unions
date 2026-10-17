@@ -22,6 +22,7 @@ export function useCurrentReviewMutations(projectId: number): {
   add: ReturnType<typeof useMutation<CurrentReview, Error, PullRequestListItem>>;
   addStack: ReturnType<typeof useMutation<CurrentReview[], Error, PullRequestListItem[]>>;
   remove: ReturnType<typeof useMutation<unknown, Error, number>>;
+  removeStack: ReturnType<typeof useMutation<unknown, Error, number[]>>;
 } {
   const queryClient = useQueryClient();
   const refresh = (): Promise<void> =>
@@ -37,6 +38,10 @@ export function useCurrentReviewMutations(projectId: number): {
     }),
     remove: useMutation({
       mutationFn: (number: number) => api.removeCurrentReview(projectId, number),
+      onSuccess: refresh,
+    }),
+    removeStack: useMutation({
+      mutationFn: (numbers: number[]) => api.removeCurrentReviewStack(projectId, numbers),
       onSuccess: refresh,
     }),
   };

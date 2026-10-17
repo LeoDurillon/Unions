@@ -1,4 +1,10 @@
-import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
+import {
+  useMutation,
+  useQueries,
+  useQuery,
+  useQueryClient,
+  type UseQueryResult,
+} from '@tanstack/react-query';
 
 import type {
   CommentView,
@@ -72,6 +78,21 @@ export function useComments(target: ReviewTarget, posting = false): UseQueryResu
     queryFn: () => api.comments(base),
     refetchInterval: posting ? POSTING_POLL_MS : false,
   });
+}
+
+/** Each review's draft count, from the same cache as `useComments`; null while it loads. */
+export function useDraftCounts(
+  reviews: { target: ReviewTarget; posting: boolean }[],
+): (number | null)[] {
+  return useQueries({
+    queries: reviews.map(({ target, posting }) => {
+      const base = reviewBase(target);
+      return {
+        queryKey: ['review', base, 'comments', posting],
+        queryFn: () => api.comments(base),
+      };
+    }),
+  }).map((query) => query.data?.filter((comment) => comment.status === 'draft').length ?? null);
 }
 
 /** What else a review write changes: the ticket's PR discussion, or the current reviews list. */

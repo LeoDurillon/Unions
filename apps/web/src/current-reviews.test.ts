@@ -87,3 +87,16 @@ test('a stack with one bad pull request adds nothing', async () => {
   expect((await send('POST', '/stack', { pullRequests: ['x'] })).status).toBe(400);
   expect(await (await send('GET', '')).json()).toEqual([]);
 });
+
+test('a stack is removed whole, or not at all when one of it is not under review', async () => {
+  await send('POST', '/stack', { pullRequests: [pull(12), pull(13), pull(14)] });
+  expect((await send('POST', '/stack/remove', { numbers: [12, 13, 99] })).status).toBe(404);
+  const kept = (await (await send('GET', '')).json()) as CurrentReview[];
+  expect(kept.map((review) => review.prNumber)).toEqual([14, 13, 12]);
+
+  const response = await send('POST', '/stack/remove', { numbers: [12, 13] });
+  expect(await response.json()).toEqual({ numbers: [12, 13] });
+  const after = (await (await send('GET', '')).json()) as CurrentReview[];
+  expect(after.map((review) => review.prNumber)).toEqual([14]);
+  expect((await send('POST', '/stack/remove', { numbers: [] })).status).toBe(400);
+});

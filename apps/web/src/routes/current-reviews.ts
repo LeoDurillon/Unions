@@ -1,5 +1,5 @@
 import { schema, type Db, type NotionApi } from '@union/core';
-import { and, desc, eq, getTableColumns } from 'drizzle-orm';
+import { and, desc, eq, getTableColumns, inArray } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
 
 import type { OnboardingGitHub } from '../github-onboarding';
@@ -111,6 +111,41 @@ function remove(db: Db, c: Context): Response {
   return c.json({ number: prNumber });
 }
 
+/** Removes a stack's reviews at once: all of them, or none when one is not under review. */
+async function removeStack(db: Db, c: Context): Promise<Response> {
+  const projectId = projectOf(db, c);
+  const { numbers } = await readObject(c.req.raw);
+  if (!Array.isArray(numbers) || numbers.length === 0 || numbers.length > MAX_STACK) {
+    throw fail(BAD_REQUEST, `Expected a list of 1 to ${MAX_STACK} pull request numbers`);
+  }
+  const wanted = [
+    ...new Set(numbers.map((number) => requireId(String(number), 'pull request number'))),
+  ];
+  const removed = db.transaction((tx) => {
+    const rows = tx
+      .delete(schema.currentReviews)
+      .where(
+        and(
+          eq(schema.currentReviews.projectId, projectId),
+          inArray(schema.currentReviews.prNumber, wanted),
+        ),
+      )
+      .returning()
+      .all();
+    const found = new Set(rows.map((row) => row.prNumber));
+    const missing = wanted.filter((number) => !found.has(number));
+    if (missing.length > 0) {
+      // Thrown inside the transaction: it rolls back, nothing is removed.
+      throw fail(
+        NOT_FOUND,
+        `${missing.map((number) => `#${number}`).join(', ')} not among the current reviews`,
+      );
+    }
+    return rows;
+  });
+  return c.json({ numbers: removed.map((row) => row.prNumber) });
+}
+
 /** `/api/projects/:projectId/pull-requests/reviews`: pull requests the user reviews without a ticket. */
 export function currentReviewRoutes(db: Db, github: OnboardingGitHub, notion: NotionApi): Hono {
   const routes = new Hono();
@@ -126,6 +161,7 @@ export function currentReviewRoutes(db: Db, github: OnboardingGitHub, notion: No
   );
   routes.post('/', (c) => add(db, c));
   routes.post('/stack', (c) => addStack(db, c));
+  routes.post('/stack/remove', (c) => removeStack(db, c));
   routes.delete('/:number', (c) => remove(db, c));
   routes.route('/:number/groupings', pullRequestGroupingRoutes(db, github, notion));
   routes.route('/:number/commits', prCommitRoutes(db, github));

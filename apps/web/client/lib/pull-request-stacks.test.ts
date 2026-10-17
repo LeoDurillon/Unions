@@ -1,7 +1,12 @@
 import { expect, test } from 'bun:test';
 
 import type { CurrentReview, PullRequestListItem } from '../../src/api-types';
-import { addableMembers, reviewStackBottoms, splitStacks } from './pull-request-stacks';
+import {
+  addableMembers,
+  reviewStackBottoms,
+  reviewStacks,
+  splitStacks,
+} from './pull-request-stacks';
 
 function pull(number: number, headBranch: string, baseBranch: string): PullRequestListItem {
   return {
@@ -64,4 +69,13 @@ test('a stack adds only the members without a ticket that are not under review y
     new Set([12]),
   );
   expect(added.map((member) => member.number)).toEqual([13]);
+});
+
+test('reviews are grouped by stack on their stored branches', () => {
+  const stacks = reviewStacks([
+    review(13, 'api', 'schema'),
+    review(9, 'solo', 'main'),
+    review(12, 'schema', 'main'),
+  ]);
+  expect(stacks.map((stack) => stack.map((member) => member.prNumber))).toEqual([[12, 13], [9]]);
 });

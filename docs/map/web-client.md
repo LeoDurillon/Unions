@@ -121,12 +121,16 @@ export); do not edit. Tests are left out.
 
 ## components/pull-requests/
 
-- `current-reviews-page.tsx`: Pull requests put under review from the Pull requests tab, without a ticket.
+- `current-reviews-page.tsx`: Pull requests put under review from the Pull requests tab, without a ticket; a stack opens with a tab per pull request.
+- `list-part.tsx`: A part of a list of pull requests (its stacks, the others): a heading with its count over its rows.
 - `pr-review-sections.tsx`: The tabs a pull request review shows before its diff.
 - `pull-request-item.tsx`: One pull request: state, title, who and when, branches, review, size, and what can be done with it.
 - `pull-request-rows.tsx`: The Pull requests tab's list: stacks first, then the other pull requests, and adding them to the current reviews.
 - `pull-requests-page.tsx`: Every pull request of the project's repository, read from GitHub, open stacks as one row; linked ones open their ticket.
+- `review-stack-item.tsx`: A stack of pull requests under review as one row: its bottom's title, its pull requests, opening and removing it whole.
 - `stack-item.tsx`: A stack of pull requests as one row: its bottom's title, its size, adding it to the reviews; its members below when opened.
+- `stack-review.tsx`: A pull request under review opened full page; one of a stack gets a tab per pull request of it, to switch between them.
+- `stack-tabs.tsx`: The pull requests of a stack under review as tabs, bottom first: the picked one is reviewed below, each shows its drafts.
 
 ## components/review/
 
@@ -232,7 +236,7 @@ export); do not edit. Tests are left out.
 - `pr-description-api.ts`: The browser's client for a ticket's pull request description endpoints.
 - `preview-api.ts`: The browser's client for a ticket's preview endpoints.
 - `project-files-api.ts`: The browser's client for a project's uploaded files.
-- `pull-request-stacks.ts`: The Pull requests tab's stacks and other pull requests, and the stack under review a pull request would join.
+- `pull-request-stacks.ts`: Stacks in the Pull requests and Current reviews tabs, and the stack under review a pull request would join.
 - `refused-commit-api.ts`: The ticket's last refused commit, or null.
 - `review-grouping-api.ts`: `base` is the review's API root (`reviewBase`).
 - `review-target.ts`: Where the target's diff, comments and send live; also the root of its query keys.

@@ -41,6 +41,11 @@
   their members. "Add stack to reviews" posts `…/pull-requests/reviews/stack` (one transaction, members already
   under review skipped); a pull request on one under review says which stack it joins. `routes/pr-review.ts` keeps a
   review's branches as GitHub has them each time it reads the files, so a retargeted PR leaves its stack.
+  The Current reviews tab groups its reviews the same way (`reviewStacks`, on their stored branches): stacks first,
+  one row each (`review-stack-item.tsx`; Remove posts `…/reviews/stack/remove`: every member in one transaction, or none). Opening one opens its bottom PR in the review
+  page with a tab per PR under the header (`stack-review.tsx`, `stack-tabs.tsx`: draft count and posting state per
+  PR, `useDraftCounts` sharing `useComments`' cache); `ReviewPage` is keyed by the PR, so switching starts on its
+  first section with no file open. Each PR keeps its own drafts and its own Post on GitHub.
 - Project settings are a page, not a modal: `?settings=<section>` (`lib/settings-sections.ts` lists the sections
   and their groups; `openSettings(section)` links to one from anywhere), `components/settings/settings-page.tsx`
   with a grouped side menu.

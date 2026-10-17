@@ -1,32 +1,13 @@
 // The Pull requests tab's list: stacks first, then the other pull requests, and adding them to the current reviews.
-import type { ReactElement, ReactNode } from 'react';
+import type { ReactElement } from 'react';
 
 import type { PullRequestListItem } from '../../../src/api-types';
 import { reviewStackBottoms, splitStacks } from '../../lib/pull-request-stacks';
 import { useCurrentReviewMutations, useCurrentReviews } from '../../lib/use-current-reviews';
 import { ErrorText } from '../ui';
+import { Part } from './list-part';
 import { PullRequestItem } from './pull-request-item';
 import { StackItem } from './stack-item';
-
-/** A part of the list: its title and count over its rows. */
-function Part({
-  title,
-  count,
-  children,
-}: {
-  title: string;
-  count: number;
-  children: ReactNode;
-}): ReactElement {
-  return (
-    <section aria-label={title}>
-      <h3 className="border-y border-zinc-200 bg-zinc-100 px-4 py-1.5 text-xs font-semibold tracking-wide text-zinc-600 uppercase dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
-        {title} · {count}
-      </h3>
-      <ul>{children}</ul>
-    </section>
-  );
-}
 
 /** What the rows need from the current reviews: who is in, which stack one would join, adding. */
 function useRowActions(projectId: number): {
