@@ -32,6 +32,9 @@ and linked.
 - [Rebase without an agent](rebase-without-agent.md): the host rebases first; the agent runs only on a conflict or
   when the checks fail after a clean rebase, and the final review runs again only when the agent changed code.
   Built (2026-10-17).
+- [Previews of pull requests under review](review-previews.md): a review's own preview at the reviewed commit
+  (`union-r<id>`, `r<id>.localhost`), with its e2e tests and Commands, in a container of its own; no agent, no
+  GitHub writes, never the project's secrets for a fork. Planned, not built.
 - [Ticket flows](ticket-flows.md): pick the steps a ticket runs (Full, Standard, Quick presets, or custom), so a
   small fix skips planning. Built (branch `ticket-flows`); a real Quick ticket run is left.
 
