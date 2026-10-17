@@ -3,6 +3,7 @@
 export * from './schema';
 export * from './schema-agent-log';
 export * from './schema-attachments';
+export * from './schema-ci-outputs';
 export * from './schema-container-runs';
 export * from './schema-diff-commits';
 export * from './schema-events';

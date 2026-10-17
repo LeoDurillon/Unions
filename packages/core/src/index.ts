@@ -1,7 +1,10 @@
 // The package's public API: re-exports every core module.
+export * from './agent-inputs';
 export * from './agent-reviews';
 export * from './agent-tools';
 export * from './agent-environment';
+export * from './ci-output-text';
+export * from './ci-outputs';
 export * from './container-runs';
 export * from './mcp-connectors';
 export * from './attachments';

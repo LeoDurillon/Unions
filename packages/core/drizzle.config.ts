@@ -7,6 +7,7 @@ export default defineConfig({
     './src/schema-agent-log.ts',
 
     './src/schema-attachments.ts',
+    './src/schema-ci-outputs.ts',
     './src/schema-container-runs.ts',
     './src/schema-diff-commits.ts',
     './src/schema-events.ts',

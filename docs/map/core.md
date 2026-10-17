@@ -6,12 +6,16 @@ export); do not edit. Tests are left out.
 ## ./
 
 - `agent-environment.ts`: The agent's environment settings as sent (`agentVariables`, `forwardPorts`), checked; only what differs from the defaults is kept.
+- `agent-inputs.ts`: What the user gave the implementer's next run: command outputs and CI outputs, read together and marked read together.
 - `agent-log.ts`: Writes the agents' output to `agent_log`, and reads a Log: events and agent lines in one order.
 - `agent-reviews.ts`: Fails the reviews a stopped worker left running, and returns them.
 - `agent-tools.ts`: A tool the list refuses: bad syntax, duplicate, built-in, or still selected by an agent.
 - `agents.ts`: The agents' default prompts, models, efforts and tools, the user's overrides, and how a run resolves them.
+- `ansi.ts`: Strips terminal colour codes from command and CI output; browser-safe.
 - `attachment-limits.ts`: Upload limits, shared by the server and the browser (which checks them before sending).
 - `attachments.ts`: Where the agents find a ticket's files: next to the repository, so `git add -A` never sees them.
+- `ci-output-text.ts`: The text the implementer gets from CI: a failed check (its failed step's log, annotations, summary), another job's log, a bot's comment; browser-safe.
+- `ci-outputs.ts`: CI output given to the implementer: kept for its next run, or sent now as a revision with the user's note.
 - `container-runs.ts`: The ticket's latest runs, newest first.
 - `db.ts`: Fresh handle, never cached: tests use `createDb(':memory:')`.
 - `diff-excerpt.ts`: The text of `start..end` on one side of a file's patch; null when none of those lines is in it.
@@ -57,6 +61,7 @@ export); do not edit. Tests are left out.
 - `runtime.ts`: Everything the worker needs from Docker.
 - `schema-agent-log.ts`: The agents' raw output, line by line, kept apart from the event log.
 - `schema-attachments.ts`: Files the user attached to a ticket, stored on the host under the attachments folder and copied into the ticket's container for the agents.
+- `schema-ci-outputs.ts`: CI output the user gave the implementer from the pull request's checks: a failed check, another job's log, a bot's comment.
 - `schema-container-runs.ts`: A command the user ran in a ticket's workspace (its container, in the checkout, as the agent), with the end of its output.
 - `schema-diff-commits.ts`: A ticket's commits at its diff snapshot, oldest first, each with its own files against its first parent.
 - `schema-events.ts`: The project's Notion data source as last read: rules point at its properties by id.

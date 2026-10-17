@@ -1,5 +1,6 @@
 import { and, asc, desc, eq, inArray } from 'drizzle-orm';
 
+import { stripAnsi } from './ansi';
 import type { Db } from './db';
 import { commands } from './schema';
 import * as schema from './schema-container-runs';
@@ -20,12 +21,10 @@ export const MAX_OUTPUT_CHARS = 65_536;
 const RUNS_LISTED = 20;
 
 const ACTIVE = ['queued', 'running'] as const;
-// oxlint-disable-next-line no-control-regex -- the escape character starts the colour codes
-const ANSI = /\u001B\[[\d;?]*[\dA-Za-z]|\u001B\][^\u0007]*\u0007/gu;
 
 /** The end of a command's output, as kept: colours stripped, the last lines within the limits. */
 export function outputTail(lines: readonly string[]): string {
-  const kept = lines.slice(-MAX_OUTPUT_LINES).map((line) => line.replaceAll(ANSI, ''));
+  const kept = lines.slice(-MAX_OUTPUT_LINES).map((line) => stripAnsi(line));
   const text = kept.join('\n');
   return text.length > MAX_OUTPUT_CHARS ? text.slice(-MAX_OUTPUT_CHARS) : text;
 }
