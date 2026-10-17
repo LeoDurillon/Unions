@@ -15,6 +15,8 @@ in `agent_tools`). A run loads the connectors only when its tools include one (`
 `IMPLEMENT_DENIED` in the worker) are not editable and always win over a selected tool.
 `investigations.ts`: one-off agent runs on a custom prompt (records, claim, finish, cancel, follow-ups); defaults
 in the browser-safe `investigation-defaults.ts`.
+`pr-stacks.ts` (browser-safe, `@union/core/pr-stacks`): `pullRequestStacks` groups pull requests by stack, a PR
+sitting on the one whose head branch it targets, bottom first.
 Drizzle schema and migrations, the pure ticket state machine (`states.ts`), ticket dependencies
 (`ticket-links.ts`: `setParent`, `ticketBase`; the start gate `blockingParent` is in `tickets.ts`), the
 `ContainerRuntime` interface and its Docker CLI implementation.

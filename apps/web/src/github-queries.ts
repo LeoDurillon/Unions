@@ -116,6 +116,7 @@ export const REPOSITORY_PULL_REQUESTS = /* GraphQL */ `
           isDraft
           headRefName
           baseRefName
+          isCrossRepository
           updatedAt
           reviewDecision
           additions

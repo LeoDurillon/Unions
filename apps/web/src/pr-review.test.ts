@@ -19,6 +19,7 @@ let db: Db;
 let app: Hono;
 let projectId: number;
 let head: string;
+let base: string;
 
 const github = {
   getDiscussion: () =>
@@ -40,7 +41,8 @@ const github = {
   getPullRequestFiles: () =>
     Promise.resolve({
       headSha: head,
-      baseBranch: 'main',
+      headBranch: 'tidy',
+      baseBranch: base,
       files: [
         toPullRequestFile(
           { filename: 'math.js', status: 'modified', additions: 2, deletions: 1, patch: PATCH },
@@ -56,6 +58,7 @@ beforeEach(async () => {
   migrateDb(db);
   app = createApp(db, github);
   head = 'h1';
+  base = 'main';
   projectId = db
     .insert(schema.projects)
     .values({ owner: 'acme', repo: 'shop', githubToken: 'tok', config: { baseBranch: 'main' } })
@@ -91,6 +94,13 @@ test('the diff comes from GitHub, file by file, and the list stays light', async
   const [listed] = (await (await send('GET', '')).json()) as CurrentReview[];
   expect(listed).not.toHaveProperty('files');
   expect(listed).toMatchObject({ prNumber: 42, headSha: 'h1' });
+});
+
+test('reading the files again keeps the branches GitHub has now: a retargeted PR moves base', async () => {
+  base = 'develop';
+  await send('GET', '/42/diff');
+  const [listed] = (await (await send('GET', '')).json()) as CurrentReview[];
+  expect(listed).toMatchObject({ headBranch: 'tidy', baseBranch: 'develop' });
 });
 
 test('comments are checked against the fetched lines and go out of date when the PR moves', async () => {

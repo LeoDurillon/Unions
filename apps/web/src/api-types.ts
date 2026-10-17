@@ -226,6 +226,8 @@ export type PullRequestListItem = {
   author: string;
   headBranch: string;
   baseBranch: string;
+  /** Its head branch is in a fork. */
+  crossRepository: boolean;
   updatedAt: string;
   /** APPROVED, CHANGES_REQUESTED or REVIEW_REQUIRED; null when the repository needs no review. */
   reviewDecision: string | null;

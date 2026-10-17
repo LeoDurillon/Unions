@@ -2,7 +2,12 @@ import type { DiffStatus, PullRequestFile } from '@union/core';
 import type { Octokit } from 'octokit';
 
 /** The files of a pull request at its head commit, ready to review. */
-export type PullRequestFiles = { headSha: string; baseBranch: string; files: PullRequestFile[] };
+export type PullRequestFiles = {
+  headSha: string;
+  headBranch: string;
+  baseBranch: string;
+  files: PullRequestFile[];
+};
 
 const STATUSES: Record<string, DiffStatus> = {
   added: 'added',
@@ -33,7 +38,7 @@ export function toPullRequestFile(raw: RawFile, index: number): PullRequestFile 
   };
 }
 
-/** The pull request's head commit, base branch and changed files (GitHub lists up to 3000). */
+/** The pull request's head commit, branches and changed files (GitHub lists up to 3000). */
 export async function fetchPullRequestFiles(
   octokit: Octokit,
   repo: { owner: string; repo: string },
@@ -47,6 +52,7 @@ export async function fetchPullRequestFiles(
   });
   return {
     headSha: data.head.sha,
+    headBranch: data.head.ref,
     baseBranch: data.base.ref,
     files: files.map((file, index) => toPullRequestFile(file, index)),
   };

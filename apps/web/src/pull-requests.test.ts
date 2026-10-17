@@ -20,6 +20,7 @@ function pull(number: number, state: RemotePullRequest['state']): RemotePullRequ
     author: 'alice',
     headBranch: `branch-${number}`,
     baseBranch: 'main',
+    crossRepository: false,
     updatedAt: '2026-10-01T10:00:00Z',
     reviewDecision: null,
     additions: 1,
@@ -101,13 +102,20 @@ test("GitHub's shape maps to ours: merged is its own state, deleted authors are 
       isDraft: true,
       headRefName: 'h',
       baseRefName: 'b',
+      isCrossRepository: true,
       updatedAt: 'd',
       reviewDecision: 'APPROVED',
       additions: 2,
       deletions: 1,
       author: null,
     }),
-  ).toMatchObject({ state: 'merged', draft: true, author: 'ghost', headBranch: 'h' });
+  ).toMatchObject({
+    state: 'merged',
+    draft: true,
+    author: 'ghost',
+    headBranch: 'h',
+    crossRepository: true,
+  });
 });
 
 test("GitHub's list is reused a few minutes; Refresh reads it again; ticket links stay current", async () => {

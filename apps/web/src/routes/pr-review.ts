@@ -55,7 +55,10 @@ async function getDiscussion(db: Db, github: OnboardingGitHub, c: Context): Prom
   return c.json(body);
 }
 
-/** Reads the pull request's files from GitHub, keeps them on the review, and lists them. */
+/**
+ * Reads the pull request's files from GitHub, keeps them on the review, and lists them. Its branches
+ * are kept too: GitHub retargets a pull request whose base branch is deleted, and stacks follow them.
+ */
 async function getDiff(db: Db, github: OnboardingGitHub, c: Context): Promise<Response> {
   const { review, project } = load(db, c);
   const auth = authOf(db, project);
@@ -68,7 +71,12 @@ async function getDiff(db: Db, github: OnboardingGitHub, c: Context): Promise<Re
     );
   }
   db.update(schema.currentReviews)
-    .set({ files: fetched.files, headSha: fetched.headSha })
+    .set({
+      files: fetched.files,
+      headSha: fetched.headSha,
+      headBranch: fetched.headBranch,
+      baseBranch: fetched.baseBranch,
+    })
     .where(eq(schema.currentReviews.id, review.id))
     .run();
   const patterns = project.config.reviewIgnore ?? [];

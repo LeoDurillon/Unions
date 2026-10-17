@@ -14,6 +14,7 @@ export type RawPullRequest = {
   isDraft: boolean;
   headRefName: string;
   baseRefName: string;
+  isCrossRepository: boolean;
   updatedAt: string;
   reviewDecision: string | null;
   additions: number;
@@ -50,6 +51,7 @@ export function toPullRequest(raw: RawPullRequest): RemotePullRequest {
     author: raw.author?.login ?? 'ghost',
     headBranch: raw.headRefName,
     baseBranch: raw.baseRefName,
+    crossRepository: raw.isCrossRepository,
     updatedAt: raw.updatedAt,
     reviewDecision: raw.reviewDecision,
     additions: raw.additions,

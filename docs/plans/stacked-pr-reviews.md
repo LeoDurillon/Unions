@@ -30,9 +30,10 @@ export function pullRequestStacks<T extends StackMember>(pulls: T[]): T[][];
 - Each stack is ordered bottom first. The bottom is the PR whose base is no other listed PR's head.
 - A PR with two children: both follow it, one after the other (a flat order is enough for tabs; such forks are rare).
 - A PR on its own is a stack of one: it shows as today.
-- Cross-repository PRs are left out: two forks can share a branch name. Add `isCrossRepository` to
-  `REPOSITORY_PULL_REQUESTS` and to `PullRequestListItem`.
-- Only open PRs are grouped. Tested in `pr-stacks.test.ts`: chain, fork, cycle-free on odd data, cross-repository.
+- A fork's head branch is no base for anything: a branch of the repository can share its name. A fork's PR can still
+  sit on one of ours. `isCrossRepository` comes with `REPOSITORY_PULL_REQUESTS`, as `crossRepository` on
+  `PullRequestListItem`.
+- Only open PRs are grouped. Tested in `pr-stacks.test.ts`: chain, two PRs on one, branches in a ring, forks.
 
 ## Pull requests tab
 
