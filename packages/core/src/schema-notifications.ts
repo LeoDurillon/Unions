@@ -13,6 +13,7 @@ export const NOTIFICATION_KINDS = [
   'start_blocked',
   'pull_request_merged',
   'pull_request_closed',
+  'pull_request_checks_failed',
   'investigation_finished',
   'investigation_failed',
   'rule_failed',

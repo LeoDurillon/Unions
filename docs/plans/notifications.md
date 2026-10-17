@@ -20,6 +20,7 @@ Built in, nothing to set up. Each comes from one event of the log (`packages/cor
 | Paused by the usage limit                          | `phase_changed` to `rate_limited`              |
 | A start blocked by an unfinished parent            | `start_blocked`                                |
 | The PR was merged or closed                        | `pull_request_merged` / `pull_request_closed`  |
+| The PR's CI checks turned red                      | `pull_request_checks_failed`                   |
 | An investigation finished or failed                | `investigation_finished`                       |
 | An event rule failed (Notion or GitHub refused it) | `event_rule_applied` with status `failed`      |
 

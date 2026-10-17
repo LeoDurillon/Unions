@@ -30,3 +30,10 @@ failed check's link, annotations and failed step's log; a job's log without the 
 body), previewed, then kept for the implementer's next run or sent now as one revision with a note (at the final
 review or once done), in `ci_outputs`. The implementer reads them as data in a "Failed CI checks" section after the
 command outputs, the newest 6 blocks, once. The GitHub App needs read access to Checks, Commit statuses and Actions.
+
+**Checks failed**: the worker reads the overall state of the open PR's checks (the head commit's rollup, one GraphQL
+call) in the same poll as the PR's state, keeps it on the ticket (`pr_checks_state`, `pr_checks_sha`) and logs
+`pull_request_checks_failed` when they turn red: on a commit already seen without red checks (a re-run that fails
+again counts), or on a new head. The first read of a ticket's checks says nothing. The event notifies in Union
+("Checks failed") and is the rule trigger "Its pull request's CI checks fail". Without the Checks permission the
+state stays unknown and nothing notifies.

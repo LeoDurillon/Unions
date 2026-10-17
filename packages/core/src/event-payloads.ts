@@ -57,6 +57,12 @@ type GitHubPayloads = {
   >;
   pull_request_merged: PullRequestNumber;
   pull_request_closed: PullRequestNumber;
+  pull_request_checks_changed: Pick<
+    (typeof tables.tickets)['$inferSelect'],
+    'prChecksState' | 'prChecksSha'
+  >;
+  /** The head commit's checks went red: once each time they turn so on a commit. */
+  pull_request_checks_failed: PullRequestNumber & { sha: string };
   github_sync_error: Failure;
   github_issue_created: { issueNumber: number };
   github_status_reverted: { remote: BoardStatus; local: BoardStatus };

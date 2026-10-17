@@ -2,6 +2,7 @@ import { emitEvent, schema, type Db, type Ticket } from '@union/core';
 import { eq } from 'drizzle-orm';
 
 import type { GitHubApi, PullRequestStatus, RepoRef } from './api';
+import { refreshChecks } from './pull-request-checks';
 
 /** After the final approval the draft PR becomes ready for review, once. */
 export async function markReadyWhenDone(
@@ -47,12 +48,10 @@ function endDates(
   };
 }
 
+type Polled = Pick<Ticket, 'prState' | 'prMergedAt' | 'prClosedAt' | 'behindBy'>;
+
 /** What GitHub says of the ticket's pull request now; what is known already when it is settled. */
-async function polled(
-  api: GitHubApi,
-  repo: RepoRef,
-  ticket: Ticket,
-): Promise<Pick<Ticket, 'prState' | 'prMergedAt' | 'prClosedAt' | 'behindBy'>> {
+async function polled(api: GitHubApi, repo: RepoRef, ticket: Ticket): Promise<Polled> {
   const settled = ticket.prState === 'merged' && ticket.prMergedAt !== null;
   const status =
     ticket.prNumber === null || settled
@@ -71,7 +70,7 @@ async function polled(
  * without a merge (`pr_closed_at`, polled still: it can be reopened) and, for tickets
  * that could be rebased, how far behind it is (`behind_by`) current. A merged pull request is final,
  * so once its merge date is known it is no longer asked about. An event is recorded only on a change,
- * so the panel and the board refresh.
+ * so the panel and the board refresh. The open pull request's CI checks are read after.
  */
 export async function refreshPullRequest(
   db: Db,
@@ -79,7 +78,13 @@ export async function refreshPullRequest(
   repo: RepoRef,
   ticket: Ticket,
 ): Promise<void> {
-  const { prState, prMergedAt, prClosedAt, behindBy } = await polled(api, repo, ticket);
+  const status = await polled(api, repo, ticket);
+  storeStatus(db, ticket, status);
+  await refreshChecks(db, api, repo, { ...ticket, ...status });
+}
+
+function storeStatus(db: Db, ticket: Ticket, status: Polled): void {
+  const { prState, prMergedAt, prClosedAt, behindBy } = status;
   if (
     prState === ticket.prState &&
     prMergedAt === ticket.prMergedAt &&

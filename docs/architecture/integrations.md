@@ -32,7 +32,8 @@
   from a project's token by hand.
 - Permissions: the GitHub App's form is pre-filled (`app-setup-form.tsx`) with Contents, Issues and Pull requests
   read and write, Metadata read, Checks, Commit statuses and Actions read (the PR tab's CI checks: check runs and
-  annotations, commit statuses, job logs), organization Projects read and write. An existing installation must
+  annotations, commit statuses, job logs; the worker's poll of the PR's checks rollup, which reads as unknown
+  without them), organization Projects read and write. An existing installation must
   accept added permissions on GitHub (Settings → GitHub Apps → the request) before they apply; until then the CI
   reads answer 403, which `routes/pr-checks.ts` turns into a message naming them. A classic token needs `repo` and
   `project`.

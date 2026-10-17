@@ -6,7 +6,6 @@ import { drizzle } from 'drizzle-orm/bun-sqlite';
 import { readMigrationFiles } from 'drizzle-orm/migrator';
 
 import * as schema from './tables';
-import { createTicket } from './tickets';
 
 const MIGRATIONS = readMigrationFiles({
   migrationsFolder: path.join(import.meta.dir, '..', 'drizzle'),
@@ -14,6 +13,19 @@ const MIGRATIONS = readMigrationFiles({
 const OWNERS = MIGRATIONS.findIndex((migration) =>
   migration.sql.some((statement) => statement.includes('__new_previews')),
 );
+
+/** A ticket in the columns of that time: today's schema has columns the old table lacks. */
+function insertTicket(sqlite: Database, projectId: number, title: string): number {
+  const row = sqlite
+    .query<{ id: number }, [number, string]>(
+      'INSERT INTO tickets (project_id, title) VALUES (?, ?) RETURNING id',
+    )
+    .get(projectId, title);
+  if (!row) {
+    throw new Error('no ticket inserted');
+  }
+  return row.id;
+}
 
 function apply(sqlite: Database, migrations: typeof MIGRATIONS): void {
   for (const statement of migrations.flatMap((migration) => migration.sql)) {
@@ -33,8 +45,8 @@ test("the owners migration keeps the tickets' previews and commands, in their pr
     .values({ owner: 'o', repo: 'r', config: { baseBranch: 'main' } })
     .returning()
     .get().id;
-  const first = createTicket(db, { projectId, title: 'A' }).id;
-  const second = createTicket(db, { projectId, title: 'B' }).id;
+  const first = insertTicket(sqlite, projectId, 'A');
+  const second = insertTicket(sqlite, projectId, 'B');
   sqlite.run(
     `INSERT INTO previews (ticket_id, status, url, compose_yaml) VALUES (?, 'running', 'http://1.localhost', 'services: {}'), (?, 'stopped', NULL, NULL)`,
     [first, second],

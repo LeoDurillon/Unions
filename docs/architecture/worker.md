@@ -48,8 +48,9 @@
   anything is set, `union-notification.ts` writes a notification through the notifier's
   `recordNotification`), one at a time and at most the target's `perTick` per tick (Notion 3, GitHub 1).
   A target says when to retry (rate limits, 5xx and network errors); retries back off, up to 5 attempts; each outcome is logged as `event_rule_applied` (the
-  ticket's Log tab). `github/pull-request.ts` logs `pull_request_merged`/`pull_request_closed`, and linking a PR by
-  hand logs `pull_request_linked`, for the rules.
+  ticket's Log tab). `github/pull-request.ts` logs `pull_request_merged`/`pull_request_closed`,
+  `github/pull-request-checks.ts` logs `pull_request_checks_failed` when the open PR's checks turn red, and linking
+  a PR by hand logs `pull_request_linked`, for the rules.
 - `notifier.ts`: `writeNotifications`, called at the start of each `EventDispatcher` tick, follows the log with its
   own cursor (`event_cursors` name `notifications`, started at the end: the past never notifies) and writes one
   `notifications` row per event that needs the user (`notificationFor` in core decides which, unique on

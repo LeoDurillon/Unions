@@ -9,9 +9,9 @@ import {
 } from '@union/core';
 
 import type { ProjectFieldChange, RepoRef } from './api';
-import { OctokitPullRequestChanges } from './octokit-pull-request-changes';
+import { OctokitChecks } from './octokit-checks';
 
-export class OctokitProjectFields extends OctokitPullRequestChanges {
+export class OctokitProjectFields extends OctokitChecks {
   async projectFields(projectNodeId: string): Promise<RemoteProjectField[]> {
     const data = await this.octokit.graphql<ProjectFieldsResponse>(PROJECT_FIELDS, {
       id: projectNodeId,

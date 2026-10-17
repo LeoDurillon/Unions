@@ -56,6 +56,12 @@ test('blocked starts, ended pull requests and failed rules notify', () => {
   expect(
     notificationFor({ type: 'pull_request_closed', payload: { number: 7 } }, ticket)?.kind,
   ).toBe('pull_request_closed');
+  expect(
+    notificationFor(
+      { type: 'pull_request_checks_failed', payload: { number: 7, sha: '2d1d788abcdef' } },
+      ticket,
+    )?.detail,
+  ).toBe('The CI checks of #7 failed on 2d1d788.');
   const failed = notificationFor(
     {
       type: 'event_rule_applied',

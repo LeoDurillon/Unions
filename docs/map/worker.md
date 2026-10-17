@@ -100,10 +100,12 @@ export); do not edit. Tests are left out.
 - `loop.ts`: Pushes every second and pulls every `pullIntervalMs`, one call at a time, until aborted.
 - `mirror.ts`: Runs one `GitHubSync` per project, each with the project's own credentials.
 - `octokit-api.ts`: The GitHub API implemented with Octokit: issues, pull requests and the project board.
+- `octokit-checks.ts`: The CI checks of the worker's GitHub client: a pull request's head commit and the overall state of its checks, in one GraphQL call.
 - `octokit-project-fields.ts`: The GitHub Project fields of the worker's GitHub client: reading them, setting one on an item, a pull request's node id.
 - `octokit-pull-request-changes.ts`: The pull request changes of the worker's GitHub client (title, labels, reviewers, assignees): the base of `OctokitGitHubApi`.
 - `pr-description-send.ts`: Writes the user's version of a rewritten description to the pull request, with Union's links added back, unless the description on GitHub changed since the age…
 - `pr-review.ts`: The review as GitHub gets it.
+- `pull-request-checks.ts`: Keeps the CI checks' state of the ticket's open pull request current, and logs when they turn red.
 - `pull-request.ts`: Keeps the pull request's state (`pr_state`), when it was merged (`pr_merged_at`) or closed without a merge (`pr_closed_at`, polled still: it can be reopened) a…
 - `queries.ts`: The GraphQL queries the worker sends to GitHub's project board API.
 - `render.ts`: Issue body as sent to GitHub: the ticket description plus a marker that identifies our ticket.

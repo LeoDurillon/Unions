@@ -1,5 +1,7 @@
 import type {
+  ChecksState,
   GitHubApi,
+  PullRequestChecks,
   IssueRef,
   ProjectInfo,
   PullRequestRef,
@@ -47,7 +49,11 @@ export class FakeGitHubApi extends FakeProjectFields implements GitHubApi {
     /** When merged; unset reads as 0. */
     mergedAt?: number;
     closedAt?: number;
+    /** The head commit; unset reads as `sha-<number>`. */
+    headSha?: string;
   })[] = [];
+  /** Commit → the state of its checks; a commit missing has none. */
+  readonly checks = new Map<string, ChecksState>();
   /** Reviews posted, in order. */
   readonly reviews: ({ number: number } & PullRequestReview)[] = [];
   private clock = 0;
@@ -254,6 +260,13 @@ export class FakeGitHubApi extends FakeProjectFields implements GitHubApi {
     const mergedAt = state === 'merged' ? (pull.mergedAt ?? 0) : null;
     const closedAt = state === 'closed' ? (pull.closedAt ?? 0) : null;
     return Promise.resolve({ state, behindBy, mergedAt, closedAt });
+  }
+
+  pullRequestChecks(_repo: RepoRef, number: number): Promise<PullRequestChecks | null> {
+    this.calls.push('pullRequestChecks');
+    const pull = this.pulls.find((candidate) => candidate.number === number);
+    const sha = pull?.headSha ?? `sha-${number}`;
+    return Promise.resolve(pull ? { sha, state: this.checks.get(sha) ?? null } : null);
   }
 
   createPullRequestReview(

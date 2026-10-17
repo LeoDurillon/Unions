@@ -11,6 +11,7 @@ export const KIND_LABELS: Record<NotificationKind, { label: string; tone: Tone }
   start_blocked: { label: 'Blocked', tone: 'amber' },
   pull_request_merged: { label: 'Merged', tone: 'green' },
   pull_request_closed: { label: 'Closed', tone: 'neutral' },
+  pull_request_checks_failed: { label: 'Checks failed', tone: 'red' },
   investigation_finished: { label: 'Answered', tone: 'green' },
   investigation_failed: { label: 'Failed', tone: 'red' },
   rule_failed: { label: 'Rule failed', tone: 'red' },

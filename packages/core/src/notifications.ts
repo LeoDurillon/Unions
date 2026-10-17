@@ -16,6 +16,9 @@ export function clipDetail(text: string): string {
   return line.length > MAX_NOTIFICATION ? `${line.slice(0, MAX_NOTIFICATION - 1)}…` : line;
 }
 
+/** A commit named as `git log --oneline` does. */
+const SHORT_SHA = 7;
+
 type Moment = { kind: NotificationKind; detail: string };
 
 function phaseMoment(to: Phase): Moment | null {
@@ -64,6 +67,12 @@ function momentOf(event: StoredEvent): Moment | null {
     return {
       kind: 'pull_request_closed',
       detail: `#${event.payload.number} was closed without merging.`,
+    };
+  }
+  if (isEvent(event, 'pull_request_checks_failed')) {
+    return {
+      kind: 'pull_request_checks_failed',
+      detail: `The CI checks of #${event.payload.number} failed on ${event.payload.sha.slice(0, SHORT_SHA)}.`,
     };
   }
   if (isEvent(event, 'investigation_finished')) {

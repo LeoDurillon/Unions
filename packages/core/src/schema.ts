@@ -105,6 +105,12 @@ export const tickets = sqliteTable(
     prMergedAt: integer('pr_merged_at'),
     /** When GitHub closed the pull request without merging it; null while it is open or merged. */
     prClosedAt: integer('pr_closed_at'),
+    /**
+     * The CI checks of the open pull request's head commit (`pr_checks_sha`), polled with its state;
+     * null when it has none, or GitHub does not let the project read them.
+     */
+    prChecksState: text('pr_checks_state', { enum: ['pending', 'success', 'failure'] }),
+    prChecksSha: text('pr_checks_sha'),
     containerName: text('container_name'),
     homeVolume: text('home_volume'),
     workspaceVolume: text('workspace_volume'),

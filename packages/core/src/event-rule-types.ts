@@ -9,6 +9,7 @@ export type EventTrigger =
   | { kind: 'pull_request_ready' }
   | { kind: 'pull_request_merged' }
   | { kind: 'pull_request_closed' }
+  | { kind: 'pull_request_checks_failed' }
   | { kind: 'board_status'; status: BoardStatus }
   /** `step` null: any step. */
   | { kind: 'awaiting_approval'; step: Step | null }
@@ -20,6 +21,7 @@ export const TRIGGER_KINDS = [
   'pull_request_ready',
   'pull_request_merged',
   'pull_request_closed',
+  'pull_request_checks_failed',
   'board_status',
   'awaiting_approval',
   'step_failed',
@@ -31,6 +33,7 @@ export const TRIGGER_LABELS: Record<EventTrigger['kind'], string> = {
   pull_request_ready: 'Its pull request is ready for review',
   pull_request_merged: 'Its pull request is merged',
   pull_request_closed: 'Its pull request is closed without merging',
+  pull_request_checks_failed: "Its pull request's CI checks fail",
   board_status: 'The ticket moves to a board column',
   awaiting_approval: 'A step waits for your approval',
   step_failed: 'A step fails',

@@ -210,6 +210,7 @@ const MATCHERS: Record<EventTrigger['kind'], Matcher> = {
   pull_request_ready: (_trigger, event) => event.type === 'pull_request_ready',
   pull_request_merged: (_trigger, event) => event.type === 'pull_request_merged',
   pull_request_closed: (_trigger, event) => event.type === 'pull_request_closed',
+  pull_request_checks_failed: (_trigger, event) => event.type === 'pull_request_checks_failed',
   ticket_created: (_trigger, event) => event.type === 'ticket_created',
   board_status: (trigger, event) => {
     const change = phaseChange(event);

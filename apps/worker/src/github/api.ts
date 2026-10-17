@@ -42,6 +42,11 @@ export type PullRequestStatus = {
   closedAt: number | null;
 };
 
+/** All the checks of a commit together: red as soon as one failed. */
+export type ChecksState = 'pending' | 'success' | 'failure';
+/** The pull request's head commit and its checks (null: none, or they cannot be read). */
+export type PullRequestChecks = { sha: string; state: ChecksState | null };
+
 /** One line comment of a pull request review, in GitHub's terms (LEFT: the old side). */
 export type ReviewLineComment = {
   path: string;
@@ -116,6 +121,8 @@ export type GitHubApi = {
     number: number,
     behind: boolean,
   ): Promise<PullRequestStatus | null>;
+  /** The CI checks of the pull request's head commit; null when the pull request is gone. */
+  pullRequestChecks(repo: RepoRef, number: number): Promise<PullRequestChecks | null>;
   /** Posts a review ("Comment", "Approve" or "Request changes"); returns its URL. */
   createPullRequestReview(
     repo: RepoRef,

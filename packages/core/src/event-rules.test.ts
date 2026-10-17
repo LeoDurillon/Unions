@@ -158,6 +158,11 @@ test('triggers match the events Union logs', () => {
       moved('running', 'awaiting_approval', 'in_review'),
     ),
   ).toBe(false);
+  const red = { type: 'pull_request_checks_failed', payload: { number: 7, sha: 'abc' } };
+  expect(triggerMatches({ kind: 'pull_request_checks_failed' }, red)).toBe(true);
+  expect(
+    triggerMatches({ kind: 'pull_request_checks_failed' }, { ...red, type: 'pull_request_status' }),
+  ).toBe(false);
 });
 
 test('events after a rule is made queue one delivery each; earlier ones never do', () => {
