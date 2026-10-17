@@ -37,6 +37,8 @@ and linked.
 - [Previews of pull requests under review](review-previews.md): a review's own preview at the reviewed commit
   (`union-r<id>`, `r<id>.localhost`), with its e2e tests and Commands, in a container of its own; no agent, no
   GitHub writes, never the project's secrets for a fork. Built (branch `review-previews`).
+- [Spend fewer tokens per ticket](agent-token-savings.md): re-reviews that know the previous round, a size limit
+  on the implementer's session, rebase, simplify and the PR description in fresh sessions. Planned (2026-10-17).
 - [Ticket flows](ticket-flows.md): pick the steps a ticket runs (Full, Standard, Quick presets, or custom), so a
   small fix skips planning. Built (branch `ticket-flows`); a real Quick ticket run is left.
 
