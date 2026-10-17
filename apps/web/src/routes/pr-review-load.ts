@@ -1,9 +1,12 @@
-// Loads the review and project a pull request route refers to, and the GitHub auth to act on them.
+// Loads the review and project a pull request route refers to, the GitHub auth to act on them, and the review's files from GitHub.
 import { projectGitHubAuth, schema, type Db } from '@union/core';
 import { and, eq } from 'drizzle-orm';
 import type { Context } from 'hono';
 
+import type { OnboardingGitHub } from '../github-onboarding';
+import type { PullRequestFiles } from '../github-pull-request-files';
 import { CONFLICT, fail, NOT_FOUND, requireId } from '../http';
+import { guarded } from './github-errors';
 
 export type Review = typeof schema.currentReviews.$inferSelect;
 export type Project = typeof schema.projects.$inferSelect;
@@ -40,4 +43,32 @@ export function authOf(
     );
   }
   return auth;
+}
+
+/** GitHub retargets a pull request whose base branch is deleted: stacks follow the kept branches. */
+export async function readReviewFiles(
+  db: Db,
+  github: OnboardingGitHub,
+  project: Project,
+  review: Review,
+): Promise<PullRequestFiles> {
+  const repo = { owner: project.owner, repo: project.repo };
+  const auth = authOf(db, project);
+  const fetched = await guarded(() => github.getPullRequestFiles(auth, repo, review.prNumber));
+  if (!fetched) {
+    throw fail(
+      NOT_FOUND,
+      `${project.owner}/${project.repo} has no pull request #${review.prNumber}`,
+    );
+  }
+  db.update(schema.currentReviews)
+    .set({
+      files: fetched.files,
+      headSha: fetched.headSha,
+      headBranch: fetched.headBranch,
+      baseBranch: fetched.baseBranch,
+    })
+    .where(eq(schema.currentReviews.id, review.id))
+    .run();
+  return fetched;
 }

@@ -7,8 +7,9 @@ export); do not edit. Tests are left out.
 
 - `agent-idle.ts`: Stops a `claude` process that ended its turn, with no background task left, but does not exit.
 - `agent-review-findings.ts`: The last `json` block of the answer; null when there is none or it is not the expected shape.
-- `agent-review-target.ts`: Checks the change out for the agent: the ticket's branch, or the pull request in a throwaway container named `names` (each kind of run has its own names, ids o…
-- `agent-review.ts`: Runs queued agent reviews, sharing the run slots with the ticket pipeline and the investigations: a ticket's in its own container, a pull request's in a throwa…
+- `agent-review-stack.ts`: A stack's agent review: its pull requests checked out together, the prompt that lists them, and the findings split per pull request.
+- `agent-review-target.ts`: A throwaway container named `names` for the project, with what `clone` checks out in it; the returned `close` removes it.
+- `agent-review.ts`: `specs` null: the review asked for none, the ticket's own text stands in for them.
 - `agent-services-step.ts`: A step that runs code (implementation, rebase), with the project's agent services beside it.
 - `agent.ts`: Runs `claude -p` inside the ticket's container and streams its events to `onEvent`.
 - `approved.ts`: The latest approved output of every step before `step`, in pipeline order.
@@ -39,7 +40,7 @@ export); do not edit. Tests are left out.
 - `leftovers.ts`: Stages every change and describes it, or null when the working tree is clean.
 - `mcp-check.ts`: Reads the account's claude.ai connectors as an agent sees them (`claude mcp list`, which also checks each one can be reached; no model runs), in a throwaway co…
 - `notifier.ts`: Follows the event log and writes a notification for each event that needs the user, announcing it on the stream.
-- `pr-checkout.ts`: The host clones the base branch, fetches the pull request (forks included, through its `pull/<n>/head` ref) and checks out the commit its files were read at; t…
+- `pr-checkout.ts`: Where a pull request's reviewed commit is kept in the checkout.
 - `pr-description-run.ts`: Runs queued rewrites of pull request descriptions, sharing the run slots with the ticket pipeline, the investigations and the agent reviews.
 - `pr-description.ts`: The template GitHub would use among the repository's files (paths relative to its root).
 - `project-files-sync.ts`: Puts the project's files in a ticket's workspace, at their paths in the repository: new or changed ones are copied (a file already there with the same content …

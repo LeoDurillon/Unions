@@ -6,7 +6,12 @@ import type { DiffResponse } from '../api-types';
 import type { OnboardingGitHub } from '../github-onboarding';
 import { BAD_REQUEST, CONFLICT, fail, NOT_FOUND, readObject, requireId } from '../http';
 import { formatReview } from '../review-feedback';
-import { cancelAgentReview, getAgentReview, startAgentReview } from './agent-review';
+import {
+  cancelAgentReview,
+  getAgentReview,
+  readAgentReviewBody,
+  startAgentReview,
+} from './agent-review';
 import {
   addComment,
   deleteComment,
@@ -194,9 +199,14 @@ function agentRefusal(db: Db, ticket: Ticket): string | null {
 
 function agentReviewRoutes(routes: Hono, db: Db): void {
   routes.get('/:id/agent-review', (c) => getAgentReview(c, db, owner(loadTicket(db, c))));
-  routes.post('/:id/agent-review', (c) => {
+  routes.post('/:id/agent-review', async (c) => {
     const ticket = loadTicket(db, c);
-    return startAgentReview(c, db, owner(ticket), agentRefusal(db, ticket));
+    const { specs } = await readAgentReviewBody(c.req.raw);
+    return startAgentReview(c, db, {
+      owner: owner(ticket),
+      refusal: agentRefusal(db, ticket),
+      specs,
+    });
   });
   routes.post('/:id/agent-review/cancel', (c) =>
     cancelAgentReview(c, db, owner(loadTicket(db, c))),

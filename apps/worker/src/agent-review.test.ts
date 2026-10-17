@@ -11,6 +11,7 @@ import {
   queueAgentReview,
   schema,
   type AgentReviewOwner,
+  type AgentReviewSpec,
   type ContainerRuntime,
   type Db,
   type ExecResult,
@@ -90,8 +91,11 @@ function answer(comments: unknown[], summary = ''): string {
   return `Done.\n\n\`\`\`json\n${JSON.stringify({ summary, comments })}\n\`\`\``;
 }
 
-async function review(owner: AgentReviewOwner): Promise<void> {
-  queueAgentReview(db, owner);
+async function review(
+  owner: AgentReviewOwner,
+  specs: AgentReviewSpec[] | null = null,
+): Promise<void> {
+  queueAgentReview(db, owner, specs);
   const runner = new AgentReviewRunner({
     db,
     runtime,
@@ -173,6 +177,24 @@ test("a ticket's review comments on its latest diff, in the ticket's container",
     status: 'succeeded',
     comments: 2,
   });
+});
+
+test("given specs, the agent reads them instead of the ticket's text", async () => {
+  const ticketId = createTicket(db, { projectId, title: 'Add search', body: 'Search by name.' }).id;
+  db.update(schema.tickets).set({ branch: 'feature' }).run();
+  db.insert(schema.diffSnapshots).values({ ticketId, baseBranch: 'main', headSha: 'h1' }).run();
+  reply = answer([]);
+
+  await review({ kind: 'ticket', id: ticketId }, [
+    { kind: 'issue', label: 'Issue #4: Search', text: 'Search by name and city.', prs: [] },
+  ]);
+  expect(runs[0]?.prompt).toContain('### Spec 1: Issue #4: Search\n\nSearch by name and city.');
+  expect(runs[0]?.prompt).toContain('for the ticket "Add search"');
+  expect(runs[0]?.prompt).not.toContain('Search by name.');
+
+  await review({ kind: 'ticket', id: ticketId }, []);
+  expect(runs[1]?.prompt).not.toContain('## Specifications');
+  expect(runs[1]?.prompt).not.toContain('Search by name.');
 });
 
 test('an answer without the comments block fails the review and adds nothing', async () => {

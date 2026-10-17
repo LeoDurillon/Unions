@@ -1,6 +1,7 @@
 # Plan: stacked pull requests in the Pull requests and Current reviews tabs
 
-Status: planned, decisions made, not started. Steps 1 to 3 are web only (no worker change, no migration); step 4,
+Status: built (branch `stacked-pr-reviews`), steps 1 to 4. Not built: the stack's size warning in the dialog
+(current reviews do not keep their size). Steps 1 to 3 are web only (no worker change, no migration); step 4,
 reviewing the stack with the agent, needs a migration and worker changes.
 
 ## Idea
@@ -152,7 +153,7 @@ Four commits, each passing `bun run check`:
 2. Pull requests tab: the stack row (collapsed until opened), Add stack to reviews, `POST /reviews/stack`. Built (branch `stacked-pr-reviews`).
 3. Built (branch `stacked-pr-reviews`): Current reviews tab: stack rows; review page: `stack-tabs.tsx`. Update
    `docs/architecture/web.md`.
-4. Review with agent: specs for any agent review (migration, dialog, prompt), then the stack run (members, stack
+4. Built (branch `stacked-pr-reviews`): Review with agent: specs for any agent review (migration, dialog, prompt), then the stack run (members, stack
    checkout, findings per PR). Update `docs/architecture/web.md` and `worker.md`. Can be split in two: specs first,
    stack run second.
 

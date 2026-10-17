@@ -16,7 +16,13 @@ export const FINDINGS_FORMAT = `End your answer with one fenced \`json\` block, 
 - \`body\`: the comment, in markdown.
 - \`summary\`: a remark on the change as a whole, or \`""\`. Do not repeat the line comments there.`;
 
+/** The same for a stack: each comment says which pull request's diff its lines are in. */
+export const STACK_FINDINGS_FORMAT = `${FINDINGS_FORMAT}
+- \`pr\`: in each comment, the number of the pull request whose diff shows those lines. A comment on how pull requests fit together goes on the higher one.`;
+
 export type Finding = {
+  /** In a stack, the pull request the comment is about; null when the agent did not say. */
+  pr: number | null;
   path: string;
   side: 'old' | 'new';
   startLine: number;
@@ -54,6 +60,7 @@ function findingOf(value: unknown): Finding | null {
     return null;
   }
   return {
+    pr: line(value.pr),
     path,
     side: value.side === 'old' ? 'old' : 'new',
     startLine: Math.min(start, end),

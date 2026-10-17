@@ -3,7 +3,8 @@ import { useState, type ReactElement } from 'react';
 import type { ReviewTarget } from '../../lib/review-target';
 import { isGrouping, useReviewGrouping } from '../../lib/use-review-grouping';
 import { Button, ErrorText } from '../ui';
-import { GroupBySpecDialog, specSources } from './group-by-spec-dialog';
+import { GroupBySpecDialog } from './group-by-spec-dialog';
+import { specSources } from './spec-picker';
 
 /** Asks an agent to group the changed files by the parts of a specification; shows where it stands. */
 export function GroupBySpecButton({

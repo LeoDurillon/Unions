@@ -38,11 +38,12 @@ const github = {
         },
       ],
     }),
-  getPullRequestFiles: () =>
+  // #42 is `tidy` into `base`; any other is on `tidy`, as a stack on #42 would be.
+  getPullRequestFiles: (_auth: unknown, _repo: unknown, number: number) =>
     Promise.resolve({
       headSha: head,
-      headBranch: 'tidy',
-      baseBranch: base,
+      headBranch: number === 42 ? 'tidy' : `tidy-${number}`,
+      baseBranch: number === 42 ? base : 'tidy',
       files: [
         toPullRequestFile(
           { filename: 'math.js', status: 'modified', additions: 2, deletions: 1, patch: PATCH },
@@ -150,4 +151,49 @@ test('the description and the discussion come from GitHub for the other tabs', a
     notes: [{ author: 'bob', body: 'Ship it.' }],
   });
   expect((await send('GET', '/7/discussion')).status).toBe(404);
+});
+
+test('a stack is reviewed in one run: its pull requests checked, unread files read first', async () => {
+  await send('POST', '', {
+    number: 43,
+    title: 'On tidy',
+    url: 'u',
+    author: 'alice',
+    headBranch: 'tidy-43',
+    baseBranch: 'tidy',
+  });
+  await send('POST', '', {
+    number: 50,
+    title: 'Alone',
+    url: 'u',
+    author: 'alice',
+    headBranch: 'solo',
+    baseBranch: 'main',
+  });
+  const spec = { kind: 'pr', label: 'PR #42 description', text: 'Tidy.', prs: [42] };
+  expect((await send('POST', '/43/agent-review', { specs: [], stack: [42, 43, 99] })).status).toBe(
+    404,
+  );
+  expect((await send('POST', '/43/agent-review', { specs: [], stack: [42, 43, 50] })).status).toBe(
+    400,
+  );
+  expect(
+    (await send('POST', '/43/agent-review', { specs: [{ ...spec, prs: [7] }], stack: [42, 43] }))
+      .status,
+  ).toBe(400);
+
+  // Neither diff was opened: both are read from GitHub before the run is queued.
+  const started = await send('POST', '/43/agent-review', { specs: [spec], stack: [43, 42] });
+  expect(started.status).toBe(202);
+  expect(await started.json()).toMatchObject({ status: 'queued', stack: [42, 43], specs: [spec] });
+  const fromBottom = (await (await send('GET', '/42/agent-review')).json()) as { stack: number[] };
+  expect(fromBottom.stack).toEqual([42, 43]);
+  expect((await send('POST', '/42/agent-review', { specs: [] })).status).toBe(409);
+  const reviews = (await (await send('GET', '')).json()) as CurrentReview[];
+  expect(
+    reviews
+      .filter((review) => review.headSha === 'h1')
+      .map((review) => review.prNumber)
+      .toSorted((a, b) => a - b),
+  ).toEqual([42, 43]);
 });

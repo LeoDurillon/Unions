@@ -5,9 +5,9 @@ import { Hono, type Context } from 'hono';
 import type { DiffResponse, DiscussionResponse } from '../api-types';
 import type { OnboardingGitHub } from '../github-onboarding';
 import { ACCEPTED, BAD_REQUEST, CONFLICT, fail, NOT_FOUND, readObject, requireId } from '../http';
-import { cancelAgentReview, getAgentReview, startAgentReview } from './agent-review';
 import { guarded } from './github-errors';
-import { authOf, load } from './pr-review-load';
+import { prAgentReviewRoutes } from './pr-agent-review';
+import { authOf, load, readReviewFiles } from './pr-review-load';
 import {
   addComment,
   deleteComment,
@@ -55,30 +55,10 @@ async function getDiscussion(db: Db, github: OnboardingGitHub, c: Context): Prom
   return c.json(body);
 }
 
-/**
- * Reads the pull request's files from GitHub, keeps them on the review, and lists them. Its branches
- * are kept too: GitHub retargets a pull request whose base branch is deleted, and stacks follow them.
- */
+/** Reads the pull request's files from GitHub, keeps them on the review, and lists them. */
 async function getDiff(db: Db, github: OnboardingGitHub, c: Context): Promise<Response> {
   const { review, project } = load(db, c);
-  const auth = authOf(db, project);
-  const repo = { owner: project.owner, repo: project.repo };
-  const fetched = await guarded(() => github.getPullRequestFiles(auth, repo, review.prNumber));
-  if (!fetched) {
-    throw fail(
-      NOT_FOUND,
-      `${project.owner}/${project.repo} has no pull request #${review.prNumber}`,
-    );
-  }
-  db.update(schema.currentReviews)
-    .set({
-      files: fetched.files,
-      headSha: fetched.headSha,
-      headBranch: fetched.headBranch,
-      baseBranch: fetched.baseBranch,
-    })
-    .where(eq(schema.currentReviews.id, review.id))
-    .run();
+  const fetched = await readReviewFiles(db, github, project, review);
   const patterns = project.config.reviewIgnore ?? [];
   const hideLockFiles = project.config.hideLockFiles !== false;
   const body: DiffResponse = {
@@ -148,14 +128,7 @@ export function prReviewRoutes(db: Db, github: OnboardingGitHub): Hono {
   routes.patch('/comments/:commentId', (c) => editComment(c, db, owner(load(db, c).review)));
   routes.delete('/comments/:commentId', (c) => deleteComment(c, db, owner(load(db, c).review)));
   routes.post('/review', (c) => submit(db, c));
-  routes.get('/agent-review', (c) => getAgentReview(c, db, owner(load(db, c).review)));
-  routes.post('/agent-review', (c) => {
-    const { review } = load(db, c);
-    const refusal =
-      review.files && review.headSha ? null : 'Open the diff first: its files are not read yet.';
-    return startAgentReview(c, db, owner(review), refusal);
-  });
-  routes.post('/agent-review/cancel', (c) => cancelAgentReview(c, db, owner(load(db, c).review)));
+  prAgentReviewRoutes(routes, db, github);
   routes.post('/comments/:commentId/keep', (c) => keepComment(c, db, owner(load(db, c).review)));
   return routes;
 }

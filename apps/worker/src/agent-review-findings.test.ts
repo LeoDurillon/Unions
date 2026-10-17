@@ -14,7 +14,7 @@ test('the findings are read from the last json block; incomplete comments are dr
       summary: ' Overall fine. ',
       comments: [
         { path: 'a.ts', side: 'new', startLine: 2, body: 'Why 3?' },
-        { path: 'a.ts', startLine: 4, endLine: 2, body: 'Reversed range.' },
+        { pr: 13, path: 'a.ts', startLine: 4, endLine: 2, body: 'Reversed range.' },
         { path: 'a.ts', startLine: 2 },
         { path: '', startLine: 2, body: 'No file.' },
         'not an object',
@@ -24,8 +24,8 @@ test('the findings are read from the last json block; incomplete comments are dr
   expect(parseFindings(text)).toEqual({
     summary: 'Overall fine.',
     comments: [
-      { path: 'a.ts', side: 'new', startLine: 2, endLine: 2, body: 'Why 3?' },
-      { path: 'a.ts', side: 'new', startLine: 2, endLine: 4, body: 'Reversed range.' },
+      { pr: null, path: 'a.ts', side: 'new', startLine: 2, endLine: 2, body: 'Why 3?' },
+      { pr: 13, path: 'a.ts', side: 'new', startLine: 2, endLine: 4, body: 'Reversed range.' },
     ],
   });
 });
@@ -41,10 +41,10 @@ test('findings on the diff become line drafts; the others keep their place in th
     {
       summary: 'Overall fine.',
       comments: [
-        { path: 'a.ts', side: 'new', startLine: 2, endLine: 2, body: 'Why 3?' },
-        { path: 'a.ts', side: 'old', startLine: 2, endLine: 2, body: 'Keep 2.' },
-        { path: 'a.ts', side: 'new', startLine: 40, endLine: 41, body: 'Far away.' },
-        { path: 'other.ts', side: 'new', startLine: 1, endLine: 1, body: 'Not changed.' },
+        { pr: null, path: 'a.ts', side: 'new', startLine: 2, endLine: 2, body: 'Why 3?' },
+        { pr: null, path: 'a.ts', side: 'old', startLine: 2, endLine: 2, body: 'Keep 2.' },
+        { pr: null, path: 'a.ts', side: 'new', startLine: 40, endLine: 41, body: 'Far away.' },
+        { pr: null, path: 'other.ts', side: 'new', startLine: 1, endLine: 1, body: 'Not changed.' },
       ],
     },
     (path) => (path === 'a.ts' ? PATCH : undefined),

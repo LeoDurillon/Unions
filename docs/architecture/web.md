@@ -43,7 +43,7 @@
   review's branches as GitHub has them each time it reads the files, so a retargeted PR leaves its stack.
   The Current reviews tab groups its reviews the same way (`reviewStacks`, on their stored branches): stacks first,
   one row each (`review-stack-item.tsx`; Remove posts `…/reviews/stack/remove`: every member in one transaction, or none). Opening one opens its bottom PR in the review
-  page with a tab per PR under the header (`stack-review.tsx`, `stack-tabs.tsx`: draft count and posting state per
+  page with its PRs as a segmented control under the header (`stack-review.tsx`, `stack-tabs.tsx`: draft count and posting state per
   PR, `useDraftCounts` sharing `useComments`' cache); `ReviewPage` is keyed by the PR, so switching starts on its
   first section with no file open. Each PR keeps its own drafts and its own Post on GitHub.
 - Project settings are a page, not a modal: `?settings=<section>` (`lib/settings-sections.ts` lists the sections
@@ -88,6 +88,14 @@
   (badge "suggested", Keep button); keeping or editing one makes it the user's (`author: 'user'`), and a new
   successful run replaces only the agent's untouched drafts. Nothing is sent: the drafts go out with the usual
   send. Its prompt and model are the `review_comments` agent in Agent settings; `final_review` is unrelated.
+  The button opens a dialog of specs (`agent-review-dialog.tsx`, `specs-form.tsx`, `spec-cards.tsx`; sources shared
+  with Group by spec in `spec-picker.tsx`): it starts from the last run's specs (`agent_reviews.specs`), else the
+  ticket's text or the PR's description (`lib/use-default-specs.ts`); none means the agent reviews the code alone,
+  and a request with no `specs` keeps the old prompt. In a stack (`lib/review-stack.ts`, provided by
+  `stack-review.tsx`) it reviews the whole stack by default: each PR's description linked to its own PR, an added
+  spec linked to all until unticked. `routes/pr-agent-review.ts` checks the PRs are one stack under review, reads
+  the files of those never opened (`readReviewFiles`), and queues one run with its members
+  (`agent_review_members`); every PR's tab shows that run (`latestAgentReview` counts the stacks a review is in).
 - Grouping by spec: "Group by spec" on either review page (`group-by-spec-dialog.tsx`) reads a specification
   (`routes/spec-sources.ts`: the PR description without Union's links, the ticket's text, a GitHub issue, any
   Notion page the integration can read), lets the user edit it, and queues a `review_groupings` row

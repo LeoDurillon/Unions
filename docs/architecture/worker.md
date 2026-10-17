@@ -56,6 +56,11 @@
   `pull/<n>/head`, so forks work). The agent ends its answer with a JSON block (`agent-review-findings.ts`, format
   appended by the host); findings outside the diff's lines become `general` drafts naming the place, so nothing is
   lost. Cancellation goes through the `cancel_agent_review` command hook.
+  Given specs go in the prompt (`specsSection`), in place of the ticket's text. A stack run (members in
+  `agent_review_members`, `agent-review-stack.ts`) checks every PR out in one container at its reviewed commit as
+  `refs/union/pr-<n>` (`clonePullRequests`), the top one at HEAD; the prompt gives each PR's own diff
+  (`<parent's ref>...refs/union/pr-<n>`) and its specs, and asks for `"pr"` on each comment. Drafts go to each PR's
+  review; the summary and comments on no PR of the stack go to the top one.
 - `pr-description-run.ts`: `PrDescriptionRunner` (same slots) rewrites a PR's description in the ticket's
   container, resuming the implementer's session (`runResumable`), from GitHub's current description, the PR template
   and the branch. `github/pr-description-send.ts` writes the user's version only if GitHub's description is still

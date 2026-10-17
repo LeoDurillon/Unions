@@ -2,6 +2,7 @@
 import type { ReactElement } from 'react';
 
 import type { CurrentReview } from '../../../src/api-types';
+import { ReviewStackContext } from '../../lib/review-stack';
 import { ReviewPage } from '../review/review-page';
 import { prReviewSections } from './pr-review-sections';
 import { StackTabs } from './stack-tabs';
@@ -40,26 +41,32 @@ export function StackReview({
   onClose: () => void;
 }): ReactElement {
   const target = { kind: 'pull-request', projectId, number: review.prNumber } as const;
+  const pulls =
+    stack.length > 1
+      ? stack.map((member) => ({ number: member.prNumber, title: member.title }))
+      : null;
   return (
-    <ReviewPage
-      // Another pull request starts afresh: its first section, no file open.
-      key={review.prNumber}
-      target={target}
-      title={`#${review.prNumber} ${review.title}`}
-      sections={prReviewSections(target)}
-      stackTabs={
-        stack.length > 1 ? (
-          <StackTabs
-            projectId={projectId}
-            stack={stack}
-            current={review.prNumber}
-            onPick={onPick}
-          />
-        ) : undefined
-      }
-      banner={<PostingBanner review={review} />}
-      posting={review.submitStatus === 'sending'}
-      onClose={onClose}
-    />
+    <ReviewStackContext.Provider value={pulls}>
+      <ReviewPage
+        // Another pull request starts afresh: its first section, no file open.
+        key={review.prNumber}
+        target={target}
+        title={`#${review.prNumber} ${review.title}`}
+        sections={prReviewSections(target)}
+        stackTabs={
+          stack.length > 1 ? (
+            <StackTabs
+              projectId={projectId}
+              stack={stack}
+              current={review.prNumber}
+              onPick={onPick}
+            />
+          ) : undefined
+        }
+        banner={<PostingBanner review={review} />}
+        posting={review.submitStatus === 'sending'}
+        onClose={onClose}
+      />
+    </ReviewStackContext.Provider>
   );
 }

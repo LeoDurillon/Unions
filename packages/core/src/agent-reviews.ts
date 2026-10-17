@@ -1,5 +1,6 @@
-import { and, asc, desc, eq, inArray, type SQL } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, sql, type SQL } from 'drizzle-orm';
 
+import type { AgentReviewSpec } from './agent-review-specs';
 import type { Db } from './db';
 import * as schema from './tables';
 import { emitEvent } from './tickets';
@@ -15,8 +16,11 @@ export type AgentDraft = Pick<
   'kind' | 'path' | 'side' | 'startLine' | 'endLine' | 'excerpt' | 'body'
 >;
 
+/** A stack's other pull requests under review: each gets its own drafts, on its own head. */
+export type MemberDrafts = { reviewId: number; headSha: string; drafts: AgentDraft[] };
+
 export type AgentReviewOutcome =
-  | { status: 'succeeded'; headSha: string; drafts: AgentDraft[] }
+  | { status: 'succeeded'; headSha: string; drafts: AgentDraft[]; others?: MemberDrafts[] }
   | { status: 'failed'; error: string }
   | { status: 'cancelled' };
 
@@ -31,10 +35,13 @@ function ownerOf(review: AgentReview): AgentReviewOwner {
     : { kind: 'ticket', id: review.ticketId };
 }
 
+/** A review's runs: its own, and those of the stacks it is a member of. */
 function owns(owner: AgentReviewOwner): SQL {
-  return owner.kind === 'ticket'
-    ? eq(schema.agentReviews.ticketId, owner.id)
-    : eq(schema.agentReviews.reviewId, owner.id);
+  if (owner.kind === 'ticket') {
+    return eq(schema.agentReviews.ticketId, owner.id);
+  }
+  const members = schema.agentReviewMembers;
+  return sql`(${schema.agentReviews.reviewId} = ${owner.id} or ${schema.agentReviews.id} in (select ${members.agentReviewId} from ${members} where ${members.reviewId} = ${owner.id}))`;
 }
 
 function ownsComment(owner: AgentReviewOwner): SQL {
@@ -72,25 +79,65 @@ export function latestAgentReview(db: Db, owner: AgentReviewOwner): AgentReview 
   );
 }
 
-/** Queues a review; refused while one is queued or running for the same owner. */
-export function queueAgentReview(db: Db, owner: AgentReviewOwner): AgentReview {
+/**
+ * Queues a review; refused while one is queued or running for the same owner. `specs`: what the
+ * agent checks the change against; null keeps the review without them. `members`: the reviews of a
+ * stack, bottom first (`owner` is the bottom one); each must be free.
+ */
+export function queueAgentReview(
+  db: Db,
+  owner: AgentReviewOwner,
+  specs: AgentReviewSpec[] | null = null,
+  members: number[] = [],
+): AgentReview {
   return db.transaction((tx) => {
-    const active = tx
-      .select()
-      .from(schema.agentReviews)
-      .where(and(owns(owner), inArray(schema.agentReviews.status, ACTIVE)))
-      .get();
-    if (active) {
-      throw new AgentReviewBusyError('The agent is already reviewing this change');
+    const owners: AgentReviewOwner[] =
+      members.length > 1 ? members.map((id) => ({ kind: 'review', id })) : [owner];
+    for (const each of owners) {
+      const active = tx
+        .select()
+        .from(schema.agentReviews)
+        .where(and(owns(each), inArray(schema.agentReviews.status, ACTIVE)))
+        .get();
+      if (active) {
+        throw new AgentReviewBusyError('The agent is already reviewing this change');
+      }
     }
     const review = tx
       .insert(schema.agentReviews)
-      .values(owner.kind === 'ticket' ? { ticketId: owner.id } : { reviewId: owner.id })
+      .values({
+        ...(owner.kind === 'ticket' ? { ticketId: owner.id } : { reviewId: owner.id }),
+        specs,
+      })
       .returning()
       .get();
+    if (members.length > 1) {
+      tx.insert(schema.agentReviewMembers)
+        .values(
+          members.map((reviewId, position) => ({ agentReviewId: review.id, reviewId, position })),
+        )
+        .run();
+    }
     changed(tx, review);
     return review;
   });
+}
+
+/** The reviews a stack run covers, bottom first; empty for a run on one change. */
+export function agentReviewStack(
+  db: Db,
+  agentReviewId: number,
+): { reviewId: number; prNumber: number }[] {
+  return db
+    .select({ reviewId: schema.currentReviews.id, prNumber: schema.currentReviews.prNumber })
+    .from(schema.agentReviewMembers)
+    .innerJoin(
+      schema.currentReviews,
+      eq(schema.currentReviews.id, schema.agentReviewMembers.reviewId),
+    )
+    .where(eq(schema.agentReviewMembers.agentReviewId, agentReviewId))
+    .orderBy(asc(schema.agentReviewMembers.position))
+    .all();
 }
 
 /** The oldest queued review, now running; null when none waits. */
@@ -116,43 +163,59 @@ export function claimAgentReview(db: Db): AgentReview | null {
   });
 }
 
+/** The agent's drafts the user did not keep or edit (`author` still `agent`) give way to new ones. */
+function replaceDrafts(
+  tx: Executor,
+  owner: AgentReviewOwner,
+  headSha: string,
+  drafts: AgentDraft[],
+): void {
+  tx.delete(schema.reviewComments)
+    .where(
+      and(
+        ownsComment(owner),
+        eq(schema.reviewComments.author, 'agent'),
+        eq(schema.reviewComments.status, 'draft'),
+      ),
+    )
+    .run();
+  for (const draft of drafts) {
+    tx.insert(schema.reviewComments)
+      .values({
+        ...draft,
+        ...(owner.kind === 'ticket' ? { ticketId: owner.id } : { reviewId: owner.id }),
+        headSha,
+        author: 'agent',
+      })
+      .run();
+  }
+}
+
 /**
  * Records the end of a run. A success replaces the agent's earlier drafts the user did not keep or
- * edit (`author` still `agent`) with the new ones; the user's own drafts are never touched.
+ * edit with the new ones, on every review it covers; the user's own drafts are never touched.
  */
 export function finishAgentReview(db: Db, id: number, outcome: AgentReviewOutcome): void {
   db.transaction((tx) => {
+    const others = outcome.status === 'succeeded' ? (outcome.others ?? []) : [];
     const review = tx
       .update(schema.agentReviews)
       .set({
         status: outcome.status,
         error: outcome.status === 'failed' ? outcome.error : null,
-        comments: outcome.status === 'succeeded' ? outcome.drafts.length : null,
+        comments:
+          outcome.status === 'succeeded'
+            ? others.reduce((sum, other) => sum + other.drafts.length, outcome.drafts.length)
+            : null,
         finishedAt: Date.now(),
       })
       .where(eq(schema.agentReviews.id, id))
       .returning()
       .get();
     if (outcome.status === 'succeeded') {
-      const owner = ownerOf(review);
-      tx.delete(schema.reviewComments)
-        .where(
-          and(
-            ownsComment(owner),
-            eq(schema.reviewComments.author, 'agent'),
-            eq(schema.reviewComments.status, 'draft'),
-          ),
-        )
-        .run();
-      for (const draft of outcome.drafts) {
-        tx.insert(schema.reviewComments)
-          .values({
-            ...draft,
-            ...(owner.kind === 'ticket' ? { ticketId: owner.id } : { reviewId: owner.id }),
-            headSha: outcome.headSha,
-            author: 'agent',
-          })
-          .run();
+      replaceDrafts(tx, ownerOf(review), outcome.headSha, outcome.drafts);
+      for (const other of others) {
+        replaceDrafts(tx, { kind: 'review', id: other.reviewId }, other.headSha, other.drafts);
       }
     }
     changed(tx, review);

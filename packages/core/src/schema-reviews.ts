@@ -7,6 +7,7 @@ import {
   type AnySQLiteColumn,
 } from 'drizzle-orm/sqlite-core';
 
+import type { AgentReviewSpec } from './agent-review-specs';
 import { now, projects, tickets } from './schema';
 import type { PullRequestFile } from './schema-types';
 
@@ -98,6 +99,8 @@ export const agentReviews = sqliteTable(
       .notNull()
       .default('queued'),
     error: text('error'),
+    /** What the agent checks the change against, as the user sent them; null: no specs asked for. */
+    specs: text('specs', { mode: 'json' }).$type<AgentReviewSpec[]>(),
     /** Drafts the run added (a run replaces the agent's drafts the user did not keep). */
     comments: integer('comments'),
     createdAt: integer('created_at').notNull().default(now),
@@ -107,5 +110,27 @@ export const agentReviews = sqliteTable(
   (t) => [
     index('agent_reviews_ticket_idx').on(t.ticketId),
     index('agent_reviews_review_idx').on(t.reviewId),
+  ],
+);
+
+/**
+ * The pull requests under review a stack's agent review covers, bottom first. The run's own
+ * `review_id` is the bottom one's; a run on one pull request has no rows here.
+ */
+export const agentReviewMembers = sqliteTable(
+  'agent_review_members',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    agentReviewId: integer('agent_review_id')
+      .notNull()
+      .references(() => agentReviews.id, { onDelete: 'cascade' }),
+    reviewId: integer('review_id')
+      .notNull()
+      .references(() => currentReviews.id, { onDelete: 'cascade' }),
+    position: integer('position').notNull(),
+  },
+  (t) => [
+    uniqueIndex('agent_review_members_idx').on(t.agentReviewId, t.reviewId),
+    index('agent_review_members_review_idx').on(t.reviewId),
   ],
 );

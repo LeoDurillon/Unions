@@ -14,6 +14,7 @@ import {
   cloneSource,
   ensureTicketContainer,
   seedCredentials,
+  type CloneSource,
   type ProvisionConfig,
   type TicketContainer,
 } from './provision';
@@ -34,11 +35,13 @@ export type ReviewTarget = {
   paths: string[];
   /** What is reviewed, for the prompt. */
   about: string;
+  /** The same without the ticket's text: given specs replace it. */
+  brief: string;
   log: (event: unknown) => void;
   close: () => Promise<void>;
 };
 
-function loadProject(db: Db, id: number): typeof schema.projects.$inferSelect {
+export function loadProject(db: Db, id: number): typeof schema.projects.$inferSelect {
   const project = db.select().from(schema.projects).where(eq(schema.projects.id, id)).get();
   if (!project) {
     throw new Error(`Project ${id} not found`);
@@ -46,7 +49,9 @@ function loadProject(db: Db, id: number): typeof schema.projects.$inferSelect {
   return project;
 }
 
-function patches(files: { path: string; patch: string }[]): (path: string) => string | undefined {
+export function patches(
+  files: { path: string; patch: string }[],
+): (path: string) => string | undefined {
   return (path) => files.find((file) => file.path === path)?.patch;
 }
 
@@ -80,6 +85,7 @@ async function ticketTarget(deps: TargetDeps, ticketId: number): Promise<ReviewT
     patchOf: patches(files),
     paths: files.map((file) => file.path),
     about: `The ticket's branch \`${ticket.branch}\`. The ticket:\n\n# ${ticket.title}\n\n${ticket.body}`,
+    brief: `The ticket's branch \`${ticket.branch}\`, for the ticket "${ticket.title}".`,
     log: (event) => {
       appendAgentLine(db, { ticketId, payload: event });
     },
@@ -100,13 +106,39 @@ export function agentReviewContainer(id: number): TicketContainer {
   };
 }
 
+/**
+ * A throwaway container named `names` for the project, with what `clone` checks out in it; the
+ * returned `close` removes it. A failure on the way removes it too.
+ */
+export async function throwawayCheckout(
+  deps: TargetDeps,
+  project: typeof schema.projects.$inferSelect,
+  names: TicketContainer,
+  clone: (source: CloneSource) => Promise<void>,
+): Promise<() => Promise<void>> {
+  const { db, runtime, config } = deps;
+  const close = (): Promise<void> =>
+    runtime.remove(names.name, { home: names.homeVolume, workspace: names.workspaceVolume });
+  try {
+    await runtime.create({ ...names, image: config.image });
+    await runtime.start(names.name);
+    await seedCredentials(runtime, names.name, config.credentialsPath);
+    const token = await projectGitToken(db, project);
+    await clone(cloneSource(config.gitBaseUrl, project.owner, project.repo, token));
+  } catch (error) {
+    await close();
+    throw error;
+  }
+  return close;
+}
+
 /** A throwaway container with the pull request checked out at the commit its files were read at. */
 async function pullRequestTarget(
   deps: TargetDeps,
   reviewId: number,
   names: TicketContainer,
 ): Promise<ReviewTarget> {
-  const { db, runtime, config } = deps;
+  const { db, runtime } = deps;
   const review = db
     .select()
     .from(schema.currentReviews)
@@ -115,32 +147,25 @@ async function pullRequestTarget(
   if (!review?.files || !review.headSha) {
     throw new Error("Open the pull request's review first: its files are not read yet");
   }
+  const { files, headSha } = review;
   const project = loadProject(db, review.projectId);
-  const close = (): Promise<void> =>
-    runtime.remove(names.name, { home: names.homeVolume, workspace: names.workspaceVolume });
-  try {
-    await runtime.create({ ...names, image: config.image });
-    await runtime.start(names.name);
-    await seedCredentials(runtime, names.name, config.credentialsPath);
-    const token = await projectGitToken(db, project);
-    const source = cloneSource(config.gitBaseUrl, project.owner, project.repo, token);
-    await clonePullRequest(runtime, names.name, source, {
+  const close = await throwawayCheckout(deps, project, names, (source) =>
+    clonePullRequest(runtime, names.name, source, {
       base: review.baseBranch,
       number: review.prNumber,
-      headSha: review.headSha,
-    });
-  } catch (error) {
-    await close();
-    throw error;
-  }
+      headSha,
+    }),
+  );
+  const about = `Pull request #${review.prNumber} by ${review.author}, from \`${review.headBranch}\` into \`${review.baseBranch}\`: ${review.title}`;
   return {
     container: names.name,
     projectId: project.id,
     base: `origin/${review.baseBranch}`,
-    headSha: review.headSha,
-    patchOf: patches(review.files),
-    paths: review.files.map((file) => file.path),
-    about: `Pull request #${review.prNumber} by ${review.author}, from \`${review.headBranch}\` into \`${review.baseBranch}\`: ${review.title}`,
+    headSha,
+    patchOf: patches(files),
+    paths: files.map((file) => file.path),
+    about,
+    brief: about,
     log: () => {
       // A pull request review has no log view.
     },

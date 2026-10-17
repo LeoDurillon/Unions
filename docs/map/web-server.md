@@ -51,10 +51,11 @@ export); do not edit. Tests are left out.
 - `mcp-connectors.ts`: `/api/agents/connectors`: the account's claude.ai connectors as the last check read them, and `POST /check` to read them again (the worker does, in a throwaway…
 - `notifications.ts`: `/api/notifications`: what needs the user across every project (the worker writes them), and marking them read.
 - `notion.ts`: Notion failures become messages the UI shows next to the field.
+- `pr-agent-review.ts`: A pull request under review's agent review: one pull request, or the stack it is in, checked and queued for the worker.
 - `pr-checks.ts`: `/api/tickets/:id/pr-checks`: the pull request's CI checks read from GitHub, and the failed ones (with related jobs and bot comments) given to the implementer.
 - `pr-commits.ts`: `<review>/commits`: the pull request's commits, and one commit's files and patches, to read the change one commit at a time.
 - `pr-description.ts`: `/api/tickets/:id/pr-description`: the agent rewrites the PR's description into a draft the user edits; sending it is a command (the worker writes to GitHub).
-- `pr-review-load.ts`: Loads the review and project a pull request route refers to, and the GitHub auth to act on them.
+- `pr-review-load.ts`: Loads the review and project a pull request route refers to, the GitHub auth to act on them, and the review's files from GitHub.
 - `pr-review.ts`: `/api/projects/:projectId/pull-requests/reviews/:number`: the description and discussion, the diff, the comments, and posting them.
 - `preview-settings.ts`: `/api/projects/:projectId/preview`: how the project's tickets run as previews, and its secret variables, whose values are written here and never read back.
 - `preview.ts`: `/api/tickets/:id/preview`: the ticket's preview and the commands that start, stop and read it (the worker runs them: the web never touches Docker).

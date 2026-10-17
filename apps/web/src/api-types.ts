@@ -1,4 +1,5 @@
 import type {
+  AgentReviewSpec,
   BoardColumn,
   ContainerRun,
   LogEntry,
@@ -185,6 +186,10 @@ export type AgentReviewView = {
   error: string | null;
   /** Drafts it added, once it succeeded. */
   comments: number | null;
+  /** What it checked the change against; null when it was given none. */
+  specs: AgentReviewSpec[] | null;
+  /** A stack run's pull requests, bottom first; null for a run on one change. */
+  stack: number[] | null;
   createdAt: number;
   startedAt: number | null;
   finishedAt: number | null;

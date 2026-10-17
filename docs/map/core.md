@@ -8,7 +8,8 @@ export); do not edit. Tests are left out.
 - `agent-environment.ts`: The agent's environment settings as sent (`agentVariables`, `forwardPorts`), checked; only what differs from the defaults is kept.
 - `agent-inputs.ts`: What the user gave the implementer's next run: command outputs and CI outputs, read together and marked read together.
 - `agent-log.ts`: Writes the agents' output to `agent_log`, and reads a Log: events and agent lines in one order.
-- `agent-reviews.ts`: Fails the reviews a stopped worker left running, and returns them.
+- `agent-review-specs.ts`: The specifications an agent review is given: read from the request, and written into the agent's prompt.
+- `agent-reviews.ts`: The reviews a stack run covers, bottom first; empty for a run on one change.
 - `agent-tools.ts`: A tool the list refuses: bad syntax, duplicate, built-in, or still selected by an agent.
 - `agents.ts`: The agents' default prompts, models, efforts and tools, the user's overrides, and how a run resolves them.
 - `ansi.ts`: Strips terminal colour codes from command and CI output; browser-safe.

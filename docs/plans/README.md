@@ -17,7 +17,8 @@ and linked.
 - [Split a PR into a stack](pr-stack-split.md): an agent splits a ready-for-review PR into stacked PRs. Needs groups.
 - [Restack](restack.md): rebase and retarget a stack after a revision or a merge.
 - [Stacked PRs in Pull requests and Current reviews](stacked-pr-reviews.md): a stack shows as one item, its review
-  page has a tab per PR, and the agent reviews the whole stack against several specs linked to its PRs.
+  page has a tab per PR, and the agent reviews the whole stack against several specs linked to its PRs. Built
+  (branch `stacked-pr-reviews`).
 - [MCP servers for agents](mcp-servers.md): claude.ai connectors built (Figma); HTTP and stdio servers left.
 - [Preview environments](preview-environments.md): compose-based previews with e2e tests (built, phases 1 to 4).
 - [Project settings as a page](project-settings-page.md): grouped side menu instead of the nine-tab modal (steps 1 to 5 built).

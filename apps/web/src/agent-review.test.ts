@@ -82,6 +82,17 @@ test('the agent reviews a ticket once it has a diff and no run works in its work
   expect((await send('POST', base)).status).toBe(409);
 });
 
+test('the specs sent are kept with the run, and shown with it; bad ones are refused', async () => {
+  const base = `/api/tickets/${ticketId}/agent-review`;
+  addSnapshot();
+  const spec = { kind: 'ticket', label: 'Ticket description', text: 'Search by name.' };
+  const bad = await send('POST', base, { specs: [{ ...spec, text: '' }] });
+  expect(bad.status).toBe(400);
+  expect(await errorOf(bad)).toBe('Spec 1: a label and a text are needed');
+  const queued = await send('POST', base, { specs: [spec] });
+  expect(await queued.json()).toMatchObject({ specs: [{ ...spec, prs: [] }] });
+});
+
 test('cancelling hands the worker a command; nothing to cancel is refused', async () => {
   const base = `/api/tickets/${ticketId}/agent-review`;
   expect((await send('POST', `${base}/cancel`)).status).toBe(409);
