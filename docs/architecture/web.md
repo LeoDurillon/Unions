@@ -8,7 +8,7 @@
   only wires the DB and `Bun.serve`. `src/api-types.ts` holds the response shapes shared with the client.
 - Setup is a wizard (`components/onboarding/`: Connect, Repository, Project, Notion, Review) shown over the board
   on first run and from "Add project". Connect takes a token or an installation of the GitHub App
-  (`components/github-app/`, also a global page in the sidebar). The board columns fill the viewport height; each column scrolls itself.
+  (`components/github-app/`, also a page of the Union settings). The board columns fill the viewport height; each column scrolls itself.
   A ticket whose PR is merged or closed (`pr_state`, polled by the worker) is in the Union-only Merged / Closed column
   (`boardColumn`), its card tagged Merged or Closed, for 21 days after `pr_merged_at` or `pr_closed_at`, then leaves the
   board (`leftBoard`); the GitHub Project still sees it as Done. A closed PR is still polled: reopened, the ticket goes back.
@@ -57,10 +57,15 @@
 - Project settings are a page, not a modal: `?settings=<section>` (`lib/settings-sections.ts` lists the sections
   and their groups; `openSettings(section)` links to one from anywhere), `components/settings/settings-page.tsx`
   with a grouped side menu.
+- Union settings (sidebar → Union settings) are the same frame (`settings/settings-frame.tsx`, `settings-nav.tsx`)
+  over `?union=<section>`: one page per agent (`agents/agent-page.tsx`: prompt, model, effort, tools, one Save;
+  Reset to default applies at once), Tools, Connectors and the GitHub App
+  (`lib/union-settings-groups.ts` lists them; `openUnionSettings(section)` links to one). The page shown is in the
+  URL too (`lib/use-navigation.ts`: `?page=previews`, `?union=`, else the board), so a reload keeps it.
 - One Save per settings page: a page's form is `useSettingsForm` (`lib/use-settings-form.ts`, unsaved = differs
   from what was loaded or last saved there) and its Save bar is `components/settings/save-bar.tsx`, sticky at the
   bottom. A form with changes registers with `useLeaveGuard` (`lib/leave-guard.ts`): `openSettings`,
-  `closeSettings` (which leaving to another page or project goes through), browser back/forward and reload ask
+  `closeSettings`, their Union settings counterparts (which leaving to another page or project goes through), browser back/forward and reload ask
   before throwing it away. What applies at once by nature keeps its own button and only guards what is typed:
   credentials verified before they are stored (GitHub token or installation), secrets, file uploads, event rules
   (records, each with its editor), Turn previews off, Disconnect, deleting the project.
@@ -95,7 +100,7 @@
   (`routes/agent-review.ts`, `@union/core` `agent-reviews.ts`). Its findings become drafts with `author: 'agent'`
   (badge "suggested", Keep button); keeping or editing one makes it the user's (`author: 'user'`), and a new
   successful run replaces only the agent's untouched drafts. Nothing is sent: the drafts go out with the usual
-  send. Its prompt and model are the `review_comments` agent in Agent settings; `final_review` is unrelated.
+  send. Its prompt and model are the `review_comments` agent in Union settings; `final_review` is unrelated.
   The button opens a dialog of specs (`agent-review-dialog.tsx`, `specs-form.tsx`, `spec-cards.tsx`; sources shared
   with Group by spec in `spec-picker.tsx`): it starts from the last run's specs (`agent_reviews.specs`), else the
   ticket's text or the PR's description (`lib/use-default-specs.ts`); none means the agent reviews the code alone,

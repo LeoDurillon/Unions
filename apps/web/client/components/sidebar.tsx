@@ -10,12 +10,6 @@ import { Button } from './ui';
 const ACTIVE = 'bg-indigo-100 font-medium text-indigo-900 dark:bg-indigo-950 dark:text-indigo-200';
 const IDLE = 'hover:bg-zinc-200/70 dark:hover:bg-zinc-800';
 
-/** Pages below the projects: the current project's investigations, then the global settings. */
-const SETTINGS_PAGES: { page: Page; label: string }[] = [
-  { page: 'agents', label: 'Agent settings' },
-  { page: 'github-app', label: 'GitHub App' },
-];
-
 function ProjectItem({
   project,
   active,
@@ -44,24 +38,17 @@ function ProjectItem({
   );
 }
 
-/** The global pages below the projects. */
-function PageLinks({ page, onPage }: { page: Page; onPage: (page: Page) => void }): ReactElement {
+/** The settings every project shares, below the projects. */
+function SettingsLink({ active, onOpen }: { active: boolean; onOpen: () => void }): ReactElement {
   return (
-    <div className="flex flex-col gap-0.5">
-      {SETTINGS_PAGES.map((entry) => (
-        <button
-          key={entry.page}
-          type="button"
-          aria-current={page === entry.page ? 'page' : undefined}
-          onClick={() => {
-            onPage(entry.page);
-          }}
-          className={`rounded-md px-3 py-2 text-left text-sm transition ${page === entry.page ? ACTIVE : IDLE}`}
-        >
-          {entry.label}
-        </button>
-      ))}
-    </div>
+    <button
+      type="button"
+      aria-current={active ? 'page' : undefined}
+      onClick={onOpen}
+      className={`rounded-md px-3 py-2 text-left text-sm transition ${active ? ACTIVE : IDLE}`}
+    >
+      Union settings
+    </button>
   );
 }
 
@@ -112,7 +99,12 @@ export function Sidebar({
         ) : null}
       </nav>
       <Button onClick={onNewProject}>+ Add project</Button>
-      <PageLinks page={page} onPage={onPage} />
+      <SettingsLink
+        active={page === 'settings'}
+        onOpen={() => {
+          onPage('settings');
+        }}
+      />
     </aside>
   );
 }

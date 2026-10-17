@@ -38,10 +38,10 @@ export function ConnectorList(): ReactElement {
   const { connectors, check, checking } = useConnectors();
   const list = connectors.data?.connectors ?? [];
   return (
-    <section className="space-y-3 rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+    <section className="space-y-3">
       <header className="flex items-start justify-between gap-3">
         <div>
-          <h3 className="font-semibold">Connectors</h3>
+          <h3 className="text-sm font-semibold">Connectors</h3>
           <p className="text-xs text-zinc-500">
             The MCP connectors of your Claude account (claude.ai → Settings → Connectors). Select
             one on an agent like a tool to give it all the connector&apos;s tools; agents without

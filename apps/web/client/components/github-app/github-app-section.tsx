@@ -110,28 +110,24 @@ function ConfiguredApp({
 }
 
 /** The GitHub App every project may use instead of a personal token. */
-export function GitHubAppPage(): ReactElement {
+export function GitHubAppSection(): ReactElement {
   const status = useGitHubApp();
   return (
-    <div className="flex h-full min-w-0 flex-1 flex-col">
-      <header className="border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
-        <h2 className="text-base font-semibold">GitHub App</h2>
+    <div className="space-y-4">
+      <header>
+        <h3 className="text-sm font-semibold">GitHub App</h3>
         <p className="text-xs text-zinc-500">
           An alternative to personal tokens: projects pick one of the app’s installations in their
           settings. Issues, comments and pull requests are then authored by the app.
         </p>
       </header>
-      <div className="min-h-0 flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-2xl space-y-4 p-4">
-          <ErrorText error={status.error} />
-          {status.data?.configured ? <ConfiguredApp app={status.data} /> : null}
-          {status.data?.configured === false ? (
-            <section className={CARD}>
-              <AppSetupForm />
-            </section>
-          ) : null}
-        </div>
-      </div>
+      <ErrorText error={status.error} />
+      {status.data?.configured ? <ConfiguredApp app={status.data} /> : null}
+      {status.data?.configured === false ? (
+        <section className={CARD}>
+          <AppSetupForm />
+        </section>
+      ) : null}
     </div>
   );
 }

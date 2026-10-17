@@ -58,6 +58,11 @@ export const AGENT_LABELS: Record<AgentId, { title: string; description: string 
   },
 };
 
+/** Whether `value` names an agent; the labels list every one (the record's type holds them to it). */
+export function isAgentId(value: string): value is AgentId {
+  return Object.hasOwn(AGENT_LABELS, value);
+}
+
 export const MODEL_LABELS: Record<AgentModel, string> = {
   haiku: 'Haiku (fastest)',
   sonnet: 'Sonnet (balanced)',

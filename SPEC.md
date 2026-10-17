@@ -277,7 +277,7 @@ The host pushes the result.
    is as it was) and calls the agent with the conflicting files; when the rebase was clean but the checks fail, it
    keeps the rebased branch and calls the agent with the checks' output. The agent is the same implementation
    agent, started with `claude -p --resume <implement session id>` and the rebase prompt, on the Implementation
-   model. There is no separate rebase agent; the rebase prompt is its own entry in Agent settings (default: say why
+   model. There is no separate rebase agent; the rebase prompt is its own page in Union settings (default: say why
    it is called, rebase onto `origin/<base>`, resolve conflicts keeping both intents, run the project's checks, fix
    what the rebase broke, abort if unsafe, never push). Allowed tools add `git rebase`, `git merge-base`, `git add`
    and `git status`; push, checkout, reset and branch deletion stay denied. A lost session falls back to a fresh one
@@ -318,7 +318,7 @@ Done. The implementation agent rewrites the branch's commits into a history a re
 
 1. **Fetch:** as for a rebase, the host brings the base and the pushed branch into the container as a bundle; a
    pushed branch with commits the workspace lacks stops it before the agent runs.
-2. **Agent run:** `claude -p --resume <implementer session>` with the `simplify` prompt (Agent settings → Simplify
+2. **Agent run:** `claude -p --resume <implementer session>` with the `simplify` prompt (Union settings → Simplify
    history), told the branch and its fork point (`git merge-base HEAD origin/<base>`). Allowed tools add `git reset`,
    `git rebase`, `git add`, `git apply`, `git commit` and `git status` (no editor: `rebase -i` and `add -p` cannot be
    used); push, checkout and branch deletion stay denied.
@@ -417,7 +417,7 @@ Claude usage) and nothing is written to GitHub: the worker only fetches the pull
 ## MCP servers for agents (planned)
 
 **Built first: claude.ai connectors.** The account's claude.ai connectors (Figma…) reach every agent container
-through the Claude login alone: their tokens stay with Anthropic. Agent settings → Connectors reads them
+through the Claude login alone: their tokens stay with Anthropic. Union settings → Connectors reads them
 (`claude mcp list` in a throwaway `union-mcp-check` container, no model run) into `mcp_connectors`; each is offered
 in the tool list as `mcp__claude_ai_<Name>` (all its tools) and selected per agent or investigation like any tool. A
 run gets `ENABLE_CLAUDEAI_MCP_SERVERS=true` only when its tools include a connector, `false` otherwise, so runs
@@ -441,7 +441,7 @@ accepts this per server when adding it, and the narrowing below applies. Buildin
 
 ### Configuration
 
-- **Registry** (Agent settings → MCP servers, global like the tool list), table `mcp_servers`:
+- **Registry** (Union settings → MCP servers, global like the tool list), table `mcp_servers`:
   `name` (slug, the `mcp__<name>__*` prefix), `transport` (`http` or `stdio`), for `http` the `url` and either secret
   `headers` or `auth = 'oauth'`, for `stdio` the `command`, `args` and secret `env`. Secrets (headers, variables, the
   OAuth token in `oauth`) are stored like the GitHub token (plain text, local app) and never sent to the browser: the
@@ -479,7 +479,7 @@ Claude Code signs in to such servers itself, as an approved client (Figma lets o
 `claude mcp login <name> --no-browser`, which prints the authorization URL and waits for the redirect URL to be
 pasted back. Union drives that and keeps the token.
 
-1. **Sign in** (Agent settings → MCP servers → Sign in): a `mcp_login` command. The worker starts a sign-in
+1. **Sign in** (Union settings → MCP servers → Sign in): a `mcp_login` command. The worker starts a sign-in
    container `union-mcp-<name>` (Claude login seeded, only that server configured), runs the login there, and
    stores the printed URL on the server (`login_status: waiting`); the page shows it as a link.
 2. The user approves in Figma. The browser then goes to `http://localhost:<port>/callback?code=…` and fails to load:

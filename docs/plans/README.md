@@ -22,6 +22,8 @@ and linked.
 - [MCP servers for agents](mcp-servers.md): claude.ai connectors built (Figma); HTTP and stdio servers left.
 - [Preview environments](preview-environments.md): compose-based previews with e2e tests (built, phases 1 to 4).
 - [Project settings as a page](project-settings-page.md): grouped side menu instead of the nine-tab modal (steps 1 to 5 built).
+- [Union settings as a page](union-settings-page.md): Agent settings and GitHub App in the same shell, one page per
+  agent, then a Models page. Step 1 built (branch `union-settings`).
 - [Notifications in Union](notifications.md): an inbox of what needs you (approvals, failures, usage limit, merged
   PRs, finished investigations), with an unread count and optional desktop notifications (built, steps 1 to 5, and the "Notify me in Union" rule action).
 - [Group a review's changes by spec](review-spec-groups.md) (built, hunks included): an agent groups the changed files by the parts of
@@ -44,7 +46,8 @@ Loose ends found while building, not planned yet (2026-10-15):
 
 - Ticket 7 (PR #1603) builds on the branch of #1582, which was closed: the user may want to retarget it to the base
   branch (Overview → base branch).
-- Project settings as a page: step 6 of [the plan](project-settings-page.md), and the two links left from step 4.
+- Project settings as a page: the two links left from step 4 ([the plan](project-settings-page.md)); step 6 is
+  planned in [Union settings as a page](union-settings-page.md).
 - The check and e2e timeouts stop `docker exec` but leave the command running in the container; the Commands runner
   kills its process group (`container-run.ts`), the gate and e2e should too.
 - The web UI on 5173 is reachable from the local network (compose publishes it on all addresses); restrict it to

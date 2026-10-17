@@ -10,9 +10,9 @@ export); do not edit. Tests are left out.
 
 ## components/agents/
 
-- `agent-card.tsx`: One agent's prompt, model, effort and tools, saved to the database; the next run of that step uses them.
 - `agent-labels.ts`: The titles and descriptions the agents page shows for each agent, model and effort level.
-- `agents-page.tsx`: The agents page: a card per agent, plus the lists of tools and MCP connectors.
+- `agent-page-header.tsx`: An agent page's title, whether it is customized, its model and effort, and what it does.
+- `agent-page.tsx`: One agent's prompt, model, effort and tools, with one Save; the next run of that step uses them.
 - `connector-list.tsx`: The claude.ai connectors the agents can use (Figma…), read from the Claude account the worker runs agents with.
 - `effort-field.tsx`: How hard the agent thinks (`claude --effort`); Default leaves it to Claude Code.
 - `model-field.tsx`: The Claude model an agent runs with.
@@ -34,7 +34,7 @@ export); do not edit. Tests are left out.
 - `flow-row.tsx`: The ticket's flow in its details: chosen while in Backlog, shown as fixed once it started.
 - `github-issue-import.tsx`: Fetches an issue of the project's repository, previews it, and creates the ticket on it.
 - `log-tab.tsx`: Replays the ticket's whole agent log, then follows it live.
-- `main-area.tsx`: Right-hand side of the app: a global page, the project's settings (`?settings=`), or the project.
+- `main-area.tsx`: Right-hand side of the app: the running previews, the Union settings (`?union=`), the project's settings (`?settings=`), or the project.
 - `markdown.tsx`: Markdown as the panel shows it.
 - `notion-import.tsx`: Fetches a page of the project's Notion data source, previews it, and creates the ticket.
 - `overview-tab.tsx`: The ticket panel's overview tab: run status, details, and the buttons that act on the ticket.
@@ -76,7 +76,7 @@ export); do not edit. Tests are left out.
 
 - `access-method.tsx`: Token or GitHub App: the two ways a project can reach GitHub.
 - `app-setup-form.tsx`: App ID and private key, checked against GitHub before they are stored on the server.
-- `github-app-page.tsx`: The GitHub App every project may use instead of a personal token.
+- `github-app-section.tsx`: The GitHub App every project may use instead of a personal token.
 - `installation-picker.tsx`: Choose where the GitHub App is installed; sets the app up first when it is not configured.
 
 ## components/investigations/
@@ -224,11 +224,18 @@ export); do not edit. Tests are left out.
 - `script-row.tsx`: What the settings store; an empty timeout is left out (the default).
 - `scripts-section.tsx`: Commands saved by name, run from a ticket's Preview tab in its workspace; one edited at a time.
 - `set-up-first.tsx`: A settings page that needs another one done first, with the way there.
+- `settings-frame.tsx`: The frame of both settings areas: a title, the open page's name and a way back, the menu on the left, the page on the right.
 - `settings-nav.tsx`: The settings pages by group; the danger zone last, set apart.
 - `settings-page.tsx`: The project's settings: a menu of pages on the left, the open one on the right (`?settings=`).
 - `union-notification-fields.tsx`: A "Notify me in Union" action's field: the message, as a template, shown under the ticket's title.
 - `value-field.tsx`: The value a rule sets, shaped by the property's type.
 - `variable-chips.tsx`: The template variables as chips: clicking one adds it to the text being written.
+
+## components/union-settings/
+
+- `union-section-body.tsx`: The open Union settings page: an agent's, or the tools', connectors' or GitHub App's.
+- `union-section-labels.ts`: The names the Union settings menu shows: each agent's title, then the other pages'.
+- `union-settings-page.tsx`: The settings every project shares: a page per agent, the tools, the GitHub App (`?union=`).
 
 ## components/usage/
 
@@ -272,9 +279,12 @@ export); do not edit. Tests are left out.
 - `spec-hunks.ts`: The hunks of `path` that serve the part; null when the file serves it whole, or the part is unknown.
 - `split-rows.ts`: Pairs a patch's lines for side-by-side display: a context line faces itself, and each run of removed lines faces the added lines that follow it, row by row; th…
 - `token-counts.ts`: A call's tokens as the Log shows them, from its `result` event: input with its cached share, output with its thinking.
+- `union-settings-groups.ts`: The Union settings pages, in menu order, by group: one page per agent, the tools, the GitHub App.
+- `union-settings-sections.ts`: The Union settings page open in the URL (`?union=implement`), and opening or leaving it.
 - `url-state.ts`: Sets or removes (`null`) query parameters as one history entry, and tells every reader.
 - `usage-format.ts`: How the Usage tables write a total: input with its cached share, output, API-equivalent cost, peak context.
 - `use-active-project.ts`: The project list plus the remembered selection, falling back to the first project.
+- `use-agent-form.ts`: An agent's page form in the Union settings: its prompt, model, effort and tools, saved together.
 - `use-agent-review.ts`: The latest agent review of the target, with starting and cancelling it.
 - `use-agent-tools.ts`: The tools agents pick from: built-in ones and the ones the user added.
 - `use-app-state.ts`: What the root layout runs on: live refetching, the projects, the open ticket, navigation, and opening notifications.
@@ -287,7 +297,7 @@ export); do not edit. Tests are left out.
 - `use-github-app.ts`: The global GitHub App's status; saving or removing it invalidates `['github-app']`.
 - `use-live-invalidation.ts`: Refetches board, ticket, investigation and notification data whenever the worker records a change.
 - `use-log.ts`: Polls a ticket's or an investigation's Log while it is shown: all of it first, then what is new.
-- `use-navigation.ts`: Which page is shown and which overlay is open; `show`/`goTo` return click handlers.
+- `use-navigation.ts`: Which page is shown (`?page=previews`, `?union=` for the Union settings, else the board) and which overlay is open.
 - `use-notifications.ts`: The notifications, page by page, with the unread count (also in the tab's title) and marking them read.
 - `use-notion-users.ts`: The Notion workspace members, read only when `enabled` (a person property is in view).
 - `use-pr-checks.ts`: The pull request's CI checks (read again every 30 s while some still run), and giving picks of them to the implementer.

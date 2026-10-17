@@ -39,8 +39,10 @@ export function useLeaveGuard(isDirty: boolean): void {
 /** The URL the app shows, to go back to when the user refuses a back/forward that leaves. */
 let shown = globalThis.location.href;
 
-function settingsOf(href: string): string | null {
-  return new URL(href).searchParams.get('settings');
+/** The settings page an URL shows, in either area: leaving it is what may lose changes. */
+function settingsOf(href: string): string {
+  const params = new URL(href).searchParams;
+  return `${params.get('settings') ?? ''}|${params.get('union') ?? ''}`;
 }
 
 // Registered when the module loads, before any component subscribes to `popstate`: a refused

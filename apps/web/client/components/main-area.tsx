@@ -2,14 +2,17 @@ import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../src/api-types';
 import { useSettingsSection } from '../lib/settings-sections';
+import { closeUnionSettings, useUnionSection } from '../lib/union-settings-sections';
 import type { Page } from '../lib/use-navigation';
-import { AgentsPage } from './agents/agents-page';
-import { GitHubAppPage } from './github-app/github-app-page';
 import { RunningPreviewsPage } from './previews/running-previews-page';
 import { ProjectSettingsPage } from './settings/settings-page';
+import { UnionSettingsPage } from './union-settings/union-settings-page';
 import { Workspace } from './workspace';
 
-/** Right-hand side of the app: a global page, the project's settings (`?settings=`), or the project. */
+/**
+ * Right-hand side of the app: the running previews, the Union settings (`?union=`), the project's
+ * settings (`?settings=`), or the project.
+ */
 export function MainArea({
   page,
   project,
@@ -25,14 +28,19 @@ export function MainArea({
   onNewTicket: () => void;
 }): ReactElement {
   const settingsSection = useSettingsSection();
+  const unionSection = useUnionSection();
   if (page === 'previews') {
     return <RunningPreviewsPage onOpenTicket={onOpenProjectTicket} />;
   }
-  if (page === 'agents') {
-    return <AgentsPage />;
-  }
-  if (page === 'github-app') {
-    return <GitHubAppPage />;
+  if (page === 'settings' && unionSection) {
+    return (
+      <UnionSettingsPage
+        section={unionSection}
+        onBack={() => {
+          closeUnionSettings();
+        }}
+      />
+    );
   }
   if (project && settingsSection) {
     return <ProjectSettingsPage project={project} section={settingsSection} />;

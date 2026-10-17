@@ -90,4 +90,4 @@ one with design decisions.
 
 ## Decisions open
 
-- **Step 6** (a shared "Union settings" area): decided later.
+- **Step 6**: planned in [Union settings as a page](union-settings-page.md), as a separate area with the same shell.
