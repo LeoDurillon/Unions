@@ -27,8 +27,8 @@ and linked.
 - [Group a review's changes by spec](review-spec-groups.md) (built, hunks included): an agent groups the changed files by the parts of
   the spec they implement (PR description, ticket, issue or Notion page), on request; a toggle in the file panel.
 - [Token usage of each run](run-token-usage.md): input, cache, output and thinking tokens per agent call and model,
-  with turns, peak context and API-equivalent cost, in the Log, the Overview tab and investigations. Steps 1 to 5
-  built (recording, backfill, Log, Overview and investigation tables); docs left.
+  with turns, peak context and API-equivalent cost, in the Log, the Overview tab and investigations. Built
+  (branch `run-token-usage`).
 
 ## Open items
 

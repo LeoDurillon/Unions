@@ -1,6 +1,6 @@
 # Plan: token usage of each run
 
-Status: steps 1 to 5 built; the live database is backfilled. Left: step 6 (`worker.md`, `SPEC.md`). Decisions taken (end of file).
+Status: built (steps 1 to 6); the live database is backfilled. Not yet seen on a new run: the next ticket step or investigation records its own rows. Decisions taken (end of file).
 
 ## Idea
 

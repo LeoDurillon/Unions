@@ -133,6 +133,11 @@
   (`system/task_started`) has its `task_notification`, and 30 s pass with no new event, it sends TERM (then KILL
   10 s later) to the processes whose environment holds the run's `UNION_AGENT_RUN` token. It logs
   `union_agent_idle_stopped`, and the run then uses that last result.
+- Token usage: nothing in the worker counts it. Each `result` an agent's `onEvent` sends to `appendAgentLine`
+  records that call in `agent_usage` (core, `agent-usage-record.ts`), under the line's owner (`runId` for a step,
+  `ticketId` alone for a side run, `investigationId`). So a new kind of agent run is counted only if its events
+  reach `agent_log`: `investigation-ticket.ts` drops them, and its call is not counted. `AgentOutcome` carries no
+  cost: the result's cost adds up over a resumed session.
 - Ticket attachments: the web stores uploads under `attachments/t<ticket>/` (gitignored, `UNION_ATTACHMENTS_DIR`
   overrides; rows in `ticket_attachments`, `routes/attachments.ts`). Before every step `attachments-sync.ts`
   replaces `/workspace/attachments` in the container (outside the repo) with the ticket's current files, and
