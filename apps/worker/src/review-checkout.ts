@@ -130,3 +130,15 @@ export async function updateReviewCheckout(
     await checkOut(deps, review, names);
   });
 }
+
+/**
+ * The review's container, checked out and running, for a command or its e2e tests; the caller
+ * stops it after (`runtime.stop`), unless the other kind of run still uses it.
+ */
+export async function openReviewContainer(deps: TargetDeps, reviewId: number): Promise<string> {
+  const { name } = await ensureReviewCheckout(deps, reviewId);
+  if (!(await deps.runtime.isRunning(name))) {
+    await deps.runtime.start(name);
+  }
+  return name;
+}

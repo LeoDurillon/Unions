@@ -1,6 +1,6 @@
 # Plan: previews of pull requests under review
 
-Status: steps 1 and 2 built (branch `review-previews`): the owner in core and the database, and a review's container and preview in the worker; steps 3 to 6 left.
+Status: steps 1 to 3 built (branch `review-previews`): the owner in core and the database, and a review's container, preview, e2e tests and commands in the worker; steps 4 to 6 left.
 
 ## Idea
 
@@ -83,7 +83,7 @@ The ticket's flow, in the review's container:
   (`previews.e2e_*`).
 - One run at a time across tickets and reviews (`PreviewManager`'s e2e slot holds an owner).
 - **Screenshots**: a review has no ticket files. A new table `preview_screenshots` (preview id, name, size), files
-  under `reviewFilesDir(reviewId)/e2e/` in Union's data folder, served by the review's preview route and removed
+  under `reviewFilesDir(reviewId)/e2e/` (`attachments/r<id>/e2e/`), served by the review's preview route and removed
   with the review. Tickets keep theirs as ticket files (the final review reads them).
 - **Instead of "Send to agent"**: "Add to review" makes a general draft comment on the review (`review_comments`,
   `kind: 'general'`) with the command, the exit code and the output's last lines in a fenced block, for the user to
@@ -133,7 +133,10 @@ The Commands section of the ticket's Preview tab, on the review's Preview tab:
    regex; `takeDownFor`; secrets left out for a fork (`from_fork` is what the client listed when the review was
    added: the worker checks the pull request's head repository again before a start with secrets). Test against real Docker with a throwaway review row (its
    container and volumes removed after), as for ticket 9001.
-3. **Worker: e2e and Commands for a review.** `runRequestedE2e` and the container-run queue on an owner; network
+3. **Worker: e2e and Commands for a review.** (Built: `run-workspace.ts`, `e2e-request.ts`,
+   `preview-screenshots.ts` in core; tested against real Docker with review 9001: a command before any preview
+   (checkout made, plain variables only, no Claude credential), one with the preview's address, and a failing e2e
+   script that reached the preview by name and left a screenshot.) `runRequestedE2e` and the container-run queue on an owner; network
    join by container name; screenshots in `preview_screenshots`. Real Docker test: a command and an e2e command
    (a script that fails and writes a PNG under `test-results`) on the throwaway review.
 4. **Web: routes and removal.** The shared preview and run modules; the review's routes; "Add to review" as a draft

@@ -8,7 +8,7 @@ import {
 } from '@union/core';
 
 import type { PreviewAction } from '../commands';
-import { runRequestedE2e } from '../e2e';
+import { runRequestedE2e } from '../e2e-request';
 import { previewSettings } from './compose';
 import { generatePreviewFile } from './compose-file';
 import { IdleWatcher, readProxyMetrics } from './idle';
@@ -54,8 +54,8 @@ export class PreviewManager {
     recoverPreviews(this.deps.db);
   }
 
-  /** The ticket whose e2e tests are running: one at a time, a browser takes a lot of memory. */
-  private e2eTicket: number | null = null;
+  /** Whose e2e tests are running: one run at a time, a browser takes a lot of memory. */
+  private e2eOwner: WorkspaceOwner | null = null;
 
   run(owner: WorkspaceOwner, action: PreviewAction): void {
     if (action === 'e2e') {
@@ -65,37 +65,35 @@ export class PreviewManager {
     this.track(owner, () => ACTIONS[action](this.deps, owner));
   }
 
-  private e2eRefusal(owner: WorkspaceOwner): string | null {
-    if (!('ticketId' in owner)) {
-      return "A pull request's end-to-end tests are not supported yet";
+  private e2eRefusal(): string | null {
+    const owner = this.e2eOwner;
+    if (owner !== null) {
+      const whose = 'ticketId' in owner ? `Ticket ${owner.ticketId}'s` : "Another pull request's";
+      return `${whose} end-to-end tests are running: one run at a time, they take a lot of memory`;
     }
-    if (this.e2eTicket !== null) {
-      return `Ticket ${this.e2eTicket}'s end-to-end tests are running: one run at a time, they take a lot of memory`;
-    }
-    return this.deps.config ? null : 'The worker cannot start ticket containers here';
+    return this.deps.config ? null : 'The worker cannot start containers here';
   }
 
   private e2e(owner: WorkspaceOwner): void {
     const { config } = this.deps;
-    const refusal = this.e2eRefusal(owner);
-    if (refusal !== null || !config || !('ticketId' in owner)) {
+    const refusal = this.e2eRefusal();
+    if (refusal !== null || !config) {
       recordE2e(this.deps.db, owner, { e2eStatus: 'skipped', e2eOutput: refusal });
       return;
     }
-    const { ticketId } = owner;
-    this.e2eTicket = ticketId;
+    this.e2eOwner = owner;
     this.track(owner, async () => {
       try {
-        await runRequestedE2e({ ...this.deps, config }, ticketId);
+        await runRequestedE2e({ ...this.deps, config }, owner);
       } finally {
-        this.e2eTicket = null;
+        this.e2eOwner = null;
       }
     });
   }
 
-  /** The owner key (`t12`) whose e2e tests run now, if any. */
+  /** The owner key (`t12`, `r3`) whose e2e tests run now, if any. */
   testing(): string | null {
-    return this.e2eTicket === null ? null : ownerKey({ ticketId: this.e2eTicket });
+    return this.e2eOwner === null ? null : ownerKey(this.e2eOwner);
   }
 
   /** What stops the previews nobody visits, through this manager. */

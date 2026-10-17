@@ -1,26 +1,21 @@
 import {
   claimContainerRun,
   finishContainerRun,
-  getPreview,
-  getTicket,
   MAX_OUTPUT_LINES,
   outputTail,
   recoverContainerRuns,
-  schema,
   updateContainerRunOutput,
   type ContainerRun,
   type ContainerRunOutcome,
   type ContainerRuntime,
   type Db,
 } from '@union/core';
-import { eq } from 'drizzle-orm';
 
 import { runIn } from './container-exec';
-import { baseUrl } from './e2e';
-import { ensureTicketContainer, REPO_DIR, type ProvisionConfig } from './provision';
-import { startServicesRun } from './services-run';
+import { REPO_DIR, type ProvisionConfig } from './provision';
+import { openWorkspace } from './run-workspace';
 
-/** Commands running at the same time, across tickets (one per ticket, by the queue's rule). */
+/** Commands running at the same time, across workspaces (one per workspace, by the queue's rule). */
 const MAX_PARALLEL = 3;
 /** How often the output so far is written for the panel. */
 const OUTPUT_FLUSH_MS = 1000;
@@ -38,15 +33,6 @@ const WRAPPER =
 const KILL = `pg=$(cat "$UNION_PID_FILE" 2>/dev/null) || exit 0; kill -TERM -$pg 2>/dev/null; sleep ${KILL_GRACE_SEC}; kill -KILL -$pg 2>/dev/null; rm -f "$UNION_PID_FILE"`;
 
 export type ContainerRunDeps = { db: Db; runtime: ContainerRuntime; config: ProvisionConfig };
-
-/** The preview's address, as e2e gets it, while the ticket's preview runs. */
-function previewEnv(db: Db, ticketId: number, projectId: number): Record<string, string> {
-  const preview = db.select().from(schema.projects).where(eq(schema.projects.id, projectId)).get()
-    ?.config.preview;
-  const url =
-    preview && getPreview(db, { ticketId })?.status === 'running' ? baseUrl(preview) : null;
-  return url ? { BASE_URL: url, PREVIEW_URL: url } : {};
-}
 
 /** Streams the command's lines, keeping the last ones and writing them out once a second. */
 async function streamed(
@@ -94,51 +80,38 @@ function outcomeOf(
   return { status, exitCode: result.exitCode, error: null, output: result.output };
 }
 
-/** Runs the command in the ticket's container, started for it and stopped after unless a step started. */
+/**
+ * Runs the command in its workspace (the ticket's container, or the pull request's), started for
+ * it and stopped after unless something else runs there.
+ */
 async function execute(
   deps: ContainerRunDeps,
   run: ContainerRun,
   cancel: AbortSignal,
 ): Promise<ContainerRunOutcome> {
-  const { db, runtime, config } = deps;
-  if (run.ticketId === null) {
-    const error = "Commands in a pull request's checkout are not supported yet";
-    return { status: 'failed', exitCode: null, error, output: '' };
-  }
-  const ticket = getTicket(db, run.ticketId);
-  if (ticket.phase.kind === 'running') {
+  const workspace = await openWorkspace(deps, run);
+  if (!workspace) {
     const error = 'A step started in this workspace: run it once it ends';
     return { status: 'failed', exitCode: null, error, output: '' };
   }
-  const { name } = await ensureTicketContainer(db, runtime, config, ticket);
-  // The same environment as the agent's: its services, on localhost, with its variables.
-  const services = await startServicesRun(deps, ticket.id);
+  const { name } = workspace;
   const pidFile = { UNION_PID_FILE: `/tmp/union-run-${run.id}.pid` };
   const timeout = AbortSignal.timeout(run.timeoutSec * MS_PER_SEC);
   try {
-    const exec = services.runtime.exec(name, ['setsid', '-w', 'sh', '-c', WRAPPER], {
+    const exec = workspace.runtime.exec(name, ['setsid', '-w', 'sh', '-c', WRAPPER], {
       cwd: REPO_DIR,
-      env: {
-        ...previewEnv(db, ticket.id, ticket.projectId),
-        ...pidFile,
-        UNION_COMMAND: run.command,
-      },
+      env: { ...workspace.env, ...pidFile, UNION_COMMAND: run.command },
       signal: AbortSignal.any([cancel, timeout]),
     });
-    const result = await streamed(db, run, exec);
+    const result = await streamed(deps.db, run, exec);
     return outcomeOf(run, result, { cancel, timeout });
   } finally {
-    await runIn(runtime, name, ['sh', '-c', KILL], { env: pidFile }).catch(() => null);
-    // A step the user started meanwhile works in the same container: it stops it itself.
-    const stepRuns = getTicket(db, ticket.id).phase.kind === 'running';
-    await services.release(stepRuns);
-    if (!stepRuns) {
-      await runtime.stop(name);
-    }
+    await runIn(deps.runtime, name, ['sh', '-c', KILL], { env: pidFile }).catch(() => null);
+    await workspace.release();
   }
 }
 
-/** Runs the commands users queue in tickets' workspaces, a few at a time. */
+/** Runs the commands users queue in tickets' and pull requests' workspaces, a few at a time. */
 export class ContainerRunner {
   private readonly active = new Map<number, { abort: AbortController; done: Promise<void> }>();
 

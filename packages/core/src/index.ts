@@ -43,6 +43,7 @@ export * from './notion-id';
 export * from './pr-descriptions';
 export * from './preview-compose';
 export * from './preview-config';
+export * from './preview-screenshots';
 export * from './preview-secrets';
 export * from './project-files';
 export * from './project-scripts';

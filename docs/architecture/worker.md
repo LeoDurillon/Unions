@@ -104,8 +104,13 @@
   (`down -v`), empties `repo/` in a root helper, checks the review's current head out, and starts the preview again
   if it ran. Preview commands for a review have `ticket_id` null and `{ reviewId }` in their payload. A review's
   preview emits no events (its page polls); the idle watcher reads `union-r<id>-*` routers too, and
-  `takeDownFor('union-r<id>')` takes it down before its container's volumes go. E2E tests of a review are refused
-  until step 3.
+  `takeDownFor('union-r<id>')` takes it down before its container's volumes go. Commands (`container_runs` with
+  `review_id`) and e2e tests run in `union-r<id>` too: `run-workspace.ts` opens a run's workspace (a ticket's
+  container with the agent's services, or the review's with the plain variables the settings let through and the
+  preview's address while it runs; never the secrets), and `e2e-request.ts` runs the tests the user asks for, one
+  run at a time across tickets and reviews. The review's container is stopped after a run unless the other kind
+  (a command, the tests) still uses it. A review's failure screenshots are `preview_screenshots` rows, the files
+  under `attachments/r<id>/e2e/` (`replaceReviewScreenshots` in `@union/core`).
 - `services-run.ts`, `agent-services-step.ts` and `preview/background.ts`: the services a project starts for the
   agent (`config.preview.agentServices`, a database for its tests). Around implementation and rebase steps, and
   around a command from the Commands section (`startServicesRun`), the worker runs `up -d <services>` in the

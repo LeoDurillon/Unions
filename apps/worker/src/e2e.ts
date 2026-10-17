@@ -4,23 +4,21 @@ import path from 'node:path';
 
 import {
   exposedServices,
-  getTicket,
-  recordE2e,
   replaceE2eScreenshots,
-  schema,
+  replaceReviewScreenshots,
   type ContainerRuntime,
   type Db,
   type PreviewConfig,
+  type WorkspaceOwner,
 } from '@union/core';
-import { eq } from 'drizzle-orm';
 
 import { runIn } from './container-exec';
 import { GATE_TIMEOUT_MS, tail } from './gate';
 import { previewSettings } from './preview/compose';
 import { startPreview, type PreviewDeps } from './preview/run';
-import { ensureTicketContainer, REPO_DIR, type ProvisionConfig } from './provision';
+import { REPO_DIR } from './provision';
 
-/** Failure screenshots kept on the ticket: enough to see what broke, few enough to read. */
+/** Failure screenshots kept: enough to see what broke, few enough to read. */
 const MAX_SCREENSHOTS = 5;
 /** `find -size` counts in 1 KiB blocks: 5 MiB. */
 const MAX_SCREENSHOT_KIB = 5120;
@@ -39,7 +37,7 @@ export type E2eResult =
 export type E2eRun = {
   db: Db;
   runtime: ContainerRuntime;
-  ticketId: number;
+  owner: WorkspaceOwner;
   container: string;
   preview: PreviewConfig;
   signal?: AbortSignal;
@@ -101,9 +99,20 @@ async function screenshots(run: E2eRun): Promise<{ name: string; bytes: Uint8Arr
   }
 }
 
+/** A ticket's go with its files (the final review reads them); a pull request's, with its preview. */
+function keepScreenshots(
+  db: Db,
+  owner: WorkspaceOwner,
+  files: { name: string; bytes: Uint8Array }[],
+): Promise<void> {
+  return 'ticketId' in owner
+    ? replaceE2eScreenshots(db, owner.ticketId, files)
+    : replaceReviewScreenshots(db, owner.reviewId, files);
+}
+
 /**
- * The project's e2e command against the ticket's preview, after its checks passed. The preview is
- * started (or updated: `up --build` only rebuilds what changed) and the ticket's container joins
+ * The project's e2e command against the owner's preview, after its checks passed. The preview is
+ * started (or updated: `up --build` only rebuilds what changed) and the owner's container joins
  * it; the command runs in the repository with `BASE_URL` (and `PREVIEW_URL`) set to the first
  * exposed service. A preview the code broke counts as red; one that cannot run now, as skipped.
  */
@@ -115,7 +124,7 @@ export async function runE2e(run: E2eRun): Promise<E2eResult | null> {
   }
   const started = await startPreview(
     { db: run.db, runtime: run.runtime, settings: previewSettings(), ...run.previewOverrides },
-    { ticketId: run.ticketId },
+    run.owner,
   );
   if (!started.ok) {
     return started.unavailable
@@ -137,7 +146,7 @@ export async function runE2e(run: E2eRun): Promise<E2eResult | null> {
   });
   const green = result.exitCode === 0;
   const kept = green ? [] : await screenshots(run).catch(() => []);
-  await replaceE2eScreenshots(run.db, run.ticketId, kept);
+  await keepScreenshots(run.db, run.owner, kept);
   return {
     status: green ? 'green' : 'red',
     command,
@@ -145,72 +154,4 @@ export async function runE2e(run: E2eRun): Promise<E2eResult | null> {
     tail: tail(result.stdout),
     screenshots: kept.length,
   };
-}
-
-function previewConfigOf(db: Db, projectId: number): PreviewConfig | undefined {
-  return db.select().from(schema.projects).where(eq(schema.projects.id, projectId)).get()?.config
-    .preview;
-}
-
-/**
- * The e2e run the user asked for from the ticket: in the ticket's container (started for it, and
- * stopped after unless a step started meanwhile), against its preview. The result is kept on the
- * preview for the panel; the user decides whether to send a failure to the agent.
- */
-export async function runRequestedE2e(
-  deps: PreviewDeps & { config: ProvisionConfig },
-  ticketId: number,
-): Promise<void> {
-  const { db, runtime } = deps;
-  recordE2e(db, { ticketId }, { e2eStatus: 'running' });
-  let container: string | null = null;
-  try {
-    const ticket = getTicket(db, ticketId);
-    const preview = previewConfigOf(db, ticket.projectId);
-    if (!preview?.e2eCommand) {
-      recordE2e(
-        db,
-        { ticketId },
-        {
-          e2eStatus: 'skipped',
-          e2eOutput: 'The project has no e2e command',
-        },
-      );
-      return;
-    }
-    ({ name: container } = await ensureTicketContainer(db, runtime, deps.config, ticket));
-    const result = await runE2e({
-      db,
-      runtime,
-      ticketId,
-      container,
-      preview,
-      previewOverrides: deps,
-    });
-    recordE2e(
-      db,
-      { ticketId },
-      result === null || result.status === 'skipped'
-        ? { e2eStatus: 'skipped', e2eOutput: result?.reason ?? 'Nothing to run' }
-        : {
-            e2eStatus: result.status,
-            e2eOutput: result.tail,
-            e2eExitCode: result.exitCode,
-            e2eScreenshots: result.screenshots,
-          },
-    );
-  } catch (error) {
-    recordE2e(
-      db,
-      { ticketId },
-      {
-        e2eStatus: 'skipped',
-        e2eOutput: error instanceof Error ? error.message : String(error),
-      },
-    );
-  } finally {
-    if (container && getTicket(db, ticketId).phase.kind !== 'running') {
-      await runtime.stop(container).catch(() => null);
-    }
-  }
 }

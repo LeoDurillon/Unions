@@ -20,7 +20,8 @@ import {
 } from '@union/core';
 import { eq } from 'drizzle-orm';
 
-import { runE2e, runRequestedE2e } from './e2e';
+import { runE2e } from './e2e';
+import { runRequestedE2e } from './e2e-request';
 import { PreviewManager } from './preview/manager';
 
 const PREVIEW: PreviewConfig = {
@@ -92,7 +93,7 @@ function e2e(preview: PreviewConfig = PREVIEW): ReturnType<typeof runE2e> {
   return runE2e({
     db,
     runtime,
-    ticketId,
+    owner: { ticketId },
     container: 'union-t1',
     preview,
     previewOverrides: {
@@ -188,7 +189,7 @@ test('a run the user asks for is kept on the preview, and the container stops af
       settings: { image: 'i', publicPort: 8080, proxyUrl: 'http://proxy', maxRunning: 3 },
       fetchFn: () => Promise.resolve(new Response('ok')),
     },
-    ticketId,
+    { ticketId },
   );
   expect(getPreview(db, { ticketId })).toMatchObject({
     e2eStatus: 'red',

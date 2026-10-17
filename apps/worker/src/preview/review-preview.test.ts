@@ -179,15 +179,19 @@ test("preview commands carry a ticket or a pull request's review", () => {
   expect(failed?.error).toContain('needs a ticketId or a numeric "reviewId"');
 });
 
-test("a pull request's container removal takes its preview down first; its e2e tests wait", async () => {
+test("a pull request's container removal takes its preview down first; e2e needs a command", async () => {
   const manager = new PreviewManager(deps());
   await manager.takeDownFor(`union-r${reviewId}`);
   expect(calls).toEqual([
     `docker compose --ansi never -p union-r${reviewId} down -v --remove-orphans`,
   ]);
+  calls = [];
   manager.run({ reviewId }, 'e2e');
+  await manager.idle();
   expect(getPreview(db, { reviewId })).toMatchObject({
     e2eStatus: 'skipped',
-    e2eOutput: "A pull request's end-to-end tests are not supported yet",
+    e2eOutput: 'The project has no e2e command',
   });
+  // Checked before the container is made.
+  expect(calls).toEqual([]);
 });

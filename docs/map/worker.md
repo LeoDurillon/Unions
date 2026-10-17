@@ -17,11 +17,12 @@ export); do not edit. Tests are left out.
 - `branch.ts`: `<issue#>-<slug>`, or `union-<ticket id>-<slug>` while the ticket has no GitHub issue.
 - `commands.ts`: Handles every pending command once.
 - `container-exec.ts`: Runs a command in the container and collects its output (for short commands, not agents).
-- `container-run.ts`: Runs the commands users queue in tickets' workspaces, a few at a time.
+- `container-run.ts`: Runs the commands users queue in tickets' and pull requests' workspaces, a few at a time.
 - `credentials.ts`: The secret the host's git uses to clone and push, minted right before use (an installation token lives one hour).
 - `diff-commits.ts`: `git log`'s records, oldest first, without their files.
 - `diff-snapshot.ts`: Replaces the ticket's diff snapshot with `base...HEAD` as it is now in the container, with each commit's own diff and the change since the head the user last r…
-- `e2e.ts`: The project's e2e command against the ticket's preview, after its checks passed.
+- `e2e-request.ts`: The e2e tests the user asks for, from a ticket or a pull request, in its own container.
+- `e2e.ts`: The project's e2e command against the owner's preview, after its checks passed.
 - `event-dispatcher.ts`: Follows the event log: writes the notifications, queues a delivery for each event a rule waits for, then does the due ones, a few per tick and one at a time.
 - `executor.ts`: Every step: planning, implementation, final review, and the rebase and simplify asked on demand.
 - `gate.ts`: Runs the project's check command in the repository; a timeout counts as red.
@@ -62,6 +63,7 @@ export); do not edit. Tests are left out.
 - `review-grouping.ts`: Runs the groupings the user asked for, on the same run slots as the pipeline and the agent reviews: a ticket's in its own container, a pull request's in a thro…
 - `review.ts`: Reading the change needs git; the default review tools allow the read-only git commands.
 - `revision.ts`: The feedback a run of `step` must address, if the user asked for changes.
+- `run-workspace.ts`: Where a user's command runs: the ticket's container with the agent's services, or the pull request's own.
 - `scheduler.ts`: Runs one agent step per ticket in `running` phase, within the shared run slots.
 - `services-run.ts`: Starts the project's agent services for a run in the ticket's container (provisioned first: compose reads the file from its workspace), forwards their ports to…
 - `side-runs.ts`: Fails what a stopped worker left running, then returns the runners.

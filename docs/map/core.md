@@ -59,6 +59,7 @@ export); do not edit. Tests are left out.
 - `preview-compose-check.ts`: A path inside the repository: the only host files a preview may use.
 - `preview-compose.ts`: The file the preview runs, written from the resolved one (after `composeProblems` found nothing): the ticket's own compose project, no fixed container names or…
 - `preview-config.ts`: Preview settings and their templates.
+- `preview-screenshots.ts`: A pull request's e2e failure screenshots: files under its own folder, listed in `preview_screenshots`.
 - `preview-secrets.ts`: The names of the project's secret preview variables: all the browser ever sees of them.
 - `previews.ts`: What a stopped worker left half done: a start or a stop it was running failed.
 - `project-files.ts`: The host folder holding one project's files, each under its row id.
