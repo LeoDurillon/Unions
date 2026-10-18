@@ -49,6 +49,9 @@ and linked.
 - [Link a review to its Notion page](review-notion-link.md): a pull request under review linked to a Notion page
   gets a Notion tab with the page's text, and Group by spec and Review with agent read that page without its URL
   again. Planned (2026-10-18), decisions to confirm.
+- [Explain a selection of the diff](review-explain.md): select lines on the review page, an agent explains in a
+  side panel how they work and which parts of the specs and repository docs they relate to; follow-ups resume
+  its session. Planned (2026-10-18), decisions to confirm.
 
 ## Open items
 
