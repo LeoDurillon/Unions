@@ -41,6 +41,8 @@ and linked.
   on the implementer's session, rebase, simplify and the PR description in fresh sessions. Planned (2026-10-17).
 - [Ticket flows](ticket-flows.md): pick the steps a ticket runs (Full, Standard, Quick presets, or custom), so a
   small fix skips planning. Built (branch `ticket-flows`); a real Quick ticket run is left.
+- [Custom agents](custom-agents.md): the user describes an agent's role, the worker writes its prompt, the user
+  picks its tools and places it in a flow. Planned (2026-10-18), decisions confirmed.
 
 ## Open items
 
