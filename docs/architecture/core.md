@@ -15,6 +15,13 @@ the rules the defaults use, the account's claude.ai connectors from `mcp-connect
 in `agent_tools`). A run loads the connectors only when its tools include one (`connectorEnv` in the worker's
 `agent.ts`); the worker's `ConnectorChecker` (`mcp-check.ts`) reads them on request. Denied rules (`BASE_DENIED`,
 `IMPLEMENT_DENIED` in the worker) are not editable and always win over a selected tool.
+Custom agents (`custom-agents.ts`, table `custom_agents`): their step is `agent_<id>` (`CustomStep` in `states.ts`,
+`isCustomStep`), so `Step` and `AgentId` stay closed unions; `STEP_TITLES` covers the built-in steps only and
+`stepTitle(step, names)` (`step-titles.ts`, browser-safe) names any step. Their overrides live in `agent_configs`
+under `agent_<id>` like a built-in's; `custom-agent-config.ts` gives their defaults (the written prompt, Sonnet,
+`CUSTOM_AGENT_TOOLS`). `nextStep` follows the flow's own order; `flowProblems` takes the custom steps a flow may
+name (`flowReadySteps`: live, prompt written); `flow-edit.ts` (browser-safe) edits a flow in the UI. The prompt
+writer's prompt and parsing are `prompt-writer.ts`; deleting checks `custom-agent-usage.ts`.
 `investigations.ts`: one-off agent runs on a custom prompt (records, claim, finish, cancel, follow-ups); defaults
 in the browser-safe `investigation-defaults.ts`.
 `pr-stacks.ts` (browser-safe, `@union/core/pr-stacks`): `pullRequestStacks` groups pull requests by stack, a PR

@@ -69,7 +69,10 @@
 - Union settings (sidebar → Union settings) are the same frame (`settings/settings-frame.tsx`, `settings-nav.tsx`)
   over `?union=<section>`: one page per agent (`agents/agent-page.tsx`: prompt, model, effort, tools, one Save;
   Reset to default applies at once), Models (every agent's model and effort in a table, `union-settings/models-page.tsx`;
-  Save sends one `PUT /api/agents/:agent` per changed row), Tools, Connectors and the GitHub App
+  Save sends one `PUT /api/agents/:agent` per changed row), the custom agents (a "Custom agents" group,
+  `union-settings/union-nav-groups.ts`; New agent `new-agent-dialog.tsx` → `POST /api/agents/custom`, their page
+  adds `agents/custom-agent-card.tsx`: role, Regenerate, Delete; `GET /api/agents/custom/names` names their steps
+  everywhere through `lib/use-custom-agents.ts`), Tools, Connectors and the GitHub App
   (`lib/union-settings-groups.ts` lists them; `openUnionSettings(section)` links to one). The page shown is in the
   URL too (`lib/use-navigation.ts`: `?page=previews`, `?union=`, else the board), so a reload keeps it.
 - One Save per settings page: a page's form is `useSettingsForm` (`lib/use-settings-form.ts`, unsaved = differs

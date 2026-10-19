@@ -1,8 +1,9 @@
 # Custom agents: the user's own pipeline steps
 
-Status: steps 1 to 3 built (2026-10-19, branch `custom-agents`): core, custom steps in the worker, the prompt
-writer; one real run (writer, then the step on ticket 9001, before the implementation). Steps 4 to 7
-planned. Decisions D1 to D4 confirmed (2026-10-18).
+Status: built (2026-10-19, branch `custom-agents`), steps 1 to 7; summarized in `docs/spec/custom-agents.md`. One
+real run (the writer, then the step on ticket 9001, before the implementation) and a UI check on a scratch
+database; a custom step after the implementation was checked with tests only. Decisions D1 to D4 confirmed
+(2026-10-18).
 
 ## Why
 

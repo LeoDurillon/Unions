@@ -42,7 +42,8 @@ and linked.
 - [Ticket flows](ticket-flows.md): pick the steps a ticket runs (Full, Standard, Quick presets, or custom), so a
   small fix skips planning. Built (branch `ticket-flows`); a real Quick ticket run is left.
 - [Custom agents](custom-agents.md): the user describes an agent's role, the worker writes its prompt, the user
-  picks its tools and places it in a flow. Step 1 built (branch `custom-agents`), steps 2 to 7 planned.
+  picks its tools and places it in a flow. Built (branch `custom-agents`), steps 1 to 7; a run after the
+  implementation is left to try.
 - [Notion comments on the ticket](notion-comments.md): a Notion tab lists the page's open discussions (page and
   inline); the user replies or starts one (the worker posts), or adds a discussion to the review for the
   implementer. Planned (2026-10-18), decisions to confirm.

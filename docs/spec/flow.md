@@ -9,7 +9,8 @@
 2. Move to In Progress → the worker creates volumes + container, clones the repo into the workspace volume.
    A ticket that depends on another one cannot start before it is done (see [Ticket dependencies](ticket-dependencies.md)).
 3. Planning steps, each a tab on the ticket: `intake` (Haiku) → `summary` (Sonnet) → `technical` (Opus) → `test_plan` (Sonnet),
-   or only those the ticket's flow keeps (none for a Quick ticket).
+   or only those the ticket's flow keeps (none for a Quick ticket), with the user's [custom agents](custom-agents.md)
+   where the flow places them (one may also run after the implementation, before the final review).
    After each, the user clicks **Approve** or **Revise** (with feedback). Revise resumes the agent session.
    Each step's output is posted/edited as one issue comment.
 4. After the last planning step is approved (at once for a flow without planning): `implement` loop (agent turn → checks → back to the agent on red, up to the

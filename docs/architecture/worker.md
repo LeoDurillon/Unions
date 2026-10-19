@@ -88,7 +88,12 @@
 - `throwaway-runs.ts`: the side runs that need no repository, in a throwaway container with only the Claude login:
   the connector check (`mcp-check.ts`) and the lesson writer (`lesson-writer-run.ts`, same slots as the agents),
   which turns feedback the user picked into proposed lessons (`lesson_suggestions`; prompt and parsing in core
-  `lesson-writer.ts`).
+  `lesson-writer.ts`), and the prompt writer (`prompt-writer-run.ts`), which writes a queued custom agent's
+  default prompt (`union-prompt-writer-<id>`, logs `custom_agent_prompt_ready` or `_failed`; a run cut by a stop
+  goes back to the queue on start).
+- `planning-step.ts`: the planning steps and the custom agents' steps (`executor.ts` routes them there);
+  `custom-step.ts` gives a custom step placed after the implementation the branch and how to read the diff.
+  `approved.ts` passes the approved outputs in the ticket's flow order, a custom step's under its agent's name.
 - `preview/`: ticket previews (phase 1 of `docs/plans/preview-environments.md`). `PreviewManager` runs the
   `preview_start`/`preview_stop`/`preview_logs` commands, one at a time per ticket. Every `docker compose` call runs
   in a throwaway helper container (`runtime.runHelper`, `docker:*-cli` image) holding the Docker socket and the

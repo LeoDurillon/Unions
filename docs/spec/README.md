@@ -9,6 +9,7 @@ Everything the agent does is mirrored to the GitHub issue.
 - [Flow](flow.md): a ticket from creation to Done, step by step.
 - [Stack](stack.md): layers, process and container model, memory, token usage, GitHub mapping.
 - [Ticket flows](ticket-flows.md): which pipeline steps a ticket runs.
+- [Custom agents](custom-agents.md): the user's own steps, prompt written from a role, placed in flows.
 - [Ticket dependencies](ticket-dependencies.md): a ticket's parent, the start gate and stacked branches.
 - [Pull requests](pull-requests.md): the Pull requests tab, Current reviews, posting a review, CI checks.
 - [Project instructions](project-instructions.md): free text sent to every agent run of a project.
