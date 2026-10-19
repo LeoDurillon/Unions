@@ -1,5 +1,5 @@
 // The lessons a Memory page save sends, checked: a known step and a one-line rule each, within the limits (browser-safe).
-import { FULL_FLOW, type PipelineStep } from './states';
+import { FULL_FLOW, isCustomStep, type PipelineStep } from './states';
 
 export type LessonInput = { section: PipelineStep; rule: string };
 
@@ -14,7 +14,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function isPipelineStep(value: unknown): value is PipelineStep {
-  return FULL_FLOW.some((step) => step === value);
+  return isCustomStep(value) || FULL_FLOW.some((step) => step === value);
 }
 
 /** One lesson, or why it is refused; its rule is trimmed and kept on one line. */

@@ -3,7 +3,7 @@ import { isEvent, type EventPayloads } from '@union/core/event-catalog';
 import { useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
 
 import { summarizeAgentEvent, type LogLine } from '../lib/agent-events';
-import { STEP_TITLES } from '../lib/labels';
+import { stepTitle } from '../lib/labels';
 import { groupRuns, type LogRun } from '../lib/log-runs';
 import { sumTokens, tokensText, type CallTokens } from '../lib/token-counts';
 import { useLog } from '../lib/use-log';
@@ -66,7 +66,7 @@ function entriesFor(entry: LogEntry): Entry[] {
     return agentReviewEntries(key, event.payload);
   }
   if (isEvent(event, 'run_started')) {
-    const text = `Run #${event.runId ?? '?'} · ${STEP_TITLES[event.payload.step]}`;
+    const text = `Run #${event.runId ?? '?'} · ${stepTitle(event.payload.step)}`;
     return [{ key, kind: 'run', text }];
   }
   if (isEvent(event, 'investigation_started')) {

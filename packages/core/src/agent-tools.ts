@@ -3,7 +3,7 @@ import { asc, eq } from 'drizzle-orm';
 import type { Db } from './db';
 import { connectorTool, listConnectors } from './mcp-connectors';
 import * as schema from './schema';
-import type { Step } from './states';
+import { isCustomStep, type BuiltInStep, type CustomStep } from './states';
 
 /** Where the worker checks out the repository inside an agent container. */
 export const AGENT_REPO_DIR = '/workspace/repo';
@@ -15,8 +15,9 @@ const READ_GIT = ['diff', 'log', 'show', 'status'] as const;
  * An agent that runs on its own: every pipeline step, the reviewer writing draft comments, the
  * writer of pull request descriptions and the lesson writer.
  */
-export type RunAgent =
-  | Step
+export type RunAgent = BuiltInRunAgent | CustomStep;
+export type BuiltInRunAgent =
+  | BuiltInStep
   | 'review_comments'
   | 'review_groups'
   | 'review_explain'
@@ -31,7 +32,7 @@ const REVIEW_TOOLS = [
 ];
 
 /** The tools each agent runs with until the user picks others. */
-export const DEFAULT_TOOLS: Record<RunAgent, readonly string[]> = {
+export const DEFAULT_TOOLS: Record<BuiltInRunAgent, readonly string[]> = {
   intake: READ_ONLY,
   summary: READ_ONLY,
   technical: READ_ONLY,
@@ -56,6 +57,21 @@ export const DEFAULT_TOOLS: Record<RunAgent, readonly string[]> = {
     'Bash(git status*)',
   ],
 };
+
+/** A custom agent's tools until the user picks others: reading git is harmless anywhere in a flow. */
+export const CUSTOM_AGENT_TOOLS: readonly string[] = REVIEW_TOOLS;
+
+/** Tools a custom agent may not have: it never commits, so its changes would trip the implementer. */
+export const CUSTOM_AGENT_REFUSED_TOOLS: readonly string[] = [
+  'Edit',
+  'Write',
+  'NotebookEdit',
+  'Bash',
+];
+
+export function defaultToolsOf(agent: RunAgent): readonly string[] {
+  return isCustomStep(agent) ? CUSTOM_AGENT_TOOLS : DEFAULT_TOOLS[agent];
+}
 
 /** Claude Code's own tools, always offered. */
 export const BUILT_IN_TOOLS: readonly { name: string; description: string }[] = [
@@ -163,8 +179,17 @@ export function removeTool(db: Db, name: string): void {
   db.delete(schema.agentTools).where(eq(schema.agentTools.name, name)).run();
 }
 
-/** Checks a selection against the list; returns it without duplicates, in the list's order. */
-export function validateTools(db: Db, tools: readonly string[]): string[] {
+/**
+ * Checks a selection against the list; returns it without duplicates, in the list's order. `agent`
+ * is who gets it: a custom agent is refused the tools that write.
+ */
+export function validateTools(db: Db, tools: readonly string[], agent?: string): string[] {
+  const refused = isCustomStep(agent)
+    ? tools.filter((tool) => CUSTOM_AGENT_REFUSED_TOOLS.includes(tool))
+    : [];
+  if (refused.length > 0) {
+    throw new AgentToolError(`A custom agent changes no file: remove ${refused.join(', ')}`);
+  }
   const known = listTools(db).map((tool) => tool.name);
   const unknown = tools.filter((tool) => !known.includes(tool));
   if (unknown.length > 0) {

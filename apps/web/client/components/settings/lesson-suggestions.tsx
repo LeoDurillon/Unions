@@ -3,7 +3,7 @@ import type { LessonSuggestion } from '@union/core';
 import type { LessonInput } from '@union/core/lesson-input';
 import { useState, type ReactElement } from 'react';
 
-import { STEP_TITLES } from '../../lib/labels';
+import { stepTitle } from '../../lib/labels';
 import { useLessonSuggestion, useLessonWriter } from '../../lib/use-memory';
 import { Badge, Button, ErrorText } from '../ui';
 
@@ -33,7 +33,7 @@ function ProposalRow({
 }): ReactElement {
   return (
     <li className="flex items-start gap-2 rounded-md border border-zinc-200 bg-white px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900">
-      <Badge tone="blue">{STEP_TITLES[proposal.section]}</Badge>
+      <Badge tone="blue">{stepTitle(proposal.section)}</Badge>
       <p className="min-w-0 flex-1 text-sm break-words">{proposal.rule}</p>
       {accepted ? (
         <span className="text-xs text-green-700 dark:text-green-400">Accepted</span>

@@ -2,13 +2,16 @@
 import type { ProjectConfig } from './schema-types';
 import {
   FULL_FLOW,
+  isCustomStep,
   PLANNING_STEPS,
+  pipelineIndex,
   STEP_TITLES,
-  STEPS,
+  type CustomStep,
   type Flow,
   type PipelineStep,
   type Step,
 } from './states';
+import { stepTitle } from './step-titles';
 
 /** A named flow the user picks for a ticket; `id` is what `ProjectConfig.defaultFlow` names. */
 export type FlowPreset = { id: string; name: string; steps: PipelineStep[] };
@@ -24,35 +27,57 @@ const DEFAULT_PRESET = 'full';
 /** Every flow ends with these: the final review's approval is what finishes a ticket. */
 const REQUIRED_STEPS: readonly PipelineStep[] = ['implement', 'final_review'];
 
+/** A built-in pipeline step or a custom agent's (`flowProblems` checks the agent exists). */
 export function isPipelineStep(value: unknown): value is PipelineStep {
-  return FULL_FLOW.some((step) => step === value);
+  return isCustomStep(value) || FULL_FLOW.some((step) => step === value);
 }
 
-/** What makes `value` no flow: not a list, unknown or repeated steps, out of order, a required step missing. */
-export function flowProblems(value: unknown): string[] {
+function orderProblems(steps: readonly PipelineStep[]): string[] {
+  const order = steps.filter((step) => !isCustomStep(step)).map((step) => pipelineIndex(step));
+  const custom = steps.filter((step) => isCustomStep(step));
+  const problems: string[] = [];
+  if (order.some((at, index) => index > 0 && at <= (order[index - 1] ?? -1))) {
+    problems.push('Steps must appear once each, in pipeline order');
+  }
+  if (new Set(custom).size < custom.length) {
+    problems.push('A custom agent appears twice');
+  }
+  if (steps.includes('final_review') && steps.at(-1) !== 'final_review') {
+    problems.push(`${STEP_TITLES.final_review} must be the last step`);
+  }
+  return problems;
+}
+
+/**
+ * What makes `value` no flow: not a list, unknown or repeated steps, built-in steps out of order, a
+ * step after the final review, a required step missing. `customSteps` are the custom agents a flow
+ * may name (`flowReadySteps`); they go anywhere before the final review.
+ */
+export function flowProblems(value: unknown, customSteps: readonly CustomStep[] = []): string[] {
   if (!Array.isArray(value)) {
     return ['A flow is a list of steps'];
   }
   const steps: unknown[] = value;
-  const unknown = steps.filter((step) => !isPipelineStep(step));
+  const unknown = steps.filter(
+    (step) => !isPipelineStep(step) || (isCustomStep(step) && !customSteps.includes(step)),
+  );
   if (unknown.length > 0) {
     return [`Unknown steps: ${unknown.map((step) => JSON.stringify(step)).join(', ')}`];
   }
-  const problems: string[] = [];
-  const order = steps.filter((step) => isPipelineStep(step)).map((step) => STEPS.indexOf(step));
-  if (order.some((at, index) => index > 0 && at <= (order[index - 1] ?? -1))) {
-    problems.push('Steps must appear once each, in pipeline order');
-  }
+  const problems = orderProblems(steps.filter((step) => isPipelineStep(step)));
   for (const step of REQUIRED_STEPS) {
     if (!steps.includes(step)) {
-      problems.push(`Every flow runs ${STEP_TITLES[step]}`);
+      problems.push(`Every flow runs ${stepTitle(step)}`);
     }
   }
   return problems;
 }
 
-export function isFlow(value: unknown): value is PipelineStep[] {
-  return flowProblems(value).length === 0;
+export function isFlow(
+  value: unknown,
+  customSteps: readonly CustomStep[] = [],
+): value is PipelineStep[] {
+  return flowProblems(value, customSteps).length === 0;
 }
 
 /** The project's presets: its own list when it has one, else the built-in ones. */

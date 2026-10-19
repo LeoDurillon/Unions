@@ -10,7 +10,7 @@ import { FULL_FLOW, PLANNING_STEPS, type Flow, type PipelineStep } from '@union/
 import { useState, type ReactElement } from 'react';
 
 import type { PublicProject } from '../../src/api-types';
-import { STEP_TITLES } from '../lib/labels';
+import { stepTitle } from '../lib/labels';
 import { CheckChip, ChipGroup, Segmented } from './choice';
 
 const CUSTOM = 'custom';
@@ -26,7 +26,7 @@ function withPlanning(flow: Flow, planning: PipelineStep, on: boolean): Pipeline
 }
 
 export function flowSteps(flow: Flow): string {
-  return flow.map((step) => STEP_TITLES[step]).join(' → ');
+  return flow.map((step) => stepTitle(step)).join(' → ');
 }
 
 /** A custom flow's planning steps, one chip each; the implementation and the review always run. */
@@ -47,7 +47,7 @@ export function PlanningChips({
             onChange(withPlanning(flow, planning, on));
           }}
         >
-          {STEP_TITLES[planning]}
+          {stepTitle(planning)}
         </CheckChip>
       ))}
     </ChipGroup>

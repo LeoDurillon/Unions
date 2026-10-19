@@ -38,7 +38,7 @@ export async function addTicket(db: Db, c: Context): Promise<Response> {
     throw fail(BAD_REQUEST, 'The parent must be a ticket of the same project');
   }
   const notionPageId = notionPageOf(body);
-  const flow = flowOf(body) ?? null;
+  const flow = flowOf(db, body) ?? null;
   const text = optionalText(body, 'body') ?? '';
   const { markdown, images } = notionPageId
     ? await fetchNotionImages(text)

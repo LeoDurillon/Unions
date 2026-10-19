@@ -21,6 +21,9 @@ export); do not edit. Tests are left out.
 - `ci-output-text.ts`: The text the implementer gets from CI: a failed check (its failed step's log, annotations, summary), another job's log, a bot's comment; browser-safe.
 - `ci-outputs.ts`: CI output given to the implementer: kept for its next run, or sent now as a revision with the user's note.
 - `container-runs.ts`: The owner's latest runs, newest first.
+- `custom-agent-config.ts`: A custom agent's defaults (its written prompt, Sonnet, the review tools) and what its settings page shows of it.
+- `custom-agent-usage.ts`: What still runs a custom agent: project flow presets that name it, and tickets not yet done whose flow has it.
+- `custom-agents.ts`: Custom agents: created and edited by the web, their prompts written by the worker's prompt writer, deleted softly.
 - `db.ts`: Fresh handle, never cached: tests use `createDb(':memory:')`.
 - `diff-excerpt.ts`: The text of `start..end` on one side of a file's patch; null when none of those lines is in it.
 - `diff-hunks.ts`: A file's patch as hunks: the grouping by spec places hunks, the review page shows some of them.
@@ -80,6 +83,7 @@ export); do not edit. Tests are left out.
 - `schema-attachments.ts`: Files the user attached to a ticket, stored on the host under the attachments folder and copied into the ticket's container for the agents.
 - `schema-ci-outputs.ts`: CI output the user gave the implementer from the pull request's checks: a failed check, another job's log, a bot's comment.
 - `schema-container-runs.ts`: A command the user ran in a workspace: a ticket's (its container, in the checkout, as the agent) or a pull request's under review (exactly one of `ticket_id` a…
+- `schema-custom-agents.ts`: The user's own agents: a name and a role, and the prompt the worker's prompt writer wrote from them.
 - `schema-diff-commits.ts`: A ticket's commits at its diff snapshot, oldest first, each with its own files against its first parent.
 - `schema-events.ts`: The project's Notion data source as last read: rules point at its properties by id.
 - `schema-lesson-suggestions.ts`: The lesson writer's runs: the feedback the user gave it and the lessons it proposed.
@@ -95,6 +99,7 @@ export); do not edit. Tests are left out.
 - `schema-types.ts`: Plain types stored in JSON columns, kept apart so schema.ts holds the tables.
 - `schema.ts`: The GitHub App projects can authenticate with instead of a token.
 - `states.ts`: Ticket state machine.
+- `step-titles.ts`: A step's name as the UI, the notifications and the issue comments show it: built-in, or the custom agent's; browser-safe.
 - `tables.ts`: Re-exports every database table definition, exposed as `schema` from `@union/core`.
 - `ticket-base.ts`: The branch the ticket starts from and why; before it starts, the one it would take now.
 - `ticket-flow.ts`: Choosing the steps a ticket runs: only before it starts, since the start fixes them.

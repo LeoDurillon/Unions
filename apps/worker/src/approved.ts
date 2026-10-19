@@ -1,4 +1,4 @@
-import { schema, STEPS, type Db, type Step } from '@union/core';
+import { pipelineIndex, schema, STEPS, type Db, type Step } from '@union/core';
 import { eq } from 'drizzle-orm';
 
 /** The latest approved output of every step before `step`, in pipeline order. */
@@ -12,7 +12,7 @@ export function approvedBefore(
     .from(schema.stepOutputs)
     .where(eq(schema.stepOutputs.ticketId, ticketId))
     .all();
-  return STEPS.slice(0, STEPS.indexOf(step))
+  return STEPS.slice(0, pipelineIndex(step))
     .map((earlier) => outputs.findLast((o) => o.step === earlier && o.validation === 'approved'))
     .filter((output) => output !== undefined)
     .map((output) => ({ step: output.step, content: output.content }));

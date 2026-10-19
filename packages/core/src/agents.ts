@@ -1,18 +1,29 @@
 // The agents' default prompts, models, efforts and tools, the user's overrides, and how a run resolves them.
 import { eq } from 'drizzle-orm';
 
-import { DEFAULT_TOOLS, validateTools, type RunAgent } from './agent-tools';
+import {
+  DEFAULT_TOOLS,
+  defaultToolsOf,
+  validateTools,
+  type BuiltInRunAgent,
+  type RunAgent,
+} from './agent-tools';
+import { customAgentDefaults, type CustomAgentInfo } from './custom-agent-config';
+import { listCustomAgents } from './custom-agents';
 import type { Db } from './db';
 import { LESSON_WRITER_PROMPT } from './lesson-writer';
 import * as schema from './schema';
 import {
+  customStep,
   isAgentEffort,
   isAgentModel,
+  isCustomStep,
   MODEL_BY_STEP,
   PLANNING_STEPS,
   STEPS,
   type AgentEffort,
   type AgentModel,
+  type CustomStep,
 } from './states';
 
 /**
@@ -32,9 +43,11 @@ export const AGENT_IDS = [
   'simplify',
   'lesson_writer',
 ] as const;
-export type AgentId = (typeof AGENT_IDS)[number];
+export type BuiltInAgentId = (typeof AGENT_IDS)[number];
+/** A built-in agent, or a custom agent by its step (`agent_<id>`). */
+export type AgentId = BuiltInAgentId | CustomStep;
 
-export const DEFAULT_PROMPTS: Record<AgentId, string> = {
+export const DEFAULT_PROMPTS: Record<BuiltInAgentId, string> = {
   shared: `You are one agent in an automated task pipeline working on a repository.
 Follow the repository's own rules (AGENTS.md, CLAUDE.md, README) when they exist.
 Output ONLY the markdown requested: no preamble, no closing remarks.`,
@@ -126,13 +139,16 @@ export type AgentConfig = {
   tools: string[] | null;
   defaultTools: string[] | null;
   customized: boolean;
+  /** Null for a built-in agent. */
+  custom: CustomAgentInfo | null;
 };
 
+/** A built-in agent's id, or a custom agent's step (whether that agent exists is not checked). */
 export function isAgentId(value: string): value is AgentId {
-  return AGENT_IDS.some((agent) => agent === value);
+  return isCustomStep(value) || AGENT_IDS.some((agent) => agent === value);
 }
 
-const MODEL_BY_AGENT: Record<RunAgent, AgentModel> = {
+const MODEL_BY_AGENT: Record<BuiltInRunAgent, AgentModel> = {
   ...MODEL_BY_STEP,
   review_comments: 'opus',
   review_groups: 'sonnet',
@@ -140,7 +156,7 @@ const MODEL_BY_AGENT: Record<RunAgent, AgentModel> = {
   pr_description: MODEL_BY_STEP.implement,
   lesson_writer: 'haiku',
 };
-const RUN_AGENTS: readonly RunAgent[] = [
+const RUN_AGENTS: readonly BuiltInRunAgent[] = [
   ...STEPS,
   'review_comments',
   'review_groups',
@@ -151,17 +167,28 @@ const RUN_AGENTS: readonly RunAgent[] = [
 
 /** Agents with a model of their own: the pipeline steps and the reviewer (not `shared`). */
 function stepOf(agent: AgentId): RunAgent | null {
-  return RUN_AGENTS.find((step) => step === agent) ?? null;
+  return isCustomStep(agent) ? agent : (RUN_AGENTS.find((step) => step === agent) ?? null);
 }
 
-function defaultModel(agent: AgentId): AgentModel | null {
-  const step = stepOf(agent);
-  return step ? MODEL_BY_AGENT[step] : null;
-}
+type Defaults = {
+  prompt: string;
+  model: AgentModel | null;
+  tools: string[] | null;
+  custom: CustomAgentInfo | null;
+};
 
-function defaultTools(agent: AgentId): string[] | null {
+function defaultsOf(db: Db, agent: AgentId): Defaults {
+  if (isCustomStep(agent)) {
+    const custom = customAgentDefaults(db, agent);
+    return { ...custom, tools: [...custom.tools] };
+  }
   const step = stepOf(agent);
-  return step ? [...DEFAULT_TOOLS[step]] : null;
+  return {
+    prompt: DEFAULT_PROMPTS[agent],
+    model: step && !isCustomStep(step) ? MODEL_BY_AGENT[step] : null,
+    tools: step ? [...defaultToolsOf(step)] : null,
+    custom: null,
+  };
 }
 
 /** The project's own instructions as a prompt section; empty when it has none. */
@@ -195,24 +222,26 @@ export function resolveAgent(db: Db, agent: AgentId): AgentConfig {
     .from(schema.agentConfigs)
     .where(eq(schema.agentConfigs.agent, agent))
     .get();
-  const fallbackModel = defaultModel(agent);
+  const defaults = defaultsOf(db, agent);
   const stored = storedChoices(row);
-  const fallbackTools = defaultTools(agent);
   return {
     agent,
-    model: fallbackModel === null ? null : (stored.model ?? fallbackModel),
-    effort: fallbackModel === null ? null : stored.effort,
-    prompt: row?.prompt ?? DEFAULT_PROMPTS[agent],
-    defaultModel: fallbackModel,
-    defaultPrompt: DEFAULT_PROMPTS[agent],
-    tools: fallbackTools === null ? null : (row?.tools ?? fallbackTools),
-    defaultTools: fallbackTools,
+    model: defaults.model === null ? null : (stored.model ?? defaults.model),
+    effort: defaults.model === null ? null : stored.effort,
+    prompt: row?.prompt ?? defaults.prompt,
+    defaultModel: defaults.model,
+    defaultPrompt: defaults.prompt,
+    tools: defaults.tools === null ? null : (row?.tools ?? defaults.tools),
+    defaultTools: defaults.tools,
     customized: row !== undefined,
+    custom: defaults.custom,
   };
 }
 
+/** The built-in agents, then the live custom ones, oldest first. */
 export function listAgents(db: Db): AgentConfig[] {
-  return AGENT_IDS.map((agent) => resolveAgent(db, agent));
+  const custom = listCustomAgents(db).map((agent) => customStep(agent.id));
+  return [...AGENT_IDS, ...custom].map((agent) => resolveAgent(db, agent));
 }
 
 /** The model a run of `step` uses: the user's choice, else the built-in one. */
@@ -221,7 +250,7 @@ export function modelFor(db: Db, step: RunAgent): AgentModel {
   if (step === 'rebase' || step === 'simplify') {
     return modelFor(db, 'implement');
   }
-  return resolveAgent(db, step).model ?? MODEL_BY_AGENT[step];
+  return resolveAgent(db, step).model ?? defaultsOf(db, step).model ?? MODEL_BY_STEP.implement;
 }
 
 /** The thinking effort a run of `step` uses; null: the CLI's default. */
@@ -236,7 +265,7 @@ export function toolsFor(db: Db, step: RunAgent): string[] {
   if (step === 'rebase' || step === 'simplify') {
     return [...new Set([...toolsFor(db, 'implement'), ...DEFAULT_TOOLS[step]])];
   }
-  return resolveAgent(db, step).tools ?? [...DEFAULT_TOOLS[step]];
+  return resolveAgent(db, step).tools ?? [...defaultToolsOf(step)];
 }
 
 /** Saves the agent's edits. Tools left out (or given to an agent without a step) are not stored. */
@@ -253,7 +282,7 @@ export function saveAgent(
   const step = stepOf(agent);
   const model = step ? change.model : null;
   const effort = step ? (change.effort ?? null) : null;
-  const tools = step && change.tools ? validateTools(db, change.tools) : null;
+  const tools = step && change.tools ? validateTools(db, change.tools, agent) : null;
   db.insert(schema.agentConfigs)
     .values({ agent, model, effort, prompt: change.prompt, tools })
     .onConflictDoUpdate({

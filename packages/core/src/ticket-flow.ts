@@ -1,6 +1,7 @@
 // Choosing the steps a ticket runs: only before it starts, since the start fixes them.
 import { eq } from 'drizzle-orm';
 
+import { flowReadySteps } from './custom-agents';
 import type { Db } from './db';
 import { flowProblems } from './flows';
 import * as schema from './schema';
@@ -12,7 +13,7 @@ export class FlowChangeRefused extends Error {}
 
 /** Sets the ticket's flow; null goes back to the project's default. */
 export function chooseFlow(db: Db, ticketId: number, flow: PipelineStep[] | null): Ticket {
-  const problems = flow === null ? [] : flowProblems(flow);
+  const problems = flow === null ? [] : flowProblems(flow, flowReadySteps(db));
   if (problems.length > 0) {
     throw new FlowChangeRefused(problems.join('; '));
   }

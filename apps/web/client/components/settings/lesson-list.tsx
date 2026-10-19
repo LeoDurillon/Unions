@@ -3,7 +3,7 @@ import type { LessonInput } from '@union/core/lesson-input';
 import { FULL_FLOW, type PipelineStep } from '@union/core/states';
 import type { ReactElement } from 'react';
 
-import { STEP_TITLES } from '../../lib/labels';
+import { stepTitle } from '../../lib/labels';
 import { Button } from '../ui';
 import { LessonCard, type LessonCardProps } from './lesson-card';
 
@@ -95,7 +95,7 @@ function StepLessons({
   return (
     <div className="space-y-2 rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-medium">{STEP_TITLES[step]}</h4>
+        <h4 className="text-sm font-medium">{stepTitle(step)}</h4>
         <Button
           className="px-2 py-1 text-xs"
           onClick={() => {

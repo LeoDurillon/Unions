@@ -10,6 +10,7 @@ export default defineConfig({
     './src/schema-attachments.ts',
     './src/schema-ci-outputs.ts',
     './src/schema-container-runs.ts',
+    './src/schema-custom-agents.ts',
     './src/schema-diff-commits.ts',
     './src/schema-events.ts',
     './src/schema-lesson-suggestions.ts',

@@ -2,6 +2,7 @@
 import {
   emitEvent,
   moveCursor,
+  customAgentNames,
   notificationFor,
   schema,
   unreadEvents,
@@ -97,10 +98,11 @@ export function writeNotifications(db: Db): number {
     return 0;
   }
   let written = 0;
+  const names = customAgentNames(db);
   db.transaction((tx) => {
     for (const event of events) {
       const subject = subjectOf(tx, event);
-      const draft = subject ? notificationFor(event, subject) : null;
+      const draft = subject ? notificationFor(event, subject, names) : null;
       if (subject && draft && record(tx, event, subject, draft)) {
         written += 1;
       }

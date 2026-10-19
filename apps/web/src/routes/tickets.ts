@@ -3,6 +3,7 @@ import {
   describeTicketBase,
   getTicket,
   InvalidTransition,
+  isCustomStep,
   latestOutput,
   latestRefusal,
   saveOutput,
@@ -52,7 +53,7 @@ function isCommandType(value: unknown): value is CommandType {
 }
 
 function isStep(value: string): value is Step {
-  return STEPS.some((step) => step === value);
+  return isCustomStep(value) || STEPS.some((step) => step === value);
 }
 
 function hasPendingCommand(db: Db, ticketId: number): boolean {

@@ -161,7 +161,7 @@ function scriptsChange(
   }
 }
 
-function configChange(project: Project, body: Record<string, unknown>): ProjectConfig {
+function configChange(db: Db, project: Project, body: Record<string, unknown>): ProjectConfig {
   const { config } = project;
   return {
     ...config,
@@ -176,7 +176,7 @@ function configChange(project: Project, body: Record<string, unknown>): ProjectC
     instructions: instructionsChange(body, config.instructions),
     memory: booleanChange(body, 'memory', config.memory),
     scripts: scriptsChange(body, config.scripts),
-    ...flowsChange(body, config),
+    ...flowsChange(db, body, config),
   };
 }
 
@@ -226,7 +226,7 @@ export async function updateProject(db: Db, c: Context): Promise<Response> {
     .set({
       ...githubChange(db, project, body),
       notionToken: notionTokenChange(body, project.notionToken),
-      config: configChange(project, body),
+      config: configChange(db, project, body),
     })
     .where(eq(schema.projects.id, project.id))
     .returning()

@@ -2,7 +2,7 @@
 import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../src/api-types';
-import { STEP_TITLES } from '../lib/labels';
+import { stepTitle } from '../lib/labels';
 import { useTicketUsage } from '../lib/use-usage';
 import { Badge } from './ui';
 import { UsageTable, type UsageRow } from './usage/usage-table';
@@ -37,7 +37,7 @@ export function RunTable({
     key: `run-${run.id}`,
     cells: [
       `#${run.id}`,
-      STEP_TITLES[run.step],
+      stepTitle(run.step),
       run.model,
       <Badge key="status" tone={RUN_TONE[run.status]}>
         {run.status}

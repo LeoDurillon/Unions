@@ -8,13 +8,32 @@ export type PlanningStep = (typeof PLANNING_STEPS)[number];
  * history leaves the reviewed code as it was, so the ticket goes back to where it was.
  */
 export type Step = PipelineStep | 'rebase' | 'simplify';
-export type PipelineStep = PlanningStep | 'implement' | 'final_review';
-/** The pipeline steps a ticket runs, in pipeline order (`flows.ts` checks and resolves it). */
+/** A custom agent's step: `agent_<id>` of its `custom_agents` row; it runs like a planning step. */
+export type CustomStep = `agent_${number}`;
+export type PipelineStep = PlanningStep | CustomStep | 'implement' | 'final_review';
+/** The steps Union ships with: every step but the custom agents'. */
+export type BuiltInStep = Exclude<Step, CustomStep>;
+/** The pipeline steps a ticket runs, in their order (`flows.ts` checks and resolves it). */
 export type Flow = readonly PipelineStep[];
 
 /** Models an agent can run on: the aliases `claude --model` accepts. */
 export const AGENT_MODELS = ['haiku', 'sonnet', 'opus'] as const;
 export type AgentModel = (typeof AGENT_MODELS)[number];
+
+const CUSTOM_STEP = /^agent_[1-9]\d*$/u;
+
+export function isCustomStep(value: unknown): value is CustomStep {
+  return typeof value === 'string' && CUSTOM_STEP.test(value);
+}
+
+export function customStep(id: number): CustomStep {
+  return `agent_${id}`;
+}
+
+/** The `custom_agents` row id of a custom step. */
+export function customAgentId(step: CustomStep): number {
+  return Number(step.slice('agent_'.length));
+}
 
 export function isAgentModel(value: unknown): value is AgentModel {
   return AGENT_MODELS.some((model) => model === value);
@@ -38,7 +57,7 @@ export const MODEL_BY_STEP = {
   // Only fallbacks: these resume the implementer's session, on its model (`modelFor`).
   rebase: 'opus',
   simplify: 'opus',
-} as const satisfies Record<Step, AgentModel>;
+} as const satisfies Record<BuiltInStep, AgentModel>;
 
 /** Board column, mirrored to the GitHub Project `Status` field. */
 export const BOARD_STATUSES = ['backlog', 'in_progress', 'in_review', 'done'] as const;
@@ -82,8 +101,8 @@ export type Action =
   | { type: 'commit_anyway' }
   | { type: 'drop_leftovers' };
 
-/** Each step's name as the UI and the notifications show it. */
-export const STEP_TITLES: Record<Step, string> = {
+/** Each built-in step's name as the UI and the notifications show it (`stepTitle` for any step). */
+export const STEP_TITLES: Record<BuiltInStep, string> = {
   intake: 'Intake',
   summary: 'Summary',
   technical: 'Technical',
@@ -94,10 +113,27 @@ export const STEP_TITLES: Record<Step, string> = {
   simplify: 'Simplify history',
 };
 
-/** Every pipeline step, in order (`rebase` and `simplify` are not). */
-export const STEPS: readonly Step[] = [...PLANNING_STEPS, 'implement', 'final_review'];
-/** Every pipeline step: the flow of a ticket that chose none before this was built. */
-export const FULL_FLOW: Flow = [...PLANNING_STEPS, 'implement', 'final_review'];
+/** A pipeline step Union ships with. */
+export type BuiltInPipelineStep = Exclude<PipelineStep, CustomStep>;
+/** Every built-in pipeline step, in order (`rebase` and `simplify` are not). */
+export const STEPS: readonly BuiltInPipelineStep[] = [
+  ...PLANNING_STEPS,
+  'implement',
+  'final_review',
+];
+/** Every built-in step: the flow of a ticket that chose none before this was built. */
+export const FULL_FLOW: readonly BuiltInPipelineStep[] = [
+  ...PLANNING_STEPS,
+  'implement',
+  'final_review',
+];
+
+const PIPELINE_ORDER: readonly Step[] = STEPS;
+
+/** Where `step` sits among the built-in pipeline steps; -1 for the others (custom, rebase, simplify). */
+export function pipelineIndex(step: Step): number {
+  return PIPELINE_ORDER.indexOf(step);
+}
 
 /** A run of `step`; a rebase always chains into a new final review, since the code changed. */
 function running(step: Step): Phase {
@@ -106,10 +142,18 @@ function running(step: Step): Phase {
     : { kind: 'running', step };
 }
 
-/** The flow's first step after `step` in pipeline order; null at its end. */
+/**
+ * The step after `step` in the flow's own order; null at its end. A step outside the flow (an older
+ * ticket's) goes on with the flow's first built-in step after it in pipeline order.
+ */
 export function nextStep(step: Step, flow: Flow = FULL_FLOW): Step | null {
-  const at = STEPS.indexOf(step);
-  return flow.find((later) => STEPS.indexOf(later) > at) ?? null;
+  const steps: readonly Step[] = flow;
+  const at = steps.indexOf(step);
+  if (at !== -1) {
+    return flow[at + 1] ?? null;
+  }
+  const order = pipelineIndex(step);
+  return flow.find((later) => pipelineIndex(later) > order) ?? null;
 }
 
 export class InvalidTransition extends Error {

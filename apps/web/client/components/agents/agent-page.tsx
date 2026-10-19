@@ -6,7 +6,7 @@ import { api } from '../../lib/api';
 import { invalidReason, useAgentForm, type AgentEdits } from '../../lib/use-agent-form';
 import { SaveBar } from '../settings/save-bar';
 import { Button, ErrorText, inputClass } from '../ui';
-import { AGENT_LABELS } from './agent-labels';
+import { agentLabel } from './agent-labels';
 import { AgentPageHeader } from './agent-page-header';
 import { ToolsField } from './tools-field';
 
@@ -30,7 +30,7 @@ function AgentForm({
   const change = (next: Partial<AgentEdits>): void => {
     form.set({ ...edits, ...next });
   };
-  const { title } = AGENT_LABELS[config.agent];
+  const { title } = agentLabel(config);
   return (
     <section className="space-y-3">
       <AgentPageHeader config={config} edits={edits} onChange={change} />

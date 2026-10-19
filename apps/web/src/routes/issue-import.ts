@@ -79,7 +79,7 @@ async function create(db: Db, github: OnboardingGitHub, c: Context): Promise<Res
     title: issue.title,
     body: issue.body,
     issue: { number: issue.number, nodeId: issue.nodeId },
-    flow: flowOf(body) ?? null,
+    flow: flowOf(db, body) ?? null,
   });
   return c.json(summarize(ticket, findTicket(db)), CREATED);
 }

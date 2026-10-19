@@ -1,6 +1,7 @@
 # Custom agents: the user's own pipeline steps
 
-Status: planned (2026-10-18). Decisions D1 to D4 confirmed (2026-10-18).
+Status: step 1 built (2026-10-19, branch `custom-agents`): core types, table, flow and tool rules. Steps 2 to 7
+planned. Decisions D1 to D4 confirmed (2026-10-18).
 
 ## Why
 

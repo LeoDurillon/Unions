@@ -10,6 +10,7 @@ import {
   effortFor,
   saveAgent,
   sharedPrompt,
+  type AgentId,
 } from './agents';
 import { createDb, migrateDb, type Db } from './db';
 import * as schema from './schema';
@@ -23,7 +24,7 @@ beforeEach(() => {
 
 test('without edits every agent uses the built-in prompt and model', () => {
   const agents = listAgents(db);
-  expect(agents.map((agent) => agent.agent)).toEqual([...AGENT_IDS]);
+  expect(agents.map((agent) => agent.agent)).toEqual<AgentId[]>([...AGENT_IDS]);
   expect(resolveAgent(db, 'intake')).toEqual({
     agent: 'intake',
     model: 'haiku',
@@ -34,6 +35,7 @@ test('without edits every agent uses the built-in prompt and model', () => {
     tools: ['Read', 'Grep', 'Glob'],
     defaultTools: ['Read', 'Grep', 'Glob'],
     customized: false,
+    custom: null,
   });
   expect(resolveAgent(db, 'shared').model).toBeNull();
   expect(resolveAgent(db, 'shared').tools).toBeNull();

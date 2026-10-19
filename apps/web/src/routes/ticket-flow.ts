@@ -3,6 +3,7 @@ import {
   chooseFlow,
   flowProblems,
   FlowChangeRefused,
+  flowReadySteps,
   type Db,
   type PipelineStep,
 } from '@union/core';
@@ -12,12 +13,12 @@ import { BAD_REQUEST, CONFLICT, fail, NOT_FOUND, readObject, requireId } from '.
 import { findTicket, summarize } from './ticket-links';
 
 /** `flow` of a request: absent (undefined), the project's default (null), or a valid flow. */
-export function flowOf(body: Record<string, unknown>): PipelineStep[] | null | undefined {
+export function flowOf(db: Db, body: Record<string, unknown>): PipelineStep[] | null | undefined {
   const { flow } = body;
   if (flow === undefined || flow === null) {
     return flow;
   }
-  const problems = flowProblems(flow);
+  const problems = flowProblems(flow, flowReadySteps(db));
   if (problems.length > 0 || !Array.isArray(flow)) {
     throw fail(BAD_REQUEST, problems.join('; '));
   }
@@ -30,7 +31,7 @@ async function putFlow(db: Db, c: Context): Promise<Response> {
   if (!findTicket(db)(id)) {
     throw fail(NOT_FOUND, `Ticket ${id} not found`);
   }
-  const flow = flowOf(await readObject(c.req.raw));
+  const flow = flowOf(db, await readObject(c.req.raw));
   if (flow === undefined) {
     throw fail(BAD_REQUEST, 'Give "flow": a list of steps, or null for the project default');
   }

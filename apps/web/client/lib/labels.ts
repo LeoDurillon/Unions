@@ -1,7 +1,8 @@
 import type { BoardColumn, Phase, Step } from '@union/core';
-import { STEP_TITLES } from '@union/core/states';
+import { stepTitle } from '@union/core/step-titles';
 
 export { STEP_TITLES } from '@union/core/states';
+export { stepTitle } from '@union/core/step-titles';
 
 export const COLUMNS: { status: BoardColumn; title: string }[] = [
   { status: 'backlog', title: 'Backlog' },
@@ -17,7 +18,7 @@ export type Tone = 'neutral' | 'blue' | 'amber' | 'red' | 'green';
 export type PhaseDescription = { label: string; status: string; step: string | null; tone: Tone };
 
 function stepPhase(status: string, step: Step, tone: Tone): PhaseDescription {
-  return { label: `${status} · ${STEP_TITLES[step]}`, status, step: STEP_TITLES[step], tone };
+  return { label: `${status} · ${stepTitle(step)}`, status, step: stepTitle(step), tone };
 }
 
 function plainPhase(status: string, tone: Tone): PhaseDescription {

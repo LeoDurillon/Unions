@@ -6,6 +6,7 @@ export * from './schema-agent-usage';
 export * from './schema-attachments';
 export * from './schema-ci-outputs';
 export * from './schema-container-runs';
+export * from './schema-custom-agents';
 export * from './schema-diff-commits';
 export * from './schema-events';
 export * from './schema-lesson-suggestions';

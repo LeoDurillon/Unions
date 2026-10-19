@@ -10,7 +10,7 @@ import type { ReactElement } from 'react';
 
 import type { DeliveryView } from '../../../src/event-api-types';
 import { eventRulesApi } from '../../lib/event-rules-api';
-import { STEP_TITLES } from '../../lib/labels';
+import { stepTitle } from '../../lib/labels';
 import { Badge, Button } from '../ui';
 import { ActionText } from './rule-action-text';
 
@@ -27,7 +27,7 @@ export function triggerText(trigger: EventTrigger): string {
     return `The ticket moves to ${BOARD_LABELS[trigger.status]}`;
   }
   if (trigger.kind === 'awaiting_approval' && trigger.step !== null) {
-    return `${STEP_TITLES[trigger.step]} waits for your approval`;
+    return `${stepTitle(trigger.step)} waits for your approval`;
   }
   if (trigger.kind === 'pull_request_reviewed' && trigger.verdict !== null) {
     return `You post a review of its pull request: ${VERDICT_LABELS[trigger.verdict]}`;

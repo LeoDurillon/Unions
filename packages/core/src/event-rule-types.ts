@@ -3,7 +3,7 @@
  * database): the settings page uses the same triggers, variables and value checks as the worker.
  */
 import { reviewVerdicts, type ReviewVerdict } from './pr-review-verdicts';
-import { BOARD_STATUSES, STEPS, type BoardStatus, type Step } from './states';
+import { BOARD_STATUSES, isCustomStep, STEPS, type BoardStatus, type Step } from './states';
 
 export type EventTrigger =
   | { kind: 'pull_request_linked' }
@@ -106,7 +106,11 @@ export function isTrigger(value: unknown): value is EventTrigger {
     return BOARD_STATUSES.some((status) => status === trigger.status);
   }
   if (trigger.kind === 'awaiting_approval') {
-    return trigger.step === null || STEPS.some((step) => step === trigger.step);
+    return (
+      trigger.step === null ||
+      isCustomStep(trigger.step) ||
+      STEPS.some((step) => step === trigger.step)
+    );
   }
   if (trigger.kind === 'pull_request_reviewed') {
     return (

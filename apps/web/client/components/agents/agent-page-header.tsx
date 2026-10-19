@@ -3,7 +3,7 @@ import type { ReactElement } from 'react';
 
 import type { AgentEdits } from '../../lib/use-agent-form';
 import { Badge } from '../ui';
-import { AGENT_LABELS } from './agent-labels';
+import { agentLabel } from './agent-labels';
 import { EffortField } from './effort-field';
 import { ModelField } from './model-field';
 
@@ -17,7 +17,7 @@ export function AgentPageHeader({
   edits: AgentEdits;
   onChange: (change: Partial<AgentEdits>) => void;
 }): ReactElement {
-  const label = AGENT_LABELS[config.agent];
+  const label = agentLabel(config);
   return (
     <header className="space-y-1">
       <div className="flex flex-wrap items-center gap-2">

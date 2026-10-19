@@ -1,7 +1,9 @@
 // The titles and descriptions the agents page shows for each agent, model and effort level.
-import type { AgentEffort, AgentId, AgentModel } from '@union/core';
+import type { AgentConfig, AgentEffort, AgentModel, BuiltInAgentId } from '@union/core';
 
-export const AGENT_LABELS: Record<AgentId, { title: string; description: string }> = {
+type AgentLabel = { title: string; description: string };
+
+export const AGENT_LABELS: Record<BuiltInAgentId, AgentLabel> = {
   shared: {
     title: 'Shared instructions',
     description: 'Sent first to every agent, before the task and the step instructions.',
@@ -68,9 +70,19 @@ export const AGENT_LABELS: Record<AgentId, { title: string; description: string 
   },
 };
 
-/** Whether `value` names an agent; the labels list every one (the record's type holds them to it). */
-export function isAgentId(value: string): value is AgentId {
+/** Whether `value` names a built-in agent; the labels list every one (the record's type holds them to it). */
+export function isAgentId(value: string): value is BuiltInAgentId {
   return Object.hasOwn(AGENT_LABELS, value);
+}
+
+/** A built-in agent's label; a custom agent is shown by its name and role. */
+export function agentLabel(config: Pick<AgentConfig, 'agent' | 'custom'>): AgentLabel {
+  if (config.custom) {
+    return { title: config.custom.name, description: config.custom.role };
+  }
+  return isAgentId(config.agent)
+    ? AGENT_LABELS[config.agent]
+    : { title: config.agent, description: '' };
 }
 
 export const MODEL_LABELS: Record<AgentModel, string> = {

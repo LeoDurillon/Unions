@@ -4,7 +4,7 @@ import type { ReactElement } from 'react';
 
 import { api } from '../../lib/api';
 import { modelRows, useModelsForm, type ModelChoice } from '../../lib/use-models-form';
-import { AGENT_LABELS, EFFORT_LABELS, MODEL_LABELS } from '../agents/agent-labels';
+import { agentLabel, EFFORT_LABELS, MODEL_LABELS } from '../agents/agent-labels';
 import { EffortField } from '../agents/effort-field';
 import { ModelField } from '../agents/model-field';
 import { SaveBar } from '../settings/save-bar';
@@ -32,7 +32,7 @@ function ModelRow({
   implementation: ModelChoice | undefined;
   onChange: (choice: ModelChoice) => void;
 }): ReactElement {
-  const { title } = AGENT_LABELS[config.agent];
+  const { title } = agentLabel(config);
   return (
     <tr className="border-t border-zinc-200 dark:border-zinc-800">
       <td className={`${CELL} font-medium`}>{title}</td>

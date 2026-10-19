@@ -2,7 +2,8 @@
 import { MAX_NOTIFICATION } from './event-actions';
 import { isEvent, type StoredEvent } from './event-catalog';
 import type { notifications } from './schema-notifications';
-import { STEP_TITLES, type Phase } from './states';
+import type { Phase } from './states';
+import { stepTitle, type CustomAgentNames } from './step-titles';
 
 export type Notification = typeof notifications.$inferSelect;
 export type NotificationKind = Notification['kind'];
@@ -21,21 +22,21 @@ const SHORT_SHA = 7;
 
 type Moment = { kind: NotificationKind; detail: string };
 
-function phaseMoment(to: Phase): Moment | null {
+function phaseMoment(to: Phase, names: CustomAgentNames): Moment | null {
   if (to.kind === 'awaiting_approval') {
-    return { kind: to.kind, detail: `${STEP_TITLES[to.step]} waits for your approval.` };
+    return { kind: to.kind, detail: `${stepTitle(to.step, names)} waits for your approval.` };
   }
   if (to.kind === 'failed') {
-    return { kind: to.kind, detail: `${STEP_TITLES[to.step]} failed: ${to.error}` };
+    return { kind: to.kind, detail: `${stepTitle(to.step, names)} failed: ${to.error}` };
   }
   if (to.kind === 'commit_refused') {
     return {
       kind: to.kind,
-      detail: `The repository's hook refused the commit of ${STEP_TITLES[to.step]}: decide what to do with the changes.`,
+      detail: `The repository's hook refused the commit of ${stepTitle(to.step, names)}: decide what to do with the changes.`,
     };
   }
   if (to.kind === 'rate_limited') {
-    return { kind: to.kind, detail: `${STEP_TITLES[to.step]} is paused by the usage limit.` };
+    return { kind: to.kind, detail: `${stepTitle(to.step, names)} is paused by the usage limit.` };
   }
   return null;
 }
@@ -50,9 +51,9 @@ function investigationMoment(status: 'succeeded' | 'failed' | 'cancelled'): Mome
     : null;
 }
 
-function momentOf(event: StoredEvent): Moment | null {
+function momentOf(event: StoredEvent, names: CustomAgentNames): Moment | null {
   if (isEvent(event, 'phase_changed')) {
-    return phaseMoment(event.payload.to);
+    return phaseMoment(event.payload.to, names);
   }
   if (isEvent(event, 'start_blocked')) {
     return {
@@ -95,13 +96,14 @@ function momentOf(event: StoredEvent): Moment | null {
 
 /**
  * The notification `event` makes about `subject` (its ticket or investigation), or null when the
- * event is routine: a step starting, a sync, a rule that succeeded.
+ * event is routine: a step starting, a sync, a rule that succeeded. `names`: the custom agents'.
  */
 export function notificationFor(
   event: StoredEvent,
   subject: { title: string },
+  names: CustomAgentNames = {},
 ): NotificationDraft | null {
-  const moment = momentOf(event);
+  const moment = momentOf(event, names);
   return moment
     ? { kind: moment.kind, title: subject.title, detail: clipDetail(moment.detail) }
     : null;

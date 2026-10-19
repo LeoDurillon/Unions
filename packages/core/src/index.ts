@@ -7,6 +7,9 @@ export * from './agent-environment';
 export * from './ci-output-text';
 export * from './ci-outputs';
 export * from './container-runs';
+export * from './custom-agent-config';
+export * from './custom-agent-usage';
+export * from './custom-agents';
 export * from './mcp-connectors';
 export * from './attachments';
 export * from './agents';
@@ -79,6 +82,7 @@ export type {
   PullRequestFile,
 } from './schema-types';
 export * from './states';
+export * from './step-titles';
 export * from './ticket-base';
 export * from './ticket-links';
 export * from './tickets';
