@@ -29,6 +29,17 @@ let projectId: number;
 let reviewId: number;
 let root: string;
 
+const outerRoot = process.env.UNION_ATTACHMENTS_DIR;
+
+/** Back to the test run's temporary folder (`scripts/test-preload.ts`), never the live default. */
+function restoreAttachmentsRoot(): void {
+  if (outerRoot === undefined) {
+    delete process.env.UNION_ATTACHMENTS_DIR;
+  } else {
+    process.env.UNION_ATTACHMENTS_DIR = outerRoot;
+  }
+}
+
 beforeEach(async () => {
   root = await mkdtemp(path.join(tmpdir(), 'union-review-files-'));
   process.env.UNION_ATTACHMENTS_DIR = root;
@@ -65,7 +76,7 @@ beforeEach(async () => {
 });
 
 afterEach(async () => {
-  delete process.env.UNION_ATTACHMENTS_DIR;
+  restoreAttachmentsRoot();
   await rm(root, { recursive: true, force: true });
 });
 

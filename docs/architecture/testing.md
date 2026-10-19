@@ -8,6 +8,11 @@ Pure logic next to its source as `*.test.ts`: the state machine, prompts, parsin
 `createDb(':memory:')` + `migrateDb`), worker code with a fake `ContainerRuntime` (an object with the methods the code
 calls, cast `as unknown as ContainerRuntime`; see `apps/worker/src/container-run.test.ts`).
 
+`scripts/test-preload.ts` (preloaded by `bunfig.toml`) points `UNION_ATTACHMENTS_DIR` at a temporary folder for the
+whole run: in-memory databases number projects and tickets from 1, so a test that removes one would otherwise delete the
+live `attachments/p1` or `t1`. A test that sets its own folder puts the previous value back afterwards, never
+`delete`s it. Run `bun test` from the repository root so the preload applies.
+
 ## 2. Real Docker
 
 For anything that runs in a container (exec, process groups, networks, compose, port forwarding), fakes are not
