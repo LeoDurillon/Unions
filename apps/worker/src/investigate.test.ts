@@ -238,6 +238,9 @@ test('the cancel command cancels a queued run itself and hands a running one to 
     sendPrDescription: () => {
       // Not under test.
     },
+    editTicket: () => {
+      // Not under test.
+    },
     rerunCiJob: () => {
       // Not under test.
     },

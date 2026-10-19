@@ -24,9 +24,17 @@ function setSynced(db: Db, ticketId: number, status: Ticket['githubSyncedStatus'
     .run();
 }
 
+/** The item was read before the issue's last reconciliation (an edit from Union written since). */
+function isStale(ticket: Ticket, item: RemoteItem): boolean {
+  return (
+    ticket.githubUpdatedAt !== null &&
+    Date.parse(item.updatedAt) <= Date.parse(ticket.githubUpdatedAt)
+  );
+}
+
 /** GitHub wins for title and description. */
 function pullFields(db: Db, ticket: Ticket, item: RemoteItem): void {
-  if (ticket.githubUpdatedAt === item.updatedAt) {
+  if (isStale(ticket, item)) {
     return;
   }
   const body = stripTicketMarker(item.body);
@@ -88,6 +96,7 @@ export function applyRemoteItem(
   ticket: Ticket,
   remoteItem: { item: RemoteItem; info: ProjectInfo },
 ): void {
-  pullFields(db, ticket, remoteItem.item);
+  // Read again: the pull awaits between tickets, and an edit from Union may have been saved since.
+  pullFields(db, getTicket(db, ticket.id), remoteItem.item);
   pullStatus(db, project, getTicket(db, ticket.id), remoteItem);
 }

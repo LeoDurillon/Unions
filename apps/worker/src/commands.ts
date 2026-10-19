@@ -9,50 +9,23 @@ import {
   recordValidation,
   schema,
   type Db,
-  type ReviewVerdict,
   type WorkspaceOwner,
 } from '@union/core';
 import { eq, isNull } from 'drizzle-orm';
 
 import { cancelRun, isCancelCommand } from './command-cancels';
-import { ciJobOf, type CiJob } from './github/ci-rerun';
+import {
+  NO_HOOKS,
+  type CommandHooks,
+  type ContainerRef,
+  type PreviewAction,
+} from './command-hooks';
+import { ciJobOf } from './github/ci-rerun';
+import { ticketEditOf } from './github/ticket-edit';
+
+export type { CommandHooks, ContainerRef, PreviewAction } from './command-hooks';
 
 type Command = typeof schema.commands.$inferSelect;
-
-export type ContainerRef = { name: string; home: string; workspace: string };
-
-/** Side effects some commands hand off (they are asynchronous; draining stays synchronous). */
-export type CommandHooks = {
-  removeContainers: (containers: ContainerRef[]) => void;
-  /** Stops a running investigation. */
-  cancelInvestigation: (id: number) => void;
-  /** Stops a running agent review. */
-  cancelAgentReview: (id: number) => void;
-  /** Stops a running grouping of a review by spec. */
-  cancelReviewGrouping: (id: number) => void;
-  /** Stops a running explanation of a review's lines. */
-  cancelReviewExplanation: (id: number) => void;
-  /** Posts a current review's drafts and summary on its pull request, with the user's verdict. */
-  submitPullRequestReview: (
-    reviewId: number,
-    submitted: { summary: string; verdict: ReviewVerdict },
-  ) => void;
-  /** Stops a running rewrite of a PR description. */
-  cancelPrDescription: (id: number) => void;
-  /** Stops a command running in a ticket's workspace. */
-  cancelContainerRun: (id: number) => void;
-  /** Writes a rewritten PR description, as the user left it, to GitHub. */
-  sendPrDescription: (id: number) => void;
-  /** Asks GitHub to run a failed Actions job of the ticket's pull request again. */
-  rerunCiJob: (ticketId: number, job: CiJob) => void;
-  /**
-   * Starts, stops, reads the logs of, or generates the compose file of a ticket's or a pull
-   * request's preview; `update` moves a pull request's checkout to the commit its review reads.
-   */
-  preview: (owner: WorkspaceOwner, action: PreviewAction) => void;
-};
-
-export type PreviewAction = 'start' | 'stop' | 'logs' | 'generate' | 'e2e' | 'update';
 
 const PREVIEW_ACTIONS: Record<string, PreviewAction> = {
   preview_start: 'start',
@@ -61,24 +34,6 @@ const PREVIEW_ACTIONS: Record<string, PreviewAction> = {
   preview_generate: 'generate',
   preview_e2e: 'e2e',
   review_checkout_update: 'update',
-};
-
-function ignore(): void {
-  // Without hooks (tests, tools), container removal and run cancellation are skipped.
-}
-
-const NO_HOOKS: CommandHooks = {
-  removeContainers: ignore,
-  cancelInvestigation: ignore,
-  cancelAgentReview: ignore,
-  cancelReviewGrouping: ignore,
-  cancelReviewExplanation: ignore,
-  submitPullRequestReview: ignore,
-  cancelPrDescription: ignore,
-  cancelContainerRun: ignore,
-  sendPrDescription: ignore,
-  rerunCiJob: ignore,
-  preview: ignore,
 };
 
 function isContainerRef(value: unknown): value is ContainerRef {
@@ -249,6 +204,10 @@ function execute(db: Db, command: Command, hooks: CommandHooks): void {
     }
     case 'update_pr_description': {
       hooks.sendPrDescription(numberField(command, 'prDescriptionId'));
+      return;
+    }
+    case 'edit_ticket': {
+      hooks.editTicket(requireTicketId(command), ticketEditOf(command.payload));
       return;
     }
     case 'rerun_ci_job': {

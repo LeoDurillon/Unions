@@ -3,6 +3,7 @@ import type {
   GitHubApi,
   PullRequestChecks,
   IssueRef,
+  IssueText,
   ProjectInfo,
   PullRequestRef,
   PullRequestReview,
@@ -103,6 +104,19 @@ export class FakeGitHubApi extends FakeProjectFields implements GitHubApi {
       blockedBy: [],
     });
     return Promise.resolve({ number, nodeId: `I_${number}` });
+  }
+
+  issueText(_repo: RepoRef, number: number): Promise<IssueText> {
+    this.calls.push('issueText');
+    const { title, body } = this.issueByNumber(number);
+    return Promise.resolve({ title, body });
+  }
+
+  updateIssue(_repo: RepoRef, number: number, text: IssueText): Promise<string> {
+    this.calls.push('updateIssue');
+    const issue = this.issueByNumber(number);
+    Object.assign(issue, text, { updatedAt: this.tick() });
+    return Promise.resolve(issue.updatedAt);
   }
 
   addToProject(_projectNodeId: string, issueNodeId: string): Promise<string> {

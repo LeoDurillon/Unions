@@ -82,7 +82,8 @@ export function NotionImportPanel({
   projectId: number;
   flow: PipelineStep[] | null;
   onCreated: (ticketId: number) => void;
-  onEdit: (title: string, body: string) => void;
+  /** Opens the page in the form, still linked to it. */
+  onEdit: (page: NotionImport) => void;
 }): ReactElement {
   const [page, setPage] = useState('');
   const fetchPage = useMutation({
@@ -125,7 +126,7 @@ export function NotionImportPanel({
             create.mutate(found);
           }}
           onEdit={() => {
-            onEdit(found.title, found.body);
+            onEdit(found);
           }}
         />
       ) : null}

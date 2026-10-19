@@ -21,6 +21,10 @@ type TicketPayloads = {
   ticket_base_chosen: { branch: string | null };
   ticket_flow_chosen: { flow: Column<typeof tables.tickets, 'flow'> };
   ticket_updated_from_github: Nothing;
+  /** The user edited the title or description in Union; the issue on GitHub has it too. */
+  ticket_edited: Nothing;
+  /** The edit was not saved: GitHub refused it, or the issue changed there since it was opened. */
+  ticket_edit_failed: { error: string };
   phase_changed: { from: Phase; to: Phase; action: Action['type']; board: BoardStatus };
   step_output: { step: Step; version: number };
   start_blocked: { parent: string; parentId: number };

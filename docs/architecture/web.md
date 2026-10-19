@@ -34,7 +34,9 @@
   `ApiServices`): the head commit's check runs and statuses and the PR's bot comments; a pick (a failed check, another
   Actions job, a bot comment) is read again and turned into the implementer's text (`ci-picks.ts`, core
   `ci-output-text.ts`), previewed, kept in `ci_outputs` or sent as a `revise` command; Re-run on a failed Actions job
-  queues `rerun_ci_job` (`ci-rerun.ts`, once per job while it waits). A pull request under review (Current reviews tab) uses the same
+  queues `rerun_ci_job` (`ci-rerun.ts`, once per job while it waits). `PUT /api/tickets/:id/text`
+  (`routes/ticket-edit.ts`) queues `edit_ticket` with the new title and description and the `base` the user started
+  from; it refuses a base the ticket no longer has, and a second edit while one waits. A pull request under review (Current reviews tab) uses the same
   page and comment code: `review_comments` rows belong to a ticket or to a `current_reviews` row
   (`routes/review-comments.ts`, `routes/pr-review.ts`), and the client reviews a `ReviewTarget`
   (`lib/review-target.ts`), whose base URL serves the diff, the comments and the send. Files matching the project's

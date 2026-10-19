@@ -9,6 +9,8 @@ export type RepoRef = { owner: string; repo: string };
 
 export type IssueRef = { number: number; nodeId: string };
 
+export type IssueText = { title: string; body: string };
+
 export type ProjectInfo = {
   statusFieldId: string;
   /** Status option name → option id. */
@@ -85,6 +87,10 @@ export type GitHubApi = {
     fieldId: string;
     optionId: string;
   }): Promise<void>;
+  /** The issue's title and description as GitHub has them now. */
+  issueText(repo: RepoRef, number: number): Promise<IssueText>;
+  /** Writes the issue's title and description; returns its new `updatedAt`. */
+  updateIssue(repo: RepoRef, number: number, text: IssueText): Promise<string>;
   listComments(repo: RepoRef, issueNumber: number): Promise<RemoteComment[]>;
   createComment(repo: RepoRef, issueNumber: number, body: string): Promise<string>;
   updateComment(repo: RepoRef, commentId: string, body: string): Promise<void>;

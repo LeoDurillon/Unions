@@ -62,7 +62,7 @@ export); do not edit. Tests are left out.
 - `step-tab.tsx`: The ticket panel tab for one step: its output, verdict, answer form and review bar.
 - `ticket-attachments.tsx`: The ticket's files, in its Overview tab: added, described and removed at any time.
 - `ticket-card.tsx`: A draggable ticket card for the board, with its phase, pull request and CI checks badges.
-- `ticket-description.tsx`: The ticket's description, folded when long.
+- `ticket-description.tsx`: The ticket's description, folded when long, and its title and description edited in place.
 - `ticket-details.tsx`: What the ticket is attached to: where it comes from, what it depends on, its files, its preview.
 - `ticket-e2e-actions.tsx`: What a ticket's failing end-to-end run can become: a revision the implementer gets, like a failing check.
 - `ticket-form.tsx`: The form that creates a ticket, with its parent and attached files.
@@ -71,6 +71,7 @@ export); do not edit. Tests are left out.
 - `ticket-panel.tsx`: The side panel for the selected ticket: header, section tabs and the body of the current tab.
 - `ticket-run-actions.tsx`: What a ticket's command output can become: kept for the implementer's next run, or sent now as a revision.
 - `ticket-tabs.tsx`: The panel's top tabs: the ticket, its preview, the agents' work, and its pull request.
+- `ticket-text-editor.tsx`: The ticket's title and description being edited on its Overview, saved to the issue by the worker.
 - `ui.tsx`: One line: a pill wrapped over two lines reads as a blob; too long, it ends in an ellipsis.
 - `verdict-badge.tsx`: The reviewer's verdict at the top of the final review.
 - `wizard-host.tsx`: The setup wizard: unavoidable on first run, dismissible when adding another project.
@@ -345,6 +346,7 @@ export); do not edit. Tests are left out.
 - `use-settings-form.ts`: A settings page's form: what is edited, whether it differs from what was saved, and its one Save.
 - `use-stored-number.ts`: A number remembered in localStorage; storage being unavailable only loses the memory.
 - `use-ticket-commands.ts`: The hook that sends commands for a ticket and refreshes what the page shows afterwards.
+- `use-ticket-edit.ts`: Saves the ticket's edited title and description: queued for the worker, done when its event comes in.
 - `use-usage.ts`: What a ticket's or an investigation's agent calls used; refetched with the ticket or the investigations.
 - `verdict.ts`: The reviewer's verdict line (`VERDICT: APPROVED` / `VERDICT: CHANGES_REQUESTED`), if any.
 - `worker-tabs.ts`: The Worker tab's own tabs: a step's in the ticket's flow order (custom agents named), the on-demand ones, the log.

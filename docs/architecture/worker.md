@@ -84,7 +84,13 @@
   the one the agent read (else `conflict`), so an edit made on GitHub is never overwritten unseen. The first
   description (`pr-description.ts`, when the PR is opened) and the rewrite both use the `pr_description` agent.
   `github/ci-rerun.ts` handles `rerun_ci_job`: GitHub runs the failed Actions job again; it logs `ci_job_rerun` or
-  `ci_job_rerun_failed` (which notifies).
+  `ci_job_rerun_failed` (which notifies). `github/ticket-edit.ts` handles `edit_ticket` (the title and description
+  edited on the Overview): it writes them to the issue only if GitHub still has the text the edit started from
+  (`base`), keeping Union's marker only when the issue had one, then to the ticket with the issue's new `updatedAt`
+  as `github_updated_at`; it logs `ticket_edited` or `ticket_edit_failed`. A ticket without an issue yet is edited
+  locally and the sync creates the issue with it. `github/inbound.ts` skips an item read before the last
+  reconciliation (its `updatedAt` not after `github_updated_at`), so a pull that started before the edit does not
+  undo it.
 - `throwaway-runs.ts`: the side runs that need no repository, in a throwaway container with only the Claude login:
   the connector check (`mcp-check.ts`) and the lesson writer (`lesson-writer-run.ts`, same slots as the agents),
   which turns feedback the user picked into proposed lessons (`lesson_suggestions`; prompt and parsing in core

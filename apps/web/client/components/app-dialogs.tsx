@@ -6,10 +6,11 @@ import type { Overlay } from '../lib/use-navigation';
 import { FlowPicker } from './flow-picker';
 import { GitHubIssueImportPanel } from './github-issue-import';
 import { NotionImportPanel } from './notion-import';
-import { TicketForm } from './ticket-form';
+import { TicketForm, type NotionPageRef } from './ticket-form';
 import { Dialog } from './ui';
 
-type Draft = { title: string; body: string; key: number };
+/** `notionPage`: the page an edited Notion import comes from, kept linked to the ticket. */
+type Draft = { title: string; body: string; notionPage: NotionPageRef | null; key: number };
 type Source = 'write' | 'github' | 'notion';
 
 /** Writing by hand always; importing from GitHub or Notion when the project reaches them. */
@@ -52,6 +53,24 @@ function TicketTabs({
   );
 }
 
+function FlowField({
+  project,
+  value,
+  onChange,
+}: {
+  project: PublicProject;
+  value: PipelineStep[] | null;
+  onChange: (flow: PipelineStep[] | null) => void;
+}): ReactElement {
+  return (
+    // Not a `Field`: its label would wrap the picker's own labels.
+    <div className="space-y-1">
+      <span className="text-sm font-medium">Flow</span>
+      <FlowPicker config={project.config} value={value} onChange={onChange} />
+    </div>
+  );
+}
+
 /** New ticket: written by hand, or imported from a GitHub issue or a Notion page. */
 function TicketBody({
   project,
@@ -62,15 +81,9 @@ function TicketBody({
 }): ReactElement {
   const [tab, setTab] = useState<Source>('write');
   const tabs = sourcesFor(project);
-  const [draft, setDraft] = useState<Draft>({ title: '', body: '', key: 0 });
+  const [draft, setDraft] = useState<Draft>({ title: '', body: '', notionPage: null, key: 0 });
   const [flow, setFlow] = useState<PipelineStep[] | null>(null);
-  const picker = (
-    // Not a `Field`: its label would wrap the picker's own labels.
-    <div className="space-y-1">
-      <span className="text-sm font-medium">Flow</span>
-      <FlowPicker config={project.config} value={flow} onChange={setFlow} />
-    </div>
-  );
+  const picker = <FlowField project={project} value={flow} onChange={setFlow} />;
   const form = (
     <TicketForm
       key={draft.key}
@@ -78,6 +91,7 @@ function TicketBody({
       flow={flow}
       initialTitle={draft.title}
       initialBody={draft.body}
+      notionPage={draft.notionPage}
       onCreated={onCreated}
     />
   );
@@ -102,8 +116,13 @@ function TicketBody({
           projectId={project.id}
           flow={flow}
           onCreated={onCreated}
-          onEdit={(title, body) => {
-            setDraft((previous) => ({ title, body, key: previous.key + 1 }));
+          onEdit={(page) => {
+            setDraft((previous) => ({
+              title: page.title,
+              body: page.body,
+              notionPage: { id: page.pageId, title: page.title },
+              key: previous.key + 1,
+            }));
             setTab('write');
           }}
         />

@@ -16,6 +16,7 @@ export); do not edit. Tests are left out.
 - `attachments-sync.ts`: Puts the ticket's current files in the container, before every step: files added since the last step appear, removed ones disappear, and whatever the agent cha…
 - `branch.ts`: `<issue#>-<slug>`, or `union-<ticket id>-<slug>` while the ticket has no GitHub issue.
 - `command-cancels.ts`: The cancel commands of the side runs: the id each one carries, and how a queued or a running one stops.
+- `command-hooks.ts`: What the commands hand off to the running worker (all asynchronous), and the no-op set for tests and tools.
 - `commands.ts`: Handles every pending command once.
 - `container-exec.ts`: Runs a command in the container and collects its output (for short commands, not agents).
 - `container-run.ts`: Runs the commands users queue in tickets' and pull requests' workspaces, a few at a time.
@@ -111,7 +112,7 @@ export); do not edit. Tests are left out.
 - `octokit-api.ts`: The GitHub API implemented with Octokit: issues, pull requests and the project board.
 - `octokit-checks.ts`: The CI checks of the worker's GitHub client: a pull request's head commit and the overall state of its checks, and re-running an Actions job.
 - `octokit-project-fields.ts`: The GitHub Project fields of the worker's GitHub client: reading them, setting one on an item, a pull request's node id.
-- `octokit-pull-request-changes.ts`: The pull request changes of the worker's GitHub client (title, labels, reviewers, assignees): the base of `OctokitGitHubApi`.
+- `octokit-pull-request-changes.ts`: The issue and pull request changes of the worker's GitHub client (issue text, PR title, labels, reviewers, assignees): the base of `OctokitGitHubApi`.
 - `pr-description-send.ts`: Writes the user's version of a rewritten description to the pull request, with Union's links added back, unless the description on GitHub changed since the age…
 - `pr-review.ts`: The review as GitHub gets it.
 - `pull-request-checks.ts`: Keeps the CI checks' state of the ticket's open pull request current, and logs when they turn red.
@@ -120,6 +121,7 @@ export); do not edit. Tests are left out.
 - `render.ts`: Issue body as sent to GitHub: the ticket description plus a marker that identifies our ticket.
 - `status.ts`: Maps board columns to the GitHub Project's Status options, and back.
 - `sync.ts`: Mirrors tickets to GitHub.
+- `ticket-edit.ts`: Writes the title and description the user edited in Union to the ticket's issue, then to the ticket.
 
 ## preview/
 

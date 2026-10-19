@@ -63,7 +63,31 @@ type NewTicket = {
   body: string;
   parentId: number | null;
   flow: PipelineStep[] | null;
+  notionPageId?: string;
 };
+
+/** A Notion page whose import is edited before the ticket is created. */
+export type NotionPageRef = { id: string; title: string };
+
+/** The ticket stays linked to the page (and gets its images) unless unlinked here. */
+function NotionLink({
+  page,
+  onUnlink,
+}: {
+  page: NotionPageRef;
+  onUnlink: () => void;
+}): ReactElement {
+  return (
+    <p className="flex items-center gap-2 text-xs text-zinc-500">
+      <span>
+        Imported from Notion: <span className="font-medium">{page.title}</span>
+      </span>
+      <button type="button" className="underline hover:text-zinc-700" onClick={onUnlink}>
+        Unlink
+      </button>
+    </p>
+  );
+}
 
 /** Creates the ticket, then uploads its files; a retry after a failed upload reuses the ticket. */
 function useCreateTicket(
@@ -91,12 +115,49 @@ function useCreateTicket(
   return { create, created: createdId !== null };
 }
 
+function TextFields({
+  title,
+  body,
+  onTitle,
+  onBody,
+}: {
+  title: string;
+  body: string;
+  onTitle: (title: string) => void;
+  onBody: (body: string) => void;
+}): ReactElement {
+  return (
+    <>
+      <Field label="Title">
+        <input
+          className={inputClass}
+          value={title}
+          onChange={(event) => {
+            onTitle(event.target.value);
+          }}
+          required
+        />
+      </Field>
+      <Field label="Description" hint="Markdown. This becomes the GitHub issue body.">
+        <textarea
+          className={`${inputClass} min-h-40 font-mono`}
+          value={body}
+          onChange={(event) => {
+            onBody(event.target.value);
+          }}
+        />
+      </Field>
+    </>
+  );
+}
+
 export function TicketForm({
   projectId,
   flow,
   onCreated,
   initialTitle = '',
   initialBody = '',
+  notionPage = null,
 }: {
   projectId: number;
   /** Chosen above the form, for every way of creating the ticket. */
@@ -104,13 +165,15 @@ export function TicketForm({
   onCreated: (ticketId: number) => void;
   initialTitle?: string;
   initialBody?: string;
+  notionPage?: NotionPageRef | null;
 }): ReactElement {
   const [title, setTitle] = useState(initialTitle);
   const [body, setBody] = useState(initialBody);
   const [parentId, setParentId] = useState<number | null>(null);
   const [files, setFiles] = useState<PendingFile[]>([]);
+  const [linked, setLinked] = useState(notionPage);
   const { create, created } = useCreateTicket(
-    { projectId, title, body, parentId, flow },
+    { projectId, title, body, parentId, flow, ...(linked ? { notionPageId: linked.id } : {}) },
     { files, setFiles },
     onCreated,
   );
@@ -122,25 +185,15 @@ export function TicketForm({
 
   return (
     <form onSubmit={submit} className="space-y-4">
-      <Field label="Title">
-        <input
-          className={inputClass}
-          value={title}
-          onChange={(event) => {
-            setTitle(event.target.value);
-          }}
-          required
-        />
-      </Field>
-      <Field label="Description" hint="Markdown. This becomes the GitHub issue body.">
-        <textarea
-          className={`${inputClass} min-h-40 font-mono`}
-          value={body}
-          onChange={(event) => {
-            setBody(event.target.value);
+      {linked ? (
+        <NotionLink
+          page={linked}
+          onUnlink={() => {
+            setLinked(null);
           }}
         />
-      </Field>
+      ) : null}
+      <TextFields title={title} body={body} onTitle={setTitle} onBody={setBody} />
       <ParentField projectId={projectId} value={parentId} onChange={setParentId} />
       <PendingFilesField files={files} onChange={setFiles} />
       <ErrorText error={create.error} />
