@@ -44,6 +44,7 @@ function ticketTarget(db: Db, c: Context): GroupingTarget {
     project: projectOf(db, ticket.projectId),
     prNumber: ticket.prNumber,
     ticketText: ticket.notionPageId ? notionMarkdown(ticket.body) : ticket.body,
+    notionPageId: ticket.notionPageId,
     headSha: snapshot?.headSha ?? null,
     refusal,
   };
@@ -71,6 +72,7 @@ function pullRequestTarget(db: Db, c: Context): GroupingTarget {
     project: projectOf(db, projectId),
     prNumber: number,
     ticketText: null,
+    notionPageId: review.notionPageId,
     headSha: review.headSha,
     refusal:
       review.files && review.headSha ? null : 'Open the diff first: its files are not read yet.',

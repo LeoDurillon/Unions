@@ -5,6 +5,7 @@ import { useState, type ReactElement, type ReactNode } from 'react';
 
 import { api } from '../lib/api';
 import { currentStep } from '../lib/labels';
+import { ReviewNotionContext } from '../lib/review-notion-context';
 import { ReviewPage } from './review/review-page';
 import { TicketPanelHeader } from './ticket-panel-header';
 import {
@@ -88,13 +89,15 @@ export function TicketPanel({
 
   if (reviewing && detail) {
     return (
-      <ReviewPage
-        target={{ kind: 'ticket', ticketId: detail.ticket.id }}
-        title={detail.ticket.title}
-        onClose={() => {
-          setReviewing(false);
-        }}
-      />
+      <ReviewNotionContext.Provider value={detail.ticket.notionPageId}>
+        <ReviewPage
+          target={{ kind: 'ticket', ticketId: detail.ticket.id }}
+          title={detail.ticket.title}
+          onClose={() => {
+            setReviewing(false);
+          }}
+        />
+      </ReviewNotionContext.Provider>
     );
   }
 

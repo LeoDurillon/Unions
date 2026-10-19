@@ -114,7 +114,7 @@
   send. Its prompt and model are the `review_comments` agent in Union settings; `final_review` is unrelated.
   The button opens a dialog of specs (`agent-review-dialog.tsx`, `specs-form.tsx`, `spec-cards.tsx`; sources shared
   with Group by spec in `spec-picker.tsx`): it starts from the last run's specs (`agent_reviews.specs`), else the
-  ticket's text or the PR's description (`lib/use-default-specs.ts`); none means the agent reviews the code alone,
+  ticket's text or the PR's description and its linked Notion page (`lib/use-default-specs.ts`); none means the agent reviews the code alone,
   and a request with no `specs` keeps the old prompt. In a stack (`lib/review-stack.ts`, provided by
   `stack-review.tsx`) it reviews the whole stack by default: each PR's description linked to its own PR, an added
   spec linked to all until unticked. `routes/pr-agent-review.ts` checks the PRs are one stack under review, reads
@@ -128,7 +128,8 @@
   `lib/use-review-notion.ts`; `prReviewSections` adds the tab when the review has a page.
 - Grouping by spec: "Group by spec" on either review page (`group-by-spec-dialog.tsx`) reads a specification
   (`routes/spec-sources.ts`: the PR description without Union's links, the ticket's text, a GitHub issue, any
-  Notion page the integration can read), lets the user edit it, and queues a `review_groupings` row
+  Notion page the integration can read; with no URL, `GroupingTarget.notionPageId`: the review's linked page or the
+  ticket's, given to the picker by `lib/review-notion-context.ts`), lets the user edit it, and queues a `review_groupings` row
   (`routes/review-groupings.ts`, `grouping-targets.ts`; `@union/core` `review-groupings.ts`). The worker's
   `ReviewGroupingRunner` (`review-grouping.ts`, same slots and checkout as the agent review, PR containers
   `union-g<id>`) runs the `review_groups` agent; `review-grouping-result.ts` keeps only changed files, puts the ones

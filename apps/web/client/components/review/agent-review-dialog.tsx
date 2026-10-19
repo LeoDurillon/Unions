@@ -1,4 +1,4 @@
-// Review with agent: the specs the change is checked against (the last run's, else the ticket's text or the PR's descriptions), for one change or a whole stack, then the start.
+// Review with agent: the specs the change is checked against (the last run's, else the ticket's text or the PR's descriptions and linked Notion pages), for one change or a whole stack, then the start.
 import type { AgentReviewSpec } from '@union/core';
 import { useState, type ReactElement } from 'react';
 

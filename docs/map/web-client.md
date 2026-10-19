@@ -153,7 +153,7 @@ export); do not edit. Tests are left out.
 ## components/review/
 
 - `agent-review-button.tsx`: Asks the review agent for draft comments on the change, and shows where it stands.
-- `agent-review-dialog.tsx`: Review with agent: the specs the change is checked against (the last run's, else the ticket's text or the PR's descriptions), for one change or a whole stack, …
+- `agent-review-dialog.tsx`: Review with agent: the specs the change is checked against (the last run's, else the ticket's text or the PR's descriptions and linked Notion pages), for one c…
 - `comment-card.tsx`: One comment: drafts can be edited or deleted, the agent's suggestions also kept as they are; sent ones are read-only.
 - `comment-editor.tsx`: Shown under the selected lines; Shift-click another line number to extend the block.
 - `comment-thread.tsx`: The comments ending on one line, and the editor when the selection ends there.
@@ -178,7 +178,7 @@ export); do not edit. Tests are left out.
 - `send-review.tsx`: Sends the drafts and an optional overall note to the implementer, from a panel under the button.
 - `spec-cards.tsx`: The specs an agent review will check the change against: one card each, its text to read or edit, the pull requests of a stack it covers.
 - `spec-groups.tsx`: The files under the parts of the specification they implement (a file can be under several, with only some of its hunks), then the changes no part covers, then…
-- `spec-picker.tsx`: Where a specification comes from (the PR description, the ticket, an issue, a Notion page): picking it, reading it, editing its text.
+- `spec-picker.tsx`: Where a specification comes from (the PR description, the ticket, an issue, a Notion page, the linked one by default): picking it, reading it, editing its text.
 - `specs-form.tsx`: The specs of a Review with agent, editable, a way to add one from any source, and the start.
 - `split-diff.tsx`: Old file on the left, new on the right; removed and added runs face each other.
 - `view-toggle.tsx`: Unified / Split switch for the review diff.
@@ -284,6 +284,7 @@ export); do not edit. Tests are left out.
 - `pull-request-stacks.ts`: Stacks in the Pull requests and Current reviews tabs, and the stack under review a pull request would join.
 - `refused-commit-api.ts`: The ticket's last refused commit, or null.
 - `review-grouping-api.ts`: `base` is the review's API root (`reviewBase`).
+- `review-notion-context.ts`: The Notion page of the open review (the page linked to a pull request, or a ticket's), for its spec sources.
 - `review-stack.ts`: The stack a pull request under review is in, for the review page's agent: its pull requests bottom first, null when alone.
 - `review-target.ts`: Where the target's diff, comments and send live; also the root of its query keys.
 - `settings-sections.ts`: The project settings page open in the URL (`?settings=preview-services`), or null.
@@ -304,7 +305,7 @@ export); do not edit. Tests are left out.
 - `use-connectors.ts`: The account's claude.ai connectors, and reading them again (polled while the worker checks).
 - `use-container-runs.ts`: The commands run in the target's workspace (polled while one is on), and running or stopping one.
 - `use-current-reviews.ts`: Adding and removing refresh the list (and the Pull requests tab, which marks what is in it).
-- `use-default-specs.ts`: The specs a Review with agent starts from when its last run gives none: the ticket's text, the PR's description, or each description of a stack.
+- `use-default-specs.ts`: The specs a Review with agent starts from when its last run gives none: the ticket's text, the PR's description and its linked Notion page, or each of a stack'…
 - `use-event-stream.ts`: Calls `onEvent` with every new event, from the browser's one shared stream (`event-hub.ts`).
 - `use-github-app.ts`: The global GitHub App's status; saving or removing it invalidates `['github-app']`.
 - `use-live-invalidation.ts`: Refetches board, ticket, investigation and notification data whenever the worker records a change.

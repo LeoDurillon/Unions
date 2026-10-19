@@ -28,7 +28,11 @@ or ID, reads it through the project's integration (any page shared with it, not 
 shows its title before **Link**; once linked, the row shows the title (a link to Notion), **Change** and **Unlink**.
 Only the page's id, title and URL are kept on the review (`current_reviews.notion_*`); the **Notion** tab, after
 Description, reads the page's text from Notion once per opening (cleaned as a ticket's import, mention titles
-resolved, folded when long), with **Refresh**. Nothing is written to Notion or GitHub.
+resolved, folded when long), with **Refresh**. Nothing is written to Notion or GitHub. The linked page is a spec
+with no URL to paste: **Group by spec** starts on it and reads it when it opens, **Review with agent** starts from
+the description and the page (in a stack, each member's description and each linked page once, linked to the pull
+requests linked to it), and the **Notion page** source of either reads it at once, with "Another page" for a URL.
+A ticket imported from Notion gets the same source for its page (its current text, not the import's).
 
 **CI checks** of a ticket's pull request ([`docs/plans/pr-checks.md`](../plans/pr-checks.md)), in the PR tab under the branch status, while
 the PR is not merged (read when the tab opens, every 30 s while a check runs, and on Refresh): the web reads the head commit's check runs and commit statuses and the PR's bot comments. The user picks failed checks, other

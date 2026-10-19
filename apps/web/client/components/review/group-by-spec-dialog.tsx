@@ -1,6 +1,7 @@
 import type { SpecSource } from '@union/core';
-import { useState, type ReactElement } from 'react';
+import { useEffect, useState, type ReactElement } from 'react';
 
+import { useLinkedNotionPage } from '../../lib/review-notion-context';
 import type { ReviewTarget } from '../../lib/review-target';
 import { useReviewGrouping } from '../../lib/use-review-grouping';
 import { Button, Dialog, ErrorText } from '../ui';
@@ -21,10 +22,18 @@ export function GroupBySpecDialog({
   open: boolean;
   onClose: () => void;
 }): ReactElement {
-  const [kind, setKind] = useState<SpecSource>(sources[0] ?? 'issue');
+  // A page linked to the pull request is the user saying "this is the spec": read it at once.
+  const startOnNotion = useLinkedNotionPage() !== null && target.kind === 'pull-request';
+  const [kind, setKind] = useState<SpecSource>(startOnNotion ? 'notion' : (sources[0] ?? 'issue'));
   const [spec, setSpec] = useState<{ label: string; text: string } | null>(null);
   const { start } = useReviewGrouping(target);
   const load = useSpecLoad(target, setSpec);
+  const { mutate } = load;
+  useEffect(() => {
+    if (startOnNotion) {
+      mutate({ kind: 'notion', ref: '' });
+    }
+  }, [startOnNotion, mutate]);
   const ready = spec !== null && spec.text.trim() !== '';
   return (
     <Dialog open={open} onClose={onClose} title="Group the change by spec" wide>

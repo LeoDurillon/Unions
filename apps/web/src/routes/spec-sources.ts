@@ -10,6 +10,7 @@ import {
 
 import type { OnboardingGitHub } from '../github-onboarding';
 import { BAD_REQUEST, CONFLICT, fail, NOT_FOUND } from '../http';
+import { mentionTitles } from '../notion-mentions';
 import { parseIssueRef } from '../pull-request-ref';
 import { guarded } from './github-errors';
 import { guarded as notionGuarded } from './notion';
@@ -76,7 +77,7 @@ async function issueSpec(
   return { kind: 'issue', label: `Issue #${number}: ${issue.title}`, text: issue.body.trim() };
 }
 
-/** Any page the project's integration can read (it only sees the pages shared with it). */
+/** Any page the project's integration can read (it only sees the pages shared with it), the linked one by default. */
 async function notionSpec(
   readers: SpecReaders,
   target: GroupingTarget,
@@ -89,16 +90,18 @@ async function notionSpec(
       'This project is not connected to Notion: set it up in the project settings',
     );
   }
-  const id = parseNotionId(ref);
+  // No page named: the one linked to the review (or the ticket's).
+  const id = ref === '' ? target.notionPageId : parseNotionId(ref);
   if (!id) {
     throw fail(BAD_REQUEST, 'Give a Notion page URL or ID');
   }
   const page = await notionGuarded(() => readers.notion.page(token, id));
   const { markdown } = await notionGuarded(() => readers.notion.pageMarkdown(token, id));
+  const titles = await mentionTitles(readers.notion, token, markdown);
   return {
     kind: 'notion',
     label: `Notion: ${page.title || 'Untitled page'}`,
-    text: notionMarkdown(markdown).trim(),
+    text: notionMarkdown(markdown, titles).trim(),
   };
 }
 
