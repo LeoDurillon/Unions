@@ -1,8 +1,14 @@
 import { createHash } from 'node:crypto';
 
-import type { StepOutput, Step } from '@union/core';
+import {
+  isCustomStep,
+  type BuiltInStep,
+  type CustomAgentNames,
+  type Step,
+  type StepOutput,
+} from '@union/core';
 
-const STEP_TITLES: Record<Step, string> = {
+const STEP_TITLES: Record<BuiltInStep, string> = {
   intake: 'Intake',
   summary: 'Summary',
   technical: 'Technical implementation',
@@ -37,15 +43,24 @@ export function stripTicketMarker(body: string): string {
   return body.replace(/\n*<!-- union:ticket=\d+ -->\s*$/u, '');
 }
 
+function commentTitle(step: Step, names: CustomAgentNames): string {
+  return isCustomStep(step) ? (names[step] ?? 'Custom agent') : STEP_TITLES[step];
+}
+
 /** `versions` is every version of the step, oldest first; the last one is shown. */
-export function renderStepComment(ticketId: number, step: Step, versions: StepOutput[]): string {
+export function renderStepComment(
+  ticketId: number,
+  step: Step,
+  versions: StepOutput[],
+  names: CustomAgentNames = {},
+): string {
   const latest = versions.at(-1);
   if (!latest) {
     throw new Error(`No output for step ${step}`);
   }
   const lines = [
     stepMarker(ticketId, step),
-    `### ${STEP_TITLES[step]} · v${latest.version} · ${VALIDATION_LABELS[latest.validation]}`,
+    `### ${commentTitle(step, names)} · v${latest.version} · ${VALIDATION_LABELS[latest.validation]}`,
     '',
     latest.content,
   ];

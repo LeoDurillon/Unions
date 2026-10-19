@@ -1,6 +1,7 @@
 import {
   boardStatus,
   emitEvent,
+  customAgentNames,
   getTicket,
   parseProjectUrl,
   schema,
@@ -218,7 +219,9 @@ export class GitHubSync {
       .where(eq(schema.stepOutputs.ticketId, ticketId))
       .orderBy(schema.stepOutputs.version)
       .all();
-    for (const step of STEPS) {
+    // The custom steps of its flow too; rebase and simplify have no comment.
+    const steps = new Set([...STEPS, ...(ticket.flow ?? [])]);
+    for (const step of steps) {
       const versions = outputs.filter((output) => output.step === step);
       if (versions.length > 0) {
         await this.pushStepComment(project, ticket, step, versions);
@@ -236,7 +239,7 @@ export class GitHubSync {
     if (!latest || ticket.issueNumber === null) {
       return;
     }
-    const body = renderStepComment(ticket.id, step, versions);
+    const body = renderStepComment(ticket.id, step, versions, customAgentNames(this.db));
     const hash = hashBody(body);
     if (latest.githubBodyHash === hash) {
       return;

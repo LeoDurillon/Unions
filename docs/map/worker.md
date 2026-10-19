@@ -12,7 +12,7 @@ export); do not edit. Tests are left out.
 - `agent-review.ts`: `specs` null: the review asked for none, the ticket's own text stands in for them.
 - `agent-services-step.ts`: A step that runs code (implementation, rebase), with the project's agent services beside it.
 - `agent.ts`: Runs `claude -p` inside the ticket's container and streams its events to `onEvent`.
-- `approved.ts`: The latest approved output of every step before `step`, in pipeline order.
+- `approved.ts`: The latest approved output of every step before `step`, in the order of the ticket's flow.
 - `attachments-sync.ts`: Puts the ticket's current files in the container, before every step: files added since the last step appear, removed ones disappear, and whatever the agent cha…
 - `branch.ts`: `<issue#>-<slug>`, or `union-<ticket id>-<slug>` while the ticket has no GitHub issue.
 - `command-cancels.ts`: The cancel commands of the side runs: the id each one carries, and how a queued or a running one stops.
@@ -20,12 +20,13 @@ export); do not edit. Tests are left out.
 - `container-exec.ts`: Runs a command in the container and collects its output (for short commands, not agents).
 - `container-run.ts`: Runs the commands users queue in tickets' and pull requests' workspaces, a few at a time.
 - `credentials.ts`: The secret the host's git uses to clone and push, minted right before use (an installation token lives one hour).
+- `custom-step.ts`: A custom agent's step: refused without a prompt; after the implementation, it reads the branch against its base.
 - `diff-commits.ts`: `git log`'s records, oldest first, without their files.
 - `diff-snapshot.ts`: Replaces the ticket's diff snapshot with `base...HEAD` as it is now in the container, with each commit's own diff and the change since the head the user last r…
 - `e2e-request.ts`: The e2e tests the user asks for, from a ticket or a pull request, in its own container.
 - `e2e.ts`: The project's e2e command against the owner's preview, after its checks passed.
 - `event-dispatcher.ts`: Follows the event log: writes the notifications, queues a delivery for each event a rule waits for, then does the due ones, a few per tick and one at a time.
-- `executor.ts`: Every step: planning, implementation, final review, and the rebase and simplify asked on demand.
+- `executor.ts`: Every step: planning and custom agents, implementation, final review, and the rebase and simplify asked on demand.
 - `gate.ts`: Runs the project's check command in the repository; a timeout counts as red.
 - `hooks.ts`: What the commands hand off to the running worker: all asynchronous, so draining stays synchronous.
 - `implement-checks.ts`: The checks after an agent turn; `retry` is what the session is sent when they are red.
@@ -43,6 +44,7 @@ export); do not edit. Tests are left out.
 - `lesson-writer-run.ts`: Runs the lesson writer the Memory page asks for, in a throwaway container with only the Claude login.
 - `mcp-check.ts`: Reads the account's claude.ai connectors as an agent sees them (`claude mcp list`, which also checks each one can be reached; no model runs), in a throwaway co…
 - `notifier.ts`: Follows the event log and writes a notification for each event that needs the user, announcing it on the stream.
+- `planning-step.ts`: A step that writes markdown and changes no file: the planning steps and the custom agents.
 - `pr-checkout.ts`: Where a pull request's reviewed commit is kept in the checkout.
 - `pr-description-run.ts`: Runs queued rewrites of pull request descriptions, sharing the run slots with the ticket pipeline, the investigations and the agent reviews.
 - `pr-description.ts`: The template GitHub would use among the repository's files (paths relative to its root).

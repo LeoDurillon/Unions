@@ -1,36 +1,27 @@
-import {
-  type ContainerRuntime,
-  type Db,
-  effortFor,
-  getTicket,
-  listAttachments,
-  listProjectFiles,
-  modelFor,
-  type Project,
-  resolveAgent,
-  stepSharedPrompt,
-  toolsFor,
-} from '@union/core';
+import { isCustomStep, type ContainerRuntime, type Db, type Project } from '@union/core';
 
-import { runAgent, runResumable } from './agent';
+import { runAgent } from './agent';
 import { runCodeStep } from './agent-services-step';
-import { approvedBefore } from './approved';
 import type { GitHubApi } from './github/api';
-import { buildPrompt, isPlanningStep, parentContext } from './prompts';
-import { ensureTicketContainer, REPO_DIR, type ProvisionConfig } from './provision';
+import { runPlanningStep } from './planning-step';
+import { isPlanningStep } from './prompts';
+import type { ProvisionConfig } from './provision';
 import { runReviewStep } from './review';
 import type { StepContext, StepExecutor, StepResult } from './scheduler';
 import { runSimplifyStep } from './simplify';
 
-/** Every step: planning, implementation, final review, and the rebase and simplify asked on demand. */
+/**
+ * Every step: planning and custom agents, implementation, final review, and the rebase and simplify
+ * asked on demand.
+ */
 export function createExecutor(
   db: Db,
   runtime: ContainerRuntime,
   config: ProvisionConfig,
   github: (project: Project) => GitHubApi | null,
 ): StepExecutor {
-  return async (context: StepContext): Promise<StepResult> => {
-    const { ticket, step } = context;
+  return (context: StepContext): Promise<StepResult> => {
+    const { step } = context;
     const deps = { db, runtime, config, github, agent: runAgent };
     if (step === 'implement' || step === 'rebase') {
       return runCodeStep(deps, context, step);
@@ -42,47 +33,9 @@ export function createExecutor(
     if (step === 'simplify') {
       return runSimplifyStep(deps, context);
     }
-    if (!isPlanningStep(step)) {
-      return { kind: 'error', error: `Unknown step ${JSON.stringify(step)}` };
+    if (!isPlanningStep(step) && !isCustomStep(step)) {
+      return Promise.resolve({ kind: 'error', error: `Unknown step ${JSON.stringify(step)}` });
     }
-    // Read on every run, so edits made in the settings apply to the next run.
-    const agent = resolveAgent(db, step);
-    const container = await ensureTicketContainer(db, runtime, config, ticket);
-    try {
-      // The planning prompt carries the previous version and the feedback, so a lost session can
-      // start over from the same prompt.
-      // Re-read: the first clone has just set the ticket's base branch.
-      const cloned = getTicket(db, ticket.id);
-      const prompt = buildPrompt({
-        ticket: cloned,
-        ...parentContext(db, cloned),
-        shared: stepSharedPrompt(db, ticket.projectId, step),
-        instructions: agent.prompt,
-        approved: approvedBefore(db, ticket.id, step),
-        revision: context.revision,
-        attachments: listAttachments(db, ticket.id),
-        projectFiles: listProjectFiles(db, ticket.projectId),
-      });
-      const run = {
-        container: container.name,
-        cwd: REPO_DIR,
-        model: modelFor(db, step),
-        effort: effortFor(db, step),
-        prompt,
-        tools: toolsFor(db, step),
-        resumeSessionId: context.resumeSessionId,
-        signal: context.signal,
-        onEvent: context.log,
-      };
-      const outcome = await runResumable(runAgent, runtime, run, prompt);
-      if (outcome.kind === 'ok') {
-        return { kind: 'ok', output: outcome.text, sessionId: outcome.sessionId };
-      }
-      return outcome.kind === 'rate_limited'
-        ? { kind: 'rate_limited', retryAt: null }
-        : { kind: 'error', error: outcome.message };
-    } finally {
-      await runtime.stop(container.name);
-    }
+    return runPlanningStep({ db, runtime, config }, { ...context, step });
   };
 }

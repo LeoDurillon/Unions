@@ -45,7 +45,7 @@ async function earlierReview(
   return `\n\n${previousReviewSection(previous, reviewed)}`;
 }
 
-function loadProject(db: Db, projectId: number): Project {
+export function loadProject(db: Db, projectId: number): Project {
   const project = db.select().from(schema.projects).where(eq(schema.projects.id, projectId)).get();
   if (!project) {
     throw new Error(`Project ${projectId} not found`);

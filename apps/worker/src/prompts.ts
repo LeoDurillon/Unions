@@ -16,6 +16,8 @@ import {
 } from '@union/core';
 import { eq } from 'drizzle-orm';
 
+import type { ApprovedOutput } from './approved';
+
 export function isPlanningStep(step: Step): step is PlanningStep {
   return PLANNING_STEPS.some((planning) => planning === step);
 }
@@ -30,8 +32,8 @@ export type PromptInput = {
   shared: string;
   /** This step's own instructions (editable per agent). */
   instructions: string;
-  /** Approved outputs of earlier steps, in pipeline order. */
-  approved: { step: Step; content: string }[];
+  /** Approved outputs of earlier steps, in the flow's order. */
+  approved: ApprovedOutput[];
   revision: { previous: string; feedback: string } | null;
   /** The files the user attached to the ticket (none for the rebase, which only replays commits). */
   attachments?: Attachment[];
@@ -105,6 +107,10 @@ ${files.map((file) => `- \`${file.path}\` (${formatBytes(file.size)})`).join('\n
 Use them for the project's local setup (a database dump, a local configuration). Never commit them, copy them elsewhere in the repository, or quote their contents in commits, reports or the pull request description: a push that contains one is refused.`;
 }
 
+function approvedSection(output: ApprovedOutput): string {
+  return `# Approved: ${output.name ?? output.step}\n\n${output.content}`;
+}
+
 export function buildPrompt({
   ticket,
   parent,
@@ -127,10 +133,7 @@ export function buildPrompt({
   if (projectFiles.length > 0) {
     parts.push(projectFilesSection(projectFiles));
   }
-  for (const output of approved) {
-    parts.push(`# Approved: ${output.step}\n\n${output.content}`);
-  }
-  parts.push(`# Your job\n\n${instructions}`);
+  parts.push(...approved.map((output) => approvedSection(output)), `# Your job\n\n${instructions}`);
   // After the job: it overrides what the instructions say of the skipped steps' outputs.
   const note = step ? flowNote(ticket.flow ?? FULL_FLOW, step) : '';
   if (note !== '') {
