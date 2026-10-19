@@ -121,6 +121,11 @@
   every member's files again (`readReviewFiles`), refuses (409) members merged or closed on GitHub by number, and
   queues one run with its members
   (`agent_review_members`); every PR's tab shows that run (`latestAgentReview` counts the stacks a review is in).
+- A review's Notion page: `routes/review-notion.ts` (mounted from `review-workspace.ts`) reads the linked page's
+  text (`GET`), checks a page before linking (`POST /check`), links (`PUT`, stores `current_reviews.notion_page_id`,
+  `notion_title`, `notion_url`) and unlinks (`DELETE`). The client's row is `review-notion-link.tsx` in the
+  Description tab (`review-description.tsx`), the tab `review-notion-tab.tsx`, both through
+  `lib/use-review-notion.ts`; `prReviewSections` adds the tab when the review has a page.
 - Grouping by spec: "Group by spec" on either review page (`group-by-spec-dialog.tsx`) reads a specification
   (`routes/spec-sources.ts`: the PR description without Union's links, the ticket's text, a GitHub issue, any
   Notion page the integration can read), lets the user edit it, and queues a `review_groupings` row

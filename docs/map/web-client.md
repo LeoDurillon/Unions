@@ -32,6 +32,7 @@ export); do not edit. Tests are left out.
 - `dropzone.tsx`: A file input as a dashed box: drop files on it, or click (or press Enter on it) to browse.
 - `flow-picker.tsx`: Picks the steps a ticket runs: one of the project's presets, or planning steps chosen one by one.
 - `flow-row.tsx`: The ticket's flow in its details: chosen while in Backlog, shown as fixed once it started.
+- `folded-markdown.tsx`: A markdown text folded under "Show more" when it is taller than a few screens' worth.
 - `github-issue-import.tsx`: Fetches an issue of the project's repository, previews it, and creates the ticket on it.
 - `log-tab.tsx`: Replays the ticket's whole agent log, then follows it live.
 - `main-area.tsx`: Right-hand side of the app: the running previews, the Union settings (`?union=`), the project's settings (`?settings=`), or the project.
@@ -134,11 +135,14 @@ export); do not edit. Tests are left out.
 
 - `current-reviews-page.tsx`: Pull requests put under review from the Pull requests tab, without a ticket; a stack opens with a tab per pull request.
 - `list-part.tsx`: A part of a list of pull requests (its stacks, the others): a heading with its count over its rows.
-- `pr-review-sections.tsx`: The tabs a pull request review shows before its diff.
+- `pr-review-sections.tsx`: The tabs a pull request review shows before its diff; Notion once it is linked to a page.
 - `pull-request-item.tsx`: One pull request: state, title, who and when, branches, review, size, and what can be done with it.
 - `pull-request-rows.tsx`: The Pull requests tab's list: stacks first, then the other pull requests, and adding them to the current reviews.
 - `pull-requests-page.tsx`: Every pull request of the project's repository, read from GitHub, open stacks as one row; linked ones open their ticket.
+- `review-description.tsx`: A pull request review's Description tab: the row linking its Notion page, then the description from GitHub.
 - `review-e2e-actions.tsx`: What a pull request's end-to-end result can become: a draft comment on the review; its failure screenshots.
+- `review-notion-link.tsx`: The Notion page row of a review's Description tab: link a page (its title checked first), change or unlink it.
+- `review-notion-tab.tsx`: A review's Notion tab: the linked page's text as Notion has it now, folded when long, with Refresh.
 - `review-preview-tab.tsx`: A pull request under review's Preview tab: its own checkout's preview, end-to-end tests and commands.
 - `review-run-actions.tsx`: What a command's output in a pull request's checkout can become: a draft comment on the review.
 - `review-stack-item.tsx`: A stack of pull requests under review as one row: its bottom's title, its pull requests, opening and removing it whole.
@@ -313,6 +317,7 @@ export); do not edit. Tests are left out.
 - `use-pr-checks.ts`: The pull request's CI checks (read again every 30 s while some still run), and giving picks of them to the implementer.
 - `use-preview.ts`: A ticket's or a pull request's preview as its section reads it, and the commands that act on it.
 - `use-review-grouping.ts`: The newest grouping by spec of the review, with starting and cancelling one.
+- `use-review-notion.ts`: The Notion page of a pull request under review: its text, and checking, linking and unlinking a page.
 - `use-review-preview.ts`: A pull request's preview as its Preview tab reads it (its checkout, its screenshots), and adding an output to the review.
 - `use-review.ts`: A pull request under review: its description and discussion, read from GitHub once per opening.
 - `use-run-agent.ts`: What a ticket's command output can do with the implementer: wait for its next run, or go now as a revision.

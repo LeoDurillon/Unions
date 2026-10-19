@@ -1,37 +1,13 @@
-import { githubText } from '@union/core/github-text';
 import type { ReactElement } from 'react';
 
-import type { PullRequestNote } from '../../../src/api-types';
+import type { CurrentReview, PullRequestNote } from '../../../src/api-types';
 import type { ReviewTarget } from '../../lib/review-target';
 import { useReviewDiscussion } from '../../lib/use-review';
-import { Markdown } from '../markdown';
 import { NoteCard, ThreadCard } from '../pull-request/note-card';
 import { filterNotes, NoteFilterControl, useNoteFilter } from '../pull-request/note-filter';
 import type { ReviewSection } from '../review/review-page';
-import { ErrorText } from '../ui';
-
-function Loading({ error }: { error: Error | null }): ReactElement {
-  return error ? (
-    <ErrorText error={error} />
-  ) : (
-    <p className="text-sm text-zinc-500">Reading the pull request on GitHub…</p>
-  );
-}
-
-/** The pull request's own description, as written on GitHub. */
-function Description({ target }: { target: ReviewTarget }): ReactElement {
-  const discussion = useReviewDiscussion(target);
-  if (!discussion.data) {
-    return <Loading error={discussion.error} />;
-  }
-  const text = discussion.data.description;
-  // A template left as it was (only its HTML comments) counts as empty.
-  return githubText(text) === '' ? (
-    <p className="text-sm text-zinc-500">No description.</p>
-  ) : (
-    <Markdown github>{text}</Markdown>
-  );
-}
+import { ReviewDescription, ReviewLoading } from './review-description';
+import { ReviewNotionTab } from './review-notion-tab';
 
 function Notes({ notes }: { notes: PullRequestNote[] }): ReactElement {
   const [filter, setFilter] = useNoteFilter();
@@ -54,7 +30,7 @@ function Notes({ notes }: { notes: PullRequestNote[] }): ReactElement {
 function Comments({ target }: { target: ReviewTarget }): ReactElement {
   const discussion = useReviewDiscussion(target);
   if (!discussion.data) {
-    return <Loading error={discussion.error} />;
+    return <ReviewLoading error={discussion.error} />;
   }
   const { notes, threads } = discussion.data;
   return (
@@ -71,10 +47,18 @@ function Comments({ target }: { target: ReviewTarget }): ReactElement {
   );
 }
 
-/** The tabs a pull request review shows before its diff. */
-export function prReviewSections(target: ReviewTarget): ReviewSection[] {
+/** The tabs a pull request review shows before its diff; Notion once it is linked to a page. */
+export function prReviewSections(target: ReviewTarget, review: CurrentReview): ReviewSection[] {
+  const notion: ReviewSection[] = review.notionPageId
+    ? [{ id: 'notion', label: 'Notion', content: <ReviewNotionTab review={review} /> }]
+    : [];
   return [
-    { id: 'description', label: 'Description', content: <Description target={target} /> },
+    {
+      id: 'description',
+      label: 'Description',
+      content: <ReviewDescription target={target} review={review} />,
+    },
+    ...notion,
     { id: 'comments', label: 'Comments', content: <Comments target={target} /> },
   ];
 }

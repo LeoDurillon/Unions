@@ -57,7 +57,7 @@ export function StackReview({
         key={review.prNumber}
         target={target}
         title={`#${review.prNumber} ${review.title}`}
-        sections={[...prReviewSections(target), reviewPreviewSection(target, scripts)]}
+        sections={[...prReviewSections(target, review), reviewPreviewSection(target, scripts)]}
         stackTabs={
           stack.length > 1 ? (
             <StackTabs

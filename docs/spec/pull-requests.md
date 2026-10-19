@@ -13,7 +13,7 @@ GitHub call), where it can be removed.
 **Open review** opens the same review page as a ticket's (file list, highlighted unified or split diff, comments on
 a line or a block of lines), with four tabs: **Description** (the pull request's description) and **Comments** (its
 review summaries, conversation comments and line threads, read only), both read from GitHub once per opening,
-**Preview** (see [Previews of pull requests under review](preview-environments.md#previews-of-pull-requests-under-review)), then **Diff**. The pull request's head commit and files are read from GitHub when the page opens and
+**Notion** once the review is linked to a page, **Preview** (see [Previews of pull requests under review](preview-environments.md#previews-of-pull-requests-under-review)), then **Diff**. The pull request's head commit and files are read from GitHub when the page opens and
 kept on the review (`current_reviews.files`, `head_sha`): comments are checked against those lines, and those
 written on an earlier head read as outdated. **Send review** offers **Comment**, **Approve** and **Request changes**;
 each queues a `submit_pr_review` command with that verdict, and the worker posts one review of that kind on the pull
@@ -22,6 +22,13 @@ body with their code (GitHub refuses line comments outside the current diff). An
 and no note; a comment or a request for changes needs one of them. The posted drafts turn sent; a failure (GitHub
 refuses, for one, an approval or a request for changes on the user's own pull request) leaves them drafts and shows
 GitHub's reason (`submit_status`).
+
+A review is linked to the Notion page it implements from its **Description** tab: **Notion page** takes a page URL
+or ID, reads it through the project's integration (any page shared with it, not only rows of its data source) and
+shows its title before **Link**; once linked, the row shows the title (a link to Notion), **Change** and **Unlink**.
+Only the page's id, title and URL are kept on the review (`current_reviews.notion_*`); the **Notion** tab, after
+Description, reads the page's text from Notion once per opening (cleaned as a ticket's import, mention titles
+resolved, folded when long), with **Refresh**. Nothing is written to Notion or GitHub.
 
 **CI checks** of a ticket's pull request ([`docs/plans/pr-checks.md`](../plans/pr-checks.md)), in the PR tab under the branch status, while
 the PR is not merged (read when the tab opens, every 30 s while a check runs, and on Refresh): the web reads the head commit's check runs and commit statuses and the PR's bot comments. The user picks failed checks, other

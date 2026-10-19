@@ -1,5 +1,4 @@
 import {
-  mentionedUrls,
   NotionError,
   notionMarkdown,
   parseNotionId,
@@ -22,6 +21,7 @@ import {
   requireText,
   UNAUTHORIZED,
 } from '../http';
+import { mentionTitles } from '../notion-mentions';
 
 /** Notion failures become messages the UI shows next to the field. */
 export async function guarded<T>(work: () => Promise<T>): Promise<T> {
@@ -71,31 +71,6 @@ function notionOf(db: Db, projectId: number): { token: string; dataSourceId: str
     );
   }
   return { token: notionToken, dataSourceId: notionDataSourceId };
-}
-
-const MAX_TITLED_MENTIONS = 10;
-
-/** The titles of the pages a markdown mentions (a few, best effort: a link without one still works). */
-async function mentionTitles(
-  notion: NotionApi,
-  token: string,
-  markdown: string,
-): Promise<Record<string, string>> {
-  const found = await Promise.all(
-    mentionedUrls(markdown)
-      .slice(0, MAX_TITLED_MENTIONS)
-      .map(async (url) => {
-        const id = parseNotionId(url);
-        const title = id
-          ? await notion.page(token, id).then(
-              (page) => page.title,
-              () => '',
-            )
-          : '';
-        return [url, title] as const;
-      }),
-  );
-  return Object.fromEntries(found.filter(([, title]) => title !== ''));
 }
 
 /** Fetches a page of the project's data source as a ticket preview; other pages are refused. */

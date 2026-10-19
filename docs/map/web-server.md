@@ -25,9 +25,11 @@ export); do not edit. Tests are left out.
 - `github-rule-choices.ts`: What a pull request rule can pick from the repository: its labels and the users who can be assigned or asked to review.
 - `http.ts`: HTTP status codes and small helpers the web routes use to read requests and fail.
 - `notion-images.ts`: Downloads the images a Notion page shows (their links expire within the hour) so they can be kept as the ticket's files: each kept one is referenced as `attach…
+- `notion-mentions.ts`: The titles of the Notion pages a page's markdown mentions, so its links read as titles.
 - `pull-request-ref.ts`: A pull request of the repository: `12`, `#12` or its `/pull/12` URL.
 - `review-feedback.ts`: The review as the implementer receives it: overall note, the comments on the whole pull request, then each line comment under its file.
 - `review-import.ts`: The thread as one comment: who said what, the first comment then the replies.
+- `review-notion-types.ts`: What a pull request under review's Notion tab reads: its linked page, with the text as read now.
 - `review-output-comment.ts`: A command's or the e2e tests' output as a review comment: what ran, how it ended, the last lines in a code block.
 - `review-preview-types.ts`: What a pull request under review's Preview tab reads: its preview, its checkout and its commands.
 - `rule-previews.ts`: What a rule's action would do for one ticket, one preview per kind of action; nothing is sent.
@@ -76,10 +78,11 @@ export); do not edit. Tests are left out.
 - `review-comments.ts`: The owner's drafts, oldest first.
 - `review-groupings.ts`: Under a review's base (`/api/tickets/:id`, `/api/projects/:projectId/pull-requests/reviews/:number`): `/groupings` (the newest), `/groupings/source` (a specifi…
 - `review-import.ts`: The PR tab: threads, review summaries and comments, and which of them are already imported.
+- `review-notion.ts`: `<review>/notion`: the Notion page a pull request under review is linked to: its text, linking and unlinking.
 - `review-preview.ts`: `<review>/preview`: a pull request's preview, its checkout and its e2e result, as commands the worker runs.
 - `review-removal.ts`: What goes with a removed pull request under review: its commands not handled yet, its container and volumes, its files.
 - `review-runs.ts`: `<review>/runs`: commands the user runs in a pull request's own checkout, and their output added to the review.
-- `review-workspace.ts`: The routes under a pull request under review that act on its own checkout: its preview and its commands.
+- `review-workspace.ts`: The routes under a pull request under review that act on its own checkout or links: preview, commands, Notion page.
 - `review.ts`: Why a review cannot be sent now, or null when it can: the ticket waits on the user after code was written, or it is done with its branch kept and its pull requ…
 - `rule-choices.ts`: What a rule picks from on GitHub, read live: the repo's labels and users (`github/rule-choices`), the Project's fields (`github/project-fields`).
 - `run-input.ts`: A command run as the user asks for it, for a ticket's workspace or a pull request's: the body read, checked and queued.

@@ -44,6 +44,9 @@ function review(prNumber: number, headBranch: string, baseBranch: string): Curre
     previewStatus: null,
     submitStatus: null,
     submitError: null,
+    notionPageId: null,
+    notionTitle: null,
+    notionUrl: null,
     createdAt: 0,
   };
 }

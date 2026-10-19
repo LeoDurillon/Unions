@@ -182,7 +182,7 @@ export function currentReviewRoutes(db: Db, github: OnboardingGitHub, notion: No
   routes.delete('/:number', (c) => remove(db, c));
   routes.route('/:number/groupings', pullRequestGroupingRoutes(db, github, notion));
   routes.route('/:number/commits', prCommitRoutes(db, github));
-  routes.route('/:number', reviewWorkspaceRoutes(db));
+  routes.route('/:number', reviewWorkspaceRoutes(db, notion));
   routes.route('/:number', prReviewRoutes(db, github));
   return routes;
 }
