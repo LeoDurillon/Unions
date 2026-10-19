@@ -108,6 +108,9 @@ test('a flow preset may name an agent once its prompt is written; deleting it is
   expect(await refused.text()).toContain('the Secure flow of o/r');
   await send('PATCH', `/api/projects/${project.id}`, { flows: null });
   expect((await send('DELETE', '/api/agents/custom/1')).status).toBe(204);
+  expect(await (await send('GET', '/api/agents/custom/names')).json()).toEqual({
+    agent_1: 'Security',
+  });
   expect((await send('GET', '/api/agents/custom/1')).status).toBe(404);
   const agents = (await (await send('GET', '/api/agents')).json()) as AgentConfig[];
   expect(agents.some((agent) => agent.agent === 'agent_1')).toBe(false);

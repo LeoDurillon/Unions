@@ -6,6 +6,7 @@
     ".": "./src/index.ts",
     "./states": "./src/states.ts",
     "./flows": "./src/flows.ts",
+    "./flow-edit": "./src/flow-edit.ts",
     "./step-titles": "./src/step-titles.ts",
     "./lesson-input": "./src/lesson-input.ts",
     "./agent-usage": "./src/agent-usage.ts",

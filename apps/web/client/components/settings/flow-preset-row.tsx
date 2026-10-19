@@ -1,7 +1,8 @@
-// One flow preset in the settings: its name, its planning steps, whether new tickets get it, and Remove.
+// One flow preset in the settings: its name, its planning steps and custom agents, whether new tickets get it, and Remove.
 import type { FlowPreset } from '@union/core/flows';
 import type { ReactElement } from 'react';
 
+import { useCustomAgentNames } from '../../lib/use-custom-agents';
 import { flowSteps, PlanningChips } from '../flow-picker';
 import { Button, inputClass } from '../ui';
 
@@ -20,6 +21,7 @@ export function FlowPresetRow({
   onMakeDefault: () => void;
   onRemove: () => void;
 }): ReactElement {
+  const names = useCustomAgentNames();
   return (
     <li className="space-y-2 rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
       <div className="flex flex-wrap items-center gap-2">
@@ -45,7 +47,7 @@ export function FlowPresetRow({
           onChange({ ...preset, steps });
         }}
       />
-      <p className="text-xs text-zinc-500">{flowSteps(preset.steps)}</p>
+      <p className="text-xs text-zinc-500">{flowSteps(preset.steps, names)}</p>
     </li>
   );
 }

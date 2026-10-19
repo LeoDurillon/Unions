@@ -33,6 +33,7 @@ export * from './event-rules';
 export * from './docker-cli';
 export * from './flow-settings';
 export * from './flows';
+export * from './flow-edit';
 export * from './ticket-flow';
 export * from './e2e-screenshots';
 export * from './github-auth';

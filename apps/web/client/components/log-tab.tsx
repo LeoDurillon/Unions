@@ -1,4 +1,4 @@
-import type { LogEntry } from '@union/core';
+import type { CustomAgentNames, LogEntry } from '@union/core';
 import { isEvent, type EventPayloads } from '@union/core/event-catalog';
 import { useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
 
@@ -6,6 +6,7 @@ import { summarizeAgentEvent, type LogLine } from '../lib/agent-events';
 import { stepTitle } from '../lib/labels';
 import { groupRuns, type LogRun } from '../lib/log-runs';
 import { sumTokens, tokensText, type CallTokens } from '../lib/token-counts';
+import { useCustomAgentNames } from '../lib/use-custom-agents';
 import { useLog } from '../lib/use-log';
 
 type Entry = { key: string; kind: LogLine['kind'] | 'run'; text: string; tokens?: CallTokens };
@@ -48,7 +49,7 @@ function ruleEntries(
   return [{ key, kind: status === 'failed' ? 'error' : 'result', text }];
 }
 
-function entriesFor(entry: LogEntry): Entry[] {
+function entriesFor(entry: LogEntry, names: CustomAgentNames): Entry[] {
   if (entry.source === 'agent') {
     return summarizeAgentEvent(entry.line.payload).map((line, index) =>
       Object.assign(line, { key: `line-${entry.line.id}-${index}` }),
@@ -66,7 +67,7 @@ function entriesFor(entry: LogEntry): Entry[] {
     return agentReviewEntries(key, event.payload);
   }
   if (isEvent(event, 'run_started')) {
-    const text = `Run #${event.runId ?? '?'} · ${stepTitle(event.payload.step)}`;
+    const text = `Run #${event.runId ?? '?'} · ${stepTitle(event.payload.step, names)}`;
     return [{ key, kind: 'run', text }];
   }
   if (isEvent(event, 'investigation_started')) {
@@ -144,7 +145,11 @@ function RunSection({
 /** Replays a whole agent log, then follows it live; every run but the last starts folded. */
 export function AgentLog({ source }: { source: LogSource }): ReactElement {
   const log = useLog(queryOf(source));
-  const entries = useMemo(() => log.entries.flatMap((entry) => entriesFor(entry)), [log.entries]);
+  const names = useCustomAgentNames();
+  const entries = useMemo(
+    () => log.entries.flatMap((entry) => entriesFor(entry, names)),
+    [log.entries, names],
+  );
   const { error } = log;
   // The runs the user opened or folded; the others follow the default.
   const [toggled, setToggled] = useState<ReadonlyMap<string, boolean>>(new Map());

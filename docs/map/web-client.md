@@ -30,9 +30,10 @@ export); do not edit. Tests are left out.
 - `board.tsx`: The columns, filling the screen down to the bottom edge.
 - `choice.tsx`: The app's choice inputs: chips for a multi-select, a switch for on / off, a segmented control for one of a few.
 - `container-commands.tsx`: Commands the user runs in a workspace (a ticket's container as the agent, or a pull request's own checkout), with the preview's address while it runs, typed or…
+- `custom-flow-steps.tsx`: A flow's custom agents in the settings and the ticket's Custom flow: listed in order, moved, removed, added.
 - `detail-row.tsx`: One line of a ticket's details: a label column, then the value.
 - `dropzone.tsx`: A file input as a dashed box: drop files on it, or click (or press Enter on it) to browse.
-- `flow-picker.tsx`: Picks the steps a ticket runs: one of the project's presets, or planning steps chosen one by one.
+- `flow-picker.tsx`: `value` null: the project's default preset, which the ticket follows until it starts.
 - `flow-row.tsx`: The ticket's flow in its details: chosen while in Backlog, shown as fixed once it started.
 - `folded-markdown.tsx`: A markdown text folded under "Show more" when it is taller than a few screens' worth.
 - `github-issue-import.tsx`: Fetches an issue of the project's repository, previews it, and creates the ticket on it.
@@ -69,7 +70,7 @@ export); do not edit. Tests are left out.
 - `ticket-panel-header.tsx`: The header of the ticket panel: its title, phase badge and the review and close buttons.
 - `ticket-panel.tsx`: The side panel for the selected ticket: header, section tabs and the body of the current tab.
 - `ticket-run-actions.tsx`: What a ticket's command output can become: kept for the implementer's next run, or sent now as a revision.
-- `ticket-tabs.tsx`: Where the Worker tab opens when no step runs: the furthest step with output, else the log.
+- `ticket-tabs.tsx`: The panel's top tabs: the ticket, its preview, the agents' work, and its pull request.
 - `ui.tsx`: One line: a pill wrapped over two lines reads as a blob; too long, it ends in an ellipsis.
 - `verdict-badge.tsx`: The reviewer's verdict at the top of the final review.
 - `wizard-host.tsx`: The setup wizard: unavoidable on first run, dismissible when adding another project.
@@ -202,7 +203,7 @@ export); do not edit. Tests are left out.
 - `events-section.tsx`: Event rules: when something happens to a ticket, set a property of its Notion page or comment on its GitHub issue or pull request.
 - `feedback-inbox.tsx`: The feedback given on Revise and final reviews: made a lesson, given to the lesson writer, or dismissed; the curated ones on request.
 - `files-section.tsx`: Files every ticket's workspace gets at a path in the repository (a database dump for the preview's seed, a local config), kept out of git.
-- `flow-preset-row.tsx`: One flow preset in the settings: its name, its planning steps, whether new tickets get it, and Remove.
+- `flow-preset-row.tsx`: One flow preset in the settings: its name, its planning steps and custom agents, whether new tickets get it, and Remove.
 - `flows-section.tsx`: The project's flow presets: the steps a ticket can run, and the one new tickets get.
 - `github-access-section.tsx`: The project settings section that shows and changes how the project reaches GitHub.
 - `github-comment-fields.tsx`: A GitHub comment action's fields: the issue or the pull request, and the comment as a template.
@@ -284,7 +285,7 @@ export); do not edit. Tests are left out.
 - `github-markdown.ts`: Renders GitHub comment text as GitHub does: its HTML (folds, images) sanitized, and `> [!NOTE]` alerts.
 - `highlight.ts`: Tokens for every changed or context line of a patch.
 - `investigate-ticket.ts`: Opens Investigations with a new investigation on the ticket ready to write (`?investigate=<id>`).
-- `labels.ts`: The step the ticket is currently on, if any.
+- `labels.ts`: `names`: the custom agents', for a ticket on a custom step.
 - `leave-guard.ts`: Unsaved settings: the forms holding changes, and asking before a navigation throws them away.
 - `line-diff.ts`: The lines of `after` against `before`: kept, added or removed, in reading order.
 - `log-runs.ts`: Splits the log at each run header, so every run can fold on its own.
@@ -320,6 +321,7 @@ export); do not edit. Tests are left out.
 - `use-container-runs.ts`: The commands run in the target's workspace (polled while one is on), and running or stopping one.
 - `use-current-reviews.ts`: Adding and removing refresh the list (and the Pull requests tab, which marks what is in it).
 - `use-custom-agent.ts`: A custom agent's changes from its page: rewriting its role, regenerating its prompt, deleting it.
+- `use-custom-agents.ts`: The custom agents as the ticket views and flow pickers need them: names by step, and the ones a flow can add.
 - `use-default-specs.ts`: The specs a Review with agent starts from when its last run gives none: the ticket's text, the PR's description and its linked Notion page, or each of a stack'…
 - `use-event-stream.ts`: Calls `onEvent` with every new event, from the browser's one shared stream (`event-hub.ts`).
 - `use-explanations.ts`: The review's explanations, polled while one waits or runs, with asking, following up and cancelling.
@@ -345,3 +347,4 @@ export); do not edit. Tests are left out.
 - `use-ticket-commands.ts`: The hook that sends commands for a ticket and refreshes what the page shows afterwards.
 - `use-usage.ts`: What a ticket's or an investigation's agent calls used; refetched with the ticket or the investigations.
 - `verdict.ts`: The reviewer's verdict line (`VERDICT: APPROVED` / `VERDICT: CHANGES_REQUESTED`), if any.
+- `worker-tabs.ts`: The Worker tab's own tabs: a step's in the ticket's flow order (custom agents named), the on-demand ones, the log.

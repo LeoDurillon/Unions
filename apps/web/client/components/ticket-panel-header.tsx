@@ -4,6 +4,7 @@ import type { ReactElement } from 'react';
 import type { TicketDetail } from '../../src/api-types';
 import { investigateTicket } from '../lib/investigate-ticket';
 import { describePhase } from '../lib/labels';
+import { useCustomAgentNames } from '../lib/use-custom-agents';
 import { Badge, Button } from './ui';
 
 export function TicketPanelHeader({
@@ -15,7 +16,8 @@ export function TicketPanelHeader({
   onReview: () => void;
   onClose: () => void;
 }): ReactElement {
-  const phase = detail ? describePhase(detail.ticket.phase) : null;
+  const names = useCustomAgentNames();
+  const phase = detail ? describePhase(detail.ticket.phase, names) : null;
   const title = detail?.ticket.title ?? 'Loading…';
   return (
     <header className="flex items-start gap-3 border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">

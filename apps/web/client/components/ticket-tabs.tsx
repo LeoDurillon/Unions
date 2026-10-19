@@ -1,9 +1,8 @@
-import { resolveFlow } from '@union/core/flows';
-import { STEPS, type Step } from '@union/core/states';
 import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../src/api-types';
-import { currentStep, STEP_TITLES } from '../lib/labels';
+import { useCustomAgentNames } from '../lib/use-custom-agents';
+import { workerTabsFor, type WorkerTab } from '../lib/worker-tabs';
 import { LogTab } from './log-tab';
 import { OverviewTab } from './overview-tab';
 import { PreviewTab } from './preview-tab';
@@ -12,15 +11,7 @@ import { StepTab } from './step-tab';
 
 /** The panel's top tabs: the ticket, its preview, the agents' work, and its pull request. */
 export type Section = 'overview' | 'preview' | 'worker' | 'pull-request';
-/** The Worker tab's own tabs: one per step, then the log. */
-export type WorkerTab = 'log' | Step;
-
-/** Where the Worker tab opens when no step runs: the furthest step with output, else the log. */
-export function latestWorkerTab(detail: TicketDetail): WorkerTab {
-  const done = STEPS.filter((step) => detail.outputs.some((output) => output.step === step));
-  return done.at(-1) ?? 'log';
-}
-
+export { latestWorkerTab, type WorkerTab } from '../lib/worker-tabs';
 type TabEntry<T> = { id: T; label: string; enabled: boolean };
 
 function sectionsFor(detail: TicketDetail): TabEntry<Section>[] {
@@ -31,24 +22,6 @@ function sectionsFor(detail: TicketDetail): TabEntry<Section>[] {
     { id: 'worker', label: 'Worker', enabled: true },
     { id: 'pull-request', label: prNumber === null ? 'PR' : `PR #${prNumber}`, enabled: true },
   ];
-}
-
-function workerTabsFor(detail: TicketDetail): TabEntry<WorkerTab>[] {
-  const active = currentStep(detail.ticket.phase);
-  const flow = resolveFlow(detail.ticket, detail.project.config);
-  const ran = (step: Step): boolean => detail.outputs.some((output) => output.step === step);
-  // A step the flow skips has no tab, unless it has output from before.
-  const inFlow = STEPS.filter((step) => flow.some((kept) => kept === step) || ran(step));
-  const steps = inFlow.map((step) => ({
-    id: step,
-    label: STEP_TITLES[step],
-    enabled: step === active || ran(step),
-  }));
-  // Rebase and simplify are not pipeline steps: their tab appears once one ran or runs.
-  const onDemand = (['rebase', 'simplify'] as const)
-    .filter((step) => step === active || detail.outputs.some((output) => output.step === step))
-    .map((step) => ({ id: step, label: STEP_TITLES[step], enabled: true }));
-  return [...steps, ...onDemand, { id: 'log', label: 'Log', enabled: true }];
 }
 
 const LOOKS = {
@@ -130,11 +103,12 @@ function WorkerBody({
   tab: WorkerTab;
   onTab: (tab: WorkerTab) => void;
 }): ReactElement {
+  const names = useCustomAgentNames();
   return (
     <div>
       <TabBar
         label="Steps"
-        tabs={workerTabsFor(detail)}
+        tabs={workerTabsFor(detail, names)}
         current={tab}
         look="sub"
         onChange={onTab}

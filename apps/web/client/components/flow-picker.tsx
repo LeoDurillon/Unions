@@ -1,3 +1,5 @@
+import type { CustomAgentNames } from '@union/core';
+import { withPlanning } from '@union/core/flow-edit';
 // Picks the steps a ticket runs: one of the project's presets, or planning steps chosen one by one.
 import {
   flowName,
@@ -6,12 +8,14 @@ import {
   sameFlow,
   type FlowPreset,
 } from '@union/core/flows';
-import { FULL_FLOW, PLANNING_STEPS, type Flow, type PipelineStep } from '@union/core/states';
+import { PLANNING_STEPS, type Flow, type PipelineStep } from '@union/core/states';
 import { useState, type ReactElement } from 'react';
 
 import type { PublicProject } from '../../src/api-types';
 import { stepTitle } from '../lib/labels';
+import { useCustomAgentNames } from '../lib/use-custom-agents';
 import { CheckChip, ChipGroup, Segmented } from './choice';
+import { CustomFlowSteps } from './custom-flow-steps';
 
 const CUSTOM = 'custom';
 
@@ -20,16 +24,14 @@ function presetOf(flow: Flow, presets: readonly FlowPreset[]): FlowPreset | null
   return presets.find((preset) => sameFlow(preset.steps, flow)) ?? null;
 }
 
-/** `planning` turned on or off, the steps kept in pipeline order. */
-function withPlanning(flow: Flow, planning: PipelineStep, on: boolean): PipelineStep[] {
-  return FULL_FLOW.filter((step) => (step === planning ? on : flow.includes(step)));
+export function flowSteps(flow: Flow, names: CustomAgentNames = {}): string {
+  return flow.map((step) => stepTitle(step, names)).join(' → ');
 }
 
-export function flowSteps(flow: Flow): string {
-  return flow.map((step) => stepTitle(step)).join(' → ');
-}
-
-/** A custom flow's planning steps, one chip each; the implementation and the review always run. */
+/**
+ * A custom flow's planning steps, one chip each, then its custom agents; the implementation and the
+ * review always run.
+ */
 export function PlanningChips({
   flow,
   onChange,
@@ -38,19 +40,22 @@ export function PlanningChips({
   onChange: (steps: PipelineStep[]) => void;
 }): ReactElement {
   return (
-    <ChipGroup>
-      {PLANNING_STEPS.map((planning) => (
-        <CheckChip
-          key={planning}
-          checked={flow.includes(planning)}
-          onChange={(on) => {
-            onChange(withPlanning(flow, planning, on));
-          }}
-        >
-          {stepTitle(planning)}
-        </CheckChip>
-      ))}
-    </ChipGroup>
+    <div className="space-y-2">
+      <ChipGroup>
+        {PLANNING_STEPS.map((planning) => (
+          <CheckChip
+            key={planning}
+            checked={flow.includes(planning)}
+            onChange={(on) => {
+              onChange(withPlanning(flow, planning, on));
+            }}
+          >
+            {stepTitle(planning)}
+          </CheckChip>
+        ))}
+      </ChipGroup>
+      <CustomFlowSteps flow={flow} onChange={onChange} />
+    </div>
   );
 }
 
@@ -64,6 +69,7 @@ export function FlowPicker({
   value: PipelineStep[] | null;
   onChange: (flow: PipelineStep[] | null) => void;
 }): ReactElement {
+  const names = useCustomAgentNames();
   const presets = projectPresets(config);
   const flow = resolveFlow({ flow: value }, config);
   const defaultSteps = resolveFlow({ flow: null }, config);
@@ -77,9 +83,9 @@ export function FlowPicker({
     ...presets.map((option) => ({
       value: option.id,
       label: option.name,
-      title: flowSteps(option.steps),
+      title: flowSteps(option.steps, names),
     })),
-    { value: CUSTOM, label: 'Custom', title: 'Choose the planning steps' },
+    { value: CUSTOM, label: 'Custom', title: 'Choose the planning steps and custom agents' },
   ];
   return (
     <div className="space-y-2">
@@ -97,7 +103,7 @@ export function FlowPicker({
       />
       {preset === null ? <PlanningChips flow={flow} onChange={choose} /> : null}
       <p className="text-xs text-zinc-500">
-        {flowSteps(flow)}
+        {flowSteps(flow, names)}
         {sameFlow(flow, defaultSteps) ? ` (the project's default, ${flowName(flow, config)})` : ''}
       </p>
     </div>

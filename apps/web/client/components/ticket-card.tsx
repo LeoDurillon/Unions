@@ -6,6 +6,7 @@ import type { ReactElement } from 'react';
 
 import type { PublicProject, TicketSummary } from '../../src/api-types';
 import { describePhase, isBlocked, refLabel, type Tone } from '../lib/labels';
+import { useCustomAgentNames } from '../lib/use-custom-agents';
 import { Badge } from './ui';
 
 const SHORT_SHA = 7;
@@ -41,13 +42,14 @@ function PrEnd({ prState }: { prState: TicketSummary['prState'] }): ReactElement
 
 /** The card's status line: how the pull request ended, else whether it waits, else its phase. */
 function CardStatus({ ticket }: { ticket: TicketSummary }): ReactElement {
+  const names = useCustomAgentNames();
   if (ticket.board === 'merged') {
     return <PrEnd prState={ticket.prState} />;
   }
   if (isBlocked(ticket)) {
     return <Badge tone="amber">Waiting for parent</Badge>;
   }
-  const phase = describePhase(ticket.phase);
+  const phase = describePhase(ticket.phase, names);
   return (
     <>
       <Badge tone={phase.tone}>{phase.status}</Badge>

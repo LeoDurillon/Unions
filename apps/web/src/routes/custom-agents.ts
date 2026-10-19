@@ -2,6 +2,7 @@
 import {
   createCustomAgent,
   CustomAgentError,
+  customAgentNames,
   customStep,
   deleteCustomAgent,
   editCustomAgent,
@@ -43,6 +44,8 @@ function configOf(db: Db, id: number): AgentConfig {
 
 export function customAgentRoutes(db: Db): Hono {
   const routes = new Hono();
+  /** Every custom agent's name by step, deleted ones included: finished tickets keep their tabs. */
+  routes.get('/names', (c) => c.json(customAgentNames(db)));
   routes.post('/', async (c) => {
     const body = await readObject(c.req.raw);
     const input = { name: textOf(body, 'name') ?? '', role: textOf(body, 'role') ?? '' };

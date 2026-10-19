@@ -3,6 +3,7 @@ import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../src/api-types';
 import { stepTitle } from '../lib/labels';
+import { useCustomAgentNames } from '../lib/use-custom-agents';
 import { useTicketUsage } from '../lib/use-usage';
 import { Badge } from './ui';
 import { UsageTable, type UsageRow } from './usage/usage-table';
@@ -32,12 +33,13 @@ export function RunTable({
   runs: TicketDetail['runs'];
 }): ReactElement | null {
   const usage = useTicketUsage(ticketId);
+  const names = useCustomAgentNames();
   const groups = usage.data?.groups ?? [];
   const rows: UsageRow[] = runs.map((run) => ({
     key: `run-${run.id}`,
     cells: [
       `#${run.id}`,
-      stepTitle(run.step),
+      stepTitle(run.step, names),
       run.model,
       <Badge key="status" tone={RUN_TONE[run.status]}>
         {run.status}

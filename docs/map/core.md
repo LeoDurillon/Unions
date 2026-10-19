@@ -41,6 +41,7 @@ export); do not edit. Tests are left out.
 - `event-rule-types.ts`: Event rules: when something happens to a ticket, do something elsewhere.
 - `event-rules.ts`: Event rules: checking and saving them, the stored Notion columns, and matching events and templates.
 - `explanation-spec-parts.ts`: The parts of a grouping by spec that selected lines of a file touch, without asking an agent.
+- `flow-edit.ts`: Editing a flow in the settings or a ticket's Custom flow: planning steps on or off, custom agents added and moved; browser-safe.
 - `flow-settings.ts`: A project's flow presets as the settings send them, checked: unique ids and names, valid steps, a default among them.
 - `flows.ts`: Ticket flows: the steps a ticket runs, the presets a project offers, and what agents are told of skipped steps.
 - `github-auth.ts`: A project's installation wins over its token; `fallbackToken` (the `GITHUB_TOKEN` environment variable) covers projects with neither.

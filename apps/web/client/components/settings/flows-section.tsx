@@ -68,7 +68,8 @@ export function FlowsSection({ project }: { project: PublicProject }): ReactElem
       <h3 className="text-sm font-semibold">Flows</h3>
       <p className="text-xs text-zinc-500">
         The steps a ticket runs, picked when it is created and changeable until it starts. Every
-        flow ends with the implementation and the final review; a small fix can skip planning.
+        flow ends with the implementation and the final review; a small fix can skip planning. Your
+        custom agents (Union settings) go anywhere before the final review.
       </p>
       <ul className="space-y-2">
         {flows.map((preset, at) => (

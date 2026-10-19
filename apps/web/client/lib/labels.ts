@@ -1,4 +1,4 @@
-import type { BoardColumn, Phase, Step } from '@union/core';
+import type { BoardColumn, CustomAgentNames, Phase, Step } from '@union/core';
 import { stepTitle } from '@union/core/step-titles';
 
 export { STEP_TITLES } from '@union/core/states';
@@ -17,33 +17,40 @@ export type Tone = 'neutral' | 'blue' | 'amber' | 'red' | 'green';
 /** What the ticket is doing (`status`), on which step if any; `label` joins the two. */
 export type PhaseDescription = { label: string; status: string; step: string | null; tone: Tone };
 
-function stepPhase(status: string, step: Step, tone: Tone): PhaseDescription {
-  return { label: `${status} · ${stepTitle(step)}`, status, step: stepTitle(step), tone };
+function stepPhase(
+  status: string,
+  step: Step,
+  tone: Tone,
+  names: CustomAgentNames,
+): PhaseDescription {
+  const title = stepTitle(step, names);
+  return { label: `${status} · ${title}`, status, step: title, tone };
 }
 
 function plainPhase(status: string, tone: Tone): PhaseDescription {
   return { label: status, status, step: null, tone };
 }
 
-export function describePhase(phase: Phase): PhaseDescription {
+/** `names`: the custom agents', for a ticket on a custom step. */
+export function describePhase(phase: Phase, names: CustomAgentNames = {}): PhaseDescription {
   switch (phase.kind) {
     case 'backlog': {
       return plainPhase('Not started', 'neutral');
     }
     case 'running': {
-      return stepPhase('Running', phase.step, 'blue');
+      return stepPhase('Running', phase.step, 'blue', names);
     }
     case 'awaiting_approval': {
-      return stepPhase('Needs review', phase.step, 'amber');
+      return stepPhase('Needs review', phase.step, 'amber', names);
     }
     case 'commit_refused': {
-      return stepPhase('Commit refused', phase.step, 'amber');
+      return stepPhase('Commit refused', phase.step, 'amber', names);
     }
     case 'rate_limited': {
-      return stepPhase('Rate limited', phase.step, 'red');
+      return stepPhase('Rate limited', phase.step, 'red', names);
     }
     case 'failed': {
-      return stepPhase('Failed', phase.step, 'red');
+      return stepPhase('Failed', phase.step, 'red', names);
     }
     case 'done': {
       return plainPhase('Done', 'green');
