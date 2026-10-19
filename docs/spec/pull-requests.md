@@ -26,6 +26,10 @@ GitHub's reason (`submit_status`).
 A review is linked to the Notion page it implements from its **Description** tab: **Notion page** takes a page URL
 or ID, reads it through the project's integration (any page shared with it, not only rows of its data source) and
 shows its title before **Link**; once linked, the row shows the title (a link to Notion), **Change** and **Unlink**.
+The Notion pages the pull request's description links to, and the integration can read, are offered as one-click
+suggestions ("Link _Export to CSV_"), never linked on their own. Each pull request of a stack has its own page; when
+others of its stack have none, **Link the whole stack to this page** gives them this one. The Current reviews list
+marks a linked review (and a stack's linked members) with **Notion**.
 Only the page's id, title and URL are kept on the review (`current_reviews.notion_*`); the **Notion** tab, after
 Description, reads the page's text from Notion once per opening (cleaned as a ticket's import, mention titles
 resolved, folded when long), with **Refresh**. Nothing is written to Notion or GitHub. The linked page is a spec

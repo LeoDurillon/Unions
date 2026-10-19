@@ -142,6 +142,7 @@ export); do not edit. Tests are left out.
 - `review-description.tsx`: A pull request review's Description tab: the row linking its Notion page, then the description from GitHub.
 - `review-e2e-actions.tsx`: What a pull request's end-to-end result can become: a draft comment on the review; its failure screenshots.
 - `review-notion-link.tsx`: The Notion page row of a review's Description tab: link a page (its title checked first), change or unlink it.
+- `review-notion-offers.tsx`: What the Notion page row offers in one click: the pages the description links to, and the same page for the whole stack.
 - `review-notion-tab.tsx`: A review's Notion tab: the linked page's text as Notion has it now, folded when long, with Refresh.
 - `review-preview-tab.tsx`: A pull request under review's Preview tab: its own checkout's preview, end-to-end tests and commands.
 - `review-run-actions.tsx`: What a command's output in a pull request's checkout can become: a draft comment on the review.
@@ -318,7 +319,7 @@ export); do not edit. Tests are left out.
 - `use-pr-checks.ts`: The pull request's CI checks (read again every 30 s while some still run), and giving picks of them to the implementer.
 - `use-preview.ts`: A ticket's or a pull request's preview as its section reads it, and the commands that act on it.
 - `use-review-grouping.ts`: The newest grouping by spec of the review, with starting and cancelling one.
-- `use-review-notion.ts`: The Notion page of a pull request under review: its text, and checking, linking and unlinking a page.
+- `use-review-notion.ts`: The Notion page of a pull request under review: its text, the description's suggestions, checking, linking and unlinking.
 - `use-review-preview.ts`: A pull request's preview as its Preview tab reads it (its checkout, its screenshots), and adding an output to the review.
 - `use-review.ts`: A pull request under review: its description and discussion, read from GitHub once per opening.
 - `use-run-agent.ts`: What a ticket's command output can do with the implementer: wait for its next run, or go now as a revision.

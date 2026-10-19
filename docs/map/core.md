@@ -56,6 +56,7 @@ export); do not edit. Tests are left out.
 - `notion-api.ts`: A column of a data source: its id (stable across renames), name, type, and choices if any.
 - `notion-error.ts`: A Notion failure with the HTTP status to answer with (401 bad token, 404 not shared).
 - `notion-id.ts`: A whole ID: not touching other hex characters, so slugs like `Add-feed-<id>` cannot shift it.
+- `notion-links.ts`: The Notion pages a text links to (a pull request's description), for the review's link suggestions.
 - `notion-markdown.ts`: Notion's page markdown (`GET /v1/pages/{id}/markdown`) as plain GitHub-flavored markdown: its own tags (mentions, callouts, colored or commented spans, toggles…
 - `pr-descriptions.ts`: What a stopped worker left: running rewrites fail; a send in flight goes back to its draft, since it may or may not have reached GitHub (the next send checks G…
 - `pr-review-verdicts.ts`: What a review posted on GitHub says of the pull request: a comment, an approval, or a request for changes.

@@ -1,6 +1,7 @@
 # Link a pull request under review to its Notion page
 
-Status: steps 1 and 2 built (2026-10-19, branch `review-notion-link`): the link, the Notion tab, the spec sources. Decisions D1 to D6
+Status: built (2026-10-19, branch `review-notion-link`), steps 1 to 3. D6 (Notion comments in the tab) waits on
+the Notion comments plan. "Link the whole stack" is offered from any member, not only the bottom one. Decisions D1 to D6
 confirmed (D6 left out).
 
 ## Why

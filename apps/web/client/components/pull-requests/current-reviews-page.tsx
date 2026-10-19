@@ -41,6 +41,11 @@ function ReviewItem({
           {review.submitStatus === 'sending' ? <Badge tone="blue">posting…</Badge> : null}
           {review.submitStatus === 'failed' ? <Badge tone="red">posting failed</Badge> : null}
           {review.previewStatus === 'running' ? <Badge tone="green">preview running</Badge> : null}
+          {review.notionTitle ? (
+            <Badge tone="neutral" title={`Notion: ${review.notionTitle}`}>
+              Notion
+            </Badge>
+          ) : null}
         </p>
       </div>
       <Button variant="primary" onClick={onOpen}>

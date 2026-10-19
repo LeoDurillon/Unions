@@ -1,4 +1,4 @@
-// The Notion page of a pull request under review: its text, and checking, linking and unlinking a page.
+// The Notion page of a pull request under review: its text, the description's suggestions, checking, linking and unlinking.
 import {
   useMutation,
   useQuery,
@@ -25,10 +25,27 @@ export function useReviewNotionPage(review: CurrentReview): UseQueryResult<Revie
   });
 }
 
+/** The Notion pages the description links to and the integration can read, but the linked one. */
+export function useReviewNotionSuggestions(
+  review: CurrentReview,
+  enabled: boolean,
+): UseQueryResult<ReviewNotionLink[]> {
+  return useQuery({
+    queryKey: ['review-notion-suggestions', review.projectId, review.prNumber, review.notionPageId],
+    queryFn: () => request<ReviewNotionLink[]>('GET', `${notionPath(review)}/suggestions`),
+    enabled,
+    staleTime: Infinity,
+    retry: false,
+  });
+}
+
+/** `stack`: the stack's pull requests without a page get it too. */
+export type LinkRequest = { page: string; stack?: boolean };
+
 /** Linking and unlinking refresh the reviews list, which carries the link to the page. */
 export function useReviewNotionLink(review: CurrentReview): {
   check: UseMutationResult<ReviewNotionLink, Error, string>;
-  link: UseMutationResult<ReviewNotionLink, Error, string>;
+  link: UseMutationResult<ReviewNotionLink, Error, LinkRequest>;
   unlink: UseMutationResult<unknown, Error, void>;
 } {
   const queryClient = useQueryClient();
@@ -40,7 +57,7 @@ export function useReviewNotionLink(review: CurrentReview): {
         request<ReviewNotionLink>('POST', `${notionPath(review)}/check`, { page }),
     }),
     link: useMutation({
-      mutationFn: (page: string) => request<ReviewNotionLink>('PUT', notionPath(review), { page }),
+      mutationFn: (body: LinkRequest) => request<ReviewNotionLink>('PUT', notionPath(review), body),
       onSuccess: refresh,
     }),
     unlink: useMutation({

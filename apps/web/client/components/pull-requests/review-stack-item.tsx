@@ -20,6 +20,7 @@ export function ReviewStackItem({
   const posting = stack.some((review) => review.submitStatus === 'sending');
   const failed = stack.some((review) => review.submitStatus === 'failed');
   const previewing = stack.some((review) => review.previewStatus === 'running');
+  const linked = stack.filter((review) => review.notionTitle !== null);
   return (
     <li className="flex items-start gap-3 border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
       <Badge tone="neutral">stack of {stack.length}</Badge>
@@ -31,6 +32,18 @@ export function ReviewStackItem({
           {posting ? <Badge tone="blue">posting…</Badge> : null}
           {failed ? <Badge tone="red">posting failed</Badge> : null}
           {previewing ? <Badge tone="green">preview running</Badge> : null}
+          {linked.length > 0 ? (
+            <Badge
+              tone="neutral"
+              title={linked
+                .map((review) => `#${review.prNumber}: ${review.notionTitle}`)
+                .join('\n')}
+            >
+              {linked.length === stack.length
+                ? 'Notion'
+                : `Notion ${linked.length}/${stack.length}`}
+            </Badge>
+          ) : null}
         </p>
       </div>
       <Button variant="primary" onClick={onOpen}>

@@ -123,7 +123,9 @@
   (`agent_review_members`); every PR's tab shows that run (`latestAgentReview` counts the stacks a review is in).
 - A review's Notion page: `routes/review-notion.ts` (mounted from `review-workspace.ts`) reads the linked page's
   text (`GET`), checks a page before linking (`POST /check`), links (`PUT`, stores `current_reviews.notion_page_id`,
-  `notion_title`, `notion_url`) and unlinks (`DELETE`). The client's row is `review-notion-link.tsx` in the
+  `notion_title`, `notion_url`) and unlinks (`DELETE`); `{ page, stack: true }` also links the stack's members without a page (stacks from
+  `@union/core/pr-stacks`). `GET /notion/suggestions` (`review-notion-suggestions.ts`) reads the description's
+  Notion links (`notionUrlsIn`, `@union/core` `notion-links.ts`) and returns the readable ones but the linked page. The client's row is `review-notion-link.tsx` (suggestions and the stack button in `review-notion-offers.tsx`) in the
   Description tab (`review-description.tsx`), the tab `review-notion-tab.tsx`, both through
   `lib/use-review-notion.ts`; `prReviewSections` adds the tab when the review has a page.
 - Grouping by spec: "Group by spec" on either review page (`group-by-spec-dialog.tsx`) reads a specification

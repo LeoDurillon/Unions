@@ -29,6 +29,15 @@ const notion = {
     }),
 } as unknown as NotionApi;
 
+const github = {
+  getDiscussion: () =>
+    Promise.resolve({
+      description: `Spec: ${urlOf(PAGE)}, data: ${urlOf(MENTIONED)}, hidden: ${urlOf(UNSHARED)}`,
+      notes: [],
+      threads: [],
+    }),
+} as unknown as OnboardingGitHub;
+
 let db: Db;
 let app: Hono;
 let projectId: number;
@@ -36,10 +45,16 @@ let projectId: number;
 beforeEach(() => {
   db = createDb(':memory:');
   migrateDb(db);
-  app = createApp(db, {} as OnboardingGitHub, notion);
+  app = createApp(db, github, notion);
   projectId = db
     .insert(schema.projects)
-    .values({ owner: 'acme', repo: 'shop', config: { baseBranch: 'main' }, notionToken: 'secret' })
+    .values({
+      owner: 'acme',
+      repo: 'shop',
+      config: { baseBranch: 'main' },
+      notionToken: 'secret',
+      githubToken: 'ghp_x',
+    })
     .returning()
     .get().id;
   db.insert(schema.currentReviews)
@@ -55,8 +70,13 @@ beforeEach(() => {
     .run();
 });
 
-function send(method: string, path: string, body?: unknown): Promise<Response> | Response {
-  return app.request(`/api/projects/${projectId}/pull-requests/reviews/7/notion${path}`, {
+function send(
+  method: string,
+  path: string,
+  body?: unknown,
+  number = 7,
+): Promise<Response> | Response {
+  return app.request(`/api/projects/${projectId}/pull-requests/reviews/${number}/notion${path}`, {
     method,
     headers: { 'content-type': 'application/json' },
     body: body === undefined ? undefined : JSON.stringify(body),
@@ -94,4 +114,48 @@ test('an unshared page, a bad URL and a project without Notion are refused', asy
 
   db.update(schema.projects).set({ notionToken: null }).run();
   expect((await send('PUT', '', { page: urlOf(PAGE) })).status).toBe(409);
+});
+
+function addReview(prNumber: number, headBranch: string, baseBranch: string): void {
+  db.insert(schema.currentReviews)
+    .values({
+      projectId,
+      prNumber,
+      title: `PR ${prNumber}`,
+      url: 'u',
+      author: 'a',
+      headBranch,
+      baseBranch,
+    })
+    .run();
+}
+
+function pages(): Record<number, string | null> {
+  return Object.fromEntries(
+    db
+      .select()
+      .from(schema.currentReviews)
+      .all()
+      .map((row) => [row.prNumber, row.notionPageId]),
+  );
+}
+
+test('linking the whole stack sets the page on its members without one, nowhere else', async () => {
+  addReview(8, 'csv-2', 'csv');
+  addReview(9, 'csv-3', 'csv-2');
+  addReview(10, 'other', 'main');
+  expect((await send('PUT', '', { page: MENTIONED }, 8)).status).toBe(200);
+
+  expect((await send('PUT', '', { page: PAGE, stack: true })).status).toBe(200);
+  expect(pages()).toEqual({ 7: PAGE, 8: MENTIONED, 9: PAGE, 10: null });
+});
+
+test("the description's readable Notion pages are suggested, never the linked one", async () => {
+  const titles = async (): Promise<string[]> =>
+    ((await (await send('GET', '/suggestions')).json()) as { title: string }[]).map(
+      (page) => page.title,
+    );
+  expect(await titles()).toEqual(['Export to CSV', 'Data model']);
+  await send('PUT', '', { page: PAGE });
+  expect(await titles()).toEqual(['Data model']);
 });

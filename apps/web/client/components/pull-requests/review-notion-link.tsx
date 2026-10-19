@@ -4,6 +4,7 @@ import { useState, type ReactElement } from 'react';
 import type { CurrentReview } from '../../../src/api-types';
 import { useReviewNotionLink } from '../../lib/use-review-notion';
 import { Button, ErrorText, inputClass } from '../ui';
+import { LinkStackButton, NotionSuggestions } from './review-notion-offers';
 
 type LinkActions = ReturnType<typeof useReviewNotionLink>;
 
@@ -65,7 +66,7 @@ function LinkForm({
             variant="primary"
             disabled={link.isPending}
             onClick={() => {
-              link.mutate(found.pageId, { onSuccess: onDone });
+              link.mutate({ page: found.pageId }, { onSuccess: onDone });
             }}
           >
             {link.isPending ? 'Linking…' : 'Link'}
@@ -108,10 +109,14 @@ export function ReviewNotionLinkRow({ review }: { review: CurrentReview }): Reac
           >
             Unlink
           </Button>
-          <ErrorText error={actions.unlink.error} />
+          <LinkStackButton review={review} actions={actions} />
+          <ErrorText error={actions.unlink.error ?? actions.link.error} />
         </div>
       ) : (
-        <LinkForm actions={actions} onDone={done} onCancel={linked ? done : null} />
+        <>
+          <NotionSuggestions review={review} actions={actions} onDone={done} />
+          <LinkForm actions={actions} onDone={done} onCancel={linked ? done : null} />
+        </>
       )}
     </section>
   );
