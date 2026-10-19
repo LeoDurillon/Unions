@@ -75,10 +75,13 @@ export function isAgentId(value: string): value is BuiltInAgentId {
   return Object.hasOwn(AGENT_LABELS, value);
 }
 
-/** A built-in agent's label; a custom agent is shown by its name and role. */
+const CUSTOM_DESCRIPTION =
+  "Your own agent: it runs where a project's flow places it, writes a markdown report you approve or send back, and changes no file. Edits apply to its next run, on tickets already running too.";
+
+/** A built-in agent's label; a custom agent is shown by its name. */
 export function agentLabel(config: Pick<AgentConfig, 'agent' | 'custom'>): AgentLabel {
   if (config.custom) {
-    return { title: config.custom.name, description: config.custom.role };
+    return { title: config.custom.name, description: CUSTOM_DESCRIPTION };
   }
   return isAgentId(config.agent)
     ? AGENT_LABELS[config.agent]

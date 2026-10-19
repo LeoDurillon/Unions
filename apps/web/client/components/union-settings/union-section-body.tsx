@@ -1,4 +1,5 @@
 import type { AgentId } from '@union/core';
+import { isCustomStep } from '@union/core/states';
 import type { ReactElement } from 'react';
 
 import type { UnionSection } from '../../lib/union-settings-groups';
@@ -18,5 +19,9 @@ const OTHER_PAGES: Record<Exclude<UnionSection, AgentId>, () => ReactElement> = 
 
 /** The open Union settings page: an agent's, or the models', tools', connectors' or GitHub App's. */
 export function UnionSectionBody({ section }: { section: UnionSection }): ReactElement {
-  return isAgentId(section) ? <AgentPage agent={section} /> : OTHER_PAGES[section]();
+  return isAgentId(section) || isCustomStep(section) ? (
+    <AgentPage agent={section} />
+  ) : (
+    OTHER_PAGES[section]()
+  );
 }

@@ -4,6 +4,7 @@ import type { ReactElement } from 'react';
 import type { AgentEdits } from '../../lib/use-agent-form';
 import { Badge } from '../ui';
 import { agentLabel } from './agent-labels';
+import { CustomAgentRole } from './custom-agent-card';
 import { EffortField } from './effort-field';
 import { ModelField } from './model-field';
 
@@ -44,6 +45,7 @@ export function AgentPageHeader({
         )}
       </div>
       <p className="text-xs text-zinc-500">{label.description}</p>
+      <CustomAgentRole config={config} />
     </header>
   );
 }

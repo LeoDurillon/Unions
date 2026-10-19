@@ -10,10 +10,12 @@ export); do not edit. Tests are left out.
 
 ## components/agents/
 
+- `agent-form.tsx`: One agent's form on its page: the prompt, model, effort and tools, saved together, and Reset to default.
 - `agent-labels.ts`: The titles and descriptions the agents page shows for each agent, model and effort level.
 - `agent-page-header.tsx`: An agent page's title, whether it is customized, its model and effort, and what it does.
 - `agent-page.tsx`: One agent's prompt, model, effort and tools, with one Save; the next run of that step uses them.
 - `connector-list.tsx`: The claude.ai connectors the agents can use (Figma…), read from the Claude account the worker runs agents with.
+- `custom-agent-card.tsx`: A custom agent's own part of its page: its role, the prompt writer's progress, Regenerate, and Delete.
 - `effort-field.tsx`: How hard the agent thinks (`claude --effort`); Default leaves it to Claude Code.
 - `model-field.tsx`: The Claude model an agent runs with.
 - `tool-list.tsx`: The tools the user added to the list, and the form to add more.
@@ -251,8 +253,11 @@ export); do not edit. Tests are left out.
 ## components/union-settings/
 
 - `models-page.tsx`: Every agent's model and effort in a table, with one Save.
+- `new-agent-dialog.tsx`: Creates a custom agent from a name and a role; the worker then writes its prompt, and its page opens.
+- `union-nav-groups.ts`: The Union settings menu's groups: the fixed pages, and the custom agents' group before Tools.
 - `union-section-body.tsx`: The open Union settings page: an agent's, or the models', tools', connectors' or GitHub App's.
 - `union-section-labels.ts`: The names the Union settings menu shows: each agent's title, then the other pages'.
+- `union-settings-nav.tsx`: The Union settings menu: the fixed pages, the custom agents' group, and New agent.
 - `union-settings-page.tsx`: The settings every project shares: a page per agent, the tools, the GitHub App (`?union=`).
 
 ## components/usage/
@@ -268,6 +273,7 @@ export); do not edit. Tests are left out.
 - `api.ts`: What a GitHub call is made with: a token, or an installation of the stored GitHub App.
 - `attachments-api.ts`: Why the file cannot be attached, checked before sending it; null when it can.
 - `choice-values.ts`: A multi-select rule value is its option names joined by commas (Notion option names cannot hold one); the worker splits it the same way.
+- `custom-agents-api.ts`: The browser's client for the custom agents endpoints: create, edit, regenerate the prompt, delete.
 - `desktop-notifications.ts`: Desktop notifications: off until the user turns them on, shown by the one tab that holds the event stream.
 - `diff-selection.ts`: A click starts a selection; a shift-click on the same side extends it to a block.
 - `env-lines.ts`: `KEY=value` lines (blank lines and `#` comments skipped) to variables.
@@ -313,6 +319,7 @@ export); do not edit. Tests are left out.
 - `use-connectors.ts`: The account's claude.ai connectors, and reading them again (polled while the worker checks).
 - `use-container-runs.ts`: The commands run in the target's workspace (polled while one is on), and running or stopping one.
 - `use-current-reviews.ts`: Adding and removing refresh the list (and the Pull requests tab, which marks what is in it).
+- `use-custom-agent.ts`: A custom agent's changes from its page: rewriting its role, regenerating its prompt, deleting it.
 - `use-default-specs.ts`: The specs a Review with agent starts from when its last run gives none: the ticket's text, the PR's description and its linked Notion page, or each of a stack'…
 - `use-event-stream.ts`: Calls `onEvent` with every new event, from the browser's one shared stream (`event-hub.ts`).
 - `use-explanations.ts`: The review's explanations, polled while one waits or runs, with asking, following up and cancelling.

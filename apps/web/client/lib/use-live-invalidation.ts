@@ -12,6 +12,10 @@ export function useLiveInvalidation(): void {
       void queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_KEY });
       return;
     }
+    if (event.type === 'custom_agent_prompt_ready' || event.type === 'custom_agent_prompt_failed') {
+      void queryClient.invalidateQueries({ queryKey: ['agents'] });
+      return;
+    }
     if (event.investigationId !== null) {
       void queryClient.invalidateQueries({ queryKey: ['investigations'] });
       return;
