@@ -4,6 +4,7 @@ import type { CommentView, DiffResponse } from '../../../src/api-types';
 import { reviewCopy, type ReviewTarget } from '../../lib/review-target';
 import { useCommentMutations, useComments, useDiff } from '../../lib/use-review';
 import { DiffArea } from './diff-area';
+import { ExplainProvider } from './explain-context';
 import { ReviewHeader } from './review-header';
 import { useDiffView } from './view-toggle';
 
@@ -97,7 +98,7 @@ function SectionBody({
  * a time on the right. `sections` add tabs before the diff, and it opens on the first; `banner` shows
  * above the content (a pull request review's posting status); `stackTabs` go under the header.
  */
-export function ReviewPage({
+function ReviewPageBody({
   target,
   title,
   onClose,
@@ -156,5 +157,14 @@ export function ReviewPage({
         />
       )}
     </div>
+  );
+}
+
+/** The review page, with its Explain panel's state. */
+export function ReviewPage(props: Parameters<typeof ReviewPageBody>[0]): ReactElement {
+  return (
+    <ExplainProvider target={props.target}>
+      <ReviewPageBody {...props} />
+    </ExplainProvider>
   );
 }

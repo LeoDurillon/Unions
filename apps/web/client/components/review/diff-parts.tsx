@@ -25,6 +25,8 @@ export type DiffViewProps = {
   renderBelow: (side: Side, line: number, comments: CommentView[]) => ReactNode;
   /** By hunk key, the parts of the spec each hunk serves: shown on its header (By spec). */
   hunkTags?: Map<string, string[]>;
+  /** Explain on a hunk's header: asks about the whole hunk. */
+  onHunk?: (header: string) => void;
 };
 
 /** The comments that end on this line of this side. */
@@ -77,18 +79,37 @@ export function Code({ line, tokens }: { line: DiffLine; tokens: Token[] | undef
 export function HunkTags({
   line,
   tags,
+  onHunk,
 }: {
   line: DiffLine;
   tags: Map<string, string[]> | undefined;
+  onHunk?: (header: string) => void;
 }): ReactNode {
   const key = line.kind === 'hunk' && tags ? headerKey(line.text) : null;
   const names = key === null ? [] : (tags?.get(key) ?? []);
-  return names.map((name) => (
-    <span
-      key={name}
-      className="ml-2 rounded bg-indigo-100 px-1.5 font-sans text-[10px] text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200"
-    >
-      {name}
-    </span>
-  ));
+  return (
+    <>
+      {names.map((name) => (
+        <span
+          key={name}
+          className="ml-2 rounded bg-indigo-100 px-1.5 font-sans text-[10px] text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200"
+        >
+          {name}
+        </span>
+      ))}
+      {line.kind === 'hunk' && onHunk ? (
+        <button
+          type="button"
+          title="Explain this hunk"
+          aria-label="Explain this hunk"
+          className="ml-2 rounded border border-indigo-300 px-1.5 font-sans text-[10px] text-indigo-700 hover:bg-indigo-50 dark:border-indigo-800 dark:text-indigo-300 dark:hover:bg-indigo-950"
+          onClick={() => {
+            onHunk(line.text);
+          }}
+        >
+          Explain
+        </button>
+      ) : null}
+    </>
+  );
 }

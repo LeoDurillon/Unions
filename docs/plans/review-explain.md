@@ -1,6 +1,10 @@
 # Explain a selection of the diff
 
-Status: planned (2026-10-18). Decisions D1 to D8 proposed, to confirm.
+Status: built (2026-10-19, branch `review-explain`), steps 1 to 4, checked with tests on a fake agent; no real run
+yet (it uses the user's Claude usage). Differences from the plan below: the agent's default effort is the CLI's
+(none of the agents has a default effort); the panel names its specs but has no **Change** link (they are changed in
+**Review with agent**); a ticket's explanation lines are also the ticket's own, so its usage counts them (they show
+in its Log, as an agent review's do).
 
 ## Why
 
@@ -48,7 +52,7 @@ Nothing is written to GitHub or Notion. Each Explain is one agent run on the use
 └─────────────┴────────────────────────────────────────┴────────────────────────────────┘
 ```
 
-## Decisions (proposed)
+## Decisions
 
 - **D1. Which specs.** The explanation is checked against the same specs as **Review with agent**: the last
   agent review's specs when there is one, else the defaults (`use-default-specs`: the PR descriptions, the
@@ -63,18 +67,19 @@ Nothing is written to GitHub or Notion. Each Explain is one agent run on the use
   also given to the agent as a starting point. An outdated grouping is still used for the files it knew, marked
   outdated.
 - **D4. Where it runs.** A ticket: its own container, as the agent review and the grouping (`openTarget`).
-  Refused while the ticket runs ("The ticket is running: explain once it stops"): its working tree is not the
-  snapshot on screen. A pull request: a container kept for the review's explanations, `union-e<reviewId>`
-  (cloned at the reviewed commit like `union-a<id>`, with the Claude credential), so a second Explain or a
-  follow-up does not clone again. Stopped once idle (10 minutes), removed with the review, on a new head (cloned
-  again at the next Explain) and by `recover`. Not `union-r<id>`: the review's preview container runs the PR's
-  code and never gets the credential.
+  Refused while the ticket runs, with the grouping's own check and message (`GroupingTarget.refusal`, confirmed
+  2026-10-19): its working tree is not the snapshot on screen. A pull request: a throwaway container per run, `union-e<explanationId>` (confirmed
+  2026-10-19), cloned at the reviewed commit like `union-a<id>` with the Claude credential and removed when the
+  run ends, and by `recover`. Not `union-r<id>`: the review's preview container runs the PR's code and never gets
+  the credential.
 - **D5. Run slots.** Shared with the pipeline, investigations and agent reviews (Max usage). A queued one says
   "Waiting for a run slot". One explanation runs per review at a time; the others wait in order.
-- **D6. Agent.** A new `review_explain` agent in Agent settings: default Sonnet, effort low, read-only tools plus
+- **D6. Agent.** A new `review_explain` agent in Agent settings: default Haiku (confirmed 2026-10-19: short
+  answers, lower cost), effort low, read-only tools plus
   git reads (as the agent review). Its prompt and model are editable like the others.
 - **D7. Follow-ups.** A follow-up is a new row with `parentId`, resuming the parent's session (`resumeSessionId`,
-  falling back to a fresh run with the thread in the prompt as `agent.ts` does when the session is lost). The panel
+  falling back to a fresh run with the thread in the prompt as `agent.ts` does when the session is lost). A pull
+  request's follow-up runs fresh with the thread: its container is gone with the session. The panel
   shows the thread under the first answer.
 - **D8. Hunk and file too (later).** A hunk header gets an **Explain** icon (the whole hunk), and the file header
   **Explain file**. Same row, `start..end` set to the hunk or the whole file. Step 4.
@@ -110,8 +115,8 @@ says so ("2 citations dropped: not found"). No block: the run fails with the ans
   selected text, `diffExcerpt`), `question`, `specs` (JSON, as sent), `head_sha`, `status` (queued, running,
   succeeded, failed, cancelled), `result` (JSON), `session_id`, `error`, timestamps. Migration with
   `cd packages/core && bunx drizzle-kit generate`.
-- `review-explanations.ts` (new): `queueExplanation` (refuses an owner whose ticket runs, and a selection outside
-  the diff), `claimExplanation` (oldest queued whose owner has none running, D5), `finishExplanation`,
+- `review-explanations.ts` (new): `queueExplanation` (refuses a selection outside the diff; the route refuses a running ticket,
+  D4), `claimExplanation` (oldest queued whose owner has none running, D5), `finishExplanation`,
   `cancelQueuedExplanation`, `failInterruptedExplanations`, `explanationsOf(owner)`. Tests next to it.
 - `explanation-spec-parts.ts` (new, pure, browser-safe): the grouping's parts for `path` and a line range (D3).
   Tests next to it.
@@ -125,15 +130,14 @@ says so ("2 citations dropped: not found"). No block: the run fails with the ans
   cancel, `recover`, `idle`). The prompt (`review-explain-prompt.ts`, new): shared prompt, the agent's prompt, the
   specs (`specsSection`), the spec parts (D3), where the change is (`target.about`, `git diff base...HEAD`), the
   selection (path, side, lines, excerpt), the question, then the answer format. Agent events go to the run's log
-  (D4: `agent_log.explanation_id`, nullable) so the panel shows the progress.
+  (`agent_log.explanation_id`, nullable, indexed) so the panel shows the progress.
 - `review-explain-result.ts` (new): parses and checks the block (above); tests on fixed answers.
-- `review-explain-container.ts` (new): `union-e<reviewId>`: ensure (clone at `headSha` with
-  `throwawayCheckout`'s steps but kept), re-clone on a new head, stop when idle, remove (with the review,
-  `recover`). Through `ContainerRuntime` only.
+- `explanationContainer(id)`: `union-e<id>`, opened through `openTarget` and removed by `recover`, as the
+  grouping's `union-g<id>`.
 - The command hook `cancel_review_explanation`, like `cancel_agent_review`. Wired in the worker entry beside the
   grouping runner.
 - Tests: the runner with a fake agent (succeeds, no block, cancelled, follow-up resumes the session, lost session
-  falls back), the container kept between two runs and re-cloned on a new head.
+  falls back), a pull request's container removed after the run.
 
 ## Web (`apps/web`)
 
@@ -141,7 +145,8 @@ says so ("2 citations dropped: not found"). No block: the run fails with the ans
   groupings, so ticket and PR reviews share it:
   - `GET /explanations`: the review's explanations, newest first, with their spec parts (D3) and `outdated`.
   - `POST /explanations`: `{ path, side, start, end, question?, specs, parentId? }`; checks the lines are in the
-    file's patch, takes the excerpt, queues. 409 while the ticket runs or one is already queued for the same lines.
+    file's patch, takes the excerpt, queues. 409 while the ticket runs (D4) or one is already queued for the same
+    lines.
   - `POST /explanations/:id/cancel`: a queued one is cancelled here; a running one through the command.
   - `GET /explanations/:id/log`: the progress, like the investigation's Log.
 - Tests: queueing (lines outside the diff refused, ticket running refused), the spec parts, cancel.
@@ -161,7 +166,7 @@ says so ("2 citations dropped: not found"). No block: the run fails with the ans
 
 ## Cost
 
-One Sonnet run per Explain, low effort: the excerpt, the specs and a few file reads. Follow-ups resume the session,
+One Haiku run per Explain, low effort: the excerpt, the specs and a few file reads. Follow-ups resume the session,
 so the context is cached. A pull request's first Explain also clones the repository once.
 
 ## Steps
@@ -169,8 +174,8 @@ so the context is cached. A pull request's first Explain also clones the reposit
 1. Record, runner, agent, result parsing and the routes, for a ticket's review only; the panel with the answer and
    the history; Explain in the comment editor. Tests on a fake agent. Check the panel on a real ticket's review
    (one real run uses the user's Claude usage: ask first).
-2. Pull requests: the `union-e<id>` container (D4), its idle stop and cleanup; check against real Docker with
-   review id 9001 and clean up `union-e9001*`.
+2. Pull requests: the throwaway `union-e<id>` container (D4); check against real Docker with id 9001 and clean
+   up `union-e9001*`.
 3. Spec parts from the grouping (D3), the progress log, follow-ups (D7), Copy as comment, Outdated and Explain
    again.
 4. Hunk and file (D8).
@@ -179,5 +184,5 @@ so the context is cached. A pull request's first Explain also clones the reposit
 
 - `docs/spec/pull-requests.md` (and the ticket review in `docs/spec/flow.md`): the panel, what an explanation
   holds, its cost.
-- `docs/architecture/worker.md`: the runner and the `union-e<id>` container. `docs/architecture/web.md`: the route.
+- `docs/architecture/worker.md`: the runner and its `union-e<id>` container. `docs/architecture/web.md`: the route.
 - This plan's status and `docs/plans/README.md`.

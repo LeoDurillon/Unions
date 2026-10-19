@@ -32,6 +32,8 @@ export type GroupingTarget = {
   headSha: string | null;
   /** Why the agent cannot read the change now; null when it can. */
   refusal: string | null;
+  /** A file's patch in the diff the review shows now; read when asked. */
+  patchOf: (path: string) => string | undefined;
 };
 
 /** What the review page shows of the newest grouping. */

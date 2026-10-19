@@ -41,6 +41,11 @@ export const AGENT_LABELS: Record<AgentId, { title: string; description: string 
     description:
       "Groups a review's changed files by the parts of a specification they implement, on request from the review page.",
   },
+  review_explain: {
+    title: 'Explain',
+    description:
+      'Explains the lines you select in a review when you click "Explain": how they work, the parts of the specs they implement and the docs they relate to.',
+  },
   pr_description: {
     title: 'PR description',
     description:

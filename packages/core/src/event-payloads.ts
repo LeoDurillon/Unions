@@ -105,6 +105,12 @@ type ReviewPayloads = {
     status: Column<typeof tables.reviewGroupings, 'status'>;
     error: string | null;
   };
+  review_explanation_changed: {
+    explanationId: number;
+    reviewId: number | null;
+    status: Column<typeof tables.reviewExplanations, 'status'>;
+    error: string | null;
+  };
   agent_review_changed: {
     agentReviewId: number;
     reviewId: number | null;

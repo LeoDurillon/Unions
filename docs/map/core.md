@@ -37,6 +37,7 @@ export); do not edit. Tests are left out.
 - `event-pull-request-action.ts`: A rule's changes to the ticket's pull request (labels, reviewers, assignees, title, a description section); browser-safe.
 - `event-rule-types.ts`: Event rules: when something happens to a ticket, do something elsewhere.
 - `event-rules.ts`: Event rules: checking and saving them, the stored Notion columns, and matching events and templates.
+- `explanation-spec-parts.ts`: The parts of a grouping by spec that selected lines of a file touch, without asking an agent.
 - `flow-settings.ts`: A project's flow presets as the settings send them, checked: unique ids and names, valid steps, a default among them.
 - `flows.ts`: Ticket flows: the steps a ticket runs, the presets a project offers, and what agents are told of skipped steps.
 - `github-auth.ts`: A project's installation wins over its token; `fallbackToken` (the `GITHUB_TOKEN` environment variable) covers projects with neither.
@@ -71,6 +72,7 @@ export); do not edit. Tests are left out.
 - `project-scripts.ts`: Saved scripts the settings refuse: not a list, a name taken twice, a command too long.
 - `project-url.ts`: Parses `https://github.com/orgs/<login>/projects/<n>` (or `users/`).
 - `refused-commits.ts`: The ticket's last refused commit: the one a `commit_refused` phase is waiting on.
+- `review-explanations.ts`: The explanations of a review's lines: queued by the web, claimed and finished by the worker.
 - `review-groupings.ts`: A grouping is already queued or running for this change.
 - `runtime.ts`: Everything the worker needs from Docker.
 - `schema-agent-log.ts`: The agents' raw output, line by line, kept apart from the event log.
@@ -87,6 +89,7 @@ export); do not edit. Tests are left out.
 - `schema-previews.ts`: A preview: its compose project (`union-t<id>` for a ticket, `union-r<id>` for a pull request under review) run from its owner's workspace, served by the proxy …
 - `schema-project-files.ts`: Files the user gave the project (a database dump, a local config), put at `path` in every ticket's workspace and kept out of git there.
 - `schema-refused-commits.ts`: Changes the agent left uncommitted that the repository's hook refused to commit.
+- `schema-review-explanations.ts`: The table of the explanations an agent gives of lines of a review's diff, and what one holds.
 - `schema-review-groupings.ts`: The agent's grouping of a review's changed files by the parts of a specification, run when the user asks: for a ticket's branch or a pull request under review …
 - `schema-reviews.ts`: Pull requests the user put under review from the Pull requests tab, without a ticket.
 - `schema-types.ts`: Plain types stored in JSON columns, kept apart so schema.ts holds the tables.

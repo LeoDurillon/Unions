@@ -27,6 +27,9 @@ test('remove_containers hands every container to the hook', () => {
     cancelReviewGrouping: () => {
       // Not under test.
     },
+    cancelReviewExplanation: () => {
+      // Not under test.
+    },
     submitPullRequestReview: () => {
       // Not under test.
     },

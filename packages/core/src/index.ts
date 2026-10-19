@@ -52,6 +52,8 @@ export * from './preview-screenshots';
 export * from './preview-secrets';
 export * from './project-files';
 export * from './project-scripts';
+export * from './review-explanations';
+export * from './explanation-spec-parts';
 export * from './review-groupings';
 export * from './notion-markdown';
 export * from './notifications';

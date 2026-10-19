@@ -19,6 +19,7 @@ export default defineConfig({
     './src/schema-previews.ts',
     './src/schema-project-files.ts',
     './src/schema-refused-commits.ts',
+    './src/schema-review-explanations.ts',
     './src/schema-review-groupings.ts',
     './src/schema-reviews.ts',
   ],

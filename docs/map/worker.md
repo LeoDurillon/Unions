@@ -15,6 +15,7 @@ export); do not edit. Tests are left out.
 - `approved.ts`: The latest approved output of every step before `step`, in pipeline order.
 - `attachments-sync.ts`: Puts the ticket's current files in the container, before every step: files added since the last step appear, removed ones disappear, and whatever the agent cha…
 - `branch.ts`: `<issue#>-<slug>`, or `union-<ticket id>-<slug>` while the ticket has no GitHub issue.
+- `command-cancels.ts`: The cancel commands of the side runs: the id each one carries, and how a queued or a running one stops.
 - `commands.ts`: Handles every pending command once.
 - `container-exec.ts`: Runs a command in the container and collects its output (for short commands, not agents).
 - `container-run.ts`: Runs the commands users queue in tickets' and pull requests' workspaces, a few at a time.
@@ -59,10 +60,14 @@ export); do not edit. Tests are left out.
 - `rebase.ts`: Rebases the ticket's branch onto its base (git alone when there is no conflict, else the implementer's own session), checks it and force-pushes it with a lease.
 - `refused-commit.ts`: Records the refusal and stops the run there: the user decides what to do with the changes.
 - `review-checkout.ts`: A pull request's own container (`union-r<id>`): its checkout at the reviewed commit, for its preview, tests and commands.
+- `review-explain-prompt.ts`: The prompts of an Explain: a fresh one with the specs, the change and the lines, and a follow-up's.
+- `review-explain-result.ts`: Reads the explanation block at the end of the agent's answer, and drops the citations it cannot back.
+- `review-explain.ts`: Runs the explanations of a review's lines on the shared run slots, a pull request's in a throwaway container.
 - `review-grouping-format.ts`: Every changed file's hunks, one line each: what the agent cites in `hunks` and `lines`.
 - `review-grouping-result.ts`: The agent's grouping, checked against the change: only changed files and their real hunks, every hunk at least once (the ones it left out are unrelated), no em…
 - `review-grouping.ts`: Runs the groupings the user asked for, on the same run slots as the pipeline and the agent reviews: a ticket's in its own container, a pull request's in a thro…
 - `review-previous.ts`: What a final review is told of the one before it: its findings, the feedback sent since, and the commits since.
+- `review-runs.ts`: The runners of the review page's agents: agent reviews, groupings by spec and explanations of lines.
 - `review.ts`: Reading the change needs git; the default review tools allow the read-only git commands.
 - `revision.ts`: The feedback a run of `step` must address, if the user asked for changes.
 - `run-workspace.ts`: Where a user's command runs: the ticket's container with the agent's services, or the pull request's own.

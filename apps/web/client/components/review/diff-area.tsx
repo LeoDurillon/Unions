@@ -4,16 +4,42 @@ import { reviewBase } from '../../lib/review-target';
 import { CommitDiffBody } from './commit-diff';
 import { CommitPicker } from './commit-picker';
 import { DiffBody } from './diff-body';
+import { ExplainPanel } from './explain-panel';
 
-/** The whole change, or one of its commits or the change since the last review, read only. */
+/**
+ * The whole change, or one of its commits or the change since the last review (read only), with
+ * the Explain panel on the right.
+ */
 export function DiffArea(props: Omit<Parameters<typeof DiffBody>[0], 'picker'>): ReactElement {
   const [commit, setCommit] = useState<string | null>(null);
-  const { target, view, banner } = props;
-  const base = reviewBase(target);
+  const base = reviewBase(props.target);
   const picker = <CommitPicker base={base} value={commit} onChange={setCommit} />;
-  if (commit === null) {
-    return <DiffBody {...props} picker={picker} />;
-  }
+  return (
+    <div className="flex min-h-0 flex-1">
+      {commit === null ? (
+        <DiffBody {...props} picker={picker} />
+      ) : (
+        <CommitBody {...props} base={base} commit={commit} picker={picker} onAll={setCommit} />
+      )}
+      <ExplainPanel paths={new Set(props.files.map((file) => file.path))} />
+    </div>
+  );
+}
+
+function CommitBody({
+  target,
+  view,
+  banner,
+  base,
+  commit,
+  picker,
+  onAll,
+}: Omit<Parameters<typeof DiffBody>[0], 'picker'> & {
+  base: string;
+  commit: string;
+  picker: ReactElement;
+  onAll: (commit: null) => void;
+}): ReactElement {
   return (
     <CommitDiffBody
       target={target}
@@ -23,7 +49,7 @@ export function DiffArea(props: Omit<Parameters<typeof DiffBody>[0], 'picker'>):
       picker={picker}
       banner={banner}
       onAllChanges={() => {
-        setCommit(null);
+        onAll(null);
       }}
     />
   );

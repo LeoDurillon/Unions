@@ -49,6 +49,7 @@ export function Thread({
       ))}
       {editing ? (
         <CommentEditor
+          path={path}
           selection={selection}
           pending={mutations.add.isPending}
           error={mutations.add.error}

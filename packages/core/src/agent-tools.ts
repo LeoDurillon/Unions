@@ -19,6 +19,7 @@ export type RunAgent =
   | Step
   | 'review_comments'
   | 'review_groups'
+  | 'review_explain'
   | 'pr_description'
   | 'lesson_writer';
 
@@ -39,6 +40,7 @@ export const DEFAULT_TOOLS: Record<RunAgent, readonly string[]> = {
   final_review: REVIEW_TOOLS,
   review_comments: REVIEW_TOOLS,
   review_groups: REVIEW_TOOLS,
+  review_explain: REVIEW_TOOLS,
   pr_description: REVIEW_TOOLS,
   // Its container holds no repository: the feedback is all in its prompt.
   lesson_writer: READ_ONLY,

@@ -1,6 +1,8 @@
 import { useState, type ReactElement } from 'react';
 
+import { isExplaining, useExplanations } from '../../lib/use-explanations';
 import { Segmented, type SegmentOption } from '../choice';
+import { useExplain, type ExplainState } from './explain-context';
 import type { DiffView } from './file-diff';
 
 export type { DiffView } from './file-diff';
@@ -33,7 +35,31 @@ export function useDiffView(): [DiffView, (view: DiffView) => void] {
   return [view, choose];
 }
 
-/** Unified / Split switch for the review diff. */
+function ExplainButton({ explain }: { explain: ExplainState }): ReactElement {
+  const rows = useExplanations(explain.target).explanations.data ?? [];
+  const running = rows.filter((row) => isExplaining(row)).length;
+  return (
+    <button
+      type="button"
+      aria-pressed={explain.open}
+      aria-label={`Explain panel${running > 0 ? `, ${running} on the way` : ''}`}
+      className={`rounded-md border px-3 py-1.5 text-sm font-medium ${explain.open ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40' : 'border-zinc-300 dark:border-zinc-700'}`}
+      onClick={() => {
+        explain.setOpen(!explain.open);
+      }}
+    >
+      Explain{running > 0 ? ` (${running})` : ''}
+    </button>
+  );
+}
+
+/** Opens and closes the Explain panel, with how many explanations are on the way. */
+function ExplainToggle(): ReactElement | null {
+  const explain = useExplain();
+  return explain ? <ExplainButton explain={explain} /> : null;
+}
+
+/** The Explain panel's toggle, then the Unified / Split switch for the review diff. */
 export function ViewToggle({
   view,
   onChange,
@@ -41,5 +67,10 @@ export function ViewToggle({
   view: DiffView;
   onChange: (view: DiffView) => void;
 }): ReactElement {
-  return <Segmented legend="Diff layout" options={VIEWS} value={view} onChange={onChange} />;
+  return (
+    <>
+      <ExplainToggle />
+      <Segmented legend="Diff layout" options={VIEWS} value={view} onChange={onChange} />
+    </>
+  );
 }

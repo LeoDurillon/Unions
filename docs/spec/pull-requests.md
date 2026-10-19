@@ -38,6 +38,28 @@ the description and the page (in a stack, each member's description and each lin
 requests linked to it), and the **Notion page** source of either reads it at once, with "Another page" for a URL.
 A ticket imported from Notion gets the same source for its page (its current text, not the import's).
 
+### Explain
+
+On either review page (a ticket's branch or a pull request under review), **Explain** asks an agent about lines of
+the diff: in the editor under selected lines (with an optional question folded under **Ask a question**), on a hunk
+header, or **Explain file** beside the file's name. The answer comes in the **Explain** side panel, on the right of
+the diff, opened by the header's **Explain** toggle (with the count on the way, remembered in the browser) or by
+asking. Each explanation shows its lines (a link that opens the file and selects them), the **Spec parts** a
+grouping by spec put them under (from the newest grouping, without the agent; "older grouping" when it read another
+commit), "Waiting for a run slot" or "Explaining…" with the agent's last steps and **Cancel**, then the answer:
+**How it works** (with links to the code it cites in the change), **Specs** (quotes of the specs, each with its
+source), **Docs** (the repository's own documents) or **Not in the spec**. The host keeps a spec quote only when it is
+found in a spec that was sent, and a doc only when its path is in the checkout; the panel counts what it dropped.
+**Ask a follow-up** resumes the agent's session on a ticket (a pull request's runs again with the thread), and
+**Copy as comment** opens the comment editor on the lines with the answer quoted, nothing sent. Older explanations
+are folded below the newest; one asked on another commit is **Outdated**, with **Explain again**.
+
+The specs are those of **Review with agent**: its last run's, else the defaults (the ticket's text, or the PR's
+description and linked Notion page). The agent is `review_explain` in Union settings (Haiku by default, read-only
+tools and git reads). A ticket's runs in its own container, refused while the ticket runs; a pull request's in a
+throwaway container cloned at the reviewed commit. Runs share the run slots, one per review at a time. Each Explain
+is one agent run on the user's Claude usage; nothing is written to GitHub or Notion.
+
 **CI checks** of a ticket's pull request ([`docs/plans/pr-checks.md`](../plans/pr-checks.md)), in the PR tab under the branch status, while
 the PR is not merged (read when the tab opens, every 30 s while a check runs, and on Refresh): the web reads the head commit's check runs and commit statuses and the PR's bot comments. The user picks failed checks, other
 GitHub Actions jobs of the head (their findings may be there) and bot comments; each is read again into text (a

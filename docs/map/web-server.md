@@ -47,6 +47,7 @@ export); do not edit. Tests are left out.
 - `current-reviews.ts`: `/api/projects/:projectId/pull-requests/reviews`: pull requests the user reviews without a ticket.
 - `event-rules.ts`: `/api/projects/:projectId/event-rules` and its deliveries, and the stored Notion columns.
 - `events.ts`: The API route that streams new events to the browser as server-sent events.
+- `explanation-request.ts`: Reads a request to explain lines of the diff, or to follow up on an explanation, into what is queued.
 - `github-app.ts`: The global GitHub App: its credentials are checked against GitHub before they are stored.
 - `github-errors.ts`: Turns GitHub failures into messages the wizard can show next to the field.
 - `github.ts`: The wizard's GitHub reads; each request carries a `token` or an app `installationId`.
@@ -76,6 +77,7 @@ export); do not edit. Tests are left out.
 - `pull-requests.ts`: `/api/projects/:projectId/pull-requests`: the repository's pull requests, read from GitHub (kept a few minutes; `?refresh` reads them again), and under `/revie…
 - `refused-commit.ts`: The ticket's last refused commit (null if none): what the user decides on while the run is paused.
 - `review-comments.ts`: The owner's drafts, oldest first.
+- `review-explanations.ts`: The explanations of a review's lines: listed with their spec parts, queued, cancelled, and their progress.
 - `review-groupings.ts`: Under a review's base (`/api/tickets/:id`, `/api/projects/:projectId/pull-requests/reviews/:number`): `/groupings` (the newest), `/groupings/source` (a specifi…
 - `review-import.ts`: The PR tab: threads, review summaries and comments, and which of them are already imported.
 - `review-notion-suggestions.ts`: `<review>/notion/suggestions`: the Notion pages the pull request's description links to, offered for linking.
@@ -96,7 +98,7 @@ export); do not edit. Tests are left out.
 - `ticket-links.ts`: `find` resolves the parent: a map over a listing, or a lookup in the database.
 - `ticket-pull-request.ts`: Looks the pull request up on GitHub (read only), then links it to the ticket.
 - `ticket-removal.ts`: Removes a cancelled ticket from Union: its runs, outputs, reviews and files go with it, and the worker is asked to remove its container (the web never calls Do…
-- `ticket-review-subroutes.ts`: A ticket's routes about its change: its refused commit, its PR description rewrite, its grouping by spec, its commits, its pull request's CI checks.
+- `ticket-review-subroutes.ts`: A ticket's routes about its change: its refused commit, its PR description rewrite, its grouping by spec, the explanations of its lines, its commits, its pull …
 - `ticket-subroutes.ts`: The routes under `/api/tickets` that have their own module: creation, the issue import, a ticket's files, its refused commit, the rewrite of its PR description…
 - `ticket-workspace.ts`: The routes about a ticket's workspace: the branch it starts from, the steps it runs, the commands run in it, and what its agents used.
 - `tickets.ts`: The API routes for tickets: listing, creating, editing outputs and moving them between steps.

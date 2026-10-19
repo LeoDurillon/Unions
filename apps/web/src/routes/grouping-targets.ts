@@ -4,6 +4,7 @@ import type { Context, Hono } from 'hono';
 
 import type { OnboardingGitHub } from '../github-onboarding';
 import { fail, NOT_FOUND, requireId } from '../http';
+import { reviewExplanationRoutes } from './review-explanations';
 import { reviewGroupingRoutes, type GroupingTarget } from './review-groupings';
 
 function projectOf(db: Db, id: number): typeof schema.projects.$inferSelect {
@@ -34,7 +35,7 @@ function ticketTarget(db: Db, c: Context): GroupingTarget {
     .get();
   let refusal: string | null = null;
   if (!ticket.branch || !snapshot) {
-    refusal = 'No diff to group yet: run the implementation first.';
+    refusal = 'No diff yet: run the implementation first.';
   } else if (ticket.phase.kind === 'running') {
     refusal =
       'Wait for the current run to finish: the agent reads the change in the same workspace.';
@@ -47,6 +48,16 @@ function ticketTarget(db: Db, c: Context): GroupingTarget {
     notionPageId: ticket.notionPageId,
     headSha: snapshot?.headSha ?? null,
     refusal,
+    patchOf: (path) =>
+      snapshot
+        ? db
+            .select({ patch: schema.diffFiles.patch })
+            .from(schema.diffFiles)
+            .where(
+              and(eq(schema.diffFiles.snapshotId, snapshot.id), eq(schema.diffFiles.path, path)),
+            )
+            .get()?.patch
+        : undefined,
   };
 }
 
@@ -76,6 +87,7 @@ function pullRequestTarget(db: Db, c: Context): GroupingTarget {
     headSha: review.headSha,
     refusal:
       review.files && review.headSha ? null : 'Open the diff first: its files are not read yet.',
+    patchOf: (path) => review.files?.find((file) => file.path === path)?.patch,
   };
 }
 
@@ -91,4 +103,14 @@ export function pullRequestGroupingRoutes(
   notion: NotionApi,
 ): Hono {
   return reviewGroupingRoutes(db, { github, notion }, (c) => pullRequestTarget(db, c));
+}
+
+/** `/api/tickets/:id/explanations`. */
+export function ticketExplanationRoutes(db: Db): Hono {
+  return reviewExplanationRoutes(db, (c) => ticketTarget(db, c));
+}
+
+/** `/api/projects/:projectId/pull-requests/reviews/:number/explanations`. */
+export function pullRequestExplanationRoutes(db: Db): Hono {
+  return reviewExplanationRoutes(db, (c) => pullRequestTarget(db, c));
 }

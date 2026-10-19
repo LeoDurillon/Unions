@@ -40,6 +40,8 @@
    and works like Request changes: the
    implementer works on the comments, then the final review runs again (from Done, the feedback is recorded on the
    final review and the ticket goes back to In progress).
+   **Explain** asks an agent about selected lines, a hunk or a file, in a side panel (see
+   [Pull requests](pull-requests.md#explain)); it is refused while the ticket runs.
    The ticket panel has three tabs: **Overview** (description, links, actions, runs), **Worker** (one tab per step,
    then the Log; it follows the running step) and **PR** (link the pull request, then its GitHub discussion, read
    only). From the PR tab or the review header, **Import** adds the unresolved line-comment threads as drafts,

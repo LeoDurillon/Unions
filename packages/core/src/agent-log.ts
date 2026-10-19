@@ -24,7 +24,13 @@ export type LogEntry =
  */
 export function appendAgentLine(
   db: Db,
-  line: { ticketId?: number; runId?: number; investigationId?: number; payload: unknown },
+  line: {
+    ticketId?: number;
+    runId?: number;
+    investigationId?: number;
+    explanationId?: number;
+    payload: unknown;
+  },
 ): void {
   db.transaction((tx) => {
     const written = tx
@@ -34,6 +40,7 @@ export function appendAgentLine(
         ticketId: line.ticketId ?? null,
         runId: line.runId ?? null,
         investigationId: line.investigationId ?? null,
+        explanationId: line.explanationId ?? null,
         payload: line.payload,
       })
       .returning()

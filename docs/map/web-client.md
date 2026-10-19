@@ -156,13 +156,18 @@ export); do not edit. Tests are left out.
 - `agent-review-button.tsx`: Asks the review agent for draft comments on the change, and shows where it stands.
 - `agent-review-dialog.tsx`: Review with agent: the specs the change is checked against (the last run's, else the ticket's text or the PR's descriptions and linked Notion pages), for one c…
 - `comment-card.tsx`: One comment: drafts can be edited or deleted, the agent's suggestions also kept as they are; sent ones are read-only.
-- `comment-editor.tsx`: Shown under the selected lines; Shift-click another line number to extend the block.
+- `comment-editor.tsx`: The editor under selected lines of the diff: a comment to add, or the lines to Explain with an optional question.
 - `comment-thread.tsx`: The comments ending on one line, and the editor when the selection ends there.
 - `commit-diff.tsx`: One commit of the change against its first parent (or the change since the last review): its files on the left, the picked one on the right, read only.
 - `commit-picker.tsx`: All the changes, the change since the last review (tickets), or one commit: a button that opens the list, and previous and next to step through the commits in …
-- `diff-area.tsx`: The whole change, or one of its commits or the change since the last review, read only.
+- `diff-area.tsx`: The whole change, or one of its commits or the change since the last review (read only), with the Explain panel on the right.
 - `diff-body.tsx`: The touched files on the left, the picked one on the right.
 - `diff-parts.tsx`: The comments that end on this line of this side.
+- `explain-context.tsx`: The review page's Explain state: the side panel, the specs an explanation is checked against, and the lines to show.
+- `explain-panel.tsx`: The Explain side panel of the review: the specs explanations use, and the threads, newest first.
+- `explanation-answer.tsx`: An explanation's answer: how the lines work with their cited code, the specs and docs they relate to.
+- `explanation-card.tsx`: One explanation and its follow-ups: the lines asked about, their spec parts, each answer, and what to do next.
+- `explanation-progress.tsx`: While an explanation waits or runs: its status, the agent's last steps (the files it reads) and Cancel.
 - `file-diff.tsx`: One file's diff, unified or side by side; comments and the editor appear under the last line they cover.
 - `file-list.tsx`: The touched files, as a list or a tree; ignored ones (lock files, project patterns) are listed apart, collapsed.
 - `file-row.tsx`: One file: status, name (the full path in the flat list), drafts and line counts.
@@ -175,14 +180,14 @@ export); do not edit. Tests are left out.
 - `import-comments.tsx`: Pulls the linked pull request's unresolved review threads in as draft comments.
 - `open-file.tsx`: One file of the review: its diff, the threads under their lines, and the outdated comments.
 - `review-header.tsx`: Back, what is reviewed and at which commit, the GitHub import (tickets), the layout switch and Send.
-- `review-page.tsx`: Full-page review of a ticket's branch or of a pull request: touched files on the left, one file at a time on the right.
+- `review-page.tsx`: The review page, with its Explain panel's state.
 - `send-review.tsx`: Sends the drafts and an optional overall note to the implementer, from a panel under the button.
 - `spec-cards.tsx`: The specs an agent review will check the change against: one card each, its text to read or edit, the pull requests of a stack it covers.
 - `spec-groups.tsx`: The files under the parts of the specification they implement (a file can be under several, with only some of its hunks), then the changes no part covers, then…
 - `spec-picker.tsx`: Where a specification comes from (the PR description, the ticket, an issue, a Notion page, the linked one by default): picking it, reading it, editing its text.
 - `specs-form.tsx`: The specs of a Review with agent, editable, a way to add one from any source, and the start.
 - `split-diff.tsx`: Old file on the left, new on the right; removed and added runs face each other.
-- `view-toggle.tsx`: Unified / Split switch for the review diff.
+- `view-toggle.tsx`: The Explain panel's toggle, then the Unified / Split switch for the review diff.
 
 ## components/settings/
 
@@ -267,6 +272,7 @@ export); do not edit. Tests are left out.
 - `env-lines.ts`: `KEY=value` lines (blank lines and `#` comments skipped) to variables.
 - `event-hub.ts`: Calls `listener` with every new event, in any tab's stream; returns the unsubscribe.
 - `event-rules-api.ts`: The browser's client for the event rules endpoints.
+- `explanation-api.ts`: The explanation routes of a review, under its API root (`reviewBase`).
 - `file-tree.ts`: The files as a directory tree, for the review's file list.
 - `github-markdown.ts`: Renders GitHub comment text as GitHub does: its HTML (folds, images) sanitized, and `> [!NOTE]` alerts.
 - `highlight.ts`: Tokens for every changed or context line of a patch.
@@ -308,6 +314,7 @@ export); do not edit. Tests are left out.
 - `use-current-reviews.ts`: Adding and removing refresh the list (and the Pull requests tab, which marks what is in it).
 - `use-default-specs.ts`: The specs a Review with agent starts from when its last run gives none: the ticket's text, the PR's description and its linked Notion page, or each of a stack'…
 - `use-event-stream.ts`: Calls `onEvent` with every new event, from the browser's one shared stream (`event-hub.ts`).
+- `use-explanations.ts`: The review's explanations, polled while one waits or runs, with asking, following up and cancelling.
 - `use-github-app.ts`: The global GitHub App's status; saving or removing it invalidates `['github-app']`.
 - `use-live-invalidation.ts`: Refetches board, ticket, investigation and notification data whenever the worker records a change.
 - `use-log.ts`: Polls a ticket's or an investigation's Log while it is shown: all of it first, then what is new.

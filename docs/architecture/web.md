@@ -144,6 +144,16 @@
   the files under their groups; a file opened under a part shows only that part's hunks (`hunk-focus.tsx`,
   `lib/spec-hunks.ts`, "Show all" to see the rest) with each hunk header tagged with its parts, except on an
   outdated grouping.
+- Explain: `routes/review-explanations.ts` (mounted beside the groupings from `grouping-targets.ts`, on the same
+  `GroupingTarget` and its refusal) lists a review's explanations with their spec parts and `outdated`, queues one
+  (`explanation-request.ts`: lines checked against the file's patch, excerpt from `diffExcerpt`, specs through
+  `parseAgentReviewSpecs`; a follow-up copies its parent's lines and specs), cancels one through a command, and
+  serves its agent lines (`/log`). The client: `explain-context.tsx` (provided by `ReviewPage`: the panel's open
+  state, the specs of the last agent review else `use-default-specs`, asking, and the lines to show), the panel
+  `explain-panel.tsx` beside the diff in `diff-area.tsx`, `explanation-card.tsx` (a thread),
+  `explanation-answer.tsx`, `explanation-progress.tsx`, `lib/use-explanations.ts` (polled while one is active).
+  Opening an explanation's lines picks the file in `diff-body.tsx` and selects them in `open-file.tsx` until the
+  user picks or selects another; Copy as comment starts the comment editor with the answer quoted.
 - Previews: project settings → Preview (`routes/preview-settings.ts`, `config.preview`: compose file, service,
   port, plain variables) and the ticket Overview's Preview section (`preview-section.tsx`, `routes/preview.ts`,
   state in the `previews` table). Start, stop and logs are commands; the worker owns Docker. What a ticket's and a

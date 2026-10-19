@@ -26,6 +26,7 @@ export const AGENT_IDS = [
   'final_review',
   'review_comments',
   'review_groups',
+  'review_explain',
   'pr_description',
   'rebase',
   'simplify',
@@ -87,6 +88,11 @@ Then read the diff from the base branch, and the surrounding code wherever a cha
 Put each changed file under every part it serves; a file serving no part goes to "unrelated" with a short reason.
 List the parts no change implements as "missing": that is what the reviewer most needs to know.
 Do not judge the code's quality: only say what implements what.`,
+  review_explain: `Explain the selected lines of a change to its reviewer, briefly: what they do and why they are there.
+Read the code around them and the callers and callees they rely on, and cite them as \`path:line\`.
+Say which parts of the specifications they implement, quoting the spec's own words; say so plainly when none asks for them.
+Look in the repository's own docs (\`docs/\`, READMEs, AGENTS.md, CLAUDE.md, ADRs) for the ones the lines relate to.
+Do not judge the code's quality and do not change any file: only explain.`,
   pr_description: `Write the pull request's description for a reviewer who has not seen the work.
 Describe the change as the branch has it now: read the diff from the base branch, not only what you remember.
 Say what changed and why, the main changes, and how it was verified. Mention what a reviewer should look at closely.
@@ -130,6 +136,7 @@ const MODEL_BY_AGENT: Record<RunAgent, AgentModel> = {
   ...MODEL_BY_STEP,
   review_comments: 'opus',
   review_groups: 'sonnet',
+  review_explain: 'haiku',
   pr_description: MODEL_BY_STEP.implement,
   lesson_writer: 'haiku',
 };
@@ -137,6 +144,7 @@ const RUN_AGENTS: readonly RunAgent[] = [
   ...STEPS,
   'review_comments',
   'review_groups',
+  'review_explain',
   'pr_description',
   'lesson_writer',
 ];

@@ -15,6 +15,7 @@ export function workerHooks(
     | 'investigations'
     | 'agentReviews'
     | 'reviewGroupings'
+    | 'reviewExplanations'
     | 'prDescriptions'
     | 'containerRuns'
     | 'previews'
@@ -26,7 +27,7 @@ export function workerHooks(
 ): CommandHooks {
   const { db, runtime, investigations, agentReviews, reviewGroupings, prDescriptions, previews } =
     deps;
-  const { apiFor, containerRuns } = deps;
+  const { apiFor, containerRuns, reviewExplanations } = deps;
   return {
     removeContainers: (containers) => {
       void removeContainers(db, runtime, containers, (name) => previews.takeDownFor(name));
@@ -39,6 +40,9 @@ export function workerHooks(
     },
     cancelReviewGrouping: (id) => {
       reviewGroupings.cancel(id);
+    },
+    cancelReviewExplanation: (id) => {
+      reviewExplanations.cancel(id);
     },
     submitPullRequestReview: (reviewId, submitted) => {
       void postPullRequestReview(db, apiFor, reviewId, submitted);

@@ -69,6 +69,15 @@
   (`<parent's ref>...refs/union/pr-<n>`) and its specs, and asks for `"pr"` on each comment. Drafts go to each PR's
   review; the summary and comments on no PR of the stack go to the top one, the comments as general ones that
   start with "Not tied to a pull request".
+- `review-explain.ts`: `ReviewExplainRunner` (in `review-runs.ts` with the agent reviews and the groupings, same
+  slots) runs queued `review_explanations`, one per review at a time (`claimExplanation`): a ticket's in its own
+  container, a pull request's in a throwaway `union-e<id>` container (`openTarget`, removed after the run and by
+  `recover`). The prompt (`review-explain-prompt.ts`) gives the specs sent, the spec parts of the newest grouping
+  (`explanationSpecParts`), the change, the lines and the question; a ticket's follow-up resumes the session of the
+  answer it follows (`runResumable`, the whole thread in a fresh prompt when it is lost), a pull request's runs
+  fresh with the thread. `review-explain-result.ts` reads the JSON block and keeps the spec quotes found in a spec
+  sent and the docs whose path exists in the checkout. Lines go to `agent_log` with `explanation_id` (and the
+  ticket, so its usage counts them). Cancellation: the `cancel_review_explanation` command (`command-cancels.ts`).
 - `pr-description-run.ts`: `PrDescriptionRunner` (same slots) rewrites a PR's description in the ticket's
   container, resuming the implementer's session (`runResumable`), from GitHub's current description, the PR template
   and the branch. `github/pr-description-send.ts` writes the user's version only if GitHub's description is still
