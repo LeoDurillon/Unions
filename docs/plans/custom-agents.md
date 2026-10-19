@@ -1,6 +1,7 @@
 # Custom agents: the user's own pipeline steps
 
-Status: step 1 built (2026-10-19, branch `custom-agents`): core types, table, flow and tool rules. Steps 2 to 7
+Status: steps 1 to 3 built (2026-10-19, branch `custom-agents`): core, custom steps in the worker, the prompt
+writer; one real run (writer, then the step on ticket 9001, before the implementation). Steps 4 to 7
 planned. Decisions D1 to D4 confirmed (2026-10-18).
 
 ## Why

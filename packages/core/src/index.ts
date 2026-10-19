@@ -54,6 +54,7 @@ export * from './preview-config';
 export * from './preview-screenshots';
 export * from './preview-secrets';
 export * from './project-files';
+export * from './prompt-writer';
 export * from './project-scripts';
 export * from './review-explanations';
 export * from './explanation-spec-parts';

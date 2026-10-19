@@ -7,11 +7,14 @@ import * as schema from './schema';
 import { customStep, type CustomStep } from './states';
 import type { CustomAgentNames } from './step-titles';
 import * as tables from './tables';
+import { emitEvent } from './tickets';
 
 export type CustomAgent = typeof tables.customAgents.$inferSelect;
 
 /** Why a change is refused; the web answers 400 (bad input) or 409 (in use, busy) with the message. */
 export class CustomAgentError extends Error {}
+
+type Executor = Parameters<typeof emitEvent>[0];
 
 export const MAX_AGENT_NAME_CHARS = 40;
 export const MAX_AGENT_ROLE_CHARS = 2000;
@@ -63,7 +66,7 @@ function refuseTakenName(db: Db, name: string, except: number | null): void {
   }
 }
 
-function update(db: Db, id: number, values: Partial<CustomAgent>): CustomAgent {
+function update(db: Executor, id: number, values: Partial<CustomAgent>): CustomAgent {
   return db
     .update(tables.customAgents)
     .set(values)
@@ -126,18 +129,27 @@ export function claimCustomAgentPrompt(db: Db): CustomAgent | null {
   });
 }
 
+/** Ends the prompt writer's run and logs it, for the settings page to follow. */
 export function finishCustomAgentPrompt(
   db: Db,
   id: number,
   outcome: { prompt: string } | { error: string },
 ): CustomAgent {
-  return update(
-    db,
-    id,
-    'prompt' in outcome
-      ? { promptStatus: 'ready', defaultPrompt: outcome.prompt, promptError: null }
-      : { promptStatus: 'failed', promptError: outcome.error },
-  );
+  return db.transaction((tx) => {
+    if ('prompt' in outcome) {
+      emitEvent(tx, { type: 'custom_agent_prompt_ready', payload: { customAgentId: id } });
+      return update(tx, id, {
+        promptStatus: 'ready',
+        defaultPrompt: outcome.prompt,
+        promptError: null,
+      });
+    }
+    emitEvent(tx, {
+      type: 'custom_agent_prompt_failed',
+      payload: { customAgentId: id, error: outcome.error },
+    });
+    return update(tx, id, { promptStatus: 'failed', promptError: outcome.error });
+  });
 }
 
 /** A stopped worker's prompt runs go back to the queue; returns how many. */

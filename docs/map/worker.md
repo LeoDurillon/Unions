@@ -49,6 +49,7 @@ export); do not edit. Tests are left out.
 - `pr-description-run.ts`: Runs queued rewrites of pull request descriptions, sharing the run slots with the ticket pipeline, the investigations and the agent reviews.
 - `pr-description.ts`: The template GitHub would use among the repository's files (paths relative to its root).
 - `project-files-sync.ts`: Puts the project's files in a ticket's workspace, at their paths in the repository: new or changed ones are copied (a file already there with the same content …
+- `prompt-writer-run.ts`: Writes the prompts of the custom agents the user created or regenerated, in a throwaway container with only the Claude login.
 - `prompts.ts`: How to see what the parent changed, from the branches the workspace was cloned with.
 - `provision.ts`: Only the Claude subscription credential is seeded: no MCP tokens, no history.
 - `publish.ts`: Push, then open the draft PR once.
@@ -82,7 +83,7 @@ export); do not edit. Tests are left out.
 - `simplify-push.ts`: Pushes a simplified history, unless the agent left the one already on GitHub.
 - `simplify.ts`: Rewrites the ticket's commits into a simpler history with the implementer's own session, checks the code did not change and force-pushes it with a lease.
 - `slots.ts`: Agent runs allowed at the same time, shared by the ticket scheduler and the investigations.
-- `throwaway-runs.ts`: The side runs that need no repository, each in a throwaway container: reading the account's connectors, and the lesson writer.
+- `throwaway-runs.ts`: The side runs that need no repository, each in a throwaway container: reading the account's connectors, the lesson writer and the prompt writer.
 - `ticket-base.ts`: Chooses the branch a ticket is cloned from, before its first clone: the branch the user chose (over the parent's), else the parent's branch while its pull requ…
 - `workspace-git.ts`: Puts the repository on `branch`: the local branch if it exists, else the pushed one (a recreated container only has `origin/<branch>`), else a new branch from …
 

@@ -140,6 +140,12 @@ type InvestigationPayloads = {
   investigation_ticket_failed: Failure;
 };
 
+/** Logged without a ticket: the Union settings page follows its custom agents' prompts. */
+type CustomAgentPayloads = {
+  custom_agent_prompt_ready: { customAgentId: number };
+  custom_agent_prompt_failed: { customAgentId: number; error: string };
+};
+
 type NotificationPayloads = {
   /** Logged without a ticket or investigation, so it stays out of their logs; the ids are here. */
   notification_created: Pick<
@@ -154,4 +160,5 @@ export type EventPayloads = TicketPayloads &
   PreviewPayloads &
   ReviewPayloads &
   InvestigationPayloads &
+  CustomAgentPayloads &
   NotificationPayloads;

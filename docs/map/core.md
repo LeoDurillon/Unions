@@ -74,6 +74,7 @@ export); do not edit. Tests are left out.
 - `project-files.ts`: The host folder holding one project's files, each under its row id.
 - `project-scripts.ts`: Saved scripts the settings refuse: not a list, a name taken twice, a command too long.
 - `project-url.ts`: Parses `https://github.com/orgs/<login>/projects/<n>` (or `users/`).
+- `prompt-writer.ts`: The prompt writer: the prompt that turns a custom agent's name and role into its instructions, and its answer read back.
 - `refused-commits.ts`: The ticket's last refused commit: the one a `commit_refused` phase is waiting on.
 - `review-explanations.ts`: The explanations of a review's lines: queued by the web, claimed and finished by the worker.
 - `review-groupings.ts`: A grouping is already queued or running for this change.
