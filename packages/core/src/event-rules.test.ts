@@ -12,7 +12,7 @@ import {
   recentDeliveries,
 } from './event-deliveries';
 import { EventRuleError, notionSets } from './event-notion-action';
-import { notionPropertyValue, renderTemplate } from './event-rule-types';
+import { isTrigger, notionPropertyValue, renderTemplate } from './event-rule-types';
 import {
   type EventRule,
   saveRule,
@@ -238,4 +238,60 @@ test('tickets imported before the link was stored are linked from their descript
   expect(backfillNotionPages(db)).toBe(1);
   expect(getTicket(db, imported.id).notionPageId).toBe('01234567-89ab-cdef-0123-456789abcdef');
   expect(backfillNotionPages(db)).toBe(0);
+});
+
+test('a review posted on a pull request without a ticket queues the rules of its project', () => {
+  queueDeliveries(db);
+  saveRule(db, projectId, {
+    name: 'Approved',
+    enabled: true,
+    trigger: { kind: 'pull_request_reviewed', verdict: 'approve' },
+    action: { kind: 'notion_property', propertyId: 's%3At', value: 'Done' },
+  });
+  const reviewId = db
+    .insert(schema.currentReviews)
+    .values({
+      projectId,
+      prNumber: 9,
+      title: 't',
+      url: 'u',
+      author: 'a',
+      headBranch: 'h',
+      baseBranch: 'main',
+    })
+    .returning()
+    .get().id;
+  const posted = { reviewId, number: 9, url: 'https://github.com/acme/shop/pull/9#r1' };
+  emitEvent(db, { type: 'pr_review_posted', payload: { ...posted, verdict: 'request_changes' } });
+  emitEvent(db, { type: 'pr_review_posted', payload: { ...posted, verdict: 'approve' } });
+  expect(queueDeliveries(db)).toBe(1);
+
+  const due = nextDelivery(db);
+  expect(
+    due ? templateValues({ owner: 'acme', repo: 'shop' }, null, due.event) : null,
+  ).toMatchObject({
+    'pr.number': '9',
+    'pr.url': 'https://github.com/acme/shop/pull/9',
+    'review.verdict': 'Approved',
+    'review.url': posted.url,
+  });
+});
+
+function reviewPosted(verdict?: 'approve' | 'request_changes'): { type: string; payload: unknown } {
+  return {
+    type: 'pr_review_posted',
+    payload: { reviewId: 1, number: 9, url: 'u', ...(verdict ? { verdict } : {}) },
+  };
+}
+
+test('a review trigger matches its verdict, or any verdict', () => {
+  const changes = { kind: 'pull_request_reviewed', verdict: 'request_changes' } as const;
+  expect(triggerMatches(changes, reviewPosted('request_changes'))).toBe(true);
+  expect(triggerMatches(changes, reviewPosted('approve'))).toBe(false);
+  // Reviews posted before the verdict was logged match only "any verdict".
+  expect(triggerMatches(changes, reviewPosted())).toBe(false);
+  expect(triggerMatches({ kind: 'pull_request_reviewed', verdict: null }, reviewPosted())).toBe(
+    true,
+  );
+  expect(isTrigger({ kind: 'pull_request_reviewed', verdict: 'merge' })).toBe(false);
 });

@@ -90,7 +90,7 @@ export); do not edit. Tests are left out.
 - `github-project-fields.ts`: The GitHub Project fields action of a rule: sets fields of the ticket's issue item, or of its pull request's (added to the Project).
 - `github-pull-request.ts`: The pull request action of a rule: changes the ticket's pull request (labels, reviewers, assignees, title, a description section).
 - `github-retry.ts`: Which GitHub failures a rule action tries again later: rate limits, outages and network errors.
-- `notion.ts`: The Notion action of a rule: sets properties of the ticket's Notion page, in one request.
+- `notion.ts`: The Notion action of a rule: sets properties of the ticket's Notion page (or the reviewed pull request's), in one request.
 - `target.ts`: What a kind of rule action needs to be done: one target per kind, picked by the event dispatcher.
 - `union-notification.ts`: The "Notify me in Union" action of a rule: a notification in the bell (and on the desktop, when on) about the ticket.
 

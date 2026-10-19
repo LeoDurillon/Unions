@@ -1,6 +1,7 @@
 import { beforeEach, expect, test } from 'bun:test';
 
-import { createDb, migrateDb, schema, type Db } from '@union/core';
+import { createDb, createTicket, migrateDb, schema, type Db } from '@union/core';
+import { eq } from 'drizzle-orm';
 
 import type { GitHubApi } from './api';
 import { FakeGitHubApi } from './fake-api';
@@ -168,4 +169,23 @@ test('a comment added while the review is posted stays a draft', async () => {
     ['Added meanwhile.', 'draft'],
   ]);
   expect(review()?.submitStatus).toBeNull();
+});
+
+test('the posted review is logged with its verdict, on the ticket whose pull request it is', async () => {
+  const project = db.select().from(schema.projects).get();
+  const ticket = project ? createTicket(db, { projectId: project.id, title: 'Search' }) : null;
+  if (!ticket) {
+    throw new Error('no project');
+  }
+  db.update(schema.tickets).set({ prNumber: 42 }).where(eq(schema.tickets.id, ticket.id)).run();
+  await postPullRequestReview(db, () => api, reviewId, { summary: '', verdict: 'approve' });
+  const [posted] = db
+    .select()
+    .from(schema.events)
+    .where(eq(schema.events.type, 'pr_review_posted'))
+    .all();
+  expect(posted).toMatchObject({
+    ticketId: ticket.id,
+    payload: { number: 42, verdict: 'approve' },
+  });
 });

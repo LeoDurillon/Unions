@@ -21,3 +21,11 @@ export function deliverAction<K extends ActionKind>(
 ): Promise<DeliveryOutcome> {
   return targets[action.kind].deliver(due, action);
 }
+
+/** Why an action on a ticket is skipped: its event has none (a review of a pull request without a ticket), or it was removed. */
+export function noTicket(delivery: Due['delivery']): DeliveryOutcome {
+  return {
+    status: 'skipped',
+    detail: delivery.ticketId === null ? 'The pull request has no ticket' : 'The ticket is gone',
+  };
+}

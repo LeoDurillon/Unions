@@ -243,6 +243,7 @@ export); do not edit. Tests are left out.
 - `settings-frame.tsx`: The frame of both settings areas: a title, the open page's name and a way back, the menu on the left, the page on the right.
 - `settings-nav.tsx`: The settings pages by group; the danger zone last, set apart.
 - `settings-page.tsx`: The project's settings: a menu of pages on the left, the open one on the right (`?settings=`).
+- `trigger-fields.tsx`: The "When" of an event rule: what triggers it, and the column, step or verdict some triggers need.
 - `union-notification-fields.tsx`: A "Notify me in Union" action's field: the message, as a template, shown under the ticket's title.
 - `value-field.tsx`: The value a rule sets, shaped by the property's type.
 - `variable-chips.tsx`: The template variables as chips: clicking one adds it to the text being written.

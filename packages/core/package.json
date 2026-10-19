@@ -18,6 +18,7 @@
     "./event-rules": "./src/event-rule-types.ts",
     "./event-pull-request": "./src/event-pull-request-action.ts",
     "./event-project-fields": "./src/event-project-fields-action.ts",
+    "./pr-review-verdicts": "./src/pr-review-verdicts.ts",
     "./preview": "./src/preview-config.ts",
     "./github-client": "./src/github-client.ts",
     "./github-text": "./src/github-text.ts",

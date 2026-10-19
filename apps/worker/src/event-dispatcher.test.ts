@@ -170,3 +170,50 @@ test('one value that cannot be set fails the whole delivery, naming its property
     { status: 'failed', error: 'Number: "https://github.com/acme/shop/pull/7" is not a number' },
   ]);
 });
+
+function postReview(
+  prNumber: number,
+  notionPageId: string | null,
+  verdict: 'approve' | 'request_changes',
+): void {
+  const reviewId = db
+    .insert(schema.currentReviews)
+    .values({
+      projectId,
+      prNumber,
+      title: 't',
+      url: 'u',
+      author: 'a',
+      headBranch: 'h',
+      baseBranch: 'main',
+      notionPageId,
+    })
+    .returning()
+    .get().id;
+  emitEvent(db, {
+    type: 'pr_review_posted',
+    payload: { reviewId, number: prNumber, url: 'u#r1', verdict },
+  });
+}
+
+test("a posted review sets the review's own Notion page; other verdicts do nothing", async () => {
+  saveRule(db, projectId, {
+    name: 'Changes requested',
+    enabled: true,
+    trigger: { kind: 'pull_request_reviewed', verdict: 'request_changes' },
+    action: { kind: 'notion_property', propertyId: 's%3At', value: 'Todo' },
+  });
+  postReview(12, 'page-r', 'request_changes');
+  await dispatch();
+  expect(updates).toEqual([
+    { pageId: 'page-r', properties: { 's%3At': { status: { name: 'Todo' } } } },
+  ]);
+  postReview(13, null, 'request_changes');
+  postReview(14, 'page-r', 'approve');
+  await dispatch();
+  expect(updates).toHaveLength(1);
+  expect(recentDeliveries(db, projectId)[0]).toMatchObject({
+    status: 'skipped',
+    detail: 'The pull request is not linked to a Notion page',
+  });
+});

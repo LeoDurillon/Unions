@@ -21,7 +21,11 @@ request: the overall note as its body, each draft on the reviewed head as a line
 body with their code (GitHub refuses line comments outside the current diff). An approval may be sent with no draft
 and no note; a comment or a request for changes needs one of them. The posted drafts turn sent; a failure (GitHub
 refuses, for one, an approval or a request for changes on the user's own pull request) leaves them drafts and shows
-GitHub's reason (`submit_status`).
+GitHub's reason (`submit_status`). A posted review logs `pr_review_posted` with its verdict, on the ticket whose
+pull request it is if there is one; the event rule trigger **You post a review of its pull request** (any verdict, or
+Approved, Changes requested, Commented) waits for it. Its Notion action sets the page the review is linked to, else
+the ticket's page; its other actions need that ticket and skip a pull request without one. Templates can use
+`{review.verdict}` and `{review.url}`.
 
 A review is linked to the Notion page it implements from its **Description** tab: **Notion page** takes a page URL
 or ID, reads it through the project's integration (any page shared with it, not only rows of its data source) and

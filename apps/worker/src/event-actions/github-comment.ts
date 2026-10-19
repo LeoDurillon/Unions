@@ -14,7 +14,7 @@ import { eq } from 'drizzle-orm';
 
 import type { GitHubApi } from '../github/api';
 import { isTemporary } from './github-retry';
-import type { ActionTarget, Due } from './target';
+import { noTicket, type ActionTarget, type Due } from './target';
 
 /** GitHub limits how fast content is created: one comment per tick at most. */
 const PER_TICK = 1;
@@ -42,7 +42,7 @@ async function deliver(
     .where(eq(schema.projects.id, rule.projectId))
     .get();
   if (!ticket || !project) {
-    return { status: 'skipped', detail: 'The ticket is gone' };
+    return noTicket(delivery);
   }
   const number = numberOf(ticket, action);
   if (typeof number !== 'number') {

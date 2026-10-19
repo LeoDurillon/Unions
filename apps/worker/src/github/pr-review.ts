@@ -91,11 +91,27 @@ function pendingDrafts(db: Db, reviewId: number): ReviewComment[] {
 }
 
 /** Only the drafts that were posted turn sent: one added while posting stays a draft. */
+/** The ticket whose pull request this is, so its rules and log see the review. */
+function ticketOf(db: Db, review: Review): number | undefined {
+  return db
+    .select({ id: schema.tickets.id })
+    .from(schema.tickets)
+    .where(
+      and(
+        eq(schema.tickets.projectId, review.projectId),
+        eq(schema.tickets.prNumber, review.prNumber),
+      ),
+    )
+    .get()?.id;
+}
+
 function finish(
   db: Db,
   review: Review,
+  verdict: ReviewVerdict,
   outcome: { url: string; posted: number[] } | { error: string },
 ): void {
+  const ticketId = ticketOf(db, review);
   db.transaction((tx) => {
     if ('url' in outcome) {
       tx.update(schema.reviewComments)
@@ -114,8 +130,8 @@ function finish(
     emitEvent(
       tx,
       'url' in outcome
-        ? { type: 'pr_review_posted', payload: { ...posted, url: outcome.url } }
-        : { type: 'pr_review_failed', payload: { ...posted, error: outcome.error } },
+        ? { type: 'pr_review_posted', ticketId, payload: { ...posted, url: outcome.url, verdict } }
+        : { type: 'pr_review_failed', ticketId, payload: { ...posted, error: outcome.error } },
     );
   });
 }
@@ -143,8 +159,10 @@ export async function postPullRequestReview(
       review.prNumber,
       buildReview(review, posted, submitted.summary, submitted.verdict),
     );
-    finish(db, review, { url, posted: posted.map((draft) => draft.id) });
+    finish(db, review, submitted.verdict, { url, posted: posted.map((draft) => draft.id) });
   } catch (error) {
-    finish(db, review, { error: error instanceof Error ? error.message : String(error) });
+    finish(db, review, submitted.verdict, {
+      error: error instanceof Error ? error.message : String(error),
+    });
   }
 }

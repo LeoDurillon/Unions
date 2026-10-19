@@ -17,6 +17,7 @@ import { checkedNotionAction, EventRuleError, type NotionSchema } from './event-
 import {
   BOARD_LABELS,
   isTrigger,
+  VERDICT_LABELS,
   type EventTrigger,
   type TemplateVariable,
 } from './event-rule-types';
@@ -166,7 +167,6 @@ const STEP_NAMES: Record<string, string> = {
   simplify: 'Simplify history',
 };
 
-/** The step a phase change is about, if any. */
 /** The step a phase change moved into (one that waits or failed); empty for other events. */
 function stepOf(event: StoredEvent | null): string {
   const to = event === null ? undefined : phaseChange(event)?.to;
@@ -174,14 +174,14 @@ function stepOf(event: StoredEvent | null): string {
   return STEP_NAMES[step] ?? step;
 }
 
-/** What a template can say about the ticket now, and the event that triggered the rule. */
-export function templateValues(
-  project: { owner: string; repo: string },
-  ticket: Ticket,
-  event: StoredEvent | null,
-  now = new Date(),
+/** What a template can say about the ticket now; empty without one (a review of a pull request with no ticket). */
+function ticketValues(
+  repo: string,
+  ticket: Ticket | null,
 ): Partial<Record<TemplateVariable, string>> {
-  const repo = `https://github.com/${project.owner}/${project.repo}`;
+  if (ticket === null) {
+    return {};
+  }
   const { prNumber, issueNumber } = ticket;
   return {
     'pr.url': prNumber === null ? '' : `${repo}/pull/${prNumber}`,
@@ -192,6 +192,37 @@ export function templateValues(
     'issue.number': issueNumber === null ? '' : String(issueNumber),
     'issue.url': issueNumber === null ? '' : `${repo}/issues/${issueNumber}`,
     'board.status': BOARD_LABELS[boardStatus(ticket.phase)],
+  };
+}
+
+/** What a template can say about a review posted on GitHub: its pull request, verdict and link. */
+function reviewValues(
+  repo: string,
+  event: StoredEvent | null,
+): Partial<Record<TemplateVariable, string>> {
+  if (event === null || !isEvent(event, 'pr_review_posted')) {
+    return {};
+  }
+  const { number, url, verdict } = event.payload;
+  return {
+    'pr.url': `${repo}/pull/${number}`,
+    'pr.number': String(number),
+    'review.verdict': verdict === undefined ? '' : VERDICT_LABELS[verdict],
+    'review.url': url,
+  };
+}
+
+/** What a template can say about the ticket now, and the event that triggered the rule. */
+export function templateValues(
+  project: { owner: string; repo: string },
+  ticket: Ticket | null,
+  event: StoredEvent | null,
+  now = new Date(),
+): Partial<Record<TemplateVariable, string>> {
+  const repo = `https://github.com/${project.owner}/${project.repo}`;
+  return {
+    ...ticketValues(repo, ticket),
+    ...reviewValues(repo, event),
     step: stepOf(event),
     'date.today': now.toISOString().slice(0, DATE_LENGTH),
     'date.now': now.toISOString(),
@@ -230,6 +261,10 @@ const MATCHERS: Record<EventTrigger['kind'], Matcher> = {
     );
   },
   step_failed: (_trigger, event) => phaseChange(event)?.to.kind === 'failed',
+  pull_request_reviewed: (trigger, event) =>
+    trigger.kind === 'pull_request_reviewed' &&
+    isEvent(event, 'pr_review_posted') &&
+    (trigger.verdict === null || event.payload.verdict === trigger.verdict),
 };
 
 /** Whether `event` is what `trigger` waits for. */

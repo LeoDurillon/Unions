@@ -12,7 +12,7 @@ import {
 import { eq } from 'drizzle-orm';
 
 import { recordNotification } from '../notifier';
-import type { ActionTarget, Due } from './target';
+import { noTicket, type ActionTarget, type Due } from './target';
 
 /** Nothing outside is called: a tick can write many. */
 const PER_TICK = 50;
@@ -29,7 +29,7 @@ function deliver(
     .where(eq(schema.projects.id, rule.projectId))
     .get();
   if (!ticket || !project) {
-    return { status: 'skipped', detail: 'The ticket is gone' };
+    return noTicket(delivery);
   }
   const message = clipDetail(
     renderTemplate(action.message, templateValues(project, ticket, event)),

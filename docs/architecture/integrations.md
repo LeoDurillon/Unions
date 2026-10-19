@@ -13,7 +13,7 @@
   so tests use a fake), and a linked pull request's CI checks (PR tab: check runs, statuses, bot comments, the
   annotations and job logs of a pick; `src/github-checks.ts` behind `CiGitHub`). Posting a pull request review is a write: it goes through the `submit_pr_review` command
   and the worker (`github/pr-review.ts`).
-- Notion writes happen in the worker only: event rules set properties of a ticket's page (`updatePage`), and a
+- Notion writes happen in the worker only: event rules set properties of a ticket's page, or for a review posted from the review panel, the page that review is linked to (`updatePage`; `event-actions/notion.ts`), and a
   ticket written from an investigation can be created as a page of the project's data source (`createPage`, with
   `markdown` content).
 - Notion reads, from the web server: verifying a project's integration secret and data source, and importing

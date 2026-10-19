@@ -1,6 +1,7 @@
 import { and, asc, desc, eq, inArray, isNotNull, isNull, like, lte } from 'drizzle-orm';
 
 import type { Db } from './db';
+import { isEvent, type StoredEvent } from './event-catalog';
 import { moveCursor, unreadEvents } from './event-cursors';
 import { triggerMatches } from './event-rules';
 import { parseNotionId } from './notion-id';
@@ -16,9 +17,37 @@ export const MAX_ATTEMPTS = 5;
 const FIRST_RETRY_MS = 30_000;
 
 /**
+ * The project an event is about: its ticket's, or for a review posted on a pull request without a
+ * ticket, the review's.
+ */
+function eventProjects(
+  db: Db,
+): (event: StoredEvent & { ticketId: number | null }) => number | undefined {
+  const projectsOf = (
+    table: typeof schema.tickets | typeof schema.currentReviews,
+  ): Map<number, number> =>
+    new Map(
+      db
+        .select({ id: table.id, projectId: table.projectId })
+        .from(table)
+        .all()
+        .map((row) => [row.id, row.projectId]),
+    );
+  const tickets = projectsOf(schema.tickets);
+  const reviews = projectsOf(schema.currentReviews);
+  return (event) => {
+    if (event.ticketId !== null) {
+      return tickets.get(event.ticketId);
+    }
+    return isEvent(event, 'pr_review_posted') ? reviews.get(event.payload.reviewId) : undefined;
+  };
+}
+
+/**
  * Reads the events logged since the last call and queues one delivery per matching enabled rule of
- * the ticket's project. A rule only applies to events after its creation; the first call starts at
- * the end of the log (nothing is replayed). Returns how many deliveries were queued.
+ * the project it is about (`eventProjects`). A rule only applies to events after its creation; the
+ * first call starts at the end of the log (nothing is replayed). Returns how many deliveries were
+ * queued.
  */
 export function queueDeliveries(db: Db): number {
   const events = unreadEvents(db, CURSOR, BATCH);
@@ -31,17 +60,11 @@ export function queueDeliveries(db: Db): number {
     .from(schema.eventRules)
     .where(eq(schema.eventRules.enabled, true))
     .all();
-  const projects = new Map(
-    db
-      .select({ id: schema.tickets.id, projectId: schema.tickets.projectId })
-      .from(schema.tickets)
-      .all()
-      .map((row) => [row.id, row.projectId]),
-  );
+  const projectOf = eventProjects(db);
   let queued = 0;
   db.transaction((tx) => {
     for (const event of events) {
-      const projectId = event.ticketId === null ? undefined : projects.get(event.ticketId);
+      const projectId = projectOf(event);
       for (const rule of rules) {
         if (
           rule.projectId === projectId &&

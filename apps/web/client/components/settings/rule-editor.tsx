@@ -1,112 +1,12 @@
 import type { NotionSchema } from '@union/core';
-import {
-  BOARD_LABELS,
-  TRIGGER_KINDS,
-  TRIGGER_LABELS,
-  type EventTrigger,
-} from '@union/core/event-rules';
-import { BOARD_STATUSES, PLANNING_STEPS } from '@union/core/states';
 import { useState, type ReactElement } from 'react';
 
 import type { RuleDraft } from '../../lib/event-rules-api';
-import { STEP_TITLES } from '../../lib/labels';
 import { useLeaveGuard } from '../../lib/leave-guard';
 import { Button, ErrorText, Field, inputClass } from '../ui';
 import { ActionFields } from './action-fields';
 import { RulePreviewBox } from './rule-preview';
-
-const APPROVAL_STEPS = [...PLANNING_STEPS, 'implement', 'final_review'] as const;
-
-function triggerOf(kind: EventTrigger['kind']): EventTrigger {
-  if (kind === 'board_status') {
-    return { kind, status: 'done' };
-  }
-  if (kind === 'awaiting_approval') {
-    return { kind, step: null };
-  }
-  return { kind };
-}
-
-/** The column or step some triggers need. */
-function TriggerDetail({
-  trigger,
-  onChange,
-}: {
-  trigger: EventTrigger;
-  onChange: (trigger: EventTrigger) => void;
-}): ReactElement | null {
-  return (
-    <>
-      {trigger.kind === 'board_status' ? (
-        <select
-          aria-label="Board column"
-          className={inputClass}
-          value={trigger.status}
-          onChange={(event) => {
-            const status = BOARD_STATUSES.find((candidate) => candidate === event.target.value);
-            if (status) {
-              onChange({ kind: 'board_status', status });
-            }
-          }}
-        >
-          {BOARD_STATUSES.map((status) => (
-            <option key={status} value={status}>
-              {BOARD_LABELS[status]}
-            </option>
-          ))}
-        </select>
-      ) : null}
-      {trigger.kind === 'awaiting_approval' ? (
-        <select
-          aria-label="Step"
-          className={inputClass}
-          value={trigger.step ?? ''}
-          onChange={(event) => {
-            const step = APPROVAL_STEPS.find((candidate) => candidate === event.target.value);
-            onChange({ kind: 'awaiting_approval', step: step ?? null });
-          }}
-        >
-          <option value="">Any step</option>
-          {APPROVAL_STEPS.map((step) => (
-            <option key={step} value={step}>
-              {STEP_TITLES[step]}
-            </option>
-          ))}
-        </select>
-      ) : null}
-    </>
-  );
-}
-
-function TriggerFields({
-  trigger,
-  onChange,
-}: {
-  trigger: EventTrigger;
-  onChange: (trigger: EventTrigger) => void;
-}): ReactElement {
-  return (
-    <Field label="When">
-      <select
-        className={inputClass}
-        value={trigger.kind}
-        onChange={(event) => {
-          const kind = TRIGGER_KINDS.find((candidate) => candidate === event.target.value);
-          if (kind) {
-            onChange(triggerOf(kind));
-          }
-        }}
-      >
-        {TRIGGER_KINDS.map((kind) => (
-          <option key={kind} value={kind}>
-            {TRIGGER_LABELS[kind]}
-          </option>
-        ))}
-      </select>
-      <TriggerDetail trigger={trigger} onChange={onChange} />
-    </Field>
-  );
-}
+import { TriggerFields } from './trigger-fields';
 
 function NameField({
   name,

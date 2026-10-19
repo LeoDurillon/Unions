@@ -2,6 +2,7 @@
  * Event rules: when something happens to a ticket, do something elsewhere. Browser-safe (no
  * database): the settings page uses the same triggers, variables and value checks as the worker.
  */
+import { reviewVerdicts, type ReviewVerdict } from './pr-review-verdicts';
 import { BOARD_STATUSES, STEPS, type BoardStatus, type Step } from './states';
 
 export type EventTrigger =
@@ -10,6 +11,8 @@ export type EventTrigger =
   | { kind: 'pull_request_merged' }
   | { kind: 'pull_request_closed' }
   | { kind: 'pull_request_checks_failed' }
+  /** A review posted from the review panel; `verdict` null: any verdict. */
+  | { kind: 'pull_request_reviewed'; verdict: ReviewVerdict | null }
   | { kind: 'board_status'; status: BoardStatus }
   /** `step` null: any step. */
   | { kind: 'awaiting_approval'; step: Step | null }
@@ -22,6 +25,7 @@ export const TRIGGER_KINDS = [
   'pull_request_merged',
   'pull_request_closed',
   'pull_request_checks_failed',
+  'pull_request_reviewed',
   'board_status',
   'awaiting_approval',
   'step_failed',
@@ -34,6 +38,7 @@ export const TRIGGER_LABELS: Record<EventTrigger['kind'], string> = {
   pull_request_merged: 'Its pull request is merged',
   pull_request_closed: 'Its pull request is closed without merging',
   pull_request_checks_failed: "Its pull request's CI checks fail",
+  pull_request_reviewed: 'You post a review of its pull request',
   board_status: 'The ticket moves to a board column',
   awaiting_approval: 'A step waits for your approval',
   step_failed: 'A step fails',
@@ -47,6 +52,12 @@ export const BOARD_LABELS: Record<BoardStatus, string> = {
   done: 'Done',
 };
 
+export const VERDICT_LABELS: Record<ReviewVerdict, string> = {
+  approve: 'Approved',
+  request_changes: 'Changes requested',
+  comment: 'Commented',
+};
+
 /** What a value template can use, as `{name}`. */
 export const TEMPLATE_VARIABLES = [
   { name: 'pr.url', description: 'Link to the pull request' },
@@ -58,6 +69,11 @@ export const TEMPLATE_VARIABLES = [
   { name: 'issue.url', description: 'Link to the GitHub issue' },
   { name: 'board.status', description: 'Board column (Backlog, In progress, In review, Done)' },
   { name: 'step', description: 'The step that waits or failed' },
+  {
+    name: 'review.verdict',
+    description: 'The posted review: Approved, Changes requested, Commented',
+  },
+  { name: 'review.url', description: 'Link to the posted review' },
   { name: 'date.today', description: "Today's date (YYYY-MM-DD)" },
   { name: 'date.now', description: 'Date and time (ISO 8601)' },
 ] as const;
@@ -91,6 +107,11 @@ export function isTrigger(value: unknown): value is EventTrigger {
   }
   if (trigger.kind === 'awaiting_approval') {
     return trigger.step === null || STEPS.some((step) => step === trigger.step);
+  }
+  if (trigger.kind === 'pull_request_reviewed') {
+    return (
+      trigger.verdict === null || reviewVerdicts.some((verdict) => verdict === trigger.verdict)
+    );
   }
   return TRIGGER_KINDS.some((kind) => kind === trigger.kind);
 }

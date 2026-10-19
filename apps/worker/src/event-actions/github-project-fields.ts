@@ -18,7 +18,7 @@ import { eq } from 'drizzle-orm';
 import type { GitHubApi } from '../github/api';
 import type { GitHubApiFor } from './github-comment';
 import { isTemporary } from './github-retry';
-import type { ActionTarget, Due } from './target';
+import { noTicket, type ActionTarget, type Due } from './target';
 
 /** GitHub limits how fast content changes: one delivery per tick at most. */
 const PER_TICK = 1;
@@ -35,7 +35,7 @@ function load(db: Db, apiFor: GitHubApiFor, { delivery, rule }: Due): Loaded | D
     .where(eq(schema.projects.id, rule.projectId))
     .get();
   if (!ticket || !project) {
-    return { status: 'skipped', detail: 'The ticket is gone' };
+    return noTicket(delivery);
   }
   if (project.githubProjectNodeId === '') {
     return { status: 'failed', error: 'The project has no GitHub Project' };

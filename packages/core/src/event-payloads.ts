@@ -1,5 +1,6 @@
 // What each type of event in the log carries, keyed by its `type`: the one place to add an event.
 import type { PortForward } from './agent-environment';
+import type { ReviewVerdict } from './pr-review-verdicts';
 import type { Action, BoardStatus, Phase, Step } from './states';
 import type * as tables from './tables';
 
@@ -77,7 +78,8 @@ type GitHubPayloads = {
     prState: Column<typeof tables.tickets, 'prState'>;
   };
   parent_branch_missing: { parent: string; branch: Column<typeof tables.tickets, 'branch'> };
-  pr_review_posted: { reviewId: number; number: number; url: string };
+  /** Logged on the ticket whose pull request it is, if one is; `verdict` is missing on reviews posted before it was kept. */
+  pr_review_posted: { reviewId: number; number: number; url: string; verdict?: ReviewVerdict };
   pr_review_failed: { reviewId: number; number: number; error: string };
   pr_description_changed: {
     prDescriptionId: number;

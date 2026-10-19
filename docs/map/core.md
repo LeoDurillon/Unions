@@ -30,7 +30,7 @@ export); do not edit. Tests are left out.
 - `event-actions.ts`: The kinds of event rule action and what each holds; browser-safe, for the settings page and the worker.
 - `event-catalog.ts`: The event log's types: a typed event to write, and a guard that narrows an event read back.
 - `event-cursors.ts`: Readers that follow the event log (the rule deliveries, the notifications) and how far each got.
-- `event-deliveries.ts`: Reads the events logged since the last call and queues one delivery per matching enabled rule of the ticket's project.
+- `event-deliveries.ts`: Reads the events logged since the last call and queues one delivery per matching enabled rule of the project it is about (`eventProjects`).
 - `event-notion-action.ts`: The Notion action of a rule: the properties it sets, checked against the stored Notion columns, and what it sends.
 - `event-payloads.ts`: What each type of event in the log carries, keyed by its `type`: the one place to add an event.
 - `event-project-fields-action.ts`: A rule's GitHub Project fields: on the ticket's issue item or its pull request's, their checks and the values sent; browser-safe.

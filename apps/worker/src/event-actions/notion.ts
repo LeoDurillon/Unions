@@ -1,6 +1,7 @@
-// The Notion action of a rule: sets properties of the ticket's Notion page, in one request.
+// The Notion action of a rule: sets properties of the ticket's Notion page (or the reviewed pull request's), in one request.
 import {
   getTicket,
+  isEvent,
   notionSchemaOf,
   notionSets,
   notionSetsText,
@@ -24,6 +25,19 @@ const PER_TICK = 3;
 
 type Target = { token: string; pageId: string; sets: NotionSet[] };
 
+/** The Notion page linked to the review a posted review event is about, if any. */
+function reviewPage(db: Db, event: Due['event']): string | null {
+  if (!isEvent(event, 'pr_review_posted')) {
+    return null;
+  }
+  const review = db
+    .select({ notionPageId: schema.currentReviews.notionPageId })
+    .from(schema.currentReviews)
+    .where(eq(schema.currentReviews.id, event.payload.reviewId))
+    .get();
+  return review?.notionPageId ?? null;
+}
+
 /** The page and the values a delivery sets, or why it cannot be done. */
 function targetOf(
   db: Db,
@@ -31,8 +45,15 @@ function targetOf(
   action: NotionPropertyAction,
 ): Target | DeliveryOutcome {
   const ticket = delivery.ticketId === null ? null : getTicket(db, delivery.ticketId);
-  if (!ticket?.notionPageId) {
-    return { status: 'skipped', detail: 'The ticket was not imported from Notion' };
+  // A review's own link to a page is the more precise one; else the page the ticket came from.
+  const pageId = reviewPage(db, event) ?? ticket?.notionPageId;
+  if (!pageId) {
+    return {
+      status: 'skipped',
+      detail: isEvent(event, 'pr_review_posted')
+        ? 'The pull request is not linked to a Notion page'
+        : 'The ticket was not imported from Notion',
+    };
   }
   const project = db
     .select()
@@ -47,7 +68,7 @@ function targetOf(
   if ('error' in sets) {
     return { status: 'failed', error: sets.error };
   }
-  return { token: project.notionToken, pageId: ticket.notionPageId, sets: sets.sets };
+  return { token: project.notionToken, pageId, sets: sets.sets };
 }
 
 /** Sets the rule's Notion properties on the ticket's page; says why when it cannot. */

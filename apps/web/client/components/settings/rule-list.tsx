@@ -1,6 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import type { EventRule, NotionSchema } from '@union/core';
-import { BOARD_LABELS, TRIGGER_LABELS, type EventTrigger } from '@union/core/event-rules';
+import {
+  BOARD_LABELS,
+  TRIGGER_LABELS,
+  VERDICT_LABELS,
+  type EventTrigger,
+} from '@union/core/event-rules';
 import type { ReactElement } from 'react';
 
 import type { DeliveryView } from '../../../src/event-api-types';
@@ -23,6 +28,9 @@ export function triggerText(trigger: EventTrigger): string {
   }
   if (trigger.kind === 'awaiting_approval' && trigger.step !== null) {
     return `${STEP_TITLES[trigger.step]} waits for your approval`;
+  }
+  if (trigger.kind === 'pull_request_reviewed' && trigger.verdict !== null) {
+    return `You post a review of its pull request: ${VERDICT_LABELS[trigger.verdict]}`;
   }
   return TRIGGER_LABELS[trigger.kind];
 }
