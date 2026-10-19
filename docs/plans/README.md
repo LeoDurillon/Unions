@@ -52,6 +52,9 @@ and linked.
 - [Explain a selection of the diff](review-explain.md): select lines on the review page, an agent explains in a
   side panel how they work and which parts of the specs and repository docs they relate to; follow-ups resume
   its session. Planned (2026-10-18), decisions to confirm.
+- [Ticket source integrations](source-integrations.md): Notion's secret, data source, columns and ticket page
+  moved to a generic `integrations` table and ticket origin, behind a provider per kind, so Jira or Linear is a
+  second implementation. Refactor, planned (2026-10-19), decisions to confirm.
 
 ## Open items
 
