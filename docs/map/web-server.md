@@ -45,6 +45,7 @@ export); do not edit. Tests are left out.
 - `attachments.ts`: A new file of the ticket: checked against the limits, stored, recorded.
 - `container-runs.ts`: `/api/tickets/:id/container-runs`: commands the user runs in the ticket's workspace (the worker runs them), with the end of their output, which the user can gi…
 - `current-reviews.ts`: `/api/projects/:projectId/pull-requests/reviews`: pull requests the user reviews without a ticket.
+- `custom-agents.ts`: The API routes for custom agents: create one (the worker writes its prompt), rename it, rewrite its role, regenerate, delete.
 - `event-rules.ts`: `/api/projects/:projectId/event-rules` and its deliveries, and the stored Notion columns.
 - `events.ts`: The API route that streams new events to the browser as server-sent events.
 - `explanation-request.ts`: Reads a request to explain lines of the diff, or to follow up on an explanation, into what is queued.

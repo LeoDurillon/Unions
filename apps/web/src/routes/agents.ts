@@ -2,6 +2,9 @@
 import {
   addTool,
   AgentToolError,
+  customAgentId,
+  findCustomAgent,
+  isCustomStep,
   isAgentId,
   listAgents,
   listTools,
@@ -29,11 +32,14 @@ import {
   readObject,
   requireText,
 } from '../http';
+import { customAgentRoutes } from './custom-agents';
 import { connectorRoutes } from './mcp-connectors';
 
-function agentOf(c: Context): AgentId {
+/** A built-in agent, or a custom one not deleted. */
+function agentOf(db: Db, c: Context): AgentId {
   const agent = c.req.param('agent') ?? '';
-  if (!isAgentId(agent)) {
+  const custom = isCustomStep(agent) ? findCustomAgent(db, customAgentId(agent)) : undefined;
+  if (!isAgentId(agent) || custom === null || (custom && custom.deletedAt !== null)) {
     throw fail(NOT_FOUND, `Unknown agent "${agent}"`);
   }
   return agent;
@@ -111,8 +117,9 @@ export function agentRoutes(db: Db): Hono {
   routes.get('/', (c) => c.json(listAgents(db)));
   routes.route('/tools', toolRoutes(db));
   routes.route('/connectors', connectorRoutes(db));
+  routes.route('/custom', customAgentRoutes(db));
   routes.put('/:agent', async (c) => {
-    const agent = agentOf(c);
+    const agent = agentOf(db, c);
     const body = await readObject(c.req.raw);
     const change = {
       prompt: requireText(body, 'prompt'),
@@ -122,6 +129,6 @@ export function agentRoutes(db: Db): Hono {
     };
     return c.json(toolErrors(BAD_REQUEST, () => saveAgent(db, agent, change)));
   });
-  routes.delete('/:agent', (c) => c.json(resetAgent(db, agentOf(c))));
+  routes.delete('/:agent', (c) => c.json(resetAgent(db, agentOf(db, c))));
   return routes;
 }

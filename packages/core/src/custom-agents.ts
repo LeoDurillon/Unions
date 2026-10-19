@@ -11,8 +11,15 @@ import { emitEvent } from './tickets';
 
 export type CustomAgent = typeof tables.customAgents.$inferSelect;
 
-/** Why a change is refused; the web answers 400 (bad input) or 409 (in use, busy) with the message. */
-export class CustomAgentError extends Error {}
+/** Why a change is refused: the web answers 400, 404 or 409 by `reason`, with the message. */
+export class CustomAgentError extends Error {
+  constructor(
+    message: string,
+    readonly reason: 'invalid' | 'not_found' | 'conflict' = 'invalid',
+  ) {
+    super(message);
+  }
+}
 
 type Executor = Parameters<typeof emitEvent>[0];
 
@@ -52,7 +59,7 @@ export function findCustomAgent(db: Db, id: number): CustomAgent | null {
 function liveAgent(db: Db, id: number): CustomAgent {
   const agent = findCustomAgent(db, id);
   if (!agent || agent.deletedAt !== null) {
-    throw new CustomAgentError(`No custom agent ${id}`);
+    throw new CustomAgentError(`No custom agent ${id}`, 'not_found');
   }
   return agent;
 }
@@ -62,7 +69,7 @@ function refuseTakenName(db: Db, name: string, except: number | null): void {
     (agent) => agent.id !== except && agent.name.toLowerCase() === name.toLowerCase(),
   );
   if (taken) {
-    throw new CustomAgentError(`An agent is already named ${name}`);
+    throw new CustomAgentError(`An agent is already named ${name}`, 'conflict');
   }
 }
 
@@ -89,20 +96,23 @@ export function editCustomAgent(
   id: number,
   change: { name?: string; role?: string },
 ): CustomAgent {
-  liveAgent(db, id);
+  const agent = liveAgent(db, id);
   const name = change.name === undefined ? undefined : nameOf(change.name);
   if (name !== undefined) {
     refuseTakenName(db, name, id);
   }
   const role = change.role === undefined ? undefined : roleOf(change.role);
-  return update(db, id, { ...(name ? { name } : {}), ...(role ? { role } : {}) });
+  if (name === undefined && role === undefined) {
+    return agent;
+  }
+  return update(db, id, { name: name ?? agent.name, role: role ?? agent.role });
 }
 
 /** Queues the prompt writer again; its prompt replaces the default (the user's own edit stays). */
 export function regenerateCustomAgent(db: Db, id: number): CustomAgent {
   const agent = liveAgent(db, id);
   if (agent.promptStatus === 'queued' || agent.promptStatus === 'running') {
-    throw new CustomAgentError('The prompt is already being written');
+    throw new CustomAgentError('The prompt is already being written', 'conflict');
   }
   return update(db, id, { promptStatus: 'queued', promptError: null });
 }
@@ -167,7 +177,7 @@ export function deleteCustomAgent(db: Db, id: number): CustomAgent {
   liveAgent(db, id);
   const users = customAgentUsers(db, customStep(id));
   if (users.length > 0) {
-    throw new CustomAgentError(`Still used by ${users.join(', ')}`);
+    throw new CustomAgentError(`Still used by ${users.join(', ')}`, 'conflict');
   }
   return db.transaction((tx) => {
     tx.delete(schema.agentConfigs)
