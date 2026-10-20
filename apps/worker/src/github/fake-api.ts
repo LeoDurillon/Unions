@@ -13,7 +13,7 @@ import type {
   RemoteItem,
   RepoRef,
 } from './api';
-import { FakeProjectFields } from './fake-project-fields';
+import { FakeStacks, type StackPull } from './fake-stacks';
 
 type FakeIssue = {
   number: number;
@@ -35,7 +35,7 @@ const DEFAULT_INFO: ProjectInfo = {
 const MS_PER_SECOND = 1000;
 
 /** In-memory GitHub for tests. `calls` records every method name, in order (`FakeProjectFields`). */
-export class FakeGitHubApi extends FakeProjectFields implements GitHubApi {
+export class FakeGitHubApi extends FakeStacks implements GitHubApi {
   readonly issues: FakeIssue[] = [];
   readonly pulls: (PullRequestRef & {
     head: string;
@@ -207,6 +207,10 @@ export class FakeGitHubApi extends FakeProjectFields implements GitHubApi {
       pull.body = body;
     }
     return Promise.resolve();
+  }
+
+  protected stackPull(number: number): StackPull {
+    return this.pullByNumber(number);
   }
 
   /** The pull request `number`; throws like GitHub's 404 when there is none. */

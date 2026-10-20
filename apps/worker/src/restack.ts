@@ -14,6 +14,7 @@ import type { ImplementDeps } from './implement-checks';
 import { runRebaseStep } from './rebase';
 import { loadProject } from './review';
 import type { StepContext, StepResult } from './scheduler';
+import { followGitHub } from './stack-follow';
 
 /** The tip of the last slice merged into the base under the open ones: where the rest starts. */
 function mergedTip(db: Db, ticket: Ticket, base: string): string | null {
@@ -48,6 +49,30 @@ async function retargetBottom(
 }
 
 /**
+ * A GitHub stack is rebased by GitHub after a merge: Union follows it. When GitHub could not (a
+ * conflict), the worker's own run stops there; the user's Restack rebases with Union.
+ */
+async function restacked(
+  deps: ImplementDeps,
+  context: StepContext,
+  restack: { upstream: string; hostOnly: boolean },
+): Promise<StepResult> {
+  const followed =
+    context.ticket.githubStackNumber === null ? null : await followGitHub(deps, context);
+  if (followed !== null) {
+    return followed;
+  }
+  if (context.ticket.githubStackNumber !== null && restack.hostOnly) {
+    return {
+      kind: 'error',
+      error:
+        "GitHub has not rebased the rest of the stack onto the base: use Rebase stack on GitHub, or Restack here to let Union's implementation agent do it.",
+    };
+  }
+  return runRebaseStep(deps, context, restack);
+}
+
+/**
  * After a slice merged, rebases the slices above it onto the base (`--onto`, so the merged commits
  * are not replayed), pushes them together and retargets the new bottom pull request. Started by the
  * worker it runs git alone; asked by the user, the implementer resolves conflicts.
@@ -67,7 +92,7 @@ export async function runRestackStep(
     };
   }
   const hostOnly = ticket.phase.kind === 'running' && ticket.phase.hostOnly === true;
-  const result = await runRebaseStep(deps, context, { upstream, hostOnly });
+  const result = await restacked(deps, context, { upstream, hostOnly });
   if (result.kind !== 'ok') {
     return result;
   }

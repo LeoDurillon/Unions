@@ -255,3 +255,41 @@ test('nothing merged into the base: nothing to restack', async () => {
   const result = await restack();
   expect(result.kind === 'error' && result.error).toContain('nothing to restack');
 });
+
+/** What GitHub does after the merge: the rest of the stack rebased onto the new base, on the remote. */
+async function githubRebasesTheRest(mergedTip: string): Promise<string> {
+  const seed = path.join(root, 'seed');
+  await git(seed, 'fetch', '--quiet', 'origin');
+  await git(seed, 'checkout', '--quiet', '-B', 'feature', 'origin/feature');
+  await git(seed, 'rebase', '--quiet', '--onto', 'origin/main', mergedTip);
+  await git(seed, 'push', '--quiet', '--force', 'origin', 'feature');
+  return git(origin(), 'rev-parse', 'feature');
+}
+
+test('on a GitHub stack, the restack takes the branches GitHub rebased: no push, no agent', async () => {
+  db.update(schema.tickets).set({ githubStackNumber: 1 }).run();
+  const tip = await squashSliceOne();
+  const rebased = await githubRebasesTheRest(tip);
+  const result = await restack();
+  expect(result).toMatchObject({ kind: 'ok', clean: true });
+  expect(result.kind === 'ok' && result.output).toContain('**Followed GitHub:**');
+  expect(await git(container(), 'rev-parse', 'HEAD')).toBe(rebased);
+  expect(await git(origin(), 'rev-parse', 'feature')).toBe(rebased);
+  expect(listSlices(db, ticketId)[1]?.tipSha).toBe(rebased);
+  const events = db
+    .select()
+    .from(schema.events)
+    .all()
+    .map((event) => event.type);
+  expect(events).toContain('stack_followed');
+  expect(events).not.toContain('branch_pushed');
+});
+
+test('on a GitHub stack GitHub has not rebased, the worker-started restack waits for the user', async () => {
+  db.update(schema.tickets).set({ githubStackNumber: 1 }).run();
+  const pushed = await git(origin(), 'rev-parse', 'feature');
+  await squashSliceOne();
+  const result = await restack();
+  expect(result.kind === 'error' && result.error).toContain('GitHub has not rebased');
+  expect(await git(origin(), 'rev-parse', 'feature')).toBe(pushed);
+});

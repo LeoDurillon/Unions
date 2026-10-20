@@ -15,6 +15,8 @@ export type StackView = {
   outOfOrder: number[];
   /** Closed without a merge: the stack stops there. */
   closed: number[];
+  /** GitHub's own stack over the pull requests; null: Union keeps the stack alone. */
+  githubStack: number | null;
   /** A slice merged into the base and the rest not moved onto it yet. */
   restackable: boolean;
 };

@@ -257,6 +257,8 @@ test('the slices are pushed together and opened as a stack on the ticket pull re
     [2, 'feature', 2],
   ]);
   expect(result.kind === 'ok' && result.output).toContain('**Split** into 2 slices');
+  expect([...(github.stacks ?? [])]).toEqual([[1, [3, 2]]]);
+  expect(db.select().from(schema.tickets).get()?.githubStackNumber).toBe(1);
 });
 
 test('commits without their slice go back to the agent, which fixes them in its session', async () => {

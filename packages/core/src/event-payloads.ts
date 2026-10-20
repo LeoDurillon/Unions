@@ -60,6 +60,8 @@ type GitHubPayloads = {
     (typeof tables.tickets)['$inferSelect'],
     'prState' | 'prMergedAt' | 'prClosedAt' | 'behindBy'
   >;
+  /** The workspace took the stack's branches as GitHub rebased them after a merge. */
+  stack_followed: { branch: string };
   /** A lower slice's pull request changed state on GitHub (the top one is the ticket's own). */
   stack_slice_status: {
     position: number;

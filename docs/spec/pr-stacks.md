@@ -41,7 +41,11 @@ While the pull request is open, the PR tab shows **Split into a stack**, usable 
    is opened (or reused) per lower slice on the slice below (ready for review when the ticket's already is), the
    ticket's pull request is retargeted onto the slice below it, each lower slice's description is written (its
    title, its part of the spec, the stack, `Part of #<issue>`; no `Closes`), the ticket's own description gets a
-   stack section, the issue gets one comment listing the stack, and `ticket_slices` is replaced. What GitHub
+   stack section, the issue gets one comment listing the stack, and `ticket_slices` is replaced. The pull
+   requests are then made a **GitHub stack** (`POST /repos/{o}/{r}/stacks`, bottom first, API version
+   `2026-03-10`), whose number is kept on the ticket (`github_stack_number`); an earlier split's stack is
+   unstacked first. Where GitHub has no stacks (a 404: GitHub Enterprise Server), Union keeps the stack alone.
+   What GitHub
    refuses after the push is listed in the report: the split stands. A slice branch of an earlier split with no
    use left is reported, not deleted.
 5. **After:** the code is the same, so the ticket returns to its final review, or to Done. Approving the final
@@ -70,13 +74,22 @@ While the pull request is open, the PR tab shows **Split into a stack**, usable 
 
 ## Merge
 
-- The user merges from the bottom, on GitHub. The worker polls every slice's pull request; `behind_by` is the
-  bottom open slice's against the base.
+- The user merges from the bottom, on GitHub; on a GitHub stack, GitHub enforces it (merging a pull request in
+  the middle lands every one below it). The worker polls the slices: on a GitHub stack with one call
+  (`GET /stacks?pull_request=<top>`, a merged one went into the stack's base) plus the bottom open pull request
+  on its own, for `behind_by` against the base.
 - The ticket is merged only once every slice is merged into the base: then its issue is closed and the usual
   "PR merged" event fires. A slice merged into another slice's branch (out of order) leaves the ticket open and
   is shown in the PR tab; so is a slice closed without a merge, where the stack stops.
-- When a slice merges into the base and others remain, the worker starts `restack` on its own (`hostOnly`, when
-  the ticket is at its final review or Done): `git rebase --onto origin/<base> <merged tip> --update-refs`, so the
+- On a **GitHub stack**, GitHub rebases the rest of the stack onto the base itself after a merge and retargets
+  the next pull request (tried 2026-10-20: within seconds, onto the squash commit). Once the next pull request
+  targets the base, the worker starts `restack` (`hostOnly`), which **follows GitHub**: it fetches the open
+  slices' branches, checks GitHub's branch holds the base, resets the workspace's branches to them and records
+  the tips, with no push and no agent (`stack_followed`). A workspace holding commits GitHub does not have is
+  refused. When GitHub has not rebased (a conflict: GitHub shows Rebase stack), the worker's run fails and the
+  user's Restack rebases with Union, as below.
+- On a stack **Union keeps alone**, when a slice merges into the base and others remain, the worker starts
+  `restack` on its own (`hostOnly`, when the ticket is at its final review or Done): `git rebase --onto origin/<base> <merged tip> --update-refs`, so the
   merged commits are not replayed even after a squash merge, the checks, then the open slices are pushed together
   and the new bottom pull request is retargeted onto the base. Started by the worker, it never calls an agent: a
   conflict or failing checks fail the step, nothing pushed, and the PR tab's **Restack** (or **Retry**) runs it

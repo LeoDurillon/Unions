@@ -94,6 +94,7 @@ export); do not edit. Tests are left out.
 - `split-rounds.ts`: The split's agent turns: its first try, then the host's problems sent back until the result passes.
 - `split-verify.ts`: Checks a split before it is pushed: the same content, every commit in its slice, each slice's checks.
 - `split.ts`: Rewrites the ticket's commits into the approved slices with the implementer's session, checks them, pushes the stack and opens it on GitHub.
+- `stack-follow.ts`: After a slice of a GitHub stack merged, GitHub rebases the rest itself: the workspace takes its branches as they are.
 - `stack-git.ts`: Git for a stack: its commits with their trailers, the lower slices' branches, a slice tip checked out.
 - `stack-publish.ts`: Opens the stack on GitHub: a pull request per lower slice, the ticket's own retargeted, their texts, the issue's comment.
 - `stack-push.ts`: Pushes every branch of a stack in one atomic push, each leased on what GitHub had: all or none.
@@ -122,6 +123,7 @@ export); do not edit. Tests are left out.
 - `dependency.ts`: Mirrors the ticket's parent as "blocked by" on its issue, once both issues exist.
 - `fake-api.ts`: In-memory GitHub for tests.
 - `fake-project-fields.ts`: The GitHub Project fields of the in-memory GitHub for tests: the fields, and what each item holds; the base of `FakeGitHubApi`.
+- `fake-stacks.ts`: GitHub stacks in the fake GitHub client: created, unstacked and read back over its pull requests.
 - `inbound.ts`: Applies a change read from GitHub to the matching ticket in the database.
 - `loop.ts`: Pushes every second and pulls every `pullIntervalMs`, one call at a time, until aborted.
 - `mirror.ts`: Runs one `GitHubSync` per project, each with the project's own credentials.
@@ -129,6 +131,7 @@ export); do not edit. Tests are left out.
 - `octokit-checks.ts`: The CI checks of the worker's GitHub client: a pull request's head commit and the overall state of its checks, and re-running an Actions job.
 - `octokit-project-fields.ts`: The GitHub Project fields of the worker's GitHub client: reading them, setting one on an item, a pull request's node id.
 - `octokit-pull-request-changes.ts`: The issue and pull request changes of the worker's GitHub client (issue text, PR title and base, labels, reviewers, assignees): the base of `OctokitGitHubApi`.
+- `octokit-stacks.ts`: GitHub's stacked pull requests in the worker's GitHub client: create a stack, unstack it, read a pull request's.
 - `pr-description-send.ts`: Writes the user's version of a rewritten description to the pull request, with Union's links added back, unless the description on GitHub changed since the age…
 - `pr-review.ts`: The review as GitHub gets it.
 - `pull-request-checks.ts`: Keeps the CI checks' state of the ticket's open pull request current, and logs when they turn red.

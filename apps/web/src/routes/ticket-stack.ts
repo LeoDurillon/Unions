@@ -39,6 +39,7 @@ export function stackView(db: Db, ticket: Ticket): StackView | null {
       prState,
       mergedInto,
     })),
+    githubStack: ticket.githubStackNumber,
     outOfOrder: status.outOfOrder,
     closed: status.closed,
     restackable,

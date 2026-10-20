@@ -205,6 +205,33 @@ ticket of a test repository, with a medium PR (a split is two agent runs on the 
 checks and retries). **Split into a stack** stays hidden until steps 1 to 5 are built: a split without merge
 handling is not safe on a real repository.
 
+## GitHub's own stacks
+
+GitHub has stacked pull requests (generally available on github.com since 2026-10-06; not on GitHub Enterprise
+Server yet): a stack map on each pull request, review layer by layer, merges only from the bottom (merging a
+pull request in the middle lands every one below it), and a Rebase stack button. REST API (`X-GitHub-Api-Version:
+2026-03-10`): `POST /repos/{o}/{r}/stacks` (`pull_requests`, bottom first, each one's base the head of the one
+below), `GET /repos/{o}/{r}/stacks?pull_request=<n>`, `POST .../stacks/{n}/add`, `POST .../stacks/{n}/unstack`;
+merging a stack needs the async merge API (`PUT .../pulls/{n}/merge-async`).
+
+Tried on LeoDurillon/Schems (2026-10-20), with the project's classic token: two stacked pull requests, a stack
+created over them (201), the bottom one squash-merged with `merge-async`. Within seconds, with no one clicking,
+GitHub retargeted the top pull request onto `main` and rewrote its branch onto the squash commit, keeping only its
+own commit. The merged branch was not deleted. Probe pull requests #4 (merged: its squash commit stays on `main`)
+and #5 (closed), stack #6 (closed), branches deleted.
+
+What it changes (built, 2026-10-20):
+
+1. **Split:** after the pull requests are opened, create the GitHub stack (`POST /stacks`) and keep its number;
+   a new split unstacks the old one first. A 404 (GitHub Enterprise Server) keeps today's Union-only stack.
+2. **Merge:** GitHub moves the rest of the stack itself, so Union must not restack after a merge (its push would
+   race GitHub's rewrite and lose the lease). Instead it follows: fetches the open slices' branches as GitHub left
+   them, resets the workspace's branches to them and records the tips, with no push and no agent. Union's Restack
+   stays for a stack GitHub does not manage (no GitHub stack) or cannot rebase (a conflict: GitHub shows Rebase
+   stack).
+3. **Polling:** one `GET /stacks?pull_request=<top>` instead of a call per pull request.
+4. **Out of order:** GitHub refuses it, so it only remains for a Union-only stack.
+
 ## Decisions
 
 Taken (2026-10-17):

@@ -34,6 +34,19 @@ export function syncLowerBranches(
   );
 }
 
+/** Puts each named local branch where GitHub has it (`origin/<name>`, just fetched). */
+export function takeRemoteBranches(
+  runtime: ContainerRuntime,
+  container: string,
+  names: readonly string[],
+): Promise<void> {
+  return setBranches(
+    runtime,
+    container,
+    names.map((name) => ({ branch: name, sha: `origin/${name}` })),
+  );
+}
+
 /** Records where every slice's branch now is: the lower ones' branches, the top one's HEAD. */
 export async function recordTips(rebase: Rebase): Promise<void> {
   const { deps, container, context } = rebase;

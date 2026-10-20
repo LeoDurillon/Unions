@@ -64,7 +64,11 @@
   `--onto origin/<base> <merged tip>` and `--update-refs` through `runRebaseStep`, without an agent when host
   only (a conflict waits for the user's Restack, which may call the rebase agent), clears the merged tips and
   retargets the new bottom pull request onto the base. Moving, pushing and recording use the open slices only
-  (`openSlices`).
+  (`openSlices`). The split also makes the pull requests a GitHub stack (`stack-publish.ts`, `createStack` in
+  `github/octokit-stacks.ts`, `tickets.github_stack_number`); on such a ticket the poll reads all slices with one
+  `pullRequestStack` call, the restack waits until GitHub retargeted the new bottom pull request, and then
+  follows GitHub's rebase (`stack-follow.ts`: fetch, reset the workspace's branches, record the tips; no push)
+  instead of rebasing with Union.
 - `investigate.ts`: `InvestigationRunner` runs queued investigations in throwaway `union-i<id>` containers
   (removed after each run; a `ticket` investigation runs in the ticket's own container instead, `investigate-ticket.ts`:
   never during a step, writing tools always denied, `git status` and HEAD compared before and after, the container

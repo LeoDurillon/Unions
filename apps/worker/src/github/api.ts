@@ -47,6 +47,21 @@ export type PullRequestStatus = {
   headSha?: string;
 };
 
+/** GitHub's own stack over pull requests (stacked pull requests), bottom first. */
+export type GitHubStack = {
+  number: number;
+  open: boolean;
+  /** The branch the whole stack merges into. */
+  base: string;
+  pullRequests: {
+    number: number;
+    state: 'open' | 'closed';
+    mergedAt: number | null;
+    headRef: string;
+    headSha: string;
+  }[];
+};
+
 /** All the checks of a commit together: red as soon as one failed. */
 export type ChecksState = 'pending' | 'success' | 'failure';
 /** The pull request's head commit and its checks (null: none, or they cannot be read). */
@@ -110,6 +125,15 @@ export type GitHubApi = {
   updatePullRequestTitle(repo: RepoRef, number: number, title: string): Promise<void>;
   /** Retargets the pull request onto another branch: a slice of a stack onto the one below. */
   updatePullRequestBase(repo: RepoRef, number: number, base: string): Promise<void>;
+  /**
+   * Makes the pull requests (bottom first, each on the head of the one below) a GitHub stack; its
+   * number, or null where GitHub has no stacks (GitHub Enterprise Server).
+   */
+  createStack(repo: RepoRef, pullRequests: number[]): Promise<number | null>;
+  /** Takes the open pull requests out of the stack, which dissolves; nothing when it is gone. */
+  unstack(repo: RepoRef, stackNumber: number): Promise<void>;
+  /** The GitHub stack the pull request is in; null when none. */
+  pullRequestStack(repo: RepoRef, number: number): Promise<GitHubStack | null>;
   /** Closes the issue, as completed: a stack's last slice merged without closing it. */
   closeIssue(repo: RepoRef, number: number): Promise<void>;
   /** Adds labels to an issue or pull request; GitHub creates the ones the repository lacks. */

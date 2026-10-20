@@ -1,6 +1,7 @@
 // Opens the stack on GitHub: a pull request per lower slice, the ticket's own retargeted, their texts, the issue's comment.
 import {
   replaceSlices,
+  schema,
   slicePrDescription,
   stackComment,
   stackSection,
@@ -9,6 +10,7 @@ import {
   type StackEntry,
   type Ticket,
 } from '@union/core';
+import { eq } from 'drizzle-orm';
 
 import type { GitHubApi, RepoRef } from './github/api';
 import type { PublishedSlice } from './split-agent';
@@ -95,6 +97,28 @@ async function writeTexts(stack: Stack, warnings: string[]): Promise<void> {
 }
 
 /**
+ * Makes the pull requests a GitHub stack (a stack map on each, merges from the bottom, the rest
+ * rebased by GitHub after a merge); an earlier split's stack is dissolved first. Null where GitHub
+ * has no stacks, or when a pull request is missing: Union then keeps the stack alone.
+ */
+async function stackOnGitHub(stack: Stack, warnings: string[]): Promise<number | null> {
+  const { api, repo, ticket, slices } = stack;
+  const numbers = slices.flatMap((slice) => (slice.prNumber === null ? [] : [slice.prNumber]));
+  if (numbers.length !== slices.length) {
+    return null;
+  }
+  try {
+    if (ticket.githubStackNumber !== null) {
+      await api.unstack(repo, ticket.githubStackNumber);
+    }
+    return await api.createStack(repo, numbers);
+  } catch (error) {
+    warnings.push(`The stack on GitHub (Union keeps it alone): ${String(error)}`);
+    return null;
+  }
+}
+
+/**
  * Publishes the pushed stack on GitHub and records its slices. What GitHub refuses is returned as
  * warnings: the branches are already pushed, so the split stands and a new split can finish it.
  */
@@ -118,6 +142,12 @@ export async function publishStack(
   const warnings: string[] = [];
   await openPullRequests(stack, warnings);
   await writeTexts(stack, warnings);
+  const githubStackNumber = await stackOnGitHub(stack, warnings);
+  deps.db
+    .update(schema.tickets)
+    .set({ githubStackNumber })
+    .where(eq(schema.tickets.id, ticket.id))
+    .run();
   replaceSlices(
     deps.db,
     ticket.id,

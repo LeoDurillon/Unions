@@ -140,3 +140,15 @@ test('every slice merged into the base: the ticket is merged and its issue close
     .map((event) => event.type);
   expect(events).toContain('pull_request_merged');
 });
+
+test('on a GitHub stack, Union waits for GitHub to retarget the next pull request, then follows', async () => {
+  api.stacks?.set(1, [lower, top]);
+  db.update(schema.tickets).set({ githubStackNumber: 1 }).run();
+  merge(lower, 'main');
+  await poll();
+  expect(getTicket(db, ticketId).phase).toEqual({ kind: 'done' });
+  expect(api.calls.filter((call) => call === 'pullRequestStack')).toHaveLength(1);
+  api.pullByNumber(top).base = 'main';
+  await poll();
+  expect(getTicket(db, ticketId).phase).toMatchObject({ step: 'restack', hostOnly: true });
+});

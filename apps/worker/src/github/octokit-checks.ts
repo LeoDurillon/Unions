@@ -1,6 +1,6 @@
 // The CI checks of the worker's GitHub client: a pull request's head commit and the overall state of its checks, and re-running an Actions job.
 import type { ChecksState, PullRequestChecks, RepoRef } from './api';
-import { OctokitPullRequestChanges } from './octokit-pull-request-changes';
+import { OctokitStacks } from './octokit-stacks';
 
 const CHECKS_ROLLUP = /* GraphQL */ `
   query ($owner: String!, $repo: String!, $number: Int!) {
@@ -61,7 +61,7 @@ function checksOf(data: RollupResponse): PullRequestChecks | null {
   return { sha: commit.oid, state: rollup ? STATES[rollup.state] : null };
 }
 
-export class OctokitChecks extends OctokitPullRequestChanges {
+export class OctokitChecks extends OctokitStacks {
   async pullRequestChecks(repo: RepoRef, number: number): Promise<PullRequestChecks | null> {
     try {
       const data = await this.octokit.graphql<RollupResponse>(CHECKS_ROLLUP, { ...repo, number });

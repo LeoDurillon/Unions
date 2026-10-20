@@ -117,6 +117,8 @@ export const tickets = sqliteTable(
     sessionId: text('session_id'), // current Claude session, resumed between steps
     /** Board column last pushed to (or seen on) the GitHub Project. */
     githubSyncedStatus: text('github_synced_status').$type<BoardStatus>(),
+    /** The GitHub stack over a split ticket's pull requests (`POST /stacks`); null: none, or unsupported. */
+    githubStackNumber: integer('github_stack_number'),
     /** Issue number of the parent last mirrored as "blocked by" on the issue; null: none. */
     githubBlockedBy: integer('github_blocked_by'),
     /** `updatedAt` of the issue when title and body were last reconciled. */

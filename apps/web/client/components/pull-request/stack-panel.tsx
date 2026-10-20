@@ -52,6 +52,12 @@ function Problems({ stack }: { stack: StackView }): ReactElement | null {
   );
 }
 
+function explanation(stack: StackView): string {
+  return stack.githubStack === null
+    ? 'Union keeps this stack (GitHub has none for it). Merge from the bottom on GitHub: when a slice merges, Union moves the rest onto the base by git alone; if that stops on a conflict, Restack lets the implementation agent resolve it. The ticket is merged once every slice is in the base.'
+    : `A stack on GitHub (#${stack.githubStack}): merge from the bottom there. GitHub rebases the rest after each merge and Union follows; if GitHub cannot (Rebase stack on GitHub), Restack lets Union's implementation agent do it. The ticket is merged once every slice is in the base.`;
+}
+
 /** Shown when the ticket is split: merge the slices from the bottom, on GitHub. */
 export function StackPanel({ detail }: { detail: TicketDetail }): ReactElement | null {
   const { ticket } = detail;
@@ -81,11 +87,7 @@ export function StackPanel({ detail }: { detail: TicketDetail }): ReactElement |
         ))}
       </ol>
       <Problems stack={stack} />
-      <p className="text-xs text-zinc-500">
-        Merge from the bottom on GitHub. When a slice merges, the rest of the stack is moved onto
-        the base by git alone; if that stops on a conflict, Restack lets the implementation agent
-        resolve it. The ticket is merged once every slice is in the base.
-      </p>
+      <p className="text-xs text-zinc-500">{explanation(stack)}</p>
       <ErrorText error={command.error} />
     </div>
   );
