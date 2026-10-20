@@ -17,6 +17,7 @@ Everything the agent does is mirrored to the GitHub issue.
 - [Investigations](investigations.md): one-off agent runs on a custom prompt.
 - [Rebase](rebase.md): bringing a ticket's branch onto the latest base.
 - [Simplify history](simplify-history.md): rewriting a branch's commits for review.
+- [Stacks of pull requests](pr-stacks.md): a ticket's pull request split into stacked ones, one per part of its spec.
 - [Preview environments](preview-environments.md): running a ticket's or a reviewed PR's branch with compose.
 - [MCP servers for agents](mcp-servers.md) (planned): claude.ai connectors built, other servers designed.
 
@@ -36,7 +37,7 @@ Everything the agent does is mirrored to the GitHub issue.
   Fine-grained tokens and apps cannot reach Projects owned by a user account: those need a classic token.
 - Each agent with a model (the pipeline steps) has an editable prompt, model, thinking effort and tools in Agent
   settings. The effort is passed as `claude --effort` (low, medium, high, xhigh, max); Default passes nothing, so
-  Claude Code decides. The rebase, the history simplification and the PR description use the implementer's model
+  Claude Code decides. The rebase, the history simplification, the split into a stack and the PR description use the implementer's model
   and effort.
 - Final review: the user decides on `CHANGES_REQUESTED` (no automatic loop); the reviewer states the last check result
   instead of re-running the checks.

@@ -1,7 +1,8 @@
 # Plan: split a ticket's pull request into a stack
 
 Status: steps 1 to 5 built (branch `pr-stack`, 2026-10-20): the table, the pure rules, the state machine, the
-split plan and the split, revise and rebase, the review page, merge; steps 6 (part B) and 7 (the spec) left. Where the build differs from
+split plan and the split, revise and rebase, the review page, merge, and the spec (`docs/spec/pr-stacks.md`);
+step 6 (part B, slices declared by the plan) left. Where the build differs from
 the plan: a conflict while moving a revision's commits fails the step (the implementer does not resolve it
 yet); Simplify history is refused on a split ticket; on the review page the slices are entries of the commit
 picker (read only, like a commit), comments stay on the whole stack's diff and the feedback names the slices

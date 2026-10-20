@@ -36,7 +36,7 @@
    which pre-fills the request with the review's findings) resumes the implementer, whose output is accepted
    automatically and followed by a new review, without an approval in between. Nothing loops on its own.
    From final review onward the user can run the ticket's branch as a live preview (see [Preview environments](preview-environments.md)),
-   rebase it onto the latest base branch (see [Rebase](rebase.md)), and simplify its commit history (see [Simplify history](simplify-history.md)).
+   rebase it onto the latest base branch (see [Rebase](rebase.md)), simplify its commit history (see [Simplify history](simplify-history.md)), and split it into a stack of pull requests (see [Stacks of pull requests](pr-stacks.md)).
    **Review changes** opens a full-page diff of the branch (files on the left, one file at a time), built from a
    snapshot the worker saves after each implementation run, syntax-highlighted, unified or split (side by side; the
    choice is remembered in the browser). The user comments on a line or a block of lines; the
