@@ -38,6 +38,10 @@ export class OctokitPullRequestChanges {
     return data.updated_at;
   }
 
+  async closeIssue(repo: RepoRef, number: number): Promise<void> {
+    await this.octokit.rest.issues.update({ ...repo, issue_number: number, state: 'closed' });
+  }
+
   async updatePullRequestBase(repo: RepoRef, number: number, base: string): Promise<void> {
     await this.octokit.rest.pulls.update({ ...repo, pull_number: number, base });
   }

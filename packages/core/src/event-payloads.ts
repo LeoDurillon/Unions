@@ -60,6 +60,13 @@ type GitHubPayloads = {
     (typeof tables.tickets)['$inferSelect'],
     'prState' | 'prMergedAt' | 'prClosedAt' | 'behindBy'
   >;
+  /** A lower slice's pull request changed state on GitHub (the top one is the ticket's own). */
+  stack_slice_status: {
+    position: number;
+    prNumber: number;
+    prState: 'open' | 'closed' | 'merged';
+    mergedInto: string | null;
+  };
   pull_request_merged: PullRequestNumber;
   pull_request_closed: PullRequestNumber;
   pull_request_checks_changed: Pick<

@@ -161,6 +161,7 @@ const PLAIN_ACTIONS = [
   'simplify',
   'split',
   'drop_split',
+  'restack',
   'cancel',
 ] as const;
 

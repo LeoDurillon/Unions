@@ -3,6 +3,7 @@ import { hasActiveContainerRun } from '@union/core';
 import { runImplementStep } from './implement';
 import type { ImplementDeps } from './implement-checks';
 import { runRebaseStep } from './rebase';
+import { runRestackStep } from './restack';
 import type { StepContext, StepResult } from './scheduler';
 import { startServicesRun } from './services-run';
 
@@ -21,13 +22,17 @@ export async function withAgentServices(
   }
 }
 
-/** The steps that run code: implementation and rebase, each with the agent's services. */
+const CODE_STEPS = {
+  implement: runImplementStep,
+  rebase: runRebaseStep,
+  restack: runRestackStep,
+} as const;
+
+/** The steps that run code: implementation, rebase and restack, each with the agent's services. */
 export function runCodeStep(
   deps: ImplementDeps,
   context: StepContext,
-  step: 'implement' | 'rebase',
+  step: keyof typeof CODE_STEPS,
 ): Promise<StepResult> {
-  return withAgentServices(deps, context, (stepDeps) =>
-    step === 'implement' ? runImplementStep(stepDeps, context) : runRebaseStep(stepDeps, context),
-  );
+  return withAgentServices(deps, context, (stepDeps) => CODE_STEPS[step](stepDeps, context));
 }

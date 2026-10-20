@@ -92,3 +92,21 @@ test('the plan can be cancelled like any step, and stack steps sit In review', (
   expect(boardStatus({ kind: 'running', step: 'split' })).toBe('in_review');
   expect(boardStatus({ kind: 'failed', step: 'restack', error: 'x' })).toBe('in_review');
 });
+
+test('a restack the worker starts after a merge is host only; a retry is the user asking', () => {
+  const p = transition({ kind: 'done' }, { type: 'restack', hostOnly: true });
+  expect(p).toEqual({
+    kind: 'running',
+    step: 'restack',
+    thenRun: 'final_review',
+    thenDone: true,
+    hostOnly: true,
+  });
+  const failed = transition(p, { type: 'run_failed', error: 'conflict' });
+  expect(transition(failed, { type: 'retry' })).toEqual({
+    kind: 'running',
+    step: 'restack',
+    thenRun: 'final_review',
+    thenDone: true,
+  });
+});

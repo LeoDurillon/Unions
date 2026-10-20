@@ -10,7 +10,8 @@ import { canRewrite } from './branch-status';
 export function SimplifyHistory({ detail }: { detail: TicketDetail }): ReactElement | null {
   const { ticket } = detail;
   const { command } = useTicketCommands(ticket.id);
-  if (ticket.branch === null || ticket.prState !== 'open') {
+  // A split ticket's history is its slices: a new split replaces it.
+  if (ticket.branch === null || ticket.prState !== 'open' || ticket.stack) {
     return null;
   }
   const allowed = canRewrite(detail);

@@ -33,7 +33,13 @@ export const REBASE_DENIED = IMPLEMENT_DENIED.filter(
 );
 
 /** A rebase in progress: the workspace, its branch and base, and the commit to restore on failure. */
-export type Rebase = Workspace & { branch: string; base: string; before: string };
+export type Rebase = Workspace & {
+  branch: string;
+  base: string;
+  before: string;
+  /** A stack restacked after a slice merged: `upstream` is that slice's tip; `hostOnly`: no agent. */
+  restack?: { upstream: string; hostOnly: boolean };
+};
 
 /** A turn in the implementer's own session: the rebase, or a rewrite of its history. */
 export type SessionTask = {
@@ -55,7 +61,7 @@ function implementerSession(db: Db, ticketId: number): string | null {
         eq(schema.runs.ticketId, ticketId),
         eq(schema.runs.status, 'succeeded'),
         isNotNull(schema.runs.sessionId),
-        inArray(schema.runs.step, ['implement', 'rebase', 'simplify', 'split']),
+        inArray(schema.runs.step, ['implement', 'rebase', 'simplify', 'split', 'restack']),
       ),
     )
     .orderBy(desc(schema.runs.id))

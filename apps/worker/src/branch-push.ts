@@ -1,9 +1,9 @@
 // Force-pushes a rewritten branch with a lease: the ticket's alone, or every slice of its stack together.
-import { privatePushFiles, type Project } from '@union/core';
+import { listSlices, privatePushFiles, type Project } from '@union/core';
 
 import { PrivateFilesError, projectRemote, pushBranch } from './publish';
 import type { Rebase } from './rebase-agent';
-import { lowerSlices, pushRewrittenStack } from './stack-refs';
+import { pushRewrittenStack } from './stack-refs';
 
 /** The project's repository with its credentials, for the fetch and the push. */
 export function remoteOf(deps: Rebase['deps'], project: Project): ReturnType<typeof projectRemote> {
@@ -12,7 +12,8 @@ export function remoteOf(deps: Rebase['deps'], project: Project): ReturnType<typ
 
 async function push(rebase: Rebase, lease: string): Promise<void> {
   const { deps, container, project, branch, context } = rebase;
-  if (lowerSlices(deps.db, context.ticket.id).length > 0) {
+  // Split, even with only the top slice left open: the slices' tips are recorded after the push.
+  if (listSlices(deps.db, context.ticket.id).length > 1) {
     await pushRewrittenStack(rebase, lease);
     return;
   }

@@ -2,7 +2,7 @@
 import {
   emitEvent,
   fixupTarget,
-  listSlices,
+  openSlices,
   restackPlan,
   shortSha,
   sliceTrailer,
@@ -28,7 +28,7 @@ function sliceLine(slice: TicketSlice, log: readonly string[], top: number): str
 /** The `# Stack` section of the implementer's prompt; empty when the ticket is not split. */
 export async function stackSection(workspace: Prepared): Promise<string> {
   const { deps, container, context, base } = workspace;
-  const slices = listSlices(deps.db, context.ticket.id);
+  const slices = openSlices(deps.db, context.ticket.id);
   const [bottom] = slices;
   if (bottom === undefined || slices.length < 2) {
     return '';
@@ -94,7 +94,7 @@ export type Restacked = { changed: number[] } | { error: string };
 export async function restackRevision(workspace: Prepared, ask: Ask): Promise<Restacked | null> {
   const { deps, container, context, base } = workspace;
   const { runtime } = deps;
-  const slices = listSlices(deps.db, context.ticket.id);
+  const slices = openSlices(deps.db, context.ticket.id);
   const [bottom] = slices;
   const top = slices.at(-1);
   if (bottom === undefined || top === undefined || slices.length < 2) {
@@ -139,7 +139,7 @@ export async function restackRevision(workspace: Prepared, ask: Ask): Promise<Re
 export async function pushRevision(workspace: Prepared): Promise<PublishResult> {
   const { deps, context, branch } = workspace;
   const ticketId = context.ticket.id;
-  const top = listSlices(deps.db, ticketId).at(-1);
+  const top = openSlices(deps.db, ticketId).at(-1);
   try {
     await pushRewrittenStack({ ...workspace, before: '' }, top?.tipSha ?? '');
     emitEvent(deps.db, { type: 'branch_pushed', ticketId, payload: { branch } });

@@ -20,6 +20,11 @@ export function listSlices(db: Db, ticketId: number): TicketSlice[] {
     .all();
 }
 
+/** The slices not merged yet, bottom first: the stack still to restack, push and review. */
+export function openSlices(db: Db, ticketId: number): TicketSlice[] {
+  return listSlices(db, ticketId).filter((slice) => slice.prState !== 'merged');
+}
+
 /** A new split's slices replace the old ones, in one transaction. */
 export function replaceSlices(db: Db, ticketId: number, slices: readonly NewTicketSlice[]): void {
   db.transaction((tx) => {

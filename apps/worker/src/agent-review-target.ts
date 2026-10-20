@@ -3,7 +3,7 @@ import {
   type ContainerRuntime,
   type Db,
   getTicket,
-  listSlices,
+  openSlices,
   schema,
   stackReviewNote,
   ticketBase,
@@ -79,7 +79,7 @@ async function ticketTarget(deps: TargetDeps, ticketId: number): Promise<ReviewT
     .from(schema.diffFiles)
     .where(eq(schema.diffFiles.snapshotId, snapshot.id))
     .all();
-  const stack = stackReviewNote(listSlices(db, ticketId), base);
+  const stack = stackReviewNote(openSlices(db, ticketId), base);
   return {
     container: name,
     projectId: project.id,

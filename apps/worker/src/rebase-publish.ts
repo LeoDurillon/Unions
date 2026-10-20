@@ -1,4 +1,4 @@
-import { emitEvent, listSlices, schema, type Db, type RefusedCommit } from '@union/core';
+import { emitEvent, openSlices, schema, type Db, type RefusedCommit } from '@union/core';
 import { eq } from 'drizzle-orm';
 
 import { forcePush } from './branch-push';
@@ -19,7 +19,7 @@ export async function verifyAndPush(
   { pushed, outcome }: { pushed: string; outcome: Pushed['outcome'] },
 ): Promise<{ error: string } | { refused: Refused } | { gate: GateResult | null }> {
   const { deps, container, project } = rebase;
-  const lower = listSlices(deps.db, rebase.context.ticket.id).slice(0, -1);
+  const lower = openSlices(deps.db, rebase.context.ticket.id).slice(0, -1);
   const problem =
     (await rebaseProblem(deps.runtime, container, rebase)) ??
     (await stackMoveProblem(deps.runtime, container, { base: rebase.base, lower }));

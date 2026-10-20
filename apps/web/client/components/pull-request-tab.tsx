@@ -8,6 +8,7 @@ import { Discussion } from './pull-request/discussion';
 import { PrDescription } from './pull-request/pr-description';
 import { SimplifyHistory } from './pull-request/simplify-history';
 import { SplitStack } from './pull-request/split-stack';
+import { StackPanel } from './pull-request/stack-panel';
 
 /**
  * The ticket's pull request: link it, its CI checks, keep its description current, then read its
@@ -18,6 +19,7 @@ export function PullRequestTab({ detail }: { detail: TicketDetail }): ReactEleme
   return (
     <div className="space-y-4">
       <PullRequestRow ticket={ticket} project={project} />
+      <StackPanel detail={detail} />
       <BranchStatus detail={detail} />
       <SimplifyHistory detail={detail} />
       <SplitStack detail={detail} />

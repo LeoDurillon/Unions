@@ -5,6 +5,7 @@ export); do not edit. Tests are left out.
 
 ## ./
 
+- `api-stack-types.ts`: A split ticket's stack, as the API sends it with the ticket.
 - `api-types.ts`: Where the commit view reads a slice's own change: `slice-<position>`.
 - `app.ts`: Builds the web server's Hono app: error handling and the API routes, wired to the database and GitHub.
 - `ci-api-types.ts`: The pull request's CI checks as the PR tab shows them, and what the user gave the implementer from them.
@@ -102,6 +103,7 @@ export); do not edit. Tests are left out.
 - `ticket-pull-request.ts`: Looks the pull request up on GitHub (read only), then links it to the ticket.
 - `ticket-removal.ts`: Removes a cancelled ticket from Union: its runs, outputs, reviews and files go with it, and the worker is asked to remove its container (the web never calls Do…
 - `ticket-review-subroutes.ts`: A ticket's routes about its change: its refused commit, its PR description rewrite, its grouping by spec, the explanations of its lines, its commits, its pull …
+- `ticket-stack.ts`: A split ticket's stack as the API shows it: its slices, what merged where, and whether a restack is due.
 - `ticket-subroutes.ts`: The routes under `/api/tickets` that have their own module: creation, the issue import, a ticket's files, its refused commit, the rewrite of its PR description…
 - `ticket-workspace.ts`: The routes about a ticket's workspace: the branch it starts from, the steps it runs, its title and description, the commands run in it, and what its agents use…
 - `tickets.ts`: The API routes for tickets: listing, creating, editing outputs and moving them between steps.

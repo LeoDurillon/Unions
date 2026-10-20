@@ -240,18 +240,15 @@ export class OctokitGitHubApi extends OctokitProjectFields implements GitHubApi 
     if (!pull) {
       return null;
     }
+    const refs = { base: pull.data.base.ref, headSha: pull.data.head.sha };
     if (pull.data.state !== 'open') {
+      const ended = { behindBy: null, mergedAt: null, closedAt: null, ...refs };
       return pull.data.merged
-        ? { state: 'merged', behindBy: null, mergedAt: timeOf(pull.data.merged_at), closedAt: null }
-        : {
-            state: 'closed',
-            behindBy: null,
-            mergedAt: null,
-            closedAt: timeOf(pull.data.closed_at),
-          };
+        ? { ...ended, state: 'merged', mergedAt: timeOf(pull.data.merged_at) }
+        : { ...ended, state: 'closed', closedAt: timeOf(pull.data.closed_at) };
     }
     if (!behind) {
-      return { state: 'open', behindBy: null, mergedAt: null, closedAt: null };
+      return { state: 'open', behindBy: null, mergedAt: null, closedAt: null, ...refs };
     }
     const { base, head } = pull.data;
     const { data } = await this.octokit.rest.repos.compareCommitsWithBasehead({
@@ -259,7 +256,7 @@ export class OctokitGitHubApi extends OctokitProjectFields implements GitHubApi 
       basehead: `${base.ref}...${head.sha}`,
       per_page: 1,
     });
-    return { state: 'open', behindBy: data.behind_by, mergedAt: null, closedAt: null };
+    return { state: 'open', behindBy: data.behind_by, mergedAt: null, closedAt: null, ...refs };
   }
 
   async createPullRequestReview(

@@ -17,7 +17,8 @@ function fromReviewed(phase: Phase, action: Action): Phase | undefined {
   }
   if (action.type === 'restack') {
     const next = running('restack');
-    return next.kind === 'running' ? { ...next, ...done } : next;
+    const hostOnly = action.hostOnly ? { hostOnly: true as const } : {};
+    return next.kind === 'running' ? { ...next, ...done, ...hostOnly } : next;
   }
   return undefined;
 }

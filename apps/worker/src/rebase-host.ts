@@ -27,12 +27,13 @@ async function conflictedFiles(runtime: ContainerRuntime, container: string): Pr
 /**
  * Rebases the branch onto `origin/<base>` with git alone. No hook runs on the picked commits, so
  * nothing can refuse them; on a conflict (or any other stop) the branch is put back at `before`.
- * `updateRefs`: a stack's slice branches move with their commits.
+ * `updateRefs`: a stack's slice branches move with their commits; `onto`: only the commits after it
+ * are moved (a restack after a slice merged).
  */
 export async function tryHostRebase(
   runtime: ContainerRuntime,
   container: string,
-  refs: { base: string; branch: string; before: string; updateRefs?: boolean },
+  refs: { base: string; branch: string; before: string; updateRefs?: boolean; onto?: string },
 ): Promise<HostRebase> {
   if (await contains(runtime, container, 'HEAD', `origin/${refs.base}`)) {
     return { kind: 'up_to_date' };
@@ -45,7 +46,10 @@ export async function tryHostRebase(
       'core.editor=true',
       'rebase',
       ...(refs.updateRefs ? ['--update-refs'] : []),
-      `origin/${refs.base}`,
+      // Only the commits after the merged slice's tip: the base already has that slice.
+      ...(refs.onto === undefined
+        ? [`origin/${refs.base}`]
+        : ['--onto', `origin/${refs.base}`, refs.onto]),
     ]),
   );
   if (result.exitCode === 0) {
@@ -73,12 +77,20 @@ export function stoppedHint(
 }
 
 /** Appended to the rebase prompt of a split ticket: the slices' branches must move too. */
-export function stackHint(base: string, branches: readonly string[]): string {
+export function stackHint(base: string, branches: readonly string[], onto?: string): string {
+  const command =
+    onto === undefined
+      ? `git rebase --update-refs origin/${base}`
+      : `git rebase --update-refs --onto origin/${base} ${onto}`;
+  const merged =
+    onto === undefined
+      ? ''
+      : ` The slice below them was merged into \`origin/${base}\` (its last commit was \`${onto}\`): move only the commits after it.`;
   if (branches.length === 0) {
-    return '';
+    return merged === '' ? '' : `\n\n${merged.trim()} Run \`${command}\`.`;
   }
   const names = branches.map((name) => `\`${name}\``).join(', ');
-  return `\n\nThis branch is a stack: the branches ${names} point at commits inside it, one per slice. Rebase with \`git rebase --update-refs origin/${base}\` so they move with their commits.`;
+  return `\n\nThis branch is a stack: the branches ${names} point at commits inside it, one per slice.${merged} Rebase with \`${command}\` so they move with their commits.`;
 }
 
 /** Appended to the rebase prompt when the host's rebase was clean but the checks fail after it. */

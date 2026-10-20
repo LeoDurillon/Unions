@@ -3,6 +3,7 @@ import { eq } from 'drizzle-orm';
 
 import type { GitHubApi, PullRequestStatus, RepoRef } from './api';
 import { refreshChecks } from './pull-request-checks';
+import { pollStack, startRestack } from './stack-pull-requests';
 
 /** After the final approval the draft PR becomes ready for review, once; a stack's other slices too. */
 export async function markReadyWhenDone(
@@ -83,8 +84,19 @@ export async function refreshPullRequest(
   repo: RepoRef,
   ticket: Ticket,
 ): Promise<void> {
-  const status = await polled(api, repo, ticket);
+  const settled = ticket.prState === 'merged' && ticket.prMergedAt !== null;
+  const stack = settled
+    ? null
+    : await pollStack(db, api, { repo, ticket, behind: canRebase(ticket) });
+  const status = stack ?? (await polled(api, repo, ticket));
   storeStatus(db, ticket, status);
+  if (stack?.restack) {
+    startRestack(db, ticket.id);
+  }
+  // A stack's top pull request may target a branch other than the default one: its Closes did nothing.
+  if (stack?.prState === 'merged' && ticket.issueNumber !== null) {
+    await api.closeIssue(repo, ticket.issueNumber);
+  }
   await refreshChecks(db, api, repo, { ...ticket, ...status });
 }
 

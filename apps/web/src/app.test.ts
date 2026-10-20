@@ -13,6 +13,7 @@ import {
   type Db,
   type Project,
 } from '@union/core';
+import { eq } from 'drizzle-orm';
 import type { Hono } from 'hono';
 
 import type { LogPage, TicketDetail, TicketSummary } from './api-types';
@@ -193,6 +194,44 @@ test('a split ticket refuses Simplify history: a new split is the way', async ()
   ]);
   const response = await send('POST', `/api/tickets/${ticket.id}/commands`, { type: 'simplify' });
   expect(response.status).toBe(409);
+});
+
+test('a split ticket shows its stack, and Restack is offered once a slice merged into the base', async () => {
+  const project = await makeProject();
+  const ticket = await makeTicket(project.id);
+  db.update(schema.tickets)
+    .set({ phase: { kind: 'done' }, branch: 'feature', prState: 'open' })
+    .run();
+  replaceSlices(db, ticket.id, [
+    {
+      position: 1,
+      title: 'A',
+      spec: 'a',
+      tipSha: 'a1',
+      branch: 'feature-s1',
+      prNumber: 3,
+      prState: 'open',
+    },
+    {
+      position: 2,
+      title: 'B',
+      spec: 'b',
+      tipSha: 'b1',
+      branch: 'feature',
+      prNumber: 2,
+      prState: 'open',
+    },
+  ]);
+  const restack = async (): Promise<number> =>
+    (await send('POST', `/api/tickets/${ticket.id}/commands`, { type: 'restack' })).status;
+  expect(await restack()).toBe(409);
+  db.update(schema.ticketSlices)
+    .set({ prState: 'merged', mergedInto: 'main', mergedTipSha: 'a1' })
+    .where(eq(schema.ticketSlices.position, 1))
+    .run();
+  const detail = (await (await send('GET', `/api/tickets/${ticket.id}`)).json()) as TicketDetail;
+  expect(detail.ticket.stack).toMatchObject({ label: 'Stack of 2 · 1 merged', restackable: true });
+  expect(await restack()).toBe(202);
 });
 
 test('editing an output creates a new version, only for the step awaiting approval', async () => {

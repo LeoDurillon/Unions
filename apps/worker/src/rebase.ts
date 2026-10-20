@@ -43,17 +43,18 @@ export async function prepareBranch(deps: ImplementDeps, context: StepContext): 
 /**
  * Rebases the ticket's branch onto its base (git alone when there is no conflict, else the
  * implementer's own session), checks it and force-pushes it with a lease. On any failure the branch
- * is put back exactly as it was, unpushed.
+ * is put back exactly as it was, unpushed. `restack`: only the commits after a merged slice move.
  */
 export async function runRebaseStep(
   deps: ImplementDeps,
   context: StepContext,
+  restack?: Rebase['restack'],
 ): Promise<StepResult> {
   const prepared = await prepareBranch(deps, context);
   const refusal = context.resume ? pausedRebase(deps.db, context.ticket.id) : null;
   // A resumed rebase restores the branch as it was before the paused run, not the rebased one.
   const before = refusal?.resumeState.before ?? prepared.before;
-  const rebase = { ...prepared, before };
+  const rebase = { ...prepared, before, ...(restack ? { restack } : {}) };
   const restore = (): Promise<void> =>
     restoreBranch(deps.runtime, rebase.container, rebase.branch, rebase.before);
   try {

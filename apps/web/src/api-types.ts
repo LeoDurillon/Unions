@@ -14,6 +14,10 @@ import type {
   schema,
 } from '@union/core';
 
+import type { StackView } from './api-stack-types';
+
+export type { StackView } from './api-stack-types';
+
 /** How a project reaches GitHub, as the browser sees it. */
 export type GitHubAccess = 'token' | 'app' | 'none';
 
@@ -46,7 +50,13 @@ export function toPublicProject(project: Project): PublicProject {
 export type TicketRef = { id: number; title: string; issueNumber: number | null; done: boolean };
 
 /** `parent`: the ticket this one builds on; it cannot start before the parent is done. */
-export type TicketSummary = Ticket & { board: BoardColumn; parent: TicketRef | null };
+
+export type TicketSummary = Ticket & {
+  board: BoardColumn;
+  parent: TicketRef | null;
+  /** Null when the ticket is not split (or the listing did not read it). */
+  stack?: StackView | null;
+};
 
 export type TicketDetail = {
   ticket: TicketSummary;
@@ -68,6 +78,7 @@ export type CommandType =
   | 'simplify'
   | 'split'
   | 'drop_split'
+  | 'restack'
   | 'cancel'
   | 'commit_anyway'
   | 'drop_leftovers';
@@ -81,6 +92,7 @@ export const COMMAND_TYPES: readonly CommandType[] = [
   'simplify',
   'split',
   'drop_split',
+  'restack',
   'cancel',
   'commit_anyway',
   'drop_leftovers',

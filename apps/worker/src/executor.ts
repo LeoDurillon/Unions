@@ -23,7 +23,7 @@ export function createExecutor(
   return (context: StepContext): Promise<StepResult> => {
     const { step } = context;
     const deps = { db, runtime, config, github, agent: runAgent };
-    if (step === 'implement' || step === 'rebase') {
+    if (step === 'implement' || step === 'rebase' || step === 'restack') {
       return runCodeStep(deps, context, step);
     }
     if (step === 'final_review') {

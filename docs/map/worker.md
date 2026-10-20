@@ -66,6 +66,7 @@ export); do not edit. Tests are left out.
 - `rebase-publish.ts`: Checks the result, runs the project's checks, then pushes; returns why it could not, the hook's refusal of the agent's leftover changes, or the gate.
 - `rebase.ts`: Rebases the ticket's branch onto its base (git alone when there is no conflict, else the implementer's own session), checks it and force-pushes it with a lease.
 - `refused-commit.ts`: Records the refusal and stops the run there: the user decides what to do with the changes.
+- `restack.ts`: Moves the rest of a stack onto the base after a slice merged, then targets the base with the new bottom pull request.
 - `review-checkout.ts`: A pull request's own container (`union-r<id>`): its checkout at the reviewed commit, for its preview, tests and commands.
 - `review-explain-prompt.ts`: The prompts of an Explain: a fresh one with the specs, the change and the lines, and a follow-up's.
 - `review-explain-result.ts`: Reads the explanation block at the end of the agent's answer, and drops the citations it cannot back.
@@ -134,6 +135,7 @@ export); do not edit. Tests are left out.
 - `pull-request.ts`: Keeps the pull request's state (`pr_state`), when it was merged (`pr_merged_at`) or closed without a merge (`pr_closed_at`, polled still: it can be reopened) a…
 - `queries.ts`: The GraphQL queries the worker sends to GitHub's project board API.
 - `render.ts`: Issue body as sent to GitHub: the ticket description plus a marker that identifies our ticket.
+- `stack-pull-requests.ts`: A split ticket's pull requests polled together: each slice's state, and the ticket merged only once every slice is in the base.
 - `status.ts`: Maps board columns to the GitHub Project's Status options, and back.
 - `sync.ts`: Mirrors tickets to GitHub.
 - `ticket-edit.ts`: Writes the title and description the user edited in Union to the ticket's issue, then to the ticket.

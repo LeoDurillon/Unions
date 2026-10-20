@@ -41,6 +41,15 @@ export function assertCommandFits(db: Db, ticket: TicketSummary, type: CommandTy
       throw fail(CONFLICT, 'The ticket is split into a stack: split it again instead');
     }
   }
+  if (type === 'restack') {
+    assertOpenPullRequest(ticket, 'restack');
+    if (!ticket.stack?.restackable) {
+      throw fail(
+        CONFLICT,
+        'Nothing to restack: no slice was merged into the base since the last push',
+      );
+    }
+  }
   if (type === 'split') {
     if (!stacksOn(db, ticket.projectId)) {
       throw fail(

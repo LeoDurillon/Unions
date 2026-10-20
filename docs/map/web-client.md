@@ -135,6 +135,7 @@ export); do not edit. Tests are left out.
 - `pr-description.tsx`: The PR's description, rewritten by the agent when the work changed after the PR was opened.
 - `simplify-history.tsx`: The Simplify history button: the implementation agent rewrites the branch&apos;s commits, the code unchanged.
 - `split-stack.tsx`: The Split into a stack button: an agent plans slices of the spec, then the branch becomes a stack of pull requests.
+- `stack-panel.tsx`: A split ticket's stack in its PR tab: each slice's pull request and state, what went wrong, and Restack.
 
 ## components/pull-requests/
 

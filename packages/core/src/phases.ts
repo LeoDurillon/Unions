@@ -29,7 +29,15 @@ export type Phase =
   // an agent run is in flight; `thenRun` chains a step without stopping for approval; `resume`
   // finishes a run paused on a refused commit, without the agent
   // `thenDone`: a simplification or clean rebase asked once done goes back to done
-  | { kind: 'running'; step: Step; thenRun?: Step; resume?: LeftoverResolution; thenDone?: true }
+  // `hostOnly`: a restack started on its own after a merge, which never calls an agent
+  | {
+      kind: 'running';
+      step: Step;
+      thenRun?: Step;
+      resume?: LeftoverResolution;
+      thenDone?: true;
+      hostOnly?: true;
+    }
   // output written, waiting for the user; `thenDone`: a split plan asked once done
   | { kind: 'awaiting_approval'; step: Step; thenDone?: true }
   // the repository's hook refused the changes the agent left uncommitted; the user decides
@@ -58,7 +66,8 @@ export type Action =
   // Leaves the split plan waiting for approval; the ticket goes back to where the split was asked.
   | { type: 'drop_split' }
   // Moves the stack's slices onto the base again, after a slice merged.
-  | { type: 'restack' }
+  // `hostOnly`: started by the worker after a merge; git alone, a conflict waits for the user.
+  | { type: 'restack'; hostOnly?: true }
   | { type: 'cancel' }
   // A hook refused the leftover commit: the run stops until the user decides.
   | { type: 'commit_refused' }

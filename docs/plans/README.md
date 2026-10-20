@@ -15,8 +15,8 @@ and linked.
   steps 1 to 5 (branch `pr-checks`).
 - [Split a PR into a stack](pr-stack.md): a ticket's PR cut into stacked PRs, one per part of the spec, still one
   ticket; revise, rebase and merge keep the stack in order. Split after the fact first, then slices from the plan.
-  Risks resolved; steps 1 to 4 built (branch `pr-stack`, 2026-10-20), behind a project setting; steps 5 to 7
-  left.
+  Risks resolved; steps 1 to 5 built (branch `pr-stack`, 2026-10-20), behind a project setting; part B (slices
+  from the plan) and the spec left.
 - [Stacked PRs in Pull requests and Current reviews](stacked-pr-reviews.md): a stack shows as one item, its review
   page picks a PR in a segmented control, and the agent reviews the whole stack against several specs linked to its
   PRs. Built, steps 1 to 4 (branch `stacked-pr-reviews`); one v1 item left (the size warning).

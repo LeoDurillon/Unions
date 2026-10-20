@@ -1,5 +1,5 @@
 // A split ticket's slices in its diff snapshot: each one's own change, from the slice below to its tip.
-import { listSlices, parseDiff, type ContainerRuntime, type Db, type DiffFile } from '@union/core';
+import { openSlices, parseDiff, type ContainerRuntime, type Db, type DiffFile } from '@union/core';
 
 import { mustRunIn } from './container-exec';
 import { REPO_DIR } from './provision';
@@ -29,7 +29,7 @@ export async function readSlices(
   input: { container: string; ticketId: number; base: string },
 ): Promise<SnapshotSlice[]> {
   const { container, ticketId, base } = input;
-  const slices = listSlices(db, ticketId);
+  const slices = openSlices(db, ticketId);
   if (slices.length < 2) {
     return [];
   }

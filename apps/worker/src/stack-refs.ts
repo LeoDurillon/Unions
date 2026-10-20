@@ -1,6 +1,6 @@
 // A split ticket's slice branches in its workspace: set from the recorded tips, checked, pushed together, recorded again.
 import {
-  listSlices,
+  openSlices,
   privatePushFiles,
   schema,
   type ContainerRuntime,
@@ -18,7 +18,7 @@ import { pushStack } from './stack-push';
 
 /** The slices below the top one (the ticket's own branch); empty when the ticket is not split. */
 export function lowerSlices(db: Rebase['deps']['db'], ticketId: number): TicketSlice[] {
-  return listSlices(db, ticketId).slice(0, -1);
+  return openSlices(db, ticketId).slice(0, -1);
 }
 
 /** Puts each lower slice's local branch where it was last pushed, so a rebase moves it from there. */
@@ -37,7 +37,7 @@ export function syncLowerBranches(
 /** Records where every slice's branch now is: the lower ones' branches, the top one's HEAD. */
 export async function recordTips(rebase: Rebase): Promise<void> {
   const { deps, container, context } = rebase;
-  const slices = listSlices(deps.db, context.ticket.id);
+  const slices = openSlices(deps.db, context.ticket.id);
   const head = await headCommit(deps.runtime, container);
   for (const [at, slice] of slices.entries()) {
     const own = at === slices.length - 1 ? null : slice.branch;

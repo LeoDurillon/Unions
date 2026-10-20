@@ -24,6 +24,8 @@ type FakeIssue = {
   updatedAt: string;
   comments: RemoteComment[];
   blockedBy: number[];
+  /** Unset: open. */
+  state?: 'closed';
 };
 
 const DEFAULT_INFO: ProjectInfo = {
@@ -216,6 +218,12 @@ export class FakeGitHubApi extends FakeProjectFields implements GitHubApi {
     return pull;
   }
 
+  closeIssue(_repo: RepoRef, number: number): Promise<void> {
+    this.calls.push('closeIssue');
+    this.issueByNumber(number).state = 'closed';
+    return Promise.resolve();
+  }
+
   updatePullRequestBase(_repo: RepoRef, number: number, base: string): Promise<void> {
     this.calls.push('updatePullRequestBase');
     this.pullByNumber(number).base = base;
@@ -279,7 +287,8 @@ export class FakeGitHubApi extends FakeProjectFields implements GitHubApi {
     const behindBy = state === 'open' && behind ? (pull.behindBy ?? 0) : null;
     const mergedAt = state === 'merged' ? (pull.mergedAt ?? 0) : null;
     const closedAt = state === 'closed' ? (pull.closedAt ?? 0) : null;
-    return Promise.resolve({ state, behindBy, mergedAt, closedAt });
+    const refs = { base: pull.base, headSha: pull.headSha ?? `sha-${pull.number}` };
+    return Promise.resolve({ state, behindBy, mergedAt, closedAt, ...refs });
   }
 
   /** Jobs run again, in order. */

@@ -36,13 +36,13 @@ import {
 } from '../http';
 import type { ApiServices } from '../services';
 import { assertCommandFits } from './ticket-command-checks';
-import { changeParent, childrenOf, findTicket, summarize } from './ticket-links';
+import { changeParent, childrenOf, findTicket, summarizeWithStack } from './ticket-links';
 import { linkPullRequest, unlinkPullRequest } from './ticket-pull-request';
 import { ticketSubroutes } from './ticket-subroutes';
 
 function loadTicket(db: Db, id: number): TicketSummary {
   try {
-    return summarize(getTicket(db, id), findTicket(db));
+    return summarizeWithStack(db, getTicket(db, id), findTicket(db));
   } catch {
     throw fail(NOT_FOUND, `Ticket ${id} not found`);
   }
@@ -70,7 +70,7 @@ function listTickets(db: Db, c: Context): Response {
   const rows = db.select().from(schema.tickets).all();
   const filtered = projectId ? rows.filter((row) => row.projectId === Number(projectId)) : rows;
   const byId = new Map(rows.map((row) => [row.id, row]));
-  return c.json(filtered.map((row) => summarize(row, (id) => byId.get(id))));
+  return c.json(filtered.map((row) => summarizeWithStack(db, row, (id) => byId.get(id))));
 }
 
 function ticketDetail(db: Db, c: Context): Response {

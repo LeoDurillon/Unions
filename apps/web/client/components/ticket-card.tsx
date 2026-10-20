@@ -60,6 +60,19 @@ function CardStatus({ ticket }: { ticket: TicketSummary }): ReactElement {
   );
 }
 
+/** A split ticket: its stack's size, what merged, and its pull requests. */
+function StackBadge({ stack }: { stack: NonNullable<TicketSummary['stack']> }): ReactElement {
+  const prs = stack.slices.flatMap((slice) =>
+    slice.prNumber === null ? [] : [`#${slice.prNumber}`],
+  );
+  const wrong = stack.outOfOrder.length > 0 || stack.closed.length > 0;
+  return (
+    <Badge tone={wrong ? 'red' : 'neutral'} title={prs.join(' → ')}>
+      {stack.label}
+    </Badge>
+  );
+}
+
 /** The flow's name when it is not the full pipeline: a short flow is worth seeing on the board. */
 function FlowBadge({
   ticket,
@@ -120,6 +133,7 @@ export function TicketCard({
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
         <CardStatus ticket={ticket} />
         <ChecksBadge ticket={ticket} />
+        {ticket.stack ? <StackBadge stack={ticket.stack} /> : null}
         {config ? <FlowBadge ticket={ticket} config={config} /> : null}
         <span className="ml-auto text-xs whitespace-nowrap text-zinc-500">
           {ticket.issueNumber === null ? 'not on GitHub yet' : `#${ticket.issueNumber}`}

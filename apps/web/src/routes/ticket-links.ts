@@ -14,6 +14,7 @@ import type { Context } from 'hono';
 
 import type { TicketRef, TicketSummary } from '../api-types';
 import { BAD_REQUEST, CONFLICT, fail, NOT_FOUND, readObject, requireId } from '../http';
+import { stackView } from './ticket-stack';
 
 export function ticketRef(ticket: Ticket): TicketRef {
   return {
@@ -28,6 +29,15 @@ export function ticketRef(ticket: Ticket): TicketRef {
 export function summarize(ticket: Ticket, find: (id: number) => Ticket | undefined): TicketSummary {
   const parent = ticket.parentTicketId === null ? undefined : find(ticket.parentTicketId);
   return { ...ticket, board: boardColumn(ticket), parent: parent ? ticketRef(parent) : null };
+}
+
+/** The summary with the ticket's stack, for the board and the ticket's panel. */
+export function summarizeWithStack(
+  db: Db,
+  ticket: Ticket,
+  find: (id: number) => Ticket | undefined,
+): TicketSummary {
+  return { ...summarize(ticket, find), stack: stackView(db, ticket) };
 }
 
 export function findTicket(db: Db): (id: number) => Ticket | undefined {

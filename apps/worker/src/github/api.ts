@@ -42,6 +42,9 @@ export type PullRequestStatus = {
   mergedAt: number | null;
   /** When it was closed without being merged. */
   closedAt: number | null;
+  /** The branch it targets (for a merged one, the branch it was merged into) and its head commit. */
+  base?: string;
+  headSha?: string;
 };
 
 /** All the checks of a commit together: red as soon as one failed. */
@@ -107,6 +110,8 @@ export type GitHubApi = {
   updatePullRequestTitle(repo: RepoRef, number: number, title: string): Promise<void>;
   /** Retargets the pull request onto another branch: a slice of a stack onto the one below. */
   updatePullRequestBase(repo: RepoRef, number: number, base: string): Promise<void>;
+  /** Closes the issue, as completed: a stack's last slice merged without closing it. */
+  closeIssue(repo: RepoRef, number: number): Promise<void>;
   /** Adds labels to an issue or pull request; GitHub creates the ones the repository lacks. */
   addLabels(repo: RepoRef, number: number, labels: string[]): Promise<void>;
   /** Removes a label; does nothing if the issue or pull request does not have it. */

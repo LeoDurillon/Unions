@@ -56,7 +56,15 @@
   ticket. `captureDiff` also stores each slice's own diff (`diff-slices.ts`, `slice` rows of `diff_commits`,
   the lower slices read from their local branches), which the review page's commit picker offers as
   `slice-<n>`; a split ticket's agent review gets each slice's range and part of the spec (`stackReviewNote`).
-  Merging is a later step of the plan.
+  Merging: `github/stack-pull-requests.ts` polls every slice's pull request (`pollStack`, from
+  `refreshPullRequest`), records what each merged into and its tip, and keeps the ticket open until every slice is
+  merged into the base (a slice merged into another slice's branch is out of order, shown in the PR tab); once
+  complete the ticket is merged and its issue closed (`closeIssue`). A slice newly merged into the base dispatches
+  `restack` with `hostOnly` (`startRestack`, when the phase allows it): `restack.ts` rebases the open slices with
+  `--onto origin/<base> <merged tip>` and `--update-refs` through `runRebaseStep`, without an agent when host
+  only (a conflict waits for the user's Restack, which may call the rebase agent), clears the merged tips and
+  retargets the new bottom pull request onto the base. Moving, pushing and recording use the open slices only
+  (`openSlices`).
 - `investigate.ts`: `InvestigationRunner` runs queued investigations in throwaway `union-i<id>` containers
   (removed after each run; a `ticket` investigation runs in the ticket's own container instead, `investigate-ticket.ts`:
   never during a step, writing tools always denied, `git status` and HEAD compared before and after, the container
