@@ -283,6 +283,7 @@ test('on a GitHub stack, the restack takes the branches GitHub rebased: no push,
     .map((event) => event.type);
   expect(events).toContain('stack_followed');
   expect(events).not.toContain('branch_pushed');
+  expect(github.calls).not.toContain('updatePullRequestBase');
 });
 
 test('on a GitHub stack GitHub has not rebased, the worker-started restack waits for the user', async () => {

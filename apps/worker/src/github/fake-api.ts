@@ -230,6 +230,7 @@ export class FakeGitHubApi extends FakeStacks implements GitHubApi {
 
   updatePullRequestBase(_repo: RepoRef, number: number, base: string): Promise<void> {
     this.calls.push('updatePullRequestBase');
+    this.refuseStackedBase(number);
     this.pullByNumber(number).base = base;
     return Promise.resolve();
   }

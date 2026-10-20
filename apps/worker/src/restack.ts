@@ -104,6 +104,10 @@ export async function runRestackStep(
       and(eq(schema.ticketSlices.ticketId, ticket.id), eq(schema.ticketSlices.prState, 'merged')),
     )
     .run();
-  const retargeted = await retargetBottom(deps, { project, ticket, base });
+  // A GitHub stack is retargeted by GitHub, which refuses Union's change.
+  const retargeted =
+    ticket.githubStackNumber === null
+      ? await retargetBottom(deps, { project, ticket, base })
+      : null;
   return retargeted === null ? result : { ...result, output: `${result.output}\n\n${retargeted}` };
 }

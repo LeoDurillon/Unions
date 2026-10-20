@@ -19,6 +19,17 @@ export abstract class FakeStacks extends FakeProjectFields {
   /** GitHub stacks by number; each holds its pull requests, bottom first. Unset: stacks unsupported. */
   stacks: Map<number, number[]> | null = new Map();
 
+  /** GitHub refuses to change the base of a pull request that is part of a stack. */
+  protected refuseStackedBase(number: number): void {
+    if (
+      [...(this.stacks ?? new Map<number, number[]>()).values()].some((pulls) =>
+        pulls.includes(number),
+      )
+    ) {
+      throw new Error('Cannot change the base branch because the pull request is part of a stack.');
+    }
+  }
+
   createStack(_repo: RepoRef, pullRequests: number[]): Promise<number | null> {
     this.calls.push('createStack');
     if (this.stacks === null) {

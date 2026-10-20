@@ -98,20 +98,33 @@ async function writeTexts(stack: Stack, warnings: string[]): Promise<void> {
 }
 
 /**
+ * Dissolves an earlier split's GitHub stack first: GitHub refuses to retarget a pull request that is
+ * part of a stack.
+ */
+async function dissolveEarlier(stack: Stack, warnings: string[]): Promise<void> {
+  const { api, repo, ticket } = stack;
+  if (ticket.githubStackNumber === null) {
+    return;
+  }
+  try {
+    await api.unstack(repo, ticket.githubStackNumber);
+  } catch (error) {
+    warnings.push(`Dissolving the earlier stack on GitHub: ${String(error)}`);
+  }
+}
+
+/**
  * Makes the pull requests a GitHub stack (a stack map on each, merges from the bottom, the rest
- * rebased by GitHub after a merge); an earlier split's stack is dissolved first. Null where GitHub
- * has no stacks, or when a pull request is missing: Union then keeps the stack alone.
+ * rebased by GitHub after a merge). Null where GitHub has no stacks, or when a pull request is
+ * missing: Union then keeps the stack alone.
  */
 async function stackOnGitHub(stack: Stack, warnings: string[]): Promise<number | null> {
-  const { api, repo, ticket, slices } = stack;
+  const { api, repo, slices } = stack;
   const numbers = slices.flatMap((slice) => (slice.prNumber === null ? [] : [slice.prNumber]));
   if (numbers.length !== slices.length) {
     return null;
   }
   try {
-    if (ticket.githubStackNumber !== null) {
-      await api.unstack(repo, ticket.githubStackNumber);
-    }
     return await api.createStack(repo, numbers);
   } catch (error) {
     warnings.push(`The stack on GitHub (Union keeps it alone): ${String(error)}`);
@@ -141,6 +154,7 @@ export async function publishStack(
     slices,
   };
   const warnings: string[] = [];
+  await dissolveEarlier(stack, warnings);
   await openPullRequests(stack, warnings);
   await writeTexts(stack, warnings);
   const githubStackNumber = await stackOnGitHub(stack, warnings);

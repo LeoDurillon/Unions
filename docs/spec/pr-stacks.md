@@ -43,8 +43,9 @@ While the pull request is open, the PR tab shows **Split into a stack**, usable 
    title, its part of the spec, the stack, `Part of #<issue>`; no `Closes`), the ticket's own description gets a
    stack section, the issue gets one comment listing the stack, and `ticket_slices` is replaced. The pull
    requests are then made a **GitHub stack** (`POST /repos/{o}/{r}/stacks`, bottom first, API version
-   `2026-03-10`), whose number is kept on the ticket (`github_stack_number`); an earlier split's stack is
-   unstacked first. Where GitHub has no stacks (a 404: GitHub Enterprise Server), Union keeps the stack alone.
+   `2026-03-10`), whose number is kept on the ticket (`github_stack_number`). GitHub refuses to change the base
+   of a pull request in a stack, so an earlier split's stack is unstacked before the pull requests are
+   retargeted, and Union never retargets a GitHub stack's pull requests after a merge. Where GitHub has no stacks (a 404: GitHub Enterprise Server), Union keeps the stack alone.
    What GitHub
    refuses after the push is listed in the report: the split stands. A slice branch of an earlier split with no
    use left is reported, not deleted.
