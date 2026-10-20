@@ -152,3 +152,11 @@ test('on a GitHub stack, Union waits for GitHub to retarget the next pull reques
   await poll();
   expect(getTicket(db, ticketId).phase).toMatchObject({ step: 'restack', hostOnly: true });
 });
+
+test('a GitHub stack dissolved by hand is forgotten: Union restacks on its own after a merge', async () => {
+  db.update(schema.tickets).set({ githubStackNumber: 1 }).run();
+  merge(lower, 'main');
+  await poll();
+  expect(getTicket(db, ticketId).githubStackNumber).toBeNull();
+  expect(getTicket(db, ticketId).phase).toMatchObject({ step: 'restack', hostOnly: true });
+});

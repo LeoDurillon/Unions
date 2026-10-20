@@ -78,12 +78,24 @@ function fromStack(stack: GitHubStack, number: number | null): PullRequestStatus
   };
 }
 
-/** The ticket's GitHub stack, when it has one; null for a stack Union keeps alone. */
-function githubStack(api: GitHubApi, input: Poll): Promise<GitHubStack | null> {
+/**
+ * The ticket's GitHub stack, when it has one; null for a stack Union keeps alone. A stack dissolved
+ * on GitHub (unstacked by hand) is forgotten: Union keeps the stack from then on.
+ */
+async function githubStack(db: Db, api: GitHubApi, input: Poll): Promise<GitHubStack | null> {
   const { ticket, repo } = input;
-  return ticket.githubStackNumber === null || ticket.prNumber === null
-    ? Promise.resolve(null)
-    : api.pullRequestStack(repo, ticket.prNumber);
+  if (ticket.githubStackNumber === null || ticket.prNumber === null) {
+    return null;
+  }
+  const stack = await api.pullRequestStack(repo, ticket.prNumber);
+  if (stack === null || !stack.open) {
+    db.update(schema.tickets)
+      .set({ githubStackNumber: null })
+      .where(eq(schema.tickets.id, ticket.id))
+      .run();
+    return null;
+  }
+  return stack;
 }
 
 type Polled = { behindBy: number | null; managed: boolean };
@@ -95,7 +107,7 @@ type Polled = { behindBy: number | null; managed: boolean };
 async function pollSlices(db: Db, api: GitHubApi, input: Poll): Promise<Polled> {
   const slices = listSlices(db, input.ticket.id);
   const bottom = slices.find((slice) => slice.prState !== 'merged');
-  const stack = await githubStack(api, input);
+  const stack = await githubStack(db, api, input);
   const polled: Polled = { behindBy: null, managed: stack !== null };
   for (const slice of slices.filter((candidate) => !settled(candidate))) {
     const isBottom = slice.id === bottom?.id;
