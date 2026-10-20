@@ -1,6 +1,6 @@
 /**
  * Notion's page markdown (`GET /v1/pages/{id}/markdown`) as plain GitHub-flavored markdown: its own
- * tags (mentions, callouts, colored or commented spans, toggles) become what any renderer, GitHub
+ * tags (mentions, link previews, callouts, colored or commented spans, toggles) become what any renderer, GitHub
  * and the agents read. Browser-safe: the panel also cleans tickets imported before this existed.
  * Idempotent: clean markdown goes through unchanged.
  */
@@ -8,6 +8,7 @@
 /** `{toggle="true"}`, `{color="blue"}` at the end of a line: Notion block attributes. */
 const BLOCK_ATTRIBUTES = /\s*\{(?:[a-z_]+="[^"]*"\s*)+\}\s*$/u;
 const MENTION = /<mention-(?<kind>[a-z]+)\b(?<attributes>[^>]*?)\/?>(?:<\/mention-\k<kind>>)?/gu;
+const LINK_PREVIEW = /<link-preview\b(?<attributes>[^>]*?)\/?>(?:<\/link-preview>)?/gu;
 const SPAN = /<span\b[^>]*>(?<inner>[\s\S]*?)<\/span>/gu;
 const STRAY_TAGS = /<\/?(?:empty-block|columns|column)\b[^>]*>/gu;
 const CALLOUT_OPEN = /^<callout\b(?<attributes>[^>]*)>\s*$/u;
@@ -32,6 +33,12 @@ function mentionText(kind: string, attributes: string, titles: Record<string, st
   return '';
 }
 
+/** A link preview (a Figma file, a video…) as its plain link: `source` is the link, `url` the block. */
+function linkPreviewText(attributes: string): string {
+  const link = attribute(attributes, 'source') ?? attribute(attributes, 'url') ?? '';
+  return link.replaceAll('&amp;', '&');
+}
+
 function isGroups(value: unknown): value is Record<string, string | undefined> {
   return typeof value === 'object' && value !== null;
 }
@@ -40,6 +47,10 @@ function inline(line: string, titles: Record<string, string>): string {
   let text = line.replaceAll(MENTION, (...match: unknown[]) => {
     const groups = match.at(-1);
     return isGroups(groups) ? mentionText(groups.kind ?? '', groups.attributes ?? '', titles) : '';
+  });
+  text = text.replaceAll(LINK_PREVIEW, (...match: unknown[]) => {
+    const groups = match.at(-1);
+    return isGroups(groups) ? linkPreviewText(groups.attributes ?? '') : '';
   });
   // Spans nest when Notion marks a commented range inside a colored one.
   for (let previous = ''; previous !== text;) {

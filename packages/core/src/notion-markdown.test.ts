@@ -16,6 +16,13 @@ test('a page mention becomes a link, titled when the title is known', () => {
   );
 });
 
+test('a link preview becomes its source as a plain link', () => {
+  const figma = 'https://www.figma.com/design/iehz/Subs?node-id=1339-6499&t=iyeq-1';
+  const line = `Maquette : <link-preview url="${PAGE}#3c37" source="${figma.replace('&', '&amp;')}" />`;
+  expect(notionMarkdown(line)).toBe(`Maquette : ${figma}`);
+  expect(notionMarkdown(`<link-preview url="${PAGE}"></link-preview>`)).toBe(PAGE);
+});
+
 test('a callout becomes a quote, its icon first and its lines no longer indented', () => {
   const callout = [
     '<callout icon="🎯" color="gray_bg">',
