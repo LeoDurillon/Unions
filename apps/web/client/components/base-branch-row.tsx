@@ -57,7 +57,7 @@ function BranchPicker({
         {[...typed, ...branches].map((branch) => (
           <label
             key={branch}
-            className={`block cursor-pointer px-3 py-1.5 font-mono text-xs has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-indigo-500 has-[:focus-visible]:ring-inset ${branch === value ? ROW_ON : ROW_OFF}`}
+            className={`relative block cursor-pointer px-3 py-1.5 font-mono text-xs has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-indigo-500 has-[:focus-visible]:ring-inset ${branch === value ? ROW_ON : ROW_OFF}`}
           >
             <input
               type="radio"

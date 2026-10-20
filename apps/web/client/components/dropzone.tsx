@@ -94,7 +94,7 @@ export function Dropzone({
   return (
     <label
       ref={box}
-      className={`flex flex-col items-center gap-0.5 rounded-lg border-2 border-dashed px-4 py-3 text-center transition has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-indigo-500 ${boxClass(over, disabled)}`}
+      className={`relative flex flex-col items-center gap-0.5 rounded-lg border-2 border-dashed px-4 py-3 text-center transition has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-indigo-500 ${boxClass(over, disabled)}`}
     >
       <input
         type="file"

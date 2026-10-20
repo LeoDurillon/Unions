@@ -71,7 +71,7 @@ export function Switch({
 }): ReactElement {
   return (
     <label
-      className={`flex items-start gap-2.5 ${disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
+      className={`relative flex items-start gap-2.5 ${disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
     >
       <input
         type="checkbox"
