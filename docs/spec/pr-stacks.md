@@ -87,8 +87,10 @@ While the pull request is open, the PR tab shows **Split into a stack**, usable 
   targets the base, the worker starts `restack` (`hostOnly`), which **follows GitHub**: it fetches the open
   slices' branches, checks GitHub's branch holds the base, resets the workspace's branches to them and records
   the tips, with no push and no agent (`stack_followed`). A workspace holding commits GitHub does not have is
-  refused. When GitHub has not rebased (a conflict: GitHub shows Rebase stack), the worker's run fails and the
-  user's Restack rebases with Union, as below.
+  refused. When GitHub has not rebased (a conflict: tried 2026-10-20, GitHub still merges the bottom slice and
+  retargets the next pull request, but leaves its branch as it was), the worker's run fails, nothing pushed,
+  and the user's Restack (or Retry) rebases with Union: `--onto` the merged tip, the rebase agent resolving the
+  conflict, the open slices force-pushed; GitHub keeps the stack.
 - On a stack **Union keeps alone**, when a slice merges into the base and others remain, the worker starts
   `restack` on its own (`hostOnly`, when the ticket is at its final review or Done): `git rebase --onto origin/<base> <merged tip> --update-refs`, so the
   merged commits are not replayed even after a squash merge, the checks, then the open slices are pushed together

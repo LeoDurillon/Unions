@@ -110,3 +110,15 @@ test('a restack the worker starts after a merge is host only; a retry is the use
     thenDone: true,
   });
 });
+
+test('Restack after a failed restack runs it again as the user asked: the agent may resolve it', () => {
+  const failed: Phase = { kind: 'failed', step: 'restack', error: 'conflict', thenDone: true };
+  expect(transition(failed, { type: 'restack' })).toEqual({
+    kind: 'running',
+    step: 'restack',
+    thenRun: 'final_review',
+    thenDone: true,
+  });
+  const otherFailure: Phase = { kind: 'failed', step: 'implement', error: 'x' };
+  expect(() => transition(otherFailure, { type: 'restack' })).toThrow(InvalidTransition);
+});

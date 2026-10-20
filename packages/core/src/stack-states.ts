@@ -59,6 +59,12 @@ export function stackTransition(phase: Phase, action: Action): Phase | null | un
   if (phase.kind === 'running') {
     return fromStackRun(phase, action);
   }
+  // The PR tab's Restack after a restack failed (one the worker started stops on a conflict): the
+  // user asks for it, so the agent may resolve the conflict, as a Retry would.
+  if (phase.kind === 'failed' && phase.step === 'restack' && action.type === 'restack') {
+    const next = running('restack');
+    return next.kind === 'running' ? { ...next, ...thenDoneOf(phase) } : next;
+  }
   const reviewed = fromReviewed(phase, action);
   if (reviewed !== undefined) {
     return reviewed;
