@@ -7,6 +7,7 @@ import { CiChecks } from './pull-request/ci-checks';
 import { Discussion } from './pull-request/discussion';
 import { PrDescription } from './pull-request/pr-description';
 import { SimplifyHistory } from './pull-request/simplify-history';
+import { SplitStack } from './pull-request/split-stack';
 
 /**
  * The ticket's pull request: link it, its CI checks, keep its description current, then read its
@@ -19,6 +20,7 @@ export function PullRequestTab({ detail }: { detail: TicketDetail }): ReactEleme
       <PullRequestRow ticket={ticket} project={project} />
       <BranchStatus detail={detail} />
       <SimplifyHistory detail={detail} />
+      <SplitStack detail={detail} />
       {ticket.prNumber === null ? (
         <p className="text-sm text-zinc-500">
           Link the pull request to read its discussion here and import review comments.

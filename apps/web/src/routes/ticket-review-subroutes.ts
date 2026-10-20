@@ -6,11 +6,12 @@ import { ticketExplanationRoutes, ticketGroupingRoutes } from './grouping-target
 import { prChecksRoutes } from './pr-checks';
 import { prDescriptionRoutes } from './pr-description';
 import { refusedCommit } from './refused-commit';
+import { reviewRoutes } from './review';
 import { ticketCommitRoutes } from './ticket-commits';
 
 /**
  * A ticket's routes about its change: its refused commit, its PR description rewrite, its grouping by
- * spec, the explanations of its lines, its commits, its pull request's CI checks.
+ * spec, the explanations of its lines, its commits, its pull request's CI checks, its review.
  */
 export function ticketReviewSubroutes(db: Db, { github, notion, ci }: ApiServices): Hono {
   const routes = new Hono();
@@ -20,5 +21,6 @@ export function ticketReviewSubroutes(db: Db, { github, notion, ci }: ApiService
   routes.route('/:id/explanations', ticketExplanationRoutes(db));
   routes.route('/:id/commits', ticketCommitRoutes(db));
   routes.route('/:id/pr-checks', prChecksRoutes(db, ci));
+  routes.route('/', reviewRoutes(db, github));
   return routes;
 }

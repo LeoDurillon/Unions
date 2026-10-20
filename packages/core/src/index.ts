@@ -83,6 +83,7 @@ export type {
   ProjectScript,
   PullRequestFile,
 } from './schema-types';
+export * from './split-plan';
 export * from './stack-description';
 export * from './stack-restack';
 export * from './stack-status';
@@ -91,5 +92,6 @@ export * from './states';
 export * from './step-titles';
 export * from './ticket-base';
 export * from './ticket-links';
+export * from './ticket-slices';
 export * from './tickets';
 export * from './workspace-owner';

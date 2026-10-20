@@ -62,13 +62,14 @@ export async function commitsAhead(
 export async function exportBranch(
   runtime: ContainerRuntime,
   container: string,
-  branch: string,
+  branch: string | readonly string[],
   hostPath: string,
 ): Promise<void> {
+  const branches = typeof branch === 'string' ? [branch] : branch;
   await mustRunIn(
     runtime,
     container,
-    git(['bundle', 'create', BUNDLE_PATH, `refs/heads/${branch}`]),
+    git(['bundle', 'create', BUNDLE_PATH, ...branches.map((name) => `refs/heads/${name}`)]),
   );
   await runtime.copyOut(container, BUNDLE_PATH, hostPath);
   await runIn(runtime, container, ['rm', '-f', BUNDLE_PATH]);

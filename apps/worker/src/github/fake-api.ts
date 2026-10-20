@@ -216,6 +216,12 @@ export class FakeGitHubApi extends FakeProjectFields implements GitHubApi {
     return pull;
   }
 
+  updatePullRequestBase(_repo: RepoRef, number: number, base: string): Promise<void> {
+    this.calls.push('updatePullRequestBase');
+    this.pullByNumber(number).base = base;
+    return Promise.resolve();
+  }
+
   updatePullRequestTitle(_repo: RepoRef, number: number, title: string): Promise<void> {
     this.calls.push('updatePullRequestTitle');
     this.pullByNumber(number).title = title;

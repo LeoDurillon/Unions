@@ -105,6 +105,8 @@ export type GitHubApi = {
   pullRequestBody(repo: RepoRef, number: number): Promise<string>;
   updatePullRequestBody(repo: RepoRef, number: number, body: string): Promise<void>;
   updatePullRequestTitle(repo: RepoRef, number: number, title: string): Promise<void>;
+  /** Retargets the pull request onto another branch: a slice of a stack onto the one below. */
+  updatePullRequestBase(repo: RepoRef, number: number, base: string): Promise<void>;
   /** Adds labels to an issue or pull request; GitHub creates the ones the repository lacks. */
   addLabels(repo: RepoRef, number: number, labels: string[]): Promise<void>;
   /** Removes a label; does nothing if the issue or pull request does not have it. */

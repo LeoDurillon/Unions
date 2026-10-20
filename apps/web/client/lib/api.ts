@@ -145,6 +145,8 @@ export const api = {
       gateCommand?: string;
       maxIterations?: number;
       createPullRequest?: boolean;
+      stacks?: boolean;
+      sliceChecks?: boolean;
       hideLockFiles?: boolean;
       reviewIgnore?: string[];
       notionToken?: string;

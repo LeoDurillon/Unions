@@ -13,6 +13,7 @@ import { listCustomAgents } from './custom-agents';
 import type { Db } from './db';
 import { LESSON_WRITER_PROMPT } from './lesson-writer';
 import * as schema from './schema';
+import { SPLIT_PLAN_PROMPT, SPLIT_PROMPT } from './stack-prompts';
 import {
   customStep,
   isAgentEffort,
@@ -41,6 +42,8 @@ export const AGENT_IDS = [
   'pr_description',
   'rebase',
   'simplify',
+  'split_plan',
+  'split',
   'lesson_writer',
 ] as const;
 export type BuiltInAgentId = (typeof AGENT_IDS)[number];
@@ -123,6 +126,8 @@ Do not change any file: the branch must end with exactly the same content, and t
 There is no editor or terminal: \`git rebase -i\` and \`git add -p\` cannot be used. For example: \`git reset --soft <fork point>\`, \`git reset\`, then \`git add <paths>\` and \`git commit -m\` for each commit; stage part of a file with \`git apply --cached\`.
 Never push.
 Output a short markdown report: the new commits' subject lines, and what was merged, split or reordered.`,
+  split_plan: SPLIT_PLAN_PROMPT,
+  split: SPLIT_PROMPT,
   lesson_writer: LESSON_WRITER_PROMPT,
 };
 
@@ -162,6 +167,7 @@ const RUN_AGENTS: readonly BuiltInRunAgent[] = [
   'review_groups',
   'review_explain',
   'pr_description',
+  'split_plan',
   'lesson_writer',
 ];
 
@@ -252,12 +258,9 @@ function inImplementerSession(step: RunAgent): step is ImplementerSessionStep {
   return IMPLEMENTER_SESSION.some((session) => session === step);
 }
 
-/** The agent whose settings a run of `step` uses. The split plan has no prompt of its own yet. */
+/** The agent whose settings a run of `step` uses. */
 function settingsOf(step: RunAgent): AgentId {
-  if (inImplementerSession(step)) {
-    return 'implement';
-  }
-  return step === 'split_plan' ? 'final_review' : step;
+  return inImplementerSession(step) ? 'implement' : step;
 }
 
 /** The model a run of `step` uses: the user's choice, else the built-in one. */
@@ -276,9 +279,6 @@ export function toolsFor(db: Db, step: RunAgent): string[] {
   // The implementer's tools, plus the git commands the step needs.
   if (inImplementerSession(step)) {
     return [...new Set([...toolsFor(db, 'implement'), ...DEFAULT_TOOLS[step]])];
-  }
-  if (step === 'split_plan') {
-    return [...DEFAULT_TOOLS.split_plan];
   }
   return resolveAgent(db, step).tools ?? [...defaultToolsOf(step)];
 }

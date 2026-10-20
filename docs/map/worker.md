@@ -27,8 +27,9 @@ export); do not edit. Tests are left out.
 - `e2e-request.ts`: The e2e tests the user asks for, from a ticket or a pull request, in its own container.
 - `e2e.ts`: The project's e2e command against the owner's preview, after its checks passed.
 - `event-dispatcher.ts`: Follows the event log: writes the notifications, queues a delivery for each event a rule waits for, then does the due ones, a few per tick and one at a time.
-- `executor.ts`: Every step: planning and custom agents, implementation, final review, and the rebase and simplify asked on demand.
+- `executor.ts`: Every step: planning and custom agents, implementation, final review, and the rebase, simplify and split asked on demand.
 - `gate.ts`: Runs the project's check command in the repository; a timeout counts as red.
+- `history-steps.ts`: The steps that rewrite a reviewed branch's history, the code unchanged: simplify, and the split into a stack.
 - `hooks.ts`: What the commands hand off to the running worker: all asynchronous, so draining stays synchronous.
 - `implement-checks.ts`: The checks after an agent turn; `retry` is what the session is sent when they are red.
 - `implement-loop.ts`: Agent turn, then checks; on red checks the same session gets the failure, up to the limit.
@@ -84,6 +85,15 @@ export); do not edit. Tests are left out.
 - `simplify-push.ts`: Pushes a simplified history, unless the agent left the one already on GitHub.
 - `simplify.ts`: Rewrites the ticket's commits into a simpler history with the implementer's own session, checks the code did not change and force-pushes it with a lease.
 - `slots.ts`: Agent runs allowed at the same time, shared by the ticket scheduler and the investigations.
+- `split-agent.ts`: The implementer's session asked to rewrite its commits into the approved slices, and the split's report.
+- `split-plan-step.ts`: The split plan: a read-only agent proposes the slices of a stack, which the user edits and approves.
+- `split-publish.ts`: The split's way to and from GitHub: the stack's branches fetched with their leases, then pushed and opened.
+- `split-rounds.ts`: The split's agent turns: its first try, then the host's problems sent back until the result passes.
+- `split-verify.ts`: Checks a split before it is pushed: the same content, every commit in its slice, each slice's checks.
+- `split.ts`: Rewrites the ticket's commits into the approved slices with the implementer's session, checks them, pushes the stack and opens it on GitHub.
+- `stack-git.ts`: Git for a stack: its commits with their trailers, the lower slices' branches, a slice tip checked out.
+- `stack-publish.ts`: Opens the stack on GitHub: a pull request per lower slice, the ticket's own retargeted, their texts, the issue's comment.
+- `stack-push.ts`: Pushes every branch of a stack in one atomic push, each leased on what GitHub had: all or none.
 - `throwaway-runs.ts`: The side runs that need no repository, each in a throwaway container: reading the account's connectors, the lesson writer and the prompt writer.
 - `ticket-base.ts`: Chooses the branch a ticket is cloned from, before its first clone: the branch the user chose (over the parent's), else the parent's branch while its pull requ…
 - `workspace-git.ts`: Puts the repository on `branch`: the local branch if it exists, else the pushed one (a recreated container only has `origin/<branch>`), else a new branch from …
@@ -112,7 +122,7 @@ export); do not edit. Tests are left out.
 - `octokit-api.ts`: The GitHub API implemented with Octokit: issues, pull requests and the project board.
 - `octokit-checks.ts`: The CI checks of the worker's GitHub client: a pull request's head commit and the overall state of its checks, and re-running an Actions job.
 - `octokit-project-fields.ts`: The GitHub Project fields of the worker's GitHub client: reading them, setting one on an item, a pull request's node id.
-- `octokit-pull-request-changes.ts`: The issue and pull request changes of the worker's GitHub client (issue text, PR title, labels, reviewers, assignees): the base of `OctokitGitHubApi`.
+- `octokit-pull-request-changes.ts`: The issue and pull request changes of the worker's GitHub client (issue text, PR title and base, labels, reviewers, assignees): the base of `OctokitGitHubApi`.
 - `pr-description-send.ts`: Writes the user's version of a rewritten description to the pull request, with Union's links added back, unless the description on GitHub changed since the age…
 - `pr-review.ts`: The review as GitHub gets it.
 - `pull-request-checks.ts`: Keeps the CI checks' state of the ticket's open pull request current, and logs when they turn red.

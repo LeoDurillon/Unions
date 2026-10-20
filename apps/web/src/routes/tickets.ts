@@ -35,8 +35,8 @@ import {
   requireText,
 } from '../http';
 import type { ApiServices } from '../services';
-import { reviewRoutes } from './review';
-import { assertStartable, changeParent, childrenOf, findTicket, summarize } from './ticket-links';
+import { assertCommandFits } from './ticket-command-checks';
+import { changeParent, childrenOf, findTicket, summarize } from './ticket-links';
 import { linkPullRequest, unlinkPullRequest } from './ticket-pull-request';
 import { ticketSubroutes } from './ticket-subroutes';
 
@@ -145,19 +145,7 @@ async function queueCommand(db: Db, c: Context): Promise<Response> {
   }
   assertAllowed(ticket, type);
   const payload = commandPayload(db, id, type, body);
-  if (type === 'start') {
-    assertStartable(db, ticket);
-  }
-  // The worker knows the PR is open (and how far behind it is) from GitHub: no count, no rebase.
-  if (type === 'rebase' && (ticket.branch === null || ticket.behindBy === null)) {
-    throw fail(
-      CONFLICT,
-      'Nothing to rebase: the ticket has no open pull request (or it was not checked yet)',
-    );
-  }
-  if (type === 'simplify' && (ticket.branch === null || ticket.prState !== 'open')) {
-    throw fail(CONFLICT, 'Nothing to simplify: the ticket has no open pull request');
-  }
+  assertCommandFits(db, ticket, type);
   if (hasPendingCommand(db, id)) {
     throw fail(CONFLICT, 'A command for this ticket is still being processed');
   }
@@ -198,6 +186,5 @@ export function ticketRoutes(db: Db, services: ApiServices): Hono {
   routes.put('/:id/pull-request', (c) => linkPullRequest(db, github, c));
   routes.delete('/:id/pull-request', (c) => unlinkPullRequest(db, c));
   routes.route('/', ticketSubroutes(db, services));
-  routes.route('/', reviewRoutes(db, github));
   return routes;
 }

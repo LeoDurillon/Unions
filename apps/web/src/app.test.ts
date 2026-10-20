@@ -161,6 +161,25 @@ test('simplify needs an open pull request and the final review or done', async (
   expect(db.select().from(schema.commands).all()).toMatchObject([{ type: 'simplify' }]);
 });
 
+test('a split needs stacks turned on for the project and an open pull request', async () => {
+  const project = await makeProject();
+  const ticket = await makeTicket(project.id);
+  const command = async (type: string): Promise<number> => {
+    const response = await send('POST', `/api/tickets/${ticket.id}/commands`, { type });
+    return response.status;
+  };
+  db.update(schema.tickets)
+    .set({ phase: { kind: 'done' }, branch: 'feature', prState: 'open' })
+    .run();
+  expect(await command('split')).toBe(409);
+  db.update(schema.projects)
+    .set({ config: { ...project.config, stacks: true } })
+    .run();
+  expect(await command('drop_split')).toBe(409);
+  expect(await command('split')).toBe(202);
+  expect(db.select().from(schema.commands).all()).toMatchObject([{ type: 'split' }]);
+});
+
 test('editing an output creates a new version, only for the step awaiting approval', async () => {
   const project = await makeProject();
   const ticket = await makeTicket(project.id);

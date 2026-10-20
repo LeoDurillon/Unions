@@ -63,6 +63,16 @@ export const AGENT_LABELS: Record<BuiltInAgentId, AgentLabel> = {
     description:
       "Proposes lessons from the feedback when you click Suggest lessons on a project's Memory page. It reads only the feedback and the lessons already kept (no repository, no tools); you accept or drop each proposal.",
   },
+  split_plan: {
+    title: 'Split plan',
+    description:
+      "Proposes how to cut a ticket's pull request into a stack of pull requests when you click Split into a stack in its PR tab. It reads the spec, the diff and the commits and changes no file; you edit and approve its plan.",
+  },
+  split: {
+    title: 'Split into a stack',
+    description:
+      "Prompt the implementation agent gets once you approve a split plan: it rewrites the branch's commits into the plan's slices, the code unchanged. It resumes its own session and uses the Implementation model and effort.",
+  },
   simplify: {
     title: 'Simplify history',
     description:

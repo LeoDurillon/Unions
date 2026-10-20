@@ -175,6 +175,8 @@ function configChange(db: Db, project: Project, body: Record<string, unknown>): 
     maxIterations: iterationsChange(body, config.maxIterations),
     instructions: instructionsChange(body, config.instructions),
     memory: booleanChange(body, 'memory', config.memory),
+    stacks: booleanChange(body, 'stacks', config.stacks),
+    sliceChecks: booleanChange(body, 'sliceChecks', config.sliceChecks),
     scripts: scriptsChange(body, config.scripts),
     ...flowsChange(db, body, config),
   };
@@ -209,6 +211,8 @@ const UPDATABLE = [
   'notionDataSourceId',
   'instructions',
   'memory',
+  'stacks',
+  'sliceChecks',
   'scripts',
   ...CHECK_FIELDS,
   ...FLOW_FIELDS,

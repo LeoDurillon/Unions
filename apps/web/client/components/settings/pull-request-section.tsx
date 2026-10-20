@@ -6,20 +6,65 @@ import { useSettingsForm } from '../../lib/use-settings-form';
 import { Switch } from '../choice';
 import { SaveBar } from './save-bar';
 
-/** Whether the worker opens a draft PR after the implementation, or the user links one by hand. */
+type PullRequestSettings = { createPullRequest: boolean; stacks: boolean; sliceChecks: boolean };
+
+function settingsOf(project: PublicProject): PullRequestSettings {
+  const { config } = project;
+  return {
+    createPullRequest: config.createPullRequest !== false,
+    stacks: config.stacks === true,
+    sliceChecks: config.sliceChecks !== false,
+  };
+}
+
+/** Stacks: Split into a stack in a ticket's PR tab, and whether each slice's checks run. */
+function StackSwitches({
+  value,
+  onChange,
+}: {
+  value: PullRequestSettings;
+  onChange: (value: PullRequestSettings) => void;
+}): ReactElement {
+  return (
+    <>
+      <Switch
+        checked={value.stacks}
+        onChange={(stacks) => {
+          onChange({ ...value, stacks });
+        }}
+        hint="Experimental, while stacks are being built: a ticket's PR tab offers Split into a stack. An agent proposes slices of the spec; once you approve, the history is rewritten into them and a pull request is opened per slice, each on the one below. Merging and restacking the slices is not handled yet: try it on a test repository."
+      >
+        <span className="font-medium">Split pull requests into stacks</span>
+      </Switch>
+      {value.stacks ? (
+        <Switch
+          checked={value.sliceChecks}
+          onChange={(sliceChecks) => {
+            onChange({ ...value, sliceChecks });
+          }}
+          hint="Runs the project's checks on each slice's tip when splitting, so each slice builds alone; a failure goes back to the agent."
+        >
+          <span className="font-medium">Check every slice</span>
+        </Switch>
+      ) : null}
+    </>
+  );
+}
+
+/** Whether the worker opens a draft PR after the implementation, or the user links one by hand; stacks. */
 export function PullRequestSection({ project }: { project: PublicProject }): ReactElement {
   const form = useSettingsForm(
-    () => project.config.createPullRequest !== false,
-    (createPullRequest) => api.updateProject(project.id, { createPullRequest }),
+    () => settingsOf(project),
+    (value) => api.updateProject(project.id, value),
   );
-  const automatic = form.value;
+  const automatic = form.value.createPullRequest;
 
   return (
     <section className="space-y-3">
       <Switch
         checked={automatic}
         onChange={(on) => {
-          form.set(on);
+          form.set({ ...form.value, createPullRequest: on });
         }}
         hint="After the implementation, the branch is pushed and a draft pull request (Closes #issue) is opened. Approving the final review marks it ready for review."
       >
@@ -30,6 +75,12 @@ export function PullRequestSection({ project }: { project: PublicProject }): Rea
           ? 'A pull request you link by hand on a ticket is always kept: no second one is opened.'
           : 'The branch is still pushed, but no pull request is opened. Link one from the ticket’s Overview tab, by number or URL.'}
       </p>
+      <StackSwitches
+        value={form.value}
+        onChange={(value) => {
+          form.set(value);
+        }}
+      />
       <SaveBar state={form} />
     </section>
   );

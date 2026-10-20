@@ -102,7 +102,9 @@ export); do not edit. Tests are left out.
 - `schema-ticket-slices.ts`: The slices of a ticket split into a stack of pull requests: a part of the spec and its commits.
 - `schema-types.ts`: Plain types stored in JSON columns, kept apart so schema.ts holds the tables.
 - `schema.ts`: The GitHub App projects can authenticate with instead of a token.
+- `split-plan.ts`: The split plan's format: the slices an agent proposes for a stack, as markdown the user can edit.
 - `stack-description.ts`: The text of a stack on GitHub: each slice's pull request description and the issue's comment.
+- `stack-prompts.ts`: The default prompts of the agents that split a ticket's pull request into a stack.
 - `stack-restack.ts`: The todo the host gives `git rebase -i` to restack a revision: each new commit moved into its slice.
 - `stack-states.ts`: The state machine's moves for a stack of pull requests: planning a split, splitting, restacking.
 - `stack-status.ts`: Where a stack stands: which slices merged and into what, and the base each reader compares with.
@@ -113,5 +115,6 @@ export); do not edit. Tests are left out.
 - `ticket-base.ts`: The branch the ticket starts from and why; before it starts, the one it would take now.
 - `ticket-flow.ts`: Choosing the steps a ticket runs: only before it starts, since the start fixes them.
 - `ticket-links.ts`: A parent link the rules refuse: wrong project, a cycle, or a ticket that already started.
+- `ticket-slices.ts`: A ticket's slices once split into a stack: read bottom first, and replaced by a new split.
 - `tickets.ts`: Tickets: reading, creating and labelling them, the event log they write to, and dispatching state-machine actions.
 - `workspace-owner.ts`: Whose workspace a preview or a command runs in: a ticket's, or a pull request's under review; browser-safe.

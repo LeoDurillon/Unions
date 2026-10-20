@@ -134,6 +134,7 @@ export); do not edit. Tests are left out.
 - `note-filter.tsx`: Whose reviews and comments the discussion shows: everyone's, people's only, or bots' only.
 - `pr-description.tsx`: The PR's description, rewritten by the agent when the work changed after the PR was opened.
 - `simplify-history.tsx`: The Simplify history button: the implementation agent rewrites the branch&apos;s commits, the code unchanged.
+- `split-stack.tsx`: The Split into a stack button: an agent plans slices of the spec, then the branch becomes a stack of pull requests.
 
 ## components/pull-requests/
 
@@ -234,7 +235,7 @@ export); do not edit. Tests are left out.
 - `project-section-body.tsx`: The project's own settings and its pull requests'.
 - `pull-request-change.tsx`: One change a pull request rule makes: labels, reviewers or assignees to pick, or a title or description template.
 - `pull-request-fields.tsx`: A pull request action's fields: the changes it makes, one box each, and adding the kinds not used yet.
-- `pull-request-section.tsx`: Whether the worker opens a draft PR after the implementation, or the user links one by hand.
+- `pull-request-section.tsx`: Whether the worker opens a draft PR after the implementation, or the user links one by hand; stacks.
 - `review-section.tsx`: Files the review page lists apart (collapsed), so the sidebar shows what needs reading.
 - `rule-action-text.tsx`: What a rule does, in a sentence for its row: the Notion properties it sets, what it changes on the pull request or its Project item, where it comments, or what…
 - `rule-editor.tsx`: Edits a rule: its name, what triggers it, and what it does.

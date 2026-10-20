@@ -30,6 +30,21 @@
   like the implementer's, and the user commits without hooks or keeps the old history, which restores the branch),
   the host checks the fork point and the tree are unchanged, and force-pushes with a lease; no install, checks or
   services. Any failure puts the branch back.
+- `history-steps.ts` runs the steps that rewrite a reviewed branch: simplify, and the split into a stack
+  (`docs/plans/pr-stack.md`), offered only on projects with `config.stacks`. `split-plan-step.ts`: a read-only
+  agent (`split_plan`, the final review's tools, a fresh session; a revision resumes it) proposes the slices in
+  `SPLIT_PLAN_FORMAT`; a plan `parseSplitPlan` cannot read gets one more turn (`settlePlan`). Approved, `split.ts`
+  resumes the implementer's session with the `split` prompt and the plan: `split-publish.ts` fetches the ticket's
+  branch and any `<branch>-s<n>` already on GitHub (`remoteSliceBranches`, refused when one has commits the
+  workspace lacks), `split-rounds.ts` sends the host's problems back in the same session up to twice
+  (`verifySplit`: `simplifyProblem`, every commit's `Slice:` trailer in order, and the checks on each lower
+  slice's tip unless `config.sliceChecks` is false), then the lower slices' branches are set and pushed with the
+  ticket's in one `git push --atomic` with a lease each (`stack-push.ts`). `stack-publish.ts` opens or reuses a
+  pull request per lower slice (draft, ready when the ticket's already is), retargets the ticket's onto the slice
+  below (`updatePullRequestBase`), writes each slice's description and the stack section of the ticket's own,
+  comments on the issue and records `ticket_slices`. GitHub failures after the push are warnings in the report:
+  the split stands. Any failure before the push puts the branch back. `markReadyWhenDone` marks every slice's
+  pull request ready. Restacking, per-slice review and merging are later steps of the plan.
 - `investigate.ts`: `InvestigationRunner` runs queued investigations in throwaway `union-i<id>` containers
   (removed after each run; a `ticket` investigation runs in the ticket's own container instead, `investigate-ticket.ts`:
   never during a step, writing tools always denied, `git status` and HEAD compared before and after, the container

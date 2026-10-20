@@ -154,7 +154,15 @@ function revise(db: Db, command: Command): void {
 }
 
 /** Commands that are a state-machine action as they are, with no payload. */
-const PLAIN_ACTIONS = ['start', 'retry', 'rebase', 'simplify', 'cancel'] as const;
+const PLAIN_ACTIONS = [
+  'start',
+  'retry',
+  'rebase',
+  'simplify',
+  'split',
+  'drop_split',
+  'cancel',
+] as const;
 
 function isPlainAction(type: string): type is (typeof PLAIN_ACTIONS)[number] {
   return PLAIN_ACTIONS.some((action) => action === type);

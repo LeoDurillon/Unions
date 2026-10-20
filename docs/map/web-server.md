@@ -93,6 +93,7 @@ export); do not edit. Tests are left out.
 - `running-previews.ts`: `/api/previews`: every preview holding containers, whatever its project, and stopping one (the worker does).
 - `spec-sources.ts`: The text of a specification, from where the user points.
 - `ticket-base.ts`: The API routes that show and change the branch a ticket is based on.
+- `ticket-command-checks.ts`: What a command needs besides a valid move of the state machine: a startable ticket, an open pull request, stacks turned on.
 - `ticket-commits.ts`: `/api/tickets/:id/commits`: the commits stored with the ticket's diff snapshot, the change since the last review, and their files.
 - `ticket-create.ts`: `POST /api/tickets`.
 - `ticket-edit.ts`: `PUT /api/tickets/:id/text`: the user's new title and description, queued for the worker, which writes them to the issue.

@@ -213,9 +213,10 @@ export class Scheduler {
     const { phase } = getTicket(this.db, ticketId);
     // In a chain (fix requested at the final review) the next step runs right away, so this
     // output counts as accepted: the reviewer reads it as the approved implementation. A simplified
-    // history waits on no one either.
+    // or split history waits on no one either.
     const accepted =
-      phase.kind === 'running' && (phase.thenRun !== undefined || phase.step === 'simplify');
+      phase.kind === 'running' &&
+      (phase.thenRun !== undefined || phase.step === 'simplify' || phase.step === 'split');
     if (result.kind === 'ok' && accepted) {
       this.db
         .update(schema.stepOutputs)

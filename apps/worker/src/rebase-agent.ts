@@ -35,9 +35,9 @@ export const REBASE_DENIED = IMPLEMENT_DENIED.filter(
 /** A rebase in progress: the workspace, its branch and base, and the commit to restore on failure. */
 export type Rebase = Workspace & { branch: string; base: string; before: string };
 
-/** A turn in the implementer's own session: the rebase, or the simplification of its history. */
+/** A turn in the implementer's own session: the rebase, or a rewrite of its history. */
 export type SessionTask = {
-  agent: 'rebase' | 'simplify';
+  agent: 'rebase' | 'simplify' | 'split';
   instructions: string;
   denied: readonly string[];
 };
@@ -55,7 +55,7 @@ function implementerSession(db: Db, ticketId: number): string | null {
         eq(schema.runs.ticketId, ticketId),
         eq(schema.runs.status, 'succeeded'),
         isNotNull(schema.runs.sessionId),
-        inArray(schema.runs.step, ['implement', 'rebase', 'simplify']),
+        inArray(schema.runs.step, ['implement', 'rebase', 'simplify', 'split']),
       ),
     )
     .orderBy(desc(schema.runs.id))
@@ -105,6 +105,16 @@ export function runInImplementerSession(rebase: Rebase, task: SessionTask): Prom
   });
   const prompt = session ? task.instructions : fresh;
   return runResumable(deps.agent, deps.runtime, agentRun(rebase, task, { prompt, session }), fresh);
+}
+
+/** Another turn of a task in the session its first turn ran in (a fix the host asks for). */
+export function continueTask(
+  rebase: Rebase,
+  task: SessionTask,
+  session: string,
+): Promise<AgentOutcome> {
+  const run = agentRun(rebase, task, { prompt: task.instructions, session });
+  return rebase.deps.agent(rebase.deps.runtime, run);
 }
 
 /** Resumes the implementer's session with the rebase prompt and why the host's rebase needs it. */

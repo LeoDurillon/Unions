@@ -46,6 +46,8 @@ test('lists the shared prompt and every step agent with their defaults', async (
     ['pr_description', 'opus', false],
     ['rebase', null, false],
     ['simplify', null, false],
+    ['split_plan', 'opus', false],
+    ['split', null, false],
     ['lesson_writer', 'haiku', false],
   ]);
 });

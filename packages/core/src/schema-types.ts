@@ -95,6 +95,10 @@ export type ProjectConfig = {
   flows?: FlowPreset[];
   /** The preset a ticket that chose none starts with; absent or unknown: Full. */
   defaultFlow?: string;
+  /** Offer Split into a stack in the PR tab (default false while stacks are being built). */
+  stacks?: boolean;
+  /** Run the checks on every slice's tip when splitting (default true). */
+  sliceChecks?: boolean;
 };
 
 /** One earlier question of an investigation and the answer it got. */

@@ -1,10 +1,10 @@
-import { emitEvent, schema, type Db, type Ticket } from '@union/core';
+import { emitEvent, listSlices, schema, type Db, type Ticket } from '@union/core';
 import { eq } from 'drizzle-orm';
 
 import type { GitHubApi, PullRequestStatus, RepoRef } from './api';
 import { refreshChecks } from './pull-request-checks';
 
-/** After the final approval the draft PR becomes ready for review, once. */
+/** After the final approval the draft PR becomes ready for review, once; a stack's other slices too. */
 export async function markReadyWhenDone(
   db: Db,
   api: GitHubApi,
@@ -15,6 +15,11 @@ export async function markReadyWhenDone(
     return;
   }
   await api.markPullRequestReady(repo, ticket.prNumber);
+  for (const slice of listSlices(db, ticket.id)) {
+    if (slice.prNumber !== null && slice.prNumber !== ticket.prNumber && slice.prState === 'open') {
+      await api.markPullRequestReady(repo, slice.prNumber);
+    }
+  }
   db.update(schema.tickets)
     .set({ prReadyAt: Date.now() })
     .where(eq(schema.tickets.id, ticket.id))

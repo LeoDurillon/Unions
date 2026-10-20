@@ -6,7 +6,10 @@ export const UNION_SETTINGS_GROUPS = [
   { label: 'General', sections: ['shared', 'models'] },
   { label: 'Planning', sections: ['intake', 'summary', 'technical', 'test_plan'] },
   { label: 'Implementation', sections: ['implement', 'final_review'] },
-  { label: 'Pull requests', sections: ['pr_description', 'rebase', 'simplify'] },
+  {
+    label: 'Pull requests',
+    sections: ['pr_description', 'rebase', 'simplify', 'split_plan', 'split'],
+  },
   { label: 'Review', sections: ['review_comments', 'review_groups', 'review_explain'] },
   { label: 'Memory', sections: ['lesson_writer'] },
   { label: 'Tools', sections: ['tools', 'connectors'] },

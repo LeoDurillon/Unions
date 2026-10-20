@@ -7,23 +7,34 @@ import { Button, ErrorText, inputClass } from './ui';
 
 type Mode = 'idle' | 'revise' | 'edit';
 
+function approveLabel(step: Step): string {
+  if (step === 'final_review') {
+    return 'Approve and mark PR ready';
+  }
+  return step === 'split_plan' ? 'Approve and split' : 'Approve';
+}
+
 function IdleButtons({
   busy,
-  finalReview,
+  step,
   onApprove,
   onChoose,
   onSendFindings,
+  onDrop,
 }: {
   busy: boolean;
-  finalReview: boolean;
+  step: Step;
   onApprove: () => void;
   onChoose: (mode: Mode) => void;
   onSendFindings: (() => void) | null;
+  /** The split plan only: forget it, back to where the split was asked. */
+  onDrop: (() => void) | null;
 }): ReactElement {
+  const finalReview = step === 'final_review';
   return (
     <>
       <Button variant="primary" disabled={busy} onClick={onApprove}>
-        {finalReview ? 'Approve and mark PR ready' : 'Approve'}
+        {approveLabel(step)}
       </Button>
       {onSendFindings ? (
         <Button onClick={onSendFindings}>Send findings to the implementer</Button>
@@ -42,6 +53,11 @@ function IdleButtons({
       >
         Edit
       </Button>
+      {onDrop ? (
+        <Button disabled={busy} onClick={onDrop}>
+          Drop the split
+        </Button>
+      ) : null}
     </>
   );
 }
@@ -101,6 +117,7 @@ type Review = {
   handleChange: (text: string) => void;
   handleSubmit: () => void;
   handleApprove: () => void;
+  handleDrop: () => void;
 };
 
 type ReviewInput = {
@@ -147,6 +164,9 @@ function useReview({ ticketId, step, saved, pending, onEditing }: ReviewInput): 
   const handleApprove = (): void => {
     act.mutate({ type: 'approve', saveFirst });
   };
+  const handleDrop = (): void => {
+    act.mutate({ type: 'drop_split' });
+  };
   const busy = act.isPending || edit.isPending;
   return {
     mode,
@@ -158,6 +178,7 @@ function useReview({ ticketId, step, saved, pending, onEditing }: ReviewInput): 
     handleChange,
     handleSubmit,
     handleApprove,
+    handleDrop,
   };
 }
 
@@ -194,8 +215,9 @@ export function ReviewBar({
         {review.mode === 'idle' ? (
           <IdleButtons
             busy={review.busy}
-            finalReview={finalReview}
+            step={step}
             onApprove={review.handleApprove}
+            onDrop={step === 'split_plan' ? review.handleDrop : null}
             onChoose={review.handleChoose}
             onSendFindings={
               findings === null
