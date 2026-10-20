@@ -2,7 +2,12 @@ import { getTicket, isIgnoredPath, schema, type Db, type Ticket } from '@union/c
 import { and, asc, desc, eq } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
 
-import { SINCE_REVIEW, type CommitDiffResponse, type CommitsResponse } from '../api-types';
+import {
+  SINCE_REVIEW,
+  slicePosition,
+  type CommitDiffResponse,
+  type CommitsResponse,
+} from '../api-types';
 import { fail, NOT_FOUND, requireId } from '../http';
 
 type CommitRow = typeof schema.diffCommits.$inferSelect;
@@ -38,6 +43,9 @@ function commitRows(db: Db, ticketId: number): CommitRow[] {
 function listCommits(rows: CommitRow[]): CommitsResponse {
   const commits = rows.filter((row) => row.kind === 'commit');
   const since = rows.find((row) => row.kind === 'since_review');
+  const slices = rows
+    .filter((row) => row.kind === 'slice')
+    .map(({ position, title, sha }) => ({ position, title, sha }));
   const reviewedAt = commits.findIndex((row) => row.sha === since?.sha);
   return {
     commits: commits.map(({ sha, title, body, author, date, parents }) => ({
@@ -49,18 +57,26 @@ function listCommits(rows: CommitRow[]): CommitsResponse {
       parents,
     })),
     sinceReview: since ? { sha: since.sha, commits: commits.length - reviewedAt - 1 } : null,
+    ...(slices.length > 0 ? { slices } : {}),
   };
 }
 
-/** The commit named in the path (a SHA, or `since-review`) in the newest snapshot. */
+/** Whether `row` is the one the path names: a SHA, `since-review`, or `slice-<position>`. */
+function named(row: CommitRow, ref: string): boolean {
+  const slice = slicePosition(ref);
+  if (slice !== null) {
+    return row.kind === 'slice' && row.position === slice;
+  }
+  return ref === SINCE_REVIEW
+    ? row.kind === 'since_review'
+    : row.kind === 'commit' && row.sha === ref;
+}
+
+/** The commit (or slice) named in the path in the newest snapshot. */
 function commitOf(db: Db, c: Context): { ticket: Ticket; row: CommitRow } {
   const ticket = loadTicket(db, c);
-  const sha = c.req.param('sha') ?? '';
-  const row = commitRows(db, ticket.id).find((candidate) =>
-    sha === SINCE_REVIEW
-      ? candidate.kind === 'since_review'
-      : candidate.kind === 'commit' && candidate.sha === sha,
-  );
+  const ref = c.req.param('sha') ?? '';
+  const row = commitRows(db, ticket.id).find((candidate) => named(candidate, ref));
   if (!row) {
     throw fail(NOT_FOUND, 'This commit is not in the newest diff of the ticket');
   }
@@ -80,7 +96,7 @@ function ignoreRule(db: Db, ticket: Ticket): (path: string) => boolean {
 
 /**
  * `/api/tickets/:id/commits`: the commits stored with the ticket's diff snapshot, the change since the
- * last review, and their files. Read only: comments are written on the whole diff.
+ * last review, a split ticket's slices, and their files. Read only: comments are written on the whole diff.
  */
 export function ticketCommitRoutes(db: Db): Hono {
   const routes = new Hono();

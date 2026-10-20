@@ -173,10 +173,25 @@ export type CommitsResponse = {
   commits: ReviewCommit[];
   /** `sha` is the reviewed head; null before a first review, or once a rebase dropped it. */
   sinceReview: { sha: string; commits: number } | null;
+  /** A split ticket's slices, bottom first, each read through `sliceRef(position)`; absent otherwise. */
+  slices?: { position: number; title: string; sha: string }[];
 };
 
 /** Where the commit view's diffs are read: a commit's SHA, or the change since the last review. */
 export const SINCE_REVIEW = 'since-review';
+
+const SLICE_REF = /^slice-(?<position>[1-9]\d*)$/u;
+
+/** Where the commit view reads a slice's own change: `slice-<position>`. */
+export function sliceRef(position: number): string {
+  return `slice-${position}`;
+}
+
+/** The slice a commit view's ref names; null for a commit or the change since the review. */
+export function slicePosition(ref: string | null): number | null {
+  const position = ref === null ? undefined : SLICE_REF.exec(ref)?.groups?.position;
+  return position === undefined ? null : Number(position);
+}
 
 /** One commit's files against its first parent (or the change since the last review), read only. */
 export type CommitDiffResponse = { sha: string; files: DiffFileSummary[] };

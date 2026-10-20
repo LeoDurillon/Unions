@@ -82,3 +82,22 @@ test('comments on the whole pull request come before the files, without lines or
     ].join('\n\n'),
   );
 });
+
+test('on a split ticket, each commented file says which slices change it', () => {
+  const text = formatReview(
+    [
+      {
+        kind: 'line',
+        path: 'math.js',
+        side: 'new',
+        startLine: 2,
+        endLine: 2,
+        excerpt: 'x',
+        body: 'Rename it.',
+      },
+    ],
+    '',
+    (path) => (path === 'math.js' ? ['slice 1 (Math)', 'slice 2 (Tidy)'] : []),
+  );
+  expect(text).toContain('## math.js\n\nChanged in slice 1 (Math) and slice 2 (Tidy).');
+});

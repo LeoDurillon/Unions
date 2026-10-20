@@ -3,7 +3,9 @@ import {
   type ContainerRuntime,
   type Db,
   getTicket,
+  listSlices,
   schema,
+  stackReviewNote,
   ticketBase,
 } from '@union/core';
 import { desc, eq } from 'drizzle-orm';
@@ -77,6 +79,7 @@ async function ticketTarget(deps: TargetDeps, ticketId: number): Promise<ReviewT
     .from(schema.diffFiles)
     .where(eq(schema.diffFiles.snapshotId, snapshot.id))
     .all();
+  const stack = stackReviewNote(listSlices(db, ticketId), base);
   return {
     container: name,
     projectId: project.id,
@@ -84,8 +87,8 @@ async function ticketTarget(deps: TargetDeps, ticketId: number): Promise<ReviewT
     headSha: snapshot.headSha,
     patchOf: patches(files),
     paths: files.map((file) => file.path),
-    about: `The ticket's branch \`${ticket.branch}\`. The ticket:\n\n# ${ticket.title}\n\n${ticket.body}`,
-    brief: `The ticket's branch \`${ticket.branch}\`, for the ticket "${ticket.title}".`,
+    about: `The ticket's branch \`${ticket.branch}\`. The ticket:\n\n# ${ticket.title}\n\n${ticket.body}${stack}`,
+    brief: `The ticket's branch \`${ticket.branch}\`, for the ticket "${ticket.title}".${stack}`,
     log: (event) => {
       appendAgentLine(db, { ticketId, payload: event });
     },

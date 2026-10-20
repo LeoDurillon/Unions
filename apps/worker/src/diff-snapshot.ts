@@ -10,6 +10,7 @@ import { eq } from 'drizzle-orm';
 
 import { mustRunIn } from './container-exec';
 import { readCommits, type SnapshotCommits } from './diff-commits';
+import { readSlices, type SnapshotSlice } from './diff-slices';
 import { REPO_DIR } from './provision';
 
 type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
@@ -57,8 +58,8 @@ function insertCommits(
 
 /**
  * Replaces the ticket's diff snapshot with `base...HEAD` as it is now in the container, with each
- * commit's own diff and the change since the head the user last reviewed. The commits are extra: a
- * failure to read them keeps the whole diff.
+ * commit's own diff, the change since the head the user last reviewed and, for a split ticket, each
+ * slice's own diff. The commits and slices are extra: a failure to read them keeps the whole diff.
  */
 export async function captureDiff(
   db: Db,
@@ -83,6 +84,7 @@ export async function captureDiff(
   const commits = await readCommits(runtime, container, { base, head: headSha, reviewed }).catch(
     (): SnapshotCommits => ({ commits: [], sinceReview: null }),
   );
+  const slices = await readSlices(db, runtime, input).catch((): SnapshotSlice[] => []);
   db.transaction((tx) => {
     tx.delete(schema.diffSnapshots).where(eq(schema.diffSnapshots.ticketId, ticketId)).run();
     const snapshot = tx
@@ -96,6 +98,9 @@ export async function captureDiff(
         .run();
     }
     insertCommits(tx, snapshot.id, commits);
+    for (const { files: sliceFiles, ...slice } of slices) {
+      insertCommit(tx, snapshot.id, { kind: 'slice', ...slice }, sliceFiles);
+    }
     emitEvent(tx, { type: 'diff_updated', ticketId, payload: { headSha, files: files.length } });
   });
 }

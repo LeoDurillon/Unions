@@ -5,7 +5,7 @@ import { Hono, type Context } from 'hono';
 import type { DiffResponse } from '../api-types';
 import type { OnboardingGitHub } from '../github-onboarding';
 import { BAD_REQUEST, CONFLICT, fail, NOT_FOUND, readObject, requireId } from '../http';
-import { formatReview } from '../review-feedback';
+import { formatTicketReview } from '../review-feedback';
 import {
   cancelAgentReview,
   getAgentReview,
@@ -171,7 +171,7 @@ async function sendReview(db: Db, c: Context): Promise<Response> {
   if (pending) {
     throw fail(CONFLICT, 'A command for this ticket is still being processed');
   }
-  const feedback = formatReview(drafts, summary);
+  const feedback = formatTicketReview(db, ticket.id, { comments: drafts, summary });
   db.transaction((tx) => {
     tx.insert(schema.commands)
       .values({ type: 'revise', ticketId: ticket.id, payload: { feedback } })

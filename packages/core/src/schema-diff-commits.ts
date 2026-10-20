@@ -5,7 +5,8 @@ import { diffSnapshots } from './schema';
 /**
  * A ticket's commits at its diff snapshot, oldest first, each with its own files against its first
  * parent. One `since_review` row (no commit of its own) holds the change since the head the user
- * last sent a review on, while that commit is still in the branch.
+ * last sent a review on, while that commit is still in the branch. A split ticket also has a
+ * `slice` row per slice (`position` is the slice's, `sha` its tip) holding that slice's own diff.
  */
 export const diffCommits = sqliteTable(
   'diff_commits',
@@ -14,7 +15,7 @@ export const diffCommits = sqliteTable(
     snapshotId: integer('snapshot_id')
       .notNull()
       .references(() => diffSnapshots.id, { onDelete: 'cascade' }),
-    kind: text('kind', { enum: ['commit', 'since_review'] }).notNull(),
+    kind: text('kind', { enum: ['commit', 'since_review', 'slice'] }).notNull(),
     position: integer('position').notNull(),
     /** The commit; for `since_review`, the head the user reviewed. */
     sha: text('sha').notNull(),

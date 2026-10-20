@@ -17,7 +17,7 @@ import {
 } from '@union/core';
 import { eq } from 'drizzle-orm';
 
-import { FakeGitHubApi } from './github/fake-api';
+import { captureDiff } from './diff-snapshot';
 import { AGENT_HOME, REPO_DIR } from './provision';
 import { runRebaseStep } from './rebase';
 import { pushRevision, restackRevision, stackSection } from './stack-revise';
@@ -28,7 +28,6 @@ let root: string;
 let db: Db;
 let ticketId: number;
 let projectId: number;
-let github: FakeGitHubApi;
 
 async function git(cwd: string, ...args: string[]): Promise<string> {
   const proc = Bun.spawn(['git', ...args], {
@@ -129,18 +128,9 @@ beforeEach(async () => {
     .values({ owner: 'acme', repo: 'shop', config: { baseBranch: 'main' } })
     .returning()
     .get().id;
-  github = new FakeGitHubApi();
-  const issue = await github.createIssue(
-    { owner: 'acme', repo: 'shop' },
-    { title: 'Invoices', body: '' },
-  );
-  const pull = await github.createPullRequest(
-    { owner: 'acme', repo: 'shop' },
-    { title: 'Invoices', body: 'Closes #1', head: 'feature', base: 'main' },
-  );
   ticketId = createTicket(db, { projectId, title: 'Invoices' }).id;
   db.update(schema.tickets)
-    .set({ branch: 'feature', prState: 'open', prNumber: pull.number, issueNumber: issue.number })
+    .set({ branch: 'feature', prState: 'open', prNumber: 2, issueNumber: 1 })
     .where(eq(schema.tickets.id, ticketId))
     .run();
   // Split already: the table is slice 1 (`feature-s1`), the CRUD slice 2 (the ticket's branch).
@@ -182,7 +172,7 @@ function deps(): Parameters<typeof runRebaseStep>[0] {
       gitBaseUrl: `file://${root}`,
       credentialsPath: path.join(root, 'credentials.json'),
     },
-    github: () => github,
+    github: () => null,
     agent: () => Promise.resolve({ kind: 'error', message: 'no agent in this test' }),
   };
 }
@@ -291,4 +281,22 @@ test('the implementer is told the slices, their commits, and how to place a new 
   expect(section).toContain('`Slice: <n>` trailer');
   replaceSlices(db, ticketId, []);
   expect(await stackSection(workspace())).toBe('');
+});
+
+test("the diff snapshot holds each slice's own change, the lower ones read from their branches", async () => {
+  await captureDiff(db, runtime, { container: 'c', ticketId, base: 'main' });
+  const rows = db
+    .select()
+    .from(schema.diffCommits)
+    .all()
+    .filter((row) => row.kind === 'slice');
+  expect(rows.map((row) => [row.position, row.title])).toEqual([
+    [1, 'Migration'],
+    [2, 'CRUD'],
+  ]);
+  const files = db.select().from(schema.diffCommitFiles).all();
+  const pathsOf = (commitId: number | undefined): string[] =>
+    files.filter((file) => file.commitId === commitId).map((file) => file.path);
+  expect(pathsOf(rows[0]?.id)).toEqual(['m.txt']);
+  expect(pathsOf(rows[1]?.id)).toEqual(['c.txt']);
 });

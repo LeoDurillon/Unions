@@ -164,7 +164,7 @@ export); do not edit. Tests are left out.
 - `comment-editor.tsx`: The editor under selected lines of the diff: a comment to add, or the lines to Explain with an optional question.
 - `comment-thread.tsx`: The comments ending on one line, and the editor when the selection ends there.
 - `commit-diff.tsx`: One commit of the change against its first parent (or the change since the last review): its files on the left, the picked one on the right, read only.
-- `commit-picker.tsx`: All the changes, the change since the last review (tickets), or one commit: a button that opens the list, and previous and next to step through the commits in …
+- `commit-picker.tsx`: All the changes, a split ticket's slice, the change since the last review (tickets), or one commit: a button that opens the list, and previous and next to step…
 - `diff-area.tsx`: The whole change, or one of its commits or the change since the last review (read only), with the Explain panel on the right.
 - `diff-body.tsx`: The touched files on the left, the picked one on the right.
 - `diff-parts.tsx`: The comments that end on this line of this side.

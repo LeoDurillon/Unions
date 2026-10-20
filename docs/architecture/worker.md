@@ -53,7 +53,10 @@
   outside commits, starts them from their recorded tips and rebases with `--update-refs` (the agent is told
   to); `stackMoveProblem` refuses a slice left behind, and `forcePush` (`branch-push.ts`) pushes the whole stack
   (`pushRewrittenStack`, `stack-refs.ts`) and records the new tips. Simplify history is refused on a split
-  ticket. Per-slice review and merging are later steps of the plan.
+  ticket. `captureDiff` also stores each slice's own diff (`diff-slices.ts`, `slice` rows of `diff_commits`,
+  the lower slices read from their local branches), which the review page's commit picker offers as
+  `slice-<n>`; a split ticket's agent review gets each slice's range and part of the spec (`stackReviewNote`).
+  Merging is a later step of the plan.
 - `investigate.ts`: `InvestigationRunner` runs queued investigations in throwaway `union-i<id>` containers
   (removed after each run; a `ticket` investigation runs in the ticket's own container instead, `investigate-ticket.ts`:
   never during a step, writing tools always denied, `git status` and HEAD compared before and after, the container

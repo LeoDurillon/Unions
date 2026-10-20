@@ -59,3 +59,22 @@ export function withStackSection(body: string, section: string): string {
 export function stackComment(stack: readonly StackEntry[]): string {
   return `Split into a stack: ${stack.map((entry) => prLabel(entry)).join(' → ')}`;
 }
+
+/** A slice as a reviewer reads it: its part of the spec and where its own change ends. */
+export type ReviewedSlice = { position: number; title: string; spec: string; tipSha: string };
+
+/**
+ * For an agent reviewing a split ticket: each slice's own change (a range to diff) and its part of
+ * the spec, so findings can say which slice they are about. Empty when the ticket is not split.
+ */
+export function stackReviewNote(slices: readonly ReviewedSlice[], base: string): string {
+  if (slices.length < 2) {
+    return '';
+  }
+  const lines = slices.map((slice, at) => {
+    const from = slices[at - 1]?.tipSha ?? base;
+    const spec = slice.spec.trim().replaceAll('\n', ' ');
+    return `${slice.position}. **${slice.title}**: \`git diff ${from}...${slice.tipSha}\`. Its part of the spec: ${spec}`;
+  });
+  return `\n\nThe branch is a stack of ${slices.length} pull requests, bottom first, each merged on the one below. Review each slice against its own part of the spec, and start each finding's comment with the slice it is about (\`Slice <n>:\`):\n\n${lines.join('\n')}`;
+}

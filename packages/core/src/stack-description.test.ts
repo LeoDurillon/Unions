@@ -3,6 +3,7 @@ import { expect, test } from 'bun:test';
 import {
   slicePrDescription,
   stackComment,
+  stackReviewNote,
   stackSection,
   withStackSection,
   type StackEntry,
@@ -77,4 +78,19 @@ test('the top pull request gets the stack in a section of its own, replaced on a
     'Closes #12\n\n<!-- union:stack -->\nNew stack\n<!-- /union:stack -->\n\nMore text.',
   );
   expect(withStackSection('', 'S')).toBe('<!-- union:stack -->\nS\n<!-- /union:stack -->');
+});
+
+test('an agent reviewing a split ticket gets each slice with its range and its part of the spec', () => {
+  const slices = [
+    { position: 1, title: 'Migration', spec: 'The table.', tipSha: 'aaa' },
+    { position: 2, title: 'CRUD', spec: 'Create\nand list.', tipSha: 'bbb' },
+  ];
+  const note = stackReviewNote(slices, 'main');
+  expect(note).toContain(
+    '1. **Migration**: `git diff main...aaa`. Its part of the spec: The table.',
+  );
+  expect(note).toContain(
+    '2. **CRUD**: `git diff aaa...bbb`. Its part of the spec: Create and list.',
+  );
+  expect(stackReviewNote(slices.slice(0, 1), 'main')).toBe('');
 });

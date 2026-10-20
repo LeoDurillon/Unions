@@ -5,7 +5,7 @@ export); do not edit. Tests are left out.
 
 ## ./
 
-- `api-types.ts`: Where the commit view's diffs are read: a commit's SHA, or the change since the last review.
+- `api-types.ts`: Where the commit view reads a slice's own change: `slice-<position>`.
 - `app.ts`: Builds the web server's Hono app: error handling and the API routes, wired to the database and GitHub.
 - `ci-api-types.ts`: The pull request's CI checks as the PR tab shows them, and what the user gave the implementer from them.
 - `ci-picks.ts`: The user's picks among the pull request's CI, checked against its current checks, then read from GitHub into the text the implementer gets.
@@ -27,7 +27,7 @@ export); do not edit. Tests are left out.
 - `notion-images.ts`: Downloads the images a Notion page shows (their links expire within the hour) so they can be kept as the ticket's files: each kept one is referenced as `attach…
 - `notion-mentions.ts`: The titles of the Notion pages a page's markdown mentions, so its links read as titles.
 - `pull-request-ref.ts`: A pull request of the repository: `12`, `#12` or its `/pull/12` URL.
-- `review-feedback.ts`: The review as the implementer receives it: overall note, the comments on the whole pull request, then each line comment under its file.
+- `review-feedback.ts`: The review the user sends, as the implementer receives it.
 - `review-import.ts`: The thread as one comment: who said what, the first comment then the replies.
 - `review-notion-types.ts`: What a pull request under review's Notion tab reads: its linked page, with the text as read now.
 - `review-output-comment.ts`: A command's or the e2e tests' output as a review comment: what ran, how it ended, the last lines in a code block.
@@ -94,7 +94,7 @@ export); do not edit. Tests are left out.
 - `spec-sources.ts`: The text of a specification, from where the user points.
 - `ticket-base.ts`: The API routes that show and change the branch a ticket is based on.
 - `ticket-command-checks.ts`: What a command needs besides a valid move of the state machine: a startable ticket, an open pull request, stacks turned on.
-- `ticket-commits.ts`: `/api/tickets/:id/commits`: the commits stored with the ticket's diff snapshot, the change since the last review, and their files.
+- `ticket-commits.ts`: `/api/tickets/:id/commits`: the commits stored with the ticket's diff snapshot, the change since the last review, a split ticket's slices, and their files.
 - `ticket-create.ts`: `POST /api/tickets`.
 - `ticket-edit.ts`: `PUT /api/tickets/:id/text`: the user's new title and description, queued for the worker, which writes them to the issue.
 - `ticket-flow.ts`: The steps a ticket runs: read from a request, and `PUT /api/tickets/:id/flow` while it is in Backlog.

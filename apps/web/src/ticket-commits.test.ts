@@ -24,7 +24,7 @@ let ticketId: number;
 
 function addCommit(
   snapshotId: number,
-  row: { kind: 'commit' | 'since_review'; position: number; sha: string; title: string },
+  row: { kind: 'commit' | 'since_review' | 'slice'; position: number; sha: string; title: string },
 ): void {
   const commit = db
     .insert(schema.diffCommits)
@@ -95,4 +95,21 @@ test('a commit outside the newest snapshot, or no review yet, is not found', asy
   addCommit(id, { kind: 'commit', position: 1, sha: FIRST, title: 'Add math' });
   expect((await get(`/${SECOND}/diff`)).status).toBe(404);
   expect((await get('/since-review/diff')).status).toBe(404);
+});
+
+test("a split ticket's slices are listed apart and read like a commit, by `slice-<n>`", async () => {
+  const id = snapshot();
+  addCommit(id, { kind: 'commit', position: 1, sha: FIRST, title: 'Add math' });
+  addCommit(id, { kind: 'slice', position: 1, sha: FIRST, title: 'Math' });
+  addCommit(id, { kind: 'slice', position: 2, sha: THIRD, title: 'Tidy' });
+  const listed = (await (await get('')).json()) as CommitsResponse;
+  expect(listed.commits.map((commit) => commit.title)).toEqual(['Add math']);
+  expect(listed.slices).toEqual([
+    { position: 1, title: 'Math', sha: FIRST },
+    { position: 2, title: 'Tidy', sha: THIRD },
+  ]);
+  const slice = (await (await get('/slice-2/diff')).json()) as CommitDiffResponse;
+  expect(slice.sha).toBe(THIRD);
+  expect(slice.files.map((file) => file.path)).toEqual(['math.js']);
+  expect((await get('/slice-3/diff')).status).toBe(404);
 });

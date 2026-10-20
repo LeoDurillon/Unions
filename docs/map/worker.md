@@ -24,7 +24,8 @@ export); do not edit. Tests are left out.
 - `credentials.ts`: The secret the host's git uses to clone and push, minted right before use (an installation token lives one hour).
 - `custom-step.ts`: A custom agent's step: refused without a prompt; after the implementation, it reads the branch against its base.
 - `diff-commits.ts`: `git log`'s records, oldest first, without their files.
-- `diff-snapshot.ts`: Replaces the ticket's diff snapshot with `base...HEAD` as it is now in the container, with each commit's own diff and the change since the head the user last r…
+- `diff-slices.ts`: A split ticket's slices in its diff snapshot: each one's own change, from the slice below to its tip.
+- `diff-snapshot.ts`: Replaces the ticket's diff snapshot with `base...HEAD` as it is now in the container, with each commit's own diff, the change since the head the user last revi…
 - `e2e-request.ts`: The e2e tests the user asks for, from a ticket or a pull request, in its own container.
 - `e2e.ts`: The project's e2e command against the owner's preview, after its checks passed.
 - `event-dispatcher.ts`: Follows the event log: writes the notifications, queues a delivery for each event a rule waits for, then does the due ones, a few per tick and one at a time.
