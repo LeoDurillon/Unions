@@ -14,6 +14,7 @@ export); do not edit. Tests are left out.
 - `agent.ts`: Runs `claude -p` inside the ticket's container and streams its events to `onEvent`.
 - `approved.ts`: The latest approved output of every step before `step`, in the order of the ticket's flow.
 - `attachments-sync.ts`: Puts the ticket's current files in the container, before every step: files added since the last step appear, removed ones disappear, and whatever the agent cha…
+- `branch-push.ts`: Force-pushes a rewritten branch with a lease: the ticket's alone, or every slice of its stack together.
 - `branch.ts`: `<issue#>-<slug>`, or `union-<ticket id>-<slug>` while the ticket has no GitHub issue.
 - `command-cancels.ts`: The cancel commands of the side runs: the id each one carries, and how a queued or a running one stops.
 - `command-hooks.ts`: What the commands hand off to the running worker (all asynchronous), and the no-op set for tests and tools.
@@ -61,7 +62,7 @@ export); do not edit. Tests are left out.
 - `rebase-fetch.ts`: Brings the base branch and the pushed branch, as they are on GitHub now, into the container: the host fetches them with the project's credentials and hands ove…
 - `rebase-git.ts`: Whether `ancestor` is already part of `ref`'s history.
 - `rebase-host.ts`: The host's own `git rebase` onto the base, tried before any agent: up to date, clean, or stopped.
-- `rebase-publish.ts`: The project's repository with its credentials, for the fetch and the push.
+- `rebase-publish.ts`: Checks the result, runs the project's checks, then pushes; returns why it could not, the hook's refusal of the agent's leftover changes, or the gate.
 - `rebase.ts`: Rebases the ticket's branch onto its base (git alone when there is no conflict, else the implementer's own session), checks it and force-pushes it with a lease.
 - `refused-commit.ts`: Records the refusal and stops the run there: the user decides what to do with the changes.
 - `review-checkout.ts`: A pull request's own container (`union-r<id>`): its checkout at the reviewed commit, for its preview, tests and commands.
@@ -94,6 +95,9 @@ export); do not edit. Tests are left out.
 - `stack-git.ts`: Git for a stack: its commits with their trailers, the lower slices' branches, a slice tip checked out.
 - `stack-publish.ts`: Opens the stack on GitHub: a pull request per lower slice, the ticket's own retargeted, their texts, the issue's comment.
 - `stack-push.ts`: Pushes every branch of a stack in one atomic push, each leased on what GitHub had: all or none.
+- `stack-refs.ts`: A split ticket's slice branches in its workspace: set from the recorded tips, checked, pushed together, recorded again.
+- `stack-revise-git.ts`: The git side of restacking a revision: each slice's commits, the reordering rebase, and its result.
+- `stack-revise.ts`: A revision on a split ticket: the implementer is told the slices, then its new commits are moved into them and the stack pushed.
 - `throwaway-runs.ts`: The side runs that need no repository, each in a throwaway container: reading the account's connectors, the lesson writer and the prompt writer.
 - `ticket-base.ts`: Chooses the branch a ticket is cloned from, before its first clone: the branch the user chose (over the parent's), else the parent's branch while its pull requ…
 - `workspace-git.ts`: Puts the repository on `branch`: the local branch if it exists, else the pushed one (a recreated container only has `origin/<branch>`), else a new branch from …

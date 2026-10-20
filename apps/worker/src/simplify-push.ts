@@ -1,10 +1,10 @@
 // Pushes a simplified history, unless the agent left the one already on GitHub.
 import { emitEvent } from '@union/core';
 
+import { forcePush } from './branch-push';
 import { captureDiff } from './diff-snapshot';
 import type { Rebase } from './rebase-agent';
 import { headCommit } from './rebase-git';
-import { forcePush } from './rebase-publish';
 
 /** After the push: the event the PR description and the rules follow, and a fresh review diff. */
 async function pushed(rebase: Rebase): Promise<void> {

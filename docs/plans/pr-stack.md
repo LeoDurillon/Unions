@@ -1,7 +1,9 @@
 # Plan: split a ticket's pull request into a stack
 
-Status: steps 1 and 2 built (branch `pr-stack`, 2026-10-20): the table, the pure rules, the state machine, the
-split plan and the split; steps 3 to 7 left. Split into a stack shows only on projects that turn on "Split pull
+Status: steps 1 to 3 built (branch `pr-stack`, 2026-10-20): the table, the pure rules, the state machine, the
+split plan and the split, revise and rebase; steps 4 to 7 left. Step 3 differs from the plan on two points: a
+conflict while moving a revision's commits fails the step (the implementer does not resolve it yet), and
+Simplify history is refused on a split ticket. Split into a stack shows only on projects that turn on "Split pull
 requests into stacks" (Pull requests settings, off by default), until steps 1 to 5 are built. Decisions taken (2026-10-17), the risks found after resolved with their suggested fixes (2026-10-20,
 see "Risks and how the plan handles them"). Replaces the ticket groups, split and restack plans: a stack stays one ticket. Part A (split an
 existing PR) first, then part B (slices declared by the plan).

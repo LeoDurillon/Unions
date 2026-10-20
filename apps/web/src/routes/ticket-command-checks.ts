@@ -1,5 +1,5 @@
 // What a command needs besides a valid move of the state machine: a startable ticket, an open pull request, stacks turned on.
-import { schema, type Db } from '@union/core';
+import { listSlices, schema, type Db } from '@union/core';
 import { eq } from 'drizzle-orm';
 
 import type { CommandType, TicketSummary } from '../api-types';
@@ -36,6 +36,10 @@ export function assertCommandFits(db: Db, ticket: TicketSummary, type: CommandTy
   }
   if (type === 'simplify') {
     assertOpenPullRequest(ticket, 'simplify');
+    // Rewriting the whole branch would mix the slices: a new split is the way.
+    if (listSlices(db, ticket.id).length > 0) {
+      throw fail(CONFLICT, 'The ticket is split into a stack: split it again instead');
+    }
   }
   if (type === 'split') {
     if (!stacksOn(db, ticket.projectId)) {

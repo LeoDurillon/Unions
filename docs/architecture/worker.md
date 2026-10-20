@@ -44,7 +44,16 @@
   below (`updatePullRequestBase`), writes each slice's description and the stack section of the ticket's own,
   comments on the issue and records `ticket_slices`. GitHub failures after the push are warnings in the report:
   the split stands. Any failure before the push puts the branch back. `markReadyWhenDone` marks every slice's
-  pull request ready. Restacking, per-slice review and merging are later steps of the plan.
+  pull request ready. A split ticket afterwards: the implementer's prompt gets a `# Stack` section (the slices
+  and their commits, `stack-revise.ts`) asking each new commit to say where it goes (`Slice: <n>`, or
+  `fixup! <sha>`); after the run, `restackRevision` asks the session about any commit it cannot place, replays
+  the stack with the host's todo (`git rebase -i` with `sequence.editor`, `stack-revise-git.ts`), checks the
+  tree is unchanged and `pushRevision` pushes every slice atomically, leased on the recorded tips. A conflict
+  while reordering fails the step, unpushed. A rebase fetches the lower slices' branches too, refuses one with
+  outside commits, starts them from their recorded tips and rebases with `--update-refs` (the agent is told
+  to); `stackMoveProblem` refuses a slice left behind, and `forcePush` (`branch-push.ts`) pushes the whole stack
+  (`pushRewrittenStack`, `stack-refs.ts`) and records the new tips. Simplify history is refused on a split
+  ticket. Per-slice review and merging are later steps of the plan.
 - `investigate.ts`: `InvestigationRunner` runs queued investigations in throwaway `union-i<id>` containers
   (removed after each run; a `ticket` investigation runs in the ticket's own container instead, `investigate-ticket.ts`:
   never during a step, writing tools always denied, `git status` and HEAD compared before and after, the container

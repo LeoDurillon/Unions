@@ -1,12 +1,15 @@
 // One rebase attempt: git's own rebase first, the implementer's session only when it stops or breaks the checks.
+
+import { remoteOf } from './branch-push';
 import { install } from './implement-checks';
 import { runRebaseAgent, type Pushed, type Rebase } from './rebase-agent';
 import { pushClean, upToDate } from './rebase-clean';
 import { fetchIntoContainer } from './rebase-fetch';
 import { contains } from './rebase-git';
-import { checksFailedHint, stoppedHint, tryHostRebase } from './rebase-host';
-import { pauseRebase, remoteOf, verifyAndPush } from './rebase-publish';
+import { checksFailedHint, stackHint, stoppedHint, tryHostRebase } from './rebase-host';
+import { pauseRebase, verifyAndPush } from './rebase-publish';
 import type { StepResult } from './scheduler';
+import { lowerSlices, syncLowerBranches } from './stack-refs';
 
 /**
  * Fetch, safety check, then git's own rebase: pushed as it is when clean and checked, else the agent
@@ -15,14 +18,21 @@ import type { StepResult } from './scheduler';
 export async function attempt(rebase: Rebase): Promise<StepResult | Pushed> {
   const { deps, container, branch, base, context } = rebase;
   const remote = await remoteOf(deps, rebase.project);
-  const pushed = await fetchIntoContainer(deps.runtime, container, remote, { base, branch });
-  if (!(await contains(deps.runtime, container, 'HEAD', `origin/${branch}`))) {
-    return {
-      kind: 'error',
-      error: `\`${branch}\` on GitHub has commits this ticket's workspace does not: rebasing would drop them.`,
-    };
+  const lower = lowerSlices(deps.db, context.ticket.id);
+  const extra = lower.map((slice) => slice.branch);
+  const pushed = await fetchIntoContainer(deps.runtime, container, remote, { base, branch, extra });
+  for (const name of [branch, ...extra]) {
+    if (!(await contains(deps.runtime, container, 'HEAD', `origin/${name}`))) {
+      return {
+        kind: 'error',
+        error: `\`${name}\` on GitHub has commits this ticket's workspace does not: rebasing would drop them.`,
+      };
+    }
   }
-  const host = await tryHostRebase(deps.runtime, container, rebase);
+  await syncLowerBranches(deps.runtime, container, lower);
+  const updateRefs = lower.length > 0;
+  const host = await tryHostRebase(deps.runtime, container, { ...rebase, updateRefs });
+  const stack = stackHint(base, extra);
   if (host.kind === 'up_to_date') {
     context.log({ type: 'union_note', text: `already up to date with origin/${base}` });
     return upToDate(rebase);
@@ -33,7 +43,7 @@ export async function attempt(rebase: Rebase): Promise<StepResult | Pushed> {
   }
   if (host.kind === 'stopped') {
     context.log({ type: 'union_note', text: rebaseStoppedNote(host.files) });
-    return withAgent(rebase, { lease: pushed, why: stoppedHint(base, host) });
+    return withAgent(rebase, { lease: pushed, why: stoppedHint(base, host) + stack });
   }
   const clean = await pushClean(rebase, pushed);
   if (!('checksFailed' in clean)) {
@@ -41,7 +51,10 @@ export async function attempt(rebase: Rebase): Promise<StepResult | Pushed> {
     return clean;
   }
   context.log({ type: 'union_note', text: 'rebased with no conflict, but the checks fail' });
-  return withAgent(rebase, { lease: pushed, why: checksFailedHint(base, clean.checksFailed) });
+  return withAgent(rebase, {
+    lease: pushed,
+    why: checksFailedHint(base, clean.checksFailed) + stack,
+  });
 }
 
 function rebaseStoppedNote(files: string[]): string {

@@ -1,26 +1,14 @@
-import {
-  emitEvent,
-  privatePushFiles,
-  schema,
-  type Db,
-  type Project,
-  type RefusedCommit,
-} from '@union/core';
+import { emitEvent, listSlices, schema, type Db, type RefusedCommit } from '@union/core';
 import { eq } from 'drizzle-orm';
 
+import { forcePush } from './branch-push';
 import { captureDiff } from './diff-snapshot';
 import { runGate, type GateResult } from './gate';
 import { commitLeftovers, type Refused } from './leftovers';
-import { PrivateFilesError, projectRemote, pushBranch } from './publish';
 import { askRebaseAgent, renderRebaseReport, type Pushed, type Rebase } from './rebase-agent';
-import { headCommit, rebaseProblem } from './rebase-git';
+import { headCommit, rebaseProblem, stackMoveProblem } from './rebase-git';
 import { outcomeOf, pauseOnRefusal, pendingRefusal, resumeRefusal } from './refused-commit';
 import type { StepResult } from './scheduler';
-
-/** The project's repository with its credentials, for the fetch and the push. */
-export function remoteOf(deps: Rebase['deps'], project: Project): ReturnType<typeof projectRemote> {
-  return projectRemote(deps.db, deps.config.gitBaseUrl, project);
-}
 
 /**
  * Checks the result, runs the project's checks, then pushes; returns why it could not, the hook's
@@ -31,7 +19,10 @@ export async function verifyAndPush(
   { pushed, outcome }: { pushed: string; outcome: Pushed['outcome'] },
 ): Promise<{ error: string } | { refused: Refused } | { gate: GateResult | null }> {
   const { deps, container, project } = rebase;
-  const problem = await rebaseProblem(deps.runtime, container, rebase);
+  const lower = listSlices(deps.db, rebase.context.ticket.id).slice(0, -1);
+  const problem =
+    (await rebaseProblem(deps.runtime, container, rebase)) ??
+    (await stackMoveProblem(deps.runtime, container, { base: rebase.base, lower }));
   if (problem) {
     return { error: problem };
   }
@@ -54,24 +45,6 @@ export async function verifyAndPush(
   }
   const refused = await forcePush(rebase, pushed);
   return refused === null ? { gate } : { error: refused };
-}
-
-/** Force-pushes the rewritten branch, leased on the commit fetched from GitHub; why not, or null. */
-export async function forcePush(rebase: Rebase, lease: string): Promise<string | null> {
-  const { deps, container, project, branch } = rebase;
-  try {
-    await pushBranch(deps.runtime, container, await remoteOf(deps, project), {
-      branch,
-      lease,
-      privateFiles: privatePushFiles(deps.db, rebase.context.ticket),
-    });
-    return null;
-  } catch (error) {
-    if (error instanceof PrivateFilesError) {
-      return error.message;
-    }
-    return `The push was refused (did someone push to \`${branch}\` meanwhile?): ${String(error)}`;
-  }
 }
 
 /** After the push: the branch is current and the review diff is refreshed; returns the new head. */

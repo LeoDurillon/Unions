@@ -7,6 +7,7 @@ import {
   emitEvent,
   dispatch,
   migrateDb,
+  replaceSlices,
   saveOutput,
   schema,
   type Db,
@@ -178,6 +179,20 @@ test('a split needs stacks turned on for the project and an open pull request', 
   expect(await command('drop_split')).toBe(409);
   expect(await command('split')).toBe(202);
   expect(db.select().from(schema.commands).all()).toMatchObject([{ type: 'split' }]);
+});
+
+test('a split ticket refuses Simplify history: a new split is the way', async () => {
+  const project = await makeProject();
+  const ticket = await makeTicket(project.id);
+  db.update(schema.tickets)
+    .set({ phase: { kind: 'done' }, branch: 'feature', prState: 'open' })
+    .run();
+  replaceSlices(db, ticket.id, [
+    { position: 1, title: 'A', spec: 'a', tipSha: 'a1', branch: 'feature-s1' },
+    { position: 2, title: 'B', spec: 'b', tipSha: 'b1', branch: 'feature' },
+  ]);
+  const response = await send('POST', `/api/tickets/${ticket.id}/commands`, { type: 'simplify' });
+  expect(response.status).toBe(409);
 });
 
 test('editing an output creates a new version, only for the step awaiting approval', async () => {

@@ -27,11 +27,12 @@ async function conflictedFiles(runtime: ContainerRuntime, container: string): Pr
 /**
  * Rebases the branch onto `origin/<base>` with git alone. No hook runs on the picked commits, so
  * nothing can refuse them; on a conflict (or any other stop) the branch is put back at `before`.
+ * `updateRefs`: a stack's slice branches move with their commits.
  */
 export async function tryHostRebase(
   runtime: ContainerRuntime,
   container: string,
-  refs: { base: string; branch: string; before: string },
+  refs: { base: string; branch: string; before: string; updateRefs?: boolean },
 ): Promise<HostRebase> {
   if (await contains(runtime, container, 'HEAD', `origin/${refs.base}`)) {
     return { kind: 'up_to_date' };
@@ -39,7 +40,13 @@ export async function tryHostRebase(
   const result = await runIn(
     runtime,
     container,
-    git(['-c', 'core.editor=true', 'rebase', `origin/${refs.base}`]),
+    git([
+      '-c',
+      'core.editor=true',
+      'rebase',
+      ...(refs.updateRefs ? ['--update-refs'] : []),
+      `origin/${refs.base}`,
+    ]),
   );
   if (result.exitCode === 0) {
     return { kind: 'clean' };
@@ -63,6 +70,15 @@ export function stoppedHint(
       ? `, with conflicts in ${stopped.files.map((file) => `\`${file}\``).join(', ')}`
       : '';
   return `\n\nThe host's \`git rebase origin/${base}\` stopped${files}. It was aborted, so the branch is as it was: rebase it yourself and resolve the conflicts.\n\n\`\`\`\n${stopped.detail}\n\`\`\``;
+}
+
+/** Appended to the rebase prompt of a split ticket: the slices' branches must move too. */
+export function stackHint(base: string, branches: readonly string[]): string {
+  if (branches.length === 0) {
+    return '';
+  }
+  const names = branches.map((name) => `\`${name}\``).join(', ');
+  return `\n\nThis branch is a stack: the branches ${names} point at commits inside it, one per slice. Rebase with \`git rebase --update-refs origin/${base}\` so they move with their commits.`;
 }
 
 /** Appended to the rebase prompt when the host's rebase was clean but the checks fail after it. */

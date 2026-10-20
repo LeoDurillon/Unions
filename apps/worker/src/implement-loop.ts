@@ -26,7 +26,7 @@ import {
   gateHint,
   previewHint,
 } from './implement-prompts';
-import { askSession, COMMIT_HOOK_HINT, commitLeftovers, type Refused } from './leftovers';
+import { askSession, COMMIT_HOOK_HINT, commitLeftovers, type Ask, type Refused } from './leftovers';
 import { attachmentsSection, buildPrompt, parentContext } from './prompts';
 import { REPO_DIR, type ProvisionConfig } from './provision';
 import type { StepContext } from './scheduler';
@@ -65,10 +65,13 @@ export type Workspace = {
   context: StepContext;
   project: Project;
   container: string;
+  /** A split ticket's `# Stack` section for the implementer (`stack-revise.ts`); empty otherwise. */
+  stackSection?: string;
 };
 
 /** Everything a new session needs: task, approved plan, instructions, and the feedback if any. */
-function freshPrompt({ deps, context, project }: Workspace): string {
+function freshPrompt(workspace: Workspace): string {
+  const { deps, context, project } = workspace;
   const { ticket, revision } = context;
   const prompt = buildPrompt({
     ticket,
@@ -82,7 +85,8 @@ function freshPrompt({ deps, context, project }: Workspace): string {
         getPreview(deps.db, { ticketId: ticket.id })?.status === 'running',
       ) +
       agentServicesHint(deps.services) +
-      COMMIT_HOOK_HINT,
+      COMMIT_HOOK_HINT +
+      (workspace.stackSection ?? ''),
     approved: approvedBefore(deps.db, ticket.id, 'implement'),
     revision: null,
     step: 'implement',
@@ -99,9 +103,25 @@ function firstPrompt(workspace: Workspace): string {
     return freshPrompt(workspace);
   }
   const attachments = listAttachments(workspace.deps.db, ticket.id);
-  return attachments.length === 0
-    ? feedbackPrompt(revision.feedback)
-    : `${feedbackPrompt(revision.feedback)}\n\n${attachmentsSection(attachments)}`;
+  const feedback = feedbackPrompt(revision.feedback) + (workspace.stackSection ?? '');
+  return attachments.length === 0 ? feedback : `${feedback}\n\n${attachmentsSection(attachments)}`;
+}
+
+/** Another turn in the implementer's session, for a question the host has (where a commit goes). */
+export function implementerAsk(workspace: Workspace, sessionId: string): Ask {
+  const { deps, context, container } = workspace;
+  return askSession(deps.agent, deps.runtime, {
+    container,
+    cwd: REPO_DIR,
+    model: modelFor(deps.db, 'implement'),
+    effort: effortFor(deps.db, 'implement'),
+    prompt: '',
+    tools: toolsFor(deps.db, 'implement'),
+    denied: IMPLEMENT_DENIED,
+    resumeSessionId: sessionId,
+    signal: context.signal,
+    onEvent: context.log,
+  });
 }
 
 /** The prompt plus the outputs the user gave the agent, when there are any. */

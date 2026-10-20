@@ -2,9 +2,10 @@
 import { schema } from '@union/core';
 import { eq } from 'drizzle-orm';
 
+import { forcePush } from './branch-push';
 import { runGate } from './gate';
 import { renderCleanReport, type Rebase } from './rebase-agent';
-import { afterPush, forcePush } from './rebase-publish';
+import { afterPush } from './rebase-publish';
 import type { StepResult } from './scheduler';
 
 /** Checks that fail after a clean rebase: the agent fixes what the base's changes broke. */

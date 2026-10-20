@@ -80,3 +80,19 @@ export async function restoreBranch(
   await mustRunIn(runtime, container, git(['reset', '--hard', commit]));
   await mustRunIn(runtime, container, git(['clean', '-fd']));
 }
+
+/** Why the stack cannot be pushed after a rebase: a slice's branch left behind; null when none. */
+export async function stackMoveProblem(
+  runtime: ContainerRuntime,
+  container: string,
+  input: { base: string; lower: readonly { branch: string }[] },
+): Promise<string | null> {
+  for (const slice of input.lower) {
+    const onBase = await contains(runtime, container, slice.branch, `origin/${input.base}`);
+    const inBranch = await contains(runtime, container, 'HEAD', slice.branch);
+    if (!onBase || !inBranch) {
+      return `\`${slice.branch}\` did not move with the branch: rebase with \`git rebase --update-refs origin/${input.base}\`.`;
+    }
+  }
+  return null;
+}
