@@ -33,6 +33,7 @@ async function lowerPullRequest(
   const found = await api.findPullRequest(repo, slice.branch);
   if (found) {
     await api.updatePullRequestBase(repo, found.number, base);
+    await api.updatePullRequestTitle(repo, found.number, slice.title);
     return found.number;
   }
   const opened = await api.createPullRequest(repo, {

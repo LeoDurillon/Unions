@@ -291,3 +291,18 @@ test('a slice branch someone pushed to is refused before the agent runs', async 
   expect(result.kind === 'error' && result.error).toContain('`feature-s1` on GitHub has commits');
   expect(prompts).toHaveLength(0);
 });
+
+test("a split run again reuses the slice's pull request, retitled, and replaces the GitHub stack", async () => {
+  const old = await github.createPullRequest(
+    { owner: 'acme', repo: 'shop' },
+    { title: 'An older plan', body: '', head: 'feature-s1', base: 'feature' },
+  );
+  github.stacks?.set(1, [old.number, 2]);
+  db.update(schema.tickets).set({ githubStackNumber: 1 }).run();
+  const result = await run(agentDoing((fork) => sliceIt(fork)));
+  expect(result).toMatchObject({ kind: 'ok' });
+  expect(github.pullByNumber(old.number)).toMatchObject({ title: 'Migration', base: 'main' });
+  expect(github.pulls).toHaveLength(2);
+  expect(github.calls).toContain('unstack');
+  expect([...(github.stacks ?? [])]).toEqual([[1, [old.number, 2]]]);
+});
