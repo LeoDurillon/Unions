@@ -66,3 +66,25 @@ test('with retries, a call that never gets an answer still ends, after each atte
   );
   expect(await settlesWithin(client.request('GET /zen'), 5000)).toBe('rejected');
 });
+
+test('a deadline ends a call before its attempts time out, as a 504', async () => {
+  const client = githubClient(
+    { kind: 'token', token: 'd' },
+    { baseUrl, timeoutMs: 60_000, retries: 0, deadlineMs: 200 },
+  );
+  const failure: unknown = await client.request('GET /zen').catch((error: unknown) => error);
+  expect(failure).toMatchObject({ status: 504 });
+});
+
+test('a deadline also ends a call waiting on its installation token, unthrottled', async () => {
+  const auth = {
+    kind: 'app' as const,
+    app: { appId: '2', privateKey },
+    installationId: 8,
+  };
+  const options = { baseUrl, timeoutMs: 60_000, retries: 0, deadlineMs: 200, throttled: false };
+  const client = githubClient(auth, options);
+  expect(await settlesWithin(client.request('GET /repos/o/r'), 3000)).toBe('rejected');
+  // Waits on the same token mint, still pending: the deadline ends it too.
+  expect(await settlesWithin(client.request('GET /repos/o/r'), 3000)).toBe('rejected');
+});

@@ -30,7 +30,10 @@
   with `@union/core/github-client`: clients are cached per credential so an installation token is minted once an
   hour, and git gets a fresh token (`gitToken`) right before each clone or push. Every request is bounded
   (`timeoutMs`, `retries`: 30 s per attempt; the web server 20 s and one retry): Octokit queues token minting and
-  GraphQL per process, so one stuck request used to block every later call until a restart. Never build an Octokit
+  GraphQL per process, so one stuck request used to block every later call until a restart. Those bounds only cover
+  `fetch`, so the web server also sets `deadlineMs` (45 s for the whole call, queues and token minting included,
+  failing as a 504) and `throttled: false` (no process-wide throttling queues for its reads): without them its
+  GitHub reads once all waited forever while the worker's still worked. Never build an Octokit
   from a project's token by hand.
 - Permissions: the GitHub App's form is pre-filled (`app-setup-form.tsx`) with Contents, Issues and Pull requests
   read and write, Metadata read, Checks and Commit statuses read, Actions read and write (the PR tab's CI checks:
