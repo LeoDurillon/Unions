@@ -17,6 +17,9 @@ const STEP_TITLES: Record<BuiltInStep, string> = {
   final_review: 'Final review',
   rebase: 'Rebase',
   simplify: 'Simplify history',
+  split_plan: 'Split plan',
+  split: 'Split into a stack',
+  restack: 'Restack',
 };
 
 const VALIDATION_LABELS = {

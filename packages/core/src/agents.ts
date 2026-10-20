@@ -244,26 +244,41 @@ export function listAgents(db: Db): AgentConfig[] {
   return [...AGENT_IDS, ...custom].map((agent) => resolveAgent(db, agent));
 }
 
+/** Steps that resume the implementer's session: they keep its model and effort, and add tools to its own. */
+const IMPLEMENTER_SESSION = ['rebase', 'simplify', 'split', 'restack'] as const;
+type ImplementerSessionStep = (typeof IMPLEMENTER_SESSION)[number];
+
+function inImplementerSession(step: RunAgent): step is ImplementerSessionStep {
+  return IMPLEMENTER_SESSION.some((session) => session === step);
+}
+
+/** The agent whose settings a run of `step` uses. The split plan has no prompt of its own yet. */
+function settingsOf(step: RunAgent): AgentId {
+  if (inImplementerSession(step)) {
+    return 'implement';
+  }
+  return step === 'split_plan' ? 'final_review' : step;
+}
+
 /** The model a run of `step` uses: the user's choice, else the built-in one. */
 export function modelFor(db: Db, step: RunAgent): AgentModel {
-  // The rebase and the simplification are the implementer's own session, so they keep its model.
-  if (step === 'rebase' || step === 'simplify') {
-    return modelFor(db, 'implement');
-  }
-  return resolveAgent(db, step).model ?? defaultsOf(db, step).model ?? MODEL_BY_STEP.implement;
+  const agent = settingsOf(step);
+  return resolveAgent(db, agent).model ?? defaultsOf(db, agent).model ?? MODEL_BY_STEP.implement;
 }
 
 /** The thinking effort a run of `step` uses; null: the CLI's default. */
 export function effortFor(db: Db, step: RunAgent): AgentEffort | null {
-  // Like their model, they keep the implementer's effort.
-  return resolveAgent(db, step === 'rebase' || step === 'simplify' ? 'implement' : step).effort;
+  return resolveAgent(db, settingsOf(step)).effort;
 }
 
 /** The tools a run of `step` is allowed: the user's choice, else the step's defaults. */
 export function toolsFor(db: Db, step: RunAgent): string[] {
-  // The implementer's tools, plus the git commands a rebase or a simplification needs.
-  if (step === 'rebase' || step === 'simplify') {
+  // The implementer's tools, plus the git commands the step needs.
+  if (inImplementerSession(step)) {
     return [...new Set([...toolsFor(db, 'implement'), ...DEFAULT_TOOLS[step]])];
+  }
+  if (step === 'split_plan') {
+    return [...DEFAULT_TOOLS.split_plan];
   }
   return resolveAgent(db, step).tools ?? [...defaultToolsOf(step)];
 }

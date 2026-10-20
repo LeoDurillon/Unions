@@ -56,6 +56,20 @@ export const DEFAULT_TOOLS: Record<BuiltInRunAgent, readonly string[]> = {
     'Bash(git commit*)',
     'Bash(git status*)',
   ],
+  // Reads the change and proposes slices: changes nothing.
+  split_plan: REVIEW_TOOLS,
+  // Added to the implementer's tools to rewrite its commits into slices, like a simplification.
+  split: [
+    'Bash(git reset*)',
+    'Bash(git rebase*)',
+    'Bash(git add*)',
+    'Bash(git apply*)',
+    'Bash(git commit*)',
+    'Bash(git branch*)',
+    'Bash(git status*)',
+  ],
+  // Added to the implementer's tools when restacking stopped on a conflict, like a rebase.
+  restack: ['Bash(git rebase*)', 'Bash(git merge-base*)', 'Bash(git add*)', 'Bash(git status*)'],
 };
 
 /** A custom agent's tools until the user picks others: reading git is harmless anywhere in a flow. */

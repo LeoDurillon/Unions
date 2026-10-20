@@ -1,20 +1,22 @@
 // Ticket state machine. Pure: the worker persists the result, nothing here does I/O.
 
-export const PLANNING_STEPS = ['intake', 'summary', 'technical', 'test_plan'] as const;
-export type PlanningStep = (typeof PLANNING_STEPS)[number];
-/**
- * `rebase` and `simplify` are outside the pipeline, run on demand once the branch exists: after a
- * rebase the agent worked on, the review runs again; a clean rebase (no agent) or a simplified
- * history leaves the reviewed code as it was, so the ticket goes back to where it was.
- */
-export type Step = PipelineStep | 'rebase' | 'simplify';
-/** A custom agent's step: `agent_<id>` of its `custom_agents` row; it runs like a planning step. */
-export type CustomStep = `agent_${number}`;
-export type PipelineStep = PlanningStep | CustomStep | 'implement' | 'final_review';
-/** The steps Union ships with: every step but the custom agents'. */
-export type BuiltInStep = Exclude<Step, CustomStep>;
-/** The pipeline steps a ticket runs, in their order (`flows.ts` checks and resolves it). */
-export type Flow = readonly PipelineStep[];
+import {
+  backToReview,
+  PLANNING_STEPS,
+  running,
+  thenDoneOf,
+  thenRunOf,
+  type Action,
+  type BuiltInStep,
+  type CustomStep,
+  type Flow,
+  type Phase,
+  type PipelineStep,
+  type Step,
+} from './phases';
+import { stackTransition } from './stack-states';
+
+export * from './phases';
 
 /** Models an agent can run on: the aliases `claude --model` accepts. */
 export const AGENT_MODELS = ['haiku', 'sonnet', 'opus'] as const;
@@ -57,49 +59,15 @@ export const MODEL_BY_STEP = {
   // Only fallbacks: these resume the implementer's session, on its model (`modelFor`).
   rebase: 'opus',
   simplify: 'opus',
+  split: 'opus',
+  restack: 'opus',
+  // Planned by a read-only agent on the final review's model.
+  split_plan: 'opus',
 } as const satisfies Record<BuiltInStep, AgentModel>;
 
 /** Board column, mirrored to the GitHub Project `Status` field. */
 export const BOARD_STATUSES = ['backlog', 'in_progress', 'in_review', 'done'] as const;
 export type BoardStatus = (typeof BOARD_STATUSES)[number];
-
-/** What a run does with the changes a hook refused to commit, once the user decided. */
-export type LeftoverResolution = 'commit' | 'discard';
-
-export type Phase =
-  | { kind: 'backlog' }
-  // an agent run is in flight; `thenRun` chains a step without stopping for approval; `resume`
-  // finishes a run paused on a refused commit, without the agent
-  // `thenDone`: a simplification or clean rebase asked once done goes back to done
-  | { kind: 'running'; step: Step; thenRun?: Step; resume?: LeftoverResolution; thenDone?: true }
-  | { kind: 'awaiting_approval'; step: Step } // output written, waiting for the user
-  // the repository's hook refused the changes the agent left uncommitted; the user decides
-  | { kind: 'commit_refused'; step: Step; thenRun?: Step; thenDone?: true }
-  | { kind: 'rate_limited'; step: Step; retryAt: number | null; thenDone?: true }
-  | { kind: 'failed'; step: Step; error: string; thenDone?: true }
-  | { kind: 'done' }
-  | { kind: 'cancelled' };
-
-export type Action =
-  | { type: 'start' } // moved to In Progress
-  | { type: 'run_finished' }
-  // The host rebased the branch with no conflict and the checks passed: no agent changed code.
-  | { type: 'rebased_clean' }
-  | { type: 'run_failed'; error: string }
-  | { type: 'rate_limited'; retryAt: number | null }
-  | { type: 'approve' }
-  | { type: 'revise' } // feedback is stored separately, then the same step re-runs
-  | { type: 'retry' }
-  // Brings the branch up to date with its base; the caller checks the pull request is still open.
-  | { type: 'rebase' }
-  // Rewrites the branch's commits into a simpler history, the code unchanged.
-  | { type: 'simplify' }
-  | { type: 'cancel' }
-  // A hook refused the leftover commit: the run stops until the user decides.
-  | { type: 'commit_refused' }
-  // Commit the refused changes without the hooks, or set them aside, then finish the run.
-  | { type: 'commit_anyway' }
-  | { type: 'drop_leftovers' };
 
 /** Each built-in step's name as the UI and the notifications show it (`stepTitle` for any step). */
 export const STEP_TITLES: Record<BuiltInStep, string> = {
@@ -111,6 +79,9 @@ export const STEP_TITLES: Record<BuiltInStep, string> = {
   final_review: 'Final review',
   rebase: 'Rebase',
   simplify: 'Simplify history',
+  split_plan: 'Split plan',
+  split: 'Split into a stack',
+  restack: 'Restack',
 };
 
 /** A pipeline step Union ships with. */
@@ -133,13 +104,6 @@ const PIPELINE_ORDER: readonly Step[] = STEPS;
 /** Where `step` sits among the built-in pipeline steps; -1 for the others (custom, rebase, simplify). */
 export function pipelineIndex(step: Step): number {
   return PIPELINE_ORDER.indexOf(step);
-}
-
-/** A run of `step`; a rebase always chains into a new final review, since the code changed. */
-function running(step: Step): Phase {
-  return step === 'rebase'
-    ? { kind: 'running', step, thenRun: 'final_review' }
-    : { kind: 'running', step };
 }
 
 /**
@@ -173,15 +137,6 @@ function fromBacklog(action: Action, flow: Flow): Phase | null {
   return action.type === 'start' ? { kind: 'running', step: flow[0] ?? 'implement' } : null;
 }
 
-/** No agent changed the code, so the final review still stands: back to it, or to done. */
-function backToReview(phase: { thenDone?: true }): Phase {
-  return phase.thenDone ? { kind: 'done' } : { kind: 'awaiting_approval', step: 'final_review' };
-}
-
-function thenDoneOf(phase: { thenDone?: true }): { thenDone?: true } {
-  return phase.thenDone ? { thenDone: true } : {};
-}
-
 function fromRunning(phase: PhaseOf<'running'>, action: Action): Phase | null {
   if (action.type === 'run_finished') {
     if (phase.step === 'simplify') {
@@ -209,10 +164,6 @@ function fromRunning(phase: PhaseOf<'running'>, action: Action): Phase | null {
     return { kind: 'commit_refused', step: phase.step, ...thenRunOf(phase), ...thenDoneOf(phase) };
   }
   return null;
-}
-
-function thenRunOf(phase: { thenRun?: Step }): { thenRun?: Step } {
-  return phase.thenRun ? { thenRun: phase.thenRun } : {};
 }
 
 /** The implementer can also be sent back with guidance; a rebase cannot. */
@@ -277,6 +228,10 @@ function fromStalled(phase: PhaseOf<'failed' | 'rate_limited'>, action: Action):
 }
 
 function applyAction(phase: Phase, action: Action, flow: Flow): Phase | null {
+  const stacked = stackTransition(phase, action);
+  if (stacked !== undefined) {
+    return stacked;
+  }
   switch (phase.kind) {
     case 'backlog': {
       return fromBacklog(action, flow);
@@ -319,6 +274,16 @@ export function transition(phase: Phase, action: Action, flow: Flow = FULL_FLOW)
   return next;
 }
 
+/** Steps on a branch already reviewed: the ticket stays In review while they run. */
+const IN_REVIEW_STEPS: ReadonlySet<Step> = new Set<Step>([
+  'final_review',
+  'rebase',
+  'simplify',
+  'split_plan',
+  'split',
+  'restack',
+]);
+
 export function boardStatus(phase: Phase): BoardStatus {
   switch (phase.kind) {
     case 'backlog':
@@ -333,9 +298,7 @@ export function boardStatus(phase: Phase): BoardStatus {
     case 'commit_refused':
     case 'rate_limited':
     case 'failed': {
-      return phase.step === 'final_review' || phase.step === 'rebase' || phase.step === 'simplify'
-        ? 'in_review'
-        : 'in_progress';
+      return IN_REVIEW_STEPS.has(phase.step) ? 'in_review' : 'in_progress';
     }
     default: {
       return assertNever(phase);

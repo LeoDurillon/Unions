@@ -26,6 +26,14 @@ writer's prompt and parsing are `prompt-writer.ts`; deleting checks `custom-agen
 in the browser-safe `investigation-defaults.ts`.
 `pr-stacks.ts` (browser-safe, `@union/core/pr-stacks`): `pullRequestStacks` groups pull requests by stack, a PR
 sitting on the one whose head branch it targets, bottom first.
+A ticket split into a **stack** of pull requests (`docs/plans/pr-stack.md`) has rows in `ticket_slices`,
+bottom first; the top slice is the ticket's own branch and PR. Its steps (`split_plan`, `split`, `restack`) move
+in `stack-states.ts`, which `transition` asks first; the step, phase and action types live in `phases.ts`
+(re-exported by `states.ts`) so both can use them. The pure rules: `stack-trailers.ts` (`Slice: <n>` trailers,
+`fixup! <sha>` targets, each slice's tip), `stack-restack.ts` (the `git rebase -i` todo moving a revision's
+commits into their slices), `stack-description.ts` (each slice's PR text, the issue comment) and `stack-status.ts`
+(merged only when every slice merged into the base; the range and PR base of a slice). The worker does not run
+these steps yet: the executor answers them with "Unknown step".
 Drizzle schema and migrations, the pure ticket state machine (`states.ts`), ticket dependencies
 (`ticket-links.ts`: `setParent`, `ticketBase`; the start gate `blockingParent` is in `tickets.ts`), the
 `ContainerRuntime` interface and its Docker CLI implementation.

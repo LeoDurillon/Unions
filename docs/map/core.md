@@ -63,6 +63,7 @@ export); do not edit. Tests are left out.
 - `notion-id.ts`: A whole ID: not touching other hex characters, so slugs like `Add-feed-<id>` cannot shift it.
 - `notion-links.ts`: The Notion pages a text links to (a pull request's description), for the review's link suggestions.
 - `notion-markdown.ts`: Notion's page markdown (`GET /v1/pages/{id}/markdown`) as plain GitHub-flavored markdown: its own tags (mentions, callouts, colored or commented spans, toggles…
+- `phases.ts`: The ticket state machine's vocabulary: its steps, phases and actions, and small phase helpers.
 - `pr-descriptions.ts`: What a stopped worker left: running rewrites fail; a send in flight goes back to its draft, since it may or may not have reached GitHub (the next send checks G…
 - `pr-review-verdicts.ts`: What a review posted on GitHub says of the pull request: a comment, an approval, or a request for changes.
 - `pr-stacks.ts`: Pull requests stacked on each other: one targets the branch of the one below.
@@ -98,8 +99,14 @@ export); do not edit. Tests are left out.
 - `schema-review-explanations.ts`: The table of the explanations an agent gives of lines of a review's diff, and what one holds.
 - `schema-review-groupings.ts`: The agent's grouping of a review's changed files by the parts of a specification, run when the user asks: for a ticket's branch or a pull request under review …
 - `schema-reviews.ts`: Pull requests the user put under review from the Pull requests tab, without a ticket.
+- `schema-ticket-slices.ts`: The slices of a ticket split into a stack of pull requests: a part of the spec and its commits.
 - `schema-types.ts`: Plain types stored in JSON columns, kept apart so schema.ts holds the tables.
 - `schema.ts`: The GitHub App projects can authenticate with instead of a token.
+- `stack-description.ts`: The text of a stack on GitHub: each slice's pull request description and the issue's comment.
+- `stack-restack.ts`: The todo the host gives `git rebase -i` to restack a revision: each new commit moved into its slice.
+- `stack-states.ts`: The state machine's moves for a stack of pull requests: planning a split, splitting, restacking.
+- `stack-status.ts`: Where a stack stands: which slices merged and into what, and the base each reader compares with.
+- `stack-trailers.ts`: Reading a stack's commits: the `Slice: <n>` trailer, `fixup!
 - `states.ts`: Ticket state machine.
 - `step-titles.ts`: A step's name as the UI, the notifications and the issue comments show it: built-in, or the custom agent's; browser-safe.
 - `tables.ts`: Re-exports every database table definition, exposed as `schema` from `@union/core`.

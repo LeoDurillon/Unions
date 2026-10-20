@@ -19,3 +19,4 @@ export * from './schema-refused-commits';
 export * from './schema-review-explanations';
 export * from './schema-review-groupings';
 export * from './schema-reviews';
+export * from './schema-ticket-slices';
