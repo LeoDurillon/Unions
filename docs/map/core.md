@@ -5,6 +5,7 @@ export); do not edit. Tests are left out.
 
 ## ./
 
+- `active-work.ts`: The work in progress a restart interrupts, per table: `bun run active` and the Update dialog list it.
 - `agent-environment.ts`: The agent's environment settings as sent (`agentVariables`, `forwardPorts`), checked; only what differs from the defaults is kept.
 - `agent-inputs.ts`: What the user gave the implementer's next run: command outputs and CI outputs, read together and marked read together.
 - `agent-log.ts`: Writes the agents' output to `agent_log`, and reads a Log: events and agent lines in one order.
@@ -20,6 +21,7 @@ export); do not edit. Tests are left out.
 - `attachments.ts`: Where the agents find a ticket's files: next to the repository, so `git add -A` never sees them.
 - `ci-output-text.ts`: The text the implementer gets from CI: a failed check (its failed step's log, annotations, summary), another job's log, a bot's comment; browser-safe.
 - `ci-outputs.ts`: CI output given to the implementer: kept for its next run, or sent now as a revision with the user's note.
+- `container-init.ts`: Identifies this container's run: its init's (PID 1) start in clock ticks, which a container restart changes and a `bun --watch` reload does not.
 - `container-runs.ts`: The owner's latest runs, newest first.
 - `custom-agent-config.ts`: A custom agent's defaults (its written prompt, Sonnet, the review tools) and what its settings page shows of it.
 - `custom-agent-usage.ts`: What still runs a custom agent: project flow presets that name it, and tickets not yet done whose flow has it.
@@ -101,6 +103,7 @@ export); do not edit. Tests are left out.
 - `schema-reviews.ts`: Pull requests the user put under review from the Pull requests tab, without a ticket.
 - `schema-ticket-slices.ts`: The slices of a ticket split into a stack of pull requests: a part of the spec and its commits.
 - `schema-types.ts`: Plain types stored in JSON columns, kept apart so schema.ts holds the tables.
+- `schema-union-update.ts`: The one-row table of Union's own update: the checkout against the remote's `main`, and the update's state.
 - `schema.ts`: The GitHub App projects can authenticate with instead of a token.
 - `split-plan.ts`: The split plan's format: the slices an agent proposes for a stack, as markdown the user can edit.
 - `stack-description.ts`: The text of a stack on GitHub: each slice's pull request description and the issue's comment.
@@ -117,4 +120,6 @@ export); do not edit. Tests are left out.
 - `ticket-links.ts`: A parent link the rules refuse: wrong project, a cycle, or a ticket that already started.
 - `ticket-slices.ts`: A ticket's slices once split into a stack: read bottom first, and replaced by a new split.
 - `tickets.ts`: Tickets: reading, creating and labelling them, the event log they write to, and dispatching state-machine actions.
+- `union-update-store.ts`: The `union_update` row: the worker's checks and the update's state, read by the sidebar.
+- `union-update.ts`: Union's own update, the pure part: what the checkout's git state allows, and when to reinstall.
 - `workspace-owner.ts`: Whose workspace a preview or a command runs in: a ticket's, or a pull request's under review; browser-safe.

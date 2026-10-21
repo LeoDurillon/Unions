@@ -5,6 +5,7 @@ import { serveStatic } from '@hono/bun';
 import { maxProjectFileBytes, migrateDb, openDb } from '@union/core';
 
 import { createApp } from './app';
+import { watchForRestart } from './restart-watch';
 
 const DEFAULT_PORT = 3000;
 /** Room for the request around the largest upload (a project file). */
@@ -13,6 +14,7 @@ const REQUEST_ENVELOPE_BYTES = 1_048_576;
 const db = openDb();
 migrateDb(db);
 const app = createApp(db);
+watchForRestart(db);
 
 if (process.env.NODE_ENV === 'production') {
   const dist = path.relative(process.cwd(), path.join(import.meta.dir, '..', 'dist'));

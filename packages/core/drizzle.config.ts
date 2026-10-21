@@ -24,6 +24,7 @@ export default defineConfig({
     './src/schema-review-groupings.ts',
     './src/schema-reviews.ts',
     './src/schema-ticket-slices.ts',
+    './src/schema-union-update.ts',
   ],
   out: './drizzle',
   dbCredentials: { url: process.env.DB_PATH ?? '../../union.sqlite' },

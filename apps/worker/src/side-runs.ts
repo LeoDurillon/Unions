@@ -8,6 +8,7 @@ import { PrDescriptionRunner } from './pr-description-run';
 import { createPreviewManager, type PreviewManager } from './preview/manager';
 import { reviewRunners, startReviewRuns, type ReviewRuns } from './review-runs';
 import { ThrowawayRuns } from './throwaway-runs';
+import { UnionUpdater } from './union-update';
 
 /**
  * The work outside the ticket pipeline: investigations, the review page's agents (`ReviewRuns`), PR
@@ -19,6 +20,8 @@ export type SideRuns = ReviewRuns & {
   prDescriptions: PrDescriptionRunner;
   containerRuns: ContainerRunner;
   previews: PreviewManager;
+  /** Union's own update; while it runs, the worker starts nothing new. */
+  updater: UnionUpdater;
   tick: () => void;
   stop: () => void;
   idle: () => Promise<void>;
@@ -35,6 +38,8 @@ export async function startSideRuns(
   const idlePreviews = previews.idleWatcher();
   const throwaway = new ThrowawayRuns(deps);
   const containerRuns = new ContainerRunner(deps);
+  const updater = new UnionUpdater(deps.db);
+  await updater.recover();
   await investigations.recover();
   const reviews = await startReviewRuns(deps);
   prDescriptions.recover();
@@ -48,6 +53,7 @@ export async function startSideRuns(
     prDescriptions,
     containerRuns,
     previews,
+    updater,
     tick: () => {
       investigations.tick();
       for (const runner of reviewRunners(reviews)) {
@@ -77,6 +83,7 @@ export async function startSideRuns(
         events.idle(),
         throwaway.idle(),
         containerRuns.idle(),
+        updater.idle(),
       ]);
     },
   };

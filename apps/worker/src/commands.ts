@@ -184,6 +184,17 @@ function decide(db: Db, command: Command): void {
   }
 }
 
+const UNION_UPDATE_COMMANDS = new Set(['union_update_check', 'union_update']);
+
+/** Union's own update: a check of the remote, or the update itself (`force` even while work runs). */
+function unionUpdate(command: Command, hooks: CommandHooks): void {
+  if (command.type === 'union_update_check') {
+    hooks.checkUnionUpdate();
+  } else {
+    hooks.updateUnion(field(command.payload, 'force') === true);
+  }
+}
+
 function execute(db: Db, command: Command, hooks: CommandHooks): void {
   if (DECISIONS.has(command.type)) {
     decide(db, command);
@@ -195,6 +206,10 @@ function execute(db: Db, command: Command, hooks: CommandHooks): void {
   }
   if (isCancelCommand(command.type)) {
     cancelRun(db, command, hooks);
+    return;
+  }
+  if (UNION_UPDATE_COMMANDS.has(command.type)) {
+    unionUpdate(command, hooks);
     return;
   }
   const preview = PREVIEW_ACTIONS[command.type];

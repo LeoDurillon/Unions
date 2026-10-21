@@ -187,6 +187,11 @@
   `branch_pushed` event came after the last `pull_request_opened` or `pr_description_sent`. Union's links ("Closes
   #n", the PR it builds on) are never part of the draft: `withoutUnionLinks` strips them, `pullRequestBody` adds them
   back.
+- Union's update: the sidebar's Update entry (`components/union-update/`, `lib/use-union-update.ts`, polled
+  every 5 s) reads `routes/union-update.ts` (the worker's last check and the work in progress, from core
+  `activeWork`) and queues `union_update_check` or `union_update`. `src/restart-watch.ts` (under compose only,
+  `UNION_SUPERVISED`) ends the web's container on `union_restart`. The page reloads itself once the status is
+  `idle` on a new commit.
 - `client/` is the SPA: Tailwind v4, TanStack Query, dnd-kit. `app.tsx` is the shell, `components/` the UI,
   `lib/` the hooks and the typed `api.ts`. The browser keeps one event stream for all its Union tabs
   (`lib/event-hub.ts`: the tab holding the Web Lock `union-events` reads `/api/events` and relays each event

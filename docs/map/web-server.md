@@ -28,6 +28,7 @@ export); do not edit. Tests are left out.
 - `notion-images.ts`: Downloads the images a Notion page shows (their links expire within the hour) so they can be kept as the ticket's files: each kept one is referenced as `attach…
 - `notion-mentions.ts`: The titles of the Notion pages a page's markdown mentions, so its links read as titles.
 - `pull-request-ref.ts`: A pull request of the repository: `12`, `#12` or its `/pull/12` URL.
+- `restart-watch.ts`: Ends the web's container when an update asks Union to restart (`union_restart`); compose starts it again on the new commit.
 - `review-feedback.ts`: The review the user sends, as the implementer receives it.
 - `review-import.ts`: The thread as one comment: who said what, the first comment then the replies.
 - `review-notion-types.ts`: What a pull request under review's Notion tab reads: its linked page, with the text as read now.
@@ -37,6 +38,7 @@ export); do not edit. Tests are left out.
 - `running-previews-types.ts`: The previews running across projects, as the Previews page and the sidebar's count read them.
 - `server.ts`: The web server's entry point: opens the database, migrates it and serves the API and the client.
 - `services.ts`: The outside services the API routes may call: GitHub (the wizard's and the PR tab's reads, its CI), Notion.
+- `union-update-types.ts`: Union's own update as the sidebar reads it: the last check, the update's state, and the work a restart would interrupt.
 
 ## routes/
 
@@ -56,7 +58,7 @@ export); do not edit. Tests are left out.
 - `grouping-targets.ts`: `/api/tickets/:id/groupings`.
 - `investigations.ts`: `/api/projects/:projectId/investigations`: one agent run on the user's prompt, with no GitHub issue.
 - `issue-import.ts`: `/api/tickets/github-issue`: a ticket from an existing issue of the project's repository.
-- `live.ts`: The routes the browser follows on its own: the event stream, the notifications it announces, the running previews.
+- `live.ts`: The routes the browser follows on its own: the event stream, the notifications it announces, the running previews, Union's update.
 - `mcp-connectors.ts`: `/api/agents/connectors`: the account's claude.ai connectors as the last check read them, and `POST /check` to read them again (the worker does, in a throwaway…
 - `memory.ts`: `/api/projects/:projectId/lessons`, `/feedback` and `/lesson-suggestion`: the project's memory (the worker runs the lesson writer).
 - `notifications.ts`: `/api/notifications`: what needs the user across every project (the worker writes them), marking them read and clearing them.
@@ -107,4 +109,5 @@ export); do not edit. Tests are left out.
 - `ticket-subroutes.ts`: The routes under `/api/tickets` that have their own module: creation, the issue import, a ticket's files, its refused commit, the rewrite of its PR description…
 - `ticket-workspace.ts`: The routes about a ticket's workspace: the branch it starts from, the steps it runs, its title and description, the commands run in it, and what its agents use…
 - `tickets.ts`: The API routes for tickets: listing, creating, editing outputs and moving them between steps.
+- `union-update.ts`: `/api/union-update`: how far Union's checkout is behind `origin/main`, and the commands that check again and update (the worker does both).
 - `usage.ts`: `/api/tickets/:id/usage`: what the ticket's agent calls used, per run, written by the worker as each call ends.

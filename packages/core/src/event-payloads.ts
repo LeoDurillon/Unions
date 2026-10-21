@@ -167,6 +167,17 @@ type NotificationPayloads = {
   > & { notificationId: number };
 };
 
+/** Union's own update, logged without a ticket. */
+type UnionUpdatePayloads = {
+  union_update_started: { from: string; to: string; force: boolean };
+  union_update_failed: Failure;
+  /**
+   * Web and worker exit on it; compose starts them again on the new commit. `init`: the worker
+   * container's init start (`initStartTicks`), to tell its restart from a reload.
+   */
+  union_restart: { from: string; to: string; init: string | null };
+};
+
 export type EventPayloads = TicketPayloads &
   RunPayloads &
   GitHubPayloads &
@@ -174,4 +185,5 @@ export type EventPayloads = TicketPayloads &
   ReviewPayloads &
   InvestigationPayloads &
   CustomAgentPayloads &
-  NotificationPayloads;
+  NotificationPayloads &
+  UnionUpdatePayloads;

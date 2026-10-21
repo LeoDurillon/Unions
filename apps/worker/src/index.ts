@@ -58,8 +58,12 @@ console.log(
 );
 while (!shutdown.signal.aborted) {
   drainCommands(db, hooks);
-  scheduler.tick();
-  sideRuns.tick();
+  sideRuns.updater.tick();
+  // While Union updates itself, nothing new starts: the restart would interrupt it.
+  if (!sideRuns.updater.paused()) {
+    scheduler.tick();
+    sideRuns.tick();
+  }
   await Bun.sleep(POLL_MS);
 }
 await Promise.all([scheduler.idle(), sideRuns.idle(), githubLoop]);

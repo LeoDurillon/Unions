@@ -57,7 +57,7 @@ export); do not edit. Tests are left out.
 - `run-agent-actions.tsx`: Giving a finished run's output to the implementer: kept for its next run, or sent now as a revision (when the ticket can go back to it) with a note.
 - `run-table.tsx`: The ticket's runs in the Overview tab: step, model, status and time, with what their agent calls used.
 - `script-buttons.tsx`: The project's saved scripts, one button each; without any, where to save them.
-- `sidebar.tsx`: Notifications, running previews, project switcher and creation entry point, always visible on the left.
+- `sidebar.tsx`: Notifications, running previews, project switcher and creation entry point, and Union's Update, always visible on the left.
 - `step-notices.tsx`: What stops the step and needs the user: a failed run, a usage limit, a refused commit.
 - `step-tab.tsx`: The ticket panel tab for one step: its output, verdict, answer form and review bar.
 - `ticket-attachments.tsx`: The ticket's files, in its Overview tab: added, described and removed at any time.
@@ -264,6 +264,11 @@ export); do not edit. Tests are left out.
 - `union-settings-nav.tsx`: The Union settings menu: the fixed pages, the custom agents' group, and New agent.
 - `union-settings-page.tsx`: The settings every project shares: a page per agent, the tools, the GitHub App (`?union=`).
 
+## components/union-update/
+
+- `update-button.tsx`: The sidebar's Update entry: enabled when the checkout is behind `origin/main`, with Check now beside it.
+- `update-dialog.tsx`: The Update dialog: the commits it pulls, and the work a restart would interrupt, with Wait and Update anyway.
+
 ## components/usage/
 
 - `call-details.tsx`: The agent calls of one row of a Usage table: each call's turns, time and peak context, then its models.
@@ -349,6 +354,7 @@ export); do not edit. Tests are left out.
 - `use-stored-number.ts`: A number remembered in localStorage; storage being unavailable only loses the memory.
 - `use-ticket-commands.ts`: The hook that sends commands for a ticket and refreshes what the page shows afterwards.
 - `use-ticket-edit.ts`: Saves the ticket's edited title and description: queued for the worker, done when its event comes in.
+- `use-union-update.ts`: Union's own update: the worker's last check (read again every few seconds), checking again, updating, and reloading the page on the new commit.
 - `use-usage.ts`: What a ticket's or an investigation's agent calls used; refetched with the ticket or the investigations.
 - `verdict.ts`: The reviewer's verdict line (`VERDICT: APPROVED` / `VERDICT: CHANGES_REQUESTED`), if any.
 - `worker-tabs.ts`: The Worker tab's own tabs: a step's in the ticket's flow order (custom agents named), the on-demand ones, the log.

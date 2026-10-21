@@ -24,7 +24,8 @@
     "./preview": "./src/preview-config.ts",
     "./github-client": "./src/github-client.ts",
     "./github-text": "./src/github-text.ts",
-    "./investigation-defaults": "./src/investigation-defaults.ts"
+    "./investigation-defaults": "./src/investigation-defaults.ts",
+    "./union-update": "./src/union-update.ts"
   },
   "dependencies": {
     "@octokit/auth-app": "catalog:github",

@@ -20,6 +20,7 @@ Everything the agent does is mirrored to the GitHub issue.
 - [Stacks of pull requests](pr-stacks.md): a ticket's pull request split into stacked ones, one per part of its spec.
 - [Preview environments](preview-environments.md): running a ticket's or a reviewed PR's branch with compose.
 - [MCP servers for agents](mcp-servers.md) (planned): claude.ai connectors built, other servers designed.
+- [Updating Union](union-update.md): the sidebar's Update, a fast-forward of `main` and a restart under compose.
 
 ## Decisions
 

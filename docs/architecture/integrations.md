@@ -42,3 +42,10 @@
   accept added permissions on GitHub (Settings → GitHub Apps → the request) before they apply; until then the CI
   reads answer 403, which `routes/pr-checks.ts` turns into a message naming them. A classic token needs `repo` and
   `project`.
+
+## Union's own remote
+
+The sidebar's Update fetches Union's checkout's `origin` (`docs/spec/union-update.md`), not a project's. An SSH
+`origin` uses the host's `~/.ssh`, mounted read-only into the worker container only (`UNION_SSH_DIR` in
+`compose.yaml`); the web and the agent containers never get it. The fetch runs with `BatchMode=yes` and
+`StrictHostKeyChecking=yes`, so a key with a passphrase or an unknown host fails instead of prompting.

@@ -103,6 +103,8 @@ export); do not edit. Tests are left out.
 - `stack-revise.ts`: A revision on a split ticket: the implementer is told the slices, then its new commits are moved into them and the stack pushed.
 - `throwaway-runs.ts`: The side runs that need no repository, each in a throwaway container: reading the account's connectors, the lesson writer and the prompt writer.
 - `ticket-base.ts`: Chooses the branch a ticket is cloned from, before its first clone: the branch the user chose (over the parent's), else the parent's branch while its pull requ…
+- `union-update-git.ts`: Git in Union's own checkout: fetching `origin/main` (over SSH with the host's keys, never prompting) and reading where it stands.
+- `union-update.ts`: Union's own update: checks the checkout against `origin/main` every few minutes, and starts the update the user asked for.
 - `workspace-git.ts`: Puts the repository on `branch`: the local branch if it exists, else the pushed one (a recreated container only has `origin/<branch>`), else a new branch from …
 
 ## event-actions/

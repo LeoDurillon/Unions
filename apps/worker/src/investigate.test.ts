@@ -247,6 +247,12 @@ test('the cancel command cancels a queued run itself and hands a running one to 
     preview: () => {
       // Not under test.
     },
+    checkUnionUpdate: () => {
+      // Not under test.
+    },
+    updateUnion: () => {
+      // Not under test.
+    },
   });
   expect(cancelled).toEqual([running.id]);
   expect(getInvestigation(db, queued.id).status).toBe('cancelled');

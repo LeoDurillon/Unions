@@ -6,6 +6,7 @@ import type { Page } from '../lib/use-navigation';
 import { NotificationBell } from './notifications/notification-bell';
 import { PreviewsButton } from './previews/previews-button';
 import { Button } from './ui';
+import { UpdateButton } from './union-update/update-button';
 
 const ACTIVE = 'bg-indigo-100 font-medium text-indigo-900 dark:bg-indigo-950 dark:text-indigo-200';
 const IDLE = 'hover:bg-zinc-200/70 dark:hover:bg-zinc-800';
@@ -52,7 +53,7 @@ function SettingsLink({ active, onOpen }: { active: boolean; onOpen: () => void 
   );
 }
 
-/** Notifications, running previews, project switcher and creation entry point, always visible on the left. */
+/** Notifications, running previews, project switcher and creation entry point, and Union's Update, always visible on the left. */
 export function Sidebar({
   projects,
   projectId,
@@ -105,6 +106,7 @@ export function Sidebar({
           onPage('settings');
         }}
       />
+      <UpdateButton />
     </aside>
   );
 }

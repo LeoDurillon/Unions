@@ -260,3 +260,10 @@
   project's API from its credentials (`projectGitHubAuth`); projects without any fall back to `GITHUB_TOKEN`, else
   their sync is off. GraphQL changes must be validated
   against GitHub's schema, and new sync behavior needs a test against the fake.
+- `union-update.ts` (`UnionUpdater`, in `side-runs.ts`), `union-update-git.ts`: Union's own update
+  (`docs/spec/union-update.md`). Every 10 minutes and on `union_update_check`, `git fetch origin main` in the
+  checkout, then `union_update` holds where it stands (core `union-update-store.ts`, refusals in
+  `union-update.ts`). On `union_update` it hands the pull to `scripts/union-update.ts`, spawned detached, and
+  `index.ts` ticks neither the scheduler nor the side runs while `paused()`. The script ends the container
+  through its init (PID 1); `recover()` tells that restart from a `--watch` reload by the init's start ticks
+  (core `container-init.ts`).

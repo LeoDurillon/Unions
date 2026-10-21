@@ -15,6 +15,7 @@ export); do not edit. Tests are left out.
 - `repo-map-lib.ts`: What `bun run map` writes: one line per source file, its own summary, grouped by folder.
 - `repo-map.ts`: Writes `docs/map/<area>.md`, one line per source file; `--check` fails when one is out of date.
 - `test-preload.ts`: Runs before every test file (`bunfig.toml`): points attachments at a temporary folder, never the live one.
+- `union-update.ts`: Union's update, started by the worker in its own process: fast-forwards to `<to>`, reinstalls if needed, then ends the worker's container so compose starts it …
 - `usage-backfill.ts`: The `usage:backfill` script: records the token usage of the agent calls already in the log (`DB_PATH`, else the default database).
 
 ## ui-check/

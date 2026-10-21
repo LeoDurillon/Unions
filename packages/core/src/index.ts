@@ -1,4 +1,5 @@
 // The package's public API: re-exports every core module.
+export * from './active-work';
 export * from './agent-inputs';
 export * from './agent-review-specs';
 export * from './agent-reviews';
@@ -6,6 +7,7 @@ export * from './agent-tools';
 export * from './agent-environment';
 export * from './ci-output-text';
 export * from './ci-outputs';
+export * from './container-init';
 export * from './container-runs';
 export * from './custom-agent-config';
 export * from './custom-agent-usage';
@@ -94,4 +96,6 @@ export * from './ticket-base';
 export * from './ticket-links';
 export * from './ticket-slices';
 export * from './tickets';
+export * from './union-update';
+export * from './union-update-store';
 export * from './workspace-owner';

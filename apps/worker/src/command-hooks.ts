@@ -37,6 +37,10 @@ export type CommandHooks = {
    * request's preview; `update` moves a pull request's checkout to the commit its review reads.
    */
   preview: (owner: WorkspaceOwner, action: PreviewAction) => void;
+  /** Fetches Union's own remote and records how far behind the checkout is. */
+  checkUnionUpdate: () => void;
+  /** Pulls Union's new commits and restarts it; `force` even while work is in progress. */
+  updateUnion: (force: boolean) => void;
 };
 
 export type PreviewAction = 'start' | 'stop' | 'logs' | 'generate' | 'e2e' | 'update';
@@ -58,4 +62,6 @@ export const NO_HOOKS: CommandHooks = {
   editTicket: ignore,
   rerunCiJob: ignore,
   preview: ignore,
+  checkUnionUpdate: ignore,
+  updateUnion: ignore,
 };

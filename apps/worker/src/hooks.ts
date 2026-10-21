@@ -8,6 +8,7 @@ import { postPullRequestReview } from './github/pr-review';
 import { editTicket } from './github/ticket-edit';
 import { removeContainers } from './janitor';
 import type { SideRuns } from './side-runs';
+import { unionUpdateHooks } from './union-update';
 
 /** What the commands hand off to the running worker: all asynchronous, so draining stays synchronous. */
 export function workerHooks(
@@ -20,6 +21,7 @@ export function workerHooks(
     | 'prDescriptions'
     | 'containerRuns'
     | 'previews'
+    | 'updater'
   > & {
     db: Db;
     runtime: ContainerRuntime;
@@ -28,7 +30,7 @@ export function workerHooks(
 ): CommandHooks {
   const { db, runtime, investigations, agentReviews, reviewGroupings, prDescriptions, previews } =
     deps;
-  const { apiFor, containerRuns, reviewExplanations } = deps;
+  const { apiFor, containerRuns, reviewExplanations, updater } = deps;
   return {
     removeContainers: (containers) => {
       void removeContainers(db, runtime, containers, (name) => previews.takeDownFor(name));
@@ -66,5 +68,6 @@ export function workerHooks(
     preview: (owner, action) => {
       previews.run(owner, action);
     },
+    ...unionUpdateHooks(updater),
   };
 }

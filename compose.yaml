@@ -10,7 +10,11 @@
 #
 # Overrides (shell or .env): UNION_UID / UNION_GID (default 1000, your host user), DOCKER_GID (group
 # of /var/run/docker.sock: `stat -c %g /var/run/docker.sock`), UNION_WEB_PORT (default 5173),
-# UNION_PREVIEW_PORT (default 8080), GITHUB_TOKEN (fallback for projects without their own token).
+# UNION_PREVIEW_PORT (default 8080), GITHUB_TOKEN (fallback for projects without their own token),
+# UNION_SSH_DIR (default ~/.ssh: the worker fetches Union's own `origin` with it, read-only).
+#
+# web and worker restart when they exit: the sidebar's Update pulls `main`, then ends both containers
+# (UNION_SUPERVISED tells them something starts them again).
 name: union-next
 
 x-app: &app
@@ -43,8 +47,10 @@ services:
   web:
     <<: *app
     command: ['bun', 'run', 'dev:web']
+    restart: unless-stopped
     environment:
       UNION_DEV_HOST: 0.0.0.0
+      UNION_SUPERVISED: '1'
     ports:
       - '${UNION_WEB_PORT:-5173}:5173'
     depends_on:
@@ -54,6 +60,7 @@ services:
   worker:
     <<: *app
     command: ['bun', 'run', 'dev:worker']
+    restart: unless-stopped
     group_add:
       - '${DOCKER_GID:-1001}'
     environment:
@@ -65,10 +72,19 @@ services:
       UNION_PREVIEW_PORT: ${UNION_PREVIEW_PORT:-8080}
       # Request counts per preview, to stop the ones nobody visits (never published to the host).
       UNION_PREVIEW_METRICS: http://proxy:8082/metrics
+      UNION_SUPERVISED: '1'
     volumes:
       - .:/app
       - /var/run/docker.sock:/var/run/docker.sock
       - ${HOME}/.claude:/home/bun/.claude-host:ro
+      # Union's own `origin` may be an SSH remote (host aliases from its config included). Only the
+      # worker gets it, read-only; projects clone over HTTPS with their own credentials.
+      - type: bind
+        source: ${UNION_SSH_DIR:-${HOME}/.ssh}
+        target: /home/bun/.ssh
+        read_only: true
+        bind:
+          create_host_path: false
     depends_on:
       install:
         condition: service_completed_successfully
