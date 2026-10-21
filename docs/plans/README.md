@@ -20,6 +20,9 @@ and linked.
 - [Stacked PRs in Pull requests and Current reviews](stacked-pr-reviews.md): a stack shows as one item, its review
   page picks a PR in a segmented control, and the agent reviews the whole stack against several specs linked to its
   PRs. Built, steps 1 to 4 (branch `stacked-pr-reviews`); one v1 item left (the size warning).
+- [Read stacks from GitHub](github-stack-reads.md): the Pull requests and Current reviews tabs, the stack agent
+  review and the stack's Notion link take stacks from GitHub's stacks API instead of chaining branches. Planned
+  (2026-10-20), decisions to confirm.
 - [MCP servers for agents](mcp-servers.md): claude.ai connectors built (Figma); HTTP and stdio servers left.
 - [Preview environments](preview-environments.md): compose-based previews with e2e tests (built, phases 1 to 4).
 - [Project settings as a page](project-settings-page.md): grouped side menu instead of the nine-tab modal (steps 1 to 5 built).
