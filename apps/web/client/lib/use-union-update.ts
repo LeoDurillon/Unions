@@ -1,6 +1,6 @@
 // Union's own update: the worker's last check (read again every few seconds), checking again, updating, and reloading the page on the new commit.
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import type { UnionUpdateView } from '../../src/union-update-types';
 import { request } from './api';
@@ -47,8 +47,52 @@ function useUnionUpdateCommand<V>(send: (value: V) => Promise<UnionUpdateView>):
 }
 
 /** Asks the worker to fetch the remote again. */
-export function useCheckForUpdate(): Mutation<void> {
+function useCheckForUpdate(): Mutation<void> {
   return useUnionUpdateCommand(() => request('POST', '/api/union-update/check'));
+}
+
+/** The worker's fetch times out after a minute; past this, the button gives up waiting. */
+const CHECK_WAIT_MS = 70_000;
+/** Read the state often while a check runs, so the button settles soon after it. */
+const CHECKING_POLL_MS = 1000;
+
+function noCleanup(): void {
+  // Nothing was started.
+}
+
+/**
+ * Check now, and whether that check still runs: the request only queues it, so it runs until the
+ * worker records a check newer than the click (or the wait runs out).
+ */
+export function useCheckNow(checkedAt: number | null): { checking: boolean; start: () => void } {
+  const queryClient = useQueryClient();
+  const check = useCheckForUpdate();
+  const [since, setSince] = useState<number | null>(null);
+  const [gaveUp, setGaveUp] = useState(false);
+  const waiting = since !== null && !gaveUp && (checkedAt === null || checkedAt < since);
+  useEffect(() => {
+    if (!waiting) {
+      return noCleanup;
+    }
+    const poll = setInterval(() => {
+      void queryClient.invalidateQueries({ queryKey: KEY });
+    }, CHECKING_POLL_MS);
+    const giveUp = setTimeout(() => {
+      setGaveUp(true);
+    }, CHECK_WAIT_MS);
+    return (): void => {
+      clearInterval(poll);
+      clearTimeout(giveUp);
+    };
+  }, [waiting, queryClient]);
+  return {
+    checking: waiting || check.isPending,
+    start: () => {
+      setGaveUp(false);
+      setSince(Date.now());
+      check.mutate();
+    },
+  };
 }
 
 /** Asks the worker to update; `force` even while work is in progress. */

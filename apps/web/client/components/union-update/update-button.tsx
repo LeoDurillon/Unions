@@ -2,7 +2,7 @@
 import { useState, type ReactElement } from 'react';
 
 import type { UnionUpdateView } from '../../../src/union-update-types';
-import { useCheckForUpdate, useUnionUpdate } from '../../lib/use-union-update';
+import { useCheckNow, useUnionUpdate } from '../../lib/use-union-update';
 import { UpdateDialog } from './update-dialog';
 
 type Update = NonNullable<UnionUpdateView['update']>;
@@ -29,17 +29,43 @@ function stateOf(update: Update | null): { label: string; title: string; ready: 
   };
 }
 
-function RefreshIcon(): ReactElement {
+function RefreshIcon({ spinning }: { spinning: boolean }): ReactElement {
   return (
-    <svg aria-hidden viewBox="0 0 20 20" fill="currentColor" className="size-4">
+    <svg
+      aria-hidden
+      viewBox="0 0 20 20"
+      fill="currentColor"
+      className={`size-4 ${spinning ? 'animate-spin' : ''}`}
+    >
       <path d="M15.3 4.7A7 7 0 0 0 3 10h2a5 5 0 0 1 8.9-3.1L12 9h5V4l-1.7.7ZM4.7 15.3A7 7 0 0 0 17 10h-2a5 5 0 0 1-8.9 3.1L8 11H3v5l1.7-.7Z" />
     </svg>
   );
 }
 
+/** Checks the remote again; disabled, its arrow turning, while a check or an update runs. */
+function CheckNowButton({ update }: { update: Update | null }): ReactElement {
+  const check = useCheckNow(update?.checkedAt ?? null);
+  const updating = update?.status === 'updating' || update?.status === 'restarting';
+  const busy = check.checking || updating;
+  return (
+    <button
+      type="button"
+      aria-label={check.checking ? 'Checking for updates' : 'Check for updates now'}
+      title={check.checking ? 'Checking for updates…' : 'Check for updates now'}
+      aria-busy={check.checking}
+      disabled={busy}
+      onClick={() => {
+        check.start();
+      }}
+      className={`rounded-md p-2 text-zinc-500 transition enabled:hover:bg-zinc-200/70 disabled:cursor-not-allowed dark:enabled:hover:bg-zinc-800 ${check.checking ? '' : 'disabled:opacity-50'}`}
+    >
+      <RefreshIcon spinning={check.checking} />
+    </button>
+  );
+}
+
 export function UpdateButton(): ReactElement {
   const { data } = useUnionUpdate();
-  const check = useCheckForUpdate();
   const [open, setOpen] = useState(false);
   const update = data?.update ?? null;
   const { label, title, ready } = stateOf(update);
@@ -58,18 +84,7 @@ export function UpdateButton(): ReactElement {
           {ready ? <span aria-hidden className="size-2 rounded-full bg-indigo-600" /> : null}
           <span className="truncate">{label}</span>
         </button>
-        <button
-          type="button"
-          aria-label="Check for updates now"
-          title="Check for updates now"
-          disabled={check.isPending}
-          onClick={() => {
-            check.mutate();
-          }}
-          className="rounded-md p-2 text-zinc-500 transition hover:bg-zinc-200/70 disabled:opacity-50 dark:hover:bg-zinc-800"
-        >
-          <RefreshIcon />
-        </button>
+        <CheckNowButton update={update} />
       </div>
       {update?.error ? (
         <p className="px-3 text-xs break-words text-red-600 dark:text-red-400">{update.error}</p>
