@@ -26,6 +26,12 @@ The sidebar's **Update** entry pulls Union's new commits and restarts it. Plan a
   host key required). Projects still clone over HTTPS with their own credentials.
 - An update the user did not force is refused when work is in progress (checked again by the worker, not only by
   the dialog).
+- An update whose commits add migrations (`packages/core/drizzle/*.sql`) backs the database up first, before the
+  merge: the restart applies them to the live database and putting the code back would not undo them. The copy
+  (`VACUUM INTO`, safe while web and worker write) goes to `backups/union-update-<date>.sqlite`, logged as
+  `union_update_backup`; the 5 newest update backups are kept, the manual ones (`union-<date>`) are never touched.
+  A failed backup refuses the update. The check counts the migrations, and the dialog says a backup comes first.
+  Restoring is manual (`bun run db:restore`).
 - A failed update (the merge, `bun install --frozen-lockfile` when `bun.lock`, `bunfig.toml` or a `package.json`
   changed) puts the checkout and its packages back on the commit it started from and restarts nothing.
 - While an update runs or waits for its restart, the worker starts no new work (commands are still recorded).
@@ -37,7 +43,7 @@ The sidebar's **Update** entry pulls Union's new commits and restarts it. Plan a
 2. The worker checks again, sets `union_update.status` to `updating`, logs `union_update_started` and spawns
    `scripts/union-update.ts <from> <to>` detached: the pull reloads the worker (`bun --watch`), the script must
    outlive that.
-3. The script fast-forwards, reinstalls when needed, sets `restarting`, logs `union_restart` (with the worker
+3. The script backs the database up when migrations come (`scripts/union-update-backup.ts`), fast-forwards, reinstalls when needed, sets `restarting`, logs `union_restart` (with the worker
    container's init start, in clock ticks), then sends SIGTERM to the container's PID 1 (compose runs it with
    `init: true`) and SIGKILL to its children 30 s later.
 4. The web follows the log for `union_restart` and sends SIGTERM to its own PID 1.

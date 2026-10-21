@@ -26,6 +26,7 @@ const BEHIND: UpdateCheck = {
   ahead: 0,
   behind: 1,
   subjects: ['New'],
+  migrations: 0,
   refusal: null,
   error: null,
 };

@@ -55,3 +55,23 @@ export function needsInstall(changed: string[]): boolean {
     (file) => file === 'bun.lock' || file === 'bunfig.toml' || file.endsWith('package.json'),
   );
 }
+
+/** Where the migrations live: an update touching them changes the database at restart. */
+export const MIGRATIONS_DIR = 'packages/core/drizzle/';
+/** Backups an update takes before a migration, apart from the manual ones (`union-<date>`). */
+export const UPDATE_BACKUP_PREFIX = 'union-update';
+/** Update backups kept; older ones are removed after each new one. */
+export const UPDATE_BACKUPS_KEPT = 5;
+
+/** The new migrations among the files an update changes. */
+export function newMigrations(changed: string[]): string[] {
+  return changed.filter((file) => file.startsWith(MIGRATIONS_DIR) && file.endsWith('.sql'));
+}
+
+/** The update backups to remove from a directory listing: all but the newest `kept` (names sort by date). */
+export function updateBackupsToDrop(names: string[], kept = UPDATE_BACKUPS_KEPT): string[] {
+  return names
+    .filter((name) => name.startsWith(`${UPDATE_BACKUP_PREFIX}-`) && name.endsWith('.sqlite'))
+    .toSorted()
+    .slice(0, -kept);
+}

@@ -456,6 +456,13 @@
       "when": 1792572897349,
       "tag": "0064_union_update",
       "breakpoints": true
+    },
+    {
+      "idx": 65,
+      "version": "6",
+      "when": 1792576712004,
+      "tag": "0065_union_update_migrations",
+      "breakpoints": true
     }
   ]
 }

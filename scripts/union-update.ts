@@ -1,8 +1,10 @@
-// Union's update, started by the worker in its own process: fast-forwards to `<to>`, reinstalls if needed, then ends the worker's container so compose starts it again.
+// Union's update, started by the worker in its own process: backs the database up when migrations come, fast-forwards to `<to>`, reinstalls if needed, then ends the worker's container so compose starts it again.
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
-import { needsInstall } from '@union/core/union-update';
+import { needsInstall, newMigrations } from '@union/core/union-update';
+
+import { backUpForUpdate } from './union-update-backup';
 
 const ROOT = path.resolve(import.meta.dir, '..');
 /** Time for the web to read `union_restart` before this container goes. */
@@ -56,6 +58,20 @@ async function record(
   );
 }
 
+/**
+ * Before the merge: the restart applies the new migrations to the live database, and the code going
+ * back would not undo them. A failed backup refuses the update.
+ */
+async function backUpIfMigrations(changed: string[]): Promise<void> {
+  const migrations = newMigrations(changed);
+  if (migrations.length === 0) {
+    return;
+  }
+  const file = await backUpForUpdate();
+  const core = await import('@union/core');
+  core.emitEvent(core.openDb(), { type: 'union_update_backup', payload: { file, migrations } });
+}
+
 /** Stops the container: SIGTERM to the init stops the worker, which stops its runs; then a kill. */
 async function endContainer(): Promise<void> {
   await Bun.sleep(EXIT_DELAY_MS);
@@ -84,7 +100,9 @@ async function main(from: string, to: string): Promise<void> {
     if ((await head()) !== from) {
       throw new Error('The checkout moved since the check; check again');
     }
-    reinstall = needsInstall(await changedFiles(from, to));
+    const changed = await changedFiles(from, to);
+    reinstall = needsInstall(changed);
+    await backUpIfMigrations(changed);
     await run(['git', 'merge', '--ff-only', '--quiet', to]);
     merged = true;
     if (reinstall) {

@@ -29,6 +29,20 @@ function Commits({ behind, subjects }: { behind: number; subjects: string[] }): 
   );
 }
 
+/** An update that changes the database is backed up first. */
+function MigrationNote({ count }: { count: number }): ReactElement | null {
+  if (count === 0) {
+    return null;
+  }
+  return (
+    <p className="text-sm text-zinc-600 dark:text-zinc-400">
+      It brings {count} database migration{count === 1 ? '' : 's'}: the database is backed up first,
+      to <code>backups/union-update-…</code> (the last 5 are kept). Restore one with{' '}
+      <code>bun run db:restore</code>.
+    </p>
+  );
+}
+
 /** What runs now, and what the restart does to each kind. */
 function InProgress({ active }: { active: Active }): ReactElement {
   return (
@@ -68,6 +82,7 @@ export function UpdateDialog({
     <Dialog open={open} onClose={onClose} title="Update Union">
       <div className="space-y-4">
         <Commits behind={view.update?.behind ?? 0} subjects={view.update?.subjects ?? []} />
+        <MigrationNote count={view.update?.migrations ?? 0} />
         {busy ? <InProgress active={view.active} /> : null}
         <ErrorText error={start.error} />
         <div className="flex justify-end gap-2">

@@ -1,0 +1,1 @@
+ALTER TABLE `union_update` ADD `migrations` integer DEFAULT 0 NOT NULL;

@@ -14,6 +14,7 @@ function viewOf(db: Db): UnionUpdateView {
       ahead: row.ahead,
       behind: row.behind,
       subjects: row.subjects,
+      migrations: row.migrations,
       refusal: row.refusal,
       status: row.status,
       error: row.error,

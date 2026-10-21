@@ -10,7 +10,7 @@ export type UnionUpdate = typeof unionUpdate.$inferSelect;
 export type UnionUpdateStatus = UnionUpdate['status'];
 export type UpdateCheck = Pick<
   UnionUpdate,
-  'localSha' | 'remoteSha' | 'ahead' | 'behind' | 'subjects' | 'refusal' | 'error'
+  'localSha' | 'remoteSha' | 'ahead' | 'behind' | 'subjects' | 'migrations' | 'refusal' | 'error'
 >;
 
 const ROW = 1;

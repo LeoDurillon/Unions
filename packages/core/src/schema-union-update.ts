@@ -16,6 +16,8 @@ export const unionUpdate = sqliteTable('union_update', {
   behind: integer('behind').notNull().default(0),
   /** The subjects of the commits behind, newest first (the first few). */
   subjects: text('subjects', { mode: 'json' }).$type<string[]>().notNull(),
+  /** Migrations the commits behind add: the update backs the database up first. */
+  migrations: integer('migrations').notNull().default(0),
   /** Why the checkout cannot update (a dirty tree, another branch…); null when it can. */
   refusal: text('refusal'),
   status: text('status', { enum: ['idle', 'updating', 'restarting', 'failed'] })

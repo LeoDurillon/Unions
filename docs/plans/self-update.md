@@ -6,7 +6,8 @@ the pull runs in `scripts/union-update.ts`, spawned detached by the worker, beca
 since the web's dev command runs the API and Vite under one shell; the sidebar polls instead of following an event;
 the fetch updates `origin/main` itself (no `refs/union/remote-main`). Left: a page open across the restart is
 reloaded by Vite's own client as the web comes back, and in headless Chrome inside WSL that reload can land blank
-(`ERR_NETWORK_CHANGED` while Docker rewires its network); a manual reload works.
+(`ERR_NETWORK_CHANGED` while Docker rewires its network); a manual reload works. Added after (2026-10-21): a database backup before an update that brings migrations
+(spec: `docs/spec/union-update.md`).
 
 ## Problem
 

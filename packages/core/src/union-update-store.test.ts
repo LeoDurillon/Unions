@@ -20,6 +20,7 @@ const CHECK: UpdateCheck = {
   ahead: 0,
   behind: 2,
   subjects: ['Two', 'One'],
+  migrations: 0,
   refusal: null,
   error: null,
 };

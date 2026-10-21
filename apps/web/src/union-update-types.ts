@@ -10,6 +10,7 @@ export type UnionUpdateView = {
     | 'ahead'
     | 'behind'
     | 'subjects'
+    | 'migrations'
     | 'refusal'
     | 'status'
     | 'error'

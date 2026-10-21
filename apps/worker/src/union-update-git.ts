@@ -2,6 +2,8 @@
 import path from 'node:path';
 
 import {
+  MIGRATIONS_DIR,
+  newMigrations,
   parseAheadBehind,
   UPDATE_BRANCH,
   UPDATE_REMOTE_REF,
@@ -77,15 +79,21 @@ export async function checkCheckout(supervised: boolean): Promise<UpdateCheck> {
   const counts = remote
     ? parseAheadBehind(await git(['rev-list', '--left-right', '--count', `HEAD...${remote}`]))
     : { ahead: 0, behind: 0 };
-  const subjects =
-    counts.behind > 0
-      ? await gitLines(['log', '--format=%s', `-n${UPDATE_SUBJECTS}`, `HEAD..${remote}`])
-      : [];
+  const behind = counts.behind > 0 && remote !== null;
+  const subjects = behind
+    ? await gitLines(['log', '--format=%s', `-n${UPDATE_SUBJECTS}`, `HEAD..${remote}`])
+    : [];
+  const migrations = behind
+    ? newMigrations(
+        await gitLines(['diff', '--name-only', `HEAD...${remote}`, '--', MIGRATIONS_DIR]),
+      )
+    : [];
   return {
     localSha,
     remoteSha: remote,
     ...counts,
     subjects,
+    migrations: migrations.length,
     refusal: updateRefusal({ branch, dirty, ahead: counts.ahead, supervised }),
     error: fetchError,
   };

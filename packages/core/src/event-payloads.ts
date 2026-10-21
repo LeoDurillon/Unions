@@ -171,6 +171,8 @@ type NotificationPayloads = {
 type UnionUpdatePayloads = {
   union_update_started: { from: string; to: string; force: boolean };
   union_update_failed: Failure;
+  /** The database copy taken before an update that brings migrations. */
+  union_update_backup: { file: string; migrations: string[] };
   /**
    * Web and worker exit on it; compose starts them again on the new commit. `init`: the worker
    * container's init start (`initStartTicks`), to tell its restart from a reload.
