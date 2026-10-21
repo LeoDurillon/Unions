@@ -14,6 +14,7 @@
     "./diff": "./src/diff.ts",
     "./diff-hunks": "./src/diff-hunks.ts",
     "./pr-stacks": "./src/pr-stacks.ts",
+    "./github-stacks": "./src/github-stacks.ts",
     "./notion-markdown": "./src/notion-markdown.ts",
     "./event-actions": "./src/event-actions.ts",
     "./event-catalog": "./src/event-catalog.ts",

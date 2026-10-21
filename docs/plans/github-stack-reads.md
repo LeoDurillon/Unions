@@ -1,6 +1,7 @@
 # Plan: read stacks from GitHub instead of grouping them by branch
 
-Status: planned (2026-10-20), decisions to confirm. Follows [Stacked PRs in Pull requests and Current
+Status: built (2026-10-21, branch `github-stack-reads`), decisions taken as recommended, except decision 3 (see
+"Not built"). Follows [Stacked PRs in Pull requests and Current
 reviews](stacked-pr-reviews.md) and [Split a PR into a stack](pr-stack.md).
 
 ## Idea
@@ -108,3 +109,10 @@ Each step passes `bun run check`; web steps reload only the web (no worker resta
 
 Verify against a real repository read-only (no writes): the Pull requests tab on a repo with a GitHub stack from
 an earlier split. UI checks block writes (`scripts/ui-check/`).
+
+## Not built
+
+- Decision 3: a ticket-linked member in a stack under review is left out of the review page's tabs (the stack stays
+  one row), not shown disabled: the current reviews do not know the members they do not hold.
+- A real GitHub read of the stacks endpoints from the web (only the fake was used); the worker's calls to the same
+  endpoints were tried on 2026-10-20.

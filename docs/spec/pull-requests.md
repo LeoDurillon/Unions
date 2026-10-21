@@ -10,6 +10,17 @@ A pull request without a ticket shows **Add to reviews** on hover (or keyboard f
 reviews** tab, per project (`current_reviews`, a snapshot of its title, author and branches, so the tab needs no
 GitHub call), where it can be removed.
 
+**Stacks** come from GitHub's stacked pull requests (`GET /repos/{o}/{r}/stacks`, read with the list; up to 500 open
+stacks): a stack is one row under "Stacks", above the other pull requests, in every filter, with its size on GitHub,
+how many of it merged, and its members (bottom first) when opened, those the list does not show named below them.
+**Add stack to reviews** adds its members without a ticket; a split ticket's stack (its slices are linked to the
+ticket) offers **Open ticket** instead. Pull requests that only target each other's branches are not a stack, except
+where GitHub has no stacks (the list answers 404): there open ones are chained by branch, as before. Current reviews
+keep each pull request's GitHub stack and place (`current_reviews.github_stack_number`, `stack_position`), written
+when it is added and again each time its files or the list are read; they are grouped by it, a ticket-linked member
+in the middle leaving the stack whole but out of the review's tabs. **Review with agent** on a stack and **Link the
+whole stack** take the stack as GitHub has it.
+
 **Open review** opens the same review page as a ticket's (file list, highlighted unified or split diff, comments on
 a line or a block of lines), with four tabs: **Description** (the pull request's description) and **Comments** (its
 review summaries, conversation comments and line threads, read only), both read from GitHub once per opening,

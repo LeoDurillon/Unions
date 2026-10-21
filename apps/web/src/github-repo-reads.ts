@@ -7,14 +7,17 @@ import {
   type ProjectFieldsResponse,
 } from '@union/core';
 import { githubClient, type ClientOptions } from '@union/core/github-client';
+import type { GitHubStack } from '@union/core/github-stacks';
 import type { Octokit } from 'octokit';
 
 import type { GitHubIssue } from './api-types';
 import type { RuleChoices } from './event-api-types';
 import { fetchBranch, fetchBranchNames, fetchIssue } from './github-repo';
 import { fetchRuleChoices } from './github-rule-choices';
+import { fetchPullRequestStack, fetchStacks } from './github-stacks';
 
 export type { RuleChoices } from './event-api-types';
+export type { StackReads } from './github-stacks';
 
 type Repo = { owner: string; repo: string };
 
@@ -50,7 +53,7 @@ export async function orNull<T>(call: () => Promise<T>): Promise<T | null> {
   }
 }
 
-/** The repository reads of `OnboardingGitHub`, and the client every call builds from its credentials. */
+/** The repository reads of `OnboardingGitHub` (stacks included), and the client every call builds from its credentials. */
 export class OctokitRepoReads {
   constructor(protected readonly options: ClientOptions = {}) {}
 
@@ -68,6 +71,14 @@ export class OctokitRepoReads {
 
   getIssue(auth: GitHubAuth, repo: Repo, number: number): Promise<GitHubIssue | null> {
     return orNull(() => fetchIssue(this.client(auth), repo, number));
+  }
+
+  listStacks(auth: GitHubAuth, repo: Repo): Promise<GitHubStack[] | null> {
+    return orNull(() => fetchStacks(this.client(auth), repo));
+  }
+
+  pullRequestStack(auth: GitHubAuth, repo: Repo, number: number): Promise<GitHubStack | null> {
+    return orNull(() => fetchPullRequestStack(this.client(auth), repo, number));
   }
 
   listRuleChoices(auth: GitHubAuth, repo: Repo): Promise<RuleChoices | null> {

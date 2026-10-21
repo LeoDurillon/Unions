@@ -49,6 +49,7 @@ export); do not edit. Tests are left out.
 - `github-auth.ts`: A project's installation wins over its token; `fallbackToken` (the `GITHUB_TOKEN` environment variable) covers projects with neither.
 - `github-client.ts`: One client per credential, kept for the process: an installation client mints its own short-lived token (one hour) and refreshes it before it expires, so it mu…
 - `github-project-fields.ts`: Reading a GitHub Project's fields (the ones a rule can set) and setting one on an item: queries and parsing, for the web and the worker.
+- `github-stacks.ts`: GitHub's stacks of pull requests as the REST API answers them, read into one shape for the worker and the web.
 - `github-text.ts`: Browser-safe: the PR tab shows GitHub text with it, and the import stores it.
 - `index.ts`: The package's public API: re-exports every core module.
 - `investigation-defaults.ts`: What a new investigation runs with until the user picks otherwise.
@@ -68,7 +69,7 @@ export); do not edit. Tests are left out.
 - `phases.ts`: The ticket state machine's vocabulary: its steps, phases and actions, and small phase helpers.
 - `pr-descriptions.ts`: What a stopped worker left: running rewrites fail; a send in flight goes back to its draft, since it may or may not have reached GitHub (the next send checks G…
 - `pr-review-verdicts.ts`: What a review posted on GitHub says of the pull request: a comment, an approval, or a request for changes.
-- `pr-stacks.ts`: Pull requests stacked on each other: one targets the branch of the one below.
+- `pr-stacks.ts`: Pull requests stacked on each other: by GitHub's stacks, or (where it has none) by branches.
 - `preview-compose-check.ts`: A path inside the repository: the only host files a preview may use.
 - `preview-compose.ts`: The file the preview runs, written from the resolved one (after `composeProblems` found nothing): the ticket's own compose project, no fixed container names or…
 - `preview-config.ts`: Preview settings and their templates.

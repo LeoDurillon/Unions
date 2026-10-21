@@ -4,6 +4,9 @@ import type {
   RemoteProjectField,
   ReviewVerdict,
 } from '@union/core';
+import type { GitHubStack } from '@union/core/github-stacks';
+
+export type { GitHubStack } from '@union/core/github-stacks';
 
 export type RepoRef = { owner: string; repo: string };
 
@@ -45,21 +48,6 @@ export type PullRequestStatus = {
   /** The branch it targets (for a merged one, the branch it was merged into) and its head commit. */
   base?: string;
   headSha?: string;
-};
-
-/** GitHub's own stack over pull requests (stacked pull requests), bottom first. */
-export type GitHubStack = {
-  number: number;
-  open: boolean;
-  /** The branch the whole stack merges into. */
-  base: string;
-  pullRequests: {
-    number: number;
-    state: 'open' | 'closed';
-    mergedAt: number | null;
-    headRef: string;
-    headSha: string;
-  }[];
 };
 
 /** All the checks of a commit together: red as soon as one failed. */

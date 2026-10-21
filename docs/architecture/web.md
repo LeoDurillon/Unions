@@ -49,12 +49,17 @@
   `diff_commits`/`diff_commit_files`, newest 100) and, once the user has sent a review (`tickets.reviewed_sha`, the
   snapshot's head then), the change since that head while it is still in the branch (`routes/ticket-commits.ts`,
   `since-review`).
-  Stacked pull requests (one targets the head branch of another; `@union/core/pr-stacks`) are one row in the Pull
-  requests tab when it lists open ones, listed first under "Stacks", apart from the others (`pull-requests/stack-item.tsx`, `lib/pull-request-stacks.ts`), opened to list
-  their members. "Add stack to reviews" posts `…/pull-requests/reviews/stack` (one transaction, members already
-  under review skipped); a pull request on one under review says which stack it joins. `routes/pr-review.ts` keeps a
-  review's branches as GitHub has them each time it reads the files, so a retargeted PR leaves its stack.
-  The Current reviews tab groups its reviews the same way (`reviewStacks`, on their stored branches): stacks first,
+  Stacked pull requests are GitHub's stacks: the list route reads them with the pull requests
+  (`routes/pull-request-listing.ts`, `listStacks` in `src/github-stacks.ts`, cached together) and sends each item's
+  `stack` (number and place) and the open `stacks` (null where GitHub has none: the client then chains open ones by
+  branch). They are one row in the Pull requests tab, in every filter, listed first under "Stacks", apart from the
+  others (`pull-requests/stack-item.tsx`, `lib/pull-request-stacks.ts`), opened to list their members and name those
+  not listed. "Add stack to reviews" posts `…/pull-requests/reviews/stack` (one transaction, members already
+  under review skipped); a pull request whose stack has one under review says which stack it joins; a split
+  ticket's slices map to its ticket, so its stack offers Open ticket. Current reviews keep `github_stack_number` and
+  `stack_position`: set from the listed item when added, written for every review when the list is read, and by
+  `readReviewFiles` (`routes/pr-review-load.ts`, `pullRequestStack`) each time it reads the files.
+  The Current reviews tab groups its reviews by them (`reviewStacks`): stacks first,
   one row each (`review-stack-item.tsx`; Remove posts `…/reviews/stack/remove`: every member in one transaction, or none). Opening one opens its bottom PR in the review
   page with its PRs as a segmented control under the header (`stack-review.tsx`, `stack-tabs.tsx`: draft count and posting state per
   PR, `useDraftCounts` sharing `useComments`' cache); `ReviewPage` is keyed by the PR, so switching starts on its
@@ -122,14 +127,14 @@
   ticket's text or the PR's description and its linked Notion page (`lib/use-default-specs.ts`); none means the agent reviews the code alone,
   and a request with no `specs` keeps the old prompt. In a stack (`lib/review-stack.ts`, provided by
   `stack-review.tsx`) it reviews the whole stack by default: each PR's description linked to its own PR, an added
-  spec linked to all until unticked. `routes/pr-agent-review.ts` checks the PRs are one stack under review, reads
+  spec linked to all until unticked. `routes/pr-agent-review.ts` checks the PRs are under review and in one GitHub stack (read then, bottom first in its order), reads
   every member's files again (`readReviewFiles`), refuses (409) members merged or closed on GitHub by number, and
   queues one run with its members
   (`agent_review_members`); every PR's tab shows that run (`latestAgentReview` counts the stacks a review is in).
 - A review's Notion page: `routes/review-notion.ts` (mounted from `review-workspace.ts`) reads the linked page's
   text (`GET`), checks a page before linking (`POST /check`), links (`PUT`, stores `current_reviews.notion_page_id`,
-  `notion_title`, `notion_url`) and unlinks (`DELETE`); `{ page, stack: true }` also links the stack's members without a page (stacks from
-  `@union/core/pr-stacks`). `GET /notion/suggestions` (`review-notion-suggestions.ts`) reads the description's
+  `notion_title`, `notion_url`) and unlinks (`DELETE`); `{ page, stack: true }` also links the reviews of its GitHub stack without a page
+  (`github_stack_number`). `GET /notion/suggestions` (`review-notion-suggestions.ts`) reads the description's
   Notion links (`notionUrlsIn`, `@union/core` `notion-links.ts`) and returns the readable ones but the linked page. The client's row is `review-notion-link.tsx` (suggestions and the stack button in `review-notion-offers.tsx`) in the
   Description tab (`review-description.tsx`), the tab `review-notion-tab.tsx`, both through
   `lib/use-review-notion.ts`; `prReviewSections` adds the tab when the review has a page.

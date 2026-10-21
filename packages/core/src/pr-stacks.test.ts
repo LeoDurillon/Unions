@@ -1,6 +1,7 @@
 import { expect, test } from 'bun:test';
 
-import { pullRequestStacks, type StackMember } from './pr-stacks';
+import type { GitHubStack } from './github-stacks';
+import { placedStacks, pullRequestStacks, stackPlaces, type StackMember } from './pr-stacks';
 
 function pr(number: number, headBranch: string, baseBranch: string, fork = false): StackMember {
   return { number, headBranch, baseBranch, crossRepository: fork };
@@ -52,4 +53,48 @@ test('branches that target each other still give every pull request once', () =>
 
 test('no pull requests, no stacks', () => {
   expect(pullRequestStacks([])).toEqual([]);
+});
+
+function githubStack(number: number, pulls: number[], open = true): GitHubStack {
+  return {
+    number,
+    open,
+    base: 'main',
+    pullRequests: pulls.map((pull) => ({
+      number: pull,
+      state: 'open',
+      mergedAt: null,
+      headRef: `b${pull}`,
+      headSha: 'sha',
+    })),
+  };
+}
+
+function placed(listed: number[], stacks: GitHubStack[]): number[][] {
+  const places = stackPlaces(stacks);
+  return placedStacks(listed, (number) => places.get(number) ?? null);
+}
+
+test('a GitHub stack groups its members bottom first, where the first one is listed', () => {
+  expect(placed([9, 14, 12, 13], [githubStack(1, [12, 13, 14])])).toEqual([[9], [12, 13, 14]]);
+});
+
+test('members of a GitHub stack not listed leave the others in it, in order', () => {
+  expect(placed([14, 12], [githubStack(1, [11, 12, 13, 14])])).toEqual([[12, 14]]);
+});
+
+test('two GitHub stacks stay apart; a closed one groups nothing', () => {
+  expect(
+    placed(
+      [1, 2, 3, 4, 5],
+      [githubStack(1, [1, 3]), githubStack(2, [2, 4]), githubStack(3, [5], false)],
+    ),
+  ).toEqual([[1, 3], [2, 4], [5]]);
+});
+
+test('each pull request gets its stack and its place from the bottom', () => {
+  expect([...stackPlaces([githubStack(4, [20, 21])])]).toEqual([
+    [20, { number: 4, position: 0 }],
+    [21, { number: 4, position: 1 }],
+  ]);
 });

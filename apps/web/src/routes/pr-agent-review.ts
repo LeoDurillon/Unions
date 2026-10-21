@@ -1,6 +1,5 @@
 // A pull request under review's agent review: one pull request, or the stack it is in, checked and queued for the worker.
 import { schema, type AgentReviewSpec, type Db } from '@union/core';
-import { pullRequestStacks } from '@union/core/pr-stacks';
 import { and, eq, inArray } from 'drizzle-orm';
 import type { Context, Hono } from 'hono';
 
@@ -12,10 +11,11 @@ import {
   readAgentReviewBody,
   startAgentReview,
 } from './agent-review';
-import { load, readReviewFiles, type Project, type Review } from './pr-review-load';
+import { guarded } from './github-errors';
+import { authOf, load, readReviewFiles, type Project, type Review } from './pr-review-load';
 
-/** The stack's reviews, bottom first; refused unless they are all under review and one stack. */
-function stackReviews(db: Db, project: Project, numbers: number[]): Review[] {
+/** The reviews of these pull requests; refused when one is not under review. */
+function underReview(db: Db, project: Project, numbers: number[]): Review[] {
   const rows = db
     .select()
     .from(schema.currentReviews)
@@ -33,19 +33,27 @@ function stackReviews(db: Db, project: Project, numbers: number[]): Review[] {
       `${missing.map((n) => `#${n}`).join(', ')} not among the current reviews`,
     );
   }
-  const stacks = pullRequestStacks(
-    rows.map((review) => ({
-      review,
-      number: review.prNumber,
-      headBranch: review.headBranch,
-      baseBranch: review.baseBranch,
-    })),
-  );
-  const [stack] = stacks;
-  if (!stack || stacks.length > 1) {
-    throw fail(BAD_REQUEST, 'These pull requests are not one stack');
+  return rows;
+}
+
+/** The stack's reviews in GitHub's order, bottom first; refused unless GitHub has them in one stack. */
+async function stackReviews(
+  deps: { db: Db; github: OnboardingGitHub },
+  project: Project,
+  numbers: number[],
+): Promise<Review[]> {
+  const rows = underReview(deps.db, project, numbers);
+  const repo = { owner: project.owner, repo: project.repo };
+  const [first] = numbers;
+  const stack =
+    first === undefined
+      ? null
+      : await guarded(() => deps.github.pullRequestStack(authOf(deps.db, project), repo, first));
+  const order = stack?.open === true ? stack.pullRequests.map((pull) => pull.number) : [];
+  if (!numbers.every((number) => order.includes(number))) {
+    throw fail(BAD_REQUEST, 'These pull requests are not one stack on GitHub');
   }
-  return stack.map((member) => member.review);
+  return rows.toSorted((a, b) => order.indexOf(a.prNumber) - order.indexOf(b.prNumber));
 }
 
 function checkSpecs(specs: AgentReviewSpec[] | null, numbers: number[]): void {
@@ -89,7 +97,7 @@ async function startStack(
     throw fail(BAD_REQUEST, `The stack must include #${opened.review.prNumber}`);
   }
   checkSpecs(body.specs, body.stack);
-  const stack = stackReviews(db, opened.project, body.stack);
+  const stack = await stackReviews(deps, opened.project, body.stack);
   await readStack(deps, opened.project, stack);
   const [bottom] = stack;
   const sending = stack.find((review) => review.submitStatus === 'sending');

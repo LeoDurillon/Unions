@@ -13,6 +13,8 @@ import type {
   TicketBaseView,
   schema,
 } from '@union/core';
+import type { GitHubStack } from '@union/core/github-stacks';
+import type { StackPlace } from '@union/core/pr-stacks';
 
 import type { StackView } from './api-stack-types';
 
@@ -271,6 +273,8 @@ export type PullRequestListItem = {
   deletions: number;
   /** The ticket this pull request is linked to, if any. */
   ticketId: number | null;
+  /** The open GitHub stack it is in, and its place there; null when in none. */
+  stack: StackPlace | null;
 };
 
 /** A pull request put under review from the Pull requests tab (as listed: without its files). */
@@ -283,6 +287,8 @@ export type CurrentReview = Omit<typeof schema.currentReviews.$inferSelect, 'fil
 export type PullRequestList = {
   total: number;
   pullRequests: PullRequestListItem[];
+  /** The repository's open GitHub stacks; null where GitHub has none (pull requests chain by branch). */
+  stacks: GitHubStack[] | null;
   /** When the list was read from GitHub: the server reuses it for a few minutes. */
   fetchedAt: number;
 };

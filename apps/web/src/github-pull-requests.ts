@@ -4,7 +4,7 @@ import type { PullRequestFilter, PullRequestListItem } from './api-types';
 import { REPOSITORY_PULL_REQUESTS } from './github-queries';
 
 /** A pull request as GitHub knows it: the ticket link is added from our side. */
-export type RemotePullRequest = Omit<PullRequestListItem, 'ticketId'>;
+export type RemotePullRequest = Omit<PullRequestListItem, 'ticketId' | 'stack'>;
 
 export type RawPullRequest = {
   number: number;

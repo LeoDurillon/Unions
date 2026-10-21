@@ -40,9 +40,24 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
+/** The GitHub stack the client listed it in, if any: kept until the next read of the stacks. */
+function stackValues(stack: unknown): Pick<NewReview, 'githubStackNumber' | 'stackPosition'> {
+  if (
+    isRecord(stack) &&
+    typeof stack.number === 'number' &&
+    typeof stack.position === 'number' &&
+    Number.isSafeInteger(stack.number) &&
+    Number.isSafeInteger(stack.position)
+  ) {
+    return { githubStackNumber: stack.number, stackPosition: stack.position };
+  }
+  return { githubStackNumber: null, stackPosition: null };
+}
+
 /** A pull request as the client listed it, as a row to insert. */
 function reviewValues(projectId: number, body: Record<string, unknown>): NewReview {
   return {
+    ...stackValues(body.stack),
     projectId,
     prNumber: requireId(String(body.number), 'pull request number'),
     title: requireText(body, 'title'),

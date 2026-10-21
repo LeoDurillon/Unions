@@ -80,6 +80,24 @@ test('a stack is added at once; those already under review are skipped', async (
   expect(again).toEqual([]);
 });
 
+test('each keeps the GitHub stack it was listed in, and its place there', async () => {
+  await send('POST', '/stack', {
+    pullRequests: [
+      { ...pull(12), stack: { number: 3, position: 0 } },
+      { ...pull(13), stack: { number: 3, position: 1 } },
+    ],
+  });
+  await send('POST', '', { ...pull(20), stack: { number: 'x' } });
+  const list = (await (await send('GET', '')).json()) as CurrentReview[];
+  expect(
+    list.map((review) => [review.prNumber, review.githubStackNumber, review.stackPosition]),
+  ).toEqual([
+    [20, null, null],
+    [13, 3, 1],
+    [12, 3, 0],
+  ]);
+});
+
 test('a stack with one bad pull request adds nothing', async () => {
   const bad = await send('POST', '/stack', { pullRequests: [pull(20), { ...pull(21), url: '' }] });
   expect(bad.status).toBe(400);

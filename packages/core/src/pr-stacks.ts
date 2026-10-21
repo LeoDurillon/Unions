@@ -1,4 +1,5 @@
-// Pull requests stacked on each other: one targets the branch of the one below. Pure and browser-safe.
+// Pull requests stacked on each other: by GitHub's stacks, or (where it has none) by branches. Pure and browser-safe.
+import type { GitHubStack } from './github-stacks';
 
 /** What a stack is read from: a pull request's branches, and whether its head is in a fork. */
 export type StackMember = {
@@ -65,4 +66,42 @@ export function pullRequestStacks<T extends StackMember>(pulls: T[]): T[][] {
   const first = (stack: T[]): number =>
     Math.min(...stack.map((pull) => position.get(pull) ?? pulls.length));
   return stacks.toSorted((a, b) => first(a) - first(b));
+}
+
+/** Where a pull request sits in a GitHub stack: its number, and its place in it from the bottom (0). */
+export type StackPlace = { number: number; position: number };
+
+/** Each pull request's place in the open stacks, by number. */
+export function stackPlaces(stacks: GitHubStack[]): Map<number, StackPlace> {
+  const places = new Map<number, StackPlace>();
+  for (const stack of stacks.filter((found) => found.open)) {
+    for (const [position, pull] of stack.pullRequests.entries()) {
+      places.set(pull.number, { number: stack.number, position });
+    }
+  }
+  return places;
+}
+
+/**
+ * The items grouped by the GitHub stack they are in, each bottom first; an item in none is a stack
+ * of one. Stacks keep the list's order, each where its first listed member is.
+ */
+export function placedStacks<T>(items: T[], placeOf: (item: T) => StackPlace | null): T[][] {
+  const byStack = new Map<number, T[]>();
+  const stacks: T[][] = [];
+  for (const item of items) {
+    const place = placeOf(item);
+    const found = place === null ? undefined : byStack.get(place.number);
+    if (found) {
+      found.push(item);
+    } else {
+      const stack = [item];
+      stacks.push(stack);
+      if (place !== null) {
+        byStack.set(place.number, stack);
+      }
+    }
+  }
+  const position = (item: T): number => placeOf(item)?.position ?? 0;
+  return stacks.map((stack) => stack.toSorted((a, b) => position(a) - position(b)));
 }

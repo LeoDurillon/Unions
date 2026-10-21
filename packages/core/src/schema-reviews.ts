@@ -50,6 +50,12 @@ export const currentReviews = sqliteTable(
     notionPageId: text('notion_page_id'),
     notionTitle: text('notion_title'),
     notionUrl: text('notion_url'),
+    /**
+     * The GitHub stack the pull request is in, and its place there from the bottom (0), as last
+     * read; null when it is in none.
+     */
+    githubStackNumber: integer('github_stack_number'),
+    stackPosition: integer('stack_position'),
     createdAt: integer('created_at').notNull().default(now),
   },
   (t) => [uniqueIndex('current_reviews_pr_idx').on(t.projectId, t.prNumber)],

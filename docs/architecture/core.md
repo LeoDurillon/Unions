@@ -24,8 +24,10 @@ name (`flowReadySteps`: live, prompt written); `flow-edit.ts` (browser-safe) edi
 writer's prompt and parsing are `prompt-writer.ts`; deleting checks `custom-agent-usage.ts`.
 `investigations.ts`: one-off agent runs on a custom prompt (records, claim, finish, cancel, follow-ups); defaults
 in the browser-safe `investigation-defaults.ts`.
-`pr-stacks.ts` (browser-safe, `@union/core/pr-stacks`): `pullRequestStacks` groups pull requests by stack, a PR
-sitting on the one whose head branch it targets, bottom first.
+`pr-stacks.ts` (browser-safe, `@union/core/pr-stacks`): `stackPlaces` and `placedStacks` group pull requests by
+the GitHub stack they are in, bottom first; `pullRequestStacks` chains them by branch (a PR sitting on the one whose
+head branch it targets), used only where GitHub has no stacks. `github-stacks.ts` (`@union/core/github-stacks`)
+reads GitHub's stacks answers (`parseStack`, `parseStacks`, the API version header) for the worker and the web.
 A ticket split into a **stack** of pull requests (`docs/plans/pr-stack.md`) has rows in `ticket_slices`,
 bottom first; the top slice is the ticket's own branch and PR. Its steps (`split_plan`, `split`, `restack`) move
 in `stack-states.ts`, which `transition` asks first; the step, phase and action types live in `phases.ts`

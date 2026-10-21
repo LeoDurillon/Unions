@@ -27,6 +27,8 @@ const github: OnboardingGitHub = {
   getPullRequest: unused,
   getDiscussion: unused,
   listPullRequests: unused,
+  listStacks: unused,
+  pullRequestStack: unused,
   getPullRequestFiles: unused,
   listBranches: () => Promise.resolve(BRANCHES),
   hasBranch: (_auth, _repo, branch) => Promise.resolve(BRANCHES.includes(branch)),

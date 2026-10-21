@@ -116,7 +116,8 @@ test('an unshared page, a bad URL and a project without Notion are refused', asy
   expect((await send('PUT', '', { page: urlOf(PAGE) })).status).toBe(409);
 });
 
-function addReview(prNumber: number, headBranch: string, baseBranch: string): void {
+/** `stack`: the GitHub stack it is in. */
+function addReview(prNumber: number, headBranch: string, stack: number | null): void {
   db.insert(schema.currentReviews)
     .values({
       projectId,
@@ -125,7 +126,9 @@ function addReview(prNumber: number, headBranch: string, baseBranch: string): vo
       url: 'u',
       author: 'a',
       headBranch,
-      baseBranch,
+      baseBranch: 'main',
+      githubStackNumber: stack,
+      stackPosition: stack === null ? null : prNumber,
     })
     .run();
 }
@@ -141,13 +144,16 @@ function pages(): Record<number, string | null> {
 }
 
 test('linking the whole stack sets the page on its members without one, nowhere else', async () => {
-  addReview(8, 'csv-2', 'csv');
-  addReview(9, 'csv-3', 'csv-2');
-  addReview(10, 'other', 'main');
+  db.update(schema.currentReviews).set({ githubStackNumber: 1, stackPosition: 0 }).run();
+  addReview(8, 'csv-2', 1);
+  addReview(9, 'csv-3', 1);
+  // In no GitHub stack, and in another one.
+  addReview(10, 'other', null);
+  addReview(11, 'other-2', 2);
   expect((await send('PUT', '', { page: MENTIONED }, 8)).status).toBe(200);
 
   expect((await send('PUT', '', { page: PAGE, stack: true })).status).toBe(200);
-  expect(pages()).toEqual({ 7: PAGE, 8: MENTIONED, 9: PAGE, 10: null });
+  expect(pages()).toEqual({ 7: PAGE, 8: MENTIONED, 9: PAGE, 10: null, 11: null });
 });
 
 test("the description's readable Notion pages are suggested, never the linked one", async () => {

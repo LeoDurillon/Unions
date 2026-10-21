@@ -1,5 +1,6 @@
-// Loads the review and project a pull request route refers to, the GitHub auth to act on them, and the review's files from GitHub.
+// Loads the review and project a pull request route refers to, the GitHub auth to act on them, and the review's files and stack from GitHub.
 import { projectGitHubAuth, schema, type Db } from '@union/core';
+import type { GitHubStack } from '@union/core/github-stacks';
 import { and, eq } from 'drizzle-orm';
 import type { Context } from 'hono';
 
@@ -45,7 +46,14 @@ export function authOf(
   return auth;
 }
 
-/** GitHub retargets a pull request whose base branch is deleted: stacks follow the kept branches. */
+function stackPositionOf(stack: GitHubStack, number: number): number {
+  return stack.pullRequests.findIndex((pull) => pull.number === number);
+}
+
+/**
+ * The pull request's files, branches and GitHub stack read again: GitHub retargets a pull request
+ * whose base branch is deleted, and a stack changes on GitHub.
+ */
 export async function readReviewFiles(
   db: Db,
   github: OnboardingGitHub,
@@ -54,7 +62,10 @@ export async function readReviewFiles(
 ): Promise<PullRequestFiles> {
   const repo = { owner: project.owner, repo: project.repo };
   const auth = authOf(db, project);
-  const fetched = await guarded(() => github.getPullRequestFiles(auth, repo, review.prNumber));
+  const [fetched, stack] = await Promise.all([
+    guarded(() => github.getPullRequestFiles(auth, repo, review.prNumber)),
+    guarded(() => github.pullRequestStack(auth, repo, review.prNumber)),
+  ]);
   if (!fetched) {
     throw fail(
       NOT_FOUND,
@@ -67,6 +78,8 @@ export async function readReviewFiles(
       headSha: fetched.headSha,
       headBranch: fetched.headBranch,
       baseBranch: fetched.baseBranch,
+      githubStackNumber: stack?.open === true ? stack.number : null,
+      stackPosition: stack?.open === true ? stackPositionOf(stack, review.prNumber) : null,
     })
     .where(eq(schema.currentReviews.id, review.id))
     .run();

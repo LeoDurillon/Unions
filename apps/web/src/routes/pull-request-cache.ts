@@ -1,13 +1,11 @@
 import type { PullRequestFilter } from '../api-types';
-import type { OnboardingGitHub } from '../github-onboarding';
-
-type Found = NonNullable<Awaited<ReturnType<OnboardingGitHub['listPullRequests']>>>;
+import type { Listing as Found } from './pull-request-listing';
 
 /** How long a repository's list is reused before GitHub is asked again (Refresh always asks). */
 export const PULL_REQUEST_CACHE_MS = 300_000;
 
 /**
- * The pull request lists last read from GitHub, per project and filter, in this process: the page
+ * The pull request lists (and stacks) last read from GitHub, per project and filter, in this process: the page
  * opens at once, and GitHub is asked at most every few minutes. Lost on restart, which is fine.
  */
 export class PullRequestCache {

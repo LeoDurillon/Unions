@@ -159,7 +159,8 @@ export function PullRequestsPage({
           <PullRequestRows
             projectId={project.id}
             pulls={list.pullRequests}
-            grouped={filter === 'open'}
+            stacks={list.stacks}
+            open={filter === 'open'}
             onOpenTicket={onOpenTicket}
           />
         ) : null}

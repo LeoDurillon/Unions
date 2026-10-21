@@ -1,6 +1,7 @@
 import { beforeEach, expect, test } from 'bun:test';
 
 import { createDb, createTicket, migrateDb, schema, type Db } from '@union/core';
+import type { GitHubStack } from '@union/core/github-stacks';
 import { eq } from 'drizzle-orm';
 import type { Hono } from 'hono';
 
@@ -33,6 +34,7 @@ let app: Hono;
 let projectId: number;
 let asked: PullRequestFilter[];
 let reachable: boolean;
+let stacks: GitHubStack[] | null;
 
 const github = {
   listPullRequests: (_auth: unknown, _repo: unknown, filter: PullRequestFilter) => {
@@ -44,6 +46,7 @@ const github = {
         : all.filter((item) => (filter === 'open') === (item.state === 'open'));
     return Promise.resolve(reachable ? { total: pullRequests.length, pullRequests } : null);
   },
+  listStacks: () => Promise.resolve(stacks),
 } as unknown as OnboardingGitHub;
 
 beforeEach(() => {
@@ -52,6 +55,7 @@ beforeEach(() => {
   app = createApp(db, github);
   asked = [];
   reachable = true;
+  stacks = null;
   projectId = db
     .insert(schema.projects)
     .values({ owner: 'acme', repo: 'shop', githubToken: 'tok', config: { baseBranch: 'main' } })
@@ -138,9 +142,9 @@ test("GitHub's list is reused a few minutes; Refresh reads it again; ticket link
 test('the cache expires on its own', async () => {
   let now = 0;
   const cache = new PullRequestCache(() => now);
-  const read = (): Promise<{ total: number; pullRequests: [] }> => {
+  const read = (): Promise<{ total: number; pullRequests: []; stacks: null }> => {
     asked.push('open');
-    return Promise.resolve({ total: 0, pullRequests: [] });
+    return Promise.resolve({ total: 0, pullRequests: [], stacks: null });
   };
   await cache.get(1, 'open', read, false);
   now = PULL_REQUEST_CACHE_MS - 1;
@@ -149,4 +153,78 @@ test('the cache expires on its own', async () => {
   now = PULL_REQUEST_CACHE_MS;
   await cache.get(1, 'open', read, false);
   expect(asked).toHaveLength(2);
+});
+
+function githubStack(number: number, pulls: number[]): GitHubStack {
+  return {
+    number,
+    open: true,
+    base: 'main',
+    pullRequests: pulls.map((member) => ({
+      number: member,
+      state: member === 5 ? 'closed' : 'open',
+      mergedAt: member === 5 ? 1 : null,
+      headRef: `branch-${member}`,
+      headSha: 'sha',
+    })),
+  };
+}
+
+test("each pull request gets its GitHub stack and place; the list sends GitHub's stacks", async () => {
+  stacks = [githubStack(3, [5, 7])];
+  const body = (await (await list('?state=all')).json()) as PullRequestList;
+  expect(body.pullRequests.map((item) => [item.number, item.stack])).toEqual([
+    [7, { number: 3, position: 1 }],
+    [5, { number: 3, position: 0 }],
+  ]);
+  expect(body.stacks?.map((stack) => stack.number)).toEqual([3]);
+});
+
+test('without stacks on GitHub, the list says so and no pull request is in one', async () => {
+  const body = (await (await list()).json()) as PullRequestList;
+  expect(body.stacks).toBeNull();
+  expect(body.pullRequests[0]?.stack).toBeNull();
+});
+
+test("reading the stacks keeps the current reviews' stacks up to date", async () => {
+  for (const number of [7, 9]) {
+    db.insert(schema.currentReviews)
+      .values({
+        projectId,
+        prNumber: number,
+        title: 't',
+        url: 'u',
+        author: 'a',
+        headBranch: `branch-${number}`,
+        baseBranch: 'main',
+        githubStackNumber: 8,
+        stackPosition: 2,
+      })
+      .run();
+  }
+  stacks = [githubStack(3, [5, 7])];
+  await list();
+  const rows = db.select().from(schema.currentReviews).all();
+  expect(rows.map((row) => [row.prNumber, row.githubStackNumber, row.stackPosition])).toEqual([
+    [7, 3, 1],
+    [9, null, null],
+  ]);
+});
+
+test("a split ticket's lower slices open the ticket too", async () => {
+  const ticket = createTicket(db, { projectId, title: 'Add search' });
+  db.update(schema.tickets).set({ prNumber: 7 }).where(eq(schema.tickets.id, ticket.id)).run();
+  db.insert(schema.ticketSlices)
+    .values({
+      ticketId: ticket.id,
+      position: 1,
+      title: 's',
+      spec: 's',
+      tipSha: 'a',
+      branch: 'b',
+      prNumber: 5,
+    })
+    .run();
+  const body = (await (await list('?state=all')).json()) as PullRequestList;
+  expect(body.pullRequests.map((item) => item.ticketId)).toEqual([ticket.id, ticket.id]);
 });

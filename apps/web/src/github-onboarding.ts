@@ -19,15 +19,15 @@ import { fetchDiscussion } from './github-discussion';
 import { fetchPullRequestFiles, type PullRequestFiles } from './github-pull-request-files';
 import { fetchPullRequests, type RemotePullRequest } from './github-pull-requests';
 import { CREATE_PROJECT, OWNER_PROJECTS } from './github-queries';
-import { OctokitRepoReads, orNull, type RuleChoices } from './github-repo-reads';
+import { OctokitRepoReads, orNull, type RuleChoices, type StackReads } from './github-repo-reads';
 
 /**
  * GitHub calls the web server makes itself, because the UI needs the answer right away: the setup
  * wizard's reads and Project creation, checking the GitHub App, looking up a pull request to link,
  * reading its discussion for the PR tab and the review import, and listing the repository's pull
- * requests for the Pull requests tab. Every call takes a token or an app installation. Tests use a fake.
+ * requests and their stacks for the Pull requests tab. Every call takes a token or an app installation. Tests use a fake.
  */
-export type OnboardingGitHub = {
+export type OnboardingGitHub = StackReads & {
   verify(auth: GitHubAuth): Promise<Viewer>;
   listRepos(auth: GitHubAuth, page: number): Promise<{ repos: RepoOption[]; hasNext: boolean }>;
   listProjects(auth: GitHubAuth, owner: string): Promise<ProjectOption[]>;

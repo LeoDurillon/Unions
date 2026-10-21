@@ -153,7 +153,7 @@ export); do not edit. Tests are left out.
 - `review-preview-tab.tsx`: A pull request under review's Preview tab: its own checkout's preview, end-to-end tests and commands.
 - `review-run-actions.tsx`: What a command's output in a pull request's checkout can become: a draft comment on the review.
 - `review-stack-item.tsx`: A stack of pull requests under review as one row: its bottom's title, its pull requests, opening and removing it whole.
-- `stack-item.tsx`: A stack of pull requests as one row: its bottom's title, its size, adding it to the reviews; its members below when opened.
+- `stack-item.tsx`: A stack of pull requests as one row: its bottom's title, its size, adding it to the reviews (or its ticket); its members below when opened.
 - `stack-review.tsx`: A pull request under review opened full page; one of a stack gets a tab per pull request of it, to switch between them.
 - `stack-tabs.tsx`: The pull requests of a stack under review as a segmented control, bottom first: the picked one is reviewed below, each shows its drafts.
 
@@ -304,7 +304,7 @@ export); do not edit. Tests are left out.
 - `preview-api.ts`: The browser's client for a ticket's preview endpoints.
 - `preview-target.ts`: Where a ticket's or a pull request's preview and commands live in the API, and their query keys.
 - `project-files-api.ts`: The browser's client for a project's uploaded files.
-- `pull-request-stacks.ts`: Stacks in the Pull requests and Current reviews tabs, and the stack under review a pull request would join.
+- `pull-request-stacks.ts`: Stacks in the Pull requests and Current reviews tabs, by GitHub's stacks, and the stack under review a pull request would join.
 - `refused-commit-api.ts`: The ticket's last refused commit, or null.
 - `review-grouping-api.ts`: `base` is the review's API root (`reviewBase`).
 - `review-notion-context.ts`: The Notion page of the open review (the page linked to a pull request, or a ticket's), for its spec sources.

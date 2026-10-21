@@ -1,7 +1,6 @@
 // `<review>/notion`: the Notion page a pull request under review is linked to: its text, linking and unlinking.
 import { notionMarkdown, schema, type Db, type NotionApi } from '@union/core';
-import { pullRequestStacks } from '@union/core/pr-stacks';
-import { eq, inArray } from 'drizzle-orm';
+import { and, eq, inArray, isNull, ne } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
 
 import { CONFLICT, fail, NOT_FOUND, readObject } from '../http';
@@ -54,27 +53,24 @@ async function pageText(db: Db, notion: NotionApi, c: Context): Promise<Response
   return c.json(result);
 }
 
-/** The review, and with `stack` the other reviews of its stack that have no page yet. */
+/** The review, and with `stack` the other reviews of its GitHub stack that have no page yet. */
 function linkedReviews(db: Db, review: Review, stack: boolean): number[] {
-  if (!stack) {
+  if (!stack || review.githubStackNumber === null) {
     return [review.id];
   }
-  const all = db
-    .select()
+  const unlinked = db
+    .select({ id: schema.currentReviews.id })
     .from(schema.currentReviews)
-    .where(eq(schema.currentReviews.projectId, review.projectId))
+    .where(
+      and(
+        eq(schema.currentReviews.projectId, review.projectId),
+        eq(schema.currentReviews.githubStackNumber, review.githubStackNumber),
+        ne(schema.currentReviews.id, review.id),
+        isNull(schema.currentReviews.notionPageId),
+      ),
+    )
     .all();
-  const stacks = pullRequestStacks(
-    all.map((row) => ({
-      row,
-      number: row.prNumber,
-      headBranch: row.headBranch,
-      baseBranch: row.baseBranch,
-    })),
-  );
-  const members = stacks.find((found) => found.some(({ row }) => row.id === review.id)) ?? [];
-  const unlinked = members.filter(({ row }) => row.id !== review.id && row.notionPageId === null);
-  return [review.id, ...unlinked.map(({ row }) => row.id)];
+  return [review.id, ...unlinked.map((row) => row.id)];
 }
 
 /** `{ page }` links this review; `{ page, stack: true }` also the stack's reviews without a page. */

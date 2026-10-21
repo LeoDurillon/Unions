@@ -24,6 +24,7 @@ export); do not edit. Tests are left out.
 - `github-repo-reads.ts`: The web's repository and Project reads from GitHub: branches, an issue, what a rule picks from (labels, users, Project fields); null for what does not exist.
 - `github-repo.ts`: The repository's branch names, the default first then by name.
 - `github-rule-choices.ts`: What a pull request rule can pick from the repository: its labels and the users who can be assigned or asked to review.
+- `github-stacks.ts`: The web's reads of GitHub's stacks of pull requests: the repository's open ones, or the one holding a pull request.
 - `http.ts`: HTTP status codes and small helpers the web routes use to read requests and fail.
 - `notion-images.ts`: Downloads the images a Notion page shows (their links expire within the hour) so they can be kept as the ticket's files: each kept one is referenced as `attach…
 - `notion-mentions.ts`: The titles of the Notion pages a page's markdown mentions, so its links read as titles.
@@ -67,7 +68,7 @@ export); do not edit. Tests are left out.
 - `pr-checks.ts`: `/api/tickets/:id/pr-checks`: the pull request's CI checks read from GitHub, the failed ones (with related jobs and bot comments) given to the implementer, a f…
 - `pr-commits.ts`: `<review>/commits`: the pull request's commits, and one commit's files and patches, to read the change one commit at a time.
 - `pr-description.ts`: `/api/tickets/:id/pr-description`: the agent rewrites the PR's description into a draft the user edits; sending it is a command (the worker writes to GitHub).
-- `pr-review-load.ts`: Loads the review and project a pull request route refers to, the GitHub auth to act on them, and the review's files from GitHub.
+- `pr-review-load.ts`: Loads the review and project a pull request route refers to, the GitHub auth to act on them, and the review's files and stack from GitHub.
 - `pr-review.ts`: `/api/projects/:projectId/pull-requests/reviews/:number`: the description and discussion, the diff, the comments, and posting them.
 - `preview-settings.ts`: `/api/projects/:projectId/preview`: how the project's tickets run as previews, and its secret variables, whose values are written here and never read back.
 - `preview-subject.ts`: What a preview's routes share for a ticket and for a pull request under review: the view, the refusals, the commands.
@@ -77,8 +78,9 @@ export); do not edit. Tests are left out.
 - `project-settings.ts`: Updates the GitHub credentials, base branch and checks.
 - `project-subroutes.ts`: The routes under `/api/projects` that have their own module: event rules and what they pick from, preview settings, files, memory.
 - `projects.ts`: The API routes for projects: creating, reading and updating them.
-- `pull-request-cache.ts`: The pull request lists last read from GitHub, per project and filter, in this process: the page opens at once, and GitHub is asked at most every few minutes.
-- `pull-requests.ts`: `/api/projects/:projectId/pull-requests`: the repository's pull requests, read from GitHub (kept a few minutes; `?refresh` reads them again), and under `/revie…
+- `pull-request-cache.ts`: The pull request lists (and stacks) last read from GitHub, per project and filter, in this process: the page opens at once, and GitHub is asked at most every f…
+- `pull-request-listing.ts`: The Pull requests tab's read from GitHub: the pull requests and the repository's stacks together, and the current reviews' stacks kept up with it.
+- `pull-requests.ts`: `/api/projects/:projectId/pull-requests`: the repository's pull requests and stacks, read from GitHub (kept a few minutes; `?refresh` reads them again), and un…
 - `refused-commit.ts`: The ticket's last refused commit (null if none): what the user decides on while the run is paused.
 - `review-comments.ts`: The owner's drafts, oldest first.
 - `review-explanations.ts`: The explanations of a review's lines: listed with their spec parts, queued, cancelled, and their progress.

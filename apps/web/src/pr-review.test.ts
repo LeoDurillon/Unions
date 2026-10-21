@@ -54,6 +54,24 @@ const github = {
         toPullRequestFile({ filename: 'logo.png', status: 'added', additions: 0, deletions: 0 }, 1),
       ],
     }),
+  // #42 and #43 are a stack on GitHub; #50 is alone.
+  pullRequestStack: (_auth: unknown, _repo: unknown, number: number) =>
+    Promise.resolve(
+      [42, 43].includes(number)
+        ? {
+            number: 1,
+            open: true,
+            base: 'main',
+            pullRequests: [42, 43].map((pull) => ({
+              number: pull,
+              state: 'open',
+              mergedAt: null,
+              headRef: pull === 42 ? 'tidy' : `tidy-${pull}`,
+              headSha: 'h1',
+            })),
+          }
+        : null,
+    ),
 } as unknown as OnboardingGitHub;
 
 beforeEach(async () => {
@@ -217,7 +235,10 @@ test('a stack is reviewed in one run: its pull requests checked, their files rea
   expect(
     reviews
       .filter((review) => review.headSha === 'h1')
-      .map((review) => review.prNumber)
-      .toSorted((a, b) => a - b),
-  ).toEqual([42, 43]);
+      .map((review) => [review.prNumber, review.githubStackNumber, review.stackPosition])
+      .toSorted(([a], [b]) => Number(a) - Number(b)),
+  ).toEqual([
+    [42, 1, 0],
+    [43, 1, 1],
+  ]);
 });
