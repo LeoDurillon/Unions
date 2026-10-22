@@ -1,23 +1,14 @@
-// A ```mermaid code block drawn as its diagram; the source stays shown when it does not parse.
+// A ```mermaid code block drawn as its diagram, with its export buttons; the source stays shown when it does not parse.
 import { useEffect, useId, useState, type ReactElement } from 'react';
+
+import { renderMermaid } from '../lib/mermaid-render';
+import { DiagramActions } from './diagram-actions';
 
 type Drawing = { svg: string } | { error: string } | null;
 
-const DARK = '(prefers-color-scheme: dark)';
-
-/** Mermaid is large: loaded on the first diagram, then shared by all of them. */
 async function draw(id: string, source: string): Promise<Drawing> {
   try {
-    const { default: mermaid } = await import('mermaid');
-    mermaid.initialize({
-      startOnLoad: false,
-      securityLevel: 'strict',
-      // A broken diagram shows its source here; Mermaid would add its own error to the page's end.
-      suppressErrorRendering: true,
-      theme: globalThis.matchMedia(DARK).matches ? 'dark' : 'default',
-    });
-    const { svg } = await mermaid.render(id, source);
-    return { svg };
+    return { svg: await renderMermaid(id, source, 'screen') };
   } catch (error) {
     return { error: error instanceof Error ? error.message : String(error) };
   }
@@ -41,8 +32,13 @@ export function MermaidDiagram({ source }: { source: string }): ReactElement {
     };
   }, [id, source]);
   if (drawing && 'svg' in drawing) {
-    // The SVG comes from Mermaid's strict mode, which strips scripts and event handlers.
-    return <div className="mermaid-diagram" dangerouslySetInnerHTML={{ __html: drawing.svg }} />;
+    return (
+      <div className="mermaid-diagram">
+        <DiagramActions id={id} source={source} />
+        {/* The SVG comes from Mermaid's strict mode, which strips scripts and event handlers. */}
+        <div dangerouslySetInnerHTML={{ __html: drawing.svg }} />
+      </div>
+    );
   }
   return (
     <div>

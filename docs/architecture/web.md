@@ -16,7 +16,9 @@
   running, passed or failed, the commit in its tooltip; nothing while they are not known.
 - Markdown (`components/markdown.tsx`) draws a ` ```mermaid ` block as its diagram (`mermaid-diagram.tsx`: Mermaid
   loaded on the first one, strict security, the theme following the color scheme); one that does not parse keeps its
-  source under a one-line error. Agents are told they may draw them (`DIAGRAM_INSTRUCTION` in core, in the shared
+  source under a one-line error. Above each diagram, SVG and PNG download it (`lib/diagram-export.ts`), drawn again
+  in the light theme on white with SVG-text labels so a canvas can export it (`lib/mermaid-render.ts` runs renders
+  one at a time, since Mermaid's settings are global); Copy source copies its Mermaid text. Agents are told they may draw them (`DIAGRAM_INSTRUCTION` in core, in the shared
   prompt and the investigation prompt); GitHub renders the same blocks in issues and pull requests.
 - Flows: the New ticket dialog picks the ticket's flow above its three sources (`flow-picker.tsx`: the project's
   presets, or Custom with a chip per planning step), sent as `flow` to `POST /api/tickets` and the issue import

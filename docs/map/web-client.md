@@ -33,6 +33,7 @@ export); do not edit. Tests are left out.
 - `container-commands.tsx`: Commands the user runs in a workspace (a ticket's container as the agent, or a pull request's own checkout), with the preview's address while it runs, typed or…
 - `custom-flow-steps.tsx`: A flow's custom agents in the settings and the ticket's Custom flow: listed in order, moved, removed, added.
 - `detail-row.tsx`: One line of a ticket's details: a label column, then the value.
+- `diagram-actions.tsx`: A diagram's buttons: download it as SVG or PNG (light, whatever the screen shows), or copy its Mermaid source.
 - `dropzone.tsx`: A file input as a dashed box: drop files on it, or click (or press Enter on it) to browse.
 - `flow-picker.tsx`: `value` null: the project's default preset, which the ticket follows until it starts.
 - `flow-row.tsx`: The ticket's flow in its details: chosen while in Backlog, shown as fixed once it started.
@@ -41,7 +42,7 @@ export); do not edit. Tests are left out.
 - `log-tab.tsx`: Replays the ticket's whole agent log, then follows it live.
 - `main-area.tsx`: Right-hand side of the app: the running previews, the Union settings (`?union=`), the project's settings (`?settings=`), or the project.
 - `markdown.tsx`: Markdown as the panel shows it.
-- `mermaid-diagram.tsx`: A ```mermaid code block drawn as its diagram; the source stays shown when it does not parse.
+- `mermaid-diagram.tsx`: A ```mermaid code block drawn as its diagram, with its export buttons; the source stays shown when it does not parse.
 - `notion-import.tsx`: Fetches a page of the project's Notion data source, previews it, and creates the ticket.
 - `overview-tab.tsx`: The ticket panel's overview tab: run status, details, and the buttons that act on the ticket.
 - `parent-picker.tsx`: Select the ticket this one builds on, among the project's other tickets.
@@ -288,6 +289,7 @@ export); do not edit. Tests are left out.
 - `choice-values.ts`: A multi-select rule value is its option names joined by commas (Notion option names cannot hold one); the worker splits it the same way.
 - `custom-agents-api.ts`: The browser's client for the custom agents endpoints: create, edit, regenerate the prompt, delete.
 - `desktop-notifications.ts`: Desktop notifications: off until the user turns them on, shown by the one tab that holds the event stream.
+- `diagram-export.ts`: Turns a drawn diagram's SVG into files to download: the SVG itself, or a PNG at twice its size.
 - `diff-selection.ts`: A click starts a selection; a shift-click on the same side extends it to a block.
 - `env-lines.ts`: `KEY=value` lines (blank lines and `#` comments skipped) to variables.
 - `event-hub.ts`: Calls `listener` with every new event, in any tab's stream; returns the unsubscribe.
@@ -301,6 +303,7 @@ export); do not edit. Tests are left out.
 - `leave-guard.ts`: Unsaved settings: the forms holding changes, and asking before a navigation throws them away.
 - `line-diff.ts`: The lines of `after` against `before`: kept, added or removed, in reading order.
 - `log-runs.ts`: Splits the log at each run header, so every run can fold on its own.
+- `mermaid-render.ts`: Draws Mermaid source as SVG, for the screen (in its color scheme) or for a file (light, with plain-text labels).
 - `notifications-api.ts`: The browser's client for the notifications: a page of them, marking them read and clearing them.
 - `open-notification.ts`: Opens what a notification is about (its ticket or investigation, in its project) and marks it read.
 - `opened-investigation.ts`: The investigation opened from elsewhere (a notification), in the URL (`?investigation=<id>`).
