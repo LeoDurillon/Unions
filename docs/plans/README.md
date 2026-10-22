@@ -54,6 +54,9 @@ and linked.
 - [Link a review to its Notion page](review-notion-link.md): a pull request under review linked to a Notion page
   gets a Notion tab with the page's text, and Group by spec and Review with agent read that page without its URL
   again. Built, steps 1 to 3 (branch `review-notion-link`); D6 waits on Notion comments.
+- [Reply to pull request comments](pr-comment-replies.md): Reply on a line thread and Quote reply on a
+  conversation comment, from a review's Comments tab and a ticket's PR tab; the worker posts. Planned
+  (2026-10-22), decisions to confirm.
 - [Explain a selection of the diff](review-explain.md): select lines on the review page, an agent explains in a
   side panel how they work and which parts of the specs and repository docs they relate to; follow-ups resume
   its session. Built (branch `review-explain`), steps 1 to 4; a real run is left.
