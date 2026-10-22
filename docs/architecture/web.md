@@ -14,6 +14,10 @@
   board (`leftBoard`); the GitHub Project still sees it as Done. A closed PR is still polled: reopened, the ticket goes back.
   While the PR is open, its card shows the CI checks of its head (`pr_checks_state`, polled by the worker): Checks
   running, passed or failed, the commit in its tooltip; nothing while they are not known.
+- Markdown (`components/markdown.tsx`) draws a ` ```mermaid ` block as its diagram (`mermaid-diagram.tsx`: Mermaid
+  loaded on the first one, strict security, the theme following the color scheme); one that does not parse keeps its
+  source under a one-line error. Agents are told they may draw them (`DIAGRAM_INSTRUCTION` in core, in the shared
+  prompt and the investigation prompt); GitHub renders the same blocks in issues and pull requests.
 - Flows: the New ticket dialog picks the ticket's flow above its three sources (`flow-picker.tsx`: the project's
   presets, or Custom with a chip per planning step), sent as `flow` to `POST /api/tickets` and the issue import
   (`routes/ticket-flow.ts` checks it). The default preset is sent as null, so the ticket follows the project's

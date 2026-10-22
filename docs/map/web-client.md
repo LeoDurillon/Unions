@@ -41,6 +41,7 @@ export); do not edit. Tests are left out.
 - `log-tab.tsx`: Replays the ticket's whole agent log, then follows it live.
 - `main-area.tsx`: Right-hand side of the app: the running previews, the Union settings (`?union=`), the project's settings (`?settings=`), or the project.
 - `markdown.tsx`: Markdown as the panel shows it.
+- `mermaid-diagram.tsx`: A ```mermaid code block drawn as its diagram; the source stays shown when it does not parse.
 - `notion-import.tsx`: Fetches a page of the project's Notion data source, previews it, and creates the ticket.
 - `overview-tab.tsx`: The ticket panel's overview tab: run status, details, and the buttons that act on the ticket.
 - `parent-picker.tsx`: Select the ticket this one builds on, among the project's other tickets.

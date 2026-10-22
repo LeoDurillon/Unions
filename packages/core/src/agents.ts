@@ -11,6 +11,7 @@ import {
 import { customAgentDefaults, type CustomAgentInfo } from './custom-agent-config';
 import { listCustomAgents } from './custom-agents';
 import type { Db } from './db';
+import { DIAGRAM_INSTRUCTION } from './diagrams';
 import { LESSON_WRITER_PROMPT } from './lesson-writer';
 import * as schema from './schema';
 import { SPLIT_PLAN_PROMPT, SPLIT_PROMPT } from './stack-prompts';
@@ -53,7 +54,8 @@ export type AgentId = BuiltInAgentId | CustomStep;
 export const DEFAULT_PROMPTS: Record<BuiltInAgentId, string> = {
   shared: `You are one agent in an automated task pipeline working on a repository.
 Follow the repository's own rules (AGENTS.md, CLAUDE.md, README) when they exist.
-Output ONLY the markdown requested: no preamble, no closing remarks.`,
+Output ONLY the markdown requested: no preamble, no closing remarks.
+${DIAGRAM_INSTRUCTION}`,
   intake: `Rewrite the raw task into a clear engineering task, then ask the technical questions the code cannot answer.
 Read the code first: never ask what a file already tells you.
 

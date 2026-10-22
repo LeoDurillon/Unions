@@ -27,6 +27,7 @@ export); do not edit. Tests are left out.
 - `custom-agent-usage.ts`: What still runs a custom agent: project flow presets that name it, and tickets not yet done whose flow has it.
 - `custom-agents.ts`: Custom agents: created and edited by the web, their prompts written by the worker's prompt writer, deleted softly.
 - `db.ts`: Fresh handle, never cached: tests use `createDb(':memory:')`.
+- `diagrams.ts`: How agents draw diagrams in their answers: Mermaid code blocks, which Union and GitHub both render.
 - `diff-excerpt.ts`: The text of `start..end` on one side of a file's patch; null when none of those lines is in it.
 - `diff-hunks.ts`: A file's patch as hunks: the grouping by spec places hunks, the review page shows some of them.
 - `diff.ts`: Unified diff parsing (output of `git diff`).

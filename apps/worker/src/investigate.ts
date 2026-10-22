@@ -3,6 +3,7 @@ import {
   claimInvestigation,
   type ContainerRuntime,
   type Db,
+  DIAGRAM_INSTRUCTION,
   emitEvent,
   failInterruptedInvestigations,
   finishInvestigation,
@@ -76,7 +77,8 @@ export function investigationPrompt(
 
 ---
 ${own === '' ? '' : `${own}\n\n`}${where}
-Output only your findings as markdown: the answer first, then the evidence (files, links) it rests on.`;
+Output only your findings as markdown: the answer first, then the evidence (files, links) it rests on.
+${DIAGRAM_INSTRUCTION}`;
 }
 
 export type InvestigationDeps = {

@@ -15,6 +15,7 @@ export * from './custom-agents';
 export * from './mcp-connectors';
 export * from './attachments';
 export * from './agents';
+export * from './diagrams';
 export * from './db';
 export * from './diff';
 export * from './diff-hunks';

@@ -213,3 +213,6 @@ dialog::backdrop {
 .hljs-strong {
   @apply font-semibold;
 }
+.markdown .mermaid-diagram {
+  @apply my-2 overflow-x-auto;
+}
