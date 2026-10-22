@@ -251,7 +251,7 @@ export function listAgents(db: Db): AgentConfig[] {
 }
 
 /** Steps that resume the implementer's session: they keep its model and effort, and add tools to its own. */
-const IMPLEMENTER_SESSION = ['rebase', 'simplify', 'split', 'restack'] as const;
+const IMPLEMENTER_SESSION = ['rebase', 'retarget', 'simplify', 'split', 'restack'] as const;
 type ImplementerSessionStep = (typeof IMPLEMENTER_SESSION)[number];
 
 function inImplementerSession(step: RunAgent): step is ImplementerSessionStep {

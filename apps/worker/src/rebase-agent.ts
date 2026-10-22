@@ -39,6 +39,8 @@ export type Rebase = Workspace & {
   before: string;
   /** A stack restacked after a slice merged: `upstream` is that slice's tip; `hostOnly`: no agent. */
   restack?: { upstream: string; hostOnly: boolean };
+  /** A change of target: the branch leaves `from` for `base`, taking only its own commits. */
+  retarget?: { from: string };
 };
 
 /** A turn in the implementer's own session: the rebase, or a rewrite of its history. */
@@ -61,7 +63,14 @@ function implementerSession(db: Db, ticketId: number): string | null {
         eq(schema.runs.ticketId, ticketId),
         eq(schema.runs.status, 'succeeded'),
         isNotNull(schema.runs.sessionId),
-        inArray(schema.runs.step, ['implement', 'rebase', 'simplify', 'split', 'restack']),
+        inArray(schema.runs.step, [
+          'implement',
+          'rebase',
+          'retarget',
+          'simplify',
+          'split',
+          'restack',
+        ]),
       ),
     )
     .orderBy(desc(schema.runs.id))

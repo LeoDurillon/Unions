@@ -24,7 +24,7 @@ export const refusedCommits = sqliteTable('refused_commits', {
   ticketId: integer('ticket_id')
     .notNull()
     .references(() => tickets.id, { onDelete: 'cascade' }),
-  step: text('step', { enum: ['implement', 'rebase', 'simplify'] }).notNull(),
+  step: text('step', { enum: ['implement', 'rebase', 'retarget', 'simplify'] }).notNull(),
   files: text('files', { mode: 'json' }).$type<string[]>().notNull(),
   hookOutput: text('hook_output').notNull(),
   /** Shortened when very large; `diffHash` covers the whole diff. */

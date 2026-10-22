@@ -40,21 +40,38 @@ export async function prepareBranch(deps: ImplementDeps, context: StepContext): 
   };
 }
 
+/** A restack, or a change of target onto `to`; neither: a plain rebase onto the ticket's base. */
+export type RebaseOptions = {
+  restack?: Rebase['restack'];
+  retarget?: { from: string; to: string };
+};
+
+function withOptions(prepared: Rebase, options: RebaseOptions): Rebase {
+  const { restack, retarget } = options;
+  return {
+    ...prepared,
+    ...(restack ? { restack } : {}),
+    ...(retarget ? { base: retarget.to, retarget: { from: retarget.from } } : {}),
+  };
+}
+
 /**
  * Rebases the ticket's branch onto its base (git alone when there is no conflict, else the
  * implementer's own session), checks it and force-pushes it with a lease. On any failure the branch
- * is put back exactly as it was, unpushed. `restack`: only the commits after a merged slice move.
+ * is put back exactly as it was, unpushed. `restack`: only the commits after a merged slice move;
+ * `retarget`: only the branch's own commits move, onto another base.
  */
 export async function runRebaseStep(
   deps: ImplementDeps,
   context: StepContext,
-  restack?: Rebase['restack'],
+  options: RebaseOptions = {},
 ): Promise<StepResult> {
   const prepared = await prepareBranch(deps, context);
-  const refusal = context.resume ? pausedRebase(deps.db, context.ticket.id) : null;
+  const step = options.retarget ? 'retarget' : 'rebase';
+  const refusal = context.resume ? pausedRebase(deps.db, context.ticket.id, step) : null;
   // A resumed rebase restores the branch as it was before the paused run, not the rebased one.
   const before = refusal?.resumeState.before ?? prepared.before;
-  const rebase = { ...prepared, before, ...(restack ? { restack } : {}) };
+  const rebase = withOptions({ ...prepared, before }, options);
   const restore = (): Promise<void> =>
     restoreBranch(deps.runtime, rebase.container, rebase.branch, rebase.before);
   try {

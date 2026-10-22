@@ -67,6 +67,8 @@ export); do not edit. Tests are left out.
 - `rebase.ts`: Rebases the ticket's branch onto its base (git alone when there is no conflict, else the implementer's own session), checks it and force-pushes it with a lease.
 - `refused-commit.ts`: Records the refusal and stops the run there: the user decides what to do with the changes.
 - `restack.ts`: Moves the rest of a stack onto the base after a slice merged, then targets the base with the new bottom pull request.
+- `retarget-github.ts`: A change of target on GitHub: the base the pull request has now, the branches that exist, and the pull request moved onto the new base.
+- `retarget.ts`: Moves a finished ticket's own commits onto another base branch, then points its pull request at it.
 - `review-checkout.ts`: A pull request's own container (`union-r<id>`): its checkout at the reviewed commit, for its preview, tests and commands.
 - `review-explain-prompt.ts`: The prompts of an Explain: a fresh one with the specs, the change and the lines, and a follow-up's.
 - `review-explain-result.ts`: Reads the explanation block at the end of the agent's answer, and drops the citations it cannot back.

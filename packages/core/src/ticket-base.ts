@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm';
 
 import type { Db } from './db';
 import * as schema from './schema';
+import { transition } from './states';
 import { TicketLinkError } from './ticket-links';
 import { emitEvent, getTicket, type Ticket } from './tickets';
 
@@ -82,4 +83,22 @@ export function describeTicketBase(
   // A base other than the project's is the user's choice, else the parent's branch.
   const reason = baseBranch === ticket.chosenBaseBranch ? 'chosen' : 'parent';
   return { branch: baseBranch, reason, fixed: true };
+}
+
+/**
+ * Keeps the branch a change of target moves the ticket onto, for the run and its retries. Refused
+ * when the ticket cannot be retargeted now, or the name is not a branch's.
+ */
+export function chooseRetarget(db: Db, ticketId: number, branch: string): Ticket {
+  const ticket = getTicket(db, ticketId);
+  transition(ticket.phase, { type: 'retarget' });
+  if (!isBranchName(branch)) {
+    throw new TicketLinkError(`"${branch}" is not a branch name`);
+  }
+  return db
+    .update(schema.tickets)
+    .set({ retargetBranch: branch })
+    .where(eq(schema.tickets.id, ticketId))
+    .returning()
+    .get();
 }

@@ -57,6 +57,9 @@ and linked.
 - [Reply to pull request comments](pr-comment-replies.md): Reply on a line thread and Quote reply on a
   conversation comment, from a review's Comments tab and a ticket's PR tab; the worker posts. Planned
   (2026-10-22), decisions to confirm.
+- [Change the target branch of a ticket](retarget.md): move a finished ticket's own commits onto another branch
+  (a fix turned hotfix: `develop` to `main`) with `git rebase --onto`, push and retarget its PR; the agent runs
+  only on a conflict or failing checks. Built (branch `retarget`, 2026-10-22).
 - [Explain a selection of the diff](review-explain.md): select lines on the review page, an agent explains in a
   side panel how they work and which parts of the specs and repository docs they relate to; follow-ups resume
   its session. Built (branch `review-explain`), steps 1 to 4; a real run is left.

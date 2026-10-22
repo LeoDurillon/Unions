@@ -3,11 +3,11 @@
 export const PLANNING_STEPS = ['intake', 'summary', 'technical', 'test_plan'] as const;
 export type PlanningStep = (typeof PLANNING_STEPS)[number];
 /**
- * `rebase` and `simplify` are outside the pipeline, run on demand once the branch exists: after a
- * rebase the agent worked on, the review runs again; a clean rebase (no agent) or a simplified
+ * `rebase`, `retarget` (a rebase onto another base) and `simplify` are outside the pipeline, run on
+ * demand once the branch exists: after a rebase the agent worked on, the review runs again; a clean rebase (no agent) or a simplified
  * history leaves the reviewed code as it was, so the ticket goes back to where it was.
  */
-export type Step = PipelineStep | 'rebase' | 'simplify' | StackStep;
+export type Step = PipelineStep | 'rebase' | 'retarget' | 'simplify' | StackStep;
 /**
  * Splitting the pull request into a stack (`stack-states.ts`): planning the slices, rewriting the
  * history into them, and restacking them after a merge or a revision. Outside the pipeline too.
@@ -59,6 +59,8 @@ export type Action =
   | { type: 'retry' }
   // Brings the branch up to date with its base; the caller checks the pull request is still open.
   | { type: 'rebase' }
+  // Moves the branch's own commits onto another base (`tickets.retarget_branch`), then its PR.
+  | { type: 'retarget' }
   // Rewrites the branch's commits into a simpler history, the code unchanged.
   | { type: 'simplify' }
   // Plans slices for a stack of pull requests, then rewrites the history into them once approved.
@@ -80,7 +82,7 @@ export type Action =
  * (a clean one, `rebased_clean`, does not).
  */
 export function running(step: Step): Phase {
-  return step === 'rebase' || step === 'restack'
+  return step === 'rebase' || step === 'retarget' || step === 'restack'
     ? { kind: 'running', step, thenRun: 'final_review' }
     : { kind: 'running', step };
 }

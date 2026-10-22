@@ -58,6 +58,7 @@ export const MODEL_BY_STEP = {
   final_review: 'opus',
   // Only fallbacks: these resume the implementer's session, on its model (`modelFor`).
   rebase: 'opus',
+  retarget: 'opus',
   simplify: 'opus',
   split: 'opus',
   restack: 'opus',
@@ -78,6 +79,7 @@ export const STEP_TITLES: Record<BuiltInStep, string> = {
   implement: 'Implementation',
   final_review: 'Final review',
   rebase: 'Rebase',
+  retarget: 'Change target',
   simplify: 'Simplify history',
   split_plan: 'Split plan',
   split: 'Split into a stack',
@@ -137,6 +139,9 @@ function fromBacklog(action: Action, flow: Flow): Phase | null {
   return action.type === 'start' ? { kind: 'running', step: flow[0] ?? 'implement' } : null;
 }
 
+/** The steps that rebase the branch: a clean one (no agent) goes back to where it was asked. */
+const REBASE_STEPS: ReadonlySet<Step> = new Set<Step>(['rebase', 'retarget']);
+
 function fromRunning(phase: PhaseOf<'running'>, action: Action): Phase | null {
   if (action.type === 'run_finished') {
     if (phase.step === 'simplify') {
@@ -146,7 +151,7 @@ function fromRunning(phase: PhaseOf<'running'>, action: Action): Phase | null {
       ? { kind: 'running', step: phase.thenRun }
       : { kind: 'awaiting_approval', step: phase.step };
   }
-  if (action.type === 'rebased_clean' && phase.step === 'rebase') {
+  if (action.type === 'rebased_clean' && REBASE_STEPS.has(phase.step)) {
     return backToReview(phase);
   }
   if (action.type === 'run_failed') {
@@ -193,8 +198,8 @@ function fromAwaitingApproval(
     const next = nextStep(phase.step, flow);
     return next ? { kind: 'running', step: next } : { kind: 'done' };
   }
-  if (action.type === 'rebase' && phase.step === 'final_review') {
-    return running('rebase');
+  if ((action.type === 'rebase' || action.type === 'retarget') && phase.step === 'final_review') {
+    return running(action.type);
   }
   if (action.type === 'simplify' && phase.step === 'final_review') {
     return running('simplify');
@@ -208,8 +213,8 @@ function fromAwaitingApproval(
  * back to done.
  */
 function fromDone(action: Action): Phase | null {
-  if (action.type === 'rebase') {
-    return { kind: 'running', step: 'rebase', thenRun: 'final_review', thenDone: true };
+  if (action.type === 'rebase' || action.type === 'retarget') {
+    return { kind: 'running', step: action.type, thenRun: 'final_review', thenDone: true };
   }
   if (action.type === 'simplify') {
     return { kind: 'running', step: 'simplify', thenDone: true };
@@ -278,6 +283,7 @@ export function transition(phase: Phase, action: Action, flow: Flow = FULL_FLOW)
 const IN_REVIEW_STEPS: ReadonlySet<Step> = new Set<Step>([
   'final_review',
   'rebase',
+  'retarget',
   'simplify',
   'split_plan',
   'split',

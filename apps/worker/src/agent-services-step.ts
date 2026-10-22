@@ -4,6 +4,7 @@ import { runImplementStep } from './implement';
 import type { ImplementDeps } from './implement-checks';
 import { runRebaseStep } from './rebase';
 import { runRestackStep } from './restack';
+import { runRetargetStep } from './retarget';
 import type { StepContext, StepResult } from './scheduler';
 import { startServicesRun } from './services-run';
 
@@ -25,10 +26,11 @@ export async function withAgentServices(
 const CODE_STEPS = {
   implement: runImplementStep,
   rebase: runRebaseStep,
+  retarget: runRetargetStep,
   restack: runRestackStep,
 } as const;
 
-/** The steps that run code: implementation, rebase and restack, each with the agent's services. */
+/** The steps that run code: implementation, rebase (and its change of target) and restack, each with the agent's services. */
 export function runCodeStep(
   deps: ImplementDeps,
   context: StepContext,

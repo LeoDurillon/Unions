@@ -1,4 +1,5 @@
 import {
+  chooseRetarget,
   createTicket,
   decideRefusal,
   dispatch,
@@ -169,6 +170,20 @@ function isPlainAction(type: string): type is (typeof PLAIN_ACTIONS)[number] {
   return PLAIN_ACTIONS.some((action) => action === type);
 }
 
+/** The plain actions, and a change of target, which names its branch. */
+const TICKET_ACTIONS = new Set<string>([...PLAIN_ACTIONS, 'retarget']);
+
+/** A state-machine action; a change of target first keeps the branch it moves onto. */
+function act(db: Db, command: Command): void {
+  const ticketId = requireTicketId(command);
+  if (isPlainAction(command.type)) {
+    dispatch(db, ticketId, { type: command.type });
+    return;
+  }
+  chooseRetarget(db, ticketId, requireString(command.payload, 'branch'));
+  dispatch(db, ticketId, { type: 'retarget' });
+}
+
 /** The user's answer to an output, or to a refused commit. */
 const DECISIONS = new Set(['approve', 'revise', 'commit_anyway', 'drop_leftovers']);
 
@@ -200,8 +215,8 @@ function execute(db: Db, command: Command, hooks: CommandHooks): void {
     decide(db, command);
     return;
   }
-  if (isPlainAction(command.type)) {
-    dispatch(db, requireTicketId(command), { type: command.type });
+  if (TICKET_ACTIONS.has(command.type)) {
+    act(db, command);
     return;
   }
   if (isCancelCommand(command.type)) {

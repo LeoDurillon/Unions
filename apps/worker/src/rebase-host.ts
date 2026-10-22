@@ -24,18 +24,40 @@ async function conflictedFiles(runtime: ContainerRuntime, container: string): Pr
   return result.stdout.split('\n').filter((line) => line.trim() !== '');
 }
 
+async function upToDate(
+  runtime: ContainerRuntime,
+  container: string,
+  refs: { base: string; onto?: string; ownOnly?: boolean },
+): Promise<boolean> {
+  const target = `origin/${refs.base}`;
+  if (!(await contains(runtime, container, 'HEAD', target))) {
+    return false;
+  }
+  return (
+    !refs.ownOnly || refs.onto === undefined || contains(runtime, container, target, refs.onto)
+  );
+}
+
 /**
  * Rebases the branch onto `origin/<base>` with git alone. No hook runs on the picked commits, so
  * nothing can refuse them; on a conflict (or any other stop) the branch is put back at `before`.
  * `updateRefs`: a stack's slice branches move with their commits; `onto`: only the commits after it
- * are moved (a restack after a slice merged).
+ * are moved (a restack after a slice merged, a change of target); `ownOnly`: up to date only once
+ * `onto` is in the base too (a change of target: the old base's commits must not stay).
  */
 export async function tryHostRebase(
   runtime: ContainerRuntime,
   container: string,
-  refs: { base: string; branch: string; before: string; updateRefs?: boolean; onto?: string },
+  refs: {
+    base: string;
+    branch: string;
+    before: string;
+    updateRefs?: boolean;
+    onto?: string;
+    ownOnly?: boolean;
+  },
 ): Promise<HostRebase> {
-  if (await contains(runtime, container, 'HEAD', `origin/${refs.base}`)) {
+  if (await upToDate(runtime, container, refs)) {
     return { kind: 'up_to_date' };
   }
   const result = await runIn(
@@ -68,12 +90,13 @@ export async function tryHostRebase(
 export function stoppedHint(
   base: string,
   stopped: Extract<HostRebase, { kind: 'stopped' }>,
+  command = `git rebase origin/${base}`,
 ): string {
   const files =
     stopped.files.length > 0
       ? `, with conflicts in ${stopped.files.map((file) => `\`${file}\``).join(', ')}`
       : '';
-  return `\n\nThe host's \`git rebase origin/${base}\` stopped${files}. It was aborted, so the branch is as it was: rebase it yourself and resolve the conflicts.\n\n\`\`\`\n${stopped.detail}\n\`\`\``;
+  return `\n\nThe host's \`${command}\` stopped${files}. It was aborted, so the branch is as it was: rebase it yourself and resolve the conflicts.\n\n\`\`\`\n${stopped.detail}\n\`\`\``;
 }
 
 /** Appended to the rebase prompt of a split ticket: the slices' branches must move too. */
@@ -99,4 +122,13 @@ export function checksFailedHint(
   checks: { command: string; exitCode: number; tail: string },
 ): string {
   return `\n\nThe host already rebased the branch onto \`origin/${base}\` without conflicts, but the checks (\`${checks.command}\`) now fail (exit ${checks.exitCode}):\n\n\`\`\`\n${checks.tail}\n\`\`\`\n\nThere is nothing left to rebase: fix what the base's changes broke, and commit the fix.`;
+}
+
+/** Appended to the rebase prompt of a change of target: which commits move, and which stay. */
+export function retargetHint(from: string, base: string, fork: string): string {
+  return `\n\nThis is a change of target: the branch leaves \`${from}\` for \`${base}\`. Only its own commits, the ones after \`${fork}\`, move: rebase with \`${retargetCommand(base, fork)}\`. The commits of \`${from}\` that \`${base}\` lacks must not come along.`;
+}
+
+export function retargetCommand(base: string, fork: string): string {
+  return `git rebase --onto origin/${base} ${fork}`;
 }

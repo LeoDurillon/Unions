@@ -24,6 +24,16 @@
   are verified and pushed, and the final review runs again. Each path writes a `union_note` line to the Log. Any
   failure puts the branch back as it was. A clean rebase saves no session, so `implementerSession` skips runs
   without one. `github/pull-request.ts` keeps `tickets.behind_by` current during the pull.
+- `retarget.ts` (with `retarget-github.ts`): the change of target, a rebase onto another base. It reads the PR's
+  base on GitHub (the branch left; the ticket's own base when GitHub already targets the new one), refuses a
+  closed PR, a split ticket or a branch missing on GitHub (`ls-remote`), then calls `runRebaseStep` with
+  `retarget: { from, to }`: the old base is fetched too, the commits after `merge-base <before> origin/<from>`
+  (`forkPoint`) move with `git rebase --onto origin/<to> <fork>`, and it is up to date only when that fork point is
+  in the new base. After an agent, `carriedOver` refuses a branch holding commits of the old base the new one
+  lacks (as they were, or rewritten: `git cherry`). Once pushed, the PR's base is updated and Union's "Builds on"
+  line removed, then `base_branch` and `chosen_base_branch` become the new base and `retarget_branch` is cleared
+  (`ticket_retargeted`). A refused PR update fails the step after the push; the retry finds the branch moved and
+  only retargets. The `retarget` command keeps the target in `tickets.retarget_branch` (`chooseRetarget`).
 - `simplify.ts` (with `simplify-agent.ts`, `simplify-finish.ts`, `simplify-git.ts`, `simplify-push.ts`): the
   on-demand history simplification. Same fetch and implementer session as the rebase (`runInImplementerSession` in
   `rebase-agent.ts`), then the agent's leftovers are committed (`commitLeftovers`; a hook's refusal pauses the step

@@ -106,3 +106,35 @@ test("the branches are the repository's, with the project's base", async () => {
   const response = await app.request(`/api/tickets/${ticketId}/branches`);
   expect(await response.json()).toEqual({ branches: BRANCHES, projectBase: 'main' });
 });
+
+function retarget(branch: string): Response | Promise<Response> {
+  return app.request(`/api/tickets/${parentId}/retarget`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ branch }),
+  });
+}
+
+test('a change of target is queued for an open pull request, onto a branch GitHub has', async () => {
+  expect((await retarget('nope')).status).toBe(404);
+  expect((await retarget('main')).status).toBe(409);
+  const queued = await retarget('release');
+  expect(queued.status).toBe(202);
+  const command = db.select().from(schema.commands).get();
+  expect(command).toMatchObject({
+    type: 'retarget',
+    ticketId: parentId,
+    payload: { branch: 'release' },
+  });
+  expect((await retarget('release')).status).toBe(409);
+});
+
+test('a change of target is refused before the final review, or once the PR is merged', async () => {
+  db.update(schema.tickets).set({ prState: 'merged' }).where(eq(schema.tickets.id, parentId)).run();
+  expect((await retarget('release')).status).toBe(409);
+  db.update(schema.tickets)
+    .set({ prState: 'open', phase: { kind: 'running', step: 'implement' } })
+    .where(eq(schema.tickets.id, parentId))
+    .run();
+  expect((await retarget('release')).status).toBe(409);
+});

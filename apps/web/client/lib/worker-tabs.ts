@@ -40,8 +40,8 @@ export function workerTabsFor(detail: TicketDetail, names: CustomAgentNames): Wo
     label: stepTitle(step, names),
     enabled: step === active || ran(step),
   }));
-  // Rebase, simplify and the split are not pipeline steps: their tab appears once one ran or runs.
-  const onDemand = (['rebase', 'simplify', 'split_plan', 'split', 'restack'] as const)
+  // Rebase, change of target, simplify and the split are not pipeline steps: their tab appears once one ran or runs.
+  const onDemand = (['rebase', 'retarget', 'simplify', 'split_plan', 'split', 'restack'] as const)
     .filter((step) => step === active || detail.outputs.some((output) => output.step === step))
     .map((step) => ({ id: step, label: stepTitle(step), enabled: true }));
   return [...steps, ...onDemand, { id: 'log', label: 'Log', enabled: true }];

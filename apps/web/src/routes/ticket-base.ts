@@ -17,7 +17,7 @@ import type { OnboardingGitHub } from '../github-onboarding';
 import { BAD_REQUEST, CONFLICT, fail, NOT_FOUND, readObject, requireId } from '../http';
 import { findTicket, summarize } from './ticket-links';
 
-function load(db: Db, c: Context): { ticket: Ticket; project: Project } {
+export function load(db: Db, c: Context): { ticket: Ticket; project: Project } {
   const id = requireId(c.req.param('id'), 'ticket id');
   const ticket = findTicket(db)(id);
   const project =
@@ -29,7 +29,7 @@ function load(db: Db, c: Context): { ticket: Ticket; project: Project } {
   return { ticket, project };
 }
 
-function authOf(db: Db, project: Project): GitHubAuth {
+export function authOf(db: Db, project: Project): GitHubAuth {
   const auth = projectGitHubAuth(db, project, process.env.GITHUB_TOKEN);
   if (!auth) {
     throw fail(

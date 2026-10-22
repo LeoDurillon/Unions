@@ -16,6 +16,7 @@ const STEP_TITLES: Record<BuiltInStep, string> = {
   implement: 'Implementation',
   final_review: 'Final review',
   rebase: 'Rebase',
+  retarget: 'Change target',
   simplify: 'Simplify history',
   split_plan: 'Split plan',
   split: 'Split into a stack',

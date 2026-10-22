@@ -16,7 +16,10 @@ export type PrDescriptionSent =
   | { status: 'conflict' }
   | { status: 'failed'; error: string };
 
-const UNION_LINKS = [/^Closes #\d+$/u, /^Builds on .+, which it targets: merge that one first\.$/u];
+/** The paragraph `pullRequestBody` adds when the branch is stacked on its parent's. */
+export const BUILDS_ON_LINK = /^Builds on .+, which it targets: merge that one first\.$/u;
+
+const UNION_LINKS = [/^Closes #\d+$/u, BUILDS_ON_LINK];
 
 /**
  * A pull request's description without the links Union adds to it (`pullRequestBody` in the

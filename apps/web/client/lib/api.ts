@@ -183,6 +183,9 @@ export const api = {
   /** Null goes back to the automatic choice (the parent's branch, else the project's). */
   setBaseBranch: (id: number, branch: string | null): Promise<TicketSummary> =>
     request('PUT', `/api/tickets/${id}/base-branch`, { branch }),
+  /** Moves the finished ticket's commits onto `branch`, then its pull request (the worker does). */
+  retarget: (id: number, branch: string): Promise<unknown> =>
+    request('POST', `/api/tickets/${id}/retarget`, { branch }),
   /** `extra`: the feedback of a revision, or the decision on a refused commit. */
   command: (id: number, type: CommandType, extra: CommandExtra = {}): Promise<unknown> =>
     request('POST', `/api/tickets/${id}/commands`, { type, ...extra }),

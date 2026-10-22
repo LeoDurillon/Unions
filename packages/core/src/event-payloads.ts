@@ -19,6 +19,8 @@ type TicketPayloads = {
   ticket_removed: { ticketId: number; title: string };
   ticket_parent_changed: { parentId: number | null };
   ticket_base_chosen: { branch: string | null };
+  /** The branch was moved onto another base and its pull request now targets it. */
+  ticket_retargeted: { from: string; to: string; number: number };
   ticket_flow_chosen: { flow: Column<typeof tables.tickets, 'flow'> };
   ticket_updated_from_github: Nothing;
   /** The user edited the title or description in Union; the issue on GitHub has it too. */

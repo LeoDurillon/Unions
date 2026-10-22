@@ -6,7 +6,7 @@ import { captureDiff } from './diff-snapshot';
 import { runGate, type GateResult } from './gate';
 import { commitLeftovers, type Refused } from './leftovers';
 import { askRebaseAgent, renderRebaseReport, type Pushed, type Rebase } from './rebase-agent';
-import { headCommit, rebaseProblem, stackMoveProblem } from './rebase-git';
+import { carriedOver, headCommit, rebaseProblem, stackMoveProblem } from './rebase-git';
 import { outcomeOf, pauseOnRefusal, pendingRefusal, resumeRefusal } from './refused-commit';
 import type { StepResult } from './scheduler';
 
@@ -22,6 +22,7 @@ export async function verifyAndPush(
   const lower = openSlices(deps.db, rebase.context.ticket.id).slice(0, -1);
   const problem =
     (await rebaseProblem(deps.runtime, container, rebase)) ??
+    (await carriedOver(deps.runtime, container, rebase)) ??
     (await stackMoveProblem(deps.runtime, container, { base: rebase.base, lower }));
   if (problem) {
     return { error: problem };
@@ -80,7 +81,7 @@ export function pauseRebase(
 ): StepResult {
   return pauseOnRefusal(rebase.deps.db, {
     ticketId: rebase.context.ticket.id,
-    step: 'rebase',
+    step: rebase.retarget ? 'retarget' : 'rebase',
     refused,
     report: outcome.text,
     sessionId: outcome.sessionId,
@@ -89,8 +90,8 @@ export function pauseRebase(
 }
 
 /** The decision a resumed rebase applies. */
-export function pausedRebase(db: Db, ticketId: number): RefusedCommit {
-  return pendingRefusal(db, ticketId, 'rebase');
+export function pausedRebase(db: Db, ticketId: number, step: 'rebase' | 'retarget'): RefusedCommit {
+  return pendingRefusal(db, ticketId, step);
 }
 
 /** Finishes a rebase paused on a refused commit: the user's decision, then the checks and the push. */

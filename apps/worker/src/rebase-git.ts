@@ -96,3 +96,57 @@ export async function stackMoveProblem(
   }
   return null;
 }
+
+/** Where the branch, at `before`, left `origin/<from>`: the commits after it are its own. */
+export async function forkPoint(
+  runtime: ContainerRuntime,
+  container: string,
+  refs: { from: string; before: string },
+): Promise<string> {
+  const fork = await mustRunIn(
+    runtime,
+    container,
+    git(['merge-base', refs.before, `origin/${refs.from}`]),
+  );
+  return fork.trim();
+}
+
+async function lines(
+  runtime: ContainerRuntime,
+  container: string,
+  args: string[],
+): Promise<string[]> {
+  const out = await mustRunIn(runtime, container, git(args));
+  return out.split('\n').filter((line) => line.trim() !== '');
+}
+
+const SHORT_SHA = 7;
+
+/**
+ * Why a change of target cannot be pushed: commits the old base has and the new one lacks came
+ * along, as they were or rewritten (same patch); null when none, or for a plain rebase.
+ */
+export async function carriedOver(
+  runtime: ContainerRuntime,
+  container: string,
+  rebase: { base: string; before: string; retarget?: { from: string } },
+): Promise<string | null> {
+  if (!rebase.retarget) {
+    return null;
+  }
+  const { from } = rebase.retarget;
+  const fork = await forkPoint(runtime, container, { from, before: rebase.before });
+  const target = `origin/${rebase.base}`;
+  const left = new Set(await lines(runtime, container, ['rev-list', fork, '--not', 'HEAD']));
+  const oldOnly = await lines(runtime, container, ['rev-list', fork, '--not', target]);
+  const kept = oldOnly.filter((sha) => !left.has(sha));
+  // `-`: a commit of the branch with the same patch as one of the old base's.
+  const cherry = await lines(runtime, container, ['cherry', fork, 'HEAD', target]);
+  const rewritten = cherry.filter((line) => line.startsWith('- ')).map((line) => line.slice(2));
+  const carried = [...kept, ...rewritten];
+  if (carried.length === 0) {
+    return null;
+  }
+  const shas = carried.map((sha) => sha.slice(0, SHORT_SHA)).join(', ');
+  return `Commits of \`${from}\` that \`${rebase.base}\` lacks came along (${shas}): only the branch's own commits, after ${fork.slice(0, SHORT_SHA)}, may move.`;
+}

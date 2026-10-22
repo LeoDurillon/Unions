@@ -69,7 +69,7 @@ async function restacked(
         "GitHub has not rebased the rest of the stack onto the base: use Rebase stack on GitHub, or Restack here to let Union's implementation agent do it.",
     };
   }
-  return runRebaseStep(deps, context, restack);
+  return runRebaseStep(deps, context, { restack });
 }
 
 /**

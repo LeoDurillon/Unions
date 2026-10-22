@@ -87,6 +87,8 @@ export const tickets = sqliteTable(
     baseBranch: text('base_branch'),
     /** The branch the user chose to start from, over the parent's and the project's; null: automatic. */
     chosenBaseBranch: text('chosen_base_branch'),
+    /** The base a change of target moves the branch onto, kept while it runs (or failed); null: none. */
+    retargetBranch: text('retarget_branch'),
     /** The diff snapshot's head when the user last sent a review: "since last review" starts there. */
     reviewedSha: text('reviewed_sha'),
     prNumber: integer('pr_number'),

@@ -47,6 +47,8 @@ export const DEFAULT_TOOLS: Record<BuiltInRunAgent, readonly string[]> = {
   lesson_writer: READ_ONLY,
   // Added to the implementer's tools for a rebase (see `toolsFor`).
   rebase: ['Bash(git rebase*)', 'Bash(git merge-base*)', 'Bash(git add*)', 'Bash(git status*)'],
+  // A rebase onto another base: the same commands.
+  retarget: ['Bash(git rebase*)', 'Bash(git merge-base*)', 'Bash(git add*)', 'Bash(git status*)'],
   // Added to the implementer's tools to rewrite its commits (see `toolsFor`).
   simplify: [
     'Bash(git reset*)',

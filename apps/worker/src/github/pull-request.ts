@@ -38,7 +38,7 @@ function canRebase(ticket: Ticket): boolean {
   return (
     phase.kind === 'done' ||
     (phase.kind === 'awaiting_approval' && phase.step === 'final_review') ||
-    (phase.kind === 'failed' && phase.step === 'rebase')
+    (phase.kind === 'failed' && (phase.step === 'rebase' || phase.step === 'retarget'))
   );
 }
 

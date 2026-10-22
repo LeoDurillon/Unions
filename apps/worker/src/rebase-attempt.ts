@@ -5,8 +5,15 @@ import { install } from './implement-checks';
 import { runRebaseAgent, type Pushed, type Rebase } from './rebase-agent';
 import { pushClean, upToDate } from './rebase-clean';
 import { fetchIntoContainer } from './rebase-fetch';
-import { contains } from './rebase-git';
-import { checksFailedHint, stackHint, stoppedHint, tryHostRebase } from './rebase-host';
+import { contains, forkPoint } from './rebase-git';
+import {
+  checksFailedHint,
+  retargetCommand,
+  retargetHint,
+  stackHint,
+  stoppedHint,
+  tryHostRebase,
+} from './rebase-host';
 import { pauseRebase, verifyAndPush } from './rebase-publish';
 import type { StepResult } from './scheduler';
 import { lowerSlices, syncLowerBranches } from './stack-refs';
@@ -22,7 +29,13 @@ async function fetchChecked(
   const remote = await remoteOf(deps, rebase.project);
   const lower = lowerSlices(deps.db, context.ticket.id);
   const extra = lower.map((slice) => slice.branch);
-  const pushed = await fetchIntoContainer(deps.runtime, container, remote, { base, branch, extra });
+  // A change of target reads the base it leaves, which is not checked like the slices.
+  const left = rebase.retarget ? [rebase.retarget.from] : [];
+  const pushed = await fetchIntoContainer(deps.runtime, container, remote, {
+    base,
+    branch,
+    extra: [...extra, ...left],
+  });
   for (const name of [branch, ...extra]) {
     if (!(await contains(deps.runtime, container, 'HEAD', `origin/${name}`))) {
       return {
@@ -32,6 +45,27 @@ async function fetchChecked(
   }
   await syncLowerBranches(deps.runtime, container, lower);
   return { pushed, extra };
+}
+
+/**
+ * Which commits move (`onto`: only the ones after it), the command that moves them, and what the
+ * agent is told about it: a restack's or a change of target's, else a plain rebase.
+ */
+async function movePlan(
+  rebase: Rebase,
+  extra: string[],
+): Promise<{ onto?: string; hint: string; command?: string }> {
+  const { deps, container, base, retarget } = rebase;
+  if (!retarget) {
+    const onto = rebase.restack?.upstream;
+    return { ...(onto === undefined ? {} : { onto }), hint: stackHint(base, extra, onto) };
+  }
+  const fork = await forkPoint(deps.runtime, container, { ...retarget, before: rebase.before });
+  return {
+    onto: fork,
+    hint: retargetHint(retarget.from, base, fork),
+    command: retargetCommand(base, fork),
+  };
 }
 
 /**
@@ -46,9 +80,14 @@ export async function attempt(rebase: Rebase): Promise<StepResult | Pushed> {
   }
   const { pushed, extra } = fetched;
   const updateRefs = extra.length > 0;
-  const onto = rebase.restack?.upstream;
-  const host = await tryHostRebase(deps.runtime, container, { ...rebase, updateRefs, onto });
-  const stack = stackHint(base, extra, onto);
+  const { hint: stack, command, ...move } = await movePlan(rebase, extra);
+  const ownOnly = rebase.retarget !== undefined;
+  const host = await tryHostRebase(deps.runtime, container, {
+    ...rebase,
+    ...move,
+    updateRefs,
+    ownOnly,
+  });
   if (host.kind === 'up_to_date') {
     context.log({ type: 'union_note', text: `already up to date with origin/${base}` });
     return upToDate(rebase);
@@ -62,7 +101,7 @@ export async function attempt(rebase: Rebase): Promise<StepResult | Pushed> {
   }
   if (host.kind === 'stopped') {
     context.log({ type: 'union_note', text: rebaseStoppedNote(host.files) });
-    return withAgent(rebase, { lease: pushed, why: stoppedHint(base, host) + stack });
+    return withAgent(rebase, { lease: pushed, why: stoppedHint(base, host, command) + stack });
   }
   const clean = await pushClean(rebase, pushed);
   if (!('checksFailed' in clean)) {

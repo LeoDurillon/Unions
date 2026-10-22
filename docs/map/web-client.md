@@ -28,6 +28,7 @@ export); do not edit. Tests are left out.
 - `attachments.tsx`: One file: its name (a download link once uploaded), size, note, and whether it may be committed.
 - `base-branch-row.tsx`: The branch the ticket starts from and why; before it starts, it can be chosen over the parent's and the project's (Automatic goes back to them).
 - `board.tsx`: The columns, filling the screen down to the bottom edge.
+- `branch-picker.tsx`: The repository's branches under a filter box, to pick a ticket's base branch or a new target.
 - `choice.tsx`: The app's choice inputs: chips for a multi-select, a switch for on / off, a segmented control for one of a few.
 - `container-commands.tsx`: Commands the user runs in a workspace (a ticket's container as the agent, or a pull request's own checkout), with the preview's address while it runs, typed or…
 - `custom-flow-steps.tsx`: A flow's custom agents in the settings and the ticket's Custom flow: listed in order, moved, removed, added.
@@ -122,7 +123,9 @@ export); do not edit. Tests are left out.
 
 ## components/pull-request/
 
+- `branch-actions.tsx`: What can be done to the pull request's branch: rebase it, change its target, simplify its history.
 - `branch-status.tsx`: How far the PR's branch is behind its base (polled from GitHub by the worker) and the Rebase button.
+- `change-target.tsx`: Change target: the finished ticket's own commits moved onto another branch, and its pull request retargeted there.
 - `ci-check-rows.tsx`: One line per CI check or bot comment of the pull request, with a box to pick it for the implementer and, on a failed Actions job, Re-run.
 - `ci-checks.tsx`: The pull request's CI checks on its last commit, and its bot comments: the failed ones and what explains them can be given to the implementer.
 - `ci-given.tsx`: The CI output given to the implementer: waiting for its next run (it can be taken back) or read.
