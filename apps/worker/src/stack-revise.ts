@@ -37,7 +37,7 @@ export async function stackSection(workspace: Prepared): Promise<string> {
   const logs = await sliceLogs(deps.runtime, container, { fork, slices });
   const top = slices.length;
   const list = slices.map((slice, at) => sliceLine(slice, logs[at] ?? [], top)).join('\n');
-  return `\n\n# Stack\n\nThis ticket's pull request is split into a stack, bottom first; each slice is a pull request on the one below:\n\n${list}\n\nCommit each change where it belongs: end a new commit's message with a \`Slice: <n>\` trailer (on its own line, after a blank line) to add it at the end of slice n, or start its subject with \`fixup! <sha>\` (a sha above) to fold it into that commit. Commit on top of the branch as usual: the host moves your commits into place after your run.`;
+  return `\n\n# Stack\n\nThis ticket's pull request is split into a stack, bottom first; each slice is a pull request on the one below:\n\n${list}\n\nCommit each change where it belongs: end a new commit's message with a \`Slice: <n>\` trailer (on its own line, after a blank line) to add it at the end of slice n, or start its subject with \`fixup! <sha>\` (a sha above) to fold it into that commit. Commit on top of the branch as usual: the host moves your commits into place after your run. A review's comments under a \`## Slice <n>\` heading are on that slice's own change (their line numbers are at its tip): fix them in slice n.`;
 }
 
 /** The added commits the host cannot place: no slice named, or no single commit to fix up. */

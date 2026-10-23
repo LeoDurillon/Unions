@@ -69,7 +69,7 @@
   the split stands. Any failure before the push puts the branch back. `markReadyWhenDone` marks every slice's
   pull request ready. A split ticket afterwards: the implementer's prompt gets a `# Stack` section (the slices
   and their commits, `stack-revise.ts`) asking each new commit to say where it goes (`Slice: <n>`, or
-  `fixup! <sha>`); after the run, `restackRevision` asks the session about any commit it cannot place, replays
+  `fixup! <sha>`), and review comments under a `## Slice <n>` heading to be fixed in that slice; after the run, `restackRevision` asks the session about any commit it cannot place, replays
   the stack with the host's todo (`git rebase -i` with `sequence.editor`, `stack-revise-git.ts`), checks the
   tree is unchanged and `pushRevision` pushes every slice atomically, leased on the recorded tips. A conflict
   while reordering fails the step, unpushed. A rebase fetches the lower slices' branches too, refuses one with

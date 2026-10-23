@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test';
 
-import { formatReview } from './review-feedback';
+import { formatReview, formatStackReview } from './review-feedback';
 
 test('comments are grouped by file with their lines and code excerpt', () => {
   const text = formatReview(
@@ -100,4 +100,36 @@ test('on a split ticket, each commented file says which slices change it', () =>
     (path) => (path === 'math.js' ? ['slice 1 (Math)', 'slice 2 (Tidy)'] : []),
   );
   expect(text).toContain('## math.js\n\nChanged in slice 1 (Math) and slice 2 (Tidy).');
+});
+
+test("a split ticket's review: the whole change first, then each slice's own comments", () => {
+  const line = { kind: 'line', side: 'new', startLine: 4, endLine: 4, excerpt: 'x' } as const;
+  const text = formatStackReview(
+    [
+      { ...line, path: 'a.ts', body: 'On the whole.', slicePosition: null },
+      { ...line, path: 'b.ts', body: 'On slice 2.', slicePosition: 2 },
+      { ...line, path: 'c.ts', body: 'Of a slice gone.', slicePosition: 9 },
+      { ...line, kind: 'general', path: '', body: 'Split it more.', slicePosition: 2 },
+    ],
+    '',
+    [
+      { position: 1, title: 'Schema', sha: 'aaaaaaaaaa', prNumber: 11 },
+      { position: 2, title: 'API', sha: 'bbbbbbbbbb', prNumber: 12 },
+    ],
+    (path) => (path === 'a.ts' ? ['slice 1 (Schema)'] : []),
+  );
+  expect(text).toBe(
+    [
+      '# Code review from the user',
+      '## a.ts\n\nChanged in slice 1 (Schema).',
+      '**Line 4**\n\n```\nx\n```\n\nOn the whole.',
+      '## c.ts',
+      '**Line 4**\n\n```\nx\n```\n\nOf a slice gone.',
+      "## Slice 2: API (#12)\n\nOn this slice's own change: line numbers are at its tip (`bbbbbbb`). Fix these in slice 2.",
+      '### On the pull request',
+      'Split it more.',
+      '### b.ts',
+      '**Line 4**\n\n```\nx\n```\n\nOn slice 2.',
+    ].join('\n\n'),
+  );
 });

@@ -1,6 +1,7 @@
 # Plan: review a split ticket slice by slice
 
-Status: steps 1 to 3 built (branch `slice-reviews`, 2026-10-23); steps 4 and 5 left.
+Status: built, steps 1 to 5 (branch `slice-reviews`, 2026-10-23). Not tried yet: a real revision of a split ticket
+from a review with slice sections (it uses the user's Claude usage). "Not in v1" below is left.
 
 ## Idea
 

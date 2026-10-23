@@ -51,6 +51,22 @@ export function sliceTips(db: Db, ticketId: number): Map<number, string> {
   return new Map(sliceRows(db, ticketId).map((row) => [row.position, row.sha]));
 }
 
+/** The slices in the newest snapshot, bottom first, with their pull requests: what a review names. */
+export function reviewSlices(
+  db: Db,
+  ticketId: number,
+): { position: number; title: string; sha: string; prNumber: number | null }[] {
+  const slices = listSlices(db, ticketId);
+  return sliceRows(db, ticketId)
+    .toSorted((a, b) => a.position - b.position)
+    .map(({ position, title, sha }) => ({
+      position,
+      title,
+      sha,
+      prNumber: slices.find((slice) => slice.position === position)?.prNumber ?? null,
+    }));
+}
+
 /** One slice's own change (from the slice below to its tip) in the newest snapshot. */
 export function sliceSnapshot(db: Db, ticketId: number, position: number): Snapshot | null {
   const row = sliceRows(db, ticketId).find((candidate) => candidate.position === position);

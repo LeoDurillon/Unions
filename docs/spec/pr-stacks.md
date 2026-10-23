@@ -61,7 +61,8 @@ While the pull request is open, the PR tab shows **Split into a stack**, usable 
 ## Revise and rebase
 
 - The implementer's prompt gets a `# Stack` section: the slices, their commits, and how to place a new commit
-  (`Slice: <n>` to add it at the end of slice n, `fixup! <sha>` to fold it into that commit).
+  (`Slice: <n>` to add it at the end of slice n, `fixup! <sha>` to fold it into that commit), and that review
+  comments under a `## Slice <n>` heading are fixed in slice n.
 - After its run, the host moves the new commits into their slices with `git rebase -i` and its own todo
   (`pick`, `fixup`, `update-ref` for the lower slices' branches). A commit it cannot place is asked about in the
   implementer's session (`<sha> Slice: <n>` or `<sha> fixup! <sha>`). The tree must not change; then every slice is
@@ -78,11 +79,14 @@ While the pull request is open, the PR tab shows **Split into a stack**, usable 
   and Explain), then each slice with its pull request and its drafts. A slice's tab shows its own change, and
   comments are written on it (`review_comments.slice_position`, `head_sha` the slice's tip); they go out of date
   when that slice's tip moves. All shows the whole-change comments, and those of slices a new split removed.
-- The review sent to the implementer says, under each file, which slices change it.
+- The review sent to the implementer (one Send for the whole ticket) starts with the comments on the whole change,
+  each file saying which slices change it, then a `## Slice <n>: <title> (#<pr>)` section per slice with the
+  comments written on its own change (line numbers at its tip). A slice gone after a new split leaves its
+  comments with the whole change's.
 - **Import from the stack** (the review header of a split ticket) reads the unresolved threads of every open
   slice's pull request, each landing on its slice's own diff as GitHub shows it, and says what each pull request
   gave; merged and closed slices are skipped. The PR tab's import of one slice's pull request lands the same way.
-  Plan for the rest: [slice-reviews.md](../plans/slice-reviews.md).
+  Plan and what is left: [slice-reviews.md](../plans/slice-reviews.md).
 - **Review with agent** on a split ticket gets each slice's range (`git diff <below>...<tip>`) and part of the
   spec, and is asked to start each finding with its slice.
 
