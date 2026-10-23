@@ -10,7 +10,13 @@ import { canRewrite } from './branch-status';
 export function SplitStack({ detail }: { detail: TicketDetail }): ReactElement | null {
   const { ticket, project } = detail;
   const { command } = useTicketCommands(ticket.id);
-  if (project.config.stacks !== true || ticket.branch === null || ticket.prState !== 'open') {
+  // Once split, Split again is in the stack panel.
+  if (
+    project.config.stacks !== true ||
+    ticket.branch === null ||
+    ticket.prState !== 'open' ||
+    ticket.stack
+  ) {
     return null;
   }
   const allowed = canRewrite(detail);
@@ -31,8 +37,7 @@ export function SplitStack({ detail }: { detail: TicketDetail }): ReactElement |
       <p className="text-xs text-zinc-500">
         An agent proposes slices of the spec, each one a pull request on the one below; you edit and
         approve the plan in its Worker tab. The implementation agent then rewrites the commits into
-        the slices, the code unchanged, and the stack is pushed and opened on GitHub. Merging and
-        restacking the slices is not handled yet.
+        the slices, the code unchanged, and the stack is pushed and opened on GitHub.
       </p>
       <ErrorText error={command.error} />
     </div>

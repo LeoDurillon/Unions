@@ -29,7 +29,8 @@ export function BranchStatus({ detail }: { detail: TicketDetail }): ReactElement
       </p>
     );
   }
-  if (ticket.behindBy === null || ticket.branch === null) {
+  // A split ticket's stack panel shows how far the stack is behind, and its Rebase.
+  if (ticket.behindBy === null || ticket.branch === null || ticket.stack) {
     return null;
   }
   const base = ticket.baseBranch ?? project.config.baseBranch;

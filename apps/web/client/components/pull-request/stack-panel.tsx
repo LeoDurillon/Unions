@@ -1,29 +1,9 @@
-// A split ticket's stack in its PR tab: each slice's pull request and state, what went wrong, and Restack.
+// A split ticket's stack in its PR tab: one line per slice, what went wrong, what can be done to it, and how it merges.
 import type { ReactElement } from 'react';
 
 import type { StackView, TicketDetail } from '../../../src/api-types';
-import { useTicketCommands } from '../../lib/use-ticket-commands';
-import { Badge, Button, ErrorText } from '../ui';
-
-const STATE_TONE = { open: 'green', merged: 'blue', closed: 'red' } as const;
-
-function SliceRow({ slice }: { slice: StackView['slices'][number] }): ReactElement {
-  return (
-    <li className="flex flex-wrap items-center gap-2">
-      <span className="text-zinc-500">{slice.position}.</span>
-      <span className="font-medium">{slice.title}</span>
-      <code className="text-xs">{slice.branch}</code>
-      {slice.prNumber === null ? null : <span>#{slice.prNumber}</span>}
-      {slice.prState === null ? null : (
-        <Badge tone={STATE_TONE[slice.prState]}>
-          {slice.prState === 'merged' && slice.mergedInto
-            ? `merged into ${slice.mergedInto}`
-            : slice.prState}
-        </Badge>
-      )}
-    </li>
-  );
-}
+import { StackActions } from './stack-actions';
+import { StackSliceRow } from './stack-slice-row';
 
 /** Out-of-order merges and closed slices: the stack cannot go on as it is. */
 function Problems({ stack }: { stack: StackView }): ReactElement | null {
@@ -58,37 +38,49 @@ function explanation(stack: StackView): string {
     : `A stack on GitHub (#${stack.githubStack}): merge from the bottom there. GitHub rebases the rest after each merge and Union follows; if GitHub cannot (Rebase stack on GitHub), Restack lets Union's implementation agent do it. The ticket is merged once every slice is in the base.`;
 }
 
-/** Shown when the ticket is split: merge the slices from the bottom, on GitHub. */
+function HowItWorks({ stack }: { stack: StackView }): ReactElement {
+  return (
+    <details className="text-xs text-zinc-500">
+      <summary className="cursor-pointer">How the stack merges</summary>
+      <div className="mt-1 space-y-1">
+        <p>{explanation(stack)}</p>
+        <p>
+          Rebase moves every slice onto the base at once and runs the checks, then force-pushes
+          them; the implementation agent is called only for conflicts or failing checks. Split again
+          plans new slices from the same code and replaces this stack. On failure the branches are
+          left as they were.
+        </p>
+      </div>
+    </details>
+  );
+}
+
+/** Shown when the ticket is split, bottom slice first: merge from the bottom, on GitHub. */
 export function StackPanel({ detail }: { detail: TicketDetail }): ReactElement | null {
-  const { ticket } = detail;
-  const { command } = useTicketCommands(ticket.id);
+  const { ticket, project } = detail;
   const { stack } = ticket;
   if (!stack) {
     return null;
   }
   return (
     <div className="space-y-2 rounded-md border border-zinc-200 p-3 text-sm dark:border-zinc-800">
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-baseline gap-2">
         <span className="font-medium">{stack.label}</span>
-        {stack.restackable ? (
-          <Button
-            disabled={command.isPending}
-            onClick={() => {
-              command.mutate({ type: 'restack' });
-            }}
-          >
-            Restack
-          </Button>
-        ) : null}
+        <span className="text-xs text-zinc-500">1 is the bottom: merge it first</span>
       </div>
-      <ol className="space-y-1">
+      <ol className="space-y-0.5">
         {stack.slices.map((slice) => (
-          <SliceRow key={slice.position} slice={slice} />
+          <StackSliceRow
+            key={slice.position}
+            slice={slice}
+            project={project}
+            current={slice.prNumber !== null && slice.prNumber === ticket.prNumber}
+          />
         ))}
       </ol>
       <Problems stack={stack} />
-      <p className="text-xs text-zinc-500">{explanation(stack)}</p>
-      <ErrorText error={command.error} />
+      <StackActions detail={detail} />
+      <HowItWorks stack={stack} />
     </div>
   );
 }
