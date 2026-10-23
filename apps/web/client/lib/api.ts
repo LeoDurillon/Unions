@@ -213,10 +213,10 @@ export const api = {
     request('POST', `${base}/review`, verdict ? { summary, verdict } : { summary }),
   reviewDiscussion: (base: string): Promise<DiscussionResponse> =>
     request('GET', `${base}/discussion`),
-  importReviewComments: (id: number): Promise<ReviewImportResult> =>
-    request('POST', `/api/tickets/${id}/comments/import`),
-  importReviewNote: (id: number, url: string): Promise<unknown> =>
-    request('POST', `/api/tickets/${id}/comments/import-note`, { url }),
+  importReviewComments: (id: number, pr: number): Promise<ReviewImportResult> =>
+    request('POST', `/api/tickets/${id}/comments/import?pr=${pr}`),
+  importReviewNote: (id: number, url: string, pr: number): Promise<unknown> =>
+    request('POST', `/api/tickets/${id}/comments/import-note?pr=${pr}`, { url }),
   /** `refresh`: ask GitHub now, not the list the server kept. */
   pullRequests: (
     projectId: number,
@@ -240,8 +240,9 @@ export const api = {
     request('POST', `/api/projects/${projectId}/pull-requests/reviews/stack/remove`, { numbers }),
   removeCurrentReview: (projectId: number, number: number): Promise<unknown> =>
     request('DELETE', `/api/projects/${projectId}/pull-requests/reviews/${number}`),
-  discussion: (id: number): Promise<DiscussionResponse> =>
-    request('GET', `/api/tickets/${id}/pull-request/discussion`),
+  /** `pr`: the ticket's pull request or one of its stack's slices'. */
+  discussion: (id: number, pr: number): Promise<DiscussionResponse> =>
+    request('GET', `/api/tickets/${id}/pull-request/discussion?pr=${pr}`),
   editOutput: (id: number, step: string, content: string): Promise<unknown> =>
     request('PUT', `/api/tickets/${id}/steps/${step}/output`, { content }),
   github: {

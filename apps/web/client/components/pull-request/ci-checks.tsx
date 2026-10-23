@@ -97,10 +97,10 @@ function CheckLists({
 }
 
 /** Read from GitHub when the tab opens, every 30 s while a check runs, and on Refresh. */
-export function CiChecks({ ticketId }: { ticketId: number }): ReactElement {
-  const { checks, preview, keep, send, drop } = usePrChecks(ticketId);
+export function CiChecks({ ticketId, pr }: { ticketId: number; pr: number }): ReactElement {
+  const { checks, preview, keep, send, drop } = usePrChecks(ticketId, pr);
   const picking = usePicking();
-  const rerun = useCiRerun(ticketId, checks.refetch);
+  const rerun = useCiRerun(ticketId, pr, checks.refetch);
   const view = checks.data;
   const handleDone = (): void => {
     picking.clear();

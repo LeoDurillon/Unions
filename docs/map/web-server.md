@@ -9,6 +9,7 @@ export); do not edit. Tests are left out.
 - `api-types.ts`: Where the commit view reads a slice's own change: `slice-<position>`.
 - `app.ts`: Builds the web server's Hono app: error handling and the API routes, wired to the database and GitHub.
 - `ci-api-types.ts`: The pull request's CI checks as the PR tab shows them, and what the user gave the implementer from them.
+- `ci-load.ts`: Loading a ticket's PR checks: the ticket, the pull request picked (its own or a slice's), the credentials, and GitHub's listing.
 - `ci-picks.ts`: The user's picks among the pull request's CI, checked against its current checks, then read from GitHub into the text the implementer gets.
 - `ci-rerun.ts`: Which check of the pull request can be run again (a failed GitHub Actions job), and the command that asks the worker to.
 - `event-api-types.ts`: The Events settings: the rules, and the Notion columns they can set (null until read).
@@ -40,6 +41,7 @@ export); do not edit. Tests are left out.
 - `server.ts`: The web server's entry point: opens the database, migrates it and serves the API and the client.
 - `services.ts`: The outside services the API routes may call: GitHub (the wizard's and the PR tab's reads, its CI), Notion.
 - `stack-checks.ts`: The CI of a split ticket's open slices, one count per check state for each slice's pull request.
+- `ticket-pull-request.ts`: The pull request a ticket's PR tab reads: its own, or one of its stack's slices' picked with `?pr=`.
 - `union-update-types.ts`: Union's own update as the sidebar reads it: the last check, the update's state, and the work a restart would interrupt.
 
 ## routes/

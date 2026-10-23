@@ -134,16 +134,19 @@ export); do not edit. Tests are left out.
 - `ci-pick-actions.tsx`: What to do with the picked checks, jobs and comments: read the text the agent would get, keep it for its next run, or send it now.
 - `comment-body.tsx`: A GitHub comment's text in compact markdown, folded behind a fade when it renders tall.
 - `description-draft.tsx`: The rewritten description, editable, with what it changes on GitHub a click away.
-- `discussion.tsx`: The pull request's GitHub discussion, and what of it goes to the implementer.
+- `discussion.tsx`: The pull request's GitHub discussion (`pr`: the ticket's or a slice's), and what of it goes to the implementer.
 - `followed-base.tsx`: The notice that GitHub moved the pull request off its base: the next rebase leaves that base's commits behind.
 - `note-card.tsx`: A review summary or a conversation comment, with its Add to review action when there is one.
 - `note-filter.tsx`: Whose reviews and comments the discussion shows: everyone's, people's only, or bots' only.
 - `pr-description.tsx`: The PR's description, rewritten by the agent when the work changed after the PR was opened.
+- `pull-request-sections.tsx`: The PR tab's sections about one pull request (the ticket's, or a slice's picked above them): CI checks, description, discussion.
 - `simplify-history.tsx`: The Simplify history button: the implementation agent rewrites the branch&apos;s commits, the code unchanged.
 - `slice-ci.tsx`: A slice's CI in one word (failed, running, passed), its counts by state on hover.
+- `slice-description.tsx`: A lower slice's pull request description, as GitHub has it: the agent rewrites only the ticket's own.
 - `split-stack.tsx`: The Split into a stack button: an agent plans slices of the spec, then the branch becomes a stack of pull requests.
-- `stack-actions.tsx`: What can be done to a split ticket's whole stack: how far it is behind its base, Rebase, Restack, Split again.
+- `stack-actions.tsx`: What can be done to a split ticket's whole stack: how far it is behind its base, Rebase stack, Restack, Split again.
 - `stack-panel.tsx`: A split ticket's stack in its PR tab: one line per slice with its CI, what went wrong, what can be done to it, and how it merges.
+- `stack-pr-picker.tsx`: Which pull request of a split ticket's stack the PR tab's checks, description and discussion are about, bottom first.
 - `stack-slice-row.tsx`: One slice of a split ticket's stack on one line: its pull request (linked), state, CI and title; its branch on hover.
 
 ## components/pull-requests/
@@ -352,7 +355,7 @@ export); do not edit. Tests are left out.
 - `use-navigation.ts`: Which page is shown (`?page=previews`, `?union=` for the Union settings, else the board) and which overlay is open.
 - `use-notifications.ts`: The notifications, page by page, with the unread count (also in the tab's title) marking them read and clearing them.
 - `use-notion-users.ts`: The Notion workspace members, read only when `enabled` (a person property is in view).
-- `use-pr-checks.ts`: The pull request's CI checks (read again every 30 s while some still run), and giving picks of them to the implementer.
+- `use-pr-checks.ts`: A pull request's CI checks (the ticket's or a slice's; read again every 30 s while some still run), and giving picks of them to the implementer.
 - `use-preview.ts`: A ticket's or a pull request's preview as its section reads it, and the commands that act on it.
 - `use-review-grouping.ts`: The newest grouping by spec of the review, with starting and cancelling one.
 - `use-review-notion.ts`: The Notion page of a pull request under review: its text, the description's suggestions, checking, linking and unlinking.

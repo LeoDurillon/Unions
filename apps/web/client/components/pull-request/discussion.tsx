@@ -110,13 +110,13 @@ function Threads({
   );
 }
 
-/** The pull request's GitHub discussion, and what of it goes to the implementer. */
-export function Discussion({ ticketId }: { ticketId: number }): ReactElement {
-  const discussion = useDiscussion(ticketId, true);
+/** The pull request's GitHub discussion (`pr`: the ticket's or a slice's), and what of it goes to the implementer. */
+export function Discussion({ ticketId, pr }: { ticketId: number; pr: number }): ReactElement {
+  const discussion = useDiscussion(ticketId, pr, true);
   const target = { kind: 'ticket', ticketId } as const;
   const comments = useComments(target);
   const mutations = useCommentMutations(target);
-  const { importNote } = useImportMutations(ticketId);
+  const { importNote } = useImportMutations(ticketId, pr);
   if (!discussion.data) {
     return discussion.error ? (
       <ErrorText error={discussion.error} />

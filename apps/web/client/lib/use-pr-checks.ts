@@ -1,4 +1,4 @@
-// The pull request's CI checks (read again every 30 s while some still run), and giving picks of them to the implementer.
+// A pull request's CI checks (the ticket's or a slice's; read again every 30 s while some still run), and giving picks of them to the implementer.
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 
 import type { CiGivenView, CiPick, CiPreview, PrChecksView } from '../../src/ci-api-types';
@@ -10,7 +10,11 @@ type Mutation<T, I> = ReturnType<typeof useMutation<T, Error, I>>;
 
 export type SendInput = { picks: CiPick[]; note: string };
 
-export function usePrChecks(ticketId: number): {
+/** `pr`: the ticket's pull request or one of its stack's slices'. */
+export function usePrChecks(
+  ticketId: number,
+  pr: number,
+): {
   checks: UseQueryResult<PrChecksView>;
   preview: Mutation<CiPreview, CiPick[]>;
   keep: Mutation<CiGivenView, CiPick[]>;
@@ -18,11 +22,12 @@ export function usePrChecks(ticketId: number): {
   drop: Mutation<CiGivenView, number>;
 } {
   const queryClient = useQueryClient();
-  const key = ['ticket', ticketId, 'pr-checks'];
+  const key = ['ticket', ticketId, 'pr-checks', pr];
   const path = `/api/tickets/${ticketId}/pr-checks`;
+  const picked = `?pr=${pr}`;
   const checks = useQuery({
     queryKey: key,
-    queryFn: (): Promise<PrChecksView> => request('GET', path),
+    queryFn: (): Promise<PrChecksView> => request('GET', `${path}${picked}`),
     retry: false,
     refetchInterval: (query) =>
       query.state.data?.checks.some((check) => check.state === 'pending') === true
@@ -34,16 +39,17 @@ export function usePrChecks(ticketId: number): {
   };
   const preview = useMutation({
     mutationFn: (picks: CiPick[]): Promise<CiPreview> =>
-      request('POST', `${path}/preview`, { picks }),
+      request('POST', `${path}/preview${picked}`, { picks }),
   });
   const keep = useMutation({
     mutationFn: (picks: CiPick[]): Promise<CiGivenView> =>
-      request('POST', `${path}/keep`, { picks }),
+      request('POST', `${path}/keep${picked}`, { picks }),
     onSuccess: given,
   });
   // The revision moves the ticket: its panel reads it again.
   const send = useMutation({
-    mutationFn: (input: SendInput): Promise<CiGivenView> => request('POST', `${path}/send`, input),
+    mutationFn: (input: SendInput): Promise<CiGivenView> =>
+      request('POST', `${path}/send${picked}`, input),
     onSuccess: given,
     onSettled: () => queryClient.invalidateQueries({ queryKey: ['ticket', ticketId] }),
   });

@@ -27,7 +27,7 @@ export function ImportComments({
   ticketId: number;
   pullRequest: number;
 }): ReactElement {
-  const { importFromGitHub } = useImportMutations(ticketId);
+  const { importFromGitHub } = useImportMutations(ticketId, pullRequest);
   return (
     <div className="flex flex-col items-end gap-1">
       <Button

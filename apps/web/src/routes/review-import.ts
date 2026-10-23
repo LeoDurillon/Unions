@@ -6,16 +6,19 @@ import type { DiscussionResponse, PullRequestDiscussion } from '../api-types';
 import type { OnboardingGitHub } from '../github-onboarding';
 import { CONFLICT, CREATED, fail, NOT_FOUND, readObject, requireText } from '../http';
 import { importedUrls, importNote, importThreads } from '../review-import';
+import { pickedPullRequest } from '../ticket-pull-request';
 import { guarded } from './github-errors';
 
 type Fetched = { number: number; url: string; discussion: PullRequestDiscussion };
 
-/** The linked pull request's discussion, read from GitHub (never written). */
-async function fetchFor(db: Db, github: OnboardingGitHub, ticket: Ticket): Promise<Fetched> {
-  const number = ticket.prNumber;
-  if (number === null) {
-    throw fail(CONFLICT, 'Link a pull request to this ticket first');
-  }
+/** The linked pull request's discussion (or a slice's, `?pr=`), read from GitHub (never written). */
+async function fetchFor(
+  db: Db,
+  github: OnboardingGitHub,
+  ticket: Ticket,
+  c: Context,
+): Promise<Fetched> {
+  const number = pickedPullRequest(db, ticket, c);
   const project = db
     .select()
     .from(schema.projects)
@@ -44,7 +47,7 @@ export async function getDiscussion(
   ticket: Ticket,
   c: Context,
 ): Promise<Response> {
-  const { number, url, discussion } = await fetchFor(db, github, ticket);
+  const { number, url, discussion } = await fetchFor(db, github, ticket, c);
   const body: DiscussionResponse = {
     ...discussion,
     number,
@@ -61,7 +64,7 @@ export async function importPullRequestComments(
   ticket: Ticket,
   c: Context,
 ): Promise<Response> {
-  const { discussion } = await fetchFor(db, github, ticket);
+  const { discussion } = await fetchFor(db, github, ticket, c);
   return c.json(importThreads(db, ticket.id, discussion.threads));
 }
 
@@ -73,7 +76,7 @@ export async function importPullRequestNote(
   c: Context,
 ): Promise<Response> {
   const url = requireText(await readObject(c.req.raw), 'url');
-  const { discussion } = await fetchFor(db, github, ticket);
+  const { discussion } = await fetchFor(db, github, ticket, c);
   const note = discussion.notes.find((candidate) => candidate.url === url);
   if (!note) {
     throw fail(NOT_FOUND, 'That comment is not in the pull request discussion');

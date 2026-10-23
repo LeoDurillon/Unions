@@ -59,7 +59,14 @@ function HowItWorks({ stack }: { stack: StackView }): ReactElement {
 }
 
 /** Shown when the ticket is split, bottom slice first: merge from the bottom, on GitHub. */
-export function StackPanel({ detail }: { detail: TicketDetail }): ReactElement | null {
+/** `shown`: the pull request the sections below are about. */
+export function StackPanel({
+  detail,
+  shown,
+}: {
+  detail: TicketDetail;
+  shown: number | null;
+}): ReactElement | null {
   const { ticket, project } = detail;
   const { stack } = ticket;
   const checks = useStackChecks(ticket.id, Boolean(stack) && ticket.prState === 'open');
@@ -80,7 +87,7 @@ export function StackPanel({ detail }: { detail: TicketDetail }): ReactElement |
             key={slice.position}
             slice={slice}
             project={project}
-            current={slice.prNumber !== null && slice.prNumber === ticket.prNumber}
+            current={slice.prNumber !== null && slice.prNumber === shown}
             ci={ciOf(slice.position)}
           />
         ))}

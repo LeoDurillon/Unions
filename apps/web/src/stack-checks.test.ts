@@ -1,4 +1,4 @@
-// Tests for the CI counts of a split ticket's open slices.
+// Tests for a split ticket's CI: each open slice's counts, and one slice's checks picked with `?pr=`.
 import { beforeEach, expect, test } from 'bun:test';
 
 import { createDb, createTicket, migrateDb, schema, type Db } from '@union/core';
@@ -95,4 +95,15 @@ test('a ticket that is not split has no slices to read', async () => {
   ).json()) as StackChecksView;
   expect(view.slices).toEqual([]);
   expect(listed).toEqual([]);
+});
+
+test("a slice's pull request is read with ?pr=; one outside the stack is refused", async () => {
+  slice(1, 5, 'open');
+  slice(2, 7, 'open');
+  const picked = await app.request(`/api/tickets/${ticketId}/pr-checks?pr=5`);
+  expect(picked.status).toBe(200);
+  expect(listed).toEqual([5]);
+  const outside = await app.request(`/api/tickets/${ticketId}/pr-checks?pr=99`);
+  expect(outside.status).toBe(404);
+  expect(listed).toEqual([5]);
 });

@@ -1,4 +1,4 @@
-// What can be done to a split ticket's whole stack: how far it is behind its base, Rebase, Restack, Split again.
+// What can be done to a split ticket's whole stack: how far it is behind its base, Rebase stack, Restack, Split again.
 import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../../src/api-types';
@@ -58,7 +58,7 @@ export function StackActions({ detail }: { detail: TicketDetail }): ReactElement
               command.mutate({ type: 'rebase' });
             }}
           >
-            Rebase
+            Rebase stack
           </Button>
         ) : null}
         {detail.project.config.stacks === true ? (

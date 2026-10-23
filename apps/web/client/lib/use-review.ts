@@ -53,11 +53,12 @@ export function useDiffFile(
  */
 export function useDiscussion(
   ticketId: number,
+  pr: number,
   enabled: boolean,
 ): UseQueryResult<DiscussionResponse> {
   return useQuery({
-    queryKey: ['pull-request', ticketId, 'discussion'],
-    queryFn: () => api.discussion(ticketId),
+    queryKey: ['pull-request', ticketId, 'discussion', pr],
+    queryFn: () => api.discussion(ticketId, pr),
     enabled,
     retry: false,
   });
@@ -156,7 +157,11 @@ export function useCommentMutations(target: ReviewTarget): {
 }
 
 /** Importing a ticket's linked pull request comments as drafts (PR tab and review header). */
-export function useImportMutations(ticketId: number): {
+/** `pr`: the pull request the comments are taken from, the ticket's or a slice's. */
+export function useImportMutations(
+  ticketId: number,
+  pr: number,
+): {
   importFromGitHub: ReturnType<typeof useMutation<ReviewImportResult, Error, void>>;
   importNote: ReturnType<typeof useMutation<unknown, Error, string>>;
 } {
@@ -170,11 +175,11 @@ export function useImportMutations(ticketId: number): {
   };
   return {
     importFromGitHub: useMutation({
-      mutationFn: () => api.importReviewComments(ticketId),
+      mutationFn: () => api.importReviewComments(ticketId, pr),
       onSuccess: refresh,
     }),
     importNote: useMutation({
-      mutationFn: (url: string) => api.importReviewNote(ticketId, url),
+      mutationFn: (url: string) => api.importReviewNote(ticketId, url, pr),
       onSuccess: refresh,
     }),
   };

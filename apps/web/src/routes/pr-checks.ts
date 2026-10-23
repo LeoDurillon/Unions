@@ -2,10 +2,8 @@
 import {
   CiOutputError,
   dropCiOutput,
-  getTicket,
   keepCiOutputs,
   listCiOutputs,
-  projectGitHubAuth,
   revisesImplementer,
   schema,
   sendCiOutputs,
@@ -16,81 +14,15 @@ import {
 import { and, eq, isNull } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
 
-import type { CiGivenView, CiPreview, PrChecksView, PullRequestChecks } from '../ci-api-types';
-import { parsePicks, readPicks, type CiSource } from '../ci-picks';
+import type { CiGivenView, CiPreview, PrChecksView } from '../ci-api-types';
+import { listing, load, loadTicket, readGitHub, type Loaded } from '../ci-load';
+import { parsePicks, readPicks } from '../ci-picks';
 import { queueRerun } from '../ci-rerun';
 import type { CiGitHub } from '../github-checks';
-import { ACCEPTED, BAD_GATEWAY, CONFLICT, fail, NOT_FOUND, readObject, requireId } from '../http';
+import { ACCEPTED, CONFLICT, fail, readObject, requireId } from '../http';
 import { stackChecks } from '../stack-checks';
-import { guarded } from './github-errors';
 
-const FORBIDDEN = 403;
 const DEFAULT_NOTE = 'The CI checks below failed on the pull request; fix what they show.';
-
-type Loaded = { ticket: Ticket; number: number; source: CiSource };
-
-function loadTicket(db: Db, c: Context): Ticket {
-  try {
-    return getTicket(db, requireId(c.req.param('id'), 'ticket id'));
-  } catch {
-    throw fail(NOT_FOUND, 'Ticket not found');
-  }
-}
-
-/** The ticket, its pull request and the credentials to read it. */
-function load(db: Db, ci: CiGitHub, c: Context): Loaded {
-  const ticket = loadTicket(db, c);
-  if (ticket.prNumber === null) {
-    throw fail(CONFLICT, 'Link a pull request to this ticket first');
-  }
-  const project = db
-    .select()
-    .from(schema.projects)
-    .where(eq(schema.projects.id, ticket.projectId))
-    .get();
-  const auth = project ? projectGitHubAuth(db, project, process.env.GITHUB_TOKEN) : null;
-  if (!project || !auth) {
-    throw fail(
-      CONFLICT,
-      'This project has no GitHub credentials: set a token or a GitHub App in the project settings',
-    );
-  }
-  const repo = { owner: project.owner, repo: project.repo };
-  return { ticket, number: ticket.prNumber, source: { ci, auth, repo } };
-}
-
-function statusOf(error: unknown): unknown {
-  return typeof error === 'object' && error !== null && 'status' in error ? error.status : null;
-}
-
-/** GitHub's 403 names no permission: say which ones the checks need. */
-function readGitHub<T>(work: () => Promise<T>): Promise<T> {
-  return guarded(async () => {
-    try {
-      return await work();
-    } catch (error) {
-      if (statusOf(error) === FORBIDDEN) {
-        throw fail(
-          BAD_GATEWAY,
-          'GitHub refused to read the checks: the GitHub App needs read access to Checks, Commit statuses and Actions (accepted on its installation), a classic token the repo scope',
-        );
-      }
-      throw error;
-    }
-  });
-}
-
-async function listing(loaded: Loaded): Promise<PullRequestChecks> {
-  const { source, number } = loaded;
-  const found = await readGitHub(() => source.ci.listChecks(source.auth, source.repo, number));
-  if (!found) {
-    throw fail(
-      NOT_FOUND,
-      `${source.repo.owner}/${source.repo.repo} has no pull request #${number}`,
-    );
-  }
-  return found;
-}
 
 function checked<T>(work: () => T): T {
   try {

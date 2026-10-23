@@ -32,11 +32,11 @@ function failedRerun(payload: unknown): string | null {
   return typeof jobId === 'number' ? `run:${jobId}` : null;
 }
 
-export function useCiRerun(ticketId: number, refetch: () => unknown): CiRerun {
+export function useCiRerun(ticketId: number, pr: number, refetch: () => unknown): CiRerun {
   const [asked, setAsked] = useState<Asked>(new Map());
   const mutation = useMutation({
     mutationFn: (checkId: string): Promise<unknown> =>
-      request('POST', `/api/tickets/${ticketId}/pr-checks/rerun`, { checkId }),
+      request('POST', `/api/tickets/${ticketId}/pr-checks/rerun?pr=${pr}`, { checkId }),
     onSuccess: (_data, checkId) => {
       setAsked((old) => new Map(old).set(checkId, Date.now()));
     },
