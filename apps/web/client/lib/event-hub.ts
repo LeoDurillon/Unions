@@ -21,7 +21,7 @@ let started = false;
 let lastSeq = 0;
 let channel: BroadcastChannel | null = null;
 
-export function isEventRow(value: unknown): value is EventRow {
+function isEventRow(value: unknown): value is EventRow {
   return (
     typeof value === 'object' &&
     value !== null &&

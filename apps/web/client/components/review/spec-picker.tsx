@@ -17,7 +17,7 @@ export const LABELS: Record<SpecSource, string> = {
   notion: 'Notion page',
 };
 
-export const REF_HINTS: Partial<Record<SpecSource, string>> = {
+const REF_HINTS: Partial<Record<SpecSource, string>> = {
   issue: 'Issue number or URL, e.g. 42',
   notion: 'Notion page URL',
 };

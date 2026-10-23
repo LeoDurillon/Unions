@@ -8,7 +8,7 @@ import type { StepContext, StepResult } from './scheduler';
 import { pushRevision, restackRevision, stackSection } from './stack-revise';
 import { commitsAhead } from './workspace-git';
 
-export { IMPLEMENT_DENIED, type ImplementDeps } from './implement-loop';
+export type { ImplementDeps } from './implement-loop';
 
 function restackNote({ changed, conflicts }: { changed: number[]; conflicts: number }): string {
   const resolved =

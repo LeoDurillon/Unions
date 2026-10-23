@@ -1,0 +1,20 @@
+id: pure-state-machine
+language: TypeScript
+severity: error
+message: The state machine stays pure; the worker persists what transition returns.
+note: No I/O, no clock, no DB in the state machine files (AGENTS.md, Rules).
+files:
+  - packages/core/src/*states.ts
+rule:
+  any:
+    - pattern: Date.now()
+    - pattern: new Date($$$)
+    - pattern: Math.random()
+    - pattern: performance.now()
+    - pattern: fetch($$$)
+    - pattern: Bun.$PROP
+    - pattern: process.$PROP
+    - kind: import_statement
+      has:
+        field: source
+        regex: ^['"](node:|bun|fs|path|child_process|drizzle-orm|octokit|\./db|\./schema)

@@ -33,12 +33,7 @@ export type AgentOutcome =
 
 const RATE_LIMIT = /usage limit|rate limit|limit reached|too many requests/iu;
 /** Always denied: the host owns the remote; the container has no credentials anyway. */
-export const BASE_DENIED = [
-  'Bash(git push*)',
-  'Bash(git remote*)',
-  'Bash(gh *)',
-  'Bash(curl *)',
-] as const;
+const BASE_DENIED = ['Bash(git push*)', 'Bash(git remote*)', 'Bash(gh *)', 'Bash(curl *)'] as const;
 
 type ResultEvent = {
   type: 'result';

@@ -166,7 +166,7 @@ function runBlock(run: ContainerRun): string {
  * The outputs of commands the user ran in the workspace and gave to the implementer; empty when
  * there are none. They ran before this run's changes, in the same checkout.
  */
-export function commandOutputPrompt(runs: readonly ContainerRun[]): string {
+function commandOutputPrompt(runs: readonly ContainerRun[]): string {
   if (runs.length === 0) {
     return '';
   }

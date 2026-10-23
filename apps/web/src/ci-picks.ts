@@ -12,7 +12,7 @@ import type { CiGitHub } from './github-checks';
 import { BAD_REQUEST, CONFLICT, fail, NOT_FOUND } from './http';
 
 /** A send reads each pick from GitHub: a few at a time keeps it quick. */
-export const MAX_PICKS = 10;
+const MAX_PICKS = 10;
 const KINDS = new Set(['check', 'job', 'comment']);
 
 export type CiSource = { ci: CiGitHub; auth: GitHubAuth; repo: { owner: string; repo: string } };

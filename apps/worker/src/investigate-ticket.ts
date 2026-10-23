@@ -53,7 +53,7 @@ export const TICKET_INVESTIGATION_DENIED = [
 ] as const;
 
 /** Where the agent stands, for the prompt: the ticket's branch in its own workspace. */
-export function ticketWhere(
+function ticketWhere(
   ticket: { title: string; body: string; branch: string | null },
   base: string,
   /** The "Builds on" section of a ticket with a parent, as its steps get it; empty without one. */

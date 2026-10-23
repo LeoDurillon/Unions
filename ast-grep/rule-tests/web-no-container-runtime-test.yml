@@ -1,0 +1,7 @@
+id: web-no-container-runtime
+valid:
+  - |
+    db.insert(schema.commands).values({ kind: 'start', ticketId }).run();
+invalid:
+  - |
+    const runtime = new DockerCli();

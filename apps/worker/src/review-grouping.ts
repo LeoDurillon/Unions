@@ -26,7 +26,7 @@ import { parseGrouping } from './review-grouping-result';
 const ANSWER_TAIL_CHARS = 2000;
 
 /** A pull request's grouping runs in its own throwaway container. */
-export function groupingContainer(id: number): TicketContainer {
+function groupingContainer(id: number): TicketContainer {
   return {
     name: `union-g${id}`,
     homeVolume: `union-g${id}-home`,
@@ -34,7 +34,7 @@ export function groupingContainer(id: number): TicketContainer {
   };
 }
 
-export function groupingPrompt(db: Db, target: ReviewTarget, spec: string): string {
+function groupingPrompt(db: Db, target: ReviewTarget, spec: string): string {
   return `${sharedPrompt(db, target.projectId)}
 
 ${resolveAgent(db, 'review_groups').prompt}

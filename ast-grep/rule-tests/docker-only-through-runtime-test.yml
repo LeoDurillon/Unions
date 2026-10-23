@@ -1,0 +1,15 @@
+id: docker-only-through-runtime
+valid:
+  - |
+    await runtime.exec(name, ['git', 'status']);
+  - |
+    runtime.runHelper({ image, command: ['docker', 'compose', 'up'] });
+invalid:
+  - |
+    spawn('docker', ['ps']);
+  - |
+    Bun.spawn(['docker', 'ps'], { stdout: 'pipe' });
+  - |
+    Bun.spawnSync(['docker', 'rm', name]);
+  - |
+    await $`docker rm -f ${name}`;

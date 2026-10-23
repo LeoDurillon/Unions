@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tan
 import type { RunningPreview } from '../../src/running-previews-types';
 import { request } from './api';
 
-export const RUNNING_PREVIEWS_KEY = ['previews', 'running'];
+const RUNNING_PREVIEWS_KEY = ['previews', 'running'];
 const POLL_MS = 5000;
 
 export function useRunningPreviews(): UseQueryResult<RunningPreview[]> {

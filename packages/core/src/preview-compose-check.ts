@@ -56,7 +56,7 @@ function present(value: unknown): boolean {
 }
 
 /** A path inside the repository: the only host files a preview may use. */
-export function insideRepo(source: string): boolean {
+function insideRepo(source: string): boolean {
   const normalized = path.posix.normalize(source);
   return normalized === PREVIEW_REPO_DIR || normalized.startsWith(`${PREVIEW_REPO_DIR}/`);
 }

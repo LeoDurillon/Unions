@@ -14,7 +14,7 @@ import { refExists } from './workspace-git';
  * The GitHub ref the left base is fetched from: its merged pull request's head (what was merged,
  * kept after the branch is deleted), else its branch while it exists; null when GitHub has neither.
  */
-export async function leftSource(remote: CloneSource, left: LeftBase): Promise<string | null> {
+async function leftSource(remote: CloneSource, left: LeftBase): Promise<string | null> {
   if (left.prNumber !== null) {
     return `refs/pull/${left.prNumber}/head`;
   }

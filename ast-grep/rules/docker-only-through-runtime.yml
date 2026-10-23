@@ -1,0 +1,26 @@
+id: docker-only-through-runtime
+language: TypeScript
+severity: error
+message: Reach Docker only through ContainerRuntime.
+note: DockerCli (packages/core/src/docker-cli.ts) is the one place that runs the docker command line (AGENTS.md, Rules).
+files:
+  - apps/**
+  - packages/**
+rule:
+  any:
+    - pattern: spawn('docker', $$$)
+    - pattern: Bun.spawn(['docker', $$$], $$$)
+    - pattern: Bun.spawn(['docker', $$$])
+    - pattern: Bun.spawnSync(['docker', $$$], $$$)
+    - pattern: Bun.spawnSync(['docker', $$$])
+    - pattern: execFile('docker', $$$)
+    - kind: template_string
+      regex: ^`docker\s
+      inside:
+        kind: call_expression
+        stopBy: end
+        has:
+          field: function
+          regex: ^(Bun\.)?\$$
+ignores:
+  - packages/core/src/docker-cli.ts

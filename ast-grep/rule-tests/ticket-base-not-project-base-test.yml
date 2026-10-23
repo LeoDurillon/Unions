@@ -1,0 +1,7 @@
+id: ticket-base-not-project-base
+valid:
+  - |
+    const base = ticketBase(project, ticket);
+invalid:
+  - |
+    const base = project.config.baseBranch;

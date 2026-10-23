@@ -9,11 +9,11 @@ function memoryPath(projectId: number, what: 'lessons' | 'feedback'): string {
   return `/api/projects/${projectId}/${what}`;
 }
 
-export function lessonsKey(projectId: number): readonly unknown[] {
+function lessonsKey(projectId: number): readonly unknown[] {
   return ['lessons', projectId];
 }
 
-export function feedbackKey(projectId: number): readonly unknown[] {
+function feedbackKey(projectId: number): readonly unknown[] {
   return ['feedback', projectId];
 }
 

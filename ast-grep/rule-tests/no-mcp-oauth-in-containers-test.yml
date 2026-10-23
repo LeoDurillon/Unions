@@ -1,0 +1,9 @@
+id: no-mcp-oauth-in-containers
+valid:
+  - |
+    const seeded = { claudeAiOauth: creds.claudeAiOauth };
+invalid:
+  - |
+    const seeded = { claudeAiOauth: creds.claudeAiOauth, mcpOAuth: creds.mcpOAuth };
+  - |
+    const mcp = creds['mcpOAuth'];

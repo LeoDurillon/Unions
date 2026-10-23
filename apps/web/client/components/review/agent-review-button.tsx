@@ -32,7 +32,7 @@ function LastRun({ review }: { review: AgentReviewView | null | undefined }): Re
 }
 
 /** Asks the review agent for draft comments on the change, and shows where it stands. */
-export function AgentReviewButton({
+function AgentReviewButton({
   target,
   hasPullRequest,
 }: {

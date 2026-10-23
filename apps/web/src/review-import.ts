@@ -10,7 +10,7 @@ type Thread = PullRequestThread;
 type Draft = Omit<typeof schema.reviewComments.$inferInsert, 'ticketId'>;
 
 /** The thread as one comment: who said what, the first comment then the replies. */
-export function threadBody(thread: Thread): string {
+function threadBody(thread: Thread): string {
   return thread.comments
     .map(
       (comment, index) =>
@@ -46,7 +46,7 @@ function current(
  * A draft from an unresolved thread. It lands on its lines of the current diff when they are still
  * there; otherwise it keeps the lines it was written on and reads as outdated, with GitHub's excerpt.
  */
-export function draftFromThread(thread: Thread, snapshot: Snapshot | null): Draft | null {
+function draftFromThread(thread: Thread, snapshot: Snapshot | null): Draft | null {
   const [first] = thread.comments;
   if (!first) {
     return null;
@@ -133,7 +133,7 @@ const REVIEW_STATES: Record<string, string> = {
 };
 
 /** Who wrote it and how, then the text. */
-export function noteBody(note: PullRequestNote): string {
+function noteBody(note: PullRequestNote): string {
   const how =
     note.kind === 'review'
       ? `${REVIEW_STATES[note.state ?? ''] ?? 'reviewed'} on GitHub`

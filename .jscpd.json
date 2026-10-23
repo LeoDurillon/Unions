@@ -1,0 +1,9 @@
+{
+  "path": ["apps", "packages", "scripts"],
+  "format": ["typescript", "tsx"],
+  "ignore": ["**/node_modules/**", "**/dist/**", "**/drizzle/**", "**/*.test.ts"],
+  "gitignore": true,
+  "minTokens": 70,
+  "threshold": 0.6,
+  "reporters": ["console"]
+}

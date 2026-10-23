@@ -25,15 +25,22 @@
     "map:check": "bun scripts/repo-map.ts --check",
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check",
-    "check": "bun run fmt:check && bun run map:check && bun run lint && bun run typecheck && bun test",
+    "check": "bun run fmt:check && bun run map:check && bun run lint && bun run sg && bun run knip && bun run dup && bun run secrets && bun run typecheck && bun test",
     "db:backup": "bun scripts/db-backup.ts",
     "db:restore": "bun scripts/db-restore.ts",
     "db:reset": "bun scripts/db-reset.ts",
-    "usage:backfill": "bun scripts/usage-backfill.ts"
+    "usage:backfill": "bun scripts/usage-backfill.ts",
+    "knip": "knip",
+    "sg": "ast-grep scan && ast-grep test --skip-snapshot-tests",
+    "dup": "jscpd --silent",
+    "secrets": "gitleaks git --redact --no-banner --log-level warn && gitleaks git --pre-commit --redact --no-banner --log-level warn"
   },
   "devDependencies": {
+    "@ast-grep/cli": "catalog:development",
     "@types/bun": "catalog:development",
     "@union/core": "workspace:*",
+    "jscpd": "catalog:development",
+    "knip": "catalog:development",
     "oxfmt": "catalog:development",
     "oxlint": "catalog:development",
     "oxlint-tsgolint": "catalog:development",
@@ -42,7 +49,10 @@
   },
   "catalogs": {
     "development": {
+      "@ast-grep/cli": "0.51.0",
       "@types/bun": "1.4.2",
+      "jscpd": "5.4.2",
+      "knip": "6.42.1",
       "oxfmt": "0.72.0",
       "oxlint": "1.87.0",
       "oxlint-tsgolint": "7.0.2004",
@@ -79,5 +89,8 @@
       "@octokit/auth-app": "8.3.1",
       "octokit": "5.0.5"
     }
-  }
+  },
+  "trustedDependencies": [
+    "@ast-grep/cli"
+  ]
 }

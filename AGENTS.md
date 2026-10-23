@@ -32,8 +32,17 @@ remove the file), then run `bun run map` to update the maps.
 
 - `bun install`
 - `bun test`: runs all tests.
-- `bun run check`: format check, map check, lint, typecheck and tests, in that order. Run it before finishing; it
-  must pass.
+- `bun run check`: format check, map check, lint, `sg`, `knip`, `dup`, `secrets`, typecheck and tests, in that
+  order. Run it before finishing; it must pass.
+- `bun run sg`: ast-grep rules (`ast-grep/rules/`, one per rule in this file that code can break, each with cases in
+  `ast-grep/rule-tests/`). When you add a rule here that a pattern can catch, add an ast-grep rule and its test.
+  Do not widen a rule's `ignores` without the reason its `note` asks for.
+- `bun run knip`: unused files, exports and dependencies (`knip.json`). Drop an `export` used only in its own file;
+  a new script run by path goes in the root workspace's `entry`.
+- `bun run dup`: jscpd copy-paste check (`.jscpd.json`); fails when duplication exceeds `threshold`. Factor the
+  copy out rather than raising the threshold; lower it when duplication goes down.
+- `bun run secrets`: gitleaks over the git history and the uncommitted changes, redacted. Needs `gitleaks` on the
+  PATH (`brew install gitleaks`). Never run it without `--redact`.
 - `bun run map`: regenerates `docs/map/` after adding, removing or re-describing files; `bun run map:check` (part of
   `check`) fails when a map is out of date or a source file has no top comment.
 - `bun run active`: says whether anything runs on the live instance (exit 1 if so); see "Working on the live

@@ -30,7 +30,7 @@ export type Pushed = {
 };
 
 /** The implementer's denied rules, minus the ones a rebase needs (`git merge*` also covers `merge-base`). */
-export const REBASE_DENIED = IMPLEMENT_DENIED.filter(
+const REBASE_DENIED = IMPLEMENT_DENIED.filter(
   (rule) => rule !== 'Bash(git rebase*)' && rule !== 'Bash(git merge*)',
 );
 

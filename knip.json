@@ -1,0 +1,19 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "ignoreBinaries": ["gitleaks"],
+  "workspaces": {
+    ".": {
+      "entry": ["scripts/*.ts", "scripts/ui-check/*.ts"],
+      "project": ["scripts/**/*.ts"]
+    },
+    "apps/web": {
+      "project": ["src/**/*.ts", "client/**/*.{ts,tsx,css}"]
+    },
+    "apps/worker": {
+      "project": ["src/**/*.ts"]
+    },
+    "packages/core": {
+      "project": ["src/**/*.ts"]
+    }
+  }
+}

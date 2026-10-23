@@ -1,0 +1,17 @@
+id: pure-state-machine
+valid:
+  - |
+    import { stackTransition } from './stack-states';
+  - |
+    const next = { ...state, at: input.now };
+invalid:
+  - |
+    const at = Date.now();
+  - |
+    const at = new Date();
+  - |
+    import { eq } from 'drizzle-orm';
+  - |
+    import { readFileSync } from 'node:fs';
+  - |
+    const id = Bun.randomUUIDv7();

@@ -32,7 +32,7 @@ import {
 } from './target';
 import { unionEnvFile } from './variables';
 
-export { PreviewError, type PreviewDeps } from './target';
+export type { PreviewDeps } from './target';
 
 const READY_TIMEOUT_MS = 180_000;
 const READY_INTERVAL_MS = 2000;
@@ -101,7 +101,7 @@ async function up(deps: PreviewDeps, target: Target, file: ComposeJson): Promise
 }
 
 /** The last lines the services printed; empty when they cannot be read. */
-export async function serviceLogs(deps: PreviewDeps, owner: WorkspaceOwner): Promise<string> {
+async function serviceLogs(deps: PreviewDeps, owner: WorkspaceOwner): Promise<string> {
   const output = await compose(deps.runtime, deps.settings, {
     args: ['-p', previewProject(owner), 'logs', '--no-color', '--tail', '200'],
   });

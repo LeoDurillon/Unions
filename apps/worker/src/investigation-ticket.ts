@@ -22,7 +22,7 @@ import { seedCredentials, type TicketContainer } from './provision';
 const WORKDIR = '/workspace';
 const MAX_TITLE = 200;
 
-export function ticketDraftContainer(id: number): TicketContainer {
+function ticketDraftContainer(id: number): TicketContainer {
   return {
     name: `union-i${id}-ticket`,
     homeVolume: `union-i${id}-ticket-home`,

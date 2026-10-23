@@ -1,0 +1,11 @@
+id: web-no-container-runtime
+language: TypeScript
+severity: error
+message: The web app never runs containers; queue a row in `commands` for the worker.
+note: Anything that drives the state machine is a command handled by the worker (AGENTS.md, Rules).
+files:
+  - apps/web/**
+rule:
+  pattern: DockerCli
+ignores:
+  - '**/*.test.ts'

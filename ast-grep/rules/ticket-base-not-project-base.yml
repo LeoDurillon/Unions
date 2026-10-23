@@ -1,0 +1,19 @@
+id: ticket-base-not-project-base
+language: TypeScript
+severity: error
+message: A ticket's base branch is ticketBase(project, ticket), not project.config.baseBranch.
+note: |
+  The parent's branch the ticket was cloned from comes first (AGENTS.md, Rules). The files ignored below need the
+  project's own branch: investigations without a ticket, the fallback when no base resolves, and the comparisons
+  with it. Add a file here only for the same reason.
+files:
+  - apps/worker/**
+rule:
+  pattern: $PROJECT.config.baseBranch
+ignores:
+  - '**/*.test.ts'
+  - apps/worker/src/investigate.ts
+  - apps/worker/src/investigate-ticket.ts
+  - apps/worker/src/provision.ts
+  - apps/worker/src/prompts.ts
+  - apps/worker/src/github/follow-base.ts

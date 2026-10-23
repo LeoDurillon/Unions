@@ -108,7 +108,7 @@ function CheckoutNotice({ target }: { target: PullRequestTarget }): ReactElement
 }
 
 /** The pull request's preview, its end-to-end tests and its commands; their output can go to the review. */
-export function ReviewPreviewTab({
+function ReviewPreviewTab({
   target,
   scripts,
 }: {

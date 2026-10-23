@@ -57,7 +57,7 @@ function latestSnapshot(
  * written, or it is done with its branch kept and its pull request not merged (the implementer then
  * works on it and the final review runs again).
  */
-export function sendRefusal(ticket: Ticket): string | null {
+function sendRefusal(ticket: Ticket): string | null {
   const { phase } = ticket;
   if (phase.kind === 'done') {
     if (ticket.branch === null) {

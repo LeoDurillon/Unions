@@ -8,7 +8,7 @@ const SOCKET = '/var/run/docker.sock';
 const DEFAULT_PROXY_PORT = 8080;
 const DEFAULT_MAX_PREVIEWS = 3;
 /** Lines of output kept for the panel and the failure reason. */
-export const TAIL_LINES = 200;
+const TAIL_LINES = 200;
 
 export type PreviewSettings = {
   image: string;

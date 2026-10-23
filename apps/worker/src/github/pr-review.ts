@@ -39,7 +39,7 @@ function quoted(draft: ReviewComment): string {
  * since GitHub refuses line comments outside the current diff. Comments on the whole pull request
  * follow the summary in the body.
  */
-export function buildReview(
+function buildReview(
   review: Pick<Review, 'headSha'>,
   drafts: ReviewComment[],
   summary: string,

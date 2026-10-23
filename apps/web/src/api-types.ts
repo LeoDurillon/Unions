@@ -401,7 +401,7 @@ export type PreviewSettingsView = {
 };
 
 /** One of the account's claude.ai connectors, and the tool rule that gives an agent all its tools. */
-export type ConnectorView = {
+type ConnectorView = {
   name: string;
   url: string;
   status: string;

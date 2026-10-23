@@ -24,7 +24,7 @@ const NO_PROMPT = {
   GIT_SSH_COMMAND: 'ssh -o BatchMode=yes -o StrictHostKeyChecking=yes',
 };
 
-export async function git(args: string[], timeout = READ_TIMEOUT_MS): Promise<string> {
+async function git(args: string[], timeout = READ_TIMEOUT_MS): Promise<string> {
   const proc = Bun.spawn(['git', '-C', UNION_ROOT, ...args], {
     env: { ...process.env, ...NO_PROMPT },
     stdout: 'pipe',

@@ -21,7 +21,7 @@ export const FINDINGS_FORMAT = `End your answer with one fenced \`json\` block, 
 export const STACK_FINDINGS_FORMAT = `${FINDINGS_FORMAT}
 - \`pr\`: in each comment, the number of the pull request whose diff shows those lines. A comment on how pull requests fit together goes on the higher one.`;
 
-export type Finding = {
+type Finding = {
   /** In a stack, the pull request the comment is about; null when the agent did not say. */
   pr: number | null;
   path: string;

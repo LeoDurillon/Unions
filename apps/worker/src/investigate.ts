@@ -35,7 +35,7 @@ import type { RunSlots } from './slots';
 /** Where a global investigation runs: the empty workspace volume, no repository. */
 const GLOBAL_DIR = '/workspace';
 
-export function investigationContainer(id: number): TicketContainer {
+function investigationContainer(id: number): TicketContainer {
   return {
     name: `union-i${id}`,
     homeVolume: `union-i${id}-home`,

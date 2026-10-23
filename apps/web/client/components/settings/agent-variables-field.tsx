@@ -47,7 +47,7 @@ function ChosenNames({
  * Which of the preview's plain variables the agent's commands get (and the commands the user runs):
  * a preview's database address would otherwise win over the one the tests' env file names.
  */
-export function AgentVariablesField({
+function AgentVariablesField({
   value,
   names,
   onChange,
@@ -81,7 +81,7 @@ export function AgentVariablesField({
 }
 
 /** Whether the agent services' published ports reach the agent's `localhost`. */
-export function ForwardPortsField({
+function ForwardPortsField({
   value,
   onChange,
 }: {

@@ -132,7 +132,7 @@ function TicketBody({
   );
 }
 
-export function TicketDialog({
+function TicketDialog({
   open,
   project,
   onClose,

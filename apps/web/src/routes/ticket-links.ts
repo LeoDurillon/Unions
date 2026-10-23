@@ -17,7 +17,7 @@ import type { TicketRef, TicketSummary } from '../api-types';
 import { BAD_REQUEST, CONFLICT, fail, NOT_FOUND, readObject, requireId } from '../http';
 import { stackView } from './ticket-stack';
 
-export function ticketRef(ticket: Ticket): TicketRef {
+function ticketRef(ticket: Ticket): TicketRef {
   return {
     id: ticket.id,
     title: ticket.title,

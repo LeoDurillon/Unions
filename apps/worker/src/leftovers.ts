@@ -12,7 +12,7 @@ const MAX_HOOK_OUTPUT_CHARS = 20_000;
 const STASH_MESSAGE = 'union: changes left out after a hook refused to commit them';
 
 /** Everything the agent left uncommitted, staged: its files, its diff and the diff's hash. */
-export type Leftovers = { files: string[]; diff: string; diffHash: string };
+type Leftovers = { files: string[]; diff: string; diffHash: string };
 
 export type LeftoverCommit =
   | { kind: 'clean' }
@@ -41,7 +41,7 @@ function sha256(text: string): string {
 }
 
 /** Stages every change and describes it, or null when the working tree is clean. */
-export async function stageLeftovers(
+async function stageLeftovers(
   runtime: ContainerRuntime,
   container: string,
 ): Promise<Leftovers | null> {

@@ -55,6 +55,6 @@ export type CiPreview = { items: NewCiOutput[] };
 export type CheckCounts = Record<CheckState, number>;
 
 /** One open slice of a split ticket and its checks; `counts` null when GitHub has no such PR. */
-export type SliceChecks = { position: number; prNumber: number; counts: CheckCounts | null };
+type SliceChecks = { position: number; prNumber: number; counts: CheckCounts | null };
 
 export type StackChecksView = { slices: SliceChecks[] };

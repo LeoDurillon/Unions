@@ -17,7 +17,7 @@ export type Listing = {
 };
 
 /** Writes each current review's stack and place, where they changed. */
-export function keepReviewStacks(db: Db, projectId: number, stacks: GitHubStack[]): void {
+function keepReviewStacks(db: Db, projectId: number, stacks: GitHubStack[]): void {
   const places = stackPlaces(stacks);
   const reviews = db
     .select()

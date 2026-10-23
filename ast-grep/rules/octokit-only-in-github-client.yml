@@ -1,0 +1,12 @@
+id: octokit-only-in-github-client
+language: TypeScript
+severity: error
+message: Build GitHub clients with @union/core/github-client, not by hand.
+note: Resolve credentials with projectGitHubAuth and build the client with @union/core/github-client (AGENTS.md, GitHub).
+rule:
+  any:
+    - pattern: new Octokit($$$)
+    - pattern: new App($$$)
+ignores:
+  - packages/core/src/github-client.ts
+  - '**/*.test.ts'

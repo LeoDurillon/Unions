@@ -35,11 +35,7 @@ const ANSWER_TAIL_CHARS = 2000;
 export type AgentReviewDeps = TargetDeps & { slots: RunSlots; agent?: AgentFn };
 
 /** `specs` null: the review asked for none, the ticket's own text stands in for them. */
-export function agentReviewPrompt(
-  db: Db,
-  target: ReviewTarget,
-  specs: AgentReviewSpec[] | null,
-): string {
+function agentReviewPrompt(db: Db, target: ReviewTarget, specs: AgentReviewSpec[] | null): string {
   const specText = specs === null ? '' : specsSection(specs);
   return `${sharedPrompt(db, target.projectId)}
 

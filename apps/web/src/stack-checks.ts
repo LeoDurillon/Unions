@@ -4,7 +4,7 @@ import { openSlices, type Db } from '@union/core';
 import type { CheckCounts, PullRequestCheck, StackChecksView } from './ci-api-types';
 import type { CiSource } from './ci-picks';
 
-export function countChecks(checks: readonly PullRequestCheck[]): CheckCounts {
+function countChecks(checks: readonly PullRequestCheck[]): CheckCounts {
   const counts: CheckCounts = { pending: 0, passed: 0, failed: 0, skipped: 0 };
   for (const check of checks) {
     counts[check.state] += 1;

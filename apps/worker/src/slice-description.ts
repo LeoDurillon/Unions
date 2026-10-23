@@ -14,7 +14,7 @@ import type { PublishedSlice } from './split-agent';
 type Slice = Pick<PublishedSlice, 'position' | 'title' | 'spec' | 'tipSha'>;
 
 /** Asks for one slice's description: its own change only, as the template wants it. */
-export function slicePrompt(input: {
+function slicePrompt(input: {
   guidance: string;
   template: Template | null;
   slice: Slice;

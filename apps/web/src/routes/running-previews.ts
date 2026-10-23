@@ -36,7 +36,7 @@ function ownerOf(db: Db, preview: Preview): RunningPreviewOwner | null {
 }
 
 /** Starting, running or stopping: what holds containers, and counts against the cap. */
-export function runningPreviews(db: Db): RunningPreview[] {
+function runningPreviews(db: Db): RunningPreview[] {
   const projects = new Map(
     db
       .select()

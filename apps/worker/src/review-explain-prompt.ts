@@ -11,7 +11,7 @@ import {
 import type { ReviewTarget } from './agent-review-target';
 
 /** Appended by the host, never editable: the explanation is read from this block. */
-export const EXPLANATION_FORMAT = `End your answer with one fenced \`json\` block, and nothing after it:
+const EXPLANATION_FORMAT = `End your answer with one fenced \`json\` block, and nothing after it:
 
 \`\`\`json
 {"explanation": "Markdown: what the lines do and how, citing code as \`path:line\`.",

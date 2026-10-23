@@ -23,7 +23,7 @@ const STATUS_TONES = {
   skipped: 'neutral',
 } as const;
 
-export function triggerText(trigger: EventTrigger): string {
+function triggerText(trigger: EventTrigger): string {
   if (trigger.kind === 'board_status') {
     return `The ticket moves to ${BOARD_LABELS[trigger.status]}`;
   }

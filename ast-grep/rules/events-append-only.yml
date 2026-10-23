@@ -1,0 +1,15 @@
+id: events-append-only
+language: TypeScript
+severity: error
+message: '`events` is append-only: never update or delete its rows.'
+note: Event ids are events.seq and SSE resumes through Last-Event-ID (AGENTS.md, Rules).
+rule:
+  any:
+    - pattern: $DB.update(events)
+    - pattern: $DB.update(schema.events)
+    - pattern: $DB.delete(events)
+    - pattern: $DB.delete(schema.events)
+    - kind: string_fragment
+      regex: (?i)(update\s+events\b|delete\s+from\s+events\b)
+ignores:
+  - '**/*.test.ts'

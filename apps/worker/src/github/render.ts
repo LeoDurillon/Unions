@@ -35,7 +35,7 @@ export function stepMarker(ticketId: number, step: Step): string {
   return `<!-- union:ticket=${ticketId} step=${step} -->`;
 }
 
-export function ticketMarker(ticketId: number): string {
+function ticketMarker(ticketId: number): string {
   return `<!-- union:ticket=${ticketId} -->`;
 }
 

@@ -1,0 +1,9 @@
+id: octokit-only-in-github-client
+valid:
+  - |
+    const client = await githubClient(auth);
+invalid:
+  - |
+    const client = new Octokit({ auth: token });
+  - |
+    const app = new App({ appId, privateKey });

@@ -12,7 +12,7 @@ type HastNode = {
   children?: HastNode[];
 };
 
-export const ALERT_KINDS = ['note', 'tip', 'important', 'warning', 'caution'] as const;
+const ALERT_KINDS = ['note', 'tip', 'important', 'warning', 'caution'] as const;
 export type AlertKind = (typeof ALERT_KINDS)[number];
 
 const ALERT_MARK = /^\s*\[!(?<kind>\w+)\]\s*/u;

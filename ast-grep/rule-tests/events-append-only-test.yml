@@ -1,0 +1,13 @@
+id: events-append-only
+valid:
+  - |
+    db.insert(schema.events).values(row).run();
+  - |
+    db.update(schema.tickets).set({ phase }).run();
+invalid:
+  - |
+    db.update(schema.events).set({ at }).run();
+  - |
+    db.delete(events).where(eq(events.seq, seq)).run();
+  - |
+    db.run('DELETE FROM events WHERE seq < 10');

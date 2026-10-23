@@ -131,7 +131,7 @@ ${OUTPUT_RULES}`;
 const FENCED = /^```(?:markdown|md)?\n(?<inner>[\s\S]*)\n```$/u;
 
 /** The agent's answer, without the code fence some answers wrap the whole description in. */
-export function unfence(text: string): string {
+function unfence(text: string): string {
   const trimmed = text.trim();
   return FENCED.exec(trimmed)?.groups?.inner?.trim() ?? trimmed;
 }

@@ -31,7 +31,7 @@ const ANSWER_TAIL_CHARS = 2000;
 const EXISTING = String.raw`while IFS= read -r p; do [ -e "$p" ] && printf "%s\n" "$p"; done; true`;
 
 /** A pull request's explanation runs in its own throwaway container. */
-export function explanationContainer(id: number): TicketContainer {
+function explanationContainer(id: number): TicketContainer {
   return {
     name: `union-e${id}`,
     homeVolume: `union-e${id}-home`,

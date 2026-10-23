@@ -1,0 +1,5 @@
+# ast-grep: structural checks for the AGENTS.md rules oxlint cannot express. Run with `bun run sg`.
+ruleDirs:
+  - ast-grep/rules
+testConfigs:
+  - testDir: ast-grep/rule-tests

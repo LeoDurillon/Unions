@@ -160,7 +160,7 @@ async function buildFile(
  * The file Union writes from the repository's compose file, after the checks. The one kept for the
  * panel shows each secret as `${NAME}`: with secrets it is built a second time that way.
  */
-export async function generatedFile(deps: PreviewDeps, target: Target): Promise<ComposeJson> {
+async function generatedFile(deps: PreviewDeps, target: Target): Promise<ComposeJson> {
   const catalog = await readCatalog(deps, target);
   const summary = catalogSummary(catalog);
   try {

@@ -1,0 +1,16 @@
+id: no-mcp-oauth-in-containers
+language: TypeScript
+severity: error
+message: Seed only the claudeAiOauth credential; never copy mcpOAuth into a container.
+note: AGENTS.md, Rules.
+files:
+  - apps/worker/**
+  - packages/core/**
+rule:
+  any:
+    - kind: property_identifier
+      regex: ^mcpOAuth$
+    - kind: string_fragment
+      regex: ^mcpOAuth$
+ignores:
+  - '**/*.test.ts'
