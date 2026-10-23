@@ -74,13 +74,13 @@ export async function findTemplate(
 }
 
 /** How to write it: the repository's template, else a plain summary. */
-function templateInstructions(template: Template | null): string {
+export function templateInstructions(template: Template | null): string {
   return template
     ? `Fill in the repository's pull request template (\`${template.path}\`), below. Keep its structure and headings, and write in the language the template is written in. Tick a checklist item only when it is true; leave the others unticked.\n\n\`\`\`markdown\n${template.text}\n\`\`\``
     : 'The repository has no pull request template. Write a short summary of the change, then the main changes, then how it was tested, in the language the ticket is written in.';
 }
 
-const OUTPUT_RULES =
+export const OUTPUT_RULES =
   'Output only the description in markdown, with no preamble. Do not add a "Closes" line or link the ticket: that is added for you.';
 
 /** Asks the implementer, who knows the work, for the pull request's description. */
@@ -131,6 +131,30 @@ export function unfence(text: string): string {
   return FENCED.exec(trimmed)?.groups?.inner?.trim() ?? trimmed;
 }
 
+/** The agent's description in the describer's session, or null when the turn fails or says nothing. */
+export async function askDescription(
+  runtime: ContainerRuntime,
+  container: string,
+  describer: Describer,
+  prompt: string,
+): Promise<string | null> {
+  const outcome = await describer.agent(runtime, {
+    container,
+    cwd: REPO_DIR,
+    model: modelFor(describer.db, 'pr_description'),
+    effort: effortFor(describer.db, 'pr_description'),
+    prompt,
+    // Reading only: the work is pushed already.
+    tools: toolsFor(describer.db, 'pr_description'),
+    denied: IMPLEMENT_DENIED,
+    resumeSessionId: describer.sessionId,
+    signal: describer.signal,
+    onEvent: describer.log,
+  });
+  const text = outcome.kind === 'ok' ? unfence(outcome.text) : '';
+  return text === '' ? null : text;
+}
+
 /** The description for a new pull request, or null to keep the default body when the turn fails. */
 export async function writeDescription(
   runtime: ContainerRuntime,
@@ -140,21 +164,13 @@ export async function writeDescription(
   try {
     const template = await findTemplate(runtime, container);
     describer.log({ type: 'union_pr_description', template: template?.path ?? null });
-    const outcome = await describer.agent(runtime, {
+    const guidance = resolveAgent(describer.db, 'pr_description').prompt;
+    return await askDescription(
+      runtime,
       container,
-      cwd: REPO_DIR,
-      model: modelFor(describer.db, 'pr_description'),
-      effort: effortFor(describer.db, 'pr_description'),
-      prompt: descriptionPrompt(template, resolveAgent(describer.db, 'pr_description').prompt),
-      // Reading only: the work is pushed already.
-      tools: toolsFor(describer.db, 'pr_description'),
-      denied: IMPLEMENT_DENIED,
-      resumeSessionId: describer.sessionId,
-      signal: describer.signal,
-      onEvent: describer.log,
-    });
-    const text = outcome.kind === 'ok' ? unfence(outcome.text) : '';
-    return text === '' ? null : text;
+      describer,
+      descriptionPrompt(template, guidance),
+    );
   } catch (error) {
     describer.log({ type: 'union_pr_description_failed', error: String(error) });
     return null;

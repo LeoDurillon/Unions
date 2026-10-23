@@ -21,6 +21,8 @@ type Stack = {
   ticket: Ticket & { prNumber: number };
   base: string;
   slices: PublishedSlice[];
+  /** The lower slices' descriptions the agent wrote, by position. */
+  descriptions: ReadonlyMap<number, string>;
 };
 
 /** The lower slice's pull request, reused when a split ran before; opened on the slice below. */
@@ -71,7 +73,12 @@ async function textOf(stack: Stack, slice: PublishedSlice, number: number): Prom
   const entries: StackEntry[] = stack.slices;
   const top = stack.slices.at(-1)?.position ?? 0;
   if (slice.position !== top) {
-    return slicePrDescription({ slice, stack: entries, issueNumber: stack.ticket.issueNumber });
+    return slicePrDescription({
+      slice,
+      stack: entries,
+      issueNumber: stack.ticket.issueNumber,
+      description: stack.descriptions.get(slice.position),
+    });
   }
   const body = await stack.api.pullRequestBody(stack.repo, number);
   return withStackSection(body, stackSection(entries, top));
@@ -143,6 +150,7 @@ export async function publishStack(
     ticket: Ticket & { prNumber: number };
     base: string;
     slices: PublishedSlice[];
+    descriptions: ReadonlyMap<number, string>;
   },
 ): Promise<string[]> {
   const { project, ticket, base, slices } = input;
@@ -152,6 +160,7 @@ export async function publishStack(
     ticket,
     base,
     slices,
+    descriptions: input.descriptions,
   };
   const warnings: string[] = [];
   await dissolveEarlier(stack, warnings);

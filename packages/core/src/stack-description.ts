@@ -21,24 +21,20 @@ export function stackSection(stack: readonly StackEntry[], current: number): str
 }
 
 /**
- * A slice's pull request description. No `Closes #<issue>`: GitHub honours it only on a pull
+ * A slice's pull request description: the one the agent wrote, else its title and part of the
+ * spec; then the stack and its issue. No `Closes #<issue>`: GitHub honours it only on a pull
  * request into the default branch, so Union closes the issue itself once every slice merged.
  */
 export function slicePrDescription(input: {
   slice: { position: number; title: string; spec: string };
   stack: readonly StackEntry[];
   issueNumber: number | null;
+  description?: string;
 }): string {
   const { slice, stack, issueNumber } = input;
   const partOf = issueNumber === null ? [] : ['', `Part of #${issueNumber}.`];
-  return [
-    `## ${slice.title}`,
-    '',
-    slice.spec.trim(),
-    '',
-    stackSection(stack, slice.position),
-    ...partOf,
-  ].join('\n');
+  const text = input.description?.trim() ?? `## ${slice.title}\n\n${slice.spec.trim()}`;
+  return [text, '', stackSection(stack, slice.position), ...partOf].join('\n');
 }
 
 const SECTION_START = '<!-- union:stack -->';

@@ -9,10 +9,10 @@ import {
 
 import type { ImplementDeps } from './implement-checks';
 import type { Rebase } from './rebase-agent';
-import { restoreBranch } from './rebase-git';
-import { prepareBranch } from './rebase-prepare';
+import { prepareBranch, restorePrepared } from './rebase-prepare';
 import type { StepContext, StepResult } from './scheduler';
 import { historyOf } from './simplify-git';
+import { describeSlices } from './slice-description';
 import { renderSplitReport, type PublishedSlice } from './split-agent';
 import { fetchStack, publishPushed } from './split-publish';
 import { splitUntilVerified } from './split-rounds';
@@ -47,10 +47,12 @@ async function attempt(rebase: Rebase): Promise<StepResult> {
       prNumber: null,
     }),
   );
+  const session = split.outcome.sessionId;
   const published = await publishPushed(rebase, {
     fetched,
     slices,
     privateFiles: privatePushFiles(rebase.deps.db, rebase.context.ticket),
+    describe: () => describeSlices(rebase, { session, fork: start.fork, slices }),
   });
   if ('error' in published) {
     return {
@@ -74,8 +76,7 @@ async function attempt(rebase: Rebase): Promise<StepResult> {
  */
 export async function runSplitStep(deps: ImplementDeps, context: StepContext): Promise<StepResult> {
   const rebase = await prepareBranch(deps, context);
-  const restore = (): Promise<void> =>
-    restoreBranch(deps.runtime, rebase.container, rebase.branch, rebase.before);
+  const restore = (): Promise<void> => restorePrepared(rebase);
   try {
     const result = await attempt(rebase).catch(async (error: unknown) => {
       await restore();

@@ -39,8 +39,11 @@ While the pull request is open, the PR tab shows **Split into a stack**, usable 
 4. **Publish:** the lower slices' branches are set at their tips and pushed with the ticket's branch in one
    `git push --atomic`, each with `--force-with-lease` (a new branch must not exist yet). Then a draft pull request
    is opened (or reused) per lower slice on the slice below (ready for review when the ticket's already is), the
-   ticket's pull request is retargeted onto the slice below it, each lower slice's description is written (its
-   title, its part of the spec, the stack, `Part of #<issue>`; no `Closes`), the ticket's own description gets a
+   ticket's pull request is retargeted onto the slice below it, each lower slice's description is written: the
+   split's session, resumed with the PR description agent's settings, fills in the repository's pull request
+   template (as for [the ticket's own](pull-requests.md); a plain summary without one) for that slice's change
+   alone, then Union adds the stack and `Part of #<issue>` (no `Closes`); a slice whose turn fails gets its title
+   and its part of the spec instead, the ticket's own description gets a
    stack section, the issue gets one comment listing the stack, and `ticket_slices` is replaced. The pull
    requests are then made a **GitHub stack** (`POST /repos/{o}/{r}/stacks`, bottom first, API version
    `2026-03-10`), whose number is kept on the ticket (`github_stack_number`). GitHub refuses to change the base

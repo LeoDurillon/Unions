@@ -52,6 +52,22 @@ function branchesToPush(
   }));
 }
 
+/** The push as the ticket's history shows it: its event and the diff now on GitHub. */
+async function recordPush(rebase: Rebase): Promise<void> {
+  const { deps, container, context, base } = rebase;
+  const ticketId = context.ticket.id;
+  emitEvent(deps.db, {
+    type: 'branch_pushed',
+    ticketId,
+    payload: { branch: rebase.branch, split: true },
+  });
+  await captureDiff(deps.db, deps.runtime, { container, ticketId, base }).catch(
+    (error: unknown) => {
+      context.log({ type: 'union_diff_failed', error: String(error) });
+    },
+  );
+}
+
 /**
  * Pushes the stack in one atomic push, then opens it on GitHub; an earlier split's slice branch the
  * new one has no use for is left as it is, and said so.
@@ -62,6 +78,8 @@ export async function publishPushed(
     fetched: Fetched;
     slices: PublishedSlice[];
     privateFiles: { name: string; blobId: string }[];
+    /** The lower slices' descriptions by position, asked once the push went through. */
+    describe: () => Promise<ReadonlyMap<number, string>>;
   },
 ): Promise<{ warnings: string[] } | { error: string }> {
   const { deps, container, project, context, base } = rebase;
@@ -85,21 +103,18 @@ export async function publishPushed(
   } catch (error) {
     return { error: `The push was refused, nothing was pushed: ${String(error)}` };
   }
-  emitEvent(deps.db, {
-    type: 'branch_pushed',
-    ticketId: ticket.id,
-    payload: { branch: rebase.branch, split: true },
-  });
-  await captureDiff(deps.db, deps.runtime, { container, ticketId: ticket.id, base }).catch(
-    (error: unknown) => {
-      context.log({ type: 'union_diff_failed', error: String(error) });
-    },
-  );
+  await recordPush(rebase);
   const kept = new Set(slices.map((slice) => slice.branch));
   const stale = [...fetched.slices.keys()].filter((name) => !kept.has(name));
   const warnings = await publishStack(
     { db: deps.db, api },
-    { project, ticket: { ...ticket, prNumber: ticket.prNumber }, base, slices },
+    {
+      project,
+      ticket: { ...ticket, prNumber: ticket.prNumber },
+      base,
+      slices,
+      descriptions: await input.describe(),
+    },
   );
   return {
     warnings: [

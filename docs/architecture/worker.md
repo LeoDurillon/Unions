@@ -63,7 +63,8 @@
   slice's tip unless `config.sliceChecks` is false), then the lower slices' branches are set and pushed with the
   ticket's in one `git push --atomic` with a lease each (`stack-push.ts`). `stack-publish.ts` opens or reuses a
   pull request per lower slice (draft, ready when the ticket's already is), retargets the ticket's onto the slice
-  below (`updatePullRequestBase`), writes each slice's description and the stack section of the ticket's own,
+  below (`updatePullRequestBase`), writes each slice's description (`slice-description.ts`: the split's session, once the push went through,
+  fills in the PR template for the slice's own range) and the stack section of the ticket's own,
   comments on the issue and records `ticket_slices`. GitHub failures after the push are warnings in the report:
   the split stands. Any failure before the push puts the branch back. `markReadyWhenDone` marks every slice's
   pull request ready. A split ticket afterwards: the implementer's prompt gets a `# Stack` section (the slices

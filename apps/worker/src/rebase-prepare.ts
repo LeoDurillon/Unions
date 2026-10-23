@@ -5,7 +5,7 @@ import { eq } from 'drizzle-orm';
 import type { ImplementDeps } from './implement-checks';
 import { ensureTicketContainer } from './provision';
 import type { Rebase } from './rebase-agent';
-import { headCommit } from './rebase-git';
+import { headCommit, restoreBranch } from './rebase-git';
 import type { StepContext } from './scheduler';
 import { ensureBranch } from './workspace-git';
 
@@ -37,4 +37,9 @@ export async function prepareBranch(deps: ImplementDeps, context: StepContext): 
     base,
     before,
   };
+}
+
+/** Puts the prepared branch back exactly as it was, whatever the step left behind. */
+export function restorePrepared(rebase: Rebase): Promise<void> {
+  return restoreBranch(rebase.deps.runtime, rebase.container, rebase.branch, rebase.before);
 }

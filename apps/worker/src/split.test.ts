@@ -16,7 +16,7 @@ import {
 } from '@union/core';
 import { eq } from 'drizzle-orm';
 
-import type { AgentFn } from './agent';
+import type { AgentFn, AgentRun } from './agent';
 import { FakeGitHubApi } from './github/fake-api';
 import { AGENT_HOME, REPO_DIR } from './provision';
 import { runSplitStep } from './split';
@@ -37,6 +37,7 @@ let ticketId: number;
 let projectId: number;
 let github: FakeGitHubApi;
 let prompts: string[];
+let descriptions: AgentRun[];
 
 async function git(cwd: string, ...args: string[]): Promise<string> {
   const proc = Bun.spawn(['git', ...args], {
@@ -153,6 +154,7 @@ beforeEach(async () => {
     .run();
   saveOutput(db, ticketId, 'split_plan', PLAN);
   prompts = [];
+  descriptions = [];
 });
 
 function setGate(gateCommand: string): void {
@@ -164,9 +166,13 @@ function setGate(gateCommand: string): void {
 
 type Step = (fork: string, turn: number) => Promise<unknown>;
 
-/** An agent that runs `change` in the workspace on each turn and reports. */
-function agentDoing(change: Step): AgentFn {
+/** An agent that runs `change` in the workspace on each split turn and reports; it describes a slice as asked. */
+function agentDoing(change: Step, describes = ''): AgentFn {
   return async (_runtime, agentRun) => {
+    if (agentRun.prompt.startsWith('# Pull request description')) {
+      descriptions.push(agentRun);
+      return { kind: 'ok', text: describes, sessionId: agentRun.resumeSessionId ?? 'd' };
+    }
     prompts.push(agentRun.prompt);
     await change(await git(container(), 'merge-base', 'HEAD', 'origin/main'), prompts.length);
     return { kind: 'ok', text: 'Split in two.', sessionId: `s${prompts.length}` };
@@ -259,6 +265,20 @@ test('the slices are pushed together and opened as a stack on the ticket pull re
   expect(result.kind === 'ok' && result.output).toContain('**Split** into 2 slices');
   expect([...(github.stacks ?? [])]).toEqual([[1, [3, 2]]]);
   expect(db.select().from(schema.tickets).get()?.githubStackNumber).toBe(1);
+});
+
+test("a lower slice's description follows the repository's template, in the split's session", async () => {
+  const template = path.join(container(), 'pull_request_template.md');
+  await writeFile(template, '## Résumé\n\n## Tests\n');
+  const filled = '## Résumé\n\nLa table des factures.\n\n## Tests\n\nMigration jouée.';
+  expect(await run(agentDoing((fork) => sliceIt(fork), filled))).toMatchObject({ kind: 'ok' });
+  expect(descriptions.map((one) => one.resumeSessionId)).toEqual(['s1']);
+  expect(descriptions[0]?.prompt).toContain('slice 1, **Migration**');
+  expect(descriptions[0]?.prompt).toContain('## Résumé');
+  const lower = github.pulls.find((pull) => pull.head === 'feature-s1');
+  expect(lower?.body).toStartWith(filled);
+  expect(lower?.body).toContain('1. **#3 Migration** (this pull request)');
+  expect(lower?.body).not.toContain('The invoices table.');
 });
 
 test('commits without their slice go back to the agent, which fixes them in its session', async () => {

@@ -15,6 +15,18 @@ const stack: StackEntry[] = [
   { position: 3, title: 'Frontend page', prNumber: 100 },
 ];
 
+test("a slice's written description replaces its spec; the stack and issue follow", () => {
+  const text = slicePrDescription({
+    slice: { position: 1, title: 'Database migration', spec: 'The table.' },
+    stack,
+    issueNumber: 12,
+    description: '## Résumé\n\nLa table.\n',
+  });
+  expect(text).toStartWith('## Résumé\n\nLa table.\n\n**Stack**');
+  expect(text).not.toContain('The table.');
+  expect(text).toEndWith('Part of #12.');
+});
+
 test('a slice describes its part of the spec, the stack around it and its issue', () => {
   const text = slicePrDescription({
     slice: { position: 2, title: 'CRUD', spec: 'Create, read, update, delete invoices.\n' },
