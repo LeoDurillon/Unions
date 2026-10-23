@@ -3,7 +3,6 @@
 import {
   claimGrouping,
   effortFor,
-  emitEvent,
   failInterruptedGroupings,
   finishGrouping,
   modelFor,
@@ -19,9 +18,11 @@ import { runAgent, type AgentFn } from './agent';
 import type { AgentReviewDeps } from './agent-review';
 import { openTarget, type ReviewTarget } from './agent-review-target';
 import { mustRunIn } from './container-exec';
+import { removeRunContainers } from './janitor';
 import { REPO_DIR, type TicketContainer } from './provision';
 import { GROUPING_FORMAT, HUNK_INDEX, hunkIndex } from './review-grouping-format';
 import { parseGrouping } from './review-grouping-result';
+import { RunPool } from './run-pool';
 
 const ANSWER_TAIL_CHARS = 2000;
 
@@ -109,67 +110,24 @@ async function groupChange(
  * Runs the groupings the user asked for, on the same run slots as the pipeline and the agent
  * reviews: a ticket's in its own container, a pull request's in a throwaway one (`union-g<id>`).
  */
-export class ReviewGroupingRunner {
-  private readonly active = new Map<number, { abort: AbortController; done: Promise<void> }>();
-
-  constructor(private readonly deps: AgentReviewDeps & { agent?: AgentFn }) {}
+export class ReviewGroupingRunner extends RunPool<ReviewGrouping, GroupingOutcome> {
+  constructor(private readonly deps: AgentReviewDeps & { agent?: AgentFn }) {
+    super({
+      slots: deps.slots,
+      claim: () => claimGrouping(deps.db),
+      run: (grouping, signal) => groupChange(deps, grouping, signal),
+      failed: (error) => ({ status: 'failed', error }),
+      stopped: { status: 'cancelled' },
+      finish: (grouping, outcome) => {
+        finishGrouping(deps.db, grouping.id, outcome);
+      },
+    });
+  }
 
   /** Fails the groupings a stopped worker left running and removes their pull request containers. */
   async recover(): Promise<void> {
-    for (const grouping of failInterruptedGroupings(this.deps.db)) {
-      if (grouping.reviewId !== null) {
-        const names = groupingContainer(grouping.id);
-        await this.deps.runtime
-          .remove(names.name, { home: names.homeVolume, workspace: names.workspaceVolume })
-          .catch((error: unknown) => {
-            emitEvent(this.deps.db, {
-              type: 'container_cleanup_failed',
-              payload: { container: names.name, error: String(error) },
-            });
-          });
-      }
-    }
-  }
-
-  tick(): void {
-    while (this.deps.slots.tryTake()) {
-      const grouping = claimGrouping(this.deps.db);
-      if (!grouping) {
-        this.deps.slots.release();
-        return;
-      }
-      const abort = new AbortController();
-      this.active.set(grouping.id, { abort, done: this.runTracked(grouping, abort.signal) });
-    }
-  }
-
-  /** Stops a running grouping; it then finishes as cancelled. */
-  cancel(id: number): void {
-    this.active.get(id)?.abort.abort();
-  }
-
-  stop(): void {
-    for (const { abort } of this.active.values()) {
-      abort.abort();
-    }
-  }
-
-  async idle(): Promise<void> {
-    await Promise.all([...this.active.values()].map((run) => run.done));
-  }
-
-  private async runTracked(grouping: ReviewGrouping, signal: AbortSignal): Promise<void> {
-    try {
-      const outcome = await groupChange(this.deps, grouping, signal).catch(
-        (error: unknown): GroupingOutcome => ({
-          status: 'failed',
-          error: error instanceof Error ? error.message : String(error),
-        }),
-      );
-      finishGrouping(this.deps.db, grouping.id, signal.aborted ? { status: 'cancelled' } : outcome);
-    } finally {
-      this.active.delete(grouping.id);
-      this.deps.slots.release();
-    }
+    const left = failInterruptedGroupings(this.deps.db).filter((run) => run.reviewId !== null);
+    const containers = left.map((run) => groupingContainer(run.id));
+    await removeRunContainers(this.deps.db, this.deps.runtime, containers);
   }
 }

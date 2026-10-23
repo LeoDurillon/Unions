@@ -13,6 +13,7 @@ import {
 import { runAgent, type AgentFn } from './agent';
 import type { TargetDeps } from './agent-review-target';
 import { seedCredentials } from './provision';
+import { RunPool, WORKER_STOPPED } from './run-pool';
 import type { RunSlots } from './slots';
 
 export type PromptWriterDeps = TargetDeps & { slots: RunSlots; agent?: AgentFn };
@@ -71,51 +72,22 @@ async function write(
 }
 
 /** Runs queued prompt writer runs, sharing the run slots with the ticket pipeline and the other side runs. */
-export class PromptWriterRunner {
-  private readonly active = new Map<number, { abort: AbortController; done: Promise<void> }>();
-
-  constructor(private readonly deps: PromptWriterDeps) {}
+export class PromptWriterRunner extends RunPool<CustomAgent, Outcome> {
+  constructor(private readonly deps: PromptWriterDeps) {
+    super({
+      slots: deps.slots,
+      claim: () => claimCustomAgentPrompt(deps.db),
+      run: (agent, signal) => write(deps, agent, signal),
+      failed: (error) => ({ error }),
+      stopped: { error: WORKER_STOPPED },
+      finish: (agent, outcome) => {
+        finishCustomAgentPrompt(deps.db, agent.id, outcome);
+      },
+    });
+  }
 
   /** A run the worker stopped during goes back to the queue: nothing was written yet. */
   recover(): void {
     requeueCustomAgentPrompts(this.deps.db);
-  }
-
-  tick(): void {
-    while (this.deps.slots.tryTake()) {
-      const agent = claimCustomAgentPrompt(this.deps.db);
-      if (!agent) {
-        this.deps.slots.release();
-        return;
-      }
-      const abort = new AbortController();
-      this.active.set(agent.id, { abort, done: this.runTracked(agent, abort.signal) });
-    }
-  }
-
-  stop(): void {
-    for (const { abort } of this.active.values()) {
-      abort.abort();
-    }
-  }
-
-  async idle(): Promise<void> {
-    await Promise.all([...this.active.values()].map((run) => run.done));
-  }
-
-  private async runTracked(agent: CustomAgent, signal: AbortSignal): Promise<void> {
-    try {
-      const outcome = await write(this.deps, agent, signal).catch((error: unknown): Outcome => ({
-        error: error instanceof Error ? error.message : String(error),
-      }));
-      finishCustomAgentPrompt(
-        this.deps.db,
-        agent.id,
-        signal.aborted ? { error: 'The worker stopped during the run' } : outcome,
-      );
-    } finally {
-      this.active.delete(agent.id);
-      this.deps.slots.release();
-    }
   }
 }

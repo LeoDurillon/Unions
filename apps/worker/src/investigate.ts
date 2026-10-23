@@ -30,6 +30,7 @@ import {
   type ProvisionConfig,
   type TicketContainer,
 } from './provision';
+import { RunPool } from './run-pool';
 import type { RunSlots } from './slots';
 
 /** Where a global investigation runs: the empty workspace volume, no repository. */
@@ -104,149 +105,115 @@ function toOutcome(outcome: AgentOutcome, cancelled: boolean): InvestigationOutc
   return { status: 'failed', error: `${prefix}${outcome.message}` };
 }
 
+async function removeContainer(deps: InvestigationDeps, id: number): Promise<void> {
+  const names = investigationContainer(id);
+  try {
+    await deps.runtime.remove(names.name, {
+      home: names.homeVolume,
+      workspace: names.workspaceVolume,
+    });
+  } catch (error) {
+    emitEvent(deps.db, {
+      type: 'container_cleanup_failed',
+      investigationId: id,
+      payload: {
+        container: names.name,
+        error: error instanceof Error ? error.message : String(error),
+      },
+    });
+  }
+}
+
+async function investigate(
+  deps: InvestigationDeps,
+  investigation: Investigation,
+  signal: AbortSignal,
+): Promise<InvestigationOutcome> {
+  const { db, runtime, config } = deps;
+  const project = db
+    .select()
+    .from(schema.projects)
+    .where(eq(schema.projects.id, investigation.projectId))
+    .get();
+  if (!project) {
+    return { status: 'failed', error: `Project ${investigation.projectId} not found` };
+  }
+  if (investigation.scope === 'ticket') {
+    return runOnTicket(deps, {
+      investigation,
+      project,
+      prompt: (where) => investigationPrompt(investigation, project, where),
+      signal,
+    });
+  }
+  const names = investigationContainer(investigation.id);
+  try {
+    await runtime.create({ ...names, image: config.image });
+    await runtime.start(names.name);
+    await seedCredentials(runtime, names.name, config.credentialsPath);
+    if (investigation.scope === 'repository') {
+      const token = await projectGitToken(db, project);
+      const source = cloneSource(config.gitBaseUrl, project.owner, project.repo, token);
+      await cloneInto(runtime, names.name, source, project.config.baseBranch);
+    }
+    if (signal.aborted) {
+      return { status: 'cancelled' };
+    }
+    const outcome = await (deps.agent ?? runAgent)(runtime, {
+      container: names.name,
+      cwd: investigation.scope === 'repository' ? REPO_DIR : GLOBAL_DIR,
+      model: investigation.model,
+      prompt: investigationPrompt(investigation, project),
+      tools: investigation.tools,
+      signal,
+      onEvent: (event) => {
+        appendAgentLine(db, { investigationId: investigation.id, payload: event });
+      },
+    });
+    return toOutcome(outcome, signal.aborted);
+  } finally {
+    await removeContainer(deps, investigation.id);
+  }
+}
+
 /**
  * Runs queued investigations, each in a throwaway container (`union-i<id>`) removed once it is done,
  * except a ticket's, which runs in the ticket's own container.
  * They share the run slots with the ticket pipeline.
  */
-export class InvestigationRunner {
-  private readonly active = new Map<number, { abort: AbortController; done: Promise<void> }>();
-
+export class InvestigationRunner extends RunPool<Investigation, InvestigationOutcome> {
   /** Tickets asked from investigations are written alongside. */
   private readonly tickets: TicketDrafter;
 
   constructor(private readonly deps: InvestigationDeps) {
+    super({
+      slots: deps.slots,
+      claim: () => claimInvestigation(deps.db),
+      run: (investigation, signal) => investigate(deps, investigation, signal),
+      failed: (error) => ({ status: 'failed', error }),
+      stopped: { status: 'cancelled' },
+      finish: (investigation, outcome) => {
+        finishInvestigation(deps.db, investigation.id, outcome);
+      },
+    });
     this.tickets = new TicketDrafter(deps);
   }
 
   /** Fails the runs a stopped worker left behind and removes their containers. */
   async recover(): Promise<void> {
     for (const id of failInterruptedInvestigations(this.deps.db)) {
-      await this.removeContainer(id);
+      await removeContainer(this.deps, id);
     }
     await this.tickets.recover();
   }
 
-  tick(): void {
-    this.claimRuns();
+  override tick(): void {
+    super.tick();
     this.tickets.tick();
   }
 
-  private claimRuns(): void {
-    while (this.deps.slots.tryTake()) {
-      const investigation = claimInvestigation(this.deps.db);
-      if (!investigation) {
-        this.deps.slots.release();
-        return;
-      }
-      const abort = new AbortController();
-      const done = this.runTracked(investigation, abort.signal);
-      this.active.set(investigation.id, { abort, done });
-    }
-  }
-
-  /** Stops a running investigation; its run then finishes as cancelled. */
-  cancel(id: number): void {
-    this.active.get(id)?.abort.abort();
-  }
-
-  stop(): void {
-    for (const { abort } of this.active.values()) {
-      abort.abort();
-    }
-  }
-
-  async idle(): Promise<void> {
-    await Promise.all([...this.active.values()].map((run) => run.done));
+  override async idle(): Promise<void> {
+    await super.idle();
     await this.tickets.idle();
-  }
-
-  private async runTracked(investigation: Investigation, signal: AbortSignal): Promise<void> {
-    try {
-      const outcome = await this.run(investigation, signal).catch(
-        (error: unknown): InvestigationOutcome => ({
-          status: 'failed',
-          error: error instanceof Error ? error.message : String(error),
-        }),
-      );
-      finishInvestigation(
-        this.deps.db,
-        investigation.id,
-        signal.aborted ? { status: 'cancelled' } : outcome,
-      );
-    } finally {
-      this.active.delete(investigation.id);
-      this.deps.slots.release();
-    }
-  }
-
-  private async run(
-    investigation: Investigation,
-    signal: AbortSignal,
-  ): Promise<InvestigationOutcome> {
-    const { db, runtime, config } = this.deps;
-    const project = db
-      .select()
-      .from(schema.projects)
-      .where(eq(schema.projects.id, investigation.projectId))
-      .get();
-    if (!project) {
-      return { status: 'failed', error: `Project ${investigation.projectId} not found` };
-    }
-    if (investigation.scope === 'ticket') {
-      return runOnTicket(this.deps, {
-        investigation,
-        project,
-        prompt: (where) => investigationPrompt(investigation, project, where),
-        signal,
-      });
-    }
-    const names = investigationContainer(investigation.id);
-    try {
-      await runtime.create({ ...names, image: config.image });
-      await runtime.start(names.name);
-      await seedCredentials(runtime, names.name, config.credentialsPath);
-      if (investigation.scope === 'repository') {
-        const token = await projectGitToken(db, project);
-        const source = cloneSource(config.gitBaseUrl, project.owner, project.repo, token);
-        await cloneInto(runtime, names.name, source, project.config.baseBranch);
-      }
-      if (signal.aborted) {
-        return { status: 'cancelled' };
-      }
-      const outcome = await (this.deps.agent ?? runAgent)(runtime, {
-        container: names.name,
-        cwd: investigation.scope === 'repository' ? REPO_DIR : GLOBAL_DIR,
-        model: investigation.model,
-        prompt: investigationPrompt(investigation, project),
-        tools: investigation.tools,
-        signal,
-        onEvent: (event) => {
-          appendAgentLine(db, { investigationId: investigation.id, payload: event });
-        },
-      });
-      return toOutcome(outcome, signal.aborted);
-    } finally {
-      await this.removeContainer(investigation.id);
-    }
-  }
-
-  private async removeContainer(id: number): Promise<void> {
-    const names = investigationContainer(id);
-    try {
-      await this.deps.runtime.remove(names.name, {
-        home: names.homeVolume,
-        workspace: names.workspaceVolume,
-      });
-    } catch (error) {
-      emitEvent(this.deps.db, {
-        type: 'container_cleanup_failed',
-        investigationId: id,
-        payload: {
-          container: names.name,
-          error: error instanceof Error ? error.message : String(error),
-        },
-      });
-    }
   }
 }

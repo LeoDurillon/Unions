@@ -17,6 +17,9 @@ import { runAgent } from './agent';
 import type { InvestigationDeps } from './investigate';
 import { withNotionPage } from './investigation-ticket-notion';
 import { seedCredentials, type TicketContainer } from './provision';
+import { RunPool } from './run-pool';
+
+type DraftOutcome = DraftedTicket | { error: string };
 
 /** The ticket is written from the conversation alone: no repository, no tools. */
 const WORKDIR = '/workspace';
@@ -79,104 +82,83 @@ export function parseTicketDraft(text: string, investigation: Investigation): Ti
   };
 }
 
+async function removeContainer(deps: InvestigationDeps, id: number): Promise<void> {
+  const names = ticketDraftContainer(id);
+  try {
+    await deps.runtime.remove(names.name, {
+      home: names.homeVolume,
+      workspace: names.workspaceVolume,
+    });
+  } catch (error) {
+    emitEvent(deps.db, {
+      type: 'container_cleanup_failed',
+      investigationId: id,
+      payload: {
+        container: names.name,
+        error: error instanceof Error ? error.message : String(error),
+      },
+    });
+  }
+}
+
+async function draftTicket(
+  deps: InvestigationDeps,
+  investigation: Investigation,
+): Promise<DraftOutcome> {
+  const { db, runtime, config } = deps;
+  const project = db
+    .select()
+    .from(schema.projects)
+    .where(eq(schema.projects.id, investigation.projectId))
+    .get();
+  if (!project) {
+    return { error: `Project ${investigation.projectId} not found` };
+  }
+  const names = ticketDraftContainer(investigation.id);
+  try {
+    await runtime.create({ ...names, image: config.image });
+    await runtime.start(names.name);
+    await seedCredentials(runtime, names.name, config.credentialsPath);
+    const outcome = await (deps.agent ?? runAgent)(runtime, {
+      container: names.name,
+      cwd: WORKDIR,
+      model: investigation.model,
+      prompt: ticketPrompt(investigation, project),
+      tools: [],
+      onEvent: () => {
+        // Not logged: the investigation's Log tab is for its own runs.
+      },
+    });
+    if (outcome.kind !== 'ok') {
+      return { error: outcome.message };
+    }
+    const draft = parseTicketDraft(outcome.text, investigation);
+    return await withNotionPage(deps.notion ?? new FetchNotionApi(), project, investigation, draft);
+  } finally {
+    await removeContainer(deps, investigation.id);
+  }
+}
+
 /**
  * Writes the tickets asked from investigations, each in a throwaway container removed afterwards,
  * sharing the run slots with the rest. Driven by the `InvestigationRunner`.
  */
-export class TicketDrafter {
-  private readonly active = new Map<number, Promise<void>>();
-
-  constructor(private readonly deps: InvestigationDeps) {}
+export class TicketDrafter extends RunPool<Investigation, DraftOutcome> {
+  constructor(private readonly deps: InvestigationDeps) {
+    super({
+      slots: deps.slots,
+      claim: () => claimTicketDraft(deps.db),
+      run: (investigation) => draftTicket(deps, investigation),
+      failed: (error) => ({ error }),
+      finish: (investigation, outcome) => {
+        finishTicketDraft(deps.db, investigation.id, outcome);
+      },
+    });
+  }
 
   async recover(): Promise<void> {
     for (const id of failInterruptedTicketDrafts(this.deps.db)) {
-      await this.removeContainer(id);
-    }
-  }
-
-  tick(): void {
-    while (this.deps.slots.tryTake()) {
-      const investigation = claimTicketDraft(this.deps.db);
-      if (!investigation) {
-        this.deps.slots.release();
-        return;
-      }
-      this.active.set(investigation.id, this.runTracked(investigation));
-    }
-  }
-
-  async idle(): Promise<void> {
-    await Promise.all(this.active.values());
-  }
-
-  private async runTracked(investigation: Investigation): Promise<void> {
-    try {
-      const outcome = await this.run(investigation).catch((error: unknown) => ({
-        error: error instanceof Error ? error.message : String(error),
-      }));
-      finishTicketDraft(this.deps.db, investigation.id, outcome);
-    } finally {
-      this.active.delete(investigation.id);
-      this.deps.slots.release();
-    }
-  }
-
-  private async run(investigation: Investigation): Promise<DraftedTicket | { error: string }> {
-    const { db, runtime, config } = this.deps;
-    const project = db
-      .select()
-      .from(schema.projects)
-      .where(eq(schema.projects.id, investigation.projectId))
-      .get();
-    if (!project) {
-      return { error: `Project ${investigation.projectId} not found` };
-    }
-    const names = ticketDraftContainer(investigation.id);
-    try {
-      await runtime.create({ ...names, image: config.image });
-      await runtime.start(names.name);
-      await seedCredentials(runtime, names.name, config.credentialsPath);
-      const outcome = await (this.deps.agent ?? runAgent)(runtime, {
-        container: names.name,
-        cwd: WORKDIR,
-        model: investigation.model,
-        prompt: ticketPrompt(investigation, project),
-        tools: [],
-        onEvent: () => {
-          // Not logged: the investigation's Log tab is for its own runs.
-        },
-      });
-      if (outcome.kind !== 'ok') {
-        return { error: outcome.message };
-      }
-      const draft = parseTicketDraft(outcome.text, investigation);
-      return await withNotionPage(
-        this.deps.notion ?? new FetchNotionApi(),
-        project,
-        investigation,
-        draft,
-      );
-    } finally {
-      await this.removeContainer(investigation.id);
-    }
-  }
-
-  private async removeContainer(id: number): Promise<void> {
-    const names = ticketDraftContainer(id);
-    try {
-      await this.deps.runtime.remove(names.name, {
-        home: names.homeVolume,
-        workspace: names.workspaceVolume,
-      });
-    } catch (error) {
-      emitEvent(this.deps.db, {
-        type: 'container_cleanup_failed',
-        investigationId: id,
-        payload: {
-          container: names.name,
-          error: error instanceof Error ? error.message : String(error),
-        },
-      });
+      await removeContainer(this.deps, id);
     }
   }
 }

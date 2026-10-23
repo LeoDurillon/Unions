@@ -2,7 +2,6 @@
 import {
   appendAgentLine,
   claimExplanation,
-  emitEvent,
   explanationOwner,
   explanationSpecParts,
   explanationThread,
@@ -22,9 +21,11 @@ import { runAgent, runResumable, type AgentFn, type AgentOutcome } from './agent
 import type { AgentReviewDeps } from './agent-review';
 import { openTarget, type ReviewTarget } from './agent-review-target';
 import { runIn } from './container-exec';
+import { removeRunContainers } from './janitor';
 import { REPO_DIR, type TicketContainer } from './provision';
 import { explainPrompt, followUpPrompt } from './review-explain-prompt';
 import { keepDocs, parseExplanation } from './review-explain-result';
+import { RunPool } from './run-pool';
 
 const ANSWER_TAIL_CHARS = 2000;
 /** Prints back each path read on stdin that exists in the checkout. */
@@ -138,74 +139,24 @@ async function explain(
  * Runs the explanations users asked for, one per review at a time, on the same run slots as the
  * pipeline: a ticket's in its own container, a pull request's in a throwaway one (`union-e<id>`).
  */
-export class ReviewExplainRunner {
-  private readonly active = new Map<number, { abort: AbortController; done: Promise<void> }>();
-
-  constructor(private readonly deps: AgentReviewDeps & { agent?: AgentFn }) {}
+export class ReviewExplainRunner extends RunPool<ReviewExplanation, ExplanationOutcome> {
+  constructor(private readonly deps: AgentReviewDeps & { agent?: AgentFn }) {
+    super({
+      slots: deps.slots,
+      claim: () => claimExplanation(deps.db),
+      run: (explanation, signal) => explain(deps, explanation, signal),
+      failed: (error) => ({ status: 'failed', error }),
+      stopped: { status: 'cancelled' },
+      finish: (explanation, outcome) => {
+        finishExplanation(deps.db, explanation.id, outcome);
+      },
+    });
+  }
 
   /** Fails the explanations a stopped worker left running and removes their pull request containers. */
   async recover(): Promise<void> {
-    for (const explanation of failInterruptedExplanations(this.deps.db)) {
-      if (explanation.reviewId !== null) {
-        const names = explanationContainer(explanation.id);
-        await this.deps.runtime
-          .remove(names.name, { home: names.homeVolume, workspace: names.workspaceVolume })
-          .catch((error: unknown) => {
-            emitEvent(this.deps.db, {
-              type: 'container_cleanup_failed',
-              payload: { container: names.name, error: String(error) },
-            });
-          });
-      }
-    }
-  }
-
-  tick(): void {
-    while (this.deps.slots.tryTake()) {
-      const explanation = claimExplanation(this.deps.db);
-      if (!explanation) {
-        this.deps.slots.release();
-        return;
-      }
-      const abort = new AbortController();
-      this.active.set(explanation.id, {
-        abort,
-        done: this.runTracked(explanation, abort.signal),
-      });
-    }
-  }
-
-  /** Stops a running explanation; it then finishes as cancelled. */
-  cancel(id: number): void {
-    this.active.get(id)?.abort.abort();
-  }
-
-  stop(): void {
-    for (const { abort } of this.active.values()) {
-      abort.abort();
-    }
-  }
-
-  async idle(): Promise<void> {
-    await Promise.all([...this.active.values()].map((run) => run.done));
-  }
-
-  private async runTracked(explanation: ReviewExplanation, signal: AbortSignal): Promise<void> {
-    try {
-      const outcome = await explain(this.deps, explanation, signal).catch(
-        (error: unknown): ExplanationOutcome => ({
-          status: 'failed',
-          error: error instanceof Error ? error.message : String(error),
-        }),
-      );
-      finishExplanation(
-        this.deps.db,
-        explanation.id,
-        signal.aborted ? { status: 'cancelled' } : outcome,
-      );
-    } finally {
-      this.active.delete(explanation.id);
-      this.deps.slots.release();
-    }
+    const left = failInterruptedExplanations(this.deps.db).filter((run) => run.reviewId !== null);
+    const containers = left.map((run) => explanationContainer(run.id));
+    await removeRunContainers(this.deps.db, this.deps.runtime, containers);
   }
 }

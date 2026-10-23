@@ -4,7 +4,6 @@ import {
   agentReviewStack,
   claimAgentReview,
   effortFor,
-  emitEvent,
   failInterruptedAgentReviews,
   finishAgentReview,
   modelFor,
@@ -27,7 +26,9 @@ import {
   type ReviewTarget,
   type TargetDeps,
 } from './agent-review-target';
+import { removeRunContainers } from './janitor';
 import { REPO_DIR } from './provision';
+import { RunPool } from './run-pool';
 import type { RunSlots } from './slots';
 
 const ANSWER_TAIL_CHARS = 2000;
@@ -138,71 +139,24 @@ async function reviewChange(
  * Runs queued agent reviews, sharing the run slots with the ticket pipeline and the investigations:
  * a ticket's in its own container, a pull request's in a throwaway one (`union-a<id>`).
  */
-export class AgentReviewRunner {
-  private readonly active = new Map<number, { abort: AbortController; done: Promise<void> }>();
-
-  constructor(private readonly deps: AgentReviewDeps) {}
+export class AgentReviewRunner extends RunPool<AgentReview, AgentReviewOutcome> {
+  constructor(private readonly deps: AgentReviewDeps) {
+    super({
+      slots: deps.slots,
+      claim: () => claimAgentReview(deps.db),
+      run: (review, signal) => reviewChange(deps, review, signal),
+      failed: (error) => ({ status: 'failed', error }),
+      stopped: { status: 'cancelled' },
+      finish: (review, outcome) => {
+        finishAgentReview(deps.db, review.id, outcome);
+      },
+    });
+  }
 
   /** Fails the reviews a stopped worker left running and removes their pull request containers. */
   async recover(): Promise<void> {
-    for (const review of failInterruptedAgentReviews(this.deps.db)) {
-      if (review.reviewId !== null) {
-        const names = agentReviewContainer(review.id);
-        await this.deps.runtime
-          .remove(names.name, { home: names.homeVolume, workspace: names.workspaceVolume })
-          .catch((error: unknown) => {
-            emitEvent(this.deps.db, {
-              type: 'container_cleanup_failed',
-              payload: { container: names.name, error: String(error) },
-            });
-          });
-      }
-    }
-  }
-
-  tick(): void {
-    while (this.deps.slots.tryTake()) {
-      const review = claimAgentReview(this.deps.db);
-      if (!review) {
-        this.deps.slots.release();
-        return;
-      }
-      const abort = new AbortController();
-      this.active.set(review.id, { abort, done: this.runTracked(review, abort.signal) });
-    }
-  }
-
-  /** Stops a running review; it then finishes as cancelled. */
-  cancel(id: number): void {
-    this.active.get(id)?.abort.abort();
-  }
-
-  stop(): void {
-    for (const { abort } of this.active.values()) {
-      abort.abort();
-    }
-  }
-
-  async idle(): Promise<void> {
-    await Promise.all([...this.active.values()].map((run) => run.done));
-  }
-
-  private async runTracked(review: AgentReview, signal: AbortSignal): Promise<void> {
-    try {
-      const outcome = await reviewChange(this.deps, review, signal).catch(
-        (error: unknown): AgentReviewOutcome => ({
-          status: 'failed',
-          error: error instanceof Error ? error.message : String(error),
-        }),
-      );
-      finishAgentReview(
-        this.deps.db,
-        review.id,
-        signal.aborted ? { status: 'cancelled' } : outcome,
-      );
-    } finally {
-      this.active.delete(review.id);
-      this.deps.slots.release();
-    }
+    const left = failInterruptedAgentReviews(this.deps.db).filter((run) => run.reviewId !== null);
+    const containers = left.map((run) => agentReviewContainer(run.id));
+    await removeRunContainers(this.deps.db, this.deps.runtime, containers);
   }
 }

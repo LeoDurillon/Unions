@@ -14,7 +14,9 @@ import {
 
 import { runIn } from './container-exec';
 import { REPO_DIR, type ProvisionConfig } from './provision';
+import { RunPool } from './run-pool';
 import { openWorkspace } from './run-workspace';
+import { RunSlots } from './slots';
 
 /** Commands running at the same time, across workspaces (one per workspace, by the queue's rule). */
 const MAX_PARALLEL = 3;
@@ -113,54 +115,20 @@ async function execute(
 }
 
 /** Runs the commands users queue in tickets' and pull requests' workspaces, a few at a time. */
-export class ContainerRunner {
-  private readonly active = new Map<number, { abort: AbortController; done: Promise<void> }>();
-
-  constructor(private readonly deps: ContainerRunDeps) {}
+export class ContainerRunner extends RunPool<ContainerRun, ContainerRunOutcome> {
+  constructor(private readonly deps: ContainerRunDeps) {
+    super({
+      slots: new RunSlots(MAX_PARALLEL),
+      claim: () => claimContainerRun(deps.db),
+      run: (run, signal) => execute(deps, run, signal),
+      failed: (error) => ({ status: 'failed', exitCode: null, error, output: '' }),
+      finish: (run, outcome) => {
+        finishContainerRun(deps.db, run.id, outcome);
+      },
+    });
+  }
 
   recover(): void {
     recoverContainerRuns(this.deps.db);
-  }
-
-  tick(): void {
-    while (this.active.size < MAX_PARALLEL) {
-      const run = claimContainerRun(this.deps.db);
-      if (!run) {
-        return;
-      }
-      const abort = new AbortController();
-      this.active.set(run.id, { abort, done: this.runTracked(run, abort.signal) });
-    }
-  }
-
-  /** Stops a running command; it then finishes as cancelled. */
-  cancel(id: number): void {
-    this.active.get(id)?.abort.abort();
-  }
-
-  stop(): void {
-    for (const { abort } of this.active.values()) {
-      abort.abort();
-    }
-  }
-
-  async idle(): Promise<void> {
-    await Promise.all([...this.active.values()].map((run) => run.done));
-  }
-
-  private async runTracked(run: ContainerRun, signal: AbortSignal): Promise<void> {
-    try {
-      const outcome = await execute(this.deps, run, signal).catch(
-        (error: unknown): ContainerRunOutcome => ({
-          status: 'failed',
-          exitCode: null,
-          error: error instanceof Error ? error.message : String(error),
-          output: '',
-        }),
-      );
-      finishContainerRun(this.deps.db, run.id, outcome);
-    } finally {
-      this.active.delete(run.id);
-    }
   }
 }

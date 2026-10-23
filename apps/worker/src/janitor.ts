@@ -1,8 +1,9 @@
-// Removes the containers and volumes of deleted tickets; a failure is logged as an event, not
-// thrown.
+// Removes containers and volumes: deleted tickets', and the runs a stopped worker left; a failure is
+// logged as an event, not thrown.
 import { emitEvent, type ContainerRuntime, type Db } from '@union/core';
 
 import type { ContainerRef } from './commands';
+import type { TicketContainer } from './provision';
 
 /**
  * Removes the containers and volumes of deleted tickets; a failure is logged as an event, not thrown.
@@ -32,4 +33,18 @@ export async function removeContainers(
       });
     }
   }
+}
+
+/** Removes the throwaway containers of runs a stopped worker left behind; a failure is logged, not thrown. */
+export async function removeRunContainers(
+  db: Db,
+  runtime: ContainerRuntime,
+  containers: TicketContainer[],
+): Promise<void> {
+  const refs = containers.map((names) => ({
+    name: names.name,
+    home: names.homeVolume,
+    workspace: names.workspaceVolume,
+  }));
+  await removeContainers(db, runtime, refs);
 }

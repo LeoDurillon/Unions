@@ -1,17 +1,13 @@
-// Runs queued rewrites of pull request descriptions, sharing the run slots with the ticket
-// pipeline, the investigations and the agent reviews.
+// Rewrites a pull request description in the ticket's container, from the template and the change.
 import {
   appendAgentLine,
-  claimPrDescription,
   type Db,
   effortFor,
-  finishPrDescription,
   getTicket,
   modelFor,
   type PrDescription,
   type PrDescriptionOutcome,
   type Project,
-  recoverPrDescriptions,
   resolveAgent,
   sharedPrompt,
   type Ticket,
@@ -126,7 +122,7 @@ async function runRewrite(
  * The implementer, resumed in the ticket's container (a fresh session if its own is gone), rewrites
  * the description GitHub has from the branch as it is now.
  */
-async function rewrite(
+export async function rewrite(
   deps: PrDescriptionDeps,
   row: PrDescription,
   signal: AbortSignal,
@@ -149,62 +145,6 @@ async function rewrite(
     // A run the user started meanwhile works in the same container: it stops it itself.
     if (getTicket(db, ticket.id).phase.kind !== 'running') {
       await runtime.stop(name);
-    }
-  }
-}
-
-/**
- * Runs queued rewrites of pull request descriptions, sharing the run slots with the ticket pipeline,
- * the investigations and the agent reviews. Nothing reaches GitHub here: the user sends the draft.
- */
-export class PrDescriptionRunner {
-  private readonly active = new Map<number, { abort: AbortController; done: Promise<void> }>();
-
-  constructor(private readonly deps: PrDescriptionDeps) {}
-
-  recover(): void {
-    recoverPrDescriptions(this.deps.db);
-  }
-
-  tick(): void {
-    while (this.deps.slots.tryTake()) {
-      const row = claimPrDescription(this.deps.db);
-      if (!row) {
-        this.deps.slots.release();
-        return;
-      }
-      const abort = new AbortController();
-      this.active.set(row.id, { abort, done: this.runTracked(row, abort.signal) });
-    }
-  }
-
-  /** Stops a running rewrite; it then finishes as cancelled. */
-  cancel(id: number): void {
-    this.active.get(id)?.abort.abort();
-  }
-
-  stop(): void {
-    for (const { abort } of this.active.values()) {
-      abort.abort();
-    }
-  }
-
-  async idle(): Promise<void> {
-    await Promise.all([...this.active.values()].map((run) => run.done));
-  }
-
-  private async runTracked(row: PrDescription, signal: AbortSignal): Promise<void> {
-    try {
-      const outcome = await rewrite(this.deps, row, signal).catch(
-        (error: unknown): PrDescriptionOutcome => ({
-          status: 'failed',
-          error: error instanceof Error ? error.message : String(error),
-        }),
-      );
-      finishPrDescription(this.deps.db, row.id, signal.aborted ? { status: 'cancelled' } : outcome);
-    } finally {
-      this.active.delete(row.id);
-      this.deps.slots.release();
     }
   }
 }

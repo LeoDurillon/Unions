@@ -101,6 +101,12 @@
   `pullRequestStack` call, the restack waits until GitHub retargeted the new bottom pull request, and then
   follows GitHub's rebase (`stack-follow.ts`: fetch, reset the workspace's branches, record the tips; no push)
   instead of rebasing with Union.
+- `run-pool.ts`: `RunPool`, the lifecycle the queued side runs share. A runner extends it with how it claims a row,
+  runs it, and finishes it (`failed` for a run that threw, `stopped` for one cancelled or stopped by the worker);
+  the pool claims while a `RunSlots` slot is free, keeps an `AbortController` per run (`cancel(id)`, `stop()`), and
+  gives the slot back once the row is finished. `idle()` waits for the runs in flight. The investigations, ticket
+  drafts, agent reviews, explanations, groupings, description rewrites, lesson and prompt writers and container runs
+  use it; the connector check (one at a time, no slots) does not.
 - `investigate.ts`: `InvestigationRunner` runs queued investigations in throwaway `union-i<id>` containers
   (removed after each run; a `ticket` investigation runs in the ticket's own container instead, `investigate-ticket.ts`:
   never during a step, writing tools always denied, `git status` and HEAD compared before and after, the container
@@ -149,7 +155,7 @@
   fresh with the thread. `review-explain-result.ts` reads the JSON block and keeps the spec quotes found in a spec
   sent and the docs whose path exists in the checkout. Lines go to `agent_log` with `explanation_id` (and the
   ticket, so its usage counts them). Cancellation: the `cancel_review_explanation` command (`command-cancels.ts`).
-- `pr-description-run.ts`: `PrDescriptionRunner` (same slots) rewrites a PR's description in the ticket's
+- `pr-description-run.ts` (the runner: `pr-description-runner.ts`): `PrDescriptionRunner` (same slots) rewrites a PR's description in the ticket's
   container, resuming the implementer's session (`runResumable`), from GitHub's current description, the PR template
   and the branch; a ticket's rewrites run one at a time (`claimPrDescription`). On a split ticket each open slice's
   is about its own change (`slice-description.ts`: `git diff <slice below>...<tip>` and its part of the spec), and

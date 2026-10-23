@@ -18,6 +18,7 @@ import {
 import { runAgent, type AgentFn } from './agent';
 import type { TargetDeps } from './agent-review-target';
 import { seedCredentials } from './provision';
+import { RunPool, WORKER_STOPPED } from './run-pool';
 import type { RunSlots } from './slots';
 
 export type LessonWriterDeps = TargetDeps & { slots: RunSlots; agent?: AgentFn };
@@ -90,53 +91,21 @@ async function write(
 }
 
 /** Runs queued lesson writer runs, sharing the run slots with the ticket pipeline and the other side runs. */
-export class LessonWriterRunner {
-  private readonly active = new Map<number, { abort: AbortController; done: Promise<void> }>();
-
-  constructor(private readonly deps: LessonWriterDeps) {}
+export class LessonWriterRunner extends RunPool<LessonSuggestion, LessonSuggestionOutcome> {
+  constructor(private readonly deps: LessonWriterDeps) {
+    super({
+      slots: deps.slots,
+      claim: () => claimLessonSuggestion(deps.db),
+      run: (row, signal) => write(deps, row, signal),
+      failed: (error) => ({ status: 'failed', error }),
+      stopped: { status: 'failed', error: WORKER_STOPPED },
+      finish: (row, outcome) => {
+        finishLessonSuggestion(deps.db, row.id, outcome);
+      },
+    });
+  }
 
   recover(): void {
     recoverLessonSuggestions(this.deps.db);
-  }
-
-  tick(): void {
-    while (this.deps.slots.tryTake()) {
-      const row = claimLessonSuggestion(this.deps.db);
-      if (!row) {
-        this.deps.slots.release();
-        return;
-      }
-      const abort = new AbortController();
-      this.active.set(row.id, { abort, done: this.runTracked(row, abort.signal) });
-    }
-  }
-
-  stop(): void {
-    for (const { abort } of this.active.values()) {
-      abort.abort();
-    }
-  }
-
-  async idle(): Promise<void> {
-    await Promise.all([...this.active.values()].map((run) => run.done));
-  }
-
-  private async runTracked(row: LessonSuggestion, signal: AbortSignal): Promise<void> {
-    try {
-      const outcome = await write(this.deps, row, signal).catch(
-        (error: unknown): LessonSuggestionOutcome => ({
-          status: 'failed',
-          error: error instanceof Error ? error.message : String(error),
-        }),
-      );
-      finishLessonSuggestion(
-        this.deps.db,
-        row.id,
-        signal.aborted ? { status: 'failed', error: 'The worker stopped during the run' } : outcome,
-      );
-    } finally {
-      this.active.delete(row.id);
-      this.deps.slots.release();
-    }
   }
 }

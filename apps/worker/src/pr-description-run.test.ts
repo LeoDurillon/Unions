@@ -20,7 +20,7 @@ import {
 import type { AgentFn, AgentRun } from './agent';
 import { FakeGitHubApi } from './github/fake-api';
 import { sendPrDescription } from './github/pr-description-send';
-import { PrDescriptionRunner } from './pr-description-run';
+import { PrDescriptionRunner } from './pr-description-runner';
 import { RunSlots } from './slots';
 
 const REPO = { owner: 'acme', repo: 'shop' };

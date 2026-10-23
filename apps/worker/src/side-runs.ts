@@ -6,7 +6,7 @@ import { ContainerRunner } from './container-run';
 import { EventDispatcher } from './event-dispatcher';
 import type { GitHubApi } from './github/api';
 import { InvestigationRunner, type InvestigationDeps } from './investigate';
-import { PrDescriptionRunner } from './pr-description-run';
+import { PrDescriptionRunner } from './pr-description-runner';
 import { createPreviewManager, type PreviewManager } from './preview/manager';
 import { reviewRunners, startReviewRuns, type ReviewRuns } from './review-runs';
 import { ThrowawayRuns } from './throwaway-runs';
