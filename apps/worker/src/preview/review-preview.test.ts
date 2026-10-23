@@ -110,11 +110,11 @@ test("a pull request's preview runs from its own checkout, under its own names",
     owner: { reviewId },
     project: `union-r${reviewId}`,
     workspaceVolume: `union-r${reviewId}-ws`,
-    exposed: [{ service: 'api', port: 8080, host: `api.r${reviewId}.localhost` }],
+    exposed: [{ service: 'api', port: 8080, host: `api-r${reviewId}.union.localhost` }],
     plain: {
       DB: `db_r${reviewId}`,
       PR: '#1582',
-      API: `http://api.r${reviewId}.localhost:8080`,
+      API: `http://api-r${reviewId}.union.localhost:8080`,
     },
     secrets: { TOKEN: 'hush' },
   });

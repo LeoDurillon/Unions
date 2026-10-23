@@ -7,7 +7,7 @@ import { Button, inputClass } from '../ui';
 export type ServiceRow = { name: string; port: string; prefix: string };
 
 function hostOf(prefix: string): string {
-  return prefix === '' ? '<ticket>.localhost' : `${prefix}.<ticket>.localhost`;
+  return prefix === '' ? 't<ticket>.union.localhost' : `${prefix}-t<ticket>.union.localhost`;
 }
 
 function Row({
@@ -74,8 +74,8 @@ export function PreviewServicesField({
       <legend className="text-sm font-medium">Services to open</legend>
       <p className="text-xs text-zinc-500">
         Name in the compose file, port it listens on, and host prefix: none serves it at{' '}
-        <code>&lt;ticket&gt;.localhost</code> (the first one is what &quot;Open&quot; goes to),{' '}
-        <code>api</code> at <code>api.&lt;ticket&gt;.localhost</code>.
+        <code>t&lt;ticket&gt;.union.localhost</code> (the first one is what &quot;Open&quot; goes
+        to), <code>api</code> at <code>api-t&lt;ticket&gt;.union.localhost</code>.
       </p>
       {rows.map((row, index) => (
         <Row

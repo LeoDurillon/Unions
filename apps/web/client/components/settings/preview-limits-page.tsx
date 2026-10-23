@@ -18,8 +18,8 @@ export function PreviewLimitsPage({ project }: { project: PublicProject }): Reac
   return (
     <section className="space-y-4">
       <p className="text-sm text-zinc-500">
-        Previews are served to this machine only (http://&lt;ticket&gt;.localhost). Each one holds
-        its own containers and database: these keep the machine&apos;s memory in check.
+        Previews are served to this machine only (http://t&lt;ticket&gt;.union.localhost). Each one
+        holds its own containers and database: these keep the machine&apos;s memory in check.
       </p>
       <TextField
         label="Stop after (minutes without a visit)"

@@ -9,7 +9,9 @@ Built (phases 1 to 4). Full design and what was built: [`docs/plans/preview-envi
   container that holds the Docker socket; the agent's container never does. The worker resolves the file with
   `docker compose config`, refuses dangerous settings (privileged, host network, Docker socket, mounts leaving the
   repository, external volumes), turns source mounts into mounts of the workspace volume, and writes a new file with
-  Traefik labels on the exposed services: `http://<id>.localhost`, `http://api.<id>.localhost`.
+  Traefik labels on the exposed services: `http://t<id>.union.localhost`, `http://api-t<id>.union.localhost`.
+  Every preview's hosts end with `union.localhost`, so a browser files the logins it saves on one preview under the
+  same site and offers them on the others.
 - Per-project environment variables (secrets kept server side) with templates such as `{service.api.url}`, given to
   compose and optionally as an app env file inside a service, never written into the workspace.
 - End-to-end tests: the agent's container joins the preview's network; Chromium's libraries are in the agent image,
@@ -54,7 +56,7 @@ Claude usage) and nothing is written to GitHub: the worker only fetches the pull
   host clones the base branch, fetches `pull/<n>/head` (forks included) and checks out the commit the review reads
   (`current_reviews.head_sha`), not the branch's tip, so the diff on screen and the running code are the same. It
   never gets the Claude credential nor a GitHub token, and is stopped once nothing runs in it. Its preview is
-  compose project `union-r<id>` at `http://r<id>.localhost` (`{ticket.id}` renders `r<id>`, `{pr.number}` the pull
+  compose project `union-r<id>` at `http://r<id>.union.localhost` (`{ticket.id}` renders `r<id>`, `{pr.number}` the pull
   request's number), under the same checks, cap and idle stop as a ticket's.
 - Secrets: a fork's pull request never gets the project's secret variables. Another gets them only when its commit is
   on its head branch in the repository itself, which the worker checks at each checkout

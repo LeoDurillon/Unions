@@ -59,14 +59,14 @@ function previewEvents(): unknown[] {
 test("names and hosts tell a ticket's preview from a pull request's", () => {
   expect(previewProject({ ticketId: 12 })).toBe('union-t12');
   expect(previewProject({ reviewId: 3 })).toBe('union-r3');
-  expect(previewHost({ ticketId: 12 })).toBe('12.localhost');
-  expect(previewHost({ reviewId: 3 })).toBe('r3.localhost');
+  expect(previewHost({ ticketId: 12 })).toBe('t12.union.localhost');
+  expect(previewHost({ reviewId: 3 })).toBe('r3.union.localhost');
 });
 
 test("a ticket's and a review's previews are separate rows, each in its project", () => {
-  updatePreview(db, { ticketId }, { status: 'running', url: 'http://1.localhost' });
+  updatePreview(db, { ticketId }, { status: 'running', url: 'http://t1.union.localhost' });
   updatePreview(db, { reviewId }, { status: 'starting' });
-  updatePreview(db, { reviewId }, { status: 'running', url: 'http://r1.localhost' });
+  updatePreview(db, { reviewId }, { status: 'running', url: 'http://r1.union.localhost' });
 
   expect(getPreview(db, { ticketId })).toMatchObject({
     reviewId: null,
@@ -74,7 +74,7 @@ test("a ticket's and a review's previews are separate rows, each in its project"
     status: 'running',
   });
   const review = getPreview(db, { reviewId });
-  expect(review).toMatchObject({ ticketId: null, projectId, url: 'http://r1.localhost' });
+  expect(review).toMatchObject({ ticketId: null, projectId, url: 'http://r1.union.localhost' });
   expect(review ? previewOwner(review) : null).toEqual({ reviewId });
   expect(activePreviews(db).filter((row) => isTicketPreview(row))).toHaveLength(1);
   expect(activePreviews(db)).toHaveLength(2);

@@ -27,24 +27,24 @@ test('phase 1 settings read as one exposed service on the main host', () => {
 
 test('templates fill in addresses from the browser and from inside the environment', () => {
   expect(renderPreviewTemplate('{service.api.url}/v1', CONTEXT)).toBe(
-    'http://api.12.localhost:8080/v1',
+    'http://api-t12.union.localhost:8080/v1',
   );
   expect(renderPreviewTemplate('{service.api.internal}', CONTEXT)).toBe('http://api:8080');
   expect(renderPreviewTemplate('postgres://{service.db.host}:5432', CONTEXT)).toBe(
     'postgres://db:5432',
   );
   expect(renderPreviewTemplate('t{ticket.id} {preview.host} {preview.url}', CONTEXT)).toBe(
-    't12 12.localhost http://12.localhost:8080',
+    't12 t12.union.localhost http://t12.union.localhost:8080',
   );
   expect(renderPreviewTemplate('{service.web.url}', { ...CONTEXT, publicPort: 80 })).toBe(
-    'http://12.localhost',
+    'http://t12.union.localhost',
   );
 });
 
 test("a pull request under review's templates use its review id and its number", () => {
   const review: TemplateContext = { ...CONTEXT, owner: { reviewId: 3 }, prNumber: 1582 };
   expect(renderPreviewTemplate('db_{ticket.id} #{pr.number} {service.api.url}', review)).toBe(
-    'db_r3 #1582 http://api.r3.localhost:8080',
+    'db_r3 #1582 http://api-r3.union.localhost:8080',
   );
   expect(renderPreviewTemplate('#{pr.number}', CONTEXT)).toBe('#');
   expect(templateProblems('{pr.number}', SERVICES)).toEqual([]);

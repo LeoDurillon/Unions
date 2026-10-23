@@ -26,7 +26,7 @@ function resolved(): ComposeJson {
         image: 'nginx:1.27-alpine',
         container_name: 'fixed-name',
         environment: { GREETING: 'hi' },
-        labels: { 'traefik.http.routers.evil.rule': 'Host(`3.localhost`)', team: 'front' },
+        labels: { 'traefik.http.routers.evil.rule': 'Host(`t3.union.localhost`)', team: 'front' },
         networks: { default: null },
         ports: [{ target: 80, published: '8081' }],
         volumes: [
@@ -46,7 +46,7 @@ function resolved(): ComposeJson {
 const TARGET: PreviewTarget = {
   project: 'union-t12',
   workspaceVolume: 'union-t12-ws',
-  exposed: [{ service: 'web', port: 80, host: '12.localhost' }],
+  exposed: [{ service: 'web', port: 80, host: 't12.union.localhost' }],
   variables: ['API_URL', 'GREETING'],
 };
 
@@ -133,7 +133,7 @@ test("the preview's file: its own project, no fixed names or host ports, mounts 
     team: 'front',
     'traefik.enable': 'true',
     'traefik.docker.network': 'union-preview',
-    'traefik.http.routers.union-t12-web.rule': 'Host(`12.localhost`)',
+    'traefik.http.routers.union-t12-web.rule': 'Host(`t12.union.localhost`)',
     'traefik.http.routers.union-t12-web.entrypoints': 'web',
     'traefik.http.services.union-t12-web.loadbalancer.server.port': '80',
   });
@@ -200,14 +200,14 @@ test('each exposed service gets its own route; the variables can also be a file 
   const file = previewCompose(resolved(), {
     ...TARGET,
     exposed: [
-      { service: 'web', port: 80, host: '12.localhost' },
-      { service: 'db', port: 5432, host: 'db.12.localhost' },
+      { service: 'web', port: 80, host: 't12.union.localhost' },
+      { service: 'db', port: 5432, host: 'db-t12.union.localhost' },
     ],
     envFile: { service: 'db', path: '/etc/app/.env', content: 'API_URL=http://api:8080\n' },
   });
   const services = file.services as Record<string, Record<string, unknown>>;
   expect(services.db?.labels).toMatchObject({
-    'traefik.http.routers.union-t12-db.rule': 'Host(`db.12.localhost`)',
+    'traefik.http.routers.union-t12-db.rule': 'Host(`db-t12.union.localhost`)',
     'traefik.http.services.union-t12-db.loadbalancer.server.port': '5432',
   });
   expect(services.db?.networks).toEqual({ default: null, union_preview: null });

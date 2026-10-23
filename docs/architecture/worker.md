@@ -158,7 +158,7 @@
   rewritten (`previewCompose`: project `union-t<id>`, no `container_name` or host ports, repository mounts become
   workspace-volume sub-path mounts, project variables in every service, Traefik labels on the exposed service),
   then given to `up` on stdin. The `proxy` service of `compose.yaml` (Traefik, network `union-preview`) serves it at
-  `http://<id>.localhost:8080`. Previews outlive worker restarts; a ticket's removal takes its preview down before
+  `http://t<id>.union.localhost:8080`. Previews outlive worker restarts; a ticket's removal takes its preview down before
   its volumes (`janitor.ts`). `compose-file.ts` keeps the generated file (`previews.compose_yaml`, `preview_generate`
   generates it alone) and runs the ticket's own edited file instead when there is one (`previews.override`, checked
   with `composeProblems(file, { workspaceVolume })`, project name enforced). Profiles: `catalog.ts` passes the
@@ -171,7 +171,7 @@
   (after a start, on provisioning) and takes it off before `down`.
 - Previews of pull requests under review (`docs/plans/review-previews.md`): the preview code takes a
   `WorkspaceOwner` (`{ ticketId }` or `{ reviewId }`). A review's preview runs as `union-r<id>` at
-  `r<id>.localhost`, from the workspace of its own container `union-r<id>` (`review-checkout.ts`): created on its
+  `r<id>.union.localhost`, from the workspace of its own container `union-r<id>` (`review-checkout.ts`): created on its
   first start, the pull request cloned on the host at `review.headSha` like an agent review's checkout, never given
   the Claude credential nor a token, stopped once the checkout is in. `current_reviews.checkout_sha` is the commit
   checked out; `checkout_in_repo` says it is on the head branch of the repository itself (fetched from `origin`

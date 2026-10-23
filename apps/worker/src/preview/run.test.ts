@@ -134,7 +134,7 @@ test('a preview starts from the workspace, rewritten, and runs once the service 
   await startPreview(deps(), { ticketId });
   expect(getPreview(db, { ticketId })).toMatchObject({
     status: 'running',
-    url: 'http://1.localhost:8080',
+    url: 'http://t1.union.localhost:8080',
     error: null,
     logTail: 'web-1  | ready',
   });
@@ -288,11 +288,11 @@ test('several services, waited for; real values go through the env file, none is
   expect(getPreview(db, { ticketId })).toMatchObject({
     status: 'running',
     urls: [
-      { service: 'web', url: 'http://1.localhost:8080' },
-      { service: 'api', url: 'http://api.1.localhost:8080' },
+      { service: 'web', url: 'http://t1.union.localhost:8080' },
+      { service: 'api', url: 'http://api-t1.union.localhost:8080' },
     ],
   });
-  expect(asked.toSorted()).toEqual(['1.localhost', 'api.1.localhost']);
+  expect(asked.toSorted()).toEqual(['api-t1.union.localhost', 't1.union.localhost']);
   const [, runConfig, shownConfig, up] = calls;
   expect(runConfig?.env).toMatchObject({ DB_PASSWORD: 'pa$word' });
   expect(shownConfig?.env).toMatchObject({ DB_PASSWORD: REFERENCE });
@@ -303,14 +303,15 @@ test('several services, waited for; real values go through the env file, none is
   expect(up?.files).toEqual([
     {
       path: '/union/preview.env',
-      content: "API_URL='http://api.1.localhost:8080'\nPRICE='costs $5'\nDB_PASSWORD='pa$word'\n",
+      content:
+        "API_URL='http://api-t1.union.localhost:8080'\nPRICE='costs $5'\nDB_PASSWORD='pa$word'\n",
     },
   ]);
   // The variables as a file in `api` (its content is tested with the variables).
   expect(file.services.api?.configs).toEqual([{ source: 'union_env', target: '/etc/app.env' }]);
   // The file kept for the panel lists the variables, the secret hidden.
   const shown = getPreview(db, { ticketId })?.composeYaml ?? '';
-  expect(shown).toContain('#   API_URL=http://api.1.localhost:8080');
+  expect(shown).toContain('#   API_URL=http://api-t1.union.localhost:8080');
   expect(shown).toContain('#   DB_PASSWORD=(secret)');
   expect(shown).not.toContain('pa$');
 });

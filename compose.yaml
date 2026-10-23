@@ -5,7 +5,7 @@
 # The worker reaches the host Docker daemon through its socket: agent containers (union-t*) run next
 # to these ones, not inside them.
 #
-# Ticket previews are served by the `proxy` service (Traefik) at http://<ticket>.localhost:8080, to
+# Ticket previews are served by the `proxy` service (Traefik) at http://t<ticket>.union.localhost:8080, to
 # this machine only (the port is published on 127.0.0.1).
 #
 # Overrides (shell or .env): UNION_UID / UNION_GID (default 1000, your host user), DOCKER_GID (group
@@ -92,7 +92,7 @@ services:
         condition: service_completed_successfully
 
   # Serves ticket previews: each preview's exposed service is labelled with its host
-  # (<ticket>.localhost) and joins the `union-preview` network, where this proxy finds it.
+  # (t<ticket>.union.localhost) and joins the `union-preview` network, where this proxy finds it.
   proxy:
     image: traefik:v3.6.2
     command:

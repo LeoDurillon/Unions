@@ -166,7 +166,7 @@ test('a preview starts once configured and the ticket has a workspace, one comma
   expect((await call('POST', `${base}/logs`)).status).toBe(409);
 
   db.update(schema.commands).set({ handledAt: Date.now() }).run();
-  updatePreview(db, { ticketId }, { status: 'running', url: 'http://1.localhost:8080' });
+  updatePreview(db, { ticketId }, { status: 'running', url: 'http://t1.union.localhost:8080' });
   expect((await view()).preview).toMatchObject({ status: 'running' });
   expect((await call('POST', `${base}/logs`)).status).toBe(202);
 });

@@ -6,12 +6,12 @@ export type WorkspaceOwner = { ticketId: number } | { reviewId: number };
 /** The owner columns of a row: exactly one of them is set. */
 export type OwnerColumns = { ticketId: number | null; reviewId: number | null };
 
-/** The id hosts and names use: `12` for ticket 12, `r3` for review 3 (their ids collide). */
+/** What `{ticket.id}` renders: `12` for ticket 12, `r3` for review 3 (their ids collide). */
 export function ownerHostId(owner: WorkspaceOwner): string {
   return 'ticketId' in owner ? String(owner.ticketId) : `r${owner.reviewId}`;
 }
 
-/** The prefix of the owner's Docker names: `t12`, `r3` (`union-t12`, `union-r3-ws`). */
+/** The prefix of the owner's Docker names and preview hosts: `t12`, `r3` (`union-t12`, `t12.union.localhost`). */
 export function ownerKey(owner: WorkspaceOwner): string {
   return 'ticketId' in owner ? `t${owner.ticketId}` : `r${owner.reviewId}`;
 }

@@ -35,7 +35,7 @@ beforeEach(() => {
     })
     .returning()
     .get().id;
-  updatePreview(db, { ticketId }, { status: 'running', url: 'http://1.localhost:8080' });
+  updatePreview(db, { ticketId }, { status: 'running', url: 'http://t1.union.localhost:8080' });
   updatePreview(db, { reviewId }, { status: 'starting' });
   updatePreview(db, { ticketId: stopped }, { status: 'stopped' });
 });

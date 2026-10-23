@@ -1,11 +1,11 @@
 import { eq, inArray } from 'drizzle-orm';
 
 import type { Db } from './db';
+import { previewServiceHost } from './preview-config';
 import * as schema from './tables';
 import { emitEvent, getTicket } from './tickets';
 import {
   ownerColumns,
-  ownerHostId,
   ownerKey,
   ownerOf,
   ticketOwnerId,
@@ -29,7 +29,7 @@ export function previewProject(owner: WorkspaceOwner): string {
 }
 
 export function previewHost(owner: WorkspaceOwner): string {
-  return `${ownerHostId(owner)}.localhost`;
+  return previewServiceHost(owner, '');
 }
 
 /** The owner of a preview row. */

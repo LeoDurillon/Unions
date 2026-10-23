@@ -3,7 +3,7 @@
  * checks as the worker.
  */
 import type { PreviewConfig, PreviewService } from './schema-types';
-import { ownerHostId, type WorkspaceOwner } from './workspace-owner';
+import { ownerHostId, ownerKey, type WorkspaceOwner } from './workspace-owner';
 
 /** Minutes without a visit before a running preview stops, when the settings do not say. */
 export const DEFAULT_IDLE_STOP_MINUTES = 60;
@@ -17,7 +17,7 @@ export const PREVIEW_TEMPLATES = [
   { name: 'service.X.host', description: "A service's host name inside the environment" },
   { name: 'ticket.id', description: 'The ticket number (r3 for a pull request under review)' },
   { name: 'pr.number', description: "The pull request's number under review (empty for a ticket)" },
-  { name: 'preview.host', description: 'The preview host (12.localhost)' },
+  { name: 'preview.host', description: 'The preview host (t12.union.localhost)' },
   { name: 'preview.url', description: "The first exposed service's address" },
 ] as const;
 
@@ -35,9 +35,16 @@ export function exposedServices(config: PreviewConfig): PreviewService[] {
     : [];
 }
 
+/**
+ * Every preview's hosts end with this domain, so browsers file the logins they save on any preview
+ * under the same site and offer them on the others.
+ */
+export const PREVIEW_DOMAIN = 'union.localhost';
+
+/** `t12.union.localhost`, `api-t12.union.localhost`, `api-r3.union.localhost`. */
 export function previewServiceHost(owner: WorkspaceOwner, prefix: string): string {
-  const id = ownerHostId(owner);
-  return prefix === '' ? `${id}.localhost` : `${prefix}.${id}.localhost`;
+  const id = ownerKey(owner);
+  return prefix === '' ? `${id}.${PREVIEW_DOMAIN}` : `${prefix}-${id}.${PREVIEW_DOMAIN}`;
 }
 
 export function previewAddress(host: string, publicPort: number): string {

@@ -48,7 +48,7 @@ test("the owners migration keeps the tickets' previews and commands, in their pr
   const first = insertTicket(sqlite, projectId, 'A');
   const second = insertTicket(sqlite, projectId, 'B');
   sqlite.run(
-    `INSERT INTO previews (ticket_id, status, url, compose_yaml) VALUES (?, 'running', 'http://1.localhost', 'services: {}'), (?, 'stopped', NULL, NULL)`,
+    `INSERT INTO previews (ticket_id, status, url, compose_yaml) VALUES (?, 'running', 'http://t1.union.localhost', 'services: {}'), (?, 'stopped', NULL, NULL)`,
     [first, second],
   );
   sqlite.run(
@@ -68,7 +68,7 @@ test("the owners migration keeps the tickets' previews and commands, in their pr
       review_id: null,
       project_id: projectId,
       status: 'running',
-      url: 'http://1.localhost',
+      url: 'http://t1.union.localhost',
       compose_yaml: 'services: {}',
     },
     {

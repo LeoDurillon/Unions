@@ -63,7 +63,7 @@ its own `assistant` lines since then. `backfillUsage` (`bun run usage:backfill`)
 A preview and a container run belong to a **workspace owner** (`workspace-owner.ts`, browser-safe): a ticket
 (`{ ticketId }`) or a pull request under review (`{ reviewId }`); their rows set exactly one of `ticket_id` and
 `review_id` (a check constraint). `previews.ts` and `container-runs.ts` take the owner; names come from
-`ownerKey` (`union-t12`, `union-r3`) and hosts from `ownerHostId` (`12.localhost`, `r3.localhost`). Only a
+`ownerKey` (`union-t12`, `union-r3`) and hosts from it too (`t12.union.localhost`, `api-r3.union.localhost`: `previewServiceHost`); `ownerHostId` (`12`, `r3`) is what `{ticket.id}` renders. Only a
 ticket's preview changes are events (`preview_changed`); a review's page polls. `previews.project_id` is the
 owner's project (the per-project cap). The worker and the web still act on tickets' previews and commands only:
 reviews' come with `docs/plans/review-previews.md`, steps 2 to 5.

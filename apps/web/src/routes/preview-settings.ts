@@ -19,7 +19,7 @@ import { BAD_REQUEST, fail, NOT_FOUND, readObject, requireId } from '../http';
 
 const SERVICE_NAME = /^[a-zA-Z0-9][a-zA-Z0-9_.-]*$/u;
 const VARIABLE_NAME = /^[A-Za-z_][A-Za-z0-9_]*$/u;
-/** A host name label: `api` in `api.12.localhost`. */
+/** The start of a host name label: `api` in `api-t12.union.localhost`. */
 const PREFIX = /^(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)?$/u;
 const MAX_PORT = 65_535;
 const MAX_SECRET_CHARS = 10_000;

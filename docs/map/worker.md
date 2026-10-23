@@ -156,7 +156,7 @@ export); do not edit. Tests are left out.
 - `forwarder.ts`: Makes the agent services reachable on the container's `localhost` (`agentForwards`).
 - `idle.ts`: Stops running previews nobody visited for the project's idle time.
 - `manager.ts`: Runs the preview commands, one at a time per ticket (a start and a stop never overlap).
-- `network.ts`: Puts the owner's container on its preview's networks, so the agent and the e2e command reach the services by name (`http://web:3000`): `<id>.localhost` would b…
+- `network.ts`: Puts the owner's container on its preview's networks, so the agent and the e2e command reach the services by name (`http://web:3000`): `t<id>.union.localhost` …
 - `ready.ts`: What Traefik answers before the service's route exists.
 - `review-preview.ts`: A pull request's preview: its checkout made before a start, and moved to a newer reviewed commit on request.
 - `run.ts`: The last lines the services printed; empty when they cannot be read.
