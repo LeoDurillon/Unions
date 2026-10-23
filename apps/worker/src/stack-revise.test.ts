@@ -236,7 +236,7 @@ test("a revision's commits go into their slices: a Slice trailer at its end, a f
     asked.push(prompt);
     return Promise.resolve(null);
   });
-  expect(restacked).toEqual({ changed: [1, 2] });
+  expect(restacked).toEqual({ changed: [1, 2], conflicts: 0 });
   expect(asked).toEqual([]);
   expect(await git(container(), 'rev-parse', 'HEAD^{tree}')).toBe(tree);
   expect(await pushRevision(workspace())).toMatchObject({ pushed: true, error: null });
@@ -252,7 +252,7 @@ test('a commit naming no slice is asked about in the session, then placed', asyn
   const restacked = await restackRevision(workspace(), (prompt) =>
     Promise.resolve(prompt.includes('More CRUD') ? `${sha.slice(0, 10)} Slice: 2` : null),
   );
-  expect(restacked).toEqual({ changed: [2] });
+  expect(restacked).toEqual({ changed: [2], conflicts: 0 });
 });
 
 test('a commit still unplaced after the question fails the step, nothing moved', async () => {

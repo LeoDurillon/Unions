@@ -7,6 +7,8 @@ import { REPO_DIR } from './provision';
 
 const TODO = `${REPO_DIR}/.git/union-restack-todo`;
 const DETAIL_LINES = 20;
+/** The conflicts one replay may hand to the implementer before it gives up. */
+const MAX_CONFLICTS = 20;
 
 function git(args: string[]): string[] {
   return ['git', '-C', REPO_DIR, ...args];
@@ -73,6 +75,15 @@ export async function sliceLogs(
   return logs;
 }
 
+export async function commitOf(
+  runtime: ContainerRuntime,
+  container: string,
+  ref: string,
+): Promise<string> {
+  const [sha = ''] = await lines(runtime, container, ['rev-parse', `${ref}^{commit}`]);
+  return sha;
+}
+
 export async function treeOf(
   runtime: ContainerRuntime,
   container: string,
@@ -82,15 +93,50 @@ export async function treeOf(
   return tree;
 }
 
+/** Where the replay stopped: the commit being applied and the files left in conflict. */
+export type Stop = { sha: string; subject: string; files: string[] };
+
+/** Resolves a stop in the workspace, its files staged; false gives up. */
+export type Resolve = (stop: Stop) => Promise<boolean>;
+
+/** The replay done, with the conflicts resolved on the way, or why it was aborted. */
+export type Replayed = { conflicts: number } | { error: string };
+
+async function conflicted(runtime: ContainerRuntime, container: string): Promise<string[]> {
+  const result = await runIn(runtime, container, git(['diff', '--name-only', '--diff-filter=U']));
+  return result.stdout.split('\n').filter((line) => line.trim() !== '');
+}
+
+async function stoppedAt(runtime: ContainerRuntime, container: string): Promise<Stop> {
+  const result = await runIn(
+    runtime,
+    container,
+    git(['log', '-1', '--format=%H%n%s', 'REBASE_HEAD']),
+  );
+  const [sha = '', subject = ''] = result.stdout.split('\n');
+  return { sha, subject, files: await conflicted(runtime, container) };
+}
+
+async function aborted(
+  runtime: ContainerRuntime,
+  container: string,
+  input: { files: readonly string[]; output: string; why: string },
+): Promise<string> {
+  await runIn(runtime, container, git(['rebase', '--abort']));
+  const { files } = input;
+  const where = files.length > 0 ? ` in ${files.map((file) => `\`${file}\``).join(', ')}` : '';
+  return `Moving the new commits into their slices stopped${where}: ${input.why}. The branch is as the implementer left it, unpushed.\n\n\`\`\`\n${tail(input.output, DETAIL_LINES)}\n\`\`\``;
+}
+
 /**
- * Replays the stack with the host's todo (`git rebase -i` reading it as its editor); stopped, it is
- * aborted and says where.
+ * Replays the stack with the host's todo (`git rebase -i` reading it as its editor). Each conflict
+ * goes to `resolve`, then the replay continues; one left unresolved aborts it.
  */
 export async function replay(
   runtime: ContainerRuntime,
   container: string,
-  input: { fork: string; todo: string },
-): Promise<string | null> {
+  input: { fork: string; todo: string; resolve: Resolve },
+): Promise<Replayed> {
   await mustRunIn(runtime, container, [
     'sh',
     '-c',
@@ -99,21 +145,42 @@ export async function replay(
     input.todo,
     TODO,
   ]);
-  const result = await runIn(
+  let result = await runIn(
     runtime,
     container,
     git(['-c', 'core.editor=true', '-c', `sequence.editor=cp ${TODO}`, 'rebase', '-i', input.fork]),
   );
-  if (result.exitCode === 0) {
-    return null;
+  let conflicts = 0;
+  while (result.exitCode !== 0) {
+    const output = `${result.stdout}\n${result.stderr}`;
+    const stop = await stoppedAt(runtime, container);
+    if (stop.files.length === 0 || conflicts === MAX_CONFLICTS) {
+      const why = stop.files.length === 0 ? 'git stopped' : 'too many conflicts';
+      return { error: await aborted(runtime, container, { files: stop.files, output, why }) };
+    }
+    conflicts += 1;
+    const resolved = await input.resolve(stop);
+    const left = await conflicted(runtime, container);
+    if (!resolved || left.length > 0) {
+      const why = 'the implementer did not resolve the conflict';
+      return { error: await aborted(runtime, container, { files: stop.files, output, why }) };
+    }
+    result = await runIn(
+      runtime,
+      container,
+      git(['-c', 'core.editor=true', 'rebase', '--continue']),
+    );
   }
-  const conflicted = await runIn(
-    runtime,
-    container,
-    git(['diff', '--name-only', '--diff-filter=U']),
-  );
-  await runIn(runtime, container, git(['rebase', '--abort']));
-  const files = conflicted.stdout.split('\n').filter((line) => line.trim() !== '');
-  const where = files.length > 0 ? ` in ${files.map((file) => `\`${file}\``).join(', ')}` : '';
-  return `Moving the new commits into their slices stopped on a conflict${where}; the branch is as the implementer left it, unpushed.\n\n\`\`\`\n${tail(`${result.stdout}\n${result.stderr}`, DETAIL_LINES)}\n\`\`\``;
+  return { conflicts };
+}
+
+/** Puts the branch back where the implementer left it, after a replay that changed the code. */
+export async function putBack(
+  runtime: ContainerRuntime,
+  container: string,
+  head: string,
+): Promise<string> {
+  const stat = await mustRunIn(runtime, container, git(['diff', '--stat', head, 'HEAD']));
+  await mustRunIn(runtime, container, git(['reset', '--quiet', '--hard', head]));
+  return stat;
 }

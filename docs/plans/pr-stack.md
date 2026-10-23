@@ -105,7 +105,7 @@ Then the host restacks without an agent: `git rebase -i --autosquash --update-re
 it writes (`GIT_SEQUENCE_EDITOR`), moving each `Slice:` commit after its slice's last commit. `--update-refs` moves the
 local slice branches with the commits (git 2.38+; the agent image's bookworm has 2.39). A commit without a
 target: the host asks the session which slice, as it asks a message for left changes. A conflict while reordering:
-the branch is reset and the implementer resolves it with the rebase prompt. Then the same tree check (reordering must
+the implementer's session resolves it and the host continues the replay (built 2026-10-23). Then the same tree check (reordering must
 not change the final code), then every changed slice branch is pushed (atomic, with leases). A fix in slice 1
 rewrites the slices above it, whose GitHub threads go outdated: the PR tab and the issue comment for the revision
 say which slices it changed and which were only moved.

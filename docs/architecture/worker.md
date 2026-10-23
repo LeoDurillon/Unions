@@ -71,8 +71,10 @@
   and their commits, `stack-revise.ts`) asking each new commit to say where it goes (`Slice: <n>`, or
   `fixup! <sha>`), and review comments under a `## Slice <n>` heading to be fixed in that slice; after the run, `restackRevision` asks the session about any commit it cannot place, replays
   the stack with the host's todo (`git rebase -i` with `sequence.editor`, `stack-revise-git.ts`), checks the
-  tree is unchanged and `pushRevision` pushes every slice atomically, leased on the recorded tips. A conflict
-  while reordering fails the step, unpushed. A rebase fetches the lower slices' branches too, refuses one with
+  tree is unchanged (else `putBack` resets every branch) and `pushRevision` pushes every slice atomically, leased
+  on the recorded tips. A conflict while reordering goes to the implementer's session (`conflictResolver`,
+  `stack-revise-conflict.ts`), which stages its resolution; `replay` continues the rebase, and aborts it when a
+  conflict is left or git stops for another reason. A rebase fetches the lower slices' branches too, refuses one with
   outside commits, starts them from their recorded tips and rebases with `--update-refs` (the agent is told
   to); `stackMoveProblem` refuses a slice left behind, and `forcePush` (`branch-push.ts`) pushes the whole stack
   (`pushRewrittenStack`, `stack-refs.ts`) and records the new tips. Simplify history is refused on a split

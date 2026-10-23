@@ -9,6 +9,14 @@ import { commitsAhead } from './workspace-git';
 
 export { IMPLEMENT_DENIED, type ImplementDeps } from './implement-loop';
 
+function restackNote({ changed, conflicts }: { changed: number[]; conflicts: number }): string {
+  const resolved =
+    conflicts === 0
+      ? ''
+      : ` (the implementer resolved ${conflicts === 1 ? 'a conflict' : `${conflicts} conflicts`} on the way)`;
+  return `**Restacked:** the new commits went into slice ${changed.join(', ')}; the slices above moved with them${resolved}, and every slice was force-pushed.`;
+}
+
 /** A split ticket's revision is moved into its slices and the stack pushed; else the branch is pushed. */
 async function publish(
   workspace: Prepared,
@@ -28,11 +36,7 @@ async function publish(
     },
   );
   if (restacked) {
-    const slices = restacked.changed.join(', ');
-    return {
-      result: await pushRevision(workspace),
-      note: `**Restacked:** the new commits went into slice ${slices}; the slices above moved with them, and every slice was force-pushed.`,
-    };
+    return { result: await pushRevision(workspace), note: restackNote(restacked) };
   }
   const result = await publishBranch({
     ...deps,

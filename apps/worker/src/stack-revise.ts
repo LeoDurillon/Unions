@@ -15,7 +15,16 @@ import type { Ask } from './leftovers';
 import type { PublishResult } from './publish';
 import { setBranches, stackCommits } from './stack-git';
 import { pushRewrittenStack } from './stack-refs';
-import { replay, sliceCommits, sliceLogs, stackFork, treeOf } from './stack-revise-git';
+import { conflictResolver } from './stack-revise-conflict';
+import {
+  commitOf,
+  putBack,
+  replay,
+  sliceCommits,
+  sliceLogs,
+  stackFork,
+  treeOf,
+} from './stack-revise-git';
 
 const ANSWER = /^(?<sha>[0-9a-f]{7,40})\s+(?<where>Slice:\s*\d+|fixup! \S+)\s*$/u;
 
@@ -37,7 +46,7 @@ export async function stackSection(workspace: Prepared): Promise<string> {
   const logs = await sliceLogs(deps.runtime, container, { fork, slices });
   const top = slices.length;
   const list = slices.map((slice, at) => sliceLine(slice, logs[at] ?? [], top)).join('\n');
-  return `\n\n# Stack\n\nThis ticket's pull request is split into a stack, bottom first; each slice is a pull request on the one below:\n\n${list}\n\nCommit each change where it belongs: end a new commit's message with a \`Slice: <n>\` trailer (on its own line, after a blank line) to add it at the end of slice n, or start its subject with \`fixup! <sha>\` (a sha above) to fold it into that commit. Commit on top of the branch as usual: the host moves your commits into place after your run. A review's comments under a \`## Slice <n>\` heading are on that slice's own change (their line numbers are at its tip): fix them in slice n.`;
+  return `\n\n# Stack\n\nThis ticket's pull request is split into a stack, bottom first; each slice is a pull request on the one below:\n\n${list}\n\nCommit each change where it belongs: end a new commit's message with a \`Slice: <n>\` trailer (on its own line, after a blank line) to add it at the end of slice n, or start its subject with \`fixup! <sha>\` (a sha above) to fold it into that commit. Commit on top of the branch as usual: the host moves your commits into place after your run. A review's comments under a \`## Slice <n>\` heading are on that slice's own change (their line numbers are at its tip): fix them in slice n. Fix a remark in the slice whose code it is about, even when a slice above changes the same lines: the host replays the slices above over your fix and hands you each conflict to resolve. Never put a lower slice's fix in a slice above it to avoid a conflict.`;
 }
 
 /** The added commits the host cannot place: no slice named, or no single commit to fix up. */
@@ -85,7 +94,7 @@ async function placed(
   });
 }
 
-export type Restacked = { changed: number[] } | { error: string };
+export type Restacked = { changed: number[]; conflicts: number } | { error: string };
 
 /**
  * Moves the commits the revision added on top of the stack into their slices (`restackPlan`), the
@@ -117,22 +126,23 @@ export async function restackRevision(workspace: Prepared, ask: Ask): Promise<Re
       error: `The new commits cannot be placed in the stack:\n\n${plan.problems.join('\n')}`,
     };
   }
+  const head = await commitOf(runtime, container, 'HEAD');
   const tree = await treeOf(runtime, container, 'HEAD');
-  await setBranches(
-    runtime,
-    container,
-    slices.slice(0, -1).map((slice) => ({ branch: slice.branch, sha: slice.tipSha })),
-  );
-  const stopped = await replay(runtime, container, { fork, todo: plan.todo });
-  if (stopped !== null) {
-    return { error: stopped };
+  const lower = slices.slice(0, -1).map((slice) => ({ branch: slice.branch, sha: slice.tipSha }));
+  await setBranches(runtime, container, lower);
+  const resolve = conflictResolver(ask, { stack, head });
+  const replayed = await replay(runtime, container, { fork, todo: plan.todo, resolve });
+  if ('error' in replayed) {
+    return replayed;
   }
   if ((await treeOf(runtime, container, 'HEAD')) !== tree) {
+    const stat = await putBack(runtime, container, head);
+    await setBranches(runtime, container, lower);
     return {
-      error: 'Moving the new commits into their slices changed the code: nothing was pushed.',
+      error: `Moving the new commits into their slices changed the code, so the branch was put back as the implementer left it, unpushed. The stack's top differed from it in:\n\n\`\`\`\n${stat.trim()}\n\`\`\``,
     };
   }
-  return { changed: plan.changed };
+  return { changed: plan.changed, conflicts: replayed.conflicts };
 }
 
 /** Pushes the restacked stack in one atomic push, leased on what was last pushed; as `publishBranch` reports. */

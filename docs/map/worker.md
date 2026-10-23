@@ -106,6 +106,7 @@ export); do not edit. Tests are left out.
 - `stack-publish.ts`: Opens the stack on GitHub: a pull request per lower slice, the ticket's own retargeted, their texts, the issue's comment.
 - `stack-push.ts`: Pushes every branch of a stack in one atomic push, each leased on what GitHub had: all or none.
 - `stack-refs.ts`: A split ticket's slice branches in its workspace: set from the recorded tips, checked, pushed together, recorded again.
+- `stack-revise-conflict.ts`: A conflict while moving a revision's commits into their slices, handed to the implementer's session to resolve.
 - `stack-revise-git.ts`: The git side of restacking a revision: each slice's commits, the reordering rebase, and its result.
 - `stack-revise.ts`: A revision on a split ticket: the implementer is told the slices, then its new commits are moved into them and the stack pushed.
 - `step-preview.ts`: Starts the ticket's preview before an implementation step when the project asks for it, and gives a step's commands its addresses.

@@ -62,12 +62,17 @@ While the pull request is open, the PR tab shows **Split into a stack**, usable 
 
 - The implementer's prompt gets a `# Stack` section: the slices, their commits, and how to place a new commit
   (`Slice: <n>` to add it at the end of slice n, `fixup! <sha>` to fold it into that commit), and that review
-  comments under a `## Slice <n>` heading are fixed in slice n.
+  comments under a `## Slice <n>` heading are fixed in slice n: a remark is fixed in the slice whose code it is
+  about, even when a slice above changes the same lines, never moved up a slice to avoid a conflict.
 - After its run, the host moves the new commits into their slices with `git rebase -i` and its own todo
   (`pick`, `fixup`, `update-ref` for the lower slices' branches). A commit it cannot place is asked about in the
   implementer's session (`<sha> Slice: <n>` or `<sha> fixup! <sha>`). The tree must not change; then every slice is
-  pushed atomically, leased on its recorded tip, and the tips are recorded again. A conflict while reordering fails
-  the step, unpushed.
+  pushed atomically, leased on its recorded tip, and the tips are recorded again.
+- A conflict while reordering (a fix in slice 1 on lines slice 2 changes too) is handed to the implementer's
+  session: it resolves the files as they should read at that point of the stack and stages them, and the host
+  continues the replay, asking again at each conflict (up to 20). A conflict it leaves, or a stop that is not a
+  conflict, aborts the replay; a replay that ends on other code than the implementer left puts every branch
+  back. Either fails the step, unpushed. The report says how many conflicts were resolved.
 - A rebase fetches the lower slices' branches too, starts them at their recorded tips and rebases with
   `--update-refs` (the rebase agent is told to); a slice branch left behind refuses the push. The stack is pushed
   together.
