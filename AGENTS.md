@@ -30,7 +30,7 @@ remove the file), then run `bun run map` to update the maps.
 
 ## Commands
 
-- `bun install`
+- `bun install` (also installs the git hooks through husky's `prepare`)
 - `bun test`: runs all tests.
 - `bun run check`: format check, map check, lint, `sg`, `knip`, `dup`, `secrets`, typecheck and tests, in that
   order. Run it before finishing; it must pass.
@@ -147,3 +147,7 @@ The limits that most often force a rewrite are: 60 lines per function, 300 lines
 ## Git
 
 Commit messages are short and imperative. Do not commit `*.sqlite*`, `.env` or `dist/`.
+
+The pre-commit hook (`.husky/pre-commit`, a few seconds) runs gitleaks on the staged changes, then format, map,
+changed-file lint, `sg`, `knip`, `dup` and typecheck; the tests stay in `bun run check`. Fix what it reports; do not
+skip it with `--no-verify`. Format and lint read the working tree, not only what is staged.

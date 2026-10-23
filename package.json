@@ -33,12 +33,14 @@
     "knip": "knip",
     "sg": "ast-grep scan && ast-grep test --skip-snapshot-tests",
     "dup": "jscpd --silent",
-    "secrets": "gitleaks git --redact --no-banner --log-level warn && gitleaks git --pre-commit --redact --no-banner --log-level warn"
+    "secrets": "gitleaks git --redact --no-banner --log-level warn && gitleaks git --pre-commit --redact --no-banner --log-level warn",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@ast-grep/cli": "catalog:development",
     "@types/bun": "catalog:development",
     "@union/core": "workspace:*",
+    "husky": "catalog:development",
     "jscpd": "catalog:development",
     "knip": "catalog:development",
     "oxfmt": "catalog:development",
@@ -51,6 +53,7 @@
     "development": {
       "@ast-grep/cli": "0.51.0",
       "@types/bun": "1.4.2",
+      "husky": "9.1.7",
       "jscpd": "5.4.2",
       "knip": "6.42.1",
       "oxfmt": "0.72.0",

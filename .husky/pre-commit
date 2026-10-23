@@ -1,0 +1,13 @@
+# Fast checks before each commit (a few seconds); `bun run check` adds the tests and stays the full gate.
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "pre-commit: gitleaks is not installed (brew install gitleaks)" >&2
+  exit 1
+fi
+gitleaks git --staged --redact --no-banner --log-level warn
+bun run fmt:check
+bun run map:check
+bun run lint:changed
+bun run sg
+bun run knip
+bun run dup
+bun run typecheck
