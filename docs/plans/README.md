@@ -75,6 +75,9 @@ and linked.
   `main`; the worker fetches `origin` (SSH through the host's `~/.ssh`, read-only), fast-forwards, reinstalls if
   needed, and web and worker exit for compose to start them again; Update anyway when something runs. Built
   (branch `self-update`, 2026-10-21).
+- [Code quality](code-quality.md): a coverage floor and a check for untested files, tests for the client's hooks,
+  import boundaries with dependency-cruiser, mutation testing of the state machine, splitting the files at the
+  300-line limit, and smaller checks. Planned (2026-10-23), decisions to confirm.
 
 ## Open items
 
