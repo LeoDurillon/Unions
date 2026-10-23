@@ -182,18 +182,29 @@ test('a split needs stacks turned on for the project and an open pull request', 
   expect(db.select().from(schema.commands).all()).toMatchObject([{ type: 'split' }]);
 });
 
-test('a split ticket refuses Simplify history: a new split is the way', async () => {
+test('a split ticket takes Simplify history, once a slice merged into the base was restacked', async () => {
   const project = await makeProject();
   const ticket = await makeTicket(project.id);
   db.update(schema.tickets)
     .set({ phase: { kind: 'done' }, branch: 'feature', prState: 'open' })
     .run();
   replaceSlices(db, ticket.id, [
-    { position: 1, title: 'A', spec: 'a', tipSha: 'a1', branch: 'feature-s1' },
-    { position: 2, title: 'B', spec: 'b', tipSha: 'b1', branch: 'feature' },
+    { position: 1, title: 'A', spec: 'a', tipSha: 'a1', branch: 'feature-s1', prState: 'merged' },
+    { position: 2, title: 'B', spec: 'b', tipSha: 'b1', branch: 'feature-s2', prState: 'open' },
+    { position: 3, title: 'C', spec: 'c', tipSha: 'c1', branch: 'feature', prState: 'open' },
   ]);
-  const response = await send('POST', `/api/tickets/${ticket.id}/commands`, { type: 'simplify' });
-  expect(response.status).toBe(409);
+  const merged = (tip: string | null): void => {
+    db.update(schema.ticketSlices)
+      .set({ mergedInto: 'main', mergedTipSha: tip })
+      .where(eq(schema.ticketSlices.position, 1))
+      .run();
+  };
+  const simplify = async (): Promise<number> =>
+    (await send('POST', `/api/tickets/${ticket.id}/commands`, { type: 'simplify' })).status;
+  merged('a1');
+  expect(await simplify()).toBe(409);
+  merged(null);
+  expect(await simplify()).toBe(202);
 });
 
 test('a split ticket shows its stack, and Restack is offered once a slice merged into the base', async () => {

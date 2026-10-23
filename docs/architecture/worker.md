@@ -77,8 +77,15 @@
   conflict is left or git stops for another reason. A rebase fetches the lower slices' branches too, refuses one with
   outside commits, starts them from their recorded tips and rebases with `--update-refs` (the agent is told
   to); `stackMoveProblem` refuses a slice left behind, and `forcePush` (`branch-push.ts`) pushes the whole stack
-  (`pushRewrittenStack`, `stack-refs.ts`) and records the new tips. Simplify history is refused on a split
-  ticket. `captureDiff` also stores each slice's own diff (`diff-slices.ts`, `slice` rows of `diff_commits`,
+  (`pushRewrittenStack`, `stack-refs.ts`) and records the new tips. Simplify history on a split ticket
+  (`simplify-stack.ts`, with `simplify-stack-run.ts`, `simplify-stack-agent.ts`, `simplify-stack-verify.ts`,
+  `simplify-stack-push.ts`) rewrites each slice on its own: `fetchChecked` (the rebase's) fetches the lower
+  slices, `stackProblem` refuses a workspace that is not the stack as last pushed, the `simplify` prompt gets the
+  slices with their tips and commits, `untilVerified` (`split-rounds.ts`, shared with the split) sends the
+  host's problems back up to twice (`verifyStackSimplify`: `simplifyProblem`, every commit's `Slice:` trailer in
+  order, each slice's new tip with its recorded tip's tree), then the lower branches are set at the new tips and
+  `pushIfRewritten` pushes the stack. No refused-commit pause: a hook's refusal fails it. A slice merged and not
+  restacked yet (`mergedTipSha`) refuses it. `captureDiff` also stores each slice's own diff (`diff-slices.ts`, `slice` rows of `diff_commits`,
   the lower slices read from their local branches), which the review page's commit picker offers as
   `slice-<n>`; a split ticket's agent review gets each slice's range and part of the spec (`stackReviewNote`).
   Merging: `github/stack-pull-requests.ts` polls every slice's pull request (`pollStack`, from

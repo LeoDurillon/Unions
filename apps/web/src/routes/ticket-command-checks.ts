@@ -1,5 +1,5 @@
 // What a command needs besides a valid move of the state machine: a startable ticket, an open pull request, stacks turned on.
-import { listSlices, schema, type Db } from '@union/core';
+import { schema, type Db } from '@union/core';
 import { eq } from 'drizzle-orm';
 
 import type { CommandType, TicketSummary } from '../api-types';
@@ -22,6 +22,14 @@ function assertOpenPullRequest(ticket: TicketSummary, what: string): void {
   }
 }
 
+/** A stack is simplified slice by slice, on the slices as they are after the last merge. */
+function assertSimplifiable(ticket: TicketSummary): void {
+  assertOpenPullRequest(ticket, 'simplify');
+  if (ticket.stack?.restackable) {
+    throw fail(CONFLICT, 'A slice was merged into the base: restack the stack first');
+  }
+}
+
 /** Refuses a command the ticket cannot take now; the state machine has already allowed it. */
 export function assertCommandFits(db: Db, ticket: TicketSummary, type: CommandType): void {
   if (type === 'start') {
@@ -35,11 +43,7 @@ export function assertCommandFits(db: Db, ticket: TicketSummary, type: CommandTy
     );
   }
   if (type === 'simplify') {
-    assertOpenPullRequest(ticket, 'simplify');
-    // Rewriting the whole branch would mix the slices: a new split is the way.
-    if (listSlices(db, ticket.id).length > 0) {
-      throw fail(CONFLICT, 'The ticket is split into a stack: split it again instead');
-    }
+    assertSimplifiable(ticket);
   }
   if (type === 'restack') {
     assertOpenPullRequest(ticket, 'restack');

@@ -76,7 +76,7 @@ export const AGENT_LABELS: Record<BuiltInAgentId, AgentLabel> = {
   simplify: {
     title: 'Simplify history',
     description:
-      "Prompt the implementation agent gets when you click Simplify history in a ticket's PR tab: it rewrites the branch's commits, the code unchanged. It resumes its own session and uses the Implementation model and effort.",
+      "Prompt the implementation agent gets when you click Simplify history in a ticket's PR tab: it rewrites the branch's commits (a stack's slice by slice), the code unchanged. It resumes its own session and uses the Implementation model and effort.",
   },
 };
 

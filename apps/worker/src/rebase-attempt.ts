@@ -30,7 +30,7 @@ function leftRefs(retarget: Rebase['retarget']): { left?: { name: string; source
  * Fetches the branch (and a stack's lower slices) as GitHub has them; refuses when one has commits
  * the workspace lacks. The lower slices' branches are put where they were last pushed.
  */
-async function fetchChecked(
+export async function fetchChecked(
   rebase: Rebase,
 ): Promise<{ pushed: string; extra: string[] } | { error: string }> {
   const { deps, container, branch, base, context } = rebase;
@@ -46,7 +46,7 @@ async function fetchChecked(
   for (const name of [branch, ...extra]) {
     if (!(await contains(deps.runtime, container, 'HEAD', `origin/${name}`))) {
       return {
-        error: `\`${name}\` on GitHub has commits this ticket's workspace does not: rebasing would drop them.`,
+        error: `\`${name}\` on GitHub has commits this ticket's workspace does not: rewriting would drop them.`,
       };
     }
   }

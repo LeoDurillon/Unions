@@ -53,7 +53,8 @@ While the pull request is open, the PR tab shows **Split into a stack**, usable 
    refuses after the push is listed in the report: the split stands. A slice branch of an earlier split with no
    use left is reported, not deleted.
 5. **After:** the code is the same, so the ticket returns to its final review, or to Done. Approving the final
-   review marks every slice's pull request ready. Simplify history is refused on a split ticket: split it again.
+   review marks every slice's pull request ready. Simplify history rewrites each slice on its own (see
+   [Simplify history](simplify-history.md#on-a-stack)).
    The PR tab shows each slice's pull request the same way (picked above its sections). **Rewrite all
    descriptions** rewrites each open slice's description about its own change, one after the other; each draft is
    reviewed and sent from its pull request, with the stack and `Part of #<issue>` added back.

@@ -92,13 +92,18 @@ export); do not edit. Tests are left out.
 - `simplify-finish.ts`: After the agent: its leftover commit (a hook may refuse it and pause the run), the checks on the new history, the push.
 - `simplify-git.ts`: The branch's history since it left its base, and why a rewritten one cannot be pushed.
 - `simplify-push.ts`: Pushes a simplified history, unless the agent left the one already on GitHub.
+- `simplify-stack-agent.ts`: The implementer's session asked to simplify a split ticket's commits slice by slice, and the step's report.
+- `simplify-stack-push.ts`: Pushes a stack's simplified history: the lower slices' branches set at their new tips, every branch pushed together.
+- `simplify-stack-run.ts`: One simplification of a stack: the fetch and its safety checks, the agent's turns until the host accepts the result, the push.
+- `simplify-stack-verify.ts`: Checks a stack's simplified history before it is pushed: every commit in its slice, every slice's tip with the same content.
+- `simplify-stack.ts`: Simplifies a split ticket's history slice by slice with the implementer's session, each slice's content unchanged, and force-pushes the stack.
 - `simplify.ts`: Rewrites the ticket's commits into a simpler history with the implementer's own session, checks the code did not change and force-pushes it with a lease.
 - `slice-description.ts`: A slice's pull request description: written by the split's session from the repository's template, or rewritten later.
 - `slots.ts`: Agent runs allowed at the same time, shared by the ticket scheduler and the investigations.
 - `split-agent.ts`: The implementer's session asked to rewrite its commits into the approved slices, and the split's report.
 - `split-plan-step.ts`: The split plan: a read-only agent proposes the slices of a stack, which the user edits and approves.
 - `split-publish.ts`: The split's way to and from GitHub: the stack's branches fetched with their leases, then pushed and opened.
-- `split-rounds.ts`: The split's agent turns: its first try, then the host's problems sent back until the result passes.
+- `split-rounds.ts`: The agent's turns at rewriting a stack: its first try, then the host's problems sent back until the result passes.
 - `split-verify.ts`: Checks a split before it is pushed: the same content, every commit in its slice, each slice's checks.
 - `split.ts`: Rewrites the ticket's commits into the approved slices with the implementer's session, checks them, pushes the stack and opens it on GitHub.
 - `stack-follow.ts`: After a slice of a GitHub stack merged, GitHub rebases the rest itself: the workspace takes its branches as they are.

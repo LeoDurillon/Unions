@@ -1,4 +1,4 @@
-// The Simplify history button: the implementation agent rewrites the branch&apos;s commits, the code unchanged.
+// The Simplify history button: the implementation agent rewrites the branch's commits (a stack's slice by slice), the code unchanged.
 import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../../src/api-types';
@@ -6,15 +6,23 @@ import { useTicketCommands } from '../../lib/use-ticket-commands';
 import { Button, ErrorText } from '../ui';
 import { canRewrite } from './branch-status';
 
+const HELP =
+  "The implementation agent rewrites the branch's commits into fewer, clearer ones. The code must stay exactly the same, so the final review stands; the branch is then force-pushed. On failure it is left as it was.";
+const STACK_HELP =
+  "The implementation agent rewrites each slice's commits into fewer, clearer ones, never moving a change to another slice. Every slice must end with exactly the same code, so the final review stands; the stack is then force-pushed together. On failure it is left as it was.";
+
 /** Shown while the pull request is open; usable at the final review or once done. */
 export function SimplifyHistory({ detail }: { detail: TicketDetail }): ReactElement | null {
   const { ticket } = detail;
   const { command } = useTicketCommands(ticket.id);
-  // A split ticket's history is its slices: a new split replaces it.
-  if (ticket.branch === null || ticket.prState !== 'open' || ticket.stack) {
+  if (ticket.branch === null || ticket.prState !== 'open') {
     return null;
   }
-  const allowed = canRewrite(detail);
+  const { stack } = ticket;
+  const allowed = canRewrite(detail) && !stack?.restackable;
+  const why = stack?.restackable
+    ? 'Restack first: a slice was merged into the base'
+    : 'Available at the final review, or once done';
   return (
     <div className="space-y-2 rounded-md border border-zinc-200 p-3 text-sm dark:border-zinc-800">
       <div className="flex flex-wrap items-center gap-3">
@@ -23,7 +31,7 @@ export function SimplifyHistory({ detail }: { detail: TicketDetail }): ReactElem
         </span>
         <Button
           disabled={!allowed || command.isPending}
-          title={allowed ? undefined : 'Available at the final review, or once done'}
+          title={allowed ? undefined : why}
           onClick={() => {
             command.mutate({ type: 'simplify' });
           }}
@@ -31,11 +39,7 @@ export function SimplifyHistory({ detail }: { detail: TicketDetail }): ReactElem
           Simplify history
         </Button>
       </div>
-      <p className="text-xs text-zinc-500">
-        The implementation agent rewrites the branch&apos;s commits into fewer, clearer ones. The
-        code must stay exactly the same, so the final review stands; the branch is then
-        force-pushed. On failure it is left as it was.
-      </p>
+      <p className="text-xs text-zinc-500">{stack ? STACK_HELP : HELP}</p>
       <ErrorText error={command.error} />
     </div>
   );

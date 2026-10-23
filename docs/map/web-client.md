@@ -142,7 +142,7 @@ export); do not edit. Tests are left out.
 - `pr-description.tsx`: A pull request's description, the same for the ticket's and each slice's: GitHub's text, and the agent's rewrite of it to edit and send.
 - `pull-request-sections.tsx`: The PR tab's sections about one pull request, the same for the ticket's and a slice's picked above them: CI checks, description, discussion.
 - `rewrite-descriptions.tsx`: A split ticket's Rewrite all descriptions: the agent rewrites each open slice's, one after the other.
-- `simplify-history.tsx`: The Simplify history button: the implementation agent rewrites the branch&apos;s commits, the code unchanged.
+- `simplify-history.tsx`: The Simplify history button: the implementation agent rewrites the branch's commits (a stack's slice by slice), the code unchanged.
 - `slice-ci.tsx`: A slice's CI in one word (failed, running, passed), its counts by state on hover.
 - `split-stack.tsx`: The Split into a stack button: an agent plans slices of the spec, then the branch becomes a stack of pull requests.
 - `stack-actions.tsx`: What can be done to a split ticket's whole stack: how far it is behind its base, Rebase stack, Restack, Split again, Rewrite all descriptions.

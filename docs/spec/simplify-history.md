@@ -27,6 +27,25 @@ Done. The implementation agent rewrites the branch's commits into a history a re
    came from there (`thenDone` in the phase, kept through a failure and its retry). Any failure puts the branch back
    as it was, unpushed, with the reason and the agent's report; **Retry** runs it again.
 
+## On a stack
+
+On a ticket split into a [stack](pr-stacks.md), each slice is simplified on its own: a reviewer reads each slice's
+pull request commit by commit.
+
+- **Before:** the lower slices' branches are fetched too (one with commits the workspace lacks stops it), and the
+  workspace must be the stack as last pushed: its branch at the top slice's recorded tip, each slice on the one
+  below. A slice merged into the base and not restacked yet refuses it: restack first (the button is disabled).
+- **Agent run:** the `simplify` prompt gets a `# Stack` section: the slices bottom first, each with its recorded
+  tip and its commits. No change may move to another slice; each slice must end with exactly its tip's content;
+  every commit ends with a `Slice: <n>` trailer, in order, as in a split.
+- **Checks by the host:** those above, plus every commit's trailer in order, every slice with a commit, and each
+  slice's new tip with the same tree as its recorded tip. No checks run: every slice's code is the same.
+  Problems go back to the same session, up to twice; then the step fails and every branch is put back, unpushed.
+- **Refused commits** fail the step as in a split: no pause, nothing pushed.
+- **Push:** the lower slices' branches are set at their new tips and pushed with the ticket's in one atomic push,
+  each leased on its recorded tip (as after a revision), the new tips recorded, and the review diff captured again.
+  The report lists each slice's commit counts and tips before and after.
+
 State machine: action `simplify`, from `awaiting_approval` on `final_review` (→ `running` `simplify`) and from
 `done` (→ `running` `simplify` with `thenDone`); `run_finished` leads back. `simplify` is a `Step` but not a
 pipeline step; it shows on the board as In review while it runs.

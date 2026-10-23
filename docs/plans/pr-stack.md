@@ -4,7 +4,7 @@ Status: steps 1 to 5 built (branch `pr-stack`, 2026-10-20): the table, the pure 
 split plan and the split, revise and rebase, the review page, merge, and the spec (`docs/spec/pr-stacks.md`);
 step 6 (part B, slices declared by the plan) left. Where the build differs from
 the plan: a conflict while moving a revision's commits fails the step (the implementer does not resolve it
-yet); Simplify history is refused on a split ticket; on the review page the slices are entries of the commit
+yet, since built); Simplify history was refused on a split ticket (since built: slice by slice, 2026-10-23); on the review page the slices are entries of the commit
 picker (read only, like a commit), comments stay on the whole stack's diff and the feedback names the slices
 that change each commented file, and the agent review gets each slice's range and part of the spec in its
 prompt (one run on the ticket, not the PR reviews' stack run); a slice closed without a merge is shown in the
