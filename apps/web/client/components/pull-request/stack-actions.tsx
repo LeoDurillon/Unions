@@ -1,10 +1,11 @@
-// What can be done to a split ticket's whole stack: how far it is behind its base, Rebase stack, Restack, Split again.
+// What can be done to a split ticket's whole stack: how far it is behind its base, Rebase stack, Restack, Split again, Rewrite all descriptions.
 import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../../src/api-types';
 import { useTicketCommands } from '../../lib/use-ticket-commands';
 import { Button, ErrorText } from '../ui';
 import { canRewrite } from './branch-status';
+import { RewriteDescriptions } from './rewrite-descriptions';
 
 const NOT_YET = 'Available at the final review, or once done';
 
@@ -73,6 +74,9 @@ export function StackActions({ detail }: { detail: TicketDetail }): ReactElement
           </Button>
         ) : null}
       </div>
+      {ticket.prNumber === null ? null : (
+        <RewriteDescriptions detail={detail} pr={ticket.prNumber} />
+      )}
       <ErrorText error={command.error} />
     </div>
   );

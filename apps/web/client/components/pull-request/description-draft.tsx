@@ -42,7 +42,7 @@ function DraftButtons({
   onSend: (text: string) => void;
   onDiscard: () => void;
   onRewrite: () => void;
-  rewriteLabel: string;
+  rewriteLabel: string | null;
 }): ReactElement {
   return (
     <div className="flex flex-wrap gap-2">
@@ -58,9 +58,11 @@ function DraftButtons({
       <Button disabled={busy || sending} onClick={onDiscard}>
         Discard
       </Button>
-      <Button disabled={busy || sending} onClick={onRewrite}>
-        {rewriteLabel}
-      </Button>
+      {rewriteLabel === null ? null : (
+        <Button disabled={busy || sending} onClick={onRewrite}>
+          {rewriteLabel}
+        </Button>
+      )}
     </div>
   );
 }
@@ -79,8 +81,8 @@ export function DescriptionDraft({
   onSend: (text: string) => void;
   onDiscard: () => void;
   onRewrite: () => void;
-  /** `Rewrite again`, or for a split ticket the rewrite of every slice's description. */
-  rewriteLabel: string;
+  /** `Rewrite again`; null: rewrites are asked elsewhere (a split ticket's stack panel). */
+  rewriteLabel: string | null;
 }): ReactElement {
   const [text, setText] = useState(draft.text ?? '');
   const [showChanges, setShowChanges] = useState(false);

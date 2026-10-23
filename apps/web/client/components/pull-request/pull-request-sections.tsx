@@ -4,15 +4,14 @@ import type { ReactElement } from 'react';
 import type { TicketDetail } from '../../../src/api-types';
 import { CiChecks } from './ci-checks';
 import { Discussion } from './discussion';
-import { PrDescription, type RewriteScope } from './pr-description';
+import { PrDescription, type RewriteFrom } from './pr-description';
 import { StackPrPicker } from './stack-pr-picker';
 
-/** How many pull requests a rewrite covers: each open slice's of a split ticket, else one. */
-function rewriteScope(detail: TicketDetail): RewriteScope {
-  const open = (detail.ticket.stack?.slices ?? []).filter(
-    (slice) => slice.prNumber !== null && slice.prState !== 'merged',
-  );
-  return { pullRequests: Math.max(open.length, 1) };
+function rewriteFrom(state: string | null | undefined, split: boolean): RewriteFrom {
+  if (state === 'merged') {
+    return null;
+  }
+  return split ? 'stack' : 'here';
 }
 
 /** The picked pull request's CI checks (not once merged), description and discussion. */
@@ -36,7 +35,7 @@ export function PullRequestSections({
         key={`description-${pr}`}
         ticketId={ticket.id}
         pr={pr}
-        scope={state === 'merged' ? null : rewriteScope(detail)}
+        from={rewriteFrom(state, ticket.stack !== null && ticket.stack !== undefined)}
       />
       <Discussion key={`discussion-${pr}`} ticketId={ticket.id} pr={pr} />
     </>

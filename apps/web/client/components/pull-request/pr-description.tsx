@@ -7,37 +7,26 @@ import { Button, ErrorText } from '../ui';
 import { DescriptionDraft } from './description-draft';
 import { GitHubDescription } from './github-description';
 
-/** What a rewrite covers: one pull request, or each open slice's of a split ticket. */
-export type RewriteScope = { pullRequests: number };
-
-function rewriteLabel(scope: RewriteScope | null, again: boolean): string {
-  const count = scope?.pullRequests ?? 1;
-  if (count > 1) {
-    return `Rewrite all ${count} descriptions${again ? ' again' : ''}`;
-  }
-  return again ? 'Rewrite again' : 'Rewrite description';
-}
+/**
+ * Where the rewrite is asked: `here`, or `stack` (a split ticket's, for every slice at once, in the
+ * stack panel); null: none (the pull request is merged).
+ */
+export type RewriteFrom = 'here' | 'stack' | null;
 
 function RewriteButton({
   view,
   actions,
-  scope,
 }: {
   view: PrDescriptionView;
   actions: DescriptionActions;
-  scope: RewriteScope;
 }): ReactElement {
-  const hint =
-    scope.pullRequests > 1
-      ? "The agent rewrites each open slice's description, one after the other; review each one in its pull request here"
-      : undefined;
   return (
     <Button
       disabled={actions.busy || view.refusal !== null}
-      title={view.refusal ?? hint}
+      title={view.refusal ?? undefined}
       onClick={actions.handleRewrite}
     >
-      {rewriteLabel(scope, false)}
+      Rewrite description
     </Button>
   );
 }
@@ -74,18 +63,24 @@ function Working({
 function Idle({
   view,
   actions,
-  scope,
+  from,
 }: {
   view: PrDescriptionView;
   actions: DescriptionActions;
-  scope: RewriteScope;
+  from: RewriteFrom;
 }): ReactElement {
   const outcome = lastOutcome(view.draft);
   return (
     <div className="space-y-2 text-sm">
       {outcome ? <p className="text-zinc-500">{outcome}</p> : null}
       <div className="flex flex-wrap items-center gap-2">
-        <RewriteButton view={view} actions={actions} scope={scope} />
+        {from === 'here' ? (
+          <RewriteButton view={view} actions={actions} />
+        ) : (
+          <span className="text-xs text-zinc-500">
+            Rewrite all descriptions from the stack above.
+          </span>
+        )}
         {view.draft?.status === 'conflict' ? (
           <Button disabled={actions.busy} onClick={actions.handleDiscard}>
             Discard the draft
@@ -102,11 +97,11 @@ type BodyProps = {
   pr: number;
   view: PrDescriptionView | undefined;
   actions: DescriptionActions;
-  scope: RewriteScope | null;
+  from: RewriteFrom;
 };
 
 /** A draft in the works or to review replaces GitHub's text; else GitHub's text and Rewrite. */
-function Body({ ticketId, pr, view, actions, scope }: BodyProps): ReactElement {
+function Body({ ticketId, pr, view, actions, from }: BodyProps): ReactElement {
   const draft = view?.draft;
   if (draft?.status === 'queued' || draft?.status === 'running') {
     return <Working draft={draft} actions={actions} />;
@@ -120,14 +115,19 @@ function Body({ ticketId, pr, view, actions, scope }: BodyProps): ReactElement {
         onSend={actions.handleSend}
         onDiscard={actions.handleDiscard}
         onRewrite={actions.handleRewrite}
-        rewriteLabel={rewriteLabel(scope, true)}
+        rewriteLabel={from === 'here' ? 'Rewrite again' : null}
       />
     );
   }
+  return <Current ticketId={ticketId} pr={pr} view={view} actions={actions} from={from} />;
+}
+
+/** No draft: GitHub's text, and what rewriting it takes. */
+function Current({ ticketId, pr, view, actions, from }: BodyProps): ReactElement {
   return (
     <>
       <GitHubDescription ticketId={ticketId} pr={pr} />
-      {view && scope ? <Idle view={view} actions={actions} scope={scope} /> : null}
+      {view && from !== null ? <Idle view={view} actions={actions} from={from} /> : null}
     </>
   );
 }
@@ -145,23 +145,23 @@ function notices(view: PrDescriptionView | undefined): { outdated: boolean; erro
 
 /**
  * `pr`'s description. The agent's draft is the user's to edit, send or discard: nothing reaches
- * GitHub before "Update on GitHub". `scope` null: no rewrite (the pull request is merged).
+ * GitHub before "Update on GitHub".
  */
 export function PrDescription({
   ticketId,
   pr,
-  scope,
+  from,
 }: {
   ticketId: number;
   pr: number;
-  scope: RewriteScope | null;
+  from: RewriteFrom;
 }): ReactElement {
   const { view, error, actions } = usePrDescription(ticketId, pr);
   const notice = notices(view);
   return (
     <section className="space-y-2 rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
       <h3 className="text-sm font-semibold">Description of #{pr}</h3>
-      {notice.outdated && scope ? (
+      {notice.outdated && from !== null ? (
         <p className="text-sm text-amber-700 dark:text-amber-400">
           The branch was pushed again after the description was written: it may be out of date.
         </p>
@@ -170,7 +170,7 @@ export function PrDescription({
       {notice.error ? (
         <p className="text-sm text-red-600 dark:text-red-400">{notice.error}</p>
       ) : null}
-      <Body ticketId={ticketId} pr={pr} view={view} actions={actions} scope={scope} />
+      <Body ticketId={ticketId} pr={pr} view={view} actions={actions} from={from} />
     </section>
   );
 }
