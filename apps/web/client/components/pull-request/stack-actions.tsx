@@ -1,4 +1,4 @@
-// What can be done to a split ticket's whole stack: how far it is behind its base, Rebase stack, Restack, Split again, Rewrite all descriptions.
+// What can be done to a split ticket's whole stack: how far it is behind its base, Rebase stack, Restack, Simplify history, Split again, Rewrite all descriptions.
 import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../../src/api-types';
@@ -6,6 +6,7 @@ import { useTicketCommands } from '../../lib/use-ticket-commands';
 import { Button, ErrorText } from '../ui';
 import { canRewrite } from './branch-status';
 import { RewriteDescriptions } from './rewrite-descriptions';
+import { SimplifyStackButton } from './simplify-history';
 
 const NOT_YET = 'Available at the final review, or once done';
 
@@ -24,6 +25,26 @@ function Behind({ detail }: { detail: TicketDetail }): ReactElement | null {
     <span className="text-amber-700 dark:text-amber-400">
       {commits} behind {base}
     </span>
+  );
+}
+
+function SplitAgain({
+  allowed,
+  busy,
+  run,
+}: {
+  allowed: boolean;
+  busy: boolean;
+  run: () => void;
+}): ReactElement {
+  return (
+    <Button
+      disabled={!allowed || busy}
+      title={allowed ? 'An agent plans new slices; the current stack is replaced' : NOT_YET}
+      onClick={run}
+    >
+      Split again
+    </Button>
   );
 }
 
@@ -62,16 +83,21 @@ export function StackActions({ detail }: { detail: TicketDetail }): ReactElement
             Rebase stack
           </Button>
         ) : null}
+        <SimplifyStackButton
+          detail={detail}
+          busy={busy}
+          run={() => {
+            command.mutate({ type: 'simplify' });
+          }}
+        />
         {detail.project.config.stacks === true ? (
-          <Button
-            disabled={!allowed || busy}
-            title={allowed ? 'An agent plans new slices; the current stack is replaced' : NOT_YET}
-            onClick={() => {
+          <SplitAgain
+            allowed={allowed}
+            busy={busy}
+            run={() => {
               command.mutate({ type: 'split' });
             }}
-          >
-            Split again
-          </Button>
+          />
         ) : null}
       </div>
       {ticket.prNumber === null ? null : (

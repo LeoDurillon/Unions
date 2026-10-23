@@ -145,7 +145,7 @@ export); do not edit. Tests are left out.
 - `simplify-history.tsx`: The Simplify history button: the implementation agent rewrites the branch's commits (a stack's slice by slice), the code unchanged.
 - `slice-ci.tsx`: A slice's CI in one word (failed, running, passed), its counts by state on hover.
 - `split-stack.tsx`: The Split into a stack button: an agent plans slices of the spec, then the branch becomes a stack of pull requests.
-- `stack-actions.tsx`: What can be done to a split ticket's whole stack: how far it is behind its base, Rebase stack, Restack, Split again, Rewrite all descriptions.
+- `stack-actions.tsx`: What can be done to a split ticket's whole stack: how far it is behind its base, Rebase stack, Restack, Simplify history, Split again, Rewrite all descriptions.
 - `stack-panel.tsx`: A split ticket's stack in its PR tab: one line per slice with its CI, what went wrong, what can be done to it, and how it merges.
 - `stack-pr-picker.tsx`: Which pull request of a split ticket's stack the PR tab's checks, description and discussion are about, bottom first.
 - `stack-slice-row.tsx`: One slice of a split ticket's stack on one line: its pull request (linked), state, CI and title; its branch on hover.
