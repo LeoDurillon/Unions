@@ -118,7 +118,7 @@ export function agentVariables(
  * The setting as the settings page sends it, checked against the project's plain variables;
  * undefined for the default (all). Throws with the reason.
  */
-export function parseAgentVariables(
+function parseAgentVariables(
   value: unknown,
   plainNames: readonly string[],
 ): AgentVariables | undefined {

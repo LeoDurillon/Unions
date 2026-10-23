@@ -7,7 +7,7 @@ export type LessonInput = { section: PipelineStep; rule: string };
 export type LessonsSave = { lessons: LessonInput[]; curated: number[] };
 
 export const MAX_LESSON_LENGTH = 500;
-export const MAX_LESSONS = 200;
+const MAX_LESSONS = 200;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);

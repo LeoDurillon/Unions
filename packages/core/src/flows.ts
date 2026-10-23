@@ -73,13 +73,6 @@ export function flowProblems(value: unknown, customSteps: readonly CustomStep[] 
   return problems;
 }
 
-export function isFlow(
-  value: unknown,
-  customSteps: readonly CustomStep[] = [],
-): value is PipelineStep[] {
-  return flowProblems(value, customSteps).length === 0;
-}
-
 /** The project's presets: its own list when it has one, else the built-in ones. */
 export function projectPresets(config: ProjectConfig): readonly FlowPreset[] {
   return config.flows ?? BUILT_IN_PRESETS;

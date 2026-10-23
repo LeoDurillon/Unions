@@ -17,7 +17,7 @@ import {
   type ComposeJson,
 } from './preview-compose-check';
 
-export { PREVIEW_ENV_FILE, PREVIEW_ENV_KEY, PREVIEW_NETWORK } from './preview-compose-check';
+export { PREVIEW_ENV_FILE, PREVIEW_NETWORK } from './preview-compose-check';
 
 /** A service the proxy serves, at `host` (`t12.union.localhost`, `api-t12.union.localhost`). */
 export type ExposedService = { service: string; port: number; host: string };

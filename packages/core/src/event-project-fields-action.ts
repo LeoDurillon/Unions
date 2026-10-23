@@ -40,7 +40,7 @@ export const PROJECT_ITEM_LABELS: Record<ProjectItemTarget, string> = {
   pull_request: "The ticket's pull request (added to the Project if it is not there)",
 };
 
-export const PROJECT_FIELD_TYPES = [
+const PROJECT_FIELD_TYPES = [
   'single_select',
   'text',
   'number',
@@ -48,15 +48,15 @@ export const PROJECT_FIELD_TYPES = [
 ] as const satisfies readonly ProjectFieldType[];
 
 /** The field Union's own sync sets on the issue's item: a rule leaves it there. */
-export const UNION_STATUS_FIELD = 'Status';
+const UNION_STATUS_FIELD = 'Status';
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/u;
 
-export function isProjectItemTarget(value: unknown): value is ProjectItemTarget {
+function isProjectItemTarget(value: unknown): value is ProjectItemTarget {
   return PROJECT_ITEM_TARGETS.some((target) => target === value);
 }
 
-export function isProjectFieldType(value: unknown): value is ProjectFieldType {
+function isProjectFieldType(value: unknown): value is ProjectFieldType {
   return PROJECT_FIELD_TYPES.some((type) => type === value);
 }
 

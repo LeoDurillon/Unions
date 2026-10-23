@@ -17,13 +17,7 @@ const MAX_NAME_LENGTH = 120;
 export const CONTAINER_ATTACHMENTS_DIR = '/workspace/attachments';
 
 /** Gitignored, next to `union.sqlite`; the web and the worker see the same folder. */
-export const DEFAULT_ATTACHMENTS_DIR = path.resolve(
-  import.meta.dir,
-  '..',
-  '..',
-  '..',
-  'attachments',
-);
+const DEFAULT_ATTACHMENTS_DIR = path.resolve(import.meta.dir, '..', '..', '..', 'attachments');
 
 /** Read on each call, so tests can point it to a temporary folder. */
 export function attachmentsRoot(): string {

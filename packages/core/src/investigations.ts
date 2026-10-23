@@ -12,7 +12,6 @@ export { INVESTIGATION_DEFAULTS } from './investigation-defaults';
 
 export type Investigation = typeof schema.investigations.$inferSelect;
 export type InvestigationScope = (typeof schema.INVESTIGATION_SCOPES)[number];
-export type { InvestigationExchange } from './schema';
 export type InvestigationStatus = (typeof schema.INVESTIGATION_STATUSES)[number];
 
 /** An investigation the request cannot create or change (bad input, or not in a state that allows it). */

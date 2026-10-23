@@ -82,7 +82,6 @@ export type { ResumeState } from './schema-refused-commits';
 export type * from './runtime';
 export * as schema from './tables';
 export type {
-  AgentVariables,
   LeftBase,
   PreviewConfig,
   PreviewService,

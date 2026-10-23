@@ -37,7 +37,7 @@ export function exposedServices(config: PreviewConfig): PreviewService[] {
  * Every preview's hosts end with this domain, so browsers file the logins they save on any preview
  * under the same site and offer them on the others.
  */
-export const PREVIEW_DOMAIN = 'union.localhost';
+const PREVIEW_DOMAIN = 'union.localhost';
 
 /** `t12.union.localhost`, `api-t12.union.localhost`, `api-r3.union.localhost`. */
 export function previewServiceHost(owner: WorkspaceOwner, prefix: string): string {

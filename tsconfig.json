@@ -11,7 +11,8 @@
     "noEmit": true,
     "types": ["bun"],
     "verbatimModuleSyntax": true,
-    "isolatedModules": true
+    "isolatedModules": true,
+    "moduleDetection": "force"
   },
   "include": ["packages", "apps", "scripts"],
   "exclude": ["**/node_modules", "**/dist"]

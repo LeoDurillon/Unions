@@ -15,7 +15,7 @@ export type LessonSuggestionOutcome =
 export class LessonSuggestionError extends Error {}
 
 /** The feedback one run reads at most: the newest ones when more are asked. */
-export const MAX_SUGGESTION_FEEDBACK = 60;
+const MAX_SUGGESTION_FEEDBACK = 60;
 
 const ACTIVE = ['queued', 'running'] as const;
 

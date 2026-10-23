@@ -15,7 +15,7 @@ export type EventDelivery = typeof schema.eventDeliveries.$inferSelect;
 const CURSOR = 'event_rules';
 const BATCH = 500;
 /** Rate limits and server errors are tried again, later each time, then given up. */
-export const MAX_ATTEMPTS = 5;
+const MAX_ATTEMPTS = 5;
 const FIRST_RETRY_MS = 30_000;
 
 /**

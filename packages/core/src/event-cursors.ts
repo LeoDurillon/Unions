@@ -7,7 +7,7 @@ import * as schema from './tables';
 type Event = typeof schema.events.$inferSelect;
 
 /** The `seq` of the last event the reader `name` handled; null before its first read. */
-export function readCursor(db: Pick<Db, 'select'>, name: string): number | null {
+function readCursor(db: Pick<Db, 'select'>, name: string): number | null {
   const row = db.select().from(schema.eventCursors).where(eq(schema.eventCursors.name, name)).get();
   return row?.seq ?? null;
 }

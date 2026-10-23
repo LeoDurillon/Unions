@@ -10,7 +10,7 @@ export type CustomAgentInfo = Pick<
   'id' | 'name' | 'role' | 'promptStatus' | 'promptError' | 'deletedAt'
 >;
 
-export const CUSTOM_AGENT_MODEL: AgentModel = 'sonnet';
+const CUSTOM_AGENT_MODEL: AgentModel = 'sonnet';
 
 export type CustomAgentDefaults = {
   prompt: string;

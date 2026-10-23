@@ -61,7 +61,7 @@ export const MIGRATIONS_DIR = 'packages/core/drizzle/';
 /** Backups an update takes before a migration, apart from the manual ones (`union-<date>`). */
 export const UPDATE_BACKUP_PREFIX = 'union-update';
 /** Update backups kept; older ones are removed after each new one. */
-export const UPDATE_BACKUPS_KEPT = 5;
+const UPDATE_BACKUPS_KEPT = 5;
 
 /** The new migrations among the files an update changes. */
 export function newMigrations(changed: string[]): string[] {

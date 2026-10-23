@@ -4,7 +4,7 @@ import { sql } from 'drizzle-orm';
 import type { Db } from './db';
 
 /** What a worker restart does to it, said to the user before Update anyway. */
-export type RestartEffect = 'restarts' | 'fails';
+type RestartEffect = 'restarts' | 'fails';
 
 export type ActiveWorkKind = {
   table: string;

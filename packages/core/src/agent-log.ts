@@ -5,8 +5,8 @@ import { recordUsage } from './agent-usage-record';
 import type { Db } from './db';
 import * as schema from './tables';
 
-export type AgentLine = typeof schema.agentLog.$inferSelect;
-export type EventRecord = typeof schema.events.$inferSelect;
+type AgentLine = typeof schema.agentLog.$inferSelect;
+type EventRecord = typeof schema.events.$inferSelect;
 
 /** Whose Log: a ticket's or an investigation's. */
 export type LogOwner = { ticketId: number } | { investigationId: number };
@@ -62,7 +62,7 @@ function linesOf(owner: LogOwner): SQL {
 }
 
 /** Both lists in log order: a line comes after the event it was written after, before the next. */
-export function mergeLog(events: EventRecord[], lines: AgentLine[]): LogEntry[] {
+function mergeLog(events: EventRecord[], lines: AgentLine[]): LogEntry[] {
   const merged: LogEntry[] = [];
   let next = 0;
   for (const event of events) {

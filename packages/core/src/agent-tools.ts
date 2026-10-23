@@ -80,19 +80,19 @@ export const DEFAULT_TOOLS: Record<BuiltInRunAgent, readonly string[]> = {
 export const CUSTOM_AGENT_TOOLS: readonly string[] = REVIEW_TOOLS;
 
 /** Tools a custom agent may not have: it never commits, so its changes would trip the implementer. */
-export const CUSTOM_AGENT_REFUSED_TOOLS: readonly string[] = [
+const CUSTOM_AGENT_REFUSED_TOOLS: ReadonlySet<string> = new Set([
   'Edit',
   'Write',
   'NotebookEdit',
   'Bash',
-];
+]);
 
 export function defaultToolsOf(agent: RunAgent): readonly string[] {
   return isCustomStep(agent) ? CUSTOM_AGENT_TOOLS : DEFAULT_TOOLS[agent];
 }
 
 /** Claude Code's own tools, always offered. */
-export const BUILT_IN_TOOLS: readonly { name: string; description: string }[] = [
+const BUILT_IN_TOOLS: readonly { name: string; description: string }[] = [
   { name: 'Read', description: 'Read files' },
   { name: 'Grep', description: 'Search file contents' },
   { name: 'Glob', description: 'Find files by name' },
@@ -123,7 +123,7 @@ export class AgentToolError extends Error {}
 const TOOL_PATTERN = /^[A-Za-z][\w-]*(?:\([^(),]+\))?$/u;
 const MAX_TOOL_LENGTH = 200;
 
-export function isToolName(name: string): boolean {
+function isToolName(name: string): boolean {
   return name.length <= MAX_TOOL_LENGTH && TOOL_PATTERN.test(name);
 }
 
@@ -176,7 +176,7 @@ export function addTool(db: Db, input: { name: string; description?: string | nu
 }
 
 /** Agents whose saved tools include `name`. */
-export function agentsUsingTool(db: Db, name: string): string[] {
+function agentsUsingTool(db: Db, name: string): string[] {
   return db
     .select()
     .from(schema.agentConfigs)
@@ -203,7 +203,7 @@ export function removeTool(db: Db, name: string): void {
  */
 export function validateTools(db: Db, tools: readonly string[], agent?: string): string[] {
   const refused = isCustomStep(agent)
-    ? tools.filter((tool) => CUSTOM_AGENT_REFUSED_TOOLS.includes(tool))
+    ? tools.filter((tool) => CUSTOM_AGENT_REFUSED_TOOLS.has(tool))
     : [];
   if (refused.length > 0) {
     throw new AgentToolError(`A custom agent changes no file: remove ${refused.join(', ')}`);

@@ -5,7 +5,7 @@ import { stripAnsi } from './ansi';
 export const MAX_CI_LOG_LINES = 300;
 /** One block's text, at most this many characters (the log is cut first). */
 export const MAX_CI_TEXT_CHARS = 32_768;
-export const MAX_CI_ANNOTATIONS = 50;
+const MAX_CI_ANNOTATIONS = 50;
 
 export type CheckAnnotation = {
   path: string;

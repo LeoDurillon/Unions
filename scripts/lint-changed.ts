@@ -1,8 +1,7 @@
 // Lints only the TypeScript files changed since the last commit, and new ones: seconds instead of the
 // whole repository while working. `bun run check` still runs everything before finishing.
 
-/** Exported only so the file is a module (top-level await). */
-export async function git(args: string[]): Promise<string[]> {
+async function git(args: string[]): Promise<string[]> {
   const child = Bun.spawn(['git', ...args], { stdout: 'pipe' });
   const output = await new Response(child.stdout).text();
   return output.split('\n');

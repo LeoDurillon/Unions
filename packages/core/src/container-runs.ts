@@ -14,7 +14,7 @@ export type ContainerRun = typeof schema.containerRuns.$inferSelect;
 /** A run the rules refuse: a step is running, another run is on, a command too long. */
 export class ContainerRunError extends Error {}
 
-export const DEFAULT_RUN_TIMEOUT_SEC = 600;
+const DEFAULT_RUN_TIMEOUT_SEC = 600;
 export const MAX_RUN_TIMEOUT_SEC = 1800;
 export const MAX_COMMAND_CHARS = 4000;
 /** The output kept: its last lines, at most this many and this many characters. */

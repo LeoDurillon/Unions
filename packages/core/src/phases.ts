@@ -12,7 +12,7 @@ export type Step = PipelineStep | 'rebase' | 'retarget' | 'simplify' | StackStep
  * Splitting the pull request into a stack (`stack-states.ts`): planning the slices, rewriting the
  * history into them, and restacking them after a merge or a revision. Outside the pipeline too.
  */
-export type StackStep = 'split_plan' | 'split' | 'restack';
+type StackStep = 'split_plan' | 'split' | 'restack';
 /** A custom agent's step: `agent_<id>` of its `custom_agents` row; it runs like a planning step. */
 export type CustomStep = `agent_${number}`;
 export type PipelineStep = PlanningStep | CustomStep | 'implement' | 'final_review';

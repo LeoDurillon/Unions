@@ -97,7 +97,7 @@ function toCalls(rows: UsageRow[]): UsageCall[] {
 }
 
 /** Every model of every call, added up; the cost stays null only when no call reported one. */
-export function sumCalls(calls: UsageCall[]): UsageTotals {
+function sumCalls(calls: UsageCall[]): UsageTotals {
   const total = emptyTotals();
   for (const call of calls) {
     total.calls += 1;
@@ -124,7 +124,7 @@ function group(key: string, runId: number | null, calls: UsageCall[]): UsageGrou
  * A ticket's calls by step run, then its side runs (agent review, grouping, PR description) in one
  * group; an investigation's, one group per call.
  */
-export function groupUsage(rows: UsageRow[], byCall: boolean): UsageView {
+function groupUsage(rows: UsageRow[], byCall: boolean): UsageView {
   const calls = toCalls(rows);
   const runOf = new Map(rows.map((row) => [row.resultLineId, row.runId]));
   const groups: UsageGroup[] = [];

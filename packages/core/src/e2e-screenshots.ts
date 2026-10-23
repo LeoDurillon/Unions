@@ -10,7 +10,7 @@ import * as schema from './tables';
 import { emitEvent } from './tickets';
 
 /** Marks the files Union keeps from the last e2e run: the next run replaces them. */
-export const E2E_SCREENSHOT_NOTE = 'Screenshot of a failing end-to-end test, kept by Union';
+const E2E_SCREENSHOT_NOTE = 'Screenshot of a failing end-to-end test, kept by Union';
 
 /**
  * Replaces the ticket's e2e screenshots with `files` (none: just removes them). They are ticket files

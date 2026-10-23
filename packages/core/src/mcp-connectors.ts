@@ -9,7 +9,7 @@ export type McpConnector = typeof schema.mcpConnectors.$inferSelect;
 export type McpConnectorCheck = typeof schema.mcpConnectorChecks.$inferSelect;
 
 /** Every claude.ai connector's tools start with this: `mcp__claude_ai_Figma__get_screenshot`. */
-export const CONNECTOR_TOOL_PREFIX = 'mcp__claude_ai_';
+const CONNECTOR_TOOL_PREFIX = 'mcp__claude_ai_';
 
 /** `claude.ai Figma: https://mcp.figma.com/mcp - ✔ Connected` */
 const LIST_LINE = /^claude\.ai (?<name>.+?): (?<url>\S+) - (?<status>.+)$/u;

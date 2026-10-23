@@ -19,7 +19,7 @@ export type AgentDraft = Pick<
 >;
 
 /** A stack's other pull requests under review: each gets its own drafts, on its own head. */
-export type MemberDrafts = { reviewId: number; headSha: string; drafts: AgentDraft[] };
+type MemberDrafts = { reviewId: number; headSha: string; drafts: AgentDraft[] };
 
 export type AgentReviewOutcome =
   | { status: 'succeeded'; headSha: string; drafts: AgentDraft[]; others?: MemberDrafts[] }

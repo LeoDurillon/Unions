@@ -23,8 +23,8 @@ export class CustomAgentError extends Error {
 
 type Executor = Parameters<typeof emitEvent>[0];
 
-export const MAX_AGENT_NAME_CHARS = 40;
-export const MAX_AGENT_ROLE_CHARS = 2000;
+const MAX_AGENT_NAME_CHARS = 40;
+const MAX_AGENT_ROLE_CHARS = 2000;
 
 function nameOf(value: string): string {
   const name = value.replaceAll(/\s+/gu, ' ').trim();

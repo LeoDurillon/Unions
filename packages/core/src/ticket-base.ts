@@ -43,7 +43,7 @@ export function chooseBaseBranch(db: Db, ticketId: number, branch: string | null
 }
 
 /** Why the ticket starts from its branch: the user chose it, it is the parent's, or the project's. */
-export type BaseReason = 'chosen' | 'parent' | 'project';
+type BaseReason = 'chosen' | 'parent' | 'project';
 
 export type TicketBaseView = {
   /** Null only for a parent's branch not pushed yet. */

@@ -5,7 +5,6 @@ import type { Db } from './db';
 import * as schema from './tables';
 
 export type RefusedCommit = typeof schema.refusedCommits.$inferSelect;
-export type NewRefusedCommit = typeof schema.refusedCommits.$inferInsert;
 
 /** The ticket's last refused commit: the one a `commit_refused` phase is waiting on. */
 export function latestRefusal(db: Db, ticketId: number): RefusedCommit | undefined {
