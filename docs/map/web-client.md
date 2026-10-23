@@ -140,10 +140,11 @@ export); do not edit. Tests are left out.
 - `note-filter.tsx`: Whose reviews and comments the discussion shows: everyone's, people's only, or bots' only.
 - `pr-description.tsx`: The PR's description, rewritten by the agent when the work changed after the PR was opened.
 - `simplify-history.tsx`: The Simplify history button: the implementation agent rewrites the branch&apos;s commits, the code unchanged.
+- `slice-ci.tsx`: A slice's CI in one word (failed, running, passed), its counts by state on hover.
 - `split-stack.tsx`: The Split into a stack button: an agent plans slices of the spec, then the branch becomes a stack of pull requests.
 - `stack-actions.tsx`: What can be done to a split ticket's whole stack: how far it is behind its base, Rebase, Restack, Split again.
-- `stack-panel.tsx`: A split ticket's stack in its PR tab: one line per slice, what went wrong, what can be done to it, and how it merges.
-- `stack-slice-row.tsx`: One slice of a split ticket's stack on one line: its pull request (linked), state and title; its branch on hover.
+- `stack-panel.tsx`: A split ticket's stack in its PR tab: one line per slice with its CI, what went wrong, what can be done to it, and how it merges.
+- `stack-slice-row.tsx`: One slice of a split ticket's stack on one line: its pull request (linked), state, CI and title; its branch on hover.
 
 ## components/pull-requests/
 
@@ -361,6 +362,7 @@ export); do not edit. Tests are left out.
 - `use-running-previews.ts`: The previews running across projects (read again every few seconds: a pull request's send no events), and stopping one.
 - `use-selected-ticket.ts`: The open ticket lives in the URL (`?ticket=3`), so it survives reloads and back/forward.
 - `use-settings-form.ts`: A settings page's form: what is edited, whether it differs from what was saved, and its one Save.
+- `use-stack-checks.ts`: The CI of a split ticket's open slices, read from GitHub when the PR tab opens and every 30 s while a check runs.
 - `use-stored-number.ts`: A number remembered in localStorage; storage being unavailable only loses the memory.
 - `use-ticket-commands.ts`: The hook that sends commands for a ticket and refreshes what the page shows afterwards.
 - `use-ticket-edit.ts`: Saves the ticket's edited title and description: queued for the worker, done when its event comes in.

@@ -1,7 +1,10 @@
-// A split ticket's stack in its PR tab: one line per slice, what went wrong, what can be done to it, and how it merges.
+// A split ticket's stack in its PR tab: one line per slice with its CI, what went wrong, what can be done to it, and how it merges.
 import type { ReactElement } from 'react';
 
 import type { StackView, TicketDetail } from '../../../src/api-types';
+import type { CheckCounts } from '../../../src/ci-api-types';
+import { useStackChecks } from '../../lib/use-stack-checks';
+import { ErrorText } from '../ui';
 import { StackActions } from './stack-actions';
 import { StackSliceRow } from './stack-slice-row';
 
@@ -59,9 +62,12 @@ function HowItWorks({ stack }: { stack: StackView }): ReactElement {
 export function StackPanel({ detail }: { detail: TicketDetail }): ReactElement | null {
   const { ticket, project } = detail;
   const { stack } = ticket;
+  const checks = useStackChecks(ticket.id, Boolean(stack) && ticket.prState === 'open');
   if (!stack) {
     return null;
   }
+  const ciOf = (position: number): CheckCounts | null | undefined =>
+    checks.data?.slices.find((slice) => slice.position === position)?.counts;
   return (
     <div className="space-y-2 rounded-md border border-zinc-200 p-3 text-sm dark:border-zinc-800">
       <div className="flex flex-wrap items-baseline gap-2">
@@ -75,9 +81,11 @@ export function StackPanel({ detail }: { detail: TicketDetail }): ReactElement |
             slice={slice}
             project={project}
             current={slice.prNumber !== null && slice.prNumber === ticket.prNumber}
+            ci={ciOf(slice.position)}
           />
         ))}
       </ol>
+      <ErrorText error={checks.error} />
       <Problems stack={stack} />
       <StackActions detail={detail} />
       <HowItWorks stack={stack} />

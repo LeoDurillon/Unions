@@ -1,4 +1,4 @@
-// `/api/tickets/:id/pr-checks`: the pull request's CI checks read from GitHub, the failed ones (with related jobs and bot comments) given to the implementer, a failed Actions job run again.
+// `/api/tickets/:id/pr-checks`: the pull request's CI checks read from GitHub, the failed ones (with related jobs and bot comments) given to the implementer, a failed Actions job run again, each open slice's checks counted.
 import {
   CiOutputError,
   dropCiOutput,
@@ -21,6 +21,7 @@ import { parsePicks, readPicks, type CiSource } from '../ci-picks';
 import { queueRerun } from '../ci-rerun';
 import type { CiGitHub } from '../github-checks';
 import { ACCEPTED, BAD_GATEWAY, CONFLICT, fail, NOT_FOUND, readObject, requireId } from '../http';
+import { stackChecks } from '../stack-checks';
 import { guarded } from './github-errors';
 
 const FORBIDDEN = 403;
@@ -161,6 +162,10 @@ async function rerun(db: Db, loaded: Loaded, c: Context): Promise<Response> {
 export function prChecksRoutes(db: Db, ci: CiGitHub): Hono {
   const routes = new Hono();
   routes.get('/', async (c) => c.json(await view(db, load(db, ci, c))));
+  routes.get('/stack', async (c) => {
+    const { ticket, source } = load(db, ci, c);
+    return c.json(await readGitHub(() => stackChecks(db, ticket.id, source)));
+  });
   routes.post('/preview', async (c) => {
     const { items } = await picked(load(db, ci, c), c);
     const preview: CiPreview = { items };

@@ -50,3 +50,11 @@ export type CiGivenView = { given: CiOutput[] };
 
 /** The text each pick gives the implementer, built but not stored. */
 export type CiPreview = { items: NewCiOutput[] };
+
+/** How many checks of a pull request's head are in each state. */
+export type CheckCounts = Record<CheckState, number>;
+
+/** One open slice of a split ticket and its checks; `counts` null when GitHub has no such PR. */
+export type SliceChecks = { position: number; prNumber: number; counts: CheckCounts | null };
+
+export type StackChecksView = { slices: SliceChecks[] };
