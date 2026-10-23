@@ -1,10 +1,10 @@
 import { diffExcerpt, githubText, schema, type Db } from '@union/core';
-import { and, desc, eq, isNotNull } from 'drizzle-orm';
+import { and, eq, isNotNull } from 'drizzle-orm';
 
 import type { PullRequestNote, PullRequestThread, ReviewImportResult } from './api-types';
+import type { ImportAnchor, Snapshot } from './slice-snapshot';
 
 type Thread = PullRequestThread;
-type Snapshot = { headSha: string; patches: Map<string, string> };
 type Draft = Omit<typeof schema.reviewComments.$inferInsert, 'ticketId'>;
 
 /** The thread as one comment: who said what, the first comment then the replies. */
@@ -78,27 +78,6 @@ export function draftFromThread(thread: Thread, snapshot: Snapshot | null): Draf
   };
 }
 
-function loadSnapshot(db: Db, ticketId: number): Snapshot | null {
-  const snapshot = db
-    .select()
-    .from(schema.diffSnapshots)
-    .where(eq(schema.diffSnapshots.ticketId, ticketId))
-    .orderBy(desc(schema.diffSnapshots.id))
-    .get();
-  if (!snapshot) {
-    return null;
-  }
-  const files = db
-    .select()
-    .from(schema.diffFiles)
-    .where(eq(schema.diffFiles.snapshotId, snapshot.id))
-    .all();
-  return {
-    headSha: snapshot.headSha,
-    patches: new Map(files.map((file) => [file.path, file.patch])),
-  };
-}
-
 /** The GitHub links of everything already imported on the ticket (sent or not). */
 export function importedUrls(db: Db, ticketId: number): string[] {
   return db
@@ -111,10 +90,18 @@ export function importedUrls(db: Db, ticketId: number): string[] {
     .flatMap((row) => (row.url === null ? [] : [row.url]));
 }
 
-/** Adds the unresolved threads not imported yet as draft comments on the ticket. */
-export function importThreads(db: Db, ticketId: number, threads: Thread[]): ReviewImportResult {
+/**
+ * Adds the unresolved threads not imported yet as draft comments on the ticket, on the diff of
+ * `anchor` (a slice's own when the pull request is a slice's).
+ */
+export function importThreads(
+  db: Db,
+  ticketId: number,
+  threads: Thread[],
+  anchor: ImportAnchor,
+): ReviewImportResult {
   const known = new Set(importedUrls(db, ticketId));
-  const snapshot = loadSnapshot(db, ticketId);
+  const { snapshot, slicePosition } = anchor;
   const result: ReviewImportResult = { imported: 0, alreadyImported: 0, resolved: 0 };
   const drafts: Draft[] = [];
   for (const thread of threads) {
@@ -129,7 +116,7 @@ export function importThreads(db: Db, ticketId: number, threads: Thread[]): Revi
   }
   if (drafts.length > 0) {
     db.insert(schema.reviewComments)
-      .values(drafts.map((draft) => ({ ...draft, ticketId })))
+      .values(drafts.map((draft) => ({ ...draft, ticketId, slicePosition })))
       .run();
   }
   result.imported = drafts.length;
@@ -156,7 +143,12 @@ export function noteBody(note: PullRequestNote): string {
  * Adds a review summary or conversation comment as a general draft (about the whole pull request);
  * false when it was imported already.
  */
-export function importNote(db: Db, ticketId: number, note: PullRequestNote): boolean {
+export function importNote(
+  db: Db,
+  ticketId: number,
+  note: PullRequestNote,
+  anchor: ImportAnchor,
+): boolean {
   if (importedUrls(db, ticketId).includes(note.url)) {
     return false;
   }
@@ -170,8 +162,9 @@ export function importNote(db: Db, ticketId: number, note: PullRequestNote): boo
       endLine: 0,
       excerpt: '',
       body: noteBody(note),
-      headSha: loadSnapshot(db, ticketId)?.headSha ?? '',
+      headSha: anchor.snapshot?.headSha ?? '',
       githubUrl: note.url,
+      slicePosition: anchor.slicePosition,
     })
     .run();
   return true;

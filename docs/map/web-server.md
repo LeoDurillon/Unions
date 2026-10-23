@@ -40,6 +40,7 @@ export); do not edit. Tests are left out.
 - `running-previews-types.ts`: The previews running across projects, as the Previews page and the sidebar's count read them.
 - `server.ts`: The web server's entry point: opens the database, migrates it and serves the API and the client.
 - `services.ts`: The outside services the API routes may call: GitHub (the wizard's and the PR tab's reads, its CI), Notion.
+- `slice-snapshot.ts`: The diff a ticket's comments are anchored in: its whole change, or one slice's own change when split.
 - `stack-checks.ts`: The CI of a split ticket's open slices, one count per check state for each slice's pull request.
 - `ticket-pull-request.ts`: The pull request a ticket's PR tab reads: its own, or one of its stack's slices' picked with `?pr=`.
 - `union-update-types.ts`: Union's own update as the sidebar reads it: the last check, the update's state, and the work a restart would interrupt.

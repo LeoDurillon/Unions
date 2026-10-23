@@ -76,6 +76,9 @@ While the pull request is open, the PR tab shows **Split into a stack**, usable 
 - The diff snapshot also holds each slice's own diff (`slice` rows of `diff_commits`). The review page's commit
   picker lists the slices (`slice-<n>`), read only like a commit. Comments are written on the whole stack's diff;
   the review sent to the implementer says, under each file, which slices change it.
+- Comments imported from a slice's pull request (the PR tab with that slice picked) land on that slice's own diff,
+  as GitHub shows them, and go out of date when that slice's tip moves. Plan for reviewing slice by slice:
+  [slice-reviews.md](../plans/slice-reviews.md).
 - **Review with agent** on a split ticket gets each slice's range (`git diff <below>...<tip>`) and part of the
   spec, and is asked to start each finding with its slice.
 

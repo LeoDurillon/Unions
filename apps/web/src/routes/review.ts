@@ -18,7 +18,7 @@ import {
   draftsOf,
   editComment,
   keepComment,
-  listComments,
+  listTicketComments,
   markSent,
   type CommentDiff,
   type CommentOwner,
@@ -220,7 +220,7 @@ export function reviewRoutes(db: Db, github: OnboardingGitHub): Hono {
   routes.get('/:id/diff/files/:fileId', (c) => getFile(db, c));
   routes.get('/:id/comments', (c) => {
     const ticket = loadTicket(db, c);
-    return listComments(c, db, owner(ticket), latestSnapshot(db, ticket.id)?.headSha);
+    return listTicketComments(c, db, ticket.id, latestSnapshot(db, ticket.id)?.headSha);
   });
   routes.post('/:id/comments', (c) => {
     const ticket = loadTicket(db, c);

@@ -142,7 +142,7 @@ export function prReviewRoutes(db: Db, github: OnboardingGitHub): Hono {
   routes.get('/diff/files/:fileId', (c) => getFile(db, c));
   routes.get('/comments', (c) => {
     const { review } = load(db, c);
-    return listComments(c, db, owner(review), review.headSha ?? undefined);
+    return listComments(c, db, owner(review), { head: review.headSha ?? undefined });
   });
   routes.post('/comments', (c) => {
     const { review } = load(db, c);

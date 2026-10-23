@@ -6,6 +6,7 @@ import type { DiscussionResponse, PullRequestDiscussion } from '../api-types';
 import type { OnboardingGitHub } from '../github-onboarding';
 import { CONFLICT, CREATED, fail, NOT_FOUND, readObject, requireText } from '../http';
 import { importedUrls, importNote, importThreads } from '../review-import';
+import { importAnchor } from '../slice-snapshot';
 import { pickedPullRequest } from '../ticket-pull-request';
 import { guarded } from './github-errors';
 
@@ -64,8 +65,9 @@ export async function importPullRequestComments(
   ticket: Ticket,
   c: Context,
 ): Promise<Response> {
-  const { discussion } = await fetchFor(db, github, ticket, c);
-  return c.json(importThreads(db, ticket.id, discussion.threads));
+  const { number, discussion } = await fetchFor(db, github, ticket, c);
+  const anchor = importAnchor(db, ticket.id, number);
+  return c.json(importThreads(db, ticket.id, discussion.threads, anchor));
 }
 
 /** Imports one review summary or conversation comment, picked by its GitHub link, as a general draft. */
@@ -76,12 +78,12 @@ export async function importPullRequestNote(
   c: Context,
 ): Promise<Response> {
   const url = requireText(await readObject(c.req.raw), 'url');
-  const { discussion } = await fetchFor(db, github, ticket, c);
+  const { number, discussion } = await fetchFor(db, github, ticket, c);
   const note = discussion.notes.find((candidate) => candidate.url === url);
   if (!note) {
     throw fail(NOT_FOUND, 'That comment is not in the pull request discussion');
   }
-  if (!importNote(db, ticket.id, note)) {
+  if (!importNote(db, ticket.id, note, importAnchor(db, ticket.id, number))) {
     throw fail(CONFLICT, 'That comment is already among the review comments');
   }
   return c.json({ url }, CREATED);

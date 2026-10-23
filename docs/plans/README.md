@@ -21,7 +21,7 @@ and linked.
   page picks a PR in a segmented control, and the agent reviews the whole stack against several specs linked to its
   PRs. Built, steps 1 to 4 (branch `stacked-pr-reviews`); one v1 item left (the size warning).
 - [Review a split ticket slice by slice](slice-reviews.md): a slice picker on the ticket's review page, comments
-  written on a slice's own diff, and the GitHub import pulling every slice's pull request onto its slice. Planned.
+  written on a slice's own diff, and the GitHub import pulling every slice's pull request onto its slice. Step 1 built (branch `slice-reviews`).
 - [Read stacks from GitHub](github-stack-reads.md): the Pull requests and Current reviews tabs, the stack agent
   review and the stack's Notion link take stacks from GitHub's stacks API instead of chaining branches. Built
   (branch `github-stack-reads`, 2026-10-21).

@@ -94,6 +94,11 @@ export const reviewComments = sqliteTable(
     sentAt: integer('sent_at'),
     /** Set when imported from the pull request (a thread's first comment, a review, a comment): a re-import skips it. */
     githubUrl: text('github_url'),
+    /**
+     * A split ticket's slice whose own diff the comment is on (its `head_sha` is that slice's tip);
+     * null when it is on the whole change.
+     */
+    slicePosition: integer('slice_position'),
     createdAt: integer('created_at').notNull().default(now),
   },
   (t) => [

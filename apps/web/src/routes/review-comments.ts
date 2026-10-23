@@ -13,6 +13,7 @@ import {
   requireId,
   requireText,
 } from '../http';
+import { sliceTips } from '../slice-snapshot';
 
 type Comment = typeof schema.reviewComments.$inferSelect;
 type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
@@ -43,12 +44,18 @@ export function draftsOf(db: Db, owner: CommentOwner): Comment[] {
     .all();
 }
 
-/** Every comment, each marked outdated when it was written on another head than `head`. */
+/** The heads comments are checked against: the whole change's, and each slice's tip by position. */
+export type CommentHeads = { head: string | undefined; tips?: ReadonlyMap<number, string> };
+
+/**
+ * Every comment, each marked outdated when it was written on another head than `head` (for a
+ * slice's comment, another tip than its slice's).
+ */
 export function listComments(
   c: Context,
   db: Db,
   owner: CommentOwner,
-  head: string | undefined,
+  { head, tips = new Map<number, string>() }: CommentHeads,
 ): Response {
   const rows = db
     .select()
@@ -56,11 +63,27 @@ export function listComments(
     .where(owns(owner))
     .orderBy(schema.reviewComments.id)
     .all();
-  const views: CommentView[] = rows.map((row) =>
+  const views: CommentView[] = rows.map((row) => {
+    const current = row.slicePosition === null ? head : tips.get(row.slicePosition);
     // General comments are about the whole pull request: they never go out of date.
-    Object.assign(row, { outdated: row.kind === 'line' && row.headSha !== head }),
-  );
+    return Object.assign(row, { outdated: row.kind === 'line' && row.headSha !== current });
+  });
   return c.json(views);
+}
+
+/** A ticket's comments: on its whole change, or on its slices' own changes once split. */
+export function listTicketComments(
+  c: Context,
+  db: Db,
+  ticketId: number,
+  head: string | undefined,
+): Response {
+  return listComments(
+    c,
+    db,
+    { kind: 'ticket', id: ticketId },
+    { head, tips: sliceTips(db, ticketId) },
+  );
 }
 
 function rangeOf(body: Record<string, unknown>): {

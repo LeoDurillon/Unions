@@ -35,7 +35,9 @@
   sent; sending formats them (`review-feedback.ts`) into a normal `revise` command. The ticket panel's PR tab
   (`pull-request-tab.tsx`, `pull-request/`) shows the linked PR's discussion (`OnboardingGitHub.getDiscussion`,
   `github-discussion.ts`); `routes/review-import.ts` and `review-import.ts` import threads (line drafts) and single
-  review summaries or comments (`general` drafts). The PR's CI checks (`routes/pr-checks.ts`,
+  review summaries or comments (`general` drafts). On a split ticket, what comes from a slice's pull request is
+  anchored on that slice's own diff (`slice-snapshot.ts`: `review_comments.slice_position`, `head_sha` the slice's
+  tip, outdated once the slice's tip moves). The PR's CI checks (`routes/pr-checks.ts`,
   `/api/tickets/:id/pr-checks`) are read through `CiGitHub` (`github-checks.ts`, beside `OnboardingGitHub` in
   `ApiServices`): the head commit's check runs and statuses and the PR's bot comments; a pick (a failed check, another
   Actions job, a bot comment) is read again and turned into the implementer's text (`ci-picks.ts`, core
