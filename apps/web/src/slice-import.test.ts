@@ -4,7 +4,12 @@ import { createDb, createTicket, migrateDb, parseDiff, schema, type Db } from '@
 import { eq } from 'drizzle-orm';
 import type { Hono } from 'hono';
 
-import type { CommentView, PullRequestNote, PullRequestThread } from './api-types';
+import type {
+  CommentView,
+  PullRequestNote,
+  PullRequestThread,
+  StackImportResult,
+} from './api-types';
 import { createApp } from './app';
 import type { OnboardingGitHub } from './github-onboarding';
 
@@ -196,4 +201,24 @@ test("a comment written on a slice is on that slice's own lines", async () => {
     },
   ]);
   expect((await post('/comments?slice=9', lines)).status).toBe(404);
+});
+
+test("the stack import reads every open slice's pull request onto its slice", async () => {
+  const results = (await (await post('/comments/import-stack')).json()) as StackImportResult;
+  expect(results).toEqual([
+    { number: 41, imported: 1, alreadyImported: 0, resolved: 0 },
+    { number: 42, imported: 1, alreadyImported: 0, resolved: 0 },
+  ]);
+  expect((await comments()).map((comment) => comment.slicePosition)).toEqual([1, 2]);
+});
+
+test('the stack import skips merged slices, and is refused on a ticket not split', async () => {
+  db.update(schema.ticketSlices)
+    .set({ prState: 'merged' })
+    .where(eq(schema.ticketSlices.position, 1))
+    .run();
+  const results = (await (await post('/comments/import-stack')).json()) as StackImportResult;
+  expect(results.map((result) => result.number)).toEqual([42]);
+  db.delete(schema.ticketSlices).run();
+  expect((await post('/comments/import-stack')).status).toBe(409);
 });

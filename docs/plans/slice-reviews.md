@@ -1,6 +1,6 @@
 # Plan: review a split ticket slice by slice
 
-Status: steps 1 and 2 built (branch `slice-reviews`, 2026-10-23); steps 3 to 5 left.
+Status: steps 1 to 3 built (branch `slice-reviews`, 2026-10-23); steps 4 and 5 left.
 
 ## Idea
 

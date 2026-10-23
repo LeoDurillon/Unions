@@ -22,7 +22,12 @@ import {
   markSent,
   type CommentOwner,
 } from './review-comments';
-import { getDiscussion, importPullRequestComments, importPullRequestNote } from './review-import';
+import {
+  getDiscussion,
+  importPullRequestComments,
+  importPullRequestNote,
+  importStackComments,
+} from './review-import';
 
 function loadTicket(db: Db, c: Context): Ticket {
   const id = requireId(c.req.param('id'), 'ticket id');
@@ -217,6 +222,9 @@ export function reviewRoutes(db: Db, github: OnboardingGitHub): Hono {
   );
   routes.post('/:id/comments/import', (c) =>
     importPullRequestComments(db, github, loadTicket(db, c), c),
+  );
+  routes.post('/:id/comments/import-stack', (c) =>
+    importStackComments(db, github, loadTicket(db, c), c),
   );
   routes.post('/:id/comments/import-note', (c) =>
     importPullRequestNote(db, github, loadTicket(db, c), c),

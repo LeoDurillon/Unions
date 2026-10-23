@@ -322,6 +322,9 @@ export type DiscussionResponse = PullRequestDiscussion & {
 /** What an import from the pull request did. */
 export type ReviewImportResult = { imported: number; alreadyImported: number; resolved: number };
 
+/** A split ticket's import from its stack: what each open slice's pull request gave, bottom first. */
+export type StackImportResult = (ReviewImportResult & { number: number })[];
+
 /** A GitHub issue of the project's repository, as fetched to create a ticket from it. */
 export type GitHubIssue = {
   number: number;

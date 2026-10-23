@@ -29,6 +29,7 @@ import type {
   PullRequestListItem,
   RepoOption,
   ReviewImportResult,
+  StackImportResult,
   TicketDetail,
   TicketSummary,
   Viewer,
@@ -218,6 +219,8 @@ export const api = {
     request('GET', `${base}/discussion`),
   importReviewComments: (id: number, pr: number): Promise<ReviewImportResult> =>
     request('POST', `/api/tickets/${id}/comments/import?pr=${pr}`),
+  importStackComments: (id: number): Promise<StackImportResult> =>
+    request('POST', `/api/tickets/${id}/comments/import-stack`),
   importReviewNote: (id: number, url: string, pr: number): Promise<unknown> =>
     request('POST', `/api/tickets/${id}/comments/import-note?pr=${pr}`, { url }),
   /** `refresh`: ask GitHub now, not the list the server kept. */

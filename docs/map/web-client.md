@@ -196,7 +196,7 @@ export); do not edit. Tests are left out.
 - `group-by-spec-button.tsx`: Asks an agent to group the changed files by the parts of a specification; shows where it stands.
 - `group-by-spec-dialog.tsx`: Picks the specification the change is grouped by, shows its text (editable: keep only the part that matters), and starts the agent.
 - `hunk-focus.tsx`: A file opened under a part of the spec (By spec): only the hunks of that part, with a bar to show them all, and each hunk header tagged with the parts it serve…
-- `import-comments.tsx`: Pulls the linked pull request's unresolved review threads in as draft comments.
+- `import-comments.tsx`: Pulls the linked pull request's unresolved review threads in as draft comments; on a split ticket, every open slice's pull request, each onto its slice.
 - `open-file.tsx`: One file of the review: its diff, the threads under their lines, and the outdated comments.
 - `review-header.tsx`: Back, what is reviewed and at which commit, the GitHub import (tickets), the layout switch and Send.
 - `review-page.tsx`: The review page, with its Explain panel's state.

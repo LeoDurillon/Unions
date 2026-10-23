@@ -13,6 +13,7 @@ import {
   type DiffResponse,
   type DiscussionResponse,
   type ReviewImportResult,
+  type StackImportResult,
 } from '../../src/api-types';
 import { agentReviewApi } from './agent-review-api';
 import { api, request } from './api';
@@ -189,4 +190,20 @@ export function useImportMutations(
       onSuccess: refresh,
     }),
   };
+}
+
+/** A split ticket's import from every open slice's pull request, each onto its slice. */
+export function useStackImport(
+  ticketId: number,
+): ReturnType<typeof useMutation<StackImportResult, Error, void>> {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => api.importStackComments(ticketId),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['review', ticketReviewBase(ticketId)] }),
+        queryClient.invalidateQueries({ queryKey: ['pull-request', ticketId] }),
+      ]);
+    },
+  });
 }

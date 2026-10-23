@@ -79,8 +79,10 @@ While the pull request is open, the PR tab shows **Split into a stack**, usable 
   comments are written on it (`review_comments.slice_position`, `head_sha` the slice's tip); they go out of date
   when that slice's tip moves. All shows the whole-change comments, and those of slices a new split removed.
 - The review sent to the implementer says, under each file, which slices change it.
-- Comments imported from a slice's pull request (the PR tab with that slice picked) land on that slice's own diff,
-  as GitHub shows them. Plan for the rest: [slice-reviews.md](../plans/slice-reviews.md).
+- **Import from the stack** (the review header of a split ticket) reads the unresolved threads of every open
+  slice's pull request, each landing on its slice's own diff as GitHub shows it, and says what each pull request
+  gave; merged and closed slices are skipped. The PR tab's import of one slice's pull request lands the same way.
+  Plan for the rest: [slice-reviews.md](../plans/slice-reviews.md).
 - **Review with agent** on a split ticket gets each slice's range (`git diff <below>...<tip>`) and part of the
   spec, and is asked to start each finding with its slice.
 
