@@ -54,14 +54,23 @@ export async function moveOnGitHub(
   project: Project,
   input: { number: number; to: string },
 ): Promise<string> {
+  await api.updatePullRequestBase(repoOf(project), input.number, input.to);
+  return dropBuildsOn(api, project, input.number);
+}
+
+/** Drops the "Builds on" line Union wrote while the PR targeted its parent's; a failure is only reported. */
+export async function dropBuildsOn(
+  api: GitHubApi,
+  project: Project,
+  number: number,
+): Promise<string> {
   const repo = repoOf(project);
-  await api.updatePullRequestBase(repo, input.number, input.to);
   try {
-    const body = await api.pullRequestBody(repo, input.number);
+    const body = await api.pullRequestBody(repo, number);
     const parts = body.replaceAll('\r\n', '\n').split(/\n{2,}/u);
     const kept = parts.filter((part) => !BUILDS_ON_LINK.test(part.trim()));
     if (kept.length < parts.length) {
-      await api.updatePullRequestBody(repo, input.number, kept.join('\n\n').trim());
+      await api.updatePullRequestBody(repo, number, kept.join('\n\n').trim());
     }
     return '';
   } catch (error) {

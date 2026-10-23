@@ -43,6 +43,23 @@ The host pushes the result.
    keeping the review from before, or to Done. Accepted risk: a clean rebase with green checks can still change
    behaviour no test covers; the pull request's human review is there for that.
 
+## Base moved on GitHub
+
+When the base's own pull request merges and GitHub deletes its branch, GitHub moves the ticket's pull request
+onto the base's target by itself (a user may also edit the base there). During its regular pull the worker
+notices that the open PR targets another branch than the ticket's base and follows it: `base_branch` and
+`chosen_base_branch` become GitHub's, and the branch left is kept in `tickets.left_base` with its merged pull
+request (`base_followed` event). Only the database changes; nothing is pushed or edited on GitHub. Not while a step
+runs or is paused (the next pull follows), and not for a split ticket (its stack follows GitHub on its own).
+
+The PR tab then says "`<old>` was merged (#n): the pull request now targets `<new>`". The next **Rebase** moves
+only the ticket's own commits, as a [change of target](retarget.md) does (`git rebase --onto origin/<new> <fork>`,
+and the check that none of the old base's commits came along), so it works after a squash merge too. The old base
+is read from its merged pull request's `refs/pull/<n>/head` (kept by GitHub after the branch is deleted), else from
+its branch, else from the workspace's last copy; with none of them, a plain rebase runs and the Log says so. Once
+pushed, `left_base` is cleared and the "Builds on" line removed from the description. A step that runs before that
+rebase (a revision, the final review) first gets the new base fetched into the workspace.
+
 ## Failure
 
 - Conflicts the agent cannot resolve, checks that still fail, or any other failure: the host aborts any rebase in

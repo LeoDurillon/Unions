@@ -11,8 +11,9 @@ a ticket split into a stack (split it again on the new base). A merged pull requ
    GitHub and is not the current base, then queues `retarget` with `{ branch }`. The worker keeps the branch in
    `tickets.retarget_branch` (for retries) and starts the `retarget` step.
 2. **The base it leaves** is the pull request's base on GitHub now (GitHub retargets a child's PR by itself when
-   its parent's branch is deleted); when GitHub already targets the new branch, the ticket's own base. Both
-   branches must exist on GitHub.
+   its parent's branch is deleted); when GitHub already targets the new branch, the base it moved the PR off
+   ([followed](rebase.md#base-moved-on-github)), else the ticket's own base. The new branch must exist on
+   GitHub; the one left must too, or have a merged pull request, whose `refs/pull/<n>/head` stands for it.
 3. **Host first:** as for a [rebase](rebase.md), the host fetches the old base, the new one and the pushed
    branch, then moves only the branch's own commits: `git rebase --onto origin/<new> <fork>`, where `<fork>` is
    `git merge-base <branch> origin/<old>`. The old base's commits that the new one lacks stay behind. Clean with

@@ -8,11 +8,12 @@ import {
   type AnySQLiteColumn,
 } from 'drizzle-orm/sqlite-core';
 
-import type { InvestigationExchange, ProjectConfig } from './schema-types';
+import type { InvestigationExchange, LeftBase, ProjectConfig } from './schema-types';
 import type { AgentEffort, AgentModel, BoardStatus, Phase, PipelineStep, Step } from './states';
 
 export type {
   InvestigationExchange,
+  LeftBase,
   ProjectConfig,
   ProjectScript,
   PullRequestFile,
@@ -89,6 +90,8 @@ export const tickets = sqliteTable(
     chosenBaseBranch: text('chosen_base_branch'),
     /** The base a change of target moves the branch onto, kept while it runs (or failed); null: none. */
     retargetBranch: text('retarget_branch'),
+    /** The base GitHub moved the pull request away from: the next rebase leaves its commits behind. */
+    leftBase: text('left_base', { mode: 'json' }).$type<LeftBase>(),
     /** The diff snapshot's head when the user last sent a review: "since last review" starts there. */
     reviewedSha: text('reviewed_sha'),
     prNumber: integer('pr_number'),

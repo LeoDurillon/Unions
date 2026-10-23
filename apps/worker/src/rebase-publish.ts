@@ -81,7 +81,8 @@ export function pauseRebase(
 ): StepResult {
   return pauseOnRefusal(rebase.deps.db, {
     ticketId: rebase.context.ticket.id,
-    step: rebase.retarget ? 'retarget' : 'rebase',
+    // A rebase that leaves a followed base moves like a change of target but stays a rebase.
+    step: rebase.context.step === 'retarget' ? 'retarget' : 'rebase',
     refused,
     report: outcome.text,
     sessionId: outcome.sessionId,

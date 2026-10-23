@@ -14,7 +14,9 @@ ticket's Overview while it is in the backlog (`tickets.parent_ticket_id`; cycles
   While the ticket is in Backlog the user can choose its base in Overview (`tickets.chosen_base_branch`, any branch
   of the repository, checked on GitHub when saved); it wins over the parent's branch at the first clone, unless it is
   gone by then (`chosen_base_missing` event, automatic choice).
-  Once started, the base changes only through a [change of target](retarget.md) from the PR tab.
+  Once started, the base changes only through a [change of target](retarget.md) from the PR tab, or when GitHub
+  moves the pull request onto another branch (the parent merged and its branch deleted): the ticket
+  [follows it](rebase.md#base-moved-on-github).
   The choice is stored in `tickets.base_branch` and used everywhere the project's base was: clone, the ticket
   branch's starting point, the review's `git diff <base>...HEAD`, the diff snapshot, and the PR base. A stacked PR
   says "Builds on #<parent PR>, which it targets: merge that one first."

@@ -21,6 +21,15 @@ type TicketPayloads = {
   ticket_base_chosen: { branch: string | null };
   /** The branch was moved onto another base and its pull request now targets it. */
   ticket_retargeted: { from: string; to: string; number: number };
+  /** GitHub moved the pull request onto `to` (`from` merged, or the base edited there): the ticket's base too. */
+  base_followed: {
+    from: string;
+    to: string;
+    prNumber: number | null;
+    reason: 'merged' | 'edited';
+  };
+  /** A rebase moved the branch off the base it left: the notice goes. */
+  left_base_dropped: { branch: string };
   ticket_flow_chosen: { flow: Column<typeof tables.tickets, 'flow'> };
   ticket_updated_from_github: Nothing;
   /** The user edited the title or description in Union; the issue on GitHub has it too. */

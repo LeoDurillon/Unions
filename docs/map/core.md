@@ -47,6 +47,7 @@ export); do not edit. Tests are left out.
 - `flow-edit.ts`: Editing a flow in the settings or a ticket's Custom flow: planning steps on or off, custom agents added and moved; browser-safe.
 - `flow-settings.ts`: A project's flow presets as the settings send them, checked: unique ids and names, valid steps, a default among them.
 - `flows.ts`: Ticket flows: the steps a ticket runs, the presets a project offers, and what agents are told of skipped steps.
+- `followed-base.ts`: When the ticket's pull request targets another branch on GitHub than the ticket's base: the base to follow.
 - `github-auth.ts`: A project's installation wins over its token; `fallbackToken` (the `GITHUB_TOKEN` environment variable) covers projects with neither.
 - `github-client.ts`: One client per credential, kept for the process: an installation client mints its own short-lived token (one hour) and refreshes it before it expires, so it mu…
 - `github-project-fields.ts`: Reading a GitHub Project's fields (the ones a rule can set) and setting one on an item: queries and parsing, for the web and the worker.

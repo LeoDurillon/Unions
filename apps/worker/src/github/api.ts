@@ -103,6 +103,8 @@ export type GitHubApi = {
   listProjectItems(projectNodeId: string): Promise<RemoteItem[]>;
   /** The open pull request whose head is `branch` in the same repository, if any. */
   findPullRequest(repo: RepoRef, branch: string): Promise<PullRequestRef | null>;
+  /** The number of the last merged pull request from `branch`; null when none was merged. */
+  mergedPullRequest(repo: RepoRef, branch: string): Promise<number | null>;
   createPullRequest(
     repo: RepoRef,
     input: { title: string; body: string; head: string; base: string },

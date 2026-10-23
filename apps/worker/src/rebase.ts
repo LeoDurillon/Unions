@@ -1,49 +1,16 @@
-import { getTicket, schema, ticketBase, type Db, type Project } from '@union/core';
-import { eq } from 'drizzle-orm';
-
 import type { ImplementDeps } from './implement-checks';
-import { ensureTicketContainer } from './provision';
+import { afterFollowed, followedMove } from './left-base';
 import type { Rebase } from './rebase-agent';
 import { attempt } from './rebase-attempt';
-import { headCommit, restoreBranch } from './rebase-git';
+import { restoreBranch } from './rebase-git';
+import { prepareBranch } from './rebase-prepare';
 import { pausedRebase, published, resumeRebase } from './rebase-publish';
 import type { StepContext, StepResult } from './scheduler';
-import { ensureBranch } from './workspace-git';
-
-function loadProject(db: Db, projectId: number): Project {
-  const project = db.select().from(schema.projects).where(eq(schema.projects.id, projectId)).get();
-  if (!project) {
-    throw new Error(`Project ${projectId} not found`);
-  }
-  return project;
-}
-
-/** The ticket's container on its branch, and the commit to put back if the run fails. */
-export async function prepareBranch(deps: ImplementDeps, context: StepContext): Promise<Rebase> {
-  const project = loadProject(deps.db, context.ticket.projectId);
-  const { name } = await ensureTicketContainer(deps.db, deps.runtime, deps.config, context.ticket);
-  const ticket = getTicket(deps.db, context.ticket.id);
-  if (!ticket.branch) {
-    throw new Error('The ticket has no branch yet');
-  }
-  const base = ticketBase(project, ticket);
-  await ensureBranch(deps.runtime, name, ticket.branch, base);
-  const before = await headCommit(deps.runtime, name);
-  return {
-    deps,
-    context: { ...context, ticket },
-    project,
-    container: name,
-    branch: ticket.branch,
-    base,
-    before,
-  };
-}
 
 /** A restack, or a change of target onto `to`; neither: a plain rebase onto the ticket's base. */
 export type RebaseOptions = {
   restack?: Rebase['restack'];
-  retarget?: { from: string; to: string };
+  retarget?: { from: string; to: string; source: string | null };
 };
 
 function withOptions(prepared: Rebase, options: RebaseOptions): Rebase {
@@ -51,7 +18,9 @@ function withOptions(prepared: Rebase, options: RebaseOptions): Rebase {
   return {
     ...prepared,
     ...(restack ? { restack } : {}),
-    ...(retarget ? { base: retarget.to, retarget: { from: retarget.from } } : {}),
+    ...(retarget
+      ? { base: retarget.to, retarget: { from: retarget.from, source: retarget.source } }
+      : {}),
   };
 }
 
@@ -67,7 +36,22 @@ export async function runRebaseStep(
   options: RebaseOptions = {},
 ): Promise<StepResult> {
   const prepared = await prepareBranch(deps, context);
-  const step = options.retarget ? 'retarget' : 'rebase';
+  // A rebase after GitHub moved the pull request off its base moves like a change of target.
+  const plain = !options.retarget && !options.restack;
+  if (plain && prepared.context.ticket.leftBase) {
+    const move = await followedMove(prepared).catch(async (error: unknown) => {
+      await deps.runtime.stop(prepared.container);
+      throw error;
+    });
+    const rebase = move ? { ...prepared, retarget: move } : prepared;
+    return afterFollowed(rebase, await runPrepared(rebase, options));
+  }
+  return runPrepared(prepared, options);
+}
+
+async function runPrepared(prepared: Rebase, options: RebaseOptions): Promise<StepResult> {
+  const { deps, context } = prepared;
+  const step = context.step === 'retarget' ? 'retarget' : 'rebase';
   const refusal = context.resume ? pausedRebase(deps.db, context.ticket.id, step) : null;
   // A resumed rebase restores the branch as it was before the paused run, not the rebased one.
   const before = refusal?.resumeState.before ?? prepared.before;

@@ -25,15 +25,27 @@
   failure puts the branch back as it was. A clean rebase saves no session, so `implementerSession` skips runs
   without one. `github/pull-request.ts` keeps `tickets.behind_by` current during the pull.
 - `retarget.ts` (with `retarget-github.ts`): the change of target, a rebase onto another base. It reads the PR's
-  base on GitHub (the branch left; the ticket's own base when GitHub already targets the new one), refuses a
-  closed PR, a split ticket or a branch missing on GitHub (`ls-remote`), then calls `runRebaseStep` with
-  `retarget: { from, to }`: the old base is fetched too, the commits after `merge-base <before> origin/<from>`
+  base on GitHub (the branch left; when GitHub already targets the new one, the base it moved the PR off
+  (`left_base`), else the ticket's own), refuses a closed PR, a split ticket or a target missing on GitHub
+  (`ls-remote`). A branch left that is gone is read from its merged PR's `refs/pull/<n>/head` (`retargetSource` in
+  `left-base.ts`); with no merged PR it is refused. Then it calls `runRebaseStep` with
+  `retarget: { from, to, source }`: the old base is fetched too (into `origin/<from>`), the commits after `merge-base <before> origin/<from>`
   (`forkPoint`) move with `git rebase --onto origin/<to> <fork>`, and it is up to date only when that fork point is
   in the new base. After an agent, `carriedOver` refuses a branch holding commits of the old base the new one
   lacks (as they were, or rewritten: `git cherry`). Once pushed, the PR's base is updated and Union's "Builds on"
   line removed, then `base_branch` and `chosen_base_branch` become the new base and `retarget_branch` is cleared
   (`ticket_retargeted`). A refused PR update fails the step after the push; the retry finds the branch moved and
   only retargets. The `retarget` command keeps the target in `tickets.retarget_branch` (`chooseRetarget`).
+- Following a base GitHub moved (`github/follow-base.ts`, `left-base.ts`, `followed-base-ref.ts`, pure part
+  `baseToFollow` in core): during the pull, when an open PR targets another branch on GitHub than
+  `tickets.base_branch` (its base merged and deleted, or edited there), and no step runs or is paused, the ticket
+  takes it (`base_branch`, `chosen_base_branch`) and keeps the branch left in `tickets.left_base`, with its merged
+  PR (the parent's, else `mergedPullRequest`); event `base_followed`. Only the database is written. The next plain
+  rebase moves like a change of target (`followedMove`): the left base read from its pull ref, else its branch,
+  else the workspace's `origin/<left>`, else a plain rebase said in the Log. It stays the `rebase` step (a paused
+  one resumes as such: `pauseRebase` reads `context.step`). Once it succeeds, `left_base` is cleared
+  (`left_base_dropped`) and the "Builds on" line removed. Before any step of a ticket with a `left_base`, the
+  executor fetches the new base into the workspace when it has no local branch for it (`ensureFollowedBase`).
 - `simplify.ts` (with `simplify-agent.ts`, `simplify-finish.ts`, `simplify-git.ts`, `simplify-push.ts`): the
   on-demand history simplification. Same fetch and implementer session as the rebase (`runInImplementerSession` in
   `rebase-agent.ts`), then the agent's leftovers are committed (`commitLeftovers`; a hook's refusal pauses the step

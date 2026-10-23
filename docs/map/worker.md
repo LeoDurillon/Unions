@@ -30,6 +30,7 @@ export); do not edit. Tests are left out.
 - `e2e.ts`: The project's e2e command against the owner's preview, after its checks passed.
 - `event-dispatcher.ts`: Follows the event log: writes the notifications, queues a delivery for each event a rule waits for, then does the due ones, a few per tick and one at a time.
 - `executor.ts`: Every step: planning and custom agents, implementation, final review, and the rebase, simplify and split asked on demand.
+- `followed-base-ref.ts`: Before a step of a ticket whose base was followed: the new base brought into the workspace, which may never have had it.
 - `gate.ts`: Runs the project's check command in the repository; a timeout counts as red.
 - `history-steps.ts`: The steps that rewrite a reviewed branch's history, the code unchanged: simplify, and the split into a stack.
 - `hooks.ts`: What the commands hand off to the running worker: all asynchronous, so draining stays synchronous.
@@ -44,6 +45,7 @@ export); do not edit. Tests are left out.
 - `investigation-ticket-notion.ts`: Creates a ticket drafted from an investigation as a page of the project's Notion data source too.
 - `investigation-ticket.ts`: Everything the investigation found, what the user wants the ticket to cover, and the format.
 - `janitor.ts`: Removes the containers and volumes of deleted tickets; a failure is logged as an event, not thrown.
+- `left-base.ts`: Where the base a ticket left is read from: its merged pull request's ref, else its branch, else the workspace's last copy.
 - `leftovers.ts`: Stages every change and describes it, or null when the working tree is clean.
 - `lesson-writer-run.ts`: Runs the lesson writer the Memory page asks for, in a throwaway container with only the Claude login.
 - `mcp-check.ts`: Reads the account's claude.ai connectors as an agent sees them (`claude mcp list`, which also checks each one can be reached; no model runs), in a throwaway co…
@@ -64,6 +66,7 @@ export); do not edit. Tests are left out.
 - `rebase-fetch.ts`: Brings the base branch and the pushed branch, as they are on GitHub now, into the container: the host fetches them with the project's credentials and hands ove…
 - `rebase-git.ts`: Whether `ancestor` is already part of `ref`'s history.
 - `rebase-host.ts`: The host's own `git rebase` onto the base, tried before any agent: up to date, clean, or stopped.
+- `rebase-prepare.ts`: The ticket's container put on its branch before a rebase, a simplification or a split, with the commit to restore.
 - `rebase-publish.ts`: Checks the result, runs the project's checks, then pushes; returns why it could not, the hook's refusal of the agent's leftover changes, or the gate.
 - `rebase.ts`: Rebases the ticket's branch onto its base (git alone when there is no conflict, else the implementer's own session), checks it and force-pushes it with a lease.
 - `refused-commit.ts`: Records the refusal and stops the run there: the user decides what to do with the changes.
@@ -129,14 +132,16 @@ export); do not edit. Tests are left out.
 - `dependency.ts`: Mirrors the ticket's parent as "blocked by" on its issue, once both issues exist.
 - `fake-api.ts`: In-memory GitHub for tests.
 - `fake-project-fields.ts`: The GitHub Project fields of the in-memory GitHub for tests: the fields, and what each item holds; the base of `FakeGitHubApi`.
+- `fake-pulls.ts`: The pull requests of the in-memory GitHub for tests, and their lookups by branch: the base of `FakeGitHubApi`.
 - `fake-stacks.ts`: GitHub stacks in the fake GitHub client: created, unstacked and read back over its pull requests.
+- `follow-base.ts`: The ticket's base follows its pull request's when GitHub moved it: the base merged and deleted, or edited there.
 - `inbound.ts`: Applies a change read from GitHub to the matching ticket in the database.
 - `loop.ts`: Pushes every second and pulls every `pullIntervalMs`, one call at a time, until aborted.
 - `mirror.ts`: Runs one `GitHubSync` per project, each with the project's own credentials.
 - `octokit-api.ts`: The GitHub API implemented with Octokit: issues, pull requests and the project board.
 - `octokit-checks.ts`: The CI checks of the worker's GitHub client: a pull request's head commit and the overall state of its checks, and re-running an Actions job.
 - `octokit-project-fields.ts`: The GitHub Project fields of the worker's GitHub client: reading them, setting one on an item, a pull request's node id.
-- `octokit-pull-request-changes.ts`: The issue and pull request changes of the worker's GitHub client (issue text, PR title and base, labels, reviewers, assignees): the base of `OctokitGitHubApi`.
+- `octokit-pull-request-changes.ts`: The issue and pull request changes of the worker's GitHub client (issue text, PR title and base, labels, reviewers, assignees) and its pull requests by branch:…
 - `octokit-stacks.ts`: GitHub's stacked pull requests in the worker's GitHub client: create a stack, unstack it, read a pull request's.
 - `pr-description-send.ts`: Writes the user's version of a rewritten description to the pull request, with Union's links added back, unless the description on GitHub changed since the age…
 - `pr-review.ts`: The review as GitHub gets it.

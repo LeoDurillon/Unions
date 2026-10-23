@@ -18,6 +18,14 @@ import { pauseRebase, verifyAndPush } from './rebase-publish';
 import type { StepResult } from './scheduler';
 import { lowerSlices, syncLowerBranches } from './stack-refs';
 
+/** The base a move leaves, read but not checked like the slices; none when the workspace's copy serves. */
+function leftRefs(retarget: Rebase['retarget']): { left?: { name: string; source: string } } {
+  if (!retarget || retarget.source === null) {
+    return {};
+  }
+  return { left: { name: retarget.from, source: retarget.source } };
+}
+
 /**
  * Fetches the branch (and a stack's lower slices) as GitHub has them; refuses when one has commits
  * the workspace lacks. The lower slices' branches are put where they were last pushed.
@@ -29,12 +37,11 @@ async function fetchChecked(
   const remote = await remoteOf(deps, rebase.project);
   const lower = lowerSlices(deps.db, context.ticket.id);
   const extra = lower.map((slice) => slice.branch);
-  // A change of target reads the base it leaves, which is not checked like the slices.
-  const left = rebase.retarget ? [rebase.retarget.from] : [];
   const pushed = await fetchIntoContainer(deps.runtime, container, remote, {
     base,
     branch,
-    extra: [...extra, ...left],
+    extra,
+    ...leftRefs(rebase.retarget),
   });
   for (const name of [branch, ...extra]) {
     if (!(await contains(deps.runtime, container, 'HEAD', `origin/${name}`))) {

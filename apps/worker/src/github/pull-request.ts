@@ -2,6 +2,7 @@ import { emitEvent, listSlices, schema, type Db, type Ticket } from '@union/core
 import { eq } from 'drizzle-orm';
 
 import type { GitHubApi, PullRequestStatus, RepoRef } from './api';
+import { followBase } from './follow-base';
 import { refreshChecks } from './pull-request-checks';
 import { pollStack, startRestack } from './stack-pull-requests';
 
@@ -56,8 +57,15 @@ function endDates(
 
 type Polled = Pick<Ticket, 'prState' | 'prMergedAt' | 'prClosedAt' | 'behindBy'>;
 
-/** What GitHub says of the ticket's pull request now; what is known already when it is settled. */
-async function polled(api: GitHubApi, repo: RepoRef, ticket: Ticket): Promise<Polled> {
+/**
+ * What GitHub says of the ticket's pull request now, with the branch it targets; what is known
+ * already when it is settled.
+ */
+async function polled(
+  api: GitHubApi,
+  repo: RepoRef,
+  ticket: Ticket,
+): Promise<Polled & { base?: string }> {
   const settled = ticket.prState === 'merged' && ticket.prMergedAt !== null;
   const status =
     ticket.prNumber === null || settled
@@ -68,6 +76,7 @@ async function polled(api: GitHubApi, repo: RepoRef, ticket: Ticket): Promise<Po
     prState,
     ...endDates(prState, status, ticket),
     behindBy: status?.behindBy ?? null,
+    ...(status?.base === undefined ? {} : { base: status.base }),
   };
 }
 
@@ -90,6 +99,9 @@ export async function refreshPullRequest(
     : await pollStack(db, api, { repo, ticket, behind: canRebase(ticket) });
   const status = stack ?? (await polled(api, repo, ticket));
   storeStatus(db, ticket, status);
+  if (stack === null && 'base' in status) {
+    await followBase(db, api, repo, { ticket: { ...ticket, ...status }, base: status.base });
+  }
   if (stack?.restack) {
     startRestack(db, ticket.id);
   }

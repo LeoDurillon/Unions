@@ -8,9 +8,9 @@ import {
 } from '@union/core';
 
 import type { ImplementDeps } from './implement-checks';
-import { prepareBranch } from './rebase';
 import type { Rebase } from './rebase-agent';
 import { restoreBranch } from './rebase-git';
+import { prepareBranch } from './rebase-prepare';
 import type { StepContext, StepResult } from './scheduler';
 import { historyOf } from './simplify-git';
 import { renderSplitReport, type PublishedSlice } from './split-agent';

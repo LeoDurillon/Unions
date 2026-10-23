@@ -11,7 +11,7 @@ function git(args: string[]): string[] {
   return ['git', '-C', REPO_DIR, ...args];
 }
 
-async function refExists(
+export async function refExists(
   runtime: ContainerRuntime,
   container: string,
   ref: string,

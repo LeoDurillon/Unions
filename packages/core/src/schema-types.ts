@@ -121,3 +121,9 @@ export type PullRequestFile = {
   /** The file's hunks (no file headers); empty for binary or very large files. */
   patch: string;
 };
+
+/**
+ * The base a ticket left when its pull request was moved onto another branch on GitHub (the base
+ * merged and deleted, or edited there), and the base's merged pull request when it has one.
+ */
+export type LeftBase = { branch: string; prNumber: number | null };

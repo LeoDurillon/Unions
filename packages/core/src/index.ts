@@ -36,6 +36,7 @@ export * from './event-rules';
 export * from './docker-cli';
 export * from './flow-settings';
 export * from './flows';
+export * from './followed-base';
 export * from './flow-edit';
 export * from './ticket-flow';
 export * from './e2e-screenshots';
@@ -81,6 +82,7 @@ export type * from './runtime';
 export * as schema from './tables';
 export type {
   AgentVariables,
+  LeftBase,
   PreviewConfig,
   PreviewService,
   ProjectScript,

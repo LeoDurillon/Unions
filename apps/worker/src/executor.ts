@@ -1,8 +1,8 @@
-import { isCustomStep, type ContainerRuntime, type Db, type Project } from '@union/core';
+import { isCustomStep, type ContainerRuntime, type Db } from '@union/core';
 
 import { runAgent } from './agent';
 import { runCodeStep } from './agent-services-step';
-import type { GitHubApi } from './github/api';
+import { ensureFollowedBase } from './followed-base-ref';
 import { isHistoryStep, runHistoryStep } from './history-steps';
 import { runPlanningStep } from './planning-step';
 import { isPlanningStep } from './prompts';
@@ -18,23 +18,33 @@ export function createExecutor(
   db: Db,
   runtime: ContainerRuntime,
   config: ProvisionConfig,
-  github: (project: Project) => GitHubApi | null,
+  github: Parameters<typeof runCodeStep>[0]['github'],
 ): StepExecutor {
-  return (context: StepContext): Promise<StepResult> => {
-    const { step } = context;
+  return async (context: StepContext): Promise<StepResult> => {
     const deps = { db, runtime, config, github, agent: runAgent };
-    if (step === 'implement' || step === 'rebase' || step === 'retarget' || step === 'restack') {
-      return runCodeStep(deps, context, step);
-    }
-    if (step === 'final_review') {
-      return runReviewStep(deps, context);
-    }
-    if (isHistoryStep(step)) {
-      return runHistoryStep(deps, context, step);
-    }
-    if (!isPlanningStep(step) && !isCustomStep(step)) {
-      return Promise.resolve({ kind: 'error', error: `Unknown step ${JSON.stringify(step)}` });
-    }
-    return runPlanningStep({ db, runtime, config }, { ...context, step });
+    await ensureFollowedBase(deps, context);
+    return runStep(deps, context);
   };
+}
+
+/** The step itself, by kind. */
+function runStep(
+  deps: Parameters<typeof runCodeStep>[0],
+  context: StepContext,
+): Promise<StepResult> {
+  const { step } = context;
+  if (step === 'implement' || step === 'rebase' || step === 'retarget' || step === 'restack') {
+    return runCodeStep(deps, context, step);
+  }
+  if (step === 'final_review') {
+    return runReviewStep(deps, context);
+  }
+  if (isHistoryStep(step)) {
+    return runHistoryStep(deps, context, step);
+  }
+  if (!isPlanningStep(step) && !isCustomStep(step)) {
+    return Promise.resolve({ kind: 'error', error: `Unknown step ${JSON.stringify(step)}` });
+  }
+  const { db, runtime, config } = deps;
+  return runPlanningStep({ db, runtime, config }, { ...context, step });
 }

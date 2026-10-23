@@ -60,6 +60,9 @@ and linked.
 - [Change the target branch of a ticket](retarget.md): move a finished ticket's own commits onto another branch
   (a fix turned hotfix: `develop` to `main`) with `git rebase --onto`, push and retarget its PR; the agent runs
   only on a conflict or failing checks. Built (branch `retarget`, 2026-10-22).
+- [Follow a base branch that was merged](follow-merged-base.md): when GitHub moves a PR onto its base's target
+  (the base merged and deleted), the worker takes the new base, and the next Rebase moves only the ticket's own
+  commits, even after a squash merge. Built (branch `follow-merged-base`, 2026-10-23).
 - [Explain a selection of the diff](review-explain.md): select lines on the review page, an agent explains in a
   side panel how they work and which parts of the specs and repository docs they relate to; follow-ups resume
   its session. Built (branch `review-explain`), steps 1 to 4; a real run is left.

@@ -7,13 +7,13 @@ import type {
   ProjectInfo,
   PullRequestRef,
   PullRequestReview,
-  PullRequestState,
   PullRequestStatus,
   RemoteComment,
   RemoteItem,
   RepoRef,
 } from './api';
-import { FakeStacks, type StackPull } from './fake-stacks';
+import { FakePulls } from './fake-pulls';
+import type { StackPull } from './fake-stacks';
 
 type FakeIssue = {
   number: number;
@@ -35,26 +35,8 @@ const DEFAULT_INFO: ProjectInfo = {
 const MS_PER_SECOND = 1000;
 
 /** In-memory GitHub for tests. `calls` records every method name, in order (`FakeProjectFields`). */
-export class FakeGitHubApi extends FakeStacks implements GitHubApi {
+export class FakeGitHubApi extends FakePulls implements GitHubApi {
   readonly issues: FakeIssue[] = [];
-  readonly pulls: (PullRequestRef & {
-    head: string;
-    base: string;
-    title: string;
-    body: string;
-    draft: boolean;
-    labels?: string[];
-    reviewers?: string[];
-    assignees?: string[];
-    /** Unset: open. */
-    state?: PullRequestState;
-    behindBy?: number;
-    /** When merged; unset reads as 0. */
-    mergedAt?: number;
-    closedAt?: number;
-    /** The head commit; unset reads as `sha-<number>`. */
-    headSha?: string;
-  })[] = [];
   /** Commit → the state of its checks; a commit missing has none. */
   readonly checks = new Map<string, ChecksState>();
   /** Reviews posted, in order. */
@@ -176,12 +158,6 @@ export class FakeGitHubApi extends FakeStacks implements GitHubApi {
         updatedAt: issue.updatedAt,
       })),
     );
-  }
-
-  findPullRequest(_repo: RepoRef, branch: string): Promise<PullRequestRef | null> {
-    this.calls.push('findPullRequest');
-    const pull = this.pulls.find((candidate) => candidate.head === branch);
-    return Promise.resolve(pull ? { number: pull.number, url: pull.url } : null);
   }
 
   createPullRequest(

@@ -135,6 +135,7 @@ export); do not edit. Tests are left out.
 - `comment-body.tsx`: A GitHub comment's text in compact markdown, folded behind a fade when it renders tall.
 - `description-draft.tsx`: The rewritten description, editable, with what it changes on GitHub a click away.
 - `discussion.tsx`: The pull request's GitHub discussion, and what of it goes to the implementer.
+- `followed-base.tsx`: The notice that GitHub moved the pull request off its base: the next rebase leaves that base's commits behind.
 - `note-card.tsx`: A review summary or a conversation comment, with its Add to review action when there is one.
 - `note-filter.tsx`: Whose reviews and comments the discussion shows: everyone's, people's only, or bots' only.
 - `pr-description.tsx`: The PR's description, rewritten by the agent when the work changed after the PR was opened.

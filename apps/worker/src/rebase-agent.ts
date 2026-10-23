@@ -39,8 +39,12 @@ export type Rebase = Workspace & {
   before: string;
   /** A stack restacked after a slice merged: `upstream` is that slice's tip; `hostOnly`: no agent. */
   restack?: { upstream: string; hostOnly: boolean };
-  /** A change of target: the branch leaves `from` for `base`, taking only its own commits. */
-  retarget?: { from: string };
+  /**
+   * A change of target, or a rebase after GitHub moved the pull request off `from`: the branch
+   * leaves `from` for `base`, taking only its own commits. `source`: the GitHub ref `from` is read
+   * from (its branch, or its merged pull request's); null: the workspace's last copy.
+   */
+  retarget?: { from: string; source: string | null };
 };
 
 /** A turn in the implementer's own session: the rebase, or a rewrite of its history. */

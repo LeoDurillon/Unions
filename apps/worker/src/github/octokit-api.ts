@@ -188,17 +188,6 @@ export class OctokitGitHubApi extends OctokitProjectFields implements GitHubApi 
     return items;
   }
 
-  async findPullRequest(repo: RepoRef, branch: string): Promise<PullRequestRef | null> {
-    const { data } = await this.octokit.rest.pulls.list({
-      ...repo,
-      head: `${repo.owner}:${branch}`,
-      state: 'open',
-      per_page: 1,
-    });
-    const [first] = data;
-    return first ? { number: first.number, url: first.html_url } : null;
-  }
-
   /** Opened as a draft: the user marks it ready at the final review. */
   async createPullRequest(
     repo: RepoRef,

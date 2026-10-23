@@ -1,7 +1,7 @@
-// The issue and pull request changes of the worker's GitHub client (issue text, PR title and base, labels, reviewers, assignees): the base of `OctokitGitHubApi`.
+// The issue and pull request changes of the worker's GitHub client (issue text, PR title and base, labels, reviewers, assignees) and its pull requests by branch: the base of `OctokitGitHubApi`.
 import { RequestError, type Octokit } from 'octokit';
 
-import type { IssueText, RepoRef } from './api';
+import type { IssueText, PullRequestRef, RepoRef } from './api';
 
 const NOT_FOUND = 404;
 
@@ -23,6 +23,28 @@ async function ignoreNotFound(call: () => Promise<unknown>): Promise<void> {
 export class OctokitPullRequestChanges {
   /** A token client or an installation client (`githubClient` in `@union/core/github-client`). */
   constructor(protected readonly octokit: Octokit) {}
+
+  async findPullRequest(repo: RepoRef, branch: string): Promise<PullRequestRef | null> {
+    const { data } = await this.octokit.rest.pulls.list({
+      ...repo,
+      head: `${repo.owner}:${branch}`,
+      state: 'open',
+      per_page: 1,
+    });
+    const [first] = data;
+    return first ? { number: first.number, url: first.html_url } : null;
+  }
+
+  async mergedPullRequest(repo: RepoRef, branch: string): Promise<number | null> {
+    const { data } = await this.octokit.rest.pulls.list({
+      ...repo,
+      head: `${repo.owner}:${branch}`,
+      state: 'closed',
+      sort: 'updated',
+      direction: 'desc',
+    });
+    return data.find((pull) => pull.merged_at !== null)?.number ?? null;
+  }
 
   async issueText(repo: RepoRef, number: number): Promise<IssueText> {
     const { data } = await this.octokit.rest.issues.get({ ...repo, issue_number: number });

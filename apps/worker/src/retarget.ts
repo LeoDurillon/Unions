@@ -5,16 +5,31 @@ import { eq } from 'drizzle-orm';
 import { remoteOf } from './branch-push';
 import type { GitHubApi } from './github/api';
 import type { ImplementDeps } from './implement-checks';
+import { retargetSource } from './left-base';
 import { runRebaseStep } from './rebase';
 import { currentBase, missingBranches, moveOnGitHub } from './retarget-github';
 import { loadProject } from './review';
 import type { StepContext, StepResult } from './scheduler';
 
-type Move = { api: GitHubApi; project: Project; number: number; from: string; to: string };
+type Move = {
+  api: GitHubApi;
+  project: Project;
+  number: number;
+  from: string;
+  to: string;
+  /** Where `from` is read from on GitHub: its branch, or its merged pull request's ref. */
+  source: string;
+};
 
-/** The base the branch leaves: the pull request's now, else (already on `to` there) the ticket's. */
+/**
+ * The base the branch leaves: the pull request's now, else (already on `to` there) the one GitHub
+ * moved it off, else the ticket's.
+ */
 function leftBase(prBase: string, ticket: Ticket, project: Project, to: string): string {
-  return prBase === to ? ticketBase(project, ticket) : prBase;
+  if (prBase !== to) {
+    return prBase;
+  }
+  return ticket.leftBase?.branch ?? ticketBase(project, ticket);
 }
 
 /** What the move needs, or why it cannot run: an open pull request, no stack, both branches on GitHub. */
@@ -38,12 +53,20 @@ async function prepareMove(deps: ImplementDeps, ticket: Ticket): Promise<Move | 
   if (from === to) {
     return { error: `The pull request already targets \`${to}\`.` };
   }
-  const missing = await missingBranches(await remoteOf(deps, project), [from, to]);
+  const remote = await remoteOf(deps, project);
+  const missing = await missingBranches(remote, [to]);
   if (missing.length > 0) {
-    const names = missing.map((name) => `\`${name}\``).join(' and ');
-    return { error: `${names} no longer exist on GitHub: rebase first, or choose another target.` };
+    return { error: `\`${to}\` does not exist on GitHub: choose another target.` };
   }
-  return { api, project, number: ticket.prNumber, from, to };
+  const known = ticket.leftBase?.branch === from ? ticket.leftBase.prNumber : null;
+  const repo = { owner: project.owner, repo: project.repo };
+  const source = await retargetSource({ api, repo, remote }, { branch: from, prNumber: known });
+  if (source === null) {
+    return {
+      error: `\`${from}\` no longer exists on GitHub and has no merged pull request: rebase first, or choose another target.`,
+    };
+  }
+  return { api, project, number: ticket.prNumber, from, to, source };
 }
 
 /** The ticket is now based on `to`, as if chosen there from the start. */
@@ -51,7 +74,7 @@ function recordMove(deps: ImplementDeps, ticketId: number, move: Move): void {
   const { from, to, number } = move;
   deps.db.transaction((tx) => {
     tx.update(schema.tickets)
-      .set({ baseBranch: to, chosenBaseBranch: to, retargetBranch: null })
+      .set({ baseBranch: to, chosenBaseBranch: to, retargetBranch: null, leftBase: null })
       .where(eq(schema.tickets.id, ticketId))
       .run();
     emitEvent(tx, { type: 'ticket_retargeted', ticketId, payload: { from, to, number } });
@@ -71,8 +94,8 @@ export async function runRetargetStep(
   if ('error' in move) {
     return { kind: 'error', error: move.error };
   }
-  const { from, to, number } = move;
-  const result = await runRebaseStep(deps, context, { retarget: { from, to } });
+  const { from, to, number, source } = move;
+  const result = await runRebaseStep(deps, context, { retarget: { from, to, source } });
   if (result.kind !== 'ok') {
     return result;
   }
