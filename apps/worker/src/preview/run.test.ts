@@ -86,7 +86,8 @@ function deps(): PreviewDeps {
     readyTimeoutMs: 50,
     readyIntervalMs: 5,
     fetchFn: (_url, init) => {
-      asked.push(new Headers(init.headers).get('host') ?? '');
+      // No host: the check that the proxy runs, before a start.
+      asked.push(new Headers(init.headers).get('host') ?? 'proxy');
       return Promise.resolve(new Response('hello', { status: answer }));
     },
   };
@@ -292,7 +293,7 @@ test('several services, waited for; real values go through the env file, none is
       { service: 'api', url: 'http://api-t1.union.localhost:8080' },
     ],
   });
-  expect(asked.toSorted()).toEqual(['api-t1.union.localhost', 't1.union.localhost']);
+  expect(asked.toSorted()).toEqual(['api-t1.union.localhost', 'proxy', 't1.union.localhost']);
   const [, runConfig, shownConfig, up] = calls;
   expect(runConfig?.env).toMatchObject({ DB_PASSWORD: 'pa$word' });
   expect(shownConfig?.env).toMatchObject({ DB_PASSWORD: REFERENCE });

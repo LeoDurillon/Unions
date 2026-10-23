@@ -20,7 +20,7 @@ import { compose, createMountFolders } from './compose';
 import { fileToRun } from './compose-file';
 import { routeToPreview } from './host-routes';
 import { joinPreview, leavePreview } from './network';
-import { waitReady } from './ready';
+import { proxyAnswers, waitReady } from './ready';
 import {
   lastLines,
   loadTarget,
@@ -35,6 +35,8 @@ export { PreviewError, type PreviewDeps } from './target';
 
 const READY_TIMEOUT_MS = 180_000;
 const READY_INTERVAL_MS = 2000;
+/** How long the proxy gets to answer before a start, when it runs. */
+const PROXY_CHECK_MS = 3000;
 /** Output lines per `preview_output` event: a build prints thousands. */
 const OUTPUT_BATCH = 25;
 
@@ -115,6 +117,19 @@ export async function takeDown(deps: PreviewDeps, owner: WorkspaceOwner): Promis
   }
 }
 
+/** Refuses a start the proxy could not serve: without it no service ever answers. */
+async function ensureProxy(deps: PreviewDeps): Promise<void> {
+  const running =
+    (await deps.runtime.networkExists(PREVIEW_NETWORK)) &&
+    (await proxyAnswers(deps.settings.proxyUrl, PROXY_CHECK_MS, deps.fetchFn));
+  if (!running) {
+    throw new PreviewError(
+      "The preview proxy is not running: it starts with Union's compose stack (bun run compose, or docker compose up -d proxy)",
+      true,
+    );
+  }
+}
+
 async function startTarget(deps: PreviewDeps, target: Target): Promise<void> {
   const self = ownerKey(target.owner);
   const others = activePreviews(deps.db).filter((row) => ownerKey(previewOwner(row)) !== self);
@@ -139,12 +154,7 @@ async function startTarget(deps: PreviewDeps, target: Target): Promise<void> {
     error: null,
     startedAt: Date.now(),
   });
-  if (!(await deps.runtime.networkExists(PREVIEW_NETWORK))) {
-    throw new PreviewError(
-      "The preview proxy is not running: it starts with Union's compose stack (bun run compose)",
-      true,
-    );
-  }
+  await ensureProxy(deps);
   await syncProjectFiles(deps.db, deps.runtime, target.projectId, {
     volume: target.workspaceVolume,
     image: deps.settings.image,

@@ -52,3 +52,20 @@ async function poll(check: ReadyCheck, deadline: number): Promise<boolean> {
 export function waitReady(check: ReadyCheck): Promise<boolean> {
   return poll(check, Date.now() + check.timeoutMs);
 }
+
+/**
+ * Whether the proxy itself answers, whatever the status: its network outlives it, so the network
+ * existing says nothing about whether it runs.
+ */
+export async function proxyAnswers(
+  proxyUrl: string,
+  timeoutMs: number,
+  fetchFn: ReadyCheck['fetchFn'] = fetch,
+): Promise<boolean> {
+  try {
+    await fetchFn(proxyUrl, { redirect: 'manual', signal: AbortSignal.timeout(timeoutMs) });
+    return true;
+  } catch {
+    return false;
+  }
+}

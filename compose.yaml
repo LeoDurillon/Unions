@@ -95,6 +95,8 @@ services:
   # (t<ticket>.union.localhost) and joins the `union-preview` network, where this proxy finds it.
   proxy:
     image: traefik:v3.6.2
+    # Like web and worker: back after Docker or WSL restarts, or previews never answer.
+    restart: unless-stopped
     command:
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
