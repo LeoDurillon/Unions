@@ -131,7 +131,12 @@ test('the ticket is written in a throwaway container and lands in the backlog', 
     title: 'Corriger la requête N+1',
   });
   expect(runs[0]).toMatchObject({ container: `union-i${id}-ticket`, model: 'sonnet', tools: [] });
-  expect(calls).toEqual([`create union-i${id}-ticket`, `remove union-i${id}-ticket`]);
+  // A stopped worker's leftover is cleared first, then the container is removed after the run.
+  expect(calls).toEqual([
+    `remove union-i${id}-ticket`,
+    `create union-i${id}-ticket`,
+    `remove union-i${id}-ticket`,
+  ]);
 });
 
 test('a failed agent keeps the error and no ticket is made', async () => {

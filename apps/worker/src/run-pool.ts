@@ -46,14 +46,19 @@ export class RunPool<Row extends { id: number }, Outcome> {
     await Promise.all([...this.active.values()].map((run) => run.done));
   }
 
+  /** Inside the try: a run that throws before returning its promise fails like one that rejects. */
+  private async outcomeOf(row: Row, signal: AbortSignal): Promise<Outcome> {
+    try {
+      return await this.spec.run(row, signal);
+    } catch (error) {
+      return this.spec.failed(error instanceof Error ? error.message : String(error));
+    }
+  }
+
   private async runTracked(row: Row, signal: AbortSignal): Promise<void> {
     const { spec } = this;
     try {
-      const outcome = await spec
-        .run(row, signal)
-        .catch((error: unknown) =>
-          spec.failed(error instanceof Error ? error.message : String(error)),
-        );
+      const outcome = await this.outcomeOf(row, signal);
       spec.finish(row, signal.aborted && spec.stopped ? spec.stopped : outcome);
     } finally {
       this.active.delete(row.id);

@@ -3,7 +3,7 @@
   "format": ["typescript", "tsx"],
   "ignore": ["**/node_modules/**", "**/dist/**", "**/drizzle/**", "**/*.test.ts"],
   "gitignore": true,
-  "minTokens": 70,
-  "threshold": 0.4,
+  "minTokens": 60,
+  "threshold": 0.55,
   "reporters": ["console"]
 }

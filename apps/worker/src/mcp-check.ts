@@ -11,7 +11,8 @@ import {
 } from '@union/core';
 
 import { runIn } from './container-exec';
-import { seedCredentials, type ProvisionConfig } from './provision';
+import type { ProvisionConfig } from './provision';
+import { inThrowaway, type ThrowawayDeps } from './throwaway-container';
 
 /** Where the connectors are read: a container like an agent's, with only the Claude login. */
 const CHECK_CONTAINER = {
@@ -24,29 +25,14 @@ const CHECK_CONTAINER = {
  * Reads the account's claude.ai connectors as an agent sees them (`claude mcp list`, which also
  * checks each one can be reached; no model runs), in a throwaway container removed after.
  */
-export async function readConnectors(
-  runtime: ContainerRuntime,
-  config: ProvisionConfig,
-): Promise<ReturnType<typeof parseMcpList>> {
-  const remove = (): Promise<void> =>
-    runtime.remove(CHECK_CONTAINER.name, {
-      home: CHECK_CONTAINER.homeVolume,
-      workspace: CHECK_CONTAINER.workspaceVolume,
-    });
-  // A check the worker was stopped in the middle of left its container.
-  await remove().catch(() => null);
-  try {
-    await runtime.create({ ...CHECK_CONTAINER, image: config.image });
-    await runtime.start(CHECK_CONTAINER.name);
-    await seedCredentials(runtime, CHECK_CONTAINER.name, config.credentialsPath);
-    const listed = await runIn(runtime, CHECK_CONTAINER.name, ['claude', 'mcp', 'list']);
+export function readConnectors(deps: ThrowawayDeps): Promise<ReturnType<typeof parseMcpList>> {
+  return inThrowaway(deps, CHECK_CONTAINER, async (container) => {
+    const listed = await runIn(deps.runtime, container, ['claude', 'mcp', 'list']);
     if (listed.exitCode !== 0) {
       throw new Error(`claude mcp list failed: ${(listed.stderr || listed.stdout).trim()}`);
     }
     return parseMcpList(listed.stdout);
-  } finally {
-    await remove();
-  }
+  });
 }
 
 /** Runs the connector checks the user asks for (Agent settings → Connectors), one at a time. */
@@ -81,9 +67,9 @@ export class ConnectorChecker {
   }
 
   private async run(id: number): Promise<void> {
-    const { db, runtime, config } = this.deps;
+    const { db } = this.deps;
     try {
-      const connectors = await (this.deps.read ?? readConnectors)(runtime, config);
+      const connectors = await (this.deps.read ?? readConnectors)(this.deps);
       replaceConnectors(db, connectors);
       finishConnectorCheck(db, id, null);
     } catch (error) {

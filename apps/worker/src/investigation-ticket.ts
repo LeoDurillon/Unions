@@ -1,7 +1,6 @@
 // Writes the tickets asked from investigations, each in a throwaway container removed afterwards.
 import {
   claimTicketDraft,
-  emitEvent,
   failInterruptedTicketDrafts,
   FetchNotionApi,
   finishTicketDraft,
@@ -16,8 +15,9 @@ import { eq } from 'drizzle-orm';
 import { runAgent } from './agent';
 import type { InvestigationDeps } from './investigate';
 import { withNotionPage } from './investigation-ticket-notion';
-import { seedCredentials, type TicketContainer } from './provision';
+import type { TicketContainer } from './provision';
 import { RunPool } from './run-pool';
+import { inThrowaway, removeThrowaway } from './throwaway-container';
 
 type DraftOutcome = DraftedTicket | { error: string };
 
@@ -82,61 +82,39 @@ export function parseTicketDraft(text: string, investigation: Investigation): Ti
   };
 }
 
-async function removeContainer(deps: InvestigationDeps, id: number): Promise<void> {
-  const names = ticketDraftContainer(id);
-  try {
-    await deps.runtime.remove(names.name, {
-      home: names.homeVolume,
-      workspace: names.workspaceVolume,
-    });
-  } catch (error) {
-    emitEvent(deps.db, {
-      type: 'container_cleanup_failed',
-      investigationId: id,
-      payload: {
-        container: names.name,
-        error: error instanceof Error ? error.message : String(error),
-      },
-    });
-  }
-}
-
-async function draftTicket(
-  deps: InvestigationDeps,
-  investigation: Investigation,
-): Promise<DraftOutcome> {
-  const { db, runtime, config } = deps;
+function draftTicket(deps: InvestigationDeps, investigation: Investigation): Promise<DraftOutcome> {
+  const { db, runtime } = deps;
   const project = db
     .select()
     .from(schema.projects)
     .where(eq(schema.projects.id, investigation.projectId))
     .get();
   if (!project) {
-    return { error: `Project ${investigation.projectId} not found` };
+    return Promise.resolve({ error: `Project ${investigation.projectId} not found` });
   }
   const names = ticketDraftContainer(investigation.id);
-  try {
-    await runtime.create({ ...names, image: config.image });
-    await runtime.start(names.name);
-    await seedCredentials(runtime, names.name, config.credentialsPath);
-    const outcome = await (deps.agent ?? runAgent)(runtime, {
-      container: names.name,
-      cwd: WORKDIR,
-      model: investigation.model,
-      prompt: ticketPrompt(investigation, project),
-      tools: [],
-      onEvent: () => {
-        // Not logged: the investigation's Log tab is for its own runs.
-      },
-    });
-    if (outcome.kind !== 'ok') {
-      return { error: outcome.message };
-    }
-    const draft = parseTicketDraft(outcome.text, investigation);
-    return await withNotionPage(deps.notion ?? new FetchNotionApi(), project, investigation, draft);
-  } finally {
-    await removeContainer(deps, investigation.id);
-  }
+  return inThrowaway(
+    deps,
+    names,
+    async (container): Promise<DraftOutcome> => {
+      const outcome = await (deps.agent ?? runAgent)(runtime, {
+        container,
+        cwd: WORKDIR,
+        model: investigation.model,
+        prompt: ticketPrompt(investigation, project),
+        tools: [],
+        onEvent: () => {
+          // Not logged: the investigation's Log tab is for its own runs.
+        },
+      });
+      if (outcome.kind !== 'ok') {
+        return { error: outcome.message };
+      }
+      const draft = parseTicketDraft(outcome.text, investigation);
+      return withNotionPage(deps.notion ?? new FetchNotionApi(), project, investigation, draft);
+    },
+    investigation.id,
+  );
 }
 
 /**
@@ -158,7 +136,7 @@ export class TicketDrafter extends RunPool<Investigation, DraftOutcome> {
 
   async recover(): Promise<void> {
     for (const id of failInterruptedTicketDrafts(this.deps.db)) {
-      await removeContainer(this.deps, id);
+      await removeThrowaway(this.deps, ticketDraftContainer(id), id);
     }
   }
 }

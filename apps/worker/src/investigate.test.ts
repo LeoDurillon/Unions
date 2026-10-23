@@ -104,7 +104,11 @@ test('runs a global investigation in a throwaway container and saves the answer'
     model: 'sonnet',
     tools: ['WebSearch'],
   });
-  expect(calls[0]).toBe(`create union-i${id}`);
+  // A stopped worker's leftover is cleared first.
+  expect(calls.slice(0, 2)).toEqual([
+    `remove union-i${id} union-i${id}-home union-i${id}-ws`,
+    `create union-i${id}`,
+  ]);
   expect(calls.at(-1)).toBe(`remove union-i${id} union-i${id}-home union-i${id}-ws`);
   const logged = db.select().from(schema.agentLog).all();
   expect(logged.map((line) => [line.investigationId, line.ticketId])).toEqual([[id, null]]);

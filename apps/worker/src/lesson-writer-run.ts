@@ -17,9 +17,9 @@ import {
 
 import { runAgent, type AgentFn } from './agent';
 import type { TargetDeps } from './agent-review-target';
-import { seedCredentials } from './provision';
 import { RunPool, WORKER_STOPPED } from './run-pool';
 import type { RunSlots } from './slots';
+import { inThrowaway } from './throwaway-container';
 
 export type LessonWriterDeps = TargetDeps & { slots: RunSlots; agent?: AgentFn };
 
@@ -50,26 +50,16 @@ function promptFor(deps: LessonWriterDeps, row: LessonSuggestion): string {
   });
 }
 
-async function write(
+function write(
   deps: LessonWriterDeps,
   row: LessonSuggestion,
   signal: AbortSignal,
 ): Promise<LessonSuggestionOutcome> {
-  const { db, runtime, config } = deps;
+  const { db, runtime } = deps;
   const prompt = promptFor(deps, row);
-  const container = containerFor(row);
-  const remove = (): Promise<void> =>
-    runtime.remove(container.name, {
-      home: container.homeVolume,
-      workspace: container.workspaceVolume,
-    });
-  await remove().catch(() => null);
-  try {
-    await runtime.create({ ...container, image: config.image });
-    await runtime.start(container.name);
-    await seedCredentials(runtime, container.name, config.credentialsPath);
+  return inThrowaway(deps, containerFor(row), async (container) => {
     const outcome = await (deps.agent ?? runAgent)(runtime, {
-      container: container.name,
+      container,
       cwd: WORKSPACE,
       model: modelFor(db, 'lesson_writer'),
       effort: effortFor(db, 'lesson_writer'),
@@ -85,9 +75,7 @@ async function write(
       return { status: 'failed', error: `${prefix}${outcome.message}` };
     }
     return { status: 'ready', suggestions: parseLessonSuggestions(outcome.text) };
-  } finally {
-    await remove();
-  }
+  });
 }
 
 /** Runs queued lesson writer runs, sharing the run slots with the ticket pipeline and the other side runs. */

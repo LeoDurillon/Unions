@@ -12,9 +12,9 @@ import {
 
 import { runAgent, type AgentFn } from './agent';
 import type { TargetDeps } from './agent-review-target';
-import { seedCredentials } from './provision';
 import { RunPool, WORKER_STOPPED } from './run-pool';
 import type { RunSlots } from './slots';
+import { inThrowaway } from './throwaway-container';
 
 export type PromptWriterDeps = TargetDeps & { slots: RunSlots; agent?: AgentFn };
 
@@ -32,25 +32,11 @@ function containerFor(agent: CustomAgent): {
   return { name, homeVolume: `${name}-home`, workspaceVolume: `${name}-ws` };
 }
 
-async function write(
-  deps: PromptWriterDeps,
-  agent: CustomAgent,
-  signal: AbortSignal,
-): Promise<Outcome> {
-  const { runtime, config } = deps;
-  const container = containerFor(agent);
-  const remove = (): Promise<void> =>
-    runtime.remove(container.name, {
-      home: container.homeVolume,
-      workspace: container.workspaceVolume,
-    });
-  await remove().catch(() => null);
-  try {
-    await runtime.create({ ...container, image: config.image });
-    await runtime.start(container.name);
-    await seedCredentials(runtime, container.name, config.credentialsPath);
+function write(deps: PromptWriterDeps, agent: CustomAgent, signal: AbortSignal): Promise<Outcome> {
+  const { runtime } = deps;
+  return inThrowaway(deps, containerFor(agent), async (container) => {
     const outcome = await (deps.agent ?? runAgent)(runtime, {
-      container: container.name,
+      container,
       cwd: WORKSPACE,
       model: PROMPT_WRITER_MODEL,
       effort: null,
@@ -66,9 +52,7 @@ async function write(
       return { error: `${prefix}${outcome.message}` };
     }
     return { prompt: parseWrittenPrompt(outcome.text) };
-  } finally {
-    await remove();
-  }
+  });
 }
 
 /** Runs queued prompt writer runs, sharing the run slots with the ticket pipeline and the other side runs. */

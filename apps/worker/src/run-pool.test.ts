@@ -61,6 +61,15 @@ describe('RunPool', () => {
     expect(runs.finished.get(1)).toEqual({ status: 'failed: boom' });
   });
 
+  test('a run that throws before returning its promise fails the same way', async () => {
+    const runs = pool([{ id: 1 }], () => {
+      throw new Error('sync');
+    });
+    runs.pool.tick();
+    await runs.pool.idle();
+    expect(runs.finished.get(1)).toEqual({ status: 'failed: sync' });
+  });
+
   test('a cancelled run finishes with the stopped outcome; the others keep running', async () => {
     const runs = pool([{ id: 1 }, { id: 2 }], (_row, signal) => untilAborted(signal));
     runs.pool.tick();

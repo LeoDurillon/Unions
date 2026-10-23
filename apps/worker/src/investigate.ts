@@ -6,7 +6,6 @@ import {
   type ContainerRuntime,
   type Db,
   DIAGRAM_INSTRUCTION,
-  emitEvent,
   failInterruptedInvestigations,
   finishInvestigation,
   type Investigation,
@@ -26,12 +25,12 @@ import {
   cloneInto,
   cloneSource,
   REPO_DIR,
-  seedCredentials,
   type ProvisionConfig,
   type TicketContainer,
 } from './provision';
 import { RunPool } from './run-pool';
 import type { RunSlots } from './slots';
+import { inThrowaway, removeThrowaway } from './throwaway-container';
 
 /** Where a global investigation runs: the empty workspace volume, no repository. */
 const GLOBAL_DIR = '/workspace';
@@ -105,26 +104,7 @@ function toOutcome(outcome: AgentOutcome, cancelled: boolean): InvestigationOutc
   return { status: 'failed', error: `${prefix}${outcome.message}` };
 }
 
-async function removeContainer(deps: InvestigationDeps, id: number): Promise<void> {
-  const names = investigationContainer(id);
-  try {
-    await deps.runtime.remove(names.name, {
-      home: names.homeVolume,
-      workspace: names.workspaceVolume,
-    });
-  } catch (error) {
-    emitEvent(deps.db, {
-      type: 'container_cleanup_failed',
-      investigationId: id,
-      payload: {
-        container: names.name,
-        error: error instanceof Error ? error.message : String(error),
-      },
-    });
-  }
-}
-
-async function investigate(
+function investigate(
   deps: InvestigationDeps,
   investigation: Investigation,
   signal: AbortSignal,
@@ -136,7 +116,10 @@ async function investigate(
     .where(eq(schema.projects.id, investigation.projectId))
     .get();
   if (!project) {
-    return { status: 'failed', error: `Project ${investigation.projectId} not found` };
+    return Promise.resolve({
+      status: 'failed',
+      error: `Project ${investigation.projectId} not found`,
+    });
   }
   if (investigation.scope === 'ticket') {
     return runOnTicket(deps, {
@@ -147,33 +130,33 @@ async function investigate(
     });
   }
   const names = investigationContainer(investigation.id);
-  try {
-    await runtime.create({ ...names, image: config.image });
-    await runtime.start(names.name);
-    await seedCredentials(runtime, names.name, config.credentialsPath);
-    if (investigation.scope === 'repository') {
-      const token = await projectGitToken(db, project);
-      const source = cloneSource(config.gitBaseUrl, project.owner, project.repo, token);
-      await cloneInto(runtime, names.name, source, project.config.baseBranch);
-    }
-    if (signal.aborted) {
-      return { status: 'cancelled' };
-    }
-    const outcome = await (deps.agent ?? runAgent)(runtime, {
-      container: names.name,
-      cwd: investigation.scope === 'repository' ? REPO_DIR : GLOBAL_DIR,
-      model: investigation.model,
-      prompt: investigationPrompt(investigation, project),
-      tools: investigation.tools,
-      signal,
-      onEvent: (event) => {
-        appendAgentLine(db, { investigationId: investigation.id, payload: event });
-      },
-    });
-    return toOutcome(outcome, signal.aborted);
-  } finally {
-    await removeContainer(deps, investigation.id);
-  }
+  return inThrowaway(
+    deps,
+    names,
+    async (container): Promise<InvestigationOutcome> => {
+      if (investigation.scope === 'repository') {
+        const token = await projectGitToken(db, project);
+        const source = cloneSource(config.gitBaseUrl, project.owner, project.repo, token);
+        await cloneInto(runtime, container, source, project.config.baseBranch);
+      }
+      if (signal.aborted) {
+        return { status: 'cancelled' };
+      }
+      const outcome = await (deps.agent ?? runAgent)(runtime, {
+        container,
+        cwd: investigation.scope === 'repository' ? REPO_DIR : GLOBAL_DIR,
+        model: investigation.model,
+        prompt: investigationPrompt(investigation, project),
+        tools: investigation.tools,
+        signal,
+        onEvent: (event) => {
+          appendAgentLine(db, { investigationId: investigation.id, payload: event });
+        },
+      });
+      return toOutcome(outcome, signal.aborted);
+    },
+    investigation.id,
+  );
 }
 
 /**
@@ -202,7 +185,7 @@ export class InvestigationRunner extends RunPool<Investigation, InvestigationOut
   /** Fails the runs a stopped worker left behind and removes their containers. */
   async recover(): Promise<void> {
     for (const id of failInterruptedInvestigations(this.deps.db)) {
-      await removeContainer(this.deps, id);
+      await removeThrowaway(this.deps, investigationContainer(id), id);
     }
     await this.tickets.recover();
   }

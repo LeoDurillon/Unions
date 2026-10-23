@@ -101,9 +101,13 @@
   `pullRequestStack` call, the restack waits until GitHub retargeted the new bottom pull request, and then
   follows GitHub's rebase (`stack-follow.ts`: fetch, reset the workspace's branches, record the tips; no push)
   instead of rebasing with Union.
+- `throwaway-container.ts`: `inThrowaway` starts a container from the agent image with only the Claude login, runs the
+  work in it and removes it whatever happened (what a stopped worker left under the name is cleared first; a failed
+  removal is a `container_cleanup_failed` event, not an error). The investigations, ticket drafts, lesson and prompt
+  writers and the connector check run in one.
 - `run-pool.ts`: `RunPool`, the lifecycle the queued side runs share. A runner extends it with how it claims a row,
   runs it, and finishes it (`failed` for a run that threw, `stopped` for one cancelled or stopped by the worker);
-  the pool claims while a `RunSlots` slot is free, keeps an `AbortController` per run (`cancel(id)`, `stop()`), and
+  the pool claims while a `RunSlots` slot is free (a run that throws before returning its promise fails the same way), keeps an `AbortController` per run (`cancel(id)`, `stop()`), and
   gives the slot back once the row is finished. `idle()` waits for the runs in flight. The investigations, ticket
   drafts, agent reviews, explanations, groupings, description rewrites, lesson and prompt writers and container runs
   use it; the connector check (one at a time, no slots) does not.
