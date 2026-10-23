@@ -1,0 +1,24 @@
+id: web-reads-github-only
+language: TypeScript
+severity: error
+message: The web server only reads GitHub; writes happen in the worker, queued as a command.
+note: |
+  Issues, comments, Project status, push, PR and reviews are written by the worker (AGENTS.md, Rules: GitHub).
+  The one exception is the setup wizard creating the GitHub Project (`CreateProject`, docs/architecture/integrations.md).
+files:
+  - apps/web/**
+rule:
+  any:
+    - pattern: $CLIENT.rest.$AREA.$METHOD
+    - pattern: $CLIENT.request($ROUTE, $$$)
+    - kind: string_fragment
+      regex: ^\s*mutation\b
+      not:
+        regex: ^\s*mutation CreateProject\b
+constraints:
+  METHOD:
+    regex: ^(create|update|delete|merge|add|remove|set|submit|dismiss|lock|unlock|replace|request|enable|disable|rerequest|cancel|transfer)
+  ROUTE:
+    regex: ^['"`](POST|PATCH|PUT|DELETE)\s
+ignores:
+  - '**/*.test.ts'

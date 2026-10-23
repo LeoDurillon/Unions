@@ -1,0 +1,14 @@
+id: sse-loops-until-aborted
+language: TypeScript
+severity: error
+message: An SSE handler loops on `!stream.aborted`.
+note: SSE handlers use Hono's streamSSE and stop when the client goes (AGENTS.md, Rules).
+rule:
+  pattern: streamSSE($CONTEXT, $HANDLER)
+  not:
+    has:
+      stopBy: end
+      kind: while_statement
+      has:
+        field: condition
+        regex: '!\s*\w+\.aborted'

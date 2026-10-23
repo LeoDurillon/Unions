@@ -1,0 +1,13 @@
+id: server-keeps-streams-open
+valid:
+  - |
+    export default { port, idleTimeout: 0, fetch: app.fetch };
+  - |
+    Bun.serve({ idleTimeout: 0, fetch: app.fetch });
+  - |
+    export default { name: 'not a server' };
+invalid:
+  - |
+    export default { port, fetch: app.fetch };
+  - |
+    Bun.serve({ idleTimeout: 30, fetch: app.fetch });

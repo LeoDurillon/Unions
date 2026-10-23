@@ -1,0 +1,11 @@
+id: use-bun-sleep
+valid:
+  - |
+    await Bun.sleep(100);
+  - |
+    new Promise((resolve) => { const t = setTimeout(resolve, ms); signal.addEventListener('abort', () => { clearTimeout(t); resolve(); }); });
+invalid:
+  - |
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  - |
+    await new Promise((resolve) => { setTimeout(() => resolve(), 100); });

@@ -1,0 +1,9 @@
+id: home-volume-writable
+valid:
+  - |
+    const mount = `${spec.homeVolume}:${AGENT_HOME}`;
+  - |
+    const mount = `${spec.workspaceVolume}:/workspace:ro`;
+invalid:
+  - |
+    const mount = `${spec.homeVolume}:${AGENT_HOME}:ro`;

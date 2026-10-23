@@ -1,0 +1,13 @@
+id: web-reads-notion-only
+language: TypeScript
+severity: error
+message: The web server only reads Notion; pages are written in the worker.
+note: AGENTS.md, Rules (Notion).
+files:
+  - apps/web/**
+rule:
+  any:
+    - pattern: $NOTION.createPage($$$)
+    - pattern: $NOTION.updatePage($$$)
+ignores:
+  - '**/*.test.ts'

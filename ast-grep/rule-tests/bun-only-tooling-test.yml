@@ -1,0 +1,13 @@
+id: bun-only-tooling
+valid:
+  - |
+    import { describe, expect, test } from 'bun:test';
+  - |
+    import { Database } from 'bun:sqlite';
+invalid:
+  - |
+    import { describe, it } from 'vitest';
+  - |
+    import Database from 'better-sqlite3';
+  - |
+    import { test } from 'node:test';

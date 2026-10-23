@@ -1,0 +1,27 @@
+id: server-keeps-streams-open
+language: TypeScript
+severity: error
+message: 'The Bun server keeps `idleTimeout: 0`: SSE streams are long-lived.'
+note: AGENTS.md, Rules. Tests' fake servers are left out.
+files:
+  - apps/web/**
+rule:
+  kind: object
+  any:
+    - inside:
+        kind: export_statement
+      has:
+        kind: pair
+        has:
+          field: key
+          regex: ^fetch$
+    - inside:
+        kind: arguments
+        inside:
+          pattern: Bun.serve($$$)
+  not:
+    has:
+      kind: pair
+      regex: ^idleTimeout:\s*0$
+ignores:
+  - '**/*.test.ts'

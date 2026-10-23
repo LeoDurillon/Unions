@@ -1,0 +1,18 @@
+id: use-bun-sleep
+language: TypeScript
+severity: error
+message: Wait with `Bun.sleep(ms)`, not a Promise around setTimeout.
+note: AGENTS.md, Rules (Bun only).
+rule:
+  kind: new_expression
+  has:
+    field: constructor
+    regex: ^Promise$
+  all:
+    - has:
+        stopBy: end
+        pattern: setTimeout($$$)
+    - not:
+        has:
+          stopBy: end
+          pattern: clearTimeout($$$)

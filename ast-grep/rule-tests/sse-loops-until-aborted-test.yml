@@ -1,0 +1,9 @@
+id: sse-loops-until-aborted
+valid:
+  - |
+    streamSSE(c, async (stream) => { while (!stream.aborted) { await stream.sleep(1000); } });
+invalid:
+  - |
+    streamSSE(c, async (stream) => { for (;;) { await stream.sleep(1000); } });
+  - |
+    streamSSE(c, async (stream) => { await stream.writeSSE({ data: 'once' }); });

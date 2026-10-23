@@ -1,0 +1,8 @@
+id: home-volume-writable
+language: TypeScript
+severity: error
+message: Never mount a ticket's HOME volume read-only.
+note: claude --resume writes its session files there (AGENTS.md, Rules).
+rule:
+  kind: template_string
+  regex: (?i)home[^`]*:ro\b

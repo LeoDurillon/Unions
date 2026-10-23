@@ -1,0 +1,10 @@
+id: bun-only-tooling
+language: TypeScript
+severity: error
+message: 'Bun only: use bun:test and bun:sqlite.'
+note: No Node-only test runners or SQLite drivers (AGENTS.md, Rules).
+rule:
+  kind: import_statement
+  has:
+    field: source
+    regex: ^['"](vitest|jest|@jest/globals|node:test|mocha|better-sqlite3|sqlite3|ts-node|node:sqlite)['"/]

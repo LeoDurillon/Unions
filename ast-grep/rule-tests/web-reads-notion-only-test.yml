@@ -1,0 +1,9 @@
+id: web-reads-notion-only
+valid:
+  - |
+    const page = await notion.page(token, pageId);
+invalid:
+  - |
+    await notion.updatePage(token, pageId, properties);
+  - |
+    await notion.createPage(token, parent, draft);
