@@ -34,6 +34,7 @@ function DraftButtons({
   onSend,
   onDiscard,
   onRewrite,
+  rewriteLabel,
 }: {
   text: string;
   busy: boolean;
@@ -41,6 +42,7 @@ function DraftButtons({
   onSend: (text: string) => void;
   onDiscard: () => void;
   onRewrite: () => void;
+  rewriteLabel: string;
 }): ReactElement {
   return (
     <div className="flex flex-wrap gap-2">
@@ -57,7 +59,7 @@ function DraftButtons({
         Discard
       </Button>
       <Button disabled={busy || sending} onClick={onRewrite}>
-        Rewrite again
+        {rewriteLabel}
       </Button>
     </div>
   );
@@ -70,12 +72,15 @@ export function DescriptionDraft({
   onSend,
   onDiscard,
   onRewrite,
+  rewriteLabel,
 }: {
   draft: PrDescriptionDraft;
   busy: boolean;
   onSend: (text: string) => void;
   onDiscard: () => void;
   onRewrite: () => void;
+  /** `Rewrite again`, or for a split ticket the rewrite of every slice's description. */
+  rewriteLabel: string;
 }): ReactElement {
   const [text, setText] = useState(draft.text ?? '');
   const [showChanges, setShowChanges] = useState(false);
@@ -111,11 +116,12 @@ export function DescriptionDraft({
         onSend={onSend}
         onDiscard={onDiscard}
         onRewrite={onRewrite}
+        rewriteLabel={rewriteLabel}
       />
       <p className="text-xs text-zinc-500">
-        Union adds its links (&quot;Closes #…&quot;) back when it updates the pull request. If
-        someone edits the description on GitHub before you send, nothing is overwritten: you are
-        asked to rewrite it again.
+        Union adds its links (&quot;Closes #…&quot;, a stack&apos;s list) back when it updates the
+        pull request. If someone edits the description on GitHub before you send, nothing is
+        overwritten: you are asked to rewrite it again.
       </p>
     </div>
   );

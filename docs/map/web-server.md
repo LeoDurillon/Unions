@@ -70,7 +70,7 @@ export); do not edit. Tests are left out.
 - `pr-agent-review.ts`: A pull request under review's agent review: one pull request, or the stack it is in, checked and queued for the worker.
 - `pr-checks.ts`: `/api/tickets/:id/pr-checks`: the pull request's CI checks read from GitHub, the failed ones (with related jobs and bot comments) given to the implementer, a f…
 - `pr-commits.ts`: `<review>/commits`: the pull request's commits, and one commit's files and patches, to read the change one commit at a time.
-- `pr-description.ts`: `/api/tickets/:id/pr-description`: the agent rewrites the PR's description into a draft the user edits; sending it is a command (the worker writes to GitHub).
+- `pr-description.ts`: `/api/tickets/:id/pr-description`: the agent rewrites the PR's description (each open slice's, for a split ticket) into drafts the user edits; sending one is a…
 - `pr-review-load.ts`: Loads the review and project a pull request route refers to, the GitHub auth to act on them, and the review's files and stack from GitHub.
 - `pr-review.ts`: `/api/projects/:projectId/pull-requests/reviews/:number`: the description and discussion, the diff, the comments, and posting them.
 - `preview-settings.ts`: `/api/projects/:projectId/preview`: how the project's tickets run as previews, and its secret variables, whose values are written here and never read back.

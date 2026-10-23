@@ -3,6 +3,7 @@ import { beforeEach, expect, test } from 'bun:test';
 import { eq } from 'drizzle-orm';
 
 import { createDb, migrateDb, type Db } from './db';
+import { prDescriptionOutdated } from './pr-description-outdated';
 import {
   claimPrDescription,
   discardPrDescription,
@@ -10,7 +11,6 @@ import {
   finishSendingPrDescription,
   getPrDescription,
   latestPrDescription,
-  prDescriptionOutdated,
   queuePrDescription,
   recoverPrDescriptions,
   startSendingPrDescription,
@@ -114,4 +114,51 @@ test("Union's links are not part of the description", () => {
     ),
   ).toBe('Summary');
   expect(withoutUnionLinks('Closes #12 and more')).toBe('Closes #12 and more');
+});
+
+function split(): void {
+  const slices = [
+    { position: 1, prNumber: 5, prState: 'merged' as const },
+    { position: 2, prNumber: 6, prState: 'open' as const },
+    { position: 3, prNumber: 9, prState: 'open' as const },
+  ];
+  for (const slice of slices) {
+    db.insert(schema.ticketSlices)
+      .values({
+        ticketId,
+        title: 't',
+        spec: 's',
+        tipSha: 'a',
+        branch: `b${slice.position}`,
+        ...slice,
+      })
+      .run();
+  }
+}
+
+test("a split ticket's rewrite covers each open slice, one run at a time", () => {
+  split();
+  const own = queuePrDescription(db, ticketId);
+  expect(own.prNumber).toBe(9);
+  const queued = db.select().from(schema.prDescriptions).all();
+  expect(queued.map((row) => [row.prNumber, row.status])).toEqual([
+    [6, 'queued'],
+    [9, 'queued'],
+  ]);
+  const first = claimPrDescription(db);
+  expect(first?.prNumber).toBe(6);
+  expect(claimPrDescription(db)).toBeNull();
+  finishPrDescription(db, first?.id ?? 0, { status: 'ready', original: 'Old', text: 'New' });
+  expect(claimPrDescription(db)?.prNumber).toBe(9);
+  expect(latestPrDescription(db, ticketId, 6)?.status).toBe('ready');
+  expect(latestPrDescription(db, ticketId, 9)?.status).toBe('running');
+});
+
+test("a slice's stack list and the top's stack section are not part of the description", () => {
+  const lower =
+    'Moves the module.\n\n**Stack**, bottom first: merge from the bottom.\n\n1. **#5 A** (this pull request)\n\nPart of #3.';
+  expect(withoutUnionLinks(lower)).toBe('Moves the module.');
+  const top =
+    'Adds search.\n\nCloses #3\n\n<!-- union:stack -->\n**Stack**, bottom first: merge from the bottom.\n\n1. #5 A\n<!-- /union:stack -->';
+  expect(withoutUnionLinks(top)).toBe('Adds search.');
 });

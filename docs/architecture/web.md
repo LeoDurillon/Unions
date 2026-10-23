@@ -193,11 +193,13 @@
   `GET /api/previews` (`routes/running-previews.ts`, polled every 5 s); the sidebar entry shows their count. Stop
   queues `preview_stop` for the preview's owner (`POST /api/previews/:id/stop`); a ticket's row opens the ticket.
 - PR description rewrite: the PR tab's Description section (`pull-request/pr-description.tsx`,
-  `routes/pr-description.ts`, `@union/core` `pr-descriptions.ts`) queues a `pr_descriptions` row. The agent's draft
+  `routes/pr-description.ts`, `@union/core` `pr-descriptions.ts`) queues a `pr_descriptions` row, one per open
+  slice's pull request on a split ticket (one button rewrites them all; `?pr=` picks the draft shown, the same
+  section for every pull request: GitHub's text, else the draft). The agent's draft
   is the user's to edit, send or discard; sending is the `update_pr_description` command. "Outdated" means a
   `branch_pushed` event came after the last `pull_request_opened` or `pr_description_sent`. Union's links ("Closes
-  #n", the PR it builds on) are never part of the draft: `withoutUnionLinks` strips them, `pullRequestBody` adds them
-  back.
+  #n", the PR it builds on, a stack's list) are never part of the draft: `withoutUnionLinks` strips them,
+  `pullRequestBody` (with the stack, for a split ticket) adds them back.
 - Union's update: the sidebar's Update entry (`components/union-update/`, `lib/use-union-update.ts`, polled
   every 5 s) reads `routes/union-update.ts` (the worker's last check and the work in progress, from core
   `activeWork`) and queues `union_update_check` or `union_update`. `src/restart-watch.ts` (under compose only,

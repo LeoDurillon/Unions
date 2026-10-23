@@ -1,6 +1,7 @@
-import { and, asc, desc, eq, inArray, max } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, notInArray } from 'drizzle-orm';
 
 import type { Db } from './db';
+import { withoutStackSection } from './stack-description';
 import * as schema from './tables';
 import { emitEvent, getTicket } from './tickets';
 
@@ -23,11 +24,10 @@ const UNION_LINKS = [/^Closes #\d+$/u, BUILDS_ON_LINK];
 
 /**
  * A pull request's description without the links Union adds to it (`pullRequestBody` in the
- * worker): `Closes #n`, and the PR it builds on.
+ * worker): `Closes #n`, the PR it builds on, and a split ticket's stack.
  */
 export function withoutUnionLinks(body: string): string {
-  return body
-    .replaceAll('\r\n', '\n')
+  return withoutStackSection(body.replaceAll('\r\n', '\n'))
     .split(/\n{2,}/u)
     .filter((part) => !UNION_LINKS.some((link) => link.test(part.trim())))
     .join('\n\n')
@@ -70,25 +70,54 @@ export function getPrDescription(db: Db, id: number): PrDescription | null {
   );
 }
 
-/** The ticket's latest rewrite, whatever its status. */
-export function latestPrDescription(db: Db, ticketId: number): PrDescription | null {
+/** The ticket's latest rewrite (of `prNumber`'s description, when given), whatever its status. */
+export function latestPrDescription(
+  db: Db,
+  ticketId: number,
+  prNumber?: number,
+): PrDescription | null {
+  const ofTicket = eq(schema.prDescriptions.ticketId, ticketId);
   return (
     db
       .select()
       .from(schema.prDescriptions)
-      .where(eq(schema.prDescriptions.ticketId, ticketId))
+      .where(
+        prNumber === undefined
+          ? ofTicket
+          : and(ofTicket, eq(schema.prDescriptions.prNumber, prNumber)),
+      )
       .orderBy(desc(schema.prDescriptions.id))
       .get() ?? null
   );
 }
 
-/** Queues a rewrite of the ticket's PR description; an unsent draft is discarded. */
+/** The pull requests a rewrite covers: each open slice's when the ticket is split, else its own. */
+function describedPullRequests(db: Executor, ticketId: number, own: number): number[] {
+  const slices = db
+    .select({ prNumber: schema.ticketSlices.prNumber, prState: schema.ticketSlices.prState })
+    .from(schema.ticketSlices)
+    .where(eq(schema.ticketSlices.ticketId, ticketId))
+    .orderBy(asc(schema.ticketSlices.position))
+    .all();
+  if (slices.length < 2) {
+    return [own];
+  }
+  return slices.flatMap((slice) =>
+    slice.prNumber !== null && slice.prState !== 'merged' ? [slice.prNumber] : [],
+  );
+}
+
+/**
+ * Queues a rewrite of the ticket's PR description, one per open slice of a split ticket; unsent
+ * drafts are discarded. Returns the ticket's own pull request's.
+ */
 export function queuePrDescription(db: Db, ticketId: number): PrDescription {
   return db.transaction((tx) => {
     const ticket = getTicket(tx, ticketId);
     if (ticket.prNumber === null) {
       throw new PrDescriptionError('The ticket has no pull request');
     }
+    const own = ticket.prNumber;
     const rows = tx
       .select()
       .from(schema.prDescriptions)
@@ -100,23 +129,38 @@ export function queuePrDescription(db: Db, ticketId: number): PrDescription {
     for (const row of rows.filter((open) => OPEN.some((status) => status === open.status))) {
       update(tx, row.id, { status: 'discarded', finishedAt: Date.now() });
     }
-    const row = tx
-      .insert(schema.prDescriptions)
-      .values({ ticketId, prNumber: ticket.prNumber })
-      .returning()
-      .get();
-    changed(tx, row);
+    const queued = describedPullRequests(tx, ticketId, own).map((prNumber) => {
+      const row = tx.insert(schema.prDescriptions).values({ ticketId, prNumber }).returning().get();
+      changed(tx, row);
+      return row;
+    });
+    const row = queued.find((each) => each.prNumber === own) ?? queued[0];
+    if (!row) {
+      throw new PrDescriptionError('No pull request of the stack is open');
+    }
     return row;
   });
 }
 
-/** The oldest queued rewrite, now running; null when none waits. */
+/**
+ * The oldest queued rewrite, now running; null when none waits. A ticket's rewrites run one at a
+ * time: they share its container and its session.
+ */
 export function claimPrDescription(db: Db): PrDescription | null {
   return db.transaction((tx) => {
+    const busy = tx
+      .select({ ticketId: schema.prDescriptions.ticketId })
+      .from(schema.prDescriptions)
+      .where(eq(schema.prDescriptions.status, 'running'))
+      .all()
+      .map((row) => row.ticketId);
+    const queued = eq(schema.prDescriptions.status, 'queued');
     const next = tx
       .select()
       .from(schema.prDescriptions)
-      .where(eq(schema.prDescriptions.status, 'queued'))
+      .where(
+        busy.length === 0 ? queued : and(queued, notInArray(schema.prDescriptions.ticketId, busy)),
+      )
       .orderBy(asc(schema.prDescriptions.id))
       .get();
     return next ? update(tx, next.id, { status: 'running', startedAt: Date.now() }) : null;
@@ -232,23 +276,4 @@ export function recoverPrDescriptions(db: Db): void {
           },
     );
   }
-}
-
-function lastAt(db: Db, ticketId: number, types: string[]): number | null {
-  const row = db
-    .select({ at: max(schema.events.at) })
-    .from(schema.events)
-    .where(and(eq(schema.events.ticketId, ticketId), inArray(schema.events.type, types)))
-    .get();
-  return row?.at ?? null;
-}
-
-/**
- * The branch was pushed again (a revision, a rebase) after Union last wrote the PR's description.
- * Unknown (a PR linked by hand) reads as not outdated.
- */
-export function prDescriptionOutdated(db: Db, ticketId: number): boolean {
-  const described = lastAt(db, ticketId, ['pull_request_opened', 'pr_description_sent']);
-  const pushed = lastAt(db, ticketId, ['branch_pushed']);
-  return described !== null && pushed !== null && pushed > described;
 }

@@ -17,6 +17,7 @@ import { Hono, type Context } from 'hono';
 
 import type { PrDescriptionDraft, PrDescriptionView } from '../api-types';
 import { ACCEPTED, CONFLICT, fail, NOT_FOUND, readObject, requireId } from '../http';
+import { pickedPullRequest } from '../ticket-pull-request';
 
 function loadTicket(db: Db, c: Context): Ticket {
   const id = requireId(c.req.param('id'), 'ticket id');
@@ -74,8 +75,9 @@ function draftOf(row: PrDescription): PrDescriptionDraft {
   };
 }
 
-function view(db: Db, ticket: Ticket): PrDescriptionView {
-  const row = latestPrDescription(db, ticket.id);
+/** `prNumber`: the ticket's pull request or one of its slices'; its latest draft is the one shown. */
+function view(db: Db, ticket: Ticket, prNumber: number | null): PrDescriptionView {
+  const row = prNumber === null ? null : latestPrDescription(db, ticket.id, prNumber);
   return {
     draft: row ? draftOf(row) : null,
     outdated: ticket.prNumber !== null && prDescriptionOutdated(db, ticket.id),
@@ -96,32 +98,39 @@ async function send(db: Db, c: Context): Promise<Response> {
   const text = typeof body.text === 'string' ? body.text : '';
   const sending = checked(() => startSendingPrDescription(db, row.id, text));
   command(db, ticket, 'update_pr_description', sending);
-  return c.json(view(db, ticket), ACCEPTED);
+  return c.json(view(db, ticket, row.prNumber), ACCEPTED);
 }
 
 /**
- * `/api/tickets/:id/pr-description`: the agent rewrites the PR's description into a draft the user
- * edits; sending it is a command (the worker writes to GitHub).
+ * `/api/tickets/:id/pr-description`: the agent rewrites the PR's description (each open slice's, for
+ * a split ticket) into drafts the user edits; sending one is a command (the worker writes to
+ * GitHub). `?pr=` picks the slice whose draft is shown.
  */
 export function prDescriptionRoutes(db: Db): Hono {
   const routes = new Hono();
-  routes.get('/', (c) => c.json(view(db, loadTicket(db, c))));
+  routes.get('/', (c) => {
+    const ticket = loadTicket(db, c);
+    const picked = ticket.prNumber === null ? null : pickedPullRequest(db, ticket, c);
+    return c.json(view(db, ticket, picked));
+  });
   routes.post('/', (c) => {
     const ticket = loadTicket(db, c);
     const reason = refusal(ticket);
     if (reason !== null) {
       throw fail(CONFLICT, reason);
     }
+    const picked = pickedPullRequest(db, ticket, c);
     checked(() => queuePrDescription(db, ticket.id));
-    return c.json(view(db, ticket), ACCEPTED);
+    return c.json(view(db, ticket, picked), ACCEPTED);
   });
   routes.post('/:draftId/send', (c) => send(db, c));
   routes.post('/:draftId/discard', (c) => {
     const ticket = loadTicket(db, c);
+    const row = loadDraft(db, c, ticket);
     checked(() => {
-      discardPrDescription(db, loadDraft(db, c, ticket).id);
+      discardPrDescription(db, row.id);
     });
-    return c.json(view(db, ticket));
+    return c.json(view(db, ticket, row.prNumber));
   });
   routes.post('/:draftId/cancel', (c) => {
     const ticket = loadTicket(db, c);
@@ -130,7 +139,7 @@ export function prDescriptionRoutes(db: Db): Hono {
       throw fail(CONFLICT, 'The agent is not rewriting the description');
     }
     command(db, ticket, 'cancel_pr_description', row);
-    return c.json(view(db, ticket), ACCEPTED);
+    return c.json(view(db, ticket, row.prNumber), ACCEPTED);
   });
   return routes;
 }

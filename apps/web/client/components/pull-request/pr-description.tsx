@@ -1,77 +1,43 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+// A pull request's description, the same for the ticket's and each slice's: GitHub's text, and the agent's rewrite of it to edit and send.
 import type { ReactElement } from 'react';
 
 import type { PrDescriptionDraft, PrDescriptionView } from '../../../src/api-types';
-import { prDescriptionApi } from '../../lib/pr-description-api';
+import { usePrDescription, type DescriptionActions } from '../../lib/use-pr-description';
 import { Button, ErrorText } from '../ui';
 import { DescriptionDraft } from './description-draft';
+import { GitHubDescription } from './github-description';
 
-type Actions = {
-  handleRewrite: () => void;
-  handleSend: (text: string) => void;
-  handleDiscard: () => void;
-  handleCancel: () => void;
-  busy: boolean;
-  error: Error | null;
-};
+/** What a rewrite covers: one pull request, or each open slice's of a split ticket. */
+export type RewriteScope = { pullRequests: number };
 
-/** Under `['ticket', id]`: the live events about the ticket refresh it. */
-function useDescription(ticketId: number): {
-  view: PrDescriptionView | undefined;
-  error: Error | null;
-  actions: Actions;
-} {
-  const queryClient = useQueryClient();
-  const queryKey = ['ticket', ticketId, 'pr-description'];
-  const query = useQuery({ queryKey, queryFn: () => prDescriptionApi.get(ticketId) });
-  const draftId = query.data?.draft?.id ?? 0;
-  const mutation = useMutation({
-    mutationFn: (run: () => Promise<PrDescriptionView>) => run(),
-    onSuccess: (view) => {
-      queryClient.setQueryData(queryKey, view);
-    },
-  });
-  const run = (call: () => Promise<PrDescriptionView>): void => {
-    mutation.mutate(call);
-  };
-  return {
-    view: query.data,
-    error: query.error,
-    actions: {
-      handleRewrite: () => {
-        run(() => prDescriptionApi.rewrite(ticketId));
-      },
-      handleSend: (text) => {
-        run(() => prDescriptionApi.send(ticketId, draftId, text));
-      },
-      handleDiscard: () => {
-        run(() => prDescriptionApi.discard(ticketId, draftId));
-      },
-      handleCancel: () => {
-        run(() => prDescriptionApi.cancel(ticketId, draftId));
-      },
-      busy: mutation.isPending,
-      error: mutation.error,
-    },
-  };
+function rewriteLabel(scope: RewriteScope | null, again: boolean): string {
+  const count = scope?.pullRequests ?? 1;
+  if (count > 1) {
+    return `Rewrite all ${count} descriptions${again ? ' again' : ''}`;
+  }
+  return again ? 'Rewrite again' : 'Rewrite description';
 }
 
 function RewriteButton({
   view,
   actions,
-  label,
+  scope,
 }: {
   view: PrDescriptionView;
-  actions: Actions;
-  label: string;
+  actions: DescriptionActions;
+  scope: RewriteScope;
 }): ReactElement {
+  const hint =
+    scope.pullRequests > 1
+      ? "The agent rewrites each open slice's description, one after the other; review each one in its pull request here"
+      : undefined;
   return (
     <Button
       disabled={actions.busy || view.refusal !== null}
-      title={view.refusal ?? undefined}
+      title={view.refusal ?? hint}
       onClick={actions.handleRewrite}
     >
-      {label}
+      {rewriteLabel(scope, false)}
     </Button>
   );
 }
@@ -89,14 +55,14 @@ function Working({
   actions,
 }: {
   draft: PrDescriptionDraft;
-  actions: Actions;
+  actions: DescriptionActions;
 }): ReactElement {
   return (
     <div className="flex items-center gap-3 text-sm">
       <span className="text-zinc-500">
         {draft.status === 'queued'
-          ? 'Waiting for a free agent slot…'
-          : 'The agent is rewriting the description…'}
+          ? 'Waiting for its turn…'
+          : 'The agent is rewriting this description…'}
       </span>
       <Button disabled={actions.busy} onClick={actions.handleCancel}>
         Cancel
@@ -105,13 +71,21 @@ function Working({
   );
 }
 
-function Idle({ view, actions }: { view: PrDescriptionView; actions: Actions }): ReactElement {
+function Idle({
+  view,
+  actions,
+  scope,
+}: {
+  view: PrDescriptionView;
+  actions: DescriptionActions;
+  scope: RewriteScope;
+}): ReactElement {
   const outcome = lastOutcome(view.draft);
   return (
     <div className="space-y-2 text-sm">
       {outcome ? <p className="text-zinc-500">{outcome}</p> : null}
       <div className="flex flex-wrap items-center gap-2">
-        <RewriteButton view={view} actions={actions} label="Rewrite description" />
+        <RewriteButton view={view} actions={actions} scope={scope} />
         {view.draft?.status === 'conflict' ? (
           <Button disabled={actions.busy} onClick={actions.handleDiscard}>
             Discard the draft
@@ -123,8 +97,17 @@ function Idle({ view, actions }: { view: PrDescriptionView; actions: Actions }):
   );
 }
 
-function Body({ view, actions }: { view: PrDescriptionView; actions: Actions }): ReactElement {
-  const { draft } = view;
+type BodyProps = {
+  ticketId: number;
+  pr: number;
+  view: PrDescriptionView | undefined;
+  actions: DescriptionActions;
+  scope: RewriteScope | null;
+};
+
+/** A draft in the works or to review replaces GitHub's text; else GitHub's text and Rewrite. */
+function Body({ ticketId, pr, view, actions, scope }: BodyProps): ReactElement {
+  const draft = view?.draft;
   if (draft?.status === 'queued' || draft?.status === 'running') {
     return <Working draft={draft} actions={actions} />;
   }
@@ -137,10 +120,16 @@ function Body({ view, actions }: { view: PrDescriptionView; actions: Actions }):
         onSend={actions.handleSend}
         onDiscard={actions.handleDiscard}
         onRewrite={actions.handleRewrite}
+        rewriteLabel={rewriteLabel(scope, true)}
       />
     );
   }
-  return <Idle view={view} actions={actions} />;
+  return (
+    <>
+      <GitHubDescription ticketId={ticketId} pr={pr} />
+      {view && scope ? <Idle view={view} actions={actions} scope={scope} /> : null}
+    </>
+  );
 }
 
 /** The notes above the section: the description may be out of date, the last rewrite's error. */
@@ -155,16 +144,24 @@ function notices(view: PrDescriptionView | undefined): { outdated: boolean; erro
 }
 
 /**
- * The PR's description, rewritten by the agent when the work changed after the PR was opened. The
- * draft is the user's to edit, send or discard: nothing reaches GitHub before "Update on GitHub".
+ * `pr`'s description. The agent's draft is the user's to edit, send or discard: nothing reaches
+ * GitHub before "Update on GitHub". `scope` null: no rewrite (the pull request is merged).
  */
-export function PrDescription({ ticketId }: { ticketId: number }): ReactElement {
-  const { view, error, actions } = useDescription(ticketId);
+export function PrDescription({
+  ticketId,
+  pr,
+  scope,
+}: {
+  ticketId: number;
+  pr: number;
+  scope: RewriteScope | null;
+}): ReactElement {
+  const { view, error, actions } = usePrDescription(ticketId, pr);
   const notice = notices(view);
   return (
     <section className="space-y-2 rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
-      <h3 className="text-sm font-semibold">Description</h3>
-      {notice.outdated ? (
+      <h3 className="text-sm font-semibold">Description of #{pr}</h3>
+      {notice.outdated && scope ? (
         <p className="text-sm text-amber-700 dark:text-amber-400">
           The branch was pushed again after the description was written: it may be out of date.
         </p>
@@ -173,7 +170,7 @@ export function PrDescription({ ticketId }: { ticketId: number }): ReactElement 
       {notice.error ? (
         <p className="text-sm text-red-600 dark:text-red-400">{notice.error}</p>
       ) : null}
-      {view ? <Body view={view} actions={actions} /> : null}
+      <Body ticketId={ticketId} pr={pr} view={view} actions={actions} scope={scope} />
     </section>
   );
 }

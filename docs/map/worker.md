@@ -93,7 +93,7 @@ export); do not edit. Tests are left out.
 - `simplify-git.ts`: The branch's history since it left its base, and why a rewritten one cannot be pushed.
 - `simplify-push.ts`: Pushes a simplified history, unless the agent left the one already on GitHub.
 - `simplify.ts`: Rewrites the ticket's commits into a simpler history with the implementer's own session, checks the code did not change and force-pushes it with a lease.
-- `slice-description.ts`: A lower slice's pull request description, written by the split's session from the repository's template.
+- `slice-description.ts`: A slice's pull request description: written by the split's session from the repository's template, or rewritten later.
 - `slots.ts`: Agent runs allowed at the same time, shared by the ticket scheduler and the investigations.
 - `split-agent.ts`: The implementer's session asked to rewrite its commits into the approved slices, and the split's report.
 - `split-plan-step.ts`: The split plan: a read-only agent proposes the slices of a stack, which the user edits and approves.

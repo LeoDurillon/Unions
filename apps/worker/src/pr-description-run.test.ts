@@ -24,6 +24,8 @@ import { PrDescriptionRunner } from './pr-description-run';
 import { RunSlots } from './slots';
 
 const REPO = { owner: 'acme', repo: 'shop' };
+/** More than the slices any test splits into. */
+const MAX_ROUNDS = 3;
 const ON_GITHUB = 'Adds search.\n\nA note a reviewer added.\n\nCloses #12';
 
 let root: string;
@@ -71,8 +73,11 @@ async function rewrite(): Promise<void> {
     apiFor: () => api,
     agent,
   });
-  runner.tick();
-  await runner.idle();
+  // A ticket's rewrites run one at a time: each tick starts the next.
+  for (let round = 0; round < MAX_ROUNDS; round += 1) {
+    runner.tick();
+    await runner.idle();
+  }
 }
 
 beforeEach(async () => {
@@ -168,4 +173,55 @@ test('a step started meanwhile fails the rewrite rather than share the workspace
   expect(runs).toHaveLength(0);
   expect(latestPrDescription(db, ticketId)).toMatchObject({ status: 'failed' });
   expect(getTicket(db, ticketId).phase.kind).toBe('running');
+});
+
+const LOWER_BODY =
+  'Moves the module.\n\n**Stack**, bottom first: merge from the bottom.\n\n1. **#2 Move** (this pull request)\n2. #1 Search\n\nPart of #12.';
+
+/** Splits the ticket in two: a lower slice with its own pull request, the ticket's on top. */
+async function split(): Promise<number> {
+  const lower = await api.createPullRequest(REPO, {
+    title: 'Move',
+    body: LOWER_BODY,
+    head: '12-add-search-s1',
+    base: 'main',
+  });
+  const own = getTicket(db, ticketId).prNumber;
+  const slices = [
+    {
+      position: 1,
+      title: 'Move',
+      branch: '12-add-search-s1',
+      tipSha: 'tip1',
+      prNumber: lower.number,
+    },
+    { position: 2, title: 'Search', branch: '12-add-search', tipSha: 'tip2', prNumber: own },
+  ];
+  for (const slice of slices) {
+    db.insert(schema.ticketSlices)
+      .values({ ticketId, spec: `Spec of ${slice.title}`, prState: 'open', ...slice })
+      .run();
+  }
+  return lower.number;
+}
+
+test("a split ticket's slices are each rewritten about their own change, then sent with the stack", async () => {
+  const lower = await split();
+  await rewrite();
+  expect(runs).toHaveLength(2);
+  expect(runs[0]?.prompt).toContain('git diff main...tip1');
+  expect(runs[0]?.prompt).toContain('Spec of Move');
+  expect(runs[0]?.prompt).toContain('Moves the module.');
+  expect(runs[0]?.prompt).not.toContain('Part of #12');
+  expect(runs[1]?.prompt).toContain('git diff tip1...tip2');
+  const draft = latestPrDescription(db, ticketId, lower);
+  if (!draft) {
+    throw new Error('no draft');
+  }
+  startSendingPrDescription(db, draft.id, 'Moves the module, edited.');
+  await sendPrDescription(db, () => api, draft.id);
+  const pull = api.pulls.find((each) => each.number === lower);
+  expect(pull?.body).toBe(
+    'Moves the module, edited.\n\n**Stack**, bottom first: merge from the bottom.\n\n1. **#2 Move** (this pull request)\n2. #1 Search\n\nPart of #12.',
+  );
 });

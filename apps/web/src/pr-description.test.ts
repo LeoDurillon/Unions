@@ -84,3 +84,34 @@ test('sending the edited draft queues the update for the worker; discarding drop
   expect((await call('POST', `/${row.id}/discard`)).status).toBe(409);
   expect((await call('POST', '/999/discard')).status).toBe(404);
 });
+
+test("a split ticket's rewrite drafts each open slice's description, shown by ?pr=", async () => {
+  setTicket({ prNumber: 4, prState: 'open', phase: { kind: 'done' } });
+  for (const [position, prNumber] of [
+    [1, 2],
+    [2, 4],
+  ] as const) {
+    db.insert(schema.ticketSlices)
+      .values({
+        ticketId,
+        position,
+        title: 't',
+        spec: 's',
+        tipSha: 'a',
+        branch: `b${position}`,
+        prNumber,
+        prState: 'open',
+      })
+      .run();
+  }
+  expect((await call('POST', '?pr=2')).status).toBe(202);
+  const rows = db.select().from(schema.prDescriptions).all();
+  expect(rows.map((row) => row.prNumber)).toEqual([2, 4]);
+  const [lower] = rows;
+  claimPrDescription(db);
+  finishPrDescription(db, lower?.id ?? 0, { status: 'ready', original: 'Old', text: 'Lower' });
+  const shown = (await (await call('GET', '?pr=2')).json()) as PrDescriptionView;
+  expect(shown.draft).toMatchObject({ status: 'ready', text: 'Lower' });
+  expect((await view()).draft?.status).toBe('queued');
+  expect((await call('GET', '?pr=7')).status).toBe(404);
+});

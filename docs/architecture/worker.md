@@ -142,7 +142,9 @@
   ticket, so its usage counts them). Cancellation: the `cancel_review_explanation` command (`command-cancels.ts`).
 - `pr-description-run.ts`: `PrDescriptionRunner` (same slots) rewrites a PR's description in the ticket's
   container, resuming the implementer's session (`runResumable`), from GitHub's current description, the PR template
-  and the branch. `github/pr-description-send.ts` writes the user's version only if GitHub's description is still
+  and the branch; a ticket's rewrites run one at a time (`claimPrDescription`). On a split ticket each open slice's
+  is about its own change (`slice-description.ts`: `git diff <slice below>...<tip>` and its part of the spec), and
+  is sent with the stack around it. `github/pr-description-send.ts` writes the user's version only if GitHub's description is still
   the one the agent read (else `conflict`), so an edit made on GitHub is never overwritten unseen. The first
   description (`pr-description.ts`, when the PR is opened) and the rewrite both use the `pr_description` agent.
   `github/ci-rerun.ts` handles `rerun_ci_job`: GitHub runs the failed Actions job again; it logs `ci_job_rerun` or

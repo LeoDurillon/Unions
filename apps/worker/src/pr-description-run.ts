@@ -11,21 +11,20 @@ import {
   type Project,
   recoverPrDescriptions,
   resolveAgent,
-  schema,
   sharedPrompt,
   type Ticket,
   ticketBase,
   toolsFor,
   withoutUnionLinks,
 } from '@union/core';
-import { eq } from 'drizzle-orm';
 
 import { runAgent, runResumable, type AgentFn } from './agent';
-import type { TargetDeps } from './agent-review-target';
+import { loadProject, type TargetDeps } from './agent-review-target';
 import type { GitHubApi } from './github/api';
 import { IMPLEMENT_DENIED } from './implement-loop';
-import { findTemplate, rewritePrompt, unfence } from './pr-description';
+import { findTemplate, rewritePrompt, unfence, type Template } from './pr-description';
 import { ensureTicketContainer, REPO_DIR } from './provision';
+import { rewriteTarget, sliceRewritePrompt, type RewriteTarget } from './slice-description';
 import type { RunSlots } from './slots';
 import { ensureBranch } from './workspace-git';
 
@@ -34,14 +33,6 @@ export type PrDescriptionDeps = TargetDeps & {
   apiFor: (project: Project) => GitHubApi | null;
   agent?: AgentFn;
 };
-
-function loadProject(db: Db, id: number): Project {
-  const project = db.select().from(schema.projects).where(eq(schema.projects.id, id)).get();
-  if (!project) {
-    throw new Error(`Project ${id} not found`);
-  }
-  return project;
-}
 
 /** What GitHub says the description is now, and the API to read it with. */
 function currentDescription(
@@ -56,10 +47,36 @@ function currentDescription(
   return api.pullRequestBody({ owner: project.owner, repo: project.repo }, prNumber);
 }
 
+type Run = {
+  ticket: Ticket;
+  project: Project;
+  container: string;
+  original: string;
+  target: RewriteTarget;
+};
+
+/** A slice's own change and spec, else the whole branch against its base. */
+function promptFor(db: Db, run: Run, input: { template: Template | null; base: string }): string {
+  const { ticket, target } = run;
+  const common = {
+    guidance: resolveAgent(db, 'pr_description').prompt,
+    template: input.template,
+    current: withoutUnionLinks(run.original),
+    ticket,
+  };
+  return target.kind === 'slice'
+    ? sliceRewritePrompt({
+        ...common,
+        slice: target.slice,
+        from: target.below?.tipSha ?? input.base,
+      })
+    : rewritePrompt({ ...common, base: input.base });
+}
+
 /** The agent's turn, in the ticket's container on its branch. */
 async function runRewrite(
   deps: PrDescriptionDeps,
-  run: { ticket: Ticket; project: Project; container: string; original: string },
+  run: Run,
   signal: AbortSignal,
 ): Promise<PrDescriptionOutcome> {
   const { db, runtime } = deps;
@@ -70,14 +87,12 @@ async function runRewrite(
   const base = ticketBase(project, ticket);
   await ensureBranch(runtime, container, ticket.branch ?? '', base);
   const template = await findTemplate(runtime, container);
-  log({ type: 'union_pr_description_rewrite', template: template?.path ?? null });
-  const prompt = rewritePrompt({
-    guidance: resolveAgent(db, 'pr_description').prompt,
-    template,
-    current: withoutUnionLinks(original),
-    base,
-    ticket,
+  log({
+    type: 'union_pr_description_rewrite',
+    template: template?.path ?? null,
+    slice: run.target.kind === 'slice' ? run.target.slice.position : null,
   });
+  const prompt = promptFor(db, run, { template, base });
   const outcome = await runResumable(
     deps.agent ?? runAgent,
     runtime,
@@ -116,7 +131,8 @@ async function rewrite(
 ): Promise<PrDescriptionOutcome> {
   const { db, runtime } = deps;
   const ticket = getTicket(db, row.ticketId);
-  if (ticket.prNumber !== row.prNumber || !ticket.branch) {
+  const target = rewriteTarget(db, ticket, row.prNumber);
+  if (target.kind === 'gone' || !ticket.branch) {
     return { status: 'failed', error: 'The ticket is no longer on this pull request' };
   }
   if (ticket.phase.kind === 'running') {
@@ -126,7 +142,7 @@ async function rewrite(
   const original = await currentDescription(deps, project, row.prNumber);
   const { name } = await ensureTicketContainer(db, runtime, deps.config, ticket);
   try {
-    return await runRewrite(deps, { ticket, project, container: name, original }, signal);
+    return await runRewrite(deps, { ticket, project, container: name, original, target }, signal);
   } finally {
     // A run the user started meanwhile works in the same container: it stops it itself.
     if (getTicket(db, ticket.id).phase.kind !== 'running') {

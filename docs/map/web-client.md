@@ -136,13 +136,13 @@ export); do not edit. Tests are left out.
 - `description-draft.tsx`: The rewritten description, editable, with what it changes on GitHub a click away.
 - `discussion.tsx`: The pull request's GitHub discussion (`pr`: the ticket's or a slice's), and what of it goes to the implementer.
 - `followed-base.tsx`: The notice that GitHub moved the pull request off its base: the next rebase leaves that base's commits behind.
+- `github-description.tsx`: A pull request's description as GitHub has it now, folded when long: the same for the ticket's PR and each slice's.
 - `note-card.tsx`: A review summary or a conversation comment, with its Add to review action when there is one.
 - `note-filter.tsx`: Whose reviews and comments the discussion shows: everyone's, people's only, or bots' only.
-- `pr-description.tsx`: The PR's description, rewritten by the agent when the work changed after the PR was opened.
-- `pull-request-sections.tsx`: The PR tab's sections about one pull request (the ticket's, or a slice's picked above them): CI checks, description, discussion.
+- `pr-description.tsx`: A pull request's description, the same for the ticket's and each slice's: GitHub's text, and the agent's rewrite of it to edit and send.
+- `pull-request-sections.tsx`: The PR tab's sections about one pull request, the same for the ticket's and a slice's picked above them: CI checks, description, discussion.
 - `simplify-history.tsx`: The Simplify history button: the implementation agent rewrites the branch&apos;s commits, the code unchanged.
 - `slice-ci.tsx`: A slice's CI in one word (failed, running, passed), its counts by state on hover.
-- `slice-description.tsx`: A lower slice's pull request description, as GitHub has it: the agent rewrites only the ticket's own.
 - `split-stack.tsx`: The Split into a stack button: an agent plans slices of the spec, then the branch becomes a stack of pull requests.
 - `stack-actions.tsx`: What can be done to a split ticket's whole stack: how far it is behind its base, Rebase stack, Restack, Split again.
 - `stack-panel.tsx`: A split ticket's stack in its PR tab: one line per slice with its CI, what went wrong, what can be done to it, and how it merges.
@@ -314,7 +314,7 @@ export); do not edit. Tests are left out.
 - `notifications-api.ts`: The browser's client for the notifications: a page of them, marking them read and clearing them.
 - `open-notification.ts`: Opens what a notification is about (its ticket or investigation, in its project) and marks it read.
 - `opened-investigation.ts`: The investigation opened from elsewhere (a notification), in the URL (`?investigation=<id>`).
-- `pr-description-api.ts`: The browser's client for a ticket's pull request description endpoints.
+- `pr-description-api.ts`: The browser's client for a ticket's pull request description endpoints; `pr` picks a slice's draft.
 - `preview-api.ts`: The browser's client for a ticket's preview endpoints.
 - `preview-target.ts`: Where a ticket's or a pull request's preview and commands live in the API, and their query keys.
 - `project-files-api.ts`: The browser's client for a project's uploaded files.
@@ -356,6 +356,7 @@ export); do not edit. Tests are left out.
 - `use-notifications.ts`: The notifications, page by page, with the unread count (also in the tab's title) marking them read and clearing them.
 - `use-notion-users.ts`: The Notion workspace members, read only when `enabled` (a person property is in view).
 - `use-pr-checks.ts`: A pull request's CI checks (the ticket's or a slice's; read again every 30 s while some still run), and giving picks of them to the implementer.
+- `use-pr-description.ts`: A pull request's description rewrite (the ticket's or a slice's): its latest draft, and rewriting, sending, discarding or cancelling it.
 - `use-preview.ts`: A ticket's or a pull request's preview as its section reads it, and the commands that act on it.
 - `use-review-grouping.ts`: The newest grouping by spec of the review, with starting and cancelling one.
 - `use-review-notion.ts`: The Notion page of a pull request under review: its text, the description's suggestions, checking, linking and unlinking.

@@ -69,6 +69,7 @@ export); do not edit. Tests are left out.
 - `notion-links.ts`: The Notion pages a text links to (a pull request's description), for the review's link suggestions.
 - `notion-markdown.ts`: Notion's page markdown (`GET /v1/pages/{id}/markdown`) as plain GitHub-flavored markdown: its own tags (mentions, link previews, callouts, colored or commented…
 - `phases.ts`: The ticket state machine's vocabulary: its steps, phases and actions, and small phase helpers.
+- `pr-description-outdated.ts`: Whether a pull request's description may be out of date: the branch was pushed after Union last wrote it.
 - `pr-descriptions.ts`: What a stopped worker left: running rewrites fail; a send in flight goes back to its draft, since it may or may not have reached GitHub (the next send checks G…
 - `pr-review-verdicts.ts`: What a review posted on GitHub says of the pull request: a comment, an approval, or a request for changes.
 - `pr-stacks.ts`: Pull requests stacked on each other: by GitHub's stacks, or (where it has none) by branches.

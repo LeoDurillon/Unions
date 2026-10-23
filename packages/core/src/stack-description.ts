@@ -14,10 +14,12 @@ function stackLine(entry: StackEntry, current: number): string {
     : `${entry.position}. ${label}`;
 }
 
+const STACK_HEADING = '**Stack**, bottom first: merge from the bottom.';
+
 /** The stack as a list, bottom first, `current` marked. */
 export function stackSection(stack: readonly StackEntry[], current: number): string {
   const lines = stack.map((entry) => stackLine(entry, current));
-  return ['**Stack**, bottom first: merge from the bottom.', '', ...lines].join('\n');
+  return [STACK_HEADING, '', ...lines].join('\n');
 }
 
 /**
@@ -49,6 +51,20 @@ export function withStackSection(body: string, section: string): string {
     return `${body.slice(0, start)}${block}${body.slice(end + SECTION_END.length)}`;
   }
   return body.trim() === '' ? block : `${body.trimEnd()}\n\n${block}`;
+}
+
+/**
+ * A slice's description without what Union adds: the top's marked section, or a lower slice's stack
+ * list and `Part of #<issue>` that end it.
+ */
+export function withoutStackSection(body: string): string {
+  const start = body.indexOf(SECTION_START);
+  const end = body.indexOf(SECTION_END);
+  if (start !== -1 && end > start) {
+    return `${body.slice(0, start)}${body.slice(end + SECTION_END.length)}`.trim();
+  }
+  const list = body.indexOf(STACK_HEADING);
+  return list === -1 ? body : body.slice(0, list).trim();
 }
 
 /** The comment on the issue once split: `Split into a stack: #101 Migration → #102 CRUD`. */

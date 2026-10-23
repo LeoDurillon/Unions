@@ -54,6 +54,7 @@ export * from './notion-error';
 export * from './notion-id';
 export * from './notion-links';
 export * from './pr-descriptions';
+export * from './pr-description-outdated';
 export * from './preview-compose';
 export * from './preview-config';
 export * from './preview-screenshots';
