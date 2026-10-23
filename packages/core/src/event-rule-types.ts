@@ -1,7 +1,5 @@
-/**
- * Event rules: when something happens to a ticket, do something elsewhere. Browser-safe (no
- * database): the settings page uses the same triggers, variables and value checks as the worker.
- */
+// Event rules: when something happens to a ticket, do something elsewhere. Browser-safe (no
+// database): the settings page uses the same triggers, variables and value checks as the worker.
 import { reviewVerdicts, type ReviewVerdict } from './pr-review-verdicts';
 import { BOARD_STATUSES, isCustomStep, STEPS, type BoardStatus, type Step } from './states';
 

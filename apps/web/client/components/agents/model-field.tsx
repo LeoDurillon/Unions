@@ -1,3 +1,4 @@
+// The Claude model an agent runs with.
 import type { AgentModel } from '@union/core';
 import { AGENT_MODELS, isAgentModel } from '@union/core/states';
 import type { ReactElement } from 'react';

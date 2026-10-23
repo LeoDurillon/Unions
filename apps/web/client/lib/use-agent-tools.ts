@@ -1,3 +1,4 @@
+// The tools agents pick from: built-in ones and the ones the user added.
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import type { ToolOption } from '@union/core';
 

@@ -1,3 +1,4 @@
+// Reads the repository's newest pull requests from GitHub, for the Pull requests tab.
 import type { Octokit } from 'octokit';
 
 import type { PullRequestFilter, PullRequestListItem } from './api-types';

@@ -1,3 +1,4 @@
+// One investigation: its questions, the latest answer, the agent's live log and a follow-up form.
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 import type { Investigation } from '@union/core';
 import type { ReactElement } from 'react';

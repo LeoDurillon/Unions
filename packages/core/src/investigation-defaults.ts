@@ -1,3 +1,4 @@
+// What a new investigation runs with until the user picks otherwise.
 import type { AgentModel } from './states';
 
 /** What a new investigation runs with until the user picks otherwise. Browser-safe. */

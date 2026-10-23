@@ -1,3 +1,5 @@
+// `docker compose <args>` in a helper container holding the Docker socket, and the ticket's
+// workspace when given (at `/workspace`, the repository in `/workspace/repo`).
 import { PREVIEW_REPO_DIR, type ContainerRuntime } from '@union/core';
 
 /** The Docker CLI image (with the compose plugin) the helper containers run. */

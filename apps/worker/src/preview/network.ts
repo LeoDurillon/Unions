@@ -1,3 +1,5 @@
+// Puts the owner's container on its preview's networks, so the agent and the e2e command reach the
+// services by name (`http://web:3000`): `t<id>.union.localhost` would be the container itself.
 import {
   getPreview,
   ownerKey,

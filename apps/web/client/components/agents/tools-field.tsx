@@ -1,3 +1,4 @@
+// Multi-select over the tool list: each tool is a toggle; the selection keeps the list's order.
 import type { ToolOption } from '@union/core';
 import type { ReactElement } from 'react';
 

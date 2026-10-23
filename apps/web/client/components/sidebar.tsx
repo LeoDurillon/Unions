@@ -1,3 +1,5 @@
+// Notifications, running previews, project switcher and creation entry point, and Union's Update,
+// always visible on the left.
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../src/api-types';

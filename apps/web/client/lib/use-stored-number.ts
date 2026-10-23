@@ -1,3 +1,4 @@
+// A number remembered in localStorage; storage being unavailable only loses the memory.
 import { useCallback, useState } from 'react';
 
 function read(key: string): number | null {

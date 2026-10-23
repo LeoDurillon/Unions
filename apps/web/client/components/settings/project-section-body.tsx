@@ -1,3 +1,4 @@
+// The project's own settings and its pull requests'.
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';

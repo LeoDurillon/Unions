@@ -1,3 +1,4 @@
+// Runs the preview commands, one at a time per ticket (a start and a stop never overlap).
 import {
   emitEvent,
   ownerKey,

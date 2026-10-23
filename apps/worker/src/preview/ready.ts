@@ -1,4 +1,4 @@
-/** What Traefik answers before the service's route exists. */
+// Waits for a preview's service to answer through the proxy.
 const NO_ROUTE = '404 page not found';
 const BAD_GATEWAY = 502;
 const UNAVAILABLE = 503;

@@ -1,3 +1,5 @@
+// One comment: drafts can be edited or deleted, the agent's suggestions also kept as they are; sent
+// ones are read-only.
 import { useState, type ReactElement } from 'react';
 
 import type { CommentView } from '../../../src/api-types';

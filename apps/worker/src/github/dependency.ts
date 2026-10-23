@@ -1,3 +1,4 @@
+// Mirrors the ticket's parent as "blocked by" on its issue, once both issues exist.
 import { emitEvent, parentOf, schema, type Db, type Ticket } from '@union/core';
 import { eq } from 'drizzle-orm';
 

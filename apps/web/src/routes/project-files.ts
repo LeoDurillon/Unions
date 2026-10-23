@@ -1,3 +1,5 @@
+// `/api/projects/:projectId/files`: the files every ticket's workspace gets; the browser never sees
+// their content.
 import { mkdir, rename, rm } from 'node:fs/promises';
 import path from 'node:path';
 

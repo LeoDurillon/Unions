@@ -1,3 +1,5 @@
+// The whole change, or one of its commits or the change since the last review (read only), with the
+// Explain panel on the right.
 import { useState, type ReactElement } from 'react';
 
 import { reviewBase, reviewSlice } from '../../lib/review-target';

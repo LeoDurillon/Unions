@@ -1,3 +1,5 @@
+// Reads the account's claude.ai connectors as an agent sees them (`claude mcp list`, which also
+// checks each one can be reached; no model runs), in a throwaway container removed after.
 import {
   claimConnectorCheck,
   failInterruptedChecks,

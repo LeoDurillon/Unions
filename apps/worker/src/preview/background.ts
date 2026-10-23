@@ -1,3 +1,5 @@
+// The services the agent works with: started in the ticket's compose project for a run, paused
+// after it.
 import {
   agentForwards,
   agentVariables,

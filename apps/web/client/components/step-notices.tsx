@@ -1,3 +1,4 @@
+// What stops the step and needs the user: a failed run, a usage limit, a refused commit.
 import type { Step } from '@union/core';
 import type { ReactElement } from 'react';
 

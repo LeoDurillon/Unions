@@ -1,3 +1,4 @@
+// Picks the ticket's flow: a preset or a custom one, shown as its planning steps and custom agents.
 import type { CustomAgentNames } from '@union/core';
 import { withPlanning } from '@union/core/flow-edit';
 // Picks the steps a ticket runs: one of the project's presets, or planning steps chosen one by one.

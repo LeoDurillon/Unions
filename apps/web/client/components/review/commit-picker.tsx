@@ -1,3 +1,5 @@
+// All the changes, the change since the last review (tickets), or one commit: a button that opens
+// the list, and previous and next to step through the commits in order.
 import { useState, type ReactElement } from 'react';
 
 import { SINCE_REVIEW, type CommitsResponse, type ReviewCommit } from '../../../src/api-types';

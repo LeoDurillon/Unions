@@ -1,3 +1,4 @@
+// Ad-hoc agent runs on a custom prompt for the project; no GitHub issue is created.
 import { useQuery } from '@tanstack/react-query';
 import type { Investigation } from '@union/core';
 import { useState, type ReactElement } from 'react';

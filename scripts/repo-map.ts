@@ -29,9 +29,7 @@ const missing: string[] = [];
 for (const area of MAP_AREAS) {
   // oxlint-disable-next-line no-await-in-loop -- five areas, read one after the other
   const files = await areaFiles(area, all);
-  missing.push(
-    ...files.filter(({ file, source }) => summaryOf(source, file) === null).map(({ file }) => file),
-  );
+  missing.push(...files.filter(({ source }) => summaryOf(source) === null).map(({ file }) => file));
   const target = `docs/map/${area.name}.md`;
   const map = renderMap(area, files);
   // oxlint-disable-next-line no-await-in-loop -- see above

@@ -1,3 +1,5 @@
+// The account's claude.ai connectors: their tool rules and hints, and the checks that read them
+// (`claude mcp list`).
 import { asc, desc, eq, inArray } from 'drizzle-orm';
 
 import type { Db } from './db';

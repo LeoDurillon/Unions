@@ -1,3 +1,5 @@
+// Files the user gave the project (a database dump, a local config), put at `path` in every
+// ticket's workspace and kept out of git there.
 import { integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
 import { now, projects } from './schema';

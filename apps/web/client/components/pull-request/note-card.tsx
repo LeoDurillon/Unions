@@ -1,3 +1,4 @@
+// A review summary or a conversation comment, with its Add to review action when there is one.
 import { githubTitle } from '@union/core/github-text';
 import { useState, type ReactElement } from 'react';
 

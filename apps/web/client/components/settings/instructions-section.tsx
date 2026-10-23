@@ -1,3 +1,4 @@
+// The project's own instructions, sent to every agent run on it after the shared instructions.
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';

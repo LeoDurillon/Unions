@@ -1,3 +1,4 @@
+// A new investigation: what to look into, where, and with which model and tools.
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { AgentModel, InvestigationScope } from '@union/core';
 import { INVESTIGATION_DEFAULTS } from '@union/core/investigation-defaults';

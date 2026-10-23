@@ -1,3 +1,4 @@
+// Slim bar above the project: which project is open, its tabs, and the actions.
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../src/api-types';

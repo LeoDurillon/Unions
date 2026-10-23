@@ -1,3 +1,5 @@
+// Event rule tables: the Notion data source as read, the rules, their deliveries, and the event
+// log's readers.
 import { index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
 import type { EventAction } from './event-actions';

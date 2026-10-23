@@ -1,3 +1,4 @@
+// The review page, with its Explain panel's state.
 import { useState, type ReactElement, type ReactNode } from 'react';
 
 import type { CommentView } from '../../../src/api-types';

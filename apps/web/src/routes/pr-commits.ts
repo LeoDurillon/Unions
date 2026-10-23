@@ -1,3 +1,5 @@
+// `<review>/commits`: the pull request's commits, and one commit's files and patches, to read the
+// change one commit at a time.
 import { isIgnoredPath, type Db, type PullRequestFile } from '@union/core';
 import { Hono, type Context } from 'hono';
 

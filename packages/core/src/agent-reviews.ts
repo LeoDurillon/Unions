@@ -1,3 +1,5 @@
+// Agent review records: queued, claimed, finished and cancelled, with the draft comments they
+// leave.
 import { and, asc, desc, eq, inArray, sql, type SQL } from 'drizzle-orm';
 
 import type { AgentReviewSpec } from './agent-review-specs';

@@ -1,3 +1,4 @@
+// Sends the drafts and an optional overall note to the implementer, from a panel under the button.
 import type { ReviewVerdict } from '@union/core';
 import { useEffect, useRef, useState, type ReactElement, type RefObject } from 'react';
 

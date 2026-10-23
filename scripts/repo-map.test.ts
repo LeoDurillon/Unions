@@ -6,28 +6,17 @@ test("a file's top comment is its summary, first sentence only", () => {
   expect(
     summaryOf('// Runs the forwarder. More detail.\n// Second line.\nimport x from "y";'),
   ).toBe('Runs the forwarder.');
-  expect(summaryOf('/**\n * The map of a part.\n */\nimport x from "y";')).toBe(
-    'The map of a part.',
-  );
   expect(summaryOf('// oxlint-disable-next-line x -- y\n// The real one.\nconst a = 1;')).toBe(
     'The real one.',
   );
 });
 
-test('without one, the export named after the file wins over constants and types', () => {
-  const source = [
-    "import x from 'y';",
-    '/** A list of names. */',
-    'export const NAMES = [];',
-    '/** A shape. */',
-    'export type Shape = {};',
-    '/** Runs the commands users queue. */',
-    'export class ContainerRunner {}',
-  ].join('\n');
-  expect(summaryOf(source, 'apps/worker/src/container-run.ts')).toBe(
-    'Runs the commands users queue.',
-  );
-  expect(summaryOf("import x from 'y';\nexport const a = 1;")).toBeNull();
+test('a file without a top `//` comment has no summary, whatever its doc comments', () => {
+  expect(summaryOf('/**\n * The map of a part.\n */\nimport x from "y";')).toBeNull();
+  expect(
+    summaryOf("import x from 'y';\n/** Runs the commands. */\nexport class Runner {}"),
+  ).toBeNull();
+  expect(summaryOf("import x from 'y';\n// Not at the top.\nexport const a = 1;")).toBeNull();
 });
 
 test('the map lists each folder with its files and their summaries', () => {

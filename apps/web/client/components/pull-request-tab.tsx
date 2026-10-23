@@ -1,3 +1,5 @@
+// The ticket's pull request: link it, its CI checks, keep its description current, then read its
+// GitHub discussion and pick what goes to the agent.
 import { useState, type ReactElement } from 'react';
 
 import type { TicketDetail } from '../../src/api-types';

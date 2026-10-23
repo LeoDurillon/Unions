@@ -1,3 +1,4 @@
+// Reads a pull request's head commit, branches and changed files from GitHub, ready to review.
 import type { DiffStatus, PullRequestFile } from '@union/core';
 import type { Octokit } from 'octokit';
 

@@ -1,3 +1,5 @@
+// Checks that a resolved compose file can run as a preview, and the keys and paths Union adds to
+// it.
 import path from 'node:path';
 
 /** Where the ticket's repository is in its workspace volume, as the compose helper mounts it. */

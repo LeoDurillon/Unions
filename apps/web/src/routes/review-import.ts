@@ -1,3 +1,4 @@
+// The PR tab's routes: the discussion, and importing its threads and notes as draft comments.
 import {
   listSlices,
   projectGitHubAuth,

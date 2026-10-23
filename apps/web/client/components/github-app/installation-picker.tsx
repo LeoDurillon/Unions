@@ -1,3 +1,4 @@
+// Choose where the GitHub App is installed; sets the app up first when it is not configured.
 import { useQuery } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 

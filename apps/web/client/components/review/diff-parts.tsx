@@ -1,3 +1,5 @@
+// What both diff layouts share: line tones, the gutter, highlighted code, a hunk's spec tags and
+// the comments on a line.
 import type { DiffLine } from '@union/core/diff';
 import type { ReactElement, ReactNode } from 'react';
 

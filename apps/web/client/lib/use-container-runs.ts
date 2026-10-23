@@ -1,3 +1,4 @@
+// The commands run in the target's workspace (polled while one is on), and running or stopping one.
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 
 import type { ContainerRunsView } from '../../src/api-types';

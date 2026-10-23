@@ -1,3 +1,5 @@
+// The claude.ai connectors the agents can use (Figma…), read from the Claude account the worker
+// runs agents with.
 import type { ReactElement } from 'react';
 
 import type { ConnectorsResponse } from '../../../src/api-types';

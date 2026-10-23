@@ -1,3 +1,4 @@
+// Runs one agent step per ticket in `running` phase, within the shared run slots.
 import {
   appendAgentLine,
   type Db,

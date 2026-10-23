@@ -1,3 +1,5 @@
+// The tools agents run with: the defaults, Claude Code's built-in ones, and the list the user adds
+// to.
 import { asc, eq } from 'drizzle-orm';
 
 import type { Db } from './db';

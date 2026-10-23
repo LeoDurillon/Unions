@@ -1,3 +1,4 @@
+// The ticket's files, in its Overview tab: added, described and removed at any time.
 import {
   useMutation,
   useQuery,

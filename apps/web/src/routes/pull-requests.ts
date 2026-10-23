@@ -1,3 +1,6 @@
+// `/api/projects/:projectId/pull-requests`: the repository's pull requests and stacks, read from
+// GitHub (kept a few minutes; `?refresh` reads them again), and under `/reviews` the ones the user
+// put under review.
 import { projectGitHubAuth, schema, type Db, type NotionApi } from '@union/core';
 import { stackPlaces } from '@union/core/pr-stacks';
 import { and, eq, isNotNull } from 'drizzle-orm';

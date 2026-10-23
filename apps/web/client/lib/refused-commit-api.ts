@@ -1,3 +1,4 @@
+// The ticket's last refused commit, or null.
 import type { RefusedCommit } from '@union/core';
 
 import { request } from './api';

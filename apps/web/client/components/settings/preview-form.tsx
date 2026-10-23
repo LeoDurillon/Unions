@@ -1,3 +1,4 @@
+// The page's form, from the saved settings; its Save writes the whole configuration.
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { exposedServices, type AgentVariables, type PreviewConfig } from '@union/core/preview';
 import type { ReactElement } from 'react';

@@ -1,3 +1,5 @@
+// Removes the containers and volumes of deleted tickets; a failure is logged as an event, not
+// thrown.
 import { emitEvent, type ContainerRuntime, type Db } from '@union/core';
 
 import type { ContainerRef } from './commands';

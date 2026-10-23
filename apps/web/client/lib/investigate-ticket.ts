@@ -1,3 +1,4 @@
+// Opens Investigations with a new investigation on the ticket ready to write (`?investigate=<id>`).
 import { confirmLeave } from './leave-guard';
 import { setParams, useUrlParam } from './url-state';
 

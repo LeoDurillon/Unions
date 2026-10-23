@@ -1,3 +1,5 @@
+// The only surface of GitHub the worker uses, and the shapes it passes; tests substitute an
+// in-memory fake.
 import type {
   ProjectFieldInput,
   ProjectLocator,

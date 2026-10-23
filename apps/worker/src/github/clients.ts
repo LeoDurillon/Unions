@@ -1,3 +1,5 @@
+// Each project's API: its GitHub App installation or its token, `GITHUB_TOKEN` for projects with
+// neither.
 import { projectGitHubAuth, type Db, type Project } from '@union/core';
 import { githubClient } from '@union/core/github-client';
 import type { Octokit } from 'octokit';

@@ -1,3 +1,4 @@
+// The settings every project shares: a page per agent, the tools, the GitHub App (`?union=`).
 import { useQuery } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 

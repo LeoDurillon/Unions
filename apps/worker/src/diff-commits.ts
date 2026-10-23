@@ -1,3 +1,5 @@
+// Reads a change's commits from `git log`, each against its first parent, and the change since the
+// last review.
 import { parseDiff, type ContainerRuntime, type DiffFile } from '@union/core';
 
 import { mustRunIn, runIn } from './container-exec';

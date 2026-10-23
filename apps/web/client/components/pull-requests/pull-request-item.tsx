@@ -1,3 +1,5 @@
+// One pull request: state, title, who and when, branches, review, size, and what can be done with
+// it.
 import type { ReactElement } from 'react';
 
 import type { PullRequestListItem } from '../../../src/api-types';

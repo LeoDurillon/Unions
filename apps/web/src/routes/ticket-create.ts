@@ -1,3 +1,4 @@
+// `POST /api/tickets`: a new ticket; one imported from Notion keeps the page's images as its files.
 import { createTicket, parseNotionId, schema, type Db } from '@union/core';
 import type { Context } from 'hono';
 

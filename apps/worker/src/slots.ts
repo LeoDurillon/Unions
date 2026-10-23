@@ -1,3 +1,4 @@
+// The run slots that cap how many agents run at once, across the pipeline and the side runs.
 /** Agent runs allowed at the same time, shared by the ticket scheduler and the investigations. */
 export class RunSlots {
   private used = 0;

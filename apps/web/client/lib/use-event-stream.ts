@@ -1,3 +1,4 @@
+// Calls `onEvent` with every new event, from the browser's one shared stream (`event-hub.ts`).
 import { useEffect, useRef } from 'react';
 
 import type { EventRow } from '../../src/api-types';

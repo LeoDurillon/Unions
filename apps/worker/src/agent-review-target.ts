@@ -1,3 +1,5 @@
+// Checks out the change an agent review reads: the ticket's branch, or a pull request in a
+// throwaway container.
 import {
   appendAgentLine,
   type ContainerRuntime,

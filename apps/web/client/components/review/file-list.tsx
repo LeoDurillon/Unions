@@ -1,3 +1,5 @@
+// The touched files, as a list or a tree; ignored ones (lock files, project patterns) are listed
+// apart, collapsed.
 import { useState, type ReactElement } from 'react';
 
 import type { CommentView, DiffFileSummary } from '../../../src/api-types';

@@ -1,3 +1,4 @@
+// Sets or removes (`null`) query parameters as one history entry, and tells every reader.
 import { useSyncExternalStore } from 'react';
 
 /** Fired after Union changes the URL itself: `pushState` does not fire `popstate`. */

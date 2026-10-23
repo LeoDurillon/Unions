@@ -1,3 +1,5 @@
+// A choice among names the compose file has (profiles, services): a box per name known once a
+// ticket's file was generated, and a field for others.
 import { useState, type ReactElement, type ReactNode } from 'react';
 
 import { CheckChip, ChipGroup, toggled } from '../choice';

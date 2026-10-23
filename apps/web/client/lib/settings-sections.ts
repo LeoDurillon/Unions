@@ -1,3 +1,4 @@
+// The project settings pages by group, and opening or closing them through `?settings=`.
 import { confirmLeave } from './leave-guard';
 import { readParam, setParams, useUrlParam } from './url-state';
 

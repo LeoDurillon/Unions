@@ -1,3 +1,4 @@
+// Mirrors tickets to GitHub.
 import {
   boardStatus,
   emitEvent,

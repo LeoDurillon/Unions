@@ -1,3 +1,5 @@
+// Creates a ticket's container: only the Claude subscription credential is seeded, the host clones,
+// the files are copied in.
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { homedir, tmpdir } from 'node:os';
 import path from 'node:path';

@@ -1,3 +1,4 @@
+// Numbered progress bar across the top of the wizard.
 import type { ReactElement } from 'react';
 
 import { STEPS } from './draft';

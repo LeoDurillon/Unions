@@ -1,3 +1,4 @@
+// Commands saved by name, run from a ticket's Preview tab in its workspace; one edited at a time.
 import type { ProjectScript } from '@union/core';
 import { useState, type ReactElement } from 'react';
 

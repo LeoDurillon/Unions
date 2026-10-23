@@ -1,3 +1,4 @@
+// The account's claude.ai connectors, and reading them again (polled while the worker checks).
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 import { useEffect } from 'react';
 

@@ -1,3 +1,4 @@
+// What the event rule routes answer with: the rules, their deliveries, previews and choices.
 import type { CommentTarget, EventRule, NotionSchema, ProjectItemTarget } from '@union/core';
 
 /** The Events settings: the rules, and the Notion columns they can set (null until read). */

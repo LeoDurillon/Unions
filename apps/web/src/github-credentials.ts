@@ -1,3 +1,5 @@
+// The GitHub credentials a wizard request carries: a token, or an installation of the stored GitHub
+// App.
 import { appAuth, getGitHubApp, type Db, type GitHubAppRow, type GitHubAuth } from '@union/core';
 
 import { BAD_REQUEST, CONFLICT, fail, optionalText } from './http';

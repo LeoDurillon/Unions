@@ -1,3 +1,4 @@
+// Reads a pull request's commits, and one commit's files, from GitHub.
 import type { PullRequestFile } from '@union/core';
 import type { Octokit } from 'octokit';
 

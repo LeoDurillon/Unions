@@ -1,3 +1,5 @@
+// Pull requests put under review from the Pull requests tab, without a ticket; a stack opens with a
+// tab per pull request.
 import { useState, type ReactElement } from 'react';
 
 import type { CurrentReview, PublicProject } from '../../../src/api-types';

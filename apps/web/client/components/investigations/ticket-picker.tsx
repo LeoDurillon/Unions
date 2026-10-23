@@ -1,3 +1,4 @@
+// The project's tickets that have a workspace to read (not cancelled), newest first.
 import { useQuery } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 

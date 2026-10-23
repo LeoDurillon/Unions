@@ -1,3 +1,5 @@
+// One file's diff, unified or side by side; comments and the editor appear under the last line they
+// cover.
 import { parsePatch, type DiffLine } from '@union/core/diff';
 import { useMemo, useState, type ReactElement, type ReactNode } from 'react';
 

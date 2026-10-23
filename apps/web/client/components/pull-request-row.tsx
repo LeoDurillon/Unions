@@ -1,3 +1,4 @@
+// The ticket's pull request: shown with an Unlink button, or a field to link one by number or URL.
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 

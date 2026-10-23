@@ -1,3 +1,4 @@
+// Repository (with the clone's name), a ticket's workspace (with the ticket), or a global subject.
 import type { InvestigationScope } from '@union/core';
 import type { ReactElement } from 'react';
 

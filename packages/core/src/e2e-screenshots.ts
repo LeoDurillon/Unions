@@ -1,3 +1,4 @@
+// The screenshots kept from a ticket's last e2e run: ticket files the next run replaces.
 import { mkdir, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 

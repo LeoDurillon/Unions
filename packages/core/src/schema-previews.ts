@@ -1,3 +1,5 @@
+// A preview: its compose project (`union-t<id>` for a ticket, `union-r<id>` for a pull request
+// under review) run from its owner's workspace, served by the proxy at `url`.
 import { sql } from 'drizzle-orm';
 import {
   check,

@@ -1,3 +1,5 @@
+// `/api/tickets/:id/container-runs`: commands the user runs in the ticket's workspace (the worker
+// runs them), with the end of their output, which the user can give to the implementer.
 import {
   getContainerRun,
   getTicket,

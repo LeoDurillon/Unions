@@ -1,3 +1,4 @@
+// The project list plus the remembered selection, falling back to the first project.
 import { useQuery } from '@tanstack/react-query';
 
 import type { PublicProject } from '../../src/api-types';

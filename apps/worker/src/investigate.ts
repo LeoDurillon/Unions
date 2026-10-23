@@ -1,3 +1,5 @@
+// Runs queued investigations, each in a throwaway container (`union-i<id>`), and builds their
+// prompt.
 import {
   appendAgentLine,
   claimInvestigation,

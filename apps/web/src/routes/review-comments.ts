@@ -1,3 +1,5 @@
+// Review comments of a ticket or of a pull request under review: drafts, edits, outdated marks and
+// sending.
 import { diffExcerpt, schema, type AgentReviewOwner, type Db } from '@union/core';
 import { and, eq, type SQL } from 'drizzle-orm';
 import type { Context } from 'hono';

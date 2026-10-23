@@ -1,3 +1,4 @@
+// Parses `https://github.com/orgs/<login>/projects/<n>` (or `users/`).
 export type ProjectLocator = { kind: 'orgs' | 'users'; login: string; number: number };
 
 const PROJECT_URL =

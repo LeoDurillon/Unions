@@ -1,3 +1,4 @@
+// The text of a specification, from where the user points.
 import {
   notionMarkdown,
   parseNotionId,

@@ -1,3 +1,4 @@
+// Reads a repository's branches and issues from GitHub.
 import type { Octokit } from 'octokit';
 
 import type { GitHubIssue } from './api-types';

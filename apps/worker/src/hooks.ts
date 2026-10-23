@@ -1,3 +1,5 @@
+// What the commands hand off to the running worker: all asynchronous, so draining stays
+// synchronous.
 import type { ContainerRuntime, Db, Project } from '@union/core';
 
 import type { CommandHooks } from './command-hooks';

@@ -1,3 +1,4 @@
+// One file of the review: its diff, the threads under their lines, and the outdated comments.
 import { useState, type ReactElement } from 'react';
 
 import type { CommentView } from '../../../src/api-types';

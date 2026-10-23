@@ -1,3 +1,4 @@
+// The browser's client for the `/api` routes, and the errors they answer with.
 import type {
   AgentConfig,
   AgentEffort,

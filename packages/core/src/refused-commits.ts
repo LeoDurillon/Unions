@@ -1,3 +1,4 @@
+// Refused commits: the ticket's last one, and the user's decision on it.
 import { desc, eq } from 'drizzle-orm';
 
 import type { Db } from './db';

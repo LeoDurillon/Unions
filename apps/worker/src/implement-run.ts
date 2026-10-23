@@ -1,3 +1,5 @@
+// The implementation before it is published: the agent's turns and the checks, or the end of a run
+// paused on a refused commit.
 import { getTicket, schema, ticketBase, type Db, type Project } from '@union/core';
 import { eq } from 'drizzle-orm';
 

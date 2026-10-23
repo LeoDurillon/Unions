@@ -1,10 +1,5 @@
-/**
- * The intake step ends its questions with an `Answer:` line for the user to fill in. These helpers
- * find those lines so the UI can show an input box in their place, then write the answers back
- * into the markdown (the later steps read the answers from there). An answer of several lines
- * continues on the lines below, indented two spaces past its `Answer:`: they stay in the same list
- * item, and are read back as the same answer.
- */
+// Splits an output at its `Answer:` lines, where the user answers the intake step's questions, and
+// writes the answers in.
 
 export type Segment =
   | { kind: 'text'; key: string; text: string }

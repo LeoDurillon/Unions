@@ -1,3 +1,5 @@
+// Files every ticket's workspace gets at a path in the repository (a database dump for the
+// preview's seed, a local config), kept out of git.
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { formatBytes } from '@union/core/attachment-limits';
 import { useState, type ReactElement } from 'react';

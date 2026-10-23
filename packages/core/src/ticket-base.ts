@@ -1,3 +1,4 @@
+// The branch the ticket starts from and why; before it starts, the one it would take now.
 import { eq } from 'drizzle-orm';
 
 import type { Db } from './db';

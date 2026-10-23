@@ -1,3 +1,4 @@
+// Builds a step's prompt: the ticket, its parent and what it changed, its files and the project's.
 import {
   CONTAINER_ATTACHMENTS_DIR,
   flowNote,

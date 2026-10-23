@@ -1,3 +1,5 @@
+// What a file opened under a part of the spec shows: that part's hunks, and the parts each hunk
+// serves.
 import { hunkKey, hunksOf, type Hunk } from '@union/core/diff-hunks';
 
 import type { GroupingView } from '../../src/routes/review-groupings';

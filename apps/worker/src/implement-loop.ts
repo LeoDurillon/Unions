@@ -1,3 +1,4 @@
+// Agent turn, then checks; on red checks the same session gets the failure, up to the limit.
 import {
   type AgentSetup,
   type ContainerRuntime,

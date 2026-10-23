@@ -1,3 +1,5 @@
+// Board labels: the columns, what a ticket is doing, its reference, and whether it waits for its
+// parent.
 import type { BoardColumn, CustomAgentNames, Phase, Step } from '@union/core';
 import { stepTitle } from '@union/core/step-titles';
 

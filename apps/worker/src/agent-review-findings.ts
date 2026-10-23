@@ -1,3 +1,4 @@
+// The agent review's answer format, and its findings read back as draft comments.
 import { diffExcerpt, type AgentDraft } from '@union/core';
 
 /** Drafts beyond this are dropped: a review that long is noise, whatever the prompt says. */

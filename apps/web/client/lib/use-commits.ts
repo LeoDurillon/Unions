@@ -1,3 +1,4 @@
+// The change's commits, oldest first, and (tickets) the change since the last review.
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 
 import { sliceRef, type CommitDiffResponse, type CommitsResponse } from '../../src/api-types';

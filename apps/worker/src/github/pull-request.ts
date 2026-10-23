@@ -1,3 +1,6 @@
+// Keeps the pull request's state (`pr_state`), when it was merged (`pr_merged_at`) or closed
+// without a merge (`pr_closed_at`, polled still: it can be reopened) and, for tickets that could be
+// rebased, how far behind it is (`behind_by`) current.
 import { emitEvent, listSlices, schema, type Db, type Ticket } from '@union/core';
 import { eq } from 'drizzle-orm';
 

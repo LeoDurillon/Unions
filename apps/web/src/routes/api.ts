@@ -1,3 +1,4 @@
+// Every `/api` route, with the outside services they may call.
 import type { Db } from '@union/core';
 import { Hono } from 'hono';
 

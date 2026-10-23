@@ -1,3 +1,5 @@
+// `/api/projects/:projectId/preview`: how the project's tickets run as previews, and its secret
+// variables, whose values are written here and never read back.
 import {
   deletePreviewSecret,
   isRecord,

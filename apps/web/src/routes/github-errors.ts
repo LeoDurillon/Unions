@@ -1,3 +1,4 @@
+// Turns GitHub failures into messages the wizard can show next to the field.
 import { HTTPException } from 'hono/http-exception';
 
 import { BAD_GATEWAY, fail, UNAUTHORIZED } from '../http';

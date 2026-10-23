@@ -1,3 +1,4 @@
+// Token or GitHub App: the two ways a project can reach GitHub.
 import type { ReactElement } from 'react';
 
 import { Segmented, type SegmentOption } from '../choice';

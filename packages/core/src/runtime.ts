@@ -1,4 +1,5 @@
-/** Everything the worker needs from Docker. Swap the CLI implementation for the Engine API without touching callers. */
+// Everything the worker needs from Docker. Swap the CLI implementation for the Engine API without
+// touching callers.
 
 export type TicketContainerSpec = {
   name: string;

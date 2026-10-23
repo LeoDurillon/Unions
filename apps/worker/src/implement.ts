@@ -1,3 +1,4 @@
+// Implements the approved plan on the ticket's branch, checks it, pushes it, opens the draft PR.
 import { captureDiff } from './diff-snapshot';
 import { implementerAsk, type ImplementDeps } from './implement-loop';
 import { renderImplementReport } from './implement-prompts';

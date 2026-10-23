@@ -1,3 +1,4 @@
+// The tabs a pull request review shows before its diff; Notion once it is linked to a page.
 import type { ReactElement } from 'react';
 
 import type { CurrentReview, PullRequestNote } from '../../../src/api-types';

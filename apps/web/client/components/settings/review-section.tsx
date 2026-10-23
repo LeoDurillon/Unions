@@ -1,3 +1,4 @@
+// Files the review page lists apart (collapsed), so the sidebar shows what needs reading.
 import { LOCK_FILES } from '@union/core/diff';
 import type { ReactElement } from 'react';
 

@@ -1,3 +1,5 @@
+// Rewrites of a ticket's PR description: queued, run, drafted, sent to GitHub, and recovered after
+// a stop.
 import { and, asc, desc, eq, inArray, notInArray } from 'drizzle-orm';
 
 import type { Db } from './db';

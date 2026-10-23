@@ -1,3 +1,5 @@
+// How a project reaches GitHub: the stored GitHub App, and the credentials `projectGitHubAuth`
+// resolves.
 import { eq } from 'drizzle-orm';
 
 import type { Db } from './db';

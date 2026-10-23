@@ -1,3 +1,4 @@
+// The reviewer's verdict at the top of the final review.
 import type { ReactElement } from 'react';
 
 import { parseVerdict } from '../lib/verdict';

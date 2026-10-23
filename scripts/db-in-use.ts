@@ -1,3 +1,4 @@
+// Who has the database open: host processes and the compose web/worker services.
 import path from 'node:path';
 
 import { processesUsing } from './db-tools';

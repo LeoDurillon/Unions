@@ -1,3 +1,4 @@
+// How the implementation agent's work is installed and checked inside the ticket's container.
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';

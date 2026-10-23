@@ -1,3 +1,4 @@
+// The Notion calls Union makes (`NotionApi`), and the client that makes them over fetch.
 import { NotionError } from './notion-error';
 
 const API = 'https://api.notion.com/v1';

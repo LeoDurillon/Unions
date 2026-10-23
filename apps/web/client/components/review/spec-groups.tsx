@@ -1,3 +1,5 @@
+// The files under the parts of the specification they implement (a file can be under several, with
+// only some of its hunks), then the changes no part covers, then the parts nothing implements.
 import type { ReactElement } from 'react';
 
 import type { DiffFileSummary } from '../../../src/api-types';

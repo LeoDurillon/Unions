@@ -1,3 +1,4 @@
+// The reviewer's verdict line (`VERDICT: APPROVED` / `VERDICT: CHANGES_REQUESTED`), if any.
 export type Verdict = 'approved' | 'changes_requested';
 
 const VERDICT_LINE = /^\s*\**\s*VERDICT:\s*\**\s*(?<verdict>APPROVED|CHANGES_REQUESTED)\b.*$/imu;

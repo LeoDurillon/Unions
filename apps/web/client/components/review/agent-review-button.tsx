@@ -1,3 +1,4 @@
+// Asks the review agent for draft comments on the change, and shows where it stands.
 import { useState, type ReactElement } from 'react';
 
 import type { AgentReviewView } from '../../../src/api-types';

@@ -1,3 +1,4 @@
+// A ticket's files from the browser: checked before sending, uploaded, and their download links.
 import type { Attachment } from '@union/core';
 import { MAX_ATTACHMENT_BYTES, formatBytes } from '@union/core/attachment-limits';
 

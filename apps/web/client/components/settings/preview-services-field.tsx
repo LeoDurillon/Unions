@@ -1,3 +1,4 @@
+// The services the proxy serves: name in the compose file, port, and host prefix.
 import type { PreviewService } from '@union/core';
 import type { ReactElement } from 'react';
 

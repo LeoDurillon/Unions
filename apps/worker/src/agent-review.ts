@@ -1,3 +1,5 @@
+// Runs queued agent reviews of a ticket's change or a pull request, sharing the run slots with the
+// pipeline.
 import {
   agentReviewStack,
   claimAgentReview,

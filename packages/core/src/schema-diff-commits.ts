@@ -1,3 +1,5 @@
+// A ticket's commits at its diff snapshot, oldest first, each with its own files against its first
+// parent.
 import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
 import { diffSnapshots } from './schema';

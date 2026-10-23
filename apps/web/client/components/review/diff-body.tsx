@@ -1,3 +1,4 @@
+// The touched files on the left, the picked one on the right.
 import { useState, type ReactElement, type ReactNode } from 'react';
 
 import type { CommentView, DiffResponse } from '../../../src/api-types';

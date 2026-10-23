@@ -1,3 +1,4 @@
+// The setup wizard's draft: what it collects, its steps, and when the user may move on.
 import type { ProjectOption, RepoOption, Viewer } from '../../../src/api-types';
 import type { GitHubCredential } from '../../lib/api';
 import type { AccessMethod } from '../github-app/access-method';

@@ -1,3 +1,4 @@
+// An agent page's title, whether it is customized, its model and effort, and what it does.
 import type { AgentConfig } from '@union/core';
 import type { ReactElement } from 'react';
 

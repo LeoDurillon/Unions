@@ -1,3 +1,4 @@
+// Stops running previews nobody visited for the project's idle time.
 import {
   activePreviews,
   DEFAULT_IDLE_STOP_MINUTES,

@@ -1,3 +1,4 @@
+// A settings page that needs another one done first, with the way there.
 import type { ReactElement } from 'react';
 
 import { openSettings, sectionLabel, type SettingsSection } from '../../lib/settings-sections';

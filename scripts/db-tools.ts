@@ -1,3 +1,4 @@
+// Backs up, restores and resets the database, for the `db:*` scripts.
 import { Database } from 'bun:sqlite';
 import { mkdir, readdir, readlink, rm, stat } from 'node:fs/promises';
 import path from 'node:path';

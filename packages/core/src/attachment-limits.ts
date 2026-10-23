@@ -1,4 +1,4 @@
-/** Upload limits, shared by the server and the browser (which checks them before sending). */
+// Upload limits, shared by the server and the browser (which checks them before sending).
 
 const KIBIBYTE = 1024;
 const MEBIBYTE = KIBIBYTE * KIBIBYTE;

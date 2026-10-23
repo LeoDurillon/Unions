@@ -1,3 +1,4 @@
+// Replays the ticket's whole agent log, then follows it live.
 import type { CustomAgentNames, LogEntry } from '@union/core';
 import { isEvent, type EventPayloads } from '@union/core/event-catalog';
 import { useEffect, useMemo, useRef, useState, type ReactElement } from 'react';

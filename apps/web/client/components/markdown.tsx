@@ -1,3 +1,4 @@
+// Markdown as the panel shows it.
 import { isValidElement, useState, type ComponentProps, type ReactElement } from 'react';
 import ReactMarkdown, { defaultUrlTransform } from 'react-markdown';
 import remarkGfm from 'remark-gfm';

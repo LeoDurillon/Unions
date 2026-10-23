@@ -1,3 +1,4 @@
+// Runs a command in the container and collects its output (for short commands, not agents).
 import type { ContainerRuntime, ExecOptions } from '@union/core';
 
 export type ExecOutput = { exitCode: number; stdout: string; stderr: string };

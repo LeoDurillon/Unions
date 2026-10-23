@@ -1,3 +1,6 @@
+// Replaces the ticket's diff snapshot with `base...HEAD` as it is now in the container, with each
+// commit's own diff, the change since the head the user last reviewed and, for a split ticket, each
+// slice's own diff.
 import {
   emitEvent,
   parseDiff,

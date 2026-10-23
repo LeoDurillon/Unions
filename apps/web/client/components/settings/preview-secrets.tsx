@@ -1,3 +1,4 @@
+// The project's secret variables: written here, never shown again.
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 

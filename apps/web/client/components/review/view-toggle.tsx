@@ -1,3 +1,4 @@
+// The Explain panel's toggle, then the Unified / Split switch for the review diff.
 import { useState, type ReactElement } from 'react';
 
 import { isExplaining, useExplanations } from '../../lib/use-explanations';

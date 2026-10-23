@@ -1,3 +1,4 @@
+// The project's settings: a menu of pages on the left, the open one on the right (`?settings=`).
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';

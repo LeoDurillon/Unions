@@ -1,3 +1,4 @@
+// Which lines of a diff a comment covers: clicks, shift-clicks, whole hunks and whole files.
 import type { DiffLine } from '@union/core/diff';
 import { hunksOf, type Hunk } from '@union/core/diff-hunks';
 

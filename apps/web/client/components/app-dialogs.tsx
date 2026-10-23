@@ -1,3 +1,4 @@
+// The dialog opened from the project bar: New ticket.
 import type { PipelineStep } from '@union/core/states';
 import { useState, type ReactElement } from 'react';
 

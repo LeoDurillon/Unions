@@ -1,3 +1,5 @@
+// A file opened under a part of the spec (By spec): only the hunks of that part, with a bar to show
+// them all, and each hunk header tagged with the parts it serves.
 import { hunksOf, keepHunks } from '@union/core/diff-hunks';
 import { useState, type ReactElement, type ReactNode } from 'react';
 

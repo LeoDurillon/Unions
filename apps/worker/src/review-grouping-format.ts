@@ -1,3 +1,5 @@
+// What the grouping agent reads and answers in: the diff's hunks, one per line, and the answer's
+// block.
 import { hunksOf } from '@union/core';
 
 /**

@@ -1,3 +1,5 @@
+// Asks the implementer for a pull request's description (from the repository's template, if any)
+// and reads it back.
 import {
   type ContainerRuntime,
   type Db,

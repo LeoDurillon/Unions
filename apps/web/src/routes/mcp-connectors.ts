@@ -1,3 +1,5 @@
+// `/api/agents/connectors`: the account's claude.ai connectors as the last check read them, and
+// `POST /check` to read them again (the worker does, in a throwaway container).
 import {
   latestConnectorCheck,
   listConnectors,

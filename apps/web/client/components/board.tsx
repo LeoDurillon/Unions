@@ -1,3 +1,4 @@
+// The columns, filling the screen down to the bottom edge.
 import {
   DndContext,
   PointerSensor,

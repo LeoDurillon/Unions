@@ -1,3 +1,4 @@
+// `/api/projects/:projectId/event-rules` and its deliveries, and the stored Notion columns.
 import {
   checkRule,
   deleteRule,

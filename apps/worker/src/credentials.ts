@@ -1,3 +1,5 @@
+// The secret the host's git uses to clone and push, minted right before use (an installation token
+// lives one hour).
 import { projectGitHubAuth, type Db, type Project } from '@union/core';
 import { gitToken } from '@union/core/github-client';
 

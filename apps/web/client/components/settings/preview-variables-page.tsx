@@ -1,3 +1,4 @@
+// What every service of a preview gets: plain variables, secrets, and the variables as a file.
 import { useQuery } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 

@@ -1,3 +1,4 @@
+// The global GitHub App: its credentials are checked against GitHub before they are stored.
 import { deleteGitHubApp, getGitHubApp, saveGitHubApp, schema, type Db } from '@union/core';
 import { isNotNull } from 'drizzle-orm';
 import { Hono } from 'hono';

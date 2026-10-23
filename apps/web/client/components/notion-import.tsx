@@ -1,3 +1,4 @@
+// Fetches a page of the project's Notion data source, previews it, and creates the ticket.
 import { useMutation } from '@tanstack/react-query';
 import type { PipelineStep } from '@union/core/states';
 import { useState, type ReactElement } from 'react';

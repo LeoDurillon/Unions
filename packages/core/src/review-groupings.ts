@@ -1,3 +1,5 @@
+// Groupings of a review's files by spec: queued, claimed, finished and cancelled, one at a time per
+// change.
 import { and, asc, desc, eq, inArray, type SQL } from 'drizzle-orm';
 
 import type { AgentReviewOwner } from './agent-reviews';

@@ -1,3 +1,5 @@
+// One client per credential, kept for the process: an installation client mints its own short-lived
+// token (one hour) and refreshes it before it expires, so it must be reused.
 import { createAppAuth } from '@octokit/auth-app';
 import { Octokit, RequestError } from 'octokit';
 

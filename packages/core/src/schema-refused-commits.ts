@@ -1,3 +1,4 @@
+// Changes the agent left uncommitted that the repository's hook refused to commit.
 import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
 import { now, tickets } from './schema';

@@ -1,3 +1,4 @@
+// Step-by-step project setup, shown over the board (the first thing a new user sees).
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 

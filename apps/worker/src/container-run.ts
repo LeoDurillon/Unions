@@ -1,3 +1,4 @@
+// Runs the commands users queue in tickets' and pull requests' workspaces, a few at a time.
 import {
   claimContainerRun,
   finishContainerRun,

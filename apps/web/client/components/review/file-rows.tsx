@@ -1,3 +1,4 @@
+// Files as a flat list of paths, or as a folder tree.
 import type { ReactElement } from 'react';
 
 import type { DiffFileSummary } from '../../../src/api-types';

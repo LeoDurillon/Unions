@@ -1,3 +1,5 @@
+// A ticket's files in the browser: one file's row, the file picker, and the New ticket form's
+// pending files.
 import { formatBytes } from '@union/core/attachment-limits';
 import { useState, type ReactElement, type ReactNode } from 'react';
 

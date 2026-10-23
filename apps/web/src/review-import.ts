@@ -1,3 +1,5 @@
+// Turns a pull request's unresolved threads and review notes into draft review comments on the
+// ticket.
 import { diffExcerpt, githubText, schema, type Db } from '@union/core';
 import { and, eq, isNotNull } from 'drizzle-orm';
 

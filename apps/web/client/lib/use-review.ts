@@ -1,3 +1,4 @@
+// A pull request under review: its description and discussion, read from GitHub once per opening.
 import {
   useMutation,
   useQueries,

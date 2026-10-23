@@ -1,3 +1,4 @@
+// Syntax highlighting for the review's diffs, with highlight.js.
 import type { DiffLine } from '@union/core/diff';
 import { common, createLowlight } from 'lowlight';
 

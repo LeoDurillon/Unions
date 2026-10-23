@@ -1,3 +1,5 @@
+// Reads a pull request's discussion from GitHub: its description, line threads, review summaries
+// and comments.
 import type { Octokit } from 'octokit';
 
 import type { PullRequestDiscussion, PullRequestNote, PullRequestThread } from './api-types';

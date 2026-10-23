@@ -1,3 +1,4 @@
+// Splits the log at each run header, so every run can fold on its own.
 /** A run of the log: its header line (none for lines logged before any run) and its lines. */
 export type LogRun<T> = { key: string; header: T | null; lines: T[] };
 

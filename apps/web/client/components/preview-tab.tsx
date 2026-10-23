@@ -1,3 +1,4 @@
+// The ticket's Preview tab: the environment, its output, its end-to-end tests, and commands.
 import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../src/api-types';

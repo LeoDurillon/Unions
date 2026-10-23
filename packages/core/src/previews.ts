@@ -1,3 +1,5 @@
+// Preview records: compose project and host, state, generated or user file, e2e results, and
+// recovery after a stop.
 import { eq, inArray } from 'drizzle-orm';
 
 import type { Db } from './db';

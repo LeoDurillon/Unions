@@ -1,3 +1,4 @@
+// Writes the tickets asked from investigations, each in a throwaway container removed afterwards.
 import {
   claimTicketDraft,
   emitEvent,

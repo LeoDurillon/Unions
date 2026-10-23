@@ -1,3 +1,4 @@
+// The files by directory; every directory starts open and folds on click.
 import { useMemo, useState, type ReactElement } from 'react';
 
 import type { DiffFileSummary } from '../../../src/api-types';

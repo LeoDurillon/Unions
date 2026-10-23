@@ -1,3 +1,5 @@
+// Right-hand side of the app: the running previews, the Union settings (`?union=`), the project's
+// settings (`?settings=`), or the project.
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../src/api-types';

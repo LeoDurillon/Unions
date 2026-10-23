@@ -1,3 +1,5 @@
+// Whether the worker opens a draft PR after the implementation, or the user links one by hand;
+// stacks.
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';

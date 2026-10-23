@@ -1,3 +1,5 @@
+// Compose YAML merged over the repository's file, for what Union adds without changing the
+// repository: a restore or seed service, a health check, an extra dependency.
 import { PREVIEW_TEMPLATES } from '@union/core/preview';
 import type { ReactElement } from 'react';
 

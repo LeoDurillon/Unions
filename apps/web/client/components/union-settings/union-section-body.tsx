@@ -1,3 +1,4 @@
+// The open Union settings page: an agent's, or the models', tools', connectors' or GitHub App's.
 import type { AgentId } from '@union/core';
 import { isCustomStep } from '@union/core/states';
 import type { ReactElement } from 'react';

@@ -1,3 +1,4 @@
+// Runs `claude -p` inside the ticket's container and streams its events to `onEvent`.
 import {
   connectorHints,
   isConnectorTool,

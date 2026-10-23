@@ -1,3 +1,4 @@
+// Ticket summaries and parent links: the stack, the children, and the check before a start.
 import {
   blockingParent,
   boardColumn,

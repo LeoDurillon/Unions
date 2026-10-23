@@ -1,3 +1,6 @@
+// Puts the project's files in a ticket's workspace, at their paths in the repository: new or
+// changed ones are copied (a file already there with the same content is left alone), removed ones
+// disappear, and git never sees any of them (`.git/info/exclude`).
 import {
   listProjectFiles,
   projectFileHostPath,

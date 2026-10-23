@@ -1,3 +1,4 @@
+// Commands the user runs in a workspace: queued, their output kept, and handed to the implementer.
 import { and, asc, desc, eq, inArray, type SQL } from 'drizzle-orm';
 
 import { stripAnsi } from './ansi';

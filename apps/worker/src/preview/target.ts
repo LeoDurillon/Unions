@@ -1,3 +1,5 @@
+// What a preview runs: its compose project, settings, workspace and served services, and why it
+// cannot start.
 import path from 'node:path';
 
 import {

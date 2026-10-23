@@ -1,3 +1,4 @@
+// A saved script in the settings: its closed card, its edit form, and the draft between them.
 import type { ProjectScript } from '@union/core';
 import type { ReactElement } from 'react';
 

@@ -1,3 +1,4 @@
+// The Notion routes: checking the connection and importing a page as a ticket; Notion is only read.
 import {
   NotionError,
   notionMarkdown,

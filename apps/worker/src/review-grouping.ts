@@ -1,3 +1,5 @@
+// Runs the groupings the user asked for, on the same run slots as the pipeline and the agent
+// reviews: a ticket's in its own container, a pull request's in a throwaway one (`union-g<id>`).
 import {
   claimGrouping,
   effortFor,

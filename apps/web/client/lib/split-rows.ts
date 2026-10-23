@@ -1,3 +1,5 @@
+// Pairs a patch's lines for side-by-side display: a context line faces itself, and each run of
+// removed lines faces the added lines that follow it, row by row; the longer run gets empty cells.
 import type { DiffLine } from '@union/core/diff';
 
 type OldLine = Extract<DiffLine, { kind: 'del' | 'context' }>;

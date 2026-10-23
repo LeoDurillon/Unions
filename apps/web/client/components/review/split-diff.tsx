@@ -1,3 +1,4 @@
+// Old file on the left, new on the right; removed and added runs face each other.
 import type { DiffLine } from '@union/core/diff';
 import type { ReactElement, ReactNode } from 'react';
 

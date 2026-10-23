@@ -1,3 +1,6 @@
+// The agent's grouping, checked against the change: only changed files and their real hunks, every
+// hunk at least once (the ones it left out are unrelated), no empty group (its part goes to
+// `missing`).
 import {
   hunkAt,
   hunksOf,

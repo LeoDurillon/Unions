@@ -1,3 +1,5 @@
+// `/api/projects/:projectId/pull-requests/reviews`: pull requests the user reviews without a
+// ticket.
 import { schema, type Db, type NotionApi } from '@union/core';
 import { and, desc, eq, getTableColumns, inArray } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';

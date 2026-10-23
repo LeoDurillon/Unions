@@ -1,3 +1,5 @@
+// `/api/projects/:projectId/pull-requests/reviews/:number`: the description and discussion, the
+// diff, the comments, and posting them.
 import {
   isIgnoredPath,
   isReviewVerdict,

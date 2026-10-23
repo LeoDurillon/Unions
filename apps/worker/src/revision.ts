@@ -1,3 +1,4 @@
+// The feedback a run of `step` must address, if the user asked for changes.
 import { latestOutput, type Db, type Step } from '@union/core';
 
 export type Revision = { previous: string; feedback: string };

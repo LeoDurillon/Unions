@@ -1,3 +1,5 @@
+// `/api/tickets/:id/attachments`: a ticket's files, checked against the limits and stored on the
+// host.
 import { mkdir, rename, rm } from 'node:fs/promises';
 import path from 'node:path';
 

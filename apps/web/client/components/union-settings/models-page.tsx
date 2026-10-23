@@ -1,3 +1,4 @@
+// Every agent's model and effort in a table, with one Save.
 import { useQuery } from '@tanstack/react-query';
 import type { AgentConfig } from '@union/core';
 import type { ReactElement } from 'react';

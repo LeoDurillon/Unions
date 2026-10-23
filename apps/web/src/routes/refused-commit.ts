@@ -1,3 +1,5 @@
+// The ticket's last refused commit (null if none): what the user decides on while the run is
+// paused.
 import { latestRefusal, type Db } from '@union/core';
 import type { Context } from 'hono';
 

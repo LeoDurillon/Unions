@@ -1,3 +1,4 @@
+// Opens the SQLite database and applies its migrations.
 import { Database } from 'bun:sqlite';
 import path from 'node:path';
 

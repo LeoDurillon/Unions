@@ -1,3 +1,4 @@
+// The setup wizard: unavoidable on first run, dismissible when adding another project.
 import type { ReactElement } from 'react';
 
 import { Wizard } from './onboarding/wizard';

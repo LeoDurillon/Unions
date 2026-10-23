@@ -1,3 +1,5 @@
+// The project's preview variables as compose gets them: escaped in the file Docker runs, secrets
+// hidden in the one people read.
 import { PREVIEW_ENV_FILE } from '@union/core';
 
 import type { Target } from './target';

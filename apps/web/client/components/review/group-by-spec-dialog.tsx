@@ -1,3 +1,5 @@
+// Picks the specification the change is grouped by, shows its text (editable: keep only the part
+// that matters), and starts the agent.
 import type { SpecSource } from '@union/core';
 import { useEffect, useState, type ReactElement } from 'react';
 

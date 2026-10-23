@@ -1,3 +1,4 @@
+// Pushes the ticket's branch from the host (never with a private file) and opens its draft PR once.
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';

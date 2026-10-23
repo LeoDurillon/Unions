@@ -1,3 +1,4 @@
+// The lines of `after` against `before`: kept, added or removed, in reading order.
 export type DiffLine = { kind: 'same' | 'added' | 'removed'; text: string };
 
 /** Past this many lines on a side the texts are shown as replaced whole: the table grows as their product. */

@@ -1,3 +1,5 @@
+// Refetches board, ticket, investigation and notification data whenever the worker records a
+// change.
 import { useQueryClient } from '@tanstack/react-query';
 
 import { ticketReviewBase } from './review-target';

@@ -1,3 +1,4 @@
+// The open ticket lives in the URL (`?ticket=3`), so it survives reloads and back/forward.
 import { useCallback } from 'react';
 
 import { setParams, useUrlParam } from './url-state';

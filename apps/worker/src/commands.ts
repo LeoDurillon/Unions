@@ -1,3 +1,4 @@
+// Handles every pending command once; a failing command is marked handled with its error.
 import {
   chooseRetarget,
   createTicket,

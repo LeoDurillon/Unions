@@ -1,3 +1,4 @@
+// Edits a rule: its name, what triggers it, and what it does.
 import type { NotionSchema } from '@union/core';
 import { useState, type ReactElement } from 'react';
 

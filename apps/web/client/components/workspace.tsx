@@ -1,3 +1,5 @@
+// Project bar plus the board, investigations or pull requests (or the empty board behind the
+// first-run wizard).
 import { useState, type ReactElement } from 'react';
 
 import type { PublicProject } from '../../src/api-types';

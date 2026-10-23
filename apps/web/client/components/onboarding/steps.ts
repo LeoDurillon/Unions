@@ -1,3 +1,4 @@
+// The setup wizard's views, one per entry of `STEPS`, in the same order.
 import type { ReactElement } from 'react';
 
 import { ConnectStep } from './connect-step';

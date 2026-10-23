@@ -1,3 +1,5 @@
+// `/api/tickets/:id/preview`: the ticket's preview and the commands that start, stop and read it
+// (the worker runs them: the web never touches Docker).
 import { getTicket, setComposeOverride, type Db, type Ticket } from '@union/core';
 import { Hono, type Context } from 'hono';
 

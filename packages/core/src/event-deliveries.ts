@@ -1,3 +1,5 @@
+// Reads the events logged since the last call and queues one delivery per matching enabled rule of
+// the project it is about (`eventProjects`).
 import { and, asc, desc, eq, inArray, isNotNull, isNull, like, lte } from 'drizzle-orm';
 
 import type { Db } from './db';

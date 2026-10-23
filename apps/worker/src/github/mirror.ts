@@ -1,3 +1,4 @@
+// Runs one `GitHubSync` per project, each with the project's own credentials.
 import { emitEvent, schema, type Db } from '@union/core';
 
 import type { GitHubApi } from './api';

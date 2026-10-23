@@ -1,3 +1,4 @@
+// Runs the project's e2e command against the owner's preview, after its checks passed.
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';

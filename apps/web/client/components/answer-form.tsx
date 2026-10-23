@@ -1,3 +1,4 @@
+// The output with a text box in place of each `Answer:` line; answers can take several lines.
 import { useState, type ReactElement } from 'react';
 
 import { answersOf, fillAnswers, splitAnswers, type Segment } from '../lib/answers';

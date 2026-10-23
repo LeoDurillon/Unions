@@ -1,3 +1,5 @@
+// Event rules: when something happens to a ticket, set a property of its Notion page or comment on
+// its GitHub issue or pull request.
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { EventRule, NotionSchema } from '@union/core';
 import { useState, type ReactElement } from 'react';

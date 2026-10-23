@@ -1,3 +1,4 @@
+// The browser's one shared event stream, handed to every listener in any tab.
 import type { EventRow } from '../../src/api-types';
 
 /**

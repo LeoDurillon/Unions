@@ -1,3 +1,4 @@
+// Turns the investigation into a backlog ticket written by an agent, and links to it once made.
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { Investigation } from '@union/core';
 import { useState, type ReactElement } from 'react';

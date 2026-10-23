@@ -1,3 +1,4 @@
+// A cancelled ticket can leave Union; a second click confirms, since nothing brings it back.
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 

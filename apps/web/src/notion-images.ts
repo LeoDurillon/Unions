@@ -1,3 +1,5 @@
+// Downloads the images a Notion page shows (their links expire within the hour) so they can be kept
+// as the ticket's files: each kept one is referenced as `attachment:<name>` in the markdown.
 import { MAX_ATTACHMENT_BYTES, MAX_TICKET_ATTACHMENT_BYTES } from '@union/core';
 
 const IMAGE = /!\[(?<alt>[^\]]*)\]\((?<url>https:\/\/[^)\s]+)\)/gu;

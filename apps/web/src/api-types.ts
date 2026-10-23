@@ -1,3 +1,5 @@
+// The shapes the API answers with, as the browser sees them: tokens and keys never leave the
+// server.
 import type {
   AgentReviewSpec,
   BoardColumn,

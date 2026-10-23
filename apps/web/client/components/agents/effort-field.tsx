@@ -1,3 +1,4 @@
+// How hard the agent thinks (`claude --effort`); Default leaves it to Claude Code.
 import type { AgentEffort } from '@union/core';
 import { AGENT_EFFORTS, isAgentEffort } from '@union/core/states';
 import type { ReactElement } from 'react';

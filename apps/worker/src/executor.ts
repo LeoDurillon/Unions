@@ -1,3 +1,5 @@
+// Every step: planning and custom agents, implementation, final review, and the rebase, simplify
+// and split asked on demand.
 import { isCustomStep, type ContainerRuntime, type Db } from '@union/core';
 
 import { runAgent } from './agent';

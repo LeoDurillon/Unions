@@ -1,3 +1,4 @@
+// Shared UI pieces: buttons, badges, fields, text inputs, error text and dialogs.
 import {
   useEffect,
   useRef,

@@ -1,3 +1,4 @@
+// The value a rule sets, shaped by the property's type.
 import type { NotionProperty } from '@union/core';
 import { useState, type ReactElement } from 'react';
 

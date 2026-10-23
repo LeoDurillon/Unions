@@ -1,3 +1,4 @@
+// Previews, Notion and the danger zone.
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';

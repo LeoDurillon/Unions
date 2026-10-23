@@ -1,3 +1,7 @@
+// GitHub calls the web server makes itself, because the UI needs the answer right away: the setup
+// wizard's reads and Project creation, checking the GitHub App, looking up a pull request to link,
+// reading its discussion for the PR tab and the review import, and listing the repository's pull
+// requests and their stacks for the Pull requests tab.
 import type { GitHubAppCredentials, GitHubAuth, ProjectField, PullRequestFile } from '@union/core';
 import { githubAppClient, type ClientOptions } from '@union/core/github-client';
 import type { Octokit } from 'octokit';

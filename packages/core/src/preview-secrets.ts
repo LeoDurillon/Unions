@@ -1,3 +1,4 @@
+// The names of the project's secret preview variables: all the browser ever sees of them.
 import { and, asc, eq } from 'drizzle-orm';
 
 import type { Db } from './db';

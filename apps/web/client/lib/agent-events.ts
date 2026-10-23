@@ -1,3 +1,4 @@
+// Condenses one raw `claude -p` stream-json event into zero or more log lines.
 import { callTokensOf, tokensText, type CallTokens } from './token-counts';
 
 export type LogLine = {

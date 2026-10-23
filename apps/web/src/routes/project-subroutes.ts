@@ -1,3 +1,5 @@
+// The routes under `/api/projects` that have their own module: event rules and what they pick from,
+// preview settings, files, memory.
 import type { Db, NotionApi } from '@union/core';
 import { Hono } from 'hono';
 

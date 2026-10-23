@@ -1,3 +1,5 @@
+// The GraphQL queries the web server sends GitHub: Projects, a pull request's threads and notes,
+// pull request lists.
 export const OWNER_PROJECTS = /* GraphQL */ `
   query OwnerProjects($login: String!) {
     repositoryOwner(login: $login) {

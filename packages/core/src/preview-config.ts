@@ -1,7 +1,5 @@
-/**
- * Preview settings and their templates. Browser-safe: the settings page uses the same reading and
- * checks as the worker.
- */
+// Preview settings and their templates. Browser-safe: the settings page uses the same reading and
+// checks as the worker.
 import type { PreviewConfig, PreviewService } from './schema-types';
 import { ownerHostId, ownerKey, type WorkspaceOwner } from './workspace-owner';
 

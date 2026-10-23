@@ -1,3 +1,4 @@
+// Asks an agent to group the changed files by the parts of a specification; shows where it stands.
 import { useState, type ReactElement } from 'react';
 
 import type { ReviewTarget } from '../../lib/review-target';

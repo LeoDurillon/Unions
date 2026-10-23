@@ -1,3 +1,4 @@
+// One rule: when, then, and its switches.
 import { useQuery } from '@tanstack/react-query';
 import type { EventRule, NotionSchema } from '@union/core';
 import {

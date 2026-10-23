@@ -1,3 +1,5 @@
+// How far the PR's branch is behind its base (polled from GitHub by the worker) and the Rebase
+// button.
 import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../../src/api-types';

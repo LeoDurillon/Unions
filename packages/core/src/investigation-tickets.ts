@@ -1,3 +1,4 @@
+// Asks for a ticket written from an answered investigation, with what the user wants it to cover.
 import { asc, eq } from 'drizzle-orm';
 
 import type { Db } from './db';

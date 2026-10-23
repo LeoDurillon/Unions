@@ -1,3 +1,7 @@
+// Under a review's base (`/api/tickets/:id`,
+// `/api/projects/:projectId/pull-requests/reviews/:number`): `/groupings` (the newest),
+// `/groupings/source` (a specification's text, for the user to check and edit), `POST /groupings`
+// (queue the agent), `/groupings/cancel`.
 import {
   GroupingBusyError,
   latestGrouping,

@@ -1,3 +1,5 @@
+// Checks pull requests out at their reviewed commits: the host clones and fetches, the container
+// gets the files.
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';

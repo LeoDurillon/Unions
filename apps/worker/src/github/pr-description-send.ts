@@ -1,3 +1,6 @@
+// Writes the user's version of a rewritten description to the pull request, with Union's links
+// added back, unless the description on GitHub changed since the agent read it: then nothing is
+// written, so an edit made on GitHub is never overwritten unseen.
 import {
   finishSendingPrDescription,
   getPrDescription,

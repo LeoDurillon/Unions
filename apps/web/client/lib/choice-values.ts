@@ -1,3 +1,5 @@
+// Multi-select rule values: option names joined by commas (Notion option names cannot hold one),
+// split the same way as in the worker.
 /**
  * A multi-select rule value is its option names joined by commas (Notion option names cannot hold
  * one); the worker splits it the same way.

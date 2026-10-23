@@ -1,3 +1,5 @@
+// Investigation records: created, queued, claimed by the worker, finished, followed up and
+// cancelled.
 import { and, asc, desc, eq } from 'drizzle-orm';
 
 import { validateTools } from './agent-tools';

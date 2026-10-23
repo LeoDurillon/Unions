@@ -1,3 +1,4 @@
+// `/api/tickets/github-issue`: a ticket from an existing issue of the project's repository.
 import { createTicket, projectGitHubAuth, schema, type Db, type Project } from '@union/core';
 import { and, eq } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';

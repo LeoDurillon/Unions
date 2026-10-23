@@ -1,3 +1,5 @@
+// The compose file a preview runs: generated from the repository's, or the user's own for the
+// ticket.
 import {
   composeProblems,
   envFileProblem,

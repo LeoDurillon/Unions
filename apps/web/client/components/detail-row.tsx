@@ -1,3 +1,4 @@
+// One line of a ticket's details: a label column, then the value.
 import type { ReactElement, ReactNode } from 'react';
 
 /** One line of a ticket's details: a label column, then the value. */

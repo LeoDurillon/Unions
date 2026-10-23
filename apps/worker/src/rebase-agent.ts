@@ -1,3 +1,5 @@
+// Rebases and history rewrites in the implementer's own session, and the report of what the host
+// checked and pushed.
 import {
   type Db,
   effortFor,

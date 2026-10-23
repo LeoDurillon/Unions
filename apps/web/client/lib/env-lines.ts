@@ -1,3 +1,4 @@
+// `KEY=value` lines to variables and back; blank lines and `#` comments are skipped.
 const LINE = /^(?<key>[^=]+)=(?<value>.*)$/u;
 
 /** `KEY=value` lines (blank lines and `#` comments skipped) to variables. */

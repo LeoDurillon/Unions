@@ -1,3 +1,4 @@
+// A pull request of the repository: `12`, `#12` or its `/pull/12` URL.
 const GITHUB_URL =
   /^https:\/\/github\.com\/(?<owner>[\w.-]+)\/(?<repo>[\w.-]+)\/(?<kind>pull|issues)\/(?<number>\d+)(?:[/?#].*)?$/u;
 const NUMBER = /^#?(?<number>\d+)$/u;

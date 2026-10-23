@@ -1,3 +1,4 @@
+// What runs as a ticket's preview: the compose file, what Union adds to it, and what is served.
 import { useQuery } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 

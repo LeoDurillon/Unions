@@ -1,3 +1,4 @@
+// Shown on the step paused on a refused commit: the changes, the hook's output, the decision.
 import { useQuery } from '@tanstack/react-query';
 import type { RefusedCommit, Step } from '@union/core';
 import { useState, type ReactElement } from 'react';

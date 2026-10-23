@@ -1,3 +1,5 @@
+// The claude.ai connectors of the Claude account the agents run with, as the last check read them
+// (`claude mcp list` in a throwaway container).
 import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
 import { now } from './schema';

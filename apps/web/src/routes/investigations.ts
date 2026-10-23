@@ -1,3 +1,5 @@
+// `/api/projects/:projectId/investigations`: one agent run on the user's prompt, with no GitHub
+// issue.
 import {
   askFollowUp,
   createInvestigation,

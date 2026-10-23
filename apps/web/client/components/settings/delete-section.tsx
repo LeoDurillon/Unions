@@ -1,3 +1,4 @@
+// Typing the repository name to confirm keeps a stray click from deleting a project.
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 

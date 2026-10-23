@@ -1,3 +1,4 @@
+// Runs the project's check command in the repository; a timeout counts as red.
 import type { ContainerRuntime } from '@union/core';
 
 import { mustRunIn, runIn } from './container-exec';

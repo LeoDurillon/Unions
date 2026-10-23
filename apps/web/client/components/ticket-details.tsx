@@ -1,3 +1,4 @@
+// What the ticket is attached to: where it comes from, what it depends on, its files, its preview.
 import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../src/api-types';

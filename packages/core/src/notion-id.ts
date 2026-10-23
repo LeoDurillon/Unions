@@ -1,4 +1,4 @@
-/** A whole ID: not touching other hex characters, so slugs like `Add-feed-<id>` cannot shift it. */
+// Parses a Notion ID from a bare ID (with or without dashes) or a notion.so URL.
 const BARE_ID = /(?<![0-9a-f])[0-9a-f]{32}(?![0-9a-f])/giu;
 const DASHED_ID =
   /(?<![0-9a-f])[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?![0-9a-f])/giu;

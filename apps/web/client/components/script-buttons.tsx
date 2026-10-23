@@ -1,3 +1,4 @@
+// The project's saved scripts, one button each; without any, where to save them.
 import type { ProjectScript } from '@union/core';
 import type { ReactElement } from 'react';
 

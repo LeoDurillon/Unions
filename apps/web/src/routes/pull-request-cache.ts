@@ -1,3 +1,5 @@
+// The pull request lists (and stacks) last read from GitHub, per project and filter, in this
+// process: the page opens at once, and GitHub is asked at most every few minutes.
 import type { PullRequestFilter } from '../api-types';
 import type { Listing as Found } from './pull-request-listing';
 

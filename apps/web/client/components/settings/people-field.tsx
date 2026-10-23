@@ -1,3 +1,4 @@
+// A person property: a box per workspace member; the value is their Notion ids.
 import type { ReactElement } from 'react';
 
 import { joinChoices, splitChoices } from '../../lib/choice-values';

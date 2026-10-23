@@ -1,3 +1,4 @@
+// What the rule as edited would do for one of the project's tickets; nothing is sent.
 import { useMutation, useQuery } from '@tanstack/react-query';
 import type { EventAction } from '@union/core/event-actions';
 import { useState, type ReactElement } from 'react';

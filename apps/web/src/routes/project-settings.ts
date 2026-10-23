@@ -1,3 +1,4 @@
+// Updates a project's settings, or deletes the project (GitHub is left untouched).
 import {
   forgetNotionSchema,
   parseScripts,

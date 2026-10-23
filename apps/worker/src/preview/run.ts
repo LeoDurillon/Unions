@@ -1,3 +1,4 @@
+// Starts and stops a preview from its owner's workspace, and reads the services' last output.
 import {
   activePreviews,
   emitEvent,

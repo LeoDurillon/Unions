@@ -1,3 +1,4 @@
+// Links a ticket to a pull request (looked up on GitHub, read only), or unlinks it.
 import {
   emitEvent,
   getTicket,

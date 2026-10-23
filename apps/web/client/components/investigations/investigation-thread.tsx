@@ -1,3 +1,4 @@
+// The questions asked before the latest one, each followed by its answer, oldest first.
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { Investigation } from '@union/core';
 import { useState, type ReactElement, type SubmitEvent } from 'react';

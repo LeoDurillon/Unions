@@ -1,3 +1,4 @@
+// The preview in one line of the Overview: its state, where it answers, the way to its tab.
 import { useQuery } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 

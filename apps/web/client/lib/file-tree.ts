@@ -1,3 +1,4 @@
+// The files as a directory tree, for the review's file list.
 export type TreeNode<T> =
   | { kind: 'dir'; name: string; path: string; children: TreeNode<T>[] }
   | { kind: 'file'; name: string; file: T };

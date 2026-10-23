@@ -1,3 +1,6 @@
+// The routes under `/api/tickets` that have their own module: creation, the issue import, a
+// ticket's files, its refused commit, the rewrite of its PR description, its grouping by spec, its
+// preview, the commands run in its workspace, its base branch, its removal once cancelled.
 import type { Db } from '@union/core';
 import { Hono } from 'hono';
 

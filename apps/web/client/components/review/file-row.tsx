@@ -1,3 +1,4 @@
+// One file: status, name (the full path in the flat list), drafts and line counts.
 import type { ReactElement } from 'react';
 
 import type { CommentView, DiffFileSummary } from '../../../src/api-types';

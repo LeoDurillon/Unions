@@ -1,3 +1,4 @@
+// The text of `start..end` on one side of a file's patch; null when none of those lines is in it.
 import { parsePatch, type DiffLine } from './diff';
 
 function lineNumber(line: DiffLine, side: 'old' | 'new'): number | null {

@@ -1,3 +1,5 @@
+// Posts a review's drafts and summary on GitHub as one pull request review, with the user's
+// verdict.
 import {
   emitEvent,
   schema,

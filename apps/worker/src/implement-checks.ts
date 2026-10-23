@@ -1,3 +1,5 @@
+// The checks after an agent turn (install, then the project's check); `retry` is what the session
+// is sent when they are red.
 import { runGate, runInstall, type GateResult } from './gate';
 import type { Workspace } from './implement-loop';
 import { gateFailurePrompt } from './implement-prompts';

@@ -1,3 +1,4 @@
+// Where the target's diff, comments and send live; also the root of its query keys.
 /**
  * What a review page reviews: a ticket's branch (with `slice`, one slice's own change of a split
  * ticket), or a pull request from the Current reviews tab.

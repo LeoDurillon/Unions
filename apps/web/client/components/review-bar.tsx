@@ -1,3 +1,4 @@
+// Approve, ask for a revision, or edit the output by hand (for example to answer questions).
 import type { Step } from '@union/core';
 import { useState, type ReactElement } from 'react';
 

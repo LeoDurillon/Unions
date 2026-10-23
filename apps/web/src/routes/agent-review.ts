@@ -1,3 +1,4 @@
+// A review's agent review: the latest one, starting it (queued for the worker) and cancelling it.
 import {
   agentReviewStack,
   AgentReviewBusyError,

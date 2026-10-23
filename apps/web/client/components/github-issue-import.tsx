@@ -1,3 +1,4 @@
+// Fetches an issue of the project's repository, previews it, and creates the ticket on it.
 import { useMutation } from '@tanstack/react-query';
 import type { PipelineStep } from '@union/core/states';
 import { useState, type ReactElement } from 'react';

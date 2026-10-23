@@ -1,3 +1,4 @@
+// API calls for a review's agent review, under the review's API root (`reviewBase`).
 import type { AgentReviewSpec } from '@union/core';
 
 import type { AgentReviewView } from '../../src/api-types';

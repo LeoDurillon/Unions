@@ -1,3 +1,4 @@
+// The GitHub App every project may use instead of a personal token.
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 

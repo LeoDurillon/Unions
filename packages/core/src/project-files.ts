@@ -1,3 +1,5 @@
+// Files the user gives a project: kept on the host, put at a path in the repository, and never
+// pushed.
 import path from 'node:path';
 
 import { and, asc, eq } from 'drizzle-orm';

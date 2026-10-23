@@ -1,3 +1,4 @@
+// The rewritten description, editable, with what it changes on GitHub a click away.
 import { useState, type ReactElement } from 'react';
 
 import type { PrDescriptionDraft } from '../../../src/api-types';

@@ -1,3 +1,5 @@
+// Runs a `ticket` investigation in the ticket's own container, on the workspace as the agent left
+// it.
 import {
   appendAgentLine,
   emitEvent,

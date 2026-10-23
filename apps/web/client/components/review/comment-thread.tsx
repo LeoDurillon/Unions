@@ -1,3 +1,4 @@
+// The comments ending on one line, and the editor when the selection ends there.
 import type { ReactElement } from 'react';
 
 import type { CommentView } from '../../../src/api-types';

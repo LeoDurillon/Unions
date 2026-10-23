@@ -1,3 +1,5 @@
+// A pull request description the agent rewrote for a ticket whose work changed after the PR was
+// opened.
 import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
 import { now, tickets } from './schema';

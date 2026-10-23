@@ -1,3 +1,5 @@
+// Runs the final review step: a fresh session reviews the branch against the approved plan, never
+// editing.
 import {
   type Db,
   effortFor,

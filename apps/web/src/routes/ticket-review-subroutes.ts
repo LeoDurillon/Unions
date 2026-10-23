@@ -1,3 +1,5 @@
+// A ticket's routes about its change: its refused commit, its PR description rewrite, its grouping
+// by spec, the explanations of its lines, its commits, its pull request's CI checks, its review.
 import type { Db } from '@union/core';
 import { Hono } from 'hono';
 

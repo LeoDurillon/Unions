@@ -1,3 +1,5 @@
+// The command a ticket's Preview section runs on request against its preview, and whether the agent
+// gets the preview.
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';

@@ -1,3 +1,4 @@
+// The pull requests under review without a ticket, and adding or removing one.
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 
 import type { CurrentReview, PullRequestListItem } from '../../src/api-types';

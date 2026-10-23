@@ -1,3 +1,5 @@
+// The pull request's GitHub discussion (`pr`: the ticket's or a slice's), and what of it goes to
+// the implementer.
 import type { ReactElement } from 'react';
 
 import type { CommentView, DiscussionResponse } from '../../../src/api-types';

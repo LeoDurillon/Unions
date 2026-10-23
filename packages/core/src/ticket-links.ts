@@ -1,3 +1,4 @@
+// Parent links between tickets, and the branch a ticket starts from (`ticketBase`).
 import { eq } from 'drizzle-orm';
 
 import type { Db } from './db';

@@ -1,3 +1,5 @@
+// The branch the ticket starts from and why; before it starts, it can be chosen over the parent's
+// and the project's (Automatic goes back to them).
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 

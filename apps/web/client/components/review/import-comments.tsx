@@ -1,3 +1,5 @@
+// Pulls the linked pull request's unresolved review threads in as draft comments; on a split
+// ticket, every open slice's pull request, each onto its slice.
 import type { ReactElement } from 'react';
 
 import type { ReviewImportResult, StackImportResult } from '../../../src/api-types';

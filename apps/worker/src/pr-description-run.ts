@@ -1,3 +1,5 @@
+// Runs queued rewrites of pull request descriptions, sharing the run slots with the ticket
+// pipeline, the investigations and the agent reviews.
 import {
   appendAgentLine,
   claimPrDescription,

@@ -1,3 +1,4 @@
+// The ticket's description, folded when long, and its title and description edited in place.
 import { useQuery } from '@tanstack/react-query';
 import { notionMarkdown } from '@union/core/notion-markdown';
 import { useState, type ReactElement } from 'react';

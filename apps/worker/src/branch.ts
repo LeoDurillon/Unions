@@ -1,3 +1,5 @@
+// A ticket's branch name: `<issue#>-<slug>`, or `union-<ticket id>-<slug>` while it has no GitHub
+// issue.
 const MAX_SLUG = 40;
 
 export function slugify(title: string): string {

@@ -1,3 +1,4 @@
+// How long a preview nobody visits keeps running, and how many of the project's run at once.
 import { DEFAULT_IDLE_STOP_MINUTES } from '@union/core/preview';
 import type { ReactElement } from 'react';
 

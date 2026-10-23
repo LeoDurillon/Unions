@@ -1,3 +1,5 @@
+// Checks the result, runs the project's checks, then pushes; returns why it could not, the hook's
+// refusal of the agent's leftover changes, or the gate.
 import { emitEvent, openSlices, schema, type Db, type RefusedCommit } from '@union/core';
 import { eq } from 'drizzle-orm';
 

@@ -1,3 +1,5 @@
+// A ticket's or a pull request's preview: its compose environment run from the workspace, opened
+// through the proxy.
 import type { Preview } from '@union/core';
 import { useState, type ReactElement, type ReactNode } from 'react';
 

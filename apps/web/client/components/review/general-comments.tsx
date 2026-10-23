@@ -1,3 +1,5 @@
+// Drafts about the whole change rather than lines of a file: the agent's overall remark, and its
+// findings outside the diff.
 import type { ReactElement } from 'react';
 
 import type { CommentView } from '../../../src/api-types';

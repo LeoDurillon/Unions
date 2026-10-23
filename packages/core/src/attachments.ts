@@ -1,3 +1,5 @@
+// A ticket's files: where they live on the host and in the container, their names, and which a push
+// must not contain.
 import path from 'node:path';
 
 import { and, eq } from 'drizzle-orm';

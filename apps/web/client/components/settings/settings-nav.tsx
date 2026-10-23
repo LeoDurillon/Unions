@@ -1,3 +1,4 @@
+// The settings pages by group; the danger zone last, set apart.
 import type { ReactElement } from 'react';
 
 const ACTIVE = 'bg-indigo-50 font-medium text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300';

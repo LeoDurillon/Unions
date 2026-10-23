@@ -1,3 +1,4 @@
+// Pushes every second and pulls every `pullIntervalMs`, one call at a time, until aborted.
 import type { GitHubMirror } from './mirror';
 
 const PUSH_INTERVAL_MS = 1000;

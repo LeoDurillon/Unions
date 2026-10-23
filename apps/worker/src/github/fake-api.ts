@@ -1,3 +1,4 @@
+// In-memory GitHub for tests.
 import type {
   ChecksState,
   GitHubApi,

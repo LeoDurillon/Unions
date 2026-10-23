@@ -1,3 +1,5 @@
+// The main tables: projects, the GitHub App, tickets, runs, outputs, events, commands, memory,
+// agents and investigations.
 import { sql } from 'drizzle-orm';
 import {
   index,

@@ -1,3 +1,5 @@
+// The routes about a ticket's workspace: the branch it starts from (and a change of target later),
+// the steps it runs, its title and description, the commands run in it, and what its agents used.
 import type { Db } from '@union/core';
 import { Hono } from 'hono';
 

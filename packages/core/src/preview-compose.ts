@@ -1,3 +1,8 @@
+// The file the preview runs, written from the resolved one (after `composeProblems` found nothing):
+// the ticket's own compose project, no fixed container names or host ports (the proxy routes the
+// traffic), the repository's mounts taken from the workspace volume, the project's variables in
+// every service (and as a file in one, if asked), and the exposed services labelled for Traefik on
+// the preview network.
 import path from 'node:path';
 
 import { PUBLISHED_PORTS_KEY } from './agent-environment';

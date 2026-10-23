@@ -1,3 +1,4 @@
+// App ID and private key, checked against GitHub before they are stored on the server.
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 

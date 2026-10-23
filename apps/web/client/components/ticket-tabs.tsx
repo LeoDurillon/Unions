@@ -1,3 +1,4 @@
+// The panel's top tabs: the ticket, its preview, the agents' work, and its pull request.
 import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../src/api-types';

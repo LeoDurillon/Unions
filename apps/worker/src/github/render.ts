@@ -1,3 +1,5 @@
+// What the worker writes on GitHub: issue bodies with our ticket marker, step comments, and their
+// hashes.
 import { createHash } from 'node:crypto';
 
 import {

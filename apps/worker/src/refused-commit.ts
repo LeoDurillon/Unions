@@ -1,3 +1,4 @@
+// Records the refusal and stops the run there: the user decides what to do with the changes.
 import {
   latestRefusal,
   markRefusalResolved,

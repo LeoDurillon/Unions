@@ -1,3 +1,4 @@
+// The wizard's GitHub reads; each request carries a `token` or an app `installationId`.
 import type { Db } from '@union/core';
 import { Hono } from 'hono';
 

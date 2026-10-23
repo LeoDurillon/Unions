@@ -1,3 +1,5 @@
+// Back, what is reviewed and at which commit, the GitHub import (tickets), the layout switch and
+// Send.
 import type { ReactElement } from 'react';
 
 import type { DiffResponse } from '../../../src/api-types';
