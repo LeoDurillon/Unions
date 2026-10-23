@@ -146,7 +146,7 @@
   is about its own change (`slice-description.ts`: `git diff <slice below>...<tip>` and its part of the spec), and
   is sent with the stack around it. `github/pr-description-send.ts` writes the user's version only if GitHub's description is still
   the one the agent read (else `conflict`), so an edit made on GitHub is never overwritten unseen. The first
-  description (`pr-description.ts`, when the PR is opened) and the rewrite both use the `pr_description` agent.
+  description (`pr-description.ts`, when the PR is opened) and the rewrite both use the `pr_description` agent. The agent puts the description between `<pr-description>` marks; `descriptionOf` keeps only what they hold, so a remark around it never reaches the draft.
   `github/ci-rerun.ts` handles `rerun_ci_job`: GitHub runs the failed Actions job again; it logs `ci_job_rerun` or
   `ci_job_rerun_failed` (which notifies). `github/ticket-edit.ts` handles `edit_ticket` (the title and description
   edited on the Overview): it writes them to the issue only if GitHub still has the text the edit started from

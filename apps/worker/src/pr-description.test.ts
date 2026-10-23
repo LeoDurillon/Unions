@@ -13,7 +13,7 @@ import { eq } from 'drizzle-orm';
 
 import type { AgentFn, AgentRun } from './agent';
 import { FakeGitHubApi } from './github/fake-api';
-import { descriptionPrompt, pickTemplate, writeDescription } from './pr-description';
+import { descriptionOf, descriptionPrompt, pickTemplate, writeDescription } from './pr-description';
 import { ensurePullRequest, pullRequestBody } from './publish';
 
 const TEMPLATE =
@@ -149,4 +149,22 @@ test('a new pull request is described; an existing one is left as it is', async 
   await ensurePullRequest(input);
   expect(asked).toBe(1);
   expect(github.pulls).toHaveLength(1);
+});
+
+test("only the marked description is kept: the agent's remarks around it are dropped", () => {
+  const answer = [
+    'I have the picture. One thing to flag: the old description held a bot comment.',
+    '<pr-description>',
+    '```markdown',
+    '## What changes',
+    '',
+    'The control page lists the notices.',
+    '```',
+    '</pr-description>',
+    'Let me know if you want it shorter.',
+  ].join('\n');
+  expect(descriptionOf(answer)).toBe('## What changes\n\nThe control page lists the notices.');
+  // An answer without marks is kept whole, as before.
+  expect(descriptionOf('```md\nAdds search.\n```')).toBe('Adds search.');
+  expect(descriptionPrompt(null)).toContain('<pr-description>');
 });

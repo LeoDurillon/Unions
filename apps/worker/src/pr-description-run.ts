@@ -22,7 +22,7 @@ import { runAgent, runResumable, type AgentFn } from './agent';
 import { loadProject, type TargetDeps } from './agent-review-target';
 import type { GitHubApi } from './github/api';
 import { IMPLEMENT_DENIED } from './implement-loop';
-import { findTemplate, rewritePrompt, unfence, type Template } from './pr-description';
+import { descriptionOf, findTemplate, rewritePrompt, type Template } from './pr-description';
 import { ensureTicketContainer, REPO_DIR } from './provision';
 import { rewriteTarget, sliceRewritePrompt, type RewriteTarget } from './slice-description';
 import type { RunSlots } from './slots';
@@ -114,7 +114,7 @@ async function runRewrite(
     const prefix = outcome.kind === 'rate_limited' ? 'Usage limit reached: ' : '';
     return { status: 'failed', error: `${prefix}${outcome.message}` };
   }
-  const text = unfence(outcome.text);
+  const text = descriptionOf(outcome.text);
   return text === ''
     ? { status: 'failed', error: 'The agent wrote no description' }
     : { status: 'ready', original, text };

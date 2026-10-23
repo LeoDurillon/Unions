@@ -80,8 +80,11 @@ export function templateInstructions(template: Template | null): string {
     : 'The repository has no pull request template. Write a short summary of the change, then the main changes, then how it was tested, in the language the ticket is written in.';
 }
 
-export const OUTPUT_RULES =
-  'Output only the description in markdown, with no preamble. Do not add a "Closes" line or link the ticket: that is added for you.';
+const OPEN_MARK = '<pr-description>';
+const CLOSE_MARK = '</pr-description>';
+
+/** The answer is parsed: only what sits between the marks becomes the description. */
+export const OUTPUT_RULES = `Your answer is read by a program. Put the description, in markdown, between a line \`${OPEN_MARK}\` and a line \`${CLOSE_MARK}\`: everything outside them is dropped, so write no note, summary or remark for the user, inside or outside. Do not add a "Closes" line or link the ticket: that is added for you.`;
 
 /** Asks the implementer, who knows the work, for the pull request's description. */
 export function descriptionPrompt(template: Template | null, guidance = ''): string {
@@ -131,6 +134,16 @@ export function unfence(text: string): string {
   return FENCED.exec(trimmed)?.groups?.inner?.trim() ?? trimmed;
 }
 
+/**
+ * The description in the agent's answer: what its last pair of marks holds, so a remark before or
+ * after is dropped; the whole answer when it has no marks. Unfenced either way.
+ */
+export function descriptionOf(answer: string): string {
+  const end = answer.lastIndexOf(CLOSE_MARK);
+  const start = end === -1 ? -1 : answer.lastIndexOf(OPEN_MARK, end);
+  return unfence(start === -1 ? answer : answer.slice(start + OPEN_MARK.length, end));
+}
+
 /** The agent's description in the describer's session, or null when the turn fails or says nothing. */
 export async function askDescription(
   runtime: ContainerRuntime,
@@ -151,7 +164,7 @@ export async function askDescription(
     signal: describer.signal,
     onEvent: describer.log,
   });
-  const text = outcome.kind === 'ok' ? unfence(outcome.text) : '';
+  const text = outcome.kind === 'ok' ? descriptionOf(outcome.text) : '';
   return text === '' ? null : text;
 }
 
