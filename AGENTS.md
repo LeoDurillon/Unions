@@ -37,12 +37,14 @@ remove the file), then run `bun run map` to update the maps.
 - `bun run sg`: ast-grep rules (`ast-grep/rules/`, one per rule in this file that code can break, each with cases in
   `ast-grep/rule-tests/`). When you add a rule here that a pattern can catch, add an ast-grep rule and its test.
   Do not widen a rule's `ignores` without the reason its `note` asks for.
-- `bun run knip`: unused files, exports and dependencies (`knip.json`). Drop an `export` used only in its own file;
-  a new script run by path goes in the root workspace's `entry`.
-- `bun run dup`: jscpd copy-paste check (`.jscpd.json`); fails when duplication exceeds `threshold`. Factor the
-  copy out rather than raising the threshold; lower it when duplication goes down.
+- `bun run knip`: unused files, exports and dependencies (`knip.json`), including what `@union/core` exports and no
+  workspace imports (`includeEntryExports`) and namespace members. Drop an `export` used only in its own file, and
+  delete what nothing uses; a new script run by path goes in the root workspace's `entry`.
+- `bun run dup`: jscpd copy-paste check (`.jscpd.json`, copies of 60 tokens and more); fails when duplication exceeds
+  `threshold`. Factor the copy out rather than raising the threshold; lower it when duplication goes down.
 - `bun run secrets`: gitleaks over the git history and the uncommitted changes, redacted. Needs `gitleaks` on the
-  PATH (`brew install gitleaks`). Never run it without `--redact`.
+  PATH (`brew install gitleaks`). `.gitleaks.toml` adds Claude OAuth tokens and legacy Notion secrets to the default
+  rules: add a rule there for any new kind of secret Union handles. Never run it without `--redact`.
 - `bun run map`: regenerates `docs/map/` after adding, removing or re-describing files; `bun run map:check` (part of
   `check`) fails when a map is out of date or a source file has no top comment.
 - `bun run active`: says whether anything runs on the live instance (exit 1 if so); see "Working on the live

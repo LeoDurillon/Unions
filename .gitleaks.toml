@@ -1,0 +1,17 @@
+# gitleaks: the default rules, plus the secrets Union handles that they miss. Run with `bun run secrets`.
+title = "union-next"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "claude-oauth-token"
+description = "Claude OAuth access or refresh token (the claudeAiOauth credential seeded into agent containers)"
+regex = '''\bsk-ant-o[ar]t01-[A-Za-z0-9_\-]{80,}'''
+keywords = ["sk-ant-oat01", "sk-ant-ort01"]
+
+[[rules]]
+id = "notion-legacy-secret"
+description = "Notion integration secret with the legacy secret_ prefix"
+regex = '''\bsecret_[A-Za-z0-9]{43}\b'''
+keywords = ["secret_"]
