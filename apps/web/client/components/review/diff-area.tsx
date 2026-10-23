@@ -1,10 +1,22 @@
 import { useState, type ReactElement } from 'react';
 
-import { reviewBase } from '../../lib/review-target';
+import { reviewBase, reviewSlice } from '../../lib/review-target';
 import { CommitDiffBody } from './commit-diff';
 import { CommitPicker } from './commit-picker';
 import { DiffBody } from './diff-body';
 import { ExplainPanel } from './explain-panel';
+
+/**
+ * A split ticket's slice: its own change, written on like the whole one. Its commits, the grouping
+ * by spec and Explain stay on the whole change.
+ */
+function SliceArea(props: Omit<Parameters<typeof DiffBody>[0], 'picker'>): ReactElement {
+  return (
+    <div className="flex min-h-0 flex-1">
+      <DiffBody {...props} picker={null} />
+    </div>
+  );
+}
 
 /**
  * The whole change, or one of its commits or the change since the last review (read only), with
@@ -13,6 +25,9 @@ import { ExplainPanel } from './explain-panel';
 export function DiffArea(props: Omit<Parameters<typeof DiffBody>[0], 'picker'>): ReactElement {
   const [commit, setCommit] = useState<string | null>(null);
   const base = reviewBase(props.target);
+  if (reviewSlice(props.target) !== null) {
+    return <SliceArea {...props} />;
+  }
   const picker = <CommitPicker base={base} value={commit} onChange={setCommit} />;
   return (
     <div className="flex min-h-0 flex-1">

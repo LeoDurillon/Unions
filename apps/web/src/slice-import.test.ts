@@ -184,3 +184,16 @@ test('a ticket not split imports on the whole change, without a slice', async ()
   await post('/comments/import');
   expect(await comments()).toMatchObject([{ slicePosition: null, headSha: 'tip2' }]);
 });
+
+test("a comment written on a slice is on that slice's own lines", async () => {
+  const lines = { path: 'math.js', side: 'new', startLine: 4, endLine: 6, body: 'Why?' };
+  expect((await post('/comments?slice=1', lines)).status).toBe(201);
+  expect(await comments()).toMatchObject([
+    {
+      slicePosition: 1,
+      headSha: 'tip1',
+      excerpt: 'export function subtract(a, b) {\n  return a - b;\n}',
+    },
+  ]);
+  expect((await post('/comments?slice=9', lines)).status).toBe(404);
+});

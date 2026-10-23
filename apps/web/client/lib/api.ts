@@ -200,10 +200,13 @@ export const api = {
   diffFile: (base: string, fileId: number): Promise<{ id: number; path: string; patch: string }> =>
     request('GET', `${base}/diff/files/${fileId}`),
   comments: (base: string): Promise<CommentView[]> => request('GET', `${base}/comments`),
+  /** `slice`: on a split ticket's slice, its own change. */
   addComment: (
     base: string,
     input: { path: string; side: 'old' | 'new'; startLine: number; endLine: number; body: string },
-  ): Promise<unknown> => request('POST', `${base}/comments`, input),
+    slice: number | null = null,
+  ): Promise<unknown> =>
+    request('POST', `${base}/comments${slice === null ? '' : `?slice=${slice}`}`, input),
   editComment: (base: string, commentId: number, body: string): Promise<unknown> =>
     request('PATCH', `${base}/comments/${commentId}`, { body }),
   deleteComment: (base: string, commentId: number): Promise<unknown> =>

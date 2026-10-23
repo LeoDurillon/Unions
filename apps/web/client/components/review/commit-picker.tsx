@@ -1,11 +1,6 @@
 import { useState, type ReactElement } from 'react';
 
-import {
-  SINCE_REVIEW,
-  sliceRef,
-  type CommitsResponse,
-  type ReviewCommit,
-} from '../../../src/api-types';
+import { SINCE_REVIEW, type CommitsResponse, type ReviewCommit } from '../../../src/api-types';
 import { useCommits } from '../../lib/use-commits';
 import { ErrorText } from '../ui';
 
@@ -95,17 +90,10 @@ function sinceLabel(since: NonNullable<CommitsResponse['sinceReview']>): string 
 }
 
 /** What the picker's button says: the whole change, the change since the review, or a commit. */
-function sliceLabel(slice: NonNullable<CommitsResponse['slices']>[number]): string {
-  return `Slice ${slice.position} · ${slice.title}`;
-}
 
 function pickedLabel(value: string | null, data: CommitsResponse | undefined): string {
   if (value === SINCE_REVIEW && data?.sinceReview) {
     return sinceLabel(data.sinceReview);
-  }
-  const slice = data?.slices?.find((candidate) => sliceRef(candidate.position) === value);
-  if (slice) {
-    return sliceLabel(slice);
   }
   const commit = data?.commits.find((candidate) => candidate.sha === value);
   return commit ? commitLine(commit) : 'All changes';
@@ -151,16 +139,6 @@ function CommitList({
           onPick(null);
         }}
       />
-      {(data.slices ?? []).map((slice) => (
-        <PlainRow
-          key={slice.position}
-          on={value === sliceRef(slice.position)}
-          label={sliceLabel(slice)}
-          onPick={() => {
-            onPick(sliceRef(slice.position));
-          }}
-        />
-      ))}
       {sinceReview ? (
         <PlainRow
           on={value === SINCE_REVIEW}
@@ -186,7 +164,7 @@ function CommitList({
 }
 
 /**
- * All the changes, a split ticket's slice, the change since the last review (tickets), or one commit: a button that opens
+ * All the changes, the change since the last review (tickets), or one commit: a button that opens
  * the list, and previous and next to step through the commits in order. Hidden when the change has
  * no commits to show (a ticket's diff taken before commits were kept).
  */

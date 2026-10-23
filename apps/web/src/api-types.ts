@@ -188,7 +188,7 @@ export type CommitsResponse = {
   /** `sha` is the reviewed head; null before a first review, or once a rebase dropped it. */
   sinceReview: { sha: string; commits: number } | null;
   /** A split ticket's slices, bottom first, each read through `sliceRef(position)`; absent otherwise. */
-  slices?: { position: number; title: string; sha: string }[];
+  slices?: { position: number; title: string; sha: string; prNumber: number | null }[];
 };
 
 /** Where the commit view's diffs are read: a commit's SHA, or the change since the last review. */

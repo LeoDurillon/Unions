@@ -13,7 +13,7 @@ import {
   requireId,
   requireText,
 } from '../http';
-import { sliceTips } from '../slice-snapshot';
+import { loadSnapshot, sliceSnapshot, sliceTips } from '../slice-snapshot';
 
 type Comment = typeof schema.reviewComments.$inferSelect;
 type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
@@ -21,8 +21,15 @@ type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
 /** Whose comments these are: a ticket's review, or a current review of a pull request. */
 export type CommentOwner = AgentReviewOwner;
 
-/** The diff comments are anchored in: its head commit, and each file's patch by path. */
-export type CommentDiff = { headSha: string; patchOf: (path: string) => string | undefined };
+/**
+ * The diff comments are anchored in: its head commit, and each file's patch by path; on a split
+ * ticket's slice, that slice's own change.
+ */
+export type CommentDiff = {
+  headSha: string;
+  patchOf: (path: string) => string | undefined;
+  slicePosition?: number | null;
+};
 
 function owns(owner: CommentOwner): SQL {
   return owner.kind === 'ticket'
@@ -130,10 +137,27 @@ export async function addComment(
       excerpt,
       body: text,
       headSha: diff.headSha,
+      slicePosition: diff.slicePosition ?? null,
     })
     .returning()
     .get();
   return c.json(comment, CREATED);
+}
+
+/** A draft on a ticket's whole change, or with `?slice=<n>` on that slice's own change. */
+export function addTicketComment(c: Context, db: Db, ticketId: number): Promise<Response> {
+  const asked = c.req.query('slice');
+  const slice = asked === undefined ? null : requireId(asked, 'slice');
+  const snapshot = slice === null ? loadSnapshot(db, ticketId) : sliceSnapshot(db, ticketId, slice);
+  if (slice !== null && snapshot === null) {
+    throw fail(NOT_FOUND, `This ticket's diff has no slice ${slice}`);
+  }
+  const diff = snapshot && {
+    headSha: snapshot.headSha,
+    patchOf: (path: string) => snapshot.patches.get(path),
+    slicePosition: slice,
+  };
+  return addComment(c, db, { kind: 'ticket', id: ticketId }, diff);
 }
 
 function draftOf(c: Context, db: Db, owner: CommentOwner): Comment {

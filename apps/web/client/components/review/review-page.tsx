@@ -1,11 +1,13 @@
 import { useState, type ReactElement, type ReactNode } from 'react';
 
-import type { CommentView, DiffResponse } from '../../../src/api-types';
+import type { CommentView } from '../../../src/api-types';
 import { reviewCopy, type ReviewTarget } from '../../lib/review-target';
 import { useCommentMutations, useComments, useDiff } from '../../lib/use-review';
+import { useSliceView, type SliceView } from '../../lib/use-slice-view';
 import { DiffArea } from './diff-area';
-import { ExplainProvider } from './explain-context';
+import { ExplainOff, ExplainProvider } from './explain-context';
 import { ReviewHeader } from './review-header';
+import { SliceTabs } from './slice-tabs';
 import { useDiffView } from './view-toggle';
 
 type Mutations = ReturnType<typeof useCommentMutations>;
@@ -47,32 +49,49 @@ function SectionTabs({
 }
 
 const DIFF_TAB = { id: 'diff', label: 'Diff' };
+
+/** The header's counts: every draft of the review, and the agent's not kept yet. */
+function draftCounts(comments: CommentView[]): { drafts: number; suggestions: number } {
+  const drafts = comments.filter((comment) => comment.status === 'draft');
+  return {
+    drafts: drafts.length,
+    suggestions: drafts.filter((comment) => comment.author === 'agent').length,
+  };
+}
 const NO_SECTIONS: ReviewSection[] = [];
 
-/** The diff, the comments and their writes, and the wording for the target. */
+/**
+ * The diff, the comments and their writes, and the wording for the target. `comments` are all of
+ * them (the header counts them); `slices` has what the picked slice of a split ticket shows.
+ */
 function useReviewData(
   target: ReviewTarget,
   posting: boolean,
 ): {
   diff: ReturnType<typeof useDiff>;
   comments: CommentView[];
+  slices: SliceView;
   error: Error | null;
   mutations: Mutations;
   copy: ReturnType<typeof reviewCopy>;
-  files: DiffResponse['files'];
   empty: boolean;
 } {
   const diff = useDiff(target);
   const comments = useComments(target, posting);
   const files = diff.data?.files ?? [];
+  const slices = useSliceView(target, files, comments.data ?? []);
   return {
     diff,
     comments: comments.data ?? [],
-    error: diff.error ?? comments.error,
-    mutations: useCommentMutations(target),
+    slices,
+    error: diff.error ?? comments.error ?? slices.error,
+    mutations: useCommentMutations(slices.target),
     copy: reviewCopy(target),
-    files,
-    empty: diff.data !== undefined && (diff.data.snapshot === null || files.length === 0),
+    // A slice always has files: none is only its diff still loading.
+    empty:
+      slices.slice === null &&
+      diff.data !== undefined &&
+      (diff.data.snapshot === null || files.length === 0),
   };
 }
 
@@ -117,46 +136,45 @@ function ReviewPageBody({
   /** The review is being posted: its comments are polled until they turn sent. */
   posting?: boolean;
 }): ReactElement {
-  const { diff, comments, error, mutations, copy, files, empty } = useReviewData(target, posting);
+  const { diff, comments, slices, error, mutations, copy, empty } = useReviewData(target, posting);
   const [view, setView] = useDiffView();
   const [tab, setTab] = useState(sections[0]?.id ?? DIFF_TAB.id);
   const section = sections.find((candidate) => candidate.id === tab);
   return (
-    <div className="fixed inset-0 z-30 flex flex-col bg-zinc-50 dark:bg-zinc-950">
-      <ReviewHeader
-        target={target}
-        copy={copy}
-        title={title}
-        diff={diff.data}
-        drafts={comments.filter((comment) => comment.status === 'draft').length}
-        suggestions={
-          comments.filter((comment) => comment.status === 'draft' && comment.author === 'agent')
-            .length
-        }
-        view={view}
-        onView={setView}
-        mutations={mutations}
-        onClose={onClose}
-      />
-      {stackTabs}
-      {sections.length > 0 ? (
-        <SectionTabs sections={[...sections, DIFF_TAB]} current={tab} onChange={setTab} />
-      ) : null}
-      {section ? (
-        <SectionBody banner={banner}>{section.content}</SectionBody>
-      ) : (
-        <DiffArea
+    <ExplainOff off={slices.slice !== null}>
+      <div className="fixed inset-0 z-30 flex flex-col bg-zinc-50 dark:bg-zinc-950">
+        <ReviewHeader
           target={target}
-          files={files}
-          comments={comments}
+          copy={copy}
+          title={title}
+          diff={diff.data}
+          {...draftCounts(comments)}
           view={view}
+          onView={setView}
           mutations={mutations}
-          banner={banner}
-          error={error}
-          emptyText={empty ? copy.empty : null}
+          onClose={onClose}
         />
-      )}
-    </div>
+        {stackTabs ?? <SliceTabs view={slices} comments={comments} />}
+        {sections.length > 0 ? (
+          <SectionTabs sections={[...sections, DIFF_TAB]} current={tab} onChange={setTab} />
+        ) : null}
+        {section ? (
+          <SectionBody banner={banner}>{section.content}</SectionBody>
+        ) : (
+          <DiffArea
+            key={slices.slice ?? 'all'}
+            target={slices.target}
+            files={slices.files}
+            comments={slices.comments}
+            view={view}
+            mutations={mutations}
+            banner={banner}
+            error={error}
+            emptyText={empty ? copy.empty : null}
+          />
+        )}
+      </div>
+    </ExplainOff>
   );
 }
 

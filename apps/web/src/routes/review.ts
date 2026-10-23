@@ -13,14 +13,13 @@ import {
   startAgentReview,
 } from './agent-review';
 import {
-  addComment,
+  addTicketComment,
   deleteComment,
   draftsOf,
   editComment,
   keepComment,
   listTicketComments,
   markSent,
-  type CommentDiff,
   type CommentOwner,
 } from './review-comments';
 import { getDiscussion, importPullRequestComments, importPullRequestNote } from './review-import';
@@ -133,22 +132,6 @@ function owner(ticket: Ticket): CommentOwner {
 }
 
 /** The latest snapshot, as the comments see it. */
-function commentDiff(db: Db, ticket: Ticket): CommentDiff | null {
-  const snapshot = latestSnapshot(db, ticket.id);
-  if (!snapshot) {
-    return null;
-  }
-  const files = db
-    .select()
-    .from(schema.diffFiles)
-    .where(eq(schema.diffFiles.snapshotId, snapshot.id))
-    .all();
-  return {
-    headSha: snapshot.headSha,
-    patchOf: (path) => files.find((file) => file.path === path)?.patch,
-  };
-}
-
 /** Sends the drafts (plus an optional overall note) to the implementer as a change request. */
 async function sendReview(db: Db, c: Context): Promise<Response> {
   const ticket = loadTicket(db, c);
@@ -224,7 +207,7 @@ export function reviewRoutes(db: Db, github: OnboardingGitHub): Hono {
   });
   routes.post('/:id/comments', (c) => {
     const ticket = loadTicket(db, c);
-    return addComment(c, db, owner(ticket), commentDiff(db, ticket));
+    return addTicketComment(c, db, ticket.id);
   });
   routes.patch('/:id/comments/:commentId', (c) => editComment(c, db, owner(loadTicket(db, c))));
   routes.delete('/:id/comments/:commentId', (c) => deleteComment(c, db, owner(loadTicket(db, c))));

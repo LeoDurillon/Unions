@@ -1,6 +1,9 @@
-/** What a review page reviews: a ticket's branch, or a pull request from the Current reviews tab. */
+/**
+ * What a review page reviews: a ticket's branch (with `slice`, one slice's own change of a split
+ * ticket), or a pull request from the Current reviews tab.
+ */
 export type ReviewTarget =
-  | { kind: 'ticket'; ticketId: number }
+  | { kind: 'ticket'; ticketId: number; slice?: number }
   | { kind: 'pull-request'; projectId: number; number: number };
 
 export function ticketReviewBase(ticketId: number): string {
@@ -48,4 +51,9 @@ export function reviewCopy(target: ReviewTarget): ReviewCopy {
     closeOnSend: false,
     verdicts: true,
   };
+}
+
+/** The slice of a split ticket the page shows; null for its whole change, or a pull request. */
+export function reviewSlice(target: ReviewTarget): number | null {
+  return target.kind === 'ticket' ? (target.slice ?? null) : null;
 }

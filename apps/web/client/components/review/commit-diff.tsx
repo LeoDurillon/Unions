@@ -1,6 +1,6 @@
 import { useState, type ReactElement, type ReactNode } from 'react';
 
-import { SINCE_REVIEW, slicePosition, type DiffFileSummary } from '../../../src/api-types';
+import { SINCE_REVIEW, type DiffFileSummary } from '../../../src/api-types';
 import type { ReviewTarget } from '../../lib/review-target';
 import { useCommitDiff, useCommitFile } from '../../lib/use-commits';
 import { Button, ErrorText } from '../ui';
@@ -54,12 +54,6 @@ function CommitFile({
 }
 
 function noticeText(sha: string, reviewed: string | undefined): string {
-  const slice = slicePosition(sha);
-  if (slice !== null) {
-    return slice === 1
-      ? 'Slice 1 of the stack: its own change, against the base.'
-      : `Slice ${slice} of the stack: its own change, against slice ${slice - 1}.`;
-  }
   return sha === SINCE_REVIEW
     ? `The changes since your last review${reviewed ? ` (at ${reviewed.slice(0, SHORT_SHA)})` : ''}.`
     : `Commit ${sha.slice(0, SHORT_SHA)}, against its parent.`;

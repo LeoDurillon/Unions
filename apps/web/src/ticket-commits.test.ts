@@ -102,11 +102,22 @@ test("a split ticket's slices are listed apart and read like a commit, by `slice
   addCommit(id, { kind: 'commit', position: 1, sha: FIRST, title: 'Add math' });
   addCommit(id, { kind: 'slice', position: 1, sha: FIRST, title: 'Math' });
   addCommit(id, { kind: 'slice', position: 2, sha: THIRD, title: 'Tidy' });
+  db.insert(schema.ticketSlices)
+    .values({
+      ticketId,
+      position: 1,
+      title: 'Math',
+      spec: '',
+      tipSha: FIRST,
+      branch: 'b-s1',
+      prNumber: 41,
+    })
+    .run();
   const listed = (await (await get('')).json()) as CommitsResponse;
   expect(listed.commits.map((commit) => commit.title)).toEqual(['Add math']);
   expect(listed.slices).toEqual([
-    { position: 1, title: 'Math', sha: FIRST },
-    { position: 2, title: 'Tidy', sha: THIRD },
+    { position: 1, title: 'Math', sha: FIRST, prNumber: 41 },
+    { position: 2, title: 'Tidy', sha: THIRD, prNumber: null },
   ]);
   const slice = (await (await get('/slice-2/diff')).json()) as CommitDiffResponse;
   expect(slice.sha).toBe(THIRD);

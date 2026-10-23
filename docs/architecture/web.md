@@ -37,7 +37,8 @@
   `github-discussion.ts`); `routes/review-import.ts` and `review-import.ts` import threads (line drafts) and single
   review summaries or comments (`general` drafts). On a split ticket, what comes from a slice's pull request is
   anchored on that slice's own diff (`slice-snapshot.ts`: `review_comments.slice_position`, `head_sha` the slice's
-  tip, outdated once the slice's tip moves). The PR's CI checks (`routes/pr-checks.ts`,
+  tip, outdated once the slice's tip moves); `POST <ticket>/comments?slice=<n>` writes on a slice, and the review
+  page's slice tabs (`slice-tabs.tsx`, `use-slice-view.ts`) read its files from `<ticket>/commits/slice-<n>`. The PR's CI checks (`routes/pr-checks.ts`,
   `/api/tickets/:id/pr-checks`) are read through `CiGitHub` (`github-checks.ts`, beside `OnboardingGitHub` in
   `ApiServices`): the head commit's check runs and statuses and the PR's bot comments; a pick (a failed check, another
   Actions job, a bot comment) is read again and turned into the implementer's text (`ci-picks.ts`, core

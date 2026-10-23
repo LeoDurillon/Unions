@@ -1,7 +1,7 @@
 import { useState, type ReactElement } from 'react';
 
 import type { CommentView, DiffFileSummary } from '../../../src/api-types';
-import type { ReviewTarget } from '../../lib/review-target';
+import { reviewSlice, type ReviewTarget } from '../../lib/review-target';
 import { useReviewGrouping } from '../../lib/use-review-grouping';
 import { Segmented, type SegmentOption } from '../choice';
 import { draftCounts } from './file-row';
@@ -132,7 +132,9 @@ export function FileList({
   const grouping = useReviewGrouping(target).grouping.data ?? null;
   const [layout, setLayout] = useLayout();
   const [bySpec, setBySpec] = useBySpec();
-  const grouped = allowBySpec && grouping?.status === 'succeeded' && grouping.result !== null;
+  // A slice's files are its own change: the grouping is the whole change's.
+  const whole = allowBySpec && reviewSlice(target) === null;
+  const grouped = whole && grouping?.status === 'succeeded' && grouping.result !== null;
   const drafts = draftCounts(comments);
   const shown = files.filter((file) => !file.ignored);
   const ignored = files.filter((file) => file.ignored);

@@ -178,7 +178,7 @@ export); do not edit. Tests are left out.
 - `comment-editor.tsx`: The editor under selected lines of the diff: a comment to add, or the lines to Explain with an optional question.
 - `comment-thread.tsx`: The comments ending on one line, and the editor when the selection ends there.
 - `commit-diff.tsx`: One commit of the change against its first parent (or the change since the last review): its files on the left, the picked one on the right, read only.
-- `commit-picker.tsx`: All the changes, a split ticket's slice, the change since the last review (tickets), or one commit: a button that opens the list, and previous and next to step…
+- `commit-picker.tsx`: All the changes, the change since the last review (tickets), or one commit: a button that opens the list, and previous and next to step through the commits in …
 - `diff-area.tsx`: The whole change, or one of its commits or the change since the last review (read only), with the Explain panel on the right.
 - `diff-body.tsx`: The touched files on the left, the picked one on the right.
 - `diff-parts.tsx`: The comments that end on this line of this side.
@@ -201,6 +201,7 @@ export); do not edit. Tests are left out.
 - `review-header.tsx`: Back, what is reviewed and at which commit, the GitHub import (tickets), the layout switch and Send.
 - `review-page.tsx`: The review page, with its Explain panel's state.
 - `send-review.tsx`: Sends the drafts and an optional overall note to the implementer, from a panel under the button.
+- `slice-tabs.tsx`: A split ticket's slices as a segmented control under the review header: All, then each slice with its pull request and drafts.
 - `spec-cards.tsx`: The specs an agent review will check the change against: one card each, its text to read or edit, the pull requests of a stack it covers.
 - `spec-groups.tsx`: The files under the parts of the specification they implement (a file can be under several, with only some of its hunks), then the changes no part covers, then…
 - `spec-picker.tsx`: Where a specification comes from (the PR description, the ticket, an issue, a Notion page, the linked one by default): picking it, reading it, editing its text.
@@ -326,6 +327,7 @@ export); do not edit. Tests are left out.
 - `review-stack.ts`: The stack a pull request under review is in, for the review page's agent: its pull requests bottom first, null when alone.
 - `review-target.ts`: Where the target's diff, comments and send live; also the root of its query keys.
 - `settings-sections.ts`: The project settings page open in the URL (`?settings=preview-services`), or null.
+- `slice-view.ts`: Which comments a split ticket's review shows on each tab: a slice's on its own, the rest on All.
 - `spec-hunks.ts`: The hunks of `path` that serve the part; null when the file serves it whole, or the part is unknown.
 - `split-rows.ts`: Pairs a patch's lines for side-by-side display: a context line faces itself, and each run of removed lines faces the added lines that follow it, row by row; th…
 - `token-counts.ts`: A call's tokens as the Log shows them, from its `result` event: input with its cached share, output with its thinking.
@@ -367,6 +369,7 @@ export); do not edit. Tests are left out.
 - `use-running-previews.ts`: The previews running across projects (read again every few seconds: a pull request's send no events), and stopping one.
 - `use-selected-ticket.ts`: The open ticket lives in the URL (`?ticket=3`), so it survives reloads and back/forward.
 - `use-settings-form.ts`: A settings page's form: what is edited, whether it differs from what was saved, and its one Save.
+- `use-slice-view.ts`: The slice a split ticket's review page shows: its tabs, its target, its files and its comments.
 - `use-stack-checks.ts`: The CI of a split ticket's open slices, read from GitHub when the PR tab opens and every 30 s while a check runs.
 - `use-stored-number.ts`: A number remembered in localStorage; storage being unavailable only loses the memory.
 - `use-ticket-commands.ts`: The hook that sends commands for a ticket and refreshes what the page shows afterwards.

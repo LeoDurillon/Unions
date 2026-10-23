@@ -1,4 +1,4 @@
-import { getTicket, isIgnoredPath, schema, type Db, type Ticket } from '@union/core';
+import { getTicket, isIgnoredPath, listSlices, schema, type Db, type Ticket } from '@union/core';
 import { and, asc, desc, eq } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
 
@@ -40,12 +40,16 @@ function commitRows(db: Db, ticketId: number): CommitRow[] {
     .all();
 }
 
-function listCommits(rows: CommitRow[]): CommitsResponse {
+/** `prOf`: a slice's pull request by its position, null before it is opened. */
+function listCommits(
+  rows: CommitRow[],
+  prOf: (position: number) => number | null,
+): CommitsResponse {
   const commits = rows.filter((row) => row.kind === 'commit');
   const since = rows.find((row) => row.kind === 'since_review');
   const slices = rows
     .filter((row) => row.kind === 'slice')
-    .map(({ position, title, sha }) => ({ position, title, sha }));
+    .map(({ position, title, sha }) => ({ position, title, sha, prNumber: prOf(position) }));
   const reviewedAt = commits.findIndex((row) => row.sha === since?.sha);
   return {
     commits: commits.map(({ sha, title, body, author, date, parents }) => ({
@@ -100,7 +104,13 @@ function ignoreRule(db: Db, ticket: Ticket): (path: string) => boolean {
  */
 export function ticketCommitRoutes(db: Db): Hono {
   const routes = new Hono();
-  routes.get('/', (c) => c.json(listCommits(commitRows(db, loadTicket(db, c).id))));
+  routes.get('/', (c) => {
+    const { id } = loadTicket(db, c);
+    const slices = listSlices(db, id);
+    const prOf = (position: number): number | null =>
+      slices.find((slice) => slice.position === position)?.prNumber ?? null;
+    return c.json(listCommits(commitRows(db, id), prOf));
+  });
   routes.get('/:sha/diff', (c) => {
     const { ticket, row } = commitOf(db, c);
     const ignored = ignoreRule(db, ticket);

@@ -1,6 +1,6 @@
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 
-import type { CommitDiffResponse, CommitsResponse } from '../../src/api-types';
+import { sliceRef, type CommitDiffResponse, type CommitsResponse } from '../../src/api-types';
 import { request } from './api';
 
 /** The commits are read from GitHub: kept this long before asking again. */
@@ -35,6 +35,20 @@ export function useCommitDiff(base: string, sha: string): UseQueryResult<CommitD
   return useQuery({
     queryKey: ['review', base, 'commit', sha],
     queryFn: () => commitsApi.diff(base, sha),
+    staleTime: Number.POSITIVE_INFINITY,
+    retry: false,
+  });
+}
+
+/** A split ticket's slice's own files, when one is picked. */
+export function useSliceDiff(
+  base: string,
+  slice: number | null,
+): UseQueryResult<CommitDiffResponse> {
+  return useQuery({
+    queryKey: ['review', base, 'commit', sliceRef(slice ?? 0)],
+    queryFn: () => commitsApi.diff(base, sliceRef(slice ?? 0)),
+    enabled: slice !== null,
     staleTime: Number.POSITIVE_INFINITY,
     retry: false,
   });

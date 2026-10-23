@@ -133,3 +133,12 @@ export function useWholeExplain(path: string | undefined): WholeExplain | undefi
     },
   };
 }
+
+/** Explain off under `off` (a split ticket's slice: its lines are not the whole change's). */
+export function ExplainOff({ off, children }: { off: boolean; children: ReactNode }): ReactNode {
+  return off ? (
+    <ExplainContext.Provider value={null}>{children}</ExplainContext.Provider>
+  ) : (
+    children
+  );
+}

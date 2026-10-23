@@ -7,15 +7,16 @@ import {
 } from '@tanstack/react-query';
 import type { ReviewVerdict } from '@union/core';
 
-import type {
-  CommentView,
-  DiffResponse,
-  DiscussionResponse,
-  ReviewImportResult,
+import {
+  sliceRef,
+  type CommentView,
+  type DiffResponse,
+  type DiscussionResponse,
+  type ReviewImportResult,
 } from '../../src/api-types';
 import { agentReviewApi } from './agent-review-api';
-import { api } from './api';
-import { reviewBase, ticketReviewBase, type ReviewTarget } from './review-target';
+import { api, request } from './api';
+import { reviewBase, reviewSlice, ticketReviewBase, type ReviewTarget } from './review-target';
 
 /** A pull request's review carries a verdict; a ticket's goes to the implementer without one. */
 type SendInput = { summary: string; verdict?: ReviewVerdict | undefined };
@@ -39,9 +40,14 @@ export function useDiffFile(
   fileId: number | null,
 ): UseQueryResult<{ id: number; path: string; patch: string }> {
   const base = reviewBase(target);
+  const slice = reviewSlice(target);
   return useQuery({
-    queryKey: ['review', base, 'file', fileId],
-    queryFn: () => api.diffFile(base, fileId ?? 0),
+    // A slice's files are its own (`diff_commit_files`): another set of ids.
+    queryKey: ['review', base, 'file', slice, fileId],
+    queryFn: () =>
+      slice === null
+        ? api.diffFile(base, fileId ?? 0)
+        : request('GET', `${base}/commits/${sliceRef(slice)}/files/${fileId ?? 0}`),
     enabled: fileId !== null,
     staleTime: Number.POSITIVE_INFINITY,
   });
@@ -129,7 +135,7 @@ export function useCommentMutations(target: ReviewTarget): {
   };
   return {
     add: useMutation({
-      mutationFn: (input: CommentInput) => api.addComment(base, input),
+      mutationFn: (input: CommentInput) => api.addComment(base, input, reviewSlice(target)),
       onSuccess: refresh,
     }),
     edit: useMutation({
