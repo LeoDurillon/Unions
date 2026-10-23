@@ -203,14 +203,19 @@
   while it is down). Starting it is idempotent (same ports: reused, so a ticket's agent review shares it); the
   checks, the install command and a resumed refused commit call `deps.services.ensure()` first, which brings it
   back if the agent killed it. Ports it cannot take are logged (`agent_ports_forwarded`) and named in the prompt
-  (`agentServicesHint`).
+  (`agentServicesHint`). The same script (`preview/forwarder-script.ts`) is the preview router: a second process
+  (`/tmp/union-hosts.*`) on the proxy's port, routing each connection by its first request's `Host` to the service
+  (`preview/host-routes.ts`, from the preview row's `urls`), started by `startPreview` and `rejoinRunningPreview`.
+- `step-preview.ts`: with `config.preview.startForImplementation`, an implementation step starts the preview first
+  (never failing the step); every code step's commands get `previewEnv` (`preview-env.ts`: `BASE_URL`,
+  `UNION_URL_<SERVICE>`) while the preview runs, and `previewHint` lists the addresses.
 - `preview/idle.ts`: stops running previews nobody visited for the project's `idleStopMinutes` (60 by default),
   from Traefik's per-router request counts (`UNION_PREVIEW_METRICS`, an entrypoint only the worker reaches); never
   while the ticket is in a step or its e2e tests run. The proxy publishes its port on `127.0.0.1` only.
 - `e2e.ts`: the end-to-end tests (`config.preview.e2eCommand`), run only when the user asks (`preview_e2e`, one at a
   time across tickets in `PreviewManager`; never from the implementation loop, which runs the checks only): starts
   the ticket's container and preview, installs the browser at the repository's Playwright version, runs the command
-  with `BASE_URL`, keeps the result on the preview (`previews.e2e_*`) and up to 5 failure screenshots as private
+  with `previewEnv` (`BASE_URL`, `UNION_URL_<SERVICE>`), keeps the result on the preview (`previews.e2e_*`) and up to 5 failure screenshots as private
   ticket files (`replaceE2eScreenshots`). The panel sends a failure to the agent as a normal revision.
 - `container-run.ts`: commands the user runs in a ticket's workspace (Preview tab → Commands, `container_runs`,
   `routes/container-runs.ts`). Refused during a step and while another runs on the ticket; up to 3 across tickets.

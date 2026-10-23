@@ -2,6 +2,7 @@ import { expect, test } from 'bun:test';
 
 import {
   exposedServices,
+  previewUrlVariables,
   renderPreviewTemplate,
   templateProblems,
   type TemplateContext,
@@ -60,4 +61,16 @@ test('unknown templates and services not exposed are reported', () => {
   ]);
   // JSON-looking values are not templates.
   expect(templateProblems('{"a": 1}', SERVICES)).toEqual([]);
+});
+
+test("each service's public address is in a UNION_URL_ variable named after it", () => {
+  expect(
+    previewUrlVariables([
+      { service: 'api', url: 'http://api-t12.union.localhost:8080' },
+      { service: 'back-office.v2', url: 'http://bo-t12.union.localhost:8080' },
+    ]),
+  ).toEqual({
+    UNION_URL_API: 'http://api-t12.union.localhost:8080',
+    UNION_URL_BACK_OFFICE_V2: 'http://bo-t12.union.localhost:8080',
+  });
 });

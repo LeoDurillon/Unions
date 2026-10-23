@@ -141,9 +141,13 @@ test('the implementation never runs the e2e tests on its own, even with an e2e c
 
 test('the agent is told where the preview answers only while it runs', async () => {
   const space = workspace();
-  updatePreview(db, { ticketId: space.context.ticket.id }, { status: 'running' });
+  const urls = [{ service: 'web', url: 'http://t1.union.localhost:8080' }];
+  updatePreview(db, { ticketId: space.context.ticket.id }, { status: 'running', urls });
   await implementLoop(space);
-  expect(runs[0]?.prompt).toContain('reachable from here at http://web:3000');
+  expect(runs[0]?.prompt).toContain(
+    "same addresses as in the user's browser: web at http://t1.union.localhost:8080 (UNION_URL_WEB).",
+  );
+  expect(runs[0]?.prompt).toContain('BASE_URL is http://web:3000');
   expect(runs[0]?.prompt).toContain('run only the ones your work touches');
 });
 

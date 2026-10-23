@@ -18,6 +18,7 @@ import {
 import { syncProjectFiles } from '../project-files-sync';
 import { compose, createMountFolders } from './compose';
 import { fileToRun } from './compose-file';
+import { routeToPreview } from './host-routes';
 import { joinPreview, leavePreview } from './network';
 import { waitReady } from './ready';
 import {
@@ -186,7 +187,7 @@ export type StartOutcome = { ok: true } | { ok: false; error: string; unavailabl
 
 /**
  * Starts (or updates) the owner's preview from its workspace, and puts the owner's container (the
- * ticket's, or the pull request's) on its networks. On any failure the reason and the services' last output are kept, and what was
+ * ticket's, or the pull request's) on its networks, answering at the preview's addresses. On any failure the reason and the services' last output are kept, and what was
  * started is taken down: a failed preview holds nothing.
  */
 export async function startPreview(
@@ -204,6 +205,7 @@ export async function startPreview(
       logTail: await serviceLogs(deps, owner),
       logAt: Date.now(),
     });
+    await routeToPreview(deps.db, deps.runtime, owner);
     return { ok: true };
   } catch (error) {
     const logTail = loaded ? await cleanUp(deps, owner) : '';

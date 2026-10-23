@@ -141,21 +141,32 @@ export function parseAgentVariables(
   return { mode: 'chosen', names: [...new Set(names)] };
 }
 
+function optionalSwitch(input: Record<string, unknown>, name: string): boolean | undefined {
+  const value = input[name];
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+  if (typeof value !== 'boolean') {
+    throw new TypeError(`"${name}" must be true or false`);
+  }
+  return value;
+}
+
 /**
- * The agent's environment settings as sent (`agentVariables`, `forwardPorts`), checked; only what
- * differs from the defaults is kept. Throws with the reason.
+ * The agent's environment settings as sent (`agentVariables`, `forwardPorts`,
+ * `startForImplementation`), checked; only what differs from the defaults is kept. Throws with the
+ * reason.
  */
 export function parseAgentEnvironment(
   input: Record<string, unknown>,
   plainNames: readonly string[],
-): { agentVariables?: AgentVariables; forwardPorts?: false } {
-  const { forwardPorts } = input;
-  if (forwardPorts !== undefined && forwardPorts !== null && typeof forwardPorts !== 'boolean') {
-    throw new Error('"forwardPorts" must be true or false');
-  }
+): { agentVariables?: AgentVariables; forwardPorts?: false; startForImplementation?: true } {
+  const forwardPorts = optionalSwitch(input, 'forwardPorts');
+  const startForImplementation = optionalSwitch(input, 'startForImplementation');
   const variables = parseAgentVariables(input.agentVariables, plainNames);
   return {
     ...(variables ? { agentVariables: variables } : {}),
     ...(forwardPorts === false ? { forwardPorts: false as const } : {}),
+    ...(startForImplementation === true ? { startForImplementation: true as const } : {}),
   };
 }

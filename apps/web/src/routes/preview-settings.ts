@@ -176,7 +176,7 @@ function profileList(value: unknown): string[] {
 function agentEnvironment(
   input: Record<string, unknown>,
   names: string[],
-): Pick<PreviewConfig, 'agentVariables' | 'forwardPorts'> {
+): Pick<PreviewConfig, 'agentVariables' | 'forwardPorts' | 'startForImplementation'> {
   try {
     return parseAgentEnvironment(input, names);
   } catch (error) {

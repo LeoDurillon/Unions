@@ -112,3 +112,20 @@ export function templateProblems(value: string, exposed: PreviewService[]): stri
 export function renderPreviewTemplate(value: string, context: TemplateContext): string {
   return value.replaceAll(TEMPLATE, (match, name: string) => templateValue(context, name) ?? match);
 }
+
+const NOT_IN_NAME = /[^A-Z0-9]+/gu;
+
+/** `UNION_URL_API`: the variable that holds the `api` service's public address. */
+export function previewUrlVariable(service: string): string {
+  return `UNION_URL_${service.toUpperCase().replaceAll(NOT_IN_NAME, '_')}`;
+}
+
+/**
+ * Each exposed service's public address, for the commands in the owner's container (the agent's,
+ * the e2e tests, the user's): it answers there as in the user's browser.
+ */
+export function previewUrlVariables(
+  urls: readonly { service: string; url: string }[],
+): Record<string, string> {
+  return Object.fromEntries(urls.map(({ service, url }) => [previewUrlVariable(service), url]));
+}

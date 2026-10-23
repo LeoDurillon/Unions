@@ -3,16 +3,12 @@ import {
   agentVariables,
   getPreview,
   getTicket,
-  schema,
   type ContainerRun,
   type ContainerRuntime,
-  type Db,
-  type WorkspaceOwner,
 } from '@union/core';
-import { eq } from 'drizzle-orm';
 
 import type { TargetDeps } from './agent-review-target';
-import { baseUrl } from './e2e';
+import { previewEnv } from './preview-env';
 import { previewSettings } from './preview/compose';
 import { loadTarget } from './preview/target';
 import { ensureTicketContainer } from './provision';
@@ -26,14 +22,6 @@ export type Workspace = {
   env: Record<string, string>;
   release: () => Promise<void>;
 };
-
-/** The preview's address, as e2e gets it, while the owner's preview runs. */
-function previewEnv(db: Db, owner: WorkspaceOwner, projectId: number): Record<string, string> {
-  const preview = db.select().from(schema.projects).where(eq(schema.projects.id, projectId)).get()
-    ?.config.preview;
-  const url = preview && getPreview(db, owner)?.status === 'running' ? baseUrl(preview) : null;
-  return url ? { BASE_URL: url, PREVIEW_URL: url } : {};
-}
 
 /**
  * The ticket's container, with the same environment as the agent's (its services, on localhost,
@@ -50,7 +38,7 @@ async function ticketWorkspace(deps: TargetDeps, ticketId: number): Promise<Work
   return {
     name,
     runtime: services.runtime,
-    env: previewEnv(db, { ticketId }, ticket.projectId),
+    env: previewEnv(db, { ticketId }),
     release: async () => {
       // A step the user started meanwhile works in the same container: it stops it itself.
       const stepRuns = getTicket(db, ticketId).phase.kind === 'running';
@@ -80,14 +68,10 @@ async function reviewWorkspace(deps: TargetDeps, reviewId: number): Promise<Work
   const { db, runtime } = deps;
   const owner = { reviewId };
   const name = await openReviewContainer(deps, reviewId);
-  const { projectId } = getPreview(db, owner) ?? { projectId: null };
   return {
     name,
     runtime,
-    env: {
-      ...reviewVariables(deps, reviewId),
-      ...(projectId === null ? {} : previewEnv(db, owner, projectId)),
-    },
+    env: { ...reviewVariables(deps, reviewId), ...previewEnv(db, owner) },
     release: async () => {
       if (getPreview(db, owner)?.e2eStatus !== 'running') {
         await runtime.stop(name);

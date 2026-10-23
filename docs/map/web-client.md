@@ -228,7 +228,7 @@ export); do not edit. Tests are left out.
 - `notion-value-row.tsx`: One property a Notion action sets: which property of the ticket's page, its value, and removing it.
 - `people-field.tsx`: A person property: a box per workspace member; the value is their Notion ids.
 - `preview-choices-field.tsx`: A choice among names the compose file has (profiles, services): a box per name known once a ticket's file was generated, and a field for others.
-- `preview-e2e-page.tsx`: The command a ticket's Preview section runs on request against its preview.
+- `preview-e2e-page.tsx`: The command a ticket's Preview section runs on request against its preview, and whether the agent gets the preview.
 - `preview-fields.tsx`: Compose YAML merged over the repository's file, for what Union adds without changing the repository: a restore or seed service, a health check, an extra depend…
 - `preview-form.tsx`: The page's form, from the saved settings; its Save writes the whole configuration.
 - `preview-limits-page.tsx`: How long a preview nobody visits keeps running, and how many of the project's run at once.

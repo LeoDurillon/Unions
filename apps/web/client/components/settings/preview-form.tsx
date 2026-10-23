@@ -22,6 +22,7 @@ export type Form = {
   envFileService: string;
   envFilePath: string;
   e2eCommand: string;
+  startForImplementation: boolean;
   profiles: string[];
   agentServices: string[];
   agentVariables: AgentVariables;
@@ -39,6 +40,7 @@ const EMPTY: Form = {
   envFileService: '',
   envFilePath: '',
   e2eCommand: '',
+  startForImplementation: false,
   profiles: [],
   agentServices: [],
   agentVariables: { mode: 'all' },
@@ -70,6 +72,7 @@ function initial(project: PublicProject): Form {
     envFileService: preview.envFile?.service ?? '',
     envFilePath: preview.envFile?.path ?? '',
     e2eCommand: preview.e2eCommand ?? '',
+    startForImplementation: preview.startForImplementation === true,
     profiles: preview.profiles ?? [],
     ...agentChoices(preview),
     idleStopMinutes: preview.idleStopMinutes === undefined ? '' : String(preview.idleStopMinutes),
@@ -91,6 +94,7 @@ function settingsOf(form: Form): PreviewConfig {
       ? {}
       : { envFile: { service: form.envFileService, path: form.envFilePath } }),
     ...(form.e2eCommand.trim() === '' ? {} : { e2eCommand: form.e2eCommand }),
+    ...(form.startForImplementation ? { startForImplementation: true } : {}),
     ...(form.profiles.length === 0 ? {} : { profiles: form.profiles }),
     ...(form.agentServices.length === 0 ? {} : { agentServices: form.agentServices }),
     ...(form.agentVariables.mode === 'all' ? {} : { agentVariables: form.agentVariables }),

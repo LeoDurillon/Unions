@@ -8,6 +8,8 @@ import {
   type WorkspaceOwner,
 } from '@union/core';
 
+import { routeToPreview } from './host-routes';
+
 /** The owner's own container (`union-t12`, the agent's; `union-r3`), which joins its preview to test it. */
 function ownerContainer(owner: WorkspaceOwner): string {
   return `union-${ownerKey(owner)}`;
@@ -47,7 +49,7 @@ export async function leavePreview(
   }
 }
 
-/** When the ticket's container is (re)provisioned while its preview runs. */
+/** When the ticket's container is (re)provisioned while its preview runs: its networks and addresses. */
 export async function rejoinRunningPreview(
   db: Db,
   runtime: ContainerRuntime,
@@ -55,5 +57,6 @@ export async function rejoinRunningPreview(
 ): Promise<void> {
   if (getPreview(db, { ticketId })?.status === 'running') {
     await joinPreview(runtime, { ticketId });
+    await routeToPreview(db, runtime, { ticketId });
   }
 }

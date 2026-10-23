@@ -6,7 +6,7 @@ export); do not edit. Tests are left out.
 ## ./
 
 - `active-work.ts`: The work in progress a restart interrupts, per table: `bun run active` and the Update dialog list it.
-- `agent-environment.ts`: The agent's environment settings as sent (`agentVariables`, `forwardPorts`), checked; only what differs from the defaults is kept.
+- `agent-environment.ts`: The agent's environment settings as sent (`agentVariables`, `forwardPorts`, `startForImplementation`), checked; only what differs from the defaults is kept.
 - `agent-inputs.ts`: What the user gave the implementer's next run: command outputs and CI outputs, read together and marked read together.
 - `agent-log.ts`: Writes the agents' output to `agent_log`, and reads a Log: events and agent lines in one order.
 - `agent-review-specs.ts`: The specifications an agent review is given: read from the request, and written into the agent's prompt.

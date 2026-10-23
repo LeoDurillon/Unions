@@ -210,7 +210,9 @@ test("with agent services, a command gets the agent's environment: services, loc
   workers.tick();
   await workers.idle();
   expect(helpers.some((args) => args.endsWith('up -d db'))).toBe(true);
-  const forwarder = execs.find((exec) => exec.command.join(' ').includes('union-forward'));
+  const forwarder = execs.find(
+    (exec) => exec.options.env?.UNION_FORWARD_BASE === '/tmp/union-forward',
+  );
   expect(JSON.parse(forwarder?.options.env?.UNION_FORWARDS ?? '[]')).toEqual([
     { service: 'db', port: 5432, targetPort: 5432 },
   ]);

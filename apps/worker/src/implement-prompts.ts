@@ -1,7 +1,14 @@
-import type { AgentInputs, AgentSetup, CiOutput, ContainerRun, PreviewConfig } from '@union/core';
+import {
+  previewUrlVariable,
+  type AgentInputs,
+  type AgentSetup,
+  type CiOutput,
+  type ContainerRun,
+  type PreviewConfig,
+} from '@union/core';
 
-import { baseUrl } from './e2e';
 import type { GateResult } from './gate';
+import { baseUrl } from './preview-env';
 import type { PublishResult } from './publish';
 
 /** Appended to the first implement prompt so the agent knows how its work is checked. */
@@ -12,18 +19,29 @@ export function gateHint(command: string | undefined): string {
 }
 
 /**
- * Appended when the ticket's preview is running as the agent starts: where it answers from the
- * agent's container, and how to run the end-to-end tests the work touches.
+ * Appended when the ticket's preview is running as the agent starts (`urls`: its public addresses;
+ * null when it does not run): where it answers from the agent's container, and how to run the
+ * end-to-end tests the work touches.
  */
-export function previewHint(preview: PreviewConfig | undefined, running: boolean): string {
+export function previewHint(
+  preview: PreviewConfig | undefined,
+  urls: readonly { service: string; url: string }[] | null,
+): string {
   const url = preview ? baseUrl(preview) : null;
-  if (!running || !url) {
+  if (!urls || !url) {
     return '';
   }
+  const addresses = urls.map(
+    (entry) => `${entry.service} at ${entry.url} (${previewUrlVariable(entry.service)})`,
+  );
+  const outside =
+    addresses.length > 0
+      ? ` From here its services answer at the same addresses as in the user's browser: ${addresses.join(', ')}. Point a browser at these, so its pages, their calls to the other services and the login cookies work as for the user.`
+      : '';
   const tests = preview?.e2eCommand
     ? ` The project's end-to-end tests run with \`${preview.e2eCommand}\`: run only the ones your work touches (they take a lot of memory); the user runs the whole suite from the ticket.`
     : '';
-  return `\n\nA preview of your work is running, reachable from here at ${url} (the BASE_URL variable): its services are on your network by their names, and it shows your changes as you make them where the source is mounted. The browser's system libraries are installed; run \`npx playwright install chromium\` once if Playwright asks for a browser.${tests}`;
+  return `\n\nA preview of your work is running. It shows your changes as you make them where the source is mounted.${outside} By name, the services are on your network too (BASE_URL is ${url}). The system libraries of Chromium and Firefox are installed: install the browser the tests use once, with the repository's own Playwright (\`npx playwright install <browser>\` in the package that depends on it).${tests}`;
 }
 
 /**

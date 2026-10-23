@@ -152,10 +152,21 @@ test('without an e2e command there is no gate', async () => {
 test('the tests run against the preview, from inside it, after the browser is installed', async () => {
   const result = await e2e();
   expect(result).toMatchObject({ status: 'green', exitCode: 0, tail: '3 passed', screenshots: 0 });
-  expect(execs[0]?.command).toContain('playwright install chromium');
-  expect(execs[1]).toEqual({
+  const [router, install, tests] = execs;
+  // The container answers at the preview's public address, routed to the service by host name.
+  const host = `t${ticketId}.union.localhost`;
+  expect(JSON.parse(router?.env?.UNION_FORWARDS ?? '{}')).toEqual({
+    port: 8080,
+    hosts: { [host]: { service: 'web', port: 3000 } },
+  });
+  expect(install?.command).toContain('playwright install chromium');
+  expect(tests).toEqual({
     command: 'sh -lc npx playwright test 2>&1',
-    env: { BASE_URL: 'http://web:3000', PREVIEW_URL: 'http://web:3000' },
+    env: {
+      BASE_URL: 'http://web:3000',
+      PREVIEW_URL: 'http://web:3000',
+      UNION_URL_WEB: `http://${host}:8080`,
+    },
   });
 });
 

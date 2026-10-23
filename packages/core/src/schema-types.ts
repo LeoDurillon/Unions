@@ -48,6 +48,11 @@ export type PreviewConfig = {
    */
   e2eCommand?: string;
   /**
+   * The ticket's preview starts before each implementation step (off when unset), so the agent can
+   * try its work in a browser and run the e2e tests it touches.
+   */
+  startForImplementation?: boolean;
+  /**
    * Minutes without a visit after which a running preview stops (60 when unset; 0: never). Never
    * while the agent runs a step on the ticket or its e2e tests run.
    */

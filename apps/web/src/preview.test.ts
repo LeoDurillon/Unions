@@ -117,6 +117,18 @@ test('preview settings are checked, saved and cleared', async () => {
   expect(cleared.config.baseBranch).toBe('main');
 });
 
+test('starting the preview for implementation steps is kept only when on', async () => {
+  const on = (await (
+    await put({ ...SETTINGS, startForImplementation: true })
+  ).json()) as PublicProject;
+  expect(on.config.preview?.startForImplementation).toBe(true);
+  const off = (await (
+    await put({ ...SETTINGS, startForImplementation: false })
+  ).json()) as PublicProject;
+  expect(off.config.preview?.startForImplementation).toBeUndefined();
+  expect((await put({ ...SETTINGS, startForImplementation: 'yes' })).status).toBe(400);
+});
+
 test('compose additions are saved when they are a compose file, refused otherwise', async () => {
   const saved = await put({
     ...SETTINGS,

@@ -10,7 +10,7 @@ export); do not edit. Tests are left out.
 - `agent-review-stack.ts`: A stack's agent review: its pull requests checked out together, the prompt that lists them, and the findings split per pull request.
 - `agent-review-target.ts`: A throwaway container named `names` for the project, with what `clone` checks out in it; the returned `close` removes it.
 - `agent-review.ts`: `specs` null: the review asked for none, the ticket's own text stands in for them.
-- `agent-services-step.ts`: A step that runs code (implementation, rebase), with the project's agent services beside it.
+- `agent-services-step.ts`: A step that runs code (implementation, rebase), with the project's agent services beside it and, while the preview runs, its addresses in the environment.
 - `agent.ts`: Runs `claude -p` inside the ticket's container and streams its events to `onEvent`.
 - `approved.ts`: The latest approved output of every step before `step`, in the order of the ticket's flow.
 - `attachments-sync.ts`: Puts the ticket's current files in the container, before every step: files added since the last step appear, removed ones disappear, and whatever the agent cha…
@@ -52,6 +52,7 @@ export); do not edit. Tests are left out.
 - `pr-checkout.ts`: Where a pull request's reviewed commit is kept in the checkout.
 - `pr-description-run.ts`: Runs queued rewrites of pull request descriptions, sharing the run slots with the ticket pipeline, the investigations and the agent reviews.
 - `pr-description.ts`: The template GitHub would use among the repository's files (paths relative to its root).
+- `preview-env.ts`: The variables that point a command in the owner's container at its running preview.
 - `project-files-sync.ts`: Puts the project's files in a ticket's workspace, at their paths in the repository: new or changed ones are copied (a file already there with the same content …
 - `prompt-writer-run.ts`: Writes the prompts of the custom agents the user created or regenerated, in a throwaway container with only the Claude login.
 - `prompts.ts`: How to see what the parent changed, from the branches the workspace was cloned with.
@@ -103,6 +104,7 @@ export); do not edit. Tests are left out.
 - `stack-refs.ts`: A split ticket's slice branches in its workspace: set from the recorded tips, checked, pushed together, recorded again.
 - `stack-revise-git.ts`: The git side of restacking a revision: each slice's commits, the reordering rebase, and its result.
 - `stack-revise.ts`: A revision on a split ticket: the implementer is told the slices, then its new commits are moved into them and the stack pushed.
+- `step-preview.ts`: Starts the ticket's preview before an implementation step when the project asks for it, and gives a step's commands its addresses.
 - `throwaway-runs.ts`: The side runs that need no repository, each in a throwaway container: reading the account's connectors, the lesson writer and the prompt writer.
 - `ticket-base.ts`: Chooses the branch a ticket is cloned from, before its first clone: the branch the user chose (over the parent's), else the parent's branch while its pull requ…
 - `union-update-git.ts`: Git in Union's own checkout: fetching `origin/main` (over SSH with the host's keys, never prompting) and reading where it stands.
@@ -153,7 +155,9 @@ export); do not edit. Tests are left out.
 - `catalog.ts`: The whole compose file, every profile enabled (`--profile '*'`): what the settings offer, and how to explain a service that is missing because its profile is n…
 - `compose-file.ts`: The file Union writes from the repository's compose file, after the checks.
 - `compose.ts`: `docker compose <args>` in a helper container holding the Docker socket, and the ticket's workspace when given (at `/workspace`, the repository in `/workspace/…
-- `forwarder.ts`: Makes the agent services reachable on the container's `localhost` (`agentForwards`).
+- `forwarder-script.ts`: The Node script that forwards ports in an owner's container: plain ports, or HTTP by host name.
+- `forwarder.ts`: Starts the port forwarders in an owner's container: the agent services' ports, and the preview's host names.
+- `host-routes.ts`: Routes the preview's public addresses inside its owner's container, to its services on their network.
 - `idle.ts`: Stops running previews nobody visited for the project's idle time.
 - `manager.ts`: Runs the preview commands, one at a time per ticket (a start and a stop never overlap).
 - `network.ts`: Puts the owner's container on its preview's networks, so the agent and the e2e command reach the services by name (`http://web:3000`): `t<id>.union.localhost` …

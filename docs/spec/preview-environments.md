@@ -14,10 +14,16 @@ Built (phases 1 to 4). Full design and what was built: [`docs/plans/preview-envi
   same site and offers them on the others.
 - Per-project environment variables (secrets kept server side) with templates such as `{service.api.url}`, given to
   compose and optionally as an app env file inside a service, never written into the workspace.
-- End-to-end tests: the agent's container joins the preview's network; Chromium's libraries are in the agent image,
-  the browser is installed at the repository's Playwright version on first use. The project's e2e command runs only
-  when the user asks, from the ticket ("Run e2e tests", one run at a time: they take a lot of memory); a failure can
-  be sent to the agent as a revision.
+- End-to-end tests: the agent's container joins the preview's network; Chromium's and Firefox's libraries are in the
+  agent image, the browser is installed at the repository's Playwright version on first use. While the preview runs,
+  the container also answers at the preview's public addresses (`http://api-t<id>.union.localhost:8080`): a router
+  on that port sends each host to its service on the preview's network, so a browser there gets the same pages, calls
+  between services and login cookies as the user's; other previews stay out of reach. Commands there (the agent's,
+  the e2e tests, the user's) get `UNION_URL_<SERVICE>`, each service's public address, besides `BASE_URL`. The
+  project's e2e command runs when the user asks, from the ticket ("Run e2e tests", one run at a time: they take a lot
+  of memory); a failure can be sent to the agent as a revision. With "Start the preview for implementation steps"
+  (Previews → End-to-end tests), the preview starts before each implementation or revision, and the agent is told
+  the addresses and to run the e2e tests its work touches.
 - Compose additions (project settings → Previews → Services): YAML merged over the repository's file as a second
   `-f`, for what Union adds without changing the repository (a database restore, migrations, a seed). Kept in the
   settings, written only in the compose helper.

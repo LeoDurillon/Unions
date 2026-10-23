@@ -3,7 +3,6 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 
 import {
-  exposedServices,
   replaceE2eScreenshots,
   replaceReviewScreenshots,
   type ContainerRuntime,
@@ -14,6 +13,7 @@ import {
 
 import { runIn } from './container-exec';
 import { GATE_TIMEOUT_MS, tail } from './gate';
+import { baseUrl, previewEnv } from './preview-env';
 import { previewSettings } from './preview/compose';
 import { startPreview, type PreviewDeps } from './preview/run';
 import { REPO_DIR } from './provision';
@@ -44,12 +44,6 @@ export type E2eRun = {
   /** Tests replace the proxy's ready check. */
   previewOverrides?: Partial<PreviewDeps>;
 };
-
-/** The address of the first exposed service from inside the environment: `http://web:3000`. */
-export function baseUrl(preview: PreviewConfig): string | null {
-  const [first] = exposedServices(preview);
-  return first ? `http://${first.name}:${first.port}` : null;
-}
 
 /**
  * The browser at the repository's own Playwright version, once: it is kept in the container's home
@@ -114,7 +108,7 @@ function keepScreenshots(
  * The project's e2e command against the owner's preview, after its checks passed. The preview is
  * started (or updated: `up --build` only rebuilds what changed) and the owner's container joins
  * it; the command runs in the repository with `BASE_URL` (and `PREVIEW_URL`) set to the first
- * exposed service. A preview the code broke counts as red; one that cannot run now, as skipped.
+ * exposed service by name, and `UNION_URL_<SERVICE>` to each one's public address. A preview the code broke counts as red; one that cannot run now, as skipped.
  */
 export async function runE2e(run: E2eRun): Promise<E2eResult | null> {
   const command = run.preview.e2eCommand;
@@ -141,7 +135,7 @@ export async function runE2e(run: E2eRun): Promise<E2eResult | null> {
   const timeout = AbortSignal.timeout(GATE_TIMEOUT_MS);
   const result = await runIn(run.runtime, run.container, ['sh', '-lc', `${command} 2>&1`], {
     cwd: REPO_DIR,
-    env: { BASE_URL: url, PREVIEW_URL: url },
+    env: previewEnv(run.db, run.owner),
     signal: run.signal ? AbortSignal.any([run.signal, timeout]) : timeout,
   });
   const green = result.exitCode === 0;

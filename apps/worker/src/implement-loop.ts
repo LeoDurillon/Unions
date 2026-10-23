@@ -69,6 +69,12 @@ export type Workspace = {
   stackSection?: string;
 };
 
+/** Where the running preview answers; empty when it does not run. */
+function runningPreviewHint(db: Db, ticketId: number, project: Project): string {
+  const row = getPreview(db, { ticketId });
+  return previewHint(project.config.preview, row?.status === 'running' ? (row.urls ?? []) : null);
+}
+
 /** Everything a new session needs: task, approved plan, instructions, and the feedback if any. */
 function freshPrompt(workspace: Workspace): string {
   const { deps, context, project } = workspace;
@@ -80,10 +86,7 @@ function freshPrompt(workspace: Workspace): string {
     instructions:
       resolveAgent(deps.db, 'implement').prompt +
       gateHint(project.config.gateCommand) +
-      previewHint(
-        project.config.preview,
-        getPreview(deps.db, { ticketId: ticket.id })?.status === 'running',
-      ) +
+      runningPreviewHint(deps.db, ticket.id, project) +
       agentServicesHint(deps.services) +
       COMMIT_HOOK_HINT +
       (workspace.stackSection ?? ''),
@@ -103,7 +106,10 @@ function firstPrompt(workspace: Workspace): string {
     return freshPrompt(workspace);
   }
   const attachments = listAttachments(workspace.deps.db, ticket.id);
-  const feedback = feedbackPrompt(revision.feedback) + (workspace.stackSection ?? '');
+  const feedback =
+    feedbackPrompt(revision.feedback) +
+    runningPreviewHint(workspace.deps.db, ticket.id, workspace.project) +
+    (workspace.stackSection ?? '');
   return attachments.length === 0 ? feedback : `${feedback}\n\n${attachmentsSection(attachments)}`;
 }
 
