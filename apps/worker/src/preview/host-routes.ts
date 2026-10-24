@@ -18,11 +18,12 @@ const HTTP_PORT = 80;
 
 /**
  * Replaces the lines Union added to `/etc/hosts` with the preview's hosts. Docker mounts the file,
- * so it is rewritten in place rather than moved.
+ * so it is rewritten in place rather than moved. Kept in memory, not in a file: this runs as root,
+ * and the agent can write anywhere a temporary file would go. `set -f`: a host is never a pattern.
  */
-const WRITE_HOSTS = `grep -v ' # union-preview$' /etc/hosts > /tmp/union-hosts.etc
-for host in $UNION_HOSTS; do echo "127.0.0.1 $host # union-preview" >> /tmp/union-hosts.etc; done
-cat /tmp/union-hosts.etc > /etc/hosts && rm /tmp/union-hosts.etc`;
+const WRITE_HOSTS = `set -f
+kept=$(grep -v ' # union-preview$' /etc/hosts); [ $? -le 1 ] || exit 1
+{ printf '%s\\n' "$kept"; for host in $UNION_HOSTS; do echo "127.0.0.1 $host # union-preview"; done; } > /etc/hosts`;
 
 /**
  * Browsers take `*.localhost` for the container itself, but Node's resolver does not: without
