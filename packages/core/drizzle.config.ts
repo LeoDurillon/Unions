@@ -13,6 +13,7 @@ export default defineConfig({
     './src/schema-custom-agents.ts',
     './src/schema-diff-commits.ts',
     './src/schema-events.ts',
+    './src/schema-integrations.ts',
     './src/schema-lesson-suggestions.ts',
     './src/schema-mcp.ts',
     './src/schema-notifications.ts',

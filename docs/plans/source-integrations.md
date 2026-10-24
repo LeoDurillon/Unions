@@ -1,6 +1,6 @@
 # Ticket source integrations
 
-Status: step 1 built (branch `source-integrations`, 2026-10-24); steps 2 to 6 planned. Decisions D1 to D7
+Status: steps 1 and 2 built (branch `source-integrations`, 2026-10-24); steps 3 to 6 planned. Decisions D1 to D7
 proposed, to confirm. A refactor: no behaviour change until a
 second kind (Jira, Linear) is added.
 
@@ -131,6 +131,10 @@ Each step ships on its own and leaves Notion working as before; run `bun run che
    `tickets`, `ticket_target` on `investigations`; `bunx drizzle-kit generate`, then the data copy appended to the
    generated SQL. Test the migration on a copy of a database with a Notion project (`db:backup`, migrate the
    copy, compare counts). On the live instance: `bun run active`, backup, then restart `web` and `worker`.
+   Built: migration `0070_source_integrations` (test in `integrations-migration.test.ts`; on a copy of the live
+   database the Notion connection with its 65 columns, 13 ticket pages and 3 investigation targets copied). Nothing
+   writes the new columns yet, so a Notion import or connection made between this migration and step 3 would be
+   missing from them: deploy steps 2 and 3 together.
 3. **Switch reads and writes to the new model.** Core: `integrationOf`, `saveIntegration`, `forgetFields`
    (replaces `forgetNotionSchema`), `notionSchemaOf` reading `integrations.fields`. Worker:
    `event-actions/notion.ts`, `investigation-ticket-notion.ts`, `event-deliveries.ts` (setting the origin of a

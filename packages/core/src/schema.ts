@@ -10,6 +10,7 @@ import {
   type AnySQLiteColumn,
 } from 'drizzle-orm/sqlite-core';
 
+import type { IntegrationKindName } from './integrations/kinds';
 import type { InvestigationExchange, LeftBase, ProjectConfig } from './schema-types';
 import type { AgentEffort, AgentModel, BoardStatus, Phase, PipelineStep, Step } from './states';
 
@@ -99,6 +100,11 @@ export const tickets = sqliteTable(
     prNumber: integer('pr_number'),
     /** The Notion page the ticket was imported from: events update its properties. */
     notionPageId: text('notion_page_id'),
+    /** The tracker the ticket was imported from (null: written in Union, or a GitHub issue). */
+    originKind: text('origin_kind').$type<IntegrationKindName>(),
+    /** The item's id in that tracker (a Notion page id) and its link. */
+    originId: text('origin_id'),
+    originUrl: text('origin_url'),
     /** When the draft PR was marked ready for review (set once, after the final approval). */
     prReadyAt: integer('pr_ready_at'),
     /**
@@ -305,6 +311,8 @@ export const investigations = sqliteTable(
     ticketContext: text('ticket_context'),
     /** The asked ticket is also created as a page of the project's Notion data source. */
     ticketInNotion: integer('ticket_in_notion', { mode: 'boolean' }).notNull().default(false),
+    /** The tracker the asked ticket is also created in; null: GitHub only. */
+    ticketTarget: text('ticket_target').$type<IntegrationKindName>(),
     /** Why the ticket failed, or (status null) why its Notion page could not be created. */
     ticketError: text('ticket_error'),
     ticketId: integer('ticket_id').references((): AnySQLiteColumn => tickets.id, {
