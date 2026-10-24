@@ -65,9 +65,9 @@ export function ProjectNav({
           aria-label="Add project"
           title="Add project"
           onClick={onNewProject}
-          className="flex size-6 items-center justify-center rounded text-base leading-none text-zinc-500 hover:bg-zinc-200/70 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+          className="flex size-6 items-center justify-center rounded text-zinc-500 hover:bg-zinc-200/70 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
         >
-          +
+          <PlusIcon />
         </button>
       </div>
       <ul className="space-y-0.5">
@@ -89,10 +89,22 @@ export function ProjectNav({
   );
 }
 
+function PlusIcon(): ReactElement {
+  return (
+    <svg aria-hidden viewBox="0 0 20 20" fill="currentColor" className="size-4">
+      <path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
+    </svg>
+  );
+}
+
 function GearIcon(): ReactElement {
   return (
     <svg aria-hidden viewBox="0 0 20 20" fill="currentColor" className="size-4 shrink-0">
-      <path d="M8.3 1.9a1 1 0 0 1 1-.9h1.4a1 1 0 0 1 1 .9l.2 1.6c.5.2 1 .5 1.4.8l1.5-.6a1 1 0 0 1 1.2.4l.7 1.2a1 1 0 0 1-.2 1.3l-1.3 1c.1.5.1 1.1 0 1.6l1.3 1a1 1 0 0 1 .2 1.3l-.7 1.2a1 1 0 0 1-1.2.4l-1.5-.6c-.4.3-.9.6-1.4.8l-.2 1.6a1 1 0 0 1-1 .9H9.3a1 1 0 0 1-1-.9l-.2-1.6c-.5-.2-1-.5-1.4-.8l-1.5.6a1 1 0 0 1-1.2-.4l-.7-1.2a1 1 0 0 1 .2-1.3l1.3-1a4.6 4.6 0 0 1 0-1.6l-1.3-1a1 1 0 0 1-.2-1.3l.7-1.2a1 1 0 0 1 1.2-.4l1.5.6c.4-.3.9-.6 1.4-.8l.2-1.6ZM10 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M7.84 1.804A1 1 0 0 1 8.82 1h2.36a1 1 0 0 1 .98.804l.331 1.652a6.993 6.993 0 0 1 1.929 1.115l1.598-.54a1 1 0 0 1 1.186.447l1.18 2.044a1 1 0 0 1-.205 1.251l-1.267 1.113a7.047 7.047 0 0 1 0 2.228l1.267 1.113a1 1 0 0 1 .206 1.25l-1.18 2.045a1 1 0 0 1-1.187.447l-1.598-.54a6.993 6.993 0 0 1-1.929 1.115l-.33 1.652a1 1 0 0 1-.98.804H8.82a1 1 0 0 1-.98-.804l-.331-1.652a6.993 6.993 0 0 1-1.929-1.115l-1.598.54a1 1 0 0 1-1.186-.447l-1.18-2.044a1 1 0 0 1 .205-1.251l1.267-1.114a7.05 7.05 0 0 1 0-2.227L1.821 7.773a1 1 0 0 1-.206-1.25l1.18-2.045a1 1 0 0 1 1.187-.447l1.598.54A6.992 6.992 0 0 1 7.51 3.456l.33-1.652ZM10 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"
+      />
     </svg>
   );
 }
