@@ -14,6 +14,8 @@ const BUTTON_VARIANTS = {
   secondary:
     'border border-zinc-300 bg-white hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800',
   danger: 'bg-red-600 text-white hover:bg-red-500 disabled:bg-red-400',
+  /** A destructive action before it is confirmed: red text, no fill. */
+  quietDanger: 'text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40',
 } as const;
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -55,7 +57,7 @@ export function Badge({
   return (
     <span
       title={title}
-      className={`inline-block max-w-full truncate rounded-full px-2 py-0.5 align-middle text-xs font-medium ${TONES[tone]}`}
+      className={`inline-block max-w-full shrink-0 truncate rounded-full px-2 py-0.5 align-middle text-xs font-medium ${TONES[tone]}`}
     >
       {children}
     </span>
@@ -111,6 +113,21 @@ export function ErrorText({ error }: { error: Error | null }): ReactElement | nu
   return error ? <p className="text-sm text-red-600 dark:text-red-400">{error.message}</p> : null;
 }
 
+/** The ✕ that closes a dialog or a panel. */
+export function CloseButton({ onClick }: { onClick: () => void }): ReactElement {
+  return (
+    <button
+      type="button"
+      aria-label="Close"
+      title="Close"
+      className="shrink-0 rounded-md px-2 py-1 text-lg leading-none text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+      onClick={onClick}
+    >
+      ✕
+    </button>
+  );
+}
+
 export function Dialog({
   open,
   onClose,
@@ -144,7 +161,7 @@ export function Dialog({
       <div className="space-y-4 p-6">
         <header className="flex items-start justify-between gap-4">
           <h2 className="text-lg font-semibold">{title}</h2>
-          <Button onClick={onClose}>Close</Button>
+          <CloseButton onClick={onClose} />
         </header>
         {open ? children : null}
       </div>

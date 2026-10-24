@@ -1,13 +1,14 @@
-// The bell's panel: the notifications newest first, "Mark all read", "Clear", older ones on request, and the desktop opt-in.
-import type { Notification } from '@union/core';
+// The bell's panel: the notifications newest first, grouped by ticket, "Mark all read", "Clear", older ones on request, and the desktop opt-in.
 import { useEffect, type ReactElement, type RefObject } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
 import { useDesktopSetting } from '../../lib/desktop-notifications';
+import { groupNotifications } from '../../lib/notification-groups';
+import type { NotificationTarget } from '../../lib/open-notification';
 import type { Notifications } from '../../lib/use-notifications';
 import { Switch } from '../choice';
 import { Button, ErrorText } from '../ui';
-import { NotificationItem } from './notification-item';
+import { NotificationGroupItem } from './notification-group';
 
 /** Closes the panel on Escape or a click outside `box` (the bell and the panel). */
 function useDismiss(box: RefObject<HTMLDivElement | null>, close: () => void): void {
@@ -92,7 +93,7 @@ export function NotificationPanel({
   projects: PublicProject[];
   box: RefObject<HTMLDivElement | null>;
   onClose: () => void;
-  onOpen: (notification: Notification) => void;
+  onOpen: (target: NotificationTarget) => void;
 }): ReactElement {
   useDismiss(box, onClose);
   const names = new Map(
@@ -107,11 +108,11 @@ export function NotificationPanel({
       <PanelHeader notifications={notifications} />
       <ErrorText error={notifications.error} />
       <ul className="min-h-0 flex-1 space-y-0.5 overflow-y-auto">
-        {items.map((notification) => (
-          <NotificationItem
-            key={notification.id}
-            notification={notification}
-            project={names.get(notification.projectId) ?? null}
+        {groupNotifications(items).map((group) => (
+          <NotificationGroupItem
+            key={group.key}
+            group={group}
+            project={names.get(group.latest.projectId) ?? null}
             onOpen={onOpen}
           />
         ))}

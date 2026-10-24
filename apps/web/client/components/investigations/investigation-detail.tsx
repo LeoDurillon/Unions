@@ -5,6 +5,7 @@ import type { ReactElement } from 'react';
 
 import { api } from '../../lib/api';
 import { MODEL_LABELS } from '../agents/agent-labels';
+import { ConfirmButton } from '../confirm-button';
 import { Badge, Button, ErrorText } from '../ui';
 import { isActive, SCOPE_LABELS, STATUS_LABELS } from './investigation-labels';
 import { InvestigationTabs } from './investigation-tabs';
@@ -72,15 +73,15 @@ function Actions({
           </Button>
         )}
         {status === 'running' ? null : (
-          <Button
-            variant="danger"
+          <ConfirmButton
+            label="Delete"
+            question="Delete this investigation and its answers?"
+            confirmLabel="Delete for good"
             disabled={busy}
-            onClick={() => {
+            onConfirm={() => {
               remove.mutate();
             }}
-          >
-            Delete
-          </Button>
+          />
         )}
       </div>
       <ErrorText error={cancel.error ?? rerun.error ?? remove.error} />

@@ -5,7 +5,7 @@ import type { TicketDetail } from '../../src/api-types';
 import { investigateTicket } from '../lib/investigate-ticket';
 import { describePhase } from '../lib/labels';
 import { useCustomAgentNames } from '../lib/use-custom-agents';
-import { Badge, Button } from './ui';
+import { Badge, Button, CloseButton } from './ui';
 
 export function TicketPanelHeader({
   detail,
@@ -44,15 +44,7 @@ export function TicketPanelHeader({
             Review changes
           </Button>
         ) : null}
-        <button
-          type="button"
-          aria-label="Close"
-          title="Close"
-          className="rounded-md px-2 py-1 text-lg leading-none text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
-          onClick={onClose}
-        >
-          ✕
-        </button>
+        <CloseButton onClick={onClose} />
       </div>
     </header>
   );

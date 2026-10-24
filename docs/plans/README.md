@@ -96,6 +96,9 @@ Loose ends found while building, not planned yet (2026-10-15):
 
 ## Ideas
 
+- [UI/UX review](ui-review.md): quick wins (step 1) built on branch `ui-review`; actions, navigation, board and
+  per-page fixes planned.
+
 - [Prefill steps on GitHub issue import](issue-import-prefill.md)
 - [Show older merged tickets](board-older-merged.md)
 - [Exclude merged PRs from the ticket view](exclude-merged-prs.md) (scope to clarify)

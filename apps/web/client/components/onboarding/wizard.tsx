@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 
 import { api } from '../../lib/api';
-import { Button, ErrorText } from '../ui';
+import { Button, CloseButton, ErrorText } from '../ui';
 import { ConnectStep } from './connect-step';
 import { canContinue, credentialOf, EMPTY_DRAFT, STEPS, type Draft, type StepProps } from './draft';
 import { Stepper } from './stepper';
@@ -120,7 +120,7 @@ export function Wizard({
             <h2 className="text-xl font-semibold">{header.title}</h2>
             <p className="text-sm text-zinc-500">{header.description}</p>
           </div>
-          {onClose ? <Button onClick={onClose}>Close</Button> : null}
+          {onClose ? <CloseButton onClick={onClose} /> : null}
         </header>
         <View {...props} />
         <ErrorText error={error} />

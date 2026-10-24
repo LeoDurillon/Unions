@@ -10,7 +10,9 @@ import { eventRulesApi, newRule, type RuleDraft } from '../../lib/event-rules-ap
 import { integrationsApi } from '../../lib/integrations-api';
 import { Button, ErrorText } from '../ui';
 import { RuleEditor } from './rule-editor';
-import { DeliveryList, RuleRow } from './rule-list';
+import { RuleRow } from './rule-list';
+
+export { EventActivitySection } from './delivery-list';
 
 function NotionColumns({
   projectId,
@@ -195,18 +197,6 @@ export function EventRulesSection({ project }: { project: PublicProject }): Reac
       </p>
       <ErrorText error={rules.error} />
       <Rules projectId={project.id} data={rules.data} />
-    </section>
-  );
-}
-
-/** What the rules did lately: each update or comment, and why one failed. */
-export function EventActivitySection({ project }: { project: PublicProject }): ReactElement {
-  return (
-    <section className="space-y-4">
-      <p className="text-sm text-zinc-500">
-        The latest Notion updates and GitHub comments the event rules made, newest first.
-      </p>
-      <DeliveryList projectId={project.id} />
     </section>
   );
 }

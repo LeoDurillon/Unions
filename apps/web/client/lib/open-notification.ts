@@ -8,11 +8,14 @@ import { notificationsApi } from './notifications-api';
 import { openInvestigation } from './opened-investigation';
 import { NOTIFICATIONS_KEY } from './use-notifications';
 
-/** What opening a notification needs to know about it. */
+/**
+ * What opening a notification needs to know about it; `alsoRead`: the other unread notifications
+ * about the same ticket or investigation, marked read with it.
+ */
 export type NotificationTarget = Pick<
   Notification,
   'id' | 'projectId' | 'ticketId' | 'investigationId'
->;
+> & { alsoRead?: number[] };
 
 /**
  * The handler that opens a notification: its project's board, then its ticket's panel or its
@@ -31,9 +34,9 @@ export function useNotificationOpener({
 }): (target: NotificationTarget) => void {
   const queryClient = useQueryClient();
   const markRead = useCallback(
-    async (id: number): Promise<void> => {
+    async (ids: number[]): Promise<void> => {
       try {
-        await notificationsApi.markRead(id);
+        await Promise.all(ids.map((id) => notificationsApi.markRead(id)));
       } catch {
         // It stays unread, as the panel shows: opening what it is about matters more.
       }
@@ -46,7 +49,7 @@ export function useNotificationOpener({
       if (!leave()) {
         return;
       }
-      void markRead(target.id);
+      void markRead([target.id, ...(target.alsoRead ?? [])]);
       selectProject(target.projectId);
       showBoard();
       if (target.investigationId !== null) {

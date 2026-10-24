@@ -43,7 +43,77 @@ function NoteInput({
   );
 }
 
-/** One file: its name (a download link once uploaded), size, note, and whether it may be committed. */
+/** The file's name (a download link once uploaded), size, note and whether it is private, on one line. */
+function FileSummary({
+  name,
+  href,
+  size,
+  note,
+  allowInRepo,
+}: {
+  name: string;
+  href?: string;
+  size: number;
+  note: string;
+  allowInRepo: boolean;
+}): ReactElement {
+  return (
+    <span className="flex min-w-0 flex-1 items-baseline gap-2">
+      {href ? (
+        <a className="truncate text-indigo-600 hover:underline dark:text-indigo-400" href={href}>
+          {name}
+        </a>
+      ) : (
+        <span className="truncate">{name}</span>
+      )}
+      <span className="shrink-0 text-xs text-zinc-500">{formatBytes(size)}</span>
+      <span className="shrink-0 text-xs text-zinc-500">
+        {allowInRepo ? 'allowed in the repository' : 'private'}
+      </span>
+      {note === '' ? null : (
+        <span className="min-w-0 truncate text-xs text-zinc-500" title={note}>
+          · {note}
+        </span>
+      )}
+    </span>
+  );
+}
+
+/** The note and the switch of an opened file row. */
+function FileDetails({
+  name,
+  note,
+  allowInRepo,
+  disabled,
+  onNote,
+  onAllow,
+}: {
+  name: string;
+  note: string;
+  allowInRepo: boolean;
+  disabled: boolean;
+  onNote: (note: string) => void;
+  onAllow: (allow: boolean) => void;
+}): ReactElement {
+  return (
+    <>
+      <NoteInput name={name} note={note} disabled={disabled} onNote={onNote} />
+      <Switch
+        checked={allowInRepo}
+        disabled={disabled}
+        onChange={onAllow}
+        hint="For example as a test fixture; otherwise private"
+      >
+        <span className="text-xs text-zinc-600 dark:text-zinc-400">Allowed in the repository</span>
+      </Switch>
+    </>
+  );
+}
+
+/**
+ * One file on one line: its name, size, note and whether it may be committed; Edit opens the note
+ * and the switch.
+ */
 export function FileRow({
   name,
   href,
@@ -51,6 +121,7 @@ export function FileRow({
   note,
   allowInRepo,
   disabled,
+  startOpen = false,
   onNote,
   onAllow,
   onRemove,
@@ -61,37 +132,47 @@ export function FileRow({
   note: string;
   allowInRepo: boolean;
   disabled: boolean;
+  /** Open the note and the switch from the start (a file just picked). */
+  startOpen?: boolean;
   /** Called when the note is done being edited (on blur), with the new text. */
   onNote: (note: string) => void;
   onAllow: (allow: boolean) => void;
   onRemove: () => void;
 }): ReactElement {
+  const [open, setOpen] = useState(startOpen);
+  const summary = { name, href, size, note, allowInRepo };
   return (
-    <li className="space-y-1 rounded-md border border-zinc-200 p-2 text-sm dark:border-zinc-800">
-      <div className="flex items-center justify-between gap-2">
-        <span className="min-w-0 truncate">
-          {href ? (
-            <a className="text-indigo-600 hover:underline dark:text-indigo-400" href={href}>
-              {name}
-            </a>
-          ) : (
-            name
-          )}{' '}
-          <span className="text-xs text-zinc-500">{formatBytes(size)}</span>
-        </span>
-        <Button className="shrink-0" disabled={disabled} onClick={onRemove}>
+    <li className="space-y-1 rounded-md border border-zinc-200 px-2 py-1 text-sm dark:border-zinc-800">
+      <div className="flex items-center gap-2">
+        <FileSummary {...summary} />
+        <Button
+          className="shrink-0 px-2 py-0.5 text-xs"
+          aria-expanded={open}
+          onClick={() => {
+            setOpen(!open);
+          }}
+        >
+          {open ? 'Done' : 'Edit'}
+        </Button>
+        <Button
+          variant="quietDanger"
+          className="shrink-0 px-2 py-0.5 text-xs"
+          disabled={disabled}
+          onClick={onRemove}
+        >
           Remove
         </Button>
       </div>
-      <NoteInput name={name} note={note} disabled={disabled} onNote={onNote} />
-      <Switch
-        checked={allowInRepo}
-        disabled={disabled}
-        onChange={onAllow}
-        hint="For example as a test fixture; otherwise private"
-      >
-        <span className="text-xs text-zinc-600 dark:text-zinc-400">Allowed in the repository</span>
-      </Switch>
+      {open ? (
+        <FileDetails
+          name={name}
+          note={note}
+          allowInRepo={allowInRepo}
+          disabled={disabled}
+          onNote={onNote}
+          onAllow={onAllow}
+        />
+      ) : null}
     </li>
   );
 }
@@ -147,6 +228,7 @@ export function PendingFilesField({
             note={pending.note}
             allowInRepo={pending.allowInRepo}
             disabled={false}
+            startOpen
             onNote={(note) => {
               change(index, { note });
             }}

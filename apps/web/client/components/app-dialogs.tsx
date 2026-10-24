@@ -96,22 +96,17 @@ function TicketBody({
       initialTitle={draft.title}
       initialBody={draft.body}
       source={draft.source}
+      flowField={picker}
       onCreated={onCreated}
     />
   );
   if (tabs.length === 1) {
-    return (
-      <div className="space-y-4">
-        {picker}
-        {form}
-      </div>
-    );
+    return form;
   }
   return (
     <div className="space-y-4">
       <TicketTabs tabs={tabs} tab={tab} onChange={setTab} />
-      {picker}
-      {tab === 'write' ? form : null}
+      {tab === 'write' ? form : picker}
       {tab === 'github' ? (
         <GitHubIssueImportPanel projectId={project.id} flow={flow} onCreated={onCreated} />
       ) : null}

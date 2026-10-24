@@ -1,7 +1,7 @@
 // The side panel for the selected ticket: header, section tabs and the body of the current tab.
 import { useQuery } from '@tanstack/react-query';
 import type { Step } from '@union/core/states';
-import { useState, type ReactElement, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactElement, type ReactNode } from 'react';
 
 import { api } from '../lib/api';
 import { currentStep } from '../lib/labels';
@@ -42,7 +42,33 @@ function usePanelTabs(
   return { section, setSection, workerTab, setWorkerTab };
 }
 
-/** The slide-over: a click on the backdrop closes it. */
+/** Whether Escape was typed in a field, where it belongs to the field rather than the panel. */
+function inField(target: EventTarget | null): boolean {
+  return (
+    target instanceof HTMLElement &&
+    (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName))
+  );
+}
+
+/** Calls `onClose` on Escape, unless a field or an inner popover took it. */
+function useEscape(onClose: () => void): void {
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent): void => {
+      if (event.key === 'Escape' && !event.defaultPrevented && !inField(event.target)) {
+        onClose();
+      }
+    };
+    globalThis.addEventListener('keydown', onKey);
+    return () => {
+      globalThis.removeEventListener('keydown', onKey);
+    };
+  }, [onClose]);
+}
+
+/**
+ * The slide-over, a modal dialog (focus stays in it): a click on the backdrop or Escape closes it.
+ * The dialog's own Escape handling is off, so Escape in a field stays the field's.
+ */
 function PanelShell({
   onClose,
   children,
@@ -50,22 +76,32 @@ function PanelShell({
   onClose: () => void;
   children: ReactNode;
 }): ReactElement {
+  const ref = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    ref.current?.showModal();
+  }, []);
+  useEscape(onClose);
   return (
-    <div
-      className="fixed inset-0 z-10 flex justify-end bg-black/40"
-      onClick={onClose}
-      role="presentation"
+    <dialog
+      ref={ref}
+      aria-label="Ticket"
+      onCancel={(event) => {
+        event.preventDefault();
+      }}
+      className="m-0 h-full max-h-none w-full max-w-none border-0 bg-transparent p-0 text-inherit backdrop:bg-transparent"
     >
-      <aside
-        className="flex h-full w-full max-w-3xl flex-col bg-white shadow-xl dark:bg-zinc-950"
-        onClick={(event) => {
-          event.stopPropagation();
-        }}
-        role="presentation"
-      >
-        {children}
-      </aside>
-    </div>
+      <div className="flex h-full justify-end bg-black/40" onClick={onClose} role="presentation">
+        <aside
+          className="flex h-full w-full max-w-3xl flex-col bg-white shadow-xl dark:bg-zinc-950"
+          onClick={(event) => {
+            event.stopPropagation();
+          }}
+          role="presentation"
+        >
+          {children}
+        </aside>
+      </div>
+    </dialog>
   );
 }
 

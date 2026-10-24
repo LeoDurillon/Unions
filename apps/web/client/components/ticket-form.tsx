@@ -3,7 +3,7 @@ import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/r
 import type { TicketOrigin } from '@union/core';
 import { integrationKind } from '@union/core/integration-kinds';
 import type { PipelineStep } from '@union/core/states';
-import { useState, type ReactElement, type SubmitEvent } from 'react';
+import { useState, type ReactElement, type ReactNode, type SubmitEvent } from 'react';
 
 import { api } from '../lib/api';
 import { attachmentsApi, type PendingFile } from '../lib/attachments-api';
@@ -155,10 +155,13 @@ export function TicketForm({
   initialTitle = '',
   initialBody = '',
   source = null,
+  flowField = null,
 }: {
   projectId: number;
-  /** Chosen above the form, for every way of creating the ticket. */
+  /** Chosen in `flowField`, shared with the other ways of creating the ticket. */
   flow: PipelineStep[] | null;
+  /** The flow picker, shown after the files. */
+  flowField?: ReactNode;
   onCreated: (ticketId: number) => void;
   initialTitle?: string;
   initialBody?: string;
@@ -194,6 +197,7 @@ export function TicketForm({
       <TextFields title={title} body={body} onTitle={setTitle} onBody={setBody} />
       <ParentField projectId={projectId} value={parentId} onChange={setParentId} />
       <PendingFilesField files={files} onChange={setFiles} />
+      {flowField}
       <ErrorText error={create.error} />
       <Button type="submit" variant="primary" disabled={create.isPending}>
         {submitLabel(create.isPending, created)}
