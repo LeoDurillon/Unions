@@ -44,7 +44,7 @@ Everything runs on your machine. Credentials stay in a local SQLite database and
 - 🌿 **Branch tools**: rebase onto the latest base, move a finished ticket onto another base, or simplify its history
   for review.
 - 🖥️ **Preview environments**: run a ticket's branch with the repository's own Docker Compose file, at
-  `http://t<id>.union.localhost`.
+  `http://t<id>.union.localhost:8080`.
 - 🔬 **Investigations**: one-off agent runs on a prompt of your own, with the model and tools you pick, and follow-up
   questions. No ticket, no GitHub issue.
 - 🧠 **Memory**: lessons per agent step, curated from your feedback and reused on the next tickets.
@@ -181,7 +181,8 @@ and pull requests are then authored by the app.
 
 ## Configuration
 
-Environment variables (shell or `.env`), all optional:
+Environment variables (in a `.env` file at the repository root), all optional; the
+[settings reference](documentation/settings.md#environment-variables) lists them all:
 
 | Variable                   | Default                               | Purpose                                                  |
 | -------------------------- | ------------------------------------- | -------------------------------------------------------- |
@@ -194,7 +195,7 @@ Environment variables (shell or `.env`), all optional:
 | `UNION_CLAUDE_CREDENTIALS` | `~/.claude/.credentials.json`         | Claude credential seeded into containers                 |
 | `UNION_AGENT_IMAGE`        | `union-agent:local`                   | Image agent containers run from                          |
 
-Agent prompts, models, thinking effort and allowed tools are edited in **Agent settings** in the sidebar and stored
+Agent prompts, models, thinking effort and allowed tools are edited in **Union settings** in the sidebar and stored
 in the database.
 
 ### Database
@@ -222,15 +223,21 @@ Compose.
 
 ## Documentation
 
-| Topic                                   | Where                                                                    |
-| --------------------------------------- | ------------------------------------------------------------------------ |
-| Product spec and design decisions       | [`docs/spec/`](docs/spec/README.md)                                      |
-| A ticket from creation to Done          | [`docs/spec/flow.md`](docs/spec/flow.md)                                 |
-| Architecture: core, web, worker         | [`docs/architecture/`](docs/architecture/)                               |
-| GitHub and Notion integrations          | [`docs/architecture/integrations.md`](docs/architecture/integrations.md) |
-| Preview environments                    | [`docs/spec/preview-environments.md`](docs/spec/preview-environments.md) |
-| Plans and ideas not built yet           | [`docs/plans/`](docs/plans/README.md)                                    |
-| Working on the code (humans and agents) | [`AGENTS.md`](AGENTS.md)                                                 |
+**Using Union:** the [user guide](documentation/README.md) covers installation, the ticket lifecycle, reviews,
+previews, agents, settings and troubleshooting.
+
+| Start here                                                       |                                                           |
+| ---------------------------------------------------------------- | --------------------------------------------------------- |
+| [Installation](documentation/installation.md)                    | What you need and how to start Union                      |
+| [Your first project](documentation/first-project.md)             | GitHub access, repository, checks                         |
+| [From ticket to pull request](documentation/ticket-lifecycle.md) | Planning, implementation, final review                    |
+| [Reviewing changes](documentation/reviewing.md)                  | The diff, comments, Explain, other people's pull requests |
+| [Settings reference](documentation/settings.md)                  | Every settings page and environment variable              |
+| [Troubleshooting](documentation/troubleshooting.md)              | Common problems and fixes                                 |
+
+**Working on Union's code:** [`AGENTS.md`](AGENTS.md) for the layout and rules, [`docs/spec/`](docs/spec/README.md)
+for the design and its decisions, [`docs/architecture/`](docs/architecture/) for how each part is built, and
+[`docs/plans/`](docs/plans/README.md) for what is not built yet.
 
 ## Development
 

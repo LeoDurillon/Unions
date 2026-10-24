@@ -20,6 +20,10 @@ Read the file for the area you change before changing it, and keep it current wh
 - `docker/agent.Dockerfile`: the agent image (`union-agent:local`, build with
   `docker build -t union-agent:local -f docker/agent.Dockerfile docker`).
 - Plans and ideas not built yet: `docs/plans/README.md`.
+- The user guide, for people who use Union rather than work on it: `documentation/` (index in
+  `documentation/README.md`). `docs/` is for working on the code. When a change alters what a user sees or does (a
+  button, a setting, a step, a default), update the guide's page that covers it in the same change. Write it for
+  users: what to click and what happens, not tables, events or file names.
 
 To find a file, read the map of its area in `docs/map/` (`core`, `web-server`, `web-client`, `worker`, `scripts`):
 one line per file, from the file's own top comment. Then search (`grep -rn`) and read only the lines you need.
