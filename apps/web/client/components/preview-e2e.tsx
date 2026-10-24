@@ -84,7 +84,7 @@ export function PreviewE2e({
     <div className="space-y-2 border-t border-zinc-200 pt-2 dark:border-zinc-800">
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-sm font-medium">End-to-end tests</span>
-        <code className="text-xs text-zinc-500">{e2eCommand}</code>
+        <code className="text-xs whitespace-pre-wrap text-zinc-500">{e2eCommand}</code>
         <Button
           disabled={run.isPending || view.e2eRefusal !== null}
           title={view.e2eRefusal ?? undefined}

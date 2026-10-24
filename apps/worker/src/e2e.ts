@@ -134,7 +134,8 @@ export async function runE2e(run: E2eRun): Promise<E2eResult | null> {
   }
   await installBrowser(run);
   const timeout = AbortSignal.timeout(GATE_TIMEOUT_MS);
-  const result = await runIn(run.runtime, run.container, ['sh', '-lc', `${command} 2>&1`], {
+  // Grouped, so every line of a multi-line command writes its errors to the output.
+  const result = await runIn(run.runtime, run.container, ['sh', '-lc', `{ ${command}\n} 2>&1`], {
     cwd: REPO_DIR,
     env: previewEnv(run.db, run.owner),
     signal: run.signal ? AbortSignal.any([run.signal, timeout]) : timeout,

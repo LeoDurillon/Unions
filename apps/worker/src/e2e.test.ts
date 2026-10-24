@@ -161,7 +161,7 @@ test('the tests run against the preview, from inside it, after the browser is in
   });
   expect(install?.command).toContain('playwright install chromium');
   expect(tests).toEqual({
-    command: 'sh -lc npx playwright test 2>&1',
+    command: 'sh -lc { npx playwright test\n} 2>&1',
     env: {
       BASE_URL: 'http://web:3000',
       PREVIEW_URL: 'http://web:3000',

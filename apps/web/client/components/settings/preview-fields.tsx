@@ -10,24 +10,31 @@ export function TextField({
   hint,
   value,
   placeholder,
+  multiline = false,
   onChange,
 }: {
   label: string;
   hint: string;
   value: string;
   placeholder: string;
+  /** A shell command pasted over several lines keeps its line breaks. */
+  multiline?: boolean;
   onChange: (value: string) => void;
 }): ReactElement {
+  const props = {
+    value,
+    placeholder,
+    onChange: (event: { target: { value: string } }): void => {
+      onChange(event.target.value);
+    },
+  };
   return (
     <Field label={label} hint={hint}>
-      <input
-        className={`${inputClass} font-mono`}
-        value={value}
-        placeholder={placeholder}
-        onChange={(event) => {
-          onChange(event.target.value);
-        }}
-      />
+      {multiline ? (
+        <textarea className={`${inputClass} h-32 font-mono text-xs`} {...props} />
+      ) : (
+        <input className={`${inputClass} font-mono`} {...props} />
+      )}
     </Field>
   );
 }
