@@ -1,10 +1,12 @@
-// Pull requests put under review from the Pull requests tab, without a ticket; a stack opens with a
-// tab per pull request.
+// The Pull requests tab's "Under review" part: pull requests put under review without a ticket, stacks
+// first; Open review opens the review page (a stack's with a tab per pull request).
 import { useState, type ReactElement } from 'react';
 
 import type { CurrentReview, PublicProject } from '../../../src/api-types';
 import { reviewStacks } from '../../lib/pull-request-stacks';
 import { useCurrentReviewMutations, useCurrentReviews } from '../../lib/use-current-reviews';
+import { ConfirmButton } from '../confirm-button';
+import { TrashIcon } from '../icon-button';
 import { Badge, Button, ErrorText } from '../ui';
 import { Part } from './list-part';
 import { ReviewStackItem } from './review-stack-item';
@@ -50,17 +52,20 @@ function ReviewItem({
           ) : null}
         </p>
       </div>
-      <Button variant="primary" onClick={onOpen}>
-        Open review
-      </Button>
-      <Button disabled={removing} onClick={onRemove}>
-        Remove
-      </Button>
+      <Button onClick={onOpen}>Open review</Button>
+      <ConfirmButton
+        label={`Stop reviewing #${review.prNumber}`}
+        icon={<TrashIcon />}
+        question="Stop reviewing it? Its drafts and preview are removed."
+        confirmLabel="Remove"
+        disabled={removing}
+        onConfirm={onRemove}
+      />
     </li>
   );
 }
 
-/** The reviews, stacks first in their own part when there are any; `onOpen` opens a pull request. */
+/** The reviews, stacks first, in one part; `onOpen` opens a pull request. */
 function ReviewRows({
   list,
   onOpen,
@@ -72,56 +77,48 @@ function ReviewRows({
 }): ReactElement {
   const { remove, removeStack } = mutations;
   const all = reviewStacks(list);
-  const stacks = all.filter((stack) => stack.length > 1);
-  const rows = all
-    .filter((stack) => stack.length === 1)
-    .flat()
-    .map((review) => (
-      <ReviewItem
-        key={review.id}
-        review={review}
-        removing={remove.isPending}
-        onOpen={() => {
-          onOpen(review.prNumber);
-        }}
-        onRemove={() => {
-          remove.mutate(review.prNumber);
-        }}
-      />
-    ));
-  if (stacks.length === 0) {
-    return <ul>{rows}</ul>;
-  }
   return (
-    <>
-      <div className="mb-6">
-        <Part title="Stacks" count={stacks.length}>
-          {stacks.map((stack) => (
-            <ReviewStackItem
-              key={stack[0]?.id}
-              stack={stack}
-              removing={removeStack.isPending}
-              onOpen={() => {
-                onOpen(stack[0]?.prNumber ?? 0);
-              }}
-              onRemove={() => {
-                removeStack.mutate(stack.map((review) => review.prNumber));
-              }}
-            />
-          ))}
-        </Part>
-      </div>
-      {rows.length > 0 ? (
-        <Part title="Pull requests" count={rows.length}>
-          {rows}
-        </Part>
-      ) : null}
-    </>
+    <Part title="Under review" count={all.length}>
+      {all
+        .filter((stack) => stack.length > 1)
+        .map((stack) => (
+          <ReviewStackItem
+            key={stack[0]?.id}
+            stack={stack}
+            removing={removeStack.isPending}
+            onOpen={() => {
+              onOpen(stack[0]?.prNumber ?? 0);
+            }}
+            onRemove={() => {
+              removeStack.mutate(stack.map((review) => review.prNumber));
+            }}
+          />
+        ))}
+      {all
+        .filter((stack) => stack.length === 1)
+        .flat()
+        .map((review) => (
+          <ReviewItem
+            key={review.id}
+            review={review}
+            removing={remove.isPending}
+            onOpen={() => {
+              onOpen(review.prNumber);
+            }}
+            onRemove={() => {
+              remove.mutate(review.prNumber);
+            }}
+          />
+        ))}
+    </Part>
   );
 }
 
-/** Pull requests put under review from the Pull requests tab, without a ticket; a stack opens with a tab per pull request. */
-export function CurrentReviewsPage({ project }: { project: PublicProject }): ReactElement {
+/**
+ * The pull requests under review without a ticket, above the rest of the Pull requests tab; nothing
+ * while there is none. An opened one shows its review page over the tab.
+ */
+export function UnderReview({ project }: { project: PublicProject }): ReactElement | null {
   const reviews = useCurrentReviews(project.id);
   const mutations = useCurrentReviewMutations(project.id);
   const [opened, setOpened] = useState<number | null>(null);
@@ -144,22 +141,16 @@ export function CurrentReviewsPage({ project }: { project: PublicProject }): Rea
       />
     );
   }
+  const error = reviews.error ?? mutations.remove.error ?? mutations.removeStack.error;
+  if (list.length === 0 && error === null) {
+    return null;
+  }
   return (
-    <div className="flex h-full flex-col">
-      <div className="border-b border-zinc-200 px-4 py-2 text-xs text-zinc-500 dark:border-zinc-800">
-        Add pull requests from the Pull requests tab (hover one that has no ticket).
+    <div className="mb-6">
+      <div className="px-4">
+        <ErrorText error={error} />
       </div>
-      <div className="min-h-0 flex-1 overflow-y-auto">
-        <div className="px-4 pt-3">
-          <ErrorText
-            error={reviews.error ?? mutations.remove.error ?? mutations.removeStack.error}
-          />
-        </div>
-        {reviews.isSuccess && list.length === 0 ? (
-          <p className="px-4 text-sm text-zinc-500">No pull request under review.</p>
-        ) : null}
-        <ReviewRows list={list} onOpen={setOpened} mutations={mutations} />
-      </div>
+      {list.length > 0 ? <ReviewRows list={list} onOpen={setOpened} mutations={mutations} /> : null}
     </div>
   );
 }

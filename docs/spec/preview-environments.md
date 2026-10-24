@@ -54,7 +54,7 @@ Built (phases 1 to 4). Full design and what was built: [`docs/plans/preview-envi
 
 ## Previews of pull requests under review
 
-Design and steps: [`docs/plans/review-previews.md`](../plans/review-previews.md). A pull request in Current reviews
+Design and steps: [`docs/plans/review-previews.md`](../plans/review-previews.md). A pull request under review
 gets what a ticket's Preview tab has, on its review page's **Preview** tab, without a ticket. No agent runs (no
 Claude usage) and nothing is written to GitHub: the worker only fetches the pull request.
 
@@ -73,6 +73,6 @@ Claude usage) and nothing is written to GitHub: the worker only fetches the pull
   while it runs; no agent services, never the secrets). A review's failure screenshots are kept with its preview
   (`preview_screenshots`, files under `attachments/r<id>/e2e/`). An output, or the last e2e result, can be **added to
   the review** as a general draft comment (what ran, how it ended, its last lines), sent with the rest of the review.
-- A review's preview and runs have no events: the tab polls while one is on its way. Current reviews marks a review
+- A review's preview and runs have no events: the tab polls while one is on its way. Under review marks a review
   or a stack whose preview runs. Removing a review (or its stack) drops its pending commands, has the worker take its
   preview down and remove its container and volumes, and deletes its files.

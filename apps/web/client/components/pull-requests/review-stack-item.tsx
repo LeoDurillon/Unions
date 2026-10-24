@@ -2,6 +2,8 @@
 import type { ReactElement } from 'react';
 
 import type { CurrentReview } from '../../../src/api-types';
+import { ConfirmButton } from '../confirm-button';
+import { TrashIcon } from '../icon-button';
 import { Badge, Button } from '../ui';
 
 /** `stack` is bottom first; Open review opens its bottom pull request. */
@@ -46,12 +48,15 @@ export function ReviewStackItem({
           ) : null}
         </p>
       </div>
-      <Button variant="primary" onClick={onOpen}>
-        Open review
-      </Button>
-      <Button disabled={removing} onClick={onRemove}>
-        Remove stack
-      </Button>
+      <Button onClick={onOpen}>Open review</Button>
+      <ConfirmButton
+        label="Stop reviewing the stack"
+        icon={<TrashIcon />}
+        question="Stop reviewing the whole stack? Its drafts and previews are removed."
+        confirmLabel="Remove"
+        disabled={removing}
+        onConfirm={onRemove}
+      />
     </li>
   );
 }

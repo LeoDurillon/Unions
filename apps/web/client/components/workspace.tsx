@@ -9,7 +9,6 @@ import { openSettings } from '../lib/settings-sections';
 import { Board, BoardView } from './board';
 import { InvestigationsPage } from './investigations/investigations-page';
 import { ProjectBar, type ProjectView } from './project-bar';
-import { CurrentReviewsPage } from './pull-requests/current-reviews-page';
 import { PullRequestsPage } from './pull-requests/pull-requests-page';
 
 function noop(): void {
@@ -44,9 +43,6 @@ function ProjectBody({
         onOpenTicket={onOpenTicket}
       />
     );
-  }
-  if (view === 'current-reviews') {
-    return <CurrentReviewsPage key={project.id} project={project} />;
   }
   if (view === 'pull-requests') {
     return <PullRequestsPage key={project.id} project={project} onOpenTicket={onOpenTicket} />;

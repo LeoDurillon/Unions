@@ -8,7 +8,7 @@
   GitHub App's installations (`/api/github/app`), looking up a pull request a user links to a ticket, reading an
   issue to create a ticket on it (`routes/issue-import.ts`), reading a linked pull request's discussion (PR tab,
   review import), a reviewed pull request's files and commits, and listing the repository's pull requests and stacks (project bar → Pull requests,
-  `routes/pull-requests.ts`; the Current reviews tab's records are local, under `/pull-requests/reviews`,
+  `routes/pull-requests.ts`; the Under review part's records are local, under `/pull-requests/reviews`,
   `routes/current-reviews.ts`), all read only (`src/github-onboarding.ts`, behind the `OnboardingGitHub` interface
   so tests use a fake), and a linked pull request's CI checks (PR tab: check runs, statuses, bot comments, the
   annotations and job logs of a pick; `src/github-checks.ts` behind `CiGitHub`). Posting a pull request review is a write: it goes through the `submit_pr_review` command

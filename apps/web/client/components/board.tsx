@@ -1,58 +1,19 @@
-// The columns, filling the screen down to the bottom edge.
-import {
-  DndContext,
-  PointerSensor,
-  useDroppable,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-} from '@dnd-kit/core';
+// The columns, filling the screen down to the bottom edge; any can fold to a strip.
+import { DndContext, PointerSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { BoardColumn } from '@union/core';
 import { leftBoard } from '@union/core/states';
 import type { ReactElement } from 'react';
 
 import type { PublicProject, TicketSummary } from '../../src/api-types';
 import { api } from '../lib/api';
 import { COLUMNS } from '../lib/labels';
-import { TicketCard } from './ticket-card';
+import { useFoldedColumns } from '../lib/use-folded-columns';
+import { Column, FoldedColumn } from './board-column';
 import { ErrorText } from './ui';
 
 const DRAG_DISTANCE_PX = 6;
 
 type Config = PublicProject['config'];
-
-function Column({
-  status,
-  title,
-  tickets,
-  config,
-  onOpen,
-}: {
-  status: BoardColumn;
-  title: string;
-  tickets: TicketSummary[];
-  config?: Config;
-  onOpen: (id: number) => void;
-}): ReactElement {
-  const { setNodeRef, isOver } = useDroppable({ id: status });
-  return (
-    <section
-      ref={setNodeRef}
-      className={`flex h-full min-w-60 flex-1 flex-col gap-2 rounded-xl p-3 transition ${isOver ? 'bg-indigo-100 dark:bg-indigo-950' : 'bg-zinc-100 dark:bg-zinc-900/60'}`}
-    >
-      <h2 className="flex items-center justify-between text-sm font-semibold">
-        {title}
-        <span className="text-xs font-normal text-zinc-500">{tickets.length}</span>
-      </h2>
-      <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto">
-        {tickets.map((ticket) => (
-          <TicketCard key={ticket.id} ticket={ticket} config={config} onOpen={onOpen} />
-        ))}
-      </div>
-    </section>
-  );
-}
 
 function useStartOnDrop(): { start: (event: DragEndEvent) => void; error: Error | null } {
   const queryClient = useQueryClient();
@@ -90,6 +51,7 @@ export function BoardView({
   onStart: (event: DragEndEvent) => void;
 }): ReactElement {
   const shown = tickets.filter((ticket) => !leftBoard(ticket, now));
+  const columns = useFoldedColumns();
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: DRAG_DISTANCE_PX } }),
   );
@@ -101,16 +63,25 @@ export function BoardView({
       <ErrorText error={error} />
       <DndContext sensors={sensors} onDragEnd={onStart}>
         <div className="flex min-h-0 flex-1 gap-4 overflow-x-auto">
-          {COLUMNS.map(({ status, title }) => (
-            <Column
-              key={status}
-              status={status}
-              title={title}
-              tickets={shown.filter((ticket) => ticket.board === status)}
-              config={config}
-              onOpen={onOpen}
-            />
-          ))}
+          {COLUMNS.map(({ status, title }) => {
+            const inColumn = shown.filter((ticket) => ticket.board === status);
+            const toggle = (): void => {
+              columns.toggle(status);
+            };
+            return columns.folded(status) ? (
+              <FoldedColumn key={status} title={title} count={inColumn.length} onUnfold={toggle} />
+            ) : (
+              <Column
+                key={status}
+                status={status}
+                title={title}
+                tickets={inColumn}
+                config={config}
+                onOpen={onOpen}
+                onFold={toggle}
+              />
+            );
+          })}
         </div>
       </DndContext>
     </div>

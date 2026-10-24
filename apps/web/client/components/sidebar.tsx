@@ -1,57 +1,38 @@
 // Notifications, running previews, project switcher and creation entry point, and Union's Update,
-// always visible on the left.
+// always visible on the left; folds to an icon rail.
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../src/api-types';
 import type { NotificationTarget } from '../lib/open-notification';
+import { useCompactSidebar } from '../lib/use-compact-sidebar';
 import type { Page } from '../lib/use-navigation';
 import { NotificationBell } from './notifications/notification-bell';
 import { PreviewsButton } from './previews/previews-button';
-import { Button } from './ui';
+import { ProjectNav, SettingsLink } from './sidebar-entries';
 import { UpdateButton } from './union-update/update-button';
 
-const ACTIVE = 'bg-indigo-100 font-medium text-indigo-900 dark:bg-indigo-950 dark:text-indigo-200';
-const IDLE = 'hover:bg-zinc-200/70 dark:hover:bg-zinc-800';
-
-function ProjectItem({
-  project,
-  active,
-  onSelect,
+/** The name, and the button that folds the sidebar to its rail or unfolds it. */
+function SidebarTitle({
+  compact,
+  onToggle,
 }: {
-  project: PublicProject;
-  active: boolean;
-  onSelect: (id: number) => void;
+  compact: boolean;
+  onToggle: () => void;
 }): ReactElement {
-  const state = active ? ACTIVE : IDLE;
   return (
-    <li>
+    <div className="flex items-center justify-between pt-1 pl-2 group-data-[compact]/side:justify-center group-data-[compact]/side:pl-0">
+      <h1 className="text-base font-semibold group-data-[compact]/side:sr-only">union</h1>
       <button
         type="button"
-        aria-current={active ? 'page' : undefined}
-        title={`${project.owner}/${project.repo}`}
-        onClick={() => {
-          onSelect(project.id);
-        }}
-        className={`block w-full truncate rounded-md px-3 py-2 text-left text-sm transition ${state}`}
+        aria-label={compact ? 'Expand the sidebar' : 'Collapse the sidebar'}
+        title={compact ? 'Expand the sidebar' : 'Collapse the sidebar'}
+        aria-expanded={!compact}
+        onClick={onToggle}
+        className="rounded-md px-2 py-1 text-zinc-500 hover:bg-zinc-200/70 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
       >
-        <span className="text-zinc-500">{project.owner}/</span>
-        {project.repo}
+        {compact ? '»' : '«'}
       </button>
-    </li>
-  );
-}
-
-/** The settings every project shares, below the projects. */
-function SettingsLink({ active, onOpen }: { active: boolean; onOpen: () => void }): ReactElement {
-  return (
-    <button
-      type="button"
-      aria-current={active ? 'page' : undefined}
-      onClick={onOpen}
-      className={`rounded-md px-3 py-2 text-left text-sm transition ${active ? ACTIVE : IDLE}`}
-    >
-      Union settings
-    </button>
+    </div>
   );
 }
 
@@ -73,9 +54,13 @@ export function Sidebar({
   onPage: (page: Page) => void;
   onOpenNotification: (target: NotificationTarget) => void;
 }): ReactElement {
+  const [compact, toggle] = useCompactSidebar();
   return (
-    <aside className="flex w-60 shrink-0 flex-col gap-3 border-r border-zinc-200 bg-zinc-100/60 p-3 dark:border-zinc-800 dark:bg-zinc-900/40">
-      <h1 className="px-2 pt-1 text-base font-semibold">union</h1>
+    <aside
+      data-compact={compact ? '' : undefined}
+      className="group/side flex w-60 shrink-0 flex-col gap-3 border-r border-zinc-200 bg-zinc-100/60 p-3 data-[compact]:w-14 data-[compact]:px-2 dark:border-zinc-800 dark:bg-zinc-900/40"
+    >
+      <SidebarTitle compact={compact} onToggle={toggle} />
       <NotificationBell projects={projects} onOpen={onOpenNotification} />
       <PreviewsButton
         active={page === 'previews'}
@@ -83,25 +68,12 @@ export function Sidebar({
           onPage('previews');
         }}
       />
-      <nav aria-label="Projects" className="min-h-0 flex-1 overflow-y-auto">
-        <p className="px-3 pb-1 text-xs font-medium tracking-wide text-zinc-500 uppercase">
-          Projects
-        </p>
-        <ul className="space-y-0.5">
-          {projects.map((project) => (
-            <ProjectItem
-              key={project.id}
-              project={project}
-              active={page === 'board' && project.id === projectId}
-              onSelect={onSelect}
-            />
-          ))}
-        </ul>
-        {projects.length === 0 ? (
-          <p className="px-3 text-sm text-zinc-500">No project yet.</p>
-        ) : null}
-      </nav>
-      <Button onClick={onNewProject}>+ Add project</Button>
+      <ProjectNav
+        projects={projects}
+        activeId={page === 'board' ? projectId : null}
+        onSelect={onSelect}
+        onNewProject={onNewProject}
+      />
       <SettingsLink
         active={page === 'settings'}
         onOpen={() => {

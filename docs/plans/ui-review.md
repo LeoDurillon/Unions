@@ -1,6 +1,6 @@
 # Plan: UI/UX review
 
-Status: steps 1 and 2 built (2026-10-24, branches `ui-review` and `ui-review-2`); steps 3 to 5 planned. From a review of every page
+Status: steps 1 to 3 built (2026-10-24), but for one spec choice per review; steps 4 and 5 planned. From a review of every page
 of the live instance, light and dark, at 1400, 1024 and 390 px wide.
 
 ## Step 1: quick wins
@@ -37,17 +37,22 @@ of the live instance, light and dark, at 1400, 1024 and 390 px wide.
 
 ## Step 3: navigation and layout
 
-- One spec choice per review (a "Specs" control at the top), used by Review with agent, Group by spec and
-  Explain instead of each picking its own.
-
-- Review mode in the URL (`?review=1` beside `?ticket=`), so reload and Back keep it.
-- Collapsible sidebar (icon rail), and a board that fits narrow screens (narrower columns, Merged / Closed folded).
-- Update button hidden unless an update exists.
-- "+ Add project" as a small + beside the Projects heading.
-- "Current reviews" as a section of Pull requests rather than its own tab.
-- "No GitHub access" as a banner, not a small link.
-- The review opened from a ticket gets the same tabs (Description, Comments, Preview, Diff) as one opened from
-  Current reviews.
+- [x] Review mode in the URL (`?review=1` beside `?ticket=`): reload keeps it, Back leaves it.
+- [x] Collapsible sidebar: « folds it to an icon rail (projects by their first two letters, counts on the icons),
+      remembered in this browser; folded at first under 1100 px wide.
+- [x] Board: narrower columns (13 rem); any column folds to a strip with its count; Merged / Closed starts folded.
+- [x] Update: a quiet small line while there is nothing to install (not hidden: Check now and the reason updates
+      are refused stay); the full entry when an update waits.
+- [x] "+ Add project" as a + beside the Projects heading (the button stays while there is no project).
+- [x] Current reviews merged into Pull requests: an "Under review" part above the stacks and pull requests;
+      removing a review asks first (its drafts and preview go). Spec and architecture docs updated.
+- [x] "No GitHub access" as a banner under the project bar, with Set up access.
+- [x] A ticket's review page gets Ticket, Preview and PR tabs (the panel's own views) beside Diff, and opens on
+      Diff.
+- [ ] One spec choice per review: left for its own plan. Review with agent and Explain take a list of editable
+      specs, Group by spec takes one; sharing a choice means keeping it on the review (server side). To decide:
+      one list for all three (Group by spec reads them together) or a main spec plus extras; whether editing it
+      in a dialog changes it for the others.
 
 ## Step 4: board
 

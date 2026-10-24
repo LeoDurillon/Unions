@@ -1,8 +1,10 @@
-// The sidebar's Update entry: enabled when the checkout is behind `origin/main`, with Check now beside it.
+// The sidebar's Update entry: prominent when the checkout is behind `origin/main`, else a quiet line;
+// Check now beside it.
 import { useState, type ReactElement } from 'react';
 
 import type { UnionUpdateView } from '../../../src/union-update-types';
 import { useCheckNow, useUnionUpdate } from '../../lib/use-union-update';
+import { SIDE_LABEL } from '../sidebar-classes';
 import { UpdateDialog } from './update-dialog';
 
 type Update = NonNullable<UnionUpdateView['update']>;
@@ -71,7 +73,7 @@ export function UpdateButton(): ReactElement {
   const { label, title, ready } = stateOf(update);
   return (
     <div className="space-y-1">
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1 group-data-[compact]/side:flex-col">
         <button
           type="button"
           disabled={!ready}
@@ -79,15 +81,17 @@ export function UpdateButton(): ReactElement {
           onClick={() => {
             setOpen(true);
           }}
-          className="flex min-w-0 flex-1 items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition enabled:hover:bg-zinc-200/70 disabled:text-zinc-500 dark:enabled:hover:bg-zinc-800"
+          className={`flex min-w-0 flex-1 items-center gap-2 rounded-md px-3 text-left transition enabled:hover:bg-zinc-200/70 disabled:text-zinc-400 dark:enabled:hover:bg-zinc-800 dark:disabled:text-zinc-500 ${ready ? 'py-2 text-sm font-medium group-data-[compact]/side:justify-center group-data-[compact]/side:px-0' : 'py-1 text-xs group-data-[compact]/side:hidden'}`}
         >
           {ready ? <span aria-hidden className="size-2 rounded-full bg-indigo-600" /> : null}
-          <span className="truncate">{label}</span>
+          <span className={SIDE_LABEL}>{label}</span>
         </button>
         <CheckNowButton update={update} />
       </div>
       {update?.error ? (
-        <p className="px-3 text-xs break-words text-red-600 dark:text-red-400">{update.error}</p>
+        <p className="px-3 text-xs break-words text-red-600 group-data-[compact]/side:hidden dark:text-red-400">
+          {update.error}
+        </p>
       ) : null}
       {data ? (
         <UpdateDialog

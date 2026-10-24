@@ -3,7 +3,7 @@ import type { DiffResponse } from '../../src/api-types';
 
 /**
  * What a review page reviews: a ticket's branch (with `slice`, one slice's own change of a split
- * ticket), or a pull request from the Current reviews tab.
+ * ticket), or a pull request under review from the Pull requests tab.
  */
 export type ReviewTarget =
   | { kind: 'ticket'; ticketId: number; slice?: number }

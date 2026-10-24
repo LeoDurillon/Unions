@@ -1,4 +1,4 @@
-// Stacks in the Pull requests and Current reviews tabs, by GitHub's stacks, and the stack under review a pull request would join.
+// Stacks in the Pull requests tab and its Under review part, by GitHub's stacks, and the stack under review a pull request would join.
 import type { GitHubStack } from '@union/core/github-stacks';
 import { placedStacks, pullRequestStacks, type StackPlace } from '@union/core/pr-stacks';
 

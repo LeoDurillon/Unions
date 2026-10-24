@@ -16,7 +16,7 @@ export function openUnionSettings(section: UnionSection = 'shared'): void {
   if (readParam('union') === section || !confirmLeave()) {
     return;
   }
-  setParams({ union: section, settings: null, page: null, ticket: null });
+  setParams({ union: section, settings: null, page: null, ticket: null, review: null });
 }
 
 /** Leaves the Union settings, asking first if they have unsaved changes; false when the user stays. */

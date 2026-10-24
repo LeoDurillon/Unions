@@ -4,6 +4,7 @@ import { useCallback, useRef, useState, type ReactElement } from 'react';
 import type { PublicProject } from '../../../src/api-types';
 import type { NotificationTarget } from '../../lib/open-notification';
 import { useNotifications } from '../../lib/use-notifications';
+import { SIDE_BADGE, SIDE_ITEM, SIDE_LABEL } from '../sidebar-classes';
 import { NotificationPanel } from './notification-panel';
 
 /** More than this shows as `99+`. */
@@ -40,12 +41,13 @@ export function NotificationBell({
         onClick={() => {
           setOpen(!open);
         }}
-        className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition hover:bg-zinc-200/70 dark:hover:bg-zinc-800"
+        title="Notifications"
+        className={`${SIDE_ITEM} hover:bg-zinc-200/70 dark:hover:bg-zinc-800`}
       >
         <BellIcon />
-        Notifications
+        <span className={SIDE_LABEL}>Notifications</span>
         {unread > 0 ? (
-          <span className="ml-auto rounded-full bg-indigo-600 px-1.5 text-xs font-semibold text-white">
+          <span className={`${SIDE_BADGE} bg-indigo-600`}>
             {unread > MAX_COUNT ? `${MAX_COUNT}+` : unread}
           </span>
         ) : null}

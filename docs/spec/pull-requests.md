@@ -6,17 +6,17 @@ state (open, draft, merged, closed), author, branches, review decision, size and
 **Open ticket** button. It is fetched when the tab opens, at most once a minute, or on **Refresh**: live events do
 not refetch it.
 
-A pull request without a ticket shows **Add to reviews** on hover (or keyboard focus): it joins the **Current
-reviews** tab, per project (`current_reviews`, a snapshot of its title, author and branches, so the tab needs no
-GitHub call), where it can be removed.
+A pull request without a ticket shows **Add to reviews** on hover (or keyboard focus): it joins **Under review**, the
+part at the top of the same tab, per project (`current_reviews`, a snapshot of its title, author and branches, so the
+part needs no GitHub call), where it can be removed (after a confirmation: its drafts and preview go with it).
 
 **Stacks** come from GitHub's stacked pull requests (`GET /repos/{o}/{r}/stacks`, read with the list; up to 500 open
 stacks): a stack is one row under "Stacks", above the other pull requests, in every filter, with its size on GitHub,
 how many of it merged, and its members (bottom first) when opened, those the list does not show named below them.
 **Add stack to reviews** adds its members without a ticket; a split ticket's stack (its slices are linked to the
 ticket) offers **Open ticket** instead. Pull requests that only target each other's branches are not a stack, except
-where GitHub has no stacks (the list answers 404): there open ones are chained by branch, as before. Current reviews
-keep each pull request's GitHub stack and place (`current_reviews.github_stack_number`, `stack_position`), written
+where GitHub has no stacks (the list answers 404): there open ones are chained by branch, as before. Reviews under
+review keep each pull request's GitHub stack and place (`current_reviews.github_stack_number`, `stack_position`), written
 when it is added and again each time its files or the list are read; they are grouped by it, a ticket-linked member
 in the middle leaving the stack whole but out of the review's tabs. **Review with agent** on a stack and **Link the
 whole stack** take the stack as GitHub has it.
@@ -43,7 +43,7 @@ or ID, reads it through the project's integration (any page shared with it, not 
 shows its title before **Link**; once linked, the row shows the title (a link to Notion), **Change** and **Unlink**.
 The Notion pages the pull request's description links to, and the integration can read, are offered as one-click
 suggestions ("Link _Export to CSV_"), never linked on their own. Each pull request of a stack has its own page; when
-others of its stack have none, **Link the whole stack to this page** gives them this one. The Current reviews list
+others of its stack have none, **Link the whole stack to this page** gives them this one. The Under review list
 marks a linked review (and a stack's linked members) with **Notion**.
 Only the page's id, title and URL are kept on the review (`current_reviews.notion_*`); the **Notion** tab, after
 Description, reads the page's text from Notion once per opening (cleaned as a ticket's import, mention titles

@@ -46,7 +46,7 @@
   `ci-output-text.ts`), previewed, kept in `ci_outputs` or sent as a `revise` command; Re-run on a failed Actions job
   queues `rerun_ci_job` (`ci-rerun.ts`, once per job while it waits). `PUT /api/tickets/:id/text`
   (`routes/ticket-edit.ts`) queues `edit_ticket` with the new title and description and the `base` the user started
-  from; it refuses a base the ticket no longer has, and a second edit while one waits. A pull request under review (Current reviews tab) uses the same
+  from; it refuses a base the ticket no longer has, and a second edit while one waits. A pull request under review (Pull requests tab, Under review) uses the same
   page and comment code: `review_comments` rows belong to a ticket or to a `current_reviews` row
   (`routes/review-comments.ts`, `routes/pr-review.ts`), and the client reviews a `ReviewTarget`
   (`lib/review-target.ts`), whose base URL serves the diff, the comments and the send. Files matching the project's
@@ -66,10 +66,10 @@
   others (`pull-requests/stack-item.tsx`, `lib/pull-request-stacks.ts`), opened to list their members and name those
   not listed. "Add stack to reviews" posts `…/pull-requests/reviews/stack` (one transaction, members already
   under review skipped); a pull request whose stack has one under review says which stack it joins; a split
-  ticket's slices map to its ticket, so its stack offers Open ticket. Current reviews keep `github_stack_number` and
+  ticket's slices map to its ticket, so its stack offers Open ticket. Reviews under review keep `github_stack_number` and
   `stack_position`: set from the listed item when added, written for every review when the list is read, and by
   `readReviewFiles` (`routes/pr-review-load.ts`, `pullRequestStack`) each time it reads the files.
-  The Current reviews tab groups its reviews by them (`reviewStacks`): stacks first,
+  The Under review part (`pull-requests/under-review.tsx`) groups its reviews by them (`reviewStacks`): stacks first,
   one row each (`review-stack-item.tsx`; Remove posts `…/reviews/stack/remove`: every member in one transaction, or none). Opening one opens its bottom PR in the review
   page with its PRs as a segmented control under the header (`stack-review.tsx`, `stack-tabs.tsx`: draft count and posting state per
   PR, `useDraftCounts` sharing `useComments`' cache); `ReviewPage` is keyed by the PR, so switching starts on its
@@ -190,8 +190,8 @@
   its paths and query keys). A ticket's keeps its event-driven refresh and its "send to the agent" actions
   (`ticket-e2e-actions.tsx`, `ticket-run-actions.tsx`); a review's polls while a command is pending or a change is
   on its way (`previewPoll`), says whose code runs and whether it gets the secrets, offers the update to the
-  reviewed commit, and "Add to review" (`pull-requests/review-e2e-actions.tsx`, `review-run-actions.tsx`). Current
-  reviews shows "preview running" on a review or a stack (`previewStatus` in the list).
+  reviewed commit, and "Add to review" (`pull-requests/review-e2e-actions.tsx`, `review-run-actions.tsx`). Under
+  review shows "preview running" on a review or a stack (`previewStatus` in the list).
 - Running previews: a global page (sidebar → Previews, `previews/running-previews-page.tsx`) lists every project's
   previews that hold containers (starting, running, stopping), tickets' and pull requests' alike, from
   `GET /api/previews` (`routes/running-previews.ts`, polled every 5 s); the sidebar entry shows their count. Stop

@@ -96,6 +96,15 @@ function useReviewData(
   };
 }
 
+/** The open tab: `startOn`, else the first section, else the diff; `section` is undefined on the diff. */
+function useSectionTab(
+  sections: ReviewSection[],
+  startOn: string | undefined,
+): { tab: string; setTab: (id: string) => void; section: ReviewSection | undefined } {
+  const [tab, setTab] = useState(startOn ?? sections[0]?.id ?? DIFF_TAB.id);
+  return { tab, setTab, section: sections.find((candidate) => candidate.id === tab) };
+}
+
 function SectionBody({
   banner,
   children,
@@ -123,6 +132,7 @@ function ReviewPageBody({
   title,
   onClose,
   sections = NO_SECTIONS,
+  startOn,
   stackTabs,
   banner,
   posting = false,
@@ -131,6 +141,8 @@ function ReviewPageBody({
   title: string;
   onClose: () => void;
   sections?: ReviewSection[];
+  /** The tab to open on (`diff` for the diff), else the first. */
+  startOn?: string;
   /** The tabs of the stack the pull request is in, under the header. */
   stackTabs?: ReactNode;
   banner?: ReactNode;
@@ -139,8 +151,7 @@ function ReviewPageBody({
 }): ReactElement {
   const { diff, comments, slices, error, mutations, copy, empty } = useReviewData(target, posting);
   const [view, setView] = useDiffView();
-  const [tab, setTab] = useState(sections[0]?.id ?? DIFF_TAB.id);
-  const section = sections.find((candidate) => candidate.id === tab);
+  const { tab, setTab, section } = useSectionTab(sections, startOn);
   return (
     <ExplainOff off={slices.slice !== null}>
       <div className="fixed inset-0 z-30 flex flex-col bg-zinc-50 dark:bg-zinc-950">

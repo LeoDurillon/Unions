@@ -5,7 +5,7 @@ import { setParams, useUrlParam } from './url-state';
 /** Opens Investigations with a new investigation on the ticket ready to write (`?investigate=<id>`). */
 export function investigateTicket(ticketId: number): void {
   if (confirmLeave()) {
-    setParams({ investigate: String(ticketId), ticket: null, settings: null });
+    setParams({ investigate: String(ticketId), ticket: null, review: null, settings: null });
   }
 }
 

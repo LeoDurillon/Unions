@@ -1,5 +1,5 @@
-// Every pull request of the project's repository, read from GitHub, open stacks as one row; linked
-// ones open their ticket.
+// The pull requests under review without a ticket, then every pull request of the project's
+// repository, read from GitHub, open stacks as one row; linked ones open their ticket.
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 
@@ -12,6 +12,7 @@ import {
 import { api } from '../../lib/api';
 import { Button, ErrorText } from '../ui';
 import { PullRequestRows } from './pull-request-rows';
+import { UnderReview } from './under-review';
 
 const FILTER_LABELS: Record<PullRequestFilter, string> = {
   open: 'Open',
@@ -154,6 +155,7 @@ export function PullRequestsPage({
         <div className="px-4 pt-3">
           <ErrorText error={query.error ?? refresh.error} />
         </div>
+        <UnderReview project={project} />
         {list && shown === 0 ? (
           <p className="px-4 text-sm text-zinc-500">No pull requests.</p>
         ) : null}

@@ -11,7 +11,7 @@ Everything the agent does is mirrored to the GitHub issue.
 - [Ticket flows](ticket-flows.md): which pipeline steps a ticket runs.
 - [Custom agents](custom-agents.md): the user's own steps, prompt written from a role, placed in flows.
 - [Ticket dependencies](ticket-dependencies.md): a ticket's parent, the start gate and stacked branches.
-- [Pull requests](pull-requests.md): the Pull requests tab, Current reviews, posting a review, CI checks.
+- [Pull requests](pull-requests.md): the Pull requests tab and its Under review part, posting a review, CI checks.
 - [Project instructions](project-instructions.md): free text sent to every agent run of a project.
 - [Memory](memory.md): lessons per agent step, curated from the user's feedback.
 - [Investigations](investigations.md): one-off agent runs on a custom prompt.

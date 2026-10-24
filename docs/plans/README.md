@@ -96,8 +96,8 @@ Loose ends found while building, not planned yet (2026-10-15):
 
 ## Ideas
 
-- [UI/UX review](ui-review.md): quick wins and action hierarchy (steps 1 and 2) built; navigation, board and
-  per-page fixes planned.
+- [UI/UX review](ui-review.md): quick wins, action hierarchy and navigation (steps 1 to 3) built; one spec
+  choice per review, board and per-page fixes planned.
 
 - [Prefill steps on GitHub issue import](issue-import-prefill.md)
 - [Show older merged tickets](board-older-merged.md)

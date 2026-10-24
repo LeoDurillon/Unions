@@ -5,9 +5,9 @@ import { useEffect, useRef, useState, type ReactElement, type ReactNode } from '
 
 import { api } from '../lib/api';
 import { currentStep } from '../lib/labels';
-import { ReviewNotionContext } from '../lib/review-notion-context';
-import { ReviewPage } from './review/review-page';
+import { useTicketReview } from '../lib/use-selected-ticket';
 import { TicketPanelHeader } from './ticket-panel-header';
+import { TicketReview } from './ticket-review';
 import {
   latestWorkerTab,
   PanelBody,
@@ -119,23 +119,18 @@ export function TicketPanel({
     query.data ? currentStep(query.data.ticket.phase) : undefined,
     query.data ? latestWorkerTab(query.data) : 'log',
   );
-  const [reviewing, setReviewing] = useState(false);
+  const [reviewing, setReviewing] = useTicketReview();
 
   const detail = query.data;
 
   if (reviewing && detail) {
     return (
-      <ReviewNotionContext.Provider
-        value={detail.ticket.originKind === 'notion' ? detail.ticket.originId : null}
-      >
-        <ReviewPage
-          target={{ kind: 'ticket', ticketId: detail.ticket.id }}
-          title={detail.ticket.title}
-          onClose={() => {
-            setReviewing(false);
-          }}
-        />
-      </ReviewNotionContext.Provider>
+      <TicketReview
+        detail={detail}
+        onClose={() => {
+          setReviewing(false);
+        }}
+      />
     );
   }
 

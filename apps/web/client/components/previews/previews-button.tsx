@@ -2,6 +2,7 @@
 import type { ReactElement } from 'react';
 
 import { useRunningPreviews } from '../../lib/use-running-previews';
+import { SIDE_BADGE, SIDE_ITEM, SIDE_LABEL } from '../sidebar-classes';
 
 function PlayIcon(): ReactElement {
   return (
@@ -25,19 +26,16 @@ export function PreviewsButton({
       aria-current={active ? 'page' : undefined}
       aria-label={count > 0 ? `Previews, ${count} running` : 'Previews'}
       onClick={onOpen}
-      className={`flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition ${
+      title="Previews"
+      className={`${SIDE_ITEM} ${
         active
           ? 'bg-indigo-100 font-medium text-indigo-900 dark:bg-indigo-950 dark:text-indigo-200'
           : 'hover:bg-zinc-200/70 dark:hover:bg-zinc-800'
       }`}
     >
       <PlayIcon />
-      Previews
-      {count > 0 ? (
-        <span className="ml-auto rounded-full bg-emerald-600 px-1.5 text-xs font-semibold text-white">
-          {count}
-        </span>
-      ) : null}
+      <span className={SIDE_LABEL}>Previews</span>
+      {count > 0 ? <span className={`${SIDE_BADGE} bg-emerald-600`}>{count}</span> : null}
     </button>
   );
 }
