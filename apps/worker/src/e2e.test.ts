@@ -35,7 +35,7 @@ const RESOLVED = { services: { web: { image: 'node:22', networks: { default: nul
 let root: string;
 let db: Db;
 let ticketId: number;
-let execs: { command: string; env?: Record<string, string> }[];
+let execs: { command: string; env?: Record<string, string>; user?: string }[];
 let testExit: number;
 let screenshots: string[];
 let resolved: unknown;
@@ -72,7 +72,11 @@ const runtime = {
   ): AsyncGenerator<string, ExecResult> {
     await Promise.resolve();
     const line = command.join(' ');
-    execs.push({ command: line, env: options.env });
+    execs.push({
+      command: line,
+      env: options.env,
+      ...(options.user ? { user: options.user } : {}),
+    });
     if (line.includes('find test-results')) {
       yield* screenshots;
       return { exitCode: 0, stderr: '' };
@@ -152,13 +156,16 @@ test('without an e2e command there is no gate', async () => {
 test('the tests run against the preview, from inside it, after the browser is installed', async () => {
   const result = await e2e();
   expect(result).toMatchObject({ status: 'green', exitCode: 0, tail: '3 passed', screenshots: 0 });
-  const [router, install, tests] = execs;
+  const [router, hosts, install, tests] = execs;
   // The container answers at the preview's public address, routed to the service by host name.
   const host = `t${ticketId}.union.localhost`;
   expect(JSON.parse(router?.env?.UNION_FORWARDS ?? '{}')).toEqual({
     port: 8080,
     hosts: { [host]: { service: 'web', port: 3000 } },
   });
+  // Its name resolves there for Node too, as root: the agent cannot write `/etc/hosts`.
+  expect(hosts).toMatchObject({ user: 'root', env: { UNION_HOSTS: host } });
+  expect(hosts?.command).toContain('/etc/hosts');
   expect(install?.command).toContain('playwright install chromium');
   expect(tests).toEqual({
     command: 'sh -lc { npx playwright test\n} 2>&1',

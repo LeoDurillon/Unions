@@ -203,7 +203,10 @@
   `variables.ts` writes them to Union's env file (`/union/preview.env`, written in the compose helper through
   `HelperSpec.files`, never in the workspace), which every service reads (`env_file`); the file kept for the panel
   lists them in a comment and shows secrets interpolated by the repository's file as `${NAME}`, never a value. `network.ts` puts the ticket's container on its preview's networks
-  (after a start, on provisioning) and takes it off before `down`.
+  (after a start, on provisioning) and takes it off before `down`. `host-routes.ts` makes the preview's public
+  addresses answer in that container: a router on their port, and their names in its `/etc/hosts` (written as
+  root, lines marked `# union-preview`), since Node's resolver, unlike a browser's, does not take `*.localhost`
+  for the container itself.
 - Previews of pull requests under review (`docs/plans/review-previews.md`): the preview code takes a
   `WorkspaceOwner` (`{ ticketId }` or `{ reviewId }`). A review's preview runs as `union-r<id>` at
   `r<id>.union.localhost`, from the workspace of its own container `union-r<id>` (`review-checkout.ts`): created on its
@@ -270,7 +273,8 @@
   findings and request changes only for open or new blocking ones. Changes asked at the review go to the implementer through the `thenRun`
   chain in `states.ts`; `revision.ts` hands it the review's feedback. `runResumable` (agent.ts) restarts in a fresh
   session when a resumed one is gone (rebuilt HOME volume).
-- `provision.ts` creates a ticket's container, seeds credentials, and clones the repo on the host with the
+- `provision.ts` creates a ticket's container (a stopped one from an older agent image is created again from
+  the current one, on the same volumes), seeds credentials, and clones the repo on the host with the
   project's token, resetting `origin` to the token-free URL before copying it in; `agent.ts` runs
   `claude -p` in it and parses stream-json; `prompts.ts` builds the step prompts (for the implementer's fresh
   session and the final review, with the `# Flow` note after the job when the ticket's flow skipped planning

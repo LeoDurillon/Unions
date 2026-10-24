@@ -11,9 +11,33 @@ import {
 } from '@union/core';
 import { eq } from 'drizzle-orm';
 
+import { mustRunIn } from '../container-exec';
 import { ensureHostRouter, type HostRoutes } from './forwarder';
 
 const HTTP_PORT = 80;
+
+/**
+ * Replaces the lines Union added to `/etc/hosts` with the preview's hosts. Docker mounts the file,
+ * so it is rewritten in place rather than moved.
+ */
+const WRITE_HOSTS = `grep -v ' # union-preview$' /etc/hosts > /tmp/union-hosts.etc
+for host in $UNION_HOSTS; do echo "127.0.0.1 $host # union-preview" >> /tmp/union-hosts.etc; done
+cat /tmp/union-hosts.etc > /etc/hosts && rm /tmp/union-hosts.etc`;
+
+/**
+ * Browsers take `*.localhost` for the container itself, but Node's resolver does not: without
+ * these lines, a test's API calls (Playwright's `request`) cannot reach the preview's addresses.
+ */
+async function resolveHosts(
+  runtime: ContainerRuntime,
+  container: string,
+  routes: HostRoutes,
+): Promise<void> {
+  await mustRunIn(runtime, container, ['sh', '-c', WRITE_HOSTS], {
+    user: 'root',
+    env: { UNION_HOSTS: Object.keys(routes.hosts).join(' ') },
+  });
+}
 
 /** Each public address's host to its service and port; null when the preview exposes nothing. */
 export function previewRoutes(
@@ -57,8 +81,10 @@ export async function routeToPreview(
   if (!routes) {
     return;
   }
+  const container = `union-${ownerKey(owner)}`;
   try {
-    await ensureHostRouter(runtime, `union-${ownerKey(owner)}`, routes);
+    await ensureHostRouter(runtime, container, routes);
+    await resolveHosts(runtime, container, routes);
   } catch {
     // The container is not running.
   }

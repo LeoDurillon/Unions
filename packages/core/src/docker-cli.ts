@@ -77,10 +77,33 @@ async function* stream(
   return { exitCode: await exited, stderr };
 }
 
+/**
+ * Whether the container exists and is kept. A stopped one built from an older agent image is
+ * removed so it is created again from the current one: its state is all in its volumes.
+ */
+async function keepExisting(spec: TicketContainerSpec): Promise<boolean> {
+  const existing = await run([
+    'container',
+    'inspect',
+    '--format',
+    '{{.Image}} {{.State.Running}}',
+    spec.name,
+  ]);
+  if (existing.code !== 0) {
+    return false;
+  }
+  const [image, running] = existing.stdout.trim().split(' ');
+  const current = await run(['image', 'inspect', '--format', '{{.Id}}', spec.image]);
+  if (running === 'true' || current.code !== 0 || current.stdout.trim() === image) {
+    return true;
+  }
+  await ok(['rm', spec.name]);
+  return false;
+}
+
 export class DockerCli implements ContainerRuntime {
   async create(spec: TicketContainerSpec): Promise<void> {
-    const existing = await run(['container', 'inspect', spec.name]);
-    if (existing.code === 0) {
+    if (await keepExisting(spec)) {
       return;
     }
     await ok(['volume', 'create', spec.homeVolume]);
@@ -134,6 +157,7 @@ export class DockerCli implements ContainerRuntime {
       'exec',
       '-i',
       ...(options.cwd ? ['-w', options.cwd] : []),
+      ...(options.user ? ['-u', options.user] : []),
       ...env,
       name,
       ...command,

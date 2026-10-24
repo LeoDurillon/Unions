@@ -14,6 +14,8 @@ export type ExecOptions = {
   stdin?: string;
   env?: Record<string, string>;
   signal?: AbortSignal;
+  /** The image's user when absent; `root` only for what the agent must not change itself. */
+  user?: string;
 };
 
 export type ExecResult = { exitCode: number; stderr: string };
@@ -33,7 +35,10 @@ export type HelperSpec = {
 };
 
 export type ContainerRuntime = {
-  /** Creates volumes and a stopped container; idempotent. */
+  /**
+   * Creates volumes and a stopped container; idempotent. A stopped container from an older image is
+   * created again from the current one, on the same volumes.
+   */
   create(spec: TicketContainerSpec): Promise<void>;
   start(name: string): Promise<void>;
   stop(name: string): Promise<void>;
