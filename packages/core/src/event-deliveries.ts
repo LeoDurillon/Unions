@@ -196,7 +196,7 @@ export function backfillNotionPages(db: Db): number {
     .from(schema.tickets)
     .where(
       and(
-        isNull(schema.tickets.notionPageId),
+        isNull(schema.tickets.originKind),
         isNotNull(schema.tickets.body),
         like(schema.tickets.body, '%Imported from Notion: %'),
       ),
@@ -208,7 +208,7 @@ export function backfillNotionPages(db: Db): number {
     const pageId = url ? parseNotionId(url) : null;
     if (pageId) {
       db.update(schema.tickets)
-        .set({ notionPageId: pageId })
+        .set({ originKind: 'notion', originId: pageId, originUrl: url })
         .where(eq(schema.tickets.id, ticket.id))
         .run();
       linked += 1;

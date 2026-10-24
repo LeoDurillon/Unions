@@ -110,7 +110,7 @@ function applicable(
   action: EventAction,
 ): { tickets: TicketSummary[]; none: string } {
   if (action.kind === 'notion_property') {
-    const linked = tickets.filter((ticket) => ticket.notionPageId !== null);
+    const linked = tickets.filter((ticket) => ticket.originKind === 'notion');
     return { tickets: linked, none: 'No ticket imported from Notion to try it on yet.' };
   }
   if (action.kind === 'union_notification') {

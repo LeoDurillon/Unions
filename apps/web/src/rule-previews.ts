@@ -26,7 +26,8 @@ function notionPreview(
   ticket: Ticket,
   action: NotionPropertyAction,
 ): RulePreview {
-  if (!ticket.notionPageId) {
+  const pageId = ticket.originKind === 'notion' ? ticket.originId : null;
+  if (!pageId) {
     return { ok: false, error: 'This ticket was not imported from Notion' };
   }
   const properties = notionSchemaOf(db, project.id)?.properties ?? [];
@@ -36,7 +37,7 @@ function notionPreview(
     : {
         ok: true,
         kind: 'notion_property',
-        pageId: ticket.notionPageId,
+        pageId,
         properties: sets.sets.map(({ property, text, value }) => ({
           name: property.name,
           text,

@@ -4,7 +4,7 @@ import { beforeEach, expect, test } from 'bun:test';
 import { createDb, migrateDb, type Db } from './db';
 import type { NotionValue } from './event-actions';
 import { checkedNotionAction, notionSets, notionSetsText } from './event-notion-action';
-import { storeNotionSchema } from './event-rules';
+import { saveNotionConnection, storeNotionSchema } from './integrations/notion-integration';
 import type { NotionProperty } from './notion-api';
 import * as schema from './tables';
 
@@ -29,7 +29,8 @@ beforeEach(() => {
     .values({ owner: 'acme', repo: 'shop', config: { baseBranch: 'main' } })
     .returning()
     .get().id;
-  storeNotionSchema(db, projectId, 'ds', { title: 'Roadmap', properties: PROPERTIES });
+  saveNotionConnection(db, projectId, { token: 'ntn', dataSourceId: 'ds' });
+  storeNotionSchema(db, projectId, { title: 'Roadmap', properties: PROPERTIES });
 });
 
 function check(values: unknown): unknown {

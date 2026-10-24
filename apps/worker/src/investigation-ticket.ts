@@ -14,7 +14,7 @@ import { eq } from 'drizzle-orm';
 
 import { runAgent } from './agent';
 import type { InvestigationDeps } from './investigate';
-import { withNotionPage } from './investigation-ticket-notion';
+import { withTargetItem } from './investigation-ticket-target';
 import type { TicketContainer } from './provision';
 import { RunPool } from './run-pool';
 import { inThrowaway, removeThrowaway } from './throwaway-container';
@@ -111,7 +111,7 @@ function draftTicket(deps: InvestigationDeps, investigation: Investigation): Pro
         return { error: outcome.message };
       }
       const draft = parseTicketDraft(outcome.text, investigation);
-      return withNotionPage(deps.notion ?? new FetchNotionApi(), project, investigation, draft);
+      return withTargetItem(deps.db, deps.notion ?? new FetchNotionApi(), investigation, draft);
     },
     investigation.id,
   );

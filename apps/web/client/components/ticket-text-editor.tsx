@@ -13,7 +13,7 @@ function hintFor(ticket: Ticket): string {
     ticket.issueNumber === null
       ? 'The GitHub issue is created with it.'
       : `Saved to issue #${ticket.issueNumber} on GitHub too.`;
-  const notion = ticket.notionPageId ? ' The Notion page is not changed.' : '';
+  const notion = ticket.originKind === 'notion' ? ' The Notion page is not changed.' : '';
   return `Markdown. ${issue}${notion} Steps already done do not run again.`;
 }
 

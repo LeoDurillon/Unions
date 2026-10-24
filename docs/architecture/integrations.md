@@ -21,8 +21,11 @@
   Notion `IntegrationProvider`, `@union/core` `integrations/`), and the page a pull
   request under review is linked to (any page shared with the integration; `routes/review-notion.ts`, its text read
   fresh each time, mention titles from core's `integrations/notion-mentions.ts`). Uses API version
-  `2026-03-11` and `GET /v1/pages/{id}/markdown`. The secret is stored in `projects.notion_token` and never sent to
-  the browser (`hasNotion` only). Pages outside the configured data source are refused. The page's markdown is cleaned at import (`notionMarkdown` in the browser-safe `@union/core/notion-markdown`: mentions become links titled from Notion, callouts quotes, comment and color spans their text, toggle children are dedented); the ticket panel cleans older imports as it shows them. Creating a ticket from a page downloads its images (Notion's signed links expire within the hour; only Notion's file hosts, raster images, within the attachment limits) into private ticket files referenced as `attachment:<name>`, which the panel shows inline (`?inline`, raster images only).
+  `2026-03-11` and `GET /v1/pages/{id}/markdown`. The secret, data source and columns as read are a row of
+  `integrations` (kind `notion`; `integrations/notion-integration.ts` reads and saves it), never sent to the browser
+  (`hasNotion` only); the settings and project creation routes still keep `projects.notion_token` and
+  `config.notionDataSourceId` in step until the client moves to the integration routes. A ticket's page is its
+  origin (`tickets.origin_kind`, `origin_id`, `origin_url`). Pages outside the configured data source are refused. The page's markdown is cleaned at import (`notionMarkdown` in the browser-safe `@union/core/notion-markdown`: mentions become links titled from Notion, callouts quotes, comment and color spans their text, toggle children are dedented); the ticket panel cleans older imports as it shows them. Creating a ticket from a page downloads its images (Notion's signed links expire within the hour; only Notion's file hosts, raster images, within the attachment limits) into private ticket files referenced as `attachment:<name>`, which the panel shows inline (`?inline`, raster images only).
 - A project reaches GitHub with a token (`projects.github_token`) or an installation of the GitHub App
   (`projects.github_installation_id`; the app's ID and private key are one row of `github_app`). Both are stored in
   plain text (local single-user app, like the original Union) and never reach the browser: responses use

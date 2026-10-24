@@ -1,6 +1,4 @@
 // The Notion action of a rule: the properties it sets, checked against the stored Notion columns, and what it sends.
-import { eq } from 'drizzle-orm';
-
 import type { Db } from './db';
 import type { NotionPropertyAction, NotionValue } from './event-actions';
 import {
@@ -9,26 +7,14 @@ import {
   unknownVariables,
   type TemplateVariable,
 } from './event-rule-types';
+import { notionSchemaOf } from './integrations/notion-integration';
 import type { NotionProperty } from './notion-api';
-import * as schema from './tables';
-
-export type NotionSchema = typeof schema.notionDataSources.$inferSelect;
 
 /** A rule the checks refuse: an unknown trigger or variable, a missing or unsupported property. */
 export class EventRuleError extends Error {}
 
 /** One property a delivery sets: the value as Notion takes it, and as the user reads it. */
 export type NotionSet = { property: NotionProperty; text: string; value: unknown };
-
-export function notionSchemaOf(db: Db, projectId: number): NotionSchema | null {
-  return (
-    db
-      .select()
-      .from(schema.notionDataSources)
-      .where(eq(schema.notionDataSources.projectId, projectId))
-      .get() ?? null
-  );
-}
 
 /** Why one value cannot be saved for `property`, or null. */
 function valueError(property: NotionProperty, value: string): string | null {

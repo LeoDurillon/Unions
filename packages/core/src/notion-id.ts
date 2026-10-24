@@ -10,6 +10,11 @@ function dashed(hex: string): string {
   return hex.toLowerCase().replace(PARTS, '$<a>-$<b>-$<c>-$<d>-$<e>');
 }
 
+/** A page's link from its id: Notion redirects it to the page, whatever its title. */
+export function notionPageUrl(pageId: string): string {
+  return `https://www.notion.so/${pageId.replaceAll('-', '')}`;
+}
+
 /**
  * The Notion ID in a bare ID (with or without dashes) or a notion.so URL; the last ID in the URL path
  * wins, since slugs put it at the end. Null when there is none.

@@ -6,6 +6,7 @@ import {
   finishGrouping,
   latestGrouping,
   migrateDb,
+  saveNotionConnection,
   schema,
   type Db,
   type NotionApi,
@@ -68,11 +69,11 @@ beforeEach(() => {
       owner: 'acme',
       repo: 'shop',
       githubToken: 'ghp_x',
-      notionToken: 'secret_x',
       config: { baseBranch: 'main' },
     })
     .returning()
     .get().id;
+  saveNotionConnection(db, projectId, { token: 'secret_x', dataSourceId: null });
   ticketId = createTicket(db, { projectId, title: 'Campaign', body: 'Ticket text' }).id;
   db.update(schema.tickets)
     .set({ branch: 'feature', prNumber: 7 })
@@ -110,7 +111,7 @@ test("a Notion page with no URL is the one linked to the review, or the ticket's
   const ticketBase = `/api/tickets/${ticketId}/groupings/source`;
   expect((await call('POST', ticketBase, { kind: 'notion' })).status).toBe(400);
   db.update(schema.tickets)
-    .set({ notionPageId: 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee' })
+    .set({ originKind: 'notion', originId: 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee' })
     .where(eq(schema.tickets.id, ticketId))
     .run();
   expect(await (await call('POST', ticketBase, { kind: 'notion' })).json()).toMatchObject({

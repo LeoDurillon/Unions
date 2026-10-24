@@ -1,6 +1,14 @@
 import { beforeEach, expect, test } from 'bun:test';
 
-import { createDb, migrateDb, NotionError, schema, type Db, type NotionApi } from '@union/core';
+import {
+  createDb,
+  migrateDb,
+  NotionError,
+  saveNotionConnection,
+  schema,
+  type Db,
+  type NotionApi,
+} from '@union/core';
 import type { Hono } from 'hono';
 
 import { createApp } from './app';
@@ -52,11 +60,11 @@ beforeEach(() => {
       owner: 'acme',
       repo: 'shop',
       config: { baseBranch: 'main' },
-      notionToken: 'secret',
       githubToken: 'ghp_x',
     })
     .returning()
     .get().id;
+  saveNotionConnection(db, projectId, { token: 'secret', dataSourceId: null });
   db.insert(schema.currentReviews)
     .values({
       projectId,
@@ -112,7 +120,7 @@ test('an unshared page, a bad URL and a project without Notion are refused', asy
   expect((await send('PUT', '', { page: 'not a page' })).status).toBe(400);
   expect(stored()).toEqual({ id: null, title: null });
 
-  db.update(schema.projects).set({ notionToken: null }).run();
+  saveNotionConnection(db, projectId, { token: null, dataSourceId: null });
   expect((await send('PUT', '', { page: urlOf(PAGE) })).status).toBe(409);
 });
 

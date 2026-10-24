@@ -89,7 +89,9 @@ export function TicketPanel({
 
   if (reviewing && detail) {
     return (
-      <ReviewNotionContext.Provider value={detail.ticket.notionPageId}>
+      <ReviewNotionContext.Provider
+        value={detail.ticket.originKind === 'notion' ? detail.ticket.originId : null}
+      >
         <ReviewPage
           target={{ kind: 'ticket', ticketId: detail.ticket.id }}
           title={detail.ticket.title}

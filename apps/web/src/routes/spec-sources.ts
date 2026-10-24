@@ -14,7 +14,7 @@ import type { OnboardingGitHub } from '../github-onboarding';
 import { BAD_REQUEST, CONFLICT, fail, NOT_FOUND } from '../http';
 import { parseIssueRef } from '../pull-request-ref';
 import { guarded } from './github-errors';
-import { guarded as notionGuarded } from './notion';
+import { guarded as notionGuarded, notionTokenOf } from './notion';
 import type { GroupingTarget } from './review-groupings';
 
 /** What the services the specification can come from are read with: all read only. */
@@ -84,13 +84,7 @@ async function notionSpec(
   target: GroupingTarget,
   ref: string,
 ): Promise<SpecText> {
-  const token = target.project.notionToken;
-  if (!token) {
-    throw fail(
-      CONFLICT,
-      'This project is not connected to Notion: set it up in the project settings',
-    );
-  }
+  const token = notionTokenOf(readers.db, target.project.id);
   // No page named: the one linked to the review (or the ticket's).
   const id = ref === '' ? target.notionPageId : parseNotionId(ref);
   if (!id) {

@@ -40,7 +40,7 @@ export function TicketDescription({ ticket }: { ticket: TicketDetail['ticket'] }
       />
     );
   }
-  const body = ticket.notionPageId ? notionMarkdown(ticket.body) : ticket.body;
+  const body = ticket.originKind === 'notion' ? notionMarkdown(ticket.body) : ticket.body;
   return (
     <section className="space-y-2" aria-label="Description">
       <div className="flex items-center justify-between">

@@ -1,6 +1,7 @@
 // The Notion action of a rule: sets properties of the ticket's Notion page (or the reviewed pull request's), in one request.
 import {
   getTicket,
+  integrationOf,
   isEvent,
   notionSchemaOf,
   notionSets,
@@ -46,7 +47,8 @@ function targetOf(
 ): Target | DeliveryOutcome {
   const ticket = delivery.ticketId === null ? null : getTicket(db, delivery.ticketId);
   // A review's own link to a page is the more precise one; else the page the ticket came from.
-  const pageId = reviewPage(db, event) ?? ticket?.notionPageId;
+  const ticketPage = ticket?.originKind === 'notion' ? ticket.originId : null;
+  const pageId = reviewPage(db, event) ?? ticketPage;
   if (!pageId) {
     return {
       status: 'skipped',
@@ -60,7 +62,8 @@ function targetOf(
     .from(schema.projects)
     .where(eq(schema.projects.id, rule.projectId))
     .get();
-  if (!project?.notionToken) {
+  const integration = integrationOf(db, rule.projectId, 'notion');
+  if (!project || !integration) {
     return { status: 'failed', error: 'The project is not connected to Notion' };
   }
   const properties = notionSchemaOf(db, rule.projectId)?.properties ?? [];
@@ -68,7 +71,7 @@ function targetOf(
   if ('error' in sets) {
     return { status: 'failed', error: sets.error };
   }
-  return { token: project.notionToken, pageId, sets: sets.sets };
+  return { token: integration.secret, pageId, sets: sets.sets };
 }
 
 /** Sets the rule's Notion properties on the ticket's page; says why when it cannot. */

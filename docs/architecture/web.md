@@ -111,9 +111,9 @@
   the user in Union (a message template, shown under the
   ticket's title in the bell, kind `rule`), or set one or more properties of the Notion page it was
   imported from (`values: [{ propertyId, value }]`, each property once; `event-notion-action.ts`)
-  (`tickets.notion_page_id`, set by the import; older imports are
+  (`tickets.origin_kind` `notion` and `origin_id`, set by the import; older imports are
   linked from their "Imported from Notion:" line by `backfillNotionPages` at worker start). Notion rules point at
-  properties by id in the stored copy of the data source's columns (`notion_data_sources`, read again on connect
+  properties by id in the stored copy of the data source's columns (`integrations.fields`, read again on connect
   or "Refresh from Notion") and are checked against it on save. Triggers, variables and Notion value shapes are in
   the browser-safe `@union/core/event-rules`; matching and the delivery queue in `event-rules.ts` and
   `event-deliveries.ts`. Rules apply only to events logged after their creation (no replay).

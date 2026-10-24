@@ -1,5 +1,12 @@
 // The API routes for projects: creating, reading and updating them.
-import { parseProjectUrl, schema, type Db, type NotionApi } from '@union/core';
+import {
+  parseProjectUrl,
+  saveNotionConnection,
+  schema,
+  type Db,
+  type NotionApi,
+  type Project,
+} from '@union/core';
 import { Hono } from 'hono';
 
 import { toPublicProject } from '../api-types';
@@ -44,6 +51,40 @@ function credentialsOf(
   return { githubToken: optionalText(body, 'token') ?? null, githubInstallationId: null };
 }
 
+/** The new project, and its Notion integration when the body connects one. */
+function insertProject(
+  db: Db,
+  body: Record<string, unknown>,
+  github: {
+    owner: string;
+    repo: string;
+    githubProjectUrl: string | null;
+    githubProjectNodeId: string;
+  },
+): Project {
+  return db.transaction((tx) => {
+    const project = tx
+      .insert(schema.projects)
+      .values({
+        ...github,
+        ...credentialsOf(db, body),
+        notionToken: optionalText(body, 'notionToken') ?? null,
+        config: {
+          baseBranch: optionalText(body, 'baseBranch') ?? DEFAULT_BRANCH,
+          notionDataSourceId: notionDataSourceOf(body),
+        },
+      })
+      .returning()
+      .get();
+    // The integration is what is read; the project's fields stay in step until the client moves to it.
+    saveNotionConnection(tx, project.id, {
+      token: project.notionToken,
+      dataSourceId: project.config.notionDataSourceId ?? null,
+    });
+    return project;
+  });
+}
+
 export function projectRoutes(db: Db, github: OnboardingGitHub, notion: NotionApi): Hono {
   const routes = new Hono();
 
@@ -80,22 +121,12 @@ export function projectRoutes(db: Db, github: OnboardingGitHub, notion: NotionAp
     if (duplicate) {
       throw fail(CONFLICT, `${owner}/${repo} is already set up`);
     }
-    const project = db
-      .insert(schema.projects)
-      .values({
-        owner,
-        repo,
-        githubProjectUrl: projectUrl ?? null,
-        githubProjectNodeId: nodeId ?? '',
-        ...credentialsOf(db, body),
-        notionToken: optionalText(body, 'notionToken') ?? null,
-        config: {
-          baseBranch: optionalText(body, 'baseBranch') ?? DEFAULT_BRANCH,
-          notionDataSourceId: notionDataSourceOf(body),
-        },
-      })
-      .returning()
-      .get();
+    const project = insertProject(db, body, {
+      owner,
+      repo,
+      githubProjectUrl: projectUrl ?? null,
+      githubProjectNodeId: nodeId ?? '',
+    });
     return c.json(toPublicProject(project), CREATED);
   });
 

@@ -121,7 +121,9 @@ export function investigationRoutes(db: Db): Hono {
     const { context, inNotion } = await readObject(c.req.raw);
     const text = typeof context === 'string' ? context : '';
     return c.json(
-      refusals(CONFLICT, () => requestTicket(db, id, text, { inNotion: inNotion === true })),
+      refusals(CONFLICT, () =>
+        requestTicket(db, id, text, { target: inNotion === true ? 'notion' : null }),
+      ),
       ACCEPTED,
     );
   });

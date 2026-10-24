@@ -5,6 +5,7 @@ import {
   EventRuleError,
   getTicket,
   listRules,
+  notionAccessOf,
   notionSchemaOf,
   recentDeliveries,
   saveRule,
@@ -58,26 +59,25 @@ function list(db: Db, c: Context): Response {
   const body: EventRulesResponse = {
     rules: listRules(db, project.id),
     notion: notionSchemaOf(db, project.id),
-    hasNotion: project.notionToken !== null && Boolean(project.config.notionDataSourceId),
+    hasNotion: notionAccessOf(db, project.id) !== null,
   };
   return c.json(body);
 }
 
-function notionAccess(project: Project): { token: string; dataSourceId: string } {
-  const { notionToken } = project;
-  const { notionDataSourceId } = project.config;
-  if (!notionToken || !notionDataSourceId) {
+function notionAccess(db: Db, projectId: number): { token: string; dataSourceId: string } {
+  const access = notionAccessOf(db, projectId);
+  if (!access) {
     throw fail(CONFLICT, 'Connect the project to Notion first (Notion settings)');
   }
-  return { token: notionToken, dataSourceId: notionDataSourceId };
+  return access;
 }
 
 /** Reads the data source's columns from Notion again and keeps them. */
 async function refreshSchema(db: Db, notion: NotionApi, c: Context): Promise<Response> {
   const project = loadProject(db, c);
-  const { token: notionToken, dataSourceId: notionDataSourceId } = notionAccess(project);
-  const source = await guarded(() => notion.dataSource(notionToken, notionDataSourceId));
-  return c.json(storeNotionSchema(db, project.id, notionDataSourceId, source));
+  const { token, dataSourceId } = notionAccess(db, project.id);
+  const source = await guarded(() => notion.dataSource(token, dataSourceId));
+  return c.json(storeNotionSchema(db, project.id, source));
 }
 
 function deliveries(db: Db, c: Context): Response {
@@ -157,7 +157,7 @@ export function eventRuleRoutes(db: Db, notion: NotionApi): Hono {
   routes.post('/:projectId/notion/schema', (c) => refreshSchema(db, notion, c));
   // The people a person property can be set to: read on demand, never stored.
   routes.get('/:projectId/notion/users', async (c) => {
-    const { token } = notionAccess(loadProject(db, c));
+    const { token } = notionAccess(db, loadProject(db, c).id);
     return c.json(await guarded(() => notion.users(token)));
   });
   return routes;

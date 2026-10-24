@@ -1,4 +1,4 @@
-// Event rules: checking and saving them, the stored Notion columns, and matching events and templates.
+// Event rules: checking and saving them, and matching events and templates.
 import { and, eq } from 'drizzle-orm';
 
 import type { Db } from './db';
@@ -13,7 +13,7 @@ import {
   type EventAction,
 } from './event-actions';
 import { isEvent, type EventPayloads, type StoredEvent } from './event-catalog';
-import { checkedNotionAction, EventRuleError, type NotionSchema } from './event-notion-action';
+import { checkedNotionAction, EventRuleError } from './event-notion-action';
 import {
   BOARD_LABELS,
   isTrigger,
@@ -21,7 +21,6 @@ import {
   type EventTrigger,
   type TemplateVariable,
 } from './event-rule-types';
-import type { NotionDataSource } from './notion-api';
 import { boardStatus } from './states';
 import * as schema from './tables';
 import type { Ticket } from './tickets';
@@ -34,31 +33,6 @@ export type RuleInput = {
   trigger: unknown;
   action: unknown;
 };
-
-/** Keeps the data source's columns as Notion has them now (the rules point at them by id). */
-export function storeNotionSchema(
-  db: Db,
-  projectId: number,
-  dataSourceId: string,
-  source: NotionDataSource,
-): NotionSchema {
-  const values = { dataSourceId, title: source.title, properties: source.properties };
-  return db
-    .insert(schema.notionDataSources)
-    .values({ projectId, ...values })
-    .onConflictDoUpdate({
-      target: schema.notionDataSources.projectId,
-      set: { ...values, fetchedAt: Date.now() },
-    })
-    .returning()
-    .get();
-}
-
-export function forgetNotionSchema(db: Db, projectId: number): void {
-  db.delete(schema.notionDataSources)
-    .where(eq(schema.notionDataSources.projectId, projectId))
-    .run();
-}
 
 type ActionChecks = {
   [K in ActionKind]: (db: Db, projectId: number, record: object) => ActionOf<K>;

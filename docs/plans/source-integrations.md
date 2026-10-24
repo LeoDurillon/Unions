@@ -1,6 +1,6 @@
 # Ticket source integrations
 
-Status: steps 1 and 2 built (branch `source-integrations`, 2026-10-24); steps 3 to 6 planned. Decisions D1 to D7
+Status: steps 1 to 3 built (branch `source-integrations`, 2026-10-24); steps 4 to 6 planned. Decisions D1 to D7
 proposed, to confirm. A refactor: no behaviour change until a
 second kind (Jira, Linear) is added.
 
@@ -140,6 +140,15 @@ Each step ships on its own and leaves Notion working as before; run `bun run che
    `event-actions/notion.ts`, `investigation-ticket-notion.ts`, `event-deliveries.ts` (setting the origin of a
    created page). Web: `ticket-create.ts`, `grouping-targets.ts`, `rule-previews.ts`, `spec-sources.ts`,
    `event-rules.ts`. `createTicket` takes `origin?: { kind; id; url }` instead of `notionPageId`.
+   Built: `integrations/store.ts` (`integrationOf`, `saveIntegration`, which forgets the columns when the config
+   changes, `removeIntegration`, `storeFields`) and `integrations/notion-integration.ts` (`notionAccessOf`,
+   `notionSchemaOf`, `storeNotionSchema`, `saveNotionConnection`). Every server read of the secret, data source,
+   columns, ticket page and investigation target uses them; `forgetNotionSchema` is gone. Until step 4, the settings
+   and creation routes keep their API and write both the integration and the old project fields, so
+   `toPublicProject` and the settings form read the same values. The client reads a ticket's `originKind`,
+   `originId` and `originUrl` already (panel, description, editor hint, rule preview), since new tickets no
+   longer get `notion_page_id`. Reviews keep `current_reviews.notion_page_id`: moving them to an origin pair is left
+   to step 6 or the Notion comments plan.
 4. **Generic routes and the public project (D6).** `routes/integrations.ts`:
    `POST /api/projects/:id/integrations/:kind/verify`, `PUT …/:kind` (secret and config),
    `DELETE …/:kind`, `POST …/:kind/fields` (refresh), `POST …/:kind/import`. Project creation takes

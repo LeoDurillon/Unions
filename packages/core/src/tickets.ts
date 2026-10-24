@@ -4,6 +4,7 @@ import { desc, eq } from 'drizzle-orm';
 import type { Db } from './db';
 import type { NewEvent } from './event-catalog';
 import { resolveFlow } from './flows';
+import type { IntegrationKindName } from './integrations/kinds';
 import * as schema from './schema';
 import type { reviewComments } from './schema-reviews';
 import {
@@ -23,6 +24,7 @@ export type ProjectConfig = schema.ProjectConfig;
 export type Run = typeof schema.runs.$inferSelect;
 export type ReviewComment = typeof reviewComments.$inferSelect;
 export type StepOutput = typeof schema.stepOutputs.$inferSelect;
+export type TicketOrigin = { kind: IntegrationKindName; id: string; url: string };
 type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
 type Executor = Db | Tx;
 
@@ -46,6 +48,16 @@ export function getTicket(db: Executor, id: number): Ticket {
   return ticket;
 }
 
+function originColumns(origin: TicketOrigin | undefined): {
+  originKind: IntegrationKindName | null;
+  originId: string | null;
+  originUrl: string | null;
+} {
+  return origin
+    ? { originKind: origin.kind, originId: origin.id, originUrl: origin.url }
+    : { originKind: null, originId: null, originUrl: null };
+}
+
 /**
  * A new backlog ticket. With `issue` it starts from an existing GitHub issue: the sync then adds
  * that issue to the project board instead of creating one.
@@ -57,8 +69,8 @@ export function createTicket(
     title: string;
     body?: string;
     issue?: { number: number; nodeId: string };
-    /** The Notion page it was imported from. */
-    notionPageId?: string;
+    /** The tracker item it was imported from (a Notion page). */
+    origin?: TicketOrigin;
     /** The steps it runs, checked by the caller; absent: the project's default at start. */
     flow?: PipelineStep[] | null;
   },
@@ -72,7 +84,7 @@ export function createTicket(
         body: input.body ?? '',
         issueNumber: input.issue?.number ?? null,
         issueNodeId: input.issue?.nodeId ?? null,
-        notionPageId: input.notionPageId ?? null,
+        ...originColumns(input.origin),
         flow: input.flow ?? null,
       })
       .returning()

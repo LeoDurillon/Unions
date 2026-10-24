@@ -45,8 +45,8 @@ function ticketTarget(db: Db, c: Context): GroupingTarget {
     owner: { kind: 'ticket', id },
     project: projectOf(db, ticket.projectId),
     prNumber: ticket.prNumber,
-    ticketText: ticket.notionPageId ? notionMarkdown(ticket.body) : ticket.body,
-    notionPageId: ticket.notionPageId,
+    ticketText: ticket.originKind === 'notion' ? notionMarkdown(ticket.body) : ticket.body,
+    notionPageId: ticket.originKind === 'notion' ? ticket.originId : null,
     headSha: snapshot?.headSha ?? null,
     refusal,
     patchOf: (path) =>

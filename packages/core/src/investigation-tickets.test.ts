@@ -1,6 +1,7 @@
 import { beforeEach, expect, test } from 'bun:test';
 
 import { createDb, migrateDb, type Db } from './db';
+import { saveNotionConnection } from './integrations/notion-integration';
 import {
   claimTicketDraft,
   failInterruptedTicketDrafts,
@@ -89,13 +90,19 @@ test('a failure, or a worker that stopped, keeps the error and lets it be asked 
 
 test('a ticket is asked in Notion only when the project has a Notion data source', () => {
   answer();
-  expect(() => requestTicket(db, id, '', { inNotion: true })).toThrow('not connected to a Notion');
-  db.update(schema.projects)
-    .set({ notionToken: 'secret', config: { baseBranch: 'main', notionDataSourceId: 'source' } })
-    .run();
-  expect(requestTicket(db, id, '', { inNotion: true }).ticketInNotion).toBe(true);
+  expect(() => requestTicket(db, id, '', { target: 'notion' })).toThrow(
+    'not connected to a Notion',
+  );
+  const { projectId } = getInvestigation(db, id);
+  saveNotionConnection(db, projectId, { token: 'secret', dataSourceId: 'source' });
+  expect(requestTicket(db, id, '', { target: 'notion' }).ticketTarget).toBe('notion');
   claimTicketDraft(db);
-  finishTicketDraft(db, id, { draft: { title: 'Fix it', body: '' }, notionPageId: 'page-1' });
-  expect(getTicket(db, getInvestigation(db, id).ticketId ?? 0).notionPageId).toBe('page-1');
-  expect(requestTicket(db, id, '').ticketInNotion).toBe(false);
+  const origin = { kind: 'notion' as const, id: 'page-1', url: 'https://www.notion.so/page1' };
+  finishTicketDraft(db, id, { draft: { title: 'Fix it', body: '' }, origin });
+  expect(getTicket(db, getInvestigation(db, id).ticketId ?? 0)).toMatchObject({
+    originKind: 'notion',
+    originId: 'page-1',
+    originUrl: 'https://www.notion.so/page1',
+  });
+  expect(requestTicket(db, id, '').ticketTarget).toBeNull();
 });

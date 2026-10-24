@@ -10,6 +10,7 @@ import {
   recentDeliveries,
   saveRule,
   schema,
+  saveNotionConnection,
   storeNotionSchema,
   type Db,
   type NotionApi,
@@ -38,10 +39,11 @@ beforeEach(() => {
   migrateDb(db);
   projectId = db
     .insert(schema.projects)
-    .values({ owner: 'acme', repo: 'shop', config: { baseBranch: 'main' }, notionToken: 'ntn' })
+    .values({ owner: 'acme', repo: 'shop', config: { baseBranch: 'main' } })
     .returning()
     .get().id;
-  storeNotionSchema(db, projectId, 'ds', {
+  saveNotionConnection(db, projectId, { token: 'ntn', dataSourceId: 'ds' });
+  storeNotionSchema(db, projectId, {
     title: 'Roadmap',
     properties: [
       { id: 'p%3Ar', name: 'PR', type: 'url', options: [] },
@@ -62,7 +64,8 @@ beforeEach(() => {
 });
 
 function openPullRequest(notionPageId?: string): void {
-  const ticket = createTicket(db, { projectId, title: 'Search', notionPageId });
+  const origin = notionPageId ? { kind: 'notion' as const, id: notionPageId, url: '' } : undefined;
+  const ticket = createTicket(db, { projectId, title: 'Search', origin });
   db.update(schema.tickets).set({ prNumber: 7 }).where(eq(schema.tickets.id, ticket.id)).run();
   emitEvent(db, {
     type: 'pull_request_opened',

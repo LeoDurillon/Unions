@@ -1,5 +1,5 @@
 // `POST /api/tickets`: a new ticket; one imported from Notion keeps the page's images as its files.
-import { createTicket, parseNotionId, schema, type Db } from '@union/core';
+import { createTicket, notionPageUrl, parseNotionId, schema, type Db } from '@union/core';
 import type { Context } from 'hono';
 
 import { BAD_REQUEST, CREATED, fail, optionalText, readObject, requireText } from '../http';
@@ -49,7 +49,9 @@ export async function addTicket(db: Db, c: Context): Promise<Response> {
     title: requireText(body, 'title'),
     body: markdown,
     flow,
-    ...(notionPageId ? { notionPageId } : {}),
+    ...(notionPageId
+      ? { origin: { kind: 'notion', id: notionPageId, url: notionPageUrl(notionPageId) } }
+      : {}),
   });
   for (const image of images) {
     // oxlint-disable-next-line no-await-in-loop -- one at a time: each is checked against the ticket's total

@@ -1,7 +1,9 @@
 // The Notion routes: checking the connection and importing a page as a ticket; Notion is only read.
 import {
   integrationKind,
+  integrationOf,
   ItemOutsideSourceError,
+  notionAccessOf,
   NotionError,
   notionProvider,
   schema,
@@ -62,20 +64,27 @@ async function verify(provider: IntegrationProvider, c: Context): Promise<Respon
   return c.json({ dataSourceId, title });
 }
 
+const NOT_CONNECTED = 'This project is not connected to Notion: set it up in the project settings';
+
+/** The project's Notion secret, for reading any page shared with the integration. */
+export function notionTokenOf(db: Db, projectId: number): string {
+  const integration = integrationOf(db, projectId, 'notion');
+  if (!integration) {
+    throw fail(CONFLICT, NOT_CONNECTED);
+  }
+  return integration.secret;
+}
+
 function notionOf(db: Db, projectId: number): { token: string; dataSourceId: string } {
   const project = db.select().from(schema.projects).where(eq(schema.projects.id, projectId)).get();
   if (!project) {
     throw fail(NOT_FOUND, 'Unknown project');
   }
-  const { notionToken } = project;
-  const { notionDataSourceId } = project.config;
-  if (!notionToken || !notionDataSourceId) {
-    throw fail(
-      CONFLICT,
-      'This project is not connected to Notion: set it up in the project settings',
-    );
+  const access = notionAccessOf(db, projectId);
+  if (!access) {
+    throw fail(CONFLICT, NOT_CONNECTED);
   }
-  return { token: notionToken, dataSourceId: notionDataSourceId };
+  return access;
 }
 
 /** Fetches a page of the project's data source as a ticket preview; other pages are refused. */

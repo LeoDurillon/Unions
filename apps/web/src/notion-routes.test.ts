@@ -183,8 +183,8 @@ test('event rules use the stored Notion columns; a ticket from an import preview
       body: imported.body,
       notionPageId: imported.pageId,
     })
-  ).json()) as { id: number; notionPageId: string };
-  expect(ticket.notionPageId).toBe(PAGE);
+  ).json()) as { id: number; originKind: string; originId: string };
+  expect(ticket).toMatchObject({ originKind: 'notion', originId: PAGE });
   db.update(schema.tickets).set({ prNumber: 12 }).run();
   const preview = await call('POST', `${base}/event-rules/preview`, {
     ...rule,

@@ -1,28 +1,9 @@
 // Notion as an `IntegrationProvider`: a thin adapter over `NotionApi`, limited to the integration's data source.
 import type { NotionApi, NotionDataSource } from '../notion-api';
 import { notionMarkdown } from '../notion-markdown';
+import { notionConfigOf } from './notion-integration';
 import { mentionTitles } from './notion-mentions';
 import { ItemOutsideSourceError, type IntegrationProvider, type SourceItem } from './provider';
-
-/** A Notion integration's config: the data source tickets come from. */
-type NotionConfig = { dataSourceId: string };
-
-function isNotionConfig(config: unknown): config is NotionConfig {
-  return (
-    typeof config === 'object' &&
-    config !== null &&
-    'dataSourceId' in config &&
-    typeof config.dataSourceId === 'string' &&
-    config.dataSourceId !== ''
-  );
-}
-
-function notionConfigOf(config: unknown): NotionConfig {
-  if (!isNotionConfig(config)) {
-    throw new Error('This Notion integration has no data source');
-  }
-  return config;
-}
 
 /** Notion writes ids with or without dashes. */
 function sameId(left: string, right: string): boolean {

@@ -1,7 +1,7 @@
 // Updates a project's settings, or deletes the project (GitHub is left untouched).
 import {
-  forgetNotionSchema,
   parseScripts,
+  saveNotionConnection,
   schema,
   ScriptsError,
   type Db,
@@ -236,12 +236,13 @@ export async function updateProject(db: Db, c: Context): Promise<Response> {
     .where(eq(schema.projects.id, project.id))
     .returning()
     .get();
-  // Another data source, or none: its stored columns no longer apply (the next refresh reads them).
-  if (
-    updated.config.notionDataSourceId !== project.config.notionDataSourceId ||
-    updated.notionToken === null
-  ) {
-    forgetNotionSchema(db, project.id);
+  // The integration is what is read; the project's fields stay in step until the client moves to it.
+  // Another data source, or none, forgets the stored columns (the next refresh reads them).
+  if ('notionToken' in body || 'notionDataSourceId' in body) {
+    saveNotionConnection(db, project.id, {
+      token: updated.notionToken,
+      dataSourceId: updated.config.notionDataSourceId ?? null,
+    });
   }
   return c.json(toPublicProject(updated));
 }

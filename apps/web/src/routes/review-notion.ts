@@ -3,20 +3,10 @@ import { mentionTitles, notionMarkdown, schema, type Db, type NotionApi } from '
 import { and, eq, inArray, isNull, ne } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
 
-import { CONFLICT, fail, NOT_FOUND, readObject } from '../http';
+import { fail, NOT_FOUND, readObject } from '../http';
 import type { ReviewNotionLink, ReviewNotionPage } from '../review-notion-types';
-import { guarded, requireNotionId } from './notion';
-import { load, type Project, type Review } from './pr-review-load';
-
-function tokenOf(project: Project): string {
-  if (!project.notionToken) {
-    throw fail(
-      CONFLICT,
-      'This project is not connected to Notion: set it up in the project settings',
-    );
-  }
-  return project.notionToken;
-}
+import { guarded, notionTokenOf, requireNotionId } from './notion';
+import { load, type Review } from './pr-review-load';
 
 function linkedPage(review: Review): string {
   if (!review.notionPageId) {
@@ -28,18 +18,18 @@ function linkedPage(review: Review): string {
 /** Any page the integration can read: reading it is the check that it is shared. */
 async function readLink(
   notion: NotionApi,
-  project: Project,
+  token: string,
   body: Record<string, unknown>,
 ): Promise<ReviewNotionLink> {
   const pageId = requireNotionId(body, 'page', 'page');
-  const page = await guarded(() => notion.page(tokenOf(project), pageId));
+  const page = await guarded(() => notion.page(token, pageId));
   return { pageId: page.id, title: page.title || 'Untitled Notion page', url: page.url };
 }
 
 async function pageText(db: Db, notion: NotionApi, c: Context): Promise<Response> {
   const { review, project } = load(db, c);
   const pageId = linkedPage(review);
-  const token = tokenOf(project);
+  const token = notionTokenOf(db, project.id);
   const page = await guarded(() => notion.page(token, pageId));
   const { markdown, truncated } = await guarded(() => notion.pageMarkdown(token, pageId));
   const titles = await mentionTitles(notion, token, markdown);
@@ -76,7 +66,7 @@ function linkedReviews(db: Db, review: Review, stack: boolean): number[] {
 async function link(db: Db, notion: NotionApi, c: Context): Promise<Response> {
   const { review, project } = load(db, c);
   const body = await readObject(c.req.raw);
-  const found = await readLink(notion, project, body);
+  const found = await readLink(notion, notionTokenOf(db, project.id), body);
   db.update(schema.currentReviews)
     .set({ notionPageId: found.pageId, notionTitle: found.title, notionUrl: found.url })
     .where(inArray(schema.currentReviews.id, linkedReviews(db, review, body.stack === true)))
@@ -101,7 +91,13 @@ export function reviewNotionRoutes(db: Db, notion: NotionApi): Hono {
   const routes = new Hono();
   routes.get('/', (c) => pageText(db, notion, c));
   routes.post('/check', async (c) =>
-    c.json(await readLink(notion, load(db, c).project, await readObject(c.req.raw))),
+    c.json(
+      await readLink(
+        notion,
+        notionTokenOf(db, load(db, c).project.id),
+        await readObject(c.req.raw),
+      ),
+    ),
   );
   routes.put('/', (c) => link(db, notion, c));
   routes.delete('/', (c) => unlink(db, c));

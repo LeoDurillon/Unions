@@ -1,5 +1,5 @@
 // `<review>/notion/suggestions`: the Notion pages the pull request's description links to, offered for linking.
-import { notionUrlsIn, type Db, type NotionApi } from '@union/core';
+import { integrationOf, notionUrlsIn, type Db, type NotionApi } from '@union/core';
 import type { Context } from 'hono';
 
 import type { OnboardingGitHub } from '../github-onboarding';
@@ -17,7 +17,7 @@ export async function notionSuggestions(
   target: { review: Review; project: Project },
 ): Promise<Response> {
   const { review, project } = target;
-  const token = project.notionToken;
+  const token = integrationOf(services.db, project.id, 'notion')?.secret;
   if (!token) {
     return c.json([]);
   }

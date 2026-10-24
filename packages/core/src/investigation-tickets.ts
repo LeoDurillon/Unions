@@ -2,10 +2,12 @@
 import { asc, eq } from 'drizzle-orm';
 
 import type { Db } from './db';
+import { integrationKind, type IntegrationKindName } from './integrations/kinds';
+import { notionAccessOf } from './integrations/notion-integration';
 import { getInvestigation, InvestigationError, type Investigation } from './investigations';
 import * as schema from './schema';
 import { setParent } from './ticket-links';
-import { createTicket, emitEvent } from './tickets';
+import { createTicket, emitEvent, type TicketOrigin } from './tickets';
 
 /**
  * Asks for a ticket written from an answered investigation, with what the user wants it to cover.
@@ -15,10 +17,10 @@ export function requestTicket(
   db: Db,
   id: number,
   context: string,
-  { inNotion = false }: { inNotion?: boolean } = {},
+  { target = null }: { target?: IntegrationKindName | null } = {},
 ): Investigation {
   const current = getInvestigation(db, id);
-  if (inNotion && !hasNotion(db, current.projectId)) {
+  if (target === 'notion' && !notionAccessOf(db, current.projectId)) {
     throw new InvestigationError('The project is not connected to a Notion data source');
   }
   if (current.status !== 'succeeded' || current.result === null) {
@@ -33,7 +35,7 @@ export function requestTicket(
       .set({
         ticketStatus: 'queued',
         ticketContext: context.trim(),
-        ticketInNotion: inNotion,
+        ticketTarget: target,
         ticketError: null,
       })
       .where(eq(schema.investigations.id, id))
@@ -69,13 +71,8 @@ export function claimTicketDraft(db: Db): Investigation | null {
 
 export type TicketDraft = { title: string; body: string };
 
-/** The drafted ticket, its Notion page when one was made, or why the page could not be made. */
-export type DraftedTicket = { draft: TicketDraft; notionPageId?: string; notionError?: string };
-
-function hasNotion(db: Db, projectId: number): boolean {
-  const project = db.select().from(schema.projects).where(eq(schema.projects.id, projectId)).get();
-  return Boolean(project?.notionToken) && Boolean(project?.config.notionDataSourceId);
-}
+/** The drafted ticket, its item in the target tracker when one was made, or why it could not be. */
+export type DraftedTicket = { draft: TicketDraft; origin?: TicketOrigin; originError?: string };
 
 /**
  * A ticket written from an investigation on a ticket builds on that ticket: it depends on it, so it
@@ -115,7 +112,7 @@ export function finishTicketDraft(
       ? createTicket(db, {
           projectId: investigation.projectId,
           ...outcome.draft,
-          notionPageId: outcome.notionPageId,
+          origin: outcome.origin,
         }).id
       : null;
   if (ticketId !== null) {
@@ -126,7 +123,7 @@ export function finishTicketDraft(
       .set(
         ticketId === null
           ? { ticketStatus: 'failed', ticketError: 'error' in outcome ? outcome.error : null }
-          : { ticketStatus: null, ticketError: notionErrorOf(outcome), ticketId },
+          : { ticketStatus: null, ticketError: originErrorOf(investigation, outcome), ticketId },
       )
       .where(eq(schema.investigations.id, id))
       .run();
@@ -143,10 +140,15 @@ export function finishTicketDraft(
   });
 }
 
-function notionErrorOf(outcome: DraftedTicket | { error: string }): string | null {
-  return 'notionError' in outcome && outcome.notionError !== undefined
-    ? `The ticket was created, but not in Notion: ${outcome.notionError}`
-    : null;
+function originErrorOf(
+  investigation: Investigation,
+  outcome: DraftedTicket | { error: string },
+): string | null {
+  if (!('originError' in outcome) || outcome.originError === undefined) {
+    return null;
+  }
+  const { label } = integrationKind(investigation.ticketTarget ?? 'notion');
+  return `The ticket was created, but not in ${label}: ${outcome.originError}`;
 }
 
 /** Ticket drafts left `running` by a worker that stopped mid-way fail; returns their investigations. */

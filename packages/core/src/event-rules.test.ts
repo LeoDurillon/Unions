@@ -3,7 +3,6 @@ import { beforeEach, expect, test } from 'bun:test';
 import { eq } from 'drizzle-orm';
 
 import { createDb, migrateDb, type Db } from './db';
-import type { NotionPropertyAction } from './event-actions';
 import {
   backfillNotionPages,
   finishDelivery,
@@ -13,13 +12,8 @@ import {
 } from './event-deliveries';
 import { EventRuleError, notionSets } from './event-notion-action';
 import { isTrigger, notionPropertyValue, renderTemplate } from './event-rule-types';
-import {
-  type EventRule,
-  saveRule,
-  storeNotionSchema,
-  templateValues,
-  triggerMatches,
-} from './event-rules';
+import { type EventRule, saveRule, templateValues, triggerMatches } from './event-rules';
+import { saveNotionConnection, storeNotionSchema } from './integrations/notion-integration';
 import * as schema from './tables';
 import { createTicket, emitEvent, getTicket } from './tickets';
 
@@ -44,13 +38,14 @@ beforeEach(() => {
     .values({ owner: 'acme', repo: 'shop', config: { baseBranch: 'main' } })
     .returning()
     .get().id;
-  storeNotionSchema(db, projectId, 'ds', { title: 'Roadmap', properties: PROPERTIES });
+  saveNotionConnection(db, projectId, { token: 'ntn', dataSourceId: 'ds' });
+  storeNotionSchema(db, projectId, { title: 'Roadmap', properties: PROPERTIES });
 });
 
 function prRule(
   value = '{pr.url}',
   propertyId = 'p%3Ar',
-): EventRule & { action: NotionPropertyAction } {
+): EventRule & { action: Extract<EventRule['action'], { kind: 'notion_property' }> } {
   const rule = saveRule(db, projectId, {
     name: 'PR link',
     enabled: true,
@@ -166,7 +161,11 @@ test('triggers match the events Union logs', () => {
 });
 
 test('events after a rule is made queue one delivery each; earlier ones never do', () => {
-  const ticket = createTicket(db, { projectId, title: 'Search', notionPageId: 'page-1' });
+  const ticket = createTicket(db, {
+    projectId,
+    title: 'Search',
+    origin: { kind: 'notion', id: 'page-1', url: '' },
+  });
   emitEvent(db, {
     type: 'pull_request_opened',
     ticketId: ticket.id,
@@ -236,7 +235,10 @@ test('tickets imported before the link was stored are linked from their descript
   });
   createTicket(db, { projectId, title: 'Local', body: 'Nothing here.' });
   expect(backfillNotionPages(db)).toBe(1);
-  expect(getTicket(db, imported.id).notionPageId).toBe('01234567-89ab-cdef-0123-456789abcdef');
+  expect(getTicket(db, imported.id)).toMatchObject({
+    originKind: 'notion',
+    originId: '01234567-89ab-cdef-0123-456789abcdef',
+  });
   expect(backfillNotionPages(db)).toBe(0);
 });
 

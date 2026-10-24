@@ -30,12 +30,12 @@ function SourceRow({ detail }: { detail: TicketDetail }): ReactElement {
       ) : (
         'GitHub issue not created yet'
       )}
-      {ticket.notionPageId ? (
+      {ticket.originKind === 'notion' && ticket.originUrl ? (
         <>
           {' · '}
           <a
             className="text-indigo-600 underline dark:text-indigo-400"
-            href={`https://www.notion.so/${ticket.notionPageId.replaceAll('-', '')}`}
+            href={ticket.originUrl}
             target="_blank"
             rel="noreferrer"
           >

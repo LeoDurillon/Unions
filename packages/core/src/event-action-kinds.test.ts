@@ -3,7 +3,8 @@ import { beforeEach, expect, test } from 'bun:test';
 
 import { createDb, migrateDb, type Db } from './db';
 import { EventRuleError } from './event-notion-action';
-import { checkRule, storeNotionSchema } from './event-rules';
+import { checkRule } from './event-rules';
+import { saveNotionConnection, storeNotionSchema } from './integrations/notion-integration';
 import * as schema from './tables';
 
 let db: Db;
@@ -17,7 +18,8 @@ beforeEach(() => {
     .values({ owner: 'o', repo: 'r', githubProjectNodeId: 'P', config: { baseBranch: 'main' } })
     .returning()
     .get().id;
-  storeNotionSchema(db, projectId, 'ds', {
+  saveNotionConnection(db, projectId, { token: 'ntn', dataSourceId: 'ds' });
+  storeNotionSchema(db, projectId, {
     title: 'Roadmap',
     properties: [{ id: 'p%3Ar', name: 'PR', type: 'url', options: [] }],
   });
