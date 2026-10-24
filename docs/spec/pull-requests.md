@@ -24,7 +24,7 @@ whole stack** take the stack as GitHub has it.
 **Open review** opens the same review page as a ticket's (file list, highlighted unified or split diff, comments on
 a line or a block of lines), with four tabs: **Description** (the pull request's description) and **Comments** (its
 review summaries, conversation comments and line threads, read only), both read from GitHub once per opening,
-**Notion** once the review is linked to a page, **Preview** (see [Previews of pull requests under review](preview-environments.md#previews-of-pull-requests-under-review)), then **Diff**. The pull request's head commit and files are read from GitHub when the page opens and
+**Notion** once the review is linked to a page (**Notion (2)** for two), **Preview** (see [Previews of pull requests under review](preview-environments.md#previews-of-pull-requests-under-review)), then **Diff**. The pull request's head commit and files are read from GitHub when the page opens and
 kept on the review (`current_reviews.files`, `head_sha`): comments are checked against those lines, and those
 written on an earlier head read as outdated. **Send review** offers **Comment**, **Approve** and **Request changes**;
 each queues a `submit_pr_review` command with that verdict, and the worker posts one review of that kind on the pull
@@ -34,24 +34,36 @@ and no note; a comment or a request for changes needs one of them. The posted dr
 refuses, for one, an approval or a request for changes on the user's own pull request) leaves them drafts and shows
 GitHub's reason (`submit_status`). A posted review logs `pr_review_posted` with its verdict, on the ticket whose
 pull request it is if there is one; the event rule trigger **You post a review of its pull request** (any verdict, or
-Approved, Changes requested, Commented) waits for it. Its Notion action sets the page the review is linked to, else
+Approved, Changes requested, Commented) waits for it. Its Notion action sets every page the review is linked to, else
 the ticket's page; its other actions need that ticket and skip a pull request without one. Templates can use
 `{review.verdict}` and `{review.url}`.
 
-A review is linked to the Notion page it implements from its **Description** tab: **Notion page** takes a page URL
-or ID, reads it through the project's integration (any page shared with it, not only rows of its data source) and
-shows its title before **Link**; once linked, the row shows the title (a link to Notion), **Change** and **Unlink**.
-The Notion pages the pull request's description links to, and the integration can read, are offered as one-click
-suggestions ("Link _Export to CSV_"), never linked on their own. Each pull request of a stack has its own page; when
-others of its stack have none, **Link the whole stack to this page** gives them this one. The Under review list
-marks a linked review (and a stack's linked members) with **Notion**.
-Only the page's id, title and URL are kept on the review (`current_reviews.notion_*`); the **Notion** tab, after
-Description, reads the page's text from Notion once per opening (cleaned as a ticket's import, mention titles
-resolved, folded when long), with **Refresh**. Nothing is written to Notion or GitHub. The linked page is a spec
-with no URL to paste: **Group by spec** starts on it and reads it when it opens, **Review with agent** starts from
-the description and the page (in a stack, each member's description and each linked page once, linked to the pull
-requests linked to it), and the **Notion page** source of either reads it at once, with "Another page" for a URL.
-A ticket imported from Notion gets the same source for its page (its current text, not the import's).
+A review is linked to the Notion pages it implements (usually one, sometimes several) from its **Description** tab:
+**Notion pages** takes a page URL or ID, reads it through the project's integration (any page shared with it, not
+only rows of its data source) and shows its title before **Link**; each linked page shows its title (a link to
+Notion) and **Unlink**, and **Link another page** adds one. The Notion pages the pull request's description links
+to, and the integration can read, are offered as one-click suggestions ("Link _Export to CSV_"), never linked on
+their own. Each pull request of a stack has its own pages; when others of its stack have none, **Link the whole stack
+to this page** gives them that one. The Under review list marks a linked review (and a stack's linked members) with
+**Notion** (with the count when several). The **Notion** tab, after Description, reads each page's text from Notion
+once per opening (cleaned as a ticket's import, mention titles resolved, folded when long), with **Refresh**.
+Nothing is written to Notion or GitHub.
+
+### Specs
+
+Every review page has one list of **specs**, in the **Specs** bar under its header, read by **Review with agent**,
+**Explain** and **Group by spec** ([plan](../plans/review-specs.md)). It starts, the first time the page reads it,
+with the ticket's text and the Notion page the ticket came from, or the pull request's description; a page linked to
+a pull request is one of its specs (linking adds it, unlinking removes it). **Edit** opens the list: each spec's
+text (read from its source each time, so a page or a description edited meanwhile is read as it is now), **Edit**
+to change it (the edited text is kept on the review, for everyone and every later run, marked "edited"), **Use the
+source** to go back to reading it, **Remove**, and **Add a spec** from the PR description, the ticket, a GitHub issue
+or any Notion page (a page added there is linked like one added from the Description tab). A source that cannot be
+read (a page no longer shared) shows in red and is left out of the runs. The list is kept in `review_specs`; a
+removed starting spec stays removed. **Review with agent** and **Group by spec** list the specs they will read, with
+**Edit the specs**; a stack's agent review reads every member's specs, each linked to its pull request, a page
+linked to several members once, linked to all of them. Group by spec reads them as one text, each a titled section,
+so its parts can come from any of them.
 
 ### Explain
 
@@ -69,8 +81,7 @@ found in a spec that was sent, and a doc only when its path is in the checkout; 
 **Copy as comment** opens the comment editor on the lines with the answer quoted, nothing sent. Older explanations
 are folded below the newest; one asked on another commit is **Outdated**, with **Explain again**.
 
-The specs are those of **Review with agent**: its last run's, else the defaults (the ticket's text, or the PR's
-description and linked Notion page). The agent is `review_explain` in Union settings (Haiku by default, read-only
+The specs are the review's (its **Specs** bar). The agent is `review_explain` in Union settings (Haiku by default, read-only
 tools and git reads). A ticket's runs in its own container, refused while the ticket runs; a pull request's in a
 throwaway container cloned at the reviewed commit. Runs share the run slots, one per review at a time. Each Explain
 is one agent run on the user's Claude usage; nothing is written to GitHub or Notion.

@@ -13,6 +13,7 @@ import {
   type GroupingResult,
   type Project,
   type ReviewGrouping,
+  type SpecEntry,
   type SpecSource,
 } from '@union/core';
 import { Hono, type Context } from 'hono';
@@ -30,8 +31,8 @@ export type GroupingTarget = {
   prNumber: number | null;
   /** The ticket's own text, for a ticket's review. */
   ticketText: string | null;
-  /** The Notion page linked to the review, or the ticket's page: read when no other page is named. */
-  notionPageId: string | null;
+  /** What the review's spec list starts with (`review_specs`): the ticket's text and page, or the PR's description. */
+  starts: SpecEntry[];
   /** The commit the review shows now: a grouping read at another one is outdated. */
   headSha: string | null;
   /** Why the agent cannot read the change now; null when it can. */

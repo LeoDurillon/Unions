@@ -45,9 +45,12 @@ function ReviewItem({
           {review.submitStatus === 'sending' ? <Badge tone="blue">posting…</Badge> : null}
           {review.submitStatus === 'failed' ? <Badge tone="red">posting failed</Badge> : null}
           {review.previewStatus === 'running' ? <Badge tone="green">preview running</Badge> : null}
-          {review.notionTitle ? (
-            <Badge tone="neutral" title={`Notion: ${review.notionTitle}`}>
-              Notion
+          {review.notionPages.length > 0 ? (
+            <Badge
+              tone="neutral"
+              title={review.notionPages.map((page) => `Notion: ${page.title}`).join('\n')}
+            >
+              {review.notionPages.length > 1 ? `Notion ${review.notionPages.length}` : 'Notion'}
             </Badge>
           ) : null}
         </p>

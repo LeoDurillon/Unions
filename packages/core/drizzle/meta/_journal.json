@@ -505,6 +505,20 @@
       "when": 1792832070362,
       "tag": "0071_drop_legacy_notion",
       "breakpoints": true
+    },
+    {
+      "idx": 72,
+      "version": "6",
+      "when": 1792840181890,
+      "tag": "0072_review_specs",
+      "breakpoints": true
+    },
+    {
+      "idx": 73,
+      "version": "6",
+      "when": 1792840947419,
+      "tag": "0073_drop_review_notion_columns",
+      "breakpoints": true
     }
   ]
 }

@@ -20,8 +20,8 @@ import type { GroupingTarget } from './review-groupings';
 /** What the services the specification can come from are read with: all read only. */
 export type SpecReaders = { db: Db; github: OnboardingGitHub; notion: NotionApi };
 
-/** A specification as the user checks it before the agent reads it. */
-export type SpecText = { kind: SpecSource; label: string; text: string };
+/** A specification as the user checks it before the agent reads it; `url` where it lives, when it has one. */
+export type SpecText = { kind: SpecSource; label: string; text: string; url?: string };
 
 function githubAuth(
   readers: SpecReaders,
@@ -75,18 +75,22 @@ async function issueSpec(
   if (!issue) {
     throw fail(NOT_FOUND, `${owner}/${repo} has no issue #${number}`);
   }
-  return { kind: 'issue', label: `Issue #${number}: ${issue.title}`, text: issue.body.trim() };
+  return {
+    kind: 'issue',
+    label: `Issue #${number}: ${issue.title}`,
+    text: issue.body.trim(),
+    url: `https://github.com/${owner}/${repo}/issues/${number}`,
+  };
 }
 
-/** Any page the project's integration can read (it only sees the pages shared with it), the linked one by default. */
+/** Any page the project's integration can read (it only sees the pages shared with it). */
 async function notionSpec(
   readers: SpecReaders,
   target: GroupingTarget,
   ref: string,
 ): Promise<SpecText> {
   const token = notionTokenOf(readers.db, target.project.id);
-  // No page named: the one linked to the review (or the ticket's).
-  const id = ref === '' ? target.notionPageId : parseNotionId(ref);
+  const id = parseNotionId(ref);
   if (!id) {
     throw fail(BAD_REQUEST, 'Give a Notion page URL or ID');
   }
@@ -97,6 +101,7 @@ async function notionSpec(
     kind: 'notion',
     label: `Notion: ${page.title || 'Untitled page'}`,
     text: notionMarkdown(markdown, titles).trim(),
+    url: page.url,
   };
 }
 

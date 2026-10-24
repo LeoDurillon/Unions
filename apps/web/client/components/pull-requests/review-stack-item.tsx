@@ -22,7 +22,7 @@ export function ReviewStackItem({
   const posting = stack.some((review) => review.submitStatus === 'sending');
   const failed = stack.some((review) => review.submitStatus === 'failed');
   const previewing = stack.some((review) => review.previewStatus === 'running');
-  const linked = stack.filter((review) => review.notionTitle !== null);
+  const linked = stack.filter((review) => review.notionPages.length > 0);
   return (
     <li className="flex items-start gap-3 border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
       <Badge tone="neutral">stack of {stack.length}</Badge>
@@ -38,7 +38,10 @@ export function ReviewStackItem({
             <Badge
               tone="neutral"
               title={linked
-                .map((review) => `#${review.prNumber}: ${review.notionTitle}`)
+                .map(
+                  (review) =>
+                    `#${review.prNumber}: ${review.notionPages.map((page) => page.title).join(', ')}`,
+                )
                 .join('\n')}
             >
               {linked.length === stack.length

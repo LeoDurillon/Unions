@@ -2,6 +2,7 @@ import { beforeEach, expect, test } from 'bun:test';
 
 import {
   createDb,
+  linkedNotionPages,
   migrateDb,
   NotionError,
   saveNotionConnection,
@@ -91,34 +92,42 @@ function send(
   });
 }
 
-function stored(): Record<string, string | null> {
-  const row = db.select().from(schema.currentReviews).get();
-  return { id: row?.notionPageId ?? null, title: row?.notionTitle ?? null };
+/** The pages linked to PR `number`, by id. */
+function linked(number = 7): string[] {
+  const review = db
+    .select()
+    .from(schema.currentReviews)
+    .all()
+    .find((row) => row.prNumber === number);
+  return review
+    ? linkedNotionPages(db, { kind: 'review', id: review.id }).map((page) => page.id)
+    : [];
 }
 
-test('a page is checked, linked by URL, read with its mentions titled, and unlinked', async () => {
-  expect((await send('GET', '')).status).toBe(404);
+test('pages are checked, linked by URL (several), read with their mentions titled, and unlinked', async () => {
+  expect(await (await send('GET', '')).json()).toEqual([]);
 
   const checked = await send('POST', '/check', { page: urlOf(PAGE) });
   expect(await checked.json()).toEqual({ pageId: PAGE, title: 'Export to CSV', url: urlOf(PAGE) });
-  expect(stored()).toEqual({ id: null, title: null });
+  expect(linked()).toEqual([]);
 
   expect((await send('PUT', '', { page: urlOf(PAGE) })).status).toBe(200);
-  expect(stored()).toEqual({ id: PAGE, title: 'Export to CSV' });
+  expect((await send('PUT', '', { page: MENTIONED })).status).toBe(200);
+  expect(linked()).toEqual([PAGE, MENTIONED]);
 
-  const page = (await (await send('GET', '')).json()) as ReviewNotionPage;
-  expect(page.title).toBe('Export to CSV');
-  expect(page.markdown).toContain('[Data model]');
-  expect(page.truncated).toBe(false);
+  const read = (await (await send('GET', '')).json()) as ReviewNotionPage[];
+  expect(read.map((page) => page.title)).toEqual(['Export to CSV', 'Data model']);
+  expect(read[0]?.markdown).toContain('[Data model]');
+  expect(read[0]?.truncated).toBe(false);
 
-  expect((await send('DELETE', '')).status).toBe(200);
-  expect(stored()).toEqual({ id: null, title: null });
+  expect((await send('DELETE', `/${PAGE}`)).status).toBe(200);
+  expect(linked()).toEqual([MENTIONED]);
 });
 
 test('an unshared page, a bad URL and a project without Notion are refused', async () => {
   expect((await send('PUT', '', { page: urlOf(UNSHARED) })).status).toBe(404);
   expect((await send('PUT', '', { page: 'not a page' })).status).toBe(400);
-  expect(stored()).toEqual({ id: null, title: null });
+  expect(linked()).toEqual([]);
 
   saveNotionConnection(db, projectId, { token: null, dataSourceId: null });
   expect((await send('PUT', '', { page: urlOf(PAGE) })).status).toBe(409);
@@ -141,13 +150,13 @@ function addReview(prNumber: number, headBranch: string, stack: number | null): 
     .run();
 }
 
-function pages(): Record<number, string | null> {
+function pages(): Record<number, string[]> {
   return Object.fromEntries(
     db
       .select()
       .from(schema.currentReviews)
       .all()
-      .map((row) => [row.prNumber, row.notionPageId]),
+      .map((row) => [row.prNumber, linked(row.prNumber)]),
   );
 }
 
@@ -161,7 +170,7 @@ test('linking the whole stack sets the page on its members without one, nowhere 
   expect((await send('PUT', '', { page: MENTIONED }, 8)).status).toBe(200);
 
   expect((await send('PUT', '', { page: PAGE, stack: true })).status).toBe(200);
-  expect(pages()).toEqual({ 7: PAGE, 8: MENTIONED, 9: PAGE, 10: null, 11: null });
+  expect(pages()).toEqual({ 7: [PAGE], 8: [MENTIONED], 9: [PAGE], 10: [], 11: [] });
 });
 
 test("the description's readable Notion pages are suggested, never the linked one", async () => {

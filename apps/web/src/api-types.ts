@@ -4,6 +4,7 @@ import type {
   AgentReviewSpec,
   BoardColumn,
   ContainerRun,
+  LinkedPage,
   LogEntry,
   PrDescription,
   Preview,
@@ -287,6 +288,8 @@ export type PullRequestListItem = {
 export type CurrentReview = Omit<typeof schema.currentReviews.$inferSelect, 'files'> & {
   /** Its preview's state; null when it never had one. */
   previewStatus: Preview['status'] | null;
+  /** The Notion pages linked to it (its `notion` specs). */
+  notionPages: LinkedPage[];
 };
 
 /** The newest 100 pull requests of the filter, and how many there are in all. */

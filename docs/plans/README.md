@@ -5,6 +5,10 @@ and linked.
 
 ## Planned in detail
 
+- [UI/UX review](ui-review.md): quick wins, action hierarchy and navigation (steps 1 to 3) built; board and
+  per-page fixes planned.
+- [One set of specs per review](review-specs.md): a Specs bar read by Review with agent, Explain and Group by
+  spec, saved edits, several Notion pages per pull request. Built (branch `review-specs`).
 - [Container commands](container-commands.md): run a command or saved script in a ticket's environment, send its
   output to the implementer. Phases 1 to 3 built (running, output, giving it to the agent, saved scripts); the preview service target left.
 - [Agent services on localhost](agent-service-ports.md): forward the agent services' published ports to the ticket
@@ -95,9 +99,6 @@ Loose ends found while building, not planned yet (2026-10-15):
 - The e2e "Send to agent" still builds its own revision text; it could use the command-output path.
 
 ## Ideas
-
-- [UI/UX review](ui-review.md): quick wins, action hierarchy and navigation (steps 1 to 3) built; one spec
-  choice per review, board and per-page fixes planned.
 
 - [Prefill steps on GitHub issue import](issue-import-prefill.md)
 - [Show older merged tickets](board-older-merged.md)

@@ -31,13 +31,7 @@ function LastRun({ review }: { review: AgentReviewView | null | undefined }): Re
 }
 
 /** Asks the review agent for draft comments on the change, and shows where it stands. */
-export function AgentReviewButton({
-  target,
-  hasPullRequest,
-}: {
-  target: ReviewTarget;
-  hasPullRequest: boolean;
-}): ReactElement {
+export function AgentReviewButton({ target }: { target: ReviewTarget }): ReactElement {
   const { review, cancel } = useAgentReview(target);
   const [open, setOpen] = useState(false);
   const latest = review.data;
@@ -74,8 +68,6 @@ export function AgentReviewButton({
       {open ? (
         <AgentReviewDialog
           target={target}
-          hasPullRequest={hasPullRequest}
-          last={latest ?? null}
           onClose={() => {
             setOpen(false);
           }}

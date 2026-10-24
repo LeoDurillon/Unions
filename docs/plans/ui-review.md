@@ -1,6 +1,6 @@
 # Plan: UI/UX review
 
-Status: steps 1 to 3 built (2026-10-24), but for one spec choice per review; steps 4 and 5 planned. From a review of every page
+Status: steps 1 to 3 built (2026-10-24); steps 4 and 5 planned. From a review of every page
 of the live instance, light and dark, at 1400, 1024 and 390 px wide.
 
 ## Step 1: quick wins
@@ -49,10 +49,7 @@ of the live instance, light and dark, at 1400, 1024 and 390 px wide.
 - [x] "No GitHub access" as a banner under the project bar, with Set up access.
 - [x] A ticket's review page gets Ticket, Preview and PR tabs (the panel's own views) beside Diff, and opens on
       Diff.
-- [ ] One spec choice per review: left for its own plan. Review with agent and Explain take a list of editable
-      specs, Group by spec takes one; sharing a choice means keeping it on the review (server side). To decide:
-      one list for all three (Group by spec reads them together) or a main spec plus extras; whether editing it
-      in a dialog changes it for the others.
+- [x] One spec choice per review: built as [its own plan](review-specs.md).
 
 ## Step 4: board
 

@@ -1,19 +1,22 @@
-// `<review>/notion`: the Notion page a pull request under review is linked to: its text, linking and unlinking.
-import { mentionTitles, notionMarkdown, schema, type Db, type NotionApi } from '@union/core';
-import { and, eq, inArray, isNull, ne } from 'drizzle-orm';
+// `<review>/notion`: the Notion pages a pull request under review is linked to (its `notion` specs):
+// their text, linking one more, unlinking one.
+import {
+  linkedNotionPages,
+  linkNotionPage,
+  mentionTitles,
+  notionMarkdown,
+  schema,
+  unlinkNotionPage,
+  type Db,
+  type NotionApi,
+} from '@union/core';
+import { and, eq, ne } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
 
-import { fail, NOT_FOUND, readObject } from '../http';
+import { readObject } from '../http';
 import type { ReviewNotionLink, ReviewNotionPage } from '../review-notion-types';
 import { guarded, notionTokenOf, requireNotionId } from './notion';
 import { load, type Review } from './pr-review-load';
-
-function linkedPage(review: Review): string {
-  if (!review.notionPageId) {
-    throw fail(NOT_FOUND, 'No Notion page linked');
-  }
-  return review.notionPageId;
-}
 
 /** Any page the integration can read: reading it is the check that it is shared. */
 async function readLink(
@@ -26,20 +29,32 @@ async function readLink(
   return { pageId: page.id, title: page.title || 'Untitled Notion page', url: page.url };
 }
 
-async function pageText(db: Db, notion: NotionApi, c: Context): Promise<Response> {
-  const { review, project } = load(db, c);
-  const pageId = linkedPage(review);
-  const token = notionTokenOf(db, project.id);
+async function pageText(
+  notion: NotionApi,
+  token: string,
+  pageId: string,
+): Promise<ReviewNotionPage> {
   const page = await guarded(() => notion.page(token, pageId));
   const { markdown, truncated } = await guarded(() => notion.pageMarkdown(token, pageId));
   const titles = await mentionTitles(notion, token, markdown);
-  const result: ReviewNotionPage = {
+  return {
+    pageId,
     title: page.title || 'Untitled Notion page',
     url: page.url,
     markdown: notionMarkdown(markdown, titles).trim(),
     truncated,
   };
-  return c.json(result);
+}
+
+/** Every linked page with its text, in the specs' order. */
+async function pagesText(db: Db, notion: NotionApi, c: Context): Promise<Response> {
+  const { review, project } = load(db, c);
+  const pages = linkedNotionPages(db, { kind: 'review', id: review.id });
+  if (pages.length === 0) {
+    return c.json([]);
+  }
+  const token = notionTokenOf(db, project.id);
+  return c.json(await Promise.all(pages.map((page) => pageText(notion, token, page.id))));
 }
 
 /** The review, and with `stack` the other reviews of its GitHub stack that have no page yet. */
@@ -47,7 +62,7 @@ function linkedReviews(db: Db, review: Review, stack: boolean): number[] {
   if (!stack || review.githubStackNumber === null) {
     return [review.id];
   }
-  const unlinked = db
+  const others = db
     .select({ id: schema.currentReviews.id })
     .from(schema.currentReviews)
     .where(
@@ -55,41 +70,38 @@ function linkedReviews(db: Db, review: Review, stack: boolean): number[] {
         eq(schema.currentReviews.projectId, review.projectId),
         eq(schema.currentReviews.githubStackNumber, review.githubStackNumber),
         ne(schema.currentReviews.id, review.id),
-        isNull(schema.currentReviews.notionPageId),
       ),
     )
-    .all();
-  return [review.id, ...unlinked.map((row) => row.id)];
+    .all()
+    .filter((other) => linkedNotionPages(db, { kind: 'review', id: other.id }).length === 0);
+  return [review.id, ...others.map((other) => other.id)];
 }
 
-/** `{ page }` links this review; `{ page, stack: true }` also the stack's reviews without a page. */
+/** `{ page }` links one more page; `{ page, stack: true }` also to the stack's reviews without a page. */
 async function link(db: Db, notion: NotionApi, c: Context): Promise<Response> {
   const { review, project } = load(db, c);
   const body = await readObject(c.req.raw);
   const found = await readLink(notion, notionTokenOf(db, project.id), body);
-  db.update(schema.currentReviews)
-    .set({ notionPageId: found.pageId, notionTitle: found.title, notionUrl: found.url })
-    .where(inArray(schema.currentReviews.id, linkedReviews(db, review, body.stack === true)))
-    .run();
+  const page = { id: found.pageId, title: found.title, url: found.url };
+  for (const id of linkedReviews(db, review, body.stack === true)) {
+    linkNotionPage(db, { kind: 'review', id }, page);
+  }
   return c.json(found);
 }
 
 function unlink(db: Db, c: Context): Response {
   const { review } = load(db, c);
-  db.update(schema.currentReviews)
-    .set({ notionPageId: null, notionTitle: null, notionUrl: null })
-    .where(eq(schema.currentReviews.id, review.id))
-    .run();
+  unlinkNotionPage(db, { kind: 'review', id: review.id }, c.req.param('pageId') ?? '');
   return c.json({ number: review.prNumber });
 }
 
 /**
- * Under `<review>`: `GET` the page's text, `POST /check` a page before linking, `PUT`, `DELETE`
- * (`/suggestions` is mounted beside, in `review-workspace.ts`).
+ * Under `<review>`: `GET` the linked pages' text, `POST /check` a page before linking, `PUT` links one
+ * more, `DELETE /:pageId` unlinks one (`/suggestions` is mounted beside, in `review-workspace.ts`).
  */
 export function reviewNotionRoutes(db: Db, notion: NotionApi): Hono {
   const routes = new Hono();
-  routes.get('/', (c) => pageText(db, notion, c));
+  routes.get('/', (c) => pagesText(db, notion, c));
   routes.post('/check', async (c) =>
     c.json(
       await readLink(
@@ -100,6 +112,6 @@ export function reviewNotionRoutes(db: Db, notion: NotionApi): Hono {
     ),
   );
   routes.put('/', (c) => link(db, notion, c));
-  routes.delete('/', (c) => unlink(db, c));
+  routes.delete('/:pageId', (c) => unlink(db, c));
   return routes;
 }

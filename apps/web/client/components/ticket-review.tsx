@@ -3,7 +3,6 @@
 import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../src/api-types';
-import { ReviewNotionContext } from '../lib/review-notion-context';
 import { PreviewTab } from './preview-tab';
 import { PullRequestTab } from './pull-request-tab';
 import { ReviewPage, type ReviewSection } from './review/review-page';
@@ -32,14 +31,12 @@ export function TicketReview({
 }): ReactElement {
   const { ticket } = detail;
   return (
-    <ReviewNotionContext.Provider value={ticket.originKind === 'notion' ? ticket.originId : null}>
-      <ReviewPage
-        target={{ kind: 'ticket', ticketId: ticket.id }}
-        title={ticket.title}
-        sections={sectionsOf(detail)}
-        startOn="diff"
-        onClose={onClose}
-      />
-    </ReviewNotionContext.Provider>
+    <ReviewPage
+      target={{ kind: 'ticket', ticketId: ticket.id }}
+      title={ticket.title}
+      sections={sectionsOf(detail)}
+      startOn="diff"
+      onClose={onClose}
+    />
   );
 }

@@ -1,69 +1,47 @@
-// Picks the specification the change is grouped by, shows its text (editable: keep only the part
-// that matters), and starts the agent.
-import type { SpecSource } from '@union/core';
-import { useEffect, useState, type ReactElement } from 'react';
+// Groups the change by the review's specs: they are read together, each a titled section, so the
+// parts can come from any of them; then the agent starts.
+import { groupingLabel, groupingText } from '@union/core/review-spec-lists';
+import type { ReactElement } from 'react';
 
-import { useLinkedNotionPage } from '../../lib/review-notion-context';
 import type { ReviewTarget } from '../../lib/review-target';
 import { useReviewGrouping } from '../../lib/use-review-grouping';
+import { useReviewSpecs } from '../../lib/use-review-specs';
 import { Button, Dialog, ErrorText } from '../ui';
-import { SourcePicker, SpecEditor, SpecLoader, useSpecLoad } from './spec-picker';
+import { SpecSummary } from './spec-summary';
 
-/**
- * Picks the specification the change is grouped by, shows its text (editable: keep only the part
- * that matters), and starts the agent.
- */
+/** Groups the change by the review's specs, read together; then the agent starts. */
 export function GroupBySpecDialog({
   target,
-  sources,
   open,
   onClose,
 }: {
   target: ReviewTarget;
-  sources: SpecSource[];
   open: boolean;
   onClose: () => void;
 }): ReactElement {
-  // A page linked to the pull request is the user saying "this is the spec": read it at once.
-  const startOnNotion = useLinkedNotionPage() !== null && target.kind === 'pull-request';
-  const [kind, setKind] = useState<SpecSource>(startOnNotion ? 'notion' : (sources[0] ?? 'issue'));
-  const [spec, setSpec] = useState<{ label: string; text: string } | null>(null);
+  const specs = useReviewSpecs(target).active;
   const { start } = useReviewGrouping(target);
-  const load = useSpecLoad(target, setSpec);
-  const { mutate } = load;
-  useEffect(() => {
-    if (startOnNotion) {
-      mutate({ kind: 'notion', ref: '' });
-    }
-  }, [startOnNotion, mutate]);
-  const ready = spec !== null && spec.text.trim() !== '';
+  const first = specs?.[0];
   return (
     <Dialog open={open} onClose={onClose} title="Group the change by spec" wide>
       <div className="space-y-4">
         <p className="text-sm text-zinc-500">
-          An agent reads this specification and the change, and groups the changed files by the part
-          of the spec they implement. It runs once, when you start it.
+          An agent reads these specs and the change, and groups the changed files by the part of the
+          specs they implement. It runs once, when you start it.
         </p>
-        <SourcePicker
-          sources={sources}
-          kind={kind}
-          onPick={(next) => {
-            setKind(next);
-            setSpec(null);
-            load.reset();
-          }}
-        />
-        <SpecLoader key={kind} kind={kind} loaded={spec !== null} load={load} />
-        {spec ? <SpecEditor spec={spec} onChange={setSpec} /> : null}
+        <SpecSummary specs={specs} onEdit={onClose} />
         <ErrorText error={start.error} />
         <div className="flex justify-end gap-2">
           <Button onClick={onClose}>Cancel</Button>
           <Button
             variant="primary"
-            disabled={!ready || start.isPending}
+            disabled={!specs || !first || start.isPending}
             onClick={() => {
-              if (spec) {
-                start.mutate({ kind, label: spec.label, spec: spec.text }, { onSuccess: onClose });
+              if (specs && first) {
+                start.mutate(
+                  { kind: first.kind, label: groupingLabel(specs), spec: groupingText(specs) },
+                  { onSuccess: onClose },
+                );
               }
             }}
           >

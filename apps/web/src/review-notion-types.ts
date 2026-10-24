@@ -1,7 +1,8 @@
-// What a pull request under review's Notion tab reads: its linked page, with the text as read now.
+// What a pull request under review's Notion tab reads: its linked pages, with their text as read now.
 
-/** The linked page, its text cleaned as a ticket's imported description is. */
+/** A linked page, its text cleaned as a ticket's imported description is. */
 export type ReviewNotionPage = {
+  pageId: string;
   title: string;
   url: string;
   markdown: string;

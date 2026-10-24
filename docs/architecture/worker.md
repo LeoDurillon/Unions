@@ -121,7 +121,7 @@
   `createPage`), the ticket's origin set to the new item.
 - `event-dispatcher.ts`: follows the `events` log (cursor in `event_cursors`), queues one `event_deliveries` row
   per matching rule and event (unique), and hands each due one to the target of its action's kind
-  (`event-actions/`: `notion.ts` sets the rule's Notion properties in one `updatePage`, all or none, `github-comment.ts` comments on the issue or the PR with
+  (`event-actions/`: `notion.ts` sets the rule's Notion properties in one `updatePage` per page (a posted review's linked pages, else the ticket's), all or none, `github-comment.ts` comments on the issue or the PR with
   the project's GitHub client, `github-pull-request.ts` makes a rule's changes to the PR in order (each can be
   done again harmlessly: the description section sits between `<!-- union-rule:<id> -->` marks and is replaced, so
   a retry redoes the whole delivery; a refusal fails it and says what was done before), `github-project-fields.ts` sets fields of the issue's

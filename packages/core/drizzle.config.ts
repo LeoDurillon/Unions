@@ -23,6 +23,7 @@ export default defineConfig({
     './src/schema-refused-commits.ts',
     './src/schema-review-explanations.ts',
     './src/schema-review-groupings.ts',
+    './src/schema-review-specs.ts',
     './src/schema-reviews.ts',
     './src/schema-ticket-slices.ts',
     './src/schema-union-update.ts',

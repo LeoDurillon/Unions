@@ -45,13 +45,6 @@ export const currentReviews = sqliteTable(
     submitStatus: text('submit_status', { enum: ['sending', 'failed'] }),
     submitError: text('submit_error'),
     /**
-     * The Notion page the pull request implements, linked by the user. Its title and URL are a
-     * snapshot for the tab label and the link; its text is read fresh each time.
-     */
-    notionPageId: text('notion_page_id'),
-    notionTitle: text('notion_title'),
-    notionUrl: text('notion_url'),
-    /**
      * The GitHub stack the pull request is in, and its place there from the bottom (0), as last
      * read; null when it is in none.
      */

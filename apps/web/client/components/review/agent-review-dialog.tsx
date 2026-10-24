@@ -1,15 +1,15 @@
-// Review with agent: the specs the change is checked against (the last run's, else the ticket's text or the PR's descriptions and linked Notion pages), for one change or a whole stack, then the start.
+// Review with agent: the review's specs (a stack's from each of its pull requests), the scope (this
+// pull request or the whole stack), and the start.
 import type { AgentReviewSpec } from '@union/core';
 import { useState, type ReactElement } from 'react';
 
-import type { AgentReviewView } from '../../../src/api-types';
 import { useReviewStack, type StackPull } from '../../lib/review-stack';
 import type { ReviewTarget } from '../../lib/review-target';
-import { useDefaultSpecs, useStackDefaultSpecs } from '../../lib/use-default-specs';
+import { useAgentReview } from '../../lib/use-agent-review';
+import { useReviewSpecs, useStackSpecs } from '../../lib/use-review-specs';
 import { Segmented } from '../choice';
-import { Dialog } from '../ui';
-import { specSources } from './spec-picker';
-import { SpecsForm } from './specs-form';
+import { Button, Dialog, ErrorText } from '../ui';
+import { SpecSummary } from './spec-summary';
 
 type Scope = 'stack' | 'one';
 
@@ -37,60 +37,55 @@ function ScopePicker({
   );
 }
 
-/** The specs to start from: the last run's when it reviewed the same scope, else the defaults. */
-function useInitialSpecs(
+/** The specs the run reads: this review's, or every member's of the stack. */
+function useScopeSpecs(
   target: ReviewTarget,
-  last: AgentReviewView | null,
   stack: StackPull[] | null,
-): { initial: (scope: Scope) => AgentReviewSpec[] | null; reading: (scope: Scope) => string } {
-  const lastScope: Scope = last?.stack ? 'stack' : 'one';
-  const lastSpecs = last?.specs ?? null;
+  scope: Scope,
+): AgentReviewSpec[] | null {
+  const one = useReviewSpecs(target).active;
   const projectId = target.kind === 'pull-request' ? target.projectId : 0;
-  const one = useDefaultSpecs(target, !(lastScope === 'one' && lastSpecs));
-  const whole = useStackDefaultSpecs(projectId, stack, !(lastScope === 'stack' && lastSpecs));
-  const defaults = (scope: Scope): typeof one => (scope === 'stack' ? whole : one);
-  return {
-    initial: (scope) => (scope === lastScope && lastSpecs ? lastSpecs : defaults(scope).specs),
-    reading: (scope) => defaults(scope).reading,
-  };
+  const numbers = (stack ?? []).map((pull) => pull.number);
+  const whole = useStackSpecs(projectId, numbers, scope === 'stack');
+  return scope === 'stack' ? whole : one;
 }
 
 export function AgentReviewDialog({
   target,
-  hasPullRequest,
-  last,
   onClose,
 }: {
   target: ReviewTarget;
-  hasPullRequest: boolean;
-  /** The last run: the dialog starts from its specs. */
-  last: AgentReviewView | null;
   onClose: () => void;
 }): ReactElement {
   const stack = useReviewStack();
   const [scope, setScope] = useState<Scope>(stack ? 'stack' : 'one');
-  const { initial, reading } = useInitialSpecs(target, last, stack);
-  const specs = initial(scope);
+  const specs = useScopeSpecs(target, stack, scope);
+  const { start } = useAgentReview(target);
+  const numbers = (stack ?? []).map((pull) => pull.number);
   return (
     <Dialog open onClose={onClose} title="Review with agent" wide>
       <div className="space-y-4">
         <p className="text-sm text-zinc-500">
-          The agent reads the change and checks it against these specs. Its comments arrive as
-          drafts on each pull request: nothing is sent until you send the review.
+          The agent reads the change and checks it against the review&apos;s specs. Its comments
+          arrive as drafts on each pull request: nothing is sent until you send the review.
         </p>
         {stack ? <ScopePicker stack={stack} scope={scope} onChange={setScope} /> : null}
-        {specs === null ? (
-          <p className="text-sm text-zinc-500">Reading {reading(scope)}…</p>
-        ) : (
-          <SpecsForm
-            key={scope}
-            target={target}
-            sources={specSources(target, hasPullRequest)}
-            initial={specs}
-            members={scope === 'stack' ? stack : null}
-            onClose={onClose}
-          />
-        )}
+        <SpecSummary specs={specs} onEdit={onClose} />
+        <ErrorText error={start.error} />
+        <div className="flex justify-end gap-2">
+          <Button onClick={onClose}>Cancel</Button>
+          <Button
+            variant="primary"
+            disabled={specs === null || start.isPending}
+            onClick={() => {
+              const body =
+                scope === 'stack' ? { specs: specs ?? [], stack: numbers } : { specs: specs ?? [] };
+              start.mutate(body, { onSuccess: onClose });
+            }}
+          >
+            {scope === 'stack' ? `Review the ${numbers.length} pull requests` : 'Start the review'}
+          </Button>
+        </div>
       </div>
     </Dialog>
   );

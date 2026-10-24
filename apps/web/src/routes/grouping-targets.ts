@@ -1,5 +1,12 @@
-// The grouping and explanation routes, under a ticket and under a pull request under review.
-import { getTicket, notionMarkdown, schema, type Db, type NotionApi } from '@union/core';
+// The grouping, explanation and spec routes, under a ticket and under a pull request under review.
+import {
+  getTicket,
+  notionMarkdown,
+  schema,
+  startingSpecs,
+  type Db,
+  type NotionApi,
+} from '@union/core';
 import { and, desc, eq } from 'drizzle-orm';
 import type { Context, Hono } from 'hono';
 
@@ -7,6 +14,7 @@ import type { OnboardingGitHub } from '../github-onboarding';
 import { fail, NOT_FOUND, requireId } from '../http';
 import { reviewExplanationRoutes } from './review-explanations';
 import { reviewGroupingRoutes, type GroupingTarget } from './review-groupings';
+import { reviewSpecRoutes } from './review-specs';
 
 function projectOf(db: Db, id: number): typeof schema.projects.$inferSelect {
   const project = db.select().from(schema.projects).where(eq(schema.projects.id, id)).get();
@@ -46,7 +54,13 @@ function ticketTarget(db: Db, c: Context): GroupingTarget {
     project: projectOf(db, ticket.projectId),
     prNumber: ticket.prNumber,
     ticketText: ticket.originKind === 'notion' ? notionMarkdown(ticket.body) : ticket.body,
-    notionPageId: ticket.originKind === 'notion' ? ticket.originId : null,
+    starts: startingSpecs({
+      kind: 'ticket',
+      notionOrigin:
+        ticket.originKind === 'notion' && ticket.originId
+          ? { id: ticket.originId, url: ticket.originUrl }
+          : null,
+    }),
     headSha: snapshot?.headSha ?? null,
     refusal,
     patchOf: (path) =>
@@ -84,7 +98,7 @@ function pullRequestTarget(db: Db, c: Context): GroupingTarget {
     project: projectOf(db, projectId),
     prNumber: number,
     ticketText: null,
-    notionPageId: review.notionPageId,
+    starts: startingSpecs({ kind: 'review', prNumber: number }),
     headSha: review.headSha,
     refusal:
       review.files && review.headSha ? null : 'Open the diff first: its files are not read yet.',
@@ -114,4 +128,14 @@ export function ticketExplanationRoutes(db: Db): Hono {
 /** `/api/projects/:projectId/pull-requests/reviews/:number/explanations`. */
 export function pullRequestExplanationRoutes(db: Db): Hono {
   return reviewExplanationRoutes(db, (c) => pullRequestTarget(db, c));
+}
+
+/** `/api/tickets/:id/specs`. */
+export function ticketSpecRoutes(db: Db, github: OnboardingGitHub, notion: NotionApi): Hono {
+  return reviewSpecRoutes({ db, github, notion }, (c) => ticketTarget(db, c));
+}
+
+/** `/api/projects/:projectId/pull-requests/reviews/:number/specs`. */
+export function pullRequestSpecRoutes(db: Db, github: OnboardingGitHub, notion: NotionApi): Hono {
+  return reviewSpecRoutes({ db, github, notion }, (c) => pullRequestTarget(db, c));
 }

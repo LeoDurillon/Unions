@@ -3,7 +3,7 @@
 import type { ReactElement } from 'react';
 
 import type { DiffResponse } from '../../../src/api-types';
-import { hasPullRequest, type ReviewCopy, type ReviewTarget } from '../../lib/review-target';
+import type { ReviewCopy, ReviewTarget } from '../../lib/review-target';
 import type { useCommentMutations } from '../../lib/use-review';
 import { Button } from '../ui';
 import { AgentReviewButton } from './agent-review-button';
@@ -68,7 +68,7 @@ export function ReviewHeader({
         <ImportComments ticketId={target.ticketId} pullRequest={diff.pullRequest} />
       ) : null}
       <ViewToggle view={view} onChange={onView} />
-      <AgentReviewButton target={target} hasPullRequest={hasPullRequest(target, diff)} />
+      <AgentReviewButton target={target} />
       <SendReview
         copy={withRefusal(copy, diff)}
         drafts={drafts}

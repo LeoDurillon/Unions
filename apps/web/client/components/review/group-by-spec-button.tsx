@@ -7,11 +7,10 @@ import type { ReviewTarget } from '../../lib/review-target';
 import { isGrouping, useReviewGrouping } from '../../lib/use-review-grouping';
 import { Button, ErrorText } from '../ui';
 import { GroupBySpecDialog } from './group-by-spec-dialog';
-import { specSources } from './spec-picker';
 
 const ON = 'border-indigo-300 bg-indigo-100 font-medium dark:border-indigo-800 dark:bg-indigo-950';
 const SHOW_TITLE = 'Show the files under the parts of the specification they implement';
-const ASK_TITLE = 'An agent groups the changed files by the parts of a specification you choose';
+const ASK_TITLE = "An agent groups the changed files by the parts of the review's specs";
 const OFF =
   'border-zinc-300 text-zinc-500 hover:text-zinc-900 dark:border-zinc-700 dark:hover:text-zinc-100';
 
@@ -126,15 +125,11 @@ function shownGrouping(latest: GroupingView | null | undefined, on: boolean): Gr
  * grouping to show. With no grouping yet, the switch opens the dialog that asks the agent for one.
  * `whole`: false for a slice or one commit, which the grouping of the whole change does not fit.
  */
-export function useBySpecControl({
-  target,
-  hasPullRequest,
-  whole,
-}: {
-  target: ReviewTarget;
-  hasPullRequest: boolean;
-  whole: boolean;
-}): { toggle: ReactElement | null; status: ReactElement | null; groups: GroupingView | null } {
+export function useBySpecControl({ target, whole }: { target: ReviewTarget; whole: boolean }): {
+  toggle: ReactElement | null;
+  status: ReactElement | null;
+  groups: GroupingView | null;
+} {
   const latest = useReviewGrouping(target).grouping.data;
   const [on, setOn] = useBySpec();
   const [open, setOpen] = useState(false);
@@ -165,7 +160,6 @@ export function useBySpecControl({
       {open ? (
         <GroupBySpecDialog
           target={target}
-          sources={specSources(target, hasPullRequest)}
           open={open}
           onClose={() => {
             setOpen(false);

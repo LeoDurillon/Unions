@@ -1,5 +1,5 @@
 // The specifications an agent review is given: read from the request, and written into the agent's prompt. Pure.
-import { SPEC_SOURCES, type SpecSource } from './schema-review-groupings';
+import { SPEC_SOURCES, type SpecSource } from './spec-source-kinds';
 
 /** A specification as the user sent it; in a stack, `prs` are the pull requests that implement it. */
 export type AgentReviewSpec = { kind: SpecSource; label: string; text: string; prs: number[] };

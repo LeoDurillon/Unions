@@ -1,4 +1,5 @@
-// The Notion page row of a review's Description tab: link a page (its title checked first), change or unlink it.
+// The Notion pages of a review's Description tab: link one or more (each title checked first),
+// unlink one.
 import { useState, type ReactElement } from 'react';
 
 import type { CurrentReview } from '../../../src/api-types';
@@ -78,44 +79,68 @@ function LinkForm({
   );
 }
 
-/** Linked: the page's title (a link to Notion), Change and Unlink; otherwise the field to link one. */
+/** One linked page: its title (a link to Notion), Unlink, and the stack offer. */
+function LinkedPage({
+  review,
+  page,
+  actions,
+}: {
+  review: CurrentReview;
+  page: CurrentReview['notionPages'][number];
+  actions: LinkActions;
+}): ReactElement {
+  return (
+    <li className="flex flex-wrap items-center gap-2 text-sm">
+      {page.url ? <PageLink title={page.title} url={page.url} /> : <span>{page.title}</span>}
+      <Button
+        variant="ghost"
+        disabled={actions.unlink.isPending}
+        onClick={() => {
+          actions.unlink.mutate(page.id);
+        }}
+      >
+        Unlink
+      </Button>
+      <LinkStackButton review={review} pageId={page.id} actions={actions} />
+    </li>
+  );
+}
+
+/**
+ * The linked pages, each with Unlink; Link another page (or, with none, the field at once) with the
+ * description's suggestions. Each page is one of the review's specs.
+ */
 export function ReviewNotionLinkRow({ review }: { review: CurrentReview }): ReactElement {
   const actions = useReviewNotionLink(review);
-  const [changing, setChanging] = useState(false);
-  const { notionTitle, notionUrl } = review;
-  const linked = notionTitle !== null && notionUrl !== null;
+  const [adding, setAdding] = useState(false);
+  const pages = review.notionPages;
   const done = (): void => {
-    setChanging(false);
+    setAdding(false);
     actions.check.reset();
   };
   return (
-    <section className="space-y-2" aria-label="Notion page">
-      <h3 className="text-sm font-semibold">Notion page</h3>
-      {linked && !changing ? (
-        <div className="flex items-center gap-2 text-sm">
-          <PageLink title={notionTitle} url={notionUrl} />
-          <Button
-            onClick={() => {
-              setChanging(true);
-            }}
-          >
-            Change
-          </Button>
-          <Button
-            disabled={actions.unlink.isPending}
-            onClick={() => {
-              actions.unlink.mutate();
-            }}
-          >
-            Unlink
-          </Button>
-          <LinkStackButton review={review} actions={actions} />
-          <ErrorText error={actions.unlink.error ?? actions.link.error} />
-        </div>
+    <section className="space-y-2" aria-label="Notion pages">
+      <h3 className="text-sm font-semibold">Notion pages</h3>
+      {pages.length > 0 ? (
+        <ul className="space-y-1">
+          {pages.map((page) => (
+            <LinkedPage key={page.id} review={review} page={page} actions={actions} />
+          ))}
+        </ul>
+      ) : null}
+      <ErrorText error={actions.unlink.error ?? actions.link.error} />
+      {pages.length > 0 && !adding ? (
+        <Button
+          onClick={() => {
+            setAdding(true);
+          }}
+        >
+          Link another page
+        </Button>
       ) : (
         <>
           <NotionSuggestions review={review} actions={actions} onDone={done} />
-          <LinkForm actions={actions} onDone={done} onCancel={linked ? done : null} />
+          <LinkForm actions={actions} onDone={done} onCancel={pages.length > 0 ? done : null} />
         </>
       )}
     </section>

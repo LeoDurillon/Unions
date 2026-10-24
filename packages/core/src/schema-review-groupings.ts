@@ -4,10 +4,10 @@ import { index, integer, sqliteTable, text, type AnySQLiteColumn } from 'drizzle
 
 import { now, tickets } from './schema';
 import { currentReviews } from './schema-reviews';
+import { SPEC_SOURCES } from './spec-source-kinds';
 
-/** Where the specification came from: the text sent is kept in `spec`, whatever the source. */
-export const SPEC_SOURCES = ['pr', 'ticket', 'issue', 'notion'] as const;
-export type SpecSource = (typeof SPEC_SOURCES)[number];
+// Where the specification came from: the text sent is kept in `spec`, whatever the source.
+export { SPEC_SOURCES, type SpecSource } from './spec-source-kinds';
 
 /** A part of the specification and the changed files that implement it. */
 export type SpecGroup = {

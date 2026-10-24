@@ -97,7 +97,6 @@ export function FileList({
   onSelect,
   part = null,
   target,
-  hasPullRequest = false,
   allowBySpec = true,
 }: {
   files: DiffFileSummary[];
@@ -109,15 +108,13 @@ export function FileList({
   part?: string | null;
   /** Whose grouping by spec to show: its files under their groups when "By spec" is on. */
   target: ReviewTarget;
-  /** The change has a pull request, whose description can be the spec to group by. */
-  hasPullRequest?: boolean;
   /** False on a single commit: the grouping is made for the whole change. */
   allowBySpec?: boolean;
 }): ReactElement {
   const [layout, setLayout] = useLayout();
   // A slice's files are its own change: the grouping is the whole change's.
   const whole = allowBySpec && reviewSlice(target) === null;
-  const bySpec = useBySpecControl({ target, hasPullRequest, whole });
+  const bySpec = useBySpecControl({ target, whole });
   const drafts = draftCounts(comments);
   const shown = files.filter((file) => !file.ignored);
   const ignored = files.filter((file) => file.ignored);

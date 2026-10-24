@@ -3,7 +3,6 @@ import type { ProjectScript } from '@union/core';
 import type { ReactElement } from 'react';
 
 import type { CurrentReview } from '../../../src/api-types';
-import { ReviewNotionContext } from '../../lib/review-notion-context';
 import { ReviewStackContext } from '../../lib/review-stack';
 import { ReviewPage } from '../review/review-page';
 import { prReviewSections } from './pr-review-sections';
@@ -52,33 +51,31 @@ export function StackReview({
       ? stack.map((member) => ({
           number: member.prNumber,
           title: member.title,
-          notionPageId: member.notionPageId,
+          linked: member.notionPages.length > 0,
         }))
       : null;
   return (
     <ReviewStackContext.Provider value={pulls}>
-      <ReviewNotionContext.Provider value={review.notionPageId}>
-        <ReviewPage
-          // Another pull request starts afresh: its first section, no file open.
-          key={review.prNumber}
-          target={target}
-          title={`#${review.prNumber} ${review.title}`}
-          sections={[...prReviewSections(target, review), reviewPreviewSection(target, scripts)]}
-          stackTabs={
-            stack.length > 1 ? (
-              <StackTabs
-                projectId={projectId}
-                stack={stack}
-                current={review.prNumber}
-                onPick={onPick}
-              />
-            ) : undefined
-          }
-          banner={<PostingBanner review={review} />}
-          posting={review.submitStatus === 'sending'}
-          onClose={onClose}
-        />
-      </ReviewNotionContext.Provider>
+      <ReviewPage
+        // Another pull request starts afresh: its first section, no file open.
+        key={review.prNumber}
+        target={target}
+        title={`#${review.prNumber} ${review.title}`}
+        sections={[...prReviewSections(target, review), reviewPreviewSection(target, scripts)]}
+        stackTabs={
+          stack.length > 1 ? (
+            <StackTabs
+              projectId={projectId}
+              stack={stack}
+              current={review.prNumber}
+              onPick={onPick}
+            />
+          ) : undefined
+        }
+        banner={<PostingBanner review={review} />}
+        posting={review.submitStatus === 'sending'}
+        onClose={onClose}
+      />
     </ReviewStackContext.Provider>
   );
 }

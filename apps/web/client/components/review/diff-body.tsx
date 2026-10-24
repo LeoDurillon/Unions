@@ -95,7 +95,6 @@ export function DiffBody({
   error,
   emptyText,
   picker,
-  hasPullRequest,
 }: {
   target: ReviewTarget;
   files: DiffResponse['files'];
@@ -107,8 +106,6 @@ export function DiffBody({
   emptyText: string | null;
   /** A pull request's commit picker, above the files. */
   picker: ReactNode;
-  /** The change has a pull request, whose description can be the spec to group by. */
-  hasPullRequest: boolean;
 }): ReactElement {
   const [picked, setPicked] = useState<Picked | null>(null);
   const shown = useExplain()?.focus ?? null;
@@ -126,7 +123,6 @@ export function DiffBody({
           }}
           part={part}
           target={target}
-          hasPullRequest={hasPullRequest}
         />
       </aside>
       <OpenFileArea

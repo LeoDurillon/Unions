@@ -72,6 +72,8 @@ export * from './project-scripts';
 export * from './review-explanations';
 export * from './explanation-spec-parts';
 export * from './review-groupings';
+export * from './review-spec-lists';
+export * from './review-specs';
 export * from './notion-markdown';
 export * from './notifications';
 export {

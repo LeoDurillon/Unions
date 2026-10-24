@@ -1,7 +1,7 @@
 // `/api/projects/:projectId/pull-requests/reviews`: pull requests the user reviews without a
 // ticket.
 import { schema, type Db, type NotionApi } from '@union/core';
-import { and, desc, eq, getTableColumns, inArray } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
 
 import type { OnboardingGitHub } from '../github-onboarding';
@@ -15,14 +15,15 @@ import {
   requireId,
   requireText,
 } from '../http';
-import { pullRequestExplanationRoutes, pullRequestGroupingRoutes } from './grouping-targets';
-import { prCommitRoutes } from './pr-commits';
+import { listedReviews } from './current-review-list';
+import {
+  pullRequestExplanationRoutes,
+  pullRequestGroupingRoutes,
+  pullRequestSpecRoutes,
+} from './grouping-targets';
 import { prReviewRoutes } from './pr-review';
 import { forgetReviews, removeReviewFiles } from './review-removal';
 import { reviewWorkspaceRoutes } from './review-workspace';
-
-/** Everything but the files, which only the review page needs. */
-const { files: _files, ...LISTED } = getTableColumns(schema.currentReviews);
 
 function projectOf(db: Db, c: Context): number {
   const id = requireId(c.req.param('projectId'), 'project id');
@@ -182,24 +183,14 @@ async function removeStack(db: Db, c: Context): Promise<Response> {
 /** `/api/projects/:projectId/pull-requests/reviews`: pull requests the user reviews without a ticket. */
 export function currentReviewRoutes(db: Db, github: OnboardingGitHub, notion: NotionApi): Hono {
   const routes = new Hono();
-  routes.get('/', (c) =>
-    c.json(
-      db
-        .select({ ...LISTED, previewStatus: schema.previews.status })
-        .from(schema.currentReviews)
-        .leftJoin(schema.previews, eq(schema.previews.reviewId, schema.currentReviews.id))
-        .where(eq(schema.currentReviews.projectId, projectOf(db, c)))
-        .orderBy(desc(schema.currentReviews.id))
-        .all(),
-    ),
-  );
+  routes.get('/', (c) => c.json(listedReviews(db, projectOf(db, c))));
   routes.post('/', (c) => add(db, c));
   routes.post('/stack', (c) => addStack(db, c));
   routes.post('/stack/remove', (c) => removeStack(db, c));
   routes.delete('/:number', (c) => remove(db, c));
   routes.route('/:number/groupings', pullRequestGroupingRoutes(db, github, notion));
   routes.route('/:number/explanations', pullRequestExplanationRoutes(db));
-  routes.route('/:number/commits', prCommitRoutes(db, github));
+  routes.route('/:number/specs', pullRequestSpecRoutes(db, github, notion));
   routes.route('/:number', reviewWorkspaceRoutes(db, { github, notion }));
   routes.route('/:number', prReviewRoutes(db, github));
   return routes;

@@ -2,16 +2,14 @@
 import { useState, type ReactElement, type ReactNode } from 'react';
 
 import type { CommentView } from '../../../src/api-types';
-import { hasPullRequest, reviewCopy, type ReviewTarget } from '../../lib/review-target';
-import { useCommentMutations, useComments, useDiff } from '../../lib/use-review';
-import { useSliceView, type SliceView } from '../../lib/use-slice-view';
+import type { ReviewTarget } from '../../lib/review-target';
+import { useReviewData } from '../../lib/use-review-data';
 import { DiffArea } from './diff-area';
 import { ExplainOff, ExplainProvider } from './explain-context';
-import { ReviewHeader } from './review-header';
+import { ReviewTop } from './review-top';
 import { SliceTabs } from './slice-tabs';
+import { SpecsEditingProvider } from './specs-editing';
 import { useDiffView } from './view-toggle';
-
-type Mutations = ReturnType<typeof useCommentMutations>;
 
 /** A tab shown before the diff (a pull request's description, its comments). */
 export type ReviewSection = { id: string; label: string; content: ReactNode };
@@ -60,41 +58,6 @@ function draftCounts(comments: CommentView[]): { drafts: number; suggestions: nu
   };
 }
 const NO_SECTIONS: ReviewSection[] = [];
-
-/**
- * The diff, the comments and their writes, and the wording for the target. `comments` are all of
- * them (the header counts them); `slices` has what the picked slice of a split ticket shows.
- */
-function useReviewData(
-  target: ReviewTarget,
-  posting: boolean,
-): {
-  diff: ReturnType<typeof useDiff>;
-  comments: CommentView[];
-  slices: SliceView;
-  error: Error | null;
-  mutations: Mutations;
-  copy: ReturnType<typeof reviewCopy>;
-  empty: boolean;
-} {
-  const diff = useDiff(target);
-  const comments = useComments(target, posting);
-  const files = diff.data?.files ?? [];
-  const slices = useSliceView(target, files, comments.data ?? []);
-  return {
-    diff,
-    comments: comments.data ?? [],
-    slices,
-    error: diff.error ?? comments.error ?? slices.error,
-    mutations: useCommentMutations(slices.target),
-    copy: reviewCopy(target),
-    // A slice always has files: none is only its diff still loading.
-    empty:
-      slices.slice === null &&
-      diff.data !== undefined &&
-      (diff.data.snapshot === null || files.length === 0),
-  };
-}
 
 /** The open tab: `startOn`, else the first section, else the diff; `section` is undefined on the diff. */
 function useSectionTab(
@@ -155,7 +118,7 @@ function ReviewPageBody({
   return (
     <ExplainOff off={slices.slice !== null}>
       <div className="fixed inset-0 z-30 flex flex-col bg-zinc-50 dark:bg-zinc-950">
-        <ReviewHeader
+        <ReviewTop
           target={target}
           copy={copy}
           title={title}
@@ -183,7 +146,6 @@ function ReviewPageBody({
             banner={banner}
             error={error}
             emptyText={empty ? copy.empty : null}
-            hasPullRequest={hasPullRequest(target, diff.data)}
           />
         )}
       </div>
@@ -195,7 +157,9 @@ function ReviewPageBody({
 export function ReviewPage(props: Parameters<typeof ReviewPageBody>[0]): ReactElement {
   return (
     <ExplainProvider target={props.target}>
-      <ReviewPageBody {...props} />
+      <SpecsEditingProvider>
+        <ReviewPageBody {...props} />
+      </SpecsEditingProvider>
     </ExplainProvider>
   );
 }

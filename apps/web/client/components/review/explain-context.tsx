@@ -12,9 +12,8 @@ import {
 
 import { fileSelection, hunkSelection, type Selection } from '../../lib/diff-selection';
 import type { ReviewTarget } from '../../lib/review-target';
-import { useAgentReview } from '../../lib/use-agent-review';
-import { useDefaultSpecs } from '../../lib/use-default-specs';
 import { useExplanations } from '../../lib/use-explanations';
+import { useReviewSpecs } from '../../lib/use-review-specs';
 
 const STORAGE_KEY = 'union.review.explain';
 
@@ -25,7 +24,7 @@ export type ExplainState = {
   target: ReviewTarget;
   open: boolean;
   setOpen: (open: boolean) => void;
-  /** The specs of the last Review with agent, else the defaults; null while they are read. */
+  /** The review's specs (its Specs bar); null while they are read. */
   specs: AgentReviewSpec[] | null;
   /** Reads the default specs: called when an editor that can Explain shows. */
   wantSpecs: () => void;
@@ -59,13 +58,6 @@ function remember(open: boolean): void {
   }
 }
 
-/** The specs D1 names: the last agent review's when it had some, else the review's defaults. */
-function useSpecs(target: ReviewTarget, wanted: boolean): AgentReviewSpec[] | null {
-  const last = useAgentReview(target).review.data?.specs ?? null;
-  const defaults = useDefaultSpecs(target, wanted && last === null);
-  return last ?? defaults.specs;
-}
-
 export function ExplainProvider({
   target,
   children,
@@ -76,7 +68,7 @@ export function ExplainProvider({
   const [open, setOpen] = useState(stored);
   const [wanted, setWanted] = useState(open);
   const [focus, setFocus] = useState<ExplainFocus | null>(null);
-  const specs = useSpecs(target, wanted || open);
+  const specs = useReviewSpecs(target, wanted || open).active;
   const { mutate, isPending, error } = useExplanations(target).ask;
   const state = useMemo((): ExplainState => {
     const choose = (next: boolean): void => {

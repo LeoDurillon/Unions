@@ -32,9 +32,9 @@
   onboarding step, rule action fields) live in `components/integrations/<kind>/`.
 - Notion reads, from the web server: verifying a project's integration secret and data source, and importing
   a page of that data source as a ticket (`src/notion.ts` behind `NotionApi`, through the Notion
-  `IntegrationProvider`), and the page a pull
-  request under review is linked to (any page shared with the integration; `routes/review-notion.ts`, its text read
-  fresh each time, mention titles from core's `integrations/notion-mentions.ts`). Uses API version
+  `IntegrationProvider`), the pages a pull
+  request under review is linked to and the review's Notion specs (any page shared with the integration;
+  `routes/review-notion.ts`, `routes/review-specs.ts`, their text read fresh each time, mention titles from core's `integrations/notion-mentions.ts`). Uses API version
   `2026-03-11` and `GET /v1/pages/{id}/markdown`. The secret, data source and columns as read are a row of
   `integrations` (kind `notion`; `integrations/notion-integration.ts` reads and saves it), never sent to the browser.
   (Before `0070_source_integrations` they were `projects.notion_token`, `config.notionDataSourceId` and the table

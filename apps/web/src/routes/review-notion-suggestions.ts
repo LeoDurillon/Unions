@@ -1,5 +1,11 @@
 // `<review>/notion/suggestions`: the Notion pages the pull request's description links to, offered for linking.
-import { integrationOf, notionUrlsIn, type Db, type NotionApi } from '@union/core';
+import {
+  integrationOf,
+  linkedNotionPages,
+  notionUrlsIn,
+  type Db,
+  type NotionApi,
+} from '@union/core';
 import type { Context } from 'hono';
 
 import type { OnboardingGitHub } from '../github-onboarding';
@@ -10,7 +16,7 @@ import { authOf, type Project, type Review } from './pr-review-load';
 /** A description rarely names more; each one is a Notion read. */
 const MAX_SUGGESTIONS = 5;
 
-/** Readable pages only (one not shared with the integration is left out), never the linked one. */
+/** Readable pages only (one not shared with the integration is left out), never a linked one. */
 export async function notionSuggestions(
   c: Context,
   services: { db: Db; github: OnboardingGitHub; notion: NotionApi },
@@ -25,8 +31,11 @@ export async function notionSuggestions(
   const discussion = await guarded(() =>
     services.github.getDiscussion(authOf(services.db, project), repo, review.prNumber),
   );
+  const linked = new Set(
+    linkedNotionPages(services.db, { kind: 'review', id: review.id }).map((page) => page.id),
+  );
   const links = notionUrlsIn(discussion?.description ?? '')
-    .filter((link) => link.id !== review.notionPageId)
+    .filter((link) => !linked.has(link.id))
     .slice(0, MAX_SUGGESTIONS);
   const pages = await Promise.all(
     links.map((link) =>

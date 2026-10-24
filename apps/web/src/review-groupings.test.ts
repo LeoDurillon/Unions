@@ -107,40 +107,6 @@ test('each source reads its text: the PR without Union links, an issue, any Noti
   });
 });
 
-test("a Notion page with no URL is the one linked to the review, or the ticket's", async () => {
-  const ticketBase = `/api/tickets/${ticketId}/groupings/source`;
-  expect((await call('POST', ticketBase, { kind: 'notion' })).status).toBe(400);
-  db.update(schema.tickets)
-    .set({ originKind: 'notion', originId: 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee' })
-    .where(eq(schema.tickets.id, ticketId))
-    .run();
-  expect(await (await call('POST', ticketBase, { kind: 'notion' })).json()).toMatchObject({
-    label: 'Notion: Spec CdeTP',
-  });
-
-  const projectId = db.select().from(schema.projects).get()?.id ?? 1;
-  db.insert(schema.currentReviews)
-    .values({
-      projectId,
-      prNumber: 9,
-      title: 'PR 9',
-      url: 'u',
-      author: 'alice',
-      headBranch: 'b',
-      baseBranch: 'main',
-    })
-    .run();
-  const reviewBase = `/api/projects/${projectId}/pull-requests/reviews/9/groupings/source`;
-  expect((await call('POST', reviewBase, { kind: 'notion', ref: '' })).status).toBe(400);
-  db.update(schema.currentReviews)
-    .set({ notionPageId: 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee' })
-    .run();
-  expect(await (await call('POST', reviewBase, { kind: 'notion', ref: '' })).json()).toMatchObject({
-    kind: 'notion',
-    label: 'Notion: Spec CdeTP',
-  });
-});
-
 test('a grouping is queued with the text as edited, once at a time, and is outdated once the change moves', async () => {
   const base = `/api/tickets/${ticketId}/groupings`;
   const started = await call('POST', base, {

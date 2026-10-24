@@ -1,4 +1,4 @@
-// What the Notion page row offers in one click: the pages the description links to, and the same page for the whole stack.
+// What the Notion pages row offers in one click: the pages the description links to, and a page for the whole stack.
 import type { ReactElement } from 'react';
 
 import type { CurrentReview } from '../../../src/api-types';
@@ -45,16 +45,17 @@ export function NotionSuggestions({
 /** For a review in a stack whose other pull requests have no page: gives them this one too. */
 export function LinkStackButton({
   review,
+  pageId,
   actions,
 }: {
   review: CurrentReview;
+  pageId: string;
   actions: LinkActions;
 }): ReactElement | null {
   const others = (useReviewStack() ?? []).filter(
-    (pull) => pull.number !== review.prNumber && pull.notionPageId === null,
+    (pull) => pull.number !== review.prNumber && !pull.linked,
   );
-  const page = review.notionPageId;
-  if (others.length === 0 || page === null) {
+  if (others.length === 0) {
     return null;
   }
   return (
@@ -62,7 +63,7 @@ export function LinkStackButton({
       disabled={actions.link.isPending}
       title={`Also links ${others.map((pull) => `#${pull.number}`).join(', ')}`}
       onClick={() => {
-        actions.link.mutate({ page, stack: true });
+        actions.link.mutate({ page: pageId, stack: true });
       }}
     >
       Link the whole stack to this page

@@ -50,9 +50,17 @@ function Comments({ target }: { target: ReviewTarget }): ReactElement {
 
 /** The tabs a pull request review shows before its diff; Notion once it is linked to a page. */
 export function prReviewSections(target: ReviewTarget, review: CurrentReview): ReviewSection[] {
-  const notion: ReviewSection[] = review.notionPageId
-    ? [{ id: 'notion', label: 'Notion', content: <ReviewNotionTab review={review} /> }]
-    : [];
+  const count = review.notionPages.length;
+  const notion: ReviewSection[] =
+    count > 0
+      ? [
+          {
+            id: 'notion',
+            label: count > 1 ? `Notion (${count})` : 'Notion',
+            content: <ReviewNotionTab review={review} />,
+          },
+        ]
+      : [];
   return [
     {
       id: 'description',

@@ -4,6 +4,7 @@ import {
   createDb,
   createTicket,
   emitEvent,
+  linkNotionPage,
   migrateDb,
   NotionError,
   queueDeliveries,
@@ -176,7 +177,7 @@ test('one value that cannot be set fails the whole delivery, naming its property
 
 function postReview(
   prNumber: number,
-  notionPageId: string | null,
+  pages: string | string[] | null,
   verdict: 'approve' | 'request_changes',
 ): void {
   const reviewId = db
@@ -189,10 +190,12 @@ function postReview(
       author: 'a',
       headBranch: 'h',
       baseBranch: 'main',
-      notionPageId,
     })
     .returning()
     .get().id;
+  for (const id of pages === null ? [] : [pages].flat()) {
+    linkNotionPage(db, { kind: 'review', id: reviewId }, { id, title: id, url: null });
+  }
   emitEvent(db, {
     type: 'pr_review_posted',
     payload: { reviewId, number: prNumber, url: 'u#r1', verdict },
@@ -218,5 +221,21 @@ test("a posted review sets the review's own Notion page; other verdicts do nothi
   expect(recentDeliveries(db, projectId)[0]).toMatchObject({
     status: 'skipped',
     detail: 'The pull request is not linked to a Notion page',
+  });
+});
+
+test('a posted review sets every Notion page linked to the pull request', async () => {
+  saveRule(db, projectId, {
+    name: 'Approved',
+    enabled: true,
+    trigger: { kind: 'pull_request_reviewed', verdict: 'approve' },
+    action: { kind: 'notion_property', propertyId: 's%3At', value: 'Todo' },
+  });
+  postReview(15, ['page-a', 'page-b'], 'approve');
+  await dispatch();
+  expect(updates.map((update) => update.pageId)).toEqual(['page-a', 'page-b']);
+  expect(recentDeliveries(db, projectId)[0]).toMatchObject({
+    status: 'succeeded',
+    detail: 'Status set to "Todo" on 2 pages',
   });
 });

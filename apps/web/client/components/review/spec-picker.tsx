@@ -1,11 +1,11 @@
-// Where a specification comes from (the PR description, the ticket, an issue, a Notion page, the linked one by default): picking it, reading it, editing its text.
+// Where a specification comes from (the PR description, the ticket, an issue, a Notion page): picking
+// it and reading it.
 import { useMutation } from '@tanstack/react-query';
 import type { SpecSource } from '@union/core';
 import { useState, type ReactElement } from 'react';
 
 import type { SpecText } from '../../../src/routes/spec-sources';
 import { reviewGroupingApi } from '../../lib/review-grouping-api';
-import { useLinkedNotionPage } from '../../lib/review-notion-context';
 import { reviewBase, type ReviewTarget } from '../../lib/review-target';
 import { Segmented } from '../choice';
 import { Button, ErrorText, inputClass } from '../ui';
@@ -56,7 +56,8 @@ export function SourcePicker({
   );
 }
 
-export type SpecDraft = { label: string; text: string };
+/** A source as read: what it says, and the reference it was read from (a page URL, an issue number). */
+export type SpecDraft = SpecText & { ref: string };
 export type Load = ReturnType<
   typeof useMutation<SpecText, Error, { kind: SpecSource; ref: string }>
 >;
@@ -65,13 +66,13 @@ export function useSpecLoad(target: ReviewTarget, onLoaded: (spec: SpecDraft) =>
   return useMutation({
     mutationFn: (next: { kind: SpecSource; ref: string }) =>
       reviewGroupingApi.source(reviewBase(target), next.kind, next.ref),
-    onSuccess: (found) => {
-      onLoaded({ label: found.label, text: found.text });
+    onSuccess: (found, read) => {
+      onLoaded({ ...found, ref: read.ref });
     },
   });
 }
 
-/** A button that reads a source with nothing to name: the PR, the ticket, the linked Notion page. */
+/** A button that reads a source with nothing to name: the PR's description, the ticket's text. */
 function ReadAtOnce({
   kind,
   what,
@@ -131,15 +132,13 @@ function RefField({
   );
 }
 
-/** The ways to read `kind`: a button, a field, or both for a review linked to a Notion page. */
+/** The ways to read `kind`: a button when there is nothing to name, else a field. */
 function Reader({
   kind,
-  linked,
   loaded,
   load,
 }: {
   kind: SpecSource;
-  linked: boolean;
   loaded: boolean;
   load: Load;
 }): ReactElement {
@@ -148,21 +147,10 @@ function Reader({
     const what = `the ${LABELS[kind].toLowerCase()}`;
     return <ReadAtOnce kind={kind} what={what} loaded={loaded} load={load} />;
   }
-  if (kind === 'notion' && linked) {
-    return (
-      <>
-        <ReadAtOnce kind={kind} what="the linked Notion page" loaded={loaded} load={load} />
-        <RefField kind={kind} hint="Another page: its Notion URL" load={load} />
-      </>
-    );
-  }
   return <RefField kind={kind} hint={hint} load={load} />;
 }
 
-/**
- * Reads the chosen source: at once for the PR, the ticket and the review's linked Notion page, from
- * a number or a URL otherwise (another Notion page than the linked one too).
- */
+/** Reads the chosen source: at once for the PR and the ticket, from a number or a URL otherwise. */
 export function SpecLoader({
   kind,
   loaded,
@@ -172,35 +160,10 @@ export function SpecLoader({
   loaded: boolean;
   load: Load;
 }): ReactElement {
-  const linked = useLinkedNotionPage();
   return (
     <>
-      <Reader kind={kind} linked={linked !== null} loaded={loaded} load={load} />
+      <Reader kind={kind} loaded={loaded} load={load} />
       <ErrorText error={load.error} />
     </>
-  );
-}
-
-export function SpecEditor({
-  spec,
-  onChange,
-}: {
-  spec: { label: string; text: string };
-  onChange: (spec: { label: string; text: string }) => void;
-}): ReactElement {
-  return (
-    <label className="block space-y-1">
-      <span className="text-sm font-medium">{spec.label}</span>
-      <textarea
-        className={`${inputClass} h-72 font-mono text-xs`}
-        value={spec.text}
-        onChange={(event) => {
-          onChange({ ...spec, text: event.target.value });
-        }}
-      />
-      <span className="block text-xs text-zinc-500">
-        Edit freely: the agent reads this text as it is when you start.
-      </span>
-    </label>
   );
 }

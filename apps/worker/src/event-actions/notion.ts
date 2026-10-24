@@ -1,8 +1,9 @@
-// The Notion action of a rule: sets properties of the ticket's Notion page (or the reviewed pull request's), in one request.
+// The Notion action of a rule: sets properties of the ticket's Notion page (or the reviewed pull request's linked pages), one request per page.
 import {
   getTicket,
   integrationOf,
   isEvent,
+  linkedNotionPages,
   notionSchemaOf,
   notionSets,
   notionSetsText,
@@ -24,19 +25,29 @@ const SERVER_ERROR = 500;
 /** Notion allows about three requests a second. */
 const PER_TICK = 3;
 
-type Target = { token: string; pageId: string; sets: NotionSet[] };
+type Target = { token: string; pageIds: string[]; sets: NotionSet[] };
 
-/** The Notion page linked to the review a posted review event is about, if any. */
-function reviewPage(db: Db, event: Due['event']): string | null {
+/** The Notion pages linked to the review a posted review event is about (none for other events). */
+function reviewPages(db: Db, event: Due['event']): string[] {
   if (!isEvent(event, 'pr_review_posted')) {
-    return null;
+    return [];
   }
-  const review = db
-    .select({ notionPageId: schema.currentReviews.notionPageId })
-    .from(schema.currentReviews)
-    .where(eq(schema.currentReviews.id, event.payload.reviewId))
-    .get();
-  return review?.notionPageId ?? null;
+  return linkedNotionPages(db, { kind: 'review', id: event.payload.reviewId }).map(
+    (page) => page.id,
+  );
+}
+
+/** A review's own links to pages are the more precise ones; else the page the ticket came from. */
+function pagesOf(
+  db: Db,
+  event: Due['event'],
+  ticket: ReturnType<typeof getTicket> | null,
+): string[] {
+  const linked = reviewPages(db, event);
+  if (linked.length > 0) {
+    return linked;
+  }
+  return ticket?.originKind === 'notion' && ticket.originId ? [ticket.originId] : [];
 }
 
 /** The page and the values a delivery sets, or why it cannot be done. */
@@ -46,10 +57,8 @@ function targetOf(
   action: NotionPropertyAction,
 ): Target | DeliveryOutcome {
   const ticket = delivery.ticketId === null ? null : getTicket(db, delivery.ticketId);
-  // A review's own link to a page is the more precise one; else the page the ticket came from.
-  const ticketPage = ticket?.originKind === 'notion' ? ticket.originId : null;
-  const pageId = reviewPage(db, event) ?? ticketPage;
-  if (!pageId) {
+  const pageIds = pagesOf(db, event, ticket);
+  if (pageIds.length === 0) {
     return {
       status: 'skipped',
       detail: isEvent(event, 'pr_review_posted')
@@ -71,10 +80,10 @@ function targetOf(
   if ('error' in sets) {
     return { status: 'failed', error: sets.error };
   }
-  return { token: integration.secret, pageId, sets: sets.sets };
+  return { token: integration.secret, pageIds, sets: sets.sets };
 }
 
-/** Sets the rule's Notion properties on the ticket's page; says why when it cannot. */
+/** Sets the rule's Notion properties on the review's linked pages, else the ticket's page; says why when it cannot. */
 async function deliver(
   db: Db,
   notion: NotionApi,
@@ -88,8 +97,12 @@ async function deliver(
   const detail = notionSetsText(target.sets);
   const properties = Object.fromEntries(target.sets.map((set) => [set.property.id, set.value]));
   try {
-    await notion.updatePage(target.token, target.pageId, properties);
-    return { status: 'succeeded', detail };
+    // Each linked page in turn; a retry sets them all again, which changes nothing on those done.
+    for (const pageId of target.pageIds) {
+      await notion.updatePage(target.token, pageId, properties);
+    }
+    const pages = target.pageIds.length > 1 ? ` on ${target.pageIds.length} pages` : '';
+    return { status: 'succeeded', detail: `${detail}${pages}` };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     // Rate limits, Notion outages and network failures pass: try again later.
