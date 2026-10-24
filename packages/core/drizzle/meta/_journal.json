@@ -498,6 +498,13 @@
       "when": 1792826194681,
       "tag": "0070_source_integrations",
       "breakpoints": true
+    },
+    {
+      "idx": 71,
+      "version": "6",
+      "when": 1792832070362,
+      "tag": "0071_drop_legacy_notion",
+      "breakpoints": true
     }
   ]
 }

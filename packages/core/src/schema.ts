@@ -44,8 +44,6 @@ export const projects = sqliteTable(
     githubToken: text('github_token'),
     /** Installation of the GitHub App (`github_app`) to use instead of a token. */
     githubInstallationId: integer('github_installation_id'),
-    /** Notion internal integration secret, for importing tickets. Never sent to the browser. */
-    notionToken: text('notion_token'),
     statusFieldId: text('status_field_id'),
     config: text('config', { mode: 'json' }).$type<ProjectConfig>().notNull(),
     ...timestamps,
@@ -98,8 +96,6 @@ export const tickets = sqliteTable(
     /** The diff snapshot's head when the user last sent a review: "since last review" starts there. */
     reviewedSha: text('reviewed_sha'),
     prNumber: integer('pr_number'),
-    /** The Notion page the ticket was imported from: events update its properties. */
-    notionPageId: text('notion_page_id'),
     /** The tracker the ticket was imported from (null: written in Union, or a GitHub issue). */
     originKind: text('origin_kind').$type<IntegrationKindName>(),
     /** The item's id in that tracker (a Notion page id) and its link. */
@@ -309,8 +305,6 @@ export const investigations = sqliteTable(
     ticketStatus: text('ticket_status', { enum: ['queued', 'running', 'failed'] }),
     /** What the user said the ticket should cover, on top of the investigation. */
     ticketContext: text('ticket_context'),
-    /** The asked ticket is also created as a page of the project's Notion data source. */
-    ticketInNotion: integer('ticket_in_notion', { mode: 'boolean' }).notNull().default(false),
     /** The tracker the asked ticket is also created in; null: GitHub only. */
     ticketTarget: text('ticket_target').$type<IntegrationKindName>(),
     /** Why the ticket failed, or (status null) why its Notion page could not be created. */

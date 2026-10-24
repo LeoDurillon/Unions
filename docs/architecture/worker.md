@@ -116,8 +116,9 @@
   never during a step, writing tools always denied, `git status` and HEAD compared before and after, the container
   stopped after unless a step started; the ticket panel's Investigate opens the form with `?investigate=<id>`), sharing the scheduler's `RunSlots` (`slots.ts`); cancellation arrives through the
   `cancel_investigation` command hook. It also drives `TicketDrafter` (`investigation-ticket.ts`), which writes
-  the tickets asked from investigations, in `union-i<id>-ticket` containers, and creates them in Notion too when asked
-  (`investigation-ticket-notion.ts`, through `NotionApi.createPage`).
+  the tickets asked from investigations, in `union-i<id>-ticket` containers, and creates them in the tracker the
+  user picked too (`ticket_target`; `investigation-ticket-target.ts`, through the provider's `createItem`, Notion's
+  `createPage`), the ticket's origin set to the new item.
 - `event-dispatcher.ts`: follows the `events` log (cursor in `event_cursors`), queues one `event_deliveries` row
   per matching rule and event (unique), and hands each due one to the target of its action's kind
   (`event-actions/`: `notion.ts` sets the rule's Notion properties in one `updatePage`, all or none, `github-comment.ts` comments on the issue or the PR with

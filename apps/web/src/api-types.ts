@@ -28,7 +28,7 @@ export type { StackView } from './api-stack-types';
 export type GitHubAccess = 'token' | 'app' | 'none';
 
 /** A project as the browser sees it: the GitHub token and the integrations' secrets never leave the server. */
-export type PublicProject = Omit<Project, 'githubToken' | 'notionToken'> & {
+export type PublicProject = Omit<Project, 'githubToken'> & {
   /** `app` wins when both are set, like in the worker. */
   githubAccess: GitHubAccess;
   integrations: PublicIntegration[];
@@ -45,7 +45,7 @@ export function toPublicProject(
   project: Project,
   integrations: PublicIntegration[],
 ): PublicProject {
-  const { githubToken, notionToken: _notionToken, ...rest } = project;
+  const { githubToken, ...rest } = project;
   return {
     ...rest,
     githubAccess: accessOf(project.githubInstallationId, githubToken),

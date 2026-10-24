@@ -87,8 +87,6 @@ export type ProjectConfig = {
   hideLockFiles?: boolean;
   /** Gitignore-style patterns hidden from the review page. */
   reviewIgnore?: string[];
-  /** Notion data source tickets can be imported from (with `notionToken`). */
-  notionDataSourceId?: string;
   /** Markdown sent to every agent run on this project, after the shared instructions. */
   instructions?: string;
   /** Send the project's lessons to its agents (default true); false keeps them, unsent. */

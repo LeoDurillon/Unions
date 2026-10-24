@@ -57,7 +57,7 @@ test('a GitHub comment says where it goes and what it says, with known variables
 });
 
 test('a GitHub comment needs no Notion columns', () => {
-  db.delete(schema.notionDataSources).run();
+  db.delete(schema.integrations).run();
   expect(check({ kind: 'github_comment', on: 'issue', body: 'Done' })).toMatchObject({
     kind: 'github_comment',
   });
@@ -80,7 +80,7 @@ test('a notification in Union holds a message with known variables, not too long
 });
 
 test('a pull request action keeps its checked changes, and needs no Notion columns', () => {
-  db.delete(schema.notionDataSources).run();
+  db.delete(schema.integrations).run();
   expect(
     check({ kind: 'github_pull_request', changes: [{ kind: 'assignees', users: ['ada'] }] }),
   ).toEqual({ kind: 'github_pull_request', changes: [{ kind: 'assignees', users: ['ada'] }] });

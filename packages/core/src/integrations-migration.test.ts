@@ -121,3 +121,32 @@ test('the integrations migration copies Notion connections, ticket pages and inv
   ]);
   expect(sqlite.query('PRAGMA foreign_key_check').all()).toEqual([]);
 });
+
+function columns(sqlite: Database, table: string): string[] {
+  return sqlite
+    .query<{ name: string }, []>(`PRAGMA table_info(${table})`)
+    .all()
+    .map((column) => column.name);
+}
+
+test('the old Notion columns, table and config field are dropped once copied, nothing else', () => {
+  const sqlite = new Database(':memory:');
+  sqlite.run('PRAGMA foreign_keys = ON');
+  apply(sqlite, MIGRATIONS.slice(0, INTEGRATIONS));
+  seed(sqlite);
+
+  apply(sqlite, MIGRATIONS.slice(INTEGRATIONS));
+
+  expect(columns(sqlite, 'projects')).not.toContain('notion_token');
+  expect(columns(sqlite, 'tickets')).not.toContain('notion_page_id');
+  expect(columns(sqlite, 'investigations')).not.toContain('ticket_in_notion');
+  expect(columns(sqlite, 'notion_data_sources')).toEqual([]);
+  expect(
+    sqlite
+      .query<{ config: string }, []>('SELECT config FROM projects ORDER BY id')
+      .all()
+      .map((row) => row.config),
+  ).toEqual(Array.from({ length: 3 }, () => JSON.stringify({ baseBranch: 'main' })));
+  expect(sqlite.query('SELECT count(*) AS n FROM tickets').get()).toEqual({ n: 2 });
+  expect(sqlite.query('SELECT count(*) AS n FROM integrations').get()).toEqual({ n: 2 });
+});

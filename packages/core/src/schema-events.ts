@@ -1,22 +1,9 @@
-// Event rule tables: the Notion data source as read, the rules, their deliveries, and the event
-// log's readers.
+// Event rule tables: the rules, their deliveries, and the event log's readers.
 import { index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
 import type { EventAction } from './event-actions';
 import type { EventTrigger } from './event-rule-types';
-import type { NotionProperty } from './notion-api';
 import { now, projects, tickets } from './schema';
-
-/** The project's Notion data source as last read: rules point at its properties by id. */
-export const notionDataSources = sqliteTable('notion_data_sources', {
-  projectId: integer('project_id')
-    .primaryKey()
-    .references(() => projects.id, { onDelete: 'cascade' }),
-  dataSourceId: text('data_source_id').notNull(),
-  title: text('title').notNull(),
-  properties: text('properties', { mode: 'json' }).$type<NotionProperty[]>().notNull(),
-  fetchedAt: integer('fetched_at').notNull().default(now),
-});
 
 /** When something happens to one of the project's tickets, do something elsewhere. */
 export const eventRules = sqliteTable(

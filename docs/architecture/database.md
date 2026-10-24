@@ -12,6 +12,9 @@
   Same in-use refusal as restore, backup to `backups/union-before-reset-*` first, and it removes the agent
   containers and volumes of the deleted tickets (ticket ids restart at 1, so `union-t1` would otherwise be reused).
   GitHub and Notion are not touched.
+- A project's trackers (Notion) are rows of `integrations` (one per kind: secret, config, columns as read), and a
+  ticket imported from one has an origin (`tickets.origin_kind`, `origin_id`, `origin_url`); details in
+  `integrations.md`.
 - After editing `packages/core/src/schema.ts`: `cd packages/core && bunx drizzle-kit generate`. Commit the migration.
   The running web and worker reload on schema changes and apply new migrations to `union.sqlite` at once, so never
   regenerate or rewrite a migration once a dev server has run it: add a new one instead.

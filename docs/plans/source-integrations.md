@@ -1,7 +1,7 @@
 # Ticket source integrations
 
-Status: steps 1 to 5 built (branch `source-integrations`, 2026-10-24; 1 to 4 deployed); step 6 planned. Decisions D1 to D7
-proposed, to confirm. A refactor: no behaviour change until a
+Status: built, steps 1 to 6 (branch `source-integrations`, 2026-10-24; 1 to 5 deployed). Decisions D1 to D7 as
+built, with the changes noted under each step. A refactor: no behaviour change until a
 second kind (Jira, Linear) is added.
 
 ## Why
@@ -178,6 +178,10 @@ Each step ships on its own and leaves Notion working as before; run `bun run che
    table `notion_data_sources`, `config.notionDataSourceId`) in a second migration, after the live instance has run
    on step 5. Update `docs/architecture/integrations.md`, `database.md`, `web.md`, `worker.md` and
    `docs/spec/flow.md`, `investigations.md`.
+   Built: `0071_drop_legacy_notion` (plain `DROP COLUMN`s, no table rebuild, then `json_remove` on the configs);
+   tested in `integrations-migration.test.ts` and on a copy of the live database (row counts of ten tables
+   unchanged). `current_reviews.notion_page_id` stays: a review's linked page is not a ticket origin, and moving
+   it is left to the Notion comments plan.
 
 Steps 1 to 3 are the bulk of the risk (data and worker); 4 and 5 are mostly renames that the type checker drives.
 

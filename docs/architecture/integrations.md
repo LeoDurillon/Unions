@@ -37,8 +37,9 @@
   fresh each time, mention titles from core's `integrations/notion-mentions.ts`). Uses API version
   `2026-03-11` and `GET /v1/pages/{id}/markdown`. The secret, data source and columns as read are a row of
   `integrations` (kind `notion`; `integrations/notion-integration.ts` reads and saves it), never sent to the browser.
-  `projects.notion_token` and `config.notionDataSourceId` are no longer written or read (dropped in a later
-  migration). A ticket's page is its
+  (Before `0070_source_integrations` they were `projects.notion_token`, `config.notionDataSourceId` and the table
+  `notion_data_sources`; `0071_drop_legacy_notion` dropped them with `tickets.notion_page_id` and
+  `investigations.ticket_in_notion`.) A ticket's page is its
   origin (`tickets.origin_kind`, `origin_id`, `origin_url`). Pages outside the configured data source are refused. The page's markdown is cleaned at import (`notionMarkdown` in the browser-safe `@union/core/notion-markdown`: mentions become links titled from Notion, callouts quotes, comment and color spans their text, toggle children are dedented); the ticket panel cleans older imports as it shows them. Creating a ticket from a page downloads its images (Notion's signed links expire within the hour; only Notion's file hosts, raster images, within the attachment limits) into private ticket files referenced as `attachment:<name>`, which the panel shows inline (`?inline`, raster images only).
 - A project reaches GitHub with a token (`projects.github_token`) or an installation of the GitHub App
   (`projects.github_installation_id`; the app's ID and private key are one row of `github_app`). Both are stored in
