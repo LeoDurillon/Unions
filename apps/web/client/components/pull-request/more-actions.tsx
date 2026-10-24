@@ -1,5 +1,5 @@
-// The rarer branch operations of an open pull request, folded under "More actions": change target,
-// simplify history, split into a stack.
+// The branch operations of an open pull request, folded under "More actions" above the CI checks:
+// change target, simplify history, split into a stack.
 import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../../src/api-types';

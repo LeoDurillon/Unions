@@ -2,7 +2,7 @@
 import { useState, type ReactElement, type ReactNode } from 'react';
 
 import type { CommentView } from '../../../src/api-types';
-import { reviewCopy, type ReviewTarget } from '../../lib/review-target';
+import { hasPullRequest, reviewCopy, type ReviewTarget } from '../../lib/review-target';
 import { useCommentMutations, useComments, useDiff } from '../../lib/use-review';
 import { useSliceView, type SliceView } from '../../lib/use-slice-view';
 import { DiffArea } from './diff-area';
@@ -172,6 +172,7 @@ function ReviewPageBody({
             banner={banner}
             error={error}
             emptyText={empty ? copy.empty : null}
+            hasPullRequest={hasPullRequest(target, diff.data)}
           />
         )}
       </div>

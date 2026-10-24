@@ -42,6 +42,48 @@ function openFile(
   return { fileId, part, fresh };
 }
 
+/** The right side: the banner, errors, general comments and the open file. */
+function OpenFileArea({
+  target,
+  comments,
+  view,
+  mutations,
+  banner,
+  error,
+  emptyText,
+  open,
+}: {
+  target: ReviewTarget;
+  comments: CommentView[];
+  view: DiffView;
+  mutations: Mutations;
+  banner: ReactNode;
+  error: Error | null;
+  emptyText: string | null;
+  open: { fileId: number; part: string | null; focus: ExplainFocus | null } | null;
+}): ReactElement {
+  return (
+    <main className="min-w-0 flex-1 overflow-y-auto p-4">
+      {banner}
+      <ErrorText error={error} />
+      {emptyText ? <p className="text-sm text-zinc-500">{emptyText}</p> : null}
+      <GeneralComments comments={comments} mutations={mutations} />
+      {open === null ? null : (
+        <OpenFile
+          key={`${open.fileId}-${open.part ?? ''}`}
+          target={target}
+          fileId={open.fileId}
+          view={view}
+          comments={comments}
+          mutations={mutations}
+          part={open.part}
+          focus={open.focus}
+        />
+      )}
+    </main>
+  );
+}
+
 /** The touched files on the left, the picked one on the right. */
 export function DiffBody({
   target,
@@ -53,6 +95,7 @@ export function DiffBody({
   error,
   emptyText,
   picker,
+  hasPullRequest,
 }: {
   target: ReviewTarget;
   files: DiffResponse['files'];
@@ -64,6 +107,8 @@ export function DiffBody({
   emptyText: string | null;
   /** A pull request's commit picker, above the files. */
   picker: ReactNode;
+  /** The change has a pull request, whose description can be the spec to group by. */
+  hasPullRequest: boolean;
 }): ReactElement {
   const [picked, setPicked] = useState<Picked | null>(null);
   const shown = useExplain()?.focus ?? null;
@@ -81,26 +126,19 @@ export function DiffBody({
           }}
           part={part}
           target={target}
+          hasPullRequest={hasPullRequest}
         />
       </aside>
-      <main className="min-w-0 flex-1 overflow-y-auto p-4">
-        {banner}
-        <ErrorText error={error} />
-        {emptyText ? <p className="text-sm text-zinc-500">{emptyText}</p> : null}
-        <GeneralComments comments={comments} mutations={mutations} />
-        {fileId === null ? null : (
-          <OpenFile
-            key={`${fileId}-${part ?? ''}`}
-            target={target}
-            fileId={fileId}
-            view={view}
-            comments={comments}
-            mutations={mutations}
-            part={part}
-            focus={fresh}
-          />
-        )}
-      </main>
+      <OpenFileArea
+        target={target}
+        comments={comments}
+        view={view}
+        mutations={mutations}
+        banner={banner}
+        error={error}
+        emptyText={emptyText}
+        open={fileId === null ? null : { fileId, part, focus: fresh }}
+      />
     </div>
   );
 }

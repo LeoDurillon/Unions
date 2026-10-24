@@ -4,14 +4,13 @@ import { useState, type ReactElement } from 'react';
 
 import type { CommentView, DiffFileSummary } from '../../../src/api-types';
 import { reviewSlice, type ReviewTarget } from '../../lib/review-target';
-import { useReviewGrouping } from '../../lib/use-review-grouping';
 import { Segmented, type SegmentOption } from '../choice';
 import { draftCounts } from './file-row';
 import { FileRows, type RowOptions, type Layout } from './file-rows';
+import { useBySpecControl } from './group-by-spec-button';
 import { SpecGroups } from './spec-groups';
 
 const STORAGE_KEY = 'union.review.files';
-const BY_SPEC_KEY = 'union.review.bySpec';
 const LAYOUTS: SegmentOption<Layout>[] = [
   { value: 'list', label: 'List' },
   { value: 'tree', label: 'Tree' },
@@ -37,50 +36,6 @@ function useLayout(): [Layout, (layout: Layout) => void] {
     }
   };
   return [layout, choose];
-}
-
-function storedBySpec(): boolean {
-  try {
-    return localStorage.getItem(BY_SPEC_KEY) !== 'off';
-  } catch {
-    return true;
-  }
-}
-
-/** Whether the files show under their spec groups, remembered in this browser (on unless turned off). */
-function useBySpec(): [boolean, (on: boolean) => void] {
-  const [on, setOn] = useState(storedBySpec);
-  const choose = (next: boolean): void => {
-    setOn(next);
-    try {
-      localStorage.setItem(BY_SPEC_KEY, next ? 'on' : 'off');
-    } catch {
-      // Storage blocked: the choice lasts until the page closes.
-    }
-  };
-  return [on, choose];
-}
-
-function BySpecToggle({
-  on,
-  onChange,
-}: {
-  on: boolean;
-  onChange: (on: boolean) => void;
-}): ReactElement {
-  return (
-    <button
-      type="button"
-      aria-pressed={on}
-      title="Group the files by the parts of the specification they implement"
-      onClick={() => {
-        onChange(!on);
-      }}
-      className={`rounded-md border px-2 py-0.5 text-xs transition ${on ? 'border-indigo-300 bg-indigo-100 font-medium dark:border-indigo-800 dark:bg-indigo-950' : 'border-zinc-300 text-zinc-500 hover:text-zinc-900 dark:border-zinc-700 dark:hover:text-zinc-100'}`}
-    >
-      By spec
-    </button>
-  );
 }
 
 /** The files matched by the review ignore rules, collapsed unless one of them is open. */
@@ -109,6 +64,31 @@ function IgnoredFiles({
   );
 }
 
+/** How many files, the By spec switch and the List / Tree switch. */
+function ListHeader({
+  count,
+  bySpec,
+  layout,
+  onLayout,
+}: {
+  count: number;
+  bySpec: ReactElement | null;
+  layout: Layout;
+  onLayout: (layout: Layout) => void;
+}): ReactElement {
+  return (
+    <div className="flex items-center justify-between gap-2 px-2">
+      <span className="text-xs text-zinc-500">
+        {count} file{count === 1 ? '' : 's'}
+      </span>
+      <div className="flex items-center gap-1">
+        {bySpec}
+        <Segmented legend="File list layout" options={LAYOUTS} value={layout} onChange={onLayout} />
+      </div>
+    </div>
+  );
+}
+
 /** The touched files, as a list or a tree; ignored ones (lock files, project patterns) are listed apart, collapsed. */
 export function FileList({
   files,
@@ -117,6 +97,7 @@ export function FileList({
   onSelect,
   part = null,
   target,
+  hasPullRequest = false,
   allowBySpec = true,
 }: {
   files: DiffFileSummary[];
@@ -128,15 +109,15 @@ export function FileList({
   part?: string | null;
   /** Whose grouping by spec to show: its files under their groups when "By spec" is on. */
   target: ReviewTarget;
+  /** The change has a pull request, whose description can be the spec to group by. */
+  hasPullRequest?: boolean;
   /** False on a single commit: the grouping is made for the whole change. */
   allowBySpec?: boolean;
 }): ReactElement {
-  const grouping = useReviewGrouping(target).grouping.data ?? null;
   const [layout, setLayout] = useLayout();
-  const [bySpec, setBySpec] = useBySpec();
   // A slice's files are its own change: the grouping is the whole change's.
   const whole = allowBySpec && reviewSlice(target) === null;
-  const grouped = whole && grouping?.status === 'succeeded' && grouping.result !== null;
+  const bySpec = useBySpecControl({ target, hasPullRequest, whole });
   const drafts = draftCounts(comments);
   const shown = files.filter((file) => !file.ignored);
   const ignored = files.filter((file) => file.ignored);
@@ -150,22 +131,21 @@ export function FileList({
   };
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between gap-2 px-2">
-        <span className="text-xs text-zinc-500">
-          {files.length} file{files.length === 1 ? '' : 's'}
-        </span>
-        <div className="flex items-center gap-1">
-          {grouped ? <BySpecToggle on={bySpec} onChange={setBySpec} /> : null}
-          <Segmented
-            legend="File list layout"
-            options={LAYOUTS}
-            value={layout}
-            onChange={setLayout}
-          />
-        </div>
-      </div>
-      {grouped && bySpec ? (
-        <SpecGroups files={shown} grouping={grouping} rows={rows} part={part} onPick={onSelect} />
+      <ListHeader
+        count={files.length}
+        bySpec={bySpec.toggle}
+        layout={layout}
+        onLayout={setLayout}
+      />
+      {bySpec.status}
+      {bySpec.groups ? (
+        <SpecGroups
+          files={shown}
+          grouping={bySpec.groups}
+          rows={rows}
+          part={part}
+          onPick={onSelect}
+        />
       ) : (
         <FileRows files={shown} {...rows} />
       )}

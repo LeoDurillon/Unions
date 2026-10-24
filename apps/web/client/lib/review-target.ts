@@ -1,4 +1,6 @@
 // Where the target's diff, comments and send live; also the root of its query keys.
+import type { DiffResponse } from '../../src/api-types';
+
 /**
  * What a review page reviews: a ticket's branch (with `slice`, one slice's own change of a split
  * ticket), or a pull request from the Current reviews tab.
@@ -57,4 +59,9 @@ export function reviewCopy(target: ReviewTarget): ReviewCopy {
 /** The slice of a split ticket the page shows; null for its whole change, or a pull request. */
 export function reviewSlice(target: ReviewTarget): number | null {
   return target.kind === 'ticket' ? (target.slice ?? null) : null;
+}
+
+/** A PR description can be read: the pull request under review, or the ticket's linked one. */
+export function hasPullRequest(target: ReviewTarget, diff: DiffResponse | undefined): boolean {
+  return target.kind === 'pull-request' || Boolean(diff?.pullRequest);
 }

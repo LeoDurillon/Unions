@@ -1,12 +1,12 @@
-// Back, what is reviewed and at which commit, the GitHub import (tickets), the layout switch and
-// Send.
+// Back, what is reviewed and at which commit, the GitHub import (tickets), Explain and the layout
+// switch, then the agent review and Send.
 import type { ReactElement } from 'react';
 
 import type { DiffResponse } from '../../../src/api-types';
-import type { ReviewCopy, ReviewTarget } from '../../lib/review-target';
+import { hasPullRequest, type ReviewCopy, type ReviewTarget } from '../../lib/review-target';
 import type { useCommentMutations } from '../../lib/use-review';
 import { Button } from '../ui';
-import { AgentButtons } from './agent-review-button';
+import { AgentReviewButton } from './agent-review-button';
 import type { DiffView } from './file-diff';
 import { ImportComments } from './import-comments';
 import { SendReview } from './send-review';
@@ -21,12 +21,10 @@ function withRefusal(copy: ReviewCopy, diff: DiffResponse | undefined): ReviewCo
   return { ...copy, blocked: diff?.sendRefusal ?? copy.blocked };
 }
 
-/** A PR description can be read: the pull request under review, or the ticket's linked one. */
-function hasPullRequest(target: ReviewTarget, diff: DiffResponse | undefined): boolean {
-  return target.kind === 'pull-request' || Boolean(diff?.pullRequest);
-}
-
-/** Back, what is reviewed and at which commit, the GitHub import (tickets), the layout switch and Send. */
+/**
+ * Back, what is reviewed and at which commit, the GitHub import (tickets), Explain and the layout
+ * switch, then the agent review beside Send: its drafts are what Send sends.
+ */
 export function ReviewHeader({
   target,
   copy,
@@ -69,8 +67,8 @@ export function ReviewHeader({
       {target.kind === 'ticket' && diff?.pullRequest ? (
         <ImportComments ticketId={target.ticketId} pullRequest={diff.pullRequest} />
       ) : null}
-      <AgentButtons target={target} hasPullRequest={hasPullRequest(target, diff)} />
       <ViewToggle view={view} onChange={onView} />
+      <AgentReviewButton target={target} hasPullRequest={hasPullRequest(target, diff)} />
       <SendReview
         copy={withRefusal(copy, diff)}
         drafts={drafts}

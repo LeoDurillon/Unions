@@ -1,5 +1,5 @@
-// The ticket's pull request: link it, its CI checks, keep its description current, read its GitHub
-// discussion and pick what goes to the agent, then the rarer branch operations.
+// The ticket's pull request: link it, its branch operations, its CI checks, keep its description
+// current, then read its GitHub discussion and pick what goes to the agent.
 import { useState, type ReactElement } from 'react';
 
 import type { TicketDetail } from '../../src/api-types';
@@ -19,8 +19,9 @@ function usePickedPullRequest(detail: TicketDetail): [number | null, (pr: number
 }
 
 /**
- * The ticket's pull request: link it, its CI checks, keep its description current, then read its
- * GitHub discussion and pick what goes to the agent. A split ticket's tab reads any slice's.
+ * The ticket's pull request: link it, its branch operations, its CI checks, keep its description
+ * current, then read its GitHub discussion and pick what goes to the agent. A split ticket's tab
+ * reads any slice's.
  */
 export function PullRequestTab({ detail }: { detail: TicketDetail }): ReactElement {
   const { ticket, project } = detail;
@@ -30,6 +31,7 @@ export function PullRequestTab({ detail }: { detail: TicketDetail }): ReactEleme
       <PullRequestRow ticket={ticket} project={project} />
       <StackPanel detail={detail} shown={pr} />
       <BranchActions detail={detail} />
+      <MoreActions detail={detail} />
       {pr === null ? (
         <p className="text-sm text-zinc-500">
           Link the pull request to read its discussion here and import review comments.
@@ -37,7 +39,6 @@ export function PullRequestTab({ detail }: { detail: TicketDetail }): ReactEleme
       ) : (
         <PullRequestSections detail={detail} pr={pr} onPick={setPr} />
       )}
-      <MoreActions detail={detail} />
     </div>
   );
 }

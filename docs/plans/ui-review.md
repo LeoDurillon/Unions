@@ -26,13 +26,19 @@ of the live instance, light and dark, at 1400, 1024 and 390 px wide.
 - [x] Ticket header: Review changes is primary while the final review waits for the user. The Approve bar sticks
       to the bottom of the panel while idle, so it stays in reach along a long output (rather than a second copy
       in the header).
-- [x] Review page: Group by spec, Review with agent and Explain in one quiet "Agent" group (not a menu: their
-      progress and Cancel stay in view); Send review is primary only once there are drafts.
+- [x] Review page, grouped by where each result lands (a first try put the three agent actions in one "Agent"
+      group, which mixed two dialogs and a side panel): Review with agent beside Send review (its drafts are what
+      Send sends); Explain beside Unified / Split (it toggles a panel); Group by spec as the file panel's
+      "By spec" switch, which asks for a grouping when there is none and shows Grouping…, Cancel, a failure or
+      Regroup under the header. Send review is primary only once there are drafts.
 - [x] Event rules: an on/off switch, Edit and Delete as icons (Delete asks first), When and Then on their own lines.
-- [x] PR tab: Change target, Simplify history and Split into a stack folded under "More actions" after the
-      checks, the description and the discussion.
+- [x] PR tab: Change target, Simplify history and Split into a stack folded under "More actions", above the CI
+      checks (Simplify history runs on almost every ticket).
 
 ## Step 3: navigation and layout
+
+- One spec choice per review (a "Specs" control at the top), used by Review with agent, Group by spec and
+  Explain instead of each picking its own.
 
 - Review mode in the URL (`?review=1` beside `?ticket=`), so reload and Back keep it.
 - Collapsible sidebar (icon rail), and a board that fits narrow screens (narrower columns, Merged / Closed folded).
