@@ -1,10 +1,12 @@
 // The Notion routes: checking the connection and importing a page as a ticket; Notion is only read.
 import {
+  integrationKind,
+  ItemOutsideSourceError,
   NotionError,
-  notionMarkdown,
-  parseNotionId,
+  notionProvider,
   schema,
   type Db,
+  type IntegrationProvider,
   type NotionApi,
 } from '@union/core';
 import { eq } from 'drizzle-orm';
@@ -22,7 +24,6 @@ import {
   requireText,
   UNAUTHORIZED,
 } from '../http';
-import { mentionTitles } from '../notion-mentions';
 
 /** Notion failures become messages the UI shows next to the field. */
 export async function guarded<T>(work: () => Promise<T>): Promise<T> {
@@ -38,23 +39,26 @@ export async function guarded<T>(work: () => Promise<T>): Promise<T> {
     if (error instanceof NotionError && error.status === NOT_FOUND) {
       throw fail(NOT_FOUND, error.message);
     }
+    if (error instanceof ItemOutsideSourceError) {
+      throw fail(CONFLICT, error.message);
+    }
     throw fail(BAD_GATEWAY, error instanceof Error ? error.message : 'Notion request failed');
   }
 }
 
 export function requireNotionId(body: Record<string, unknown>, key: string, label: string): string {
-  const id = parseNotionId(requireText(body, key));
+  const id = integrationKind('notion').parseRef(requireText(body, key));
   if (!id) {
     throw fail(BAD_REQUEST, `That is not a Notion ${label} ID or URL`);
   }
   return id;
 }
 
-async function verify(notion: NotionApi, c: Context): Promise<Response> {
+async function verify(provider: IntegrationProvider, c: Context): Promise<Response> {
   const body = await readObject(c.req.raw);
   const token = requireText(body, 'token');
   const dataSourceId = requireNotionId(body, 'dataSourceId', 'data source');
-  const title = await guarded(() => notion.dataSourceTitle(token, dataSourceId));
+  const { title } = await guarded(() => provider.verify(token, { dataSourceId }));
   return c.json({ dataSourceId, title });
 }
 
@@ -75,21 +79,17 @@ function notionOf(db: Db, projectId: number): { token: string; dataSourceId: str
 }
 
 /** Fetches a page of the project's data source as a ticket preview; other pages are refused. */
-async function importPage(db: Db, notion: NotionApi, c: Context): Promise<Response> {
+async function importPage(db: Db, provider: IntegrationProvider, c: Context): Promise<Response> {
   const body = await readObject(c.req.raw);
   const { token, dataSourceId } = notionOf(db, Number(body.projectId));
   const pageId = requireNotionId(body, 'page', 'page');
-  const page = await guarded(() => notion.page(token, pageId));
-  if (page.dataSourceId?.replaceAll('-', '') !== dataSourceId.replaceAll('-', '')) {
-    throw fail(CONFLICT, "This page is not a row of the project's Notion data source");
-  }
-  const { markdown, truncated } = await guarded(() => notion.pageMarkdown(token, pageId));
-  const titles = await mentionTitles(notion, token, markdown);
+  const page = await guarded(() => provider.item(token, { dataSourceId }, pageId));
+  const { label } = integrationKind('notion');
   const result: NotionImport = {
-    title: page.title || 'Untitled Notion page',
-    body: `${notionMarkdown(markdown, titles).trim()}\n\n---\nImported from Notion: ${page.url}`,
+    title: page.title || `Untitled ${label} page`,
+    body: `${page.markdown}\n\n---\nImported from ${label}: ${page.url}`,
     url: page.url,
-    truncated,
+    truncated: page.truncated,
     pageId: page.id,
   };
   return c.json(result);
@@ -97,7 +97,8 @@ async function importPage(db: Db, notion: NotionApi, c: Context): Promise<Respon
 
 export function notionRoutes(db: Db, notion: NotionApi): Hono {
   const routes = new Hono();
-  routes.post('/verify', (c) => verify(notion, c));
-  routes.post('/import', (c) => importPage(db, notion, c));
+  const provider = notionProvider(notion);
+  routes.post('/verify', (c) => verify(provider, c));
+  routes.post('/import', (c) => importPage(db, provider, c));
   return routes;
 }

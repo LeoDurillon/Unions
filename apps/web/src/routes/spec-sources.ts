@@ -1,5 +1,6 @@
 // The text of a specification, from where the user points.
 import {
+  mentionTitles,
   notionMarkdown,
   parseNotionId,
   projectGitHubAuth,
@@ -11,7 +12,6 @@ import {
 
 import type { OnboardingGitHub } from '../github-onboarding';
 import { BAD_REQUEST, CONFLICT, fail, NOT_FOUND } from '../http';
-import { mentionTitles } from '../notion-mentions';
 import { parseIssueRef } from '../pull-request-ref';
 import { guarded } from './github-errors';
 import { guarded as notionGuarded } from './notion';

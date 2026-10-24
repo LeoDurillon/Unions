@@ -1,6 +1,7 @@
 # Ticket source integrations
 
-Status: planned (2026-10-19). Decisions D1 to D7 proposed, to confirm. A refactor: no behaviour change until a
+Status: step 1 built (branch `source-integrations`, 2026-10-24); steps 2 to 6 planned. Decisions D1 to D7
+proposed, to confirm. A refactor: no behaviour change until a
 second kind (Jira, Linear) is added.
 
 ## Why

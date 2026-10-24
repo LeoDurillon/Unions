@@ -70,7 +70,7 @@ and linked.
   its session. Built (branch `review-explain`), steps 1 to 4; a real run is left.
 - [Ticket source integrations](source-integrations.md): Notion's secret, data source, columns and ticket page
   moved to a generic `integrations` table and ticket origin, behind a provider per kind, so Jira or Linear is a
-  second implementation. Refactor, planned (2026-10-19), decisions to confirm.
+  second implementation. Refactor; step 1 built (branch `source-integrations`, 2026-10-24), decisions to confirm.
 - [Update Union from the sidebar](self-update.md): an Update button enabled when the checkout is behind the remote's
   `main`; the worker fetches `origin` (SSH through the host's `~/.ssh`, read-only), fast-forwards, reinstalls if
   needed, and web and worker exit for compose to start them again; Update anyway when something runs. Built

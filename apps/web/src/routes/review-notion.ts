@@ -1,10 +1,9 @@
 // `<review>/notion`: the Notion page a pull request under review is linked to: its text, linking and unlinking.
-import { notionMarkdown, schema, type Db, type NotionApi } from '@union/core';
+import { mentionTitles, notionMarkdown, schema, type Db, type NotionApi } from '@union/core';
 import { and, eq, inArray, isNull, ne } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
 
 import { CONFLICT, fail, NOT_FOUND, readObject } from '../http';
-import { mentionTitles } from '../notion-mentions';
 import type { ReviewNotionLink, ReviewNotionPage } from '../review-notion-types';
 import { guarded, requireNotionId } from './notion';
 import { load, type Project, type Review } from './pr-review-load';
