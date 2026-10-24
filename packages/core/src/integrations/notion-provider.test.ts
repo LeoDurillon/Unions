@@ -2,7 +2,7 @@ import { expect, test } from 'bun:test';
 
 import type { NotionApi, NotionPage } from '../notion-api';
 import { NotionError } from '../notion-error';
-import { integrationKind } from './kinds';
+import { integrationKind, isIntegrationKindName } from './kinds';
 import { notionProvider } from './notion-provider';
 import { ItemOutsideSourceError } from './provider';
 
@@ -64,7 +64,10 @@ test('a config without a data source is refused before any call', () => {
 test('readFields returns the data source columns', async () => {
   expect(await provider.readFields('secret', CONFIG)).toEqual({
     title: 'Roadmap',
-    properties: [{ id: 's%3At', name: 'Status', type: 'status', options: ['Todo', 'Done'] }],
+    fields: {
+      title: 'Roadmap',
+      properties: [{ id: 's%3At', name: 'Status', type: 'status', options: ['Todo', 'Done'] }],
+    },
   });
 });
 
@@ -94,5 +97,14 @@ test('the Notion kind parses page URLs and cleans markdown', () => {
     PAGE,
   );
   expect(kind.parseRef('not an id')).toBeNull();
+  expect(
+    kind.readConfig({ dataSourceId: `https://www.notion.so/x/${PAGE.replaceAll('-', '')}` }),
+  ).toEqual({
+    config: { dataSourceId: PAGE },
+  });
+  expect(kind.readConfig({ dataSourceId: 'nope' })).toHaveProperty('error');
+  expect(kind.readConfig(null)).toHaveProperty('error');
+  expect(isIntegrationKindName('notion')).toBe(true);
+  expect(isIntegrationKindName('toString')).toBe(false);
   expect(kind.cleanMarkdown('<callout>\n\tNote\n</callout>')).not.toContain('<callout');
 });

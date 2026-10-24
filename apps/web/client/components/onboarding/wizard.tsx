@@ -36,8 +36,13 @@ async function createFrom(draft: Draft): Promise<number> {
     ...(draft.notionTitle === null
       ? {}
       : {
-          notionToken: draft.notionToken.trim(),
-          notionDataSourceId: draft.notionDataSourceId.trim(),
+          integrations: [
+            {
+              kind: 'notion',
+              secret: draft.notionToken.trim(),
+              config: { dataSourceId: draft.notionDataSourceId.trim() },
+            },
+          ],
         }),
   });
   return created.id;

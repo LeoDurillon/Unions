@@ -3,8 +3,9 @@ import { useMutation } from '@tanstack/react-query';
 import type { PipelineStep } from '@union/core/states';
 import { useState, type ReactElement } from 'react';
 
-import type { NotionImport } from '../../src/api-types';
+import type { SourceImport } from '../../src/api-types';
 import { api } from '../lib/api';
+import { integrationsApi } from '../lib/integrations-api';
 import { Markdown } from './markdown';
 import { Button, ErrorText, Field, inputClass } from './ui';
 
@@ -14,7 +15,7 @@ function Preview({
   onCreate,
   onEdit,
 }: {
-  page: NotionImport;
+  page: SourceImport;
   creating: boolean;
   onCreate: () => void;
   onEdit: () => void;
@@ -84,19 +85,19 @@ export function NotionImportPanel({
   flow: PipelineStep[] | null;
   onCreated: (ticketId: number) => void;
   /** Opens the page in the form, still linked to it. */
-  onEdit: (page: NotionImport) => void;
+  onEdit: (page: SourceImport) => void;
 }): ReactElement {
   const [page, setPage] = useState('');
   const fetchPage = useMutation({
-    mutationFn: () => api.notion.importPage(projectId, page.trim()),
+    mutationFn: () => integrationsApi.importItem(projectId, 'notion', page.trim()),
   });
   const create = useMutation({
-    mutationFn: (found: NotionImport) =>
+    mutationFn: (found: SourceImport) =>
       api.createTicket({
         projectId,
         title: found.title,
         body: found.body,
-        notionPageId: found.pageId,
+        notionPageId: found.id,
         flow,
       }),
     onSuccess: (ticket) => {

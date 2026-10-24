@@ -10,7 +10,6 @@ import {
   recentDeliveries,
   saveRule,
   schema,
-  storeNotionSchema,
   type Db,
   type NotionApi,
   type Project,
@@ -70,14 +69,6 @@ function notionAccess(db: Db, projectId: number): { token: string; dataSourceId:
     throw fail(CONFLICT, 'Connect the project to Notion first (Notion settings)');
   }
   return access;
-}
-
-/** Reads the data source's columns from Notion again and keeps them. */
-async function refreshSchema(db: Db, notion: NotionApi, c: Context): Promise<Response> {
-  const project = loadProject(db, c);
-  const { token, dataSourceId } = notionAccess(db, project.id);
-  const source = await guarded(() => notion.dataSource(token, dataSourceId));
-  return c.json(storeNotionSchema(db, project.id, source));
 }
 
 function deliveries(db: Db, c: Context): Response {
@@ -154,7 +145,6 @@ export function eventRuleRoutes(db: Db, notion: NotionApi): Hono {
   });
   routes.post('/:projectId/event-rules/preview', (c) => preview(db, c));
   routes.get('/:projectId/event-deliveries', (c) => deliveries(db, c));
-  routes.post('/:projectId/notion/schema', (c) => refreshSchema(db, notion, c));
   // The people a person property can be set to: read on demand, never stored.
   routes.get('/:projectId/notion/users', async (c) => {
     const { token } = notionAccess(db, loadProject(db, c).id);

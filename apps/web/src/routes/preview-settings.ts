@@ -16,8 +16,9 @@ import {
 import { desc, eq } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
 
-import { toPublicProject, type PreviewSettingsView } from '../api-types';
+import type { PreviewSettingsView } from '../api-types';
 import { BAD_REQUEST, fail, NOT_FOUND, readObject, requireId } from '../http';
+import { publicProjectOf } from '../public-project';
 
 const SERVICE_NAME = /^[a-zA-Z0-9][a-zA-Z0-9_.-]*$/u;
 const VARIABLE_NAME = /^[A-Za-z_][A-Za-z0-9_]*$/u;
@@ -300,7 +301,7 @@ export function previewSettingsRoutes(db: Db): Hono {
       .where(eq(schema.projects.id, project.id))
       .returning()
       .get();
-    return c.json(toPublicProject(updated));
+    return c.json(publicProjectOf(db, updated));
   });
   routes.put('/:projectId/preview/secrets/:name', async (c) => {
     const project = loadProject(db, c);

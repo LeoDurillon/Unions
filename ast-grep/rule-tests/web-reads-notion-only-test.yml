@@ -2,8 +2,12 @@ id: web-reads-notion-only
 valid:
   - |
     const page = await notion.page(token, pageId);
+  - |
+    const item = await provider.item(secret, config, id);
 invalid:
   - |
     await notion.updatePage(token, pageId, properties);
   - |
     await notion.createPage(token, parent, draft);
+  - |
+    await provider.createItem(secret, config, { title, markdown });

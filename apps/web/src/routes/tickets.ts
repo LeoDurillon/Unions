@@ -1,7 +1,5 @@
 // The API routes for tickets: listing, creating, editing outputs and moving them between steps.
 import {
-  describeTicketBase,
-  getTicket,
   InvalidTransition,
   isCustomStep,
   latestOutput,
@@ -13,40 +11,25 @@ import {
   type Db,
   type Step,
 } from '@union/core';
-import { and, eq, isNull } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
 
-import {
-  COMMAND_TYPES,
-  toPublicProject,
-  type CommandType,
-  type TicketDetail,
-  type TicketSummary,
-} from '../api-types';
+import { COMMAND_TYPES, type CommandType, type TicketSummary } from '../api-types';
 import {
   ACCEPTED,
   BAD_REQUEST,
   CONFLICT,
   CREATED,
   fail,
-  NOT_FOUND,
   readObject,
   requireId,
   requireText,
 } from '../http';
 import type { ApiServices } from '../services';
-import { assertCommandFits } from './ticket-command-checks';
-import { changeParent, childrenOf, findTicket, summarizeWithStack } from './ticket-links';
+import { assertCommandFits, hasPendingCommand } from './ticket-command-checks';
+import { loadTicket, ticketDetail } from './ticket-detail';
+import { changeParent, summarizeWithStack } from './ticket-links';
 import { linkPullRequest, unlinkPullRequest } from './ticket-pull-request';
 import { ticketSubroutes } from './ticket-subroutes';
-
-function loadTicket(db: Db, id: number): TicketSummary {
-  try {
-    return summarizeWithStack(db, getTicket(db, id), findTicket(db));
-  } catch {
-    throw fail(NOT_FOUND, `Ticket ${id} not found`);
-  }
-}
 
 function isCommandType(value: unknown): value is CommandType {
   return COMMAND_TYPES.some((type) => type === value);
@@ -56,49 +39,12 @@ function isStep(value: string): value is Step {
   return isCustomStep(value) || STEPS.some((step) => step === value);
 }
 
-function hasPendingCommand(db: Db, ticketId: number): boolean {
-  const pending = db
-    .select()
-    .from(schema.commands)
-    .where(and(eq(schema.commands.ticketId, ticketId), isNull(schema.commands.handledAt)))
-    .get();
-  return pending !== undefined;
-}
-
 function listTickets(db: Db, c: Context): Response {
   const projectId = c.req.query('projectId');
   const rows = db.select().from(schema.tickets).all();
   const filtered = projectId ? rows.filter((row) => row.projectId === Number(projectId)) : rows;
   const byId = new Map(rows.map((row) => [row.id, row]));
   return c.json(filtered.map((row) => summarizeWithStack(db, row, (id) => byId.get(id))));
-}
-
-function ticketDetail(db: Db, c: Context): Response {
-  const id = requireId(c.req.param('id'), 'ticket id');
-  const ticket = loadTicket(db, id);
-  const project = db
-    .select()
-    .from(schema.projects)
-    .all()
-    .find((row) => row.id === ticket.projectId);
-  if (!project) {
-    throw fail(NOT_FOUND, 'Project not found');
-  }
-  const parent = ticket.parentTicketId === null ? null : findTicket(db)(ticket.parentTicketId);
-  const detail: TicketDetail = {
-    ticket,
-    project: toPublicProject(project),
-    children: childrenOf(db, id),
-    base: describeTicketBase(ticket, parent ?? null, project.config.baseBranch),
-    outputs: db
-      .select()
-      .from(schema.stepOutputs)
-      .where(eq(schema.stepOutputs.ticketId, id))
-      .orderBy(schema.stepOutputs.version)
-      .all(),
-    runs: db.select().from(schema.runs).where(eq(schema.runs.ticketId, id)).all(),
-  };
-  return c.json(detail);
 }
 
 function assertAllowed(ticket: TicketSummary, type: CommandType): void {

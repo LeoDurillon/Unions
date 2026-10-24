@@ -1,6 +1,6 @@
-// What a command needs besides a valid move of the state machine: a startable ticket, an open pull request, stacks turned on.
+// What a command needs besides a valid move of the state machine: no command already waiting, a startable ticket, an open pull request, stacks turned on.
 import { schema, type Db } from '@union/core';
-import { eq } from 'drizzle-orm';
+import { and, eq, isNull } from 'drizzle-orm';
 
 import type { CommandType, TicketSummary } from '../api-types';
 import { CONFLICT, fail } from '../http';
@@ -63,4 +63,14 @@ export function assertCommandFits(db: Db, ticket: TicketSummary, type: CommandTy
     }
     assertOpenPullRequest(ticket, 'split');
   }
+}
+
+/** A command not handled yet: the next one waits for the worker to take it. */
+export function hasPendingCommand(db: Db, ticketId: number): boolean {
+  const pending = db
+    .select()
+    .from(schema.commands)
+    .where(and(eq(schema.commands.ticketId, ticketId), isNull(schema.commands.handledAt)))
+    .get();
+  return pending !== undefined;
 }

@@ -16,8 +16,8 @@ export type SourceItem = {
 export type IntegrationProvider = {
   /** Checks the secret and config; the source's title (a data source's name) for the UI. */
   verify(secret: string, config: unknown): Promise<{ title: string }>;
-  /** The source's columns as they are now, in the kind's own shape. */
-  readFields(secret: string, config: unknown): Promise<unknown>;
+  /** The source's columns as they are now, in the kind's own shape, and its title. */
+  readFields(secret: string, config: unknown): Promise<{ title: string; fields: unknown }>;
   /** One item of the source; throws `ItemOutsideSourceError` for an item outside it. */
   item(secret: string, config: unknown, id: string): Promise<SourceItem>;
   /** Adds an item to the source, for kinds that can. */

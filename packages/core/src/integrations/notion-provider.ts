@@ -37,10 +37,10 @@ export function notionProvider(notion: NotionApi): IntegrationProvider {
     verify: async (token, config) => ({
       title: await notion.dataSourceTitle(token, notionConfigOf(config).dataSourceId),
     }),
-    readFields: async (token, config): Promise<NotionDataSource> => {
+    readFields: async (token, config): Promise<{ title: string; fields: NotionDataSource }> => {
       // Async so a bad config rejects, as the other calls do, rather than throwing.
       const source = await notion.dataSource(token, notionConfigOf(config).dataSourceId);
-      return source;
+      return { title: source.title, fields: source };
     },
     item: (token, config, pageId) => item(notion, token, config, pageId),
     createItem: async (token, config, content) => {

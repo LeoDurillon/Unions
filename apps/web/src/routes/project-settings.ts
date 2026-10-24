@@ -1,7 +1,6 @@
 // Updates a project's settings, or deletes the project (GitHub is left untouched).
 import {
   parseScripts,
-  saveNotionConnection,
   schema,
   ScriptsError,
   type Db,
@@ -12,7 +11,6 @@ import {
 import { and, eq, inArray, isNull } from 'drizzle-orm';
 import type { Context } from 'hono';
 
-import { toPublicProject } from '../api-types';
 import { optionalInstallationId, requireApp } from '../github-credentials';
 import {
   BAD_REQUEST,
@@ -23,8 +21,8 @@ import {
   readObject,
   requireId,
 } from '../http';
+import { publicProjectOf } from '../public-project';
 import { removeTicketFiles } from './attachments';
-import { requireNotionId } from './notion';
 import { removeProjectFiles } from './project-files';
 import { FLOW_FIELDS, flowsChange } from './project-flows';
 
@@ -106,26 +104,6 @@ function patternsChange(
   return patterns;
 }
 
-/** A present key with an empty string disconnects; otherwise the ID must parse. */
-function dataSourceChange(
-  body: Record<string, unknown>,
-  current: string | undefined,
-): string | undefined {
-  if (!('notionDataSourceId' in body)) {
-    return current;
-  }
-  return body.notionDataSourceId === ''
-    ? undefined
-    : requireNotionId(body, 'notionDataSourceId', 'data source');
-}
-
-function notionTokenChange(body: Record<string, unknown>, current: string | null): string | null {
-  if (!('notionToken' in body)) {
-    return current;
-  }
-  return optionalText(body, 'notionToken') ?? null;
-}
-
 const MAX_INSTRUCTIONS = 20_000;
 
 /** A present key replaces the instructions (empty clears them); an absent key leaves them. */
@@ -169,7 +147,6 @@ function configChange(db: Db, project: Project, body: Record<string, unknown>): 
     createPullRequest: booleanChange(body, 'createPullRequest', config.createPullRequest),
     hideLockFiles: booleanChange(body, 'hideLockFiles', config.hideLockFiles),
     reviewIgnore: patternsChange(body, config.reviewIgnore),
-    notionDataSourceId: dataSourceChange(body, config.notionDataSourceId),
     baseBranch: optionalText(body, 'baseBranch') ?? config.baseBranch,
     installCommand: commandChange(body, 'installCommand', config.installCommand),
     gateCommand: commandChange(body, 'gateCommand', config.gateCommand),
@@ -208,8 +185,6 @@ const UPDATABLE = [
   'createPullRequest',
   'hideLockFiles',
   'reviewIgnore',
-  'notionToken',
-  'notionDataSourceId',
   'instructions',
   'memory',
   'stacks',
@@ -230,21 +205,12 @@ export async function updateProject(db: Db, c: Context): Promise<Response> {
     .update(schema.projects)
     .set({
       ...githubChange(db, project, body),
-      notionToken: notionTokenChange(body, project.notionToken),
       config: configChange(db, project, body),
     })
     .where(eq(schema.projects.id, project.id))
     .returning()
     .get();
-  // The integration is what is read; the project's fields stay in step until the client moves to it.
-  // Another data source, or none, forgets the stored columns (the next refresh reads them).
-  if ('notionToken' in body || 'notionDataSourceId' in body) {
-    saveNotionConnection(db, project.id, {
-      token: updated.notionToken,
-      dataSourceId: updated.config.notionDataSourceId ?? null,
-    });
-  }
-  return c.json(toPublicProject(updated));
+  return c.json(publicProjectOf(db, updated));
 }
 
 /**

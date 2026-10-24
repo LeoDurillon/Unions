@@ -3,34 +3,30 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
-import { api } from '../../lib/api';
-import { eventRulesApi } from '../../lib/event-rules-api';
+import { integrationsApi, projectIntegration } from '../../lib/integrations-api';
 import { useSettingsForm } from '../../lib/use-settings-form';
 import { TokenInput } from '../onboarding/connect-step';
 import { NotionHelp } from '../onboarding/notion-step';
 import { Badge, Button, ErrorText, Field, inputClass } from '../ui';
 import { SaveBar } from './save-bar';
 
-/** Verifies before saving, so a typo never replaces a working connection. */
+/** Notion is read with them before they are saved, so a typo never replaces a working connection. */
 async function connect(project: PublicProject, token: string, dataSource: string): Promise<string> {
-  const verified = await api.notion.verify(token, dataSource);
-  await api.updateProject(project.id, {
-    notionToken: token,
-    notionDataSourceId: verified.dataSourceId,
+  const saved = await integrationsApi.save(project.id, 'notion', {
+    ...(token === '' ? {} : { secret: token }),
+    config: { dataSourceId: dataSource },
   });
-  // The event rules pick among the data source's columns.
-  await eventRulesApi.refreshNotion(project.id);
-  return verified.title || 'Untitled data source';
+  return saved.title || 'Untitled data source';
 }
 
 /** Applies at once: the integration secret is dropped and imports stop. */
 function Disconnect({ project }: { project: PublicProject }): ReactElement | null {
   const queryClient = useQueryClient();
   const disconnect = useMutation({
-    mutationFn: () => api.updateProject(project.id, { notionToken: '', notionDataSourceId: '' }),
+    mutationFn: () => integrationsApi.remove(project.id, 'notion'),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['projects'] }),
   });
-  if (!project.hasNotion) {
+  if (!projectIntegration(project, 'notion')) {
     return null;
   }
   return (
@@ -48,16 +44,23 @@ function Disconnect({ project }: { project: PublicProject }): ReactElement | nul
   );
 }
 
-function invalidReason(token: string, dataSource: string): string | null {
-  if (token.trim() === '') {
+/** A connected project keeps its stored secret when none is pasted. */
+function invalidReason(connected: boolean, token: string, dataSource: string): string | null {
+  if (!connected && token.trim() === '') {
     return 'Paste the integration secret to verify the connection.';
   }
   return dataSource.trim() === '' ? 'Give the data source.' : null;
 }
 
+function dataSourceOf(project: PublicProject): string {
+  const dataSourceId = projectIntegration(project, 'notion')?.config.dataSourceId;
+  return typeof dataSourceId === 'string' ? dataSourceId : '';
+}
+
 export function NotionSection({ project }: { project: PublicProject }): ReactElement {
+  const connected = projectIntegration(project, 'notion') !== null;
   const form = useSettingsForm(
-    () => ({ token: '', dataSource: project.config.notionDataSourceId ?? '' }),
+    () => ({ token: '', dataSource: dataSourceOf(project) }),
     ({ token, dataSource }) => connect(project, token.trim(), dataSource.trim()),
   );
   const { token, dataSource } = form.value;
@@ -66,14 +69,14 @@ export function NotionSection({ project }: { project: PublicProject }): ReactEle
     <section className="space-y-4">
       <p className="flex items-center gap-2 text-sm">
         Notion import
-        <Badge tone={project.hasNotion ? 'green' : 'neutral'}>
-          {project.hasNotion ? 'connected' : 'not connected'}
+        <Badge tone={connected ? 'green' : 'neutral'}>
+          {connected ? 'connected' : 'not connected'}
         </Badge>
       </p>
       <NotionHelp />
       <Field
         label="Integration secret"
-        hint={project.hasNotion ? 'Paste a new secret to replace the stored one.' : undefined}
+        hint={connected ? 'Leave empty to keep the stored one, or paste a new secret.' : undefined}
       >
         <TokenInput
           value={token}
@@ -92,7 +95,11 @@ export function NotionSection({ project }: { project: PublicProject }): ReactEle
           }}
         />
       </Field>
-      <SaveBar state={form} label="Verify and save" invalid={invalidReason(token, dataSource)}>
+      <SaveBar
+        state={form}
+        label="Verify and save"
+        invalid={invalidReason(connected, token, dataSource)}
+      >
         <Disconnect project={project} />
       </SaveBar>
     </section>

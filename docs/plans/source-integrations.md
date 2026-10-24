@@ -1,6 +1,6 @@
 # Ticket source integrations
 
-Status: steps 1 to 3 built (branch `source-integrations`, 2026-10-24); steps 4 to 6 planned. Decisions D1 to D7
+Status: steps 1 to 4 built (branch `source-integrations`, 2026-10-24; 1 to 3 deployed); steps 5 and 6 planned. Decisions D1 to D7
 proposed, to confirm. A refactor: no behaviour change until a
 second kind (Jira, Linear) is added.
 
@@ -154,7 +154,15 @@ Each step ships on its own and leaves Notion working as before; run `bun run che
    `DELETE …/:kind`, `POST …/:kind/fields` (refresh), `POST …/:kind/import`. Project creation takes
    `integrations: [{ kind, secret, config }]`. The old `/api/notion/*` routes and the `notionToken` /
    `notionDataSourceId` fields of the settings route go in the same step, with the client.
-5. **Client.** `api.ts` (`integrations` namespace), `hasNotion` → `integrationOf`, the import component in the New
+   Built: `routes/integrations.ts`; verify needs no project (`POST /api/integrations/:kind/verify`, for
+   onboarding), and `PUT` reads the columns before saving, so it also verifies, and keeps the stored secret when
+   none is sent. Each kind checks its config from the browser (`IntegrationKind.readConfig`); providers are built
+   per kind by `integrationProvider`. `PublicProject.integrations` carries `config` too (the settings form shows the
+   data source) and `fieldsReadAt`. The client calls the new routes (`lib/integrations-api.ts`), so the minimal client
+   changes of step 5 are done here: settings, onboarding, the import, the New ticket dialog and investigations. The
+   Notion columns refresh moved from `/notion/schema` to `…/integrations/notion/fields`; the people route stays
+   Notion's (`/notion/users`). The double write of step 3 is gone.
+5. **Client.** (Partly done in step 4: the calls, `hasNotion`.) `api.ts` (`integrations` namespace), `hasNotion` → `integrationOf`, the import component in the New
    ticket dialog and investigations (D7), Notion settings and onboarding moved under `integrations/notion/` and
    calling the generic routes, `ticket-details.tsx` / `ticket-description.tsx` reading `originKind`. Check with
    `scripts/ui-check/`: the Notion settings, the New ticket import, a Notion ticket's panel, an event rule preview.

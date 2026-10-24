@@ -58,6 +58,7 @@ export * from './integrations/notion-integration';
 export * from './integrations/notion-mentions';
 export * from './integrations/notion-provider';
 export * from './integrations/provider';
+export * from './integrations/providers';
 export * from './integrations/store';
 export * from './pr-descriptions';
 export * from './pr-description-outdated';

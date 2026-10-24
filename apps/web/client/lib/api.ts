@@ -22,7 +22,6 @@ import type {
   GitHubAppStatus,
   InstallationOption,
   IssueImport,
-  NotionImport,
   ProjectOption,
   PublicProject,
   PullRequestFilter,
@@ -36,6 +35,7 @@ import type {
   Viewer,
 } from '../../src/api-types';
 import type { LinkResult } from '../../src/routes/ticket-pull-request';
+import type { NewIntegration } from './integrations-api';
 
 export type CommandExtra = { feedback?: string; message?: string; refusalId?: number };
 
@@ -133,8 +133,7 @@ export const api = {
       repo: string;
       baseBranch: string;
       githubProjectNodeId: string;
-      notionToken?: string;
-      notionDataSourceId?: string;
+      integrations?: NewIntegration[];
     } & GitHubCredential,
   ): Promise<PublicProject> => request('POST', '/api/projects', input),
   updateProject: (
@@ -151,8 +150,6 @@ export const api = {
       sliceChecks?: boolean;
       hideLockFiles?: boolean;
       reviewIgnore?: string[];
-      notionToken?: string;
-      notionDataSourceId?: string;
       instructions?: string;
       scripts?: ProjectScript[];
       /** Null: back to the built-in presets. */
@@ -285,14 +282,5 @@ export const api = {
       flow: PipelineStep[] | null,
     ): Promise<TicketSummary> =>
       request('POST', '/api/tickets/github-issue', { projectId, issue, flow }),
-  },
-  notion: {
-    verify: (
-      token: string,
-      dataSourceId: string,
-    ): Promise<{ dataSourceId: string; title: string }> =>
-      request('POST', '/api/notion/verify', { token, dataSourceId }),
-    importPage: (projectId: number, page: string): Promise<NotionImport> =>
-      request('POST', '/api/notion/import', { projectId, page }),
   },
 };

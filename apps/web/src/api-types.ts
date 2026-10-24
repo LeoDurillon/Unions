@@ -18,19 +18,20 @@ import type {
 import type { GitHubStack } from '@union/core/github-stacks';
 import type { StackPlace } from '@union/core/pr-stacks';
 
+import type { PublicIntegration } from './api-integration-types';
 import type { StackView } from './api-stack-types';
 
+export type { PublicIntegration, SourceImport } from './api-integration-types';
 export type { StackView } from './api-stack-types';
 
 /** How a project reaches GitHub, as the browser sees it. */
 export type GitHubAccess = 'token' | 'app' | 'none';
 
-/** A project as the browser sees it: the GitHub token never leaves the server. */
+/** A project as the browser sees it: the GitHub token and the integrations' secrets never leave the server. */
 export type PublicProject = Omit<Project, 'githubToken' | 'notionToken'> & {
   /** `app` wins when both are set, like in the worker. */
   githubAccess: GitHubAccess;
-  /** Token and data source both set: the New ticket dialog offers the Notion import. */
-  hasNotion: boolean;
+  integrations: PublicIntegration[];
 };
 
 function accessOf(installationId: number | null, token: string | null): GitHubAccess {
@@ -40,12 +41,15 @@ function accessOf(installationId: number | null, token: string | null): GitHubAc
   return token === null ? 'none' : 'token';
 }
 
-export function toPublicProject(project: Project): PublicProject {
-  const { githubToken, notionToken, ...rest } = project;
+export function toPublicProject(
+  project: Project,
+  integrations: PublicIntegration[],
+): PublicProject {
+  const { githubToken, notionToken: _notionToken, ...rest } = project;
   return {
     ...rest,
     githubAccess: accessOf(project.githubInstallationId, githubToken),
-    hasNotion: notionToken !== null && Boolean(project.config.notionDataSourceId),
+    integrations,
   };
 }
 
@@ -341,16 +345,6 @@ export type GitHubIssue = {
 
 /** The import preview: the issue, and the ticket it already belongs to, if any. */
 export type IssueImport = Omit<GitHubIssue, 'nodeId' | 'pullRequest'> & { ticketId: number | null };
-
-/** A Notion page fetched for import: shown as a preview, then turned into a ticket. */
-export type NotionImport = {
-  title: string;
-  body: string;
-  url: string;
-  truncated: boolean;
-  /** The page, linked to the ticket created from it (event rules update it). */
-  pageId: string;
-};
 
 /** A rewrite of a ticket's PR description, as the PR tab shows it. */
 export type PrDescriptionDraft = {

@@ -1,7 +1,7 @@
 // The API routes for projects: creating, reading and updating them.
 import {
   parseProjectUrl,
-  saveNotionConnection,
+  saveIntegration,
   schema,
   type Db,
   type NotionApi,
@@ -9,7 +9,6 @@ import {
 } from '@union/core';
 import { Hono } from 'hono';
 
-import { toPublicProject } from '../api-types';
 import { optionalInstallationId, requireApp } from '../github-credentials';
 import type { OnboardingGitHub } from '../github-onboarding';
 import {
@@ -21,22 +20,13 @@ import {
   readObject,
   requireText,
 } from '../http';
+import { publicProjectOf } from '../public-project';
+import { newIntegrationsOf } from './integrations';
 import { investigationRoutes } from './investigations';
-import { requireNotionId } from './notion';
 import { deleteProject, updateProject } from './project-settings';
 import { pullRequestRoutes } from './pull-requests';
 
 const DEFAULT_BRANCH = 'main';
-
-/** Optional at creation: both Notion fields or neither. */
-function notionDataSourceOf(body: Record<string, unknown>): string | undefined {
-  const token = optionalText(body, 'notionToken');
-  const source = optionalText(body, 'notionDataSourceId');
-  if (Boolean(token) !== Boolean(source)) {
-    throw fail(BAD_REQUEST, 'Give both the Notion token and the data source ID, or neither');
-  }
-  return source ? requireNotionId(body, 'notionDataSourceId', 'data source') : undefined;
-}
 
 /** A GitHub App installation or a token (or neither: the worker falls back to `GITHUB_TOKEN`). */
 function credentialsOf(
@@ -51,7 +41,7 @@ function credentialsOf(
   return { githubToken: optionalText(body, 'token') ?? null, githubInstallationId: null };
 }
 
-/** The new project, and its Notion integration when the body connects one. */
+/** The new project, and the integrations the body connects it to (checked first: none is half made). */
 function insertProject(
   db: Db,
   body: Record<string, unknown>,
@@ -62,25 +52,20 @@ function insertProject(
     githubProjectNodeId: string;
   },
 ): Project {
+  const integrations = newIntegrationsOf(body);
   return db.transaction((tx) => {
     const project = tx
       .insert(schema.projects)
       .values({
         ...github,
         ...credentialsOf(db, body),
-        notionToken: optionalText(body, 'notionToken') ?? null,
-        config: {
-          baseBranch: optionalText(body, 'baseBranch') ?? DEFAULT_BRANCH,
-          notionDataSourceId: notionDataSourceOf(body),
-        },
+        config: { baseBranch: optionalText(body, 'baseBranch') ?? DEFAULT_BRANCH },
       })
       .returning()
       .get();
-    // The integration is what is read; the project's fields stay in step until the client moves to it.
-    saveNotionConnection(tx, project.id, {
-      token: project.notionToken,
-      dataSourceId: project.config.notionDataSourceId ?? null,
-    });
+    for (const { kind, ...input } of integrations) {
+      saveIntegration(tx, project.id, kind, input);
+    }
     return project;
   });
 }
@@ -94,7 +79,7 @@ export function projectRoutes(db: Db, github: OnboardingGitHub, notion: NotionAp
         .select()
         .from(schema.projects)
         .all()
-        .map((project) => toPublicProject(project)),
+        .map((project) => publicProjectOf(db, project)),
     ),
   );
 
@@ -127,7 +112,7 @@ export function projectRoutes(db: Db, github: OnboardingGitHub, notion: NotionAp
       githubProjectUrl: projectUrl ?? null,
       githubProjectNodeId: nodeId ?? '',
     });
-    return c.json(toPublicProject(project), CREATED);
+    return c.json(publicProjectOf(db, project), CREATED);
   });
 
   routes.patch('/:id', (c) => updateProject(db, c));

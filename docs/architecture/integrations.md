@@ -16,15 +16,25 @@
 - Notion writes happen in the worker only: event rules set properties of a ticket's page, or for a review posted from the review panel, the page that review is linked to (`updatePage`; `event-actions/notion.ts`), and a
   ticket written from an investigation can be created as a page of the project's data source (`createPage`, with
   `markdown` content).
+- Trackers a project is connected to (Notion now) are rows of `integrations`, one per kind: secret, config, the
+  tracker's columns as read. Each kind has a browser-safe entry (`@union/core/integration-kinds`: label, ID parsing,
+  config check) and a provider over its API client (`integrationProvider`, `integrations/providers.ts`). The web
+  routes are generic (`routes/integrations.ts`): `POST /api/integrations/:kind/verify` (no project: onboarding),
+  and under `/api/projects/:id/integrations/:kind`, `PUT` (reads the columns with the new secret and config, then
+  saves; no secret keeps the stored one), `DELETE`, `POST /fields` (read the columns again) and `POST /import` (an
+  item of the source as a ticket preview). A new project takes `integrations: [{ kind, secret, config }]`. The
+  browser sees `PublicProject.integrations` (`toPublicIntegration`, `public-project.ts`: kind, title, config,
+  `ready`), never a secret. The web server never calls a provider's `createItem` (ast-grep
+  `web-reads-notion-only`).
 - Notion reads, from the web server: verifying a project's integration secret and data source, and importing
-  a page of that data source as a ticket (`src/notion.ts` behind `NotionApi`, `routes/notion.ts` through the
-  Notion `IntegrationProvider`, `@union/core` `integrations/`), and the page a pull
+  a page of that data source as a ticket (`src/notion.ts` behind `NotionApi`, through the Notion
+  `IntegrationProvider`), and the page a pull
   request under review is linked to (any page shared with the integration; `routes/review-notion.ts`, its text read
   fresh each time, mention titles from core's `integrations/notion-mentions.ts`). Uses API version
   `2026-03-11` and `GET /v1/pages/{id}/markdown`. The secret, data source and columns as read are a row of
-  `integrations` (kind `notion`; `integrations/notion-integration.ts` reads and saves it), never sent to the browser
-  (`hasNotion` only); the settings and project creation routes still keep `projects.notion_token` and
-  `config.notionDataSourceId` in step until the client moves to the integration routes. A ticket's page is its
+  `integrations` (kind `notion`; `integrations/notion-integration.ts` reads and saves it), never sent to the browser.
+  `projects.notion_token` and `config.notionDataSourceId` are no longer written or read (dropped in a later
+  migration). A ticket's page is its
   origin (`tickets.origin_kind`, `origin_id`, `origin_url`). Pages outside the configured data source are refused. The page's markdown is cleaned at import (`notionMarkdown` in the browser-safe `@union/core/notion-markdown`: mentions become links titled from Notion, callouts quotes, comment and color spans their text, toggle children are dedented); the ticket panel cleans older imports as it shows them. Creating a ticket from a page downloads its images (Notion's signed links expire within the hour; only Notion's file hosts, raster images, within the attachment limits) into private ticket files referenced as `attachment:<name>`, which the panel shows inline (`?inline`, raster images only).
 - A project reaches GitHub with a token (`projects.github_token`) or an installation of the GitHub App
   (`projects.github_installation_id`; the app's ID and private key are one row of `github_app`). Both are stored in

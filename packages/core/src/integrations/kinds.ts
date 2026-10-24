@@ -15,7 +15,21 @@ export type IntegrationKind = {
   parseRef(input: string): string | null;
   /** The tracker's markdown as plain GitHub-flavored markdown. */
   cleanMarkdown(markdown: string): string;
+  /** A config as sent by the browser, checked and normalized; or what is wrong with it. */
+  readConfig(input: unknown): { config: Record<string, unknown> } | { error: string };
 };
+
+/** Notion's config: the data source, from its ID or URL. */
+function readNotionConfig(input: unknown): { config: Record<string, unknown> } | { error: string } {
+  const value =
+    typeof input === 'object' && input !== null && 'dataSourceId' in input
+      ? input.dataSourceId
+      : undefined;
+  const dataSourceId = typeof value === 'string' ? parseNotionId(value) : null;
+  return dataSourceId
+    ? { config: { dataSourceId } }
+    : { error: 'That is not a Notion data source ID or URL' };
+}
 
 const KINDS: Record<IntegrationKindName, IntegrationKind> = {
   notion: {
@@ -24,8 +38,13 @@ const KINDS: Record<IntegrationKindName, IntegrationKind> = {
     itemLabel: 'page',
     parseRef: parseNotionId,
     cleanMarkdown: (markdown) => notionMarkdown(markdown),
+    readConfig: readNotionConfig,
   },
 };
+
+export function isIntegrationKindName(value: string): value is IntegrationKindName {
+  return Object.hasOwn(KINDS, value);
+}
 
 export function integrationKind(kind: IntegrationKindName): IntegrationKind {
   return KINDS[kind];

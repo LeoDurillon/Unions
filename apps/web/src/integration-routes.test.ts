@@ -3,7 +3,7 @@ import { beforeEach, expect, test } from 'bun:test';
 import { createDb, migrateDb, NotionError, schema, type Db, type NotionApi } from '@union/core';
 import type { Hono } from 'hono';
 
-import type { NotionImport, PublicProject } from './api-types';
+import type { PublicProject, SourceImport } from './api-types';
 import { createApp } from './app';
 import type { OnboardingGitHub } from './github-onboarding';
 
@@ -62,96 +62,111 @@ function call(method: string, path: string, body?: unknown): Response | Promise<
   });
 }
 
-async function project(notionFields: Record<string, string> = {}): Promise<PublicProject> {
+const NOTION = { kind: 'notion', secret: 'secret_ok', config: { dataSourceId: SOURCE } };
+
+async function project(integrations: unknown[] = []): Promise<PublicProject> {
   const response = await call('POST', '/api/projects', {
     owner: 'o',
     repo: 'r',
     githubProjectNodeId: 'P',
-    ...notionFields,
+    integrations,
   });
   return (await response.json()) as PublicProject;
 }
 
-test('verify checks the token and the data source, accepting a URL', async () => {
-  const ok = await call('POST', '/api/notion/verify', {
-    token: 'secret_ok',
-    dataSourceId: `https://www.notion.so/${SOURCE.replaceAll('-', '')}?v=1`,
-  });
-  expect(await ok.json()).toEqual({ dataSourceId: SOURCE, title: 'Roadmap' });
+function verify(secret: string, dataSourceId: string): Response | Promise<Response> {
+  return call('POST', '/api/integrations/notion/verify', { secret, config: { dataSourceId } });
+}
+
+function importPage(projectId: number, ref: string): Response | Promise<Response> {
+  return call('POST', `/api/projects/${projectId}/integrations/notion/import`, { ref });
+}
+
+test('verify checks the secret and the data source, accepting a URL', async () => {
+  const ok = await verify('secret_ok', `https://www.notion.so/${SOURCE.replaceAll('-', '')}?v=1`);
+  expect(await ok.json()).toEqual({ title: 'Roadmap', config: { dataSourceId: SOURCE } });
+  expect((await verify('bad', SOURCE)).status).toBe(401);
+  expect((await verify('secret_ok', OTHER)).status).toBe(404);
+  expect((await verify('secret_ok', 'nope')).status).toBe(400);
   expect(
-    (await call('POST', '/api/notion/verify', { token: 'bad', dataSourceId: SOURCE })).status,
-  ).toBe(401);
-  expect(
-    (await call('POST', '/api/notion/verify', { token: 'secret_ok', dataSourceId: OTHER })).status,
+    (await call('POST', '/api/integrations/jira/verify', { secret: 's', config: {} })).status,
   ).toBe(404);
-  expect(
-    (await call('POST', '/api/notion/verify', { token: 'secret_ok', dataSourceId: 'nope' })).status,
-  ).toBe(400);
 });
 
-test('a project stores the Notion connection, never returning the token', async () => {
-  const created = await project({
-    notionToken: 'secret_ok',
-    notionDataSourceId: SOURCE.replaceAll('-', ''),
-  });
-  expect(created).toMatchObject({ hasNotion: true, config: { notionDataSourceId: SOURCE } });
+test('a project is created with its integrations, never returning the secret', async () => {
+  const created = await project([
+    { ...NOTION, config: { dataSourceId: SOURCE.replaceAll('-', '') } },
+  ]);
+  expect(created.integrations).toEqual([
+    {
+      kind: 'notion',
+      title: '',
+      ready: true,
+      config: { dataSourceId: SOURCE },
+      fieldsReadAt: null,
+    },
+  ]);
   expect(JSON.stringify(created)).not.toContain('secret_ok');
-  expect(db.select().from(schema.projects).get()?.notionToken).toBe('secret_ok');
+  expect(db.select().from(schema.integrations).get()?.secret).toBe('secret_ok');
   const half = await call('POST', '/api/projects', {
     owner: 'o',
     repo: 'x',
     githubProjectNodeId: 'P',
-    notionToken: 't',
+    integrations: [{ kind: 'notion', secret: 't', config: {} }],
   });
   expect(half.status).toBe(400);
+  // Refused before anything is written.
+  expect(db.select().from(schema.projects).all()).toHaveLength(1);
 });
 
 test('import returns a preview of a page from the data source, and refuses other pages', async () => {
-  const created = await project({ notionToken: 'secret_ok', notionDataSourceId: SOURCE });
-  const preview = await call('POST', '/api/notion/import', { projectId: created.id, page: PAGE });
-  const body = (await preview.json()) as NotionImport;
-  expect(body.title).toBe('Add dark mode');
+  const created = await project([NOTION]);
+  const preview = await importPage(created.id, PAGE);
+  const body = (await preview.json()) as SourceImport;
+  expect(body).toMatchObject({ title: 'Add dark mode', id: PAGE });
   expect(body.body).toContain('## Goal');
   expect(body.body).toContain('Imported from Notion: https://www.notion.so/');
-  const foreign = await call('POST', '/api/notion/import', {
-    projectId: created.id,
-    page: FOREIGN,
-  });
-  expect(foreign.status).toBe(409);
+  expect((await importPage(created.id, FOREIGN)).status).toBe(409);
+  expect((await importPage(created.id, 'not a page')).status).toBe(400);
 });
 
-test('import needs a connected project; settings can connect and disconnect', async () => {
+test('import needs a connected project; settings connect, keep the secret, and disconnect', async () => {
   const created = await project();
-  expect(
-    (await call('POST', '/api/notion/import', { projectId: created.id, page: PAGE })).status,
-  ).toBe(409);
-  await call('PATCH', `/api/projects/${created.id}`, {
-    notionToken: 'secret_ok',
-    notionDataSourceId: SOURCE,
-  });
-  expect(
-    (await call('POST', '/api/notion/import', { projectId: created.id, page: PAGE })).status,
-  ).toBe(200);
-  const cleared = await call('PATCH', `/api/projects/${created.id}`, {
-    notionToken: '',
-    notionDataSourceId: '',
-  });
-  expect(await cleared.json()).toMatchObject({ hasNotion: false });
-  expect(db.select().from(schema.projects).get()?.notionToken).toBeNull();
+  const base = `/api/projects/${created.id}/integrations/notion`;
+  expect((await importPage(created.id, PAGE)).status).toBe(409);
+  expect((await call('PUT', base, { config: { dataSourceId: SOURCE } })).status).toBe(400);
+  // Notion refuses the bad secret (the fake answers 404 to any column read it refuses).
+  expect((await call('PUT', base, { secret: 'bad', config: { dataSourceId: SOURCE } })).ok).toBe(
+    false,
+  );
+  expect(db.select().from(schema.integrations).all()).toEqual([]);
+
+  const saved = await call('PUT', base, { secret: 'secret_ok', config: { dataSourceId: SOURCE } });
+  expect(await saved.json()).toMatchObject({ kind: 'notion', title: 'Roadmap', ready: true });
+  expect((await importPage(created.id, PAGE)).status).toBe(200);
+  // No secret: the stored one is kept.
+  expect((await call('PUT', base, { config: { dataSourceId: SOURCE } })).status).toBe(200);
+  expect(db.select().from(schema.integrations).get()?.secret).toBe('secret_ok');
+
+  expect((await call('DELETE', base)).status).toBe(200);
+  const listed = (await (await call('GET', '/api/projects')).json()) as PublicProject[];
+  expect(listed[0]?.integrations).toEqual([]);
+  expect((await call('PUT', '/api/projects/99/integrations/notion', NOTION)).status).toBe(404);
 });
 
 test('event rules use the stored Notion columns; a ticket from an import previews its value', async () => {
   const created = await project();
   const base = `/api/projects/${created.id}`;
-  expect((await call('POST', `${base}/notion/schema`)).status).toBe(409);
+  const fields = `${base}/integrations/notion/fields`;
+  expect((await call('POST', fields)).status).toBe(409);
   expect((await call('GET', `${base}/notion/users`)).status).toBe(409);
-  await call('PATCH', base, { notionToken: 'secret_ok', notionDataSourceId: SOURCE });
+  await call('PUT', `${base}/integrations/notion`, NOTION);
   expect(await (await call('GET', `${base}/notion/users`)).json()).toEqual([
     { id: '0f1e2d3c-4b5a-4968-8778-695a4b3c2d1e', name: 'Ada' },
   ]);
-  expect(await (await call('POST', `${base}/notion/schema`)).json()).toMatchObject({
-    title: 'Roadmap',
-    properties: [{ name: 'PR' }, { name: 'Status' }],
+  expect(await (await call('POST', fields)).json()).toMatchObject({ title: 'Roadmap' });
+  expect(await (await call('GET', `${base}/event-rules`)).json()).toMatchObject({
+    notion: { title: 'Roadmap', properties: [{ name: 'PR' }, { name: 'Status' }] },
   });
 
   const rule = {
@@ -173,15 +188,13 @@ test('event rules use the stored Notion columns; a ticket from an import preview
   });
 
   // The import's page is linked to the ticket made from it.
-  const imported = (await (
-    await call('POST', '/api/notion/import', { projectId: created.id, page: PAGE })
-  ).json()) as NotionImport;
+  const imported = (await (await importPage(created.id, PAGE)).json()) as SourceImport;
   const ticket = (await (
     await call('POST', '/api/tickets', {
       projectId: created.id,
       title: imported.title,
       body: imported.body,
-      notionPageId: imported.pageId,
+      notionPageId: imported.id,
     })
   ).json()) as { id: number; originKind: string; originId: string };
   expect(ticket).toMatchObject({ originKind: 'notion', originId: PAGE });
@@ -211,7 +224,7 @@ test('event rules use the stored Notion columns; a ticket from an import preview
     ],
   });
 
-  // Another data source: the stored columns no longer apply.
-  await call('PATCH', base, { notionToken: '', notionDataSourceId: '' });
+  // Disconnected: the stored columns go with the integration.
+  await call('DELETE', `${base}/integrations/notion`);
   expect(await (await call('GET', `${base}/event-rules`)).json()).toMatchObject({ notion: null });
 });

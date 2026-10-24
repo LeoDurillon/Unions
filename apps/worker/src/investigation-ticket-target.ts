@@ -2,19 +2,13 @@
 import {
   integrationKind,
   integrationOf,
-  notionProvider,
+  integrationProvider,
   type Db,
   type DraftedTicket,
-  type IntegrationKindName,
-  type IntegrationProvider,
   type Investigation,
   type NotionApi,
   type TicketDraft,
 } from '@union/core';
-
-const PROVIDERS: Record<IntegrationKindName, (notion: NotionApi) => IntegrationProvider> = {
-  notion: notionProvider,
-};
 
 /**
  * The draft with its new item in the target tracker, when the user asked for one. A failure there
@@ -31,7 +25,7 @@ export async function withTargetItem(
     return { draft };
   }
   const integration = integrationOf(db, investigation.projectId, kind);
-  const provider = PROVIDERS[kind](notion);
+  const provider = integrationProvider(kind, { notion });
   if (!integration || !provider.createItem) {
     return {
       draft,

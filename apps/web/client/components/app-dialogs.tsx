@@ -3,6 +3,7 @@ import type { PipelineStep } from '@union/core/states';
 import { useState, type ReactElement } from 'react';
 
 import type { PublicProject } from '../../src/api-types';
+import { canImportFrom } from '../lib/integrations-api';
 import type { Overlay } from '../lib/use-navigation';
 import { FlowPicker } from './flow-picker';
 import { GitHubIssueImportPanel } from './github-issue-import';
@@ -21,7 +22,9 @@ function sourcesFor(project: PublicProject): { id: Source; label: string }[] {
     ...(project.githubAccess === 'none'
       ? []
       : [{ id: 'github' as const, label: 'Import from GitHub' }]),
-    ...(project.hasNotion ? [{ id: 'notion' as const, label: 'Import from Notion' }] : []),
+    ...(canImportFrom(project, 'notion')
+      ? [{ id: 'notion' as const, label: 'Import from Notion' }]
+      : []),
   ];
 }
 
@@ -121,7 +124,7 @@ function TicketBody({
             setDraft((previous) => ({
               title: page.title,
               body: page.body,
-              notionPage: { id: page.pageId, title: page.title },
+              notionPage: { id: page.id, title: page.title },
               key: previous.key + 1,
             }));
             setTab('write');

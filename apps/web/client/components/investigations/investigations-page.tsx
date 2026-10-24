@@ -81,7 +81,11 @@ function Detail({
     <InvestigationDetail
       key={`${current.id}-${current.status}`}
       investigation={current}
-      hasNotion={project.hasNotion}
+      hasNotion={
+        new Map(
+          project.integrations.map((integration) => [integration.kind, integration.ready]),
+        ).get('notion') ?? false
+      }
       onDeleted={() => {
         onSelect('new');
       }}

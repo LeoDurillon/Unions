@@ -1,8 +1,8 @@
 // The onboarding step that connects a Notion data source with its token.
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, type UseMutationResult } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 
-import { api } from '../../lib/api';
+import { integrationsApi } from '../../lib/integrations-api';
 import { Button, ErrorText, Field, inputClass } from '../ui';
 import { TokenInput } from './connect-step';
 import type { StepProps } from './draft';
@@ -30,16 +30,27 @@ export function NotionHelp(): ReactElement {
   );
 }
 
-export function NotionStep({ draft, patch }: StepProps): ReactElement {
-  const verify = useMutation({
-    mutationFn: () => api.notion.verify(draft.notionToken.trim(), draft.notionDataSourceId.trim()),
+type Verified = { title: string; config: Record<string, unknown> };
+
+/** Checks the secret and data source; the step is done once Notion answers with its title. */
+function useVerify({ draft, patch }: StepProps): UseMutationResult<Verified, Error, void> {
+  return useMutation({
+    mutationFn: () =>
+      integrationsApi.verify('notion', draft.notionToken.trim(), {
+        dataSourceId: draft.notionDataSourceId.trim(),
+      }),
     onSuccess: (result) => {
+      const { dataSourceId } = result.config;
       patch({
-        notionDataSourceId: result.dataSourceId,
+        notionDataSourceId: typeof dataSourceId === 'string' ? dataSourceId : '',
         notionTitle: result.title || 'Untitled data source',
       });
     },
   });
+}
+
+export function NotionStep({ draft, patch }: StepProps): ReactElement {
+  const verify = useVerify({ draft, patch });
   const change = (fields: Partial<StepProps['draft']>): void => {
     patch({ ...fields, notionTitle: null });
     verify.reset();

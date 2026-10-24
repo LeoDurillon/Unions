@@ -45,9 +45,6 @@ export const eventRulesApi = {
     request('POST', `${base(projectId)}/event-rules/preview`, { ...rule, ticketId }),
   deliveries: (projectId: number): Promise<DeliveryView[]> =>
     request('GET', `${base(projectId)}/event-deliveries`),
-  /** Reads the data source's columns from Notion again. */
-  refreshNotion: (projectId: number): Promise<NotionSchema> =>
-    request('POST', `${base(projectId)}/notion/schema`),
   /** The repository's labels and assignable users, for a pull request rule. */
   ruleChoices: (projectId: number): Promise<RuleChoices> =>
     request('GET', `${base(projectId)}/github/rule-choices`),

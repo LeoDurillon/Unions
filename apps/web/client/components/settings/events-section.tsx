@@ -7,6 +7,7 @@ import { useState, type ReactElement } from 'react';
 import type { PublicProject } from '../../../src/api-types';
 import type { EventRulesResponse } from '../../../src/event-api-types';
 import { eventRulesApi, newRule, type RuleDraft } from '../../lib/event-rules-api';
+import { integrationsApi } from '../../lib/integrations-api';
 import { Button, ErrorText } from '../ui';
 import { RuleEditor } from './rule-editor';
 import { DeliveryList, RuleRow } from './rule-list';
@@ -21,7 +22,7 @@ function NotionColumns({
   onRefreshed: () => Promise<void>;
 }): ReactElement {
   const refresh = useMutation({
-    mutationFn: () => eventRulesApi.refreshNotion(projectId),
+    mutationFn: () => integrationsApi.refreshFields(projectId, 'notion'),
     onSuccess: onRefreshed,
   });
   return (
