@@ -1,71 +1,128 @@
-# union-next
+<div align="center">
 
-A local Kanban board over a GitHub Project where Claude agents do the work.
+# Union
 
-You write a ticket, drag it to **In Progress**, and Union starts a Docker container for it. Inside, Claude Code (on
-your Claude Max subscription) works through a pipeline on a clone of the project's repository:
+**A local Kanban board where Claude agents do the work.**
 
-1. **Planning**: intake (clarifying questions you answer inline), summary, technical plan, test plan. Each step is
-   a tab on the ticket; you **Approve** it or **Revise** it with feedback.
-2. **Implementation**: after the test plan is approved, the agent writes the code and runs the project's checks
-   until they pass. The host pushes the branch and opens a draft pull request.
-3. **Final review**: a separate agent reviews the branch against the plan. You can also review the diff in Union,
-   comment on lines and send the comments back to the implementer. Approving marks the PR ready for review.
+Write a ticket, drag it to _In Progress_, and review a pull request.
 
-**Investigations** (a tab next to the board) run an agent once on a prompt of your own, about the project's
-repository or a general subject, with the model and tools you pick, and you can ask follow-up questions on the
-answer. It stays in Union: no ticket, no GitHub issue.
+![Bun](https://img.shields.io/badge/Bun-1.4.1-000?logo=bun&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
+![Hono](https://img.shields.io/badge/Hono-4-E36002?logo=hono&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-local-003B57?logo=sqlite&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-required-2496ED?logo=docker&logoColor=white)
 
-A ticket can depend on another one: it waits until that ticket is Done, then starts from its branch, and its
-pull request targets that branch.
+[Features](#features) · [How it works](#how-it-works) · [Quick start](#quick-start) ·
+[Configuration](#configuration) · [Documentation](#documentation) · [Development](#development)
 
-Everything is mirrored to GitHub: one issue per ticket, one comment per step, the ticket's column on the GitHub
-Project board, and "blocked by" between the issues of linked tickets. Tickets can also be imported from a Notion
-database. Each ticket keeps its own container and volumes, so work survives between steps, and several tickets can
-run in parallel.
+</div>
 
-The app runs on your machine only. Credentials (GitHub token or App key, Notion secret) stay in a local SQLite
-database and never reach the agent containers: the host does every clone, push and GitHub call.
+---
 
-See [docs/spec/](docs/spec/README.md) for the design and [AGENTS.md](AGENTS.md) for working on the code.
+Union sits on top of a **GitHub Project**. Each ticket you move to **In Progress** gets its own Docker container in
+which **Claude Code**, running on your Claude Max subscription, plans the change with you, implements it until the
+project's checks pass, and has it reviewed by a second agent. You stay in control at every step: nothing moves forward
+until you approve it.
 
-## Requirements
+Everything runs on your machine. Credentials stay in a local SQLite database and never reach the agent containers.
 
-- Linux or WSL2 with **Docker** (Compose v2). The worker starts agent containers through the Docker socket.
-- **Claude Code** logged in on the host with your Claude Max account: Union seeds each container with the
-  credential from `~/.claude/.credentials.json`. Run `claude` once and log in if that file does not exist.
-- A **GitHub** repository with a GitHub Project (or let the setup wizard create one), and one of:
+## Features
+
+- 🗂️ **Kanban over GitHub Projects**: one board per project, mirrored both ways: one issue per ticket, one comment
+  per step, the ticket's column on the Project board, and "blocked by" links between issues.
+- 🧭 **Planning with you in the loop**: intake (clarifying questions you answer inline), summary, technical plan and
+  test plan. **Approve** each step or **Revise** it with feedback.
+- 🛠️ **Implementation that passes your checks**: the agent writes the code and loops on your check command (for
+  example `bun run check`) until it passes. Union pushes the branch and opens a draft pull request.
+- 🔍 **Agent and human review**: a separate agent reviews the branch against the plan. Review the diff in Union,
+  comment on lines, and send the comments back to the implementer.
+- 🔗 **Ticket dependencies and PR stacks**: a ticket can wait for another one and start from its branch; a large pull
+  request can be split into stacked ones.
+- 🌿 **Branch tools**: rebase onto the latest base, move a finished ticket onto another base, or simplify its history
+  for review.
+- 🖥️ **Preview environments**: run a ticket's branch with the repository's own Docker Compose file, at
+  `http://t<id>.union.localhost`.
+- 🔬 **Investigations**: one-off agent runs on a prompt of your own, with the model and tools you pick, and follow-up
+  questions. No ticket, no GitHub issue.
+- 🧠 **Memory**: lessons per agent step, curated from your feedback and reused on the next tickets.
+- ⚙️ **Configurable agents**: edit each step's prompt, model, thinking effort and tools, write your own agents, and
+  choose which steps a ticket's flow runs.
+- 📥 **Notion import**: pull tickets from a Notion database.
+- ⚡ **Parallel by default**: each ticket keeps its own container and volumes, so work survives between steps and
+  several tickets run at once, up to a concurrency limit.
+
+## How it works
+
+```mermaid
+flowchart LR
+    T[Ticket] -->|drag to In Progress| P
+
+    subgraph C[Ticket container: Claude Code]
+        P[Planning<br/>intake · summary · plan · test plan] -->|approved| I[Implementation<br/>loop until checks pass]
+        I --> R[Final review<br/>agent + you]
+    end
+
+    R -->|approved| D[Pull request<br/>ready for review]
+    P -. revise .-> P
+    R -. send comments .-> I
+```
+
+| Phase              | What happens                                                                                    | Your part                                    |
+| ------------------ | ----------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| **Planning**       | Intake, summary, technical plan and test plan; each is a tab on the ticket                      | Answer questions, approve or revise each tab |
+| **Implementation** | The agent writes code and runs the project's checks until they pass; the host pushes a draft PR | Wait, or watch the live log                  |
+| **Final review**   | A reviewer agent checks the branch against the plan                                             | Review the diff, comment, approve            |
+| **Done**           | The pull request is marked ready for review                                                     | Merge on GitHub                              |
+
+Under the hood, Union is two Bun processes sharing one SQLite database:
+
+- **web**: a Hono API and a React SPA. It reads state, writes plain records, and streams events to the browser over
+  SSE. It never runs agents or writes to GitHub.
+- **worker**: drains a queue of commands, drives each ticket's state machine, starts agent containers through the
+  Docker socket, and does every clone, push and GitHub call.
+
+## Quick start
+
+### Requirements
+
+- **Linux or WSL2** with **Docker** (Compose v2).
+- **Claude Code** logged in on the host with your Claude Max account. Union seeds each container with the credential
+  from `~/.claude/.credentials.json`; run `claude` once and log in if that file does not exist.
+- A **GitHub repository** with a GitHub Project (the setup wizard can create one), and one of:
   - a **fine-grained token** for an organization repository: resource owner = the organization; repository
     permissions Contents, Issues and Pull requests read and write; organization permission Projects read and write;
-  - a **classic token** with the `repo` and `project` scopes (required when the Project belongs to a user
-    account rather than an organization);
-  - a **GitHub App** installed on the organization (set up from the app; see below).
+  - a **classic token** with the `repo` and `project` scopes (required when the Project belongs to a user account);
+  - a **GitHub App** installed on the organization ([see below](#using-a-github-app)).
 - Optional: a **Notion** internal integration to import tickets.
-- To run without Docker Compose: **Bun 1.4.1** and git on the host.
 
-## Installation
+### Run it
 
 ```sh
-git clone <this repository> union-next
+git clone git@github.com:LeoDurillon/Unions.git union-next
 cd union-next
 bun run compose        # or: docker compose up --build
 ```
 
 The first start installs the dependencies, builds the agent image (`union-agent:local`), then starts the web app and
-the worker. Open <http://localhost:5173>.
+the worker. Open **<http://localhost:5173>**.
 
-If the worker cannot reach Docker, set the group of the Docker socket (and your user id if it is not 1000) in a
-`.env` file next to `compose.yaml`:
+> [!TIP]
+> If the worker cannot reach Docker, set the group of the Docker socket (and your user id if it is not 1000) in a
+> `.env` file next to `compose.yaml`:
+>
+> ```sh
+> echo "DOCKER_GID=$(stat -c %g /var/run/docker.sock)" >> .env
+> echo "UNION_UID=$(id -u)" >> .env
+> echo "UNION_GID=$(id -g)" >> .env
+> ```
 
-```sh
-echo "DOCKER_GID=$(stat -c %g /var/run/docker.sock)" >> .env
-echo "UNION_UID=$(id -u)" >> .env
-echo "UNION_GID=$(id -g)" >> .env
-```
+Stop the stack with `bun run compose:down`; follow the logs with `bun run compose:logs`.
 
-Stop the stack with `bun run compose:down`, follow logs with `bun run compose:logs`.
+<details>
+<summary><b>Without Docker Compose</b></summary>
 
-### Without Docker Compose
+Needs **Bun 1.4.1** and git on the host.
 
 ```sh
 bun install
@@ -75,7 +132,9 @@ bun run dev            # web on http://localhost:5173 and the worker, with reloa
 
 `bun run start` builds the client and runs the production server on <http://localhost:3000> with the worker.
 
-## First project
+</details>
+
+### Your first project
 
 The setup wizard opens on first run (later: **+ Add project** in the sidebar):
 
@@ -85,16 +144,18 @@ The setup wizard opens on first run (later: **+ Add project** in the sidebar):
 4. **Notion** (optional): integration secret and data source ID.
 5. **Review**: check the base branch and create the project.
 
-Then open the project's **Settings** to set the install and check commands (for example `bun install` and
+Then open the project's **Settings** and set the install and check commands (for example `bun install` and
 `bun run check`): the implementation step loops on the check command until it passes.
 
-### Using a GitHub App instead of a token
+### Using a GitHub App
 
 Open **GitHub App** in the sidebar, enter the organization and click **Create the GitHub App**: GitHub opens with the
 permissions filled in. Paste the App ID and the generated private key (`.pem`) into Union, install the app on the
 organization, then pick that installation in the wizard or in the project's **Settings → General**. Issues, comments
-and pull requests are then authored by the app. Apps cannot reach Projects owned by a user account; use a classic
-token for those.
+and pull requests are then authored by the app.
+
+> [!NOTE]
+> Apps and fine-grained tokens cannot reach Projects owned by a user account; use a classic token for those.
 
 ## Configuration
 
@@ -106,23 +167,72 @@ Environment variables (shell or `.env`), all optional:
 | `UNION_MAX_CONCURRENT`     | `2`                                   | Agent runs at the same time, tickets and investigations  |
 | `UNION_GITHUB_PULL_MS`     | `30000`                               | How often changes made on GitHub are pulled              |
 | `UNION_WEB_PORT`           | `5173`                                | Port of the web app (Compose)                            |
+| `UNION_PREVIEW_PORT`       | `8080`                                | Port of the preview environments' proxy (Compose)        |
 | `DB_PATH`                  | `union.sqlite` at the repository root | Database file shared by web and worker                   |
 | `UNION_CLAUDE_CREDENTIALS` | `~/.claude/.credentials.json`         | Claude credential seeded into containers                 |
 | `UNION_AGENT_IMAGE`        | `union-agent:local`                   | Image agent containers run from                          |
 
-Agent prompts, models and allowed tools are edited in **Agent settings** in the sidebar and stored in the
-database.
+Agent prompts, models, thinking effort and allowed tools are edited in **Agent settings** in the sidebar and stored
+in the database.
 
-## Database
+### Database
 
-All state is in `union.sqlite` at the repository root.
+All state lives in `union.sqlite` at the repository root.
 
-- `bun run db:backup [file]`: consistent copy into `backups/`, safe while the app runs.
-- `bun run db:restore <file>`: restores a backup (stop the app first; the current database is saved).
-- `bun run db:reset --yes`: empty database, and removes the agent containers of the deleted tickets. GitHub and Notion
-  are not touched.
+| Command                     | Effect                                                                                       |
+| --------------------------- | -------------------------------------------------------------------------------------------- |
+| `bun run db:backup [file]`  | Consistent copy into `backups/`, safe while the app runs                                     |
+| `bun run db:restore <file>` | Restores a backup (stop the app first; the current database is saved)                        |
+| `bun run db:reset --yes`    | Empty database; removes the agent containers of deleted tickets. GitHub and Notion untouched |
+
+### Updating
+
+When your checkout is behind `origin/main`, **Update** in the sidebar fast-forwards it and restarts Union under
+Compose.
+
+## Security model
+
+- Union runs on your machine only. There is no authentication on the web UI: do not expose it.
+- GitHub tokens, the GitHub App key and the Notion secret stay in the local database. They never reach the browser
+  or the agent containers: the host does every clone, push and GitHub call.
+- A ticket's container gets only the `claudeAiOauth` credential, not your Claude history or MCP logins. Known risks
+  are listed in the [spec](docs/spec/README.md#open-risks).
+
+## Documentation
+
+| Topic                                   | Where                                                                    |
+| --------------------------------------- | ------------------------------------------------------------------------ |
+| Product spec and design decisions       | [`docs/spec/`](docs/spec/README.md)                                      |
+| A ticket from creation to Done          | [`docs/spec/flow.md`](docs/spec/flow.md)                                 |
+| Architecture: core, web, worker         | [`docs/architecture/`](docs/architecture/)                               |
+| GitHub and Notion integrations          | [`docs/architecture/integrations.md`](docs/architecture/integrations.md) |
+| Preview environments                    | [`docs/spec/preview-environments.md`](docs/spec/preview-environments.md) |
+| Plans and ideas not built yet           | [`docs/plans/`](docs/plans/README.md)                                    |
+| Working on the code (humans and agents) | [`AGENTS.md`](AGENTS.md)                                                 |
 
 ## Development
 
-`bun run check` runs formatting, lint, type checking and tests; it must pass before committing. See
-[AGENTS.md](AGENTS.md) for the layout and the rules.
+```text
+apps/
+  web/        Hono API + React SPA (Vite, Tailwind)
+  worker/     command queue, state machines, agents, GitHub sync
+packages/
+  core/       schema and migrations, pure state machine, default agent prompts, ContainerRuntime
+docker/       agent image and dev image
+docs/         spec, architecture, plans, file maps
+```
+
+```sh
+bun install            # dependencies and git hooks
+bun run dev            # web + worker with reload
+bun test               # tests
+bun run check          # format, maps, lint, ast-grep, knip, duplication, secrets, typecheck, tests
+```
+
+`bun run check` must pass before committing. Read [AGENTS.md](AGENTS.md) for the layout, the rules and the lint
+limits.
+
+**Built with** [Bun](https://bun.sh), [TypeScript](https://www.typescriptlang.org),
+[Hono](https://hono.dev), [React](https://react.dev), [Vite](https://vite.dev),
+[Tailwind CSS](https://tailwindcss.com), [Drizzle ORM](https://orm.drizzle.team) on SQLite, and
+[Claude Code](https://claude.com/claude-code).
