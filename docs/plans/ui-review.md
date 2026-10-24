@@ -1,6 +1,6 @@
 # Plan: UI/UX review
 
-Status: steps 1 to 3 built (2026-10-24); steps 4 and 5 planned. From a review of every page
+Status: steps 1 to 4 built (2026-10-24); step 5 planned. From a review of every page
 of the live instance, light and dark, at 1400, 1024 and 390 px wide.
 
 ## Step 1: quick wins
@@ -53,9 +53,13 @@ of the live instance, light and dark, at 1400, 1024 and 390 px wide.
 
 ## Step 4: board
 
-- Search and filters (text, origin, label); clamp card titles to 3 lines.
-- One state pill per card ("Needs review · Final review"), a "child of #…" chip for sub-tickets.
-- Empty column states; the drag hint only while it helps, or a Start button on backlog cards.
+- [x] Search (every word in the title, `#issue` or `#PR`), **Needs you** with its count (a step to approve, a
+      failure, a refused commit, red CI checks), and From Notion / From GitHub when some tickets came from
+      Notion; "N of M" and Clear while filtering. Tickets have no labels, so there is no label filter.
+- [x] Card titles clamped to 3 lines (whole on hover); one state pill ("Needs review · Final review"); the
+      parent as a small "↳ after #…" chip.
+- [x] Empty columns say so ("Nothing running", "None matches the filter").
+- [x] A **Start** button on backlog cards that can start; the hint shows only while one can, and names both ways.
 
 ## Step 5: pages
 

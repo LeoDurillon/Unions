@@ -6,7 +6,7 @@ ticket's Overview while it is in the backlog (`tickets.parent_ticket_id`; cycles
 - **Start gate:** the child cannot start until the parent is Done. The check lives in core (`blockingParent`,
   called by `dispatch` on `start`), so the web refuses with 409, the worker refuses a queued start, and a move to
   In Progress made on GitHub is reverted (`start_blocked` event). The board shows "Waiting for parent" and the card
-  cannot be dragged.
+  cannot be dragged nor started from its Start button.
 - **Branch:** at the child's first clone the worker picks its base (`resolveTicketBase`): the parent's branch while
   its pull request is open and the branch exists on GitHub, else the project's base branch. A parent whose PR is
   merged is already in it; one whose PR is closed is dropped, and the child's "Builds on" section says its changes

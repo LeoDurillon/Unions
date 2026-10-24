@@ -80,3 +80,8 @@ export function refLabel(ref: { id: number; issueNumber: number | null }): strin
 export function isBlocked(ticket: { parent: { done: boolean } | null }): boolean {
   return ticket.parent !== null && !ticket.parent.done;
 }
+
+/** A backlog ticket whose parent, if any, is done: it can start. */
+export function isStartable(ticket: { phase: Phase; parent: { done: boolean } | null }): boolean {
+  return ticket.phase.kind === 'backlog' && !isBlocked(ticket);
+}

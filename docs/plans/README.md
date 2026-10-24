@@ -5,7 +5,7 @@ and linked.
 
 ## Planned in detail
 
-- [UI/UX review](ui-review.md): quick wins, action hierarchy and navigation (steps 1 to 3) built; board and
+- [UI/UX review](ui-review.md): quick wins, action hierarchy, navigation and the board (steps 1 to 4) built;
   per-page fixes planned.
 - [One set of specs per review](review-specs.md): a Specs bar read by Review with agent, Explain and Group by
   spec, saved edits, several Notion pages per pull request. Built (branch `review-specs`).

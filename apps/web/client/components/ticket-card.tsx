@@ -1,11 +1,12 @@
-// A draggable ticket card for the board, with its phase, pull request and CI checks badges.
+// A draggable ticket card for the board: its title, its state, the ticket it builds on, its pull
+// request and CI checks, and Start while it waits in the backlog.
 import { useDraggable } from '@dnd-kit/core';
 import { flowName, resolveFlow } from '@union/core/flows';
 import { FULL_FLOW } from '@union/core/states';
 import type { ReactElement } from 'react';
 
 import type { PublicProject, TicketSummary } from '../../src/api-types';
-import { describePhase, isBlocked, refLabel, type Tone } from '../lib/labels';
+import { describePhase, isBlocked, isStartable, refLabel, type Tone } from '../lib/labels';
 import { useCustomAgentNames } from '../lib/use-custom-agents';
 import { Badge } from './ui';
 
@@ -40,7 +41,7 @@ function PrEnd({ prState }: { prState: TicketSummary['prState'] }): ReactElement
   );
 }
 
-/** The card's status line: how the pull request ended, else whether it waits, else its phase. */
+/** The card's state, one pill: how the pull request ended, else whether it waits, else its phase and step. */
 function CardStatus({ ticket }: { ticket: TicketSummary }): ReactElement {
   const names = useCustomAgentNames();
   if (ticket.board === 'merged') {
@@ -50,14 +51,7 @@ function CardStatus({ ticket }: { ticket: TicketSummary }): ReactElement {
     return <Badge tone="amber">Waiting for parent</Badge>;
   }
   const phase = describePhase(ticket.phase, names);
-  return (
-    <>
-      <Badge tone={phase.tone}>{phase.status}</Badge>
-      {phase.step === null ? null : (
-        <span className="text-xs whitespace-nowrap text-zinc-500">{phase.step}</span>
-      )}
-    </>
-  );
+  return <Badge tone={phase.tone}>{phase.label}</Badge>;
 }
 
 /** A split ticket: its stack's size, what merged, and its pull requests. */
@@ -88,17 +82,43 @@ function FlowBadge({
   return <Badge tone="neutral">{flowName(flow, config)}</Badge>;
 }
 
+/** The ticket it builds on, as a small chip: its whole title on hover. */
+function ParentChip({ parent }: { parent: NonNullable<TicketSummary['parent']> }): ReactElement {
+  return (
+    <span
+      title={`Starts after ${refLabel(parent)} ${parent.title}`}
+      className="inline-block max-w-full truncate rounded border border-zinc-200 px-1.5 text-xs text-zinc-500 dark:border-zinc-700"
+    >
+      ↳ after {refLabel(parent)}
+    </span>
+  );
+}
+
+/** Starts the agent on a backlog ticket, above the card's own click. */
+function StartButton({ onStart }: { onStart: () => void }): ReactElement {
+  return (
+    <button
+      type="button"
+      onClick={onStart}
+      className="relative z-[1] rounded-md border border-indigo-300 px-2 py-0.5 text-xs font-medium text-indigo-700 hover:bg-indigo-50 dark:border-indigo-800 dark:text-indigo-300 dark:hover:bg-indigo-950/40"
+    >
+      Start
+    </button>
+  );
+}
+
 export function TicketCard({
   ticket,
   config,
   onOpen,
+  onStart,
 }: {
   ticket: TicketSummary;
   config?: PublicProject['config'];
   onOpen: (id: number) => void;
+  onStart?: (id: number) => void;
 }): ReactElement {
-  const blocked = isBlocked(ticket);
-  const draggable = ticket.phase.kind === 'backlog' && !blocked;
+  const draggable = isStartable(ticket);
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: ticket.id,
     disabled: !draggable,
@@ -121,20 +141,24 @@ export function TicketCard({
         onClick={() => {
           onOpen(ticket.id);
         }}
-        className="text-left text-sm font-medium after:absolute after:inset-0 after:content-['']"
+        title={ticket.title}
+        className="line-clamp-3 text-left text-sm font-medium after:absolute after:inset-0 after:content-['']"
       >
         {ticket.title}
       </button>
-      {ticket.parent ? (
-        <p className="text-xs text-zinc-500">
-          ↳ after {refLabel(ticket.parent)} {ticket.parent.title}
-        </p>
-      ) : null}
+      {ticket.parent ? <ParentChip parent={ticket.parent} /> : null}
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
         <CardStatus ticket={ticket} />
         <ChecksBadge ticket={ticket} />
         {ticket.stack ? <StackBadge stack={ticket.stack} /> : null}
         {config ? <FlowBadge ticket={ticket} config={config} /> : null}
+        {draggable && onStart ? (
+          <StartButton
+            onStart={() => {
+              onStart(ticket.id);
+            }}
+          />
+        ) : null}
         <span className="ml-auto text-xs whitespace-nowrap text-zinc-500">
           {ticket.issueNumber === null ? 'not on GitHub yet' : `#${ticket.issueNumber}`}
         </span>

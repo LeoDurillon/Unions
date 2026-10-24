@@ -10,7 +10,7 @@
    The Overview's **Edit** changes the title and description afterwards: the worker writes them to the issue, unless
    it changed on GitHub since the edit was opened (then nothing is written and the edit says so); the Notion page is
    not changed, and steps already done do not run again.
-2. Move to In Progress → the worker creates volumes + container, clones the repo into the workspace volume.
+2. Move to In Progress (drag the card, or its **Start** button) → the worker creates volumes + container, clones the repo into the workspace volume.
    A ticket that depends on another one cannot start before it is done (see [Ticket dependencies](ticket-dependencies.md)).
 3. Planning steps, each a tab on the ticket: `intake` (Haiku) → `summary` (Sonnet) → `technical` (Opus) → `test_plan` (Sonnet),
    or only those the ticket's flow keeps (none for a Quick ticket), with the user's [custom agents](custom-agents.md)
