@@ -46,8 +46,3 @@ export function projectIntegration(
   );
   return byKind.get(kind) ?? null;
 }
-
-/** Tickets can be imported from it: connected, with a complete config. */
-export function canImportFrom(project: PublicProject, kind: IntegrationKindName): boolean {
-  return projectIntegration(project, kind)?.ready ?? false;
-}

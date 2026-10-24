@@ -1,6 +1,6 @@
 // The questions asked before the latest one, each followed by its answer, oldest first.
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { Investigation } from '@union/core';
+import type { IntegrationKindName, Investigation } from '@union/core';
 import { useState, type ReactElement, type SubmitEvent } from 'react';
 
 import { api } from '../../lib/api';
@@ -120,18 +120,18 @@ function FollowUpForm({ investigation }: { investigation: Investigation }): Reac
 /** What can follow an answer: a ticket written from the investigation, or another question. */
 export function NextSteps({
   investigation,
-  hasNotion,
+  targets,
   onOpenTicket,
 }: {
   investigation: Investigation;
-  hasNotion: boolean;
+  targets: IntegrationKindName[];
   onOpenTicket: (id: number) => void;
 }): ReactElement {
   return (
     <div className="space-y-4 border-t border-zinc-200 pt-4 dark:border-zinc-800">
       <InvestigationTicket
         investigation={investigation}
-        hasNotion={hasNotion}
+        targets={targets}
         onOpenTicket={onOpenTicket}
       />
       <FollowUpForm investigation={investigation} />

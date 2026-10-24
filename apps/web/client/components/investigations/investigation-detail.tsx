@@ -1,6 +1,6 @@
 // One investigation: its questions, the latest answer, the agent's live log and a follow-up form.
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
-import type { Investigation } from '@union/core';
+import type { IntegrationKindName, Investigation } from '@union/core';
 import type { ReactElement } from 'react';
 
 import { api } from '../../lib/api';
@@ -91,13 +91,13 @@ function Actions({
 /** One investigation: its questions, the latest answer, the agent's live log and a follow-up form. */
 export function InvestigationDetail({
   investigation,
-  hasNotion,
+  targets,
   onDeleted,
   onOpenTicket,
 }: {
   investigation: Investigation;
-  /** The project has a Notion data source: the ticket can be created there too. */
-  hasNotion: boolean;
+  /** The trackers the project is connected to: the ticket can be created in one of them too. */
+  targets: IntegrationKindName[];
   onDeleted: () => void;
   onOpenTicket: (id: number) => void;
 }): ReactElement {
@@ -119,11 +119,7 @@ export function InvestigationDetail({
       <LatestQuestion investigation={investigation} />
       <InvestigationTabs investigation={investigation} />
       {investigation.status === 'succeeded' ? (
-        <NextSteps
-          investigation={investigation}
-          hasNotion={hasNotion}
-          onOpenTicket={onOpenTicket}
-        />
+        <NextSteps investigation={investigation} targets={targets} onOpenTicket={onOpenTicket} />
       ) : null}
     </article>
   );

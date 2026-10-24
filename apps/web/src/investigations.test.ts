@@ -6,6 +6,7 @@ import {
   createDb,
   emitEvent,
   migrateDb,
+  saveNotionConnection,
   schema,
   type Db,
   type Investigation,
@@ -141,8 +142,20 @@ test('a ticket is asked from an answered investigation, once at a time', async (
   expect(await asked.json()).toMatchObject({
     ticketStatus: 'queued',
     ticketContext: 'Backend only',
+    ticketTarget: null,
   });
   expect((await send('POST', `${base()}/${id}/ticket`, {})).status).toBe(409);
+});
+
+test('a ticket is asked in a tracker only when the project is connected to it', async () => {
+  const { id } = await created();
+  claimInvestigation(db);
+  finishInvestigation(db, id, { status: 'succeeded', result: 'Found it.' });
+  const inNotion = { context: '', target: 'notion' };
+  expect((await send('POST', `${base()}/${id}/ticket`, inNotion)).status).toBe(409);
+  saveNotionConnection(db, projectId, { token: 'secret', dataSourceId: 'source' });
+  const asked = await send('POST', `${base()}/${id}/ticket`, inNotion);
+  expect(await asked.json()).toMatchObject({ ticketStatus: 'queued', ticketTarget: 'notion' });
 });
 
 test("a ticket investigation names the project's ticket it runs on", async () => {

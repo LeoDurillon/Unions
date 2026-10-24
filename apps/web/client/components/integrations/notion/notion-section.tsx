@@ -2,13 +2,13 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 
-import type { PublicProject } from '../../../src/api-types';
-import { integrationsApi, projectIntegration } from '../../lib/integrations-api';
-import { useSettingsForm } from '../../lib/use-settings-form';
-import { TokenInput } from '../onboarding/connect-step';
-import { NotionHelp } from '../onboarding/notion-step';
-import { Badge, Button, ErrorText, Field, inputClass } from '../ui';
-import { SaveBar } from './save-bar';
+import type { PublicProject } from '../../../../src/api-types';
+import { integrationsApi, projectIntegration } from '../../../lib/integrations-api';
+import { useSettingsForm } from '../../../lib/use-settings-form';
+import { TokenInput } from '../../onboarding/connect-step';
+import { SaveBar } from '../../settings/save-bar';
+import { Badge, Button, ErrorText, Field, inputClass } from '../../ui';
+import { NotionHelp } from './notion-step';
 
 /** Notion is read with them before they are saved, so a typo never replaces a working connection. */
 async function connect(project: PublicProject, token: string, dataSource: string): Promise<string> {

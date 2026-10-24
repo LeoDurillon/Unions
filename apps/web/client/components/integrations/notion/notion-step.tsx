@@ -2,10 +2,10 @@
 import { useMutation, type UseMutationResult } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 
-import { integrationsApi } from '../../lib/integrations-api';
-import { Button, ErrorText, Field, inputClass } from '../ui';
-import { TokenInput } from './connect-step';
-import type { StepProps } from './draft';
+import { integrationsApi } from '../../../lib/integrations-api';
+import { TokenInput } from '../../onboarding/connect-step';
+import type { StepProps } from '../../onboarding/draft';
+import { Button, ErrorText, Field, inputClass } from '../../ui';
 
 export function NotionHelp(): ReactElement {
   return (

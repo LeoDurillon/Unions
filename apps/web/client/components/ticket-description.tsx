@@ -1,10 +1,10 @@
 // The ticket's description, folded when long, and its title and description edited in place.
 import { useQuery } from '@tanstack/react-query';
-import { notionMarkdown } from '@union/core/notion-markdown';
 import { useState, type ReactElement } from 'react';
 
 import type { TicketDetail } from '../../src/api-types';
 import { attachmentsApi, attachmentUrl } from '../lib/attachments-api';
+import { shownBody } from '../lib/ticket-origin';
 import type { TicketText } from '../lib/use-ticket-edit';
 import { FoldedMarkdown } from './folded-markdown';
 import { TicketTextEditor } from './ticket-text-editor';
@@ -40,7 +40,7 @@ export function TicketDescription({ ticket }: { ticket: TicketDetail['ticket'] }
       />
     );
   }
-  const body = ticket.originKind === 'notion' ? notionMarkdown(ticket.body) : ticket.body;
+  const body = shownBody(ticket);
   return (
     <section className="space-y-2" aria-label="Description">
       <div className="flex items-center justify-between">

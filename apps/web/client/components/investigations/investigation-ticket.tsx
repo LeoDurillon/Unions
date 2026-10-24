@@ -1,44 +1,58 @@
 // Turns the investigation into a backlog ticket written by an agent, and links to it once made.
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { Investigation } from '@union/core';
+import type { IntegrationKindName, Investigation } from '@union/core';
+import { integrationKind } from '@union/core/integration-kinds';
 import { useState, type ReactElement } from 'react';
 
 import { api } from '../../lib/api';
 import { Switch } from '../choice';
 import { Button, ErrorText, inputClass } from '../ui';
 
-function NotionOption({
-  checked,
+/** One switch per tracker; one at most is on (a ticket has one origin). */
+function TargetOptions({
+  targets,
+  value,
   onChange,
 }: {
-  checked: boolean;
-  onChange: (checked: boolean) => void;
+  targets: IntegrationKindName[];
+  value: IntegrationKindName | null;
+  onChange: (value: IntegrationKindName | null) => void;
 }): ReactElement {
   return (
-    <Switch
-      checked={checked}
-      onChange={onChange}
-      hint="A page with the ticket's title and description, in the project's Notion data source; the ticket is linked to it."
-    >
-      Also create it in Notion
-    </Switch>
+    <>
+      {targets.map((kind) => {
+        const { label, itemLabel, sourceLabel } = integrationKind(kind);
+        return (
+          <Switch
+            key={kind}
+            checked={value === kind}
+            onChange={(checked) => {
+              onChange(checked ? kind : null);
+            }}
+            hint={`A ${itemLabel} with the ticket's title and description, in the project's ${label} ${sourceLabel}; the ticket is linked to it.`}
+          >
+            Also create it in {label}
+          </Switch>
+        );
+      })}
+    </>
   );
 }
 
 function Ask({
   investigation,
-  hasNotion,
+  targets,
   onCancel,
 }: {
   investigation: Investigation;
-  hasNotion: boolean;
+  targets: IntegrationKindName[];
   onCancel: () => void;
 }): ReactElement {
   const queryClient = useQueryClient();
   const [context, setContext] = useState('');
-  const [inNotion, setInNotion] = useState(false);
+  const [target, setTarget] = useState<IntegrationKindName | null>(null);
   const ask = useMutation({
-    mutationFn: () => api.requestInvestigationTicket(investigation, { context, inNotion }),
+    mutationFn: () => api.requestInvestigationTicket(investigation, { context, target }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['investigations'] }),
   });
   return (
@@ -61,7 +75,7 @@ function Ask({
           }}
         />
       </label>
-      {hasNotion ? <NotionOption checked={inNotion} onChange={setInNotion} /> : null}
+      <TargetOptions targets={targets} value={target} onChange={setTarget} />
       <ErrorText error={ask.error} />
       <div className="flex gap-2">
         <Button
@@ -79,7 +93,7 @@ function Ask({
   );
 }
 
-/** Why the ticket failed, or why it has no Notion page though it was asked there. */
+/** Why the ticket failed, or why it has no item in the tracker it was asked in. */
 function TicketError({
   status,
   error,
@@ -102,11 +116,11 @@ function TicketError({
 /** Turns the investigation into a backlog ticket written by an agent, and links to it once made. */
 export function InvestigationTicket({
   investigation,
-  hasNotion,
+  targets,
   onOpenTicket,
 }: {
   investigation: Investigation;
-  hasNotion: boolean;
+  targets: IntegrationKindName[];
   onOpenTicket: (id: number) => void;
 }): ReactElement {
   const [asking, setAsking] = useState(false);
@@ -118,7 +132,7 @@ export function InvestigationTicket({
     return (
       <Ask
         investigation={investigation}
-        hasNotion={hasNotion}
+        targets={targets}
         onCancel={() => {
           setAsking(false);
         }}

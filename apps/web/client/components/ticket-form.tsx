@@ -1,5 +1,7 @@
 // The form that creates a ticket, with its parent and attached files.
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
+import type { TicketOrigin } from '@union/core';
+import { integrationKind } from '@union/core/integration-kinds';
 import type { PipelineStep } from '@union/core/states';
 import { useState, type ReactElement, type SubmitEvent } from 'react';
 
@@ -63,24 +65,19 @@ type NewTicket = {
   body: string;
   parentId: number | null;
   flow: PipelineStep[] | null;
-  notionPageId?: string;
+  origin?: TicketOrigin;
 };
 
-/** A Notion page whose import is edited before the ticket is created. */
-export type NotionPageRef = { id: string; title: string };
+/** A tracker item (a Notion page) whose import is edited before the ticket is created. */
+export type SourceRef = TicketOrigin & { title: string };
 
-/** The ticket stays linked to the page (and gets its images) unless unlinked here. */
-function NotionLink({
-  page,
-  onUnlink,
-}: {
-  page: NotionPageRef;
-  onUnlink: () => void;
-}): ReactElement {
+/** The ticket stays linked to the item (and gets its images) unless unlinked here. */
+function SourceLink({ item, onUnlink }: { item: SourceRef; onUnlink: () => void }): ReactElement {
   return (
     <p className="flex items-center gap-2 text-xs text-zinc-500">
       <span>
-        Imported from Notion: <span className="font-medium">{page.title}</span>
+        Imported from {integrationKind(item.kind).label}:{' '}
+        <span className="font-medium">{item.title}</span>
       </span>
       <button type="button" className="underline hover:text-zinc-700" onClick={onUnlink}>
         Unlink
@@ -157,7 +154,7 @@ export function TicketForm({
   onCreated,
   initialTitle = '',
   initialBody = '',
-  notionPage = null,
+  source = null,
 }: {
   projectId: number;
   /** Chosen above the form, for every way of creating the ticket. */
@@ -165,15 +162,16 @@ export function TicketForm({
   onCreated: (ticketId: number) => void;
   initialTitle?: string;
   initialBody?: string;
-  notionPage?: NotionPageRef | null;
+  source?: SourceRef | null;
 }): ReactElement {
   const [title, setTitle] = useState(initialTitle);
   const [body, setBody] = useState(initialBody);
   const [parentId, setParentId] = useState<number | null>(null);
   const [files, setFiles] = useState<PendingFile[]>([]);
-  const [linked, setLinked] = useState(notionPage);
+  const [linked, setLinked] = useState(source);
+  const origin = linked ? { kind: linked.kind, id: linked.id, url: linked.url } : null;
   const { create, created } = useCreateTicket(
-    { projectId, title, body, parentId, flow, ...(linked ? { notionPageId: linked.id } : {}) },
+    { projectId, title, body, parentId, flow, ...(origin ? { origin } : {}) },
     { files, setFiles },
     onCreated,
   );
@@ -186,8 +184,8 @@ export function TicketForm({
   return (
     <form onSubmit={submit} className="space-y-4">
       {linked ? (
-        <NotionLink
-          page={linked}
+        <SourceLink
+          item={linked}
           onUnlink={() => {
             setLinked(null);
           }}

@@ -2,6 +2,7 @@
 import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../src/api-types';
+import { originName } from '../lib/ticket-origin';
 import { BaseBranchRow } from './base-branch-row';
 import { DetailRow } from './detail-row';
 import { FlowRow } from './flow-row';
@@ -11,6 +12,7 @@ import { TicketLinks } from './ticket-links';
 
 function SourceRow({ detail }: { detail: TicketDetail }): ReactElement {
   const { ticket, project } = detail;
+  const origin = originName(ticket.originKind);
   const issueUrl =
     ticket.issueNumber === null
       ? null
@@ -30,7 +32,7 @@ function SourceRow({ detail }: { detail: TicketDetail }): ReactElement {
       ) : (
         'GitHub issue not created yet'
       )}
-      {ticket.originKind === 'notion' && ticket.originUrl ? (
+      {origin && ticket.originUrl ? (
         <>
           {' · '}
           <a
@@ -39,7 +41,7 @@ function SourceRow({ detail }: { detail: TicketDetail }): ReactElement {
             target="_blank"
             rel="noreferrer"
           >
-            Notion page
+            {origin}
           </a>
         </>
       ) : null}

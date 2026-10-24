@@ -9,9 +9,9 @@ import {
 } from '@union/core/event-actions';
 import type { ReactElement } from 'react';
 
+import { NotionActionFields } from '../integrations/notion/notion-action-fields';
 import { Field, inputClass } from '../ui';
 import { GitHubCommentFields } from './github-comment-fields';
-import { NotionActionFields } from './notion-action-fields';
 import { ProjectFieldsFields } from './project-fields-fields';
 import { PullRequestFields } from './pull-request-fields';
 import { UnionNotificationFields } from './union-notification-fields';

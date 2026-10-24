@@ -6,6 +6,7 @@ import {
   deleteInvestigation,
   getInvestigation,
   InvestigationError,
+  isIntegrationKindName,
   isInvestigationScope,
   listInvestigations,
   requestTicket,
@@ -118,12 +119,12 @@ export function investigationRoutes(db: Db): Hono {
   });
   routes.post('/:id/ticket', async (c) => {
     const { id } = investigationOf(db, c);
-    const { context, inNotion } = await readObject(c.req.raw);
+    const { context, target } = await readObject(c.req.raw);
     const text = typeof context === 'string' ? context : '';
+    // Another tracker the ticket is created in too; anything else is GitHub only.
+    const kind = typeof target === 'string' && isIntegrationKindName(target) ? target : null;
     return c.json(
-      refusals(CONFLICT, () =>
-        requestTicket(db, id, text, { target: inNotion === true ? 'notion' : null }),
-      ),
+      refusals(CONFLICT, () => requestTicket(db, id, text, { target: kind })),
       ACCEPTED,
     );
   });

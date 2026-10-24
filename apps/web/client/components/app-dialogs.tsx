@@ -1,30 +1,30 @@
 // The dialog opened from the project bar: New ticket.
+import { integrationKind, type IntegrationKindName } from '@union/core/integration-kinds';
 import type { PipelineStep } from '@union/core/states';
 import { useState, type ReactElement } from 'react';
 
 import type { PublicProject } from '../../src/api-types';
-import { canImportFrom } from '../lib/integrations-api';
 import type { Overlay } from '../lib/use-navigation';
 import { FlowPicker } from './flow-picker';
 import { GitHubIssueImportPanel } from './github-issue-import';
-import { NotionImportPanel } from './notion-import';
-import { TicketForm, type NotionPageRef } from './ticket-form';
+import { SourceImportPanel } from './integrations/source-import';
+import { TicketForm, type SourceRef } from './ticket-form';
 import { Dialog } from './ui';
 
-/** `notionPage`: the page an edited Notion import comes from, kept linked to the ticket. */
-type Draft = { title: string; body: string; notionPage: NotionPageRef | null; key: number };
-type Source = 'write' | 'github' | 'notion';
+/** `source`: the tracker item an edited import comes from, kept linked to the ticket. */
+type Draft = { title: string; body: string; source: SourceRef | null; key: number };
+type Source = 'write' | 'github' | IntegrationKindName;
 
-/** Writing by hand always; importing from GitHub or Notion when the project reaches them. */
+/** Writing by hand always; importing from GitHub, or from each tracker the project is connected to. */
 function sourcesFor(project: PublicProject): { id: Source; label: string }[] {
   return [
     { id: 'write', label: 'Write' },
     ...(project.githubAccess === 'none'
       ? []
       : [{ id: 'github' as const, label: 'Import from GitHub' }]),
-    ...(canImportFrom(project, 'notion')
-      ? [{ id: 'notion' as const, label: 'Import from Notion' }]
-      : []),
+    ...project.integrations
+      .filter((integration) => integration.ready)
+      .map(({ kind }) => ({ id: kind, label: `Import from ${integrationKind(kind).label}` })),
   ];
 }
 
@@ -75,7 +75,7 @@ function FlowField({
   );
 }
 
-/** New ticket: written by hand, or imported from a GitHub issue or a Notion page. */
+/** New ticket: written by hand, or imported from a GitHub issue or a tracker's item (a Notion page). */
 function TicketBody({
   project,
   onCreated,
@@ -85,7 +85,7 @@ function TicketBody({
 }): ReactElement {
   const [tab, setTab] = useState<Source>('write');
   const tabs = sourcesFor(project);
-  const [draft, setDraft] = useState<Draft>({ title: '', body: '', notionPage: null, key: 0 });
+  const [draft, setDraft] = useState<Draft>({ title: '', body: '', source: null, key: 0 });
   const [flow, setFlow] = useState<PipelineStep[] | null>(null);
   const picker = <FlowField project={project} value={flow} onChange={setFlow} />;
   const form = (
@@ -95,7 +95,7 @@ function TicketBody({
       flow={flow}
       initialTitle={draft.title}
       initialBody={draft.body}
-      notionPage={draft.notionPage}
+      source={draft.source}
       onCreated={onCreated}
     />
   );
@@ -115,22 +115,24 @@ function TicketBody({
       {tab === 'github' ? (
         <GitHubIssueImportPanel projectId={project.id} flow={flow} onCreated={onCreated} />
       ) : null}
-      {tab === 'notion' ? (
-        <NotionImportPanel
+      {tab === 'write' || tab === 'github' ? null : (
+        <SourceImportPanel
+          key={tab}
           projectId={project.id}
+          kind={tab}
           flow={flow}
           onCreated={onCreated}
-          onEdit={(page) => {
+          onEdit={(item) => {
             setDraft((previous) => ({
-              title: page.title,
-              body: page.body,
-              notionPage: { id: page.id, title: page.title },
+              title: item.title,
+              body: item.body,
+              source: { kind: tab, id: item.id, url: item.url, title: item.title },
               key: previous.key + 1,
             }));
             setTab('write');
           }}
         />
-      ) : null}
+      )}
     </div>
   );
 }

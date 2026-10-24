@@ -1,24 +1,15 @@
-// `POST /api/tickets`: a new ticket; one imported from Notion keeps the page's images as its files.
-import { createTicket, notionPageUrl, parseNotionId, schema, type Db } from '@union/core';
+// `POST /api/tickets`: a new ticket; one imported from a tracker (Notion) keeps the item's images as its files.
+import { createTicket, schema, type Db } from '@union/core';
 import type { Context } from 'hono';
 
 import { BAD_REQUEST, CREATED, fail, optionalText, readObject, requireText } from '../http';
-import { fetchNotionImages } from '../notion-images';
 import { addAttachment } from './attachments';
 import { flowOf } from './ticket-flow';
 import { findTicket, linkParent, summarize } from './ticket-links';
-
-function notionPageOf(body: Record<string, unknown>): string | null {
-  const notionPage = optionalText(body, 'notionPageId');
-  const notionPageId = notionPage === undefined ? null : parseNotionId(notionPage);
-  if (notionPage !== undefined && notionPageId === null) {
-    throw fail(BAD_REQUEST, 'That is not a Notion page ID');
-  }
-  return notionPageId;
-}
+import { originOf, withOriginImages } from './ticket-origin';
 
 /**
- * `POST /api/tickets`. A ticket imported from Notion keeps the page's images as its own files,
+ * `POST /api/tickets`. A ticket imported from a tracker keeps the item's images as its own files,
  * fetched before it is created (their links expire within the hour), so its text never points to
  * a link about to break.
  */
@@ -38,24 +29,22 @@ export async function addTicket(db: Db, c: Context): Promise<Response> {
   if (parentId !== null && findTicket(db)(parentId)?.projectId !== projectId) {
     throw fail(BAD_REQUEST, 'The parent must be a ticket of the same project');
   }
-  const notionPageId = notionPageOf(body);
+  const origin = originOf(body);
   const flow = flowOf(db, body) ?? null;
-  const text = optionalText(body, 'body') ?? '';
-  const { markdown, images } = notionPageId
-    ? await fetchNotionImages(text)
-    : { markdown: text, images: [] };
+  const { markdown, images, note } = await withOriginImages(
+    origin,
+    optionalText(body, 'body') ?? '',
+  );
   const ticket = createTicket(db, {
     projectId,
     title: requireText(body, 'title'),
     body: markdown,
     flow,
-    ...(notionPageId
-      ? { origin: { kind: 'notion', id: notionPageId, url: notionPageUrl(notionPageId) } }
-      : {}),
+    ...(origin ? { origin } : {}),
   });
   for (const image of images) {
     // oxlint-disable-next-line no-await-in-loop -- one at a time: each is checked against the ticket's total
-    await addAttachment(db, ticket.id, { ...image, note: 'An image of the Notion page' });
+    await addAttachment(db, ticket.id, { ...image, note });
   }
   const linked = parentId === null ? ticket : linkParent(db, ticket.id, parentId);
   return c.json(summarize(linked, findTicket(db)), CREATED);

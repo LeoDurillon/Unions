@@ -189,15 +189,24 @@ test('event rules use the stored Notion columns; a ticket from an import preview
 
   // The import's page is linked to the ticket made from it.
   const imported = (await (await importPage(created.id, PAGE)).json()) as SourceImport;
-  const ticket = (await (
-    await call('POST', '/api/tickets', {
+  const newTicket = (origin: unknown): Response | Promise<Response> =>
+    call('POST', '/api/tickets', {
       projectId: created.id,
       title: imported.title,
       body: imported.body,
-      notionPageId: imported.id,
-    })
-  ).json()) as { id: number; originKind: string; originId: string };
-  expect(ticket).toMatchObject({ originKind: 'notion', originId: PAGE });
+      origin,
+    });
+  const origin = { kind: 'notion', id: imported.id, url: imported.url };
+  expect((await newTicket({ ...origin, kind: 'jira' })).status).toBe(400);
+  expect((await newTicket({ ...origin, id: 'nope' })).status).toBe(400);
+  expect((await newTicket({ ...origin, url: 'http://www.notion.so/x' })).status).toBe(400);
+  const ticket = (await (await newTicket(origin)).json()) as {
+    id: number;
+    originKind: string;
+    originId: string;
+    originUrl: string;
+  };
+  expect(ticket).toMatchObject({ originKind: 'notion', originId: PAGE, originUrl: imported.url });
   db.update(schema.tickets).set({ prNumber: 12 }).run();
   const preview = await call('POST', `${base}/event-rules/preview`, {
     ...rule,

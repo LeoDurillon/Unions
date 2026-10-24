@@ -3,9 +3,9 @@ import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
 import { closeSettings } from '../../lib/settings-sections';
+import { NotionSection } from '../integrations/notion/notion-section';
 import { DeleteSection } from './delete-section';
 import { EventActivitySection, EventRulesSection } from './events-section';
-import { NotionSection } from './notion-section';
 import { PreviewE2ePage } from './preview-e2e-page';
 import { PreviewLimitsPage } from './preview-limits-page';
 import { PreviewServicesPage } from './preview-services-page';

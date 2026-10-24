@@ -1,9 +1,9 @@
 // The setup wizard's views, one per entry of `STEPS`, in the same order.
 import type { ReactElement } from 'react';
 
+import { NotionStep } from '../integrations/notion/notion-step';
 import { ConnectStep } from './connect-step';
 import type { StepProps } from './draft';
-import { NotionStep } from './notion-step';
 import { ProjectStep } from './project-step';
 import { RepositoryStep } from './repository-step';
 import { ReviewStep } from './review-step';

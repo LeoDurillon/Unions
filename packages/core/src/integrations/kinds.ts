@@ -11,6 +11,8 @@ export type IntegrationKind = {
   label: string;
   /** What one of its items is called: "page". */
   itemLabel: string;
+  /** What its items come from: "data source". */
+  sourceLabel: string;
   /** An item's id from a URL or a bare id; null when the input holds none. */
   parseRef(input: string): string | null;
   /** The tracker's markdown as plain GitHub-flavored markdown. */
@@ -36,6 +38,7 @@ const KINDS: Record<IntegrationKindName, IntegrationKind> = {
     kind: 'notion',
     label: 'Notion',
     itemLabel: 'page',
+    sourceLabel: 'data source',
     parseRef: parseNotionId,
     cleanMarkdown: (markdown) => notionMarkdown(markdown),
     readConfig: readNotionConfig,

@@ -3,8 +3,8 @@ import type { NotionProperty } from '@union/core';
 import type { NotionValue } from '@union/core/event-actions';
 import type { ReactElement } from 'react';
 
-import { Button, Field, inputClass } from '../ui';
-import { ValueField } from './value-field';
+import { ValueField } from '../../settings/value-field';
+import { Button, Field, inputClass } from '../../ui';
 
 export function NotionValueRow({
   projectId,

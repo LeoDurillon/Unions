@@ -1,6 +1,6 @@
 # Ticket source integrations
 
-Status: steps 1 to 4 built (branch `source-integrations`, 2026-10-24; 1 to 3 deployed); steps 5 and 6 planned. Decisions D1 to D7
+Status: steps 1 to 5 built (branch `source-integrations`, 2026-10-24; 1 to 4 deployed); step 6 planned. Decisions D1 to D7
 proposed, to confirm. A refactor: no behaviour change until a
 second kind (Jira, Linear) is added.
 
@@ -166,6 +166,14 @@ Each step ships on its own and leaves Notion working as before; run `bun run che
    ticket dialog and investigations (D7), Notion settings and onboarding moved under `integrations/notion/` and
    calling the generic routes, `ticket-details.tsx` / `ticket-description.tsx` reading `originKind`. Check with
    `scripts/ui-check/`: the Notion settings, the New ticket import, a Notion ticket's panel, an event rule preview.
+   Built: the Notion settings, onboarding step and rule action fields (with its value row) moved to
+   `components/integrations/notion/` (not `settings/integrations/`: the onboarding step is not a setting). The import
+   is `integrations/source-import.tsx`, one tab per ready integration; the ticket form keeps a `SourceRef` (kind,
+   id, URL, title). `POST /api/tickets` takes `origin: { kind, id, url }` (the URL must be https) instead of
+   `notionPageId`, and the investigation's ticket `target` instead of `inNotion`. The panel names the origin by kind
+   (`lib/ticket-origin.ts`). `IntegrationKind` gained `sourceLabel` ("data source"). UI check on a copy of the
+   database: the tabs, the import with its truncation note, editing an import (link kept), the created ticket's
+   origin, and an investigation asked in Notion.
 6. **Drop the old columns** (`projects.notion_token`, `tickets.notion_page_id`, `investigations.ticket_in_notion`,
    table `notion_data_sources`, `config.notionDataSourceId`) in a second migration, after the live instance has run
    on step 5. Update `docs/architecture/integrations.md`, `database.md`, `web.md`, `worker.md` and

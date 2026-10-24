@@ -2,6 +2,7 @@
 import { useState, type ReactElement, type SubmitEvent } from 'react';
 
 import type { TicketDetail } from '../../src/api-types';
+import { originName } from '../lib/ticket-origin';
 import { useTicketEdit, type TicketText } from '../lib/use-ticket-edit';
 import { Button, ErrorText, Field, inputClass } from './ui';
 
@@ -13,7 +14,8 @@ function hintFor(ticket: Ticket): string {
     ticket.issueNumber === null
       ? 'The GitHub issue is created with it.'
       : `Saved to issue #${ticket.issueNumber} on GitHub too.`;
-  const notion = ticket.originKind === 'notion' ? ' The Notion page is not changed.' : '';
+  const origin = originName(ticket.originKind);
+  const notion = origin ? ` The ${origin} is not changed.` : '';
   return `Markdown. ${issue}${notion} Steps already done do not run again.`;
 }
 

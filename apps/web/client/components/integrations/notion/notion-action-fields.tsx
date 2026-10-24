@@ -4,7 +4,7 @@ import type { NotionPropertyAction, NotionValue } from '@union/core/event-action
 import { WRITABLE_NOTION_TYPES } from '@union/core/event-rules';
 import type { ReactElement } from 'react';
 
-import { Button } from '../ui';
+import { Button } from '../../ui';
 import { NotionValueRow } from './notion-value-row';
 
 function NoNotion(): ReactElement {

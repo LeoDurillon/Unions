@@ -25,7 +25,11 @@
   item of the source as a ticket preview). A new project takes `integrations: [{ kind, secret, config }]`. The
   browser sees `PublicProject.integrations` (`toPublicIntegration`, `public-project.ts`: kind, title, config,
   `ready`), never a secret. The web server never calls a provider's `createItem` (ast-grep
-  `web-reads-notion-only`).
+  `web-reads-notion-only`). A new ticket takes `origin: { kind, id, url }` (`routes/ticket-origin.ts`, which also
+  keeps the item's images per kind), and an investigation's ticket `target: kind`. In the client, the New ticket
+  dialog has one "Import from …" tab per ready integration (`components/integrations/source-import.tsx`), the
+  investigation one "Also create it in …" switch per integration, and each kind's own screens (settings,
+  onboarding step, rule action fields) live in `components/integrations/<kind>/`.
 - Notion reads, from the web server: verifying a project's integration secret and data source, and importing
   a page of that data source as a ticket (`src/notion.ts` behind `NotionApi`, through the Notion
   `IntegrationProvider`), and the page a pull

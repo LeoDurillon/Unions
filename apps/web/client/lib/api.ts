@@ -4,11 +4,13 @@ import type {
   AgentEffort,
   AgentModel,
   FlowPreset,
+  IntegrationKindName,
   Investigation,
   InvestigationScope,
   PipelineStep,
   ProjectScript,
   ReviewVerdict,
+  TicketOrigin,
   ToolOption,
 } from '@union/core';
 
@@ -117,7 +119,8 @@ export const api = {
     request('POST', `${investigationPath(investigation)}/rerun`),
   requestInvestigationTicket: (
     investigation: Investigation,
-    ticket: { context: string; inNotion: boolean },
+    /** `target`: a tracker the ticket is created in too; null: GitHub only. */
+    ticket: { context: string; target: IntegrationKindName | null },
   ): Promise<Investigation> =>
     request('POST', `${investigationPath(investigation)}/ticket`, ticket),
   askFollowUp: (investigation: Investigation, prompt: string): Promise<Investigation> =>
@@ -166,8 +169,8 @@ export const api = {
     title: string;
     body: string;
     parentId?: number | null;
-    /** The Notion page it is imported from. */
-    notionPageId?: string;
+    /** The tracker item it is imported from (a Notion page). */
+    origin?: TicketOrigin;
     /** Null: the project's default flow. */
     flow?: PipelineStep[] | null;
   }): Promise<TicketSummary> => request('POST', '/api/tickets', input),
