@@ -47,6 +47,7 @@ export function GroupBySpecButton({
         </span>
       ) : null}
       <Button
+        variant="ghost"
         title="An agent groups the changed files by the parts of a specification you choose."
         onClick={() => {
           setOpen(true);

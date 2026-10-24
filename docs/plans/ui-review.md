@@ -1,6 +1,6 @@
 # Plan: UI/UX review
 
-Status: step 1 (quick wins) built on branch `ui-review` (2026-10-24); steps 2 to 5 planned. From a review of every page
+Status: steps 1 and 2 built (2026-10-24, branches `ui-review` and `ui-review-2`); steps 3 to 5 planned. From a review of every page
 of the live instance, light and dark, at 1400, 1024 and 390 px wide.
 
 ## Step 1: quick wins
@@ -19,15 +19,18 @@ of the live instance, light and dark, at 1400, 1024 and 390 px wide.
 
 ## Step 2: actions and hierarchy
 
-- A quiet (ghost) button variant and icon buttons for row actions (edit, delete, move, turn off); outlined buttons
-  only for real secondary actions.
-- One destructive pattern: `ConfirmButton` for GitHub App Remove and Memory ✕, like investigation Delete.
-- Ticket header: Review changes primary when a step waits for review; Approve / Revise reachable from the header.
-- Review page toolbar: the agent actions in one menu (Group by spec, Review with agent, Explain); Send review
-  secondary while it has no comment.
-- Event rules: a toggle for on/off, Edit and Delete as icons, the condition and the action set apart.
-- PR tab: CI checks and the description first; Change target, Simplify history and Split into a stack under
-  "More actions".
+- [x] A `ghost` button variant and a shared `IconButton` (pencil, check, trash) for row actions; `ConfirmButton`
+      takes an `icon` for a row's delete.
+- [x] GitHub App Remove asks first (it is refused while a project uses the app). Memory ✕ needs no confirm: it
+      only changes the draft, which Discard brings back.
+- [x] Ticket header: Review changes is primary while the final review waits for the user. The Approve bar sticks
+      to the bottom of the panel while idle, so it stays in reach along a long output (rather than a second copy
+      in the header).
+- [x] Review page: Group by spec, Review with agent and Explain in one quiet "Agent" group (not a menu: their
+      progress and Cancel stay in view); Send review is primary only once there are drafts.
+- [x] Event rules: an on/off switch, Edit and Delete as icons (Delete asks first), When and Then on their own lines.
+- [x] PR tab: Change target, Simplify history and Split into a stack folded under "More actions" after the
+      checks, the description and the discussion.
 
 ## Step 3: navigation and layout
 

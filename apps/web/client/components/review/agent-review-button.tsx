@@ -7,6 +7,7 @@ import { isActive, useAgentReview } from '../../lib/use-agent-review';
 import { Button, ErrorText } from '../ui';
 import { AgentReviewDialog } from './agent-review-dialog';
 import { GroupBySpecButton } from './group-by-spec-button';
+import { ExplainToggle } from './view-toggle';
 
 /** What the last run left: its error, or how many suggestions it added. */
 function LastRun({ review }: { review: AgentReviewView | null | undefined }): ReactElement | null {
@@ -65,6 +66,7 @@ function AgentReviewButton({
     <div className="flex items-center gap-2">
       <LastRun review={latest} />
       <Button
+        variant="ghost"
         title="The agent checks the change against the specs you give; its comments arrive as drafts."
         onClick={() => {
           setOpen(true);
@@ -86,7 +88,10 @@ function AgentReviewButton({
   );
 }
 
-/** The agent's two helpers on the review page: grouping the change by spec, and reviewing it. */
+/**
+ * The agent's helpers on the review page, in one quiet group: grouping the change by spec, reviewing
+ * it, and the Explain panel.
+ */
 export function AgentButtons({
   target,
   hasPullRequest,
@@ -95,9 +100,14 @@ export function AgentButtons({
   hasPullRequest: boolean;
 }): ReactElement {
   return (
-    <>
+    <fieldset className="flex min-w-0 items-center gap-1 rounded-lg border border-zinc-200 py-0.5 pr-0.5 pl-2 dark:border-zinc-800">
+      <legend className="sr-only">Agent</legend>
+      <span aria-hidden className="text-xs font-medium text-zinc-500">
+        Agent
+      </span>
       <GroupBySpecButton target={target} hasPullRequest={hasPullRequest} />
       <AgentReviewButton target={target} hasPullRequest={hasPullRequest} />
-    </>
+      <ExplainToggle />
+    </fieldset>
   );
 }

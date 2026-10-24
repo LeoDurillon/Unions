@@ -204,7 +204,11 @@ export function ReviewBar({
   const findings =
     finalReview && parseVerdict(content) === 'changes_requested' ? findingsOf(content) : null;
   return (
-    <div className="space-y-3 rounded-lg border border-amber-300 bg-amber-50 p-3 dark:border-amber-900 dark:bg-amber-950/40">
+    // While idle it sticks to the bottom of the panel, so Approve stays in reach along a long output;
+    // not while a draft is open, which can be as long as the output.
+    <div
+      className={`space-y-3 rounded-lg border border-amber-300 bg-amber-50 p-3 dark:border-amber-900 dark:bg-amber-950 ${review.mode === 'idle' ? 'sticky bottom-0 z-[1] shadow-[0_-4px_12px_rgb(0_0_0/0.06)]' : ''}`}
+    >
       {finalReview && review.mode === 'revise' ? (
         <p className="text-xs text-zinc-600 dark:text-zinc-400">
           The implementation agent makes these changes, then the final review runs again.

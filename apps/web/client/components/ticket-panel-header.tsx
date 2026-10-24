@@ -7,6 +7,12 @@ import { describePhase } from '../lib/labels';
 import { useCustomAgentNames } from '../lib/use-custom-agents';
 import { Badge, Button, CloseButton } from './ui';
 
+/** The final review waits for the user: reading the changes is what comes next. */
+function waitsForCodeReview(detail: TicketDetail): boolean {
+  const { phase } = detail.ticket;
+  return phase.kind === 'awaiting_approval' && phase.step === 'final_review';
+}
+
 export function TicketPanelHeader({
   detail,
   onReview,
@@ -40,7 +46,11 @@ export function TicketPanelHeader({
           </Button>
         ) : null}
         {detail?.ticket.branch ? (
-          <Button className="whitespace-nowrap" onClick={onReview}>
+          <Button
+            className="whitespace-nowrap"
+            variant={waitsForCodeReview(detail) ? 'primary' : 'secondary'}
+            onClick={onReview}
+          >
             Review changes
           </Button>
         ) : null}

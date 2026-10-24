@@ -5,6 +5,7 @@ import { useState, type ReactElement } from 'react';
 import type { GitHubAppStatus } from '../../../src/api-types';
 import { api } from '../../lib/api';
 import { useGitHubApp } from '../../lib/use-github-app';
+import { ConfirmButton } from '../confirm-button';
 import { Badge, Button, ErrorText } from '../ui';
 import { AppSetupForm } from './app-setup-form';
 
@@ -88,23 +89,24 @@ function ConfiguredApp({
         />
       ) : null}
       <ErrorText error={remove.error} />
-      <div className="flex gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <Button
+          className="whitespace-nowrap"
           onClick={() => {
             setReplacing(!replacing);
           }}
         >
           {replacing ? 'Cancel' : 'Replace credentials'}
         </Button>
-        <Button
-          variant="danger"
+        <ConfirmButton
+          label="Remove"
+          question="Remove the GitHub App and its key from Union? Projects still using it must switch to a token first."
+          confirmLabel="Remove the app"
           disabled={remove.isPending}
-          onClick={() => {
+          onConfirm={() => {
             remove.mutate();
           }}
-        >
-          Remove
-        </Button>
+        />
       </div>
     </section>
   );

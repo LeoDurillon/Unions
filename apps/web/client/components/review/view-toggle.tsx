@@ -1,4 +1,4 @@
-// The Explain panel's toggle, then the Unified / Split switch for the review diff.
+// The Unified / Split switch for the review diff, and the Explain panel's toggle (in the agent group).
 import { useState, type ReactElement } from 'react';
 
 import { isExplaining, useExplanations } from '../../lib/use-explanations';
@@ -44,7 +44,7 @@ function ExplainButton({ explain }: { explain: ExplainState }): ReactElement {
       type="button"
       aria-pressed={explain.open}
       aria-label={`Explain panel${running > 0 ? `, ${running} on the way` : ''}`}
-      className={`rounded-md border px-3 py-1.5 text-sm font-medium ${explain.open ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40' : 'border-zinc-300 dark:border-zinc-700'}`}
+      className={`rounded-md px-3 py-1.5 text-sm font-medium ${explain.open ? 'bg-indigo-100 text-indigo-900 dark:bg-indigo-950 dark:text-indigo-200' : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100'}`}
       onClick={() => {
         explain.setOpen(!explain.open);
       }}
@@ -55,12 +55,12 @@ function ExplainButton({ explain }: { explain: ExplainState }): ReactElement {
 }
 
 /** Opens and closes the Explain panel, with how many explanations are on the way. */
-function ExplainToggle(): ReactElement | null {
+export function ExplainToggle(): ReactElement | null {
   const explain = useExplain();
   return explain ? <ExplainButton explain={explain} /> : null;
 }
 
-/** The Explain panel's toggle, then the Unified / Split switch for the review diff. */
+/** The Unified / Split switch for the review diff. */
 export function ViewToggle({
   view,
   onChange,
@@ -68,10 +68,5 @@ export function ViewToggle({
   view: DiffView;
   onChange: (view: DiffView) => void;
 }): ReactElement {
-  return (
-    <>
-      <ExplainToggle />
-      <Segmented legend="Diff layout" options={VIEWS} value={view} onChange={onChange} />
-    </>
-  );
+  return <Segmented legend="Diff layout" options={VIEWS} value={view} onChange={onChange} />;
 }

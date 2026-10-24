@@ -159,7 +159,7 @@ export function SendReview({ canSend, ...props }: SendProps): ReactElement {
     <div ref={anchor} className="relative flex items-center gap-3">
       {canSend ? null : <span className="text-xs text-zinc-500">{props.copy.blocked}</span>}
       <Button
-        variant="primary"
+        variant={props.drafts > 0 ? 'primary' : 'secondary'}
         disabled={!canSend}
         aria-expanded={open}
         onClick={() => {

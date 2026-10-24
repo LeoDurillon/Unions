@@ -1,7 +1,8 @@
 // One lesson as a card: its whole rule, wrapped; the pencil opens a multiline field to edit it.
 import { MAX_LESSON_LENGTH } from '@union/core/lesson-input';
-import { useEffect, useRef, type ReactElement, type ReactNode } from 'react';
+import { useEffect, useRef, type ReactElement } from 'react';
 
+import { CheckIcon, IconButton, PencilIcon } from '../icon-button';
 import { inputClass } from '../ui';
 
 export type LessonCardProps = {
@@ -17,50 +18,6 @@ export type LessonCardProps = {
   onMove: (direction: -1 | 1) => void;
   onRemove: () => void;
 };
-
-const ICON_BUTTON =
-  'flex size-7 shrink-0 items-center justify-center rounded text-zinc-500 hover:bg-zinc-200 hover:text-zinc-800 disabled:opacity-30 dark:hover:bg-zinc-800 dark:hover:text-zinc-200';
-
-function IconButton({
-  label,
-  disabled = false,
-  onClick,
-  children,
-}: {
-  label: string;
-  disabled?: boolean;
-  onClick: () => void;
-  children: ReactNode;
-}): ReactElement {
-  return (
-    <button
-      type="button"
-      title={label}
-      aria-label={label}
-      className={ICON_BUTTON}
-      disabled={disabled}
-      onClick={onClick}
-    >
-      {children}
-    </button>
-  );
-}
-
-function PencilIcon(): ReactElement {
-  return (
-    <svg aria-hidden viewBox="0 0 20 20" fill="currentColor" className="size-4">
-      <path d="M13.6 2.6a2 2 0 0 1 2.8 0l1 1a2 2 0 0 1 0 2.8l-9.3 9.3a1 1 0 0 1-.46.26l-4 1a.75.75 0 0 1-.91-.91l1-4a1 1 0 0 1 .26-.46l9.6-9Zm1.4 1.4L5.9 13.1l-.5 2 2-.5L16.6 5.4l-1.6-1.4Z" />
-    </svg>
-  );
-}
-
-function CheckIcon(): ReactElement {
-  return (
-    <svg aria-hidden viewBox="0 0 20 20" fill="currentColor" className="size-4">
-      <path d="M16.7 5.3a1 1 0 0 1 0 1.4l-8 8a1 1 0 0 1-1.4 0l-4-4a1 1 0 1 1 1.4-1.4L8 12.6l7.3-7.3a1 1 0 0 1 1.4 0Z" />
-    </svg>
-  );
-}
 
 /** The rule in a field that grows with it; Enter or Escape closes it (a rule is one paragraph). */
 function RuleField({ props }: { props: LessonCardProps }): ReactElement {
@@ -132,7 +89,7 @@ export function LessonCard(props: LessonCardProps): ReactElement {
         >
           ↓
         </IconButton>
-        <IconButton label="Remove lesson" onClick={props.onRemove}>
+        <IconButton label="Remove lesson" danger onClick={props.onRemove}>
           ✕
         </IconButton>
       </div>

@@ -96,7 +96,7 @@ Loose ends found while building, not planned yet (2026-10-15):
 
 ## Ideas
 
-- [UI/UX review](ui-review.md): quick wins (step 1) built on branch `ui-review`; actions, navigation, board and
+- [UI/UX review](ui-review.md): quick wins and action hierarchy (steps 1 and 2) built; navigation, board and
   per-page fixes planned.
 
 - [Prefill steps on GitHub issue import](issue-import-prefill.md)

@@ -14,6 +14,9 @@ const BUTTON_VARIANTS = {
   secondary:
     'border border-zinc-300 bg-white hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800',
   danger: 'bg-red-600 text-white hover:bg-red-500 disabled:bg-red-400',
+  /** A minor action beside others: no border until hovered. */
+  ghost:
+    'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100',
   /** A destructive action before it is confirmed: red text, no fill. */
   quietDanger: 'text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40',
 } as const;

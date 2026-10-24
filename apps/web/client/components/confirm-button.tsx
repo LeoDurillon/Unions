@@ -1,7 +1,34 @@
 // A destructive action that asks first: a quiet red button, then the question with confirm and keep.
-import { useState, type ReactElement } from 'react';
+import { useState, type ReactElement, type ReactNode } from 'react';
 
+import { IconButton } from './icon-button';
 import { Button } from './ui';
+
+/** The button before the question: an icon for a row action, else quiet red text. */
+function Trigger({
+  label,
+  icon,
+  disabled,
+  onClick,
+}: {
+  label: string;
+  icon: ReactNode;
+  disabled: boolean;
+  onClick: () => void;
+}): ReactElement {
+  if (icon !== null) {
+    return (
+      <IconButton label={label} danger disabled={disabled} onClick={onClick}>
+        {icon}
+      </IconButton>
+    );
+  }
+  return (
+    <Button variant="quietDanger" disabled={disabled} onClick={onClick}>
+      {label}
+    </Button>
+  );
+}
 
 /** A destructive action that asks first: a quiet red button, then the question with confirm and keep. */
 export function ConfirmButton({
@@ -9,26 +36,29 @@ export function ConfirmButton({
   question,
   confirmLabel,
   disabled = false,
+  icon = null,
   onConfirm,
 }: {
+  /** The button's text, or its accessible name when `icon` is set. */
   label: string;
   question: string;
   confirmLabel: string;
   disabled?: boolean;
+  /** Shows an icon-only button (a row action) instead of the quiet red one. */
+  icon?: ReactNode;
   onConfirm: () => void;
 }): ReactElement {
   const [asking, setAsking] = useState(false);
   if (!asking) {
     return (
-      <Button
-        variant="quietDanger"
+      <Trigger
+        label={label}
+        icon={icon}
         disabled={disabled}
         onClick={() => {
           setAsking(true);
         }}
-      >
-        {label}
-      </Button>
+      />
     );
   }
   return (

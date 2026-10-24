@@ -1,12 +1,12 @@
-// The ticket's pull request: link it, its CI checks, keep its description current, then read its
-// GitHub discussion and pick what goes to the agent.
+// The ticket's pull request: link it, its CI checks, keep its description current, read its GitHub
+// discussion and pick what goes to the agent, then the rarer branch operations.
 import { useState, type ReactElement } from 'react';
 
 import type { TicketDetail } from '../../src/api-types';
 import { PullRequestRow } from './pull-request-row';
 import { BranchActions } from './pull-request/branch-actions';
+import { MoreActions } from './pull-request/more-actions';
 import { PullRequestSections } from './pull-request/pull-request-sections';
-import { SplitStack } from './pull-request/split-stack';
 import { StackPanel } from './pull-request/stack-panel';
 import { stackPullRequests } from './pull-request/stack-pr-picker';
 
@@ -30,7 +30,6 @@ export function PullRequestTab({ detail }: { detail: TicketDetail }): ReactEleme
       <PullRequestRow ticket={ticket} project={project} />
       <StackPanel detail={detail} shown={pr} />
       <BranchActions detail={detail} />
-      <SplitStack detail={detail} />
       {pr === null ? (
         <p className="text-sm text-zinc-500">
           Link the pull request to read its discussion here and import review comments.
@@ -38,6 +37,7 @@ export function PullRequestTab({ detail }: { detail: TicketDetail }): ReactEleme
       ) : (
         <PullRequestSections detail={detail} pr={pr} onPick={setPr} />
       )}
+      <MoreActions detail={detail} />
     </div>
   );
 }
