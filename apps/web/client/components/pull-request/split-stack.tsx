@@ -3,8 +3,12 @@ import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../../src/api-types';
 import { useTicketCommands } from '../../lib/use-ticket-commands';
+import { HelpText } from '../help-text';
 import { Button, ErrorText } from '../ui';
 import { canRewrite } from './branch-status';
+
+const HELP =
+  'An agent proposes slices of the spec, each one a pull request on the one below. You edit and approve the plan in its Worker tab; the implementation agent then rewrites the commits into the slices, the code unchanged, and the stack is pushed and opened on GitHub.';
 
 /** Shown while the pull request is open, on projects that turned stacks on. */
 export function SplitStack({ detail }: { detail: TicketDetail }): ReactElement | null {
@@ -34,11 +38,7 @@ export function SplitStack({ detail }: { detail: TicketDetail }): ReactElement |
           Split into a stack
         </Button>
       </div>
-      <p className="text-xs text-zinc-500">
-        An agent proposes slices of the spec, each one a pull request on the one below; you edit and
-        approve the plan in its Worker tab. The implementation agent then rewrites the commits into
-        the slices, the code unchanged, and the stack is pushed and opened on GitHub.
-      </p>
+      <HelpText>{HELP}</HelpText>
       <ErrorText error={command.error} />
     </div>
   );

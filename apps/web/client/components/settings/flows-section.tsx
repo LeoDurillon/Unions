@@ -77,7 +77,7 @@ export function FlowsSection({ project }: { project: PublicProject }): ReactElem
             key={preset.id}
             preset={preset}
             isDefault={preset.id === defaultFlow}
-            canRemove={flows.length > 1}
+            canRemove={flows.length > 1 && preset.id !== defaultFlow}
             onChange={(next) => {
               replace(at, next);
             }}

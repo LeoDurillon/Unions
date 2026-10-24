@@ -58,7 +58,7 @@ function IterationField({
   return (
     <Field label="Iteration limit" hint="Agent turns before the step ends, even if checks are red.">
       <input
-        className={`${inputClass} w-24`}
+        className={`${inputClass} max-w-24`}
         type="number"
         min={1}
         max={MAX_ITERATIONS}

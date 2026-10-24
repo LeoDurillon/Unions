@@ -6,7 +6,7 @@ state (open, draft, merged, closed), author, branches, review decision, size and
 **Open ticket** button. It is fetched when the tab opens, at most once a minute, or on **Refresh**: live events do
 not refetch it.
 
-A pull request without a ticket shows **Add to reviews** on hover (or keyboard focus): it joins **Under review**, the
+A pull request without a ticket shows **Add to reviews**: it joins **Under review**, the
 part at the top of the same tab, per project (`current_reviews`, a snapshot of its title, author and branches, so the
 part needs no GitHub call), where it can be removed (after a confirmation: its drafts and preview go with it).
 

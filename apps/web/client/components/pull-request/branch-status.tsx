@@ -4,7 +4,11 @@ import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../../src/api-types';
 import { useTicketCommands } from '../../lib/use-ticket-commands';
+import { HelpText } from '../help-text';
 import { Button, ErrorText } from '../ui';
+
+const HELP =
+  'Git rebases the branch and the checks run, then it is force-pushed. The implementation agent is called only for conflicts or failing checks, and then the final review runs again. On failure the branch is left as it was.';
 
 /**
  * Where the branch can be rewritten (a rebase, a simpler history): the ticket waits on its final
@@ -60,11 +64,7 @@ export function BranchStatus({ detail }: { detail: TicketDetail }): ReactElement
           Rebase
         </Button>
       </div>
-      <p className="text-xs text-zinc-500">
-        Git rebases the branch and the checks run, then it is force-pushed. The implementation agent
-        is called only for conflicts or failing checks, and then the final review runs again. On
-        failure the branch is left as it was.
-      </p>
+      <HelpText>{HELP}</HelpText>
       <ErrorText error={command.error} />
     </div>
   );

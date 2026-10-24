@@ -1,5 +1,6 @@
-// The tools the user added to the list, and the form to add more.
+// The tools the user added to the list, the built-in ones folded, and the form to add more.
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type { ToolOption } from '@union/core';
 import { useState, type ReactElement, type SubmitEvent } from 'react';
 
 import { api } from '../../lib/api';
@@ -53,6 +54,25 @@ function AddToolForm(): ReactElement {
   );
 }
 
+/** The tools every agent page lists without adding them: Claude Code's own and the git rules the defaults use. */
+function BuiltIn({ tools }: { tools: ToolOption[] }): ReactElement | null {
+  const builtIn = tools.filter((tool) => tool.source === 'built-in');
+  if (builtIn.length === 0) {
+    return null;
+  }
+  return (
+    <details className="text-xs text-zinc-500">
+      <summary className="cursor-pointer select-none">
+        Built in ({builtIn.length}): Claude Code&apos;s tools and the git rules the agents use by
+        default
+      </summary>
+      <p className="mt-1 font-mono leading-relaxed">
+        {builtIn.map((tool) => tool.name).join(' · ')}
+      </p>
+    </details>
+  );
+}
+
 /** The tools the user added to the list, and the form to add more. */
 export function ToolList(): ReactElement {
   const queryClient = useQueryClient();
@@ -73,6 +93,7 @@ export function ToolList(): ReactElement {
           whatever is selected.
         </p>
       </header>
+      <BuiltIn tools={tools.data ?? []} />
       <ErrorText error={tools.error ?? remove.error} />
       {custom.length === 0 ? (
         <p className="text-sm text-zinc-500">No tools added yet.</p>

@@ -37,7 +37,12 @@ export function FlowPresetRow({
           <input type="radio" name="default-flow" checked={isDefault} onChange={onMakeDefault} />
           Default for new tickets
         </label>
-        <Button className="ml-auto" disabled={!canRemove} onClick={onRemove}>
+        <Button
+          className="ml-auto"
+          disabled={!canRemove}
+          title={isDefault ? 'Make another flow the default first' : undefined}
+          onClick={onRemove}
+        >
           Remove
         </Button>
       </div>

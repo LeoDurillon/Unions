@@ -3,6 +3,7 @@ import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../../src/api-types';
 import { useTicketCommands } from '../../lib/use-ticket-commands';
+import { HelpText } from '../help-text';
 import { Button, ErrorText } from '../ui';
 import { canRewrite } from './branch-status';
 
@@ -58,7 +59,7 @@ export function SimplifyHistory({ detail }: { detail: TicketDetail }): ReactElem
           Simplify history
         </Button>
       </div>
-      <p className="text-xs text-zinc-500">{HELP}</p>
+      <HelpText>{HELP}</HelpText>
       <ErrorText error={command.error} />
     </div>
   );

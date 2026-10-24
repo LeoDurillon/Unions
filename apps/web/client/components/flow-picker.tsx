@@ -29,6 +29,9 @@ export function flowSteps(flow: Flow, names: CustomAgentNames = {}): string {
   return flow.map((step) => stepTitle(step, names)).join(' → ');
 }
 
+/** The steps every flow ends with, shown after the planning ones, never unticked. */
+const LOCKED_STEPS = ['implement', 'final_review'] as const;
+
 /**
  * A custom flow's planning steps, one chip each, then its custom agents; the implementation and the
  * review always run.
@@ -53,6 +56,15 @@ export function PlanningChips({
           >
             {stepTitle(planning)}
           </CheckChip>
+        ))}
+        {LOCKED_STEPS.map((step) => (
+          <span
+            key={step}
+            title="Every flow ends with the implementation and the final review"
+            className="rounded-full border border-dashed border-zinc-300 px-2.5 py-0.5 text-xs text-zinc-500 dark:border-zinc-700"
+          >
+            ✓ {stepTitle(step)} 🔒
+          </span>
         ))}
       </ChipGroup>
       <CustomFlowSteps flow={flow} onChange={onChange} />

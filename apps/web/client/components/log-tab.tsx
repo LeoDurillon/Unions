@@ -119,17 +119,20 @@ function RunSection({
       className="border-t border-zinc-300 pt-2 first:border-t-0 first:pt-0 dark:border-zinc-700"
     >
       <summary className="flex cursor-pointer list-none items-baseline gap-2">
-        <span aria-hidden className="w-3 text-center text-zinc-500">
+        <span aria-hidden className="w-3 shrink-0 text-center text-zinc-500">
           {open ? '▾' : '▸'}
         </span>
-        {run.header ? (
-          <Line entry={run.header} />
-        ) : (
-          <p className="font-semibold">Before the runs</p>
-        )}
-        <span className="text-zinc-500">
-          {run.lines.length} line{run.lines.length === 1 ? '' : 's'}
-          {total ? ` · ${total}` : ''}
+        <span className="min-w-0">
+          {run.header ? (
+            <Line entry={run.header} />
+          ) : (
+            <p className="font-semibold">Before the runs</p>
+          )}
+          {/* The run's size and usage on a line of their own, so a long header does not wrap them. */}
+          <span className="block text-zinc-500">
+            {run.lines.length} line{run.lines.length === 1 ? '' : 's'}
+            {total ? ` · ${total}` : ''}
+          </span>
         </span>
       </summary>
       {open ? (

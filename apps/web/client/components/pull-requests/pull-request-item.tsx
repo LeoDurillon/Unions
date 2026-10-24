@@ -7,6 +7,10 @@ import { Badge, Button } from '../ui';
 
 type Tone = 'green' | 'red' | 'amber' | 'blue' | 'neutral';
 
+/** The size and the action sit in fixed columns, so the rows line up. */
+const STATS = 'w-28 shrink-0 pt-0.5 text-right font-mono text-xs';
+export const ACTION = 'flex w-36 shrink-0 justify-end';
+
 function stateBadge(pull: PullRequestListItem): { label: string; tone: Tone } {
   if (pull.state === 'merged') {
     return { label: 'merged', tone: 'blue' };
@@ -23,7 +27,7 @@ const REVIEW_BADGES: Record<string, { label: string; tone: Tone }> = {
   REVIEW_REQUIRED: { label: 'review required', tone: 'amber' },
 };
 
-/** What a row offers: its ticket when linked, else adding it to the current reviews (shown on hover). */
+/** What a row offers: its ticket when linked, else adding it to the reviews (a quiet button). */
 function RowAction({
   pull,
   inReview,
@@ -51,7 +55,7 @@ function RowAction({
     return <Badge tone="blue">in reviews</Badge>;
   }
   return (
-    <Button className="opacity-0 group-hover:opacity-100 focus:opacity-100" onClick={onAddReview}>
+    <Button variant="ghost" onClick={onAddReview}>
       Add to reviews
     </Button>
   );
@@ -76,7 +80,7 @@ export function PullRequestItem({
   const review =
     pull.state === 'open' && pull.reviewDecision ? REVIEW_BADGES[pull.reviewDecision] : undefined;
   return (
-    <li className="group flex items-start gap-3 border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
+    <li className="flex items-start gap-3 border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
       <Badge tone={state.tone}>{state.label}</Badge>
       <div className="min-w-0 flex-1 space-y-1">
         <a
@@ -98,16 +102,18 @@ export function PullRequestItem({
           {joins === null ? null : <span>joins the stack of #{joins} in reviews</span>}
         </p>
       </div>
-      <span className="shrink-0 font-mono text-xs">
+      <span className={STATS}>
         <span className="text-green-700 dark:text-green-400">+{pull.additions}</span>{' '}
         <span className="text-red-700 dark:text-red-400">−{pull.deletions}</span>
       </span>
-      <RowAction
-        pull={pull}
-        inReview={inReview}
-        onOpenTicket={onOpenTicket}
-        onAddReview={onAddReview}
-      />
+      <div className={ACTION}>
+        <RowAction
+          pull={pull}
+          inReview={inReview}
+          onOpenTicket={onOpenTicket}
+          onAddReview={onAddReview}
+        />
+      </div>
     </li>
   );
 }

@@ -4,7 +4,7 @@ import { useState, type ReactElement } from 'react';
 import type { PullRequestListItem } from '../../../src/api-types';
 import { addableMembers, unlistedMembers, type StackRow } from '../../lib/pull-request-stacks';
 import { Badge, Button } from '../ui';
-import { PullRequestItem } from './pull-request-item';
+import { ACTION, PullRequestItem } from './pull-request-item';
 
 /** The ticket every listed member belongs to (a split ticket's stack), if they share one. */
 function ticketOf(pulls: PullRequestListItem[]): number | null {
@@ -162,13 +162,15 @@ export function StackItem({
         <Toggle open={open} onToggle={setOpen} />
         <SizeBadges row={row} />
         <StackSummary row={row} />
-        <StackAction
-          pulls={pulls}
-          inReview={inReview}
-          adding={adding}
-          onAdd={onAddStack}
-          onOpenTicket={onOpenTicket}
-        />
+        <div className={ACTION}>
+          <StackAction
+            pulls={pulls}
+            inReview={inReview}
+            adding={adding}
+            onAdd={onAddStack}
+            onOpenTicket={onOpenTicket}
+          />
+        </div>
       </div>
       {open ? (
         <ul className="border-t border-zinc-200 pl-8 dark:border-zinc-800">

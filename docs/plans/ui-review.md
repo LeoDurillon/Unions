@@ -1,6 +1,6 @@
 # Plan: UI/UX review
 
-Status: steps 1 to 4 built (2026-10-24); step 5 planned. From a review of every page
+Status: built (2026-10-24), steps 1 to 5; two small items left out (step 5). From a review of every page
 of the live instance, light and dark, at 1400, 1024 and 390 px wide.
 
 ## Step 1: quick wins
@@ -63,16 +63,20 @@ of the live instance, light and dark, at 1400, 1024 and 390 px wide.
 
 ## Step 5: pages
 
-- Help text: one short line per field, the rest behind an ⓘ or a "Learn more".
-- Pull requests: skeleton rows while loading; fixed right-hand columns for the stats and the actions; a visible
-  "Review" action instead of a hover-only one.
-- Current reviews: the row opens the review; Remove as an icon; the hint in the empty state.
-- Running previews: service chips ("api ↗") with the URL on hover; an empty state.
-- Investigations: hide "done" in the list; tool chips show the selected tools plus "Add tool…" (agent pages too);
-  answer tables scroll visibly.
-- Notifications: say what Clear does; fold the desktop-notification footer once seen.
-- Review page: file paths truncated in the middle; Tree by default when many files share a prefix.
-- Settings: Notion group renamed Integrations; base branch picked with the branch picker; Iteration limit as a
-  number input; Flows show Implementation and Final review as locked chips and cannot remove the default flow;
-  a taller compose editor; Tools page says which tools are built in.
-- Log: run stats on their own line.
+- [x] Help text: `HelpText` shows the first sentence with "more" (the PR tab's Rebase, Change target, Simplify
+      history, Split into a stack). Other long hints stay as they are for now.
+- [x] Pull requests: grey rows while GitHub is read; the size and the action in fixed right-hand columns;
+      **Add to reviews** always visible (quiet), no longer on hover only.
+- [x] Under review (was Current reviews): Remove as an icon that asks first (step 3). The row still links its title
+      to GitHub; Open review opens it.
+- [x] Running previews: one chip per service ("api ↗", the URL on hover); an empty state saying where to start one.
+- [x] Investigations: no "done" badge in the list; the tool chips show the selected tools and "+ Add a tool (N
+      more)" (agent pages too); wide tables in answers scroll on their own.
+- [x] Notifications: **Delete all** (asks first); the desktop setting folded to one line saying where it stands.
+- [x] Review page: a file's name always shows in full, its folders cut from the left (`…/conception/package.json`).
+      Not done: Tree by default, no longer needed once the names show.
+- [x] Settings: the Notion group is **Integrations › Notion**; Iteration limit a narrow number field; Flows show
+      Implementation and Final review as locked chips (in New ticket too) and the default flow cannot be
+      removed; a taller, resizable compose editor; the Tools page lists the built-in tools, folded.
+      Not done: a branch picker for the base branch (it needs a project-level branch list on the server).
+- [x] Log: each run's line count and usage on its own line under its title.

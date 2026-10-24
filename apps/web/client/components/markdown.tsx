@@ -1,5 +1,11 @@
 // Markdown as the panel shows it.
-import { isValidElement, useState, type ComponentProps, type ReactElement } from 'react';
+import {
+  isValidElement,
+  useState,
+  type ComponentProps,
+  type ReactElement,
+  type ReactNode,
+} from 'react';
 import ReactMarkdown, { defaultUrlTransform } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -62,7 +68,16 @@ function CodeBlock({ children, ...props }: ComponentProps<'pre'>): ReactElement 
   return source === null ? <pre {...props}>{children}</pre> : <MermaidDiagram source={source} />;
 }
 
-const COMPONENTS = { img: Image, input: TaskBox, pre: CodeBlock };
+/** A wide table scrolls on its own instead of pushing the page wider. */
+function Table({ children }: { children?: ReactNode }): ReactElement {
+  return (
+    <div className="max-w-full overflow-x-auto">
+      <table>{children}</table>
+    </div>
+  );
+}
+
+const COMPONENTS = { img: Image, input: TaskBox, pre: CodeBlock, table: Table };
 
 /**
  * Markdown as the panel shows it. `files` maps a ticket file's name to its address, for the

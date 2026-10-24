@@ -101,6 +101,26 @@ function Toolbar({
   );
 }
 
+const LOADING_ROWS = 6;
+
+/** Grey rows while GitHub is read the first time. */
+function LoadingRows(): ReactElement {
+  return (
+    <ul aria-label="Loading pull requests" className="mt-3 animate-pulse">
+      {Array.from({ length: LOADING_ROWS }, (_, index) => (
+        <li
+          key={index}
+          className="flex items-center gap-3 border-b border-zinc-200 px-4 py-4 dark:border-zinc-800"
+        >
+          <span className="h-4 w-12 rounded-full bg-zinc-200 dark:bg-zinc-800" />
+          <span className="h-4 flex-1 rounded bg-zinc-200 dark:bg-zinc-800" />
+          <span className="h-4 w-28 rounded bg-zinc-200 dark:bg-zinc-800" />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 /** The list, as the server keeps it, and Refresh: GitHub read again now, put in its place. */
 function usePullRequestList(
   projectId: number,
@@ -156,6 +176,7 @@ export function PullRequestsPage({
           <ErrorText error={query.error ?? refresh.error} />
         </div>
         <UnderReview project={project} />
+        {!list && query.isFetching ? <LoadingRows /> : null}
         {list && shown === 0 ? (
           <p className="px-4 text-sm text-zinc-500">No pull requests.</p>
         ) : null}

@@ -5,8 +5,8 @@ and linked.
 
 ## Planned in detail
 
-- [UI/UX review](ui-review.md): quick wins, action hierarchy, navigation and the board (steps 1 to 4) built;
-  per-page fixes planned.
+- [UI/UX review](ui-review.md): built (2026-10-24), steps 1 to 5: quick wins, action hierarchy,
+  navigation, the board and per-page fixes.
 - [One set of specs per review](review-specs.md): a Specs bar read by Review with agent, Explain and Group by
   spec, saved edits, several Notion pages per pull request. Built (branch `review-specs`).
 - [Container commands](container-commands.md): run a command or saved script in a ticket's environment, send its

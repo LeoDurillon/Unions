@@ -5,8 +5,12 @@ import { useState, type ReactElement } from 'react';
 import type { TicketDetail } from '../../../src/api-types';
 import { api } from '../../lib/api';
 import { BranchPicker } from '../branch-picker';
+import { HelpText } from '../help-text';
 import { Button, ErrorText } from '../ui';
 import { canRewrite } from './branch-status';
+
+const HELP =
+  "Only this ticket's commits move onto the new branch, then it is force-pushed and the pull request targets it. Git rebases them and the checks run; the implementation agent is called only for conflicts or failing checks, and then the final review runs again. On failure the branch is left as it was.";
 
 function useRetarget(
   ticketId: number,
@@ -82,12 +86,7 @@ export function ChangeTarget({ detail }: { detail: TicketDetail }): ReactElement
           {picking ? 'Close' : 'Change target'}
         </Button>
       </div>
-      <p className="text-xs text-zinc-500">
-        Only this ticket&apos;s commits move onto the new branch (git rebases them and the checks
-        run), then it is force-pushed and the pull request targets it. The implementation agent is
-        called only for conflicts or failing checks, and then the final review runs again. On
-        failure the branch is left as it was.
-      </p>
+      <HelpText>{HELP}</HelpText>
       {picking && allowed ? (
         <TargetPicker
           ticketId={ticket.id}

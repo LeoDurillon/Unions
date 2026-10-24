@@ -38,7 +38,9 @@ function InvestigationItem({
       >
         <span className="block truncate text-sm font-medium">{investigation.title}</span>
         <span className="flex items-center gap-2 text-xs text-zinc-500">
-          <Badge tone={status.tone}>{status.label}</Badge>
+          {investigation.status === 'succeeded' ? null : (
+            <Badge tone={status.tone}>{status.label}</Badge>
+          )}
           {SCOPE_LABELS[investigation.scope].title}
           <span className="ml-auto">{new Date(investigation.createdAt).toLocaleDateString()}</span>
         </span>

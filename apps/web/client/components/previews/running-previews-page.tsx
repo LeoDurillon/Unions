@@ -48,11 +48,17 @@ function Links({ preview }: { preview: RunningPreview }): ReactElement | null {
   }
   const urls = preview.urls ?? (preview.url ? [{ service: '', url: preview.url }] : []);
   return (
-    <ul className="flex flex-wrap gap-x-3 text-xs">
+    <ul className="flex flex-wrap gap-1.5 text-xs">
       {urls.map(({ service, url }) => (
         <li key={url}>
-          <a className={LINK} href={url} target="_blank" rel="noreferrer">
-            {service === '' ? url : `${service}: ${url}`} ↗
+          <a
+            className="inline-block rounded-full border border-indigo-200 px-2 py-0.5 text-indigo-700 hover:bg-indigo-50 dark:border-indigo-900 dark:text-indigo-300 dark:hover:bg-indigo-950/40"
+            href={url}
+            target="_blank"
+            rel="noreferrer"
+            title={url}
+          >
+            {service === '' ? 'Open' : service} ↗
           </a>
         </li>
       ))}
@@ -77,9 +83,6 @@ function Row({
       <div className="min-w-0 flex-1 space-y-1">
         <div className="flex min-w-0 items-center gap-2">
           <Badge tone={status.tone}>{status.label}</Badge>
-          <Badge tone="neutral">
-            {preview.owner.kind === 'ticket' ? 'ticket' : 'pull request'}
-          </Badge>
           <Owner preview={preview} onOpenTicket={onOpenTicket} />
         </div>
         <p className="text-xs text-zinc-500">
@@ -122,7 +125,12 @@ export function RunningPreviewsPage({
       </header>
       <ErrorText error={previews.error ?? stop.error} />
       {previews.data && list.length === 0 ? (
-        <p className="px-4 py-6 text-sm text-zinc-500">No preview is running.</p>
+        <div className="px-4 py-10 text-center text-sm text-zinc-500">
+          <p className="font-medium text-zinc-700 dark:text-zinc-300">No preview is running.</p>
+          <p className="mt-1">
+            Start one from a ticket&apos;s Preview tab, or from a pull request&apos;s review.
+          </p>
+        </div>
       ) : null}
       <ul className="min-h-0 flex-1 overflow-y-auto">
         {list.map((preview) => (

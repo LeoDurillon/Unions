@@ -38,8 +38,8 @@ export const SETTINGS_GROUPS = [
     ],
   },
   {
-    label: 'Notion',
-    sections: [{ id: 'notion', label: 'Connection' }],
+    label: 'Integrations',
+    sections: [{ id: 'notion', label: 'Notion' }],
   },
   {
     label: 'Events',

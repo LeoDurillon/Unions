@@ -98,7 +98,7 @@ export function AdditionsField({
       hint={`Optional. Merged over ${composeFile || 'the compose file'} like a second -f file: new services, or keys added to existing ones. Relative paths start from that file's folder. Never written to the repository; checked like the rest.`}
     >
       <textarea
-        className={`${inputClass} h-48 font-mono text-xs`}
+        className={`${inputClass} h-96 resize-y font-mono text-xs`}
         value={value}
         spellCheck={false}
         placeholder={ADDITIONS_PLACEHOLDER}
