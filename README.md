@@ -27,6 +27,8 @@ until you approve it.
 
 Everything runs on your machine. Credentials stay in a local SQLite database and never reach the agent containers.
 
+![The board: tickets in Backlog, In progress, In review and Done, with what each one needs from you](docs/screenshots/board.png)
+
 ## Features
 
 - 🗂️ **Kanban over GitHub Projects**: one board per project, mirrored both ways: one issue per ticket, one comment
@@ -75,6 +77,26 @@ flowchart LR
 | **Final review**   | A reviewer agent checks the branch against the plan                                             | Review the diff, comment, approve            |
 | **Done**           | The pull request is marked ready for review                                                     | Merge on GitHub                              |
 
+<table>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/ticket-plan.png" alt="A ticket's technical plan, with a Mermaid diagram, waiting for Approve or Request revision"></td>
+    <td width="50%"><img src="docs/screenshots/review.png" alt="The review page: the branch's diff, file by file, with Review with agent and Send review"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Approve each planning step</b>, or ask for a revision</td>
+    <td align="center"><b>Review the diff</b> and send line comments to the implementer</td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/investigation.png" alt="An investigation's answer about the repository, with a follow-up box"></td>
+    <td width="50%" valign="middle">
+      <b>Investigations</b>: ask an agent about the repository or any subject, then follow up or turn the answer
+      into a ticket.
+    </td>
+  </tr>
+</table>
+
+<sub>Screenshots show a demo project.</sub>
+
 Under the hood, Union is two Bun processes sharing one SQLite database:
 
 - **web**: a Hono API and a React SPA. It reads state, writes plain records, and streams events to the browser over
@@ -99,8 +121,8 @@ Under the hood, Union is two Bun processes sharing one SQLite database:
 ### Run it
 
 ```sh
-git clone git@github.com:LeoDurillon/Unions.git union-next
-cd union-next
+git clone git@github.com:LeoDurillon/Unions.git
+cd Unions
 bun run compose        # or: docker compose up --build
 ```
 
