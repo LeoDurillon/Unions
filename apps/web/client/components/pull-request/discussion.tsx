@@ -3,6 +3,7 @@
 import type { ReactElement } from 'react';
 
 import type { CommentView, DiscussionResponse } from '../../../src/api-types';
+import { ticketRepliesBase, usePrReplies, type PrReplies } from '../../lib/use-pr-replies';
 import {
   useCommentMutations,
   useComments,
@@ -14,6 +15,7 @@ import { ImportComments } from '../review/import-comments';
 import { ErrorText } from '../ui';
 import { NoteCard, ThreadCard } from './note-card';
 import { filterNotes, NoteFilterControl, useNoteFilter } from './note-filter';
+import { ReplyArea, SendAllReplies } from './reply-area';
 
 type Mutations = ReturnType<typeof useCommentMutations>;
 type ImportNote = ReturnType<typeof useImportMutations>['importNote'];
@@ -55,9 +57,11 @@ function ImportedDrafts({
 function Notes({
   discussion,
   importNote,
+  replies,
 }: {
   discussion: DiscussionResponse;
   importNote: ImportNote;
+  replies: PrReplies;
 }): ReactElement {
   const [filter, setFilter] = useNoteFilter();
   const notes = filterNotes(discussion.notes, filter);
@@ -78,6 +82,14 @@ function Notes({
           onImport={() => {
             importNote.mutate(note.url);
           }}
+          reply={
+            <ReplyArea
+              replies={replies}
+              target={{ kind: 'note', url: note.url }}
+              githubUrl={note.url}
+              quote={note}
+            />
+          }
         />
       ))}
     </section>
@@ -87,9 +99,11 @@ function Notes({
 function Threads({
   ticketId,
   discussion,
+  replies,
 }: {
   ticketId: number;
   discussion: DiscussionResponse;
+  replies: PrReplies;
 }): ReactElement {
   const { threads } = discussion;
   return (
@@ -106,6 +120,13 @@ function Threads({
           key={thread.comments[0]?.url ?? thread.path}
           thread={thread}
           imported={discussion.imported.includes(thread.comments[0]?.url ?? '')}
+          reply={
+            <ReplyArea
+              replies={replies}
+              target={{ kind: 'thread', threadId: thread.id }}
+              githubUrl={thread.comments[0]?.url}
+            />
+          }
         />
       ))}
     </section>
@@ -119,6 +140,7 @@ export function Discussion({ ticketId, pr }: { ticketId: number; pr: number }): 
   const comments = useComments(target);
   const mutations = useCommentMutations(target);
   const { importNote } = useImportMutations(ticketId, pr);
+  const replies = usePrReplies(ticketRepliesBase(ticketId), pr, discussion.refetch, `?pr=${pr}`);
   if (!discussion.data) {
     return discussion.error ? (
       <ErrorText error={discussion.error} />
@@ -128,9 +150,10 @@ export function Discussion({ ticketId, pr }: { ticketId: number; pr: number }): 
   }
   return (
     <div className="space-y-6">
+      <SendAllReplies replies={replies} />
       <ImportedDrafts comments={comments.data ?? []} mutations={mutations} />
-      <Notes discussion={discussion.data} importNote={importNote} />
-      <Threads ticketId={ticketId} discussion={discussion.data} />
+      <Notes discussion={discussion.data} importNote={importNote} replies={replies} />
+      <Threads ticketId={ticketId} discussion={discussion.data} replies={replies} />
     </div>
   );
 }

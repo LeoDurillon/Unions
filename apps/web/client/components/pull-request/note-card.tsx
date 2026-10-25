@@ -1,6 +1,6 @@
-// A review summary or a conversation comment, with its Add to review action when there is one.
+// A review summary or a conversation comment, with its Add to review action when there is one; a line thread; each with its replies below.
 import { githubTitle } from '@union/core/github-text';
-import { useState, type ReactElement } from 'react';
+import { useState, type ReactElement, type ReactNode } from 'react';
 
 import type { PullRequestNote, PullRequestThread } from '../../../src/api-types';
 import { Badge, Button } from '../ui';
@@ -88,12 +88,15 @@ export function NoteCard({
   imported = false,
   pending = false,
   onImport,
+  reply,
 }: {
   note: PullRequestNote;
   imported?: boolean;
   pending?: boolean;
-  /** Without it the note is read only (a pull request reviewed without a ticket). */
+  /** Without it the note cannot be added to the review (a pull request reviewed without a ticket). */
   onImport?: () => void;
+  /** Its replies and Quote reply; without it the note is read only. */
+  reply?: ReactNode;
 }): ReactElement {
   const [open, setOpen] = useState(!note.bot);
   return (
@@ -113,6 +116,7 @@ export function NoteCard({
         <>
           <CommentBody text={note.body} />
           <NoteAction imported={imported} pending={pending} onImport={onImport} />
+          {reply}
         </>
       ) : null}
     </article>
@@ -126,13 +130,16 @@ function place(thread: PullRequestThread): string {
   return `${thread.path}:${range}${thread.side === 'old' ? ' (removed)' : ''}`;
 }
 
-/** A line-comment thread: where it sits, then each comment. */
+/** A line-comment thread: where it sits, then each comment, then its replies. */
 export function ThreadCard({
   thread,
   imported = false,
+  reply,
 }: {
   thread: PullRequestThread;
   imported?: boolean;
+  /** Its replies and Reply; without it the thread is read only. */
+  reply?: ReactNode;
 }): ReactElement {
   const [first] = thread.comments;
   return (
@@ -150,6 +157,7 @@ export function ThreadCard({
           <CommentBody text={comment.body} />
         </div>
       ))}
+      {reply}
     </article>
   );
 }

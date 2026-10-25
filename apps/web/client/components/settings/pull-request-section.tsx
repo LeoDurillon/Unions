@@ -1,5 +1,5 @@
 // Whether the worker opens a draft PR after the implementation, or the user links one by hand;
-// stacks.
+// suggested replies to GitHub comments; stacks.
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
@@ -8,7 +8,12 @@ import { useSettingsForm } from '../../lib/use-settings-form';
 import { Switch } from '../choice';
 import { SaveBar } from './save-bar';
 
-type PullRequestSettings = { createPullRequest: boolean; stacks: boolean; sliceChecks: boolean };
+type PullRequestSettings = {
+  createPullRequest: boolean;
+  stacks: boolean;
+  sliceChecks: boolean;
+  suggestReplies: boolean;
+};
 
 function settingsOf(project: PublicProject): PullRequestSettings {
   const { config } = project;
@@ -16,6 +21,7 @@ function settingsOf(project: PublicProject): PullRequestSettings {
     createPullRequest: config.createPullRequest !== false,
     stacks: config.stacks === true,
     sliceChecks: config.sliceChecks !== false,
+    suggestReplies: config.suggestReplies !== false,
   };
 }
 
@@ -53,7 +59,7 @@ function StackSwitches({
   );
 }
 
-/** Whether the worker opens a draft PR after the implementation, or the user links one by hand; stacks. */
+/** Whether the worker opens a draft PR after the implementation, or the user links one by hand; suggested replies; stacks. */
 export function PullRequestSection({ project }: { project: PublicProject }): ReactElement {
   const form = useSettingsForm(
     () => settingsOf(project),
@@ -77,6 +83,15 @@ export function PullRequestSection({ project }: { project: PublicProject }): Rea
           ? 'A pull request you link by hand on a ticket is always kept: no second one is opened.'
           : 'The branch is still pushed, but no pull request is opened. Link one from the ticket’s Overview tab, by number or URL.'}
       </p>
+      <Switch
+        checked={form.value.suggestReplies}
+        onChange={(suggestReplies) => {
+          form.set({ ...form.value, suggestReplies });
+        }}
+        hint="When you send a review with comments added from GitHub, the implementer drafts a reply to each once its changes are pushed: what it changed and in which commit, or why not. You edit, send or discard each one in the PR tab; nothing is posted until you send it."
+      >
+        <span className="font-medium">Suggest replies to GitHub comments</span>
+      </Switch>
       <StackSwitches
         value={form.value}
         onChange={(value) => {

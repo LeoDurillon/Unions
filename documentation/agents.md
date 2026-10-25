@@ -19,17 +19,17 @@ Changes apply from the next run, including on tickets already running.
 
 ## The agents
 
-| Group          | Agents                                                      | Default model                   |
-| -------------- | ----------------------------------------------------------- | ------------------------------- |
-| General        | **Shared instructions**: sent first to every agent          | –                               |
-| Planning       | Intake, Summary, Technical, Test plan                       | Haiku, Sonnet, Opus, Sonnet     |
-| Implementation | Implementation, Final review                                | Opus, Opus                      |
-| Pull requests  | PR description, Rebase, Simplify history, Split plan, Split | The implementer's model, mostly |
-| Review         | Review comments, Group by spec, Explain                     | Opus, Sonnet, Haiku             |
-| Memory         | Lesson writer                                               | Haiku                           |
+| Group          | Agents                                                                                  | Default model                   |
+| -------------- | --------------------------------------------------------------------------------------- | ------------------------------- |
+| General        | **Shared instructions**: sent first to every agent                                      | –                               |
+| Planning       | Intake, Summary, Technical, Test plan                                                   | Haiku, Sonnet, Opus, Sonnet     |
+| Implementation | Implementation, Final review                                                            | Opus, Opus                      |
+| Pull requests  | PR description, Replies to GitHub comments, Rebase, Simplify history, Split plan, Split | The implementer's model, mostly |
+| Review         | Review comments, Group by spec, Explain                                                 | Opus, Sonnet, Haiku             |
+| Memory         | Lesson writer                                                                           | Haiku                           |
 
-The rebase, simplify history, split and PR description agents continue the implementer's session, so they run on
-the implementer's model and effort.
+The rebase, simplify history, split, PR description and replies agents continue the implementer's session, so they
+run on the implementer's model and effort.
 
 On an agent's page:
 

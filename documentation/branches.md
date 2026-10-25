@@ -12,8 +12,26 @@ in the template's language, and ends with `Closes #<issue>`.
 - **Link** a pull request by number or URL when you opened one yourself, or **Unlink** it.
 - **Rewrite description** writes the description again from the current code; you review the draft before it is
   sent to GitHub.
-- The **discussion** shows the pull request's comments and reviews from GitHub, read only. Import its line comments
-  into a review with **Import** (see [Reviewing changes](reviewing.md#comment-and-send)).
+- The **discussion** shows the pull request's comments and reviews from GitHub. Import its line comments into a
+  review with **Import** (see [Reviewing changes](reviewing.md#comment-and-send)), or answer them where you read
+  them (see [Reply to comments](#reply-to-comments)).
+
+## Reply to comments
+
+Under each line thread, **Reply** opens a box: write your answer, tick **Resolve the thread** if it is settled, and
+click **Send**. Under a review summary or a conversation comment, **Quote reply** opens the box with the comment
+quoted and its author named, since GitHub cannot thread those; **Send** posts a new comment on the pull request.
+The box says who posts: the GitHub App's bot, or the project's token. Your reply shows as "Sending…" until GitHub
+has it, then appears in the discussion. If GitHub refuses it, the box opens again with your text and the reason.
+
+**Suggested replies.** When you send a review that includes comments imported from GitHub, the implementer
+writes a reply to each of them once its changes are pushed: what it changed and in which commit, or why it did
+not. They appear under their threads and comments as **Suggested reply**, with **Send**, **Edit** and **Discard**,
+and **Send all replies** above the discussion. Nothing is posted until you send it. Turn this off in the project
+settings, under **Pull requests**.
+
+The Comments tab of a pull request you review (see [Reviewing changes](reviewing.md)) has the same Reply and Quote
+reply.
 
 ## CI checks
 

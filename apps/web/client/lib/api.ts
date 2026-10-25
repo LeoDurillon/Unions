@@ -151,6 +151,7 @@ export const api = {
       createPullRequest?: boolean;
       stacks?: boolean;
       sliceChecks?: boolean;
+      suggestReplies?: boolean;
       hideLockFiles?: boolean;
       reviewIgnore?: string[];
       instructions?: string;

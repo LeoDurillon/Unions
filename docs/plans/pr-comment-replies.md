@@ -1,7 +1,7 @@
 # Reply to pull request comments
 
 Status: planned (2026-10-22), revised (2026-10-25): suggested replies from the implementer added, stored on
-`review_comments`; built together with the manual replies. Decisions D1 to D10 to confirm. Steps 1 to 5
+`review_comments`; built together with the manual replies. Decisions D1 to D10 to confirm. Steps 1 to 6
 built (branch `pr-comment-replies`).
 
 ## Why
@@ -142,18 +142,26 @@ read it, and, when the implementer just worked on those comments, find the answe
 
 ## Client (`apps/web/client`)
 
-- `components/pull-request/reply-box.tsx` (new): the textarea, Send, Cancel, the resolve box (threads only), who
-  posts, the error, the kept text. A suggestion opens it filled, with Discard.
-- `note-card.tsx` (155 lines): `ThreadCard` and `NoteCard` take an optional `reply` (the target's mutation, its
-  pending reply and its suggestion); without it they stay read only. The pending reply renders as a dimmed
-  comment, "Sending…"; a suggestion as "Suggested reply" with Edit, Send, Discard. If the file passes 300 lines,
-  `ThreadCard` moves to `thread-card.tsx`.
-- `lib/use-pr-replies.ts` (new): the mutations per target and for suggestions, and `useEvents` on the D5 events
-  for that pull request to refetch the discussion (as `use-ci-rerun.ts`).
-- `pr-review-sections.tsx` and `discussion.tsx` pass `reply`; the ticket's PR tab shows **Send all replies (n)**
-  when it has drafts.
-- The project setting of D10 in the project settings page. The `pr_replies` agent's page (label, menu entry) is
-  built.
+All built (step 6):
+
+- `lib/use-pr-replies.ts`: the replies query (`['pr-replies', base, number]`), the reply and suggestion mutations,
+  and `useEvents` on the D5 events of that pull request: each reads the replies again, `pr_comment_replied` also
+  the discussion. A failed reply sent from the page opens its box again with the text and GitHub's reason (kept in
+  the page's state, so lost on a reload).
+- `components/pull-request/reply-box.tsx`: the textarea, Resolve the thread (threads only), Send, Cancel, who
+  posts, the error with the text kept. `suggested-reply.tsx`: a suggestion (Send, Edit, which opens the box with
+  Save, Discard; dimmed "Sending…" while sent). `reply-area.tsx`: under a thread or note, the pending replies,
+  the suggestion, Reply or Quote reply (the note quoted with `quoteReply`); and **Send all replies (n)**.
+- `note-card.tsx`: `NoteCard` and `ThreadCard` take a `reply` slot; without it they stay read only.
+- `discussion.tsx` (the ticket's PR tab, `?pr=` for a slice) and `pull-requests/review-comments-tab.tsx` (moved out
+  of `pr-review-sections.tsx`, at its import limit) pass the reply area.
+- The setting **Suggest replies to GitHub comments** in the project's Pull requests settings
+  (`project-settings.ts` accepts `suggestReplies`); the `pr_replies` agent's page (label, menu entry).
+- Checked with `scripts/ui-check/` against the worktree's server on a scratch database (two suggestions seeded,
+  the GitHub discussion stubbed, writes blocked): both suggestions and Send all shown, who posts, Send and Send all
+  posting to the right routes, Edit opening with the text and Resolve ticked, a thread reply's payload (target,
+  body, resolve) and its text kept with the refusal shown, Quote reply opening with `@carol wrote:` and the quote,
+  and no Resolve on a note. The review page's Comments tab uses the same components and was not run in a browser.
 
 ## Worker (`apps/worker`)
 
@@ -204,4 +212,4 @@ read it, and, when the implementer just worked on those comments, find the answe
   the implementer suggests replies after a revision.
 - `docs/architecture/integrations.md`: the new writes and the permission; `web.md`, `worker.md`: the routes, the
   command, the suggestions turn; `database.md` if it lists columns.
-- `documentation/`: the guide's pages on the PR tab and reviews (replying, suggested replies, the setting).
+- `documentation/`: done in step 6 (`branches.md` Reply to comments, `reviewing.md`, `settings.md`, `agents.md`).

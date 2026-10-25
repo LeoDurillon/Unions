@@ -34,7 +34,8 @@ You can send a review while the ticket waits for you at the implementation or th
 To bring in what people wrote on GitHub, click **Import from #\<PR\>** in the header (or **Import** in the PR tab).
 Unresolved line comments become drafts on their lines, with the replies folded in. Review summaries and
 conversation comments are offered one by one with **Add to review**, since bots post many of them. Comments whose
-lines no longer exist show as outdated, with GitHub's excerpt.
+lines no longer exist show as outdated, with GitHub's excerpt. Once the implementer has worked on imported
+comments, it drafts a reply to each for you to send (see [Reply to comments](branches.md#reply-to-comments)).
 
 ## Explain
 
@@ -79,13 +80,13 @@ newest first, with their author, branches, review state and size. Stacks of pull
 
 **Open review** opens the same review page, with these tabs:
 
-| Tab             | What it shows                                                                               |
-| --------------- | ------------------------------------------------------------------------------------------- |
-| **Description** | The pull request's description, and the Notion pages it implements (**Link** a page here).  |
-| **Comments**    | Its review summaries, conversation and line threads, read only.                             |
-| **Notion**      | The text of the linked Notion pages, once there are some.                                   |
-| **Preview**     | A [preview](previews.md#previews-of-pull-requests-under-review) of the pull request's code. |
-| **Diff**        | The diff, comments, Explain and Review with agent, as for a ticket.                         |
+| Tab             | What it shows                                                                                |
+| --------------- | -------------------------------------------------------------------------------------------- |
+| **Description** | The pull request's description, and the Notion pages it implements (**Link** a page here).   |
+| **Comments**    | Its review summaries, conversation and line threads, each with **Reply** or **Quote reply**. |
+| **Notion**      | The text of the linked Notion pages, once there are some.                                    |
+| **Preview**     | A [preview](previews.md#previews-of-pull-requests-under-review) of the pull request's code.  |
+| **Diff**        | The diff, comments, Explain and Review with agent, as for a ticket.                          |
 
 **Send review** posts one review on GitHub, signed by your token or the GitHub App: **Comment**, **Approve** or
 **Request changes**. Your overall note becomes its body, and each draft a line comment. Drafts on lines that are no

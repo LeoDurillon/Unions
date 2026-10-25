@@ -94,6 +94,14 @@ test('the automatic pull request can be turned off and on; only booleans are acc
   expect(stored()?.config.createPullRequest).toBe(true);
 });
 
+test('suggested replies to GitHub comments can be turned off', async () => {
+  await send('PATCH', `/api/projects/${projectId}`, { suggestReplies: false });
+  expect(stored()?.config.suggestReplies).toBe(false);
+  expect((await send('PATCH', `/api/projects/${projectId}`, { suggestReplies: 'no' })).status).toBe(
+    400,
+  );
+});
+
 test('review ignore rules: patterns are trimmed and validated; lock files can be shown again', async () => {
   await send('PATCH', `/api/projects/${projectId}`, {
     reviewIgnore: [' dist/ ', '', '*.snap'],

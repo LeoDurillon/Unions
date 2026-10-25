@@ -155,6 +155,7 @@ function configChange(db: Db, project: Project, body: Record<string, unknown>): 
     memory: booleanChange(body, 'memory', config.memory),
     stacks: booleanChange(body, 'stacks', config.stacks),
     sliceChecks: booleanChange(body, 'sliceChecks', config.sliceChecks),
+    suggestReplies: booleanChange(body, 'suggestReplies', config.suggestReplies),
     scripts: scriptsChange(body, config.scripts),
     ...flowsChange(db, body, config),
   };
@@ -189,6 +190,7 @@ const UPDATABLE = [
   'memory',
   'stacks',
   'sliceChecks',
+  'suggestReplies',
   'scripts',
   ...CHECK_FIELDS,
   ...FLOW_FIELDS,
