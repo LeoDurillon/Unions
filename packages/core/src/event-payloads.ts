@@ -13,6 +13,13 @@ type Column<
 type Failure = { error: string };
 type Nothing = Record<string, never>;
 type PullRequestNumber = { number: Column<typeof tables.tickets, 'prNumber'> };
+/** The `reply_pr_comment` command a reply came from; `commentId` for a suggested reply. */
+type ReplyOrigin = {
+  commandId: number;
+  number: number;
+  reviewId: number | null;
+  commentId: number | null;
+};
 
 type TicketPayloads = {
   ticket_created: { title: string };
@@ -105,6 +112,12 @@ type GitHubPayloads = {
   /** Logged on the ticket whose pull request it is, if one is; `verdict` is missing on reviews posted before it was kept. */
   pr_review_posted: { reviewId: number; number: number; url: string; verdict?: ReviewVerdict };
   pr_review_failed: { reviewId: number; number: number; error: string };
+  /** A reply posted on GitHub; `resolveError` when the thread could not be resolved after it. */
+  pr_comment_replied: ReplyOrigin & { url: string; resolveError: string | null };
+  /** `body` is the text that was not posted, so the reply box gets it back. */
+  pr_comment_reply_failed: ReplyOrigin & { error: string; body: string };
+  /** The implementer drafted replies to the imported comments of a revision. */
+  pr_replies_suggested: PullRequestNumber & { count: number };
   pr_description_changed: {
     prDescriptionId: number;
     status: Column<typeof tables.prDescriptions, 'status'>;

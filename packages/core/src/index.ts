@@ -83,6 +83,7 @@ export {
   PREVIEW_REPO_DIR,
   type ComposeJson,
 } from './preview-compose-check';
+export * from './pr-comment-reply';
 export * from './pr-review-verdicts';
 export * from './previews';
 export * from './project-url';

@@ -102,6 +102,8 @@ export type ProjectConfig = {
   stacks?: boolean;
   /** Run the checks on every slice's tip when splitting (default true). */
   sliceChecks?: boolean;
+  /** After a revision on comments imported from GitHub, the implementer drafts a reply to each (default true). */
+  suggestReplies?: boolean;
 };
 
 /** One earlier question of an investigation and the answer it got. */

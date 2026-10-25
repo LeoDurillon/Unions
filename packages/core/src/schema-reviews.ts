@@ -93,6 +93,20 @@ export const reviewComments = sqliteTable(
      * null when it is on the whole change.
      */
     slicePosition: integer('slice_position'),
+    /**
+     * The reply to an imported comment, posted on GitHub when the user sends it. `requested`: Send
+     * review asked the implementer for one; `draft`: written, to edit, send or discard; `sending`:
+     * queued to the worker. Null: none asked.
+     */
+    replyStatus: text('reply_status', {
+      enum: ['requested', 'draft', 'sending', 'sent', 'discarded'],
+    }),
+    replyBody: text('reply_body'),
+    replyAuthor: text('reply_author', { enum: ['user', 'agent'] }),
+    /** Resolve the comment's thread once the reply is posted. */
+    replyResolve: integer('reply_resolve', { mode: 'boolean' }).notNull().default(false),
+    /** GitHub's reason the last send failed. */
+    replyError: text('reply_error'),
     createdAt: integer('created_at').notNull().default(now),
   },
   (t) => [

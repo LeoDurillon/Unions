@@ -1,8 +1,8 @@
 # Reply to pull request comments
 
 Status: planned (2026-10-22), revised (2026-10-25): suggested replies from the implementer added, stored on
-`review_comments`; built together with the manual replies. Decisions D1 to D10 to confirm. Step 1 built
-(branch `pr-comment-replies`).
+`review_comments`; built together with the manual replies. Decisions D1 to D10 to confirm. Steps 1 and 2
+built (branch `pr-comment-replies`).
 
 ## Why
 
@@ -39,8 +39,10 @@ read it, and, when the implementer just worked on those comments, find the answe
   `target` is `{ kind: 'thread', threadId }` (the thread's GraphQL node id), `{ kind: 'note', url }` (the quoted
   comment, for the pending reply's place) or `{ kind: 'comment', commentId }` (a `review_comments` row with a
   suggested reply). `body` is the final text: a quote is built before, in the box or when the suggestion is
-  written, never by the worker. For a manual reply the command row is the pending reply; a suggestion's state is
-  on its row (D8).
+  written, never by the worker. A suggestion's state is on its row (D8). A manual reply is pending while its
+  command has no `pr_comment_replied` or `_failed` event (`commandId`): `drainCommands` marks a command handled
+  as soon as it hands it to the worker's hook, before GitHub answers. One older than `STALE_REPLY_MS` (10
+  minutes) is no longer shown pending, for a worker stopped mid-post.
 - **D3. Who posts.** The project's credentials, as for reviews: the GitHub App's bot (`<slug>[bot]`, the slug is
   stored with the App) or the token's user. The box says which under Send ("Posts as @union-app[bot]") from the
   project's auth, no GitHub call; for a token, "Posts with the project's token".
@@ -51,9 +53,9 @@ read it, and, when the implementer just worked on those comments, find the answe
   request's threads by its first comment's URL (the row's `github_url`), which is the same check; none found is
   "The thread is gone on GitHub". A note needs no check: it posts on `issues/{number}/comments` of the project's
   repository, the URL only places the pending reply.
-- **D5. Events.** `pr_comment_replied: { number, url, reviewId: number | null, commentId: number | null }` and
-  `pr_comment_reply_failed: { number, error, body, reviewId: number | null, commentId: number | null }`, on the
-  ticket whose pull request it is if there is one (as `pr_review_posted`), and
+- **D5. Events.** `pr_comment_replied: { commandId, number, reviewId, commentId, url, resolveError }` and
+  `pr_comment_reply_failed: { commandId, number, reviewId, commentId, error, body }` (`reviewId` and `commentId`
+  null when none), on the ticket whose pull request it is if there is one (as `pr_review_posted`), and
   `pr_replies_suggested: { number, count }` when the implementer wrote suggestions. The client refetches the
   discussion on any of them for the same pull request. No notification for a failure (the user is on the page) and
   no rule trigger in v1.
@@ -66,18 +68,23 @@ read it, and, when the implementer just worked on those comments, find the answe
   reply goes on that row, no new table: `reply_body` (text, null), `reply_author` (`agent | user`, `user` once
   edited, as `author`), `reply_resolve` (boolean: the agent's "fixed" ticks it, the user can untick),
   `reply_status` (`draft | sending | sent | discarded`, null when none was written) and `reply_error` (GitHub's
-  reason of the last failure, null otherwise). Discard sets `discarded`, so a later revision does not write it
-  again. The Comments and PR tabs match rows to threads and notes by `github_url` (a thread's first comment).
+  reason of the last failure, null otherwise). `reply_status` is `requested | draft | sending | sent |
+  discarded`: **Send review** sets `requested` on the imported comments it sends when the project's setting is on
+  (D10), the implementer's turn turns them into `draft` (or back to null when it wrote none). Discard sets
+  `discarded`, so a later revision does not write it again. The Comments and PR tabs match rows to threads and notes by `github_url` (a thread's first comment).
 - **D9. When the implementer writes them.** Only after a revision from **Send review** whose sent comments
   include imported ones, and only once the branch is pushed (so "fixed in abc123" names a commit the reviewer
   sees; a stack's revision, after `pushRevision`). One turn in the implementer's session, like the pull request
-  description (`askDescription`): reading only, its answer in a `<pr-replies>` block, one entry per comment id
-  (`{ id, body, resolve }`); ids it was not given are dropped. A failed or empty turn logs
+  description (`askDescription`): reading only, its answer in a fenced `json` block, as the agent review's
+  findings, one entry per comment id (`{ id, body, resolve }`); ids it was not given are dropped. The comments are
+  the ticket's rows in `requested`: the state machine's `revise` carries no feedback (it is stored on the step
+  output), so nothing new goes through `states.ts`. A failed or empty turn logs
   `union_pr_replies_failed` and never fails the step. Comments written in Union get no reply. A slice's comment
   replies on its slice's pull request (`slice_position`), else the ticket's.
 - **D10. A setting and an agent role.** `pr_replies` is an agent role in `agents.ts` (prompt, model, effort, tools,
   editable on its Agent settings page like `pr_description`), and the project setting **Suggest replies to GitHub
-  comments** (on by default) turns the turn off: it costs one turn per revision that had GitHub comments.
+  comments** (`suggestReplies`, on by default) turns the turn off: it costs one turn per revision that had GitHub
+  comments. Send review reads it, so a revision sent with it off asks for none.
 
 ## GitHub API (check each point before building)
 
@@ -93,22 +100,21 @@ read it, and, when the implementer just worked on those comments, find the answe
 
 ## Core (`packages/core`)
 
-- `pr-comment-reply.ts` (new, pure, browser-safe): the payload type and its guard (`replyOf(payload)`), and
-  `quoteReply(note: { author, body }, reply)` (the quote, cut per D6, then the reply). Tests next to it.
-- `pr-reply-suggestions.ts` (new, pure): the `<pr-replies>` block's format, its parser (unknown ids and empty
-  bodies dropped) and the prompt's list of comments. Tests next to it.
-- `schema-reviews.ts`: the columns of D8, and a migration (`bunx drizzle-kit generate`).
-- `event-payloads.ts` (202 lines): the three events of D5.
-- `agents.ts` (316 lines): the `pr_replies` role (D10). Already over the limit: put its prompt in its own file
-  first if adding it breaks the lint.
-- `states.ts`: the revise action and `revision` carry `replyTo: number[]` (the ids of the sent comments imported
-  from GitHub) next to `feedback`; a test in `states.test.ts`.
-- The command type `reply_pr_comment` where command types are declared; the project setting in the config type.
+- `pr-comment-reply.ts` (built, browser-safe, `@union/core/pr-comment-reply`): the payload type and its guard
+  (`replyOf(payload)`, which throws as `ciJobOf` does), `replyBodyProblem(body)` (D6), and
+  `quoteReply(note: { author, body }, reply)` (the author named, the quote cut per D6, then the reply). Tested.
+- `schema-reviews.ts`: the columns of D8 (built, migration `0074_pr_comment_replies`).
+- `event-payloads.ts`: the three events of D5 (built).
+- `schema-types.ts`: `ProjectConfig.suggestReplies` (built).
+- `agents.ts` (316 lines): the `pr_replies` role (D10), in step 4. Already over the limit: put its prompt in its
+  own file first if adding it breaks the lint.
+- Command types are plain strings, handled in the worker's `commands.ts`: nothing to declare in core.
 
 ## Web (`apps/web`)
 
 - `github-queries.ts`, `github-discussion.ts`: thread `id`; `PullRequestThread.id` in `api-types.ts`.
-- `routes/review.ts`: `sendReview` puts `replyTo` in the `revise` payload (drafts with `github_url`).
+- `routes/review.ts`: `sendReview` sets `reply_status = 'requested'` on the drafts it sends that have a
+  `github_url`, in its transaction, when `suggestReplies` is not false.
 - `routes/pr-comment-replies.ts` (new): `POST` checks the body (D6), that the review or ticket has that pull
   request, and inserts the command (202); `pendingReplies(db, projectId, number)` lists the unhandled
   `reply_pr_comment` commands for it. Mounted under a review (`<review>/replies`, beside the routes of
@@ -142,9 +148,11 @@ read it, and, when the implementer just worked on those comments, find the answe
 - `github/pr-comment-reply.ts` (new): loads the project, checks the target (D4), posts, resolves if asked, sets
   the row's `reply_status` (`sent`, or back to `draft` with `reply_error`) for a suggestion, emits the event; 403
   names the permission.
+- `pr-reply-format.ts` (new, pure, as `agent-review-findings.ts`): the answer's format, its parser (unknown ids,
+  empty and too long bodies dropped, `resolve` only on line comments) and the list of comments in the prompt.
 - `pr-reply-suggestions.ts` (new): after the push in `implement.ts` (`publishAndReport`, both the branch and the
-  stack path), when `revision.replyTo` is not empty and the setting is on: the rows, the prompt, the turn in the
-  implementer's session (as `askDescription`), the replies written as drafts (a note's with its quote), the event.
+  stack path), when the ticket has rows in `requested`: the prompt, the turn in the implementer's session (as
+  `askDescription`), the replies written as drafts (a note's with its quote), the event.
 - `commands.ts` (294 lines): one `case 'reply_pr_comment'` calling a hook, the payload check in core; `replyTo`
   read with `feedback` for `revise`. Near the limit: move the revise case's payload reading out first.
 - Tests with the fake `GitHubApi`: a thread reply, a note reply, a suggestion on a line comment found by its URL,
@@ -154,12 +162,11 @@ read it, and, when the implementer just worked on those comments, find the answe
 ## Steps
 
 1. Read side: the thread id in the query and types, `toThread` test.
-2. Core: payload, quote, the suggestions' block, columns and migration, events, `replyTo` in the state machine,
-   with tests.
+2. Core: payload, quote, columns and migration, events, the setting, with tests.
 3. Worker: API methods, the reply handler, the command; tests.
-4. Worker: the suggestions turn after the push, the `pr_replies` role and the setting; tests.
+4. Worker: the answer's format, the suggestions turn after the push, the `pr_replies` role; tests.
 5. Web: the reply route, the suggestions routes, pending replies and suggestions in the discussion responses,
-   `replyTo` in Send review; tests.
+   `requested` set by Send review; tests.
 6. Client: the reply box and suggestions in both tabs, Send all, the setting, refetch on the events; checked with
    `scripts/ui-check/` (writes blocked).
 7. A real reply and a real revision with suggestions on a test pull request the user picks (a GitHub write and
