@@ -42,6 +42,7 @@ function comment(id: number, author: string, body: string): PullRequestThread['c
 
 const THREADS: PullRequestThread[] = [
   {
+    id: 'PRRT_1',
     resolved: false,
     path: 'math.js',
     side: 'new',
@@ -52,6 +53,7 @@ const THREADS: PullRequestThread[] = [
     comments: [comment(11, 'alice', 'Add a test for this.'), comment(12, 'bob', 'Agreed.')],
   },
   {
+    id: 'PRRT_2',
     resolved: false,
     path: 'gone.js',
     side: 'new',
@@ -62,6 +64,7 @@ const THREADS: PullRequestThread[] = [
     comments: [comment(21, 'alice', 'Typo.')],
   },
   {
+    id: 'PRRT_3',
     resolved: true,
     path: 'math.js',
     side: 'old',
@@ -251,8 +254,9 @@ test('notes: empty review summaries are left out, bots flagged, oldest first', (
   ]);
 });
 
-test("GitHub's thread shape maps to ours: LEFT is the old side, deleted authors are ghosts", () => {
+test("GitHub's thread shape maps to ours: its node id kept, LEFT is the old side, deleted authors are ghosts", () => {
   const thread = toThread({
+    id: 'PRRT_kw',
     isResolved: false,
     path: 'a.ts',
     diffSide: 'LEFT',
@@ -274,7 +278,7 @@ test("GitHub's thread shape maps to ours: LEFT is the old side, deleted authors 
       ],
     },
   });
-  expect(thread).toMatchObject({ side: 'old', line: 3 });
+  expect(thread).toMatchObject({ id: 'PRRT_kw', side: 'old', line: 3 });
   expect(thread.comments).toEqual([
     { author: 'ghost', body: 'Why?', url: 'u', createdAt: 't', diffHunk: 'h', commitSha: 'abc' },
   ]);

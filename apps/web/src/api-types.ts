@@ -237,6 +237,8 @@ export type AgentReviewView = {
 
 /** One line-comment thread of a pull request, as GitHub returns it. */
 export type PullRequestThread = {
+  /** GitHub's node id of the thread, which a reply and a resolve name. */
+  id: string;
   resolved: boolean;
   path: string;
   side: 'old' | 'new';

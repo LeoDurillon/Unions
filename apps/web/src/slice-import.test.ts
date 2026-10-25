@@ -25,6 +25,7 @@ const WHOLE = `${HEADER}@@ -1,3 +1,9 @@\n${MULTIPLY}${ADD}${SUBTRACT}`;
 
 function thread(pr: number, id: number, line: number): PullRequestThread {
   return {
+    id: `PRRT_${pr}_${id}`,
     resolved: false,
     path: 'math.js',
     side: 'new',

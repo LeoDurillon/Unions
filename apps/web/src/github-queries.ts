@@ -42,6 +42,7 @@ export const PULL_REQUEST_THREADS = /* GraphQL */ `
             endCursor
           }
           nodes {
+            id
             isResolved
             path
             diffSide

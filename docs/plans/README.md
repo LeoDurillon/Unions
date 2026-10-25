@@ -61,8 +61,9 @@ and linked.
   gets a Notion tab with the page's text, and Group by spec and Review with agent read that page without its URL
   again. Built, steps 1 to 3 (branch `review-notion-link`); D6 waits on Notion comments.
 - [Reply to pull request comments](pr-comment-replies.md): Reply on a line thread and Quote reply on a
-  conversation comment, from a review's Comments tab and a ticket's PR tab; the worker posts. Planned
-  (2026-10-22), decisions to confirm.
+  conversation comment, from a review's Comments tab and a ticket's PR tab; the worker posts. After a revision on
+  imported GitHub comments, the implementer suggests a reply to each, a draft until the user sends it. Planned
+  (2026-10-22, revised 2026-10-25), decisions to confirm.
 - [Change the target branch of a ticket](retarget.md): move a finished ticket's own commits onto another branch
   (a fix turned hotfix: `develop` to `main`) with `git rebase --onto`, push and retarget its PR; the agent runs
   only on a conflict or failing checks. Built (branch `retarget`, 2026-10-22).

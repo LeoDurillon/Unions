@@ -17,6 +17,7 @@ type RawComment = {
 };
 
 export type RawThread = {
+  id: string;
   isResolved: boolean;
   path: string;
   diffSide: 'LEFT' | 'RIGHT';
@@ -69,6 +70,7 @@ export function toThread(raw: RawThread): PullRequestThread {
       : [],
   );
   return {
+    id: raw.id,
     resolved: raw.isResolved,
     path: raw.path,
     side: raw.diffSide === 'LEFT' ? 'old' : 'new',
