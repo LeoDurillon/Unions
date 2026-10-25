@@ -1,8 +1,7 @@
 # Reply to pull request comments
 
-Status: planned (2026-10-22), revised (2026-10-25): suggested replies from the implementer added, stored on
-`review_comments`; built together with the manual replies. Decisions D1 to D10 to confirm. Steps 1 to 6
-built (branch `pr-comment-replies`).
+Status: built, steps 1 to 6 (2026-10-25, on `main`; spec in `docs/spec/pull-requests.md#replies-to-comments`).
+Step 7, a real reply and a real revision with suggestions on a test pull request, is left.
 
 ## Why
 
@@ -206,7 +205,7 @@ All built (step 6):
 8. Later, if wanted: GitHub threads drawn on the diff with Reply (D7), replies held in GitHub's pending review
    (D1), suggestions for a pull request under review without a ticket (no implementer there today).
 
-## Docs to update when built
+## Docs (updated)
 
 - `docs/spec/pull-requests.md` and `docs/spec/flow.md`: the Comments tab and the PR tab are no longer read only;
   the implementer suggests replies after a revision.

@@ -167,6 +167,16 @@
   is sent with the stack around it. `github/pr-description-send.ts` writes the user's version only if GitHub's description is still
   the one the agent read (else `conflict`), so an edit made on GitHub is never overwritten unseen. The first
   description (`pr-description.ts`, when the PR is opened) and the rewrite both use the `pr_description` agent. The agent puts the description between `<pr-description>` marks; `descriptionOf` keeps only what they hold, so a remark around it never reaches the draft.
+  After a push, `pr-reply-suggestions.ts` (called from `implement.ts`, branch or stack) asks the implementer's session
+  for a reply to each of the ticket's comments in `reply_status = 'requested'` (the `pr_replies` agent; the answer's
+  format and parser, and the author of an imported note to quote, in `pr-reply-format.ts`), writes them as drafts,
+  logs `pr_replies_suggested`, and adds a line to the report; a failed turn is logged (`union_pr_replies_failed`)
+  and never fails the step. `github/pr-comment-reply.ts` handles `reply_pr_comment` (through `github/hooks.ts`, the
+  hooks that write to GitHub): `pr-comment-reply-target.ts` checks a thread is on the project's repository and that
+  pull request, or finds an imported line comment's thread by its first comment's URL; it posts the reply (in the
+  thread, resolved if asked, else as a conversation comment), turns a suggestion `sent` or back to a draft with
+  `reply_error`, and logs `pr_comment_replied` or `pr_comment_reply_failed` with the command's id. The GitHub calls
+  are in `github/octokit-threads.ts` (and `fake-threads.ts` for tests).
   `github/ci-rerun.ts` handles `rerun_ci_job`: GitHub runs the failed Actions job again; it logs `ci_job_rerun` or
   `ci_job_rerun_failed` (which notifies). `github/ticket-edit.ts` handles `edit_ticket` (the title and description
   edited on the Overview): it writes them to the issue only if GitHub still has the text the edit started from

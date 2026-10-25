@@ -12,7 +12,10 @@
   `routes/current-reviews.ts`), all read only (`src/github-onboarding.ts`, behind the `OnboardingGitHub` interface
   so tests use a fake), and a linked pull request's CI checks (PR tab: check runs, statuses, bot comments, the
   annotations and job logs of a pick; `src/github-checks.ts` behind `CiGitHub`). Posting a pull request review is a write: it goes through the `submit_pr_review` command
-  and the worker (`github/pr-review.ts`).
+  and the worker (`github/pr-review.ts`). So is replying to a pull request's comments: the `reply_pr_comment`
+  command, posted by `github/pr-comment-reply.ts` (GraphQL `addPullRequestReviewThreadReply` and
+  `resolveReviewThread` for a line thread, `POST /issues/{n}/comments` for a conversation comment); the web only
+  says who posts from the stored credentials (`pr-replies.ts`), without a GitHub call.
 - Notion writes happen in the worker only: event rules set properties of a ticket's page, or for a review posted from the review panel, the page that review is linked to (`updatePage`; `event-actions/notion.ts`), and a
   ticket written from an investigation can be created as a page of the project's data source (`createPage`, with
   `markdown` content).
@@ -59,8 +62,9 @@
   check runs and annotations, commit statuses, job logs; the worker's poll of the PR's checks rollup, which reads as
   unknown without them; write only to re-run a failed job), organization Projects read and write. An existing installation must
   accept added permissions on GitHub (Settings → GitHub Apps → the request) before they apply; until then the CI
-  reads answer 403, which `routes/pr-checks.ts` turns into a message naming them. A classic token needs `repo` and
-  `project`.
+  reads answer 403, which `routes/pr-checks.ts` turns into a message naming them. Replies to comments need only
+  Pull requests read and write (the issue-comments endpoint takes Issues or Pull requests); a refusal (a 403, or
+  GraphQL's "Resource not accessible") is reported naming it. A classic token needs `repo` and `project`.
 
 ## Union's own remote
 

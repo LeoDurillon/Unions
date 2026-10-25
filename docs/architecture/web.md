@@ -44,7 +44,15 @@
   `ApiServices`): the head commit's check runs and statuses and the PR's bot comments; a pick (a failed check, another
   Actions job, a bot comment) is read again and turned into the implementer's text (`ci-picks.ts`, core
   `ci-output-text.ts`), previewed, kept in `ci_outputs` or sent as a `revise` command; Re-run on a failed Actions job
-  queues `rerun_ci_job` (`ci-rerun.ts`, once per job while it waits). `PUT /api/tickets/:id/text`
+  queues `rerun_ci_job` (`ci-rerun.ts`, once per job while it waits). Replies to the pull request's comments
+  (`routes/pr-comment-replies.ts`): `/api/tickets/:id/pr-replies` (`?pr=` for a slice) and `<review>/replies` read
+  the replies (`pr-replies.ts`: the `reply_pr_comment` commands without a `pr_comment_replied`/`_failed` event yet,
+  the ticket's suggested replies on that pull request, who posts) and queue a reply; the ticket's also edit, send
+  (one or all) and discard suggestions (`pr-reply-commands.ts`). Send review marks the imported drafts it sends
+  `reply_status = 'requested'` (`markSent`'s `askReplies`, unless `config.suggestReplies` is false). In the client,
+  `lib/use-pr-replies.ts` reads them and follows the reply events, and `pull-request/reply-area.tsx` (with
+  `reply-box.tsx`, `suggested-reply.tsx`) sits in each `ThreadCard` and `NoteCard` of the PR tab (`discussion.tsx`)
+  and the review's Comments tab (`pull-requests/review-comments-tab.tsx`). `PUT /api/tickets/:id/text`
   (`routes/ticket-edit.ts`) queues `edit_ticket` with the new title and description and the `base` the user started
   from; it refuses a base the ticket no longer has, and a second edit while one waits. A pull request under review (Pull requests tab, Under review) uses the same
   page and comment code: `review_comments` rows belong to a ticket or to a `current_reviews` row

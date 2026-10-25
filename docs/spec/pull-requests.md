@@ -23,7 +23,7 @@ whole stack** take the stack as GitHub has it.
 
 **Open review** opens the same review page as a ticket's (file list, highlighted unified or split diff, comments on
 a line or a block of lines), with four tabs: **Description** (the pull request's description) and **Comments** (its
-review summaries, conversation comments and line threads, read only), both read from GitHub once per opening,
+review summaries, conversation comments and line threads, each to reply to: see [Replies to comments](#replies-to-comments)), both read from GitHub once per opening,
 **Notion** once the review is linked to a page (**Notion (2)** for two), **Preview** (see [Previews of pull requests under review](preview-environments.md#previews-of-pull-requests-under-review)), then **Diff**. The pull request's head commit and files are read from GitHub when the page opens and
 kept on the review (`current_reviews.files`, `head_sha`): comments are checked against those lines, and those
 written on an earlier head read as outdated. **Send review** offers **Comment**, **Approve** and **Request changes**;
@@ -48,6 +48,36 @@ to this page** gives them that one. The Under review list marks a linked review 
 **Notion** (with the count when several). The **Notion** tab, after Description, reads each page's text from Notion
 once per opening (cleaned as a ticket's import, mention titles resolved, folded when long), with **Refresh**.
 Nothing is written to Notion or GitHub.
+
+### Replies to comments
+
+The Comments tab of a pull request under review and a ticket's PR tab (the ticket's pull request, or a slice's) let
+the user answer what was said on GitHub. A line thread has **Reply**: a box with **Resolve the thread** (unticked)
+that posts one reply in the thread. A review summary or a conversation comment has **Quote reply**: the box opens
+with `@author wrote:` and the text quoted (cut after 12 lines), and Send posts a new conversation comment, since
+GitHub cannot thread those. A reply is posted at once, on its own, not held with the review. The box says who posts
+(`Posts as @<app>[bot]` or the project's token), from the project's credentials without asking GitHub. A reply is
+trimmed, and refused empty or over GitHub's 65,536 characters.
+
+The web queues a `reply_pr_comment` command (`{ projectId, number, target, body, resolve, reviewId, ticketId }`;
+`target` a thread's node id, a note's URL, or a review comment with a suggested reply); the worker posts with the
+project's credentials, after checking that a thread is on the project's repository and that pull request. A refused
+resolve does not fail the posted reply. It logs `pr_comment_replied` (with `resolveError` when the thread could not be
+resolved) or `pr_comment_reply_failed` (GitHub's reason and the text), on the ticket whose pull request it is if
+there is one. Until then the reply shows dimmed, "Sending…" (a command with neither event, for 10 minutes at most);
+once posted, the discussion is read from GitHub again; on a failure the box opens again with the text and the reason.
+Nothing goes to the implementer: replying is not **Add to review**. No notification, no rule trigger.
+
+**Suggested replies.** When **Send review** on a ticket sends comments imported from GitHub (`github_url` set), it
+marks them `reply_status = 'requested'`, unless the project turned off **Suggest replies to GitHub comments** (Project
+settings → Pull requests, on by default). After the implementer's revision is pushed, one more turn in its session
+(the `pr_replies` agent: its prompt in Union settings, the Implementation model) writes a reply to each: what changed
+and in which commit, or why not; a reply to a conversation comment quotes it. They are drafts on their rows
+(`reply_body`, `reply_author`, `reply_resolve`, `reply_status = 'draft'`), shown under their thread or comment as
+**Suggested reply** with **Send**, **Edit** (the user's then) and **Discard**, and **Send all replies (n)** above the
+discussion. Sending one queues `reply_pr_comment` for it (`sending`), and it turns `sent`, or back to a draft with
+GitHub's reason (`reply_error`). A comment the agent left out, or a failed turn, is no longer asked for; the step
+itself never fails on it. The implementer's report says how many replies it drafted.
 
 ### Specs
 
