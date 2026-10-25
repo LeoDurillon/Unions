@@ -2,17 +2,16 @@
 import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../src/api-types';
-import { originName } from '../lib/ticket-origin';
 import { BaseBranchRow } from './base-branch-row';
 import { DetailRow } from './detail-row';
 import { FlowRow } from './flow-row';
 import { PreviewSummary } from './preview-summary';
 import { TicketAttachments } from './ticket-attachments';
 import { TicketLinks } from './ticket-links';
+import { TicketNotionRow } from './ticket-notion-row';
 
 function SourceRow({ detail }: { detail: TicketDetail }): ReactElement {
   const { ticket, project } = detail;
-  const origin = originName(ticket.originKind);
   const issueUrl =
     ticket.issueNumber === null
       ? null
@@ -32,19 +31,6 @@ function SourceRow({ detail }: { detail: TicketDetail }): ReactElement {
       ) : (
         'GitHub issue not created yet'
       )}
-      {origin && ticket.originUrl ? (
-        <>
-          {' · '}
-          <a
-            className="text-indigo-600 underline dark:text-indigo-400"
-            href={ticket.originUrl}
-            target="_blank"
-            rel="noreferrer"
-          >
-            {origin}
-          </a>
-        </>
-      ) : null}
     </DetailRow>
   );
 }
@@ -63,6 +49,7 @@ export function TicketDetails({
   return (
     <div className="space-y-3 rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
       <SourceRow detail={detail} />
+      <TicketNotionRow detail={detail} />
       <TicketLinks detail={detail} onOpen={onOpenTicket} />
       <BaseBranchRow detail={detail} />
       <FlowRow detail={detail} />

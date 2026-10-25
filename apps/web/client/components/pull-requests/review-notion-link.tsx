@@ -4,80 +4,11 @@ import { useState, type ReactElement } from 'react';
 
 import type { CurrentReview } from '../../../src/api-types';
 import { useReviewNotionLink } from '../../lib/use-review-notion';
-import { Button, ErrorText, inputClass } from '../ui';
+import { NotionLinkForm, NotionPageLink } from '../notion-link-form';
+import { Button, ErrorText } from '../ui';
 import { LinkStackButton, NotionSuggestions } from './review-notion-offers';
 
 type LinkActions = ReturnType<typeof useReviewNotionLink>;
-
-function PageLink({ title, url }: { title: string; url: string }): ReactElement {
-  return (
-    <a
-      href={url}
-      target="_blank"
-      rel="noreferrer"
-      className="font-medium text-indigo-600 hover:underline dark:text-indigo-400"
-    >
-      {title}
-    </a>
-  );
-}
-
-/** A URL field; the page it names is read (its title shown) before it is linked. */
-function LinkForm({
-  actions,
-  onDone,
-  onCancel,
-}: {
-  actions: LinkActions;
-  onDone: () => void;
-  onCancel: (() => void) | null;
-}): ReactElement {
-  const [page, setPage] = useState('');
-  const { check, link } = actions;
-  const found = check.data;
-  return (
-    <div className="space-y-2">
-      <div className="flex gap-2">
-        <input
-          className={`${inputClass} font-mono`}
-          aria-label="Notion page URL"
-          placeholder="Link a Notion page: its URL or ID"
-          value={page}
-          onChange={(event) => {
-            setPage(event.target.value);
-            check.reset();
-          }}
-        />
-        <Button
-          disabled={page.trim() === '' || check.isPending}
-          onClick={() => {
-            check.mutate(page.trim());
-          }}
-        >
-          {check.isPending ? 'Reading…' : 'Check'}
-        </Button>
-        {onCancel ? <Button onClick={onCancel}>Cancel</Button> : null}
-      </div>
-      {found ? (
-        <div className="flex items-center gap-2 text-sm">
-          <span>
-            Link <PageLink title={found.title} url={found.url} />?
-          </span>
-          <Button
-            variant="primary"
-            disabled={link.isPending}
-            onClick={() => {
-              link.mutate({ page: found.pageId }, { onSuccess: onDone });
-            }}
-          >
-            {link.isPending ? 'Linking…' : 'Link'}
-          </Button>
-        </div>
-      ) : null}
-      <ErrorText error={check.error ?? link.error} />
-    </div>
-  );
-}
 
 /** One linked page: its title (a link to Notion), Unlink, and the stack offer. */
 function LinkedPage({
@@ -91,7 +22,7 @@ function LinkedPage({
 }): ReactElement {
   return (
     <li className="flex flex-wrap items-center gap-2 text-sm">
-      {page.url ? <PageLink title={page.title} url={page.url} /> : <span>{page.title}</span>}
+      {page.url ? <NotionPageLink title={page.title} url={page.url} /> : <span>{page.title}</span>}
       <Button
         variant="ghost"
         disabled={actions.unlink.isPending}
@@ -140,7 +71,15 @@ export function ReviewNotionLinkRow({ review }: { review: CurrentReview }): Reac
       ) : (
         <>
           <NotionSuggestions review={review} actions={actions} onDone={done} />
-          <LinkForm actions={actions} onDone={done} onCancel={pages.length > 0 ? done : null} />
+          <NotionLinkForm
+            check={actions.check}
+            linking={actions.link.isPending}
+            linkError={actions.link.error}
+            onLink={(page) => {
+              actions.link.mutate({ page }, { onSuccess: done });
+            }}
+            onCancel={pages.length > 0 ? done : null}
+          />
         </>
       )}
     </section>

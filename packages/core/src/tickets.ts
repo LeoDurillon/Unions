@@ -58,6 +58,14 @@ function originColumns(origin: TicketOrigin | undefined): {
     : { originKind: null, originId: null, originUrl: null };
 }
 
+/** Links the ticket to the tracker item it comes from (null: unlinks it), its text left as it is. */
+export function setTicketOrigin(db: Db, id: number, origin: TicketOrigin | null): void {
+  db.update(schema.tickets)
+    .set(originColumns(origin ?? undefined))
+    .where(eq(schema.tickets.id, id))
+    .run();
+}
+
 /**
  * A new backlog ticket. With `issue` it starts from an existing GitHub issue: the sync then adds
  * that issue to the project board instead of creating one.

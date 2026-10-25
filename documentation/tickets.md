@@ -42,6 +42,18 @@ To change the title or description later, use **Edit** in the ticket's **Overvie
 issue, unless someone changed the issue on GitHub after you started editing: then nothing is written, and Union
 says so. Steps that already ran do not run again.
 
+## Link a ticket to its Notion page
+
+A ticket written in Union (or imported from GitHub) can be linked to its Notion page afterwards, when the project
+is connected to Notion. In the ticket's **Overview**, the **Notion** row has **Link a Notion page**: paste the
+page's URL, click **Check** to see its title, then **Link**. Any page shared with your Notion integration works,
+not only pages of the connected data source.
+
+The ticket's description stays as you wrote it. From then on the ticket behaves like one imported from that page:
+[event rules](automation.md) set its properties, and the page is one of the specs when you group a diff by spec or
+review with an agent. **Change** links another page, **Unlink** removes the link; neither touches the page in
+Notion.
+
 ## Start a ticket
 
 Drag the card to **In progress**, or click **Start** on the card or in the ticket's Overview. Moving the item to In

@@ -28,7 +28,7 @@ import type { ApiServices } from '../services';
 import { assertCommandFits, hasPendingCommand } from './ticket-command-checks';
 import { loadTicket, ticketDetail } from './ticket-detail';
 import { changeParent, summarizeWithStack } from './ticket-links';
-import { linkPullRequest, unlinkPullRequest } from './ticket-pull-request';
+import { ticketOutsideLinkRoutes } from './ticket-outside-links';
 import { ticketSubroutes } from './ticket-subroutes';
 
 function isCommandType(value: unknown): value is CommandType {
@@ -122,15 +122,13 @@ async function editOutput(db: Db, c: Context): Promise<Response> {
 }
 
 export function ticketRoutes(db: Db, services: ApiServices): Hono {
-  const { github } = services;
   const routes = new Hono();
   routes.get('/', (c) => listTickets(db, c));
   routes.get('/:id', (c) => ticketDetail(db, c));
   routes.post('/:id/commands', (c) => queueCommand(db, c));
   routes.put('/:id/steps/:step/output', (c) => editOutput(db, c));
   routes.put('/:id/parent', (c) => changeParent(db, c));
-  routes.put('/:id/pull-request', (c) => linkPullRequest(db, github, c));
-  routes.delete('/:id/pull-request', (c) => unlinkPullRequest(db, c));
+  routes.route('/', ticketOutsideLinkRoutes(db, services));
   routes.route('/', ticketSubroutes(db, services));
   return routes;
 }

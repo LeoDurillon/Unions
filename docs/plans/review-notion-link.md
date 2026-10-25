@@ -48,7 +48,8 @@ Nothing is written to Notion or GitHub: the link is a plain record of the review
   - A last run's specs still win over the defaults, as today.
 - **D5. Tickets too.** A ticket with a `notionPageId` gets the same shortcut in the spec picker: the Notion page
   source reads its page at once (current text, not the import snapshot, which the "Ticket description" source
-  already gives). Cheap, same code path; no link UI for tickets (their page is set at import).
+  already gives). Cheap, same code path. No link UI for tickets at first (their page was set at import); since
+  2026-10-25 the ticket's **Notion** row links one after creation (`routes/ticket-notion-link.ts`).
 - **D6. Notion comments.** The [Notion comments](notion-comments.md) plan adds a Notion tab on tickets. Once both are
   built, the review's Notion tab shows the page's discussions under the text, read only at first ("Add to review"
   later, as a general draft of the current review). Not part of this plan's steps.
