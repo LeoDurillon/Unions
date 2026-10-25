@@ -15,6 +15,8 @@ Read the file for the area you change before changing it, and keep it current wh
   → `docs/architecture/web.md`
 - `apps/worker`: drains `commands`, drives the state machines, runs agents, previews and side runs, syncs GitHub.
   → `docs/architecture/worker.md`
+- Agent runs: settings, prompts, containers, sessions, the formats Union reads back →
+  `docs/architecture/agents.md`
 - GitHub and Notion access, credentials → `docs/architecture/integrations.md`
 - Database file, migrations, backup/restore/reset → `docs/architecture/database.md`
 - `docker/agent.Dockerfile`: the agent image (`union-agent:local`, build with

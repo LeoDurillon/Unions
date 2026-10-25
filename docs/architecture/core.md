@@ -2,19 +2,10 @@
 
 <!-- Moved from AGENTS.md: read the file for the area you change; keep it current when behavior changes. -->
 
-`packages/core`: shared code. `agents.ts` holds the default agent prompts and models; edits made in the UI's
-Agent settings are stored in `agent_configs` (overrides only, Reset deletes the row) and the worker resolves them
-on every run (`resolveAgent`, `modelFor`, `effortFor`, `toolsFor`; the effort becomes `claude --effort`, unset
-leaves the CLI's default). Change a default there, not in the worker. Ticket agents
-get `sharedPrompt` first: the shared instructions, then the project's own (`config.instructions`, project
-settings → Instructions; investigations get those too, via `projectInstructions`). The pipeline steps get
-`stepSharedPrompt` instead (`lessons.ts`): the same, then the step's lessons (project settings → Memory), unless
-`config.memory` is false.
-`agent-tools.ts` holds each step's default allowed tools and the tool list agents pick from (Claude Code's tools,
-the rules the defaults use, the account's claude.ai connectors from `mcp-connectors.ts`, and the user's additions
-in `agent_tools`). A run loads the connectors only when its tools include one (`connectorEnv` in the worker's
-`agent.ts`); the worker's `ConnectorChecker` (`mcp-check.ts`) reads them on request. Denied rules (`BASE_DENIED`,
-`IMPLEMENT_DENIED` in the worker) are not editable and always win over a selected tool.
+`packages/core`: shared code. `agents.ts` holds the agents' defaults and resolves the user's overrides
+(`agent_configs`); `agent-tools.ts` their tools and the list agents pick from, connectors included
+(`mcp-connectors.ts`); `lessons.ts` the shared prompt with a step's lessons (`stepSharedPrompt`). How a run's
+settings, prompt and denied tools are put together: `docs/architecture/agents.md`.
 Custom agents (`custom-agents.ts`, table `custom_agents`): their step is `agent_<id>` (`CustomStep` in `states.ts`,
 `isCustomStep`), so `Step` and `AgentId` stay closed unions; `STEP_TITLES` covers the built-in steps only and
 `stepTitle(step, names)` (`step-titles.ts`, browser-safe) names any step. Their overrides live in `agent_configs`
