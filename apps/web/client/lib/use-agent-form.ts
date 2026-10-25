@@ -1,5 +1,5 @@
-// An agent's page form in the Union settings: its prompt, model, effort and tools, saved together.
-import { useQueryClient } from '@tanstack/react-query';
+// An agent's page form in the Union settings: its prompt, model, effort and tools, saved together, and its reset.
+import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 import type { AgentConfig, AgentEffort, AgentModel } from '@union/core';
 
 import { api } from './api';
@@ -42,4 +42,19 @@ export function useAgentForm(config: AgentConfig): SettingsForm<AgentEdits> {
       await queryClient.invalidateQueries({ queryKey: ['agents'] });
     },
   );
+}
+
+/** Reset to default: deletes the agent's edits, then `onReset`. */
+export function useResetAgent(
+  agent: AgentConfig['agent'],
+  onReset: () => void,
+): UseMutationResult<unknown, Error, void> {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => api.resetAgent(agent),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['agents'] });
+      onReset();
+    },
+  });
 }

@@ -78,7 +78,8 @@ only the Claude login (`throwaway-container.ts`).
 ## What Union reads back
 
 Four formats are asked for only by the editable prompt. A user's edit can drop them, so the guide tells users to
-keep them and `agents.test.ts` keeps them in the defaults:
+keep them, the agent page warns when an edit drops one (`missingFormats`, `prompt-formats.ts`, browser-safe), and
+`agents.test.ts` keeps them in the defaults:
 
 | Agent          | Format                                               | Read by                            | Without it                            |
 | -------------- | ---------------------------------------------------- | ---------------------------------- | ------------------------------------- |

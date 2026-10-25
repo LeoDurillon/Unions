@@ -29,7 +29,8 @@
     "./github-text": "./src/github-text.ts",
     "./investigation-defaults": "./src/investigation-defaults.ts",
     "./union-update": "./src/union-update.ts",
-    "./review-spec-lists": "./src/review-spec-lists.ts"
+    "./review-spec-lists": "./src/review-spec-lists.ts",
+    "./prompt-formats": "./src/prompt-formats.ts"
   },
   "dependencies": {
     "@octokit/auth-app": "catalog:github",

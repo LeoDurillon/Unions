@@ -61,7 +61,8 @@ On an agent's page:
 
 ### What Union reads from an answer
 
-Four prompts ask for a format that Union reads back. If you edit one of these prompts, keep its format:
+Four prompts ask for a format that Union reads back. If you edit one of these prompts, keep its format: the
+agent's page warns you under the prompt when your edit drops it. You can still save it.
 
 - **Intake**: an `Answer:` line under each question. Each becomes a box where you answer the question. Without
   these lines you have nowhere to answer.
