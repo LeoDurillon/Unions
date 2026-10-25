@@ -24,6 +24,7 @@ export type BuiltInRunAgent =
   | 'review_groups'
   | 'review_explain'
   | 'pr_description'
+  | 'pr_replies'
   | 'lesson_writer';
 
 /** Reading a change with git, in both the plain and the `git -C <repo>` form agents often use. */
@@ -45,6 +46,7 @@ export const DEFAULT_TOOLS: Record<BuiltInRunAgent, readonly string[]> = {
   review_groups: REVIEW_TOOLS,
   review_explain: REVIEW_TOOLS,
   pr_description: REVIEW_TOOLS,
+  pr_replies: REVIEW_TOOLS,
   // Its container holds no repository: the feedback is all in its prompt.
   lesson_writer: READ_ONLY,
   // Added to the implementer's tools for a rebase (see `toolsFor`).

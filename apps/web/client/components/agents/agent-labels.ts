@@ -53,6 +53,11 @@ export const AGENT_LABELS: Record<BuiltInAgentId, AgentLabel> = {
     description:
       'Writes the pull request description when the PR is opened, and rewrites it when you click "Rewrite description" in the PR tab. It resumes the implementation session and fills in the repository\'s PR template.',
   },
+  pr_replies: {
+    title: 'Replies to GitHub comments',
+    description:
+      'Drafts a reply to each comment imported from GitHub once the implementer has worked on it and pushed: what changed and in which commit, or why not. It resumes the implementation session; you edit, send or discard each reply in the PR tab.',
+  },
   rebase: {
     title: 'Rebase',
     description:

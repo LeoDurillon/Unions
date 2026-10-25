@@ -3,6 +3,7 @@ import { captureDiff } from './diff-snapshot';
 import { implementerAsk, type ImplementDeps } from './implement-loop';
 import { renderImplementReport } from './implement-prompts';
 import { implement, prepare, resume, type Implemented, type Prepared } from './implement-run';
+import { suggestReplies } from './pr-reply-suggestions';
 import { publishBranch, type PublishResult } from './publish';
 import type { StepContext, StepResult } from './scheduler';
 import { pushRevision, restackRevision, stackSection } from './stack-revise';
@@ -58,6 +59,24 @@ async function publish(
   return { result, note: null };
 }
 
+/** Once the revision is on GitHub, the implementer drafts its replies to the imported comments it worked on. */
+async function repliesNote(workspace: Prepared, sessionId: string | null): Promise<string | null> {
+  const { deps, context, container } = workspace;
+  const count = await suggestReplies({
+    ...deps,
+    container,
+    ticketId: context.ticket.id,
+    sessionId,
+    signal: context.signal,
+    log: context.log,
+  });
+  if (count === 0) {
+    return null;
+  }
+  const replies = count === 1 ? 'a reply' : `${count} replies`;
+  return `**Replies:** ${replies} to the GitHub comments of this revision, drafted for you to send from the PR tab.`;
+}
+
 async function publishAndReport(workspace: Prepared, done: Implemented): Promise<StepResult> {
   const { deps, project, container, branch, base } = workspace;
   const { loop } = done;
@@ -68,7 +87,10 @@ async function publishAndReport(workspace: Prepared, done: Implemented): Promise
       error: `${published.error}\n\nThe agent's report:\n\n${loop.outcome.text}`,
     };
   }
-  const note = [done.note, published.note]
+  const replies = published.result.pushed
+    ? await repliesNote(workspace, loop.outcome.sessionId)
+    : null;
+  const note = [done.note, published.note, replies]
     .filter((text) => text !== undefined && text !== null)
     .join('\n\n');
   const output = renderImplementReport({

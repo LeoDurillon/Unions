@@ -1,7 +1,7 @@
 # Reply to pull request comments
 
 Status: planned (2026-10-22), revised (2026-10-25): suggested replies from the implementer added, stored on
-`review_comments`; built together with the manual replies. Decisions D1 to D10 to confirm. Steps 1 to 3
+`review_comments`; built together with the manual replies. Decisions D1 to D10 to confirm. Steps 1 to 4
 built (branch `pr-comment-replies`).
 
 ## Why
@@ -107,8 +107,9 @@ read it, and, when the implementer just worked on those comments, find the answe
 - `schema-reviews.ts`: the columns of D8 (built, migration `0074_pr_comment_replies`).
 - `event-payloads.ts`: the three events of D5 (built).
 - `schema-types.ts`: `ProjectConfig.suggestReplies` (built).
-- `agents.ts` (316 lines): the `pr_replies` role (D10), in step 4. Already over the limit: put its prompt in its
-  own file first if adding it breaks the lint.
+- Built: `agents.ts` and `agent-tools.ts`: the `pr_replies` role (D10), the Implementation model (it resumes that
+  session, whose cache is that model's), the review tools. Its prompt is in `pr-prompts.ts` (was
+  `stack-prompts.ts`: `agents.ts` was at its import limit).
 - Command types are plain strings, handled in the worker's `commands.ts`: nothing to declare in core.
 
 ## Web (`apps/web`)
@@ -140,7 +141,8 @@ read it, and, when the implementer just worked on those comments, find the answe
   for that pull request to refetch the discussion (as `use-ci-rerun.ts`).
 - `pr-review-sections.tsx` and `discussion.tsx` pass `reply`; the ticket's PR tab shows **Send all replies (n)**
   when it has drafts.
-- The project setting of D10 in the project settings page; the `pr_replies` agent on its Agent settings page.
+- The project setting of D10 in the project settings page. The `pr_replies` agent's page (label, menu entry) is
+  built.
 
 ## Worker (`apps/worker`)
 
@@ -152,18 +154,23 @@ read it, and, when the implementer just worked on those comments, find the answe
   `reply_status` to `sent` or back to `draft` with `reply_error`, emits the event).
 - Built: `github/hooks.ts` gathers the hooks that write to GitHub (`hooks.ts` was at its import limit), with the
   new `replyToPrComment`.
-- `pr-reply-format.ts` (new, pure, as `agent-review-findings.ts`): the answer's format, its parser (unknown ids,
-  empty and too long bodies dropped, `resolve` only on line comments) and the list of comments in the prompt.
-- `pr-reply-suggestions.ts` (new): after the push in `implement.ts` (`publishAndReport`, both the branch and the
-  stack path), when the ticket has rows in `requested`: the prompt, the turn in the implementer's session (as
-  `askDescription`), the replies written as drafts (a note's with its quote), the event.
+- Built: `pr-reply-format.ts` (pure, as `agent-review-findings.ts`): the answer's format, its parser (unknown
+  ids, repeats, empty and too long bodies dropped, `resolve` only on line comments), the list of comments in the
+  prompt, and `importedNote` (the author and text of a note as `review-import.ts` writes it, for the quote; an
+  edited one gets no quote).
+- Built: `pr-reply-suggestions.ts`: when the ticket has rows in `requested`, the turn in the implementer's session
+  (as `askDescription`), the replies written as drafts (a note's with its quote), the others back to null, and
+  `pr_replies_suggested`. `implement.ts` runs it after a push (branch or stack) and adds a **Replies:** line to the
+  report. The setting is not read here: Send review only asks for replies when it is on.
 - Built: `commands.ts`: the switch of `execute` became a table (`OTHER_COMMANDS`, complexity), with
   `reply_pr_comment` calling the hook after `replyOf` checks the payload.
 - Tests with the fake `GitHubApi` (built): a thread reply resolved, a thread of another pull request and a gone
   one refused, a note reply, suggestions on a line and a conversation comment, a gone thread putting the
   suggestion back to a draft, another project's or a Union comment refused, a refused resolve that still reports
-  the reply, no credentials, the command reaching its hook. Step 4, with a fake agent: the suggestions written
-  from the block, unknown ids dropped, a failed turn that leaves the step ok.
+  the reply, no credentials, the command reaching its hook. Step 4 (built), with a fake agent: the format and
+  parser, drafts written in the resumed session with a note quoted, no turn without comments asked, a comment
+  left out no longer asked, a failed turn logged without drafts. The call from `implement.ts` is not unit-tested
+  (the step needs a container): it waits for the real run (step 7).
 
 ## Steps
 

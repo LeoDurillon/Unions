@@ -35,7 +35,7 @@ in `stack-states.ts`, which `transition` asks first; the step, phase and action 
 `fixup! <sha>` targets, each slice's tip), `stack-restack.ts` (the `git rebase -i` todo moving a revision's
 commits into their slices), `stack-description.ts` (each slice's PR text, the issue comment) and `stack-status.ts`
 (merged only when every slice merged into the base; the range and PR base of a slice). The worker runs `split_plan` and `split`
-yet (`split-plan.ts` holds the plan's format and parser, `stack-prompts.ts` their prompts, `ticket-slices.ts`
+yet (`split-plan.ts` holds the plan's format and parser, `pr-prompts.ts` their prompts, with the replies agent's, `ticket-slices.ts`
 the slice records); `restack` still answers "Unknown step".
 Drizzle schema and migrations, the pure ticket state machine (`states.ts`), ticket dependencies
 (`ticket-links.ts`: `setParent`, `ticketBase`; the start gate `blockingParent` is in `tickets.ts`), the

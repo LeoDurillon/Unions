@@ -1,4 +1,4 @@
-// The default prompts of the agents that split a ticket's pull request into a stack.
+// The default prompts of the agents that work on a ticket's open pull request: the replies to its comments, and its split into a stack.
 
 import { SPLIT_PLAN_FORMAT } from './split-plan';
 
@@ -20,3 +20,9 @@ Do not change any file: the branch must end with exactly the same content, and t
 There is no editor or terminal: \`git rebase -i\` and \`git add -p\` cannot be used. For example: \`git reset --soft <fork point>\`, \`git reset\`, then \`git add <paths>\` and \`git commit -F <file>\` for each commit; stage part of a file with \`git apply --cached\`.
 Never push.
 Output a short markdown report: per slice, its commits' subject lines.`;
+
+/** Resumes the implementer's session after the push: it knows what it changed and why. */
+export const PR_REPLIES_PROMPT = `Draft the replies to the reviewers' comments on the pull request that you just worked on. The user reads each one and sends it to GitHub, where the comment's author reads it.
+For each comment below, say what you changed for it and in which commit (its short sha, from \`git log\`), or, when you did not change the code for it, why.
+One to three sentences, plain and factual, in the language of the comment. No greeting, no thanks, and do not repeat the comment.
+Do not change any file.`;

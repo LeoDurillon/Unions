@@ -9,6 +9,7 @@ import {
 } from '@union/core';
 import { and, eq } from 'drizzle-orm';
 
+import { loadProject } from '../review';
 import type { GitHubApi } from './api';
 import { repliedComment, replyPlace } from './pr-comment-reply-target';
 
@@ -27,14 +28,6 @@ function reasonOf(error: unknown): string {
     return 'GitHub refused it: the GitHub App needs Pull requests read and write (accepted on its installation), a token write access to the repository';
   }
   return message;
-}
-
-function loadProject(db: Db, projectId: number): Project {
-  const project = db.select().from(schema.projects).where(eq(schema.projects.id, projectId)).get();
-  if (!project) {
-    throw new Error(`Project ${projectId} not found`);
-  }
-  return project;
 }
 
 /** The ticket whose pull request this is, so its log and the PR tab see the reply. */

@@ -8,7 +8,7 @@ export const UNION_SETTINGS_GROUPS = [
   { label: 'Implementation', sections: ['implement', 'final_review'] },
   {
     label: 'Pull requests',
-    sections: ['pr_description', 'rebase', 'simplify', 'split_plan', 'split'],
+    sections: ['pr_description', 'pr_replies', 'rebase', 'simplify', 'split_plan', 'split'],
   },
   { label: 'Review', sections: ['review_comments', 'review_groups', 'review_explain'] },
   { label: 'Memory', sections: ['lesson_writer'] },

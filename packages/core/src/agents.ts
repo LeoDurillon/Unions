@@ -13,8 +13,8 @@ import { listCustomAgents } from './custom-agents';
 import type { Db } from './db';
 import { DIAGRAM_INSTRUCTION } from './diagrams';
 import { LESSON_WRITER_PROMPT } from './lesson-writer';
+import { PR_REPLIES_PROMPT, SPLIT_PLAN_PROMPT, SPLIT_PROMPT } from './pr-prompts';
 import * as schema from './schema';
-import { SPLIT_PLAN_PROMPT, SPLIT_PROMPT } from './stack-prompts';
 import {
   customStep,
   isAgentEffort,
@@ -41,6 +41,7 @@ export const AGENT_IDS = [
   'review_groups',
   'review_explain',
   'pr_description',
+  'pr_replies',
   'rebase',
   'simplify',
   'split_plan',
@@ -128,6 +129,7 @@ Do not change any file: the branch must end with exactly the same content, and t
 There is no editor or terminal: \`git rebase -i\` and \`git add -p\` cannot be used. For example: \`git reset --soft <fork point>\`, \`git reset\`, then \`git add <paths>\` and \`git commit -m\` for each commit; stage part of a file with \`git apply --cached\`.
 Never push.
 Output a short markdown report: the new commits' subject lines, and what was merged, split or reordered.`,
+  pr_replies: PR_REPLIES_PROMPT,
   split_plan: SPLIT_PLAN_PROMPT,
   split: SPLIT_PROMPT,
   lesson_writer: LESSON_WRITER_PROMPT,
@@ -161,6 +163,8 @@ const MODEL_BY_AGENT: Record<BuiltInRunAgent, AgentModel> = {
   review_groups: 'sonnet',
   review_explain: 'haiku',
   pr_description: MODEL_BY_STEP.implement,
+  // It resumes the implementer's session, whose cache is the implementer's model's.
+  pr_replies: MODEL_BY_STEP.implement,
   lesson_writer: 'haiku',
 };
 const RUN_AGENTS: readonly BuiltInRunAgent[] = [
@@ -169,6 +173,7 @@ const RUN_AGENTS: readonly BuiltInRunAgent[] = [
   'review_groups',
   'review_explain',
   'pr_description',
+  'pr_replies',
   'split_plan',
   'lesson_writer',
 ];
