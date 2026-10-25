@@ -39,7 +39,7 @@ questions and its answers, and works in a fresh container, with a fresh clone fo
 
 **Create ticket** asks an agent to write a ticket from the whole investigation: a title, the problem, what to
 change, acceptance criteria and the useful findings, in the language of your questions. Add context to say what the
-ticket must cover.
+ticket must cover. It runs on the investigation's model.
 
 The ticket lands in Backlog, with its GitHub issue, and the investigation links to it. When the project is
 connected to Notion, **Also create it in Notion** adds a page for it in the Notion data source too.

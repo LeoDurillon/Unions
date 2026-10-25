@@ -37,6 +37,16 @@ PR description and Replies to GitHub comments also continue the implementer's se
 effort of their own. They start on Opus and stay there when you change Implementation's model: change theirs too if
 you want them to follow.
 
+Three kinds of runs have no page in Union settings:
+
+- **Investigations**, and the tickets written from them with **Create ticket**: you pick the model and tools in the
+  investigation's form (Opus, reading the code and the web, to start with), and the ticket is written on the same
+  model. See [Investigations](investigations.md).
+- **The prompt writer** writes a custom agent's prompt from its role, on Sonnet, when you create the agent or click
+  **Regenerate**.
+- **Read connectors** and **Check again** (Union settings → Connectors) only read your connectors: no model runs, so
+  they use none of your Claude usage.
+
 On an agent's page:
 
 - **Prompt**: what the agent is told to do. A few prompts ask for an answer Union reads: keep that part when you
