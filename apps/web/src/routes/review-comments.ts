@@ -1,7 +1,7 @@
 // Review comments of a ticket or of a pull request under review: drafts, edits, outdated marks and
 // sending.
 import { diffExcerpt, schema, type AgentReviewOwner, type Db } from '@union/core';
-import { and, eq, type SQL } from 'drizzle-orm';
+import { and, eq, isNotNull, type SQL } from 'drizzle-orm';
 import type { Context } from 'hono';
 
 import type { CommentView } from '../api-types';
@@ -209,8 +209,23 @@ export function deleteComment(c: Context, db: Db, owner: CommentOwner): Response
   return c.json({ ok: true });
 }
 
-/** Marks the owner's drafts sent, inside the caller's transaction. */
-export function markSent(tx: Tx, owner: CommentOwner): void {
+/**
+ * Marks the owner's drafts sent, inside the caller's transaction. With `askReplies`, those imported
+ * from GitHub also ask the implementer for a reply to their author once its revision is pushed.
+ */
+export function markSent(tx: Tx, owner: CommentOwner, { askReplies = false } = {}): void {
+  if (askReplies) {
+    tx.update(schema.reviewComments)
+      .set({ replyStatus: 'requested' })
+      .where(
+        and(
+          owns(owner),
+          eq(schema.reviewComments.status, 'draft'),
+          isNotNull(schema.reviewComments.githubUrl),
+        ),
+      )
+      .run();
+  }
   tx.update(schema.reviewComments)
     .set({ status: 'sent', sentAt: Date.now() })
     .where(and(owns(owner), eq(schema.reviewComments.status, 'draft')))

@@ -1,7 +1,7 @@
 # Reply to pull request comments
 
 Status: planned (2026-10-22), revised (2026-10-25): suggested replies from the implementer added, stored on
-`review_comments`; built together with the manual replies. Decisions D1 to D10 to confirm. Steps 1 to 4
+`review_comments`; built together with the manual replies. Decisions D1 to D10 to confirm. Steps 1 to 5
 built (branch `pr-comment-replies`).
 
 ## Why
@@ -114,20 +114,31 @@ read it, and, when the implementer just worked on those comments, find the answe
 
 ## Web (`apps/web`)
 
-- `github-queries.ts`, `github-discussion.ts`: thread `id`; `PullRequestThread.id` in `api-types.ts`.
-- `routes/review.ts`: `sendReview` sets `reply_status = 'requested'` on the drafts it sends that have a
-  `github_url`, in its transaction, when `suggestReplies` is not false.
-- `routes/pr-comment-replies.ts` (new): `POST` checks the body (D6), that the review or ticket has that pull
-  request, and inserts the command (202); `pendingReplies(db, projectId, number)` lists the unhandled
-  `reply_pr_comment` commands for it. Mounted under a review (`<review>/replies`, beside the routes of
-  `review-workspace.ts`) and under a ticket (`/api/tickets/:id/pr-replies`, the ticket's `prNumber`).
-- `routes/pr-reply-suggestions.ts` (new): under a ticket, `PATCH` a suggestion (body, resolve; `reply_author`
-  becomes `user`), `POST .../send` (one, or all drafts of the pull request: `reply_status` to `sending` and one
-  command each, in a transaction), `POST .../discard`.
-- The two discussion responses (review and ticket) gain `pending: PendingReply[]` and, the ticket's,
-  `suggested: SuggestedReply[]` (row id, `github_url`, body, resolve, status, error).
-- Tests: the route refuses an empty or too long body, a ticket without a pull request; the command's payload;
-  sending all suggestions queues one command per draft; a discarded one is not sent.
+- `github-queries.ts`, `github-discussion.ts`: thread `id`; `PullRequestThread.id` in `api-types.ts` (step 1).
+  All built (step 5):
+
+- `routes/review.ts`: `sendReview` passes `askReplies` to `markSent` (`routes/review-comments.ts`), which sets
+  `reply_status = 'requested'` on the drafts it sends that have a `github_url`, in the same transaction, when
+  `suggestReplies` is not false.
+- `pr-replies.ts`: the read side. `pendingReplies` lists the `reply_pr_comment` commands of that pull request
+  (thread and note targets) of the last `STALE_REPLY_MS` that have no `pr_comment_replied` or `_failed` event
+  and no error; `suggestedReplies` the ticket's rows in `draft` or `sending` on that pull request
+  (`commentPullRequest`: the slice's, else the ticket's); who posts (`Posts as @<slug>[bot]` from the stored App,
+  or the token), with `canPost`.
+- `pr-reply-commands.ts`: the write side. `checkedBody` (D6, 400), `queueReply`, and a suggestion's edit, send
+  (one or all of the pull request, all or none, `sending` and one command each) and discard; a suggestion that is
+  not a draft any more is a 409.
+- `routes/pr-comment-replies.ts`: `/api/tickets/:id/pr-replies` (`GET` the replies, `POST` a reply, on `?pr=` or
+  the ticket's pull request; `PATCH /suggestions/:commentId`, `POST /suggestions/:commentId/send`,
+  `POST /suggestions/send`, `POST /suggestions/:commentId/discard`), and `<review>/replies` (`GET`, `POST`; no
+  suggestions), mounted in `ticket-review-subroutes.ts` and `review-workspace.ts`.
+- Changed from the plan: the replies are their own `GET` (`RepliesResponse` in `reply-api-types.ts`), not fields
+  of the discussion responses: the client re-reads them on every reply event without asking GitHub, and reads the
+  discussion again only when a reply was posted. (`routes/review-import.ts` was also at its import limit.)
+- Tests (`pr-comment-replies.test.ts`): a thread reply queued then pending until its event, a note reply never
+  resolving, empty, too long and bad targets refused, no pull request refused, suggestions listed, edited, sent
+  one by one and all, a second send refused, discarded ones not sent, Send review asking replies only for imported
+  drafts and only with the setting on, a current review's reply with its id and no suggestions.
 
 ## Client (`apps/web/client`)
 

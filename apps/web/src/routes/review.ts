@@ -166,7 +166,12 @@ async function sendReview(db: Db, c: Context): Promise<Response> {
     tx.insert(schema.commands)
       .values({ type: 'revise', ticketId: ticket.id, payload: { feedback } })
       .run();
-    markSent(tx, owner(ticket));
+    const project = tx
+      .select({ config: schema.projects.config })
+      .from(schema.projects)
+      .where(eq(schema.projects.id, ticket.projectId))
+      .get();
+    markSent(tx, owner(ticket), { askReplies: project?.config.suggestReplies !== false });
     // "Since last review" starts from the head this review was written on.
     const reviewed = latestSnapshot(tx, ticket.id)?.headSha ?? null;
     tx.update(schema.tickets)
