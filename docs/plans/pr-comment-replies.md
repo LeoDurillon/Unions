@@ -1,7 +1,7 @@
 # Reply to pull request comments
 
 Status: planned (2026-10-22), revised (2026-10-25): suggested replies from the implementer added, stored on
-`review_comments`; built together with the manual replies. Decisions D1 to D10 to confirm. Steps 1 and 2
+`review_comments`; built together with the manual replies. Decisions D1 to D10 to confirm. Steps 1 to 3
 built (branch `pr-comment-replies`).
 
 ## Why
@@ -86,16 +86,17 @@ read it, and, when the implementer just worked on those comments, find the answe
   comments** (`suggestReplies`, on by default) turns the turn off: it costs one turn per revision that had GitHub
   comments. Send review reads it, so a revision sent with it off asks for none.
 
-## GitHub API (check each point before building)
+## GitHub API (checked against GitHub's docs, 2026-10-25; not yet against GitHub itself)
 
-- Thread reply: GraphQL `addPullRequestReviewThreadReply(input: { pullRequestReviewThreadId, body })` returns the
-  new comment's `url`. Works on resolved and outdated threads.
-- Resolve: `resolveReviewThread(input: { threadId })`, only when **Resolve the thread** is ticked; a refusal there
+- Thread reply: GraphQL `addPullRequestReviewThreadReply(input: { pullRequestReviewThreadId, body })` returns
+  `comment { url }` (checked). Works on resolved and outdated threads (to see on the real run).
+- Resolve: `resolveReviewThread(input: { threadId })` (checked), only when **Resolve the thread** is ticked; a refusal there
   does not fail the posted reply (the event says "posted, not resolved: <reason>").
-- Conversation comment: `POST /repos/{o}/{r}/issues/{n}/comments` (`GitHubApi.createComment` already exists).
-- Permissions: the App's **Pull requests: write** (already needed to post reviews) covers both; check whether the
-  issue-comments endpoint on a pull request also wants **Issues: write**, and name the missing one on a 403, as
-  `github/ci-rerun.ts` does. A token's user needs write access to resolve a thread.
+- Conversation comment: `POST /repos/{o}/{r}/issues/{n}/comments`, through a new
+  `createPullRequestComment` that returns the comment's URL (`createComment` returns its id).
+- Permissions: the endpoint is listed under both **Issues: write** and **Pull requests: write**, so the App's
+  **Pull requests: write** (already needed to post reviews) covers both kinds of reply. A refusal (a 403, or
+  GraphQL's "Resource not accessible") names it. A token's user needs write access to resolve a thread.
 - The thread's node `id` is read today by nobody: add `id` to the `reviewThreads` nodes of `PULL_REQUEST_THREADS`.
 
 ## Core (`packages/core`)
@@ -143,21 +144,26 @@ read it, and, when the implementer just worked on those comments, find the answe
 
 ## Worker (`apps/worker`)
 
-- `github/api.ts` (169 lines): `threadPullRequest(threadId)`, `replyToThread(threadId, body)`,
-  `resolveThread(threadId)`, and the thread of a comment URL on a pull request (D4).
-- `github/pr-comment-reply.ts` (new): loads the project, checks the target (D4), posts, resolves if asked, sets
-  the row's `reply_status` (`sent`, or back to `draft` with `reply_error`) for a suggestion, emits the event; 403
-  names the permission.
+- Built: `github/api.ts` declares `threadPullRequest`, `threadOfComment` (D4), `replyToThread`, `resolveThread`
+  and `createPullRequestComment`, implemented in `octokit-threads.ts` and `fake-threads.ts` (new links of the
+  client and fake class chains).
+- Built: `github/pr-comment-reply-target.ts` (the comment row checked to be the project's and imported; the
+  thread checked, or found by URL) and `github/pr-comment-reply.ts` (posts, resolves if asked, sets the row's
+  `reply_status` to `sent` or back to `draft` with `reply_error`, emits the event).
+- Built: `github/hooks.ts` gathers the hooks that write to GitHub (`hooks.ts` was at its import limit), with the
+  new `replyToPrComment`.
 - `pr-reply-format.ts` (new, pure, as `agent-review-findings.ts`): the answer's format, its parser (unknown ids,
   empty and too long bodies dropped, `resolve` only on line comments) and the list of comments in the prompt.
 - `pr-reply-suggestions.ts` (new): after the push in `implement.ts` (`publishAndReport`, both the branch and the
   stack path), when the ticket has rows in `requested`: the prompt, the turn in the implementer's session (as
   `askDescription`), the replies written as drafts (a note's with its quote), the event.
-- `commands.ts` (294 lines): one `case 'reply_pr_comment'` calling a hook, the payload check in core; `replyTo`
-  read with `feedback` for `revise`. Near the limit: move the revise case's payload reading out first.
-- Tests with the fake `GitHubApi`: a thread reply, a note reply, a suggestion on a line comment found by its URL,
-  a thread of another pull request refused, a failed resolve that still reports the reply; with a fake agent: the
-  suggestions written from the block, unknown ids dropped, a failed turn that leaves the step ok.
+- Built: `commands.ts`: the switch of `execute` became a table (`OTHER_COMMANDS`, complexity), with
+  `reply_pr_comment` calling the hook after `replyOf` checks the payload.
+- Tests with the fake `GitHubApi` (built): a thread reply resolved, a thread of another pull request and a gone
+  one refused, a note reply, suggestions on a line and a conversation comment, a gone thread putting the
+  suggestion back to a draft, another project's or a Union comment refused, a refused resolve that still reports
+  the reply, no credentials, the command reaching its hook. Step 4, with a fake agent: the suggestions written
+  from the block, unknown ids dropped, a failed turn that leaves the step ok.
 
 ## Steps
 

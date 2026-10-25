@@ -1,5 +1,5 @@
 // What the commands hand off to the running worker (all asynchronous), and the no-op set for tests and tools.
-import type { ReviewVerdict, WorkspaceOwner } from '@union/core';
+import type { PrCommentReply, ReviewVerdict, WorkspaceOwner } from '@union/core';
 
 import type { CiJob } from './github/ci-rerun';
 import type { TicketEdit } from './github/ticket-edit';
@@ -32,6 +32,8 @@ export type CommandHooks = {
   editTicket: (ticketId: number, edit: TicketEdit) => void;
   /** Asks GitHub to run a failed Actions job of the ticket's pull request again. */
   rerunCiJob: (ticketId: number, job: CiJob) => void;
+  /** Posts a reply to a pull request comment; `commandId` ties its event to the command. */
+  replyToPrComment: (commandId: number, reply: PrCommentReply) => void;
   /**
    * Starts, stops, reads the logs of, or generates the compose file of a ticket's or a pull
    * request's preview; `update` moves a pull request's checkout to the commit its review reads.
@@ -61,6 +63,7 @@ export const NO_HOOKS: CommandHooks = {
   sendPrDescription: ignore,
   editTicket: ignore,
   rerunCiJob: ignore,
+  replyToPrComment: ignore,
   preview: ignore,
   checkUnionUpdate: ignore,
   updateUnion: ignore,

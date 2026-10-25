@@ -13,8 +13,8 @@ import type {
   RemoteItem,
   RepoRef,
 } from './api';
-import { FakePulls } from './fake-pulls';
 import type { StackPull } from './fake-stacks';
+import { FakeThreads } from './fake-threads';
 
 type FakeIssue = {
   number: number;
@@ -36,7 +36,7 @@ const DEFAULT_INFO: ProjectInfo = {
 const MS_PER_SECOND = 1000;
 
 /** In-memory GitHub for tests. `calls` records every method name, in order (`FakeProjectFields`). */
-export class FakeGitHubApi extends FakePulls implements GitHubApi {
+export class FakeGitHubApi extends FakeThreads implements GitHubApi {
   readonly issues: FakeIssue[] = [];
   /** Commit → the state of its checks; a commit missing has none. */
   readonly checks = new Map<string, ChecksState>();

@@ -9,6 +9,7 @@ import {
   transition,
   emitEvent,
   recordValidation,
+  replyOf,
   schema,
   type Db,
   type WorkspaceOwner,
@@ -211,6 +212,31 @@ function unionUpdate(command: Command, hooks: CommandHooks): void {
   }
 }
 
+/** The commands handled on their own, mostly handed to a hook: the GitHub writes, a ticket created. */
+const OTHER_COMMANDS: Record<string, (db: Db, command: Command, hooks: CommandHooks) => void> = {
+  create_ticket: (db, command) => {
+    createFromCommand(db, command);
+  },
+  submit_pr_review: (_db, command, hooks) => {
+    submitReview(command, hooks);
+  },
+  update_pr_description: (_db, command, hooks) => {
+    hooks.sendPrDescription(numberField(command, 'prDescriptionId'));
+  },
+  edit_ticket: (_db, command, hooks) => {
+    hooks.editTicket(requireTicketId(command), ticketEditOf(command.payload));
+  },
+  rerun_ci_job: (_db, command, hooks) => {
+    hooks.rerunCiJob(requireTicketId(command), ciJobOf(command.payload));
+  },
+  reply_pr_comment: (_db, command, hooks) => {
+    hooks.replyToPrComment(command.id, replyOf(command.payload));
+  },
+  remove_containers: (_db, command, hooks) => {
+    hooks.removeContainers(containersOf(command.payload));
+  },
+};
+
 function execute(db: Db, command: Command, hooks: CommandHooks): void {
   if (DECISIONS.has(command.type)) {
     decide(db, command);
@@ -233,35 +259,11 @@ function execute(db: Db, command: Command, hooks: CommandHooks): void {
     hooks.preview(previewOwnerOf(command), preview);
     return;
   }
-  switch (command.type) {
-    case 'create_ticket': {
-      createFromCommand(db, command);
-      return;
-    }
-    case 'submit_pr_review': {
-      submitReview(command, hooks);
-      return;
-    }
-    case 'update_pr_description': {
-      hooks.sendPrDescription(numberField(command, 'prDescriptionId'));
-      return;
-    }
-    case 'edit_ticket': {
-      hooks.editTicket(requireTicketId(command), ticketEditOf(command.payload));
-      return;
-    }
-    case 'rerun_ci_job': {
-      hooks.rerunCiJob(requireTicketId(command), ciJobOf(command.payload));
-      return;
-    }
-    case 'remove_containers': {
-      hooks.removeContainers(containersOf(command.payload));
-      return;
-    }
-    default: {
-      throw new Error(`Unknown command type "${command.type}"`);
-    }
+  const handle = OTHER_COMMANDS[command.type];
+  if (!handle) {
+    throw new Error(`Unknown command type "${command.type}"`);
   }
+  handle(db, command, hooks);
 }
 
 /** Returns the failure message, or null when the command succeeded. */

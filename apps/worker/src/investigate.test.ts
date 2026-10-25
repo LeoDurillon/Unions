@@ -248,6 +248,9 @@ test('the cancel command cancels a queued run itself and hands a running one to 
     rerunCiJob: () => {
       // Not under test.
     },
+    replyToPrComment: () => {
+      // Not under test.
+    },
     preview: () => {
       // Not under test.
     },

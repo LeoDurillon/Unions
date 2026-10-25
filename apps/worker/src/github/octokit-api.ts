@@ -12,8 +12,8 @@ import type {
   RemoteItem,
   RepoRef,
 } from './api';
-import { OctokitProjectFields } from './octokit-project-fields';
 import { isNotFound } from './octokit-pull-request-changes';
+import { OctokitThreads } from './octokit-threads';
 import {
   ADD_TO_PROJECT,
   LIST_ITEMS,
@@ -77,7 +77,7 @@ function timeOf(date: string | null): number | null {
   return date === null ? null : Date.parse(date);
 }
 
-export class OctokitGitHubApi extends OctokitProjectFields implements GitHubApi {
+export class OctokitGitHubApi extends OctokitThreads implements GitHubApi {
   async resolveProject(locator: ProjectLocator): Promise<string> {
     const variables = { login: locator.login, number: locator.number };
     const data =

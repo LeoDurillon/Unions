@@ -75,6 +75,9 @@ export type PullRequestReview = {
   verdict: ReviewVerdict;
 };
 
+/** The pull request a line thread is on: `owner/repo` and its number. */
+export type ThreadPullRequest = { repository: string; number: number };
+
 /** One field of a Project item to set; a null value clears it. */
 export type ProjectFieldChange = {
   projectNodeId: string;
@@ -160,6 +163,15 @@ export type GitHubApi = {
     number: number,
     review: PullRequestReview,
   ): Promise<string>;
+  /** The pull request a line thread (its node id) is on; null when the thread is gone. */
+  threadPullRequest(threadId: string): Promise<ThreadPullRequest | null>;
+  /** The node id of the pull request's line thread whose first comment has `url`; null when none. */
+  threadOfComment(repo: RepoRef, number: number, url: string): Promise<string | null>;
+  /** Replies in a line thread; returns the reply's URL. */
+  replyToThread(threadId: string, body: string): Promise<string>;
+  resolveThread(threadId: string): Promise<void>;
+  /** Posts a conversation comment on the pull request; returns its URL. */
+  createPullRequestComment(repo: RepoRef, number: number, body: string): Promise<string>;
   /** Numbers of the issues of `repo` the issue is marked as blocked by. */
   listBlockedBy(repo: RepoRef, issueNumber: number): Promise<number[]>;
   /** Marks the issue as blocked by another issue of the same repository. */
