@@ -109,3 +109,4 @@ A new agent whose answer is parsed puts its format in the worker's part of the p
 3. Run it through the worker's agent function (`agent.ts`, passed as `deps.agent`) with `modelFor`, `effortFor`, `toolsFor` and the right denied list, and send its
    events to `appendAgentLine` so its usage is counted (`agent_usage`).
 4. Add it to the tables above and to the guide's agent table (`documentation/agents.md`).
+   `apps/web/src/agents-docs.test.ts` fails until both name it, and until the guide shows its default model.
