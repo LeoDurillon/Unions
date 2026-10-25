@@ -14,6 +14,7 @@ import {
 } from './agents';
 import { createDb, migrateDb, type Db } from './db';
 import * as schema from './schema';
+import { SPLIT_PLAN_FORMAT } from './split-plan';
 
 let db: Db;
 
@@ -129,4 +130,17 @@ test("an effort is saved per agent with a model; the rebase and simplify use the
     .set({ effort: 'huge' as never })
     .run();
   expect(effortFor(db, 'implement')).toBeNull();
+});
+
+// The formats a parser reads that only the editable prompt asks for; the worker appends all the others.
+test('default prompts ask for the formats Union reads back', () => {
+  // The client's `answers.ts` turns each `Answer:` line into an input box.
+  expect(DEFAULT_PROMPTS.intake).toContain('"Answer:"');
+  // The client's `verdict.ts` reads the first line.
+  expect(DEFAULT_PROMPTS.final_review).toContain('"VERDICT: APPROVED"');
+  expect(DEFAULT_PROMPTS.final_review).toContain('"VERDICT: CHANGES_REQUESTED"');
+  // `parseSplitPlan` reads the `## Slice <n>:` sections.
+  expect(DEFAULT_PROMPTS.split_plan).toContain(SPLIT_PLAN_FORMAT);
+  // `stack-trailers.ts` places each commit by its trailer.
+  expect(DEFAULT_PROMPTS.split).toContain('`Slice: <n>`');
 });

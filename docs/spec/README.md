@@ -39,8 +39,13 @@ Everything the agent does is mirrored to the GitHub issue.
   Fine-grained tokens and apps cannot reach Projects owned by a user account: those need a classic token.
 - Each agent with a model (the pipeline steps) has an editable prompt, model, thinking effort and tools in Agent
   settings. The effort is passed as `claude --effort` (low, medium, high, xhigh, max); Default passes nothing, so
-  Claude Code decides. The rebase, the history simplification, the split into a stack and the PR description use the implementer's model
-  and effort.
+  Claude Code decides. The rebase (and the change of target and the restack, which run its prompt), the history
+  simplification and the split into a stack resume the implementer's session with its model and effort
+  (`IMPLEMENTER_SESSION` in `agents.ts`). The PR description and the replies resume it too, but have their own
+  settings, which start on the Implementation default model (Opus).
+  Only four default prompts carry a format a parser reads (Intake's `Answer:` lines, the final review's `VERDICT:`
+  line, the split plan's `## Slice <n>:` sections, the split's `Slice: <n>` trailers); `agents.test.ts` keeps them.
+  The worker appends every other output format after the user's prompt, so an edit cannot break it.
 - Final review: the user decides on `CHANGES_REQUESTED` (no automatic loop); the reviewer states the last check result
   instead of re-running the checks.
 - Rebase reuses the implementation agent (`--resume` + a rebase prompt), and the final review always re-runs

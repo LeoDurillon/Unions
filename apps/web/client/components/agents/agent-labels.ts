@@ -31,7 +31,8 @@ export const AGENT_LABELS: Record<BuiltInAgentId, AgentLabel> = {
   },
   final_review: {
     title: 'Final review',
-    description: 'Reviews the diff against the plan and gives a verdict before you approve.',
+    description:
+      'Reviews the diff against the plan and gives a verdict before you approve. Keep the "VERDICT:" first line: it shows as the verdict.',
   },
   review_comments: {
     title: 'Review comments',
@@ -61,7 +62,7 @@ export const AGENT_LABELS: Record<BuiltInAgentId, AgentLabel> = {
   rebase: {
     title: 'Rebase',
     description:
-      "Prompt the implementation agent gets when you click Rebase in a ticket's PR tab. It resumes its own session and uses the Implementation model and effort.",
+      "Prompt the implementation agent gets when you click Rebase in a ticket's PR tab, and when a change of target or a restack needs it. It resumes its own session and uses the Implementation model and effort.",
   },
   lesson_writer: {
     title: 'Lesson writer',
@@ -71,12 +72,12 @@ export const AGENT_LABELS: Record<BuiltInAgentId, AgentLabel> = {
   split_plan: {
     title: 'Split plan',
     description:
-      "Proposes how to cut a ticket's pull request into a stack of pull requests when you click Split into a stack in its PR tab. It reads the spec, the diff and the commits and changes no file; you edit and approve its plan.",
+      'Proposes how to cut a ticket\'s pull request into a stack of pull requests when you click Split into a stack in its PR tab. It reads the spec, the diff and the commits and changes no file; you edit and approve its plan. Keep the "## Slice <n>:" sections and their "**Spec:**" lines: Union reads the slices from them.',
   },
   split: {
     title: 'Split into a stack',
     description:
-      "Prompt the implementation agent gets once you approve a split plan: it rewrites the branch's commits into the plan's slices, the code unchanged. It resumes its own session and uses the Implementation model and effort.",
+      'Prompt the implementation agent gets once you approve a split plan: it rewrites the branch\'s commits into the plan\'s slices, the code unchanged. It resumes its own session and uses the Implementation model and effort. Keep the "Slice: <n>" trailers: Union places each commit by them.',
   },
   simplify: {
     title: 'Simplify history',

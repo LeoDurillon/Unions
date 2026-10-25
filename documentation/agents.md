@@ -19,22 +19,28 @@ Changes apply from the next run, including on tickets already running.
 
 ## The agents
 
-| Group          | Agents                                                                                  | Default model                   |
-| -------------- | --------------------------------------------------------------------------------------- | ------------------------------- |
-| General        | **Shared instructions**: sent first to every agent                                      | –                               |
-| Planning       | Intake, Summary, Technical, Test plan                                                   | Haiku, Sonnet, Opus, Sonnet     |
-| Implementation | Implementation, Final review                                                            | Opus, Opus                      |
-| Pull requests  | PR description, Replies to GitHub comments, Rebase, Simplify history, Split plan, Split | The implementer's model, mostly |
-| Review         | Review comments, Group by spec, Explain                                                 | Opus, Sonnet, Haiku             |
-| Memory         | Lesson writer                                                                           | Haiku                           |
+| Group          | Agents                                                 | Default model               |
+| -------------- | ------------------------------------------------------ | --------------------------- |
+| General        | **Shared instructions**: sent first to every agent     | –                           |
+| Planning       | Intake, Summary, Technical, Test plan                  | Haiku, Sonnet, Opus, Sonnet |
+| Implementation | Implementation, Final review                           | Opus, Opus                  |
+| Pull requests  | PR description, Replies to GitHub comments, Split plan | Opus, Opus, Opus            |
+| Branch history | Rebase, Simplify history, Split into a stack           | Implementation's            |
+| Review         | Review comments, Group by spec, Explain                | Opus, Sonnet, Haiku         |
+| Memory         | Lesson writer                                          | Haiku                       |
 
-The rebase, simplify history, split, PR description and replies agents continue the implementer's session, so they
-run on the implementer's model and effort.
+Rebase, Simplify history and Split into a stack are only prompts: the implementation agent runs them in its own
+session, with the Implementation model and effort. A change of target and a restack use the Rebase prompt the same
+way.
+
+PR description and Replies to GitHub comments also continue the implementer's session, but they have a model and
+effort of their own. They start on Opus and stay there when you change Implementation's model: change theirs too if
+you want them to follow.
 
 On an agent's page:
 
-- **Prompt**: what the agent is told to do. Keep the structure it asks for (the Intake's `Answer:` lines, the final
-  review's verdict line): Union reads it.
+- **Prompt**: what the agent is told to do. A few prompts ask for an answer Union reads: keep that part when you
+  edit them (see [What Union reads from an answer](#what-union-reads-from-an-answer)).
 - **Model**: Haiku (fastest, uses the least), Sonnet, or Opus (most capable).
 - **Effort**: how hard the agent thinks (`low` to `max`). **Default** leaves it to Claude Code.
 - **Tools**: what the agent may do. The planning and review agents read; the implementer also edits and runs
@@ -42,6 +48,22 @@ On an agent's page:
 - **Reset to default** brings back Union's prompt.
 
 **Models** shows every agent's model and effort in one table.
+
+### What Union reads from an answer
+
+Four prompts ask for a format that Union reads back. If you edit one of these prompts, keep its format:
+
+- **Intake**: an `Answer:` line under each question. Each becomes a box where you answer the question. Without
+  these lines you have nowhere to answer.
+- **Final review**: a first line `VERDICT: APPROVED` or `VERDICT: CHANGES_REQUESTED`. The ticket shows it as the
+  verdict. Without it you only get the review's text.
+- **Split plan**: one `## Slice <n>: <title>` section per slice, each with a `**Spec:**` paragraph, and at least two
+  slices. If Union cannot read the plan, it asks the agent once more, then the step fails.
+- **Split into a stack**: a `Slice: <n>` line at the end of each commit message. Union uses it to put each commit in
+  its slice. A commit without it is sent back to the agent.
+
+The other formats Union reads are added after your prompt, so you can rewrite those prompts freely: the PR
+description, review comments, groups, explanations, replies, lessons, and a commit a git hook refused.
 
 ## Tools and connectors
 
