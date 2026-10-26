@@ -1,12 +1,12 @@
 // The review page, with its Explain panel's state.
 import { useState, type ReactElement, type ReactNode } from 'react';
 
-import type { CommentView } from '../../../src/api-types';
 import type { ReviewTarget } from '../../lib/review-target';
 import { useReviewData } from '../../lib/use-review-data';
 import { DiffArea } from './diff-area';
 import { ExplainOff, ExplainProvider } from './explain-context';
 import { ReviewTop } from './review-top';
+import { SlicePickProvider } from './slice-pick';
 import { SliceTabs } from './slice-tabs';
 import { SpecsEditingProvider } from './specs-editing';
 import { useDiffView } from './view-toggle';
@@ -49,14 +49,6 @@ function SectionTabs({
 
 const DIFF_TAB = { id: 'diff', label: 'Diff' };
 
-/** The header's counts: every draft of the review, and the agent's not kept yet. */
-function draftCounts(comments: CommentView[]): { drafts: number; suggestions: number } {
-  const drafts = comments.filter((comment) => comment.status === 'draft');
-  return {
-    drafts: drafts.length,
-    suggestions: drafts.filter((comment) => comment.author === 'agent').length,
-  };
-}
 const NO_SECTIONS: ReviewSection[] = [];
 
 /** The open tab: `startOn`, else the first section, else the diff; `section` is undefined on the diff. */
@@ -85,6 +77,20 @@ function SectionBody({
   );
 }
 
+type ReviewPageProps = {
+  target: ReviewTarget;
+  title: string;
+  onClose: () => void;
+  sections?: ReviewSection[];
+  /** The tab to open on (`diff` for the diff), else the first. */
+  startOn?: string;
+  /** The tabs of the stack the pull request is in, under the header. */
+  stackTabs?: ReactNode;
+  banner?: ReactNode;
+  /** The review is being posted: its comments are polled until they turn sent. */
+  posting?: boolean;
+};
+
 /**
  * Full-page review of a ticket's branch or of a pull request: touched files on the left, one file at
  * a time on the right. `sections` add tabs before the diff, and it opens on the first; `banner` shows
@@ -99,62 +105,52 @@ function ReviewPageBody({
   stackTabs,
   banner,
   posting = false,
-}: {
-  target: ReviewTarget;
-  title: string;
-  onClose: () => void;
-  sections?: ReviewSection[];
-  /** The tab to open on (`diff` for the diff), else the first. */
-  startOn?: string;
-  /** The tabs of the stack the pull request is in, under the header. */
-  stackTabs?: ReactNode;
-  banner?: ReactNode;
-  /** The review is being posted: its comments are polled until they turn sent. */
-  posting?: boolean;
-}): ReactElement {
+}: ReviewPageProps): ReactElement {
   const { diff, comments, slices, error, mutations, copy, empty } = useReviewData(target, posting);
   const [view, setView] = useDiffView();
   const { tab, setTab, section } = useSectionTab(sections, startOn);
   return (
     <ExplainOff off={slices.slice !== null}>
-      <div className="fixed inset-0 z-30 flex flex-col bg-zinc-50 dark:bg-zinc-950">
-        <ReviewTop
-          target={target}
-          copy={copy}
-          title={title}
-          diff={diff.data}
-          {...draftCounts(comments)}
-          view={view}
-          onView={setView}
-          mutations={mutations}
-          onClose={onClose}
-        />
-        {stackTabs ?? <SliceTabs view={slices} comments={comments} />}
-        {sections.length > 0 ? (
-          <SectionTabs sections={[...sections, DIFF_TAB]} current={tab} onChange={setTab} />
-        ) : null}
-        {section ? (
-          <SectionBody banner={banner}>{section.content}</SectionBody>
-        ) : (
-          <DiffArea
-            key={slices.slice ?? 'all'}
-            target={slices.target}
-            files={slices.files}
-            comments={slices.comments}
+      <SlicePickProvider view={slices}>
+        <div className="fixed inset-0 z-30 flex flex-col bg-zinc-50 dark:bg-zinc-950">
+          <ReviewTop
+            target={target}
+            copy={copy}
+            title={title}
+            diff={diff.data}
+            comments={comments}
             view={view}
+            onView={setView}
             mutations={mutations}
-            banner={banner}
-            error={error}
-            emptyText={empty ? copy.empty : null}
+            onClose={onClose}
           />
-        )}
-      </div>
+          {stackTabs ?? <SliceTabs view={slices} comments={comments} />}
+          {sections.length > 0 ? (
+            <SectionTabs sections={[...sections, DIFF_TAB]} current={tab} onChange={setTab} />
+          ) : null}
+          {section ? (
+            <SectionBody banner={banner}>{section.content}</SectionBody>
+          ) : (
+            <DiffArea
+              key={slices.slice ?? 'all'}
+              target={slices.target}
+              files={slices.files}
+              comments={slices.comments}
+              view={view}
+              mutations={mutations}
+              banner={banner}
+              error={error}
+              emptyText={empty ? copy.empty : null}
+            />
+          )}
+        </div>
+      </SlicePickProvider>
     </ExplainOff>
   );
 }
 
 /** The review page, with its Explain panel's state. */
-export function ReviewPage(props: Parameters<typeof ReviewPageBody>[0]): ReactElement {
+export function ReviewPage(props: ReviewPageProps): ReactElement {
   return (
     <ExplainProvider target={props.target}>
       <SpecsEditingProvider>

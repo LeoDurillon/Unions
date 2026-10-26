@@ -9,13 +9,34 @@ import { MoreActions } from './pull-request/more-actions';
 import { PullRequestSections } from './pull-request/pull-request-sections';
 import { StackPanel } from './pull-request/stack-panel';
 import { stackPullRequests } from './pull-request/stack-pr-picker';
+import { useSlicePick } from './review/slice-pick';
 
 /** The picked slice's pull request while it is still in the stack, else the ticket's own. */
-function usePickedPullRequest(detail: TicketDetail): [number | null, (pr: number) => void] {
+function useLocalPick(detail: TicketDetail): [number | null, (pr: number) => void] {
   const [picked, setPicked] = useState<number | null>(null);
   const { ticket } = detail;
   const inStack = picked !== null && stackPullRequests(ticket.stack).includes(picked);
   return [inStack ? picked : ticket.prNumber, setPicked];
+}
+
+/**
+ * On the review page, the pull request of the slice its stack's tabs show (the ticket's own under
+ * All), and picking one here shows that slice there too; in the ticket panel, the tab's own pick.
+ */
+function usePickedPullRequest(detail: TicketDetail): [number | null, (pr: number) => void] {
+  const local = useLocalPick(detail);
+  const page = useSlicePick();
+  if (page === null || page.slices.length === 0) {
+    return local;
+  }
+  const { slices, slice, setSlice } = page;
+  const shown = slices.find((candidate) => candidate.position === slice)?.prNumber;
+  return [
+    shown ?? detail.ticket.prNumber,
+    (pr) => {
+      setSlice(slices.find((candidate) => candidate.prNumber === pr)?.position ?? null);
+    },
+  ];
 }
 
 /**
