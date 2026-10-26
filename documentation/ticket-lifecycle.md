@@ -21,12 +21,12 @@ revision, Union edits that comment instead of adding another one.
 
 ## Planning
 
-| Step          | Default model | What it writes                                                                      |
-| ------------- | ------------- | ----------------------------------------------------------------------------------- |
-| **Intake**    | Haiku         | The questions the request leaves open, each followed by an `Answer:` line for you.  |
-| **Summary**   | Sonnet        | What the ticket asks for, in a few lines, with what is in and out of scope.         |
-| **Technical** | Opus          | The technical plan: the approach, the files to change, the risks. Diagrams welcome. |
-| **Test plan** | Sonnet        | The tests that prove the change works.                                              |
+| Step          | Default model | What it writes                                                                          |
+| ------------- | ------------- | --------------------------------------------------------------------------------------- |
+| **Intake**    | Haiku         | The questions the request leaves open, each followed by an `Answer:` line for you.      |
+| **Summary**   | Sonnet        | What the ticket asks for, with numbered acceptance criteria, decisions and assumptions. |
+| **Technical** | Opus          | The technical plan: the approach, the files to change, the risks. Diagrams welcome.     |
+| **Test plan** | Sonnet        | The tests that prove the change works.                                                  |
 
 The agents read the repository but do not change it during planning. Each step reads the steps approved before it.
 
@@ -54,7 +54,7 @@ ticket's branch:
 3. It commits its work. Union pushes the branch and opens a **draft pull request** that closes the issue. The pull
    request's description follows the repository's pull request template when it has one.
 
-The tab then shows the agent's report: what changed and how the checks ended. Read it, look at the diff with
+The tab then shows the agent's report: what changed, how the checks ended, and where it departed from the plan. Read it, look at the diff with
 **Review changes**, then **Approve** to run the final review, or **Request revision** with what to change.
 
 The agent works in the ticket's own container and workspace, which stay between steps: a revision continues from
