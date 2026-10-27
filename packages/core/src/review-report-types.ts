@@ -5,16 +5,16 @@ import type { SpecSource } from './spec-source-kinds';
 /** A spec as the report's run sent it; `id` is the number the agent cites it by. */
 export type ReportSpec = { id: number; kind: SpecSource; label: string; text: string };
 
-const REPORT_VERDICTS = ['matches', 'partial', 'diverges'] as const;
+export const REPORT_VERDICTS = ['matches', 'partial', 'diverges'] as const;
 export type ReportVerdict = (typeof REPORT_VERDICTS)[number];
 
 export const REQUIREMENT_STATUSES = ['done', 'partial', 'missing', 'differs', 'unclear'] as const;
 export type RequirementStatus = (typeof REQUIREMENT_STATUSES)[number];
 
-const IMPORTANT_FILE_KINDS = ['core', 'risky', 'entry', 'migration', 'api', 'test'] as const;
+export const IMPORTANT_FILE_KINDS = ['core', 'risky', 'entry', 'migration', 'api', 'test'] as const;
 type ImportantFileKind = (typeof IMPORTANT_FILE_KINDS)[number];
 
-const REPORT_LEVELS = ['low', 'medium', 'high'] as const;
+export const REPORT_LEVELS = ['low', 'medium', 'high'] as const;
 type ReportLevel = (typeof REPORT_LEVELS)[number];
 
 /** Lines of a file, both ends included. */
@@ -49,10 +49,10 @@ export type ReportRequirement = {
 /** A change no requirement asked for. */
 export type OutOfScopeChange = { path: string; hunks: string[]; reason: string; risk: ReportLevel };
 
-type ReportRisk = { title: string; detail: string; paths: string[]; severity: ReportLevel };
+export type ReportRisk = { title: string; detail: string; paths: string[]; severity: ReportLevel };
 
 /** A repository document the change should have updated. */
-type ReportDoc = { path: string; note: string };
+export type ReportDoc = { path: string; note: string };
 
 /** What the host kept of the agent's answer, and how much it dropped. */
 export type ReviewReportResult = {

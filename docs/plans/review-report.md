@@ -1,6 +1,7 @@
 # Plan: a spec report on a review
 
-Status: step 1 built (2026-10-27, branch `review-report`); decisions to confirm (end of file).
+Status: steps 1 and 2 built (2026-10-27, branches `review-report`, `review-report-2`); decisions to confirm (end
+of file).
 
 ## Why
 

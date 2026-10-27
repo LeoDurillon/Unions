@@ -1,14 +1,11 @@
 // Reads the explanation block at the end of the agent's answer, and drops the citations it cannot back.
 import type { AgentReviewSpec, ExplainedDoc, ExplainedSpec, ExplanationResult } from '@union/core';
 
-const JSON_BLOCK = /```json[^\n]*\n(?<json>[\s\S]*?)\n\s*```/gu;
+import { isRecord, lastJsonBlock } from './json-block';
+
 const MAX_EXPLANATION = 12_000;
 const MAX_TEXT = 2000;
 const MAX_CITATIONS = 20;
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
-}
 
 function text(value: unknown, max = MAX_TEXT): string {
   return typeof value === 'string' ? value.trim().slice(0, max) : '';
@@ -20,17 +17,7 @@ function list(value: unknown): Record<string, unknown>[] {
 
 /** The last JSON block holding an `explanation`; null when there is none. */
 function lastBlock(answer: string): Record<string, unknown> | null {
-  for (const block of [...answer.matchAll(JSON_BLOCK)].toReversed()) {
-    try {
-      const parsed: unknown = JSON.parse(block.groups?.json ?? '');
-      if (isRecord(parsed) && typeof parsed.explanation === 'string') {
-        return parsed;
-      }
-    } catch {
-      // Not this block: an earlier one may be the answer.
-    }
-  }
-  return null;
+  return lastJsonBlock(answer, (block) => typeof block.explanation === 'string');
 }
 
 function squeezed(value: string): string {

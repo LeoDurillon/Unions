@@ -10,7 +10,8 @@ import {
   type UnrelatedChange,
 } from '@union/core';
 
-const JSON_BLOCK = /```json[^\n]*\n(?<json>[\s\S]*?)\n\s*```/gu;
+import { isRecord, lastJsonBlock } from './json-block';
+
 const MAX_GROUPS = 40;
 const MAX_TEXT = 2000;
 const NOT_PLACED = 'Not placed by the agent';
@@ -22,10 +23,6 @@ type Change = { path: string; hunks: Hunk[]; keys: string[] };
 /** Some changes: by path, the keys of the hunks taken. */
 type Placement = Map<string, Set<string>>;
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
-}
-
 function text(value: unknown): string {
   return typeof value === 'string' ? value.trim().slice(0, MAX_TEXT) : '';
 }
@@ -36,22 +33,11 @@ function list(value: unknown): unknown[] {
 
 /** The last JSON block holding `groups`, as the agent wrote it; null when there is none. */
 function lastBlock(answer: string): Record<string, unknown> | null {
-  const blocks = [...answer.matchAll(JSON_BLOCK)].toReversed();
-  for (const block of blocks) {
-    try {
-      const parsed: unknown = JSON.parse(block.groups?.json ?? '');
-      if (isRecord(parsed) && Array.isArray(parsed.groups)) {
-        return parsed;
-      }
-    } catch {
-      // Not this block: an earlier one may be the answer.
-    }
-  }
-  return null;
+  return lastJsonBlock(answer, (block) => Array.isArray(block.groups));
 }
 
 /** `Automatic unpublishing` → `automatic-unpublishing`, unique among the keys already taken. */
-function keyOf(title: string, taken: Set<string>): string {
+export function keyOf(title: string, taken: Set<string>): string {
   const base =
     title
       .normalize('NFKD')

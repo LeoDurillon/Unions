@@ -9,6 +9,12 @@ import { emitEvent } from './tickets';
 
 export type ReviewReport = typeof schema.reviewReports.$inferSelect;
 export type * from './review-report-types';
+export {
+  IMPORTANT_FILE_KINDS,
+  REPORT_LEVELS,
+  REPORT_VERDICTS,
+  REQUIREMENT_STATUSES,
+} from './review-report-types';
 
 export type ReportOutcome =
   | { status: 'succeeded'; headSha: string; result: ReviewReportResult }

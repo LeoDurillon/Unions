@@ -230,6 +230,9 @@ test('the cancel command cancels a queued run itself and hands a running one to 
     cancelReviewExplanation: () => {
       // Not under test.
     },
+    cancelReviewReport: () => {
+      // Not used here.
+    },
     submitPullRequestReview: () => {
       // Not under test.
     },

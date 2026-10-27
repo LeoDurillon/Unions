@@ -160,6 +160,20 @@
   fresh with the thread. `review-explain-result.ts` reads the JSON block and keeps the spec quotes found in a spec
   sent and the docs whose path exists in the checkout. Lines go to `agent_log` with `explanation_id` (and the
   ticket, so its usage counts them). Cancellation: the `cancel_review_explanation` command (`command-cancels.ts`).
+- `review-report.ts`: `ReviewReportRunner` (in `review-runs.ts`, same slots) runs queued `review_reports`: a
+  ticket's in its own container, a pull request's in a throwaway `union-s<id>` container (`openTarget`, removed by
+  `recover`), with the diff's hunk index written in the checkout (`withHunkIndex`, `hunk-index-file.ts`, shared
+  with the grouping). The prompt (`review-report-prompt.ts`) gives the specs as numbered sections, the change
+  (`checkedOutChange`, shared with the grouping) and the format (`review-report-format.ts`). An answer without the
+  block is asked for it once more in the same session (`review-report-ask.ts`); still none, the run fails with the
+  first answer kept as `raw`. `review-report-result.ts` reads the block (fields in `review-report-fields.ts`, lists
+  in `review-report-items.ts`, out of scope in `review-report-scope.ts`): a quote is kept only when found in a spec
+  sent, paths are relative, out-of-scope changes are on the diff's files, every changed file that is no
+  requirement's code or tests is "Not placed by the agent", at most 8 important files of which 2 outside the
+  change. `review-report-checkout.ts` then reads the named files' line counts in the container, drops the paths
+  that are not there (a deleted file of the change stays an important file) and cuts ranges to the file. All it
+  drops is counted in `dropped`. A ticket's lines go to its `agent_log`. Cancellation: the `cancel_review_report`
+  command (`reportId`).
 - `pr-description-run.ts` (the runner: `pr-description-runner.ts`): `PrDescriptionRunner` (same slots) rewrites a PR's description in the ticket's
   container, resuming the implementer's session (`runResumable`), from GitHub's current description, the PR template
   and the branch; a ticket's rewrites run one at a time (`claimPrDescription`). On a split ticket each open slice's
