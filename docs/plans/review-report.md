@@ -1,7 +1,7 @@
 # Plan: a spec report on a review
 
-Status: steps 1 to 6 built (2026-10-27, branches `review-report` to `review-report-6`); steps 7 to 9 planned
-(**A triage for a faster review**, below); decisions to confirm (end of file). Built differently from below: no header button (the header is at its import limit): the Report tab holds
+Status: steps 1 to 9 built (2026-10-27, branches `review-report` to `review-report-9`; steps 7 to 9 are **A triage
+for a faster review**, below); decisions to confirm (end of file). Built differently from below: no header button (the header is at its import limit): the Report tab holds
 Start, the status and Cancel; the counts are plain text, not links to their sections; Send missing to the implementer
 is **Add the gaps to the review**, on a ticket and a pull request: one general draft listing the requirements missing,
 partial or done differently, sent with the review.
@@ -263,6 +263,11 @@ the lines the diff adds.
 
 The **Needs you** items and the **Skim** files marked on the diff itself; **Not useful** on an item, kept as a
 project lesson so the agent stops raising that kind of item on that repository.
+
+Built 2026-10-27 (`review-report-9`). Each run varies in what it notices (the third run missed "shown on loan
+campaigns", which the second found): a project lesson ("Flag a page shared by loan and subsidy campaigns") makes such
+a finding stable, as **Not useful** makes an unwanted one go. The lessons of the spec report are a group of the
+Memory page (`review_report`); the Memory page's save accepts it. The marks on the diff are on the new side only.
 
 Each step ends with a run on ticket 24, after the user agrees, to compare with the first report.
 

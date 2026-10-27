@@ -7,6 +7,7 @@ import type { CommentView } from '../../../src/api-types';
 import type { Selection, Side } from '../../lib/diff-selection';
 import type { Token } from '../../lib/highlight';
 import { headerKey } from '../../lib/spec-hunks';
+import { useLineMark, type LineMark } from './report-line-marks';
 
 export const ROW_TONE = {
   add: 'bg-green-50 dark:bg-green-950/40',
@@ -36,21 +37,47 @@ export function commentsAt(comments: CommentView[], side: Side, line: number): C
   return comments.filter((comment) => comment.side === side && comment.endLine === line);
 }
 
-/** A line number; a button that starts (shift: extends) a selection when the line takes comments. */
+/** The spec report's mark on a line: a red bar, and where a cited range starts, its items' numbers. */
+function Mark({ mark }: { mark: LineMark }): ReactElement | null {
+  if (!mark.first) {
+    return null;
+  }
+  return (
+    <span
+      title={mark.titles.join('\n')}
+      className="absolute top-0 left-0.5 rounded bg-red-100 px-1 font-sans text-[10px] font-medium text-red-700 dark:bg-red-950 dark:text-red-300"
+    >
+      {mark.numbers.join('·')}
+    </span>
+  );
+}
+
+/**
+ * A line number; a button that starts (shift: extends) a selection when the line takes comments.
+ * `marked`: a line of the new side, which the spec report's items can point at.
+ */
 export function Gutter({
   value,
   onPick,
+  marked = false,
 }: {
   value: number | null;
   onPick: ((extend: boolean) => void) | null;
+  marked?: boolean;
 }): ReactElement {
+  const mark = useLineMark(marked ? value : null);
+  const cell = `w-12 select-none px-2 text-right align-top ${mark ? 'relative border-r-2 border-red-400' : ''}`;
   if (value === null || !onPick) {
     return (
-      <td className="w-12 select-none px-2 text-right align-top text-zinc-400">{value ?? ''}</td>
+      <td className={`${cell} text-zinc-400`}>
+        {mark ? <Mark mark={mark} /> : null}
+        {value ?? ''}
+      </td>
     );
   }
   return (
-    <td className="w-12 select-none px-2 text-right align-top">
+    <td className={cell}>
+      {mark ? <Mark mark={mark} /> : null}
       <button
         type="button"
         className="text-zinc-400 hover:text-indigo-600"

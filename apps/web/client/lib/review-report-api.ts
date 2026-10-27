@@ -10,4 +10,7 @@ export const reviewReportApi = {
   cancel: (base: string): Promise<ReportView> => request('POST', `${base}/reports/cancel`),
   /** Adds a draft on the whole change asking for the requirements the report found not met. */
   addGaps: (base: string): Promise<unknown> => request('POST', `${base}/reports/gaps`),
+  /** Hides an item of what needs the reviewer; a non-empty rule becomes a spec report lesson. */
+  notUseful: (base: string, index: number, rule: string): Promise<ReportView> =>
+    request('POST', `${base}/reports/attention/${index}/not-useful`, { rule }),
 };

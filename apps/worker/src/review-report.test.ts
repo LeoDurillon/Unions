@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 
 import {
+  addLesson,
   createDb,
   createTicket,
   latestReport,
@@ -195,4 +196,15 @@ test("still no block: the report fails and keeps the agent's first answer", asyn
     error: "The agent's answer has no report block",
     raw: 'The report, in words only.',
   });
+});
+
+test("the project's spec report lessons are in the prompt, not the pipeline's", async () => {
+  const projectId = db.select().from(schema.projects).get()?.id ?? 0;
+  addLesson(db, projectId, { section: 'review_report', rule: 'Flag pages shared by loans.' });
+  addLesson(db, projectId, { section: 'implement', rule: 'Run the linter.' });
+  replies = [REPORT];
+  await report();
+  expect(runs[0]?.prompt).toContain('# Lessons from past reports');
+  expect(runs[0]?.prompt).toContain('- Flag pages shared by loans.');
+  expect(runs[0]?.prompt).not.toContain('Run the linter.');
 });

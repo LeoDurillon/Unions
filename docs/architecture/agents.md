@@ -38,7 +38,8 @@ A pipeline step's prompt is built by `buildPrompt` (`apps/worker/src/prompts.ts`
 
 1. **Shared**: the `shared` agent's prompt, then the project's instructions (`projectInstructions`), then the step's
    lessons unless `config.memory` is false. That is `stepSharedPrompt` (`lessons.ts`); runs outside the pipeline get
-   `sharedPrompt`, the same without lessons.
+   `sharedPrompt`, the same without lessons; the spec report gets its own lessons (section `review_report`,
+   `reportLessonsPrompt`) after it.
 2. `# Task`: the ticket's title and body.
 3. `# Builds on`: the parent ticket and where to see its changes, when it has one.
 4. `# Attached files`, `# Project files`, when there are any.
@@ -68,7 +69,7 @@ their own prompt from `sharedPrompt` and the agent's prompt, in the modules of t
 | `review_comments`                                     | ticket's, or `union-a<id>` for a PR | fresh                          | no      | `agent-review.ts`, `agent-review-stack.ts`     |
 | `review_groups`                                       | ticket's, or `union-g<id>` for a PR | fresh                          | no      | `review-grouping.ts`                           |
 | `review_explain`                                      | ticket's, or `union-e<id>` for a PR | a ticket's follow-up resumes   | no      | `review-explain.ts`                            |
-| `review_report`                                       | ticket's, or `union-s<id>` for a PR | fresh                          | no      | `review-report.ts`                             |
+| `review_report`                                       | ticket's, or `union-s<id>` for a PR | fresh                          | its own | `review-report.ts`                             |
 | `lesson_writer`                                       | throwaway, no repository            | fresh                          | no      | `lesson-writer-run.ts`                         |
 
 Runs without an agent page: the prompt writer (Sonnet, throwaway, `prompt-writer-run.ts`), the connector check

@@ -173,3 +173,28 @@ export function failInterruptedReports(db: Db): ReviewReport[] {
   }
   return running;
 }
+
+/**
+ * Marks the item at `index` of what needs the reviewer not useful, on a finished report; the report,
+ * or null when it has no such item.
+ */
+export function markNotUseful(db: Db, reportId: number, index: number): ReviewReport | null {
+  const report = db
+    .select()
+    .from(schema.reviewReports)
+    .where(eq(schema.reviewReports.id, reportId))
+    .get();
+  const item = report?.result?.attention[index];
+  if (!report?.result || !item) {
+    return null;
+  }
+  const attention = report.result.attention.with(index, { ...item, notUseful: true });
+  const updated = db
+    .update(schema.reviewReports)
+    .set({ result: { ...report.result, attention } })
+    .where(eq(schema.reviewReports.id, reportId))
+    .returning()
+    .get();
+  changed(db, updated);
+  return filled(updated);
+}

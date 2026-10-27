@@ -1,6 +1,7 @@
-// The project's lessons by agent step, as cards: edited one at a time, reordered and removed in the page's form.
-import type { LessonInput } from '@union/core/lesson-input';
-import { FULL_FLOW, type PipelineStep } from '@union/core/states';
+// The project's lessons by agent step (and the spec report's), as cards: edited one at a time, reordered
+// and removed in the page's form.
+import { REPORT_LESSONS, type LessonInput, type LessonSection } from '@union/core/lesson-input';
+import { FULL_FLOW } from '@union/core/states';
 import type { ReactElement } from 'react';
 
 import { stepTitle } from '../../lib/labels';
@@ -8,6 +9,14 @@ import { Button } from '../ui';
 import { LessonCard, type LessonCardProps } from './lesson-card';
 
 type Change = (lessons: LessonInput[]) => void;
+
+/** The groups the page lists: the pipeline's steps, then the spec report. */
+const SECTIONS: readonly LessonSection[] = [...FULL_FLOW, REPORT_LESSONS];
+
+/** A lesson group's title: its step's, or "Spec report". */
+export function lessonTitle(section: LessonSection): string {
+  return section === REPORT_LESSONS ? 'Spec report' : stepTitle(section);
+}
 
 /** Which lesson shows its field, by its place in the whole list; null: none. */
 export type Editing = { at: number | null; open: (at: number | null) => void };
@@ -75,7 +84,7 @@ function StepLessons({
   onChange,
   editing,
 }: {
-  step: PipelineStep;
+  step: LessonSection;
   lessons: readonly LessonInput[];
   onChange: Change;
   editing: Editing;
@@ -95,7 +104,7 @@ function StepLessons({
   return (
     <div className="space-y-2 rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-medium">{stepTitle(step)}</h4>
+        <h4 className="text-sm font-medium">{lessonTitle(step)}</h4>
         <Button
           className="px-2 py-1 text-xs"
           onClick={() => {
@@ -115,7 +124,7 @@ function StepLessons({
   );
 }
 
-/** Every step of the pipeline, with its lessons; a change goes to the page's form. */
+/** Every step of the pipeline, then the spec report, with their lessons; a change goes to the page's form. */
 export function LessonList({
   lessons,
   onChange,
@@ -127,7 +136,7 @@ export function LessonList({
 }): ReactElement {
   return (
     <div className="space-y-3">
-      {FULL_FLOW.map((step) => (
+      {SECTIONS.map((step) => (
         <StepLessons
           key={step}
           step={step}

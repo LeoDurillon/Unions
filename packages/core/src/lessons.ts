@@ -3,7 +3,7 @@ import { and, asc, desc, eq, inArray, isNull } from 'drizzle-orm';
 
 import { sharedPrompt } from './agents';
 import type { Db } from './db';
-import type { LessonInput } from './lesson-input';
+import { REPORT_LESSONS, type LessonInput, type LessonSection } from './lesson-input';
 import type { Step } from './states';
 import * as schema from './tables';
 
@@ -117,18 +117,42 @@ function memoryOn(db: Db, projectId: number): boolean {
   return project?.config.memory !== false;
 }
 
+/** The rules of a section as a prompt's list; none when memory is off. */
+function rulesOf(db: Db, projectId: number, section: Step | LessonSection): string[] {
+  if (!memoryOn(db, projectId)) {
+    return [];
+  }
+  return listLessons(db, projectId)
+    .filter((lesson) => lesson.section === section)
+    .map((lesson) => `- ${lesson.rule}`);
+}
+
 /** The lessons for `step` as a prompt section; empty when there are none or memory is off. */
 export function lessonsPrompt(db: Db, projectId: number, step: Step): string {
-  if (!memoryOn(db, projectId)) {
-    return '';
-  }
-  const rules = listLessons(db, projectId)
-    .filter((lesson) => lesson.section === step)
-    .map((lesson) => `- ${lesson.rule}`);
+  const rules = rulesOf(db, projectId, step);
   if (rules.length === 0) {
     return '';
   }
   return `# Lessons from past tickets\n\nThe user wrote these rules from their feedback on earlier tickets of this project. Follow them.\n\n${rules.join('\n')}`;
+}
+
+/** The spec report's lessons as a prompt section; empty when there are none or memory is off. */
+export function reportLessonsPrompt(db: Db, projectId: number): string {
+  const rules = rulesOf(db, projectId, REPORT_LESSONS);
+  if (rules.length === 0) {
+    return '';
+  }
+  return `# Lessons from past reports\n\nThe user wrote these rules from their feedback on earlier spec reports of this project. Follow them.\n\n${rules.join('\n')}`;
+}
+
+/** Adds one lesson after the project's others. */
+export function addLesson(db: Db, projectId: number, lesson: LessonInput): Lesson {
+  const last = listLessons(db, projectId).at(-1);
+  return db
+    .insert(schema.lessons)
+    .values({ projectId, ...lesson, position: (last?.position ?? -1) + 1 })
+    .returning()
+    .get();
 }
 
 /** What a ticket step's agent gets first: the shared and project instructions, then the step's lessons. */

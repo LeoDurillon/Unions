@@ -84,6 +84,14 @@ bar's) and the whole change, and writes:
 - **Risks**, **Questions** to ask the author, and **Docs to update**; at the end, the changed files the agent said
   nothing about, if any.
 
+Not every item will be worth your time on every project. **Not useful** on an item hides it, and proposes a rule
+for the next reports of this project ("Do not raise …"): edit it to cover the kind of item, or clear it to only hide
+this one. The rule is kept on the Memory page under **Spec report**, where you can edit or remove it.
+
+In the Diff tab, while the report is current, the open file starts with what the report says about it (**Read
+first**, **Skim**, and the **Needs you** items about it), and the lines an item points at carry a red bar with the
+item's number.
+
 Click a file or its lines to open them in the Diff tab. **Add as draft comment** opens the comment editor on those
 lines with the note: nothing is sent until you send your review. **Add the gaps to the review** adds one draft on
 the whole change listing the requirements missing, partial or done differently, with their notes: edit it, then send

@@ -148,7 +148,13 @@ on hover), in List, Tree and By spec. **Add the gaps to the review** (while the 
 requirement missing, partial or done differently) adds one general draft listing them with their notes and quotes
 (`POST …/reports/gaps`, built from the stored report by `reportGaps`), sent with the review like any draft. **Copy
 as markdown** copies the report; **Run again** writes a new one in its place; once the review's head moved, the
-report is **Outdated**. Reports written before the triage show without it. The agent is `review_report` in Union settings (Opus by default,
+report is **Outdated**. Reports written before the triage show without it. **Not useful** on a **Needs you** item hides it (`POST
+…/reports/attention/:index/not-useful`, the item flagged `notUseful` on the stored report; the numbers of the others
+stay) and, with a rule (prefilled "Do not raise …", one line, at most 500 characters), adds it to the project's
+lessons under `review_report` (the Memory page's **Spec report** group), which every later report of the project
+reads. In the Diff tab, while the report is current, the open file starts with a note (Read first and why, Skim and
+why, the **Needs you** items about it), and the lines an item cites carry a red bar on the new side's line numbers,
+with the items' numbers where a cited range starts. The agent is `review_report` in Union settings (Opus by default,
 read-only tools and git reads); each report is one run on the user's Claude usage; nothing is written to GitHub or
 Notion.
 

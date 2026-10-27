@@ -163,7 +163,7 @@
 - `review-report.ts`: `ReviewReportRunner` (in `review-runs.ts`, same slots) runs queued `review_reports`: a
   ticket's in its own container, a pull request's in a throwaway `union-s<id>` container (`openTarget`, removed by
   `recover`), with the diff's hunk index written in the checkout (`withHunkIndex`, `hunk-index-file.ts`, shared
-  with the grouping). The prompt (`review-report-prompt.ts`) gives the specs as numbered sections (a spec kept
+  with the grouping). The prompt (`review-report-prompt.ts`) gives the project's spec report lessons (`reportLessonsPrompt`), the specs as numbered sections (a spec kept
   `sameAs` another, by `distinctSpecs` in core, is not repeated), the change
   (`checkedOutChange`, shared with the grouping) and the format (`review-report-format.ts`). An answer without the
   block is asked for it once more in the same session (`review-report-ask.ts`); still none, the run fails with the

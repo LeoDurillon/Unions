@@ -63,6 +63,8 @@ export type AttentionItem = {
   /** The requirement it is about (`ReportRequirement.key`), if any. */
   requirement: string | null;
   cites: ReportCite[];
+  /** The reviewer marked it not useful: no longer shown. */
+  notUseful?: true;
 };
 
 /** Where a step's why comes from; `inferred` when nothing the host could check says it. */

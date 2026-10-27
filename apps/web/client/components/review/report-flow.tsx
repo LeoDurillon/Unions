@@ -35,7 +35,7 @@ function marksOf(flow: ReportFlow, result: ReviewReportResult): Map<string, numb
     flow.nodes.map((node) => [
       node.id,
       result.attention.flatMap((item, at) =>
-        item.cites.some((cite) => cite.path === node.path) ? [at + 1] : [],
+        !item.notUseful && item.cites.some((cite) => cite.path === node.path) ? [at + 1] : [],
       ),
     ]),
   );

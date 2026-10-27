@@ -1,9 +1,15 @@
 // Under a review's base (`/api/tickets/:id`, `/api/projects/:projectId/pull-requests/reviews/:number`):
 // `/reports` (the newest spec report), `POST /reports` (queue one on the review's specs), `/reports/cancel`,
-// `/reports/gaps` (a draft asking for the requirements it found not met).
+// `/reports/gaps` (a draft asking for the requirements it found not met), `/reports/attention/:index/not-useful`
+// (an item hidden, its rule kept as a lesson).
 import {
+  addLesson,
   distinctSpecs,
   latestReport,
+  lessonRule,
+  markNotUseful,
+  MAX_LESSON_LENGTH,
+  REPORT_LESSONS,
   MAX_SPEC_CHARS,
   MAX_SPECS,
   queueReport,
@@ -17,7 +23,7 @@ import {
 import { reportGaps } from '@union/core/review-report-markdown';
 import { Hono, type Context } from 'hono';
 
-import { ACCEPTED, CONFLICT, CREATED, fail } from '../http';
+import { ACCEPTED, BAD_REQUEST, CONFLICT, CREATED, fail, NOT_FOUND, readObject } from '../http';
 import { addGeneralDraft } from '../review-output-comment';
 import type { ReviewSpecView } from '../review-spec-types';
 import type { GroupingTarget } from './review-groupings';
@@ -132,9 +138,35 @@ function addGaps(db: Db, c: Context, target: GroupingTarget): Response {
 }
 
 /**
+ * Marks an item of what needs the reviewer not useful; with a rule, the rule becomes a lesson of the
+ * project's spec reports, sent to the next ones.
+ */
+async function notUseful(db: Db, c: Context, target: GroupingTarget): Promise<Response> {
+  const report = latestReport(db, target.owner);
+  const shown = view(report, target);
+  if (!report?.result || !shown || shown.outdated) {
+    throw fail(CONFLICT, 'No current report on this change');
+  }
+  const index = Number(c.req.param('index'));
+  if (!Number.isInteger(index) || !report.result.attention[index]) {
+    throw fail(NOT_FOUND, 'The report has no such item');
+  }
+  const body = await readObject(c.req.raw);
+  const rule = lessonRule(body.rule);
+  if (rule.length > MAX_LESSON_LENGTH) {
+    throw fail(BAD_REQUEST, `A lesson is at most ${MAX_LESSON_LENGTH} characters`);
+  }
+  if (rule !== '') {
+    addLesson(db, target.project.id, { section: REPORT_LESSONS, rule });
+  }
+  return c.json(view(markNotUseful(db, report.id, index), target));
+}
+
+/**
  * Under a review's base (`/api/tickets/:id`, `/api/projects/:projectId/pull-requests/reviews/:number`):
  * `/reports` (the newest spec report), `POST /reports` (queue one on the review's specs),
- * `/reports/cancel`, `/reports/gaps` (a draft asking for the requirements it found not met).
+ * `/reports/cancel`, `/reports/gaps` (a draft asking for the requirements it found not met),
+ * `/reports/attention/:index/not-useful` (an item hidden, its rule kept as a lesson).
  */
 export function reviewReportRoutes(
   readers: SpecReaders,
@@ -148,5 +180,6 @@ export function reviewReportRoutes(
   routes.post('/', (c) => start(readers, c, targetOf(c)));
   routes.post('/cancel', (c) => cancel(readers.db, c, targetOf(c)));
   routes.post('/gaps', (c) => addGaps(readers.db, c, targetOf(c)));
+  routes.post('/attention/:index/not-useful', (c) => notUseful(readers.db, c, targetOf(c)));
   return routes;
 }

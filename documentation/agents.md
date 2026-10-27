@@ -117,7 +117,9 @@ every run of this project.
 - On a feedback: **Make a lesson** (drafted from its first line, for you to edit), **Suggest with agent**, or
   **Dismiss**.
 - **Suggest lessons from new feedback** asks the lesson writer agent for proposals. **Accept** or dismiss each one.
-- Write, edit, reorder or remove lessons by hand, grouped by step. Up to 500 characters each.
+- Write, edit, reorder or remove lessons by hand, grouped by step. Up to 500 characters each. The last group,
+  **Spec report**, holds the rules the spec report reads: the ones you keep when you mark an item of its **Needs
+  you** not useful, and any you add (for example "Flag a page shared by loan and subsidy campaigns").
 - Nothing is kept until you click **Save**.
 - **Send lessons to the agents** turns them off without deleting them.
 

@@ -3,9 +3,9 @@ import type { LessonSuggestion } from '@union/core';
 import type { LessonInput } from '@union/core/lesson-input';
 import { useState, type ReactElement } from 'react';
 
-import { stepTitle } from '../../lib/labels';
 import { useLessonSuggestion, useLessonWriter } from '../../lib/use-memory';
 import { Badge, Button, ErrorText } from '../ui';
+import { lessonTitle } from './lesson-list';
 
 /** Adds lessons to the page's form, with the feedback they came from (curated on Save). */
 export type AcceptLessons = (lessons: LessonInput[], feedbackIds: number[]) => void;
@@ -33,7 +33,7 @@ function ProposalRow({
 }): ReactElement {
   return (
     <li className="flex items-start gap-2 rounded-md border border-zinc-200 bg-white px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900">
-      <Badge tone="blue">{stepTitle(proposal.section)}</Badge>
+      <Badge tone="blue">{lessonTitle(proposal.section)}</Badge>
       <p className="min-w-0 flex-1 text-sm break-words">{proposal.rule}</p>
       {accepted ? (
         <span className="text-xs text-green-700 dark:text-green-400">Accepted</span>

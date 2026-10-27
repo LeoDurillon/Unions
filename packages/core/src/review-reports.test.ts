@@ -10,6 +10,7 @@ import {
   failInterruptedReports,
   finishReport,
   latestReport,
+  markNotUseful,
   queueReport,
   ReportBusyError,
   type ReportSpec,
@@ -173,4 +174,18 @@ test('a report goes with its ticket or its review', () => {
   db.delete(schema.tickets).where(eq(schema.tickets.id, ticket.id)).run();
   db.delete(schema.currentReviews).where(eq(schema.currentReviews.id, review.id)).run();
   expect(db.select().from(schema.reviewReports).all()).toEqual([]);
+});
+
+test('an item marked not useful is kept on the report, flagged; a missing one is refused', () => {
+  const report = queueReport(db, ticket, specs);
+  const item = { kind: 'risk' as const, title: 'Locks', detail: '', requirement: null, cites: [] };
+  finishReport(db, report.id, {
+    status: 'succeeded',
+    headSha: 'abc',
+    result: { ...result, attention: [item, { ...item, title: 'Slow' }] },
+  });
+  expect(markNotUseful(db, report.id, 9)).toBeNull();
+  const marked = markNotUseful(db, report.id, 1);
+  expect(marked?.result?.attention.map((a) => a.notUseful ?? false)).toEqual([false, true]);
+  expect(latestReport(db, ticket)?.result?.attention[1]?.notUseful).toBe(true);
 });

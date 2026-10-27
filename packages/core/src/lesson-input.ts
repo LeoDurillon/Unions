@@ -1,7 +1,14 @@
-// The lessons a Memory page save sends, checked: a known step and a one-line rule each, within the limits (browser-safe).
+// The lessons a Memory page save sends, checked: a known step (or the spec report) and a one-line rule
+// each, within the limits (browser-safe).
 import { FULL_FLOW, isCustomStep, type PipelineStep } from './states';
 
-export type LessonInput = { section: PipelineStep; rule: string };
+/** The spec report's lessons: it is no pipeline step, but learns from the reviewer as the steps do. */
+export const REPORT_LESSONS = 'review_report';
+
+/** Where a lesson applies: a step of the pipeline, or the spec report. */
+export type LessonSection = PipelineStep | typeof REPORT_LESSONS;
+
+export type LessonInput = { section: LessonSection; rule: string };
 
 /** What a save holds: every lesson, and the feedback the new ones were made from. */
 export type LessonsSave = { lessons: LessonInput[]; curated: number[] };
@@ -13,16 +20,23 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-function isPipelineStep(value: unknown): value is PipelineStep {
-  return isCustomStep(value) || FULL_FLOW.some((step) => step === value);
+function isLessonSection(value: unknown): value is LessonSection {
+  return (
+    value === REPORT_LESSONS || isCustomStep(value) || FULL_FLOW.some((step) => step === value)
+  );
+}
+
+/** A rule as lessons keep it: on one line, trimmed. */
+export function lessonRule(value: unknown): string {
+  return typeof value === 'string' ? value.replaceAll(/\s+/gu, ' ').trim() : '';
 }
 
 /** One lesson, or why it is refused; its rule is trimmed and kept on one line. */
 function parseLesson(value: unknown, index: number): LessonInput | string {
-  if (!isRecord(value) || !isPipelineStep(value.section)) {
+  if (!isRecord(value) || !isLessonSection(value.section)) {
     return `Lesson ${index + 1} needs a step`;
   }
-  const rule = typeof value.rule === 'string' ? value.rule.replaceAll(/\s+/gu, ' ').trim() : '';
+  const rule = lessonRule(value.rule);
   if (rule === '') {
     return `Lesson ${index + 1} is empty`;
   }

@@ -1,13 +1,26 @@
 // The prompts of a spec report: the first one with the specs and the change, and the one more turn
 // asking for the block when the answer has none.
-import { resolveAgent, sharedPrompt, type Db, type ReportSpec } from '@union/core';
+import {
+  reportLessonsPrompt,
+  resolveAgent,
+  sharedPrompt,
+  type Db,
+  type ReportSpec,
+} from '@union/core';
 
 import type { ReviewTarget } from './agent-review-target';
 import { checkedOutChange } from './review-change-prompt';
 import { REPORT_FORMAT, specSections } from './review-report-format';
 
+/** The shared and project instructions, then the lessons the reviewer gave earlier reports. */
+function instructions(db: Db, projectId: number): string {
+  const lessons = reportLessonsPrompt(db, projectId);
+  const shared = sharedPrompt(db, projectId);
+  return lessons === '' ? shared : `${shared}\n\n${lessons}`;
+}
+
 export function reportPrompt(db: Db, target: ReviewTarget, specs: ReportSpec[]): string {
-  return `${sharedPrompt(db, target.projectId)}
+  return `${instructions(db, target.projectId)}
 
 ${resolveAgent(db, 'review_report').prompt}
 

@@ -6,9 +6,11 @@ import { saveAgent } from './agents';
 import { createDb, migrateDb, type Db } from './db';
 import { parseLessonsSave } from './lesson-input';
 import {
+  addLesson,
   lessonsPrompt,
   listFeedback,
   listLessons,
+  reportLessonsPrompt,
   saveLessons,
   setFeedbackCurated,
   stepSharedPrompt,
@@ -123,4 +125,22 @@ test('a save is checked: known steps, non-empty one-line rules, feedback ids', (
   expect(parseLessonsSave({ lessons: [], curated: ['1'] })).toBe(
     '"curated" must be a list of feedback ids',
   );
+});
+
+test("the spec report's lessons: added after the others, saved by the Memory page, in its own prompt", () => {
+  saveLessons(db, projectId, [{ section: 'implement', rule: 'Use bun.' }]);
+  const added = addLesson(db, projectId, { section: 'review_report', rule: 'Flag loan pages.' });
+  expect(added).toMatchObject({ section: 'review_report', position: 1 });
+  expect(reportLessonsPrompt(db, projectId)).toContain('# Lessons from past reports');
+  expect(reportLessonsPrompt(db, projectId)).toContain('- Flag loan pages.');
+  expect(reportLessonsPrompt(db, projectId)).not.toContain('Use bun.');
+  expect(lessonsPrompt(db, projectId, 'implement')).not.toContain('Flag loan pages.');
+  expect(reportLessonsPrompt(db, otherId)).toBe('');
+  const save = parseLessonsSave({
+    lessons: [{ section: 'review_report', rule: ' Flag  loan pages. ' }],
+  });
+  expect(save).toEqual({
+    lessons: [{ section: 'review_report', rule: 'Flag loan pages.' }],
+    curated: [],
+  });
 });

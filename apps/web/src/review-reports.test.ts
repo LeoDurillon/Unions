@@ -5,6 +5,7 @@ import {
   createTicket,
   finishReport,
   latestReport,
+  listLessons,
   migrateDb,
   schema,
   type Db,
@@ -234,4 +235,46 @@ test("the report's gaps become one draft on the whole change, while the report i
   ]);
   db.insert(schema.diffSnapshots).values({ ticketId, baseBranch: 'main', headSha: 'h2' }).run();
   expect(await (await call('POST', `${base}/gaps`)).text()).toContain('outdated');
+});
+
+test('an item marked not useful is hidden; its rule becomes a spec report lesson', async () => {
+  const base = `/api/tickets/${ticketId}/reports`;
+  await call('POST', base);
+  const item = { kind: 'risk' as const, detail: '', requirement: null, cites: [] };
+  finishReport(db, latestReport(db, { kind: 'ticket', id: ticketId })?.id ?? 0, {
+    status: 'succeeded',
+    headSha: 'h1',
+    result: {
+      verdict: 'partial',
+      summary: '',
+      flow: { nodes: [], edges: [], steps: [] },
+      attention: [
+        { ...item, title: 'Locks' },
+        { ...item, title: 'Slow' },
+      ],
+      importantFiles: [],
+      skim: [],
+      unreviewed: [],
+      requirements: [],
+      outOfScope: [],
+      risks: [],
+      questions: [],
+      docs: [],
+      dropped: 0,
+    },
+  });
+  expect((await call('POST', `${base}/attention/5/not-useful`, {})).status).toBe(404);
+  const long = await call('POST', `${base}/attention/1/not-useful`, { rule: 'x'.repeat(501) });
+  expect(long.status).toBe(400);
+  const marked = await json<ReportView>(
+    call('POST', `${base}/attention/1/not-useful`, { rule: '  Do not flag\n slow queries. ' }),
+  );
+  expect(marked.result?.attention.map((a) => [a.title, a.notUseful ?? false])).toEqual([
+    ['Locks', false],
+    ['Slow', true],
+  ]);
+  await call('POST', `${base}/attention/0/not-useful`, {});
+  expect(listLessons(db, projectId).map((l) => [l.section, l.rule])).toEqual([
+    ['review_report', 'Do not flag slow queries.'],
+  ]);
 });

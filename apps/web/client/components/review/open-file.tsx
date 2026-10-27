@@ -8,8 +8,8 @@ import { useDiffFile, type useCommentMutations } from '../../lib/use-review';
 import { ErrorText } from '../ui';
 import { hasThread, OutdatedComments, Thread } from './comment-thread';
 import { useWholeExplain, type ExplainFocus, type WholeExplain } from './explain-context';
-import { FileDiff, type DiffView } from './file-diff';
 import { useHunkFocus } from './hunk-focus';
+import { ReportFileDiff, type DiffView } from './report-file-diff';
 
 type Mutations = ReturnType<typeof useCommentMutations>;
 
@@ -90,13 +90,13 @@ export function OpenFile({
     return <ErrorText error={file.error} />;
   }
   const { path } = file.data;
-  const outdated = forFile.filter((comment) => comment.outdated);
   return (
     <div className="space-y-3">
       <FileHeader path={path} patch={file.data.patch} whole={whole} />
       {focus.bar}
-      <OutdatedComments comments={outdated} mutations={mutations} />
-      <FileDiff
+      <OutdatedComments comments={forFile.filter((c) => c.outdated)} mutations={mutations} />
+      <ReportFileDiff
+        target={target}
         path={path}
         view={view}
         patch={focus.patch}

@@ -32,7 +32,7 @@ export function ReportBody({
     <div className="space-y-6">
       <ReportHeader target={target} report={report} onAgain={onAgain} />
       <ReportFlowSection result={result} onOpen={onOpen} />
-      <ReportAttention result={result} onOpen={onOpen} />
+      <ReportAttention target={target} result={result} onOpen={onOpen} />
       <ReportImportantFiles files={result.importantFiles} onOpen={onOpen} />
       <ReportSkim result={result} onOpen={onOpen} />
       <ReportRequirements requirements={result.requirements} specs={report.specs} onOpen={onOpen} />
