@@ -2,6 +2,7 @@
 // `/reports` (the newest spec report), `POST /reports` (queue one on the review's specs), `/reports/cancel`,
 // `/reports/gaps` (a draft asking for the requirements it found not met).
 import {
+  distinctSpecs,
   latestReport,
   MAX_SPEC_CHARS,
   MAX_SPECS,
@@ -46,7 +47,12 @@ function view(report: ReviewReport | null, target: GroupingTarget): ReportView |
     createdAt,
     startedAt,
     finishedAt,
-    specs: report.specs.map(({ id: specId, kind, label }) => ({ id: specId, kind, label })),
+    specs: report.specs.map(({ id: specId, kind, label, sameAs }) => ({
+      id: specId,
+      kind,
+      label,
+      sameAs,
+    })),
     result,
     outdated:
       status === 'succeeded' && target.headSha !== null && report.headSha !== target.headSha,
@@ -55,7 +61,8 @@ function view(report: ReviewReport | null, target: GroupingTarget): ReportView |
 
 /**
  * The specs a report reads: the review's, as the Specs bar shows them, without the removed ones and
- * the ones whose source could not be read; numbered for the agent to cite.
+ * the ones whose source could not be read; numbered for the agent to cite, images out, one another
+ * holds sent once (`distinctSpecs`).
  */
 function reportSpecsOf(views: ReviewSpecView[]): ReportSpec[] {
   const readable = views.flatMap((spec) =>
@@ -69,14 +76,15 @@ function reportSpecsOf(views: ReviewSpecView[]): ReportSpec[] {
   if (readable.length > MAX_SPECS) {
     throw fail(CONFLICT, `At most ${MAX_SPECS} specs: remove some in the Specs bar.`);
   }
-  const long = readable.find((spec) => spec.text.length > MAX_SPEC_CHARS);
+  const specs = distinctSpecs(readable);
+  const long = specs.find((spec) => spec.text.length > MAX_SPEC_CHARS);
   if (long) {
     throw fail(
       CONFLICT,
       `${long.label} is longer than ${MAX_SPEC_CHARS} characters: edit it in the Specs bar to keep the part that matters.`,
     );
   }
-  return readable.map(({ kind, label, text }, at) => ({ id: at + 1, kind, label, text }));
+  return specs;
 }
 
 async function start(readers: SpecReaders, c: Context, target: GroupingTarget): Promise<Response> {

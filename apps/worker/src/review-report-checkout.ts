@@ -33,6 +33,7 @@ export async function lineCounts(
 export function reportPaths(result: ReviewReportResult): string[] {
   return [
     ...result.importantFiles.map((file) => file.path),
+    ...result.attention.flatMap((item) => item.cites.map((cite) => cite.path)),
     ...result.requirements.flatMap((item) => [...item.evidence.map((e) => e.path), ...item.tests]),
     ...result.risks.flatMap((risk) => risk.paths),
     ...result.docs.map((doc) => doc.path),
@@ -49,8 +50,9 @@ function counted<T>(items: T[], kept: T[]): number {
 }
 
 /**
- * The report with what the checkout cannot back dropped and counted: code, tests and docs that are
- * not files, line ranges past a file's end, an unchanged important file that does not exist.
+ * The report with what the checkout cannot back dropped and counted: code, tests, docs and lines to
+ * look at that are not files, line ranges past a file's end, an unchanged important file that does
+ * not exist.
  */
 export function keepInCheckout(
   result: ReviewReportResult,
@@ -63,6 +65,11 @@ export function keepInCheckout(
     const tests = item.tests.filter((path) => counts.has(path));
     dropped += counted(item.evidence, evidence) + counted(item.tests, tests);
     return { ...item, evidence, tests };
+  });
+  const attention = result.attention.map((item) => {
+    const cites = item.cites.flatMap((cite) => within(cite, counts.get(cite.path) ?? 0) ?? []);
+    dropped += counted(item.cites, cites);
+    return { ...item, cites };
   });
   const importantFiles = result.importantFiles.filter(
     (file) => counts.has(file.path) || changed.has(file.path),
@@ -80,6 +87,7 @@ export function keepInCheckout(
   dropped += counted(result.importantFiles, importantFiles) + counted(result.docs, docs);
   return {
     ...result,
+    attention,
     requirements,
     importantFiles,
     docs,

@@ -1,6 +1,6 @@
 import { beforeEach, expect, test } from 'bun:test';
 
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 
 import type { AgentReviewOwner } from './agent-reviews';
 import { createDb, migrateDb, type Db } from './db';
@@ -49,7 +49,8 @@ beforeEach(() => {
 
 const specs: ReportSpec[] = [{ id: 1, kind: 'ticket', label: 'Ticket', text: 'Do it' }];
 
-const result: ReviewReportResult = {
+/** A result as reports stored it before the triage. */
+const older = {
   verdict: 'matches',
   summary: 'Done.',
   importantFiles: [],
@@ -59,6 +60,14 @@ const result: ReviewReportResult = {
   questions: [],
   docs: [],
   dropped: 0,
+};
+
+const result: ReviewReportResult = {
+  ...older,
+  verdict: 'matches',
+  attention: [],
+  skim: [],
+  unreviewed: [],
 };
 
 function reportEvents(): unknown[] {
@@ -99,6 +108,12 @@ test('a new report replaces the finished ones', () => {
       .all()
       .map((r) => r.id),
   ).toEqual([second.id]);
+});
+
+test('a report stored before the triage reads with its lists empty', () => {
+  const report = queueReport(db, ticket, specs);
+  db.run(sql`update review_reports set result = ${JSON.stringify(older)} where id = ${report.id}`);
+  expect(latestReport(db, ticket)?.result).toEqual(result);
 });
 
 test('claims the oldest queued report and finishes it with its result', () => {

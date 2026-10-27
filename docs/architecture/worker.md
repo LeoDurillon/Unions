@@ -163,14 +163,17 @@
 - `review-report.ts`: `ReviewReportRunner` (in `review-runs.ts`, same slots) runs queued `review_reports`: a
   ticket's in its own container, a pull request's in a throwaway `union-s<id>` container (`openTarget`, removed by
   `recover`), with the diff's hunk index written in the checkout (`withHunkIndex`, `hunk-index-file.ts`, shared
-  with the grouping). The prompt (`review-report-prompt.ts`) gives the specs as numbered sections, the change
+  with the grouping). The prompt (`review-report-prompt.ts`) gives the specs as numbered sections (a spec kept
+  `sameAs` another, by `distinctSpecs` in core, is not repeated), the change
   (`checkedOutChange`, shared with the grouping) and the format (`review-report-format.ts`). An answer without the
   block is asked for it once more in the same session (`review-report-ask.ts`); still none, the run fails with the
   first answer kept as `raw`. `review-report-result.ts` reads the block (fields in `review-report-fields.ts`, lists
-  in `review-report-items.ts`, out of scope in `review-report-scope.ts`): a quote is kept only when found in a spec
-  sent, paths are relative, out-of-scope changes are on the diff's files, every changed file that is no
-  requirement's code or tests is "Not placed by the agent", at most 8 important files of which 2 outside the
-  change. `review-report-checkout.ts` then reads the named files' line counts in the container, drops the paths
+  in `review-report-items.ts`, out of scope in `review-report-scope.ts`, the triage in `review-report-triage.ts`): a
+  quote is kept only when found in a spec sent (`quoteKey`: markdown marks, escapes and quote signs aside), paths
+  are relative, out-of-scope changes are on the diff's files, at most 8 important files of which 2 outside the
+  change; at most 5 `attention` items, then one added for each requirement missing, partial or done differently the
+  agent left out (`withGaps`); `skim` only changed files neither read first nor pointed at; the verdict is never
+  `matches` while a requirement is not done; a changed file the report places nowhere is `unreviewed`. `review-report-checkout.ts` then reads the named files' line counts in the container, drops the paths
   that are not there (a deleted file of the change stays an important file) and cuts ranges to the file. All it
   drops is counted in `dropped`. A ticket's lines go to its `agent_log`. Cancellation: the `cancel_review_report`
   command (`reportId`).

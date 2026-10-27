@@ -1,6 +1,6 @@
 // Links from the spec report to the diff: a file (its name, then its folder, shortened), its key lines as
-// chips, opened in the Diff tab or with a comment started on them.
-import type { ReportLines } from '@union/core';
+// chips, opened in the Diff tab, or a draft comment started on them.
+import type { ReportCite, ReportLines } from '@union/core';
 import type { ReactElement } from 'react';
 
 import { useExplain } from './explain-context';
@@ -25,7 +25,7 @@ export function useOpenLines(openDiff: () => void): OpenLines {
 }
 
 /** Groups citations by file, keeping the order of each file's first one. */
-export function byFile(cites: (ReportLines & { path: string })[]): FileLines[] {
+export function byFile(cites: ReportCite[]): FileLines[] {
   const files = new Map<string, ReportLines[]>();
   for (const { path, start, end } of cites) {
     files.set(path, [...(files.get(path) ?? []), { start, end }]);
@@ -102,5 +102,29 @@ export function FileRef({ path, lines, onOpen }: FileLines & { onOpen: OpenLines
         <LinesChip key={`${at.start}-${at.end}`} path={path} lines={at} onOpen={onOpen} />
       ))}
     </span>
+  );
+}
+
+/** Opens the comment editor on `cite` with `draft` in it: nothing is sent. */
+export function DraftButton({
+  cite,
+  draft,
+  onOpen,
+}: {
+  cite: ReportCite;
+  draft: string;
+  onOpen: OpenLines;
+}): ReactElement {
+  return (
+    <button
+      type="button"
+      title="Open the comment editor on these lines, with the note: nothing is sent"
+      className="shrink-0 text-xs text-indigo-700 hover:underline dark:text-indigo-300"
+      onClick={() => {
+        onOpen(cite.path, cite, draft);
+      }}
+    >
+      Add as draft comment
+    </button>
   );
 }

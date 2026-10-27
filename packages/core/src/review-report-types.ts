@@ -1,9 +1,18 @@
-// What a spec report holds: the specs it read, its verdict, the important files, each requirement's
-// status, and what the spec did not ask for. Pure, browser-safe.
+// What a spec report holds: the specs it read, its verdict, what needs the reviewer, the files to read
+// first and to skim, each requirement's status, and what the spec did not ask for. Pure, browser-safe.
 import type { SpecSource } from './spec-source-kinds';
 
-/** A spec as the report's run sent it; `id` is the number the agent cites it by. */
-export type ReportSpec = { id: number; kind: SpecSource; label: string; text: string };
+/**
+ * A spec as the report's run sent it; `id` is the number the agent cites it by. `sameAs`: the spec
+ * holding every line of this one, sent in its place.
+ */
+export type ReportSpec = {
+  id: number;
+  kind: SpecSource;
+  label: string;
+  text: string;
+  sameAs?: number;
+};
 
 export const REPORT_VERDICTS = ['matches', 'partial', 'diverges'] as const;
 export type ReportVerdict = (typeof REPORT_VERDICTS)[number];
@@ -16,6 +25,16 @@ type ImportantFileKind = (typeof IMPORTANT_FILE_KINDS)[number];
 
 export const REPORT_LEVELS = ['low', 'medium', 'high'] as const;
 type ReportLevel = (typeof REPORT_LEVELS)[number];
+
+export const ATTENTION_KINDS = [
+  'differs',
+  'missing',
+  'partial',
+  'unasked',
+  'risk',
+  'question',
+] as const;
+export type AttentionKind = (typeof ATTENTION_KINDS)[number];
 
 /** Lines of a file, both ends included. */
 export type ReportLines = { start: number; end: number };
@@ -32,6 +51,22 @@ export type ImportantFile = {
   unchanged: boolean;
 };
 
+/** Lines of a file the report cites. */
+export type ReportCite = ReportLines & { path: string };
+
+/** Something the reviewer must look at, in the report's order of importance. */
+export type AttentionItem = {
+  kind: AttentionKind;
+  title: string;
+  detail: string;
+  /** The requirement it is about (`ReportRequirement.key`), if any. */
+  requirement: string | null;
+  cites: ReportCite[];
+};
+
+/** A changed file the reviewer can skim, and why. */
+export type SkimFile = { path: string; why: string };
+
 /** A part of the specs, and how the change meets it. */
 export type ReportRequirement = {
   key: string;
@@ -41,7 +76,7 @@ export type ReportRequirement = {
   /** The spec it comes from (`ReportSpec.id`); null when unknown. */
   specId: number | null;
   status: RequirementStatus;
-  evidence: (ReportLines & { path: string })[];
+  evidence: ReportCite[];
   tests: string[];
   note: string;
 };
@@ -58,11 +93,15 @@ export type ReportDoc = { path: string; note: string };
 export type ReviewReportResult = {
   verdict: ReportVerdict;
   summary: string;
+  attention: AttentionItem[];
   importantFiles: ImportantFile[];
+  skim: SkimFile[];
   requirements: ReportRequirement[];
   outOfScope: OutOfScopeChange[];
   risks: ReportRisk[];
   questions: string[];
   docs: ReportDoc[];
+  /** Changed files the agent said nothing about. */
+  unreviewed: string[];
   dropped: number;
 };

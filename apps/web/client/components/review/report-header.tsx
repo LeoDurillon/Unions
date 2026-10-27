@@ -31,6 +31,16 @@ function droppedNote(dropped: number): string {
     : ` · ${dropped} citations dropped: they could not be checked`;
 }
 
+/** "Ticket, Notion: X (same as Ticket, not sent again)". */
+function specsRead(specs: ReportView['specs']): string {
+  return specs
+    .map((spec) => {
+      const host = specs.find((other) => other.id === spec.sameAs);
+      return host ? `${spec.label} (same as ${host.label}, not sent again)` : spec.label;
+    })
+    .join(', ');
+}
+
 function CopyMarkdown({ report }: { report: ReportView }): ReactElement | null {
   const [copied, setCopied] = useState(false);
   const { result } = report;
@@ -112,10 +122,12 @@ export function ReportHeader({
       <header className="space-y-2">
         <div className="flex flex-wrap items-center gap-2">
           <Badge tone={VERDICT_TONES[result.verdict]}>{VERDICT_LABELS[result.verdict]}</Badge>
-          <span className="flex-1 text-sm text-zinc-500">{reportCounts(result)}</span>
-          <AddGaps target={target} report={report} />
-          <CopyMarkdown report={report} />
-          {report.outdated ? null : <Button onClick={onAgain}>Run again</Button>}
+          <span className="text-sm text-zinc-500">{reportCounts(result)}</span>
+          <span className="ml-auto flex flex-wrap items-center gap-2">
+            <AddGaps target={target} report={report} />
+            <CopyMarkdown report={report} />
+            {report.outdated ? null : <Button onClick={onAgain}>Run again</Button>}
+          </span>
         </div>
         {result.summary === '' ? null : (
           <p className="rounded-lg bg-zinc-100 px-3 py-2 text-sm leading-relaxed dark:bg-zinc-900">
@@ -123,7 +135,7 @@ export function ReportHeader({
           </p>
         )}
         <p className="text-xs text-zinc-500">
-          Specs read: {report.specs.map((spec) => spec.label).join(', ')}
+          Specs read: {specsRead(report.specs)}
           {droppedNote(result.dropped)}
         </p>
       </header>

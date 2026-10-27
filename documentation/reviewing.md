@@ -60,25 +60,35 @@ drafts, like yours: keep, edit or delete each one before you send the review.
 
 ## Spec report
 
-The **Report** tab answers, before you read the diff, whether the change does what its specs ask. Click **Write the
-report**: an agent reads the specs listed there (the [Specs](#specs) bar's) and the whole change, and writes:
+The **Report** tab tells you, before you read the diff, what needs your attention and what you can skim, judged
+against the change's specs. Click **Write the report**: an agent reads the specs listed there (the [Specs](#specs)
+bar's) and the whole change, and writes:
 
+- **Needs you**: the few things to look at, most important first: a requirement done differently or missing,
+  something nobody asked for, a real risk, a question to settle before approving. Each has its lines and **Add as
+  draft comment**. When nothing needs you, the report says so.
 - **Read first**: the few files to start with, in order, each with why it matters and its key lines. While the
   report is current, these files carry a **Key** mark in the file list (hover it for the reason).
-- **Requirements**, in the specs' own order: each one **Done**, **Partial**, **Missing**, **Done differently** or
-  **Unclear in the spec**, with the spec's words, the code and the tests that do it, and a note.
+- **Skim**: the files you can go through quickly (wiring, renames, tests that mirror the code); click to open the
+  list. They carry a **Skim** mark in the file list.
+- **Requirements to check**, in the specs' own order: each **Partial**, **Missing**, **Done differently** or
+  **Unclear in the spec**, with the spec's words, the code and the tests, and a note. Text the spec quotes (a
+  label, a message) must match exactly, or the requirement is done differently. The ones **Done as asked** are
+  folded: click to open them.
 - **Not in the spec**: what the change does that nobody asked for, with a risk.
-- **Risks**, **Questions** to ask the author, and **Docs to update**.
+- **Risks**, **Questions** to ask the author, and **Docs to update**; at the end, the changed files the agent said
+  nothing about, if any.
 
-Click a file or its lines to open them in the Diff tab. **Add as draft comment** opens the comment editor on a
-requirement's code with its note: nothing is sent until you send your review. **Add the gaps to the review** adds
-one draft on the whole change listing the requirements missing, partial or done differently, with their notes:
-edit it, then send it with your review (to the implementer on a ticket, on GitHub for a pull request). **Copy as
-markdown** copies the whole report.
+Click a file or its lines to open them in the Diff tab. **Add as draft comment** opens the comment editor on those
+lines with the note: nothing is sent until you send your review. **Add the gaps to the review** adds one draft on
+the whole change listing the requirements missing, partial or done differently, with their notes: edit it, then send
+it with your review (to the implementer on a ticket, on GitHub for a pull request). **Copy as markdown** copies the
+whole report.
 
 Union checks what the agent cites: a quote not found in the specs, or a file that does not exist, is left out, and
-the report says how many it dropped. When the change moves on (a new snapshot, a new commit on the pull request),
-the report shows as **Outdated**, with **Run again**.
+the report says how many it dropped. A spec that repeats another (a ticket imported from a Notion page, and that
+page) is sent once, and images in a spec are left out. When the change moves on (a new snapshot, a new commit on the
+pull request), the report shows as **Outdated**, with **Run again**.
 
 A report is one agent run (Opus by default) on your Claude usage. On a ticket, it is refused while the ticket runs a
 step. While it runs, the tab shows **Cancel**.

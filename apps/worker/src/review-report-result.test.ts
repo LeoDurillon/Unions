@@ -59,7 +59,7 @@ test('keeps a quote found in a spec sent, under the spec it is in; a made-up one
   expect(result?.verdict).toBe('partial');
 });
 
-test("every changed file is a requirement's code or out of scope; unknown paths go", () => {
+test('the changed files the report places nowhere are not looked at; unknown paths go', () => {
   const result = parseReport(
     answer({
       verdict: 'matches',
@@ -88,9 +88,8 @@ test("every changed file is a requirement's code or out of scope; unknown paths 
   expect(result?.outOfScope[0]?.hunks).toHaveLength(1);
   expect(result?.outOfScope.map(({ path, reason, risk }) => ({ path, reason, risk }))).toEqual([
     { path: 'api.ts', reason: 'renames a helper', risk: 'low' },
-    { path: 'ui.tsx', reason: 'Not placed by the agent', risk: 'medium' },
-    { path: 'package.json', reason: 'Not placed by the agent', risk: 'medium' },
   ]);
+  expect(result?.unreviewed).toEqual(['ui.tsx', 'package.json']);
   // Two bad evidence entries, one bad test path, one path outside the diff.
   expect(result?.dropped).toBe(4);
   expect(result?.verdict).toBe('matches');
@@ -189,4 +188,106 @@ test('the checkout drops what is not there and cuts line ranges to the file', ()
   expect(result.docs).toEqual([{ path: 'docs/a.md', note: 'x' }]);
   // Two evidence entries, a test, an important file and a doc.
   expect(result.dropped).toBe(parsed.dropped + 5);
+});
+
+test('a quote matches its spec despite markdown marks, escapes and quote signs', () => {
+  const specs: ReportSpec[] = [
+    {
+      id: 1,
+      kind: 'notion',
+      label: 'Notion',
+      text: 'Texte “**Table de palier : MPR**”, sinon \\{seuil\\}',
+    },
+  ];
+  const result = parseReport(
+    answer({
+      requirements: [
+        { title: 'Label', spec: 'Texte "Table de palier : MPR"', specId: 1, status: 'done' },
+        { title: 'Fallback', spec: 'sinon {seuil}', specId: 1, status: 'done' },
+      ],
+    }),
+    specs,
+    FILES,
+  );
+  expect(result?.requirements.map((r) => r.specId)).toEqual([1, 1]);
+  expect(result?.dropped).toBe(0);
+});
+
+test('never "matches" while a requirement is not done', () => {
+  const result = parseReport(
+    answer({
+      verdict: 'matches',
+      requirements: [
+        { title: 'Label', status: 'done' },
+        { title: 'Household income', status: 'unclear' },
+      ],
+    }),
+    SPECS,
+    FILES,
+  );
+  expect(result?.verdict).toBe('partial');
+});
+
+test('what needs the reviewer: at most 5 of the agent, then every gap it left out', () => {
+  const result = parseReport(
+    answer({
+      requirements: [
+        {
+          key: 'label',
+          title: 'Label',
+          status: 'differs',
+          note: 'Plural.',
+          evidence: [{ path: 'ui.tsx', start: 1 }],
+        },
+        { key: 'tooltip', title: 'Tooltip', status: 'missing', note: 'Not found.' },
+        { key: 'unpub', title: 'Unpublish', status: 'done' },
+      ],
+      attention: [
+        {
+          kind: 'differs',
+          title: 'Plural label',
+          requirement: 'Label',
+          lines: [{ path: 'ui.tsx', start: 1, end: 1 }],
+        },
+        { kind: 'odd', title: 'Shared helper', lines: [{ path: '/etc/x', start: 1 }] },
+        { detail: 'no title' },
+        ...Array.from({ length: 5 }, (_, at) => ({ kind: 'question', title: `Q${at}` })),
+      ],
+    }),
+    SPECS,
+    FILES,
+  );
+  expect(result?.attention.map((item) => [item.kind, item.title, item.requirement])).toEqual([
+    ['differs', 'Plural label', 'label'],
+    ['risk', 'Shared helper', null],
+    ['question', 'Q0', null],
+    ['question', 'Q1', null],
+    ['question', 'Q2', null],
+    ['missing', 'Tooltip', 'tooltip'],
+  ]);
+  expect(result?.attention[0]?.cites).toEqual([{ path: 'ui.tsx', start: 1, end: 1 }]);
+  // A bad line, an item without a title, two past the fifth.
+  expect(result?.dropped).toBe(4);
+});
+
+test('skim: changed files only, once, never one to read first or to look at', () => {
+  const result = parseReport(
+    answer({
+      requirements: [{ title: 'Unpublish', status: 'done' }],
+      importantFiles: [{ path: 'api.ts' }],
+      attention: [{ title: 'Bump', lines: [{ path: 'package.json', start: 1 }] }],
+      skim: [
+        { path: 'ui.tsx', why: 'wiring' },
+        { path: 'ui.tsx', why: 'again' },
+        { path: 'api.ts', why: 'read first' },
+        { path: 'package.json', why: 'looked at' },
+        { path: 'elsewhere.ts', why: 'not changed' },
+      ],
+    }),
+    SPECS,
+    FILES,
+  );
+  expect(result?.skim).toEqual([{ path: 'ui.tsx', why: 'wiring' }]);
+  expect(result?.unreviewed).toEqual([]);
+  expect(result?.dropped).toBe(4);
 });

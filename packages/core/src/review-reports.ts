@@ -10,6 +10,7 @@ import { emitEvent } from './tickets';
 export type ReviewReport = typeof schema.reviewReports.$inferSelect;
 export type * from './review-report-types';
 export {
+  ATTENTION_KINDS,
   IMPORTANT_FILE_KINDS,
   REPORT_LEVELS,
   REPORT_VERDICTS,
@@ -48,16 +49,25 @@ function changed(db: Executor, report: ReviewReport): void {
   });
 }
 
+/** A report written before the triage (what needs the reviewer, what to skim) has none of its lists. */
+function filled(report: ReviewReport): ReviewReport {
+  if (!report.result) {
+    return report;
+  }
+  const stored: Partial<ReviewReportResult> = report.result;
+  const { attention = [], skim = [], unreviewed = [] } = stored;
+  return { ...report, result: { ...report.result, attention, skim, unreviewed } };
+}
+
 /** The newest report on the change, whatever its status. */
 export function latestReport(db: Db, owner: AgentReviewOwner): ReviewReport | null {
-  return (
-    db
-      .select()
-      .from(schema.reviewReports)
-      .where(owns(owner))
-      .orderBy(desc(schema.reviewReports.id))
-      .get() ?? null
-  );
+  const report = db
+    .select()
+    .from(schema.reviewReports)
+    .where(owns(owner))
+    .orderBy(desc(schema.reviewReports.id))
+    .get();
+  return report ? filled(report) : null;
 }
 
 /**

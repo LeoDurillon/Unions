@@ -125,11 +125,11 @@ Read the code around them and the callers and callees they rely on, and cite the
 Say which parts of the specifications they implement, quoting the spec's own words; say so plainly when none asks for them.
 Look in the repository's own docs (\`docs/\`, READMEs, AGENTS.md, CLAUDE.md, ADRs) for the ones the lines relate to.
 Do not judge the code's quality and do not change any file: only explain.`,
-  review_report: `Report to the reviewer how the change meets its specifications, before they read the diff.
-Read the specifications first and split them into their requirements (behaviours, acceptance criteria), in their own order and words.
-Then read the diff from the base branch, the surrounding code and the tests. For each requirement, say whether the change does it, partly does it, does it another way, or misses it; show the code and the tests that prove it.
-Name the few files to read first, in the order to read them, and why each matters.
-List what the change does that no requirement asked for, the risks beyond the spec, the questions to ask the author, and the repository's docs the change should have updated.
+  review_report: `Tell the reviewer, before they read the diff, what needs their attention and what they can skim, judged against the specifications: the report is there to make the review faster.
+Read the specifications first and split them into their requirements (behaviours, acceptance criteria), in their own order and words, from their titles and context as well as their lists.
+Then read the diff from the base branch, the surrounding code and the tests. For each requirement, say whether the change does it, partly does it, does it another way, or misses it; show the code and the tests that prove it. Text the spec quotes must match exactly.
+Rank the few things the reviewer must look at; name the files to read first and the ones they can skim.
+Be precise rather than complete: leave out a risk that would not change a review comment, a question that does not block approval, and what the code plainly does.
 Judge against the specs, not taste: no style remarks, no line-by-line review.`,
   pr_description: `Write the pull request's description for a reviewer who has not seen the work.
 Describe the change as the branch has it now: read the diff from the base branch, not only what you remember.

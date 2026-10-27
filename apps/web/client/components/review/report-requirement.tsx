@@ -6,7 +6,7 @@ import type { ReactElement } from 'react';
 
 import type { Tone } from '../../lib/labels';
 import { Badge } from '../ui';
-import { byFile, FileLink, FileRef, type OpenLines } from './report-open';
+import { byFile, DraftButton, FileLink, FileRef, type OpenLines } from './report-open';
 
 const STATUS_TONES: Record<RequirementStatus, Tone> = {
   done: 'green',
@@ -87,16 +87,7 @@ export function ReportRequirementCard({
         <Badge tone={STATUS_TONES[requirement.status]}>{STATUS_LABELS[requirement.status]}</Badge>
         <h4 className="min-w-0 flex-1 text-sm font-medium">{requirement.title}</h4>
         {first ? (
-          <button
-            type="button"
-            title="Open the comment editor on its code, with the note: nothing is sent"
-            className="shrink-0 text-xs text-indigo-700 hover:underline dark:text-indigo-300"
-            onClick={() => {
-              onOpen(first.path, first, `${requirement.title}: ${note}`);
-            }}
-          >
-            Add as draft comment
-          </button>
+          <DraftButton cite={first} draft={`${requirement.title}: ${note}`} onOpen={onOpen} />
         ) : null}
       </header>
       <Quote requirement={requirement} specs={specs} />

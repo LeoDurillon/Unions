@@ -2,6 +2,7 @@
 // specs sent, the important files, the risks and the docs.
 import {
   IMPORTANT_FILE_KINDS,
+  quoteKey,
   REPORT_LEVELS,
   REQUIREMENT_STATUSES,
   type ImportantFile,
@@ -27,11 +28,10 @@ import { MAX_IMPORTANT_FILES, MAX_UNCHANGED_FILES } from './review-report-format
 /** The requirements, and their keys by what the agent called them (its key or its title). */
 export type Requirements = Parsed<ReportRequirement> & { keys: Map<string, string> };
 
-function squeezed(value: string): string {
-  return value.replaceAll(/\s+/gu, ' ').trim().toLowerCase();
-}
-
-/** The spec a quote is found in, the one the agent named first; `lost` when it is in none. */
+/**
+ * The spec a quote is found in (markdown marks and quote signs aside), the one the agent named first;
+ * `lost` when it is in none.
+ */
 function quoteOf(
   item: Record<string, unknown>,
   specs: ReportSpec[],
@@ -42,14 +42,14 @@ function quoteOf(
     return { spec: null, specId: named?.id ?? null, lost: false };
   }
   const found = [...(named ? [named] : []), ...specs].find((spec) =>
-    squeezed(spec.text).includes(squeezed(quote)),
+    quoteKey(spec.text).includes(quoteKey(quote)),
   );
   return found
     ? { spec: quote, specId: found.id, lost: false }
     : { spec: null, specId: named?.id ?? null, lost: true };
 }
 
-function evidenceOf(value: unknown): Parsed<ReportRequirement['evidence'][number]> {
+export function evidenceOf(value: unknown): Parsed<ReportRequirement['evidence'][number]> {
   return keep(records(value), (item) => {
     const path = pathOf(item.path);
     const range = rangeOf(item.start, item.end);

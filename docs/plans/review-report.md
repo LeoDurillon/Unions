@@ -1,7 +1,7 @@
 # Plan: a spec report on a review
 
-Status: steps 1 to 5 built (2026-10-27, branches `review-report` to `review-report-5`); decisions to confirm (end
-of file). Built differently from below: no header button (the header is at its import limit): the Report tab holds
+Status: steps 1 to 6 built (2026-10-27, branches `review-report` to `review-report-6`); steps 7 to 9 planned
+(**A triage for a faster review**, below); decisions to confirm (end of file). Built differently from below: no header button (the header is at its import limit): the Report tab holds
 Start, the status and Cancel; the counts are plain text, not links to their sections; Send missing to the implementer
 is **Add the gaps to the review**, on a ticket and a pull request: one general draft listing the requirements missing,
 partial or done differently, sent with the review.
@@ -196,6 +196,61 @@ own.
 Later: a stack's report (every member's specs, per D6 of [review-specs](review-specs.md)); posting the report as a
 pull request comment (a worker write, through a command); a notification when it ends; feeding **By spec** from a
 current report instead of a separate grouping run.
+
+## A triage for a faster review (steps 7 to 9)
+
+The first real run (ticket 24, 2026-10-27) showed the goal more clearly: the report exists to make the review
+faster, by saying what needs the reviewer and what they can skim. That run gave every requirement, file and risk
+the same weight, so the reviewer still read everything. It also showed gaps in what Union sends and checks:
+
+- the same spec sent twice (the ticket's description imported from Notion, and the Notion page), and the Notion
+  copy carrying 5 kB of signed image links;
+- spec quotes dropped because the check compared raw markdown (`**bold**`, `\{`, curly quotes) with the agent's
+  plain words: the two most precise requirements lost their quote;
+- "Matches the specs" with every requirement done, while the notes said the UI text differed from the text the
+  spec quoted ("paliers" for "palier", "Inconnu" for "inconnu");
+- the ticket's title asked for something (the household's global income) no requirement checked;
+- "Not in the spec" listing files that were also a requirement's code, and Union's own "Not placed by the agent"
+  fallback shown as a medium risk;
+- a summary that described the code rather than what the reviewer should do.
+
+### Step 7: the triage
+
+- **Needs you**: the report's centre, at most 5 ranked items (`attention`): a requirement that differs or is
+  missing, behaviour nobody asked for, a medium or high risk, a question that blocks approval; each one sentence,
+  with its lines. The host adds an item for every requirement missing, partial or done differently that the agent
+  left out. With none, the report says so: nothing needs the reviewer.
+- **Skim**: the changed files the reviewer can skim (`skim`: wiring, renames, generated files, tests that mirror
+  the code), each with why; marked **Skim** in the file list, as **Key** marks the files to read first.
+- **Done as asked**: the requirements done are collapsed; the others show as cards.
+- **Not looked at**: a changed file the agent placed nowhere is listed as such (`unreviewed`), no longer as a
+  medium risk out of scope.
+- **Input**: a spec whose lines are all in another spec is not sent again (kept in the report's specs as "same as"
+  the other); markdown images become `[image N]`.
+- **Checks**: quotes are matched ignoring markdown marks, escapes and typographic quotes; the verdict cannot be
+  `matches` while a requirement is not done.
+- **Prompt**: text the spec quotes must match exactly, else `differs`; requirements also come from a spec's title
+  and context (`unclear` when the bullets do not settle them); out of scope only what no requirement needs; risks
+  only when they would change a review comment, questions only when they block approval; a summary that leads with
+  the decision, in at most 3 sentences.
+- Older reports, without these fields, still show.
+
+### Step 8: how it works
+
+A map of the change before the diff: the agent returns nodes (a file or function, with its lines) and edges
+("fetches", "renders", "uses"), at most 12 nodes on the change's main path; the host checks them as it checks
+citations and draws them (a layered layout in Union's own SVG): changed nodes highlighted, unchanged ones grey, the
+**Needs you** items numbered on their nodes, a click opens the lines in the diff. Under it, a walkthrough of 3 to 6
+steps, each what and why; every why cites its source (the pull request's description, a commit message, a code
+comment, a spec), checked as quotes are, or says it is inferred. The commits and the pull request's description
+join the agent's input.
+
+### Step 9: in the diff
+
+The **Needs you** items and the **Skim** files marked on the diff itself; **Not useful** on an item, kept as a
+project lesson so the agent stops raising that kind of item on that repository.
+
+Each step ends with a run on ticket 24, after the user agrees, to compare with the first report.
 
 ## Decisions to confirm
 

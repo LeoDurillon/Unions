@@ -17,27 +17,42 @@ const LEVEL_TONES: Record<ReviewReportResult['risks'][number]['severity'], Tone>
 export const ROWS_CLASS =
   'divide-y divide-zinc-200 rounded-lg border border-zinc-200 bg-white text-sm dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900';
 
-/** A titled part of the report, left out when it has nothing. */
+/** A titled part of the report, left out when it has nothing; `collapsed`: closed until clicked. */
 export function ReportSection({
   id,
   title,
   count,
+  collapsed = false,
   children,
 }: {
   id: string;
   title: string;
   count: number;
+  collapsed?: boolean;
   children: ReactNode;
 }): ReactElement | null {
   if (count === 0) {
     return null;
   }
+  const heading = (
+    <>
+      {title}
+      <span className="text-sm font-normal text-zinc-400">{count}</span>
+    </>
+  );
+  if (collapsed) {
+    return (
+      <details id={id} className="space-y-2">
+        <summary className="cursor-pointer font-semibold select-none">
+          <h3 className="inline-flex items-baseline gap-2">{heading}</h3>
+        </summary>
+        {children}
+      </details>
+    );
+  }
   return (
     <section id={id} className="space-y-2">
-      <h3 className="flex items-baseline gap-2 font-semibold">
-        {title}
-        <span className="text-sm font-normal text-zinc-400">{count}</span>
-      </h3>
+      <h3 className="flex items-baseline gap-2 font-semibold">{heading}</h3>
       {children}
     </section>
   );

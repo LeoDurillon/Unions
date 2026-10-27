@@ -158,7 +158,7 @@ test('the agent reads the numbered specs and the change; its report is checked a
   expect(runs).toHaveLength(1);
   expect(runs[0]).toMatchObject({ container: 'union-t1', cwd: REPO_DIR, model: 'opus' });
   expect(runs[0]?.prompt).toContain('### Spec 1: Ticket\n\n- Unpublish the others\n- Tooltip');
-  expect(runs[0]?.prompt).toContain('Report to the reviewer how the change meets');
+  expect(runs[0]?.prompt).toContain('what needs their attention and what they can skim');
   expect(runs[0]?.prompt).toContain('git diff main...HEAD');
   expect(runs[0]?.prompt).toContain('"importantFiles"');
   expect(latestReport(db, { kind: 'ticket', id: ticketId })).toMatchObject({

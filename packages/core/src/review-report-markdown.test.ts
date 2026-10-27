@@ -8,6 +8,15 @@ const specs: ReportSpec[] = [{ id: 1, kind: 'notion', label: 'Notion: Campaigns'
 const report: ReviewReportResult = {
   verdict: 'partial',
   summary: 'Unpublishing is done; the tooltip is missing.',
+  attention: [
+    {
+      kind: 'missing',
+      title: 'No tooltip',
+      detail: 'The spec asks for one.',
+      requirement: 'tooltip',
+      cites: [{ path: 'ui/card.tsx', start: 3, end: 9 }],
+    },
+  ],
   importantFiles: [
     {
       path: 'api/activate.ts',
@@ -26,6 +35,7 @@ const report: ReviewReportResult = {
       unchanged: true,
     },
   ],
+  skim: [{ path: 'api/index.ts', why: 'Exports only.' }],
   requirements: [
     {
       key: 'unpublish',
@@ -52,6 +62,7 @@ const report: ReviewReportResult = {
   risks: [],
   questions: ['Should drafts stay published?'],
   docs: [],
+  unreviewed: ['README.md'],
   dropped: 0,
 };
 
@@ -68,10 +79,20 @@ test('writes the report in its reading order, leaving out empty sections', () =>
       '',
       '1 done · 1 missing · 1 not in the spec',
       '',
+      '## Needs you',
+      '',
+      '1. **No tooltip** (missing)',
+      '   The spec asks for one.',
+      '   `ui/card.tsx:3-9`',
+      '',
       '## Important files',
       '',
       '1. `api/activate.ts:40-72`: The heart of the change.',
       '2. `api/publish.ts` (not changed): Its caller now skips drafts.',
+      '',
+      '## Skim',
+      '',
+      '- `api/index.ts`: Exports only.',
       '',
       '## Requirements',
       '',
@@ -97,6 +118,10 @@ test('writes the report in its reading order, leaving out empty sections', () =>
       '## Questions',
       '',
       '- Should drafts stay published?',
+      '',
+      '## Not looked at by the agent',
+      '',
+      '- `README.md`',
     ].join('\n'),
   );
 });

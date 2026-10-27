@@ -1,6 +1,8 @@
-// A spec report as markdown, for Copy as markdown on the review page. Pure, browser-safe.
+// A spec report as markdown, for Copy as markdown on the review page, and its labels. Pure, browser-safe.
 import {
   REQUIREMENT_STATUSES,
+  type AttentionItem,
+  type AttentionKind,
   type ImportantFile,
   type ReportLines,
   type OutOfScopeChange,
@@ -23,6 +25,15 @@ export const STATUS_LABELS: Record<RequirementStatus, string> = {
   missing: 'Missing',
   differs: 'Done differently',
   unclear: 'Unclear in the spec',
+};
+
+export const ATTENTION_LABELS: Record<AttentionKind, string> = {
+  differs: 'Differs from the spec',
+  missing: 'Missing',
+  partial: 'Partly done',
+  unasked: 'Not asked for',
+  risk: 'Risk',
+  question: 'To ask',
 };
 
 function place(path: string, range: ReportLines): string {
@@ -50,6 +61,20 @@ function importantFile(file: ImportantFile, position: number): string {
   const where = lines === '' ? `\`${file.path}\`` : lines;
   const unchanged = file.unchanged ? ' (not changed)' : '';
   return `${position + 1}. ${where}${unchanged}: ${file.why}`;
+}
+
+function attentionItem(item: AttentionItem, position: number): string {
+  const cites = item.cites.map((cite) => place(cite.path, cite)).join(', ');
+  const lines = [
+    `${position + 1}. **${item.title}** (${ATTENTION_LABELS[item.kind].toLowerCase()})`,
+  ];
+  if (item.detail !== '') {
+    lines.push(`   ${item.detail.replaceAll('\n', '\n   ')}`);
+  }
+  if (cites !== '') {
+    lines.push(`   ${cites}`);
+  }
+  return lines.join('\n');
 }
 
 function requirement(item: ReportRequirement, specs: Pick<ReportSpec, 'id' | 'label'>[]): string[] {
@@ -94,7 +119,12 @@ export function reportMarkdown(
     '',
     reportCounts(result),
     '',
+    ...section('Needs you', result.attention.map(attentionItem)),
     ...section('Important files', result.importantFiles.map(importantFile)),
+    ...section(
+      'Skim',
+      result.skim.map((file) => `- \`${file.path}\`: ${file.why}`),
+    ),
     ...section(
       'Requirements',
       result.requirements.flatMap((item, i) => [
@@ -114,6 +144,10 @@ export function reportMarkdown(
     ...section(
       'Docs to update',
       result.docs.map((d) => `- \`${d.path}\`: ${d.note}`),
+    ),
+    ...section(
+      'Not looked at by the agent',
+      result.unreviewed.map((path) => `- \`${path}\``),
     ),
   ]
     .join('\n')

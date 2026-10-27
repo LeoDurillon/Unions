@@ -1,14 +1,17 @@
-// A finished spec report: its header (verdict, counts, actions), then the files to read first, the
-// requirements and the other sections.
+// A finished spec report, in the order a reviewer uses it: its header (verdict, summary, actions), what
+// needs them, the files to read first and to skim, the requirements to check (the done ones closed), then
+// the other sections.
 import type { ReactElement } from 'react';
 
 import type { ReportView } from '../../../src/routes/review-reports';
 import type { ReviewTarget } from '../../lib/review-target';
+import { ReportAttention } from './report-attention';
 import { ReportHeader } from './report-header';
 import { ReportImportantFiles } from './report-important-files';
 import type { OpenLines } from './report-open';
-import { ReportRequirementCard } from './report-requirement';
-import { ReportSection, ReportSections } from './report-sections';
+import { ReportRequirements } from './report-requirements';
+import { ReportSections } from './report-sections';
+import { ReportSkim, ReportUnreviewed } from './report-skim';
 
 export function ReportBody({
   target,
@@ -28,24 +31,12 @@ export function ReportBody({
   return (
     <div className="space-y-6">
       <ReportHeader target={target} report={report} onAgain={onAgain} />
+      <ReportAttention result={result} onOpen={onOpen} />
       <ReportImportantFiles files={result.importantFiles} onOpen={onOpen} />
-      <ReportSection
-        id="report-requirements"
-        title="Requirements"
-        count={result.requirements.length}
-      >
-        <div className="space-y-2">
-          {result.requirements.map((requirement) => (
-            <ReportRequirementCard
-              key={requirement.key}
-              requirement={requirement}
-              specs={report.specs}
-              onOpen={onOpen}
-            />
-          ))}
-        </div>
-      </ReportSection>
+      <ReportSkim result={result} onOpen={onOpen} />
+      <ReportRequirements requirements={result.requirements} specs={report.specs} onOpen={onOpen} />
       <ReportSections result={result} onOpen={onOpen} />
+      <ReportUnreviewed result={result} onOpen={onOpen} />
     </div>
   );
 }

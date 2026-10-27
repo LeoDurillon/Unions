@@ -70,6 +70,14 @@ test("a report reads the review's specs, numbered; one at a time; outdated once 
       { ...ticket, text: 'Only the threshold.' },
       { kind: 'pr', ref: null, label: 'PR #7 description', url: null, text: null, removed: false },
       { kind: 'issue', ref: '12', label: 'Issue #12', url: null, text: 'No.', removed: true },
+      {
+        kind: 'issue',
+        ref: '13',
+        label: 'Issue #13',
+        url: null,
+        text: 'Only the threshold.',
+        removed: false,
+      },
     ],
   });
   const started = await call('POST', base);
@@ -79,12 +87,15 @@ test("a report reads the review's specs, numbered; one at a time; outdated once 
     specs: [
       { id: 1, kind: 'ticket', label: 'Ticket description' },
       { id: 2, kind: 'pr', label: 'PR #7 description' },
+      { id: 3, kind: 'issue', label: 'Issue #13', sameAs: 1 },
     ],
   });
   const queued = latestReport(db, { kind: 'ticket', id: ticketId });
+  // The issue holds the same text as the ticket: it is not sent again.
   expect(queued?.specs.map((spec) => spec.text)).toEqual([
     'Only the threshold.',
     'Unpublish the other scenarios.',
+    '',
   ]);
   expect((await call('POST', base)).status).toBe(409);
 
@@ -94,7 +105,10 @@ test("a report reads the review's specs, numbered; one at a time; outdated once 
     result: {
       verdict: 'matches',
       summary: 'Done.',
+      attention: [],
       importantFiles: [],
+      skim: [],
+      unreviewed: [],
       requirements: [],
       outOfScope: [],
       risks: [],
@@ -187,7 +201,10 @@ test("the report's gaps become one draft on the whole change, while the report i
   const result = {
     verdict: 'partial' as const,
     summary: '',
+    attention: [],
     importantFiles: [],
+    skim: [],
+    unreviewed: [],
     requirements: [{ ...requirement, status: 'done' as const }],
     outOfScope: [],
     risks: [],
