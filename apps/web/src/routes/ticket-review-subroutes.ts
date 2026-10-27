@@ -1,5 +1,5 @@
 // A ticket's routes about its change: its refused commit, its PR description rewrite, its grouping
-// by spec and its specs, the explanations of its lines, its commits, its pull request's CI checks and replies, its review.
+// by spec and its specs, the explanations of its lines, its spec report, its commits, its pull request's CI checks and replies, its review.
 import type { Db } from '@union/core';
 import { Hono } from 'hono';
 
@@ -7,6 +7,7 @@ import type { ApiServices } from '../services';
 import {
   ticketExplanationRoutes,
   ticketGroupingRoutes,
+  ticketReportRoutes,
   ticketSpecRoutes,
 } from './grouping-targets';
 import { prChecksRoutes } from './pr-checks';
@@ -18,7 +19,7 @@ import { ticketCommitRoutes } from './ticket-commits';
 
 /**
  * A ticket's routes about its change: its refused commit, its PR description rewrite, its grouping by
- * spec and its specs, the explanations of its lines, its commits, its pull request's CI checks and replies, its review.
+ * spec and its specs, the explanations of its lines, its spec report, its commits, its pull request's CI checks and replies, its review.
  */
 export function ticketReviewSubroutes(db: Db, { github, notion, ci }: ApiServices): Hono {
   const routes = new Hono();
@@ -27,6 +28,7 @@ export function ticketReviewSubroutes(db: Db, { github, notion, ci }: ApiService
   routes.route('/:id/groupings', ticketGroupingRoutes(db, github, notion));
   routes.route('/:id/explanations', ticketExplanationRoutes(db));
   routes.route('/:id/specs', ticketSpecRoutes(db, github, notion));
+  routes.route('/:id/reports', ticketReportRoutes(db, github, notion));
   routes.route('/:id/commits', ticketCommitRoutes(db));
   routes.route('/:id/pr-checks', prChecksRoutes(db, ci));
   routes.route('/:id/pr-replies', ticketReplyRoutes(db));

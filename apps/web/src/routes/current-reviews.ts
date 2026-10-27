@@ -19,6 +19,7 @@ import { listedReviews } from './current-review-list';
 import {
   pullRequestExplanationRoutes,
   pullRequestGroupingRoutes,
+  pullRequestReportRoutes,
   pullRequestSpecRoutes,
 } from './grouping-targets';
 import { prReviewRoutes } from './pr-review';
@@ -191,6 +192,7 @@ export function currentReviewRoutes(db: Db, github: OnboardingGitHub, notion: No
   routes.route('/:number/groupings', pullRequestGroupingRoutes(db, github, notion));
   routes.route('/:number/explanations', pullRequestExplanationRoutes(db));
   routes.route('/:number/specs', pullRequestSpecRoutes(db, github, notion));
+  routes.route('/:number/reports', pullRequestReportRoutes(db, github, notion));
   routes.route('/:number', reviewWorkspaceRoutes(db, { github, notion }));
   routes.route('/:number', prReviewRoutes(db, github));
   return routes;

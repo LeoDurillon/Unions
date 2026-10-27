@@ -82,7 +82,7 @@ and linked.
   (branch `self-update`, 2026-10-21).
 - [A spec report on a review](review-report.md): on request, an agent compares the change with the review's specs
   and writes a full report (the important files to read first; each requirement done, partial, missing or
-  different, with its code and tests; what the spec did not ask for; risks, questions, docs), in a Report tab. Steps 1 and 2 built (branches `review-report`, `review-report-2`), decisions to confirm.
+  different, with its code and tests; what the spec did not ask for; risks, questions, docs), in a Report tab. Steps 1 to 3 built (branches `review-report` to `review-report-3`), decisions to confirm.
 - [Code quality](code-quality.md): a coverage floor and a check for untested files, tests for the client's hooks,
   import boundaries with dependency-cruiser, mutation testing of the state machine, splitting the files at the
   300-line limit, and smaller checks. Planned (2026-10-23), decisions to confirm.

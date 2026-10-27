@@ -180,6 +180,13 @@
   the files under their groups; a file opened under a part shows only that part's hunks (`hunk-focus.tsx`,
   `lib/spec-hunks.ts`, "Show all" to see the rest) with each hunk header tagged with its parts, except on an
   outdated grouping.
+- Spec report: `routes/review-reports.ts` (mounted beside the groupings from `grouping-targets.ts`, on the same
+  `GroupingTarget` and its refusal): `GET /reports` the newest report (the specs it read by name, the result, the
+  agent's `raw` text of a failed run, `outdated` once the review's head moved), `POST /reports` reads the review's
+  specs as the Specs bar shows them (`readReviewSpecs`: removed and unreadable ones left out, numbered for the
+  agent; refused without one, over `MAX_SPECS` or over `MAX_SPEC_CHARS`) and queues a `review_reports` row
+  (`@union/core` `review-reports.ts`), `POST /reports/cancel` queues `cancel_review_report`. The worker's
+  `ReviewReportRunner` writes it (`docs/architecture/worker.md`).
 - Explain: `routes/review-explanations.ts` (mounted beside the groupings from `grouping-targets.ts`, on the same
   `GroupingTarget` and its refusal) lists a review's explanations with their spec parts and `outdated`, queues one
   (`explanation-request.ts`: lines checked against the file's patch, excerpt from `diffExcerpt`, specs through

@@ -1,6 +1,6 @@
 # Plan: a spec report on a review
 
-Status: steps 1 and 2 built (2026-10-27, branches `review-report`, `review-report-2`); decisions to confirm (end
+Status: steps 1 to 3 built (2026-10-27, branches `review-report` to `review-report-3`); decisions to confirm (end
 of file).
 
 ## Why
@@ -142,9 +142,11 @@ kept, so the user can still read it.
 
 ### Web (`apps/web`)
 
-- `routes/review-reports.ts` under `reviewBase` (ticket and pull request share it): `GET /reports/latest`,
-  `POST /reports` (reads the review's specs from `review_specs`, refuses when none can be read, inserts the queued
-  row), `POST /reports/:id/cancel` (queues the command). Route tests with the fakes.
+- `routes/review-reports.ts` under `reviewBase` (ticket and pull request share it), as the groupings: `GET
+  /reports` (the newest, `outdated` when the change moved), `POST /reports` (reads the review's specs as the Specs
+  bar does, `readReviewSpecs`; refuses while the ticket runs, without a readable spec, over 10 specs or a spec
+  over 50,000 characters; inserts the queued row), `POST /reports/cancel` (queues `cancel_review_report`). Route
+  tests with the fakes.
 
 ### Client (`apps/web/client`)
 

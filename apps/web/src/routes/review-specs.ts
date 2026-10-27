@@ -59,6 +59,14 @@ function views(
   return Promise.all(rows.map((row) => viewOf(readers, target, row)));
 }
 
+/** The review's specs, started the first time, each with the text the agents get now. */
+export function readReviewSpecs(
+  readers: SpecReaders,
+  target: GroupingTarget,
+): Promise<ReviewSpecView[]> {
+  return views(readers, target, startReviewSpecs(readers.db, target.owner, target.starts));
+}
+
 /** A Notion spec names its page by id, as a link does (the dialog may send the page's URL). */
 function withPageId(spec: SavedSpecEntry): SavedSpecEntry {
   if (spec.kind !== 'notion') {
@@ -92,12 +100,7 @@ export function reviewSpecRoutes(
   targetOf: (c: Context) => GroupingTarget,
 ): Hono {
   const routes = new Hono();
-  routes.get('/', async (c) => {
-    const target = targetOf(c);
-    return c.json(
-      await views(readers, target, startReviewSpecs(readers.db, target.owner, target.starts)),
-    );
-  });
+  routes.get('/', async (c) => c.json(await readReviewSpecs(readers, targetOf(c))));
   routes.put('/', (c) => save(readers, targetOf(c), c));
   return routes;
 }
