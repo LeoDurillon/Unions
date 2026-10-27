@@ -8,6 +8,23 @@ const specs: ReportSpec[] = [{ id: 1, kind: 'notion', label: 'Notion: Campaigns'
 const report: ReviewReportResult = {
   verdict: 'partial',
   summary: 'Unpublishing is done; the tooltip is missing.',
+  flow: {
+    nodes: [
+      { id: 'card', label: 'Card', path: 'ui/card.tsx', lines: null, changed: true },
+      { id: 'activate', label: 'Activation', path: 'api/activate.ts', lines: null, changed: true },
+    ],
+    edges: [{ from: 'card', to: 'activate', label: 'calls' }],
+    steps: [
+      {
+        title: 'Activation unpublishes.',
+        what: 'In one transaction.',
+        why: 'So no two scenarios are live.',
+        source: 'commit',
+        quote: 'keep **one** live',
+        nodes: ['activate'],
+      },
+    ],
+  },
   attention: [
     {
       kind: 'missing',
@@ -78,6 +95,13 @@ test('writes the report in its reading order, leaving out empty sections', () =>
       'Unpublishing is done; the tooltip is missing.',
       '',
       '1 done · 1 missing · 1 not in the spec',
+      '',
+      '## How it works',
+      '',
+      '1. **Activation unpublishes.** In one transaction.',
+      '   Why (a commit): So no two scenarios are live. > keep one live',
+      '',
+      '- Card → Activation: calls',
       '',
       '## Needs you',
       '',

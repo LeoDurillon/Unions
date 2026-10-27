@@ -19,6 +19,8 @@ ${specSections(specs)}
 
 ${checkedOutChange(target)}
 
+Its commits (\`git log ${target.base}..HEAD\`) often say why it was made: read their messages.
+
 ## Your answer
 
 ${REPORT_FORMAT}`;

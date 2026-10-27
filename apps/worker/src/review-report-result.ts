@@ -11,6 +11,7 @@ import {
 
 import { lastJsonBlock } from './json-block';
 import { oneOf, text, texts } from './review-report-fields';
+import { flowOf } from './review-report-flow';
 import { docsOf, importantFilesOf, requirementsOf, risksOf } from './review-report-items';
 import { outOfScopeOf } from './review-report-scope';
 import { attentionOf, skimOf, unaskedItems, unaskedOf, withGaps } from './review-report-triage';
@@ -43,14 +44,15 @@ function unreviewedOf(result: Omit<ReviewReportResult, 'unreviewed'>, changed: s
 }
 
 /**
- * The agent's report, checked against the specs sent and the change (`files`, the diff's patches);
- * paths outside the change are only checked for shape here (`keepInCheckout` checks they exist).
- * Null when the answer has no report block.
+ * The agent's report, checked against the specs sent, the change (`files`, the diff's patches) and its
+ * commit messages; paths outside the change are only checked for shape here (`keepInCheckout` checks
+ * they exist). Null when the answer has no report block.
  */
 export function parseReport(
   answer: string,
   specs: ReportSpec[],
   files: { path: string; patch: string }[],
+  commits = '',
 ): ReviewReportResult | null {
   const block = lastJsonBlock(answer, (candidate) => Array.isArray(candidate.requirements));
   if (!block) {
@@ -68,9 +70,11 @@ export function parseReport(
   const outOfScope = outOfScopeOf(block.outOfScope, files);
   const risks = risksOf(block.risks);
   const docs = docsOf(block.docs);
+  const flow = flowOf(block.flow, changed, { specs, commits, files });
   const result = {
     verdict: verdictOf(oneOf(REPORT_VERDICTS, block.verdict), requirements.items),
     summary: text(block.summary),
+    flow: flow.flow,
     attention: [
       ...withGaps(attention.items, requirements.items),
       ...unaskedItems(
@@ -86,7 +90,7 @@ export function parseReport(
     risks: risks.items,
     questions: texts(block.questions),
     docs: docs.items,
-    dropped: [requirements, importantFiles, attention, skim, outOfScope, risks, docs].reduce(
+    dropped: [requirements, importantFiles, attention, skim, outOfScope, risks, docs, flow].reduce(
       (sum, parsed) => sum + parsed.dropped,
       0,
     ),

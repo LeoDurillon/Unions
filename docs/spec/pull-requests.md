@@ -128,7 +128,11 @@ answer when it had no report block.
 The report's specs are the bar's with images replaced by `[image N]`, and a spec whose lines are (nearly) all in
 another is kept as "same as" it and not sent again (`distinctSpecs`); the specs line says so. A report shows its
 verdict (matches, partly matches, diverges from the specs; never matches while a requirement is not done), the
-counts per status, a summary, the specs it read and how many citations Union dropped; then **Needs you** (at most 5
+counts per status, a summary, the specs it read and how many citations Union dropped; then **How it works** (a map of the change's main path, at most 12 nodes: a file or a function of it, the
+changed ones highlighted and opening their lines in the diff, the unchanged ones grey and dashed, linked by how one
+uses another, each with the numbers of the **Needs you** items pointing at its file; under it a walkthrough of up to
+6 steps, what and why, each why marked **From the spec**, **From a commit** or **From a comment** when its quote is
+found there (a spec sent, the change's commit messages, the lines the diff adds), else **Inferred**); **Needs you** (at most 5
 items the agent ranks, plus one per requirement missing, partial or done differently it left out, and one per
 requirement whose code does something unasked (its `unasked`, even when done) it did not raise: kind, title,
 detail, lines, **Add as draft comment**; without any and with a matching verdict, a line saying nothing needs the

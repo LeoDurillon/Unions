@@ -18,7 +18,7 @@ import { withHunkIndex } from './hunk-index-file';
 import { removeRunContainers } from './janitor';
 import { REPO_DIR, type TicketContainer } from './provision';
 import { askReport, reportPrompt } from './review-report-ask';
-import { keepInCheckout, lineCounts, reportPaths } from './review-report-checkout';
+import { commitMessages, keepInCheckout, lineCounts, reportPaths } from './review-report-checkout';
 import { RunPool } from './run-pool';
 
 type Deps = AgentReviewDeps & { agent?: AgentFn };
@@ -53,7 +53,9 @@ async function writeReport(
       signal,
       onEvent: target.log,
     };
-    const { outcome, result } = await askReport(deps, run, report.specs, files);
+    const commits = await commitMessages(runtime, target.container, target.base);
+    const sources = { specs: report.specs, files, commits };
+    const { outcome, result } = await askReport(deps, run, sources);
     if (outcome.kind !== 'ok') {
       const prefix = outcome.kind === 'rate_limited' ? 'Usage limit reached: ' : '';
       return { status: 'failed', error: `${prefix}${outcome.message}` };

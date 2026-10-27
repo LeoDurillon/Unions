@@ -1,5 +1,6 @@
-// What a spec report holds: the specs it read, its verdict, what needs the reviewer, the files to read
-// first and to skim, each requirement's status, and what the spec did not ask for. Pure, browser-safe.
+// What a spec report holds: the specs it read, its verdict, how the change works, what needs the
+// reviewer, the files to read first and to skim, each requirement's status, and what the spec did not
+// ask for. Pure, browser-safe.
 import type { SpecSource } from './spec-source-kinds';
 
 /**
@@ -64,6 +65,38 @@ export type AttentionItem = {
   cites: ReportCite[];
 };
 
+/** Where a step's why comes from; `inferred` when nothing the host could check says it. */
+export const WHY_SOURCES = ['spec', 'commit', 'comment', 'inferred'] as const;
+export type WhySource = (typeof WHY_SOURCES)[number];
+
+/** A part of the code on the change's main path: a file, or a function of it, with its lines. */
+export type FlowNode = {
+  id: string;
+  label: string;
+  path: string;
+  lines: ReportLines | null;
+  /** In the change's diff. */
+  changed: boolean;
+};
+
+/** One node using another: `label` says how ("fetches", "renders", "uses"). */
+export type FlowEdge = { from: string; to: string; label: string };
+
+/** One step of the walkthrough: what happens, and why, from where. */
+export type FlowStep = {
+  title: string;
+  what: string;
+  why: string;
+  source: WhySource;
+  /** The source's own words, checked; null when inferred. */
+  quote: string | null;
+  /** Ids of the nodes the step is about. */
+  nodes: string[];
+};
+
+/** How the change works: a small map of its main path, and a walkthrough of it. */
+export type ReportFlow = { nodes: FlowNode[]; edges: FlowEdge[]; steps: FlowStep[] };
+
 /** A changed file the reviewer can skim, and why. */
 export type SkimFile = { path: string; why: string };
 
@@ -93,6 +126,7 @@ export type ReportDoc = { path: string; note: string };
 export type ReviewReportResult = {
   verdict: ReportVerdict;
   summary: string;
+  flow: ReportFlow;
   attention: AttentionItem[];
   importantFiles: ImportantFile[];
   skim: SkimFile[];

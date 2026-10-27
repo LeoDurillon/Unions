@@ -1,5 +1,6 @@
 // The spec report's sections: the frame they share (a title with a count, rows in one box), then the last
-// ones: what the specs did not ask for, the risks, the questions and the docs to update.
+// ones: what the specs did not ask for, the risks, the questions, the docs to update, and the changed
+// files the agent said nothing about.
 import type { ReviewReportResult } from '@union/core';
 import type { ReactElement, ReactNode } from 'react';
 
@@ -17,18 +18,23 @@ const LEVEL_TONES: Record<ReviewReportResult['risks'][number]['severity'], Tone>
 export const ROWS_CLASS =
   'divide-y divide-zinc-200 rounded-lg border border-zinc-200 bg-white text-sm dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900';
 
-/** A titled part of the report, left out when it has nothing; `collapsed`: closed until clicked. */
+/**
+ * A titled part of the report, left out when it has nothing (`count` 0); `collapsed`: closed until
+ * clicked; `counted`: the count shown beside the title.
+ */
 export function ReportSection({
   id,
   title,
   count,
   collapsed = false,
+  counted = true,
   children,
 }: {
   id: string;
   title: string;
   count: number;
   collapsed?: boolean;
+  counted?: boolean;
   children: ReactNode;
 }): ReactElement | null {
   if (count === 0) {
@@ -37,7 +43,7 @@ export function ReportSection({
   const heading = (
     <>
       {title}
-      <span className="text-sm font-normal text-zinc-400">{count}</span>
+      {counted ? <span className="text-sm font-normal text-zinc-400">{count}</span> : null}
     </>
   );
   if (collapsed) {
@@ -152,5 +158,30 @@ export function ReportSections({
         </ul>
       </ReportSection>
     </>
+  );
+}
+
+export function ReportUnreviewed({
+  result,
+  onOpen,
+}: {
+  result: ReviewReportResult;
+  onOpen: OpenLines;
+}): ReactElement {
+  return (
+    <ReportSection
+      id="report-unreviewed"
+      title="Not looked at by the agent"
+      count={result.unreviewed.length}
+      collapsed
+    >
+      <ul className={ROWS_CLASS}>
+        {result.unreviewed.map((path) => (
+          <li key={path} className="flex px-3 py-2">
+            <FileLink path={path} onOpen={onOpen} />
+          </li>
+        ))}
+      </ul>
+    </ReportSection>
   );
 }

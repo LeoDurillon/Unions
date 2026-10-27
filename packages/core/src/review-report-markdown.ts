@@ -5,7 +5,9 @@ import {
   REQUIREMENT_STATUSES,
   type AttentionItem,
   type AttentionKind,
+  type FlowStep,
   type ImportantFile,
+  type ReportFlow,
   type ReportLines,
   type OutOfScopeChange,
   type ReportRequirement,
@@ -79,6 +81,27 @@ function attentionItem(item: AttentionItem, position: number): string {
   return lines.join('\n');
 }
 
+const WHY_LABELS: Record<FlowStep['source'], string> = {
+  spec: 'the spec',
+  commit: 'a commit',
+  comment: 'a code comment',
+  inferred: 'inferred',
+};
+
+/** The walkthrough, then the map's links: "Campaign page → Campaign header: passes the name". */
+function flowLines(flow: ReportFlow): string[] {
+  const label = (id: string): string => flow.nodes.find((node) => node.id === id)?.label ?? id;
+  const steps = flow.steps.map((step, at) => {
+    const quote = step.quote === null ? '' : ` > ${plainQuote(step.quote)}`;
+    const why = step.why === '' ? '' : `\n   Why (${WHY_LABELS[step.source]}): ${step.why}${quote}`;
+    return `${at + 1}. **${step.title}** ${step.what}${why}`;
+  });
+  const links = flow.edges.map(
+    (edge) => `- ${label(edge.from)} → ${label(edge.to)}: ${edge.label}`,
+  );
+  return [...steps, ...(steps.length > 0 && links.length > 0 ? [''] : []), ...links];
+}
+
 function requirement(item: ReportRequirement, specs: Pick<ReportSpec, 'id' | 'label'>[]): string[] {
   const source = specs.find((spec) => spec.id === item.specId);
   const lines = [`### ${item.title}: ${STATUS_LABELS[item.status]}`, ''];
@@ -121,6 +144,7 @@ export function reportMarkdown(
     '',
     reportCounts(result),
     '',
+    ...section('How it works', flowLines(result.flow)),
     ...section('Needs you', result.attention.map(attentionItem)),
     ...section('Important files', result.importantFiles.map(importantFile)),
     ...section(

@@ -105,6 +105,7 @@ test("a report reads the review's specs, numbered; one at a time; outdated once 
     result: {
       verdict: 'matches',
       summary: 'Done.',
+      flow: { nodes: [], edges: [], steps: [] },
       attention: [],
       importantFiles: [],
       skim: [],
@@ -201,6 +202,7 @@ test("the report's gaps become one draft on the whole change, while the report i
   const result = {
     verdict: 'partial' as const,
     summary: '',
+    flow: { nodes: [], edges: [], steps: [] },
     attention: [],
     importantFiles: [],
     skim: [],

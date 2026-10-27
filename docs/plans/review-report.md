@@ -253,6 +253,12 @@ steps, each what and why; every why cites its source (the pull request's descrip
 comment, a spec), checked as quotes are, or says it is inferred. The commits and the pull request's description
 join the agent's input.
 
+Built 2026-10-27 (`review-report-8`), differently on two points: the pull request's description is checked as a
+spec (it is one when the Specs bar has it), not as a source of its own; and the layout is Union's own (layers by
+longest path, a starting node just above what it points at, order by the nodes above), with no dependency. Commit
+messages are read in the container (`git log <base>..HEAD`) before the agent runs; a comment's quote is looked for in
+the lines the diff adds.
+
 ### Step 9: in the diff
 
 The **Needs you** items and the **Skim** files marked on the diff itself; **Not useful** on an item, kept as a

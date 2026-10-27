@@ -1,10 +1,11 @@
-// The report's important files: the ones to read first, in order, each with why and its key lines.
-import type { ImportantFile } from '@union/core';
+// The report's files to read first, in order, each with why and its key lines; and the ones to skim,
+// closed until clicked.
+import type { ImportantFile, ReviewReportResult } from '@union/core';
 import type { ReactElement } from 'react';
 
 import type { Tone } from '../../lib/labels';
 import { Badge } from '../ui';
-import { FileName, FileRef, type OpenLines } from './report-open';
+import { FileLink, FileName, FileRef, type OpenLines } from './report-open';
 import { ReportSection, ROWS_CLASS } from './report-sections';
 
 const KINDS: Record<ImportantFile['kind'], { label: string; tone: Tone }> = {
@@ -61,6 +62,27 @@ export function ReportImportantFiles({
           <FileItem key={file.path} file={file} position={at + 1} onOpen={onOpen} />
         ))}
       </ol>
+    </ReportSection>
+  );
+}
+
+export function ReportSkim({
+  result,
+  onOpen,
+}: {
+  result: ReviewReportResult;
+  onOpen: OpenLines;
+}): ReactElement {
+  return (
+    <ReportSection id="report-skim" title="Skim" count={result.skim.length} collapsed>
+      <ul className={ROWS_CLASS}>
+        {result.skim.map((file) => (
+          <li key={file.path} className="flex flex-wrap items-baseline gap-x-3 px-3 py-2">
+            <FileLink path={file.path} onOpen={onOpen} />
+            <span className="text-zinc-600 dark:text-zinc-400">{file.why}</span>
+          </li>
+        ))}
+      </ul>
     </ReportSection>
   );
 }

@@ -1,6 +1,7 @@
-// Checks the report's paths against the checkout: the files it names must exist (a deleted file of the
-// change aside), and its line ranges are cut to the file's length.
-import type { ContainerRuntime, ReportLines, ReviewReportResult } from '@union/core';
+// Reads what the report is checked against in the container: the files it names must exist (a deleted
+// file of the change aside), its line ranges are cut to the file's length; and the change's commit
+// messages.
+import type { ContainerRuntime, ReportFlow, ReportLines, ReviewReportResult } from '@union/core';
 
 import { runIn } from './container-exec';
 import { REPO_DIR } from './provision';
@@ -29,10 +30,23 @@ export async function lineCounts(
   );
 }
 
+/** The change's commit messages (`base..HEAD`); empty when git cannot read them. */
+export async function commitMessages(
+  runtime: ContainerRuntime,
+  container: string,
+  base: string,
+): Promise<string> {
+  const out = await runIn(runtime, container, ['git', 'log', '--format=%B', `${base}..HEAD`], {
+    cwd: REPO_DIR,
+  });
+  return out.exitCode === 0 ? out.stdout : '';
+}
+
 /** Every path the report names, to look for in the checkout. */
 export function reportPaths(result: ReviewReportResult): string[] {
   return [
     ...result.importantFiles.map((file) => file.path),
+    ...result.flow.nodes.map((node) => node.path),
     ...result.attention.flatMap((item) => item.cites.map((cite) => cite.path)),
     ...result.requirements.flatMap((item) => [...item.evidence.map((e) => e.path), ...item.tests]),
     ...result.risks.flatMap((risk) => risk.paths),
@@ -47,6 +61,27 @@ function within<T extends ReportLines>(range: T, count: number): T | null {
 
 function counted<T>(items: T[], kept: T[]): number {
   return items.length - kept.length;
+}
+
+/** The flow without the nodes that are neither changed nor files, their lines cut to the file. */
+function flowInCheckout(
+  flow: ReportFlow,
+  counts: ReadonlyMap<string, number>,
+  changed: ReadonlySet<string>,
+): ReportFlow {
+  const nodes = flow.nodes.flatMap((node) => {
+    if (!counts.has(node.path) && !changed.has(node.path)) {
+      return [];
+    }
+    const lines = node.lines ? within(node.lines, counts.get(node.path) ?? 0) : null;
+    return [{ ...node, lines }];
+  });
+  const ids = new Set(nodes.map((node) => node.id));
+  return {
+    nodes,
+    edges: flow.edges.filter((edge) => ids.has(edge.from) && ids.has(edge.to)),
+    steps: flow.steps.map((step) => ({ ...step, nodes: step.nodes.filter((id) => ids.has(id)) })),
+  };
 }
 
 /**
@@ -80,13 +115,18 @@ export function keepInCheckout(
     file.lines = file.lines.flatMap((range) => within(range, count) ?? []);
   }
   const docs = result.docs.filter((doc) => counts.has(doc.path));
+  const flow = flowInCheckout(result.flow, counts, changed);
   const risks = result.risks.map((risk) => ({
     ...risk,
     paths: risk.paths.filter((path) => counts.has(path) || changed.has(path)),
   }));
-  dropped += counted(result.importantFiles, importantFiles) + counted(result.docs, docs);
+  dropped +=
+    counted(result.importantFiles, importantFiles) +
+    counted(result.docs, docs) +
+    counted(result.flow.nodes, flow.nodes);
   return {
     ...result,
+    flow,
     attention,
     requirements,
     importantFiles,

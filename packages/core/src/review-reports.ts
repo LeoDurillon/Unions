@@ -11,6 +11,7 @@ export type ReviewReport = typeof schema.reviewReports.$inferSelect;
 export type * from './review-report-types';
 export {
   ATTENTION_KINDS,
+  WHY_SOURCES,
   IMPORTANT_FILE_KINDS,
   REPORT_LEVELS,
   REPORT_VERDICTS,
@@ -49,14 +50,18 @@ function changed(db: Executor, report: ReviewReport): void {
   });
 }
 
-/** A report written before the triage (what needs the reviewer, what to skim) has none of its lists. */
+/**
+ * A report written before the triage (what needs the reviewer, what to skim) or the map of how the
+ * change works has none of their lists.
+ */
 function filled(report: ReviewReport): ReviewReport {
   if (!report.result) {
     return report;
   }
   const stored: Partial<ReviewReportResult> = report.result;
   const { attention = [], skim = [], unreviewed = [] } = stored;
-  return { ...report, result: { ...report.result, attention, skim, unreviewed } };
+  const flow = stored.flow ?? { nodes: [], edges: [], steps: [] };
+  return { ...report, result: { ...report.result, flow, attention, skim, unreviewed } };
 }
 
 /** The newest report on the change, whatever its status. */

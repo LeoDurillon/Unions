@@ -64,6 +64,10 @@ The **Report** tab tells you, before you read the diff, what needs your attentio
 against the change's specs. Click **Write the report**: an agent reads the specs listed there (the [Specs](#specs)
 bar's) and the whole change, and writes:
 
+- **How it works**: a small map of the change's main path (click a part to open it in the diff; the grey ones are
+  not changed; the red numbers are the **Needs you** items about that part), and a walkthrough in a few steps:
+  what happens, and why. Each why says where it comes from: **From the spec**, **From a commit** or **From a
+  comment** (Union found those words there), or **Inferred** (the agent's reading, nothing checked it).
 - **Needs you**: the few things to look at, most important first: a requirement done differently or missing,
   something nobody asked for (even inside a requirement that is done), a real risk, a question to settle before
   approving. Each has its lines and **Add as

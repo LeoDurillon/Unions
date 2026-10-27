@@ -65,6 +65,7 @@ const older = {
 const result: ReviewReportResult = {
   ...older,
   verdict: 'matches',
+  flow: { nodes: [], edges: [], steps: [] },
   attention: [],
   skim: [],
   unreviewed: [],
