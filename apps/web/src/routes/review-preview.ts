@@ -108,7 +108,10 @@ function addE2eToReview(db: Db, c: Context): Response {
     output: preview.e2eOutput ?? '',
     screenshots: preview.e2eScreenshots ?? 0,
   });
-  return c.json(addGeneralDraft(db, review, body), CREATED);
+  return c.json(
+    addGeneralDraft(db, { kind: 'review', id: review.id }, review.headSha, body),
+    CREATED,
+  );
 }
 
 /** A screenshot of the last failing e2e run, shown as an image: only PNGs are kept. */

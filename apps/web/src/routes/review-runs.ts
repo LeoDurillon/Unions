@@ -60,7 +60,10 @@ function addToReview(db: Db, c: Context): Response {
   if (row.status === 'queued' || row.status === 'running') {
     throw fail(CONFLICT, 'The command has not finished yet');
   }
-  return c.json(addGeneralDraft(db, review, outputComment(row)), CREATED);
+  return c.json(
+    addGeneralDraft(db, { kind: 'review', id: review.id }, review.headSha, outputComment(row)),
+    CREATED,
+  );
 }
 
 /**

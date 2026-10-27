@@ -1,5 +1,6 @@
-// A command's or the e2e tests' output as a review comment: what ran, how it ended, the last lines in a code block.
-import { schema, type Db } from '@union/core';
+// A command's or the e2e tests' output as a review comment: what ran, how it ended, the last lines in a
+// code block; and adding a draft on a whole change, of a ticket or a pull request.
+import { schema, type AgentReviewOwner, type Db } from '@union/core';
 
 /** Lines of output a comment quotes: enough to read the failure, not a log dump. */
 const QUOTED_LINES = 60;
@@ -54,16 +55,20 @@ export function outputComment(run: OutputOfRun): string {
   return parts.join('\n\n');
 }
 
-/** Adds the text as a draft about the whole pull request, for the user to edit before sending. */
+/**
+ * Adds the text as a draft about the whole change (a ticket's or a pull request's, at `headSha`), for
+ * the user to edit before sending.
+ */
 export function addGeneralDraft(
   db: Db,
-  review: { id: number; headSha: string | null },
+  owner: AgentReviewOwner,
+  headSha: string | null,
   body: string,
 ): typeof schema.reviewComments.$inferSelect {
   return db
     .insert(schema.reviewComments)
     .values({
-      reviewId: review.id,
+      ...(owner.kind === 'ticket' ? { ticketId: owner.id } : { reviewId: owner.id }),
       kind: 'general',
       path: '',
       side: 'new',
@@ -71,7 +76,7 @@ export function addGeneralDraft(
       endLine: 0,
       excerpt: '',
       body,
-      headSha: review.headSha ?? '',
+      headSha: headSha ?? '',
     })
     .returning()
     .get();

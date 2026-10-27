@@ -1,5 +1,6 @@
 // Under a review's base (`/api/tickets/:id`, `/api/projects/:projectId/pull-requests/reviews/:number`):
-// `/reports` (the newest spec report), `POST /reports` (queue one on the review's specs), `/reports/cancel`.
+// `/reports` (the newest spec report), `POST /reports` (queue one on the review's specs), `/reports/cancel`,
+// `/reports/gaps` (a draft asking for the requirements it found not met).
 import {
   latestReport,
   MAX_SPEC_CHARS,
@@ -12,9 +13,11 @@ import {
   type ReviewReport,
   type ReviewReportResult,
 } from '@union/core';
+import { reportGaps } from '@union/core/review-report-markdown';
 import { Hono, type Context } from 'hono';
 
-import { ACCEPTED, CONFLICT, fail } from '../http';
+import { ACCEPTED, CONFLICT, CREATED, fail } from '../http';
+import { addGeneralDraft } from '../review-output-comment';
 import type { ReviewSpecView } from '../review-spec-types';
 import type { GroupingTarget } from './review-groupings';
 import { readReviewSpecs } from './review-specs';
@@ -103,10 +106,27 @@ function cancel(db: Db, c: Context, target: GroupingTarget): Response {
   return c.json(view(report, target), ACCEPTED);
 }
 
+/** A draft on the whole change asking for what the current report found not met. */
+function addGaps(db: Db, c: Context, target: GroupingTarget): Response {
+  const report = latestReport(db, target.owner);
+  const shown = view(report, target);
+  if (!report?.result || !shown) {
+    throw fail(CONFLICT, 'No finished report on this change');
+  }
+  if (shown.outdated) {
+    throw fail(CONFLICT, 'The report is outdated: run it again first.');
+  }
+  const body = reportGaps(report.result, report.specs);
+  if (body === null) {
+    throw fail(CONFLICT, 'The report found every requirement met');
+  }
+  return c.json(addGeneralDraft(db, target.owner, target.headSha, body), CREATED);
+}
+
 /**
  * Under a review's base (`/api/tickets/:id`, `/api/projects/:projectId/pull-requests/reviews/:number`):
  * `/reports` (the newest spec report), `POST /reports` (queue one on the review's specs),
- * `/reports/cancel`.
+ * `/reports/cancel`, `/reports/gaps` (a draft asking for the requirements it found not met).
  */
 export function reviewReportRoutes(
   readers: SpecReaders,
@@ -119,5 +139,6 @@ export function reviewReportRoutes(
   });
   routes.post('/', (c) => start(readers, c, targetOf(c)));
   routes.post('/cancel', (c) => cancel(readers.db, c, targetOf(c)));
+  routes.post('/gaps', (c) => addGaps(readers.db, c, targetOf(c)));
   return routes;
 }

@@ -119,3 +119,38 @@ export function reportMarkdown(
     .join('\n')
     .trimEnd();
 }
+
+/** The requirements a review should ask about: not done, or done otherwise than the spec says. */
+const GAPS: ReadonlySet<RequirementStatus> = new Set(['missing', 'partial', 'differs']);
+
+function gap(item: ReportRequirement, specs: Pick<ReportSpec, 'id' | 'label'>[]): string {
+  const source = specs.find((spec) => spec.id === item.specId);
+  const lines = [`- **${item.title}** (${STATUS_LABELS[item.status].toLowerCase()})`];
+  if (item.note !== '') {
+    lines.push(`  ${item.note.replaceAll('\n', '\n  ')}`);
+  }
+  if (item.spec !== null) {
+    const from = source ? ` (${source.label})` : '';
+    lines.push(`  > ${item.spec.replaceAll('\n', '\n  > ')}${from}`);
+  }
+  return lines.join('\n');
+}
+
+/**
+ * A review comment asking for the report's gaps (the requirements missing, partial or done
+ * differently), in the specs' order; null when there is none.
+ */
+export function reportGaps(
+  result: ReviewReportResult,
+  specs: Pick<ReportSpec, 'id' | 'label'>[],
+): string | null {
+  const gaps = result.requirements.filter((item) => GAPS.has(item.status));
+  if (gaps.length === 0) {
+    return null;
+  }
+  return [
+    'The spec report found these requirements not met:',
+    '',
+    ...gaps.map((item) => gap(item, specs)),
+  ].join('\n');
+}

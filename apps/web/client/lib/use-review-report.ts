@@ -1,4 +1,5 @@
-// The newest spec report of the review, with starting and cancelling one.
+// The newest spec report of the review, with starting and cancelling one, and adding its gaps to the
+// review.
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 
 import type { ReportView } from '../../src/routes/review-reports';
@@ -12,11 +13,12 @@ export function isReporting(report: ReportView | null | undefined): boolean {
   return report?.status === 'queued' || report?.status === 'running';
 }
 
-/** The newest spec report of the review, with starting and cancelling one. */
+/** The newest spec report of the review, with starting and cancelling one, and adding its gaps. */
 export function useReviewReport(target: ReviewTarget): {
   report: UseQueryResult<ReportView | null>;
   start: ReturnType<typeof useMutation<ReportView, Error, void>>;
   cancel: ReturnType<typeof useMutation<ReportView, Error, void>>;
+  addGaps: ReturnType<typeof useMutation<unknown, Error, void>>;
 } {
   const queryClient = useQueryClient();
   const base = reviewBase(target);
@@ -31,5 +33,10 @@ export function useReviewReport(target: ReviewTarget): {
     report,
     start: useMutation({ mutationFn: () => reviewReportApi.start(base), onSuccess: refresh }),
     cancel: useMutation({ mutationFn: () => reviewReportApi.cancel(base), onSuccess: refresh }),
+    addGaps: useMutation({
+      mutationFn: () => reviewReportApi.addGaps(base),
+      // The draft shows with the review's other comments.
+      onSuccess: () => queryClient.invalidateQueries({ queryKey: ['review', base, 'comments'] }),
+    }),
   };
 }

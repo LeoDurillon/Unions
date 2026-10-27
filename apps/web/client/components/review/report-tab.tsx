@@ -88,6 +88,7 @@ export function ReportTab({
   }
   return (
     <ReportBody
+      target={target}
       report={latest}
       onOpen={onOpen}
       onAgain={() => {

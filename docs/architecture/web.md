@@ -185,12 +185,15 @@
   agent's `raw` text of a failed run, `outdated` once the review's head moved), `POST /reports` reads the review's
   specs as the Specs bar shows them (`readReviewSpecs`: removed and unreadable ones left out, numbered for the
   agent; refused without one, over `MAX_SPECS` or over `MAX_SPEC_CHARS`) and queues a `review_reports` row
-  (`@union/core` `review-reports.ts`), `POST /reports/cancel` queues `cancel_review_report`. The worker's
+  (`@union/core` `review-reports.ts`), `POST /reports/cancel` queues `cancel_review_report`, `POST /reports/gaps` adds a general draft from the
+  stored report (`reportGaps`, `addGeneralDraft` in `review-output-comment.ts`; refused when outdated or with no
+  gap). The worker's
   `ReviewReportRunner` writes it (`docs/architecture/worker.md`). The client: the **Report** tab, added by
   `ticket-review.tsx` and `prReviewSections`; a section's `content` may be a function of `{ openDiff }`
   (`review-page.tsx`) so its links can switch to the Diff tab. `report-tab.tsx` (writing, failed, empty or the
   report), `report-start.tsx` (the specs through `SpecSummary`, Start), `report-body.tsx`, `report-important-files.tsx`,
-  `report-requirement.tsx`, `report-sections.tsx`; `report-open.tsx` opens a file at lines (or a draft comment on
+  `report-header.tsx` (verdict, counts, Add the gaps, Copy as markdown, Run again), `report-requirement.tsx`,
+  `report-sections.tsx`; `report-open.tsx` opens a file at lines (or a draft comment on
   them) through the Explain focus (`explain.show`), `report-marks.tsx` gives the file rows the current report's
   important files (the **Key** badge in `file-row.tsx`, provided by `file-list.tsx`). `lib/use-review-report.ts`
   polls while a report is queued or running; labels and Copy as markdown come from the browser-safe

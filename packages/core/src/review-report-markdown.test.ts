@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test';
 
-import { reportCounts, reportMarkdown } from './review-report-markdown';
+import { reportCounts, reportGaps, reportMarkdown } from './review-report-markdown';
 import type { ReportSpec, ReviewReportResult } from './review-report-types';
 
 const specs: ReportSpec[] = [{ id: 1, kind: 'notion', label: 'Notion: Campaigns', text: '…' }];
@@ -99,4 +99,32 @@ test('writes the report in its reading order, leaving out empty sections', () =>
       '- Should drafts stay published?',
     ].join('\n'),
   );
+});
+
+test('the gaps are the requirements missing, partial or done differently, with their note and quote', () => {
+  expect(reportGaps(report, specs)).toBe(
+    [
+      'The spec report found these requirements not met:',
+      '',
+      '- **Tooltip** (missing)',
+      '  No change found.',
+    ].join('\n'),
+  );
+  const differs = {
+    ...report,
+    requirements: report.requirements.map((item) =>
+      item.key === 'unpublish'
+        ? { ...item, status: 'differs' as const, note: 'On save, not on activation.' }
+        : item,
+    ),
+  };
+  expect(reportGaps(differs, specs)?.split('\n').slice(2, 6)).toEqual([
+    '- **Automatic unpublishing** (done differently)',
+    '  On save, not on activation.',
+    '  > Unpublish the others',
+    '  > on activation (Notion: Campaigns)',
+  ]);
+  expect(
+    reportGaps({ ...report, requirements: report.requirements.slice(0, 1) }, specs),
+  ).toBeNull();
 });

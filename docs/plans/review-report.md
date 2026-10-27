@@ -1,8 +1,10 @@
 # Plan: a spec report on a review
 
-Status: steps 1 to 4 built (2026-10-27, branches `review-report` to `review-report-4`); decisions to confirm (end
+Status: steps 1 to 5 built (2026-10-27, branches `review-report` to `review-report-5`); decisions to confirm (end
 of file). Built differently from below: no header button (the header is at its import limit): the Report tab holds
-Start, the status and Cancel; the counts are plain text, not links to their sections.
+Start, the status and Cancel; the counts are plain text, not links to their sections; Send missing to the implementer
+is **Add the gaps to the review**, on a ticket and a pull request: one general draft listing the requirements missing,
+partial or done differently, sent with the review.
 
 ## Why
 

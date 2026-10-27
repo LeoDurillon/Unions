@@ -132,7 +132,10 @@ its kind, why and key lines; up to 2 files the change does not touch, marked "no
 comment** on the first piece of code: the comment editor opens on those lines with the note, nothing sent), **Not in
 the spec**, **Risks**, **Questions** and **Docs to update**. A link opens the Diff tab on the file at those lines.
 While the report is current, the file list marks its important files **Key \<n\>** (the reason on hover), in List,
-Tree and By spec. **Copy as markdown** copies the report; **Run again** writes a new one in its place; once the
+Tree and By spec. **Add the gaps to the review** (while the report is current and finds a requirement missing,
+partial or done differently) adds one general draft listing them with their notes and quotes (`POST …/reports/gaps`,
+built from the stored report by `reportGaps`), sent with the review like any draft. **Copy as markdown** copies the
+report; **Run again** writes a new one in its place; once the
 review's head moved, the report is **Outdated**. The agent is `review_report` in Union settings (Opus by default,
 read-only tools and git reads); each report is one run on the user's Claude usage; nothing is written to GitHub or
 Notion.

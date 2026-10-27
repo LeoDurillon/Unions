@@ -71,8 +71,10 @@ report**: an agent reads the specs listed there (the [Specs](#specs) bar's) and 
 - **Risks**, **Questions** to ask the author, and **Docs to update**.
 
 Click a file or its lines to open them in the Diff tab. **Add as draft comment** opens the comment editor on a
-requirement's code with its note: nothing is sent until you send your review. **Copy as markdown** copies the whole
-report.
+requirement's code with its note: nothing is sent until you send your review. **Add the gaps to the review** adds
+one draft on the whole change listing the requirements missing, partial or done differently, with their notes:
+edit it, then send it with your review (to the implementer on a ticket, on GitHub for a pull request). **Copy as
+markdown** copies the whole report.
 
 Union checks what the agent cites: a quote not found in the specs, or a file that does not exist, is left out, and
 the report says how many it dropped. When the change moves on (a new snapshot, a new commit on the pull request),

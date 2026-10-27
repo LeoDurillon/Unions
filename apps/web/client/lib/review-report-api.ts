@@ -8,4 +8,6 @@ export const reviewReportApi = {
   /** Queues a report on the review's specs, as its Specs bar lists them. */
   start: (base: string): Promise<ReportView> => request('POST', `${base}/reports`),
   cancel: (base: string): Promise<ReportView> => request('POST', `${base}/reports/cancel`),
+  /** Adds a draft on the whole change asking for the requirements the report found not met. */
+  addGaps: (base: string): Promise<unknown> => request('POST', `${base}/reports/gaps`),
 };

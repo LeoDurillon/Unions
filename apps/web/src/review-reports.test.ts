@@ -169,3 +169,50 @@ test("a pull request's report reads its description, once its files are read", a
     'Unpublish the other scenarios.',
   );
 });
+
+test("the report's gaps become one draft on the whole change, while the report is current", async () => {
+  const base = `/api/tickets/${ticketId}/reports`;
+  expect((await call('POST', `${base}/gaps`)).status).toBe(409);
+  await call('POST', base);
+  const queued = latestReport(db, { kind: 'ticket', id: ticketId });
+  const requirement = {
+    key: 'tooltip',
+    title: 'Tooltip',
+    spec: null,
+    specId: null,
+    evidence: [],
+    tests: [],
+    note: 'Not found.',
+  };
+  const result = {
+    verdict: 'partial' as const,
+    summary: '',
+    importantFiles: [],
+    requirements: [{ ...requirement, status: 'done' as const }],
+    outOfScope: [],
+    risks: [],
+    questions: [],
+    docs: [],
+    dropped: 0,
+  };
+  finishReport(db, queued?.id ?? 0, { status: 'succeeded', headSha: 'h1', result });
+  const none = await call('POST', `${base}/gaps`);
+  expect(await none.text()).toContain('every requirement met');
+
+  db.update(schema.reviewReports)
+    .set({ result: { ...result, requirements: [{ ...requirement, status: 'missing' }] } })
+    .run();
+  const added = await call('POST', `${base}/gaps`);
+  expect(added.status).toBe(201);
+  expect(db.select().from(schema.reviewComments).all()).toMatchObject([
+    {
+      ticketId,
+      kind: 'general',
+      status: 'draft',
+      headSha: 'h1',
+      body: 'The spec report found these requirements not met:\n\n- **Tooltip** (missing)\n  Not found.',
+    },
+  ]);
+  db.insert(schema.diffSnapshots).values({ ticketId, baseBranch: 'main', headSha: 'h2' }).run();
+  expect(await (await call('POST', `${base}/gaps`)).text()).toContain('outdated');
+});
