@@ -11,13 +11,13 @@ import {
   type ReviewReportResult,
 } from './review-report-types';
 
-const VERDICT_LABELS: Record<ReportVerdict, string> = {
+export const VERDICT_LABELS: Record<ReportVerdict, string> = {
   matches: 'Matches the specs',
   partial: 'Partly matches the specs',
   diverges: 'Diverges from the specs',
 };
 
-const STATUS_LABELS: Record<RequirementStatus, string> = {
+export const STATUS_LABELS: Record<RequirementStatus, string> = {
   done: 'Done',
   partial: 'Partial',
   missing: 'Missing',
@@ -52,7 +52,7 @@ function importantFile(file: ImportantFile, position: number): string {
   return `${position + 1}. ${where}${unchanged}: ${file.why}`;
 }
 
-function requirement(item: ReportRequirement, specs: ReportSpec[]): string[] {
+function requirement(item: ReportRequirement, specs: Pick<ReportSpec, 'id' | 'label'>[]): string[] {
   const source = specs.find((spec) => spec.id === item.specId);
   const lines = [`### ${item.title}: ${STATUS_LABELS[item.status]}`, ''];
   if (item.spec !== null) {
@@ -83,7 +83,10 @@ function section(title: string, items: string[]): string[] {
   return items.length === 0 ? [] : [`## ${title}`, '', ...items, ''];
 }
 
-export function reportMarkdown(result: ReviewReportResult, specs: ReportSpec[]): string {
+export function reportMarkdown(
+  result: ReviewReportResult,
+  specs: Pick<ReportSpec, 'id' | 'label'>[],
+): string {
   return [
     `# ${VERDICT_LABELS[result.verdict]}`,
     '',

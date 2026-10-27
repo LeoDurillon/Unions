@@ -11,8 +11,15 @@ import { SliceTabs } from './slice-tabs';
 import { SpecsEditingProvider } from './specs-editing';
 import { useDiffView } from './view-toggle';
 
+/** What a tab's content can do on the page: switch to the Diff tab (where its links open files). */
+type SectionActions = { openDiff: () => void };
+
 /** A tab shown before the diff (a pull request's description, its comments). */
-export type ReviewSection = { id: string; label: string; content: ReactNode };
+export type ReviewSection = {
+  id: string;
+  label: string;
+  content: ReactNode | ((actions: SectionActions) => ReactNode);
+};
 
 function SectionTabs({
   sections,
@@ -129,7 +136,15 @@ function ReviewPageBody({
             <SectionTabs sections={[...sections, DIFF_TAB]} current={tab} onChange={setTab} />
           ) : null}
           {section ? (
-            <SectionBody banner={banner}>{section.content}</SectionBody>
+            <SectionBody banner={banner}>
+              {typeof section.content === 'function'
+                ? section.content({
+                    openDiff: () => {
+                      setTab(DIFF_TAB.id);
+                    },
+                  })
+                : section.content}
+            </SectionBody>
           ) : (
             <DiffArea
               key={slices.slice ?? 'all'}

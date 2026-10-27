@@ -1,7 +1,8 @@
 # Plan: a spec report on a review
 
-Status: steps 1 to 3 built (2026-10-27, branches `review-report` to `review-report-3`); decisions to confirm (end
-of file).
+Status: steps 1 to 4 built (2026-10-27, branches `review-report` to `review-report-4`); decisions to confirm (end
+of file). Built differently from below: no header button (the header is at its import limit): the Report tab holds
+Start, the status and Cancel; the counts are plain text, not links to their sections.
 
 ## Why
 

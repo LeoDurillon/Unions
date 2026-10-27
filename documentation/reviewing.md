@@ -16,8 +16,8 @@ Click **Review changes** in a ticket's panel. The page opens on the **Diff** tab
 - The commit picker shows all the changes, the changes since your last review, or one commit at a time.
 - Lock files are hidden by default. Hide other paths in the project's **Settings → Review**.
 
-The other tabs show the ticket, its preview and its pull request, so you can check the change against the request
-without leaving the page.
+The other tabs show the ticket, its preview, its pull request and its [spec report](#spec-report), so you can check
+the change against the request without leaving the page.
 
 The diff is a snapshot Union takes after each implementation run, so it shows what the agent left, even before the
 branch is pushed.
@@ -58,10 +58,33 @@ ticket runs a step.
 **Review with agent** asks an agent to read the change against its specs and leave line comments. They arrive as
 drafts, like yours: keep, edit or delete each one before you send the review.
 
+## Spec report
+
+The **Report** tab answers, before you read the diff, whether the change does what its specs ask. Click **Write the
+report**: an agent reads the specs listed there (the [Specs](#specs) bar's) and the whole change, and writes:
+
+- **Read first**: the few files to start with, in order, each with why it matters and its key lines. While the
+  report is current, these files carry a **Key** mark in the file list (hover it for the reason).
+- **Requirements**, in the specs' own order: each one **Done**, **Partial**, **Missing**, **Done differently** or
+  **Unclear in the spec**, with the spec's words, the code and the tests that do it, and a note.
+- **Not in the spec**: what the change does that nobody asked for, with a risk.
+- **Risks**, **Questions** to ask the author, and **Docs to update**.
+
+Click a file or its lines to open them in the Diff tab. **Add as draft comment** opens the comment editor on a
+requirement's code with its note: nothing is sent until you send your review. **Copy as markdown** copies the whole
+report.
+
+Union checks what the agent cites: a quote not found in the specs, or a file that does not exist, is left out, and
+the report says how many it dropped. When the change moves on (a new snapshot, a new commit on the pull request),
+the report shows as **Outdated**, with **Run again**.
+
+A report is one agent run (Opus by default) on your Claude usage. On a ticket, it is refused while the ticket runs a
+step. While it runs, the tab shows **Cancel**.
+
 ## Specs
 
-The **Specs** bar under the header lists what the change is supposed to do. Explain, Review with agent and Group
-by spec all read it.
+The **Specs** bar under the header lists what the change is supposed to do. Explain, Review with agent, Group by
+spec and the spec report all read it.
 
 - It starts with the ticket's description and the Notion page it came from, or the pull request's description.
 - **Edit** opens the list: edit a spec's text for this review (it is marked "edited"), go back to its source with

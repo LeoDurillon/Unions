@@ -1,10 +1,11 @@
-// A ticket's review page: the diff, with the ticket's description, preview and pull request as tabs
-// beside it, as a pull request review has; it opens on the diff.
+// A ticket's review page: the diff, with the ticket's description, preview, pull request and spec
+// report as tabs beside it, as a pull request review has; it opens on the diff.
 import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../src/api-types';
 import { PreviewTab } from './preview-tab';
 import { PullRequestTab } from './pull-request-tab';
+import { ReportTab } from './review/report-tab';
 import { ReviewPage, type ReviewSection } from './review/review-page';
 import { TicketDescription } from './ticket-description';
 
@@ -17,6 +18,13 @@ function sectionsOf(detail: TicketDetail): ReviewSection[] {
       id: 'pull-request',
       label: prNumber === null ? 'PR' : `PR #${prNumber}`,
       content: <PullRequestTab detail={detail} />,
+    },
+    {
+      id: 'report',
+      label: 'Report',
+      content: ({ openDiff }) => (
+        <ReportTab target={{ kind: 'ticket', ticketId: detail.ticket.id }} openDiff={openDiff} />
+      ),
     },
   ];
 }

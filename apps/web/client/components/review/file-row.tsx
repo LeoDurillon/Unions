@@ -1,7 +1,8 @@
-// One file: status, name (the full path in the flat list), drafts and line counts.
+// One file: status, name (the full path in the flat list), its Key mark, drafts and line counts.
 import type { ReactElement } from 'react';
 
 import type { CommentView, DiffFileSummary } from '../../../src/api-types';
+import { KeyBadge } from './report-marks';
 
 const STATUS_MARK = { added: 'A', deleted: 'D', modified: 'M', renamed: 'R' } as const;
 const STATUS_COLOR = {
@@ -45,7 +46,7 @@ function FileLabel({ label }: { label: string }): ReactElement {
   );
 }
 
-/** One file: status, name (the full path in the flat list), drafts and line counts. */
+/** One file: status, name (the full path in the flat list), its Key mark, drafts and line counts. */
 export function FileRow({
   file,
   label,
@@ -78,6 +79,7 @@ export function FileRow({
         {STATUS_MARK[file.status]}
       </span>
       <FileLabel label={label} />
+      <KeyBadge path={file.path} />
       {note ? <span className="shrink-0 text-[10px] text-zinc-500">{note}</span> : null}
       {drafts > 0 ? (
         <span className="rounded-full bg-indigo-600 px-1.5 text-[10px] text-white">{drafts}</span>

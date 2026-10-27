@@ -8,6 +8,7 @@ import { Segmented, type SegmentOption } from '../choice';
 import { draftCounts } from './file-row';
 import { FileRows, type RowOptions, type Layout } from './file-rows';
 import { useBySpecControl } from './group-by-spec-button';
+import { ImportantFilesProvider } from './report-marks';
 import { SpecGroups } from './spec-groups';
 
 const STORAGE_KEY = 'union.review.files';
@@ -127,26 +128,28 @@ export function FileList({
     layout,
   };
   return (
-    <div className="space-y-3">
-      <ListHeader
-        count={files.length}
-        bySpec={bySpec.toggle}
-        layout={layout}
-        onLayout={setLayout}
-      />
-      {bySpec.status}
-      {bySpec.groups ? (
-        <SpecGroups
-          files={shown}
-          grouping={bySpec.groups}
-          rows={rows}
-          part={part}
-          onPick={onSelect}
+    <ImportantFilesProvider target={target}>
+      <div className="space-y-3">
+        <ListHeader
+          count={files.length}
+          bySpec={bySpec.toggle}
+          layout={layout}
+          onLayout={setLayout}
         />
-      ) : (
-        <FileRows files={shown} {...rows} />
-      )}
-      <IgnoredFiles files={ignored} rows={rows} />
-    </div>
+        {bySpec.status}
+        {bySpec.groups ? (
+          <SpecGroups
+            files={shown}
+            grouping={bySpec.groups}
+            rows={rows}
+            part={part}
+            onPick={onSelect}
+          />
+        ) : (
+          <FileRows files={shown} {...rows} />
+        )}
+        <IgnoredFiles files={ignored} rows={rows} />
+      </div>
+    </ImportantFilesProvider>
   );
 }

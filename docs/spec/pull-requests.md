@@ -22,9 +22,9 @@ in the middle leaving the stack whole but out of the review's tabs. **Review wit
 whole stack** take the stack as GitHub has it.
 
 **Open review** opens the same review page as a ticket's (file list, highlighted unified or split diff, comments on
-a line or a block of lines), with four tabs: **Description** (the pull request's description) and **Comments** (its
+a line or a block of lines), with these tabs: **Description** (the pull request's description) and **Comments** (its
 review summaries, conversation comments and line threads, each to reply to: see [Replies to comments](#replies-to-comments)), both read from GitHub once per opening,
-**Notion** once the review is linked to a page (**Notion (2)** for two), **Preview** (see [Previews of pull requests under review](preview-environments.md#previews-of-pull-requests-under-review)), then **Diff**. The pull request's head commit and files are read from GitHub when the page opens and
+**Notion** once the review is linked to a page (**Notion (2)** for two), **Report** (see [Spec report](#spec-report)), **Preview** (see [Previews of pull requests under review](preview-environments.md#previews-of-pull-requests-under-review)), then **Diff**. The pull request's head commit and files are read from GitHub when the page opens and
 kept on the review (`current_reviews.files`, `head_sha`): comments are checked against those lines, and those
 written on an earlier head read as outdated. **Send review** offers **Comment**, **Approve** and **Request changes**;
 each queues a `submit_pr_review` command with that verdict, and the worker posts one review of that kind on the pull
@@ -115,6 +115,27 @@ The specs are the review's (its **Specs** bar). The agent is `review_explain` in
 tools and git reads). A ticket's runs in its own container, refused while the ticket runs; a pull request's in a
 throwaway container cloned at the reviewed commit. Runs share the run slots, one per review at a time. Each Explain
 is one agent run on the user's Claude usage; nothing is written to GitHub or Notion.
+
+### Spec report
+
+On either review page, the **Report** tab (a ticket's review has it too, after its PR tab) holds the newest spec
+report of the change ([plan](../plans/review-report.md)). Without one, it says what a report is, lists the specs it
+will read (the review's **Specs** bar, with **Edit the specs**) and offers **Write the report**, which queues one run
+(`POST …/reports`; refused while the ticket runs, without a readable spec, over 10 specs or a spec over 50,000
+characters). While it waits or runs, the tab says so, with **Cancel**. A failed run shows why, and the agent's
+answer when it had no report block.
+
+A report shows its verdict (matches, partly matches, diverges from the specs), the counts per status, a summary, the
+specs it read and how many citations Union dropped; then **Read first** (at most 8 files in reading order, each with
+its kind, why and key lines; up to 2 files the change does not touch, marked "not changed", shown without a link),
+**Requirements** (status, the spec's words with their source, code and tests as links, a note, and **Add as draft
+comment** on the first piece of code: the comment editor opens on those lines with the note, nothing sent), **Not in
+the spec**, **Risks**, **Questions** and **Docs to update**. A link opens the Diff tab on the file at those lines.
+While the report is current, the file list marks its important files **Key \<n\>** (the reason on hover), in List,
+Tree and By spec. **Copy as markdown** copies the report; **Run again** writes a new one in its place; once the
+review's head moved, the report is **Outdated**. The agent is `review_report` in Union settings (Opus by default,
+read-only tools and git reads); each report is one run on the user's Claude usage; nothing is written to GitHub or
+Notion.
 
 **CI checks** of a ticket's pull request ([`docs/plans/pr-checks.md`](../plans/pr-checks.md)), in the PR tab under the branch status, while
 the PR is not merged (read when the tab opens, every 30 s while a check runs, and on Refresh): the web reads the head commit's check runs and commit statuses and the PR's bot comments. The user picks failed checks, other
