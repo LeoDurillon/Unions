@@ -172,7 +172,8 @@
   quote is kept only when found in a spec sent (`quoteKey`: markdown marks, escapes and quote signs aside), paths
   are relative, out-of-scope changes are on the diff's files, at most 8 important files of which 2 outside the
   change; at most 5 `attention` items, then one added for each requirement missing, partial or done differently the
-  agent left out (`withGaps`) and one for each requirement's `unasked` behaviour it did not raise (`unaskedItems`); `skim` only changed files neither read first nor pointed at; the verdict is never
+  agent left out (`withGaps`) and one for each requirement's `unasked` behaviour it did not raise (`unaskedItems`: not when an unasked item of
+  the agent's is about that requirement or cites one of its files); `skim` only changed files neither read first nor pointed at; the verdict is never
   `matches` while a requirement is not done; a changed file the report places nowhere is `unreviewed`; the map of how
   the change works (`flow`, `review-report-flow.ts`): at most 12 nodes on paths of the checkout, edges between them,
   up to 6 steps whose why keeps its source (`spec`, `commit`, `comment`) only when its quote is found in the specs,

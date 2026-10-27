@@ -76,20 +76,22 @@ export function unaskedOf(value: unknown, keys: Map<string, string>): Map<string
 }
 
 /**
- * One item for each requirement whose code does something unasked (`unasked`, by key) that no item of
- * the agent's already raises; even a requirement done.
+ * One item for each requirement whose code does something unasked (`unasked`, by key), even a
+ * requirement done; unless an unasked item of the agent's is about it or cites one of its files.
  */
 export function unaskedItems(
   attention: AttentionItem[],
   requirements: ReportRequirement[],
   unasked: ReadonlyMap<string, string>,
 ): AttentionItem[] {
-  const raised = new Set(
-    attention.flatMap((item) => (item.kind === 'unasked' ? (item.requirement ?? []) : [])),
-  );
+  const agents = attention.filter((item) => item.kind === 'unasked');
+  const raised = new Set(agents.flatMap((item) => item.requirement ?? []));
+  const cited = new Set(agents.flatMap((item) => item.cites.map((cite) => cite.path)));
   return requirements.flatMap((requirement): AttentionItem[] => {
     const what = unasked.get(requirement.key);
-    if (what === undefined || raised.has(requirement.key)) {
+    const covered =
+      raised.has(requirement.key) || requirement.evidence.some((e) => cited.has(e.path));
+    if (what === undefined || covered) {
       return [];
     }
     const { key, title, evidence } = requirement;

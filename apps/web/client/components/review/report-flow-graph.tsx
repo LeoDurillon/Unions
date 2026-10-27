@@ -12,8 +12,46 @@ const PAD = 4;
 const LABEL_WIDTH = 168;
 const LABEL_HEIGHT = 18;
 const MIN_BEND = 24;
+/**
+ * How far along its link a label sits: nearer the source when the target has other links in, nearer
+ * the target when the source has other links out, so labels of links meeting at a node part.
+ */
+const LABEL_NEAR = 0.25;
+const LABEL_MIDDLE = 0.5;
 
-function Link({ edge, layout }: { edge: FlowEdge; layout: FlowLayout }): ReactElement | null {
+function labelAt(edge: FlowEdge, edges: FlowEdge[]): number {
+  const into = edges.filter((other) => other.to === edge.to).length;
+  const out = edges.filter((other) => other.from === edge.from).length;
+  if (into > 1 && out <= 1) {
+    return LABEL_NEAR;
+  }
+  return out > 1 && into <= 1 ? 1 - LABEL_NEAR : LABEL_MIDDLE;
+}
+
+/** The middle weights of a cubic Bézier curve. */
+const BERNSTEIN = 3;
+
+type Point = { x: number; y: number };
+
+/** The point at `t` (0 to 1) of the cubic Bézier curve through `p`. */
+function along(p: [Point, Point, Point, Point], t: number): Point {
+  const u = 1 - t;
+  const weights = [u * u * u, BERNSTEIN * u * u * t, BERNSTEIN * u * t * t, t * t * t];
+  return {
+    x: p.reduce((sum, point, at) => sum + (weights[at] ?? 0) * point.x, 0),
+    y: p.reduce((sum, point, at) => sum + (weights[at] ?? 0) * point.y, 0),
+  };
+}
+
+function Link({
+  edge,
+  edges,
+  layout,
+}: {
+  edge: FlowEdge;
+  edges: FlowEdge[];
+  layout: FlowLayout;
+}): ReactElement | null {
   const from = layout.at.get(edge.from);
   const to = layout.at.get(edge.to);
   if (!from || !to) {
@@ -23,6 +61,15 @@ function Link({ edge, layout }: { edge: FlowEdge; layout: FlowLayout }): ReactEl
   const [x2, y2] = [to.x + NODE_WIDTH / 2, to.y];
   const bend = Math.max(MIN_BEND, Math.abs(y2 - y1) / 2);
   const path = `M ${x1} ${y1} C ${x1} ${y1 + bend}, ${x2} ${y2 - bend}, ${x2} ${y2}`;
+  const label = along(
+    [
+      { x: x1, y: y1 },
+      { x: x1, y: y1 + bend },
+      { x: x2, y: y2 - bend },
+      { x: x2, y: y2 },
+    ],
+    labelAt(edge, edges),
+  );
   return (
     <g>
       <path
@@ -34,8 +81,8 @@ function Link({ edge, layout }: { edge: FlowEdge; layout: FlowLayout }): ReactEl
       />
       {edge.label === '' ? null : (
         <foreignObject
-          x={(x1 + x2 - LABEL_WIDTH) / 2}
-          y={(y1 + y2 - LABEL_HEIGHT) / 2}
+          x={label.x - LABEL_WIDTH / 2}
+          y={label.y - LABEL_HEIGHT / 2}
           width={LABEL_WIDTH}
           height={LABEL_HEIGHT}
         >
@@ -152,7 +199,7 @@ export function FlowGraph({
           </marker>
         </defs>
         {flow.edges.map((edge) => (
-          <Link key={`${edge.from}\n${edge.to}`} edge={edge} layout={layout} />
+          <Link key={`${edge.from}\n${edge.to}`} edge={edge} edges={flow.edges} layout={layout} />
         ))}
         {flow.nodes.map((node) => (
           <Node

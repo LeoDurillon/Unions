@@ -58,9 +58,8 @@ function Step({
     <li className="flex gap-3 px-3 py-2">
       <span className="w-4 shrink-0 text-right text-zinc-400 tabular-nums">{position}</span>
       <div className="min-w-0 flex-1 space-y-1">
-        <p>
-          <span className="font-medium">{step.title}</span> {step.what}
-        </p>
+        <p className="font-medium">{step.title}</p>
+        {step.what === '' ? null : <p>{step.what}</p>}
         {step.why === '' ? null : (
           <p className="text-zinc-600 dark:text-zinc-400">
             <Badge tone={source.tone} title={source.title}>
