@@ -1,4 +1,6 @@
 // A spec report as markdown, for Copy as markdown on the review page, and its labels. Pure, browser-safe.
+
+import { plainQuote } from './review-report-specs';
 import {
   REQUIREMENT_STATUSES,
   type AttentionItem,
@@ -81,7 +83,7 @@ function requirement(item: ReportRequirement, specs: Pick<ReportSpec, 'id' | 'la
   const source = specs.find((spec) => spec.id === item.specId);
   const lines = [`### ${item.title}: ${STATUS_LABELS[item.status]}`, ''];
   if (item.spec !== null) {
-    lines.push(`> ${item.spec.replaceAll('\n', '\n> ')}`);
+    lines.push(`> ${plainQuote(item.spec).replaceAll('\n', '\n> ')}`);
     if (source) {
       lines.push(`> — ${source.label}`);
     }
@@ -165,7 +167,7 @@ function gap(item: ReportRequirement, specs: Pick<ReportSpec, 'id' | 'label'>[])
   }
   if (item.spec !== null) {
     const from = source ? ` (${source.label})` : '';
-    lines.push(`  > ${item.spec.replaceAll('\n', '\n  > ')}${from}`);
+    lines.push(`  > ${plainQuote(item.spec).replaceAll('\n', '\n  > ')}${from}`);
   }
   return lines.join('\n');
 }

@@ -1,6 +1,6 @@
 // Reads the report block at the end of the agent's answer: quotes checked against the specs sent,
-// paths against the change, the gaps always among what needs the reviewer, the changed files it says
-// nothing about listed; what it cannot back is dropped and counted.
+// paths against the change, the gaps and unasked behaviours always among what needs the reviewer, the
+// changed files it says nothing about listed; what it cannot back is dropped and counted.
 import {
   REPORT_VERDICTS,
   type ReportRequirement,
@@ -13,7 +13,7 @@ import { lastJsonBlock } from './json-block';
 import { oneOf, text, texts } from './review-report-fields';
 import { docsOf, importantFilesOf, requirementsOf, risksOf } from './review-report-items';
 import { outOfScopeOf } from './review-report-scope';
-import { attentionOf, skimOf, withGaps } from './review-report-triage';
+import { attentionOf, skimOf, unaskedItems, unaskedOf, withGaps } from './review-report-triage';
 
 /**
  * The agent's verdict, but never `matches` while a requirement is not done; when it gave none, the
@@ -71,7 +71,14 @@ export function parseReport(
   const result = {
     verdict: verdictOf(oneOf(REPORT_VERDICTS, block.verdict), requirements.items),
     summary: text(block.summary),
-    attention: withGaps(attention.items, requirements.items),
+    attention: [
+      ...withGaps(attention.items, requirements.items),
+      ...unaskedItems(
+        attention.items,
+        requirements.items,
+        unaskedOf(block.requirements, requirements.keys),
+      ),
+    ],
     importantFiles: importantFiles.items,
     skim: skim.items,
     requirements: requirements.items,

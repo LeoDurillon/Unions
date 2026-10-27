@@ -291,3 +291,31 @@ test('skim: changed files only, once, never one to read first or to look at', ()
   expect(result?.unreviewed).toEqual([]);
   expect(result?.dropped).toBe(4);
 });
+
+test("a requirement's unasked behaviour needs the reviewer, done or not, unless the agent raised it", () => {
+  const result = parseReport(
+    answer({
+      requirements: [
+        {
+          key: 'shown',
+          title: 'Threshold shown',
+          status: 'done',
+          unasked: 'Also shown on loan campaigns.',
+          evidence: [{ path: 'ui.tsx', start: 1 }],
+        },
+        { key: 'known', title: 'Known threshold', status: 'done', unasked: "Adds 'Hors paliers'." },
+        { key: 'plain', title: 'Plain', status: 'done', unasked: '' },
+      ],
+      attention: [{ kind: 'unasked', title: "'Hors paliers' case", requirement: 'known' }],
+    }),
+    SPECS,
+    FILES,
+  );
+  expect(
+    result?.attention.map((item) => [item.kind, item.title, item.detail, item.requirement]),
+  ).toEqual([
+    ['unasked', "'Hors paliers' case", '', 'known'],
+    ['unasked', 'Also shown on loan campaigns.', 'Threshold shown', 'shown'],
+  ]);
+  expect(result?.attention[1]?.cites).toEqual([{ path: 'ui.tsx', start: 1, end: 1 }]);
+});

@@ -65,7 +65,8 @@ against the change's specs. Click **Write the report**: an agent reads the specs
 bar's) and the whole change, and writes:
 
 - **Needs you**: the few things to look at, most important first: a requirement done differently or missing,
-  something nobody asked for, a real risk, a question to settle before approving. Each has its lines and **Add as
+  something nobody asked for (even inside a requirement that is done), a real risk, a question to settle before
+  approving. Each has its lines and **Add as
   draft comment**. When nothing needs you, the report says so.
 - **Read first**: the few files to start with, in order, each with why it matters and its key lines. While the
   report is current, these files carry a **Key** mark in the file list (hover it for the reason).

@@ -1,5 +1,5 @@
-// The report's triage read from the agent's block: what needs the reviewer (with every gap it left out
-// added), the files they can skim, and the changed files the report says nothing about.
+// The report's triage read from the agent's block: what needs the reviewer (with every gap and every
+// unasked behaviour it left out added), and the files they can skim.
 import {
   ATTENTION_KINDS,
   type AttentionItem,
@@ -60,6 +60,41 @@ export function withGaps(
     return [{ kind, title, detail: note, requirement: key, cites: evidence }];
   });
   return [...attention, ...gaps];
+}
+
+/** Each requirement's unasked behaviour (its `unasked` field), by requirement key. */
+export function unaskedOf(value: unknown, keys: Map<string, string>): Map<string, string> {
+  const found = new Map<string, string>();
+  for (const item of records(value)) {
+    const key = keys.get(text(item.key)) ?? keys.get(text(item.title));
+    const unasked = text(item.unasked);
+    if (key !== undefined && unasked !== '') {
+      found.set(key, unasked);
+    }
+  }
+  return found;
+}
+
+/**
+ * One item for each requirement whose code does something unasked (`unasked`, by key) that no item of
+ * the agent's already raises; even a requirement done.
+ */
+export function unaskedItems(
+  attention: AttentionItem[],
+  requirements: ReportRequirement[],
+  unasked: ReadonlyMap<string, string>,
+): AttentionItem[] {
+  const raised = new Set(
+    attention.flatMap((item) => (item.kind === 'unasked' ? (item.requirement ?? []) : [])),
+  );
+  return requirements.flatMap((requirement): AttentionItem[] => {
+    const what = unasked.get(requirement.key);
+    if (what === undefined || raised.has(requirement.key)) {
+      return [];
+    }
+    const { key, title, evidence } = requirement;
+    return [{ kind: 'unasked', title: what, detail: title, requirement: key, cites: evidence }];
+  });
 }
 
 /** Changed files to skim, each once; never one the reviewer is told to read (`read`). */

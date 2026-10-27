@@ -2,6 +2,7 @@
 // it, and a comment to start on its code.
 import type { ReportRequirement, ReportSpec, RequirementStatus } from '@union/core';
 import { STATUS_LABELS } from '@union/core/review-report-markdown';
+import { plainQuote } from '@union/core/review-report-specs';
 import type { ReactElement } from 'react';
 
 import type { Tone } from '../../lib/labels';
@@ -29,7 +30,7 @@ function Quote({
   const source = specs.find((spec) => spec.id === requirement.specId);
   return (
     <blockquote className="border-l-2 border-zinc-300 pl-3 text-sm whitespace-pre-wrap text-zinc-600 dark:border-zinc-700 dark:text-zinc-400">
-      {requirement.spec}
+      {plainQuote(requirement.spec)}
       {source ? <span className="block text-xs text-zinc-500">— {source.label}</span> : null}
     </blockquote>
   );

@@ -235,6 +235,14 @@ the same weight, so the reviewer still read everything. It also showed gaps in w
   the decision, in at most 3 sentences.
 - Older reports, without these fields, still show.
 
+Built 2026-10-27 (`review-report-7`). Its first run on ticket 24 found every gap above; then (`review-report-7-fixes`):
+each requirement says what its code does unasked (`unasked`), which the host adds to **Needs you** when the agent
+did not raise it, even past the 5 and even on a done requirement (the first run left "also shown on loan campaigns"
+in a folded note); a **Needs you** risk is also in **Risks** with that severity, and shared code changed without a
+test of its other users is at least medium; a new way for a page or request to fail counts as a risk (the first run
+dropped one); quotes read without markdown's escapes and bold marks. The report's language follows the specs'
+unless the user's prompt sets one.
+
 ### Step 8: how it works
 
 A map of the change before the diff: the agent returns nodes (a file or function, with its lines) and edges

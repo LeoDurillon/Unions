@@ -172,7 +172,7 @@
   quote is kept only when found in a spec sent (`quoteKey`: markdown marks, escapes and quote signs aside), paths
   are relative, out-of-scope changes are on the diff's files, at most 8 important files of which 2 outside the
   change; at most 5 `attention` items, then one added for each requirement missing, partial or done differently the
-  agent left out (`withGaps`); `skim` only changed files neither read first nor pointed at; the verdict is never
+  agent left out (`withGaps`) and one for each requirement's `unasked` behaviour it did not raise (`unaskedItems`); `skim` only changed files neither read first nor pointed at; the verdict is never
   `matches` while a requirement is not done; a changed file the report places nowhere is `unreviewed`. `review-report-checkout.ts` then reads the named files' line counts in the container, drops the paths
   that are not there (a deleted file of the change stays an important file) and cuts ranges to the file. All it
   drops is counted in `dropped`. A ticket's lines go to its `agent_log`. Cancellation: the `cancel_review_report`

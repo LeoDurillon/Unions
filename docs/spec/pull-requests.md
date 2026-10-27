@@ -129,7 +129,8 @@ The report's specs are the bar's with images replaced by `[image N]`, and a spec
 another is kept as "same as" it and not sent again (`distinctSpecs`); the specs line says so. A report shows its
 verdict (matches, partly matches, diverges from the specs; never matches while a requirement is not done), the
 counts per status, a summary, the specs it read and how many citations Union dropped; then **Needs you** (at most 5
-items the agent ranks, plus one per requirement missing, partial or done differently it left out: kind, title,
+items the agent ranks, plus one per requirement missing, partial or done differently it left out, and one per
+requirement whose code does something unasked (its `unasked`, even when done) it did not raise: kind, title,
 detail, lines, **Add as draft comment**; without any and with a matching verdict, a line saying nothing needs the
 reviewer), **Read first** (at most 8 files in reading order, each with its kind, why and key lines; up to 2 files the
 change does not touch, marked "not changed", shown without a link), **Skim** (changed files the reviewer can skim,
@@ -137,7 +138,7 @@ folded), **Requirements to check** (the ones not done: status, the spec's words 
 links, a note, and **Add as draft comment** on the first piece of code: the comment editor opens on those lines with
 the note, nothing sent), **Done as asked** (folded), **Not in the spec**, **Risks**, **Questions**, **Docs to
 update** and **Not looked at by the agent** (changed files the report places nowhere, folded). A quote is matched
-ignoring markdown marks, escapes and quote signs. A link opens the Diff tab on the file at those lines. While the
+ignoring markdown marks, escapes and quote signs, and shown without escapes and bold marks (`plainQuote`). A link opens the Diff tab on the file at those lines. While the
 report is current, the file list marks its important files **Key \<n\>** and the ones to skim **Skim** (the reason
 on hover), in List, Tree and By spec. **Add the gaps to the review** (while the report is current and finds a
 requirement missing, partial or done differently) adds one general draft listing them with their notes and quotes

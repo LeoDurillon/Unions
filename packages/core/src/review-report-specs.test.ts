@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test';
 
-import { distinctSpecs, quoteKey, withoutImages } from './review-report-specs';
+import { distinctSpecs, plainQuote, quoteKey, withoutImages } from './review-report-specs';
 
 test('images become numbered placeholders, links and all', () => {
   expect(
@@ -49,4 +49,13 @@ test('a longer spec holding a shorter one is the one sent', () => {
     { kind: 'notion', label: 'Long', text: 'one line\ntwo line\nthree line' },
   ]);
   expect(specs.map((spec) => spec.sameAs ?? null)).toEqual([2, null]);
+});
+
+test("a quote reads without markdown's escapes and bold marks", () => {
+  expect(plainQuote(String.raw`si seuil connu, seuil de revenus : \{seuil\}`)).toBe(
+    'si seuil connu, seuil de revenus : {seuil}',
+  );
+  expect(plainQuote('texte “**Table de palier**” in __init__.py')).toBe(
+    'texte “Table de palier” in __init__.py',
+  );
 });

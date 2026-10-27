@@ -19,6 +19,11 @@ export function withoutImages(text: string): string {
   });
 }
 
+/** A quote as the reviewer reads it: without markdown's escapes and bold marks. */
+export function plainQuote(quote: string): string {
+  return quote.replaceAll(/\\(?<mark>[\\`*_{}[\]()#+\-.!|])/gu, '$<mark>').replaceAll('**', '');
+}
+
 /** A text as quotes are compared: without markdown marks, escapes and quote signs, spaces squeezed, in lower case. */
 export function quoteKey(text: string): string {
   return text
