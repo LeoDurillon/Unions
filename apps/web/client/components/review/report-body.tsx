@@ -8,7 +8,7 @@ import { ReportHeader } from './report-header';
 import { ReportImportantFiles } from './report-important-files';
 import type { OpenLines } from './report-open';
 import { ReportRequirementCard } from './report-requirement';
-import { ReportSections } from './report-sections';
+import { ReportSection, ReportSections } from './report-sections';
 
 export function ReportBody({
   target,
@@ -29,9 +29,12 @@ export function ReportBody({
     <div className="space-y-6">
       <ReportHeader target={target} report={report} onAgain={onAgain} />
       <ReportImportantFiles files={result.importantFiles} onOpen={onOpen} />
-      {result.requirements.length > 0 ? (
-        <section id="report-requirements" className="space-y-2">
-          <h3 className="font-semibold">Requirements</h3>
+      <ReportSection
+        id="report-requirements"
+        title="Requirements"
+        count={result.requirements.length}
+      >
+        <div className="space-y-2">
           {result.requirements.map((requirement) => (
             <ReportRequirementCard
               key={requirement.key}
@@ -40,8 +43,8 @@ export function ReportBody({
               onOpen={onOpen}
             />
           ))}
-        </section>
-      ) : null}
+        </div>
+      </ReportSection>
       <ReportSections result={result} onOpen={onOpen} />
     </div>
   );

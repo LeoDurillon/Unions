@@ -1,11 +1,11 @@
-// The spec report's last sections: what the specs did not ask for, the risks, the questions and the
-// docs to update.
+// The spec report's sections: the frame they share (a title with a count, rows in one box), then the last
+// ones: what the specs did not ask for, the risks, the questions and the docs to update.
 import type { ReviewReportResult } from '@union/core';
 import type { ReactElement, ReactNode } from 'react';
 
 import type { Tone } from '../../lib/labels';
 import { Badge } from '../ui';
-import { CodeLink, type OpenLines } from './report-open';
+import { FileLink, FileName, type OpenLines } from './report-open';
 
 const LEVEL_TONES: Record<ReviewReportResult['risks'][number]['severity'], Tone> = {
   low: 'neutral',
@@ -13,7 +13,12 @@ const LEVEL_TONES: Record<ReviewReportResult['risks'][number]['severity'], Tone>
   high: 'red',
 };
 
-function Section({
+/** The rows of a section: one box, a line between rows. */
+export const ROWS_CLASS =
+  'divide-y divide-zinc-200 rounded-lg border border-zinc-200 bg-white text-sm dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900';
+
+/** A titled part of the report, left out when it has nothing. */
+export function ReportSection({
   id,
   title,
   count,
@@ -29,9 +34,67 @@ function Section({
   }
   return (
     <section id={id} className="space-y-2">
-      <h3 className="font-semibold">{title}</h3>
-      <ul className="space-y-2 text-sm">{children}</ul>
+      <h3 className="flex items-baseline gap-2 font-semibold">
+        {title}
+        <span className="text-sm font-normal text-zinc-400">{count}</span>
+      </h3>
+      {children}
     </section>
+  );
+}
+
+function OutOfScope({
+  changes,
+  onOpen,
+}: {
+  changes: ReviewReportResult['outOfScope'];
+  onOpen: OpenLines;
+}): ReactElement {
+  return (
+    <ul className={ROWS_CLASS}>
+      {changes.map((change) => (
+        <li key={`${change.path}:${change.hunks.join(',')}`} className="space-y-1 px-3 py-2">
+          <div className="flex items-center gap-2">
+            <span className="flex min-w-0 flex-1">
+              <FileLink path={change.path} onOpen={onOpen} />
+            </span>
+            <Badge tone={LEVEL_TONES[change.risk]}>{change.risk} risk</Badge>
+          </div>
+          <p className="text-zinc-600 dark:text-zinc-400">{change.reason}</p>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function Risks({
+  risks,
+  onOpen,
+}: {
+  risks: ReviewReportResult['risks'];
+  onOpen: OpenLines;
+}): ReactElement {
+  return (
+    <ul className={ROWS_CLASS}>
+      {risks.map((risk) => (
+        <li key={risk.title} className="space-y-1 px-3 py-2">
+          <p className="flex items-center gap-2">
+            <Badge tone={LEVEL_TONES[risk.severity]}>{risk.severity}</Badge>
+            <span className="font-medium">{risk.title}</span>
+          </p>
+          {risk.detail === '' ? null : (
+            <p className="text-zinc-600 dark:text-zinc-400">{risk.detail}</p>
+          )}
+          {risk.paths.length > 0 ? (
+            <p className="flex flex-wrap gap-x-4 gap-y-1">
+              {risk.paths.map((path) => (
+                <FileLink key={path} path={path} onOpen={onOpen} />
+              ))}
+            </p>
+          ) : null}
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -44,43 +107,35 @@ export function ReportSections({
 }): ReactElement {
   return (
     <>
-      <Section id="report-out-of-scope" title="Not in the spec" count={result.outOfScope.length}>
-        {result.outOfScope.map((change) => (
-          <li key={`${change.path}:${change.hunks.join(',')}`} className="flex flex-wrap gap-2">
-            <CodeLink path={change.path} onOpen={onOpen} />
-            <Badge tone={LEVEL_TONES[change.risk]}>{change.risk} risk</Badge>
-            <span>{change.reason}</span>
-          </li>
-        ))}
-      </Section>
-      <Section id="report-risks" title="Risks" count={result.risks.length}>
-        {result.risks.map((risk) => (
-          <li key={risk.title} className="space-y-1">
-            <p className="flex flex-wrap items-center gap-2">
-              <Badge tone={LEVEL_TONES[risk.severity]}>{risk.severity}</Badge>
-              <span className="font-medium">{risk.title}</span>
-              {risk.paths.map((path) => (
-                <CodeLink key={path} path={path} onOpen={onOpen} />
-              ))}
-            </p>
-            {risk.detail === '' ? null : <p>{risk.detail}</p>}
-          </li>
-        ))}
-      </Section>
-      <Section id="report-questions" title="Questions" count={result.questions.length}>
-        {result.questions.map((question) => (
-          <li key={question} className="list-inside list-disc">
-            {question}
-          </li>
-        ))}
-      </Section>
-      <Section id="report-docs" title="Docs to update" count={result.docs.length}>
-        {result.docs.map((doc) => (
-          <li key={doc.path}>
-            <span className="font-mono text-xs">{doc.path}</span>: {doc.note}
-          </li>
-        ))}
-      </Section>
+      <ReportSection
+        id="report-out-of-scope"
+        title="Not in the spec"
+        count={result.outOfScope.length}
+      >
+        <OutOfScope changes={result.outOfScope} onOpen={onOpen} />
+      </ReportSection>
+      <ReportSection id="report-risks" title="Risks" count={result.risks.length}>
+        <Risks risks={result.risks} onOpen={onOpen} />
+      </ReportSection>
+      <ReportSection id="report-questions" title="Questions" count={result.questions.length}>
+        <ol className={`${ROWS_CLASS} list-inside list-decimal`}>
+          {result.questions.map((question) => (
+            <li key={question} className="px-3 py-2">
+              {question}
+            </li>
+          ))}
+        </ol>
+      </ReportSection>
+      <ReportSection id="report-docs" title="Docs to update" count={result.docs.length}>
+        <ul className={ROWS_CLASS}>
+          {result.docs.map((doc) => (
+            <li key={doc.path} className="space-y-1 px-3 py-2">
+              <FileName path={doc.path} />
+              <p className="text-zinc-600 dark:text-zinc-400">{doc.note}</p>
+            </li>
+          ))}
+        </ul>
+      </ReportSection>
     </>
   );
 }

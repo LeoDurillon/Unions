@@ -117,7 +117,11 @@ export function ReportHeader({
           <CopyMarkdown report={report} />
           {report.outdated ? null : <Button onClick={onAgain}>Run again</Button>}
         </div>
-        {result.summary === '' ? null : <p className="text-sm">{result.summary}</p>}
+        {result.summary === '' ? null : (
+          <p className="rounded-lg bg-zinc-100 px-3 py-2 text-sm leading-relaxed dark:bg-zinc-900">
+            {result.summary}
+          </p>
+        )}
         <p className="text-xs text-zinc-500">
           Specs read: {report.specs.map((spec) => spec.label).join(', ')}
           {droppedNote(result.dropped)}

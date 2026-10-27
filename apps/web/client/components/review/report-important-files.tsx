@@ -2,39 +2,47 @@
 import type { ImportantFile } from '@union/core';
 import type { ReactElement } from 'react';
 
-import { CodeLink, type OpenLines } from './report-open';
+import type { Tone } from '../../lib/labels';
+import { Badge } from '../ui';
+import { FileName, FileRef, type OpenLines } from './report-open';
+import { ReportSection, ROWS_CLASS } from './report-sections';
 
-const KIND_LABELS: Record<ImportantFile['kind'], string> = {
-  core: 'Core',
-  risky: 'Risky',
-  entry: 'Entry point',
-  migration: 'Migration',
-  api: 'API',
-  test: 'Test',
+const KINDS: Record<ImportantFile['kind'], { label: string; tone: Tone }> = {
+  core: { label: 'Core', tone: 'blue' },
+  risky: { label: 'Risky', tone: 'amber' },
+  entry: { label: 'Entry point', tone: 'neutral' },
+  migration: { label: 'Migration', tone: 'red' },
+  api: { label: 'API', tone: 'blue' },
+  test: { label: 'Test', tone: 'green' },
 };
 
-function FileItem({ file, onOpen }: { file: ImportantFile; onOpen: OpenLines }): ReactElement {
+function FileItem({
+  file,
+  position,
+  onOpen,
+}: {
+  file: ImportantFile;
+  position: number;
+  onOpen: OpenLines;
+}): ReactElement {
+  const kind = KINDS[file.kind];
   return (
-    <li className="space-y-1">
-      <div className="flex flex-wrap items-center gap-2">
-        {file.unchanged ? (
-          <span className="font-mono text-xs">{file.path}</span>
-        ) : (
-          <CodeLink path={file.path} onOpen={onOpen} />
-        )}
-        <span className="text-xs text-zinc-500">
-          {KIND_LABELS[file.kind]}
-          {file.unchanged ? ' · not changed' : ''}
-        </span>
+    <li className="flex gap-3 px-3 py-2">
+      <span className="w-4 shrink-0 text-right text-zinc-400 tabular-nums">{position}</span>
+      <div className="min-w-0 flex-1 space-y-1">
+        <div className="flex items-center gap-2">
+          <span className="flex min-w-0 flex-1">
+            {file.unchanged ? (
+              <FileName path={file.path} />
+            ) : (
+              <FileRef path={file.path} lines={file.lines} onOpen={onOpen} />
+            )}
+          </span>
+          {file.unchanged ? <span className="text-xs text-zinc-500">not changed</span> : null}
+          <Badge tone={kind.tone}>{kind.label}</Badge>
+        </div>
+        {file.why === '' ? null : <p className="text-zinc-600 dark:text-zinc-400">{file.why}</p>}
       </div>
-      {file.why === '' ? null : <p className="text-sm">{file.why}</p>}
-      {file.lines.length > 0 && !file.unchanged ? (
-        <p className="flex flex-wrap gap-2">
-          {file.lines.map((lines) => (
-            <CodeLink key={lines.start} path={file.path} lines={lines} onOpen={onOpen} />
-          ))}
-        </p>
-      ) : null}
     </li>
   );
 }
@@ -46,17 +54,13 @@ export function ReportImportantFiles({
   files: ImportantFile[];
   onOpen: OpenLines;
 }): ReactElement | null {
-  if (files.length === 0) {
-    return null;
-  }
   return (
-    <section id="report-important-files" className="space-y-2">
-      <h3 className="font-semibold">Read first</h3>
-      <ol className="list-decimal space-y-3 pl-5">
-        {files.map((file) => (
-          <FileItem key={file.path} file={file} onOpen={onOpen} />
+    <ReportSection id="report-important-files" title="Read first" count={files.length}>
+      <ol className={ROWS_CLASS}>
+        {files.map((file, at) => (
+          <FileItem key={file.path} file={file} position={at + 1} onOpen={onOpen} />
         ))}
       </ol>
-    </section>
+    </ReportSection>
   );
 }
