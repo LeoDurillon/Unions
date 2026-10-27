@@ -26,7 +26,7 @@ Changes apply from the next run, including on tickets already running.
 | Implementation | Implementation, Final review                           | Opus, Opus                  |
 | Pull requests  | PR description, Replies to GitHub comments, Split plan | Opus, Opus, Opus            |
 | Branch history | Rebase, Simplify history, Split into a stack           | Implementation's            |
-| Review         | Review comments, Group by spec, Explain                | Opus, Sonnet, Haiku         |
+| Review         | Review comments, Group by spec, Explain, Spec report   | Opus, Sonnet, Haiku, Opus   |
 | Memory         | Lesson writer                                          | Haiku                       |
 
 Rebase, Simplify history and Split into a stack are only prompts: the implementation agent runs them in its own

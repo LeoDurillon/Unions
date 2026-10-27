@@ -49,6 +49,11 @@ export const AGENT_LABELS: Record<BuiltInAgentId, AgentLabel> = {
     description:
       'Explains the lines you select in a review when you click "Explain": how they work, the parts of the specs they implement and the docs they relate to.',
   },
+  review_report: {
+    title: 'Spec report',
+    description:
+      'Writes a report on how a review\'s change meets its specs when you click "Report" on the review page: the files to read first, each requirement done, partial, missing or done differently, what the spec did not ask for, risks and questions.',
+  },
   pr_description: {
     title: 'PR description',
     description:

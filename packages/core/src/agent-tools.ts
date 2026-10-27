@@ -23,6 +23,7 @@ export type BuiltInRunAgent =
   | 'review_comments'
   | 'review_groups'
   | 'review_explain'
+  | 'review_report'
   | 'pr_description'
   | 'pr_replies'
   | 'lesson_writer';
@@ -45,6 +46,7 @@ export const DEFAULT_TOOLS: Record<BuiltInRunAgent, readonly string[]> = {
   review_comments: REVIEW_TOOLS,
   review_groups: REVIEW_TOOLS,
   review_explain: REVIEW_TOOLS,
+  review_report: REVIEW_TOOLS,
   pr_description: REVIEW_TOOLS,
   pr_replies: REVIEW_TOOLS,
   // Its container holds no repository: the feedback is all in its prompt.

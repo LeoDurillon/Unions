@@ -54,21 +54,22 @@ their own prompt from `sharedPrompt` and the agent's prompt, in the modules of t
 
 ## Where each agent runs
 
-| Agent                                                 | Container                           | Session                        | Lessons | Code                                           |
-| ----------------------------------------------------- | ----------------------------------- | ------------------------------ | ------- | ---------------------------------------------- |
-| `intake`, `summary`, `technical`, `test_plan`, custom | ticket's                            | fresh; a revision resumes it   | yes     | `planning-step.ts`, `custom-step.ts`           |
-| `implement`                                           | ticket's                            | fresh; a revision resumes it   | yes     | `implement-loop.ts`                            |
-| `final_review`                                        | ticket's, on the branch             | fresh, told its earlier review | yes     | `review.ts`                                    |
-| `split_plan`                                          | ticket's                            | fresh; a revision resumes it   | yes     | `split-plan-step.ts`                           |
-| `rebase` (and retarget, restack)                      | ticket's                            | implementer's                  | no      | `rebase-agent.ts`                              |
-| `simplify`                                            | ticket's                            | implementer's                  | no      | `simplify-agent.ts`, `simplify-stack-agent.ts` |
-| `split`                                               | ticket's                            | implementer's                  | no      | `split-agent.ts`                               |
-| `pr_description`                                      | ticket's                            | implementer's                  | no      | `pr-description.ts`, `pr-description-run.ts`   |
-| `pr_replies`                                          | ticket's                            | implementer's                  | no      | `pr-reply-suggestions.ts`                      |
-| `review_comments`                                     | ticket's, or `union-a<id>` for a PR | fresh                          | no      | `agent-review.ts`, `agent-review-stack.ts`     |
-| `review_groups`                                       | ticket's, or `union-g<id>` for a PR | fresh                          | no      | `review-grouping.ts`                           |
-| `review_explain`                                      | ticket's, or `union-e<id>` for a PR | a ticket's follow-up resumes   | no      | `review-explain.ts`                            |
-| `lesson_writer`                                       | throwaway, no repository            | fresh                          | no      | `lesson-writer-run.ts`                         |
+| Agent                                                 | Container                           | Session                        | Lessons | Code                                                                 |
+| ----------------------------------------------------- | ----------------------------------- | ------------------------------ | ------- | -------------------------------------------------------------------- |
+| `intake`, `summary`, `technical`, `test_plan`, custom | ticket's                            | fresh; a revision resumes it   | yes     | `planning-step.ts`, `custom-step.ts`                                 |
+| `implement`                                           | ticket's                            | fresh; a revision resumes it   | yes     | `implement-loop.ts`                                                  |
+| `final_review`                                        | ticket's, on the branch             | fresh, told its earlier review | yes     | `review.ts`                                                          |
+| `split_plan`                                          | ticket's                            | fresh; a revision resumes it   | yes     | `split-plan-step.ts`                                                 |
+| `rebase` (and retarget, restack)                      | ticket's                            | implementer's                  | no      | `rebase-agent.ts`                                                    |
+| `simplify`                                            | ticket's                            | implementer's                  | no      | `simplify-agent.ts`, `simplify-stack-agent.ts`                       |
+| `split`                                               | ticket's                            | implementer's                  | no      | `split-agent.ts`                                                     |
+| `pr_description`                                      | ticket's                            | implementer's                  | no      | `pr-description.ts`, `pr-description-run.ts`                         |
+| `pr_replies`                                          | ticket's                            | implementer's                  | no      | `pr-reply-suggestions.ts`                                            |
+| `review_comments`                                     | ticket's, or `union-a<id>` for a PR | fresh                          | no      | `agent-review.ts`, `agent-review-stack.ts`                           |
+| `review_groups`                                       | ticket's, or `union-g<id>` for a PR | fresh                          | no      | `review-grouping.ts`                                                 |
+| `review_explain`                                      | ticket's, or `union-e<id>` for a PR | a ticket's follow-up resumes   | no      | `review-explain.ts`                                                  |
+| `review_report`                                       | ticket's, or `union-s<id>` for a PR | fresh                          | no      | `review-report.ts` (step 2 of [the plan](../plans/review-report.md)) |
+| `lesson_writer`                                       | throwaway, no repository            | fresh                          | no      | `lesson-writer-run.ts`                                               |
 
 Runs without an agent page: the prompt writer (Sonnet, throwaway, `prompt-writer-run.ts`), the connector check
 (`mcp-check.ts`), investigations (`union-i<id>`, or the ticket's container; model and tools from the form, the project's instructions via `projectInstructions`,
@@ -97,6 +98,7 @@ The worker appends every other format after the user's prompt, so an edit cannot
 | `review_groups`         | a final `json` block of groups          | `review-grouping-format.ts`, `review-grouping-result.ts` |
 | `review_explain`        | a final `json` block                    | `review-explain-prompt.ts`, `review-explain-result.ts`   |
 | `pr_replies`            | a final `json` block of replies         | `pr-reply-format.ts`                                     |
+| `review_report`         | a final `json` block: the report        | `review-report-format.ts`, `review-report-result.ts`     |
 | `lesson_writer`         | a JSON array of lessons                 | `lesson-writer.ts` (core)                                |
 | `implement`, `simplify` | a last line `Refused commit: <message>` | `leftovers.ts`                                           |
 

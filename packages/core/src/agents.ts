@@ -40,6 +40,7 @@ export const AGENT_IDS = [
   'review_comments',
   'review_groups',
   'review_explain',
+  'review_report',
   'pr_description',
   'pr_replies',
   'rebase',
@@ -124,6 +125,12 @@ Read the code around them and the callers and callees they rely on, and cite the
 Say which parts of the specifications they implement, quoting the spec's own words; say so plainly when none asks for them.
 Look in the repository's own docs (\`docs/\`, READMEs, AGENTS.md, CLAUDE.md, ADRs) for the ones the lines relate to.
 Do not judge the code's quality and do not change any file: only explain.`,
+  review_report: `Report to the reviewer how the change meets its specifications, before they read the diff.
+Read the specifications first and split them into their requirements (behaviours, acceptance criteria), in their own order and words.
+Then read the diff from the base branch, the surrounding code and the tests. For each requirement, say whether the change does it, partly does it, does it another way, or misses it; show the code and the tests that prove it.
+Name the few files to read first, in the order to read them, and why each matters.
+List what the change does that no requirement asked for, the risks beyond the spec, the questions to ask the author, and the repository's docs the change should have updated.
+Judge against the specs, not taste: no style remarks, no line-by-line review.`,
   pr_description: `Write the pull request's description for a reviewer who has not seen the work.
 Describe the change as the branch has it now: read the diff from the base branch, not only what you remember.
 Say what changed and why, the main changes, and how it was verified. Mention what a reviewer should look at closely.
@@ -174,6 +181,8 @@ const MODEL_BY_AGENT: Record<BuiltInRunAgent, AgentModel> = {
   review_comments: 'opus',
   review_groups: 'sonnet',
   review_explain: 'haiku',
+  // It compares the change with the specs and judges it, unlike the grouping.
+  review_report: 'opus',
   pr_description: MODEL_BY_STEP.implement,
   // It resumes the implementer's session, whose cache is the implementer's model's.
   pr_replies: MODEL_BY_STEP.implement,
@@ -184,6 +193,7 @@ const RUN_AGENTS: readonly BuiltInRunAgent[] = [
   'review_comments',
   'review_groups',
   'review_explain',
+  'review_report',
   'pr_description',
   'pr_replies',
   'split_plan',

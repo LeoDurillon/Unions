@@ -10,7 +10,10 @@ export const UNION_SETTINGS_GROUPS = [
     label: 'Pull requests',
     sections: ['pr_description', 'pr_replies', 'rebase', 'simplify', 'split_plan', 'split'],
   },
-  { label: 'Review', sections: ['review_comments', 'review_groups', 'review_explain'] },
+  {
+    label: 'Review',
+    sections: ['review_comments', 'review_groups', 'review_explain', 'review_report'],
+  },
   { label: 'Memory', sections: ['lesson_writer'] },
   { label: 'Tools', sections: ['tools', 'connectors'] },
   { label: 'GitHub', sections: ['github-app'] },

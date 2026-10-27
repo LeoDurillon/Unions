@@ -2,8 +2,8 @@
 import { index, integer, sqliteTable, text, type AnySQLiteColumn } from 'drizzle-orm/sqlite-core';
 
 import type { AgentReviewSpec } from './agent-review-specs';
-import { now, tickets } from './schema';
-import { currentReviews } from './schema-reviews';
+import { now } from './schema';
+import { reviewOwnerColumns, runStatusColumn } from './schema-review-runs';
 
 /** A part of a spec the agent says the lines implement, quoted from the spec named `source`. */
 export type ExplainedSpec = { source: string; quote: string; how: string };
@@ -31,10 +31,7 @@ export const reviewExplanations = sqliteTable(
   'review_explanations',
   {
     id: integer('id').primaryKey({ autoIncrement: true }),
-    ticketId: integer('ticket_id').references(() => tickets.id, { onDelete: 'cascade' }),
-    reviewId: integer('review_id').references((): AnySQLiteColumn => currentReviews.id, {
-      onDelete: 'cascade',
-    }),
+    ...reviewOwnerColumns,
     parentId: integer('parent_id').references((): AnySQLiteColumn => reviewExplanations.id, {
       onDelete: 'cascade',
     }),
@@ -48,9 +45,7 @@ export const reviewExplanations = sqliteTable(
     specs: text('specs', { mode: 'json' }).$type<AgentReviewSpec[]>().notNull(),
     /** The commit the review showed when asked: another one later makes it outdated. */
     headSha: text('head_sha').notNull(),
-    status: text('status', { enum: ['queued', 'running', 'succeeded', 'failed', 'cancelled'] })
-      .notNull()
-      .default('queued'),
+    status: runStatusColumn,
     result: text('result', { mode: 'json' }).$type<ExplanationResult>(),
     sessionId: text('session_id'),
     error: text('error'),
