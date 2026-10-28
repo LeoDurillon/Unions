@@ -1,8 +1,7 @@
 // The slice a split ticket's review page shows: its tabs, its target, its files and its comments.
-import { useState } from 'react';
-
 import type { CommentView, CommitsResponse, DiffResponse } from '../../src/api-types';
 import { reviewBase, type ReviewTarget } from './review-target';
+import { useReviewSlice } from './review-url';
 import { onSliceTab } from './slice-view';
 import { useCommits, useSliceDiff } from './use-commits';
 
@@ -27,7 +26,7 @@ export function useSliceView(
   files: DiffResponse['files'],
   comments: CommentView[],
 ): SliceView {
-  const [picked, setPicked] = useState<number | null>(null);
+  const [picked, setPicked] = useReviewSlice();
   const base = reviewBase(whole);
   const commits = useCommits(base);
   const slices = whole.kind === 'ticket' ? (commits.data?.slices ?? NO_SLICES) : NO_SLICES;

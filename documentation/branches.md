@@ -106,7 +106,7 @@ Turn on **Split pull requests into stacks** in **Settings → Pull requests** fi
    stack where GitHub supports it.
 
 The stack stays one ticket, with one card and one issue. Approving its final review marks every slice's pull
-request ready. The review page shows each slice as a tab, and **Review with agent** reviews slice by slice. The review page's PR tab follows the slice you pick: it shows that slice's pull request (the top one under **All**), and picking a pull request there shows its slice's diff.
+request ready. The review page shows each slice as a tab, and **Review with agent** reviews slice by slice. The review page's PR tab follows the slice you pick: it shows that slice's pull request (the top one under **All**), and picking a pull request there shows its slice's diff. The browser's Back and Forward buttons move between the slices you looked at, and the page's address keeps the slice, so a reload or a copied link opens on it.
 
 Merge the slices from the bottom, on GitHub. After each merge, Union brings the slices above onto the base (GitHub
 does it itself for a GitHub stack). If that hits a conflict, the step fails without pushing anything; click

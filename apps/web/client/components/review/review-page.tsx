@@ -58,13 +58,26 @@ const DIFF_TAB = { id: 'diff', label: 'Diff' };
 
 const NO_SECTIONS: ReviewSection[] = [];
 
+/** The open tab kept outside the page (in the URL); null is the first. */
+type KeptTab = { id: string | null; set: (id: string) => void };
+
 /** The open tab: `startOn`, else the first section, else the diff; `section` is undefined on the diff. */
 function useSectionTab(
   sections: ReviewSection[],
   startOn: string | undefined,
+  kept: KeptTab | undefined,
 ): { tab: string; setTab: (id: string) => void; section: ReviewSection | undefined } {
-  const [tab, setTab] = useState(startOn ?? sections[0]?.id ?? DIFF_TAB.id);
-  return { tab, setTab, section: sections.find((candidate) => candidate.id === tab) };
+  const first = startOn ?? sections[0]?.id ?? DIFF_TAB.id;
+  const [own, setOwn] = useState(first);
+  const wanted = kept ? kept.id : own;
+  // A tab this page does not have (a stale URL) opens the first.
+  const known = wanted === DIFF_TAB.id || sections.some((candidate) => candidate.id === wanted);
+  const tab = wanted !== null && known ? wanted : first;
+  return {
+    tab,
+    setTab: kept ? kept.set : setOwn,
+    section: sections.find((candidate) => candidate.id === tab),
+  };
 }
 
 function SectionBody({
@@ -84,6 +97,10 @@ function SectionBody({
   );
 }
 
+function contentOf(section: ReviewSection, openDiff: () => void): ReactNode {
+  return typeof section.content === 'function' ? section.content({ openDiff }) : section.content;
+}
+
 type ReviewPageProps = {
   target: ReviewTarget;
   title: string;
@@ -91,6 +108,8 @@ type ReviewPageProps = {
   sections?: ReviewSection[];
   /** The tab to open on (`diff` for the diff), else the first. */
   startOn?: string;
+  /** Where the open tab is kept, when not in the page's own state. */
+  tab?: KeptTab;
   /** The tabs of the stack the pull request is in, under the header. */
   stackTabs?: ReactNode;
   banner?: ReactNode;
@@ -109,13 +128,14 @@ function ReviewPageBody({
   onClose,
   sections = NO_SECTIONS,
   startOn,
+  tab: kept,
   stackTabs,
   banner,
   posting = false,
 }: ReviewPageProps): ReactElement {
   const { diff, comments, slices, error, mutations, copy, empty } = useReviewData(target, posting);
   const [view, setView] = useDiffView();
-  const { tab, setTab, section } = useSectionTab(sections, startOn);
+  const { tab, setTab, section } = useSectionTab(sections, startOn, kept);
   return (
     <ExplainOff off={slices.slice !== null}>
       <SlicePickProvider view={slices}>
@@ -137,13 +157,9 @@ function ReviewPageBody({
           ) : null}
           {section ? (
             <SectionBody banner={banner}>
-              {typeof section.content === 'function'
-                ? section.content({
-                    openDiff: () => {
-                      setTab(DIFF_TAB.id);
-                    },
-                  })
-                : section.content}
+              {contentOf(section, () => {
+                setTab(DIFF_TAB.id);
+              })}
             </SectionBody>
           ) : (
             <DiffArea

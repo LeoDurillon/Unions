@@ -1,5 +1,6 @@
 // The project settings pages by group, and opening or closing them through `?settings=`.
 import { confirmLeave } from './leave-guard';
+import { CLOSE_REVIEW } from './review-url';
 import { readParam, setParams, useUrlParam } from './url-state';
 
 /** The project settings pages, in menu order, by group; the id is what `?settings=` holds. */
@@ -81,7 +82,7 @@ export function openSettings(section: SettingsSection = 'general'): void {
   if (readParam('settings') === section || !confirmLeave()) {
     return;
   }
-  setParams({ settings: section, union: null, page: null, ticket: null, review: null });
+  setParams({ settings: section, union: null, page: null, ticket: null, ...CLOSE_REVIEW });
 }
 
 /** Leaves the settings page, asking first if it has unsaved changes; false when the user stays. */

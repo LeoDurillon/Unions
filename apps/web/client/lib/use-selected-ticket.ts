@@ -2,6 +2,7 @@
 // survive reloads and back/forward.
 import { useCallback } from 'react';
 
+import { CLOSE_REVIEW } from './review-url';
 import { setParams, useUrlParam } from './url-state';
 
 function ticketIdOf(value: string | null): number | null {
@@ -13,7 +14,7 @@ function ticketIdOf(value: string | null): number | null {
 export function useSelectedTicket(): [number | null, (id: number | null) => void] {
   const ticketId = ticketIdOf(useUrlParam('ticket'));
   const select = useCallback((id: number | null): void => {
-    setParams({ ticket: id === null ? null : String(id), review: null });
+    setParams({ ticket: id === null ? null : String(id), ...CLOSE_REVIEW });
   }, []);
   return [ticketId, select];
 }
@@ -22,7 +23,7 @@ export function useSelectedTicket(): [number | null, (id: number | null) => void
 export function useTicketReview(): [boolean, (open: boolean) => void] {
   const open = useUrlParam('review') === '1';
   const set = useCallback((next: boolean): void => {
-    setParams({ review: next ? '1' : null });
+    setParams(next ? { review: '1' } : CLOSE_REVIEW);
   }, []);
   return [open, set];
 }

@@ -1,5 +1,6 @@
 // The Union settings page open in the URL (`?union=implement`), and opening or leaving it.
 import { confirmLeave } from './leave-guard';
+import { CLOSE_REVIEW } from './review-url';
 import { isUnionSection, type UnionSection } from './union-settings-groups';
 import { readParam, setParams, useUrlParam } from './url-state';
 
@@ -16,7 +17,7 @@ export function openUnionSettings(section: UnionSection = 'shared'): void {
   if (readParam('union') === section || !confirmLeave()) {
     return;
   }
-  setParams({ union: section, settings: null, page: null, ticket: null, review: null });
+  setParams({ union: section, settings: null, page: null, ticket: null, ...CLOSE_REVIEW });
 }
 
 /** Leaves the Union settings, asking first if they have unsaved changes; false when the user stays. */

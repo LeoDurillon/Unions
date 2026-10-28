@@ -1,8 +1,9 @@
 // A ticket's review page: the diff, with the ticket's description, preview, pull request and spec
-// report as tabs beside it, as a pull request review has; it opens on the diff.
+// report as tabs beside it, as a pull request review has; it opens on the diff. The tab is kept in the URL.
 import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../src/api-types';
+import { useReviewTab } from '../lib/review-url';
 import { PreviewTab } from './preview-tab';
 import { PullRequestTab } from './pull-request-tab';
 import { ReportTab } from './review/report-tab';
@@ -38,12 +39,14 @@ export function TicketReview({
   onClose: () => void;
 }): ReactElement {
   const { ticket } = detail;
+  const tab = useReviewTab();
   return (
     <ReviewPage
       target={{ kind: 'ticket', ticketId: ticket.id }}
       title={ticket.title}
       sections={sectionsOf(detail)}
       startOn="diff"
+      tab={tab}
       onClose={onClose}
     />
   );

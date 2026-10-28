@@ -17,7 +17,8 @@ Click **Review changes** in a ticket's panel. The page opens on the **Diff** tab
 - Lock files are hidden by default. Hide other paths in the project's **Settings → Review**.
 
 The other tabs show the ticket, its preview, its pull request and its [spec report](#spec-report), so you can check
-the change against the request without leaving the page.
+the change against the request without leaving the page. The browser's Back and Forward buttons move between the
+tabs you opened, and reloading the page keeps the tab you are on.
 
 The diff is a snapshot Union takes after each implementation run, so it shows what the agent left, even before the
 branch is pushed.

@@ -1,9 +1,10 @@
 // The investigation opened from elsewhere (a notification), in the URL (`?investigation=<id>`).
+import { CLOSE_REVIEW } from './review-url';
 import { setParams, useUrlParam } from './url-state';
 
 /** Opens Investigations on the investigation; the ticket panel closes. */
 export function openInvestigation(id: number): void {
-  setParams({ investigation: String(id), investigate: null, ticket: null, review: null });
+  setParams({ investigation: String(id), investigate: null, ticket: null, ...CLOSE_REVIEW });
 }
 
 export function clearOpenedInvestigation(): void {
