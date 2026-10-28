@@ -5,6 +5,7 @@ import { useState, type ReactElement } from 'react';
 import type { PublicProject } from '../../src/api-types';
 import { clearInvestigateTicket, useInvestigateTicket } from '../lib/investigate-ticket';
 import { clearOpenedInvestigation, useOpenedInvestigation } from '../lib/opened-investigation';
+import { useReviewedPullRequest } from '../lib/review-url';
 import { openSettings } from '../lib/settings-sections';
 import { Board, BoardView } from './board';
 import { InvestigationsPage } from './investigations/investigations-page';
@@ -61,6 +62,11 @@ export function Workspace({
   onNewTicket: () => void;
 }): ReactElement {
   const [chosen, setChosen] = useState<ProjectView>('board');
+  // A pull request review in the URL (a reload, Back) is on the Pull requests view, and closing it stays there.
+  const [reviewedPr] = useReviewedPullRequest();
+  if (reviewedPr !== null && chosen !== 'pull-requests') {
+    setChosen('pull-requests');
+  }
   const askedTicket = useInvestigateTicket();
   const openedInvestigation = useOpenedInvestigation();
   const view = askedTicket === null && openedInvestigation === null ? chosen : 'investigations';

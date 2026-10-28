@@ -27,7 +27,7 @@ and linked.
 - [Review a split ticket slice by slice](slice-reviews.md): a slice picker on the ticket's review page, comments
   written on a slice's own diff, and the GitHub import pulling every slice's pull request onto its slice. Built (branch `slice-reviews`).
 - [The review page's slice in the URL](review-slice-url.md): `?slice=2` (then `?tab=`), so Back and Forward move
-  between the slices looked at and a reload keeps one. Built, steps 1 and 2 (branch `review-slice-url`).
+  between the slices looked at and a reload keeps one. Built, steps 1 to 3 (with the pull requests under review, `?review-pr=`).
 - [Read stacks from GitHub](github-stack-reads.md): the Pull requests and Current reviews tabs, the stack agent
   review and the stack's Notion link take stacks from GitHub's stacks API instead of chaining branches. Built
   (branch `github-stack-reads`, 2026-10-21).

@@ -1,7 +1,6 @@
 # Plan: the review page's slice in the URL
 
-Status: steps 1 and 2 built (branch `review-slice-url`, 2026-10-28); step 3 (the pull requests under review in
-the URL) left.
+Status: built, steps 1 to 3 (branches `review-slice-url` and `review-pr-url`, 2026-10-28).
 
 ## Idea
 
@@ -60,7 +59,8 @@ so there the parameter only takes effect once step 3 is done, and the tab state 
    tab that does not exist on this page (a stale `tab=report` on a pull request review) falls back to `startOn`.
 3. Optional, separate: the pull requests under review in the URL (`?review-pr=<n>` in `under-review.tsx` instead
    of `useState`), so the stack tabs of a reviewed stack (`stack-tabs.tsx`, `onPick`) get Back and Forward the same
-   way. It touches the Pull requests page's own navigation, so it gets its own check.
+   way. It touches the Pull requests page's own navigation, so it gets its own check. Built: the parameter also
+   puts the workspace on the Pull requests view, and the review's tab uses `?tab=` as a ticket's does.
 
 Each step updates `documentation/branches.md` (the review page paragraph): Back and Forward move between the
 slices you looked at, and the address of the page keeps the slice.

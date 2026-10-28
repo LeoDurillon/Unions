@@ -142,6 +142,9 @@ newest first, with their author, branches, review state and size. Stacks of pull
 longer in the diff are quoted in the body instead. If GitHub refuses (for example, an approval of your own pull
 request), your drafts stay, with GitHub's reason.
 
+The browser's Back and Forward buttons move between the pull requests and tabs you opened, Back again closes the
+review page, and reloading the page keeps the pull request and tab you are on.
+
 Removing a pull request from Under review deletes its drafts and stops its preview.
 
 The list is read from GitHub when the tab opens, at most once a minute; click **Refresh** to read it again.

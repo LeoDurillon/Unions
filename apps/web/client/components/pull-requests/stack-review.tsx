@@ -4,6 +4,7 @@ import type { ReactElement } from 'react';
 
 import type { CurrentReview } from '../../../src/api-types';
 import { ReviewStackContext } from '../../lib/review-stack';
+import { useReviewTab } from '../../lib/review-url';
 import { ReviewPage } from '../review/review-page';
 import { prReviewSections } from './pr-review-sections';
 import { reviewPreviewSection } from './review-preview-tab';
@@ -46,6 +47,7 @@ export function StackReview({
   onClose: () => void;
 }): ReactElement {
   const target = { kind: 'pull-request', projectId, number: review.prNumber } as const;
+  const tab = useReviewTab();
   const pulls =
     stack.length > 1
       ? stack.map((member) => ({
@@ -72,6 +74,7 @@ export function StackReview({
             />
           ) : undefined
         }
+        tab={tab}
         banner={<PostingBanner review={review} />}
         posting={review.submitStatus === 'sending'}
         onClose={onClose}
