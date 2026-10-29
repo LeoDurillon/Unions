@@ -33,6 +33,11 @@ export async function startReviewPreview(
   return startPreview(deps, owner);
 }
 
+/** Starts a ticket's preview, or a pull request's (checked out first). */
+export function startOwnerPreview(deps: PreviewDeps, owner: WorkspaceOwner): Promise<StartOutcome> {
+  return 'reviewId' in owner ? startReviewPreview(deps, owner.reviewId) : startPreview(deps, owner);
+}
+
 /** Empties the checkout's folder as root: a service may have written files there as root. */
 async function clearRepository(deps: PreviewDeps, workspaceVolume: string): Promise<void> {
   const lines = deps.runtime.runHelper({

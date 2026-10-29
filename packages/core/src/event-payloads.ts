@@ -135,6 +135,8 @@ type PreviewPayloads = {
   preview_output: { lines: string[] };
   preview_idle_stopped: { minutes: number; message: string };
   preview_busy: { message: string };
+  /** Its containers, volumes and built images were removed; it starts again from nothing. */
+  preview_reset: { message: string };
 };
 
 type ReviewPayloads = {

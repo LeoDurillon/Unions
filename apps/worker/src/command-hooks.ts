@@ -37,7 +37,7 @@ export type CommandHooks = {
   /** Posts a reply to a pull request comment; `commandId` ties its event to the command. */
   replyToPrComment: (commandId: number, reply: PrCommentReply) => void;
   /**
-   * Starts, stops, reads the logs of, or generates the compose file of a ticket's or a pull
+   * Starts, stops, resets, reads the logs of, or generates the compose file of a ticket's or a pull
    * request's preview; `update` moves a pull request's checkout to the commit its review reads.
    */
   preview: (owner: WorkspaceOwner, action: PreviewAction) => void;
@@ -47,7 +47,7 @@ export type CommandHooks = {
   updateUnion: (force: boolean) => void;
 };
 
-export type PreviewAction = 'start' | 'stop' | 'logs' | 'generate' | 'e2e' | 'update';
+export type PreviewAction = 'start' | 'stop' | 'reset' | 'logs' | 'generate' | 'e2e' | 'update';
 
 function ignore(): void {
   // Without hooks (tests, tools), container removal and run cancellation are skipped.

@@ -4,6 +4,8 @@ import {
   createDb,
   createTicket,
   migrateDb,
+  queueContainerRun,
+  recordE2e,
   saveGeneratedCompose,
   schema,
   updatePreview,
@@ -260,5 +262,45 @@ test('the e2e tests run on request, never during a run, one request at a time', 
   expect((await call('POST', `${base}/e2e`)).status).toBe(409);
   expect(db.select().from(schema.commands).all()).toMatchObject([
     { type: 'preview_e2e', ticketId },
+  ]);
+});
+
+test('a reset drops a preview there is, never during a step, a test run or a command', async () => {
+  const base = `/api/tickets/${ticketId}/preview`;
+  const view = async (): Promise<PreviewView> =>
+    (await (await call('GET', base)).json()) as PreviewView;
+  await put(SETTINGS);
+  db.update(schema.tickets)
+    .set({ workspaceVolume: 'union-t1-ws' })
+    .where(eq(schema.tickets.id, ticketId))
+    .run();
+  expect((await view()).resetRefusal).toContain('no preview to reset');
+  // The agent's services hold containers without a preview.
+  await put({ ...SETTINGS, agentServices: ['db'] });
+  expect((await view()).resetRefusal).toBeNull();
+  updatePreview(db, { ticketId }, { status: 'stopped' });
+
+  db.update(schema.tickets)
+    .set({ phase: { kind: 'running', step: 'implement' } })
+    .where(eq(schema.tickets.id, ticketId))
+    .run();
+  expect((await view()).resetRefusal).toContain('step is running');
+  expect((await call('POST', `${base}/reset`)).status).toBe(409);
+  db.update(schema.tickets)
+    .set({ phase: { kind: 'done' } })
+    .where(eq(schema.tickets.id, ticketId))
+    .run();
+
+  recordE2e(db, { ticketId }, { e2eStatus: 'running' });
+  expect((await view()).resetRefusal).toContain('end-to-end tests are running');
+  recordE2e(db, { ticketId }, { e2eStatus: 'green' });
+  const run = queueContainerRun(db, { owner: { ticketId }, command: 'npm run seed' });
+  expect((await view()).resetRefusal).toContain('command is running');
+  db.delete(schema.containerRuns).where(eq(schema.containerRuns.id, run.id)).run();
+
+  expect((await call('POST', `${base}/reset`)).status).toBe(202);
+  expect((await call('POST', `${base}/reset`)).status).toBe(409);
+  expect(db.select().from(schema.commands).all()).toMatchObject([
+    { type: 'preview_reset', ticketId },
   ]);
 });

@@ -46,6 +46,8 @@ and linked.
 - [Rebase without an agent](rebase-without-agent.md): the host rebases first; the agent runs only on a conflict or
   when the checks fail after a clean rebase, and the final review runs again only when the agent changed code.
   Built (2026-10-17).
+- [Reset a preview](preview-reset.md): drop a preview's containers, volumes (agent services included) and built
+  images, then start it fresh; the workspace's code is kept. Built, steps 1 to 5 (branch `preview-reset`).
 - [Previews of pull requests under review](review-previews.md): a review's own preview at the reviewed commit
   (`union-r<id>`, `r<id>.localhost`), with its e2e tests and Commands, in a container of its own; no agent, no
   GitHub writes, never the project's secrets for a fork. Built (branch `review-previews`).

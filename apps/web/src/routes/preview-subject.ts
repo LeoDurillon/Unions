@@ -1,5 +1,12 @@
 // What a preview's routes share for a ticket and for a pull request under review: the view, the refusals, the commands.
-import { getPreview, schema, type Db, type PreviewConfig, type WorkspaceOwner } from '@union/core';
+import {
+  getPreview,
+  hasActiveContainerRun,
+  schema,
+  type Db,
+  type PreviewConfig,
+  type WorkspaceOwner,
+} from '@union/core';
 import { and, eq, isNull, sql } from 'drizzle-orm';
 import type { Context } from 'hono';
 
@@ -10,14 +17,16 @@ import { BAD_REQUEST, fail, readObject } from '../http';
 const MAX_COMPOSE_CHARS = 200_000;
 
 /**
- * Whose preview it is, its project, why its workspace cannot run one yet (null: it can), and why
- * its e2e tests must wait (null: they need not).
+ * Whose preview it is, its project, why its workspace cannot run one yet (null: it can), why its
+ * e2e tests must wait, and why its services cannot be removed now (null: they need not, they can).
+ * `services`: it has the agent's services, which may hold containers without a preview.
  */
 export type PreviewSubject = {
   owner: WorkspaceOwner;
   projectId: number;
   noWorkspace: string | null;
   e2eBusy: string | null;
+  servicesBusy: string | null;
 };
 
 export function previewConfig(db: Db, subject: PreviewSubject): PreviewConfig | undefined {
@@ -86,6 +95,22 @@ export function stopRefusal(db: Db, owner: WorkspaceOwner): string | null {
     : null;
 }
 
+/** Why the preview cannot be dropped and started fresh now; null when it can. */
+export function resetRefusal(db: Db, subject: PreviewSubject): string | null {
+  const preview = getPreview(db, subject.owner);
+  if (preview === null && (previewConfig(db, subject)?.agentServices ?? []).length === 0) {
+    return 'There is no preview to reset.';
+  }
+  const busy = subject.servicesBusy ?? previewRefusal(db, subject);
+  if (busy !== null) {
+    return busy;
+  }
+  if (preview?.e2eStatus === 'running') {
+    return 'The end-to-end tests are running against it.';
+  }
+  return hasActiveContainerRun(db, subject.owner) ? 'A command is running in the workspace.' : null;
+}
+
 export function logsRefusal(db: Db, owner: WorkspaceOwner): string | null {
   return getPreview(db, owner)?.status === 'running' ? null : 'The preview is not running.';
 }
@@ -99,6 +124,7 @@ export function previewView(db: Db, subject: PreviewSubject): PreviewView {
     e2eCommand: config?.e2eCommand ?? null,
     e2eRefusal: e2eRefusal(db, subject),
     refusal: previewRefusal(db, subject),
+    resetRefusal: resetRefusal(db, subject),
     pending: pendingPreviewCommand(db, subject.owner),
   };
 }

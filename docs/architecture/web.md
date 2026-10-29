@@ -210,7 +210,7 @@
   user picks or selects another; Copy as comment starts the comment editor with the answer quoted.
 - Previews: project settings → Preview (`routes/preview-settings.ts`, `config.preview`: compose file, service,
   port, plain variables) and the ticket Overview's Preview section (`preview-section.tsx`, `routes/preview.ts`,
-  state in the `previews` table). Start, stop and logs are commands; the worker owns Docker. What a ticket's and a
+  state in the `previews` table). Start, stop, reset and logs are commands; the worker owns Docker. What a ticket's and a
   pull request's preview routes share (the view, the refusals, a pending command, queueing one, the user's compose
   file) is `routes/preview-subject.ts`. A pull request under review's own preview and commands live under
   `…/reviews/:number/preview` and `…/runs` (`routes/review-preview.ts`, `routes/review-runs.ts`): its commands carry

@@ -42,7 +42,7 @@ const PROXY_CHECK_MS = 3000;
 const OUTPUT_BATCH = 25;
 
 /** Sends the output to the ticket's log a batch at a time; a pull request's preview has no log. */
-function outputLog(
+export function outputLog(
   db: Db,
   owner: WorkspaceOwner,
 ): { push: (line: string) => void; flush: () => void } {
@@ -108,10 +108,15 @@ async function serviceLogs(deps: PreviewDeps, owner: WorkspaceOwner): Promise<st
   return output.tail.join('\n');
 }
 
-export async function takeDown(deps: PreviewDeps, owner: WorkspaceOwner): Promise<void> {
+/** Removes the compose project's containers and volumes; `extra` adds to `down` (`--rmi local`). */
+export async function takeDown(
+  deps: PreviewDeps,
+  owner: WorkspaceOwner,
+  extra: string[] = [],
+): Promise<void> {
   await leavePreview(deps.runtime, owner);
   const output = await compose(deps.runtime, deps.settings, {
-    args: ['-p', previewProject(owner), 'down', '-v', '--remove-orphans'],
+    args: ['-p', previewProject(owner), 'down', '-v', '--remove-orphans', ...extra],
   });
   if (output.exitCode !== 0) {
     throw new PreviewError(`docker compose down failed:\n${lastLines(output.tail)}`);

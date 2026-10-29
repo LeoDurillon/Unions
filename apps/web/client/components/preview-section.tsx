@@ -3,12 +3,12 @@
 import type { Preview } from '@union/core';
 import { useState, type ReactElement, type ReactNode } from 'react';
 
-import type { PreviewView } from '../../src/api-types';
 import type { Tone } from '../lib/labels';
 import type { PreviewTarget } from '../lib/preview-target';
 import { openSettings } from '../lib/settings-sections';
 import { usePreview, type PreviewCalls } from '../lib/use-preview';
 import { PreviewComposeDialog } from './preview-compose-dialog';
+import { Controls, type Act } from './preview-controls';
 import { PreviewE2e } from './preview-e2e';
 import { Badge, Button, ErrorText } from './ui';
 
@@ -20,83 +20,6 @@ export const PREVIEW_STATUS: Record<Preview['status'], { label: string; tone: To
   failed: { label: 'Failed', tone: 'red' },
 };
 
-type Calls = PreviewCalls;
-type Act = (call: () => Promise<PreviewView>) => void;
-
-/** Every exposed service's address; previews from before several services were possible have one. */
-function OpenLinks({ preview }: { preview: Preview | null }): ReactElement | null {
-  if (preview?.status !== 'running') {
-    return null;
-  }
-  const urls = preview.urls ?? (preview.url ? [{ service: '', url: preview.url }] : []);
-  return (
-    <ul className="space-y-1 text-sm">
-      {urls.map(({ service, url }) => (
-        <li key={url} className="flex items-baseline gap-2">
-          {service === '' ? null : (
-            <span className="w-24 shrink-0 truncate text-zinc-500">{service}</span>
-          )}
-          <a
-            className="min-w-0 truncate text-indigo-600 hover:underline dark:text-indigo-400"
-            href={url}
-            target="_blank"
-            rel="noreferrer"
-          >
-            {url} ↗
-          </a>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-function Controls({
-  view,
-  calls,
-  act,
-  busy,
-  onCompose,
-}: {
-  view: PreviewView;
-  calls: Calls;
-  act: Act;
-  busy: boolean;
-  onCompose: () => void;
-}): ReactElement {
-  const status = view.preview?.status;
-  const running = status === 'running';
-  return (
-    <div className="space-y-2">
-      <OpenLinks preview={view.preview} />
-      <div className="flex flex-wrap items-center gap-2">
-        <Button
-          variant={running ? 'secondary' : 'primary'}
-          disabled={busy || view.refusal !== null}
-          title={view.refusal ?? undefined}
-          onClick={() => {
-            act(calls.start);
-          }}
-        >
-          {running ? 'Restart' : 'Start preview'}
-        </Button>
-        {running || status === 'failed' ? (
-          <Button
-            disabled={busy}
-            onClick={() => {
-              act(calls.stop);
-            }}
-          >
-            Stop
-          </Button>
-        ) : null}
-        <Button onClick={onCompose}>
-          {view.preview?.override ? 'Compose file (yours)' : 'Compose file'}
-        </Button>
-      </div>
-    </div>
-  );
-}
-
 function LogTail({
   preview,
   calls,
@@ -104,7 +27,7 @@ function LogTail({
   busy,
 }: {
   preview: Preview;
-  calls: Calls;
+  calls: PreviewCalls;
   act: Act;
   busy: boolean;
 }): ReactElement | null {

@@ -14,6 +14,7 @@ function view(values: Partial<PreviewView>): PreviewView {
     e2eCommand: null,
     e2eRefusal: null,
     refusal: null,
+    resetRefusal: null,
     pending: false,
     ...values,
   };

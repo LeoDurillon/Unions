@@ -33,6 +33,7 @@ type Command = typeof schema.commands.$inferSelect;
 const PREVIEW_ACTIONS: Record<string, PreviewAction> = {
   preview_start: 'start',
   preview_stop: 'stop',
+  preview_reset: 'reset',
   preview_logs: 'logs',
   preview_generate: 'generate',
   preview_e2e: 'e2e',

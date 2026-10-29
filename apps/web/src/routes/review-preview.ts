@@ -20,6 +20,7 @@ import {
   pendingPreviewCommand,
   previewConfig,
   previewRefusal,
+  resetRefusal,
   previewView,
   queuePreviewCommand,
   readOwnFile,
@@ -36,6 +37,7 @@ function subjectOf(review: Review): PreviewSubject {
       ? null
       : "Open the pull request's review first: its files are not read yet.",
     e2eBusy: null,
+    servicesBusy: null,
   };
 }
 
@@ -150,6 +152,9 @@ export function reviewPreviewRoutes(db: Db): Hono {
   );
   routes.post('/stop', (c) =>
     command(db, c, 'preview_stop', (r) => stopRefusal(db, { reviewId: r.id })),
+  );
+  routes.post('/reset', (c) =>
+    command(db, c, 'preview_reset', (r) => resetRefusal(db, subjectOf(r))),
   );
   routes.post('/e2e', (c) => command(db, c, 'preview_e2e', (r) => e2eRefusal(db, subjectOf(r))));
   routes.post('/generate', (c) =>

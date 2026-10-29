@@ -1,4 +1,4 @@
-// `/api/tickets/:id/preview`: the ticket's preview and the commands that start, stop and read it
+// `/api/tickets/:id/preview`: the ticket's preview and the commands that start, stop, reset and read it
 // (the worker runs them: the web never touches Docker).
 import { getTicket, setComposeOverride, type Db, type Ticket } from '@union/core';
 import { Hono, type Context } from 'hono';
@@ -12,6 +12,7 @@ import {
   previewView,
   queuePreviewCommand,
   readOwnFile,
+  resetRefusal,
   stopRefusal,
   type PreviewSubject,
 } from './preview-subject';
@@ -35,6 +36,10 @@ function subjectOf(ticket: Ticket): PreviewSubject {
     e2eBusy:
       ticket.phase.kind === 'running'
         ? 'Wait for the current run to finish: the tests run in the same container.'
+        : null,
+    servicesBusy:
+      ticket.phase.kind === 'running'
+        ? 'A step is running on the ticket: its services are in use until it ends.'
         : null,
   };
 }
@@ -66,7 +71,7 @@ async function saveOwnFile(db: Db, c: Context): Promise<Response> {
 }
 
 /**
- * `/api/tickets/:id/preview`: the ticket's preview and the commands that start, stop and read it
+ * `/api/tickets/:id/preview`: the ticket's preview and the commands that start, stop, reset and read it
  * (the worker runs them: the web never touches Docker).
  */
 export function previewRoutes(db: Db): Hono {
@@ -74,6 +79,7 @@ export function previewRoutes(db: Db): Hono {
   routes.get('/', (c) => c.json(view(db, loadTicket(db, c))));
   routes.post('/start', (c) => command(db, c, 'preview_start', (s) => previewRefusal(db, s)));
   routes.post('/stop', (c) => command(db, c, 'preview_stop', (s) => stopRefusal(db, s.owner)));
+  routes.post('/reset', (c) => command(db, c, 'preview_reset', (s) => resetRefusal(db, s)));
   routes.post('/e2e', (c) => command(db, c, 'preview_e2e', (s) => e2eRefusal(db, s)));
   routes.post('/generate', (c) => command(db, c, 'preview_generate', (s) => previewRefusal(db, s)));
   routes.put('/compose', (c) => saveOwnFile(db, c));

@@ -13,16 +13,20 @@ import { runRequestedE2e } from '../e2e-request';
 import { previewSettings } from './compose';
 import { generatePreviewFile } from './compose-file';
 import { IdleWatcher, readProxyMetrics } from './idle';
-import { startReviewPreview, updateReviewPreview } from './review-preview';
-import { refreshPreviewLogs, startPreview, stopPreview, takeDown, type PreviewDeps } from './run';
+import { resetPreview } from './reset';
+import { startOwnerPreview, updateReviewPreview } from './review-preview';
+import { refreshPreviewLogs, stopPreview, takeDown, type PreviewDeps } from './run';
 
 type Action = (deps: PreviewDeps, owner: WorkspaceOwner) => Promise<unknown>;
 
-/** A pull request's start checks it out first; only a pull request's checkout can be updated. */
+/**
+ * A pull request's start checks it out first; only a pull request's checkout can be updated. A reset
+ * drops everything the preview holds and starts it again.
+ */
 const ACTIONS: Record<Exclude<PreviewAction, 'e2e'>, Action> = {
-  start: (deps, owner) =>
-    'reviewId' in owner ? startReviewPreview(deps, owner.reviewId) : startPreview(deps, owner),
+  start: startOwnerPreview,
   stop: stopPreview,
+  reset: resetPreview,
   logs: refreshPreviewLogs,
   generate: generatePreviewFile,
   update: (deps, owner) =>

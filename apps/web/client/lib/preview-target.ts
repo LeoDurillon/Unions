@@ -34,6 +34,7 @@ export function previewCalls(target: PreviewTarget): {
   get: () => Promise<PreviewView>;
   start: () => Promise<PreviewView>;
   stop: () => Promise<PreviewView>;
+  reset: () => Promise<PreviewView>;
   logs: () => Promise<PreviewView>;
   e2e: () => Promise<PreviewView>;
   generate: () => Promise<PreviewView>;
@@ -44,6 +45,7 @@ export function previewCalls(target: PreviewTarget): {
     get: () => request('GET', path),
     start: () => request('POST', `${path}/start`),
     stop: () => request('POST', `${path}/stop`),
+    reset: () => request('POST', `${path}/reset`),
     logs: () => request('POST', `${path}/logs`),
     e2e: () => request('POST', `${path}/e2e`),
     generate: () => request('POST', `${path}/generate`),

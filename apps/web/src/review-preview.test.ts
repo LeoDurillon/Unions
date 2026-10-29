@@ -121,6 +121,15 @@ test("a review's preview starts once at a time, as a command carrying the review
   expect((await send('POST', '/preview/stop')).status).toBe(409);
 });
 
+test("a review's preview resets once it has one, as a command carrying the review", async () => {
+  expect((await previewView()).resetRefusal).toContain('no preview to reset');
+  updatePreview(db, { reviewId }, { status: 'failed', error: 'migration failed' });
+  expect((await previewView()).resetRefusal).toBeNull();
+  expect((await send('POST', '/preview/reset')).status).toBe(202);
+  expect(commands()).toEqual([{ type: 'preview_reset', ticketId: null, payload: { reviewId } }]);
+  expect((await send('POST', '/preview/reset')).status).toBe(409);
+});
+
 test('a review whose files are not read yet cannot start; a fork never gets the secrets', async () => {
   setReview({ headSha: null, fromFork: true, checkoutSha: 'aaa1111', checkoutInRepo: true });
   const shown = await previewView();

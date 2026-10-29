@@ -36,6 +36,16 @@ with **Stop**.
   it off), except while the agent works on the ticket or its end-to-end tests run.
 - At most 3 previews run at once (`UNION_MAX_PREVIEWS`); a project can allow fewer.
 
+### Start over with a fresh preview
+
+**Restart** updates a running preview in place: its data, such as its database, is kept. When that data is broken (a
+failed migration, a bad seed), click **Reset preview** and confirm. Union removes the preview's containers, its
+volumes (its databases, and those of the agent's services) and the images it built, builds them again from scratch,
+and starts the preview. The code in the ticket's workspace is kept. The ticket's Log says when a reset happened.
+
+You can't reset while the agent works on the ticket (it uses the same services), while the end-to-end tests run, or
+while a command runs. A pull request's preview has the same button.
+
 Union checks the Compose file before it runs anything and refuses settings that would reach outside the preview:
 privileged containers, the host network, the Docker socket, mounts outside the repository, and external volumes.
 

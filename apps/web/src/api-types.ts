@@ -385,6 +385,8 @@ export type PreviewView = {
   e2eRefusal: string | null;
   /** Why it cannot start now; null when it can. */
   refusal: string | null;
+  /** Why it cannot be dropped (containers, volumes, built images) and started fresh now. */
+  resetRefusal: string | null;
   /** A command of it waits for the worker: a page without events polls until it is handled. */
   pending: boolean;
 };

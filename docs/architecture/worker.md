@@ -216,7 +216,9 @@
   `custom-step.ts` gives a custom step placed after the implementation the branch and how to read the diff.
   `approved.ts` passes the approved outputs in the ticket's flow order, a custom step's under its agent's name.
 - `preview/`: ticket previews (phase 1 of `docs/plans/preview-environments.md`). `PreviewManager` runs the
-  `preview_start`/`preview_stop`/`preview_logs` commands, one at a time per ticket. Every `docker compose` call runs
+  `preview_start`/`preview_stop`/`preview_reset`/`preview_logs` commands, one at a time per ticket. `reset.ts`
+  takes the project down with `--rmi local`, logs `preview_reset`, builds with `--no-cache` and starts it again;
+  during a step it emits `preview_busy` and touches nothing. Every `docker compose` call runs
   in a throwaway helper container (`runtime.runHelper`, `docker:*-cli` image) holding the Docker socket and the
   ticket's workspace volume; the agent's container never holds the socket. The repository's compose file is
   resolved (`compose config --format json`), checked (`composeProblems` in `@union/core`: no privileged or
