@@ -48,7 +48,8 @@ let network: string[];
 
 /** The compose helper: `config` prints the resolved file, `up` and `down` succeed unless told not to. */
 const runtime = {
-  networkExists: () => Promise.resolve(true),
+  // Compose made no proxy network here: its joins are tested in `proxy-network.test.ts`.
+  networkExists: (name: string) => Promise.resolve(!name.endsWith('-proxy')),
   projectNetworks: (project: string) => Promise.resolve([`${project}_default`, 'union-preview']),
   connectNetwork: (name: string, container: string) => {
     network.push(`join ${name} ${container}`);

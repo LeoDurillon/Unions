@@ -26,7 +26,10 @@ let projectId: number;
 /** Compose resolves a one-service file and starts it; the service answers at once. */
 const runtime = {
   networkExists: () => Promise.resolve(true),
+  serviceContainers: () => Promise.resolve(['union-next-proxy-1']),
   projectNetworks: () => Promise.resolve([]),
+  connectNetwork: () => Promise.resolve(),
+  disconnectNetwork: () => Promise.resolve(),
   async *runHelper(spec: HelperSpec): AsyncGenerator<string, ExecResult> {
     await Promise.resolve();
     if (spec.command.join(' ').includes(' config ')) {

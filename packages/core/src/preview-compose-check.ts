@@ -16,7 +16,7 @@ export const PREVIEW_ENV_KEY = 'union_env';
 export const PREVIEW_ENV_FILE = '/union/preview.env';
 /** Where the compose helper gets the settings' compose additions (`composeAdditions`). */
 export const PREVIEW_ADDITIONS_FILE = '/union/compose.additions.yml';
-/** The Docker network Traefik routes previews on (created by Union's compose stack). */
+/** The proxy's home network (created by Union's compose stack): no preview's service joins it. */
 export const PREVIEW_NETWORK = 'union-preview';
 
 /** A file Union wrote (or the user edited from it) may use Union's keys, pointing at these. */
@@ -193,12 +193,8 @@ function volumeProblems(config: ComposeJson, union?: UnionKeys): string[] {
   });
 }
 
-function networkProblems(config: ComposeJson, union?: UnionKeys): string[] {
+function networkProblems(config: ComposeJson): string[] {
   return entries(config.networks)
-    .filter(
-      ([key, network]) =>
-        !(union && key === PREVIEW_NETWORK_KEY && network.name === PREVIEW_NETWORK),
-    )
     .filter(([, network]) => network.external === true || network.driver === 'host')
     .map(([key]) => `network "${key}" is external: previews would share it`);
 }
@@ -226,7 +222,7 @@ function reservedProblems(config: ComposeJson): string[] {
 function topLevelProblems(config: ComposeJson, union?: UnionKeys): string[] {
   return [
     ...volumeProblems(config, union),
-    ...networkProblems(config, union),
+    ...networkProblems(config),
     ...fileProblems(config),
     // Checked above when the file is Union's: they must point at this ticket's volume and network.
     ...(union ? [] : reservedProblems(config)),

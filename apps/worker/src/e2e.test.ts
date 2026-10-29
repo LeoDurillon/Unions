@@ -55,6 +55,7 @@ const runtime = {
   },
   writeFile: () => Promise.resolve(),
   networkExists: () => Promise.resolve(true),
+  serviceContainers: () => Promise.resolve(['union-next-proxy-1']),
   projectNetworks: () => Promise.resolve(['union-t1_default']),
   connectNetwork: () => Promise.resolve(),
   disconnectNetwork: () => Promise.resolve(),

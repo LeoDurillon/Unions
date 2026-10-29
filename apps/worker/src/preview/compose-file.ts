@@ -11,6 +11,7 @@ import {
   composeServices,
   tidyCompose,
   withoutProfiles,
+  withProxyNetwork,
   withWorkspaceMounts,
   type ComposeJson,
   type WorkspaceOwner,
@@ -193,7 +194,10 @@ async function ownFile(deps: PreviewDeps, target: Target, yaml: string): Promise
   // Its secrets are `${NAME}` references: compose fills them in here.
   const resolved = await resolve(deps, target, { yaml }, configEnvironment(target, false));
   const file = {
-    ...withoutProfiles(withWorkspaceMounts(resolved, target.workspaceVolume)),
+    ...withProxyNetwork(
+      withoutProfiles(withWorkspaceMounts(resolved, target.workspaceVolume)),
+      target.project,
+    ),
     name: target.project,
   };
   refuse(

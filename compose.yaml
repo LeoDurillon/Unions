@@ -92,7 +92,8 @@ services:
         condition: service_completed_successfully
 
   # Serves ticket previews: each preview's exposed service is labelled with its host
-  # (t<ticket>.union.localhost) and joins the `union-preview` network, where this proxy finds it.
+  # (t<ticket>.union.localhost) and joins its preview's own network (union-t<ticket>-proxy), which
+  # the worker connects this proxy to: no preview shares a network with another.
   proxy:
     image: traefik:v3.6.2
     # Like web and worker: back after Docker or WSL restarts, or previews never answer.

@@ -64,6 +64,7 @@ export * from './pr-descriptions';
 export * from './pr-description-outdated';
 export * from './preview-compose';
 export * from './preview-config';
+export * from './preview-proxy-network';
 export * from './preview-screenshots';
 export * from './preview-secrets';
 export * from './project-files';

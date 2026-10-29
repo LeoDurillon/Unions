@@ -67,6 +67,8 @@ export type ContainerRuntime = {
   networkExists(name: string): Promise<boolean>;
   /** The networks of a compose project (by its label), for an outside container to join. */
   projectNetworks(project: string): Promise<string[]>;
+  /** The containers of a compose service (`proxy`) on a network, by name. */
+  serviceContainers(network: string, service: string): Promise<string[]>;
   /** Joins or leaves a network; already joined or already left is not an error. */
   connectNetwork(network: string, container: string): Promise<void>;
   disconnectNetwork(network: string, container: string): Promise<void>;

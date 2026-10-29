@@ -4,7 +4,8 @@ Built (phases 1 to 4). Full design and what was built: [`docs/plans/preview-envi
 
 - A ticket's branch runs from the repository's own Docker Compose file (path set per project), so apps with a
   database or a queue work. Each ticket is its own compose project (`union-t<id>`): its own containers, network and
-  volumes, no published host ports.
+  volumes, no published host ports. The proxy reaches its exposed services on a network of that preview alone
+  (`union-t<id>-proxy`), so a service name (`s3`, `db`) never answers from another preview.
 - It runs from the ticket's workspace volume (the agent's live working copy), through a short-lived helper
   container that holds the Docker socket; the agent's container never does. The worker resolves the file with
   `docker compose config`, refuses dangerous settings (privileged, host network, Docker socket, mounts leaving the

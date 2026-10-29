@@ -132,7 +132,7 @@ test("the preview's file: its own project, no fixed names or host ports, mounts 
   expect(web.labels).toEqual({
     team: 'front',
     'traefik.enable': 'true',
-    'traefik.docker.network': 'union-preview',
+    'traefik.docker.network': 'union-t12-proxy',
     'traefik.http.routers.union-t12-web.rule': 'Host(`t12.union.localhost`)',
     'traefik.http.routers.union-t12-web.entrypoints': 'web',
     'traefik.http.services.union-t12-web.loadbalancer.server.port': '80',
@@ -145,9 +145,8 @@ test("the preview's file: its own project, no fixed names or host ports, mounts 
   expect(file.volumes).toMatchObject({
     union_workspace: { external: true, name: 'union-t12-ws' },
   });
-  expect(file.networks).toMatchObject({
-    union_preview: { external: true, name: 'union-preview' },
-  });
+  // Its own proxy network, made by its compose project: another preview's `web` is never on it.
+  expect(file.networks).toMatchObject({ union_preview: { name: 'union-t12-proxy' } });
 });
 
 test('the exposed service must exist and have its own network', () => {

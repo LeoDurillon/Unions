@@ -37,6 +37,7 @@ let buildExit: number;
 /** Compose answers `config` with the resolved file; `build` exits with `buildExit`, the rest 0. */
 const runtime = {
   networkExists: () => Promise.resolve(true),
+  serviceContainers: () => Promise.resolve(['union-next-proxy-1']),
   projectNetworks: (project: string) => Promise.resolve([`${project}_default`]),
   connectNetwork: () => Promise.resolve(),
   disconnectNetwork: () => Promise.resolve(),

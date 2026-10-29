@@ -2,7 +2,7 @@
 // the ticket's own compose project, no fixed container names or host ports (the proxy routes the
 // traffic), the repository's mounts taken from the workspace volume, the project's variables in
 // every service (and as a file in one, if asked), and the exposed services labelled for Traefik on
-// the preview network.
+// the preview's own proxy network.
 import path from 'node:path';
 
 import { PUBLISHED_PORTS_KEY } from './agent-environment';
@@ -10,12 +10,12 @@ import {
   isRecord,
   PREVIEW_ENV_FILE,
   PREVIEW_ENV_KEY,
-  PREVIEW_NETWORK,
   PREVIEW_NETWORK_KEY,
   PREVIEW_REPO_DIR,
   PREVIEW_WORKSPACE_KEY,
   type ComposeJson,
 } from './preview-compose-check';
+import { previewProxyNetwork } from './preview-proxy-network';
 
 export { PREVIEW_ENV_FILE, PREVIEW_NETWORK } from './preview-compose-check';
 
@@ -68,7 +68,7 @@ function routing(project: string, exposed: ExposedService): Record<string, strin
   const router = `${project}-${exposed.service}`;
   return {
     'traefik.enable': 'true',
-    'traefik.docker.network': PREVIEW_NETWORK,
+    'traefik.docker.network': previewProxyNetwork(project),
     [`traefik.http.routers.${router}.rule`]: `Host(\`${exposed.host}\`)`,
     [`traefik.http.routers.${router}.entrypoints`]: 'web',
     [`traefik.http.services.${router}.loadbalancer.server.port`]: String(exposed.port),
@@ -146,7 +146,7 @@ export function withWorkspaceMounts(config: ComposeJson, workspaceVolume: string
  * the ticket's own compose project, no fixed container names or host ports (the proxy routes the
  * traffic), the repository's mounts taken from the workspace volume, the project's variables in every
  * service (and as a file in one, if asked), and the exposed services labelled for Traefik on the
- * preview network.
+ * preview's own proxy network.
  */
 export function previewCompose(config: ComposeJson, target: PreviewTarget): ComposeJson {
   const services = isRecord(config.services) ? config.services : {};
@@ -161,7 +161,7 @@ export function previewCompose(config: ComposeJson, target: PreviewTarget): Comp
     ),
     networks: {
       ...(isRecord(config.networks) ? config.networks : {}),
-      [PREVIEW_NETWORK_KEY]: { external: true, name: PREVIEW_NETWORK },
+      [PREVIEW_NETWORK_KEY]: { name: previewProxyNetwork(target.project) },
     },
     ...(target.envFile
       ? {

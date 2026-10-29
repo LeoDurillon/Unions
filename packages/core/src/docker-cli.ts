@@ -212,6 +212,19 @@ export class DockerCli implements ContainerRuntime {
     return listed.split('\n').filter((line) => line.trim() !== '');
   }
 
+  async serviceContainers(network: string, service: string): Promise<string[]> {
+    const listed = await ok([
+      'ps',
+      '--filter',
+      `network=${network}`,
+      '--filter',
+      `label=com.docker.compose.service=${service}`,
+      '--format',
+      '{{.Names}}',
+    ]);
+    return listed.split('\n').filter((line) => line.trim() !== '');
+  }
+
   async connectNetwork(network: string, container: string): Promise<void> {
     const joined = await run(['network', 'connect', network, container]);
     if (joined.code !== 0 && !/already exists|already attached/iu.test(joined.stderr)) {

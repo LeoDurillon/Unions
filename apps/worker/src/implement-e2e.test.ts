@@ -28,7 +28,10 @@ let e2eRuns: number;
 /** Checks pass; the e2e command fails on its first run only; compose and the proxy just work. */
 const runtime = {
   networkExists: () => Promise.resolve(true),
+  serviceContainers: () => Promise.resolve(['union-next-proxy-1']),
   projectNetworks: () => Promise.resolve([]),
+  connectNetwork: () => Promise.resolve(),
+  disconnectNetwork: () => Promise.resolve(),
   async *runHelper(spec: HelperSpec): AsyncGenerator<string, ExecResult> {
     await Promise.resolve();
     if (spec.command.includes('config')) {

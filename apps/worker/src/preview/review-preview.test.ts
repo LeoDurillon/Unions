@@ -27,7 +27,10 @@ let calls: string[];
 
 const runtime = {
   networkExists: () => Promise.resolve(true),
+  serviceContainers: () => Promise.resolve(['union-next-proxy-1']),
   projectNetworks: () => Promise.resolve([]),
+  connectNetwork: () => Promise.resolve(),
+  disconnectNetwork: () => Promise.resolve(),
   create: (spec: { name: string }) => {
     calls.push(`create ${spec.name}`);
     return Promise.resolve();

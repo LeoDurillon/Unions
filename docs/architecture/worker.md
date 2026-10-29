@@ -228,8 +228,12 @@
   host-namespace settings, no mounts or builds outside `/workspace/repo`, no external volumes or networks), and
   rewritten (`previewCompose`: project `union-t<id>`, no `container_name` or host ports, repository mounts become
   workspace-volume sub-path mounts, project variables in every service, Traefik labels on the exposed service),
-  then given to `up` on stdin. The `proxy` service of `compose.yaml` (Traefik, network `union-preview`) serves it at
-  `http://t<id>.union.localhost:8080`. Previews outlive worker restarts; a ticket's removal takes its preview down before
+  then given to `up` on stdin. The `proxy` service of `compose.yaml` (Traefik, home network `union-preview`) serves it at
+  `http://t<id>.union.localhost:8080`. The exposed services join the preview's own proxy network
+  (`union-t<id>-proxy`, made by its compose project, `previewProxyNetwork`), never a network other previews join:
+  there a service name (`s3`) would answer from every preview that has one. `proxy-network.ts` connects the proxy
+  container (the `proxy` service on `union-preview`, `runtime.serviceContainers`) to it after `up` and disconnects it
+  before `down`. An edited file written with the old shared network is moved onto it (`withProxyNetwork`). Previews outlive worker restarts; a ticket's removal takes its preview down before
   its volumes (`janitor.ts`). `compose-file.ts` keeps the generated file (`previews.compose_yaml`, `preview_generate`
   generates it alone) and runs the ticket's own edited file instead when there is one (`previews.override`, checked
   with `composeProblems(file, { workspaceVolume })`, project name enforced). Profiles: `catalog.ts` passes the
