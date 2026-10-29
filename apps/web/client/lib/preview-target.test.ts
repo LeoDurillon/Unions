@@ -13,6 +13,7 @@ function view(values: Partial<PreviewView>): PreviewView {
     composeFile: 'compose.yaml',
     e2eCommand: null,
     e2eRefusal: null,
+    e2eStale: null,
     refusal: null,
     resetRefusal: null,
     pending: false,

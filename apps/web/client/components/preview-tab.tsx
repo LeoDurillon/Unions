@@ -17,7 +17,7 @@ export function PreviewTab({ detail }: { detail: TicketDetail }): ReactElement {
   const { ticket, project } = detail;
   const target = { kind: 'ticket', ticketId: ticket.id } as const;
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <PreviewSection target={target} canRevise={canRevise(ticket.phase)} />
       <ContainerCommands
         target={target}

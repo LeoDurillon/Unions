@@ -56,6 +56,8 @@ function containerOwner(name: string): WorkspaceOwner | null {
 export class PreviewManager {
   /** By owner key (`t12`, `r3`). */
   private readonly busy = new Map<string, Promise<void>>();
+  /** The starts in progress, by owner key: a stop asked meanwhile aborts them. */
+  private readonly starting = new Map<string, AbortController>();
 
   constructor(private readonly deps: PreviewDeps) {}
 
@@ -71,7 +73,30 @@ export class PreviewManager {
       this.e2e(owner);
       return;
     }
+    if (action === 'start') {
+      this.start(owner, options);
+      return;
+    }
+    const start = this.starting.get(ownerKey(owner));
+    if (action === 'stop' && start !== undefined) {
+      start.abort();
+      return;
+    }
     this.track(owner, () => ACTIONS[action](this.deps, owner, options));
+  }
+
+  /** A start a stop can abort: what it brought up is taken down and the preview is stopped. */
+  private start(owner: WorkspaceOwner, options: PreviewOptions): void {
+    const key = ownerKey(owner);
+    const controller = new AbortController();
+    this.track(owner, async () => {
+      this.starting.set(key, controller);
+      try {
+        await ACTIONS.start({ ...this.deps, signal: controller.signal }, owner, options);
+      } finally {
+        this.starting.delete(key);
+      }
+    });
   }
 
   private e2eRefusal(): string | null {

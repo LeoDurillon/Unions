@@ -1,106 +1,34 @@
 // Starts and stops a preview from its owner's workspace, and reads the services' last output.
 import {
   activePreviews,
-  emitEvent,
   getPreview,
   getTicket,
   PREVIEW_NETWORK,
   previewProject,
   updatePreview,
-  workspaceSubpaths,
   ownerKey,
   previewOwner,
   ticketOwnerId,
-  type ComposeJson,
-  type Db,
   type WorkspaceOwner,
 } from '@union/core';
 
 import { syncProjectFiles } from '../project-files-sync';
-import { compose, createMountFolders } from './compose';
+import { compose } from './compose';
 import { fileToRun } from './compose-file';
+import { up } from './compose-up';
 import { findDataFolders } from './data-folders';
 import { routeToPreview } from './host-routes';
 import { joinPreview, joinProxy, leavePreview } from './network';
 import { proxyAnswers, waitReady } from './ready';
-import {
-  lastLines,
-  loadTarget,
-  PreviewError,
-  projectDirectory,
-  type PreviewDeps,
-  type Target,
-} from './target';
-import { unionEnvFile } from './variables';
+import { lastLines, loadTarget, PreviewError, type PreviewDeps, type Target } from './target';
 
 export type { PreviewDeps } from './target';
 
 const READY_TIMEOUT_MS = 180_000;
+const CANCELLED = 'The start was cancelled';
 const READY_INTERVAL_MS = 2000;
 /** How long the proxy gets to answer before a start, when it runs. */
 const PROXY_CHECK_MS = 3000;
-/** Output lines per `preview_output` event: a build prints thousands. */
-const OUTPUT_BATCH = 25;
-
-/** Sends the output to the ticket's log a batch at a time; a pull request's preview has no log. */
-export function outputLog(
-  db: Db,
-  owner: WorkspaceOwner,
-): { push: (line: string) => void; flush: () => void } {
-  const ticketId = ticketOwnerId(owner);
-  let lines: string[] = [];
-  const flush = (): void => {
-    if (ticketId !== null && lines.length > 0) {
-      emitEvent(db, { type: 'preview_output', ticketId, payload: { lines } });
-      lines = [];
-    }
-  };
-  return {
-    push: (line) => {
-      if (ticketId === null) {
-        return;
-      }
-      lines.push(line);
-      if (lines.length >= OUTPUT_BATCH) {
-        flush();
-      }
-    },
-    flush,
-  };
-}
-
-async function up(deps: PreviewDeps, target: Target, file: ComposeJson): Promise<void> {
-  await createMountFolders(
-    deps.runtime,
-    deps.settings,
-    target.workspaceVolume,
-    workspaceSubpaths(file),
-  );
-  const log = outputLog(deps.db, target.owner);
-  const output = await compose(deps.runtime, deps.settings, {
-    args: [
-      '-p',
-      target.project,
-      '--project-directory',
-      projectDirectory(target),
-      '-f',
-      '-',
-      'up',
-      '-d',
-      '--build',
-      '--remove-orphans',
-    ],
-    workspaceVolume: target.workspaceVolume,
-    stdin: JSON.stringify(file),
-    files: unionEnvFile(target),
-    onLine: log.push,
-  });
-  log.flush();
-  if (output.exitCode !== 0) {
-    throw new PreviewError(`docker compose up failed:\n${lastLines(output.tail)}`);
-  }
-}
-
 /** The last lines the services printed; empty when they cannot be read. */
 async function serviceLogs(deps: PreviewDeps, owner: WorkspaceOwner): Promise<string> {
   const output = await compose(deps.runtime, deps.settings, {
@@ -179,9 +107,13 @@ async function startTarget(deps: PreviewDeps, target: Target): Promise<void> {
         timeoutMs: deps.readyTimeoutMs ?? READY_TIMEOUT_MS,
         intervalMs: deps.readyIntervalMs ?? READY_INTERVAL_MS,
         fetchFn: deps.fetchFn,
+        signal: deps.signal,
       }),
     ),
   );
+  if (deps.signal?.aborted === true) {
+    throw new PreviewError(CANCELLED);
+  }
   const silent = target.exposed.filter((_exposed, index) => answered[index] !== true);
   if (silent.length > 0) {
     throw new PreviewError(
@@ -230,9 +162,10 @@ export async function startPreview(
   } catch (error) {
     const logTail = loaded ? await cleanUp(deps, owner) : '';
     const message = error instanceof Error ? error.message : String(error);
+    const cancelled = deps.signal?.aborted === true;
     updatePreview(deps.db, owner, {
-      status: 'failed',
-      error: message,
+      status: cancelled ? 'stopped' : 'failed',
+      error: cancelled ? null : message,
       logTail: logTail === '' ? null : logTail,
       logAt: Date.now(),
     });

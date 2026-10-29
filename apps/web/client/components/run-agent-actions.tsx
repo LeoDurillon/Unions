@@ -5,8 +5,12 @@ import { useState, type ReactElement } from 'react';
 
 import { Badge, Button, inputClass } from './ui';
 
-/** Where the output stands with the implementer. */
-function AgentState({ forAgent }: { forAgent: ContainerRun['forAgent'] }): ReactElement | null {
+/** Where the output stands with the implementer: on its run's line. */
+export function AgentState({
+  forAgent,
+}: {
+  forAgent: ContainerRun['forAgent'];
+}): ReactElement | null {
   if (forAgent === 'next_run') {
     return <Badge tone="amber">For the agent&apos;s next run</Badge>;
   }
@@ -77,9 +81,9 @@ export function RunAgentActions({
   return (
     <div className="space-y-1">
       <div className="flex flex-wrap items-center gap-2">
-        <AgentState forAgent={run.forAgent} />
         {run.forAgent === 'sent' ? null : (
           <Button
+            size="sm"
             disabled={pending}
             onClick={() => {
               onKeep(!kept);
@@ -90,6 +94,7 @@ export function RunAgentActions({
         )}
         {canSend && run.forAgent !== 'sent' && !sending ? (
           <Button
+            size="sm"
             disabled={pending}
             onClick={() => {
               setSending(true);

@@ -19,6 +19,7 @@ export function AddRunToReview({
   return (
     <div className="flex flex-wrap items-center gap-2">
       <Button
+        size="sm"
         disabled={add.isPending || add.isSuccess}
         onClick={() => {
           add.mutate();

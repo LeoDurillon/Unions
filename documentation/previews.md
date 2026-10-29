@@ -27,8 +27,10 @@ working copy, and serves each exposed service at an address of its own:
 | The first one     | `http://t<ticket>.union.localhost:8080`     |
 | One with a prefix | `http://api-t<ticket>.union.localhost:8080` |
 
-The tab shows the services' output. The sidebar's **Previews** entry lists every preview running, across projects,
-with **Stop**.
+While it starts, the tab counts the time and shows the build's output as it comes; **Cancel start** stops it and
+removes what it had started. Once it runs, the tab shows its addresses, **Restart** and **Stop**, and the services'
+output. The **⋯** menu beside the status holds the Compose file, **Reset preview…** and the preview settings. The
+sidebar's **Previews** entry lists every preview running, across projects, with **Stop**.
 
 - Each ticket's preview is its own Compose project, with its own containers, network and volumes.
 - Previews answer on this machine only.
@@ -39,7 +41,7 @@ with **Stop**.
 ### Start over with a fresh preview
 
 **Restart** updates a running preview in place: its data, such as its database, is kept. When that data is broken (a
-failed migration, a bad seed), click **Reset preview** and confirm. Union removes the preview's containers, its
+failed migration, a bad seed), choose **Reset preview…** in the **⋯** menu and confirm. Union removes the preview's containers, its
 volumes (its databases, and those of the agent's services) and the images it built, builds them again from scratch,
 and starts the preview. The code in the ticket's workspace is kept. The ticket's Log says when a reset happened.
 
@@ -57,12 +59,16 @@ privileged containers, the host network, the Docker socket, mounts outside the r
 ## End-to-end tests
 
 Set the command in **Settings → Previews → End-to-end tests**, for example `npx playwright test`. Then click **Run
-e2e tests** in a ticket's Preview tab. The tests run in the ticket's container, against the running preview; the
+e2e tests** in a ticket's Preview tab (**Run again** once there is a result).
+The result shows how long ago it ran; open **Output** for its last lines, or **Command** for what ran. The tests run in the ticket's container, against the running preview; the
 browser they need is installed on first use, at your repository's Playwright version.
 
 Commands there get `BASE_URL` and one `UNION_URL_<SERVICE>` variable per exposed service.
 
-A failure can be sent to the implementer as a revision. With **Start the preview for implementation steps**, the
+A failure can be sent to the implementer as a revision (**Send the failure to the agent**). When the preview
+restarted or the agent worked on the ticket after the tests ran, the tab says the result may be out of date and
+offers only **Run again**: send a failure from tests run on the current code. A pull request's result can't be added to
+the review in that case either. With **Start the preview for implementation steps**, the
 preview also starts before each implementation run, and the agent is told to run the end-to-end tests its change
 touches.
 
@@ -76,6 +82,10 @@ its services and variables. Use it to run a migration, a seed or one test. You s
 - cannot run while a step runs, and one runs at a time per ticket;
 - stops after 10 minutes by default (30 at most), or when you cancel it;
 - can be kept for the implementer's next run, or sent now as a revision with a note.
+
+Each command you ran is one line: its exit code, the command and how long it took. Click a line to open its output
+and the buttons that keep it or send it to the agent; **↻ Again** runs it again. The newest is open, and the list shows
+the last five, with **Show older** for the rest.
 
 Save the commands you run often in **Settings → Scripts**: each becomes a button in the Preview tab.
 

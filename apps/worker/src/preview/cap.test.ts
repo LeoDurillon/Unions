@@ -108,3 +108,21 @@ test("the project's own cap counts only its previews", async () => {
     "1 of the project's previews are running already",
   );
 });
+
+test('a start aborted while it waits for the service is taken down and stopped', async () => {
+  const ticketId = ticketWithWorkspace(projectId, 'a');
+  const controller = new AbortController();
+  const started = startPreview(
+    {
+      ...deps(),
+      readyTimeoutMs: 5000,
+      fetchFn: () => Promise.resolve(new Response('', { status: 502 })),
+      signal: controller.signal,
+    },
+    { ticketId },
+  );
+  await Bun.sleep(20);
+  controller.abort();
+  await started;
+  expect(getPreview(db, { ticketId })).toMatchObject({ status: 'stopped', error: null });
+});

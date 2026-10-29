@@ -212,7 +212,9 @@
   port, plain variables) and the ticket Overview's Preview section (`preview-section.tsx`, `routes/preview.ts`,
   state in the `previews` table). Start, stop, reset and logs are commands; the worker owns Docker. What a ticket's and a
   pull request's preview routes share (the view, the refusals, a pending command, queueing one, the user's compose
-  file) is `routes/preview-subject.ts`. A pull request under review's own preview and commands live under
+  file) is `routes/preview-subject.ts`. Its `e2eStale` says when the last e2e result predates the preview's last
+  start or the ticket's last agent run (`e2eStaleness` in core): the client then hides "Send the failure to the
+  agent", and a review refuses adding the result. A pull request under review's own preview and commands live under
   `…/reviews/:number/preview` and `…/runs` (`routes/review-preview.ts`, `routes/review-runs.ts`): its commands carry
   `{ reviewId }` in their payload (`ticket_id` null), plus `update` (`review_checkout_update`), the e2e screenshots,
   and "Add to review" (`POST …/e2e/review`, `…/runs/:id/review`), which writes the output as a general draft comment

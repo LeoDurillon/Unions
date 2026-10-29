@@ -35,6 +35,8 @@ export type PreviewDeps = {
   readyTimeoutMs?: number;
   readyIntervalMs?: number;
   fetchFn?: (url: string, init: RequestInit) => Promise<Response>;
+  /** Aborts a start: a stop asked while it runs. */
+  signal?: AbortSignal;
 };
 
 /**

@@ -4,83 +4,19 @@
 import type { ContainerRun, ProjectScript } from '@union/core';
 import { useState, type ReactElement, type ReactNode } from 'react';
 
-import type { Tone } from '../lib/labels';
 import type { PreviewTarget } from '../lib/preview-target';
 import { useContainerRuns, type RunInput, type RunsView } from '../lib/use-container-runs';
+import { RunItem } from './container-run-item';
 import { AddRunToReview } from './pull-requests/review-run-actions';
 import { ScriptButtons } from './script-buttons';
 import { TicketRunActions } from './ticket-run-actions';
-import { Badge, Button, ErrorText, inputClass } from './ui';
+import { Button, ErrorText, inputClass } from './ui';
 
-const STATUS: Record<ContainerRun['status'], { label: string; tone: Tone }> = {
-  queued: { label: 'Waiting', tone: 'neutral' },
-  running: { label: 'Running…', tone: 'blue' },
-  succeeded: { label: 'Exit 0', tone: 'green' },
-  failed: { label: 'Failed', tone: 'red' },
-  cancelled: { label: 'Cancelled', tone: 'neutral' },
-};
-const MS_PER_SEC = 1000;
 /** The command box grows with its lines, between these. */
 const MIN_ROWS = 2;
 const MAX_ROWS = 12;
-
-function duration(run: ContainerRun): string | null {
-  if (run.startedAt === null) {
-    return null;
-  }
-  const seconds = ((run.finishedAt ?? Date.now()) - run.startedAt) / MS_PER_SEC;
-  return `${seconds.toFixed(1)} s`;
-}
-
-function statusLabel(run: ContainerRun): string {
-  return run.status === 'failed' && run.exitCode !== null
-    ? `Exit ${run.exitCode}`
-    : STATUS[run.status].label;
-}
-
-function RunItem({
-  run,
-  latest,
-  onCancel,
-  onAgain,
-  children,
-}: {
-  run: ContainerRun;
-  latest: boolean;
-  onCancel: () => void;
-  onAgain: () => void;
-  /** What can be done with the output. */
-  children?: ReactNode;
-}): ReactElement {
-  const on = run.status === 'queued' || run.status === 'running';
-  return (
-    <li className="space-y-1 text-xs">
-      <div className="flex flex-wrap items-start gap-2">
-        <Badge tone={STATUS[run.status].tone}>{statusLabel(run)}</Badge>
-        {run.scriptName === null ? null : <Badge tone="neutral">{run.scriptName}</Badge>}
-        <code className="max-h-24 min-w-0 flex-1 overflow-auto pt-0.5 whitespace-pre-wrap">
-          $ {run.command}
-        </code>
-        <span className="text-zinc-500">{duration(run)}</span>
-        {on ? (
-          <Button onClick={onCancel}>Cancel</Button>
-        ) : (
-          <Button onClick={onAgain}>Run again</Button>
-        )}
-      </div>
-      {run.error ? <p className="text-red-600 dark:text-red-400">{run.error}</p> : null}
-      {run.output === '' ? null : (
-        <details open={latest}>
-          <summary className="cursor-pointer text-zinc-500">Output (last lines)</summary>
-          <pre className="mt-1 max-h-72 overflow-auto rounded-md bg-zinc-950 p-2 whitespace-pre-wrap text-zinc-100">
-            {run.output}
-          </pre>
-        </details>
-      )}
-      {children}
-    </li>
-  );
-}
+/** Runs listed before "Show older". */
+const SHOWN_RUNS = 5;
 
 /**
  * The command box, several lines if needed (run as one script; Ctrl+Enter runs it). Run is off
@@ -161,6 +97,77 @@ function againInput(run: ContainerRun, scripts: readonly ProjectScript[]): RunIn
     : { command: run.command };
 }
 
+/** The runs, newest first: the newest open unless closed, the older past `SHOWN_RUNS` behind a button. */
+function RunList({
+  target,
+  scripts,
+  view,
+  onCancel,
+  onAgain,
+}: {
+  target: PreviewTarget;
+  scripts: readonly ProjectScript[];
+  view: RunsView;
+  onCancel: (id: number) => void;
+  onAgain: (input: RunInput) => void;
+}): ReactElement | null {
+  const [toggled, setToggled] = useState<Record<number, boolean>>({});
+  const [all, setAll] = useState(false);
+  const shown = all ? view.runs : view.runs.slice(0, SHOWN_RUNS);
+  const older = view.runs.length - shown.length;
+  return (
+    <>
+      <ul className="space-y-1">
+        {shown.map((item, index) => {
+          const open = toggled[item.id] ?? index === 0;
+          return (
+            <RunItem
+              key={item.id}
+              run={item}
+              open={open}
+              onToggle={() => {
+                setToggled({ ...toggled, [item.id]: !open });
+              }}
+              onCancel={() => {
+                onCancel(item.id);
+              }}
+              onAgain={() => {
+                onAgain(againInput(item, scripts));
+              }}
+            >
+              <RunActions target={target} run={item} view={view} />
+            </RunItem>
+          );
+        })}
+      </ul>
+      {older > 0 ? (
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={() => {
+            setAll(true);
+          }}
+        >
+          Show {older} older
+        </Button>
+      ) : null}
+    </>
+  );
+}
+
+/** Where the commands run: in full before the first, folded once there are runs to read. */
+function Intro({ intro, folded }: { intro: ReactNode; folded: boolean }): ReactElement {
+  if (!folded) {
+    return <p className="text-xs text-zinc-500">{intro}</p>;
+  }
+  return (
+    <details className="text-xs text-zinc-500">
+      <summary className="cursor-pointer">Where they run</summary>
+      <p className="mt-1">{intro}</p>
+    </details>
+  );
+}
+
 /**
  * Commands the user runs in a workspace (a ticket's container as the agent, or a pull request's own
  * checkout), with the preview's address while it runs, typed or saved in the project settings; one
@@ -185,29 +192,23 @@ export function ContainerCommands({
   };
   const view = runs.data;
   return (
-    <section className="space-y-2 border-t border-zinc-200 pt-3 dark:border-zinc-800">
-      <h3 className="text-sm font-medium">Commands</h3>
-      <p className="text-xs text-zinc-500">{intro}</p>
+    <section className="space-y-2 rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
+      <h3 className="text-sm font-semibold">Commands</h3>
+      <Intro intro={intro} folded={(view?.runs.length ?? 0) > 0} />
       <ScriptButtons scripts={scripts} blocked={blocked} pending={run.isPending} onRun={submit} />
       <CommandForm blocked={blocked} pending={run.isPending} onRun={submit} />
       <ErrorText error={runs.error ?? run.error ?? cancel.error} />
-      <ul className="space-y-3">
-        {(view?.runs ?? []).map((item, index) => (
-          <RunItem
-            key={item.id}
-            run={item}
-            latest={index === 0}
-            onCancel={() => {
-              cancel.mutate(item.id);
-            }}
-            onAgain={() => {
-              submit(againInput(item, scripts));
-            }}
-          >
-            {view ? <RunActions target={target} run={item} view={view} /> : null}
-          </RunItem>
-        ))}
-      </ul>
+      {view ? (
+        <RunList
+          target={target}
+          scripts={scripts}
+          view={view}
+          onCancel={(id) => {
+            cancel.mutate(id);
+          }}
+          onAgain={submit}
+        />
+      ) : null}
     </section>
   );
 }

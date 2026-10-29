@@ -12,9 +12,10 @@ import {
 import { syncProjectFiles } from '../project-files-sync';
 import { compose } from './compose';
 import { fileToRun } from './compose-file';
+import { outputLog } from './compose-up';
 import { emptyDataFolders } from './data-folders';
 import { startOwnerPreview } from './review-preview';
-import { outputLog, takeDown } from './run';
+import { takeDown } from './run';
 import {
   lastLines,
   loadTarget,

@@ -3,9 +3,9 @@ import { useQuery } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 
 import { previewApi } from '../lib/preview-api';
+import { PREVIEW_STATUS } from '../lib/preview-status';
 import { openSettings } from '../lib/settings-sections';
 import { DetailRow } from './detail-row';
-import { PREVIEW_STATUS } from './preview-section';
 import { Badge } from './ui';
 
 const LINK = 'text-indigo-600 hover:underline dark:text-indigo-400';

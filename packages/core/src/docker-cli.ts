@@ -1,6 +1,7 @@
 // The container runtime that drives the `docker` command line to run ticket containers.
 import { spawn } from 'node:child_process';
 
+import { helperArgs, removeOnAbort } from './docker-helper';
 import type {
   ContainerRuntime,
   ExecOptions,
@@ -45,7 +46,7 @@ async function ok(args: string[], stdin?: string): Promise<string> {
 async function* stream(
   args: string[],
   stdin: string | undefined,
-  signal: AbortSignal | undefined,
+  signal?: AbortSignal,
 ): AsyncGenerator<string, ExecResult> {
   const child = spawn('docker', args, { stdio: ['pipe', 'pipe', 'pipe'], signal });
   child.stdin.end(stdin ?? '');
@@ -166,38 +167,15 @@ export class DockerCli implements ContainerRuntime {
   }
 
   runHelper(spec: HelperSpec): AsyncGenerator<string, ExecResult> {
-    // Each file's content travels in a variable of its own and is written by the shell: the
-    // helper has no volume to hold it, and stdin may already carry the compose file.
-    const files = spec.files ?? [];
-    const contents = files.flatMap((file, index) => ['-e', `UNION_FILE_${index}=${file.content}`]);
-    const writes = files
-      .map(
-        (file, index) =>
-          `mkdir -p "$(dirname '${file.path}')" && printf '%s' "$UNION_FILE_${index}" > '${file.path}' && `,
-      )
-      .join('');
-    const env = Object.entries(spec.env ?? {}).flatMap(([k, v]) => ['-e', `${k}=${v}`]);
-    const mounts = (spec.mounts ?? []).flatMap((mount) => [
-      '-v',
-      `${mount.source}:${mount.target}`,
-    ]);
-    const args = [
-      'run',
-      '--rm',
-      '-i',
-      ...mounts,
-      ...contents,
-      ...env,
-      ...(spec.cwd ? ['-w', spec.cwd] : []),
-      spec.image,
-      // Compose reports its progress on stderr: one stream keeps the lines in order.
-      'sh',
-      '-c',
-      `${writes}exec "$@" 2>&1`,
-      'sh',
-      ...spec.command,
-    ];
-    return stream(args, spec.stdin, spec.signal);
+    if (!spec.signal) {
+      return stream(helperArgs(spec, null), spec.stdin);
+    }
+    // Killing the CLI would leave the container running: an abort removes the container instead.
+    const name = `union-helper-${crypto.randomUUID()}`;
+    removeOnAbort(spec.signal, async () => {
+      await run(['rm', '-f', name]);
+    });
+    return stream(helperArgs(spec, name), spec.stdin);
   }
 
   async projectNetworks(project: string): Promise<string[]> {

@@ -1,5 +1,6 @@
 // What a preview's routes share for a ticket and for a pull request under review: the view, the refusals, the commands.
 import {
+  e2eStaleness,
   getPreview,
   hasActiveContainerRun,
   schema,
@@ -7,7 +8,7 @@ import {
   type PreviewConfig,
   type WorkspaceOwner,
 } from '@union/core';
-import { and, eq, isNull, sql } from 'drizzle-orm';
+import { and, eq, isNull, max, sql } from 'drizzle-orm';
 import type { Context } from 'hono';
 
 import type { PreviewView } from '../api-types';
@@ -115,14 +116,30 @@ export function logsRefusal(db: Db, owner: WorkspaceOwner): string | null {
   return getPreview(db, owner)?.status === 'running' ? null : 'The preview is not running.';
 }
 
+/** When the agent last started working in a ticket's workspace; a pull request's agents do not write to it. */
+function codeChangedAt(db: Db, owner: WorkspaceOwner): number | null {
+  if (!('ticketId' in owner)) {
+    return null;
+  }
+  return (
+    db
+      .select({ at: max(schema.runs.startedAt) })
+      .from(schema.runs)
+      .where(eq(schema.runs.ticketId, owner.ticketId))
+      .get()?.at ?? null
+  );
+}
+
 export function previewView(db: Db, subject: PreviewSubject): PreviewView {
   const config = previewConfig(db, subject);
+  const preview = getPreview(db, subject.owner);
   return {
-    preview: getPreview(db, subject.owner),
+    preview,
     configured: config !== undefined,
     composeFile: config?.composeFile ?? null,
     e2eCommand: config?.e2eCommand ?? null,
     e2eRefusal: e2eRefusal(db, subject),
+    e2eStale: preview ? e2eStaleness(preview, codeChangedAt(db, subject.owner)) : null,
     refusal: previewRefusal(db, subject),
     resetRefusal: resetRefusal(db, subject),
     pending: pendingPreviewCommand(db, subject.owner),

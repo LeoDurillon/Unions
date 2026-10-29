@@ -1,11 +1,10 @@
-// The preview's addresses and buttons: Start (Restart while it runs, data kept), Stop, Reset and its
-// compose file.
+// The preview's addresses and buttons: Start (Cancel while it starts; Restart, data kept, and Stop
+// while it runs).
 import type { Preview } from '@union/core';
 import type { ReactElement } from 'react';
 
 import type { PreviewView } from '../../src/api-types';
 import type { PreviewCalls } from '../lib/use-preview';
-import { ResetButton } from './preview-reset';
 import { Button } from './ui';
 
 export type Act = (call: () => Promise<PreviewView>) => void;
@@ -37,51 +36,124 @@ function OpenLinks({ preview }: { preview: Preview | null }): ReactElement | nul
   );
 }
 
-export function Controls({
+/** While it starts: Cancel, which stops the start; not while the e2e tests started it. */
+function CancelStart({
   view,
   calls,
   act,
   busy,
-  onCompose,
 }: {
   view: PreviewView;
   calls: PreviewCalls;
   act: Act;
   busy: boolean;
-  onCompose: () => void;
+}): ReactElement {
+  const stopping = view.preview?.status === 'stopping' || view.pending;
+  const testing = view.preview?.e2eStatus === 'running';
+  return (
+    <Button
+      disabled={busy || stopping || testing}
+      title={
+        testing
+          ? 'The end-to-end tests started it: wait for them to end'
+          : 'Stops the start and takes down what it brought up'
+      }
+      onClick={() => {
+        act(calls.stop);
+      }}
+    >
+      {stopping ? 'Stopping…' : 'Cancel start'}
+    </Button>
+  );
+}
+
+/** The one button a preview not running gets: Start, or Cancel while it starts. */
+function StartOrCancel({
+  view,
+  calls,
+  act,
+  busy,
+}: {
+  view: PreviewView;
+  calls: PreviewCalls;
+  act: Act;
+  busy: boolean;
 }): ReactElement {
   const status = view.preview?.status;
-  const running = status === 'running';
+  if (status === 'starting' || status === 'stopping') {
+    return <CancelStart view={view} calls={calls} act={act} busy={busy} />;
+  }
+  return (
+    <Button
+      variant="primary"
+      disabled={busy || view.refusal !== null}
+      title={view.refusal ?? undefined}
+      onClick={() => {
+        act(calls.start);
+      }}
+    >
+      Start preview
+    </Button>
+  );
+}
+
+/** A running preview's buttons: Restart (its data kept) and Stop. */
+function RunningButtons({
+  calls,
+  act,
+  busy,
+  refusal,
+}: {
+  calls: PreviewCalls;
+  act: Act;
+  busy: boolean;
+  refusal: string | null;
+}): ReactElement {
+  return (
+    <>
+      <Button
+        disabled={busy || refusal !== null}
+        title={refusal ?? 'Updates the running preview; its data is kept'}
+        onClick={() => {
+          act(calls.start);
+        }}
+      >
+        Restart
+      </Button>
+      <Button
+        disabled={busy}
+        onClick={() => {
+          act(calls.stop);
+        }}
+      >
+        Stop
+      </Button>
+    </>
+  );
+}
+
+/** The preview's addresses and the buttons its state calls for. */
+export function Controls({
+  view,
+  calls,
+  act,
+  busy,
+}: {
+  view: PreviewView;
+  calls: PreviewCalls;
+  act: Act;
+  busy: boolean;
+}): ReactElement {
+  const running = view.preview?.status === 'running';
   return (
     <div className="space-y-2">
       <OpenLinks preview={view.preview} />
       <div className="flex flex-wrap items-center gap-2">
-        <Button
-          variant={running ? 'secondary' : 'primary'}
-          disabled={busy || view.refusal !== null}
-          title={
-            view.refusal ?? (running ? 'Updates the running preview; its data is kept' : undefined)
-          }
-          onClick={() => {
-            act(calls.start);
-          }}
-        >
-          {running ? 'Restart' : 'Start preview'}
-        </Button>
-        {running || status === 'failed' ? (
-          <Button
-            disabled={busy}
-            onClick={() => {
-              act(calls.stop);
-            }}
-          >
-            Stop
-          </Button>
-        ) : null}
-        <ResetButton view={view} calls={calls} act={act} busy={busy} />
-        <Button onClick={onCompose}>
-          {view.preview?.override ? 'Compose file (yours)' : 'Compose file'}
-        </Button>
+        {running ? (
+          <RunningButtons calls={calls} act={act} busy={busy} refusal={view.refusal} />
+        ) : (
+          <StartOrCancel view={view} calls={calls} act={act} busy={busy} />
+        )}
       </div>
     </div>
   );

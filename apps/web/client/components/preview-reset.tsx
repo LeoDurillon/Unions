@@ -82,48 +82,36 @@ function ResetConfirm({
   );
 }
 
-/** Drops everything the preview holds and starts it fresh: shown once there is something to drop. */
-export function ResetButton({
+/** Whether Reset is offered: once there is something to drop. */
+export function canOfferReset(view: PreviewView): boolean {
+  return view.preview !== null || view.resetRefusal === null;
+}
+
+/** The confirmation of a Reset chosen from the menu: dropping everything, then starting fresh. */
+export function ResetPanel({
   view,
   calls,
   act,
   busy,
+  onClose,
 }: {
   view: PreviewView;
   calls: PreviewCalls;
   act: Act;
   busy: boolean;
-}): ReactElement | null {
-  const [asking, setAsking] = useState(false);
-  if (view.preview === null && view.resetRefusal !== null) {
-    return null;
-  }
-  const disabled = busy || view.resetRefusal !== null;
-  if (!asking) {
-    return (
-      <Button
-        variant="quietDanger"
-        disabled={disabled}
-        title={view.resetRefusal ?? undefined}
-        onClick={() => {
-          setAsking(true);
-        }}
-      >
-        Reset preview
-      </Button>
-    );
-  }
+  onClose: () => void;
+}): ReactElement {
   return (
-    <ResetConfirm
-      folders={view.preview?.dataFolders ?? []}
-      disabled={disabled}
-      onReset={(chosen) => {
-        setAsking(false);
-        act(() => calls.reset(chosen));
-      }}
-      onKeep={() => {
-        setAsking(false);
-      }}
-    />
+    <div className="rounded-md border border-red-200 p-3 dark:border-red-900">
+      <ResetConfirm
+        folders={view.preview?.dataFolders ?? []}
+        disabled={busy || view.resetRefusal !== null}
+        onReset={(chosen) => {
+          onClose();
+          act(() => calls.reset(chosen));
+        }}
+        onKeep={onClose}
+      />
+    </div>
   );
 }

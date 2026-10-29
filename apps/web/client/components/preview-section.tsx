@@ -1,109 +1,16 @@
 // A ticket's or a pull request's preview: its compose environment run from the workspace, opened
 // through the proxy.
-import type { Preview } from '@union/core';
 import { useState, type ReactElement, type ReactNode } from 'react';
 
-import type { Tone } from '../lib/labels';
 import type { PreviewTarget } from '../lib/preview-target';
-import { openSettings } from '../lib/settings-sections';
-import { usePreview, type PreviewCalls } from '../lib/use-preview';
+import { usePreview } from '../lib/use-preview';
 import { PreviewComposeDialog } from './preview-compose-dialog';
-import { Controls, type Act } from './preview-controls';
+import { Controls } from './preview-controls';
 import { PreviewE2e } from './preview-e2e';
-import { Badge, Button, ErrorText } from './ui';
-
-export const PREVIEW_STATUS: Record<Preview['status'], { label: string; tone: Tone }> = {
-  starting: { label: 'Starting…', tone: 'blue' },
-  running: { label: 'Running', tone: 'green' },
-  stopping: { label: 'Stopping…', tone: 'blue' },
-  stopped: { label: 'Stopped', tone: 'neutral' },
-  failed: { label: 'Failed', tone: 'red' },
-};
-
-function LogTail({
-  preview,
-  calls,
-  act,
-  busy,
-}: {
-  preview: Preview;
-  calls: PreviewCalls;
-  act: Act;
-  busy: boolean;
-}): ReactElement | null {
-  if (!preview.logTail && preview.status !== 'running') {
-    return null;
-  }
-  return (
-    <details className="text-xs">
-      <summary className="cursor-pointer text-zinc-500">
-        Services&apos; output
-        {preview.logAt ? ` (read ${new Date(preview.logAt).toLocaleTimeString()})` : ''}
-      </summary>
-      <pre className="mt-1 max-h-72 overflow-auto rounded-md bg-zinc-950 p-2 whitespace-pre-wrap text-zinc-100">
-        {preview.logTail ?? 'Nothing yet.'}
-      </pre>
-      {preview.status === 'running' ? (
-        <Button
-          disabled={busy}
-          onClick={() => {
-            act(calls.logs);
-          }}
-        >
-          Read again
-        </Button>
-      ) : null}
-    </details>
-  );
-}
-
-/** Opens the project's preview settings (closing the ticket). */
-function SettingsLink({
-  className,
-  children,
-}: {
-  className: string;
-  children: string;
-}): ReactElement {
-  return (
-    <button
-      type="button"
-      className={className}
-      onClick={() => {
-        openSettings('preview-services');
-      }}
-    >
-      {children}
-    </button>
-  );
-}
-
-function Heading({ preview }: { preview: Preview | null }): ReactElement {
-  return (
-    <h3 className="flex items-center gap-2 text-sm font-semibold">
-      Preview
-      {preview ? (
-        <Badge tone={PREVIEW_STATUS[preview.status].tone}>
-          {PREVIEW_STATUS[preview.status].label}
-        </Badge>
-      ) : null}
-      <SettingsLink className="ml-auto text-xs font-normal text-zinc-500 hover:underline">
-        Settings
-      </SettingsLink>
-    </h3>
-  );
-}
-
-function NotSetUp(): ReactElement {
-  return (
-    <p className="text-xs text-zinc-500">
-      Previews are not set up for this project.{' '}
-      <SettingsLink className="text-indigo-600 hover:underline dark:text-indigo-400">
-        Set up previews
-      </SettingsLink>
-    </p>
-  );
-}
+import { PreviewHeading, PreviewNotSetUp } from './preview-heading';
+import { PreviewOutput } from './preview-output';
+import { ResetPanel } from './preview-reset';
+import { ErrorText } from './ui';
 
 /**
  * A ticket's or a pull request's preview: its compose environment run from the workspace, opened
@@ -122,27 +29,39 @@ export function PreviewSection({
 }): ReactElement | null {
   const { query, calls, act, busy, error } = usePreview(target);
   const [composeOpen, setComposeOpen] = useState(false);
+  const [resetting, setResetting] = useState(false);
   const view = query.data;
   if (!view) {
     return null;
   }
   if (!view.configured) {
-    return <NotSetUp />;
+    return <PreviewNotSetUp />;
   }
   const { preview } = view;
   return (
     <section className="space-y-2 rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
-      <Heading preview={preview} />
-      {notice}
-      <Controls
+      <PreviewHeading
         view={view}
-        calls={calls}
-        act={act}
-        busy={busy}
         onCompose={() => {
           setComposeOpen(true);
         }}
+        onReset={() => {
+          setResetting(true);
+        }}
       />
+      {notice}
+      <Controls view={view} calls={calls} act={act} busy={busy} />
+      {resetting ? (
+        <ResetPanel
+          view={view}
+          calls={calls}
+          act={act}
+          busy={busy}
+          onClose={() => {
+            setResetting(false);
+          }}
+        />
+      ) : null}
       <PreviewComposeDialog
         target={target}
         view={view}
@@ -151,13 +70,10 @@ export function PreviewSection({
           setComposeOpen(false);
         }}
       />
-      {preview?.status === 'failed' && preview.error ? (
-        <pre className="text-xs whitespace-pre-wrap text-red-600 dark:text-red-400">
-          {preview.error}
-        </pre>
-      ) : null}
       <ErrorText error={error} />
-      {preview ? <LogTail preview={preview} calls={calls} act={act} busy={busy} /> : null}
+      {preview ? (
+        <PreviewOutput target={target} preview={preview} calls={calls} act={act} busy={busy} />
+      ) : null}
       <PreviewE2e target={target} view={view} canRevise={canRevise} />
     </section>
   );

@@ -383,6 +383,8 @@ export type PreviewView = {
   e2eCommand: string | null;
   /** Why the e2e tests cannot run now; null when they can. */
   e2eRefusal: string | null;
+  /** Why the last e2e result may not describe the preview now; null when it does (or none). */
+  e2eStale: string | null;
   /** Why it cannot start now; null when it can. */
   refusal: string | null;
   /** Why it cannot be dropped (containers, volumes, built images) and started fresh now. */

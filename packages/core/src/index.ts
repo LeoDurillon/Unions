@@ -88,6 +88,7 @@ export {
 } from './preview-compose-check';
 export * from './pr-comment-reply';
 export * from './pr-review-verdicts';
+export * from './e2e-staleness';
 export * from './previews';
 export * from './project-url';
 export * from './refused-commits';

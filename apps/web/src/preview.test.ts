@@ -262,3 +262,15 @@ test('the e2e tests run on request, never during a run, one request at a time', 
     { type: 'preview_e2e', ticketId },
   ]);
 });
+
+test('an e2e result older than an agent run says it is stale', async () => {
+  const base = `/api/tickets/${ticketId}/preview`;
+  await put({ ...SETTINGS, e2eCommand: 'npx playwright test' });
+  updatePreview(db, { ticketId }, { status: 'running', startedAt: 1000 });
+  db.update(schema.previews).set({ e2eStatus: 'red', e2eAt: 2000 }).run();
+  expect(((await (await call('GET', base)).json()) as PreviewView).e2eStale).toBeNull();
+  db.insert(schema.runs)
+    .values({ ticketId, step: 'implement', model: 'm', status: 'succeeded', startedAt: 3000 })
+    .run();
+  expect(((await (await call('GET', base)).json()) as PreviewView).e2eStale).toContain('agent');
+});

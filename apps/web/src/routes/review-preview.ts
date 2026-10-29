@@ -2,6 +2,7 @@
 import path from 'node:path';
 
 import {
+  e2eStaleness,
   getPreview,
   listReviewScreenshots,
   reviewScreenshotsDir,
@@ -54,8 +55,12 @@ function updateRefusal(db: Db, review: Review): string | null {
 }
 
 function e2eReviewRefusal(db: Db, review: Review): string | null {
-  const status = getPreview(db, { reviewId: review.id })?.e2eStatus;
-  return status === 'green' || status === 'red' ? null : 'No end-to-end result to add yet.';
+  const preview = getPreview(db, { reviewId: review.id });
+  const status = preview?.e2eStatus;
+  if (!preview || (status !== 'green' && status !== 'red')) {
+    return 'No end-to-end result to add yet.';
+  }
+  return e2eStaleness(preview, null);
 }
 
 /** A fork's never; another's once its checkout says the commit is on a branch of the repository. */

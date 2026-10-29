@@ -21,19 +21,24 @@ const BUTTON_VARIANTS = {
   quietDanger: 'text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40',
 } as const;
 
+/** `sm`: an action repeated on every row of a list. */
+const BUTTON_SIZES = { md: 'px-3 py-1.5 text-sm', sm: 'px-2 py-0.5 text-xs' } as const;
+
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: keyof typeof BUTTON_VARIANTS;
+  size?: keyof typeof BUTTON_SIZES;
 };
 
 export function Button({
   variant = 'secondary',
+  size = 'md',
   className = '',
   ...props
 }: ButtonProps): ReactElement {
   return (
     <button
       type="button"
-      className={`rounded-md px-3 py-1.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60 ${BUTTON_VARIANTS[variant]} ${className}`}
+      className={`rounded-md font-medium transition disabled:cursor-not-allowed disabled:opacity-60 ${BUTTON_SIZES[size]} ${BUTTON_VARIANTS[variant]} ${className}`}
       {...props}
     />
   );

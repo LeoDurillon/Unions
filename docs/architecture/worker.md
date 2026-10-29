@@ -216,7 +216,9 @@
   `custom-step.ts` gives a custom step placed after the implementation the branch and how to read the diff.
   `approved.ts` passes the approved outputs in the ticket's flow order, a custom step's under its agent's name.
 - `preview/`: ticket previews (phase 1 of `docs/plans/preview-environments.md`). `PreviewManager` runs the
-  `preview_start`/`preview_stop`/`preview_reset`/`preview_logs` commands, one at a time per ticket. `reset.ts`
+  `preview_start`/`preview_stop`/`preview_reset`/`preview_logs` commands, one at a time per ticket; a
+  `preview_stop` while a start runs aborts it (`PreviewDeps.signal`, honoured by `compose up` and the readiness
+  wait): the start takes down what it brought up and records `stopped`. `reset.ts`
   takes the project down with `--rmi local`, empties the data folders the user chose among `previews.data_folders`
   (`data-folders.ts`: after each `up`, the mounted repository folders `git check-ignore` matches with no tracked
   file, run in a helper holding only the workspace volume), logs `preview_reset`, builds with `--no-cache` and
