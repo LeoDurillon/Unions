@@ -33,6 +33,7 @@ export * from './event-project-fields-action';
 export * from './event-pull-request-action';
 export * from './event-rule-types';
 export * from './event-rules';
+export * from './compose-containers';
 export * from './docker-cli';
 export * from './flow-settings';
 export * from './flows';

@@ -137,6 +137,8 @@ type PreviewPayloads = {
   preview_busy: { message: string };
   /** Its containers, volumes and built images were removed; it starts again from nothing. */
   preview_reset: { message: string };
+  /** Exposed services of a running preview stopped (crashed, killed): it is failed now. */
+  preview_services_stopped: { services: string[]; message: string };
 };
 
 type ReviewPayloads = {

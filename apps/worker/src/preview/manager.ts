@@ -12,6 +12,7 @@ import type { PreviewAction, PreviewOptions } from '../commands';
 import { runRequestedE2e } from '../e2e-request';
 import { previewSettings } from './compose';
 import { generatePreviewFile } from './compose-file';
+import { failStoppedPreview, HealthWatcher } from './health';
 import { IdleWatcher, readProxyMetrics } from './idle';
 import { resetPreview } from './reset';
 import { startOwnerPreview, updateReviewPreview } from './review-preview';
@@ -139,6 +140,32 @@ export class PreviewManager {
         this.stopIdle(owner, minutes);
       },
       testing: () => this.testing(),
+    });
+  }
+
+  /** What watches the running previews: stops those nobody visits, fails those whose services stopped. */
+  watchers(): { tick: () => void } {
+    const watchers = [this.idleWatcher(), this.healthWatcher()];
+    return {
+      tick: () => {
+        for (const watcher of watchers) {
+          watcher.tick();
+        }
+      },
+    };
+  }
+
+  /** What fails the running previews whose exposed services stopped, through this manager. */
+  private healthWatcher(): HealthWatcher {
+    return new HealthWatcher({
+      db: this.deps.db,
+      runtime: this.deps.runtime,
+      onStopped: (owner) => {
+        // Busy (a start, a stop, its tests): what runs then decides its state.
+        if (!this.busy.has(ownerKey(owner))) {
+          this.track(owner, () => failStoppedPreview(this.deps, owner));
+        }
+      },
     });
   }
 

@@ -58,7 +58,11 @@ function entriesFor(entry: LogEntry, names: CustomAgentNames): Entry[] {
   }
   const { event } = entry;
   const key = `${event.seq}`;
-  if (isEvent(event, 'preview_idle_stopped') || isEvent(event, 'preview_reset')) {
+  if (
+    isEvent(event, 'preview_idle_stopped') ||
+    isEvent(event, 'preview_reset') ||
+    isEvent(event, 'preview_services_stopped')
+  ) {
     return [{ key, kind: 'result', text: event.payload.message }];
   }
   if (isEvent(event, 'event_rule_applied')) {

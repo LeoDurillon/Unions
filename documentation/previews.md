@@ -34,6 +34,10 @@ sidebar's **Previews** entry lists every preview running, across projects, with 
 
 - Each ticket's preview is its own Compose project, with its own containers, network and volumes.
 - Previews answer on this machine only.
+- When a service the preview serves stops on its own (it crashed, or was killed), the preview shows **Failed**
+  within a minute, with which service stopped and the services' last output. Its other containers are stopped (left
+  running while the agent works on the ticket, which uses them); click **Start preview** to bring it back with its
+  data. The ticket's Log says when it happened.
 - A preview nobody visited for an hour stops by itself (**Settings → Previews → Limits** changes the delay, or turns
   it off), except while the agent works on the ticket or its end-to-end tests run.
 - At most 3 previews run at once (`UNION_MAX_PREVIEWS`); a project can allow fewer.

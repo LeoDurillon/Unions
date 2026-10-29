@@ -34,6 +34,9 @@ export type HelperSpec = {
   files?: { path: string; content: string }[];
 };
 
+/** A container of a compose project, as `docker ps -a` lists it. */
+export type ProjectContainer = { service: string; running: boolean; exitCode: number | null };
+
 export type ContainerRuntime = {
   /**
    * Creates volumes and a stopped container; idempotent. A stopped container from an older image is
@@ -67,6 +70,8 @@ export type ContainerRuntime = {
   networkExists(name: string): Promise<boolean>;
   /** The networks of a compose project (by its label), for an outside container to join. */
   projectNetworks(project: string): Promise<string[]>;
+  /** Every container of a compose project (by its label), running or not. */
+  projectContainers(project: string): Promise<ProjectContainer[]>;
   /** The containers of a compose service (`proxy`) on a network, by name. */
   serviceContainers(network: string, service: string): Promise<string[]>;
   /** Joins or leaves a network; already joined or already left is not an error. */

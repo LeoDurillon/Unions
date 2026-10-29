@@ -1,12 +1,14 @@
 // The container runtime that drives the `docker` command line to run ticket containers.
 import { spawn } from 'node:child_process';
 
+import { CONTAINER_FORMAT, parseProjectContainers } from './compose-containers';
 import { helperArgs, removeOnAbort } from './docker-helper';
 import type {
   ContainerRuntime,
   ExecOptions,
   ExecResult,
   HelperSpec,
+  ProjectContainer,
   TicketContainerSpec,
 } from './runtime';
 
@@ -188,6 +190,18 @@ export class DockerCli implements ContainerRuntime {
       '{{.Name}}',
     ]);
     return listed.split('\n').filter((line) => line.trim() !== '');
+  }
+
+  async projectContainers(project: string): Promise<ProjectContainer[]> {
+    const listed = await ok([
+      'ps',
+      '-a',
+      '--filter',
+      `label=com.docker.compose.project=${project}`,
+      '--format',
+      CONTAINER_FORMAT,
+    ]);
+    return parseProjectContainers(listed);
   }
 
   async serviceContainers(network: string, service: string): Promise<string[]> {

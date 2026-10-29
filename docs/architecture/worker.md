@@ -218,7 +218,11 @@
 - `preview/`: ticket previews (phase 1 of `docs/plans/preview-environments.md`). `PreviewManager` runs the
   `preview_start`/`preview_stop`/`preview_reset`/`preview_logs` commands, one at a time per ticket; a
   `preview_stop` while a start runs aborts it (`PreviewDeps.signal`, honoured by `compose up` and the readiness
-  wait): the start takes down what it brought up and records `stopped`. `reset.ts`
+  wait): the start takes down what it brought up and records `stopped`. `health.ts` asks Docker every 30 seconds
+  (`runtime.projectContainers`, `stoppedServices` in core) whether a running preview's exposed services still have a
+  container up; when one stopped, the manager (never during a start, a stop or its tests) records `failed` with the
+  services' last lines, `compose stop`s the project unless a step runs on the ticket, and logs
+  `preview_services_stopped`. `reset.ts`
   takes the project down with `--rmi local`, empties the data folders the user chose among `previews.data_folders`
   (`data-folders.ts`: after each `up`, the mounted repository folders `git check-ignore` matches with no tracked
   file, run in a helper holding only the workspace volume), logs `preview_reset`, builds with `--no-cache` and

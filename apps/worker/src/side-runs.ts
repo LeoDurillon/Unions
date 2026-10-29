@@ -15,7 +15,7 @@ import { UnionUpdater } from './union-update';
 /**
  * The work outside the ticket pipeline: investigations, the review page's agents (`ReviewRuns`), PR
  * description rewrites and the lesson writer (taking their slots from it), the event rules, stopping previews nobody
- * visits, reading the account's claude.ai connectors, and the commands users run in workspaces.
+ * visits, failing those whose services stopped, reading the account's claude.ai connectors, and the commands users run in workspaces.
  */
 export type SideRuns = ReviewRuns & {
   investigations: InvestigationRunner;
@@ -37,7 +37,7 @@ export async function startSideRuns(
   const prDescriptions = new PrDescriptionRunner(deps);
   const previews = createPreviewManager(deps);
   const events = new EventDispatcher(deps.db, new FetchNotionApi(), deps.apiFor);
-  const idlePreviews = previews.idleWatcher();
+  const watchPreviews = previews.watchers();
   const throwaway = new ThrowawayRuns(deps);
   const containerRuns = new ContainerRunner(deps);
   const updater = new UnionUpdater(deps.db);
@@ -63,7 +63,7 @@ export async function startSideRuns(
       }
       prDescriptions.tick();
       events.tick();
-      idlePreviews.tick();
+      watchPreviews.tick();
       throwaway.tick();
       containerRuns.tick();
     },

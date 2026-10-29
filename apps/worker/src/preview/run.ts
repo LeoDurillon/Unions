@@ -30,7 +30,7 @@ const READY_INTERVAL_MS = 2000;
 /** How long the proxy gets to answer before a start, when it runs. */
 const PROXY_CHECK_MS = 3000;
 /** The last lines the services printed; empty when they cannot be read. */
-async function serviceLogs(deps: PreviewDeps, owner: WorkspaceOwner): Promise<string> {
+export async function serviceLogs(deps: PreviewDeps, owner: WorkspaceOwner): Promise<string> {
   const output = await compose(deps.runtime, deps.settings, {
     args: ['-p', previewProject(owner), 'logs', '--no-color', '--tail', '200'],
   });
