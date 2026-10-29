@@ -9,13 +9,11 @@ function Trigger({
   label,
   icon,
   disabled,
-  title,
   onClick,
 }: {
   label: string;
   icon: ReactNode;
   disabled: boolean;
-  title: string | undefined;
   onClick: () => void;
 }): ReactElement {
   if (icon !== null) {
@@ -26,7 +24,7 @@ function Trigger({
     );
   }
   return (
-    <Button variant="quietDanger" disabled={disabled} title={title} onClick={onClick}>
+    <Button variant="quietDanger" disabled={disabled} onClick={onClick}>
       {label}
     </Button>
   );
@@ -38,7 +36,6 @@ export function ConfirmButton({
   question,
   confirmLabel,
   disabled = false,
-  title,
   icon = null,
   onConfirm,
 }: {
@@ -47,8 +44,6 @@ export function ConfirmButton({
   question: string;
   confirmLabel: string;
   disabled?: boolean;
-  /** The text button's tooltip: why it is disabled. */
-  title?: string;
   /** Shows an icon-only button (a row action) instead of the quiet red one. */
   icon?: ReactNode;
   onConfirm: () => void;
@@ -60,7 +55,6 @@ export function ConfirmButton({
         label={label}
         icon={icon}
         disabled={disabled}
-        title={title}
         onClick={() => {
           setAsking(true);
         }}

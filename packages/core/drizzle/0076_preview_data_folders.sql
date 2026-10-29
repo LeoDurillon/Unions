@@ -1,0 +1,1 @@
+ALTER TABLE `previews` ADD `data_folders` text;

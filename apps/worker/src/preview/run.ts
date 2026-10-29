@@ -19,6 +19,7 @@ import {
 import { syncProjectFiles } from '../project-files-sync';
 import { compose, createMountFolders } from './compose';
 import { fileToRun } from './compose-file';
+import { findDataFolders } from './data-folders';
 import { routeToPreview } from './host-routes';
 import { joinPreview, leavePreview } from './network';
 import { proxyAnswers, waitReady } from './ready';
@@ -165,7 +166,9 @@ async function startTarget(deps: PreviewDeps, target: Target): Promise<void> {
     volume: target.workspaceVolume,
     image: deps.settings.image,
   });
-  await up(deps, target, await fileToRun(deps, target));
+  const file = await fileToRun(deps, target);
+  await up(deps, target, file);
+  await findDataFolders(deps, target, file);
   // All at once: each service gets the whole wait, not what the previous one left.
   const answered = await Promise.all(
     target.exposed.map((exposed) =>

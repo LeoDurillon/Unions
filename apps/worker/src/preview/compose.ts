@@ -2,6 +2,8 @@
 // workspace when given (at `/workspace`, the repository in `/workspace/repo`).
 import { PREVIEW_REPO_DIR, type ContainerRuntime } from '@union/core';
 
+import { workspaceScript } from './workspace-script';
+
 /** The Docker CLI image (with the compose plugin) the helper containers run. */
 const COMPOSE_IMAGE = 'docker:29.0.0-cli';
 const SOCKET = '/var/run/docker.sock';
@@ -123,28 +125,15 @@ export async function createMountFolders(
   if (subpaths.length === 0) {
     return;
   }
-  const lines = runtime.runHelper({
+  const run = await workspaceScript(runtime, {
     image: settings.image,
-    command: [
-      'sh',
-      '-c',
-      CREATE_MISSING,
-      'sh',
-      ...subpaths.map((subpath) => `/workspace/${subpath}`),
-    ],
-    mounts: [{ source: workspaceVolume, target: '/workspace' }],
+    volume: workspaceVolume,
+    script: CREATE_MISSING,
+    args: subpaths.map((subpath) => `/workspace/${subpath}`),
   });
-  const output: string[] = [];
-  for (;;) {
-    const next = await lines.next();
-    if (next.done) {
-      if (next.value.exitCode !== 0) {
-        throw new Error(
-          `Could not create the folders the compose file mounts:\n${output.join('\n')}`,
-        );
-      }
-      return;
-    }
-    output.push(next.value);
+  if (run.exitCode !== 0) {
+    throw new Error(
+      `Could not create the folders the compose file mounts:\n${run.output.join('\n')}`,
+    );
   }
 }

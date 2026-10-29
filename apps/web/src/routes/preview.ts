@@ -5,6 +5,7 @@ import { Hono, type Context } from 'hono';
 
 import type { PreviewView } from '../api-types';
 import { ACCEPTED, CONFLICT, fail, NOT_FOUND, requireId } from '../http';
+import { queueReset } from './preview-reset';
 import {
   e2eRefusal,
   logsRefusal,
@@ -12,7 +13,6 @@ import {
   previewView,
   queuePreviewCommand,
   readOwnFile,
-  resetRefusal,
   stopRefusal,
   type PreviewSubject,
 } from './preview-subject';
@@ -79,7 +79,11 @@ export function previewRoutes(db: Db): Hono {
   routes.get('/', (c) => c.json(view(db, loadTicket(db, c))));
   routes.post('/start', (c) => command(db, c, 'preview_start', (s) => previewRefusal(db, s)));
   routes.post('/stop', (c) => command(db, c, 'preview_stop', (s) => stopRefusal(db, s.owner)));
-  routes.post('/reset', (c) => command(db, c, 'preview_reset', (s) => resetRefusal(db, s)));
+  routes.post('/reset', async (c) => {
+    const ticket = loadTicket(db, c);
+    await queueReset(db, c, subjectOf(ticket));
+    return c.json(view(db, ticket), ACCEPTED);
+  });
   routes.post('/e2e', (c) => command(db, c, 'preview_e2e', (s) => e2eRefusal(db, s)));
   routes.post('/generate', (c) => command(db, c, 'preview_generate', (s) => previewRefusal(db, s)));
   routes.put('/compose', (c) => saveOwnFile(db, c));

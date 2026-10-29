@@ -48,6 +48,7 @@ test('a pull request polls while a command waits or a change is on its way; a ti
     composeError: null,
     composeAt: null,
     composeCatalog: null,
+    dataFolders: null,
     override: null,
     overrideAt: null,
     startedAt: null,

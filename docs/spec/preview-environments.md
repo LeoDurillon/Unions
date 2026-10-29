@@ -40,7 +40,9 @@ Built (phases 1 to 4). Full design and what was built: [`docs/plans/preview-envi
   wins over the repository's env files. Secrets never reach the agent.
 - **Reset preview** (after a confirmation, a ticket's and a pull request's): `down -v --remove-orphans --rmi local`
   (every container of the compose project, the agent's services included, its volumes and the images it built), a
-  `build --no-cache`, then a start. The workspace is kept. Refused during a step, an e2e run or a command; Restart
+  `build --no-cache`, then a start. The workspace is kept, except the data folders the user ticks: the repository
+  folders the compose file mounts that git ignores whole and tracks nothing in, found at each start
+  (`previews.data_folders`). Refused during a step, an e2e run or a command; Restart
   keeps updating in place, data kept. Design: [`docs/plans/preview-reset.md`](../plans/preview-reset.md).
 - **Previews** (in the sidebar, with the number running): every project's previews that hold containers, tickets'
   and pull requests' under review, with their links and **Stop**; a ticket's opens its panel.

@@ -14,13 +14,13 @@ import { ACCEPTED, CONFLICT, CREATED, fail, NOT_FOUND } from '../http';
 import { addGeneralDraft, outputComment } from '../review-output-comment';
 import type { ReviewPreviewView } from '../review-preview-types';
 import { load, type Review } from './pr-review-load';
+import { queueReset } from './preview-reset';
 import {
   e2eRefusal,
   logsRefusal,
   pendingPreviewCommand,
   previewConfig,
   previewRefusal,
-  resetRefusal,
   previewView,
   queuePreviewCommand,
   readOwnFile,
@@ -153,9 +153,11 @@ export function reviewPreviewRoutes(db: Db): Hono {
   routes.post('/stop', (c) =>
     command(db, c, 'preview_stop', (r) => stopRefusal(db, { reviewId: r.id })),
   );
-  routes.post('/reset', (c) =>
-    command(db, c, 'preview_reset', (r) => resetRefusal(db, subjectOf(r))),
-  );
+  routes.post('/reset', async (c) => {
+    const { review } = load(db, c);
+    await queueReset(db, c, subjectOf(review));
+    return c.json(view(db, review), ACCEPTED);
+  });
   routes.post('/e2e', (c) => command(db, c, 'preview_e2e', (r) => e2eRefusal(db, subjectOf(r))));
   routes.post('/generate', (c) =>
     command(db, c, 'preview_generate', (r) =>

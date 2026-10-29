@@ -217,7 +217,10 @@
   `approved.ts` passes the approved outputs in the ticket's flow order, a custom step's under its agent's name.
 - `preview/`: ticket previews (phase 1 of `docs/plans/preview-environments.md`). `PreviewManager` runs the
   `preview_start`/`preview_stop`/`preview_reset`/`preview_logs` commands, one at a time per ticket. `reset.ts`
-  takes the project down with `--rmi local`, logs `preview_reset`, builds with `--no-cache` and starts it again;
+  takes the project down with `--rmi local`, empties the data folders the user chose among `previews.data_folders`
+  (`data-folders.ts`: after each `up`, the mounted repository folders `git check-ignore` matches with no tracked
+  file, run in a helper holding only the workspace volume), logs `preview_reset`, builds with `--no-cache` and
+  starts it again;
   during a step it emits `preview_busy` and touches nothing. Every `docker compose` call runs
   in a throwaway helper container (`runtime.runHelper`, `docker:*-cli` image) holding the Docker socket and the
   ticket's workspace volume; the agent's container never holds the socket. The repository's compose file is

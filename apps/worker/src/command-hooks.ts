@@ -40,12 +40,15 @@ export type CommandHooks = {
    * Starts, stops, resets, reads the logs of, or generates the compose file of a ticket's or a pull
    * request's preview; `update` moves a pull request's checkout to the commit its review reads.
    */
-  preview: (owner: WorkspaceOwner, action: PreviewAction) => void;
+  preview: (owner: WorkspaceOwner, action: PreviewAction, options?: PreviewOptions) => void;
   /** Fetches Union's own remote and records how far behind the checkout is. */
   checkUnionUpdate: () => void;
   /** Pulls Union's new commits and restarts it; `force` even while work is in progress. */
   updateUnion: (force: boolean) => void;
 };
+
+/** A reset's choice: the data folders to empty (`data`), among the ones its last start found. */
+export type PreviewOptions = { folders?: string[] };
 
 export type PreviewAction = 'start' | 'stop' | 'reset' | 'logs' | 'generate' | 'e2e' | 'update';
 

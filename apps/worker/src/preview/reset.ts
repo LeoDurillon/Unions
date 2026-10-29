@@ -1,5 +1,6 @@
 // Resets a preview: its containers, volumes (the agent's services' included) and built images go,
-// its images are built again without the cache, then it starts from nothing.
+// the data folders chosen are emptied, its images are built again without the cache, then it starts
+// from nothing.
 import {
   emitEvent,
   getTicket,
@@ -11,6 +12,7 @@ import {
 import { syncProjectFiles } from '../project-files-sync';
 import { compose } from './compose';
 import { fileToRun } from './compose-file';
+import { emptyDataFolders } from './data-folders';
 import { startOwnerPreview } from './review-preview';
 import { outputLog, takeDown } from './run';
 import {
@@ -27,6 +29,12 @@ import { unionEnvFile } from './variables';
 const REMOVE_BUILT_IMAGES = ['--rmi', 'local'];
 
 const RESET_MESSAGE = 'Preview reset: its containers, volumes and built images were removed';
+
+function resetMessage(emptied: string[]): string {
+  return emptied.length === 0
+    ? RESET_MESSAGE
+    : `${RESET_MESSAGE}, and ${emptied.join(', ')} emptied`;
+}
 
 /** Builds the project's images again, every layer: a cached one may be what broke. */
 async function buildFresh(deps: PreviewDeps, target: Target): Promise<void> {
@@ -59,14 +67,20 @@ function stepRunning(deps: PreviewDeps, owner: WorkspaceOwner): boolean {
   return ticketId !== null && getTicket(deps.db, ticketId).phase.kind === 'running';
 }
 
-async function dropAndBuild(deps: PreviewDeps, owner: WorkspaceOwner): Promise<void> {
+async function dropAndBuild(
+  deps: PreviewDeps,
+  owner: WorkspaceOwner,
+  folders: string[],
+): Promise<void> {
   updatePreview(deps.db, owner, { status: 'stopping' });
   await takeDown(deps, owner, REMOVE_BUILT_IMAGES);
+  const target = loadTarget(deps, owner);
+  const emptied = await emptyDataFolders(deps, target, folders);
   const ticketId = ticketOwnerId(owner);
   if (ticketId !== null) {
-    emitEvent(deps.db, { type: 'preview_reset', ticketId, payload: { message: RESET_MESSAGE } });
+    const message = resetMessage(emptied);
+    emitEvent(deps.db, { type: 'preview_reset', ticketId, payload: { message } });
   }
-  const target = loadTarget(deps, owner);
   updatePreview(deps.db, owner, { status: 'starting', error: null });
   await syncProjectFiles(deps.db, deps.runtime, target.projectId, {
     volume: target.workspaceVolume,
@@ -77,10 +91,14 @@ async function dropAndBuild(deps: PreviewDeps, owner: WorkspaceOwner): Promise<v
 
 /**
  * Removes everything the owner's compose project holds (containers, volumes, the images it built),
- * builds its images without the cache and starts it. The workspace, the code, is kept. Refused
- * while a step runs on the ticket.
+ * empties the chosen `folders` among the data folders found at its last start, builds its images
+ * without the cache and starts it. The code is kept. Refused while a step runs on the ticket.
  */
-export async function resetPreview(deps: PreviewDeps, owner: WorkspaceOwner): Promise<void> {
+export async function resetPreview(
+  deps: PreviewDeps,
+  owner: WorkspaceOwner,
+  folders: string[] = [],
+): Promise<void> {
   const ticketId = ticketOwnerId(owner);
   if (stepRunning(deps, owner)) {
     if (ticketId !== null) {
@@ -93,7 +111,7 @@ export async function resetPreview(deps: PreviewDeps, owner: WorkspaceOwner): Pr
     return;
   }
   try {
-    await dropAndBuild(deps, owner);
+    await dropAndBuild(deps, owner, folders);
   } catch (error) {
     updatePreview(deps.db, owner, {
       status: 'failed',

@@ -1,7 +1,6 @@
 # Reset a preview: drop its containers and data, start fresh
 
-Status: built, steps 1 to 5 (branch `preview-reset`, 2026-10-29); the ignored data folders (step 6, optional)
-left. Open questions settled as proposed: Reset starts the preview again, Stop
+Status: built, steps 1 to 6 (branches `preview-reset` and `preview-reset-folders`, 2026-10-29). Open questions settled as proposed: Reset starts the preview again, Stop
 is unchanged, the button is only in the Preview tab.
 
 The user's words: "there's no way to restart completely the container of a preview, so if failed data corrupt the
@@ -60,7 +59,8 @@ preview's compose project holds, then starts it again from nothing. The workspac
 The folders of case 5 are part of the checkout, so they are not removed by default. After the first steps, the
 confirmation lists the compose file's workspace mounts that git ignores entirely (`git check-ignore` on each
 subpath, in the owner's container) and offers a box per folder: "Also empty `data/` (ignored by git)". A tracked
-folder (`./src:/app/src`) is never offered. Build it only if a project of the user's actually keeps its data this way.
+folder (`./src:/app/src`) is never offered. Built: the folders are found at each start (`previews.data_folders`), so
+a preview never started since offers none.
 
 ## Steps
 

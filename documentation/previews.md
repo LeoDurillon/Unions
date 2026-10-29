@@ -43,6 +43,11 @@ failed migration, a bad seed), click **Reset preview** and confirm. Union remove
 volumes (its databases, and those of the agent's services) and the images it built, builds them again from scratch,
 and starts the preview. The code in the ticket's workspace is kept. The ticket's Log says when a reset happened.
 
+Some Compose files keep data in a folder of the repository (`./data:/var/lib/postgresql/data`) rather than in a
+volume. When git ignores such a folder and it holds no tracked file, the confirmation offers **Also empty
+`data/`**: tick it to empty that folder too. Union finds these folders each time the preview starts, so start the
+preview once before you reset it.
+
 You can't reset while the agent works on the ticket (it uses the same services), while the end-to-end tests run, or
 while a command runs. A pull request's preview has the same button.
 

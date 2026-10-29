@@ -118,6 +118,11 @@ function patchPreview(
   });
 }
 
+/** The mounted folders git ignores whole, found at a start: a reset may empty them. */
+export function recordDataFolders(db: Db, owner: WorkspaceOwner, folders: string[]): void {
+  patchPreview(db, owner, { dataFolders: folders });
+}
+
 /** The file Union generated (YAML), or why it could not. */
 export function saveGeneratedCompose(
   db: Db,

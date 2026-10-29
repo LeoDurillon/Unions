@@ -8,7 +8,7 @@ import {
   type WorkspaceOwner,
 } from '@union/core';
 
-import type { PreviewAction } from '../commands';
+import type { PreviewAction, PreviewOptions } from '../commands';
 import { runRequestedE2e } from '../e2e-request';
 import { previewSettings } from './compose';
 import { generatePreviewFile } from './compose-file';
@@ -17,7 +17,11 @@ import { resetPreview } from './reset';
 import { startOwnerPreview, updateReviewPreview } from './review-preview';
 import { refreshPreviewLogs, stopPreview, takeDown, type PreviewDeps } from './run';
 
-type Action = (deps: PreviewDeps, owner: WorkspaceOwner) => Promise<unknown>;
+type Action = (
+  deps: PreviewDeps,
+  owner: WorkspaceOwner,
+  options: PreviewOptions,
+) => Promise<unknown>;
 
 /**
  * A pull request's start checks it out first; only a pull request's checkout can be updated. A reset
@@ -26,7 +30,7 @@ type Action = (deps: PreviewDeps, owner: WorkspaceOwner) => Promise<unknown>;
 const ACTIONS: Record<Exclude<PreviewAction, 'e2e'>, Action> = {
   start: startOwnerPreview,
   stop: stopPreview,
-  reset: resetPreview,
+  reset: (deps, owner, options) => resetPreview(deps, owner, options.folders),
   logs: refreshPreviewLogs,
   generate: generatePreviewFile,
   update: (deps, owner) =>
@@ -62,12 +66,12 @@ export class PreviewManager {
   /** Whose e2e tests are running: one run at a time, a browser takes a lot of memory. */
   private e2eOwner: WorkspaceOwner | null = null;
 
-  run(owner: WorkspaceOwner, action: PreviewAction): void {
+  run(owner: WorkspaceOwner, action: PreviewAction, options: PreviewOptions = {}): void {
     if (action === 'e2e') {
       this.e2e(owner);
       return;
     }
-    this.track(owner, () => ACTIONS[action](this.deps, owner));
+    this.track(owner, () => ACTIONS[action](this.deps, owner, options));
   }
 
   private e2eRefusal(): string | null {

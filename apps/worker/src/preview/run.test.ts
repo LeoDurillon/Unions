@@ -62,7 +62,9 @@ const runtime = {
   async *runHelper(spec: HelperSpec): AsyncGenerator<string, ExecResult> {
     // The folders a file mounts are made by a plain helper, not a compose call.
     if (spec.command[0] !== 'docker') {
-      folders.push(...spec.command.slice(4));
+      if (spec.command[2]?.includes('mkdir') === true) {
+        folders.push(...spec.command.slice(4));
+      }
       return { exitCode: 0, stderr: '' };
     }
     calls.push(spec);

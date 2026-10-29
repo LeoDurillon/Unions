@@ -55,6 +55,11 @@ export const previews = sqliteTable(
       profiles: string[];
       services: string[];
     }>(),
+    /**
+     * The repository's folders its services mount that git ignores whole (`data`), found at its last
+     * start: what a reset may empty besides its volumes.
+     */
+    dataFolders: text('data_folders', { mode: 'json' }).$type<string[]>(),
     /** The user's own version of it: when set, Start runs it instead of generating one. */
     override: text('override'),
     overrideAt: integer('override_at'),

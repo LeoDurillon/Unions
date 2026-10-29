@@ -1,11 +1,11 @@
-// The preview's addresses and buttons: Start (Restart while it runs, data kept), Stop, Reset (everything dropped,
-// after a confirmation, then started fresh) and its compose file.
+// The preview's addresses and buttons: Start (Restart while it runs, data kept), Stop, Reset and its
+// compose file.
 import type { Preview } from '@union/core';
 import type { ReactElement } from 'react';
 
 import type { PreviewView } from '../../src/api-types';
 import type { PreviewCalls } from '../lib/use-preview';
-import { ConfirmButton } from './confirm-button';
+import { ResetButton } from './preview-reset';
 import { Button } from './ui';
 
 export type Act = (call: () => Promise<PreviewView>) => void;
@@ -34,38 +34,6 @@ function OpenLinks({ preview }: { preview: Preview | null }): ReactElement | nul
         </li>
       ))}
     </ul>
-  );
-}
-
-const RESET_QUESTION =
-  "Remove the preview's containers, volumes (its databases) and the images it built, then start it again? The code in the workspace is kept.";
-
-/** Drops everything the preview holds and starts it fresh: shown once there is something to drop. */
-function ResetButton({
-  view,
-  calls,
-  act,
-  busy,
-}: {
-  view: PreviewView;
-  calls: PreviewCalls;
-  act: Act;
-  busy: boolean;
-}): ReactElement | null {
-  if (view.preview === null && view.resetRefusal !== null) {
-    return null;
-  }
-  return (
-    <ConfirmButton
-      label="Reset preview"
-      question={RESET_QUESTION}
-      confirmLabel="Reset and start"
-      disabled={busy || view.resetRefusal !== null}
-      title={view.resetRefusal ?? undefined}
-      onConfirm={() => {
-        act(calls.reset);
-      }}
-    />
   );
 }
 

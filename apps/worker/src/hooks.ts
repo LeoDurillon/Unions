@@ -56,8 +56,8 @@ export function workerHooks(
     cancelContainerRun: (id) => {
       containerRuns.cancel(id);
     },
-    preview: (owner, action) => {
-      previews.run(owner, action);
+    preview: (owner, action, options) => {
+      previews.run(owner, action, options);
     },
     ...gitHubHooks(db, apiFor),
     ...unionUpdateHooks(updater),

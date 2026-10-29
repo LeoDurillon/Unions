@@ -26,7 +26,7 @@ import {
 import { ciJobOf } from './github/ci-rerun';
 import { ticketEditOf } from './github/ticket-edit';
 
-export type { CommandHooks, ContainerRef, PreviewAction } from './command-hooks';
+export type { CommandHooks, ContainerRef, PreviewAction, PreviewOptions } from './command-hooks';
 
 type Command = typeof schema.commands.$inferSelect;
 
@@ -87,6 +87,12 @@ function previewOwnerOf(command: Command): WorkspaceOwner {
     throw new TypeError(`${command.type} needs a ticketId or a numeric "reviewId"`);
   }
   return { reviewId };
+}
+
+/** A reset's chosen data folders; the worker empties only the ones its last start found. */
+function foldersOf(payload: unknown): string[] {
+  const list = field(payload, 'folders');
+  return Array.isArray(list) ? list.filter((item): item is string => typeof item === 'string') : [];
 }
 
 function numberField(command: Command, key: string): number {
@@ -257,7 +263,7 @@ function execute(db: Db, command: Command, hooks: CommandHooks): void {
   }
   const preview = PREVIEW_ACTIONS[command.type];
   if (preview) {
-    hooks.preview(previewOwnerOf(command), preview);
+    hooks.preview(previewOwnerOf(command), preview, { folders: foldersOf(command.payload) });
     return;
   }
   const handle = OTHER_COMMANDS[command.type];

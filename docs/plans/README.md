@@ -47,7 +47,7 @@ and linked.
   when the checks fail after a clean rebase, and the final review runs again only when the agent changed code.
   Built (2026-10-17).
 - [Reset a preview](preview-reset.md): drop a preview's containers, volumes (agent services included) and built
-  images, then start it fresh; the workspace's code is kept. Built, steps 1 to 5 (branch `preview-reset`).
+  images, and the data folders git ignores the user ticks, then start it fresh; the code is kept. Built, steps 1 to 6.
 - [Previews of pull requests under review](review-previews.md): a review's own preview at the reviewed commit
   (`union-r<id>`, `r<id>.localhost`), with its e2e tests and Commands, in a container of its own; no agent, no
   GitHub writes, never the project's secrets for a fork. Built (branch `review-previews`).

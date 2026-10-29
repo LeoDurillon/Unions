@@ -129,13 +129,25 @@ export function previewView(db: Db, subject: PreviewSubject): PreviewView {
   };
 }
 
-/** Queues a preview command for the worker: a ticket's carries its id, a review's its id in the payload. */
-export function queuePreviewCommand(db: Db, owner: WorkspaceOwner, type: string): void {
+/**
+ * Queues a preview command for the worker: a ticket's carries its id, a review's its id in the
+ * payload, beside what `payload` adds (a reset's folders).
+ */
+export function queuePreviewCommand(
+  db: Db,
+  owner: WorkspaceOwner,
+  type: string,
+  payload: Record<string, unknown> = {},
+): void {
   db.insert(schema.commands)
     .values(
       'ticketId' in owner
-        ? { type, ticketId: owner.ticketId }
-        : { type, payload: { reviewId: owner.reviewId } },
+        ? {
+            type,
+            ticketId: owner.ticketId,
+            payload: Object.keys(payload).length > 0 ? payload : null,
+          }
+        : { type, payload: { ...payload, reviewId: owner.reviewId } },
     )
     .run();
 }

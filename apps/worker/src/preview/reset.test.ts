@@ -6,6 +6,7 @@ import {
   getPreview,
   migrateDb,
   schema,
+  recordDataFolders,
   updatePreview,
   type ContainerRuntime,
   type Db,
@@ -29,6 +30,8 @@ let db: Db;
 let ticketId: number;
 /** The compose calls, without the helper's `docker compose` prefix. */
 let composed: string[];
+/** The folders the plain helpers' scripts got (`$1`…). */
+let scripted: string[][];
 let buildExit: number;
 
 /** Compose answers `config` with the resolved file; `build` exits with `buildExit`, the rest 0. */
@@ -40,6 +43,7 @@ const runtime = {
   async *runHelper(spec: HelperSpec): AsyncGenerator<string, ExecResult> {
     await Promise.resolve();
     if (spec.command[0] !== 'docker') {
+      scripted.push(spec.command.slice(4));
       return { exitCode: 0, stderr: '' };
     }
     const command = spec.command.slice(4).join(' ');
@@ -93,6 +97,7 @@ beforeEach(() => {
     .run();
   updatePreview(db, { ticketId }, { status: 'failed', error: 'relation "users" is broken' });
   composed = [];
+  scripted = [];
   buildExit = 0;
 });
 
@@ -125,4 +130,17 @@ test('a reset during a step touches nothing: the agent uses its services', async
   expect(composed).toEqual([]);
   expect(getPreview(db, { ticketId })?.status).toBe('failed');
   expect(events('preview_busy')).toHaveLength(1);
+});
+
+test('the data folders chosen, among the ones found, are emptied after the take-down', async () => {
+  recordDataFolders(db, { ticketId }, ['data']);
+  await resetPreview(deps(), { ticketId }, ['data', 'src']);
+  expect(scripted).toContainEqual(['data']);
+  expect(scripted.flat()).not.toContain('src');
+  expect(events('preview_reset')).toEqual([
+    {
+      message:
+        'Preview reset: its containers, volumes and built images were removed, and data emptied',
+    },
+  ]);
 });
