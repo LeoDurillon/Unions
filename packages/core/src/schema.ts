@@ -101,6 +101,8 @@ export const tickets = sqliteTable(
     /** The item's id in that tracker (a Notion page id) and its link. */
     originId: text('origin_id'),
     originUrl: text('origin_url'),
+    /** When a cancel closed the issue and pull requests on GitHub (once: they can be reopened). */
+    githubClosedAt: integer('github_closed_at'),
     /** When the draft PR was marked ready for review (set once, after the final approval). */
     prReadyAt: integer('pr_ready_at'),
     /**

@@ -89,6 +89,7 @@ type GitHubPayloads = {
   };
   pull_request_merged: PullRequestNumber;
   pull_request_closed: PullRequestNumber;
+  ticket_closed_on_github: { issueNumber: number | null; pullRequests: number[] };
   pull_request_checks_changed: Pick<
     (typeof tables.tickets)['$inferSelect'],
     'prChecksState' | 'prChecksSha'

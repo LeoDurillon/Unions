@@ -58,6 +58,10 @@ function pullStatus(
   ticket: Ticket,
   remoteItem: { item: RemoteItem; info: ProjectInfo },
 ): void {
+  // Closing its issue can move the card (GitHub's "item closed" workflow): nothing to revert.
+  if (ticket.phase.kind === 'cancelled') {
+    return;
+  }
   const { item, info } = remoteItem;
   const names = project.config.statusOptions;
   const remote = boardStatusFor(names, item.status);

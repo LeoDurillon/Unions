@@ -15,6 +15,7 @@ import {
 import { and, eq, isNull } from 'drizzle-orm';
 
 import type { GitHubApi, ProjectInfo, RepoRef } from './api';
+import { closeWhenCancelled } from './close-cancelled';
 import { pushDependency } from './dependency';
 import { applyRemoteItem } from './inbound';
 import { markReadyWhenDone, refreshPullRequest } from './pull-request';
@@ -143,11 +144,17 @@ export class GitHubSync {
   }
 
   private async pushTicket(project: Project, ticketId: number): Promise<void> {
+    const { phase, issueNumber } = getTicket(this.db, ticketId);
+    // Cancelled before it had an issue: nothing to open just to close.
+    if (phase.kind === 'cancelled' && issueNumber === null) {
+      return;
+    }
     await this.ensureIssue(project, ticketId);
     await this.pushStatus(project, ticketId);
     await this.pushComments(project, ticketId);
     await pushDependency(this.db, this.api, repoOf(project), getTicket(this.db, ticketId));
     await markReadyWhenDone(this.db, this.api, repoOf(project), getTicket(this.db, ticketId));
+    await closeWhenCancelled(this.db, this.api, repoOf(project), getTicket(this.db, ticketId));
   }
 
   private async ensureIssue(project: Project, ticketId: number): Promise<void> {

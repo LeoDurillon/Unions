@@ -356,7 +356,7 @@
   diff changed. A paused rebase keeps its rebased branch and push lease (`resumeState`).
 - `github/`: `api.ts` is the narrow `GitHubApi` the worker depends on, `octokit-api.ts` the real client,
   `fake-api.ts` the in-memory one for tests, `sync.ts` the mirror (issue, Status field, one comment per step,
-  pull of title/description and "move to In Progress"; `dependency.ts` pushes a ticket's parent as "blocked by"), `queries.ts` the GraphQL. `clients.ts` builds each
+  pull of title/description and "move to In Progress"; `close-cancelled.ts` closes a cancelled ticket's open pull requests and its issue, once (`tickets.github_closed_at`, set for tickets cancelled before this existed by the migration, so they are not closed retroactively); `dependency.ts` pushes a ticket's parent as "blocked by"), `queries.ts` the GraphQL. `clients.ts` builds each
   project's API from its credentials (`projectGitHubAuth`); projects without any fall back to `GITHUB_TOKEN`, else
   their sync is off. GraphQL changes must be validated
   against GitHub's schema, and new sync behavior needs a test against the fake.

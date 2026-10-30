@@ -3,6 +3,7 @@ import type {
   ChecksState,
   GitHubApi,
   PullRequestChecks,
+  IssueCloseReason,
   IssueRef,
   IssueText,
   ProjectInfo,
@@ -27,6 +28,7 @@ type FakeIssue = {
   blockedBy: number[];
   /** Unset: open. */
   state?: 'closed';
+  closeReason?: IssueCloseReason;
 };
 
 const DEFAULT_INFO: ProjectInfo = {
@@ -199,9 +201,21 @@ export class FakeGitHubApi extends FakeThreads implements GitHubApi {
     return pull;
   }
 
-  closeIssue(_repo: RepoRef, number: number): Promise<void> {
+  closeIssue(
+    _repo: RepoRef,
+    number: number,
+    reason: IssueCloseReason = 'completed',
+  ): Promise<void> {
     this.calls.push('closeIssue');
-    this.issueByNumber(number).state = 'closed';
+    const issue = this.issueByNumber(number);
+    issue.state = 'closed';
+    issue.closeReason = reason;
+    return Promise.resolve();
+  }
+
+  closePullRequest(_repo: RepoRef, number: number): Promise<void> {
+    this.calls.push('closePullRequest');
+    this.pullByNumber(number).state = 'closed';
     return Promise.resolve();
   }
 

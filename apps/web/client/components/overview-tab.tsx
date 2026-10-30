@@ -51,6 +51,7 @@ export function OverviewTab({
           <Button
             variant="danger"
             disabled={command.isPending}
+            title="Stops the ticket, and closes its issue and open pull requests on GitHub"
             onClick={() => {
               command.mutate({ type: 'cancel' });
             }}

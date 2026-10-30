@@ -1,7 +1,7 @@
 // The issue and pull request changes of the worker's GitHub client (issue text, PR title and base, labels, reviewers, assignees) and its pull requests by branch: the base of `OctokitGitHubApi`.
 import { RequestError, type Octokit } from 'octokit';
 
-import type { IssueText, PullRequestRef, RepoRef } from './api';
+import type { IssueCloseReason, IssueText, PullRequestRef, RepoRef } from './api';
 
 const NOT_FOUND = 404;
 
@@ -60,8 +60,21 @@ export class OctokitPullRequestChanges {
     return data.updated_at;
   }
 
-  async closeIssue(repo: RepoRef, number: number): Promise<void> {
-    await this.octokit.rest.issues.update({ ...repo, issue_number: number, state: 'closed' });
+  async closeIssue(
+    repo: RepoRef,
+    number: number,
+    reason: IssueCloseReason = 'completed',
+  ): Promise<void> {
+    await this.octokit.rest.issues.update({
+      ...repo,
+      issue_number: number,
+      state: 'closed',
+      state_reason: reason,
+    });
+  }
+
+  async closePullRequest(repo: RepoRef, number: number): Promise<void> {
+    await this.octokit.rest.pulls.update({ ...repo, pull_number: number, state: 'closed' });
   }
 
   async updatePullRequestBase(repo: RepoRef, number: number, base: string): Promise<void> {

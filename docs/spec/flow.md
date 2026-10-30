@@ -57,5 +57,7 @@
    "On the pull request" before the line comments. `review_comments.github_url` makes a re-import skip what is
    already there. HTML comments and layout tags are dropped from GitHub text (`githubText`). Sent, imported comments
    ask the implementer for a reply to their author once its revision is pushed (`reply_status = 'requested'`).
+   Cancelling a ticket closes its open pull requests (a stack's too) and its issue as not planned, once its agent
+   stopped; merged pull requests and the branch stay, and what is reopened on GitHub is left alone.
 6. On archive (or project deletion) the containers and volumes are removed. Done alone keeps them, so the
    preview still works after approval.

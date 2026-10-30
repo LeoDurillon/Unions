@@ -10,6 +10,8 @@ import type { GitHubStack } from '@union/core/github-stacks';
 
 export type { GitHubStack } from '@union/core/github-stacks';
 
+export type IssueCloseReason = 'completed' | 'not_planned';
+
 export type RepoRef = { owner: string; repo: string };
 
 export type IssueRef = { number: number; nodeId: string };
@@ -129,8 +131,10 @@ export type GitHubApi = {
   unstack(repo: RepoRef, stackNumber: number): Promise<void>;
   /** The GitHub stack the pull request is in; null when none. */
   pullRequestStack(repo: RepoRef, number: number): Promise<GitHubStack | null>;
-  /** Closes the issue, as completed: a stack's last slice merged without closing it. */
-  closeIssue(repo: RepoRef, number: number): Promise<void>;
+  /** Closes the issue: completed when a stack's last slice merged, not planned when its ticket is cancelled. */
+  closeIssue(repo: RepoRef, number: number, reason?: IssueCloseReason): Promise<void>;
+  /** Closes the pull request without merging it. */
+  closePullRequest(repo: RepoRef, number: number): Promise<void>;
   /** Adds labels to an issue or pull request; GitHub creates the ones the repository lacks. */
   addLabels(repo: RepoRef, number: number, labels: string[]): Promise<void>;
   /** Removes a label; does nothing if the issue or pull request does not have it. */
