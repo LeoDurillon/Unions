@@ -48,7 +48,7 @@ export async function runCodeStep(
   step: keyof typeof CODE_STEPS,
 ): Promise<StepResult> {
   if (step === 'implement') {
-    await startStepPreview(deps, context.ticket.id);
+    await startStepPreview(deps, context.ticket.id, context.signal);
   }
   return withAgentServices(deps, context, (stepDeps) => CODE_STEPS[step](stepDeps, context));
 }

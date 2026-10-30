@@ -1,7 +1,15 @@
-// Starts the ticket's preview before an implementation step when the project asks for it, and gives a step's commands its addresses.
-import { getPreview, getTicket, schema, type ContainerRuntime, type Db } from '@union/core';
+// Installs and starts the ticket's preview before an implementation step when the project asks for it, and gives a step's commands its addresses.
+import {
+  getPreview,
+  getTicket,
+  schema,
+  updatePreview,
+  type ContainerRuntime,
+  type Db,
+} from '@union/core';
 import { eq } from 'drizzle-orm';
 
+import { runInstall } from './gate';
 import { previewEnv } from './preview-env';
 import { withEnvironment } from './preview/background';
 import { previewSettings } from './preview/compose';
@@ -10,26 +18,39 @@ import { containerNames, ensureTicketContainer, type ProvisionConfig } from './p
 
 type StepDeps = { db: Db; runtime: ContainerRuntime; config: ProvisionConfig };
 
-function startsForImplementation(db: Db, projectId: number): boolean {
-  const project = db.select().from(schema.projects).where(eq(schema.projects.id, projectId)).get();
-  return project?.config.preview?.startForImplementation === true;
-}
-
 /**
- * Before an implementation step, the preview starts (in the ticket's container, provisioned first:
- * the preview runs from its workspace) unless it runs already. Never fails the step: a preview that
+ * Before an implementation step, the project's install command runs and the preview starts (in the
+ * ticket's container, provisioned first: the preview runs from its workspace, and its services from
+ * the dependencies installed there) unless it runs already. Never fails the step: a preview that
  * cannot start keeps its reason on the ticket's panel, and the agent works without.
  */
-export async function startStepPreview(deps: StepDeps, ticketId: number): Promise<void> {
+export async function startStepPreview(
+  deps: StepDeps,
+  ticketId: number,
+  signal?: AbortSignal,
+): Promise<void> {
   const ticket = getTicket(deps.db, ticketId);
+  const project = deps.db
+    .select()
+    .from(schema.projects)
+    .where(eq(schema.projects.id, ticket.projectId))
+    .get();
   if (
-    !startsForImplementation(deps.db, ticket.projectId) ||
+    project?.config.preview?.startForImplementation !== true ||
     getPreview(deps.db, { ticketId })?.status === 'running'
   ) {
     return;
   }
   try {
-    await ensureTicketContainer(deps.db, deps.runtime, deps.config, ticket);
+    const { name } = await ensureTicketContainer(deps.db, deps.runtime, deps.config, ticket);
+    const { installCommand } = project.config;
+    const installError = installCommand
+      ? await runInstall(deps.runtime, name, installCommand, signal)
+      : null;
+    if (installError) {
+      updatePreview(deps.db, { ticketId }, { status: 'failed', error: installError });
+      return;
+    }
     await startPreview({ ...deps, settings: previewSettings() }, { ticketId });
   } catch {
     // The step provisions the container itself and reports what fails there.

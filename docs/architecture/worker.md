@@ -290,8 +290,8 @@
   (`agentServicesHint`). The same script (`preview/forwarder-script.ts`) is the preview router: a second process
   (`/tmp/union-hosts.*`) on the proxy's port, routing each connection by its first request's `Host` to the service
   (`preview/host-routes.ts`, from the preview row's `urls`), started by `startPreview` and `rejoinRunningPreview`.
-- `step-preview.ts`: with `config.preview.startForImplementation`, an implementation step starts the preview first
-  (never failing the step); every code step's commands get `previewEnv` (`preview-env.ts`: `BASE_URL`,
+- `step-preview.ts`: with `config.preview.startForImplementation`, an implementation step runs the install command, then
+  starts the preview (never failing the step; a failed install is the preview's reason and it does not start); every code step's commands get `previewEnv` (`preview-env.ts`: `BASE_URL`,
   `UNION_URL_<SERVICE>`) while the preview runs, and `previewHint` lists the addresses.
 - `preview/idle.ts`: stops running previews nobody visited for the project's `idleStopMinutes` (60 by default),
   from Traefik's per-router request counts (`UNION_PREVIEW_METRICS`, an entrypoint only the worker reaches); never

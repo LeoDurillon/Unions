@@ -73,7 +73,7 @@ A failure can be sent to the implementer as a revision (**Send the failure to th
 restarted or the agent worked on the ticket after the tests ran, the tab says the result may be out of date and
 offers only **Run again**: send a failure from tests run on the current code. A pull request's result can't be added to
 the review in that case either. With **Start the preview for implementation steps**, the
-preview also starts before each implementation run, and the agent is told to run the end-to-end tests its change
+project's install command runs and the preview starts before each implementation run, and the agent is told to run the end-to-end tests its change
 touches.
 
 E2e tests take a lot of memory, so they only run when you ask, one ticket at a time.
