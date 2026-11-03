@@ -1,7 +1,8 @@
 // A diagram's buttons: download it as SVG or PNG (light, whatever the screen shows), or copy its Mermaid source.
 import { useState, type ReactElement } from 'react';
 
-import { download, pngBlob, standaloneSvg, svgSize } from '../lib/diagram-export';
+import { pngBlob, standaloneSvg, svgSize } from '../lib/diagram-export';
+import { download } from '../lib/download';
 import { renderMermaid } from '../lib/mermaid-render';
 
 type Format = 'svg' | 'png';

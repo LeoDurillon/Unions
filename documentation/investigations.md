@@ -35,6 +35,12 @@ questions and its answers, and works in a fresh container, with a fresh clone fo
 
 **Run again** asks the latest question again, for example after the code changed.
 
+## Export it
+
+**Export** downloads the investigation as a Markdown file: its scope, model and tools, then every question with
+its answer, oldest first. A question still running or failed says so in place of its answer. Nothing is sent
+anywhere: the file is made in your browser.
+
 ## Turn it into a ticket
 
 **Create ticket** asks an agent to write a ticket from the whole investigation: a title, the problem, what to
