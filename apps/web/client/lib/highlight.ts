@@ -26,11 +26,10 @@ const BY_NAME: Record<string, string> = {
 export function languageFor(path: string): string | null {
   const name = (path.split('/').at(-1) ?? '').toLowerCase();
   const byName = BY_NAME[name] ?? (name.startsWith('dockerfile') ? 'dockerfile' : undefined);
-  if (byName !== undefined) {
-    return byName;
-  }
   const extension = name.includes('.') ? (name.split('.').at(-1) ?? '') : '';
-  return extension !== '' && lowlight.registered(extension) ? extension : null;
+  const language = byName ?? extension;
+  // `common` lacks some named languages (dockerfile, cmake): highlighting one throws.
+  return language !== '' && lowlight.registered(language) ? language : null;
 }
 
 function classesOf(node: ElementNode): string[] {
