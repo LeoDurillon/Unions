@@ -1,8 +1,12 @@
-// What still runs a custom agent: project flow presets that name it, and tickets not yet done whose flow has it.
+// What still runs a custom agent: project flow presets that name it, tickets not yet done whose flow has
+// it, and its review runs waiting or running.
+import { and, eq, inArray } from 'drizzle-orm';
+
 import type { Db } from './db';
 import { projectPresets } from './flows';
 import * as schema from './schema';
-import type { CustomStep } from './states';
+import { reviewAgentRuns } from './schema-review-agent-runs';
+import { customAgentId, type CustomStep } from './states';
 
 function presetUsers(db: Db, step: CustomStep): string[] {
   return db
@@ -30,7 +34,21 @@ function ticketUsers(db: Db, step: CustomStep): string[] {
     .map((ticket) => `ticket #${ticket.id}`);
 }
 
+function reviewRunUsers(db: Db, step: CustomStep): string[] {
+  const active = db
+    .select({ id: reviewAgentRuns.id })
+    .from(reviewAgentRuns)
+    .where(
+      and(
+        eq(reviewAgentRuns.agentId, customAgentId(step)),
+        inArray(reviewAgentRuns.status, ['queued', 'running']),
+      ),
+    )
+    .all();
+  return active.length === 0 ? [] : [`its review run ${active.map((run) => run.id).join(', ')}`];
+}
+
 /** Who still runs `step`, as the refusal names them; empty when it can go. */
 export function customAgentUsers(db: Db, step: CustomStep): string[] {
-  return [...presetUsers(db, step), ...ticketUsers(db, step)];
+  return [...presetUsers(db, step), ...ticketUsers(db, step), ...reviewRunUsers(db, step)];
 }

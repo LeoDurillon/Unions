@@ -33,6 +33,9 @@ test('remove_containers hands every container to the hook', () => {
     cancelReviewReport: () => {
       // Not used here.
     },
+    cancelReviewAgentRun: () => {
+      // Not used here.
+    },
     submitPullRequestReview: () => {
       // Not under test.
     },

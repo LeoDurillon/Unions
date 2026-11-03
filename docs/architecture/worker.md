@@ -181,6 +181,15 @@
   that are not there (a deleted file of the change stays an important file) and cuts ranges to the file. All it
   drops is counted in `dropped`. A ticket's lines go to its `agent_log`. Cancellation: the `cancel_review_report`
   command (`reportId`).
+- `review-agent-run.ts`: `ReviewAgentRunner` (in `review-runs.ts`, same slots) runs queued `review_agent_runs`, each
+  in its own throwaway `union-v<id>` (`review-agent-checkout.ts`): a pull request through `openTarget`, a ticket by
+  `exportBranch` of its branch and base from its container, cloned on the host (both kept as local branches),
+  checked out at the snapshot's head and copied in with the token-free `origin`; the ticket's container is only
+  read. `review-agent-setup.ts` then syncs the project's files and runs its install command, neither for a fork's
+  pull request (`fromFork`). The prompt (`review-agent-prompt.ts`): shared instructions and the agent's lessons,
+  its prompt, the specs (`specSections`), `checkedOutChange` with the hunk index (`withHunkIndex`), the commits,
+  how the checkout was prepared, and the citing rules, always appended. The answer is kept as is; `recover` fails
+  interrupted runs and removes their containers; cancel: the `cancel_review_agent_run` command (`runId`).
 - `pr-description-run.ts` (the runner: `pr-description-runner.ts`): `PrDescriptionRunner` (same slots) rewrites a PR's description in the ticket's
   container, resuming the implementer's session (`runResumable`), from GitHub's current description, the PR template
   and the branch; a ticket's rewrites run one at a time (`claimPrDescription`). On a split ticket each open slice's

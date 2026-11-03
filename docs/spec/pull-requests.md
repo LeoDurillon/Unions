@@ -24,7 +24,8 @@ whole stack** take the stack as GitHub has it.
 **Open review** opens the same review page as a ticket's (file list, highlighted unified or split diff, comments on
 a line or a block of lines), with these tabs: **Description** (the pull request's description) and **Comments** (its
 review summaries, conversation comments and line threads, each to reply to: see [Replies to comments](#replies-to-comments)), both read from GitHub once per opening,
-**Notion** once the review is linked to a page (**Notion (2)** for two), **Report** (see [Spec report](#spec-report)), **Preview** (see [Previews of pull requests under review](preview-environments.md#previews-of-pull-requests-under-review)), then **Diff**. The pull request's head commit and files are read from GitHub when the page opens and
+**Notion** once the review is linked to a page (**Notion (2)** for two), **Report** (see [Spec report](#spec-report)), **Agents** (the user's review agents, see
+[Custom agents](custom-agents.md#review-agents)), **Preview** (see [Previews of pull requests under review](preview-environments.md#previews-of-pull-requests-under-review)), then **Diff**. The pull request's head commit and files are read from GitHub when the page opens and
 kept on the review (`current_reviews.files`, `head_sha`): comments are checked against those lines, and those
 written on an earlier head read as outdated. **Send review** offers **Comment**, **Approve** and **Request changes**;
 each queues a `submit_pr_review` command with that verdict, and the worker posts one review of that kind on the pull

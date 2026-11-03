@@ -9,7 +9,7 @@ Some settings apply to every project (**Union settings**, at the bottom of the s
 | Setting                           | Where                               | Applies to    |
 | --------------------------------- | ----------------------------------- | ------------- |
 | Prompts, models, effort and tools | Union settings → one page per agent | Every project |
-| Custom agents                     | Union settings → **New agent**      | Every project |
+| Custom and review agents          | Union settings → **New agent**      | Every project |
 | Tools list and connectors         | Union settings → Tools, Connectors  | Every project |
 | Project instructions              | Settings → Instructions             | One project   |
 | Lessons (memory)                  | Settings → Memory                   | One project   |
@@ -89,19 +89,48 @@ into the container.
 
 ## Custom agents
 
-Add a step of your own, for example "Check the plan for security risks":
+**Union settings → New agent** asks first what kind of agent you want. You cannot change the kind later.
 
-1. **Union settings → New agent**: a name and a role, in your own words.
+- **Ticket step**: a step of a ticket's flow, for example "Check the plan for security risks".
+- **Review agent**: an agent you run yourself on a review page, for example "Say whether this pull request can be
+  merged".
+
+For either kind:
+
+1. Give it a name and a role, in your own words.
 2. An agent writes the prompt from that role, in the style of the built-in ones. The page says "Writing the
-   prompt…" until it is done.
-3. Place the agent in a flow (**Settings → Flows**, or a ticket's Custom flow), anywhere before the final review.
+   prompt…" until it is done. Read the prompt before you use the agent.
+3. **Regenerate** writes the prompt again from the role.
 
-A custom agent runs like a planning step: its report is a tab, you approve it or ask for changes, it gets a comment
-on the issue, and the steps after it read its approved report. It reads the code but never changes it. Placed after
-the implementation, it reads the branch's diff.
+Ticket steps are listed under **Custom agents** in Union settings, review agents under **Review agents**.
 
-**Regenerate** writes the prompt again from the role. **Delete** is refused while a flow or an unfinished ticket
-uses the agent.
+### Ticket steps
+
+Place the agent in a flow (**Settings → Flows**, or a ticket's Custom flow), anywhere before the final review.
+
+It runs like a planning step: its report is a tab, you approve it or ask for changes, it gets a comment on the
+issue, and the steps after it read its approved report. It reads the code but never changes it. Placed after the
+implementation, it reads the branch's diff.
+
+**Delete** is refused while a flow or an unfinished ticket uses the agent.
+
+### Review agents
+
+A review agent runs when you ask, from **Run agent** on the review page of a pull request or of a ticket's branch.
+It reads the review's specs, the change and its commits, and answers in markdown. A file it names, like
+`src/app.ts:12-30`, opens that part of the diff when you click it.
+
+It works in its own copy of the change, which is thrown away when it finishes:
+
+- The project's files and its install command are set up first, so the agent can run commands there: build, type
+  checks, lint, tests. Your ticket's workspace is never touched.
+- It cannot push or post anything to GitHub.
+- On a pull request from a fork, nothing is installed and the agent is told not to run the fork's code: it only
+  reads it.
+
+Its tools start with Bash, so it can run those commands. It can never edit files.
+
+**Delete** is refused while one of its runs waits or runs. The answers it already gave stay on the review pages.
 
 ## Project instructions
 

@@ -66,19 +66,16 @@ function view(report: ReviewReport | null, target: GroupingTarget): ReportView |
 }
 
 /**
- * The specs a report reads: the review's, as the Specs bar shows them, without the removed ones and
+ * The specs an agent reads: the review's, as the Specs bar shows them, without the removed ones and
  * the ones whose source could not be read; numbered for the agent to cite, images out, one another
- * holds sent once (`distinctSpecs`).
+ * holds sent once (`distinctSpecs`). Empty when none can be read.
  */
-function reportSpecsOf(views: ReviewSpecView[]): ReportSpec[] {
+export function readableSpecs(views: ReviewSpecView[]): ReportSpec[] {
   const readable = views.flatMap((spec) =>
     !spec.removed && spec.current !== null && spec.current.trim() !== ''
       ? [{ kind: spec.kind, label: spec.label, text: spec.current.trim() }]
       : [],
   );
-  if (readable.length === 0) {
-    throw fail(CONFLICT, 'No spec can be read: add one in the Specs bar first.');
-  }
   if (readable.length > MAX_SPECS) {
     throw fail(CONFLICT, `At most ${MAX_SPECS} specs: remove some in the Specs bar.`);
   }
@@ -89,6 +86,15 @@ function reportSpecsOf(views: ReviewSpecView[]): ReportSpec[] {
       CONFLICT,
       `${long.label} is longer than ${MAX_SPEC_CHARS} characters: edit it in the Specs bar to keep the part that matters.`,
     );
+  }
+  return specs;
+}
+
+/** A report needs at least one spec to check the change against. */
+function reportSpecsOf(views: ReviewSpecView[]): ReportSpec[] {
+  const specs = readableSpecs(views);
+  if (specs.length === 0) {
+    throw fail(CONFLICT, 'No spec can be read: add one in the Specs bar first.');
   }
   return specs;
 }

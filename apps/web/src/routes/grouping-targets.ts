@@ -1,5 +1,5 @@
-// The grouping, explanation, spec and report routes, under a ticket and under a pull request under
-// review.
+// The grouping, explanation, spec, report and review agent routes, under a ticket and under a pull
+// request under review.
 import {
   getTicket,
   notionMarkdown,
@@ -13,6 +13,7 @@ import type { Context, Hono } from 'hono';
 
 import type { OnboardingGitHub } from '../github-onboarding';
 import { fail, NOT_FOUND, requireId } from '../http';
+import { reviewAgentRunRoutes } from './review-agent-runs';
 import { reviewExplanationRoutes } from './review-explanations';
 import { reviewGroupingRoutes, type GroupingTarget } from './review-groupings';
 import { reviewReportRoutes } from './review-reports';
@@ -150,4 +151,18 @@ export function ticketReportRoutes(db: Db, github: OnboardingGitHub, notion: Not
 /** `/api/projects/:projectId/pull-requests/reviews/:number/reports`. */
 export function pullRequestReportRoutes(db: Db, github: OnboardingGitHub, notion: NotionApi): Hono {
   return reviewReportRoutes({ db, github, notion }, (c) => pullRequestTarget(db, c));
+}
+
+/** `/api/tickets/:id/review-agents`. */
+export function ticketReviewAgentRoutes(db: Db, github: OnboardingGitHub, notion: NotionApi): Hono {
+  return reviewAgentRunRoutes({ db, github, notion }, (c) => ticketTarget(db, c));
+}
+
+/** `/api/projects/:projectId/pull-requests/reviews/:number/review-agents`. */
+export function pullRequestReviewAgentRoutes(
+  db: Db,
+  github: OnboardingGitHub,
+  notion: NotionApi,
+): Hono {
+  return reviewAgentRunRoutes({ db, github, notion }, (c) => pullRequestTarget(db, c));
 }

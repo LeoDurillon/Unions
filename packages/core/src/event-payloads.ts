@@ -155,6 +155,13 @@ type ReviewPayloads = {
     status: Column<typeof tables.reviewReports, 'status'>;
     error: string | null;
   };
+  review_agent_run_changed: {
+    runId: number;
+    agentId: number;
+    reviewId: number | null;
+    status: Column<typeof tables.reviewAgentRuns, 'status'>;
+    error: string | null;
+  };
   review_explanation_changed: {
     explanationId: number;
     reviewId: number | null;

@@ -12,7 +12,12 @@ Custom agents (`custom-agents.ts`, table `custom_agents`): their step is `agent_
 under `agent_<id>` like a built-in's; `custom-agent-config.ts` gives their defaults (the written prompt, Sonnet,
 `CUSTOM_AGENT_TOOLS`). `nextStep` follows the flow's own order; `flowProblems` takes the custom steps a flow may
 name (`flowReadySteps`: live, prompt written); `flow-edit.ts` (browser-safe) edits a flow in the UI. The prompt
-writer's prompt and parsing are `prompt-writer.ts`; deleting checks `custom-agent-usage.ts`.
+writer's prompt and parsing are `prompt-writer.ts` (told the agent's kind); deleting checks `custom-agent-usage.ts`.
+An agent's `kind` (`step` | `review`) is fixed at creation: flows name only step agents (`flowReadySteps`), review
+pages run only review agents (`readyReviewAgents`). Review agents' runs are `review-agent-runs.ts` (table
+`review_agent_runs`: owner, agent, the specs sent, status, `headSha`, the markdown `output`; queued by the web, one
+at a time per change, claimed and finished by the worker, `review_agent_run_changed` on each change);
+`diff-links.ts` (browser-safe, `@union/core/diff-links`) reads a `path:line` reference of their answers.
 `investigations.ts`: one-off agent runs on a custom prompt (records, claim, finish, cancel, follow-ups); defaults
 in the browser-safe `investigation-defaults.ts`.
 `pr-stacks.ts` (browser-safe, `@union/core/pr-stacks`): `stackPlaces` and `placedStacks` group pull requests by

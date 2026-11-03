@@ -1,12 +1,13 @@
 // Markdown as the panel shows it.
 import {
   isValidElement,
+  useMemo,
   useState,
   type ComponentProps,
   type ReactElement,
   type ReactNode,
 } from 'react';
-import ReactMarkdown, { defaultUrlTransform } from 'react-markdown';
+import ReactMarkdown, { defaultUrlTransform, type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
 import { GITHUB_REHYPE } from '../lib/github-markdown';
@@ -77,7 +78,22 @@ function Table({ children }: { children?: ReactNode }): ReactElement {
   );
 }
 
-const COMPONENTS = { img: Image, input: TaskBox, pre: CodeBlock, table: Table };
+const COMPONENTS: Components = { img: Image, input: TaskBox, pre: CodeBlock, table: Table };
+
+/** Turns an inline code span into something else (a link), or null to keep it as code. */
+type RenderCode = (text: string) => ReactNode | null;
+
+/** The components with inline code given to `renderCode`; a block's code (it ends with a newline) is left alone. */
+function withCode(renderCode: RenderCode | undefined): Components {
+  if (!renderCode) {
+    return COMPONENTS;
+  }
+  function Code({ children, ...props }: ComponentProps<'code'>): ReactNode {
+    const inline = typeof children === 'string' && !children.includes('\n') && !props.className;
+    return (inline ? renderCode?.(children) : null) ?? <code {...props}>{children}</code>;
+  }
+  return { ...COMPONENTS, code: Code };
+}
 
 /**
  * Markdown as the panel shows it. `files` maps a ticket file's name to its address, for the
@@ -88,6 +104,7 @@ export function Markdown({
   files,
   compact = false,
   github = false,
+  renderCode,
 }: {
   children: string;
   files?: Record<string, string>;
@@ -95,7 +112,10 @@ export function Markdown({
   compact?: boolean;
   /** Text from GitHub: its HTML (folds, images) is rendered, sanitized, and its alerts styled. */
   github?: boolean;
+  /** Inline code spans it turns into something else (links to the diff); null keeps a span as code. */
+  renderCode?: RenderCode;
 }): ReactElement {
+  const components = useMemo(() => withCode(renderCode), [renderCode]);
   const transform = (url: string): string =>
     url.startsWith(ATTACHMENT)
       ? (files?.[url.slice(ATTACHMENT.length)] ?? '')
@@ -106,7 +126,7 @@ export function Markdown({
         remarkPlugins={[remarkGfm]}
         rehypePlugins={github ? GITHUB_REHYPE : undefined}
         urlTransform={transform}
-        components={COMPONENTS}
+        components={components}
       >
         {children}
       </ReactMarkdown>

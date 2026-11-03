@@ -78,19 +78,24 @@ function RoleField({
   );
 }
 
-/** Deleting is refused while a project's flow or an unfinished ticket runs the agent. */
+/**
+ * Deleting is refused while a project's flow or an unfinished ticket runs the agent, or one of its
+ * review runs waits or runs.
+ */
 function DeleteAgent({
   actions,
-  name,
+  custom,
 }: {
   actions: CustomAgentActions;
-  name: string;
+  custom: CustomAgentInfo;
 }): ReactElement {
+  const { name } = custom;
   return (
     <div className="space-y-2 rounded-md border border-red-200 p-3 dark:border-red-900">
       <p className="text-sm">
-        Deleting {name} removes it from the menus and the flow pickers. Finished tickets keep its
-        tab.
+        {custom.kind === 'review'
+          ? `Deleting ${name} removes it from the menus and from Run agent on review pages. The answers it already gave stay there.`
+          : `Deleting ${name} removes it from the menus and the flow pickers. Finished tickets keep its tab.`}
       </p>
       <Button
         disabled={actions.remove.isPending}
@@ -114,5 +119,5 @@ export function CustomAgentRole({ config }: { config: AgentConfig }): ReactEleme
 
 export function CustomAgentDanger({ config }: { config: AgentConfig }): ReactElement | null {
   const actions = useCustomAgent(config.custom?.id ?? 0);
-  return config.custom ? <DeleteAgent actions={actions} name={config.custom.name} /> : null;
+  return config.custom ? <DeleteAgent actions={actions} custom={config.custom} /> : null;
 }

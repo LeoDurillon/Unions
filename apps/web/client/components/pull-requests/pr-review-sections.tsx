@@ -1,8 +1,9 @@
-// The tabs a pull request review shows before its diff: Notion once it is linked to a page, the spec
-// report last.
+// The tabs a pull request review shows before its diff: Notion once it is linked to a page, then the
+// spec report and the review agents last.
 import type { CurrentReview } from '../../../src/api-types';
 import type { ReviewTarget } from '../../lib/review-target';
 import { ReportTab } from '../review/report-tab';
+import { ReviewAgentsTab } from '../review/review-agents-tab';
 import type { ReviewSection } from '../review/review-page';
 import { ReviewCommentsTab } from './review-comments-tab';
 import { ReviewDescription } from './review-description';
@@ -37,6 +38,11 @@ export function prReviewSections(target: ReviewTarget, review: CurrentReview): R
       id: 'report',
       label: 'Report',
       content: ({ openDiff }) => <ReportTab target={target} openDiff={openDiff} />,
+    },
+    {
+      id: 'agents',
+      label: 'Agents',
+      content: ({ openDiff }) => <ReviewAgentsTab target={target} openDiff={openDiff} />,
     },
   ];
 }

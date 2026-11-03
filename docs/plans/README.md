@@ -58,6 +58,9 @@ and linked.
 - [Custom agents](custom-agents.md): the user describes an agent's role, the worker writes its prompt, the user
   picks its tools and places it in a flow. Built (branch `custom-agents`), steps 1 to 7; a run after the
   implementation is left to try.
+- [Custom review agents](custom-review-agents.md): a custom agent of the Review kind, run on demand on a review
+  page in a throwaway checkout, allowed `Bash` to build and test, answering in markdown whose `path:line`
+  references open the diff. Built (branch `custom-review-agents`, 2026-11-03); a run with Claude is left to try.
 - [Notion comments on the ticket](notion-comments.md): a Notion tab lists the page's open discussions (page and
   inline); the user replies or starts one (the worker posts), or adds a discussion to the review for the
   implementer. Planned (2026-10-18), decisions to confirm.

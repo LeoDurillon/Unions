@@ -6,20 +6,20 @@ import {
   reportMarkdown,
   VERDICT_LABELS,
 } from '@union/core/review-report-markdown';
-import { useState, type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 import type { ReportView } from '../../../src/routes/review-reports';
 import type { Tone } from '../../lib/labels';
 import type { ReviewTarget } from '../../lib/review-target';
 import { useReviewReport } from '../../lib/use-review-report';
 import { Badge, Button, ErrorText } from '../ui';
+import { CopyMarkdownButton } from './copy-markdown-button';
 
 const VERDICT_TONES: Record<NonNullable<ReportView['result']>['verdict'], Tone> = {
   matches: 'green',
   partial: 'amber',
   diverges: 'red',
 };
-const COPIED_MS = 2000;
 
 /** What the host dropped from the agent's answer, said once when there is any. */
 function droppedNote(dropped: number): string {
@@ -39,31 +39,6 @@ function specsRead(specs: ReportView['specs']): string {
       return host ? `${spec.label} (same as ${host.label}, not sent again)` : spec.label;
     })
     .join(', ');
-}
-
-function CopyMarkdown({ report }: { report: ReportView }): ReactElement | null {
-  const [copied, setCopied] = useState(false);
-  const { result } = report;
-  if (!result) {
-    return null;
-  }
-  const copy = async (): Promise<void> => {
-    await navigator.clipboard.writeText(reportMarkdown(result, report.specs));
-    setCopied(true);
-    setTimeout(() => {
-      setCopied(false);
-    }, COPIED_MS);
-  };
-  return (
-    <Button
-      variant="ghost"
-      onClick={() => {
-        void copy();
-      }}
-    >
-      {copied ? 'Copied' : 'Copy as markdown'}
-    </Button>
-  );
 }
 
 /** One draft on the whole change asking for what is missing, partial or done differently. */
@@ -125,7 +100,7 @@ export function ReportHeader({
           <span className="text-sm text-zinc-500">{reportCounts(result)}</span>
           <span className="ml-auto flex flex-wrap items-center gap-2">
             <AddGaps target={target} report={report} />
-            <CopyMarkdown report={report} />
+            <CopyMarkdownButton text={() => reportMarkdown(result, report.specs)} />
             {report.outdated ? null : <Button onClick={onAgain}>Run again</Button>}
           </span>
         </div>

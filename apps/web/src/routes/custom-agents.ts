@@ -1,4 +1,4 @@
-// The API routes for custom agents: create one (the worker writes its prompt), rename it, rewrite its role, regenerate, delete.
+// The API routes for custom agents: create one of a kind (a ticket step or a review agent; the worker writes its prompt), rename it, rewrite its role, regenerate, delete.
 import {
   createCustomAgent,
   CustomAgentError,
@@ -48,7 +48,11 @@ export function customAgentRoutes(db: Db): Hono {
   routes.get('/names', (c) => c.json(customAgentNames(db)));
   routes.post('/', async (c) => {
     const body = await readObject(c.req.raw);
-    const input = { name: textOf(body, 'name') ?? '', role: textOf(body, 'role') ?? '' };
+    const input = {
+      name: textOf(body, 'name') ?? '',
+      role: textOf(body, 'role') ?? '',
+      kind: textOf(body, 'kind'),
+    };
     const agent = refusals(() => createCustomAgent(db, input));
     return c.json(configOf(db, agent.id), CREATED);
   });

@@ -99,10 +99,15 @@ export function isAgentId(value: string): value is BuiltInAgentId {
 const CUSTOM_DESCRIPTION =
   "Your own agent: it runs where a project's flow places it, writes a markdown report you approve or send back, and changes no file. Edits apply to its next run, on tickets already running too.";
 
+const REVIEW_AGENT_DESCRIPTION =
+  "Your own review agent: run it from a review page (Run agent), on a pull request or a ticket's branch. It works in a copy of the change that is thrown away after, may run commands there (build, tests), and answers in markdown whose file references open the diff. Edits apply to its next run.";
+
 /** A built-in agent's label; a custom agent is shown by its name. */
 export function agentLabel(config: Pick<AgentConfig, 'agent' | 'custom'>): AgentLabel {
   if (config.custom) {
-    return { title: config.custom.name, description: CUSTOM_DESCRIPTION };
+    const description =
+      config.custom.kind === 'review' ? REVIEW_AGENT_DESCRIPTION : CUSTOM_DESCRIPTION;
+    return { title: config.custom.name, description };
   }
   return isAgentId(config.agent)
     ? AGENT_LABELS[config.agent]

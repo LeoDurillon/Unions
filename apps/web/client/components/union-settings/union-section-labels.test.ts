@@ -33,7 +33,12 @@ test('the menu order puts PR description before Review comments', () => {
 
 const SECURITY = {
   agent: 'agent_2',
-  custom: { name: 'Security pass' },
+  custom: { name: 'Security pass', kind: 'step' },
+} as unknown as AgentConfig;
+
+const MERGE = {
+  agent: 'agent_3',
+  custom: { name: 'Merge readiness', kind: 'review' },
 } as unknown as AgentConfig;
 
 test('a custom agent has a page, after the built-in agents, named after it', () => {
@@ -52,4 +57,15 @@ test('the menu shows a Custom agents group before Tools only when there are some
   expect(navGroups([SECURITY]).find((group) => group.label === 'Custom agents')?.sections).toEqual([
     { id: 'agent_2', label: 'Security pass' },
   ]);
+});
+
+test('review agents get their own group, after the custom agents and before Tools', () => {
+  const groups = navGroups([SECURITY, MERGE]);
+  const labels = groups.map((group) => group.label);
+  expect(labels.indexOf('Custom agents')).toBe(labels.indexOf('Tools') - 2);
+  expect(labels.indexOf('Review agents')).toBe(labels.indexOf('Tools') - 1);
+  expect(groups.find((group) => group.label === 'Review agents')?.sections).toEqual([
+    { id: 'agent_3', label: 'Merge readiness' },
+  ]);
+  expect(navGroups([MERGE]).map((group) => group.label)).not.toContain('Custom agents');
 });

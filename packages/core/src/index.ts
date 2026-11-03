@@ -74,6 +74,7 @@ export * from './project-scripts';
 export * from './review-explanations';
 export * from './explanation-spec-parts';
 export * from './review-groupings';
+export * from './review-agent-runs';
 export * from './review-reports';
 export * from './review-report-specs';
 export * from './review-spec-lists';

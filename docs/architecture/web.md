@@ -94,8 +94,9 @@
 - Union settings (sidebar → Union settings) are the same frame (`settings/settings-frame.tsx`, `settings-nav.tsx`)
   over `?union=<section>`: one page per agent (`agents/agent-page.tsx`: prompt, model, effort, tools, one Save;
   Reset to default applies at once), Models (every agent's model and effort in a table, `union-settings/models-page.tsx`;
-  Save sends one `PUT /api/agents/:agent` per changed row), the custom agents (a "Custom agents" group,
-  `union-settings/union-nav-groups.ts`; New agent `new-agent-dialog.tsx` → `POST /api/agents/custom`, their page
+  Save sends one `PUT /api/agents/:agent` per changed row), the custom agents (a "Custom agents" group of ticket steps and a "Review agents" group,
+  `union-settings/union-nav-groups.ts`; New agent `new-agent-dialog.tsx` with the kind (`agent-kind-field.tsx`) →
+  `POST /api/agents/custom` (`kind`), their page
   adds `agents/custom-agent-card.tsx`: role, Regenerate, Delete; `GET /api/agents/custom/names` names their steps
   everywhere through `lib/use-custom-agents.ts`), Tools, Connectors and the GitHub App
   (`lib/union-settings-groups.ts` lists them; `openUnionSettings(section)` links to one). The page shown is in the
@@ -180,6 +181,14 @@
   the files under their groups; a file opened under a part shows only that part's hunks (`hunk-focus.tsx`,
   `lib/spec-hunks.ts`, "Show all" to see the rest) with each hunk header tagged with its parts, except on an
   outdated grouping.
+- Review agents: `routes/review-agent-runs.ts`, mounted as `/review-agents` beside the reports
+  (`grouping-targets.ts`, same `GroupingTarget` and refusal): `GET` the ready review agents, the newest run per
+  agent on the change (specs by name, `outdated`) and the refusal; `POST { agentId }` queues a `review_agent_runs`
+  row with the review's readable specs (`readableSpecs`, shared with the report, none needed; 409 when busy, 400
+  for an agent that is not a ready review agent); `POST /:runId/cancel` queues `cancel_review_agent_run`. The
+  client: the **Agents** tab after Report (`review/review-agents-tab.tsx`, `review-agent-run-card.tsx`,
+  `lib/use-review-agents.ts`, polled while a run works), its answer in `Markdown` with `renderCode`
+  (`review/diff-link-code.tsx`: a changed file's reference opens the Diff tab through `useOpenLines`).
 - Spec report: `routes/review-reports.ts` (mounted beside the groupings from `grouping-targets.ts`, on the same
   `GroupingTarget` and its refusal): `GET /reports` the newest report (the specs it read by name, the result, the
   agent's `raw` text of a failed run, `outdated` once the review's head moved), `POST /reports` reads the review's

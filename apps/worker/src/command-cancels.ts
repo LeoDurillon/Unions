@@ -7,6 +7,7 @@ import {
   cancelQueuedInvestigation,
   cancelQueuedPrDescription,
   cancelQueuedReport,
+  cancelQueuedReviewAgentRun,
   type Db,
 } from '@union/core';
 
@@ -58,6 +59,13 @@ const CANCELS: Record<
     queued: cancelQueuedReport,
     running: (hooks, id) => {
       hooks.cancelReviewReport(id);
+    },
+  },
+  cancel_review_agent_run: {
+    key: 'runId',
+    queued: cancelQueuedReviewAgentRun,
+    running: (hooks, id) => {
+      hooks.cancelReviewAgentRun(id);
     },
   },
   cancel_pr_description: {

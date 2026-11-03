@@ -24,7 +24,8 @@ An agent's prompt, model, effort and tools are resolved on every run (`packages/
   reads them on request.
 - The effort becomes `claude --effort`; null passes nothing, so Claude Code decides.
 - Custom agents (`agent_<id>`) take their defaults from `custom-agent-config.ts` (the written prompt, Sonnet,
-  `CUSTOM_AGENT_TOOLS`); `Edit`, `Write`, `NotebookEdit` and bare `Bash` are refused for them.
+  `CUSTOM_AGENT_TOOLS`, or `REVIEW_AGENT_TOOLS` with bare `Bash` for a review agent); `Edit`, `Write` and
+  `NotebookEdit` are refused for them, and bare `Bash` for a ticket step (`validateTools` reads the kind).
 
 Denied rules always win over a selected tool and are not editable. Every run gets `BASE_DENIED` (`agent.ts`: no
 push, no remote, no `gh`, no `curl`). Runs that work on the branch add `IMPLEMENT_DENIED` (`implement-loop.ts`: no
@@ -70,6 +71,7 @@ their own prompt from `sharedPrompt` and the agent's prompt, in the modules of t
 | `review_groups`                                       | ticket's, or `union-g<id>` for a PR | fresh                          | no      | `review-grouping.ts`                           |
 | `review_explain`                                      | ticket's, or `union-e<id>` for a PR | a ticket's follow-up resumes   | no      | `review-explain.ts`                            |
 | `review_report`                                       | ticket's, or `union-s<id>` for a PR | fresh                          | its own | `review-report.ts`                             |
+| review agents (custom, of the review kind)            | `union-v<id>`, for a ticket too     | fresh                          | yes     | `review-agent-run.ts`                          |
 | `lesson_writer`                                       | throwaway, no repository            | fresh                          | no      | `lesson-writer-run.ts`                         |
 
 Runs without an agent page: the prompt writer (Sonnet, throwaway, `prompt-writer-run.ts`), the connector check
@@ -100,6 +102,7 @@ The worker appends every other format after the user's prompt, so an edit cannot
 | `review_explain`        | a final `json` block                    | `review-explain-prompt.ts`, `review-explain-result.ts`   |
 | `pr_replies`            | a final `json` block of replies         | `pr-reply-format.ts`                                     |
 | `review_report`         | a final `json` block: the report        | `review-report-format.ts`, `review-report-result.ts`     |
+| review agents           | markdown citing `path:line`             | `review-agent-prompt.ts`; links: `diff-links.ts` (core)  |
 | `lesson_writer`         | a JSON array of lessons                 | `lesson-writer.ts` (core)                                |
 | `implement`, `simplify` | a last line `Refused commit: <message>` | `leftovers.ts`                                           |
 

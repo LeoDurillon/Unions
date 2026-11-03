@@ -15,6 +15,15 @@ test("the writer gets the agent's name and role, the house style, and the output
   expect(prompt).toContain('never changes a file');
 });
 
+test('a review agent is told it may run commands in a throwaway checkout and cites `path:line`', () => {
+  const prompt = promptWriterPrompt({ name: 'Merge', role: 'Can it be merged?', kind: 'review' });
+  expect(prompt).toContain('reviews changes to a software repository');
+  expect(prompt).toContain('may run commands in that checkout');
+  expect(prompt).toContain('`path:line`');
+  expect(prompt).toContain('<example name="Spec report">');
+  expect(prompt).not.toContain('Output one section starting with `## Merge`');
+});
+
 test('the answer is the prompt alone: a fence around it is dropped, empty or too long is refused', () => {
   expect(parseWrittenPrompt('  Check auth.\nOutput one section.  ')).toBe(
     'Check auth.\nOutput one section.',

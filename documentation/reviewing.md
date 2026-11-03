@@ -16,7 +16,8 @@ Click **Review changes** in a ticket's panel. The page opens on the **Diff** tab
 - The commit picker shows all the changes, the changes since your last review, or one commit at a time.
 - Lock files are hidden by default. Hide other paths in the project's **Settings → Review**.
 
-The other tabs show the ticket, its preview, its pull request and its [spec report](#spec-report), so you can check
+The other tabs show the ticket, its preview, its pull request, its [spec report](#spec-report) and your
+[review agents](#your-review-agents), so you can check
 the change against the request without leaving the page. The browser's Back and Forward buttons move between the
 tabs you opened, and reloading the page keeps the tab you are on.
 
@@ -106,6 +107,24 @@ pull request), the report shows as **Outdated**, with **Run again**.
 
 A report is one agent run (Opus by default) on your Claude usage. On a ticket, it is refused while the ticket runs a
 step. While it runs, the tab shows **Cancel**.
+
+## Your review agents
+
+The **Agents** tab runs the review agents you created (Union settings → **New agent** → **Review agent**, see
+[Custom agents](agents.md#review-agents)). Without one yet, the tab offers **New review agent**.
+
+1. Pick an agent and click **Run agent**. It reads the Specs bar's specs (it also runs with none), the change and
+   its commits.
+2. Union prepares a copy of the change for it, runs the project's install command there, then the agent reviews.
+   It may build and test that copy; your ticket's workspace is left as it is.
+3. Its answer shows in the tab, under the agent's name. A file it names, like `src/app.ts:12-30`, is a link: click
+   it to open those lines in the Diff tab. A file the change does not touch stays plain text.
+
+One agent runs at a time on a change; **Cancel** stops it. Each agent keeps its last answer here: **Run again**
+replaces it, and **Copy as markdown** copies it. When the change moves on, the answer says so.
+
+A run uses your Claude usage, with the agent's own model (Sonnet by default). On a ticket, it is refused while the
+ticket runs a step. On a pull request from a fork, nothing is installed and the agent only reads the code.
 
 ## Specs
 

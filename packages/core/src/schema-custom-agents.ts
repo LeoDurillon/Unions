@@ -11,6 +11,10 @@ export const CUSTOM_AGENT_PROMPT_STATUSES = [
   'failed',
 ] as const;
 
+/** Where the agent runs: a step of ticket flows, or on demand on a review page (fixed at creation). */
+export const CUSTOM_AGENT_KINDS = ['step', 'review'] as const;
+export type CustomAgentKind = (typeof CUSTOM_AGENT_KINDS)[number];
+
 /**
  * A custom agent: its step is `agent_<id>` (`customStep`). The user's edits (prompt, model, effort,
  * tools) live in `agent_configs` under that key, like a built-in agent's. Deleting is soft: finished
@@ -21,6 +25,7 @@ export const customAgents = sqliteTable('custom_agents', {
   name: text('name').notNull(),
   /** What the user wants it to do, in their words: the prompt writer's input. */
   role: text('role').notNull(),
+  kind: text('kind', { enum: CUSTOM_AGENT_KINDS }).notNull().default('step'),
   /** Null until the prompt writer first succeeds; a later run replaces it. */
   defaultPrompt: text('default_prompt'),
   promptStatus: text('prompt_status', { enum: CUSTOM_AGENT_PROMPT_STATUSES })

@@ -4,12 +4,14 @@ import { and, asc, eq, isNull } from 'drizzle-orm';
 import { customAgentUsers } from './custom-agent-usage';
 import type { Db } from './db';
 import * as schema from './schema';
+import { CUSTOM_AGENT_KINDS, type CustomAgentKind } from './schema-custom-agents';
 import { customStep, type CustomStep } from './states';
 import type { CustomAgentNames } from './step-titles';
 import * as tables from './tables';
 import { emitEvent } from './tickets';
 
 export type CustomAgent = typeof tables.customAgents.$inferSelect;
+export type { CustomAgentKind } from './schema-custom-agents';
 
 /** Why a change is refused: the web answers 400, 404 or 409 by `reason`, with the message. */
 export class CustomAgentError extends Error {
@@ -82,12 +84,24 @@ function update(db: Executor, id: number, values: Partial<CustomAgent>): CustomA
     .get();
 }
 
-/** A new agent, queued for the prompt writer. */
-export function createCustomAgent(db: Db, input: { name: string; role: string }): CustomAgent {
+function kindOf(value: string | undefined): CustomAgentKind {
+  const kind = CUSTOM_AGENT_KINDS.find((known) => known === (value ?? 'step'));
+  if (!kind) {
+    throw new CustomAgentError(`An agent's kind is ${CUSTOM_AGENT_KINDS.join(' or ')}`);
+  }
+  return kind;
+}
+
+/** A new agent, queued for the prompt writer; a ticket step unless `kind` says otherwise. */
+export function createCustomAgent(
+  db: Db,
+  input: { name: string; role: string; kind?: string },
+): CustomAgent {
   const name = nameOf(input.name);
   const role = roleOf(input.role);
+  const kind = kindOf(input.kind);
   refuseTakenName(db, name, null);
-  return db.insert(tables.customAgents).values({ name, role }).returning().get();
+  return db.insert(tables.customAgents).values({ name, role, kind }).returning().get();
 }
 
 /** Renames the agent or rewrites its role; the prompt stays until the user regenerates it. */
@@ -172,7 +186,10 @@ export function requeueCustomAgentPrompts(db: Db): number {
     .all().length;
 }
 
-/** Refused while a project's flow or a ticket not yet done runs it; its overrides go with it. */
+/**
+ * Refused while a project's flow, a ticket not yet done or a review run waiting or running uses it; its
+ * overrides go with it.
+ */
 export function deleteCustomAgent(db: Db, id: number): CustomAgent {
   liveAgent(db, id);
   const users = customAgentUsers(db, customStep(id));
@@ -199,9 +216,19 @@ export function customAgentNames(db: Db): CustomAgentNames {
   );
 }
 
-/** The steps a flow may name: live agents whose prompt was written at least once. */
+/** Live agents of `kind` whose prompt was written at least once. */
+function readyAgents(db: Db, kind: CustomAgentKind): CustomAgent[] {
+  return listCustomAgents(db).filter(
+    (agent) => agent.kind === kind && agent.defaultPrompt !== null,
+  );
+}
+
+/** The steps a flow may name: ready agents of the `step` kind. */
 export function flowReadySteps(db: Db): CustomStep[] {
-  return listCustomAgents(db)
-    .filter((agent) => agent.defaultPrompt !== null)
-    .map((agent) => customStep(agent.id));
+  return readyAgents(db, 'step').map((agent) => customStep(agent.id));
+}
+
+/** The agents a review page may run: ready agents of the `review` kind. */
+export function readyReviewAgents(db: Db): CustomAgent[] {
+  return readyAgents(db, 'review');
 }

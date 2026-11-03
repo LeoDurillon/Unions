@@ -1,5 +1,5 @@
 // The browser's client for the custom agents endpoints: create, edit, regenerate the prompt, delete.
-import type { AgentConfig, CustomAgentNames } from '@union/core';
+import type { AgentConfig, CustomAgentKind, CustomAgentNames } from '@union/core';
 
 import { request } from './api';
 
@@ -7,7 +7,7 @@ const BASE = '/api/agents/custom';
 
 export const customAgentsApi = {
   names: (): Promise<CustomAgentNames> => request('GET', `${BASE}/names`),
-  create: (input: { name: string; role: string }): Promise<AgentConfig> =>
+  create: (input: { name: string; role: string; kind: CustomAgentKind }): Promise<AgentConfig> =>
     request('POST', BASE, input),
   edit: (id: number, change: { name?: string; role?: string }): Promise<AgentConfig> =>
     request('PATCH', `${BASE}/${id}`, change),

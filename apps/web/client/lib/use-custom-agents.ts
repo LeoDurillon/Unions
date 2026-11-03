@@ -16,11 +16,11 @@ export function useCustomAgentNames(): CustomAgentNames {
   return useQuery({ queryKey: ['agents', 'names'], queryFn: customAgentsApi.names }).data ?? NONE;
 }
 
-/** The live agents whose prompt is written: the only ones a flow may name. */
+/** The live ticket-step agents whose prompt is written: the only ones a flow may name. */
 export function useFlowAgents(): CustomAgentChoice[] {
   const agents = useQuery({ queryKey: ['agents'], queryFn: api.agents }).data ?? [];
   return agents.flatMap((agent) =>
-    isCustomStep(agent.agent) && agent.custom && agent.defaultPrompt !== ''
+    isCustomStep(agent.agent) && agent.custom?.kind === 'step' && agent.defaultPrompt !== ''
       ? [{ step: agent.agent, name: agent.custom.name }]
       : [],
   );

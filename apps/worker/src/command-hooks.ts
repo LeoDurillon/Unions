@@ -19,6 +19,7 @@ export type CommandHooks = {
   cancelReviewExplanation: (id: number) => void;
   /** Stops a running spec report of a review. */
   cancelReviewReport: (id: number) => void;
+  cancelReviewAgentRun: (id: number) => void;
   /** Posts a current review's drafts and summary on its pull request, with the user's verdict. */
   submitPullRequestReview: (
     reviewId: number,
@@ -63,6 +64,7 @@ export const NO_HOOKS: CommandHooks = {
   cancelReviewGrouping: ignore,
   cancelReviewExplanation: ignore,
   cancelReviewReport: ignore,
+  cancelReviewAgentRun: ignore,
   submitPullRequestReview: ignore,
   cancelPrDescription: ignore,
   cancelContainerRun: ignore,
