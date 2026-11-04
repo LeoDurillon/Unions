@@ -160,3 +160,35 @@ test('a GitHub stack dissolved by hand is forgotten: Union restacks on its own a
   expect(getTicket(db, ticketId).githubStackNumber).toBeNull();
   expect(getTicket(db, ticketId).phase).toMatchObject({ step: 'restack', hostOnly: true });
 });
+
+const eventTypes = (): string[] =>
+  db
+    .select()
+    .from(schema.events)
+    .all()
+    .map((event) => event.type);
+
+test('a GitHub stack merged as a whole: every slice went into the base, the ticket is merged', async () => {
+  api.stacks?.set(1, [lower, top]);
+  db.update(schema.tickets).set({ githubStackNumber: 1 }).run();
+  merge(lower, 'main');
+  merge(top, 'feature-s1');
+  await poll();
+  expect(listSlices(db, ticketId).map((slice) => slice.mergedInto)).toEqual(['main', 'main']);
+  expect(getTicket(db, ticketId)).toMatchObject({ prState: 'merged', githubStackNumber: 1 });
+  expect(api.calls).toContain('closeIssue');
+  expect(eventTypes()).toContain('pull_request_merged');
+});
+
+test('a stack merged as a whole but read alone first is looked up again, and merged', async () => {
+  merge(lower, 'main');
+  merge(top, 'feature-s1');
+  await poll();
+  expect(getTicket(db, ticketId)).toMatchObject({ prState: 'open' });
+  expect(listSlices(db, ticketId)[1]).toMatchObject({ mergedInto: 'feature-s1' });
+  api.stacks?.set(1, [lower, top]);
+  await poll();
+  expect(listSlices(db, ticketId)[1]).toMatchObject({ mergedInto: 'main' });
+  expect(getTicket(db, ticketId)).toMatchObject({ prState: 'merged', githubStackNumber: 1 });
+  expect(eventTypes()).toContain('pull_request_merged');
+});

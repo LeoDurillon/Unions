@@ -105,6 +105,12 @@ While the pull request is open, the PR tab shows **Split into a stack**, usable 
 - The ticket is merged only once every slice is merged into the base: then its issue is closed and the usual
   "PR merged" event fires. A slice merged into another slice's branch (out of order) leaves the ticket open and
   is shown in the PR tab; so is a slice closed without a merge, where the stack stops.
+- A **GitHub stack merged as a whole** (one merge on GitHub lands every pull request, seen 2026-11-04) reads
+  closed (`open: false`), and each pull request alone says it was merged into the branch below. Union keeps such
+  a stack (every pull request in it has a merge date) and reads its slices from it: all went into the base, so
+  the ticket is merged. Only a closed stack with an unmerged pull request counts as dissolved. A slice that reads
+  as merged into the branch below sends the worker to the stack lookup again, even with no stack number kept, so
+  a stack read alone before is corrected on the next poll.
 - On a **GitHub stack**, GitHub rebases the rest of the stack onto the base itself after a merge and retargets
   the next pull request (tried 2026-10-20: within seconds, onto the squash commit). Once the next pull request
   targets the base, the worker starts `restack` (`hostOnly`), which **follows GitHub**: it fetches the open

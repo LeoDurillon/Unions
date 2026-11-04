@@ -78,38 +78,56 @@ function fromStack(stack: GitHubStack, number: number | null): PullRequestStatus
   };
 }
 
+/** A slice merged into another slice's branch: by hand out of order, or as part of a GitHub stack. */
+function strayed(slice: TicketSlice, base: string): boolean {
+  return slice.prState === 'merged' && slice.mergedInto !== base;
+}
+
+/** A GitHub stack merged as a whole is closed too, but every pull request in it went into its base. */
+function mergedWhole(stack: GitHubStack): boolean {
+  return stack.pullRequests.every((pull) => pull.mergedAt !== null);
+}
+
+type SlicesPoll = Poll & { base: string; slices: readonly TicketSlice[] };
+
 /**
  * The ticket's GitHub stack, when it has one; null for a stack Union keeps alone. A stack dissolved
- * on GitHub (unstacked by hand) is forgotten: Union keeps the stack from then on.
+ * on GitHub (unstacked by hand) is forgotten: Union keeps the stack from then on. A stack merged as a
+ * whole is kept, and is looked up again when a slice reads as merged into the slice below (one
+ * merged before this rule, its number forgotten).
  */
-async function githubStack(db: Db, api: GitHubApi, input: Poll): Promise<GitHubStack | null> {
+async function githubStack(db: Db, api: GitHubApi, input: SlicesPoll): Promise<GitHubStack | null> {
   const { ticket, repo } = input;
-  if (ticket.githubStackNumber === null || ticket.prNumber === null) {
+  const strays = input.slices.some((slice) => strayed(slice, input.base));
+  if ((ticket.githubStackNumber === null && !strays) || ticket.prNumber === null) {
     return null;
   }
   const stack = await api.pullRequestStack(repo, ticket.prNumber);
-  if (stack === null || !stack.open) {
+  const usable = stack !== null && (stack.open || mergedWhole(stack));
+  const number = usable ? stack.number : null;
+  if (number !== ticket.githubStackNumber) {
     db.update(schema.tickets)
-      .set({ githubStackNumber: null })
+      .set({ githubStackNumber: number })
       .where(eq(schema.tickets.id, ticket.id))
       .run();
-    return null;
   }
-  return stack;
+  return usable ? stack : null;
 }
 
 type Polled = { behindBy: number | null; managed: boolean };
 
 /**
  * Polls the slices not settled yet: with a GitHub stack, one call for all of them; the bottom open
- * one is still asked on its own, for how far it is behind and the branch it targets now.
+ * one is still asked on its own, for how far it is behind and the branch it targets now. A slice
+ * merged into the slice below is read again from the GitHub stack, which says it went into the base.
  */
-async function pollSlices(db: Db, api: GitHubApi, input: Poll): Promise<Polled> {
-  const slices = listSlices(db, input.ticket.id);
+async function pollSlices(db: Db, api: GitHubApi, input: SlicesPoll): Promise<Polled> {
+  const { slices, base } = input;
   const bottom = slices.find((slice) => slice.prState !== 'merged');
   const stack = await githubStack(db, api, input);
   const polled: Polled = { behindBy: null, managed: stack !== null };
-  for (const slice of slices.filter((candidate) => !settled(candidate))) {
+  const due = slices.filter((slice) => !settled(slice) || (stack !== null && strayed(slice, base)));
+  for (const slice of due) {
     const isBottom = slice.id === bottom?.id;
     const listed = stack === null || isBottom ? null : fromStack(stack, slice.prNumber);
     const status =
@@ -175,7 +193,11 @@ export async function pollStack(db: Db, api: GitHubApi, input: Poll): Promise<St
     return null;
   }
   const base = projectBase(db, input.ticket);
-  const polled = await pollSlices(db, api, input);
+  const polled = await pollSlices(db, api, {
+    ...input,
+    base,
+    slices: listSlices(db, input.ticket.id),
+  });
   const slices = listSlices(db, input.ticket.id);
   const status = stackStatus(slices, base);
   const top = slices.at(-1);
