@@ -10,6 +10,7 @@
     "./step-titles": "./src/step-titles.ts",
     "./lesson-input": "./src/lesson-input.ts",
     "./agent-usage": "./src/agent-usage.ts",
+    "./agent-activity": "./src/agent-activity.ts",
     "./attachment-limits": "./src/attachment-limits.ts",
     "./diff": "./src/diff.ts",
     "./diff-hunks": "./src/diff-hunks.ts",

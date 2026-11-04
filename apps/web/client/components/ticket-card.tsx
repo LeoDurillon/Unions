@@ -1,5 +1,6 @@
 // A draggable ticket card for the board: its title, its state, the ticket it builds on, its pull
-// request and CI checks, and Start while it waits in the backlog.
+// request and CI checks, what its agent is doing while it runs, and Start while it waits in the
+// backlog.
 import { useDraggable } from '@dnd-kit/core';
 import { flowName, resolveFlow } from '@union/core/flows';
 import { FULL_FLOW } from '@union/core/states';
@@ -8,6 +9,7 @@ import type { ReactElement } from 'react';
 import type { PublicProject, TicketSummary } from '../../src/api-types';
 import { describePhase, isBlocked, isStartable, refLabel, type Tone } from '../lib/labels';
 import { useCustomAgentNames } from '../lib/use-custom-agents';
+import { CardProgress } from './card-progress';
 import { Badge } from './ui';
 
 const SHORT_SHA = 7;
@@ -163,6 +165,7 @@ export function TicketCard({
           {ticket.issueNumber === null ? 'not on GitHub yet' : `#${ticket.issueNumber}`}
         </span>
       </div>
+      <CardProgress ticket={ticket} />
     </div>
   );
 }

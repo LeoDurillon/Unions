@@ -141,6 +141,12 @@
   (`lib/open-notification.ts`). Desktop notifications are off until turned on in the panel (stored in
   localStorage; the browser asks permission): only the tab holding the shared stream shows them
   (`subscribeAsLead` in `lib/event-hub.ts`), and only while Union is not in view.
+- Live progress on board cards: agent output stays off the shared event stream, so a running card
+  (`card-progress.tsx`) reads `GET /api/projects/:projectId/run-progress` (`routes/run-progress.ts`, core
+  `run-progress.ts`): each running run's start and the latest assistant line of `agent_log`, summarized by
+  `@union/core/agent-activity` (the same summary the Log uses, in `lib/agent-events.ts`). Every running card shares
+  one query (`lib/use-run-progress.ts`, every 3 s, not while the tab is hidden), keyed under `tickets` so a
+  `run_started` or `run_finished` event refreshes it at once.
 - Keyboard shortcuts: one keydown listener per part through `useShortcuts` (`client/lib/shortcuts.ts`): no key
   counts when typed in a field, with Ctrl, ⌘ or Alt, held down, already handled (`defaultPrevented`), or while a
   `<dialog>` without `data-shortcuts` is open (the ticket panel has it, since it answers its own keys). The board

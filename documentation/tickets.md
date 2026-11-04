@@ -13,6 +13,12 @@ Each project has a board with five columns. Union keeps it in step with the GitH
 Each card shows the ticket's state ("Needs review · Technical", "Running · Implementation"), its issue number, the
 ticket it depends on, and the CI checks of its pull request. Fold a column you do not need with its arrow.
 
+While an agent works on a ticket, its card also shows how long the run has gone and the last thing the agent did:
+the tool it called (`Edit src/api/client.ts`, `Bash bun test`) or the first line of what it wrote. The line
+refreshes every few seconds. When the agent has written nothing for two minutes, the card says when its last
+message came ("last message 5 min ago"), so a run that seems stuck shows without opening it. The ticket's **Log**
+has the whole story.
+
 Above the board:
 
 - **Search** finds tickets by title, issue number (`#36`) or pull request number.

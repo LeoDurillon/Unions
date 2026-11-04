@@ -1,54 +1,24 @@
 // Condenses one raw `claude -p` stream-json event into zero or more log lines.
+import {
+  contentBlocks,
+  fromAssistantBlock,
+  isRecord,
+  type ActivityLine,
+} from '@union/core/agent-activity';
+
 import { callTokensOf, tokensText, type CallTokens } from './token-counts';
 
 export type LogLine = {
-  kind: 'init' | 'text' | 'tool' | 'tool_result' | 'result' | 'error';
+  kind: ActivityLine['kind'] | 'init' | 'tool_result' | 'result' | 'error';
   text: string;
   /** On a call's result: what it used, for its run's total. */
   tokens?: CallTokens;
 };
 
-const MAX_TEXT = 600;
-const MAX_ARG = 140;
 const MS_PER_SECOND = 1000;
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
 
 function asText(value: unknown): string {
   return typeof value === 'string' ? value : '';
-}
-
-function clip(text: string, max: number): string {
-  const flat = text.trim();
-  return flat.length > max ? `${flat.slice(0, max)}…` : flat;
-}
-
-function contentBlocks(event: Record<string, unknown>): Record<string, unknown>[] {
-  const { message } = event;
-  if (!isRecord(message) || !Array.isArray(message.content)) {
-    return [];
-  }
-  return message.content.filter(isRecord);
-}
-
-function toolArgument(input: unknown): string {
-  if (!isRecord(input)) {
-    return '';
-  }
-  const first = Object.values(input).find((value) => typeof value === 'string');
-  return typeof first === 'string' ? clip(first, MAX_ARG) : '';
-}
-
-function fromAssistantBlock(block: Record<string, unknown>): LogLine | null {
-  if (block.type === 'text' && typeof block.text === 'string' && block.text.trim() !== '') {
-    return { kind: 'text', text: clip(block.text, MAX_TEXT) };
-  }
-  if (block.type === 'tool_use' && typeof block.name === 'string') {
-    return { kind: 'tool', text: `${block.name} ${toolArgument(block.input)}`.trim() };
-  }
-  return null;
 }
 
 function fromUserBlock(block: Record<string, unknown>): LogLine | null {

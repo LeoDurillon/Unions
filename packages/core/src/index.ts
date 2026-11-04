@@ -22,6 +22,7 @@ export * from './diff-hunks';
 export * from './diff-excerpt';
 export * from './agent-log';
 export * from './agent-usage';
+export * from './run-progress';
 export { backfillUsage } from './agent-usage-record';
 export * from './agent-usage-totals';
 export * from './event-actions';
