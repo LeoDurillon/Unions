@@ -14,7 +14,8 @@ failed start takes the preview down the same way. Data still survives in these c
 1. **Restart** (shown while it runs) is only `up -d --build --remove-orphans` again: containers that did not change
    are kept, and every named volume is kept.
 2. **Agent services** (`config.agentServices`, a database for the agent's tests) are paused after each step with
-   `compose stop` (`pauseAgentServices`, `background.ts`): containers and volumes kept on purpose. The next preview
+   `compose down` without `-v` (`pauseAgentServices`, `background.ts`): volumes kept on purpose, containers and
+   networks removed. The next preview
    start runs `up` in the same compose project (`union-t<id>`) and reuses that database. The preview row says
    `stopped`, so the tab offers no Stop (only `running` and `failed` show it). The user cannot get rid of that data
    from the UI.

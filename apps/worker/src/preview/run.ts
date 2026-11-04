@@ -37,19 +37,32 @@ export async function serviceLogs(deps: PreviewDeps, owner: WorkspaceOwner): Pro
   return output.tail.join('\n');
 }
 
-/** Removes the compose project's containers and volumes; `extra` adds to `down` (`--rmi local`). */
+/** `compose down` with `flags`, once the owner's container and the proxy left its networks. */
+async function down(deps: PreviewDeps, owner: WorkspaceOwner, flags: string[]): Promise<void> {
+  await leavePreview(deps.runtime, owner);
+  const output = await compose(deps.runtime, deps.settings, {
+    args: ['-p', previewProject(owner), 'down', ...flags],
+  });
+  if (output.exitCode !== 0) {
+    throw new PreviewError(`docker compose down failed:\n${lastLines(output.tail)}`);
+  }
+}
+
+/** Removes the compose project's containers, networks and volumes; `extra` adds to `down` (`--rmi local`). */
 export async function takeDown(
   deps: PreviewDeps,
   owner: WorkspaceOwner,
   extra: string[] = [],
 ): Promise<void> {
-  await leavePreview(deps.runtime, owner);
-  const output = await compose(deps.runtime, deps.settings, {
-    args: ['-p', previewProject(owner), 'down', '-v', '--remove-orphans', ...extra],
-  });
-  if (output.exitCode !== 0) {
-    throw new PreviewError(`docker compose down failed:\n${lastLines(output.tail)}`);
-  }
+  await down(deps, owner, ['-v', '--remove-orphans', ...extra]);
+}
+
+/**
+ * Removes the compose project's containers and networks, keeping its volumes and so its data: a
+ * stopped preview holds no network (Docker has room for about 30), and a start creates them again.
+ */
+export async function bringDown(deps: PreviewDeps, owner: WorkspaceOwner): Promise<void> {
+  await down(deps, owner, ['--remove-orphans']);
 }
 
 /** Refuses a start the proxy could not serve: without it no service ever answers. */

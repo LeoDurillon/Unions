@@ -32,7 +32,8 @@ Built (phases 1 to 4). Full design and what was built: [`docs/plans/preview-envi
   step and preview start, kept out of git (`.git/info/exclude`) and refused in pushes, never readable from the
   browser. A database dump for the additions' restore, a local config.
 - Services for the agent: chosen compose services run in the ticket's project while it implements or rebases (a
-  database for its tests), and while the user runs a command from the ticket, stopped after. The ports they publish
+  database for its tests), and while the user runs a command from the ticket, taken down after (their containers and networks go, their
+  volumes and data stay). A preview whose served services crashed is taken down the same way. The ports they publish
   in the compose file are forwarded to the ticket container's `localhost` (IPv4 and IPv6), so the repository's
   laptop settings (`.env.test` with `localhost:5432`) work unchanged; the agent is told where each one answers. A
   project whose settings already use the services' names turns it off (Previews → Services, "Reach them on

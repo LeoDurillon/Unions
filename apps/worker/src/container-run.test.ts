@@ -58,6 +58,8 @@ const runtime = {
   copyIn: () => Promise.resolve(),
   projectNetworks: () => Promise.resolve([]),
   connectNetwork: () => Promise.resolve(),
+  disconnectNetwork: () => Promise.resolve(),
+  networkExists: () => Promise.resolve(false),
   async *exec(_name: string, command: string[], options: ExecOptions = {}) {
     execs.push({ command, options });
     if (command[0] !== 'setsid') {
@@ -222,7 +224,7 @@ test("with agent services, a command gets the agent's environment: services, loc
     UNION_COMMAND: 'pnpm test:e2e',
   });
   expect(command?.options.env?.DATABASE_URL).toBeUndefined();
-  // After the run the services stop with the container.
-  expect(helpers.at(-1)).toContain('stop');
+  // After the run the services go down (volumes kept) and the container stops.
+  expect(helpers.at(-1)).toContain('-p union-t1 down --remove-orphans');
   expect(stops).toBe(1);
 });

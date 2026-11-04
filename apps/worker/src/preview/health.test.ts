@@ -32,6 +32,10 @@ let composed: string[];
 
 const runtime = {
   projectContainers: () => Promise.resolve(containers),
+  networkExists: () => Promise.resolve(true),
+  serviceContainers: () => Promise.resolve(['union-next-proxy-1']),
+  projectNetworks: (project: string) => Promise.resolve([`${project}_default`]),
+  disconnectNetwork: () => Promise.resolve(),
   async *runHelper(spec: HelperSpec): AsyncGenerator<string, ExecResult> {
     await Promise.resolve();
     const command = spec.command.slice(4).join(' ');
@@ -65,14 +69,14 @@ beforeEach(() => {
   composed = [];
 });
 
-test('a running preview whose exposed service exited fails, keeps its output, and stops the rest', async () => {
+test('a running preview whose exposed service exited fails, keeps its output, and takes the rest down without its volumes', async () => {
   await failStoppedPreview(deps(), { ticketId });
   expect(getPreview(db, { ticketId })).toMatchObject({
     status: 'failed',
     error: 'The preview stopped: "api" exited (code 1). Start it again; its data is kept.',
     logTail: 'api-1  | Error: cannot reach db',
   });
-  expect(composed.at(-1)).toBe('-p union-t1 stop');
+  expect(composed.at(-1)).toBe('-p union-t1 down --remove-orphans');
   const events = db
     .select()
     .from(schema.events)
@@ -88,7 +92,7 @@ test("during a step the agent's services are left running", async () => {
     .run();
   await failStoppedPreview(deps(), { ticketId });
   expect(getPreview(db, { ticketId })?.status).toBe('failed');
-  expect(composed.some((command) => command.endsWith(' stop'))).toBe(false);
+  expect(composed.some((command) => command.includes(' down'))).toBe(false);
 });
 
 test('a preview whose services are up, or one not running, is left alone', async () => {

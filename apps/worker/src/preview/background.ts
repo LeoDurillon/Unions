@@ -15,6 +15,7 @@ import {
 import { compose, createMountFolders } from './compose';
 import { fileToRun } from './compose-file';
 import { joinPreview } from './network';
+import { bringDown } from './run';
 import { lastLines, loadTarget, projectDirectory, type PreviewDeps } from './target';
 import { unionEnvFile } from './variables';
 
@@ -123,8 +124,9 @@ export async function startAgentServices(
 }
 
 /**
- * After the run: the services stop (containers and data kept, memory freed), unless the preview
- * runs, which uses them, or `inUse` says another run of the ticket still does.
+ * After the run: the services' containers and networks are removed (volumes and data kept, memory
+ * and networks freed), unless the preview runs, which uses them, or `inUse` says another run of the
+ * ticket still does.
  */
 export async function pauseAgentServices(
   deps: PreviewDeps,
@@ -140,7 +142,7 @@ export async function pauseAgentServices(
     if (services.length === 0) {
       return;
     }
-    await compose(deps.runtime, deps.settings, { args: ['-p', target.project, 'stop'] });
+    await bringDown(deps, { ticketId });
     emitEvent(deps.db, { type: 'agent_services_stopped', ticketId, payload: { services } });
   } catch {
     // Nothing to stop.

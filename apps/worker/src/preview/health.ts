@@ -14,8 +14,7 @@ import {
   type WorkspaceOwner,
 } from '@union/core';
 
-import { compose } from './compose';
-import { serviceLogs, type PreviewDeps } from './run';
+import { bringDown, serviceLogs, type PreviewDeps } from './run';
 
 const CHECK_EVERY_MS = 30_000;
 
@@ -95,9 +94,9 @@ export class HealthWatcher {
 }
 
 /**
- * Fails a running preview whose exposed services stopped, with their last output. Its other
- * containers are stopped, not removed, so a start brings it back with its data; while a step runs
- * on the ticket they are left to the agent, which uses its services.
+ * Fails a running preview whose exposed services stopped, with their last output. Its containers
+ * and networks are removed, its volumes kept, so a start brings it back with its data; while a step
+ * runs on the ticket they are left to the agent, which uses its services.
  */
 export async function failStoppedPreview(deps: PreviewDeps, owner: WorkspaceOwner): Promise<void> {
   const row = getPreview(deps.db, owner);
@@ -111,7 +110,7 @@ export async function failStoppedPreview(deps: PreviewDeps, owner: WorkspaceOwne
   const logTail = await serviceLogs(deps, owner);
   const ticketId = ticketOwnerId(owner);
   if (ticketId === null || getTicket(deps.db, ticketId).phase.kind !== 'running') {
-    await compose(deps.runtime, deps.settings, { args: ['-p', previewProject(owner), 'stop'] });
+    await bringDown(deps, owner);
   }
   const message = stoppedMessage(stopped);
   updatePreview(deps.db, owner, {

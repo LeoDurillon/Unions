@@ -166,9 +166,9 @@ test('services that cannot start leave the step without them, and say why in the
   expect(failed).toHaveLength(1);
 });
 
-test('after the step the services stop, unless the preview uses them', async () => {
+test('after the step the services go down, volumes kept, unless the preview uses them', async () => {
   await pauseAgentServices(deps(), ticketId);
-  expect(composeCalls).toEqual(['-p union-t1 stop']);
+  expect(composeCalls).toEqual(['-p union-t1 down --remove-orphans']);
   composeCalls = [];
   await pauseAgentServices(deps(), ticketId, true);
   expect(composeCalls).toEqual([]);

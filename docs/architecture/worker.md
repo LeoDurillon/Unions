@@ -230,7 +230,8 @@
   wait): the start takes down what it brought up and records `stopped`. `health.ts` asks Docker every 30 seconds
   (`runtime.projectContainers`, `stoppedServices` in core) whether a running preview's exposed services still have a
   container up; when one stopped, the manager (never during a start, a stop or its tests) records `failed` with the
-  services' last lines, `compose stop`s the project unless a step runs on the ticket, and logs
+  services' last lines, takes the project down without its volumes (`bringDown`: containers and networks go, data
+  stays) unless a step runs on the ticket, and logs
   `preview_services_stopped`. `reset.ts`
   takes the project down with `--rmi local`, empties the data folders the user chose among `previews.data_folders`
   (`data-folders.ts`: after each `up`, the mounted repository folders `git check-ignore` matches with no tracked
@@ -285,8 +286,8 @@
   around a command from the Commands section (`startServicesRun`), the worker runs `up -d <services>` in the
   ticket's compose project (shared with the preview), joins the ticket's container to it, gives every command run
   in that container the plain variables the setting lets through (`config.preview.agentVariables`: all by default,
-  none, or chosen; `agentVariables` in core; never the secrets) through `withEnvironment`, and `stop`s the services
-  after (data kept) unless the preview runs or another run of the ticket uses them. A preview stopped during such
+  none, or chosen; `agentVariables` in core; never the secrets) through `withEnvironment`, and takes the services
+  down after (`bringDown`: volumes and data kept, containers and networks removed) unless the preview runs or another run of the ticket uses them. A preview stopped during such
   a step removes only the services the proxy serves.
   Their published ports reach the container's `localhost` as on a laptop (unless `config.preview.forwardPorts` is
   false, for repositories already using the services' names): `previewCompose` drops `ports` but keeps
