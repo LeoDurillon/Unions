@@ -77,6 +77,9 @@
   ticket's slices map to its ticket, so its stack offers Open ticket. Reviews under review keep `github_stack_number` and
   `stack_position`: set from the listed item when added, written for every review when the list is read, and by
   `readReviewFiles` (`routes/pr-review-load.ts`, `pullRequestStack`) each time it reads the files.
+  Each read of the list from GitHub also removes the reviews of pull requests it shows closed or merged, or misses from
+  an Open list holding every open one (`routes/closed-reviews.ts`, the same cleanup as Remove); the client reads
+  the reviews again after it.
   The Under review part (`pull-requests/under-review.tsx`) groups its reviews by them (`reviewStacks`): stacks first,
   one row each (`review-stack-item.tsx`; Remove posts `…/reviews/stack/remove`: every member in one transaction, or none). Opening one opens its bottom PR in the review
   page with its PRs as a segmented control under the header (`stack-review.tsx`, `stack-tabs.tsx`: draft count and posting state per

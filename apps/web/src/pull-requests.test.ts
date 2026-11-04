@@ -186,8 +186,8 @@ test('without stacks on GitHub, the list says so and no pull request is in one',
   expect(body.pullRequests[0]?.stack).toBeNull();
 });
 
-test("reading the stacks keeps the current reviews' stacks up to date", async () => {
-  for (const number of [7, 9]) {
+function addReviews(numbers: number[]): void {
+  for (const number of numbers) {
     db.insert(schema.currentReviews)
       .values({
         projectId,
@@ -202,8 +202,13 @@ test("reading the stacks keeps the current reviews' stacks up to date", async ()
       })
       .run();
   }
+}
+
+test("reading the stacks keeps the current reviews' stacks up to date", async () => {
+  addReviews([7, 9]);
   stacks = [githubStack(3, [5, 7])];
-  await list();
+  // All: #9 missing from it says nothing of its state, it stays.
+  await list('?state=all');
   const rows = db.select().from(schema.currentReviews).all();
   expect(rows.map((row) => [row.prNumber, row.githubStackNumber, row.stackPosition])).toEqual([
     [7, 3, 1],
@@ -227,4 +232,18 @@ test("a split ticket's lower slices open the ticket too", async () => {
     .run();
   const body = (await (await list('?state=all')).json()) as PullRequestList;
   expect(body.pullRequests.map((item) => item.ticketId)).toEqual([ticket.id, ticket.id]);
+});
+
+test('reading the list removes the reviews of merged and closed pull requests', async () => {
+  addReviews([7, 5, 9]);
+  // Open, and every open one listed: #5 is merged, #9 is no longer open.
+  await list();
+  const rows = db.select().from(schema.currentReviews).all();
+  expect(rows.map((row) => row.prNumber)).toEqual([7]);
+  const removals = db
+    .select()
+    .from(schema.commands)
+    .where(eq(schema.commands.type, 'remove_containers'))
+    .all();
+  expect(removals).toHaveLength(1);
 });

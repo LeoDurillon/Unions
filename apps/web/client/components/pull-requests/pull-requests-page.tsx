@@ -131,9 +131,17 @@ function usePullRequestList(
 } {
   const queryClient = useQueryClient();
   const queryKey = ['pull-requests', projectId, filter];
+  // A read from GitHub removes the reviews of closed and merged pull requests.
+  const reviewsRead = (): void => {
+    void queryClient.invalidateQueries({ queryKey: ['current-reviews', projectId] });
+  };
   const query = useQuery({
     queryKey,
-    queryFn: () => api.pullRequests(projectId, filter),
+    queryFn: async () => {
+      const fresh = await api.pullRequests(projectId, filter);
+      reviewsRead();
+      return fresh;
+    },
     staleTime: STALE_MS,
     gcTime: KEEP_MS,
     retry: false,
@@ -142,6 +150,7 @@ function usePullRequestList(
     mutationFn: () => api.pullRequests(projectId, filter, true),
     onSuccess: (fresh) => {
       queryClient.setQueryData(queryKey, fresh);
+      reviewsRead();
     },
   });
   return { query, refresh };

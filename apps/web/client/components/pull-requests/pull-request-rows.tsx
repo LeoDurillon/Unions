@@ -109,13 +109,11 @@ export function PullRequestRows({
       {stacks.length > 0 ? (
         <StackPart stacks={stacks} actions={actions} onOpenTicket={onOpenTicket} />
       ) : null}
-      {stacks.length > 0 && singles.length > 0 ? (
+      {singles.length > 0 ? (
         <Part title="Pull requests" count={singles.length}>
           {rows}
         </Part>
-      ) : (
-        <ul>{rows}</ul>
-      )}
+      ) : null}
     </>
   );
 }

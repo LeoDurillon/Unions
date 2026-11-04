@@ -165,5 +165,7 @@ The browser's Back and Forward buttons move between the pull requests and tabs y
 review page, and reloading the page keeps the pull request and tab you are on.
 
 Removing a pull request from Under review deletes its drafts and stops its preview.
+A pull request that is merged or closed on GitHub leaves Under review on its own, the same way, the next time the
+list is read.
 
 The list is read from GitHub when the tab opens, at most once a minute; click **Refresh** to read it again.
