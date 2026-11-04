@@ -1,5 +1,5 @@
-// Notifications, running previews, project switcher and creation entry point, and Union's Update,
-// always visible on the left; folds to an icon rail.
+// Notifications, running previews, project switcher and creation entry point, Claude usage and
+// Union's Update, always visible on the left; folds to an icon rail.
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../src/api-types';
@@ -10,6 +10,7 @@ import { NotificationBell } from './notifications/notification-bell';
 import { PreviewsButton } from './previews/previews-button';
 import { ProjectNav, SettingsLink } from './sidebar-entries';
 import { UpdateButton } from './union-update/update-button';
+import { ClaudeMeter } from './usage/claude-meter';
 
 /** The name, and the button that folds the sidebar to its rail or unfolds it. */
 function SidebarTitle({
@@ -80,6 +81,7 @@ export function Sidebar({
           onPage('settings');
         }}
       />
+      <ClaudeMeter />
       <UpdateButton />
     </aside>
   );

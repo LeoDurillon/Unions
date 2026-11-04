@@ -11,6 +11,7 @@ const KEYS = ['input', 'cacheRead', 'cacheWrite', 'output', 'thinking', 'turns']
 const THOUSAND = 1000;
 const HUNDRED_THOUSAND = 100_000;
 const MILLION = 1_000_000;
+const BILLION = 1_000_000_000;
 const PERCENT = 100;
 
 export function callTokensOf(payload: unknown): CallTokens | null {
@@ -39,8 +40,11 @@ export function sumTokens(calls: CallTokens[]): CallTokens {
   return total;
 }
 
-/** 950, 5.7k, 308k, 4.1M. */
+/** 950, 5.7k, 308k, 4.1M, 1.8B. */
 export function count(value: number): string {
+  if (value >= BILLION) {
+    return `${(value / BILLION).toFixed(1)}B`;
+  }
   if (value >= MILLION) {
     return `${(value / MILLION).toFixed(1)}M`;
   }

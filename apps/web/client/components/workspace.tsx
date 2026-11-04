@@ -1,4 +1,4 @@
-// Project bar plus the board, investigations or pull requests (or the empty board behind the
+// Project bar plus the board, investigations, pull requests or usage (or the empty board behind the
 // first-run wizard).
 import { useState, type ReactElement } from 'react';
 
@@ -7,51 +7,10 @@ import { clearInvestigateTicket, useInvestigateTicket } from '../lib/investigate
 import { clearOpenedInvestigation, useOpenedInvestigation } from '../lib/opened-investigation';
 import { useReviewedPullRequest } from '../lib/review-url';
 import { openSettings } from '../lib/settings-sections';
-import { Board, BoardView } from './board';
-import { InvestigationsPage } from './investigations/investigations-page';
 import { ProjectBar, type ProjectView } from './project-bar';
-import { PullRequestsPage } from './pull-requests/pull-requests-page';
+import { ProjectBody } from './project-body';
 
-function noop(): void {
-  // The empty board behind the first-run wizard is display only.
-}
-
-function ProjectBody({
-  project,
-  view,
-  askedTicket,
-  openedInvestigation,
-  onOpenTicket,
-}: {
-  project: PublicProject | null;
-  view: ProjectView;
-  /** A ticket a new investigation was asked about (`?investigate=`). */
-  askedTicket: number | null;
-  /** An investigation opened from elsewhere (`?investigation=`). */
-  openedInvestigation: number | null;
-  onOpenTicket: (id: number) => void;
-}): ReactElement {
-  if (!project) {
-    return <BoardView tickets={[]} now={0} error={null} onOpen={onOpenTicket} onDrop={noop} />;
-  }
-  if (view === 'investigations') {
-    return (
-      <InvestigationsPage
-        key={`${project.id}:${askedTicket ?? ''}:${openedInvestigation ?? ''}`}
-        project={project}
-        initialTicket={askedTicket}
-        initialInvestigation={openedInvestigation}
-        onOpenTicket={onOpenTicket}
-      />
-    );
-  }
-  if (view === 'pull-requests') {
-    return <PullRequestsPage key={project.id} project={project} onOpenTicket={onOpenTicket} />;
-  }
-  return <Board project={project} onOpen={onOpenTicket} />;
-}
-
-/** Project bar plus the board, investigations or pull requests (or the empty board behind the first-run wizard). */
+/** Project bar plus the board, investigations, pull requests or usage (or the empty board behind the first-run wizard). */
 export function Workspace({
   project,
   onOpenTicket,

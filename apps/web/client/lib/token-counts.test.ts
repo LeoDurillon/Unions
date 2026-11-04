@@ -13,12 +13,9 @@ const call: CallTokens = {
 };
 
 test('counts are short', () => {
-  expect([count(950), count(5687), count(308_012), count(4_100_000)]).toEqual([
-    '950',
-    '5.7k',
-    '308k',
-    '4.1M',
-  ]);
+  expect([count(950), count(5687), count(308_012), count(4_100_000), count(1_804_629_233)]).toEqual(
+    ['950', '5.7k', '308k', '4.1M', '1.8B'],
+  );
 });
 
 test('a call reads as its turns, input with the cached share, and output', () => {

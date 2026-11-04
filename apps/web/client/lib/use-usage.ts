@@ -1,6 +1,7 @@
-// What a ticket's or an investigation's agent calls used; refetched with the ticket or the investigations.
+// What agent calls used: a ticket's or an investigation's (refetched with them), a project's over a
+// range of days, and how much of the Claude subscription's windows is used.
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import type { Investigation, UsageView } from '@union/core';
+import type { ClaudeLimits, Investigation, ProjectUsage, UsageView } from '@union/core';
 
 import { request } from './api';
 
@@ -21,5 +22,31 @@ export function useInvestigationUsage(
     queryKey: ['investigations', id, 'usage'],
     queryFn: (): Promise<UsageView> =>
       request('GET', `/api/projects/${projectId}/investigations/${id}/usage`),
+  });
+}
+
+/** Union learns the windows only from its own agents' calls: asking more often than this adds nothing. */
+const LIMITS_POLL_MS = 60_000;
+
+/** How much of the subscription's five-hour and weekly windows is used; null before any report. */
+export function useClaudeLimits(): UseQueryResult<ClaudeLimits | null> {
+  return useQuery({
+    queryKey: ['claude-limits'],
+    queryFn: (): Promise<ClaudeLimits | null> => request('GET', '/api/claude-limits'),
+    refetchInterval: LIMITS_POLL_MS,
+  });
+}
+
+export type UsageRange = '7' | '30' | '90' | 'all';
+
+/** Under `['tickets', projectId]`: a ticket's events refetch it. */
+export function useProjectUsage(
+  projectId: number,
+  range: UsageRange,
+): UseQueryResult<ProjectUsage> {
+  return useQuery({
+    queryKey: ['tickets', projectId, 'usage', range],
+    queryFn: (): Promise<ProjectUsage> =>
+      request('GET', `/api/projects/${projectId}/usage?days=${range}`),
   });
 }

@@ -141,6 +141,13 @@
   (`lib/open-notification.ts`). Desktop notifications are off until turned on in the panel (stored in
   localStorage; the browser asks permission): only the tab holding the shared stream shows them
   (`subscribeAsLead` in `lib/event-hub.ts`), and only while Union is not in view.
+- Claude usage: `GET /api/claude-limits` (`routes/claude-usage.ts`, core `claude-limits.ts`) returns the newest
+  `rate_limit_event` an agent call printed (`unifiedWindows.five_hour` / `seven_day`: utilization and reset), read
+  from `agent_log` (the last 20 000 lines at most). The sidebar's `usage/claude-meter.tsx` polls it every minute.
+  `GET /api/projects/:projectId/usage?days=7|30|90|all` sums the project's `agent_usage` rows (its tickets' and
+  its investigations') in core `project-usage.ts` and the pure `usage-summary.ts`: total, weeks (Monday, UTC),
+  steps, models, the ten most expensive tickets, investigations. The project's Usage tab is
+  `usage/usage-page.tsx`, its chart `usage/weeks-chart.tsx` (scale from `lib/nice-scale.ts`).
 - Live progress on board cards: agent output stays off the shared event stream, so a running card
   (`card-progress.tsx`) reads `GET /api/projects/:projectId/run-progress` (`routes/run-progress.ts`, core
   `run-progress.ts`): each running run's start and the latest assistant line of `agent_log`, summarized by

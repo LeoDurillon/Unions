@@ -5,12 +5,13 @@ import type { ReactElement } from 'react';
 import type { PublicProject } from '../../src/api-types';
 import { Button } from './ui';
 
-export type ProjectView = 'board' | 'investigations' | 'pull-requests';
+export type ProjectView = 'board' | 'investigations' | 'pull-requests' | 'usage';
 
 const VIEWS: { view: ProjectView; label: string }[] = [
   { view: 'board', label: 'Board' },
   { view: 'investigations', label: 'Investigations' },
   { view: 'pull-requests', label: 'Pull requests' },
+  { view: 'usage', label: 'Usage' },
 ];
 
 function ViewTabs({

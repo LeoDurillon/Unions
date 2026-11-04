@@ -61,6 +61,17 @@ Each step, revision, investigation and Explain is one or more agent runs on your
 each run's tokens in the Overview, the Log and an investigation's Usage tab, with what the same tokens would cost
 on the Anthropic API. A Max subscription does not bill that amount; it helps compare models and steps.
 
+**Claude usage** at the bottom of the sidebar shows how much of your subscription's two windows is used: the
+**5 hours** window and the **Week** window, each with a bar and the time it starts over. The bar turns amber from
+80% and red at the limit. Union reads these figures from Claude's answers to its own agents, so they update while
+an agent runs. What you use elsewhere (Claude Code, claude.ai) shows at the next agent call, and the meter says how
+old its figures are when no agent has run for a while. Folded, the sidebar shows the higher of the two shares.
+
+A project's **Usage** tab (beside **Pull requests**) adds up what its agents used over the last 7, 30 or 90 days, or
+since the start: the API-equivalent cost, the agent calls and the tokens, a bar per week (hover one for its
+figures), then the cost per step, per model and for the most expensive tickets (click one to open it), with the
+investigations on their own line.
+
 To use less:
 
 - pick the **Quick** or **Standard** flow for small tickets;
