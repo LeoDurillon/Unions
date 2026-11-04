@@ -1,8 +1,9 @@
-// A review summary or a conversation comment, with its Add to review action when there is one; a line thread; each with its replies below.
+// A review summary or a conversation comment, with its Add to review action when there is one; a line thread, its place a link to the diff; each with its replies below.
 import { githubTitle } from '@union/core/github-text';
 import { useState, type ReactElement, type ReactNode } from 'react';
 
 import type { PullRequestNote, PullRequestThread } from '../../../src/api-types';
+import { openDiffLines, type DiffLines, type ReviewPageKind } from '../../lib/review-url';
 import { Badge, Button } from '../ui';
 import { CommentBody } from './comment-body';
 
@@ -123,6 +124,13 @@ export function NoteCard({
   );
 }
 
+/** The lines the thread is on: in the latest diff, else (outdated) where it was written. */
+function threadLines(thread: PullRequestThread): DiffLines {
+  const end = thread.line ?? thread.originalLine ?? 1;
+  const start = thread.line === null ? thread.originalStartLine : thread.startLine;
+  return { path: thread.path, side: thread.side, start: Math.min(start ?? end, end), end };
+}
+
 function place(thread: PullRequestThread): string {
   const line = thread.line ?? thread.originalLine;
   const start = thread.startLine ?? thread.originalStartLine;
@@ -130,22 +138,50 @@ function place(thread: PullRequestThread): string {
   return `${thread.path}:${range}${thread.side === 'old' ? ' (removed)' : ''}`;
 }
 
+/** Where the thread sits; a link to those lines in the review's diff when there is one. */
+function Place({
+  thread,
+  diffIn,
+}: {
+  thread: PullRequestThread;
+  diffIn: ReviewPageKind | undefined;
+}): ReactElement {
+  if (!diffIn) {
+    return <span className="font-mono">{place(thread)}</span>;
+  }
+  return (
+    <button
+      type="button"
+      title={`Open ${thread.path} in the diff`}
+      className="font-mono text-indigo-700 hover:underline dark:text-indigo-300"
+      onClick={() => {
+        openDiffLines(threadLines(thread), diffIn);
+      }}
+    >
+      {place(thread)}
+    </button>
+  );
+}
+
 /** A line-comment thread: where it sits, then each comment, then its replies. */
 export function ThreadCard({
   thread,
   imported = false,
   reply,
+  diffIn,
 }: {
   thread: PullRequestThread;
   imported?: boolean;
   /** Its replies and Reply; without it the thread is read only. */
   reply?: ReactNode;
+  /** The review page whose Diff tab its place opens at its lines; without it the place is plain text. */
+  diffIn?: ReviewPageKind;
 }): ReactElement {
   const [first] = thread.comments;
   return (
     <article className={CARD}>
       <header className="flex flex-wrap items-center gap-2 text-xs">
-        <span className="font-mono">{place(thread)}</span>
+        <Place thread={thread} diffIn={diffIn} />
         {thread.resolved ? <Badge tone="green">resolved</Badge> : null}
         {thread.line === null ? <Badge tone="amber">outdated</Badge> : null}
         {imported ? <Badge tone="blue">in the review</Badge> : null}

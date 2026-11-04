@@ -12,6 +12,8 @@ import {
 
 import { fileSelection, hunkSelection, type Selection } from '../../lib/diff-selection';
 import type { ReviewTarget } from '../../lib/review-target';
+import { diffLinesOf } from '../../lib/review-url';
+import { useUrlParam } from '../../lib/url-state';
 import { useExplanations } from '../../lib/use-explanations';
 import { useReviewSpecs } from '../../lib/use-review-specs';
 
@@ -58,6 +60,19 @@ function remember(open: boolean): void {
   }
 }
 
+type SetFocus = (next: (last: ExplainFocus | null) => ExplainFocus) => void;
+
+/** Shows the lines the URL asks for (`?lines=`, a line comment's link from the PR tab). */
+function useAskedLines(setFocus: SetFocus): void {
+  const asked = useUrlParam('lines');
+  useEffect(() => {
+    const lines = diffLinesOf(asked);
+    if (lines) {
+      setFocus((last) => ({ ...lines, draft: null, seq: (last?.seq ?? 0) + 1 }));
+    }
+  }, [asked, setFocus]);
+}
+
 export function ExplainProvider({
   target,
   children,
@@ -68,6 +83,7 @@ export function ExplainProvider({
   const [open, setOpen] = useState(stored);
   const [wanted, setWanted] = useState(open);
   const [focus, setFocus] = useState<ExplainFocus | null>(null);
+  useAskedLines(setFocus);
   const specs = useReviewSpecs(target, wanted || open).active;
   const { mutate, isPending, error } = useExplanations(target).ask;
   const state = useMemo((): ExplainState => {

@@ -120,6 +120,7 @@ function Threads({
           key={thread.comments[0]?.url ?? thread.path}
           thread={thread}
           imported={discussion.imported.includes(thread.comments[0]?.url ?? '')}
+          diffIn="ticket"
           reply={
             <ReplyArea
               replies={replies}

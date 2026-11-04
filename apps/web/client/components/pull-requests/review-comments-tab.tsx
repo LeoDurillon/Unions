@@ -62,6 +62,7 @@ export function ReviewCommentsTab({
           <ThreadCard
             key={thread.comments[0]?.url ?? thread.path}
             thread={thread}
+            diffIn="pull-request"
             reply={
               <ReplyArea
                 replies={replies}

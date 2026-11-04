@@ -14,7 +14,8 @@ in the template's language, and ends with `Closes #<issue>`.
   sent to GitHub.
 - The **discussion** shows the pull request's comments and reviews from GitHub. Import its line comments into a
   review with **Import** (see [Reviewing changes](reviewing.md#comment-and-send)), or answer them where you read
-  them (see [Reply to comments](#reply-to-comments)).
+  them (see [Reply to comments](#reply-to-comments)). Click a line thread's file and lines to open them in the
+  review's diff.
 
 ## Reply to comments
 
