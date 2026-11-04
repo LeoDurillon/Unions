@@ -10,6 +10,7 @@ import { FileRows, type RowOptions, type Layout } from './file-rows';
 import { useBySpecControl } from './group-by-spec-button';
 import { ImportantFilesProvider } from './report-marks';
 import { SpecGroups } from './spec-groups';
+import { useFileKeys } from './use-file-keys';
 
 const STORAGE_KEY = 'union.review.files';
 const LAYOUTS: SegmentOption<Layout>[] = [
@@ -127,6 +128,7 @@ export function FileList({
     },
     layout,
   };
+  useFileKeys(files, layout, selected, rows.onSelect);
   return (
     <ImportantFilesProvider target={target}>
       <div className="space-y-3">

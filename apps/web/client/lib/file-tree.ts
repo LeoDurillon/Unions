@@ -64,3 +64,12 @@ export function buildFileTree<T extends { path: string }>(files: T[]): TreeNode<
   }
   return nodesOf(root, '');
 }
+
+function flatten<T>(nodes: TreeNode<T>[]): T[] {
+  return nodes.flatMap((node) => (node.kind === 'file' ? [node.file] : flatten(node.children)));
+}
+
+/** The files in the order the tree shows them, top to bottom. */
+export function treeOrder<T extends { path: string }>(files: T[]): T[] {
+  return flatten(buildFileTree(files));
+}

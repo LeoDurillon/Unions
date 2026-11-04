@@ -72,6 +72,7 @@ export function BoardView({
         filter={filter}
         onFilter={setFilter}
         canStart={onStart !== undefined}
+        onOpen={onOpen}
       />
       <ErrorText error={error} />
       <DndContext sensors={sensors} onDragEnd={onDrop}>

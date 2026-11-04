@@ -1,6 +1,6 @@
 // Above the board: the search, "Needs you" with its count, where the tickets came from (when some
 // came from Notion), how many the filter shows, and how to start one while the backlog has any.
-import type { ReactElement } from 'react';
+import { useRef, type ReactElement } from 'react';
 
 import type { TicketSummary } from '../../src/api-types';
 import {
@@ -11,6 +11,7 @@ import {
   type OriginFilter,
 } from '../lib/board-filter';
 import { isStartable } from '../lib/labels';
+import { useBoardKeys } from '../lib/use-board-keys';
 import { Segmented } from './choice';
 import { inputClass } from './ui';
 
@@ -33,7 +34,7 @@ function NeedsYouToggle({
     <button
       type="button"
       aria-pressed={on}
-      title="Steps waiting for your approval, failures, refused commits and red CI checks"
+      title="Steps waiting for your approval, failures, refused commits and red CI checks (n opens the first)"
       onClick={() => {
         onChange(!on);
       }}
@@ -106,6 +107,7 @@ export function BoardToolbar({
   filter,
   onFilter,
   canStart,
+  onOpen,
 }: {
   /** Every ticket on the board, before the filter. */
   tickets: TicketSummary[];
@@ -115,16 +117,21 @@ export function BoardToolbar({
   onFilter: (filter: BoardFilter) => void;
   /** The cards have Start buttons: while the backlog has a ticket that can start, say how. */
   canStart: boolean;
+  /** Opens a ticket: `n` opens the first that needs the user. */
+  onOpen: (id: number) => void;
 }): ReactElement {
+  const search = useRef<HTMLInputElement>(null);
+  useBoardKeys(tickets, search, onOpen);
   const filtering = isFiltering(filter);
   const startable = canStart && tickets.some((ticket) => isStartable(ticket));
   return (
     <div className="flex flex-wrap items-center gap-2">
       <div className="w-72">
         <input
+          ref={search}
           type="search"
           aria-label="Search tickets"
-          placeholder="Search tickets, #issue or #PR"
+          placeholder="Search tickets, #issue or #PR (/)"
           className={`${inputClass} py-1 text-xs`}
           value={filter.text}
           onChange={(event) => {

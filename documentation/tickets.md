@@ -19,6 +19,9 @@ Above the board:
 - **Needs you** shows only the tickets waiting for you, with their count: a step to approve, a question to answer,
   a failed run.
 
+Press **/** to jump to the search, **c** to write a new ticket, and **n** to open the first ticket that needs you.
+Press **?** anywhere for the list of [keyboard shortcuts](#keyboard-shortcuts).
+
 ## Create a ticket
 
 Click **New ticket** in the project bar. The dialog has one tab per source:
@@ -113,6 +116,26 @@ Click a card to open its panel:
 
 **Investigate** in the panel header asks an agent a question about this ticket's workspace (see
 [Investigations](investigations.md)). **Review changes** opens the diff (see [Reviewing changes](reviewing.md)).
+
+When other tickets wait for you, **Next needing you** in the header opens the next one, in the board's order (its
+badge says how many there are). Use it after approving a step to go straight to the next thing to do.
+
+## Keyboard shortcuts
+
+Press **?** to see them in Union. They do nothing while you type in a text field or while a dialog is open, and
+Ctrl, ⌘ and Alt combinations stay the browser's.
+
+| Where       | Key       | What it does                                     |
+| ----------- | --------- | ------------------------------------------------ |
+| Anywhere    | **?**     | List the shortcuts.                              |
+| Board       | **/**     | Jump to the search.                              |
+| Board       | **c**     | Write a new ticket.                              |
+| Board       | **n**     | Open the first ticket that needs you.            |
+| Ticket      | **n / p** | Open the next or previous ticket that needs you. |
+| Ticket      | **r**     | Review the changes.                              |
+| Ticket      | **1 – 4** | Switch to Overview, Preview, Worker or PR.       |
+| Ticket      | **Esc**   | Close the panel.                                 |
+| Review page | **j / k** | Open the next or previous file.                  |
 
 ## Cancel and remove
 

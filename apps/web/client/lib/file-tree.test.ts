@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test';
 
-import { buildFileTree, type TreeNode } from './file-tree';
+import { buildFileTree, treeOrder, type TreeNode } from './file-tree';
 
 /** The tree as indented lines, directories ending with a slash. */
 function outline(nodes: TreeNode<{ path: string }>[], depth = 0): string[] {
@@ -35,4 +35,19 @@ test('files are grouped by directory, directories first, single-directory chains
   expect(src?.kind === 'dir' && src.children[0]?.kind === 'dir' && src.children[0].path).toBe(
     'src/pages/lots',
   );
+});
+
+test('treeOrder lists the files as the tree shows them: folders first, then by name', () => {
+  const files = [
+    { path: 'b.ts' },
+    { path: 'src/z.ts' },
+    { path: 'a.ts' },
+    { path: 'src/lib/c.ts' },
+  ];
+  expect(treeOrder(files).map((file) => file.path)).toEqual([
+    'src/lib/c.ts',
+    'src/z.ts',
+    'a.ts',
+    'b.ts',
+  ]);
 });

@@ -10,7 +10,8 @@ including ones written by people.
 Click **Review changes** in a ticket's panel. The page opens on the **Diff** tab:
 
 - On the left, the changed files, as a **List** or a **Tree**. **By spec** groups them by the part of the spec they
-  implement (see [Specs](#specs)).
+  implement (see [Specs](#specs)). Press **j** and **k** to open the next or previous file, in the order the list
+  shows them.
 - On the right, one file at a time, with syntax highlighting, **Unified** or **Split** (side by side). Union
   remembers your choice in this browser.
 - The commit picker shows all the changes, the changes since your last review, or one commit at a time.

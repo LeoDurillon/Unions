@@ -141,6 +141,14 @@
   (`lib/open-notification.ts`). Desktop notifications are off until turned on in the panel (stored in
   localStorage; the browser asks permission): only the tab holding the shared stream shows them
   (`subscribeAsLead` in `lib/event-hub.ts`), and only while Union is not in view.
+- Keyboard shortcuts: one keydown listener per part through `useShortcuts` (`client/lib/shortcuts.ts`): no key
+  counts when typed in a field, with Ctrl, ⌘ or Alt, held down, already handled (`defaultPrevented`), or while a
+  `<dialog>` without `data-shortcuts` is open (the ticket panel has it, since it answers its own keys). The board
+  (`lib/use-board-keys.ts`, only while no ticket is open), the ticket panel (`components/ticket-panel-keys.ts`, not on
+  its review page), the review's file list (`review/use-file-keys.ts`) and `?` / `c` (`shortcuts-help.tsx`,
+  mounted by `main-area.tsx`) each own their keys; keep the list in `shortcuts-help.tsx` and the user guide in step.
+  "Next needing you" walks the board's own `tickets` query in column order (`lib/next-needing.ts`, with `needsYou`
+  from `board-filter.ts`).
 - Agent review comments: "Review with agent" on either review page queues an `agent_reviews` row
   (`routes/agent-review.ts`, `@union/core` `agent-reviews.ts`). Its findings become drafts with `author: 'agent'`
   (badge "suggested", Keep button); keeping or editing one makes it the user's (`author: 'user'`), and a new
