@@ -25,14 +25,22 @@ function loadTicket(db: Db, c: Context): Ticket {
   }
 }
 
+/** Why the ticket has no workspace: not made yet, or removed once the ticket finished. */
+function noWorkspace(ticket: Ticket): string {
+  if (ticket.phase.kind === 'cancelled') {
+    return 'The ticket is cancelled: its workspace was removed.';
+  }
+  return ticket.prState === 'merged'
+    ? 'The pull request is merged: its workspace was removed.'
+    : 'The ticket has no workspace yet: run the implementation first.';
+}
+
 /** The ticket's workspace exists once its first implementation ran; the agent shares the container. */
 function subjectOf(ticket: Ticket): PreviewSubject {
   return {
     owner: { ticketId: ticket.id },
     projectId: ticket.projectId,
-    noWorkspace: ticket.workspaceVolume
-      ? null
-      : 'The ticket has no workspace yet: run the implementation first.',
+    noWorkspace: ticket.workspaceVolume ? null : noWorkspace(ticket),
     e2eBusy:
       ticket.phase.kind === 'running'
         ? 'Wait for the current run to finish: the tests run in the same container.'

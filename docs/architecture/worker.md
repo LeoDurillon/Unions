@@ -302,6 +302,15 @@
 - `step-preview.ts`: with `config.preview.startForImplementation`, an implementation step runs the install command, then
   starts the preview (never failing the step; a failed install is the preview's reason and it does not start); every code step's commands get `previewEnv` (`preview-env.ts`: `BASE_URL`,
   `UNION_URL_<SERVICE>`) while the preview runs, and `previewHint` lists the addresses.
+- `ticket-cleanup.ts` (ticked with the preview manager and its watchers in `preview-runs.ts`): every minute, the
+  tickets that still have a container and are finished (`finishedReason`: `pr_state` merged, or phase cancelled)
+  with no work on them (`hasWork`: a running phase, a queued or running row in the side-run tables, a preview
+  starting or stopping, e2e tests running, an unhandled command) are cleaned one at a time:
+  `PreviewManager.removeFinished` (`removeFinishedPreview` in `reset.ts`: `compose down -v --rmi local`, row
+  `stopped`; skipped while a preview command runs, retried next pass), then `runtime.remove` of the container and
+  both volumes, the ticket's container columns cleared, `ticket_workspace_removed` logged. A failure logs
+  `container_cleanup_failed` once and leaves the ticket until the worker restarts. Without it, each stopped
+  preview kept its two networks, and Docker's default address pools (about 30 networks) ran out.
 - `preview/idle.ts`: stops running previews nobody visited for the project's `idleStopMinutes` (60 by default),
   from Traefik's per-router request counts (`UNION_PREVIEW_METRICS`, an entrypoint only the worker reaches); never
   while the ticket is in a step or its e2e tests run. The proxy publishes its port on `127.0.0.1` only.

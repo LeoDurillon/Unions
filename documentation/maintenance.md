@@ -46,6 +46,6 @@ it would remove. None of them touch GitHub or Notion.
 
 GitHub stays the reference for each ticket's title, description and column; Union owns the state of its runs.
 
-Containers and volumes of a ticket are removed when you remove the ticket, delete the project or reset the database.
-A Done ticket keeps them, so its preview and branch operations still work. To free disk space, cancel and remove
-tickets you no longer need.
+Containers and volumes of a ticket, and its preview with the images it built, are removed once its pull request is
+merged or the ticket is cancelled, and when you remove the ticket, delete the project or reset the database. A Done
+ticket whose pull request is still open keeps them, so its preview and branch operations still work.

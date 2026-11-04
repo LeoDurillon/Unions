@@ -61,7 +61,8 @@ function entriesFor(entry: LogEntry, names: CustomAgentNames): Entry[] {
   if (
     isEvent(event, 'preview_idle_stopped') ||
     isEvent(event, 'preview_reset') ||
-    isEvent(event, 'preview_services_stopped')
+    isEvent(event, 'preview_services_stopped') ||
+    isEvent(event, 'ticket_workspace_removed')
   ) {
     return [{ key, kind: 'result', text: event.payload.message }];
   }

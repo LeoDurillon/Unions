@@ -61,6 +61,8 @@ type RunPayloads = {
   run_finished: { step: Step; status: Column<typeof tables.runs, 'status'> };
   container_stop_failed: Failure;
   container_cleanup_failed: { container: string; error: string };
+  /** Its pull request merged or the ticket cancelled: its preview, container and volumes went. */
+  ticket_workspace_removed: { reason: 'merged' | 'cancelled'; message: string };
   agent_ports_forwarded: { forwards: PortForward[]; skipped: string[] };
   agent_ports_failed: Failure;
   agent_services_started: { services: string[] };

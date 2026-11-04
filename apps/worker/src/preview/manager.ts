@@ -14,7 +14,7 @@ import { previewSettings } from './compose';
 import { generatePreviewFile } from './compose-file';
 import { failStoppedPreview, HealthWatcher } from './health';
 import { IdleWatcher, readProxyMetrics } from './idle';
-import { resetPreview } from './reset';
+import { removeFinishedPreview, resetPreview } from './reset';
 import { startOwnerPreview, updateReviewPreview } from './review-preview';
 import { refreshPreviewLogs, stopPreview, takeDown, type PreviewDeps } from './run';
 
@@ -195,6 +195,39 @@ export class PreviewManager {
         // Nothing was running: the volume can go.
       }
     }
+  }
+
+  /**
+   * Takes a finished ticket's preview down with its built images: false, and nothing done, while
+   * a command on it runs (the next pass tries again). A failure is thrown.
+   */
+  async removeFinished(ticketId: number): Promise<boolean> {
+    const owner = { ticketId };
+    const key = ownerKey(owner);
+    if (this.busy.has(key)) {
+      return false;
+    }
+    const removal = (async (): Promise<Error | null> => {
+      try {
+        await removeFinishedPreview(this.deps, owner);
+        return null;
+      } catch (error) {
+        return error instanceof Error ? error : new Error(String(error));
+      } finally {
+        this.busy.delete(key);
+      }
+    })();
+    this.busy.set(
+      key,
+      (async (): Promise<void> => {
+        await removal;
+      })(),
+    );
+    const failure = await removal;
+    if (failure !== null) {
+      throw failure;
+    }
+    return true;
   }
 
   async idle(): Promise<void> {

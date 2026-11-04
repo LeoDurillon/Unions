@@ -1,8 +1,9 @@
 // Resets a preview: its containers, volumes (the agent's services' included) and built images go,
 // the data folders chosen are emptied, its images are built again without the cache, then it starts
-// from nothing.
+// from nothing. A finished ticket's preview is taken down the same way, for good.
 import {
   emitEvent,
+  getPreview,
   getTicket,
   ticketOwnerId,
   updatePreview,
@@ -121,4 +122,18 @@ export async function resetPreview(
     return;
   }
   await startOwnerPreview(deps, owner);
+}
+
+/**
+ * Takes a finished ticket's preview down for good: its containers, networks, volumes and built
+ * images (pulled ones stay). Its row, when it has one, says stopped without its last error.
+ */
+export async function removeFinishedPreview(
+  deps: PreviewDeps,
+  owner: WorkspaceOwner,
+): Promise<void> {
+  await takeDown(deps, owner, REMOVE_BUILT_IMAGES);
+  if (getPreview(deps.db, owner) !== null) {
+    updatePreview(deps.db, owner, { status: 'stopped', error: null });
+  }
 }

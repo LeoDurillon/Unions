@@ -7,21 +7,23 @@ import { EventDispatcher } from './event-dispatcher';
 import type { GitHubApi } from './github/api';
 import { InvestigationRunner, type InvestigationDeps } from './investigate';
 import { PrDescriptionRunner } from './pr-description-runner';
-import { createPreviewManager, type PreviewManager } from './preview/manager';
+import { startPreviewRuns, type PreviewRuns } from './preview-runs';
 import { reviewRunners, startReviewRuns, type ReviewRuns } from './review-runs';
 import { ThrowawayRuns } from './throwaway-runs';
 import { UnionUpdater } from './union-update';
 
 /**
  * The work outside the ticket pipeline: investigations, the review page's agents (`ReviewRuns`), PR
- * description rewrites and the lesson writer (taking their slots from it), the event rules, stopping previews nobody
- * visits, failing those whose services stopped, reading the account's claude.ai connectors, and the commands users run in workspaces.
+ * description rewrites and the lesson writer (taking their slots from it), the event rules, the
+ * previews' work (`PreviewRuns`: stopping those nobody visits, failing those whose services stopped,
+ * removing finished tickets'), reading the account's claude.ai connectors, and the commands users
+ * run in workspaces.
  */
 export type SideRuns = ReviewRuns & {
   investigations: InvestigationRunner;
   prDescriptions: PrDescriptionRunner;
   containerRuns: ContainerRunner;
-  previews: PreviewManager;
+  previews: PreviewRuns['previews'];
   /** Union's own update; while it runs, the worker starts nothing new. */
   updater: UnionUpdater;
   tick: () => void;
@@ -35,9 +37,9 @@ export async function startSideRuns(
 ): Promise<SideRuns> {
   const investigations = new InvestigationRunner(deps);
   const prDescriptions = new PrDescriptionRunner(deps);
-  const previews = createPreviewManager(deps);
+  const previewRuns = startPreviewRuns(deps);
+  const { previews } = previewRuns;
   const events = new EventDispatcher(deps.db, new FetchNotionApi(), deps.apiFor);
-  const watchPreviews = previews.watchers();
   const throwaway = new ThrowawayRuns(deps);
   const containerRuns = new ContainerRunner(deps);
   const updater = new UnionUpdater(deps.db);
@@ -45,7 +47,6 @@ export async function startSideRuns(
   await investigations.recover();
   const reviews = await startReviewRuns(deps);
   prDescriptions.recover();
-  previews.recover();
   throwaway.recover();
   containerRuns.recover();
   backfillNotionPages(deps.db);
@@ -63,7 +64,7 @@ export async function startSideRuns(
       }
       prDescriptions.tick();
       events.tick();
-      watchPreviews.tick();
+      previewRuns.tick();
       throwaway.tick();
       containerRuns.tick();
     },
@@ -81,7 +82,7 @@ export async function startSideRuns(
         investigations.idle(),
         ...reviewRunners(reviews).map((runner) => runner.idle()),
         prDescriptions.idle(),
-        previews.idle(),
+        previewRuns.idle(),
         events.idle(),
         throwaway.idle(),
         containerRuns.idle(),

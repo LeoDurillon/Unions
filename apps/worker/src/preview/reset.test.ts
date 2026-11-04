@@ -16,7 +16,7 @@ import {
 import { eq } from 'drizzle-orm';
 
 import { previewSettings } from './compose';
-import { resetPreview } from './reset';
+import { removeFinishedPreview, resetPreview } from './reset';
 import type { PreviewDeps } from './run';
 
 const RESOLVED = {
@@ -144,4 +144,16 @@ test('the data folders chosen, among the ones found, are emptied after the take-
         'Preview reset: its containers, volumes and built images were removed, and data emptied',
     },
   ]);
+});
+
+test("a finished ticket's preview goes down with its built images, and says stopped", async () => {
+  await removeFinishedPreview(deps(), { ticketId });
+  expect(composed).toEqual(['-p union-t1 down -v --remove-orphans --rmi local']);
+  expect(getPreview(db, { ticketId })).toMatchObject({ status: 'stopped', error: null });
+});
+
+test('a finished ticket that never had a preview gets no preview row', async () => {
+  db.delete(schema.previews).run();
+  await removeFinishedPreview(deps(), { ticketId });
+  expect(getPreview(db, { ticketId })).toBeNull();
 });

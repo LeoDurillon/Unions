@@ -59,5 +59,9 @@
    ask the implementer for a reply to their author once its revision is pushed (`reply_status = 'requested'`).
    Cancelling a ticket closes its open pull requests (a stack's too) and its issue as not planned, once its agent
    stopped; merged pull requests and the branch stay, and what is reopened on GitHub is left alone.
-6. On archive (or project deletion) the containers and volumes are removed. Done alone keeps them, so the
-   preview still works after approval.
+6. Once nothing comes back to the ticket (its pull request merged, a stack's once every slice is, or the ticket
+   cancelled), the worker removes its preview (containers, networks, volumes and the images it built), then its
+   container and volumes, and clears `container_name`, `home_volume` and `workspace_volume`; it waits while a step,
+   a side run, a preview command, e2e tests or an unhandled command is on the ticket. Removing the ticket or deleting
+   the project removes them too. Done alone keeps them, so the preview still works after approval and the pull
+   request can still be revised; a pull request closed without a merge keeps them too, since it can be reopened.

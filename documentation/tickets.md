@@ -118,6 +118,7 @@ Click a card to open its panel:
 
 **Cancel ticket** stops the ticket: a running step is stopped, and the card goes back to Backlog marked
 **Cancelled**. Its open pull requests are closed on GitHub, and its issue is closed as not planned; a merged pull
-request stays as it is, the branch is kept, and you can reopen either on GitHub, which Union leaves alone. A
+request stays as it is, the branch is kept, and you can reopen either on GitHub, which Union leaves alone. Once the
+agent stopped, Union removes the ticket's preview, container and workspace (the branch on GitHub stays). A
 cancelled ticket can then leave Union with **Remove for good**, in its Overview: its runs, outputs
-and files are deleted, and its container and volumes removed. Nothing brings it back.
+and files are deleted. Nothing brings it back.

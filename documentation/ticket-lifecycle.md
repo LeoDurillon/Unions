@@ -90,6 +90,11 @@ A Done ticket keeps its container, workspace and branch, so you can still:
 
 Merge the pull request on GitHub as usual. Once it is merged or closed, the ticket moves to **Merged / Closed**.
 
+Once the pull request is merged, Union removes the ticket's preview, container and workspace within a minute or two,
+along with the images its preview built, to free disk space and Docker networks. The ticket's Log says when. Its
+branch, pull request and history in Union stay. A pull request closed without a merge keeps them, since it can be
+reopened.
+
 ## When a step stops
 
 | What you see                                  | What it means                                                         | What to do                                                             |

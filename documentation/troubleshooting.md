@@ -71,6 +71,12 @@ external volumes. Move what you need into **compose additions**, or drop those s
 **The preview stopped by itself.**
 Nobody opened it for the project's idle time (an hour by default). Change it in **Settings → Previews → Limits**.
 
+**The preview fails with "all predefined address pools have been fully subnetted".**
+Docker has no room left for the preview's networks: each preview makes two, and Docker allows about 30 by default.
+Previews of merged or cancelled tickets are removed on their own; reset or stop previews you no longer need, or
+remove cancelled tickets. To allow many more networks, set `default-address-pools` with smaller subnets in Docker's
+`daemon.json` (for example `{"base": "172.80.0.0/12", "size": 24}`) and restart Docker.
+
 ## Still stuck?
 
 Back up the database (`bun run db:backup`) before you try anything drastic, and open an issue on Union's repository
