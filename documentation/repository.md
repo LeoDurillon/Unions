@@ -8,10 +8,18 @@ ticket changed. Use it to read a file before you write a ticket, or to look at c
 - **At the top**: the branch shown (the project's base branch), its latest commit, who made it and when. The short
   commit id opens the commit on GitHub. **Refresh** reads the branch again after someone pushed to it.
 - **On the left**: the folders and files. Click a folder to open it; click a file to show it.
-- **On the right**: the file, with line numbers and colours for its language. Markdown shows as source for now.
-  Images show as images. A binary file, or one larger than 1 MB, shows only its size: **Open on GitHub** opens it
+- **On the right**: the file, with line numbers and colours for its language. Images show as images. A binary file, or one larger than 1 MB, shows only its size: **Open on GitHub** opens it
   there. A folder shows its contents with their sizes.
 - **The path above the file**: click a folder in it to go back up.
+
+## Markdown files
+
+A Markdown file (a README, a doc) opens rendered, as GitHub shows it: headings, tables, diagrams and images.
+**Source** above it shows the text with line numbers; the next file you open is rendered again.
+
+- A link to another file of the repository opens that file here. Back returns to the page you came from.
+- A link to a file the branch does not have opens GitHub instead.
+- Images stored in the repository load from it, up to 10 MB each.
 
 ## Find a file
 

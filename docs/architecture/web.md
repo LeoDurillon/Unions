@@ -162,7 +162,13 @@
   from `GET /commits/{ref}` with the sha media type, then `git.getCommit`; 404 when the ref names nothing),
   `…/tree?sha=` (recursive; with `&prefix=` one folder's own entries, for a tree GitHub `truncated`),
   `…/blob?sha=&path=&size=` (a size above core `REPOSITORY_FILE_LIMIT`, 1 MB, answers `too-large` without reading;
-  core `repositoryBlob` tells text, image (a data URL) and binary). The URL holds `?view=repository&repo-ref=&repo-path=`
+  core `repositoryBlob` tells text, image (a data URL) and binary), `…/raw?sha=&path=&size=` (an image's own bytes
+  for `<img>` in rendered Markdown, up to `REPOSITORY_IMAGE_LIMIT`, 10 MB; images only, sent with
+  `Content-Security-Policy: sandbox` and `nosniff` so an SVG opened on its own runs nothing). A Markdown file
+  renders through `markdown.tsx` with GitHub's HTML (`repository/markdown-view.tsx`, Rendered / Source, reset per
+  file); its `resolveUrl` (`lib/markdown-links.ts`, relative paths by `lib/repo-paths.ts`) points images of the
+  commit at `raw`, links to its files at the tab's own `?view=repository&repo-path=` (a click there is caught and
+  opens the file without a reload), and links to paths it lacks at GitHub. The URL holds `?view=repository&repo-ref=&repo-path=`
   (`lib/repository-url.ts`); the tree index and the go-to-file match are pure (`lib/repo-tree.ts`,
   `lib/path-filter.ts`).
 - Live progress on board cards: agent output stays off the shared event stream, so a running card

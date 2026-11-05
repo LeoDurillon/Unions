@@ -3,6 +3,9 @@
 /** Files above this size are not read: the tab shows their size and a link to GitHub. */
 export const REPOSITORY_FILE_LIMIT = 1_000_000;
 
+/** Images a rendered Markdown file shows are served as they are, up to this size (screenshots run large). */
+export const REPOSITORY_IMAGE_LIMIT = 10_000_000;
+
 /** A NUL byte in the first bytes of a file means binary, as git decides. */
 const SNIFF_BYTES = 8000;
 
@@ -25,7 +28,8 @@ export type RepositoryBlob =
   | { kind: 'binary'; size: number }
   | { kind: 'too-large'; size: number };
 
-function imageType(path: string): string | null {
+/** The image type a path's extension names; null when it is not an image. */
+export function repositoryImageType(path: string): string | null {
   const name = path.split('/').at(-1) ?? '';
   const extension = name.includes('.') ? (name.split('.').at(-1) ?? '').toLowerCase() : '';
   return IMAGE_TYPES[extension] ?? null;
@@ -48,7 +52,7 @@ export function repositoryBlob(path: string, bytes: Uint8Array): RepositoryBlob 
   if (size > REPOSITORY_FILE_LIMIT) {
     return { kind: 'too-large', size };
   }
-  const type = imageType(path);
+  const type = repositoryImageType(path);
   if (type) {
     return {
       kind: 'image',

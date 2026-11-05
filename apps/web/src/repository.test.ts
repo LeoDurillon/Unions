@@ -135,3 +135,19 @@ test('the cache drops the least recently used past its weight', () => {
   lru.set('big', 'xxxxxx');
   expect(lru.get('big')).toBeUndefined();
 });
+
+test('an image is served as its bytes, with its type and a sandbox', async () => {
+  const response = await app.request(
+    `/api/projects/${projectId}/repository/raw?sha=${README}&path=docs/logo.svg`,
+  );
+  expect(response.status).toBe(200);
+  expect(response.headers.get('content-type')).toBe('image/svg+xml');
+  expect(response.headers.get('content-security-policy')).toBe('sandbox');
+  expect(await response.text()).toBe('# Shop');
+});
+
+test('only images are served raw, and not past their limit', async () => {
+  expect((await get(`raw?sha=${README}&path=README.md`)).status).toBe(400);
+  expect((await get(`raw?sha=${README}&path=a.png&size=20000000`)).status).toBe(413);
+  expect(calls).toEqual([]);
+});

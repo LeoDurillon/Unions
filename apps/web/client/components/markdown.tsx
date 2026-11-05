@@ -105,6 +105,7 @@ export function Markdown({
   compact = false,
   github = false,
   renderCode,
+  resolveUrl,
 }: {
   children: string;
   files?: Record<string, string>;
@@ -114,12 +115,16 @@ export function Markdown({
   github?: boolean;
   /** Inline code spans it turns into something else (links to the diff); null keeps a span as code. */
   renderCode?: RenderCode;
+  /** Rewrites a link (`href`) or an image (`src`), as `key` says; undefined leaves it to the default. */
+  resolveUrl?: (url: string, key: string) => string | undefined;
 }): ReactElement {
   const components = useMemo(() => withCode(renderCode), [renderCode]);
-  const transform = (url: string): string =>
-    url.startsWith(ATTACHMENT)
-      ? (files?.[url.slice(ATTACHMENT.length)] ?? '')
-      : defaultUrlTransform(url);
+  const transform = (url: string, key: string): string => {
+    if (url.startsWith(ATTACHMENT)) {
+      return files?.[url.slice(ATTACHMENT.length)] ?? '';
+    }
+    return resolveUrl?.(url, key) ?? defaultUrlTransform(url);
+  };
   return (
     <div className={compact ? 'markdown markdown-compact' : 'markdown'}>
       <ReactMarkdown

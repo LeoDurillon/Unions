@@ -13,12 +13,14 @@ type Props = {
   projectId: number;
   repo: { owner: string; repo: string };
   commit: RepositoryCommit;
+  /** The branch in the URL (null: the base branch), kept on the links of a Markdown file. */
+  gitRef: string | null;
   path: string | null;
   onPick: (path: string | null) => void;
 };
 
 function Loaded({ tree, ...props }: Props & { tree: RepositoryTree }): ReactElement {
-  const { projectId, repo, commit, path, onPick } = props;
+  const { projectId, repo, commit, gitRef, path, onPick } = props;
   const state = useRepoTree(projectId, tree, path);
   const [query, setQuery] = useState('');
   const pick = (next: string): void => {
@@ -48,8 +50,12 @@ function Loaded({ tree, ...props }: Props & { tree: RepositoryTree }): ReactElem
       </aside>
       <div className="min-w-0 flex-1 overflow-auto bg-white dark:bg-zinc-900">
         <FileViewer
-          projectId={projectId}
-          place={{ ...repo, sha: commit.sha }}
+          base={{
+            projectId,
+            place: { ...repo, sha: commit.sha },
+            ref: gitRef,
+            byPath: state.byPath,
+          }}
           path={current}
           entry={state.byPath.get(current)}
           index={state.index}

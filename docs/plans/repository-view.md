@@ -3,7 +3,8 @@
 Status: steps 1 and 2 built (2026-11-05, branch `repository-view`). Checked against GitHub on both live projects
 (an App and a token; the Senova tree, 4,451 entries, in one call, under a second; files read once, then from the
 cache) and in headless Chromium on 3100 (tab, tree, highlighting, the URL kept on reload, go to file, folders; no
-write tried). Images are shown already (step 3 had them). Left: steps 3 to 5; a file in the URL under a folder a
+write tried). Images are shown already (step 3 had them). Markdown rendered (2026-11-05): relative links open the file in
+the tab, relative images load through `raw`; checked on Senova's README (two SVGs, 46 links, Back). Left: steps 3 to 5; a file in the URL under a folder a
 truncated tree has not read yet shows "Nothing at this path" until that folder is opened.
 
 ## Idea

@@ -2,11 +2,13 @@
 import type { ReactElement, ReactNode } from 'react';
 
 import type { RepositoryBlob, RepositoryEntry } from '../../../src/repository-api-types';
-import { SHORT_SHA, sizeText, type GitHubPlace } from '../../lib/repo-links';
+import type { MarkdownBase } from '../../lib/markdown-links';
+import { SHORT_SHA, sizeText } from '../../lib/repo-links';
 import { nameOf, type RepoIndex } from '../../lib/repo-tree';
 import { readable, useRepositoryBlob } from '../../lib/repository-api';
 import { ErrorText } from '../ui';
 import { FileHeader } from './file-header';
+import { isMarkdown, MarkdownView } from './markdown-view';
 import { TextView } from './text-view';
 
 function Notice({ children }: { children: ReactNode }): ReactElement {
@@ -45,8 +47,10 @@ function FolderEntries({
   );
 }
 
-function FileBody({ projectId, entry }: { projectId: number; entry: RepositoryEntry }): ReactNode {
-  const blob = useRepositoryBlob(projectId, entry);
+type FileProps = { base: MarkdownBase; onPick: (path: string) => void };
+
+function FileBody({ entry, ...props }: FileProps & { entry: RepositoryEntry }): ReactNode {
+  const blob = useRepositoryBlob(props.base.projectId, entry);
   if (entry.type === 'submodule') {
     return (
       <Notice>A submodule: another repository, at commit {entry.sha.slice(0, SHORT_SHA)}.</Notice>
@@ -61,12 +65,20 @@ function FileBody({ projectId, entry }: { projectId: number; entry: RepositoryEn
   if (!blob.data) {
     return <Notice>Loading…</Notice>;
   }
-  return <BlobBody blob={blob.data} path={entry.path} />;
+  return <BlobBody {...props} blob={blob.data} path={entry.path} />;
 }
 
-function BlobBody({ blob, path }: { blob: RepositoryBlob; path: string }): ReactElement {
+function BlobBody({
+  blob,
+  path,
+  ...props
+}: FileProps & { blob: RepositoryBlob; path: string }): ReactElement {
   if (blob.kind === 'text') {
-    return <TextView text={blob.text} path={path} />;
+    return isMarkdown(path) ? (
+      <MarkdownView key={path} {...props} text={blob.text} path={path} />
+    ) : (
+      <TextView text={blob.text} path={path} />
+    );
   }
   if (blob.kind === 'image') {
     return (
@@ -84,15 +96,13 @@ function BlobBody({ blob, path }: { blob: RepositoryBlob; path: string }): React
 
 /** The picked file or folder (the root when nothing is picked). */
 export function FileViewer({
-  projectId,
-  place,
+  base,
   path,
   entry,
   index,
   onPick,
 }: {
-  projectId: number;
-  place: GitHubPlace;
+  base: MarkdownBase;
   path: string;
   /** Undefined when nothing at the commit has that path. */
   entry: RepositoryEntry | undefined;
@@ -102,9 +112,9 @@ export function FileViewer({
   const folder = path === '' || entry?.type === 'dir' ? (index.get(path) ?? []) : null;
   return (
     <section aria-label={path === '' ? 'Repository root' : path} className="min-w-0">
-      <FileHeader place={place} path={path} entry={entry} onPick={onPick} />
+      <FileHeader place={base.place} path={path} entry={entry} onPick={onPick} />
       {folder ? <FolderEntries entries={folder} onPick={onPick} /> : null}
-      {!folder && entry ? <FileBody projectId={projectId} entry={entry} /> : null}
+      {!folder && entry ? <FileBody base={base} entry={entry} onPick={onPick} /> : null}
       {!folder && !entry ? <Notice>Nothing at this path in this commit.</Notice> : null}
     </section>
   );

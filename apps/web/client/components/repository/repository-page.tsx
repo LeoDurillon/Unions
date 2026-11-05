@@ -38,6 +38,7 @@ export function RepositoryPage({ project }: { project: PublicProject }): ReactEl
           projectId={project.id}
           repo={{ owner: project.owner, repo: project.repo }}
           commit={commit.data}
+          gitRef={ref}
           path={path}
           onPick={setPath}
         />

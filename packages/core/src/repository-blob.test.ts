@@ -1,7 +1,7 @@
 // Tests how a file read from the repository is shown: text, image, binary or too large.
 import { describe, expect, test } from 'bun:test';
 
-import { REPOSITORY_FILE_LIMIT, repositoryBlob } from './repository-blob';
+import { REPOSITORY_FILE_LIMIT, repositoryBlob, repositoryImageType } from './repository-blob';
 
 const encode = (text: string): Uint8Array => new TextEncoder().encode(text);
 
@@ -38,5 +38,11 @@ describe('repositoryBlob', () => {
 
   test('an empty file is empty text', () => {
     expect(repositoryBlob('empty', new Uint8Array())).toEqual({ kind: 'text', size: 0, text: '' });
+  });
+
+  test('an image type comes from the extension', () => {
+    expect(repositoryImageType('a/b.JPG')).toBe('image/jpeg');
+    expect(repositoryImageType('a/b.md')).toBeNull();
+    expect(repositoryImageType('png')).toBeNull();
   });
 });

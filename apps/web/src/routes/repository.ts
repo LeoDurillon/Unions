@@ -1,12 +1,17 @@
 // `/api/projects/:projectId/repository`: the Repository tab's reads from GitHub: the commit a branch or sha
-// names, the tree at it, one file.
+// names, the tree at it, one file, and an image's own bytes for a rendered Markdown file.
 import { schema, type Db, type GitHubAuth } from '@union/core';
-import { REPOSITORY_FILE_LIMIT, repositoryBlob } from '@union/core/repository-blob';
+import {
+  REPOSITORY_FILE_LIMIT,
+  REPOSITORY_IMAGE_LIMIT,
+  repositoryBlob,
+  repositoryImageType,
+} from '@union/core/repository-blob';
 import { eq } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
 
 import type { RepositoryGitHub } from '../github-repository';
-import { BAD_REQUEST, fail, NOT_FOUND, requireId } from '../http';
+import { BAD_REQUEST, fail, NOT_FOUND, PAYLOAD_TOO_LARGE, requireId } from '../http';
 import type { RepositoryCommit } from '../repository-api-types';
 import { guarded } from './github-errors';
 import { authOf } from './ticket-base';
@@ -85,11 +90,41 @@ async function blob(db: Db, github: RepositoryGitHub, c: Context): Promise<Respo
   return c.json(repositoryBlob(c.req.query('path') ?? '', bytes));
 }
 
+/**
+ * An image of the repository as its own bytes, for `<img>` in a rendered Markdown file. Images only: the
+ * sandbox and nosniff keep an SVG opened on its own from running anything.
+ */
+async function raw(db: Db, github: RepositoryGitHub, c: Context): Promise<Response> {
+  const target = targetOf(db, c);
+  const sha = shaOf(c);
+  const type = repositoryImageType(c.req.query('path') ?? '');
+  if (type === null) {
+    throw fail(BAD_REQUEST, 'Only images are served as they are');
+  }
+  const size = Number(c.req.query('size'));
+  if (Number.isFinite(size) && size > REPOSITORY_IMAGE_LIMIT) {
+    throw fail(PAYLOAD_TOO_LARGE, 'This image is too large to show here');
+  }
+  const bytes = await guarded(() => github.getBlob(target.auth, target.repo, sha));
+  if (!bytes) {
+    throw fail(NOT_FOUND, 'No such file in the repository');
+  }
+  return new Response(new Uint8Array(bytes), {
+    headers: {
+      'content-type': type,
+      'content-security-policy': 'sandbox',
+      'x-content-type-options': 'nosniff',
+      'cache-control': 'private, max-age=31536000, immutable',
+    },
+  });
+}
+
 /** The Repository tab's reads from GitHub, under `/api/projects/:projectId/repository`. */
 export function repositoryRoutes(db: Db, github: RepositoryGitHub): Hono {
   const routes = new Hono();
   routes.get('/:projectId/repository/commit', (c) => commit(db, github, c));
   routes.get('/:projectId/repository/tree', (c) => tree(db, github, c));
   routes.get('/:projectId/repository/blob', (c) => blob(db, github, c));
+  routes.get('/:projectId/repository/raw', (c) => raw(db, github, c));
   return routes;
 }
