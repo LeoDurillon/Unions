@@ -2,9 +2,14 @@
 import type { Db, NotionApi, Ticket } from '@union/core';
 import { Hono } from 'hono';
 
-import { ACCEPTED, CONFLICT, fail, readObject } from '../http';
+import { ACCEPTED, CONFLICT, fail, NOT_FOUND, readObject } from '../http';
 import { pendingNotionComments, queueNotionComment } from '../notion-comment-commands';
 import { readDiscussions } from '../notion-discussions';
+import {
+  importedDiscussions,
+  importNotionDiscussion,
+  notionImportRefusal,
+} from '../notion-review-import';
 import { notionTokenOf } from './notion';
 import { loadTicket } from './ticket-notion-link';
 
@@ -21,7 +26,8 @@ function pageOf(ticket: Ticket): { id: string; url: string } {
 
 /**
  * `GET` reads the discussions from Notion on each call (the tab reads once per opening), with the
- * comments not posted yet. `POST` (`{ discussionId?, text }`) queues a reply or a page comment.
+ * comments not posted yet and those in the review. `POST` (`{ discussionId?, text }`) queues a
+ * reply or a page comment; `POST /import` (`{ discussionId }`) adds a discussion to the review.
  */
 export function ticketNotionCommentRoutes(db: Db, notion: NotionApi): Hono {
   const routes = new Hono();
@@ -30,7 +36,31 @@ export function ticketNotionCommentRoutes(db: Db, notion: NotionApi): Hono {
     const page = pageOf(ticket);
     const token = notionTokenOf(db, ticket.projectId);
     const view = await readDiscussions(notion, token, page);
-    return c.json({ ...view, pending: pendingNotionComments(db, ticket.id) });
+    const ids = view.discussions.map((discussion) => discussion.id);
+    return c.json({
+      ...view,
+      pending: pendingNotionComments(db, ticket.id),
+      review: {
+        importedIds: importedDiscussions(db, ticket.id, page.id, ids),
+        refusal: notionImportRefusal(ticket),
+      },
+    });
+  });
+  routes.post('/:id/notion-comments/import', async (c) => {
+    const ticket = loadTicket(db, c);
+    const page = pageOf(ticket);
+    const refusal = notionImportRefusal(ticket);
+    if (refusal !== null) {
+      throw fail(CONFLICT, refusal);
+    }
+    const { discussionId } = await readObject(c.req.raw);
+    // Read again: the thread as it is now, replies included.
+    const view = await readDiscussions(notion, notionTokenOf(db, ticket.projectId), page);
+    const discussion = view.discussions.find((one) => one.id === discussionId);
+    if (!discussion) {
+      throw fail(NOT_FOUND, 'This discussion is not open on the page any more');
+    }
+    return c.json({ imported: importNotionDiscussion(db, ticket, page.id, discussion) });
   });
   routes.post('/:id/notion-comments', async (c) => {
     const ticket = loadTicket(db, c);

@@ -89,7 +89,7 @@ export function commentPullRequest(db: Db, ticket: Ticket, comment: ReviewCommen
 }
 
 function suggestionOf(comment: ReviewComment): SuggestedReply[] {
-  const { githubUrl, replyBody, replyStatus } = comment;
+  const { sourceUrl: githubUrl, replyBody, replyStatus } = comment;
   if (githubUrl === null || replyBody === null) {
     return [];
   }

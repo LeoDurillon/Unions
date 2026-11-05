@@ -1,4 +1,4 @@
-// One open discussion of a Notion page: the text it is about, its comments oldest first, then Reply.
+// One open discussion of a Notion page: the text it is about, its comments oldest first, then Reply; Add to review sends it to the implementer.
 import type { ReactElement } from 'react';
 
 import type {
@@ -8,6 +8,7 @@ import type {
 } from '../../../src/notion-discussion-types';
 import type { NotionCommentSend } from '../../lib/use-notion-comments';
 import { Markdown } from '../markdown';
+import { Badge, Button } from '../ui';
 import { NotionReply } from './notion-reply';
 
 const CARD =
@@ -33,19 +34,50 @@ function Comment({ comment }: { comment: NotionCommentView }): ReactElement {
   );
 }
 
+/** Whether the discussion is in the ticket's review, why it cannot be added, and adding it. */
+export type DiscussionReview = {
+  imported: boolean;
+  refusal: string | null;
+  adding: boolean;
+  onAdd: () => void;
+};
+
+function AddToReview({ review }: { review: DiscussionReview }): ReactElement {
+  if (review.imported) {
+    return <Badge tone="green">In the review</Badge>;
+  }
+  return (
+    <Button
+      size="sm"
+      disabled={review.refusal !== null || review.adding}
+      title={
+        review.refusal ?? 'A draft of the review, for the implementer with the next Send review'
+      }
+      onClick={() => {
+        review.onAdd();
+      }}
+    >
+      {review.adding ? 'Adding…' : 'Add to review'}
+    </Button>
+  );
+}
+
 export function NotionDiscussion({
   discussion,
   pending,
   sender,
+  review,
 }: {
   discussion: NotionDiscussionView;
   pending: PendingNotionComment[];
   sender: NotionCommentSend;
+  review: DiscussionReview;
 }): ReactElement {
   return (
     <article className={CARD} aria-label={PLACES[discussion.place]}>
       <div className="flex items-baseline gap-2 text-xs text-zinc-500">
         <span>{PLACES[discussion.place]}</span>
+        <AddToReview review={review} />
         <a
           href={discussion.url}
           target="_blank"

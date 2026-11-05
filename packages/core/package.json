@@ -18,6 +18,7 @@
     "./pr-stacks": "./src/pr-stacks.ts",
     "./github-stacks": "./src/github-stacks.ts",
     "./notion-markdown": "./src/notion-markdown.ts",
+    "./notion-discussion-link": "./src/notion-discussion-link.ts",
     "./integration-kinds": "./src/integrations/kinds.ts",
     "./event-actions": "./src/event-actions.ts",
     "./event-catalog": "./src/event-catalog.ts",

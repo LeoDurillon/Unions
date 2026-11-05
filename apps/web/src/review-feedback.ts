@@ -1,5 +1,5 @@
 // The review the user sends, as the implementer receives it.
-import { schema, type Db, type ReviewComment } from '@union/core';
+import { isNotionUrl, schema, type Db, type ReviewComment } from '@union/core';
 import { and, desc, eq } from 'drizzle-orm';
 
 import { reviewSlices } from './slice-snapshot';
@@ -7,7 +7,7 @@ import { reviewSlices } from './slice-snapshot';
 type Draft = Pick<
   ReviewComment,
   'kind' | 'path' | 'side' | 'startLine' | 'endLine' | 'excerpt' | 'body'
-> & { slicePosition?: number | null };
+> & { slicePosition?: number | null; sourceUrl?: string | null };
 
 /** A slice of a split ticket, as its section of the review names it. */
 export type ReviewSlice = { position: number; title: string; sha: string; prNumber: number | null };
@@ -23,7 +23,10 @@ function lines(comment: Draft): string {
   return comment.side === 'old' ? `${range} (removed code)` : range;
 }
 
-/** The comments under headings of `level` (`##`): the general ones, then each file's line comments. */
+/**
+ * The comments under headings of `level` (`##`): the general ones (those from the Notion page
+ * apart, as they are about the spec), then each file's line comments.
+ */
 function commentParts(
   comments: readonly Draft[],
   level: string,
@@ -31,8 +34,16 @@ function commentParts(
 ): string[] {
   const parts: string[] = [];
   const general = comments.filter((comment) => comment.kind === 'general');
-  if (general.length > 0) {
-    parts.push(`${level} On the pull request`, ...general.map((comment) => comment.body.trim()));
+  const onSpec = general.filter((comment) => isNotionUrl(comment.sourceUrl ?? ''));
+  const onPull = general.filter((comment) => !onSpec.includes(comment));
+  if (onPull.length > 0) {
+    parts.push(`${level} On the pull request`, ...onPull.map((comment) => comment.body.trim()));
+  }
+  if (onSpec.length > 0) {
+    parts.push(
+      `${level} On the spec (Notion comments)`,
+      ...onSpec.map((comment) => comment.body.trim()),
+    );
   }
   const onLines = comments.filter((comment) => comment.kind === 'line');
   for (const path of new Set(onLines.map((comment) => comment.path))) {

@@ -63,7 +63,7 @@ function comment(input: {
       body: 'Rename this.',
       headSha: 'h1',
       status: input.status ?? 'sent',
-      githubUrl: input.githubUrl === undefined ? `https://gh/c${(urls += 1)}` : input.githubUrl,
+      sourceUrl: input.githubUrl === undefined ? `https://gh/c${(urls += 1)}` : input.githubUrl,
       replyStatus: input.replyStatus === undefined ? 'draft' : input.replyStatus,
       replyBody: input.replyStatus === null ? null : 'Renamed in 3f2a1c.',
       replyAuthor: 'agent',
@@ -187,15 +187,21 @@ test('suggestions are listed, edited (the user’s then), sent one by one or all
   ]);
 });
 
-test('Send review asks a reply for the drafts imported from GitHub, unless the setting is off', async () => {
+test('Send review asks a reply for the drafts imported from GitHub (not Notion), unless the setting is off', async () => {
   const imported = comment({ status: 'draft', replyStatus: null });
   const mine = comment({ status: 'draft', githubUrl: null, replyStatus: null });
+  const fromNotion = comment({
+    status: 'draft',
+    githubUrl: 'https://www.notion.so/p?d=d',
+    replyStatus: null,
+  });
   db.update(schema.tickets)
     .set({ phase: { kind: 'awaiting_approval', step: 'implement' } })
     .where(eq(schema.tickets.id, ticketId))
     .run();
   expect((await send('POST', `/api/tickets/${ticketId}/review`, { summary: '' })).status).toBe(200);
   expect([row(imported)?.replyStatus, row(mine)?.replyStatus]).toEqual(['requested', null]);
+  expect(row(fromNotion)?.replyStatus).toBeNull();
 
   db.delete(schema.commands).run();
   db.update(schema.projects)

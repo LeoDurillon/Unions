@@ -1,8 +1,7 @@
 # Notion comments on the ticket
 
 Status: planned (2026-10-18, updated 2026-11-05 against `main`). Decisions D1 to D6 confirmed (2026-11-05). Steps 1
-and 2 built and deployed (checked read only against a real ticket's page); step 3, replies, built (branch
-`notion-comments`, a comment and a reply posted on ticket 26's page with the user's approval).
+and 2 built and deployed (checked read only against a real ticket's page); step 3, replies, deployed; step 4, Add to review, built (branch `notion-comments`).
 
 ## Why
 
@@ -182,7 +181,12 @@ this plan.
    `POST /api/tickets/:id/notion-comments/import` (`{ discussionId }`, reads the discussion fresh from Notion),
    the heading in `review-feedback.ts` with a test, the button and "In the review" state in the tab (the `GET`
    answers the imported discussion ids, as `importedUrls` does). Later, if wanted: the same text as a planning
-   step's "Request changes".
+   step's "Request changes". **Built** (2026-11-05): migration `0079_review_source_url` (a
+   rename, rows kept), `notion-review-import.ts` (one general draft, deduped by
+   `https://www.notion.so/<page>?d=<discussion>`), the route, the heading, `markSent` asking no GitHub reply for a
+   Notion draft, the card's "on Notion" link; the button and "In the review" checked in the browser with the import
+   answered by the check. Changes: the button is offered once the ticket has a branch (and its pull request is not
+   merged), since a draft can wait for Send review; a general draft keeps no head (never outdated).
 5. The review's Notion tab (D6 of review-notion-link): the discussions under each linked page's text, read only,
    from the same read and component.
 6. Optional: a `notion_comment_added` trigger for rules and notifications, from a poll in the worker (Notion has no

@@ -29,5 +29,11 @@ export type PendingNotionComment = {
   createdAt: number;
 };
 
-/** What the ticket's tab reads: the discussions, and the comments being sent. */
-export type NotionTabView = NotionDiscussionsView & { pending: PendingNotionComment[] };
+/** The discussions already in the ticket's review, and why one cannot be added now (null when it can). */
+type NotionReviewState = { importedIds: string[]; refusal: string | null };
+
+/** What the ticket's tab reads: the discussions, the comments being sent, and Add to review. */
+export type NotionTabView = NotionDiscussionsView & {
+  pending: PendingNotionComment[];
+  review: NotionReviewState;
+};

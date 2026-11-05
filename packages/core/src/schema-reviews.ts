@@ -86,8 +86,11 @@ export const reviewComments = sqliteTable(
       .notNull()
       .default('user'),
     sentAt: integer('sent_at'),
-    /** Set when imported from the pull request (a thread's first comment, a review, a comment): a re-import skips it. */
-    githubUrl: text('github_url'),
+    /**
+     * Set when imported: from the pull request (a thread's first comment, a review, a comment), or a
+     * discussion of the ticket's Notion page (its `?d=` link). A re-import skips it.
+     */
+    sourceUrl: text('source_url'),
     /**
      * A split ticket's slice whose own diff the comment is on (its `head_sha` is that slice's tip);
      * null when it is on the whole change.
@@ -112,7 +115,7 @@ export const reviewComments = sqliteTable(
   (t) => [
     index('review_comments_ticket_idx').on(t.ticketId, t.status),
     index('review_comments_review_idx').on(t.reviewId, t.status),
-    uniqueIndex('review_comments_github_idx').on(t.ticketId, t.githubUrl),
+    uniqueIndex('review_comments_source_idx').on(t.ticketId, t.sourceUrl),
   ],
 );
 

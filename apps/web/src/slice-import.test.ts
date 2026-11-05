@@ -181,7 +181,7 @@ test("a slice's conversation comment is imported on that slice", async () => {
   const { url } = note(41);
   expect((await post('/comments/import-note?pr=41', { url })).status).toBe(201);
   expect(await comments()).toMatchObject([
-    { kind: 'general', slicePosition: 1, headSha: 'tip1', githubUrl: url },
+    { kind: 'general', slicePosition: 1, headSha: 'tip1', sourceUrl: url },
   ]);
 });
 

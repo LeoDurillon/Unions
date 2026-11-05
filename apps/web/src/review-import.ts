@@ -51,7 +51,7 @@ function draftFromThread(thread: Thread, snapshot: Snapshot | null): Draft | nul
   if (!first) {
     return null;
   }
-  const github = { githubUrl: first.url, body: threadBody(thread) };
+  const github = { sourceUrl: first.url, body: threadBody(thread) };
   const here = current(thread, snapshot);
   if (here && snapshot) {
     const { start, end, excerpt } = here;
@@ -83,10 +83,10 @@ function draftFromThread(thread: Thread, snapshot: Snapshot | null): Draft | nul
 /** The GitHub links of everything already imported on the ticket (sent or not). */
 export function importedUrls(db: Db, ticketId: number): string[] {
   return db
-    .select({ url: schema.reviewComments.githubUrl })
+    .select({ url: schema.reviewComments.sourceUrl })
     .from(schema.reviewComments)
     .where(
-      and(eq(schema.reviewComments.ticketId, ticketId), isNotNull(schema.reviewComments.githubUrl)),
+      and(eq(schema.reviewComments.ticketId, ticketId), isNotNull(schema.reviewComments.sourceUrl)),
     )
     .all()
     .flatMap((row) => (row.url === null ? [] : [row.url]));
@@ -110,7 +110,7 @@ export function importThreads(
     const draft = thread.resolved ? null : draftFromThread(thread, snapshot);
     if (thread.resolved) {
       result.resolved += 1;
-    } else if (draft && known.has(draft.githubUrl ?? '')) {
+    } else if (draft && known.has(draft.sourceUrl ?? '')) {
       result.alreadyImported += 1;
     } else if (draft) {
       drafts.push(draft);
@@ -165,7 +165,7 @@ export function importNote(
       excerpt: '',
       body: noteBody(note),
       headSha: anchor.snapshot?.headSha ?? '',
-      githubUrl: note.url,
+      sourceUrl: note.url,
       slicePosition: anchor.slicePosition,
     })
     .run();

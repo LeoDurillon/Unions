@@ -42,7 +42,7 @@ export function repliedComment(db: Db, reply: PrCommentReply, commentId: number)
   if (!comment || commentProject(db, comment) !== reply.projectId) {
     throw new Error(`Review comment ${commentId} is not one of this project's`);
   }
-  if (comment.githubUrl === null) {
+  if (comment.sourceUrl === null) {
     throw new Error('This comment was written in Union: there is nothing to reply to on GitHub');
   }
   return comment;
@@ -79,10 +79,10 @@ export async function replyPlace(
   if (reply.target.kind === 'thread') {
     return checkedThread(api, repo, reply, reply.target.threadId);
   }
-  if (comment?.kind !== 'line' || comment.githubUrl === null) {
+  if (comment?.kind !== 'line' || comment.sourceUrl === null) {
     return { kind: 'conversation' };
   }
-  const threadId = await api.threadOfComment(repo, reply.number, comment.githubUrl);
+  const threadId = await api.threadOfComment(repo, reply.number, comment.sourceUrl);
   if (threadId === null) {
     throw new Error(GONE);
   }

@@ -58,6 +58,7 @@ export * from './notion-api';
 export type { NotionComment } from './notion-comment-parse';
 export * from './notion-comment-post';
 export * from './notion-comments';
+export * from './notion-discussion-link';
 export * from './notion-error';
 export * from './notion-id';
 export * from './notion-links';

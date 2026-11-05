@@ -158,7 +158,7 @@ test('unresolved threads become drafts on their current lines, with the replies'
     kind: 'line',
     body: '**@alice** on GitHub:\n\nAdd a test for this.\n\n**@bob** replied:\n\nAgreed.',
   });
-  expect(current?.githubUrl).toContain('discussion_r11');
+  expect(current?.sourceUrl).toContain('discussion_r11');
   // Its file is no longer in the diff: kept on its original line, outdated, with GitHub's excerpt.
   expect(outdated).toMatchObject({
     path: 'gone.js',
@@ -222,7 +222,7 @@ test('a review summary or comment is imported on its own as a general draft, onc
       path: '',
       status: 'draft',
       outdated: false,
-      githubUrl: url,
+      sourceUrl: url,
       body: '**@coderabbitai** reviewed on GitHub:\n\nNitpick: rename x.',
     },
   ]);

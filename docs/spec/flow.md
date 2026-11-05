@@ -56,7 +56,10 @@
    replies folded in with their authors; each lands on its lines of the current diff, or reads as outdated with
    GitHub's excerpt when those lines are gone. Review summaries and conversation comments are added one by one
    (**Add to review**), since bots post many of them: they become `general` drafts (no file or lines), sent under
-   "On the pull request" before the line comments. `review_comments.github_url` makes a re-import skip what is
+   "On the pull request" before the line comments. A discussion of the ticket's Notion page is added from the
+   Notion tab (**Add to review**, once the ticket has a branch): the whole thread as one `general` draft, sent
+   under "On the spec (Notion comments)" after "On the pull request"; it asks for no reply. `review_comments.source_url`
+   (the GitHub comment's link, or `https://www.notion.so/<page>?d=<discussion>`) makes a re-import skip what is
    already there. HTML comments and layout tags are dropped from GitHub text (`githubText`). Sent, imported comments
    ask the implementer for a reply to their author once its revision is pushed (`reply_status = 'requested'`).
    Cancelling a ticket closes its open pull requests (a stack's too) and its issue as not planned, once its agent

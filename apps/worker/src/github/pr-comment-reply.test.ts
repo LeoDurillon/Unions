@@ -49,7 +49,7 @@ function comment(kind: 'line' | 'general', githubUrl: string | null): number {
       body: 'Rename this.',
       headSha: 'h1',
       status: 'sent',
-      githubUrl,
+      sourceUrl: githubUrl,
       replyStatus: 'sending',
       replyBody: 'Done.',
       replyAuthor: 'agent',

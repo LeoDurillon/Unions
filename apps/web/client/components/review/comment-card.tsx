@@ -1,5 +1,6 @@
 // One comment: drafts can be edited or deleted, the agent's suggestions also kept as they are; sent
 // ones are read-only.
+import { isNotionUrl } from '@union/core/notion-discussion-link';
 import { useState, type ReactElement } from 'react';
 
 import type { CommentView } from '../../../src/api-types';
@@ -31,14 +32,14 @@ function CommentHeader({ comment }: { comment: CommentView }): ReactElement {
         <Badge tone="amber">suggested by the agent</Badge>
       ) : null}
       {comment.outdated ? <Badge tone="amber">outdated</Badge> : null}
-      {comment.githubUrl ? (
+      {comment.sourceUrl ? (
         <a
-          href={comment.githubUrl}
+          href={comment.sourceUrl}
           target="_blank"
           rel="noreferrer"
           className="ml-auto text-indigo-600 hover:underline dark:text-indigo-400"
         >
-          on GitHub
+          {isNotionUrl(comment.sourceUrl) ? 'on Notion' : 'on GitHub'}
         </a>
       ) : null}
     </div>
@@ -46,8 +47,8 @@ function CommentHeader({ comment }: { comment: CommentView }): ReactElement {
 }
 
 function CommentText({ comment }: { comment: CommentView }): ReactElement {
-  if (comment.githubUrl) {
-    // Imported from GitHub, where it was written as markdown.
+  if (comment.sourceUrl) {
+    // Imported from GitHub or Notion, where it was written as markdown.
     return <Markdown>{comment.body}</Markdown>;
   }
   return <p className="whitespace-pre-wrap">{comment.body}</p>;

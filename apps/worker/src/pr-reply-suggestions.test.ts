@@ -41,7 +41,7 @@ function comment(input: {
       body: input.body,
       headSha: 'h1',
       status: 'sent',
-      githubUrl: input.githubUrl === undefined ? `u${(urls += 1)}` : input.githubUrl,
+      sourceUrl: input.githubUrl === undefined ? `u${(urls += 1)}` : input.githubUrl,
       replyStatus: input.replyStatus === undefined ? 'requested' : input.replyStatus,
     })
     .returning()

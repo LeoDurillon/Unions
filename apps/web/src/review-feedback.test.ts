@@ -83,6 +83,44 @@ test('comments on the whole pull request come before the files, without lines or
   );
 });
 
+test('Notion discussions come under their own heading, after those on the pull request', () => {
+  const general = {
+    kind: 'general' as const,
+    path: '',
+    side: 'new' as const,
+    startLine: 0,
+    endLine: 0,
+    excerpt: '',
+  };
+  expect(
+    formatReview(
+      [
+        {
+          ...general,
+          body: '**Ada** on the Notion page:\n\nCSV too?',
+          sourceUrl: 'https://www.notion.so/p?d=d',
+        },
+        {
+          ...general,
+          body: '**@bot** commented on GitHub:\n\nNit.',
+          sourceUrl: 'https://github.com/a/b#1',
+        },
+        { ...general, body: 'Mine.' },
+      ],
+      '',
+    ),
+  ).toBe(
+    [
+      '# Code review from the user',
+      '## On the pull request',
+      '**@bot** commented on GitHub:\n\nNit.',
+      'Mine.',
+      '## On the spec (Notion comments)',
+      '**Ada** on the Notion page:\n\nCSV too?',
+    ].join('\n\n'),
+  );
+});
+
 test('on a split ticket, each commented file says which slices change it', () => {
   const text = formatReview(
     [

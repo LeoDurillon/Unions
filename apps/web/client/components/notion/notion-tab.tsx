@@ -7,6 +7,7 @@ import {
   useNotionCommentSend,
   type NotionCommentSend,
 } from '../../lib/use-notion-comments';
+import { useNotionReviewImport, type NotionReviewImport } from '../../lib/use-notion-review-import';
 import { Button, ErrorText } from '../ui';
 import { NotionDiscussion } from './notion-discussion';
 import { NotionReply } from './notion-reply';
@@ -14,9 +15,11 @@ import { NotionReply } from './notion-reply';
 function Discussions({
   view,
   sender,
+  reviewImport,
 }: {
   view: NotionTabView;
   sender: NotionCommentSend;
+  reviewImport: NotionReviewImport;
 }): ReactElement {
   const pendingIn = (discussionId: string | null): NotionTabView['pending'] =>
     view.pending.filter((comment) => comment.discussionId === discussionId);
@@ -37,6 +40,14 @@ function Discussions({
             discussion={discussion}
             pending={pendingIn(discussion.id)}
             sender={sender}
+            review={{
+              imported: view.review.importedIds.includes(discussion.id),
+              refusal: view.review.refusal,
+              adding: reviewImport.adding === discussion.id,
+              onAdd: () => {
+                reviewImport.add(discussion.id);
+              },
+            }}
           />
         ))
       )}
@@ -53,6 +64,7 @@ function Discussions({
 export function NotionTab({ ticketId }: { ticketId: number }): ReactElement {
   const comments = useNotionComments(ticketId);
   const sender = useNotionCommentSend(ticketId);
+  const reviewImport = useNotionReviewImport(ticketId);
   const { data } = comments;
   return (
     <div className="space-y-4">
@@ -77,11 +89,11 @@ export function NotionTab({ ticketId }: { ticketId: number }): ReactElement {
           {comments.isFetching ? 'Reading…' : 'Refresh'}
         </Button>
       </div>
-      <ErrorText error={comments.error} />
+      <ErrorText error={comments.error ?? reviewImport.error} />
       {!data && comments.isFetching ? (
         <p className="text-sm text-zinc-500">Reading the comments on Notion…</p>
       ) : null}
-      {data ? <Discussions view={data} sender={sender} /> : null}
+      {data ? <Discussions view={data} sender={sender} reviewImport={reviewImport} /> : null}
     </div>
   );
 }

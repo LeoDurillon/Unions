@@ -40,6 +40,12 @@ conversation comments are offered one by one with **Add to review**, since bots 
 lines no longer exist show as outdated, with GitHub's excerpt. Once the implementer has worked on imported
 comments, it drafts a reply to each for you to send (see [Reply to comments](branches.md#reply-to-comments)).
 
+A comment on the ticket's Notion page can go to the implementer too: in the ticket's **Notion** tab, click **Add to
+review** on the discussion (once the ticket has been implemented). The whole discussion becomes a comment of the
+review, marked **on Notion**, which you can edit or delete before **Send review**; the implementer gets it under its
+own heading, as a remark on the spec rather than the code. Nothing is posted or resolved in Notion: answer there
+once the fix is in.
+
 ## Explain
 
 Select lines and click **Explain**, click **Explain** on a hunk, or **Explain file** next to a file's name. An agent

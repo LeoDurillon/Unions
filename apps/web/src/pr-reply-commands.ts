@@ -43,7 +43,7 @@ function draftSuggestion(db: Db, ticket: Ticket, commentId: number): ReviewComme
       and(eq(schema.reviewComments.id, commentId), eq(schema.reviewComments.ticketId, ticket.id)),
     )
     .get();
-  if (!comment || comment.replyBody === null || comment.githubUrl === null) {
+  if (!comment || comment.replyBody === null || comment.sourceUrl === null) {
     throw fail(NOT_FOUND, 'No suggested reply on this comment');
   }
   if (comment.replyStatus !== 'draft') {

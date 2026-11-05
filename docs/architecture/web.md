@@ -54,7 +54,9 @@
   `reply-box.tsx`, `suggested-reply.tsx`) sits in each `ThreadCard` and `NoteCard` of the PR tab (`discussion.tsx`)
   and the review's Comments tab (`pull-requests/review-comments-tab.tsx`). A ticket's Notion comments
   (`routes/notion-comments.ts`): `GET` reads the page's discussions (`notion-discussions.ts`) with the
-  `post_notion_comment` commands not answered yet (`notion-comment-commands.ts`), `POST` queues one; in the client,
+  `post_notion_comment` commands not answered yet (`notion-comment-commands.ts`), `POST` queues one, `POST /import` adds a discussion to the review (`notion-review-import.ts`:
+  one `general` draft, deduped by its Notion link in `source_url`; `review-feedback.ts` puts these under "On the
+  spec (Notion comments)", and `markSent` asks no reply for them); in the client,
   `lib/use-notion-comments.ts` and `notion/notion-tab.tsx`, `notion-discussion.tsx`, `notion-reply.tsx` (which
   reuses the PR tab's `reply-box.tsx`). `PUT /api/tickets/:id/text`
   (`routes/ticket-edit.ts`) queues `edit_ticket` with the new title and description and the `base` the user started

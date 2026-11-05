@@ -69,7 +69,7 @@ there is one. Until then the reply shows dimmed, "Sending…" (a command with ne
 once posted, the discussion is read from GitHub again; on a failure the box opens again with the text and the reason.
 Nothing goes to the implementer: replying is not **Add to review**. No notification, no rule trigger.
 
-**Suggested replies.** When **Send review** on a ticket sends comments imported from GitHub (`github_url` set), it
+**Suggested replies.** When **Send review** on a ticket sends comments imported from GitHub (`source_url` set, not a Notion link), it
 marks them `reply_status = 'requested'`, unless the project turned off **Suggest replies to GitHub comments** (Project
 settings → Pull requests, on by default). After the implementer's revision is pushed, one more turn in its session
 (the `pr_replies` agent: its prompt in Union settings, the Implementation model) writes a reply to each: what changed
