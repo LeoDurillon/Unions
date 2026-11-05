@@ -22,6 +22,10 @@ export function NotionHelp(): ReactElement {
         </a>{' '}
         and copy its secret.
       </li>
+      <li>
+        In its Capabilities, also turn on Read comments and Insert comments, for each ticket&apos;s
+        Notion tab.
+      </li>
       <li>Share the database with the integration: ••• → Connections → add it.</li>
       <li>
         In the database settings, Manage data sources → Copy data source ID (or paste its URL).

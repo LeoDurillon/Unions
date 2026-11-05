@@ -31,8 +31,8 @@
   saves; no secret keeps the stored one), `DELETE`, `POST /fields` (read the columns again) and `POST /import` (an
   item of the source as a ticket preview). A new project takes `integrations: [{ kind, secret, config }]`. The
   browser sees `PublicProject.integrations` (`toPublicIntegration`, `public-project.ts`: kind, title, config,
-  `ready`), never a secret. The web server never calls a provider's `createItem` (ast-grep
-  `web-reads-notion-only`). A new ticket takes `origin: { kind, id, url }` (`routes/ticket-origin.ts`, which also
+  `ready`), never a secret. The web server never calls a provider's `createItem`, nor Notion's `createPage`, `updatePage` or
+  `addComment` (ast-grep `web-reads-notion-only`). A new ticket takes `origin: { kind, id, url }` (`routes/ticket-origin.ts`, which also
   keeps the item's images per kind), and an investigation's ticket `target: kind`. In the client, the New ticket
   dialog has one "Import from …" tab per ready integration (`components/integrations/source-import.tsx`), the
   investigation one "Also create it in …" switch per integration, and each kind's own screens (settings,
@@ -41,7 +41,7 @@
   a page of that data source as a ticket (`src/notion.ts` behind `NotionApi`, through the Notion
   `IntegrationProvider`), the pages a pull
   request under review is linked to and the review's Notion specs (any page shared with the integration;
-  `routes/review-notion.ts`, `routes/review-specs.ts`, their text read fresh each time, mention titles from core's `integrations/notion-mentions.ts`), and the open
+  `routes/review-notion.ts`, `routes/review-specs.ts`, their text (and in the review's Notion tab, their open discussions) read fresh each time, mention titles from core's `integrations/notion-mentions.ts`), and the open
   discussions of a ticket's page (`routes/notion-comments.ts`, `GET /api/tickets/:id/notion-comments`; `src/notion-discussions.ts`
   reads the page's comments, then those of each block its markdown marks as commented, one block at a time and at
   most 30; core's `notion-comments.ts` groups them and quotes the commented text; needs the integration's "Read

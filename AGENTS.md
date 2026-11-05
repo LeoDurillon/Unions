@@ -107,7 +107,7 @@ files and uses `union.sqlite` here, which holds the user's real projects.
   hand. Tokens and the App's key never reach the browser (`toPublicProject`). Details:
   `docs/architecture/integrations.md`.
 - Notion: the web server only reads (`src/notion.ts` behind `NotionApi`); writes (page properties from event rules,
-  pages for tickets written from investigations) happen in the worker. Its secret is a row of `integrations` and
+  pages for tickets written from investigations, comments from a ticket's Notion tab) happen in the worker. Its secret is a row of `integrations` and
   never reaches the browser (`toPublicIntegration`). Details: `docs/architecture/integrations.md`.
 - A ticket's base branch is `ticketBase(project, ticket)`: the parent's branch it was cloned from, else the project's.
   Never use `project.config.baseBranch` directly in the worker. Starting goes through `dispatch`, which refuses a

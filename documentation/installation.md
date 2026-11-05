@@ -11,7 +11,9 @@ The simplest way to run all of it is Docker Compose.
   login from `~/.claude/.credentials.json`. If that file does not exist, run `claude` once and log in.
 - **GitHub access** to the repository you want the agents to work on. You can paste a token or set up a GitHub App
   later, in the setup wizard; see [Your first project](first-project.md#connect-github).
-- Optional: a **Notion** internal integration, to import tickets from a Notion database.
+- Optional: a **Notion** internal integration, to import tickets from a Notion database. In its **Capabilities**,
+  keep **Read content**, **Update content** and **Insert content**, and turn on **Read comments** and **Insert
+  comments** for the ticket's Notion tab (and **Read user information** to pick people in event rules).
 
 Agents run on your Claude subscription. Each step of each ticket uses some of your Claude usage, and by default two
 runs can happen at the same time (see `UNION_MAX_CONCURRENT` in the [settings reference](settings.md#environment-variables)).

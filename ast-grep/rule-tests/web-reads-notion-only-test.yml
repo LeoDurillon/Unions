@@ -4,10 +4,16 @@ valid:
     const page = await notion.page(token, pageId);
   - |
     const item = await provider.item(secret, config, id);
+  - |
+    const comments = await notion.comments(token, pageId);
+  - |
+    await api.addComment(base, input, slice);
 invalid:
   - |
     await notion.updatePage(token, pageId, properties);
   - |
     await notion.createPage(token, parent, draft);
+  - |
+    await notion.addComment(token, { pageId }, richText);
   - |
     await provider.createItem(secret, config, { title, markdown });

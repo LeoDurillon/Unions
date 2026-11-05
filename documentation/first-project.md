@@ -8,7 +8,8 @@ you visit Union. Later, open it again from **+** next to **Projects** in the sid
 1. **Connect**: paste a GitHub token and click **Verify**, or switch to **GitHub App** (see below).
 2. **Repository**: pick the repository the agents work on.
 3. **Project**: pick an existing GitHub Project, or let Union create one.
-4. **Notion** (optional): an integration secret and the ID of the data source to import tickets from.
+4. **Notion** (optional): an integration secret and the ID of the data source to import tickets from. The
+   integration needs the capabilities listed in [Installation](installation.md).
 5. **Review**: check the base branch (the branch tickets start from and pull requests target), then create the
    project.
 
