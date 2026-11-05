@@ -13,13 +13,13 @@ import type { Db } from './db';
 import * as schema from './tables';
 
 type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
-type Executor = Db | Tx;
+export type Executor = Db | Tx;
 type AgentLine = typeof schema.agentLog.$inferSelect;
 
 const MICRO = 1_000_000;
 
 /** The lines of the same Log (a ticket's or an investigation's) and Claude session. */
-function sameSession(line: AgentLine, sessionId: string): SQL | undefined {
+export function sameSession(line: AgentLine, sessionId: string): SQL | undefined {
   const owner = ownerOf(line);
   return owner
     ? and(owner, sql`json_extract(${schema.agentLog.payload}, '$.session_id') = ${sessionId}`)
@@ -35,8 +35,19 @@ function ownerOf(line: AgentLine): SQL | null {
     : eq(schema.agentLog.investigationId, line.investigationId);
 }
 
-function ofType(type: string): SQL {
+export function ofType(type: string): SQL {
   return sql`json_extract(${schema.agentLog.payload}, '$.type') = ${type}`;
+}
+
+/** The session's result before this one: the previous call's end. */
+export function previousResult(db: Executor, line: AgentLine, session: SQL): AgentLine | undefined {
+  return db
+    .select()
+    .from(schema.agentLog)
+    .where(and(session, ofType('result'), lt(schema.agentLog.id, line.id)))
+    .orderBy(desc(schema.agentLog.id))
+    .limit(1)
+    .get();
 }
 
 /** The session's result before this one, and the call's own turns since. */
@@ -45,13 +56,7 @@ function before(
   line: AgentLine,
   session: SQL,
 ): { previous: AgentLine | undefined; turns: Turn[] } {
-  const previous = db
-    .select()
-    .from(schema.agentLog)
-    .where(and(session, ofType('result'), lt(schema.agentLog.id, line.id)))
-    .orderBy(desc(schema.agentLog.id))
-    .limit(1)
-    .get();
+  const previous = previousResult(db, line, session);
   const turns = db
     .select({ payload: schema.agentLog.payload })
     .from(schema.agentLog)

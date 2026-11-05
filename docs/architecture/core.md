@@ -55,7 +55,13 @@ with the last `events.seq` at the time, and `readLog` merges both tables into on
 When the line is a call's `result`, it also records what the call consumed in `agent_usage`, a row per model
 (`agent-usage-record.ts`). The result's `modelUsage` and cost add up over a resumed session, so a call's share is
 its result minus the session's previous one in the same Log (`agent-usage.ts`, pure); its peak context comes from
-its own `assistant` lines since then. `backfillUsage` (`bun run usage:backfill`) replays the past results.
+its own `assistant` lines since then. Its tool uses since then go to `agent_tool_usage` (`agent-tool-record.ts`),
+a row per key: `agent-tool-key.ts` names the Bash command's family (`git diff`, `git diff --stat`, `jest`…) and its
+form (family and flags), the file a `Read` read, the skill, the subagent type; `agent-tool-calls.ts` adds up the
+calls, errors, refusals (`permission_denied` lines) and result sizes, a subagent's apart. `backfillUsage` and
+`backfillToolUsage` (`bun run usage:backfill`) replay the past results. `project-findings.ts` reads both tables for
+a project's range, and the pure `usage-findings.ts` (from the tokens) and `tool-findings.ts` (from the tool uses)
+say what stands out, with their thresholds as constants.
 A preview and a container run belong to a **workspace owner** (`workspace-owner.ts`, browser-safe): a ticket
 (`{ ticketId }`) or a pull request under review (`{ reviewId }`); their rows set exactly one of `ticket_id` and
 `review_id` (a check constraint). `previews.ts` and `container-runs.ts` take the owner; names come from

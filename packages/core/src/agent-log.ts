@@ -1,6 +1,7 @@
 // Writes the agents' output to `agent_log`, and reads a Log: events and agent lines in one order.
 import { and, asc, eq, gt, sql, type SQL } from 'drizzle-orm';
 
+import { recordToolUsage } from './agent-tool-record';
 import { recordUsage } from './agent-usage-record';
 import type { Db } from './db';
 import * as schema from './tables';
@@ -20,7 +21,7 @@ export type LogEntry =
 
 /**
  * Logs one line of an agent's output, after the last event logged so far. A call's `result` also
- * records what the call consumed (`agent_usage`).
+ * records what the call consumed (`agent_usage`) and its tool uses (`agent_tool_usage`).
  */
 export function appendAgentLine(
   db: Db,
@@ -46,6 +47,7 @@ export function appendAgentLine(
       .returning()
       .get();
     recordUsage(tx, written);
+    recordToolUsage(tx, written);
   });
 }
 

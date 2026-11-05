@@ -72,6 +72,24 @@ since the start: the API-equivalent cost, the agent calls and the tokens, a bar 
 figures), then the cost per step, per model and for the most expensive tickets (click one to open it), with the
 investigations on their own line.
 
+Under the totals, **What to improve** lists what the agents' logs show over the same range, each with the tickets
+that show it most (click one to open it). Each card is marked **Repository** when the fix belongs in your project's
+code and docs, or **Union** when it is about how Union runs the agents:
+
+- **Large sessions**: steps whose runs carry a very large context, read again at every turn.
+- **Tickets costing far more than the others** and **Many review rounds**: tickets worth a look before the next
+  similar one (a smaller ticket, a clearer spec, feedback that settles the open points).
+- **Commands that print a lot**: output that stays in the session; ask for less, or add a script that prints only
+  what matters.
+- **Checks run in many different ways**: the agents work out each time how to run the tests or the linter; one
+  script named in the repository's `CLAUDE.md` saves those turns.
+- **Files read again on ticket after ticket**: a short note in the `CLAUDE.md` or `AGENTS.md` of their folder can
+  spare reading them whole.
+- **Commands refused** and **Skills loaded again and again**: tell the agents in `CLAUDE.md` how to write commands,
+  or put a skill used on every ticket into `CLAUDE.md`.
+
+Nothing there uses your Claude subscription: it is counted from the logs Union already keeps.
+
 To use less:
 
 - pick the **Quick** or **Standard** flow for small tickets;

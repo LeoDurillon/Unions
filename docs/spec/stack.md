@@ -42,6 +42,9 @@
   calls and models; the side runs and the ticket's total below) and an investigation's Usage tab.
 - The cost is what the tokens would cost on the API: a Max subscription does not bill it. It weighs models and
   cached input against each other; it is not a quota.
+- Each call also records its tool uses in `agent_tool_usage`: a row per tool key (the Bash command's family and
+  form, the file read, the skill, the subagent type) with calls, errors, refusals and the size of the results.
+  The project's Usage tab reads both tables for its findings (plan: `docs/plans/usage-insights.md`).
 - `bun run usage:backfill` records the calls already in `agent_log`.
 
 ## GitHub mapping

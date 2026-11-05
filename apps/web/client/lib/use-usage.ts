@@ -1,7 +1,13 @@
 // What agent calls used: a ticket's or an investigation's (refetched with them), a project's over a
 // range of days, and how much of the Claude subscription's windows is used.
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import type { ClaudeLimits, Investigation, ProjectUsage, UsageView } from '@union/core';
+import type {
+  ClaudeLimits,
+  Investigation,
+  ProjectFindings,
+  ProjectUsage,
+  UsageView,
+} from '@union/core';
 
 import { request } from './api';
 
@@ -48,5 +54,17 @@ export function useProjectUsage(
     queryKey: ['tickets', projectId, 'usage', range],
     queryFn: (): Promise<ProjectUsage> =>
       request('GET', `/api/projects/${projectId}/usage?days=${range}`),
+  });
+}
+
+/** Under `['tickets', projectId]`, like the usage it reads. */
+export function useProjectFindings(
+  projectId: number,
+  range: UsageRange,
+): UseQueryResult<ProjectFindings> {
+  return useQuery({
+    queryKey: ['tickets', projectId, 'usage-findings', range],
+    queryFn: (): Promise<ProjectFindings> =>
+      request('GET', `/api/projects/${projectId}/usage/findings?days=${range}`),
   });
 }

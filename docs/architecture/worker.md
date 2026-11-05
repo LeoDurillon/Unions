@@ -351,7 +351,8 @@
   10 s later) to the processes whose environment holds the run's `UNION_AGENT_RUN` token. It logs
   `union_agent_idle_stopped`, and the run then uses that last result.
 - Token usage: nothing in the worker counts it. Each `result` an agent's `onEvent` sends to `appendAgentLine`
-  records that call in `agent_usage` (core, `agent-usage-record.ts`), under the line's owner (`runId` for a step,
+  records that call in `agent_usage` (core, `agent-usage-record.ts`) and its tool uses in `agent_tool_usage`
+  (`agent-tool-record.ts`), under the line's owner (`runId` for a step,
   `ticketId` alone for a side run, `investigationId`). So a new kind of agent run is counted only if its events
   reach `agent_log`: `investigation-ticket.ts` drops them, and its call is not counted. `AgentOutcome` carries no
   cost: the result's cost adds up over a resumed session.

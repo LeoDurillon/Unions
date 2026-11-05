@@ -10,3 +10,11 @@ const UNKNOWN_AGENT = 'Custom agent';
 export function stepTitle(step: Step, names: CustomAgentNames = {}): string {
   return isCustomStep(step) ? (names[step] ?? UNKNOWN_AGENT) : STEP_TITLES[step];
 }
+
+/** A step read back as text (a run's step in a finding): its title, or the text when it names none. */
+export function stepTextTitle(step: string, names: CustomAgentNames = {}): string {
+  if (isCustomStep(step)) {
+    return stepTitle(step, names);
+  }
+  return Object.entries(STEP_TITLES).find(([id]) => id === step)?.[1] ?? step;
+}
