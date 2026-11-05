@@ -1,16 +1,27 @@
-// Project bar plus the board, investigations, pull requests or usage (or the empty board behind the
-// first-run wizard).
+// Project bar plus the board, investigations, pull requests, repository or usage (or the empty board
+// behind the first-run wizard).
 import { useState, type ReactElement } from 'react';
 
 import type { PublicProject } from '../../src/api-types';
 import { clearInvestigateTicket, useInvestigateTicket } from '../lib/investigate-ticket';
 import { clearOpenedInvestigation, useOpenedInvestigation } from '../lib/opened-investigation';
+import { CLOSE_REPOSITORY, openRepository, useRepositoryOpen } from '../lib/repository-url';
 import { useReviewedPullRequest } from '../lib/review-url';
 import { openSettings } from '../lib/settings-sections';
+import { setParams } from '../lib/url-state';
 import { ProjectBar, type ProjectView } from './project-bar';
 import { ProjectBody } from './project-body';
 
-/** Project bar plus the board, investigations, pull requests or usage (or the empty board behind the first-run wizard). */
+/** The view the URL or the user picked: an investigation asked for, then the Repository tab (`?view=repository`), then the tab chosen. */
+function useView(chosen: ProjectView, asked: boolean): ProjectView {
+  const repository = useRepositoryOpen();
+  if (asked) {
+    return 'investigations';
+  }
+  return repository ? 'repository' : chosen;
+}
+
+/** Project bar plus the board, investigations, pull requests, repository or usage (or the empty board behind the first-run wizard). */
 export function Workspace({
   project,
   onOpenTicket,
@@ -28,7 +39,7 @@ export function Workspace({
   }
   const askedTicket = useInvestigateTicket();
   const openedInvestigation = useOpenedInvestigation();
-  const view = askedTicket === null && openedInvestigation === null ? chosen : 'investigations';
+  const view = useView(chosen, askedTicket !== null || openedInvestigation !== null);
   return (
     <div className="flex min-w-0 flex-1 flex-col">
       <ProjectBar
@@ -40,6 +51,13 @@ export function Workspace({
           }
           if (openedInvestigation !== null) {
             clearOpenedInvestigation();
+          }
+          if (next === 'repository') {
+            openRepository();
+            return;
+          }
+          if (view === 'repository') {
+            setParams(CLOSE_REPOSITORY);
           }
           setChosen(next);
         }}

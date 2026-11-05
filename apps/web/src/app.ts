@@ -5,7 +5,9 @@ import { HTTPException } from 'hono/http-exception';
 
 import { OctokitCi, type CiGitHub } from './github-checks';
 import { OctokitOnboarding, type OnboardingGitHub } from './github-onboarding';
+import { OctokitRepository, type RepositoryGitHub } from './github-repository';
 import { INTERNAL_ERROR } from './http';
+import { CachedRepository } from './repository-cache';
 import { apiRoutes } from './routes/api';
 
 /**
@@ -26,10 +28,13 @@ export function createApp(
   db: Db,
   github: OnboardingGitHub = new OctokitOnboarding(WEB_GITHUB_LIMITS),
   notion: NotionApi = new FetchNotionApi(),
-  ci: CiGitHub = new OctokitCi(WEB_GITHUB_LIMITS),
+  more: { ci?: CiGitHub; repository?: RepositoryGitHub } = {},
 ): Hono {
+  const ci = more.ci ?? new OctokitCi(WEB_GITHUB_LIMITS);
+  const repository =
+    more.repository ?? new CachedRepository(new OctokitRepository(WEB_GITHUB_LIMITS));
   const app = new Hono();
-  app.route('/api', apiRoutes(db, { github, notion, ci }));
+  app.route('/api', apiRoutes(db, { github, notion, ci, repository }));
   app.onError(toErrorResponse);
   return app;
 }

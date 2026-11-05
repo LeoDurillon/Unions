@@ -35,7 +35,8 @@
     "./review-spec-lists": "./src/review-spec-lists.ts",
     "./prompt-formats": "./src/prompt-formats.ts",
     "./review-report-markdown": "./src/review-report-markdown.ts",
-    "./review-report-specs": "./src/review-report-specs.ts"
+    "./review-report-specs": "./src/review-report-specs.ts",
+    "./repository-blob": "./src/repository-blob.ts"
   },
   "dependencies": {
     "@octokit/auth-app": "catalog:github",

@@ -154,6 +154,17 @@
   its investigations') in core `project-usage.ts` and the pure `usage-summary.ts`: total, weeks (Monday, UTC),
   steps, models, the ten most expensive tickets, investigations. The project's Usage tab is
   `usage/usage-page.tsx`, its chart `usage/weeks-chart.tsx` (scale from `lib/nice-scale.ts`).
+- Repository tab (`components/repository/`, plan in `docs/plans/repository-view.md`): the web reads GitHub itself,
+  through `RepositoryGitHub` (`github-repository.ts`, an `ApiServices` member beside `ci`), wrapped by
+  `CachedRepository` (`repository-cache.ts`): trees and files are named by their sha, so they are kept in memory
+  (16 trees, 64 MB of files, least recently used out, `weighted-lru.ts`). `routes/repository.ts`, mounted through
+  `project-github.ts`: `GET /api/projects/:projectId/repository/commit?ref=` (the base branch by default; the sha
+  from `GET /commits/{ref}` with the sha media type, then `git.getCommit`; 404 when the ref names nothing),
+  `…/tree?sha=` (recursive; with `&prefix=` one folder's own entries, for a tree GitHub `truncated`),
+  `…/blob?sha=&path=&size=` (a size above core `REPOSITORY_FILE_LIMIT`, 1 MB, answers `too-large` without reading;
+  core `repositoryBlob` tells text, image (a data URL) and binary). The URL holds `?view=repository&repo-ref=&repo-path=`
+  (`lib/repository-url.ts`); the tree index and the go-to-file match are pure (`lib/repo-tree.ts`,
+  `lib/path-filter.ts`).
 - Live progress on board cards: agent output stays off the shared event stream, so a running card
   (`card-progress.tsx`) reads `GET /api/projects/:projectId/run-progress` (`routes/run-progress.ts`, core
   `run-progress.ts`): each running run's start and the latest assistant line of `agent_log`, summarized by

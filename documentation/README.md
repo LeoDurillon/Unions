@@ -25,6 +25,7 @@ This guide explains how to install Union and use it day to day. To work on Union
   pull requests.
 - [Preview environments](previews.md): run a branch with Docker Compose, run end-to-end tests and commands.
 - [Investigations](investigations.md): ask an agent a one-off question about your code or anything else.
+- [Browsing the repository](repository.md): read any file of the project's repository, at its base branch.
 
 ## Make it yours
 

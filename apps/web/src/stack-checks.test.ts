@@ -63,7 +63,7 @@ beforeEach(() => {
   listed = [];
   db = createDb(':memory:');
   migrateDb(db);
-  app = createApp(db, undefined, undefined, ci);
+  app = createApp(db, undefined, undefined, { ci });
   const project = db
     .insert(schema.projects)
     .values({ owner: 'acme', repo: 'shop', githubToken: 'tok', config: { baseBranch: 'main' } })

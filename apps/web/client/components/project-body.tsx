@@ -1,4 +1,4 @@
-// The open view of the project: the board, its investigations, its pull requests or its usage.
+// The open view of the project: the board, its investigations, its pull requests, its repository or its usage.
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../src/api-types';
@@ -6,6 +6,7 @@ import { Board, BoardView } from './board';
 import { InvestigationsPage } from './investigations/investigations-page';
 import type { ProjectView } from './project-bar';
 import { PullRequestsPage } from './pull-requests/pull-requests-page';
+import { RepositoryPage } from './repository/repository-page';
 import { UsagePage } from './usage/usage-page';
 
 function noop(): void {
@@ -41,6 +42,9 @@ export function ProjectBody({
         onOpenTicket={onOpenTicket}
       />
     );
+  }
+  if (view === 'repository') {
+    return <RepositoryPage key={project.id} project={project} />;
   }
   if (view === 'usage') {
     return <UsagePage key={project.id} project={project} onOpenTicket={onOpenTicket} />;
