@@ -1,11 +1,38 @@
-// A review's Notion tab: each linked page's text as Notion has it now, folded when long, with Refresh.
+// A review's Notion tab: each linked page's text as Notion has it now, folded when long, then its open discussions (read only), with Refresh.
 import type { ReactElement } from 'react';
 
 import type { CurrentReview } from '../../../src/api-types';
 import type { ReviewNotionPage } from '../../../src/review-notion-types';
 import { useReviewNotionPages } from '../../lib/use-review-notion';
 import { FoldedMarkdown } from '../folded-markdown';
+import { NotionDiscussion } from '../notion/notion-discussion';
 import { Button, ErrorText } from '../ui';
+
+/** The page's open discussions, read only: replying and Add to review are a ticket's. */
+function PageDiscussions({ page }: { page: ReviewNotionPage }): ReactElement | null {
+  const { discussions } = page;
+  if ('error' in discussions) {
+    return <p className="text-xs text-amber-700 dark:text-amber-400">{discussions.error}</p>;
+  }
+  if (discussions.discussions.length === 0) {
+    return null;
+  }
+  return (
+    <div className="space-y-3">
+      <h4 className="text-xs font-semibold tracking-wide text-zinc-500 uppercase">
+        Open discussions ({discussions.discussions.length})
+      </h4>
+      {discussions.truncated ? (
+        <p className="text-xs text-amber-700 dark:text-amber-400">
+          The page has many commented passages: only the first ones were read.
+        </p>
+      ) : null}
+      {discussions.discussions.map((discussion) => (
+        <NotionDiscussion key={discussion.id} discussion={discussion} />
+      ))}
+    </div>
+  );
+}
 
 function PageText({ page }: { page: ReviewNotionPage }): ReactElement {
   return (
@@ -31,6 +58,7 @@ function PageText({ page }: { page: ReviewNotionPage }): ReactElement {
       ) : (
         <FoldedMarkdown>{page.markdown}</FoldedMarkdown>
       )}
+      <PageDiscussions page={page} />
     </section>
   );
 }

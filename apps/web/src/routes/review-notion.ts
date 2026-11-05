@@ -1,5 +1,5 @@
 // `<review>/notion`: the Notion pages a pull request under review is linked to (its `notion` specs):
-// their text, linking one more, unlinking one.
+// their text and open discussions, linking one more, unlinking one.
 import {
   linkedNotionPages,
   linkNotionPage,
@@ -14,6 +14,7 @@ import { and, eq, ne } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
 
 import { readObject } from '../http';
+import { discussionsOfPage } from '../notion-discussions';
 import type { ReviewNotionLink, ReviewNotionPage } from '../review-notion-types';
 import { guarded, notionTokenOf, requireNotionId } from './notion';
 import { load, type Review } from './pr-review-load';
@@ -43,10 +44,24 @@ async function pageText(
     url: page.url,
     markdown: notionMarkdown(markdown, titles).trim(),
     truncated,
+    discussions: await discussionsOr(notion, token, { id: pageId, url: page.url, markdown }),
   };
 }
 
-/** Every linked page with its text, in the specs' order. */
+/** The discussions, or the reason they are missing: a refusal (no "Read comments") keeps the text. */
+async function discussionsOr(
+  notion: NotionApi,
+  token: string,
+  page: { id: string; url: string; markdown: string },
+): Promise<ReviewNotionPage['discussions']> {
+  try {
+    return await discussionsOfPage(notion, token, page);
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : String(error) };
+  }
+}
+
+/** Every linked page with its text and discussions, in the specs' order. */
 async function pagesText(db: Db, notion: NotionApi, c: Context): Promise<Response> {
   const { review, project } = load(db, c);
   const pages = linkedNotionPages(db, { kind: 'review', id: review.id });
@@ -54,7 +69,13 @@ async function pagesText(db: Db, notion: NotionApi, c: Context): Promise<Respons
     return c.json([]);
   }
   const token = notionTokenOf(db, project.id);
-  return c.json(await Promise.all(pages.map((page) => pageText(notion, token, page.id))));
+  const read: ReviewNotionPage[] = [];
+  for (const page of pages) {
+    // One page at a time: each reads its commented blocks too, and Notion answers 429 to bursts.
+    // oxlint-disable-next-line no-await-in-loop
+    read.push(await pageText(notion, token, page.id));
+  }
+  return c.json(read);
 }
 
 /** The review, and with `stack` the other reviews of its GitHub stack that have no page yet. */
@@ -96,7 +117,7 @@ function unlink(db: Db, c: Context): Response {
 }
 
 /**
- * Under `<review>`: `GET` the linked pages' text, `POST /check` a page before linking, `PUT` links one
+ * Under `<review>`: `GET` the linked pages' text and discussions, `POST /check` a page before linking, `PUT` links one
  * more, `DELETE /:pageId` unlinks one (`/suggestions` is mounted beside, in `review-workspace.ts`).
  */
 export function reviewNotionRoutes(db: Db, notion: NotionApi): Hono {

@@ -48,7 +48,9 @@ their own. Each pull request of a stack has its own pages; when others of its st
 to this page** gives them that one. The Under review list marks a linked review (and a stack's linked members) with
 **Notion** (with the count when several). The **Notion** tab, after Description, reads each page's text from Notion
 once per opening (cleaned as a ticket's import, mention titles resolved, folded when long), with **Refresh**.
-Nothing is written to Notion or GitHub.
+Under each page's text come its open discussions, read only, as the ticket's Notion tab shows them (page comments,
+then those on the text with their quote, then those on whole blocks); without the "Read comments" capability the
+text still shows, with the reason. Nothing is written to Notion or GitHub.
 
 ### Replies to comments
 

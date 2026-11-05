@@ -36,6 +36,28 @@ const notion = {
       markdown: `## Goal\n\nSee <mention-page url="${urlOf(MENTIONED)}"/>.`,
       truncated: false,
     }),
+  comments: (_token: string, id: string) =>
+    id === PAGE
+      ? Promise.resolve([
+          {
+            id: 'c1',
+            discussionId: 'd1',
+            blockId: null,
+            author: 'Grace',
+            createdAt: '2026-01-01T00:00:00.000Z',
+            richText: [
+              {
+                text: 'CSV only?',
+                href: null,
+                bold: false,
+                italic: false,
+                strikethrough: false,
+                code: false,
+              },
+            ],
+          },
+        ])
+      : Promise.reject(new NotionError('Insufficient permissions', 403)),
 } as unknown as NotionApi;
 
 const github = {
@@ -181,4 +203,18 @@ test("the description's readable Notion pages are suggested, never the linked on
   expect(await titles()).toEqual(['Export to CSV', 'Data model']);
   await send('PUT', '', { page: PAGE });
   expect(await titles()).toEqual(['Data model']);
+});
+
+test("each page comes with its open discussions; a refused read keeps the page's text", async () => {
+  await send('PUT', '', { page: PAGE });
+  await send('PUT', '', { page: MENTIONED });
+  const [spec, model] = (await (await send('GET', '')).json()) as ReviewNotionPage[];
+  expect(spec?.discussions).toMatchObject({
+    truncated: false,
+    discussions: [
+      { id: 'd1', place: 'page', comments: [{ author: 'Grace', markdown: 'CSV only?' }] },
+    ],
+  });
+  expect(model?.markdown).toContain('## Goal');
+  expect(JSON.stringify(model?.discussions)).toContain('Read comments');
 });

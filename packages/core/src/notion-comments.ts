@@ -7,7 +7,8 @@ const DISCUSSION_SPAN =
   /<span\b[^>]*\bdiscussion-urls="(?<urls>[^"]*)"[^>]*>(?<inner>[\s\S]*?)<\/span>/gu;
 const DISCUSSION_URL = /discussion:\/\/[^/\s,"]+\/(?<block>[^/\s,"]+)\/(?<discussion>[^/\s,"]+)/gu;
 const TAGS = /<[^>]*>/gu;
-const MARKS = /\*\*|~~/gu;
+/** Bold, italic, strikethrough and code marks: a quote shows the words alone. */
+const MARKS = /\*+|~~|`/gu;
 const SPACES = /\s+/gu;
 /** A run's text: its spaces at both ends, kept outside the marks, and what they surround. */
 const EDGES = /^(?<lead>\s*)(?<core>[\s\S]*?)(?<trail>\s*)$/u;

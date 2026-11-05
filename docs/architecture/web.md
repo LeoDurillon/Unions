@@ -188,7 +188,9 @@
   `specs-bar.tsx` under the header (`review-top.tsx`), the dialog `specs-dialog.tsx` and `spec-row.tsx`, its open
   state in `specs-editing.tsx` (the agent dialogs' "Edit the specs"), `lib/use-review-specs.ts`.
 - A review's Notion pages: its `notion` specs. `routes/review-notion.ts` (mounted from `review-workspace.ts`) reads
-  each linked page's text (`GET`), checks a page before linking (`POST /check`), links one more (`PUT`) and unlinks
+  each linked page's text and its open discussions (`GET`, one page at a time; `discussionsOfPage` in
+  `notion-discussions.ts` reuses the markdown already read, and a refused comment read becomes the page's
+  `discussions.error`, so the text still shows), checks a page before linking (`POST /check`), links one more (`PUT`) and unlinks
   one (`DELETE /:pageId`); `{ page, stack: true }` also links the reviews of its GitHub stack without a page
   (`github_stack_number`). The reviews list carries `notionPages` (`current-review-list.ts`). `GET
   /notion/suggestions` (`review-notion-suggestions.ts`) reads the description's Notion links (`notionUrlsIn`,

@@ -35,7 +35,7 @@ function Comment({ comment }: { comment: NotionCommentView }): ReactElement {
 }
 
 /** Whether the discussion is in the ticket's review, why it cannot be added, and adding it. */
-export type DiscussionReview = {
+type DiscussionReview = {
   imported: boolean;
   refusal: string | null;
   adding: boolean;
@@ -62,22 +62,26 @@ function AddToReview({ review }: { review: DiscussionReview }): ReactElement {
   );
 }
 
-export function NotionDiscussion({
-  discussion,
-  pending,
-  sender,
-  review,
-}: {
-  discussion: NotionDiscussionView;
+/** What a ticket's tab adds to a discussion: its replies being sent, Reply, and Add to review. */
+export type DiscussionActions = {
   pending: PendingNotionComment[];
   sender: NotionCommentSend;
   review: DiscussionReview;
+};
+
+/** Without `actions` (a review's Notion tab), read only. */
+export function NotionDiscussion({
+  discussion,
+  actions,
+}: {
+  discussion: NotionDiscussionView;
+  actions?: DiscussionActions;
 }): ReactElement {
   return (
     <article className={CARD} aria-label={PLACES[discussion.place]}>
       <div className="flex items-baseline gap-2 text-xs text-zinc-500">
         <span>{PLACES[discussion.place]}</span>
-        <AddToReview review={review} />
+        {actions ? <AddToReview review={actions.review} /> : null}
         <a
           href={discussion.url}
           target="_blank"
@@ -95,7 +99,14 @@ export function NotionDiscussion({
       {discussion.comments.map((comment) => (
         <Comment key={comment.id} comment={comment} />
       ))}
-      <NotionReply discussionId={discussion.id} label="Reply" pending={pending} sender={sender} />
+      {actions ? (
+        <NotionReply
+          discussionId={discussion.id}
+          label="Reply"
+          pending={actions.pending}
+          sender={actions.sender}
+        />
+      ) : null}
     </article>
   );
 }

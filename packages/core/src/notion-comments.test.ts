@@ -26,6 +26,10 @@ test('commented spans: one per discussion, in page order, quotes joined without 
     { discussionId: ON_A, blockId: BLOCK_A, quote: 'on the loan form, the' },
   ]);
   expect(commentedSpans('no comments here <span color="blue">blue</span>')).toEqual([]);
+  const [coded] = commentedSpans(
+    `<span discussion-urls="${url(BLOCK_A, ON_A)}">Fix \`daemon.json\` *now*</span>`,
+  );
+  expect(coded?.quote).toBe('Fix daemon.json now');
 });
 
 test('a very long quote is cut', () => {

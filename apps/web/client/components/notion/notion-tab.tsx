@@ -38,14 +38,16 @@ function Discussions({
           <NotionDiscussion
             key={discussion.id}
             discussion={discussion}
-            pending={pendingIn(discussion.id)}
-            sender={sender}
-            review={{
-              imported: view.review.importedIds.includes(discussion.id),
-              refusal: view.review.refusal,
-              adding: reviewImport.adding === discussion.id,
-              onAdd: () => {
-                reviewImport.add(discussion.id);
+            actions={{
+              pending: pendingIn(discussion.id),
+              sender,
+              review: {
+                imported: view.review.importedIds.includes(discussion.id),
+                refusal: view.review.refusal,
+                adding: reviewImport.adding === discussion.id,
+                onAdd: () => {
+                  reviewImport.add(discussion.id);
+                },
               },
             }}
           />

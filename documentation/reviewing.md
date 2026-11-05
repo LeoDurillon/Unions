@@ -159,7 +159,7 @@ newest first, with their author, branches, review state and size. Stacks of pull
 | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | **Description** | The pull request's description, and the Notion pages it implements (**Link** a page here).                                               |
 | **Comments**    | Its review summaries, conversation and line threads, each with **Reply** or **Quote reply**; a thread's file and lines open in the diff. |
-| **Notion**      | The text of the linked Notion pages, once there are some.                                                                                |
+| **Notion**      | The text of the linked Notion pages, once there are some, each followed by its open comments (read only).                                |
 | **Preview**     | A [preview](previews.md#previews-of-pull-requests-under-review) of the pull request's code.                                              |
 | **Diff**        | The diff, comments, Explain and Review with agent, as for a ticket.                                                                      |
 

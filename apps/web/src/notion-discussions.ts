@@ -72,15 +72,14 @@ function viewOf(discussion: NotionDiscussion, pageUrl: string): NotionDiscussion
   };
 }
 
-/** The open discussions of the page at `pageUrl`, from its current text (not an import's copy). */
-export function readDiscussions(
+/** The open discussions of the page, from its `markdown` as Notion gives it now (not cleaned). */
+export function discussionsOfPage(
   notion: NotionApi,
   token: string,
-  page: { id: string; url: string },
+  page: { id: string; url: string; markdown: string },
 ): Promise<NotionDiscussionsView> {
   return guarded(async () => {
-    const { markdown } = await notion.pageMarkdown(token, page.id);
-    const spans = commentedSpans(markdown);
+    const spans = commentedSpans(page.markdown);
     const blockIds = [...new Set(spans.map((span) => span.blockId))];
     const read = blockIds.slice(0, MAX_COMMENT_BLOCKS);
     const comments = await readComments(notion, token, page.id, read);
@@ -90,4 +89,14 @@ export function readDiscussions(
       truncated: read.length < blockIds.length,
     };
   });
+}
+
+/** The open discussions of the page, from its current text (not an import's copy). */
+export async function readDiscussions(
+  notion: NotionApi,
+  token: string,
+  page: { id: string; url: string },
+): Promise<NotionDiscussionsView> {
+  const { markdown } = await guarded(() => notion.pageMarkdown(token, page.id));
+  return discussionsOfPage(notion, token, { ...page, markdown });
 }

@@ -1,7 +1,7 @@
 # Notion comments on the ticket
 
 Status: planned (2026-10-18, updated 2026-11-05 against `main`). Decisions D1 to D6 confirmed (2026-11-05). Steps 1
-and 2 built and deployed (checked read only against a real ticket's page); step 3, replies, deployed; step 4, Add to review, built (branch `notion-comments`).
+and 2 built and deployed (checked read only against a real ticket's page); step 3, replies, deployed; step 4, Add to review, deployed; step 5, the review's tab, built (branch `notion-comments`).
 
 ## Why
 
@@ -188,7 +188,9 @@ this plan.
    answered by the check. Changes: the button is offered once the ticket has a branch (and its pull request is not
    merged), since a draft can wait for Send review; a general draft keeps no head (never outdated).
 5. The review's Notion tab (D6 of review-notion-link): the discussions under each linked page's text, read only,
-   from the same read and component.
+   from the same read and component. **Built** (2026-11-05): `GET <review>/notion` gives each page its
+   `discussions` (or the reason they could not be read; the text still shows), pages read one at a time;
+   `NotionDiscussion` read only without `actions`. Checked in the browser with stubbed reads.
 6. Optional: a `notion_comment_added` trigger for rules and notifications, from a poll in the worker (Notion has no
    webhook for internal integrations without a public URL). Only if step 4 shows it is wanted.
 
