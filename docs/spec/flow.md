@@ -49,7 +49,8 @@
    [Pull requests](pull-requests.md#explain)); it is refused while the ticket runs.
    The ticket panel's tabs: **Overview** (description, links, actions, runs), **Preview**, **Worker** (one tab per
    step, then the Log; it follows the running step), **Notion** (the open discussions of the ticket's Notion page,
-   read when the tab opens; enabled for a ticket linked to a page) and **PR** (link the pull request, then its GitHub discussion, with
+   read when the tab opens, with Reply in each and New comment, which the worker posts; enabled for a ticket linked
+   to a page) and **PR** (link the pull request, then its GitHub discussion, with
    Reply, Quote reply and the implementer's suggested replies: see
    [Replies to comments](pull-requests.md#replies-to-comments)). From the PR tab or the review header, **Import** adds the unresolved line-comment threads as drafts,
    replies folded in with their authors; each lands on its lines of the current diff, or reads as outdated with

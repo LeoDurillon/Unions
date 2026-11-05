@@ -206,7 +206,9 @@
   pull request, or finds an imported line comment's thread by its first comment's URL; it posts the reply (in the
   thread, resolved if asked, else as a conversation comment), turns a suggestion `sent` or back to a draft with
   `reply_error`, and logs `pr_comment_replied` or `pr_comment_reply_failed` with the command's id. The GitHub calls
-  are in `github/octokit-threads.ts` (and `fake-threads.ts` for tests).
+  are in `github/octokit-threads.ts` (and `fake-threads.ts` for tests). `notion/comment-post.ts` handles
+  `post_notion_comment` (through its `notionHooks`): it posts the comment with the project's Notion secret and logs
+  `notion_comment_posted` or `notion_comment_failed` (with the text, which the tab puts back in its box).
   `github/ci-rerun.ts` handles `rerun_ci_job`: GitHub runs the failed Actions job again; it logs `ci_job_rerun` or
   `ci_job_rerun_failed` (which notifies). `github/ticket-edit.ts` handles `edit_ticket` (the title and description
   edited on the Overview): it writes them to the issue only if GitHub still has the text the edit started from

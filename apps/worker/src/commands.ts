@@ -9,6 +9,7 @@ import {
   transition,
   emitEvent,
   recordValidation,
+  notionCommentOf,
   replyOf,
   schema,
   type Db,
@@ -238,6 +239,9 @@ const OTHER_COMMANDS: Record<string, (db: Db, command: Command, hooks: CommandHo
   },
   reply_pr_comment: (_db, command, hooks) => {
     hooks.replyToPrComment(command.id, replyOf(command.payload));
+  },
+  post_notion_comment: (_db, command, hooks) => {
+    hooks.postNotionComment(command.id, notionCommentOf(command.payload));
   },
   remove_containers: (_db, command, hooks) => {
     hooks.removeContainers(containersOf(command.payload));

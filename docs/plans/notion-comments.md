@@ -1,7 +1,8 @@
 # Notion comments on the ticket
 
 Status: planned (2026-10-18, updated 2026-11-05 against `main`). Decisions D1 to D6 confirmed (2026-11-05). Steps 1
-and 2 built (branch `notion-comments`, checked read only against a real ticket's page).
+and 2 built and deployed (checked read only against a real ticket's page); step 3, replies, built (branch
+`notion-comments`, a comment and a reply posted on ticket 26's page with the user's approval).
 
 ## Why
 
@@ -170,7 +171,12 @@ this plan.
    (2026-11-05). Docs: the guide's ticket panel and shortcuts, `docs/spec/flow.md`, `integrations.md`.
 3. Replies: `toRichText`, the command, the worker handler, events, the reply box and New comment. Check on a
    **test page** of the data source the user picks (posting on a real ticket's page is a write the user approves
-   first).
+   first). **Built** (2026-11-05): checked by posting a page comment and a reply in its thread on ticket 26's page
+   (approved; the user deletes them), read back with their marks; the tab's reply box checked in the browser with
+   the POST answered by the check. Changes: comments post under the integration's name (D2's fallback: Union
+   keeps no GitHub login of the user to put in a custom name); `notion_comment_failed` is not a notification yet;
+   the worker's poster is `notion/comment-post.ts` (with `notionHooks`), the client's box `notion-reply.tsx`,
+   reusing the PR tab's `reply-box.tsx`; `MAX_NOTION_COMMENT` is 4000 and a comment has at most 100 text runs.
 4. Add to review (D6): the `source_url` rename, `importNotionDiscussion` beside `importNote` in
    `apps/web/src/review-import.ts` (173 lines; a new `notion-review-import.ts` if it passes 300),
    `POST /api/tickets/:id/notion-comments/import` (`{ discussionId }`, reads the discussion fresh from Notion),

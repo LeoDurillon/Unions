@@ -20,3 +20,14 @@ export type NotionDiscussionsView = {
   /** The page has more commented blocks than one read takes: the last ones were not read. */
   truncated: boolean;
 };
+
+/** A comment queued for the worker that Notion does not have yet; `discussionId` null for a page comment. */
+export type PendingNotionComment = {
+  commandId: number;
+  discussionId: string | null;
+  text: string;
+  createdAt: number;
+};
+
+/** What the ticket's tab reads: the discussions, and the comments being sent. */
+export type NotionTabView = NotionDiscussionsView & { pending: PendingNotionComment[] };

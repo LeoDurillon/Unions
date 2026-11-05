@@ -1,12 +1,25 @@
-// A ticket's Notion tab: the open discussions of its page, read once per opening, with Refresh.
+// A ticket's Notion tab: the open discussions of its page, read once per opening, with Refresh, replies and New comment.
 import type { ReactElement } from 'react';
 
-import type { NotionDiscussionsView } from '../../../src/notion-discussion-types';
-import { useNotionComments } from '../../lib/use-notion-comments';
+import type { NotionTabView } from '../../../src/notion-discussion-types';
+import {
+  useNotionComments,
+  useNotionCommentSend,
+  type NotionCommentSend,
+} from '../../lib/use-notion-comments';
 import { Button, ErrorText } from '../ui';
 import { NotionDiscussion } from './notion-discussion';
+import { NotionReply } from './notion-reply';
 
-function Discussions({ view }: { view: NotionDiscussionsView }): ReactElement {
+function Discussions({
+  view,
+  sender,
+}: {
+  view: NotionTabView;
+  sender: NotionCommentSend;
+}): ReactElement {
+  const pendingIn = (discussionId: string | null): NotionTabView['pending'] =>
+    view.pending.filter((comment) => comment.discussionId === discussionId);
   return (
     <>
       {view.truncated ? (
@@ -19,15 +32,27 @@ function Discussions({ view }: { view: NotionDiscussionsView }): ReactElement {
         <p className="text-sm text-zinc-500">No open comments on the page.</p>
       ) : (
         view.discussions.map((discussion) => (
-          <NotionDiscussion key={discussion.id} discussion={discussion} />
+          <NotionDiscussion
+            key={discussion.id}
+            discussion={discussion}
+            pending={pendingIn(discussion.id)}
+            sender={sender}
+          />
         ))
       )}
+      <NotionReply
+        discussionId={null}
+        label="New comment"
+        pending={pendingIn(null)}
+        sender={sender}
+      />
     </>
   );
 }
 
 export function NotionTab({ ticketId }: { ticketId: number }): ReactElement {
   const comments = useNotionComments(ticketId);
+  const sender = useNotionCommentSend(ticketId);
   const { data } = comments;
   return (
     <div className="space-y-4">
@@ -56,7 +81,7 @@ export function NotionTab({ ticketId }: { ticketId: number }): ReactElement {
       {!data && comments.isFetching ? (
         <p className="text-sm text-zinc-500">Reading the comments on Notion…</p>
       ) : null}
-      {data ? <Discussions view={data} /> : null}
+      {data ? <Discussions view={data} sender={sender} /> : null}
     </div>
   );
 }

@@ -18,7 +18,11 @@
   says who posts from the stored credentials (`pr-replies.ts`), without a GitHub call.
 - Notion writes happen in the worker only: event rules set properties of a ticket's page, or for a review posted from the review panel, the page that review is linked to (`updatePage`; `event-actions/notion.ts`), and a
   ticket written from an investigation can be created as a page of the project's data source (`createPage`, with
-  `markdown` content).
+  `markdown` content). A comment typed in a ticket's Notion tab is the `post_notion_comment` command
+  (`{ projectId, ticketId, pageId, discussionId | null, text }`, core's `notion-comment-post.ts`); the worker's
+  `notion/comment-post.ts` converts the text (core's `notion-rich-text.ts`: links, `**bold**`, `` `code` ``) and
+  posts it with `addComment` (`POST /v1/comments`, in the discussion or on the page), under the integration's name,
+  and logs `notion_comment_posted` or `notion_comment_failed` (403 names the "Insert comments" capability).
 - Trackers a project is connected to (Notion now) are rows of `integrations`, one per kind: secret, config, the
   tracker's columns as read. Each kind has a browser-safe entry (`@union/core/integration-kinds`: label, ID parsing,
   config check) and a provider over its API client (`integrationProvider`, `integrations/providers.ts`). The web

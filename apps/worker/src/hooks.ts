@@ -6,6 +6,7 @@ import type { CommandHooks } from './command-hooks';
 import type { GitHubApi } from './github/api';
 import { gitHubHooks } from './github/hooks';
 import { removeContainers } from './janitor';
+import { notionHooks } from './notion/comment-post';
 import type { SideRuns } from './side-runs';
 import { unionUpdateHooks } from './union-update';
 
@@ -64,6 +65,7 @@ export function workerHooks(
     preview: (owner, action, options) => {
       previews.run(owner, action, options);
     },
+    ...notionHooks(db),
     ...gitHubHooks(db, apiFor),
     ...unionUpdateHooks(updater),
   };

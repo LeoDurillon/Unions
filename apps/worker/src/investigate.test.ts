@@ -257,6 +257,9 @@ test('the cancel command cancels a queued run itself and hands a running one to 
     replyToPrComment: () => {
       // Not under test.
     },
+    postNotionComment: () => {
+      // Not under test.
+    },
     preview: () => {
       // Not under test.
     },

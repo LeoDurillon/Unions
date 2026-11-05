@@ -119,6 +119,15 @@ type GitHubPayloads = {
   pr_comment_replied: ReplyOrigin & { url: string; resolveError: string | null };
   /** `body` is the text that was not posted, so the reply box gets it back. */
   pr_comment_reply_failed: ReplyOrigin & { error: string; body: string };
+  /** A comment posted on the ticket's Notion page, in `discussionId` (a new one for a page comment). */
+  notion_comment_posted: { commandId: number; discussionId: string; commentId: string };
+  /** `text` is the comment that was not posted, so its box gets it back. */
+  notion_comment_failed: {
+    commandId: number;
+    discussionId: string | null;
+    text: string;
+    error: string;
+  };
   /** The implementer drafted replies to the imported comments of a revision. */
   pr_replies_suggested: PullRequestNumber & { count: number };
   pr_description_changed: {

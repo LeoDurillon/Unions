@@ -122,8 +122,12 @@ Click a card to open its panel:
 - **Notion**: the open comments of the ticket's Notion page, for a ticket imported from Notion or linked to a page.
   Comments on the whole page come first, then those on a passage of the text, under the passage they are about.
   **Open in Notion** opens a discussion there; **Refresh** reads the comments again. Resolved comments are not
-  shown. Your Notion integration needs the **Read comments** capability (in Notion, the integration's settings,
-  then **Capabilities**); without it the tab says so.
+  shown. **Reply** under a discussion answers in it; **New comment** at the bottom starts a discussion on the
+  page. You can write `**bold**`, `` `code` `` and `[links](https://…)`. The comment shows "Sending to Notion…"
+  until Notion has it, then the tab reads the comments again; if Notion refuses it, the box opens again with your
+  text and the reason. Comments appear in Notion under your integration's name. Your Notion integration needs the
+  **Read comments** and **Insert comments** capabilities (in Notion, the integration's settings, then
+  **Capabilities**); without them the tab says which.
 
 **Investigate** in the panel header asks an agent a question about this ticket's workspace (see
 [Investigations](investigations.md)). **Review changes** opens the diff (see [Reviewing changes](reviewing.md)).

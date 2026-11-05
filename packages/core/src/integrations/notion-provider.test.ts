@@ -42,6 +42,7 @@ const notion: NotionApi = {
     }),
   users: () => Promise.resolve([]),
   comments: () => Promise.resolve([]),
+  addComment: () => Promise.reject(new Error('No comments here')),
   updatePage: () => Promise.resolve(),
   createPage: (_token, dataSourceId, page) => {
     created.push({ dataSourceId, title: page.title });

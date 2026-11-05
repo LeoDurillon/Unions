@@ -1,6 +1,7 @@
 // The Notion calls Union makes (`NotionApi`), and the client that makes them over fetch.
-import { commentsOf, type NotionComment } from './notion-comment-parse';
+import { commentOf, commentsOf, type NotionComment } from './notion-comment-parse';
 import { NotionError } from './notion-error';
+import type { NotionRichTextInput } from './notion-rich-text';
 
 const API = 'https://api.notion.com/v1';
 /** Required by the markdown endpoint, and the only value it accepts. */
@@ -35,6 +36,15 @@ export type NotionApi = {
    * "Read comments" capability. A page's list also holds comments on whole blocks of it.
    */
   comments(token: string, blockId: string): Promise<NotionComment[]>;
+  /**
+   * Posts a comment: a reply in a discussion, or a new discussion on the page. Needs the
+   * integration's "Insert comments" capability; Notion shows it under the integration's name.
+   */
+  addComment(
+    token: string,
+    target: { discussionId: string } | { pageId: string },
+    richText: NotionRichTextInput[],
+  ): Promise<NotionComment>;
   /** Sets page properties, keyed by property id, in Notion's property value shape. */
   updatePage(token: string, pageId: string, properties: Record<string, unknown>): Promise<void>;
   /** Adds a page to the data source, with this title and markdown content. */
@@ -201,6 +211,24 @@ export class FetchNotionApi implements NotionApi {
   async comments(token: string, blockId: string): Promise<NotionComment[]> {
     const path = `/comments?block_id=${encodeURIComponent(blockId)}&page_size=100`;
     return commentsOf(await this.listAll(token, path, MAX_COMMENT_PAGES));
+  }
+
+  async addComment(
+    token: string,
+    target: { discussionId: string } | { pageId: string },
+    richText: NotionRichTextInput[],
+  ): Promise<NotionComment> {
+    const where =
+      'discussionId' in target
+        ? { discussion_id: target.discussionId }
+        : { parent: { page_id: target.pageId } };
+    const comment = commentOf(
+      await this.write('POST', token, '/comments', { ...where, rich_text: richText }),
+    );
+    if (!comment) {
+      throw new Error('Notion posted the comment but its answer could not be read');
+    }
+    return comment;
   }
 
   async updatePage(

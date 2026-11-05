@@ -1,8 +1,14 @@
-// One open discussion of a Notion page: the text it is about, then its comments, oldest first.
+// One open discussion of a Notion page: the text it is about, its comments oldest first, then Reply.
 import type { ReactElement } from 'react';
 
-import type { NotionCommentView, NotionDiscussionView } from '../../../src/notion-discussion-types';
+import type {
+  NotionCommentView,
+  NotionDiscussionView,
+  PendingNotionComment,
+} from '../../../src/notion-discussion-types';
+import type { NotionCommentSend } from '../../lib/use-notion-comments';
 import { Markdown } from '../markdown';
+import { NotionReply } from './notion-reply';
 
 const CARD =
   'space-y-3 rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm dark:border-zinc-800 dark:bg-zinc-900';
@@ -29,8 +35,12 @@ function Comment({ comment }: { comment: NotionCommentView }): ReactElement {
 
 export function NotionDiscussion({
   discussion,
+  pending,
+  sender,
 }: {
   discussion: NotionDiscussionView;
+  pending: PendingNotionComment[];
+  sender: NotionCommentSend;
 }): ReactElement {
   return (
     <article className={CARD} aria-label={PLACES[discussion.place]}>
@@ -53,6 +63,7 @@ export function NotionDiscussion({
       {discussion.comments.map((comment) => (
         <Comment key={comment.id} comment={comment} />
       ))}
+      <NotionReply discussionId={discussion.id} label="Reply" pending={pending} sender={sender} />
     </article>
   );
 }

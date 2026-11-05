@@ -3,6 +3,7 @@ import { beforeEach, expect, test } from 'bun:test';
 import {
   createDb,
   createTicket,
+  emitEvent,
   migrateDb,
   NotionError,
   saveNotionConnection,
@@ -16,7 +17,7 @@ import type { Hono } from 'hono';
 
 import { createApp } from './app';
 import type { OnboardingGitHub } from './github-onboarding';
-import type { NotionDiscussionsView } from './notion-discussion-types';
+import type { NotionTabView } from './notion-discussion-types';
 
 const PAGE = 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee';
 const PAGE_URL = 'https://www.notion.so/Export-aaaaaaaabbbb4ccc8dddeeeeeeeeeeee';
@@ -87,7 +88,7 @@ function read(): Promise<Response> | Response {
 test('the discussions: the page one, then the one on the text with its quote', async () => {
   const response = await read();
   expect(response.status).toBe(200);
-  const view = (await response.json()) as NotionDiscussionsView;
+  const view = (await response.json()) as NotionTabView;
   expect(reads).toEqual([PAGE, BLOCK]);
   expect(view.truncated).toBe(false);
   expect(view.discussions.map(({ id, place, quote }) => ({ id, place, quote }))).toEqual([
@@ -107,7 +108,7 @@ test('a page with many commented blocks is read in part, and says so', async () 
     const id = String(index).padStart(8, '0');
     return span(`${id}-bbbb-4ccc-8ddd-eeeeeeeeeeee`, `${id}-dddd-4ccc-8ddd-eeeeeeeeeeee`, 'x');
   }).join('\n');
-  const view = (await (await read()).json()) as NotionDiscussionsView;
+  const view = (await (await read()).json()) as NotionTabView;
   expect(reads.length).toBe(31);
   expect(view.truncated).toBe(true);
 });
@@ -124,4 +125,42 @@ test('a ticket without a Notion page is refused', async () => {
   const response = await read();
   expect(response.status).toBe(409);
   expect(reads).toEqual([]);
+});
+
+function send(body: unknown): Promise<Response> | Response {
+  return app.request(`/api/tickets/${ticketId}/notion-comments`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+}
+
+test('a reply is queued for the worker and shows pending until its event', async () => {
+  const response = await send({ discussionId: ON_TEXT, text: ' Done in #42 ' });
+  expect(response.status).toBe(202);
+  const { id } = (await response.json()) as { id: number };
+  const command = db.select().from(schema.commands).all().at(-1);
+  expect(command).toMatchObject({
+    id,
+    type: 'post_notion_comment',
+    ticketId,
+    payload: { pageId: PAGE, discussionId: ON_TEXT, text: 'Done in #42' },
+  });
+  let view = (await (await read()).json()) as NotionTabView;
+  expect(view.pending.map((item) => [item.discussionId, item.text])).toEqual([
+    [ON_TEXT, 'Done in #42'],
+  ]);
+  emitEvent(db, {
+    type: 'notion_comment_posted',
+    ticketId,
+    payload: { commandId: id, discussionId: ON_TEXT, commentId: 'c9' },
+  });
+  view = (await (await read()).json()) as NotionTabView;
+  expect(view.pending).toEqual([]);
+});
+
+test('an empty comment is refused, and nothing is queued', async () => {
+  const response = await send({ text: '  ' });
+  expect(response.status).toBe(400);
+  expect(db.select().from(schema.commands).all()).toEqual([]);
 });
