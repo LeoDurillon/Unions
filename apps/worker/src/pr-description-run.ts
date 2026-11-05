@@ -1,5 +1,6 @@
 // Rewrites a pull request description in the ticket's container, from the template and the change.
 import {
+  IMPLEMENT_DENIED,
   appendAgentLine,
   type Db,
   effortFor,
@@ -19,7 +20,6 @@ import {
 import { runAgent, runResumable, type AgentFn } from './agent';
 import { loadProject, type TargetDeps } from './agent-review-target';
 import type { GitHubApi } from './github/api';
-import { IMPLEMENT_DENIED } from './implement-loop';
 import { descriptionOf, findTemplate, rewritePrompt, type Template } from './pr-description';
 import { ensureTicketContainer, REPO_DIR } from './provision';
 import { rewriteTarget, sliceRewritePrompt, type RewriteTarget } from './slice-description';

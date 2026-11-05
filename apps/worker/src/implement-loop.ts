@@ -1,5 +1,6 @@
 // Agent turn, then checks; on red checks the same session gets the failure, up to the limit.
 import {
+  IMPLEMENT_DENIED,
   type AgentSetup,
   type ContainerRuntime,
   type Db,
@@ -33,15 +34,6 @@ import { REPO_DIR, type ProvisionConfig } from './provision';
 import type { StepContext } from './scheduler';
 
 /** Branch moves and history rewrites belong to the host (rebase has its own step). */
-export const IMPLEMENT_DENIED = [
-  'Bash(git checkout*)',
-  'Bash(git switch*)',
-  'Bash(git rebase*)',
-  'Bash(git reset*)',
-  'Bash(git merge*)',
-  'Bash(git worktree*)',
-  'Bash(git branch -D*)',
-] as const;
 const DEFAULT_MAX_ITERATIONS = 3;
 
 export type ImplementDeps = {

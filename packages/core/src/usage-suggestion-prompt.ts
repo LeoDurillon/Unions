@@ -1,6 +1,7 @@
 // The prompt of a "Suggest improvements" investigation: the project's usage findings as figures, and what to answer.
 import type { ProjectFindings } from './project-findings';
 import type { Finding, FindingItem, FindingKind } from './usage-findings';
+import { rulesSection, type StepRules } from './usage-suggestion-rules';
 import type { ProjectUsage } from './usage-summary';
 
 const MICRO = 1_000_000;
@@ -114,10 +115,14 @@ Answer in Markdown with these sections; leave out an empty one:
 - \`## Lessons for the agents\`: one-line rules, each for one step (intake, technical, implement,
   final_review…), worth adding to the project's memory in Union.`;
 
-/** The investigation's title and prompt, from the findings over `range` (e.g. "the last 30 days"). */
+/**
+ * The investigation's title and prompt, from the findings over `range` (e.g. "the last 30 days"),
+ * with the rules each step that ran is under.
+ */
 export function suggestionPrompt(
   findings: ProjectFindings,
   usage: ProjectUsage,
+  rules: StepRules[],
   range: string,
 ): { title: string; prompt: string } {
   const sections = findings.findings.map((finding) => findingSection(finding, findings));
@@ -125,6 +130,7 @@ export function suggestionPrompt(
     INTRO,
     `## Usage over ${range}`,
     `In all: $${usage.total.costUsd.toFixed(2)}, ${usage.total.calls} agent calls. Per step:\n${stepLines(usage)}`,
+    rulesSection(rules),
     `## What stands out`,
     ...sections,
     `## Tickets named above\n${ticketList(findings)}`,

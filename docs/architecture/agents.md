@@ -27,11 +27,12 @@ An agent's prompt, model, effort and tools are resolved on every run (`packages/
   `CUSTOM_AGENT_TOOLS`, or `REVIEW_AGENT_TOOLS` with bare `Bash` for a review agent); `Edit`, `Write` and
   `NotebookEdit` are refused for them, and bare `Bash` for a ticket step (`validateTools` reads the kind).
 
-Denied rules always win over a selected tool and are not editable. Every run gets `BASE_DENIED` (`agent.ts`: no
-push, no remote, no `gh`, no `curl`). Runs that work on the branch add `IMPLEMENT_DENIED` (`implement-loop.ts`: no
-checkout, switch, rebase, reset, merge, worktree, branch deletion), loosened per step: `REBASE_DENIED` allows
-rebase and merge, `SIMPLIFY_DENIED` (also the split's) allows rebase and reset. A ticket investigation denies every
-writing tool (`TICKET_INVESTIGATION_DENIED`).
+Denied rules always win over a selected tool and are not editable. They live in core (`agent-denied.ts`), so the
+"Suggest improvements" prompt describes the rules the runs get. Every run gets `BASE_DENIED` (no push, no remote,
+no `gh`, no `curl`; `agent.ts` adds it). Runs that work on the branch add `IMPLEMENT_DENIED` (no checkout, switch,
+rebase, reset, merge, worktree, branch deletion), loosened per step by `deniedFor`: a rebase (and retarget,
+restack) may rebase and merge, simplify and split may rebase and reset. The PR description and replies get
+`IMPLEMENT_DENIED`. A ticket investigation denies every writing tool (`TICKET_INVESTIGATION_DENIED`).
 
 ## The prompt
 

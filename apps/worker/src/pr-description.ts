@@ -1,6 +1,7 @@
 // Asks the implementer for a pull request's description (from the repository's template, if any)
 // and reads it back.
 import {
+  IMPLEMENT_DENIED,
   type ContainerRuntime,
   type Db,
   effortFor,
@@ -11,7 +12,6 @@ import {
 
 import type { AgentFn } from './agent';
 import { runIn } from './container-exec';
-import { IMPLEMENT_DENIED } from './implement-loop';
 import { REPO_DIR } from './provision';
 
 /** Where GitHub looks for a pull request template, in its order; the names are case-insensitive. */

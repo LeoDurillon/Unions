@@ -1,8 +1,7 @@
 // The implementer's session asked to simplify a split ticket's commits slice by slice, and the step's report.
-import { resolveAgent, shortSha, type Db, type TicketSlice } from '@union/core';
+import { deniedFor, resolveAgent, shortSha, type Db, type TicketSlice } from '@union/core';
 
 import type { Rebase, SessionTask } from './rebase-agent';
-import { SIMPLIFY_DENIED } from './simplify-agent';
 import type { History } from './simplify-git';
 
 const HOOK_HINT =
@@ -37,7 +36,7 @@ ${list}
 
 Simplify each slice's commits on their own: never move a change from one slice to another. Each slice must end with exactly the same content as its tip above: the host compares every slice's new tip with it, and moves each lower slice's branch to its new tip itself. Every commit message ends with a trailer naming its slice, on its own line after a blank line: \`Slice: <n>\` (numbered as above). The trailers never go back (1, 1, 2, 3).
 For example: \`git reset --soft <fork point>\` and \`git reset\`, then for each slice in turn, \`git diff --binary HEAD <its tip> -- <paths> | git apply --cached\` stages what it changes in those paths; commit, and check \`git diff --quiet HEAD <its tip>\` before the next slice. Do not create or move branches.${HOOK_HINT}`;
-  return { agent: 'simplify', instructions, denied: SIMPLIFY_DENIED };
+  return { agent: 'simplify', instructions, denied: deniedFor('simplify') };
 }
 
 /** Another turn when the host refused the result: what to fix. */

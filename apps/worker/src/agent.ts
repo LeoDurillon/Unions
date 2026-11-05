@@ -1,5 +1,6 @@
 // Runs `claude -p` inside the ticket's container and streams its events to `onEvent`.
 import {
+  BASE_DENIED,
   connectorHints,
   isConnectorTool,
   type AgentEffort,
@@ -33,8 +34,6 @@ export type AgentOutcome =
 
 const RATE_LIMIT = /usage limit|rate limit|limit reached|too many requests/iu;
 /** Always denied: the host owns the remote; the container has no credentials anyway. */
-const BASE_DENIED = ['Bash(git push*)', 'Bash(git remote*)', 'Bash(gh *)', 'Bash(curl *)'] as const;
-
 type ResultEvent = {
   type: 'result';
   result: string;

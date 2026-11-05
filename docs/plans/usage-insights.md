@@ -89,8 +89,21 @@ log, follow-ups, the Markdown export and the tickets drafted from an answer, and
   The findings are a snapshot: the investigation keeps the figures it was asked about.
 - Opus (`INVESTIGATION_DEFAULTS.model`), tools `Read`, `Grep` and `Glob` only: no shell, no web.
 
-Left for later: lessons from the answer proposed to Memory in one click (the lesson writer's accept/dismiss), and
-the answer's sections parsed into separate ticket drafts.
+- The prompt also says how Union runs the agents (`usage-suggestion-rules.ts`): its rules win over the
+  repository's `.claude/settings.json`, compound commands are checked part by part, `gh` and `curl` are denied on
+  purpose, the worker owns the branch; then each step that ran, with its tools (`toolsFor`, the user's choices
+  included) and what it is denied (`deniedFor`, core `agent-denied.ts`, the lists the worker passes). The first
+  Senova answer (investigation 42) proposed allowing `gh pr diff` and a rebase recipe with `git checkout
+  --theirs`, both denied by Union: this is what it lacked.
+
+Left for later:
+
+- Lessons from the answer proposed to Memory in one click (the lesson writer's accept/dismiss), and the answer's
+  sections parsed into separate ticket drafts.
+- What Union already does or plans (re-reviews since the last reviewed commit, the token savings plan), so the
+  answer does not propose it again.
+- A few refused command lines per call (cut short) kept in `agent_tool_usage`, so the answer can tell a `cd`
+  prefix from a pipe or a loop; today only their count is kept (a migration).
 
 ## Part 3: did it help
 

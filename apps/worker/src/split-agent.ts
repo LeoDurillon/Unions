@@ -1,8 +1,7 @@
 // The implementer's session asked to rewrite its commits into the approved slices, and the split's report.
-import { resolveAgent, shortSha, type Db, type PlannedSlice } from '@union/core';
+import { deniedFor, resolveAgent, shortSha, type Db, type PlannedSlice } from '@union/core';
 
 import type { Rebase, SessionTask } from './rebase-agent';
-import { SIMPLIFY_DENIED } from './simplify-agent';
 import type { History } from './simplify-git';
 
 const HOOK_HINT =
@@ -21,7 +20,7 @@ export function splitTask(
   const { base, branch } = rebase;
   const { start, slices, plan } = input;
   const instructions = `${resolveAgent(db, 'split').prompt}\n\nYour branch is \`${branch}\`: ${start.commits} commit(s) since it left \`${base}\` at \`${start.fork}\` (the fork point). Leave that fork point as it is, even if \`origin/${base}\` moved since.\n\nThe slices, bottom first:\n\n${sliceList(slices)}\n\n# Approved split plan\n\n${plan.trim()}${HOOK_HINT}`;
-  return { agent: 'split', instructions, denied: SIMPLIFY_DENIED };
+  return { agent: 'split', instructions, denied: deniedFor('split') };
 }
 
 /** Another turn when the host refused the result: what to fix. */

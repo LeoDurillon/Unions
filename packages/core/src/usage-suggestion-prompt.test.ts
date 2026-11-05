@@ -3,6 +3,7 @@ import { expect, test } from 'bun:test';
 
 import type { ProjectFindings } from './project-findings';
 import { suggestionPrompt } from './usage-suggestion-prompt';
+import type { StepRules } from './usage-suggestion-rules';
 import type { ProjectUsage } from './usage-summary';
 
 const SLICE = { calls: 3, input: 0, output: 0, costUsd: 12.5 };
@@ -15,6 +16,11 @@ const USAGE: ProjectUsage = {
   tickets: [],
   investigations: { ...SLICE, costUsd: 0, calls: 0 },
 };
+
+const RULES: StepRules[] = [
+  { step: 'implement', tools: ['Read', 'Bash'], denied: ['Bash(git checkout*)'] },
+  { step: 'intake', tools: ['Read'], denied: [] },
+];
 
 const FINDINGS: ProjectFindings = {
   findings: [
@@ -33,7 +39,7 @@ const FINDINGS: ProjectFindings = {
 };
 
 test('the prompt gives the figures, the tickets by name, and what to answer', () => {
-  const { title, prompt } = suggestionPrompt(FINDINGS, USAGE, 'all time');
+  const { title, prompt } = suggestionPrompt(FINDINGS, USAGE, RULES, 'all time');
   expect(title).toBe('Suggest improvements from usage over all time');
   expect(prompt).toContain(
     'In all: $12.50, 3 agent calls. Per step:\n- implement: $12.50, 3 calls',
@@ -45,4 +51,16 @@ test('the prompt gives the figures, the tickets by name, and what to answer', ()
   expect(prompt).toContain('## Tickets named above\n- #1641: Les AIR\n');
   expect(prompt).toContain('(for Union)');
   expect(prompt).toContain('Do not change any file.');
+});
+
+test('the prompt says which rules Union runs each step under', () => {
+  const { prompt } = suggestionPrompt(FINDINGS, USAGE, RULES, 'all time');
+  expect(prompt).toContain('## How Union runs the agents');
+  expect(prompt).toContain(
+    'Every run is denied `Bash(git push*)`, `Bash(git remote*)`, `Bash(gh *)`, `Bash(curl *)`.',
+  );
+  expect(prompt).toContain(
+    '- implement: tools `Read`, `Bash`; also denied `Bash(git checkout*)`\n- intake: tools `Read`\n',
+  );
+  expect(prompt.indexOf('## How Union runs')).toBeLessThan(prompt.indexOf('## What stands out'));
 });

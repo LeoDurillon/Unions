@@ -5,6 +5,7 @@ import { createInvestigation, InvestigationError, type Investigation } from './i
 import { projectFindings } from './project-findings';
 import { projectUsage } from './project-usage';
 import { suggestionPrompt } from './usage-suggestion-prompt';
+import { stepRules } from './usage-suggestion-rules';
 
 /** Reading the repository is all it needs: no web search, no shell. */
 const TOOLS = ['Read', 'Grep', 'Glob'];
@@ -27,9 +28,12 @@ export function suggestImprovements(
   if (findings.findings.length === 0) {
     throw new InvestigationError('Nothing stands out in this range: there is nothing to ask about');
   }
+  const usage = projectUsage(db, projectId, days, now);
+  const steps = usage.steps.flatMap((slice) => (slice.step === null ? [] : [slice.step]));
   const { title, prompt } = suggestionPrompt(
     findings,
-    projectUsage(db, projectId, days, now),
+    usage,
+    stepRules(db, steps),
     rangeText(days),
   );
   return createInvestigation(db, {

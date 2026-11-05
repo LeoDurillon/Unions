@@ -1,6 +1,7 @@
 // Rebases and history rewrites in the implementer's own session, and the report of what the host
 // checked and pushed.
 import {
+  deniedFor,
   type Db,
   effortFor,
   modelFor,
@@ -14,7 +15,7 @@ import { and, desc, eq, inArray, isNotNull } from 'drizzle-orm';
 import { runResumable, type AgentOutcome, type AgentRun } from './agent';
 import { approvedBefore } from './approved';
 import type { GateResult } from './gate';
-import { IMPLEMENT_DENIED, type Workspace } from './implement-loop';
+import type { Workspace } from './implement-loop';
 import { agentServicesHint, gateHint } from './implement-prompts';
 import { askSession, COMMIT_HOOK_HINT, type Ask } from './leftovers';
 import { buildPrompt, parentContext } from './prompts';
@@ -28,11 +29,6 @@ export type Pushed = {
   outcome: Extract<AgentOutcome, { kind: 'ok' }>;
   gate: GateResult | null;
 };
-
-/** The implementer's denied rules, minus the ones a rebase needs (`git merge*` also covers `merge-base`). */
-const REBASE_DENIED = IMPLEMENT_DENIED.filter(
-  (rule) => rule !== 'Bash(git rebase*)' && rule !== 'Bash(git merge*)',
-);
 
 /** A rebase in progress: the workspace, its branch and base, and the commit to restore on failure. */
 export type Rebase = Workspace & {
@@ -88,7 +84,7 @@ function implementerSession(db: Db, ticketId: number): string | null {
 function rebaseTask(db: Db, rebase: Rebase, why = ''): SessionTask {
   const { base, branch, project, deps } = rebase;
   const instructions = `${resolveAgent(db, 'rebase').prompt}\n\nThe base branch was fetched just now as \`origin/${base}\`; your branch is \`${branch}\`.${why}${gateHint(project.config.gateCommand)}${agentServicesHint(deps.services)}${COMMIT_HOOK_HINT}`;
-  return { agent: 'rebase', instructions, denied: REBASE_DENIED };
+  return { agent: 'rebase', instructions, denied: deniedFor('rebase') };
 }
 
 function agentRun(

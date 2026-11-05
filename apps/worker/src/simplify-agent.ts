@@ -1,16 +1,10 @@
 // The implementer's session asked to rewrite its commits, and the report the step leaves.
-import { resolveAgent, type Db } from '@union/core';
+import { deniedFor, resolveAgent, type Db } from '@union/core';
 
-import { IMPLEMENT_DENIED } from './implement-loop';
 import type { Rebase, SessionTask } from './rebase-agent';
 import type { History } from './simplify-git';
 
 const SHORT_SHA = 7;
-
-/** The implementer's denied rules, minus the history rewrites this run is for. */
-export const SIMPLIFY_DENIED = IMPLEMENT_DENIED.filter(
-  (rule) => rule !== 'Bash(git rebase*)' && rule !== 'Bash(git reset*)',
-);
 
 /** A refused commit stops the rewrite; the user decides on it, as for the implementer. */
 const HOOK_HINT =
@@ -24,7 +18,7 @@ function commitCount(count: number): string {
 export function simplifyTask(db: Db, rebase: Rebase, start: History): SessionTask {
   const { base, branch } = rebase;
   const instructions = `${resolveAgent(db, 'simplify').prompt}\n\nYour branch is \`${branch}\`: ${commitCount(start.commits)} since it left \`${base}\` at \`${start.fork}\` (the fork point). Leave that fork point as it is, even if \`origin/${base}\` moved since.${HOOK_HINT}`;
-  return { agent: 'simplify', instructions, denied: SIMPLIFY_DENIED };
+  return { agent: 'simplify', instructions, denied: deniedFor('simplify') };
 }
 
 /** What the host checked and pushed, under the agent's own report. */

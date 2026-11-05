@@ -1,5 +1,6 @@
 // After a revision is pushed, asks the implementer for a reply to each comment imported from GitHub it worked on, kept as drafts the user sends.
 import {
+  IMPLEMENT_DENIED,
   effortFor,
   emitEvent,
   getTicket,
@@ -14,7 +15,6 @@ import {
 import { and, eq, inArray } from 'drizzle-orm';
 
 import type { AgentFn } from './agent';
-import { IMPLEMENT_DENIED } from './implement-loop';
 import { importedNote, repliesOf, repliesPrompt, type SuggestedReply } from './pr-reply-format';
 import { REPO_DIR } from './provision';
 

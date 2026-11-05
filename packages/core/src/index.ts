@@ -4,6 +4,7 @@ export * from './agent-inputs';
 export * from './agent-review-specs';
 export * from './agent-reviews';
 export * from './agent-tools';
+export * from './agent-denied';
 export * from './agent-environment';
 export * from './ci-output-text';
 export * from './ci-outputs';
