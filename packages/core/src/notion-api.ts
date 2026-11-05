@@ -1,4 +1,5 @@
 // The Notion calls Union makes (`NotionApi`), and the client that makes them over fetch.
+import { commentsOf, type NotionComment } from './notion-comment-parse';
 import { NotionError } from './notion-error';
 
 const API = 'https://api.notion.com/v1';
@@ -8,6 +9,8 @@ const UNAUTHORIZED = 401;
 const NOT_FOUND = 404;
 /** 100 members a page: enough for any team Union serves. */
 const MAX_USER_PAGES = 10;
+/** 100 comments a page: a block with more open comments than this is not a discussion one reads. */
+const MAX_COMMENT_PAGES = 10;
 
 export type NotionPage = { id: string; title: string; url: string; dataSourceId: string | null };
 
@@ -27,6 +30,11 @@ export type NotionApi = {
   pageMarkdown(token: string, pageId: string): Promise<{ markdown: string; truncated: boolean }>;
   /** The workspace members; needs the integration's "Read user information" capability. */
   users(token: string): Promise<NotionUser[]>;
+  /**
+   * The open (unresolved) comments of a page or of one block, oldest first; needs the integration's
+   * "Read comments" capability. A page's list also holds comments on whole blocks of it.
+   */
+  comments(token: string, blockId: string): Promise<NotionComment[]>;
   /** Sets page properties, keyed by property id, in Notion's property value shape. */
   updatePage(token: string, pageId: string, properties: Record<string, unknown>): Promise<void>;
   /** Adds a page to the data source, with this title and markdown content. */
@@ -166,21 +174,33 @@ export class FetchNotionApi implements NotionApi {
     return { title: plain(body.title), properties: propertiesOf(body.properties) };
   }
 
-  async users(token: string): Promise<NotionUser[]> {
-    const users: NotionUser[] = [];
+  /** The `results` of every page of a list (`path` has a query), up to `maxPages` pages. */
+  private async listAll(token: string, path: string, maxPages: number): Promise<unknown[]> {
+    const results: unknown[] = [];
     let cursor: string | null = null;
-    for (let page = 0; page < MAX_USER_PAGES; page += 1) {
+    for (let page = 0; page < maxPages; page += 1) {
       const query: string = cursor === null ? '' : `&start_cursor=${encodeURIComponent(cursor)}`;
       // Pages follow one another: each needs the cursor of the one before.
       // oxlint-disable-next-line no-await-in-loop
-      const body = await this.get(token, `/users?page_size=100${query}`);
-      users.push(...usersOf(body.results));
+      const body = await this.get(token, `${path}${query}`);
+      const pageResults: unknown[] = Array.isArray(body.results) ? body.results : [];
+      results.push(...pageResults);
       if (body.has_more !== true || typeof body.next_cursor !== 'string') {
         break;
       }
       cursor = body.next_cursor;
     }
-    return users.toSorted((left, right) => left.name.localeCompare(right.name));
+    return results;
+  }
+
+  async users(token: string): Promise<NotionUser[]> {
+    const results = await this.listAll(token, '/users?page_size=100', MAX_USER_PAGES);
+    return usersOf(results).toSorted((left, right) => left.name.localeCompare(right.name));
+  }
+
+  async comments(token: string, blockId: string): Promise<NotionComment[]> {
+    const path = `/comments?block_id=${encodeURIComponent(blockId)}&page_size=100`;
+    return commentsOf(await this.listAll(token, path, MAX_COMMENT_PAGES));
   }
 
   async updatePage(

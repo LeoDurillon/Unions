@@ -37,7 +37,11 @@
   a page of that data source as a ticket (`src/notion.ts` behind `NotionApi`, through the Notion
   `IntegrationProvider`), the pages a pull
   request under review is linked to and the review's Notion specs (any page shared with the integration;
-  `routes/review-notion.ts`, `routes/review-specs.ts`, their text read fresh each time, mention titles from core's `integrations/notion-mentions.ts`). Uses API version
+  `routes/review-notion.ts`, `routes/review-specs.ts`, their text read fresh each time, mention titles from core's `integrations/notion-mentions.ts`), and the open
+  discussions of a ticket's page (`routes/notion-comments.ts`, `GET /api/tickets/:id/notion-comments`; `src/notion-discussions.ts`
+  reads the page's comments, then those of each block its markdown marks as commented, one block at a time and at
+  most 30; core's `notion-comments.ts` groups them and quotes the commented text; needs the integration's "Read
+  comments" capability, a 403 answers which). Uses API version
   `2026-03-11` and `GET /v1/pages/{id}/markdown`. The secret, data source and columns as read are a row of
   `integrations` (kind `notion`; `integrations/notion-integration.ts` reads and saves it), never sent to the browser.
   (Before `0070_source_integrations` they were `projects.notion_token`, `config.notionDataSourceId` and the table

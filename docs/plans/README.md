@@ -63,7 +63,7 @@ and linked.
   references open the diff. Built (branch `custom-review-agents`, 2026-11-03); a run with Claude is left to try.
 - [Notion comments on the ticket](notion-comments.md): a Notion tab lists the page's open discussions (page and
   inline); the user replies or starts one (the worker posts), or adds a discussion to the review for the
-  implementer. Planned (2026-10-18), decisions to confirm.
+  implementer. Decisions confirmed; steps 1 and 2 built (2026-11-05, branch `notion-comments`).
 - [Link a review to its Notion page](review-notion-link.md): a pull request under review linked to a Notion page
   gets a Notion tab with the page's text, and Group by spec and Review with agent read that page without its URL
   again. Built, steps 1 to 3 (branch `review-notion-link`); D6 waits on Notion comments.

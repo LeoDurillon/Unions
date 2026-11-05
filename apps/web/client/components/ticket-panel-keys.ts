@@ -6,7 +6,7 @@ import type { TicketDetail, TicketSummary } from '../../src/api-types';
 import { api } from '../lib/api';
 import { nextNeedingYou, othersNeedingYou } from '../lib/next-needing';
 import { useShortcuts } from '../lib/shortcuts';
-import type { Section } from './ticket-tabs';
+import { hasNotionPage, type Section } from './ticket-tabs';
 
 /** The tickets around the open one that need the user, from the board's list (shared with the board). */
 export type NeedingYou = {
@@ -36,6 +36,7 @@ const SECTION_KEYS: Record<string, Section> = {
   '2': 'preview',
   '3': 'worker',
   '4': 'pull-request',
+  '5': 'notion',
 };
 
 /** Listens while the panel shows (not its review page); returns the tickets `n` and `p` open. */
@@ -63,7 +64,7 @@ export function usePanelKeys({
   const sections = Object.fromEntries(
     Object.entries(SECTION_KEYS).map(([key, section]) => [
       key,
-      detail
+      detail && (section !== 'notion' || hasNotionPage(detail.ticket))
         ? () => {
             onSection(section);
           }

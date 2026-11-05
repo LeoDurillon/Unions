@@ -55,6 +55,8 @@ export * from './lesson-suggestions';
 export * from './lesson-writer';
 export * from './lessons';
 export * from './notion-api';
+export type { NotionComment } from './notion-comment-parse';
+export * from './notion-comments';
 export * from './notion-error';
 export * from './notion-id';
 export * from './notion-links';

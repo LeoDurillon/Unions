@@ -14,13 +14,14 @@ export function OverviewTab({
   detail,
   onOpenTicket,
   onRemoved,
-  onOpenPreview,
+  onOpenTab,
 }: {
   detail: TicketDetail;
   onOpenTicket: (id: number) => void;
   /** After a cancelled ticket is removed: the panel closes. */
   onRemoved: () => void;
-  onOpenPreview: () => void;
+  /** The Preview and Notion tabs, from their summaries here. */
+  onOpenTab: (tab: 'preview' | 'notion') => void;
 }): ReactElement {
   const { ticket, runs } = detail;
   const blocked = isBlocked(ticket);
@@ -30,7 +31,7 @@ export function OverviewTab({
 
   return (
     <div className="space-y-4">
-      <TicketDetails detail={detail} onOpenTicket={onOpenTicket} onOpenPreview={onOpenPreview} />
+      <TicketDetails detail={detail} onOpenTicket={onOpenTicket} onOpenTab={onOpenTab} />
       <TicketDescription ticket={ticket} />
       <ErrorText error={command.error} />
       <div className="flex gap-2">

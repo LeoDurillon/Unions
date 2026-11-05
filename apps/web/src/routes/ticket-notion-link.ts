@@ -7,7 +7,8 @@ import type { ReviewNotionLink } from '../review-notion-types';
 import { guarded, notionTokenOf, requireNotionId } from './notion';
 import { findTicket } from './ticket-links';
 
-function load(db: Db, c: Context): Ticket {
+/** The ticket of `:id`; 404 when there is none. */
+export function loadTicket(db: Db, c: Context): Ticket {
   const id = requireId(c.req.param('id'), 'ticket id');
   const ticket = findTicket(db)(id);
   if (!ticket) {
@@ -18,7 +19,7 @@ function load(db: Db, c: Context): Ticket {
 
 /** `{ page }`, read through the project's integration: reading it is the check that it is shared. */
 async function readPage(db: Db, notion: NotionApi, c: Context): Promise<ReviewNotionLink> {
-  const ticket = load(db, c);
+  const ticket = loadTicket(db, c);
   const pageId = requireNotionId(await readObject(c.req.raw), 'page', 'page');
   const token = notionTokenOf(db, ticket.projectId);
   const page = await guarded(() => notion.page(token, pageId));
@@ -28,13 +29,13 @@ async function readPage(db: Db, notion: NotionApi, c: Context): Promise<ReviewNo
 /** The page becomes the ticket's origin, as if imported from it; its description is kept as written. */
 async function link(db: Db, notion: NotionApi, c: Context): Promise<Response> {
   const found = await readPage(db, notion, c);
-  setTicketOrigin(db, load(db, c).id, { kind: 'notion', id: found.pageId, url: found.url });
+  setTicketOrigin(db, loadTicket(db, c).id, { kind: 'notion', id: found.pageId, url: found.url });
   return c.json(found);
 }
 
 /** Forgets the link; the page itself is left untouched in Notion. */
 function unlink(db: Db, c: Context): Response {
-  setTicketOrigin(db, load(db, c).id, null);
+  setTicketOrigin(db, loadTicket(db, c).id, null);
   return c.json({ ok: true });
 }
 

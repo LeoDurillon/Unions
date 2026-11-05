@@ -1,0 +1,58 @@
+// One open discussion of a Notion page: the text it is about, then its comments, oldest first.
+import type { ReactElement } from 'react';
+
+import type { NotionCommentView, NotionDiscussionView } from '../../../src/notion-discussion-types';
+import { Markdown } from '../markdown';
+
+const CARD =
+  'space-y-3 rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm dark:border-zinc-800 dark:bg-zinc-900';
+
+const PLACES: Record<NotionDiscussionView['place'], string> = {
+  page: 'On the page',
+  text: 'On the text',
+  block: 'On a block of the page',
+};
+
+function Comment({ comment }: { comment: NotionCommentView }): ReactElement {
+  return (
+    <div className="space-y-1">
+      <div className="flex items-baseline gap-2">
+        <span className="font-medium">{comment.author}</span>
+        <span className="text-xs text-zinc-500">
+          {new Date(comment.createdAt).toLocaleString()}
+        </span>
+      </div>
+      <Markdown compact>{comment.markdown}</Markdown>
+    </div>
+  );
+}
+
+export function NotionDiscussion({
+  discussion,
+}: {
+  discussion: NotionDiscussionView;
+}): ReactElement {
+  return (
+    <article className={CARD} aria-label={PLACES[discussion.place]}>
+      <div className="flex items-baseline gap-2 text-xs text-zinc-500">
+        <span>{PLACES[discussion.place]}</span>
+        <a
+          href={discussion.url}
+          target="_blank"
+          rel="noreferrer"
+          className="ml-auto hover:underline"
+        >
+          Open in Notion
+        </a>
+      </div>
+      {discussion.quote === null ? null : (
+        <blockquote className="border-l-2 border-amber-400 pl-2 text-zinc-600 dark:text-zinc-400">
+          {discussion.quote}
+        </blockquote>
+      )}
+      {discussion.comments.map((comment) => (
+        <Comment key={comment.id} comment={comment} />
+      ))}
+    </article>
+  );
+}

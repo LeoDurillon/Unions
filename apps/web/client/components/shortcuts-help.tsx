@@ -26,7 +26,7 @@ const GROUPS: Group[] = [
       ['n', 'Next ticket that needs you'],
       ['p', 'Previous ticket that needs you'],
       ['r', 'Review the changes'],
-      ['1 – 4', 'Overview, Preview, Worker, PR'],
+      ['1 – 5', 'Overview, Preview, Worker, PR, Notion'],
       ['Esc', 'Close the ticket'],
     ],
   },

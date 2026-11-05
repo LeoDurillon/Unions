@@ -39,22 +39,32 @@ function SourceRow({ detail }: { detail: TicketDetail }): ReactElement {
 export function TicketDetails({
   detail,
   onOpenTicket,
-  onOpenPreview,
+  onOpenTab,
 }: {
   detail: TicketDetail;
   onOpenTicket: (id: number) => void;
-  onOpenPreview: () => void;
+  onOpenTab: (tab: 'preview' | 'notion') => void;
 }): ReactElement {
   const { ticket } = detail;
   return (
     <div className="space-y-3 rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
       <SourceRow detail={detail} />
-      <TicketNotionRow detail={detail} />
+      <TicketNotionRow
+        detail={detail}
+        onOpenComments={() => {
+          onOpenTab('notion');
+        }}
+      />
       <TicketLinks detail={detail} onOpen={onOpenTicket} />
       <BaseBranchRow detail={detail} />
       <FlowRow detail={detail} />
       <TicketAttachments ticketId={ticket.id} />
-      <PreviewSummary ticketId={ticket.id} onOpenTab={onOpenPreview} />
+      <PreviewSummary
+        ticketId={ticket.id}
+        onOpenTab={() => {
+          onOpenTab('preview');
+        }}
+      />
     </div>
   );
 }

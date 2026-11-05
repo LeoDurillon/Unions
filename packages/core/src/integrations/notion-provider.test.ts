@@ -41,6 +41,7 @@ const notion: NotionApi = {
       truncated: true,
     }),
   users: () => Promise.resolve([]),
+  comments: () => Promise.resolve([]),
   updatePage: () => Promise.resolve(),
   createPage: (_token, dataSourceId, page) => {
     created.push({ dataSourceId, title: page.title });

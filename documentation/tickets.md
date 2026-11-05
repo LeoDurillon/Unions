@@ -119,6 +119,11 @@ Click a card to open its panel:
 - **Worker**: one tab per step with the agent's output, then the **Log**, which shows what the agent does live.
 - **PR**: the ticket's pull request, its CI checks and branch operations. See
   [Branches and pull requests](branches.md).
+- **Notion**: the open comments of the ticket's Notion page, for a ticket imported from Notion or linked to a page.
+  Comments on the whole page come first, then those on a passage of the text, under the passage they are about.
+  **Open in Notion** opens a discussion there; **Refresh** reads the comments again. Resolved comments are not
+  shown. Your Notion integration needs the **Read comments** capability (in Notion, the integration's settings,
+  then **Capabilities**); without it the tab says so.
 
 **Investigate** in the panel header asks an agent a question about this ticket's workspace (see
 [Investigations](investigations.md)). **Review changes** opens the diff (see [Reviewing changes](reviewing.md)).
@@ -131,17 +136,17 @@ badge says how many there are). Use it after approving a step to go straight to 
 Press **?** to see them in Union. They do nothing while you type in a text field or while a dialog is open, and
 Ctrl, ⌘ and Alt combinations stay the browser's.
 
-| Where       | Key       | What it does                                     |
-| ----------- | --------- | ------------------------------------------------ |
-| Anywhere    | **?**     | List the shortcuts.                              |
-| Board       | **/**     | Jump to the search.                              |
-| Board       | **c**     | Write a new ticket.                              |
-| Board       | **n**     | Open the first ticket that needs you.            |
-| Ticket      | **n / p** | Open the next or previous ticket that needs you. |
-| Ticket      | **r**     | Review the changes.                              |
-| Ticket      | **1 – 4** | Switch to Overview, Preview, Worker or PR.       |
-| Ticket      | **Esc**   | Close the panel.                                 |
-| Review page | **j / k** | Open the next or previous file.                  |
+| Where       | Key       | What it does                                       |
+| ----------- | --------- | -------------------------------------------------- |
+| Anywhere    | **?**     | List the shortcuts.                                |
+| Board       | **/**     | Jump to the search.                                |
+| Board       | **c**     | Write a new ticket.                                |
+| Board       | **n**     | Open the first ticket that needs you.              |
+| Ticket      | **n / p** | Open the next or previous ticket that needs you.   |
+| Ticket      | **r**     | Review the changes.                                |
+| Ticket      | **1 – 5** | Switch to Overview, Preview, Worker, PR or Notion. |
+| Ticket      | **Esc**   | Close the panel.                                   |
+| Review page | **j / k** | Open the next or previous file.                    |
 
 ## Cancel and remove
 

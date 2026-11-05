@@ -1,19 +1,26 @@
-// The panel's top tabs: the ticket, its preview, the agents' work, and its pull request.
+// The panel's top tabs: the ticket, its preview, the agents' work, its pull request and its Notion page's
+// comments.
 import type { ReactElement } from 'react';
 
-import type { TicketDetail } from '../../src/api-types';
+import type { TicketDetail, TicketSummary } from '../../src/api-types';
 import { useCustomAgentNames } from '../lib/use-custom-agents';
 import { workerTabsFor, type WorkerTab } from '../lib/worker-tabs';
 import { LogTab } from './log-tab';
+import { NotionTab } from './notion/notion-tab';
 import { OverviewTab } from './overview-tab';
 import { PreviewTab } from './preview-tab';
 import { PullRequestTab } from './pull-request-tab';
 import { StepTab } from './step-tab';
 
-/** The panel's top tabs: the ticket, its preview, the agents' work, and its pull request. */
-export type Section = 'overview' | 'preview' | 'worker' | 'pull-request';
+/** The panel's top tabs: the ticket, its preview, the agents' work, its pull request, its Notion page. */
+export type Section = 'overview' | 'preview' | 'worker' | 'pull-request' | 'notion';
 export { latestWorkerTab, type WorkerTab } from '../lib/worker-tabs';
 type TabEntry<T> = { id: T; label: string; enabled: boolean };
+
+/** Imported from a Notion page, created as one, or linked to one: its comments can be read. */
+export function hasNotionPage(ticket: TicketSummary): boolean {
+  return ticket.originKind === 'notion' && ticket.originId !== null;
+}
 
 function sectionsFor(detail: TicketDetail): TabEntry<Section>[] {
   const { prNumber } = detail.ticket;
@@ -22,6 +29,7 @@ function sectionsFor(detail: TicketDetail): TabEntry<Section>[] {
     { id: 'preview', label: 'Preview', enabled: true },
     { id: 'worker', label: 'Worker', enabled: true },
     { id: 'pull-request', label: prNumber === null ? 'PR' : `PR #${prNumber}`, enabled: true },
+    { id: 'notion', label: 'Notion', enabled: hasNotionPage(detail.ticket) },
   ];
 }
 
@@ -146,9 +154,7 @@ export function PanelBody({
         detail={detail}
         onOpenTicket={onOpenTicket}
         onRemoved={onRemoved}
-        onOpenPreview={() => {
-          onSection('preview');
-        }}
+        onOpenTab={onSection}
       />
     );
   }
@@ -157,6 +163,9 @@ export function PanelBody({
   }
   if (section === 'pull-request') {
     return <PullRequestTab detail={detail} />;
+  }
+  if (section === 'notion' && hasNotionPage(detail.ticket)) {
+    return <NotionTab key={detail.ticket.id} ticketId={detail.ticket.id} />;
   }
   return <WorkerBody detail={detail} tab={workerTab} onTab={onWorkerTab} />;
 }
