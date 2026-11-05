@@ -1,15 +1,15 @@
-// A project's Usage tab: what its agents used over a range of days, with its API-equivalent cost:
-// in all, per week, what it shows to improve, per step, per model and per ticket.
+// A project's Usage tab: what its agents used over a range of days, with its API-equivalent cost (the
+// Cost tab), and what their logs show to improve (the What to improve tab).
 import { useState, type ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
 import { useProjectFindings, useProjectUsage, type UsageRange } from '../../lib/use-usage';
 import { Segmented, type SegmentOption } from '../choice';
+import { TabButton } from '../tab-button';
 import { ErrorText } from '../ui';
-import { UsageBreakdown } from './usage-breakdown';
+import { SuggestImprovements } from './suggest-improvements';
+import { UsageCost } from './usage-cost';
 import { UsageFindings } from './usage-findings';
-import { Tiles } from './usage-tiles';
-import { WeeksChart } from './weeks-chart';
 
 const RANGES: SegmentOption<UsageRange>[] = [
   { value: '7', label: '7 days' },
@@ -17,6 +17,29 @@ const RANGES: SegmentOption<UsageRange>[] = [
   { value: '90', label: '90 days' },
   { value: 'all', label: 'All' },
 ];
+
+type Tab = 'cost' | 'improve';
+
+function Header({
+  range,
+  onRange,
+}: {
+  range: UsageRange;
+  onRange: (range: UsageRange) => void;
+}): ReactElement {
+  return (
+    <header className="flex flex-wrap items-center justify-between gap-2">
+      <div>
+        <h2 className="text-base font-semibold">Usage</h2>
+        <p className="text-xs text-zinc-500">
+          What this project&apos;s agents used: its tickets and investigations. The cost is what
+          these tokens would cost on the API; a Max subscription is not billed per call.
+        </p>
+      </div>
+      <Segmented legend="Range" options={RANGES} value={range} onChange={onRange} />
+    </header>
+  );
+}
 
 export function UsagePage({
   project,
@@ -26,41 +49,36 @@ export function UsagePage({
   onOpenTicket: (id: number) => void;
 }): ReactElement {
   const [range, setRange] = useState<UsageRange>('30');
+  const [tab, setTab] = useState<Tab>('cost');
   const usage = useProjectUsage(project.id, range);
   const findings = useProjectFindings(project.id, range);
+  const found = findings.data?.findings.length ?? 0;
   return (
     <div className="h-full overflow-y-auto">
-      <div className="mx-auto max-w-5xl space-y-6 p-4">
-        <header className="flex flex-wrap items-center justify-between gap-2">
-          <div>
-            <h2 className="text-base font-semibold">Usage</h2>
-            <p className="text-xs text-zinc-500">
-              What this project&apos;s agents used: its tickets and investigations. The cost is what
-              these tokens would cost on the API; a Max subscription is not billed per call.
-            </p>
-          </div>
-          <Segmented legend="Range" options={RANGES} value={range} onChange={setRange} />
-        </header>
-        <ErrorText error={usage.error} />
-        {usage.data ? (
-          <>
-            <Tiles total={usage.data.total} />
-            {usage.data.total.calls === 0 ? (
-              <p className="text-sm text-zinc-500">No agent call in this range.</p>
-            ) : (
-              <>
-                <section className="space-y-2">
-                  <h3 className="text-sm font-semibold">Cost per week</h3>
-                  <WeeksChart weeks={usage.data.weeks} />
-                </section>
-                {findings.data ? (
-                  <UsageFindings findings={findings.data} onOpenTicket={onOpenTicket} />
-                ) : null}
-                <UsageBreakdown usage={usage.data} onOpenTicket={onOpenTicket} />
-              </>
-            )}
-          </>
-        ) : null}
+      <div className="mx-auto max-w-5xl space-y-4 p-4">
+        <Header range={range} onRange={setRange} />
+        <div role="tablist" className="flex border-b border-zinc-200 dark:border-zinc-800">
+          <TabButton tab="cost" current={tab} label="Cost" onSelect={setTab} />
+          <TabButton
+            tab="improve"
+            current={tab}
+            label={found === 0 ? 'What to improve' : `What to improve (${found})`}
+            onSelect={setTab}
+          />
+        </div>
+        <div role="tabpanel" className="space-y-6">
+          <ErrorText error={tab === 'cost' ? usage.error : findings.error} />
+          {tab === 'cost' && usage.data ? (
+            <UsageCost usage={usage.data} onOpenTicket={onOpenTicket} />
+          ) : null}
+          {tab === 'improve' && findings.data ? (
+            <UsageFindings
+              findings={findings.data}
+              action={<SuggestImprovements projectId={project.id} range={range} />}
+              onOpenTicket={onOpenTicket}
+            />
+          ) : null}
+        </div>
       </div>
     </div>
   );

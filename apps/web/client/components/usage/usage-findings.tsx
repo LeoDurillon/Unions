@@ -1,7 +1,7 @@
 // A project's findings on its Usage tab: what its agents' calls and tool uses show to improve, each with the tickets that show it.
 import type { Finding, FindingItem, ProjectFindings } from '@union/core';
 import { stepTextTitle } from '@union/core/step-titles';
-import type { ReactElement } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 
 import { FINDING_TEXTS } from '../../lib/finding-text';
 import { useCustomAgentNames } from '../../lib/use-custom-agents';
@@ -109,19 +109,25 @@ function FindingCard({
 
 export function UsageFindings({
   findings,
+  action,
   onOpenTicket,
 }: {
   findings: ProjectFindings;
+  /** Shown beside the title when something stands out. */
+  action: ReactNode;
   onOpenTicket: Open;
 }): ReactElement {
   return (
     <section className="space-y-2">
-      <div>
-        <h3 className="text-sm font-semibold">What to improve</h3>
-        <p className="text-xs text-zinc-500">
-          Read from the agents&apos; logs over this range. “Repository” is for the project&apos;s
-          code and docs (CLAUDE.md, scripts, skills); “Union” is for how Union runs the agents.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div>
+          <h3 className="sr-only">What to improve</h3>
+          <p className="text-xs text-zinc-500">
+            Read from the agents&apos; logs over this range. “Repository” is for the project&apos;s
+            code and docs (CLAUDE.md, scripts, skills); “Union” is for how Union runs the agents.
+          </p>
+        </div>
+        {findings.findings.length === 0 ? null : action}
       </div>
       {findings.findings.length === 0 ? (
         <p className="text-sm text-zinc-500">Nothing stands out in this range.</p>

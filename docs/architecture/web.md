@@ -155,7 +155,12 @@
   steps, models, the ten most expensive tickets, investigations. The project's Usage tab is
   `usage/usage-page.tsx`, its chart `usage/weeks-chart.tsx` (scale from `lib/nice-scale.ts`).
   `GET /api/projects/:projectId/usage/findings?days=…` returns core `projectFindings`: what the range shows to
-  improve and the tickets it links to; `usage/usage-findings.tsx` shows it, worded by `lib/finding-text.ts`.
+  improve and the tickets it links to; `usage/usage-findings.tsx` shows it in the page's What to improve tab
+  (the Cost tab is `usage/usage-cost.tsx`), worded by `lib/finding-text.ts`.
+  `POST /api/projects/:projectId/usage/suggestions?days=…` (button `usage/suggest-improvements.tsx`) queues a
+  `repository` investigation through core `suggestImprovements` (`usage-suggestion.ts`, prompt in the pure
+  `usage-suggestion-prompt.ts`): the findings and the cost per step as its prompt, Opus, `Read`/`Grep`/`Glob`
+  only; refused when nothing stands out. The worker runs it like any investigation.
 - Repository tab (`components/repository/`, plan in `docs/plans/repository-view.md`): the web reads GitHub itself,
   through `RepositoryGitHub` (`github-repository.ts`, an `ApiServices` member beside `ci`), wrapped by
   `CachedRepository` (`repository-cache.ts`): trees and files are named by their sha, so they are kept in memory

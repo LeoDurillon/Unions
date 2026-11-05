@@ -67,12 +67,12 @@ on the Anthropic API. A Max subscription does not bill that amount; it helps com
 an agent runs. What you use elsewhere (Claude Code, claude.ai) shows at the next agent call, and the meter says how
 old its figures are when no agent has run for a while. Folded, the sidebar shows the higher of the two shares.
 
-A project's **Usage** tab (beside **Pull requests**) adds up what its agents used over the last 7, 30 or 90 days, or
-since the start: the API-equivalent cost, the agent calls and the tokens, a bar per week (hover one for its
+A project's **Usage** tab (beside **Pull requests**) has two tabs, both over the last 7, 30 or 90 days, or since
+the start. **Cost** adds up what its agents used: the API-equivalent cost, the agent calls and the tokens, a bar per week (hover one for its
 figures), then the cost per step, per model and for the most expensive tickets (click one to open it), with the
 investigations on their own line.
 
-Under the totals, **What to improve** lists what the agents' logs show over the same range, each with the tickets
+**What to improve** (with the number of findings) lists what the agents' logs show over the same range, each with the tickets
 that show it most (click one to open it). Each card is marked **Repository** when the fix belongs in your project's
 code and docs, or **Union** when it is about how Union runs the agents:
 
@@ -89,6 +89,12 @@ code and docs, or **Union** when it is about how Union runs the agents:
   or put a skill used on every ticket into `CLAUDE.md`.
 
 Nothing there uses your Claude subscription: it is counted from the logs Union already keeps.
+
+**Suggest improvements**, at the top of that tab, asks an agent what to change for these findings. Click it, then
+**Start**: Union starts an investigation (Opus, reading the repository only, on your Claude subscription) with the
+findings and the cost per step as its question, and opens it in **Investigations**. Its answer lists changes to the
+repository, each written as a ticket you can create from the investigation, changes to Union's settings, and
+one-line lessons you can add to the project's **Memory**. Ask follow-up questions there as with any investigation.
 
 To use less:
 

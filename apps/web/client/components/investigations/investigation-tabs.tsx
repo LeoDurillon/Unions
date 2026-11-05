@@ -5,37 +5,11 @@ import { useState, type ReactElement } from 'react';
 import { useInvestigationUsage } from '../../lib/use-usage';
 import { AgentLog } from '../log-tab';
 import { Markdown } from '../markdown';
+import { TabButton } from '../tab-button';
 import { UsageTable } from '../usage/usage-table';
 import { isActive } from './investigation-labels';
 
 type Tab = 'result' | 'log' | 'usage';
-
-function TabButton({
-  tab,
-  current,
-  label,
-  onSelect,
-}: {
-  tab: Tab;
-  current: Tab;
-  label: string;
-  onSelect: (tab: Tab) => void;
-}): ReactElement {
-  const on = tab === current;
-  return (
-    <button
-      type="button"
-      role="tab"
-      aria-selected={on}
-      onClick={() => {
-        onSelect(tab);
-      }}
-      className={`border-b-2 px-3 py-1.5 text-sm ${on ? 'border-indigo-500 font-medium' : 'border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'}`}
-    >
-      {label}
-    </button>
-  );
-}
 
 function Answer({ investigation }: { investigation: Investigation }): ReactElement {
   if (investigation.error !== null) {

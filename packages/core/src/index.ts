@@ -27,6 +27,7 @@ export * from './claude-limits';
 export * from './project-usage';
 export * from './usage-summary';
 export * from './project-findings';
+export { suggestImprovements } from './usage-suggestion';
 export type { Finding, FindingItem, FindingKind } from './usage-findings';
 export { backfillUsage } from './agent-usage-record';
 export { backfillToolUsage } from './agent-tool-record';

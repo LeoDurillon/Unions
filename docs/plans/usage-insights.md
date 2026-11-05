@@ -1,7 +1,7 @@
 # Plan: what the agents' logs say to improve
 
-Status: part 1 built (branch `usage-insights`, 2026-11-05), checked on a copy of the live database; parts 2 and 3
-planned.
+Status: part 1 built and deployed (commit `8071857`, 2026-11-05); part 2 built (branch `usage-suggestions`);
+part 3 planned.
 
 ## Idea
 
@@ -75,11 +75,22 @@ The guide (`documentation/how-it-works.md`, Usage and cost) says what each means
 
 ## Part 2: "Suggest improvements" (uses Claude)
 
-A `usage` investigation scope beside `global`, `repository` and `ticket`: the repository checked out read-only, the
-findings as a compact digest (not the raw logs), and the question: concrete changes, each tagged repository change
-(CLAUDE.md line, module AGENTS.md, check script, skill, subagent: drafted as a ticket with the existing
-investigation tickets), lesson for a step (proposed to Memory), or Union setting. Started from a button on the
-Findings section, with the cost said before.
+Built as a `repository` investigation rather than a scope of its own: the investigations already give the live
+log, follow-ups, the Markdown export and the tickets drafted from an answer, and need no schema or worker change.
+
+- The findings have a tab of their own on the Usage page, **What to improve** (with their count), beside
+  **Cost**; the range picker above serves both.
+- **Suggest improvements** at the top of that tab, then **Start** (it says the agent runs on the Claude
+  subscription). `POST /api/projects/:projectId/usage/suggestions?days=` calls core `suggestImprovements`
+  (`usage-suggestion.ts`), which refuses when nothing stands out, and opens the new investigation.
+- The prompt (`usage-suggestion-prompt.ts`, pure): what Union's steps are, the cost per step over the range, each
+  finding with its figures, who acts and its tickets by number and title, then what to answer: changes to the
+  repository (each a ticket: why, what, how to tell it worked), Union settings, one-line lessons per step.
+  The findings are a snapshot: the investigation keeps the figures it was asked about.
+- Opus (`INVESTIGATION_DEFAULTS.model`), tools `Read`, `Grep` and `Glob` only: no shell, no web.
+
+Left for later: lessons from the answer proposed to Memory in one click (the lesson writer's accept/dismiss), and
+the answer's sections parsed into separate ticket drafts.
 
 ## Part 3: did it help
 

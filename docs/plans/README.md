@@ -6,7 +6,8 @@ and linked.
 ## Planned in detail
 
 - [What the agents' logs say to improve](usage-insights.md): findings on the Usage tab from each call's tokens
-  and tool uses (part 1 built, branch `usage-insights`), then a Claude run that proposes the changes (part 2).
+  and tool uses (part 1 built), then a Claude run that proposes the changes (part 2 built, branch
+  `usage-suggestions`).
 - [UI/UX review](ui-review.md): built (2026-10-24), steps 1 to 5: quick wins, action hierarchy,
   navigation, the board and per-page fixes.
 - [One set of specs per review](review-specs.md): a Specs bar read by Review with agent, Explain and Group by
