@@ -93,6 +93,17 @@ and linked.
 - [Code quality](code-quality.md): a coverage floor and a check for untested files, tests for the client's hooks,
   import boundaries with dependency-cruiser, mutation testing of the state machine, splitting the files at the
   300-line limit, and smaller checks. Planned (2026-10-23), decisions to confirm.
+- [Keyboard shortcuts and the next ticket that needs you](keyboard-shortcuts.md): `?`, `/`, `c` and `n` on the
+  board, `n` / `p`, `r` and `1`–`4` on a ticket, `j` / `k` on a review page, and **Next needing you** in the panel
+  header. Built (2026-11-04); Approve / Revise keys left out on purpose.
+- [Live progress on board cards](card-progress.md): a running card's elapsed time and its agent's last tool call or
+  message, polled every 3 s. Built (2026-11-04); not yet seen during a real run.
+- [Claude usage meter and a project's Usage tab](usage-meter.md): the subscription's 5-hour and weekly windows in
+  the sidebar, read from the agents' `rate_limit_event` lines; a project's API-equivalent cost per week, step,
+  model and ticket. Built (2026-11-04); dark mode not looked at.
+- [A project's Repository tab](repository-view.md): the whole repository at a branch or commit, read from GitHub:
+  a folder tree with a path filter, files highlighted with line links, Markdown and images rendered; links in from
+  the review page. Steps 1 and 2 built (2026-11-05, branch `repository-view`); steps 3 to 5 left.
 
 ## Open items
 
