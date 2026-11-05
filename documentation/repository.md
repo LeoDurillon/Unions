@@ -5,12 +5,19 @@ ticket changed. Use it to read a file before you write a ticket, or to look at c
 
 ## What you see
 
-- **At the top**: the branch shown (the project's base branch), its latest commit, who made it and when. The short
-  commit id opens the commit on GitHub. **Refresh** reads the branch again after someone pushed to it.
+- **At the top**: the branch shown, its latest commit, who made it and when. The short commit id opens the commit on
+  GitHub. **Refresh** reads the branch again after someone pushed to it.
 - **On the left**: the folders and files. Click a folder to open it; click a file to show it.
 - **On the right**: the file, with line numbers and colours for its language. Images show as images. A binary file, or one larger than 1 MB, shows only its size: **Open on GitHub** opens it
   there. A folder shows its contents with their sizes.
 - **The path above the file**: click a folder in it to go back up.
+
+## Another branch
+
+The tab opens on the project's base branch. Click its name, top left, to list the repository's branches (the base
+branch first), type a few letters to filter them, and click one: the file you were reading stays open, as it is on
+that branch. A tag or a commit id works too: type it, then click **Show "…"**. Pick the base branch again to come
+back. Back in your browser returns to the branch you had before.
 
 ## Markdown files
 
@@ -36,4 +43,4 @@ covers the folders you have opened.
   file opens.
 - Union reads the files from GitHub with the project's token or GitHub App. Nothing is cloned and no agent runs, so
   it costs no Claude usage.
-- A branch an agent is still working on shows here only once it has been pushed to GitHub.
+- A ticket's branch is in the list only once it has been pushed to GitHub.

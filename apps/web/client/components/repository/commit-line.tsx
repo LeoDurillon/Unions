@@ -1,4 +1,4 @@
-// The commit the Repository tab shows: its branch, short sha (a link to GitHub), message, author and age, and Refresh.
+// The commit the Repository tab shows: its short sha (a link to GitHub), message, author and age, and Refresh.
 import type { ReactElement } from 'react';
 
 import type { RepositoryCommit } from '../../../src/repository-api-types';
@@ -19,9 +19,6 @@ export function CommitLine({
   const when = commit.date === null ? null : timeAgo(Date.parse(commit.date), now);
   return (
     <div className="flex min-w-0 flex-1 items-center gap-2 text-xs text-zinc-500">
-      <span className="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200">
-        {commit.ref}
-      </span>
       <a
         href={commit.url}
         target="_blank"

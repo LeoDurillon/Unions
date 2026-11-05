@@ -8,6 +8,7 @@ import { createApp } from './app';
 import type { RepositoryGitHub } from './github-repository';
 import type { RepositoryTree } from './repository-api-types';
 import { CachedRepository } from './repository-cache';
+import { repositoryRoutes } from './routes/repository';
 import { WeightedLru } from './weighted-lru';
 
 const COMMIT = 'a'.repeat(40);
@@ -150,4 +151,21 @@ test('only images are served raw, and not past their limit', async () => {
   expect((await get(`raw?sha=${README}&path=README.md`)).status).toBe(400);
   expect((await get(`raw?sha=${README}&path=a.png&size=20000000`)).status).toBe(413);
   expect(calls).toEqual([]);
+});
+
+test('the branches come with the base branch the tab opens on', async () => {
+  const routes = repositoryRoutes(db, {
+    github: { listBranches: () => Promise.resolve(['develop', 'feature/a']) },
+    repository: fake,
+  });
+  const response = await routes.request(`/${projectId}/repository/branches`);
+  expect(await response.json()).toEqual({
+    branches: ['develop', 'feature/a'],
+    projectBase: 'develop',
+  });
+  const unreachable = repositoryRoutes(db, {
+    github: { listBranches: () => Promise.resolve(null) },
+    repository: fake,
+  });
+  expect((await unreachable.request(`/${projectId}/repository/branches`)).status).toBe(404);
 });

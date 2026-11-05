@@ -1,4 +1,5 @@
-// The repository's branches under a filter box, to pick a ticket's base branch or a new target.
+// The repository's branches under a filter box: a ticket's base branch or new target, the branch the Repository
+// tab shows.
 import { useQuery } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 
@@ -9,26 +10,31 @@ const ROW_ON = 'bg-indigo-50 text-indigo-900 dark:bg-indigo-950/40 dark:text-ind
 const ROW_OFF = 'hover:bg-zinc-100 dark:hover:bg-zinc-800';
 const BRANCHES_STALE_MS = 60_000;
 
-/** The repository's branches under a filter box; a name typed that is not listed can be used too. */
-export function BranchPicker({
+/** A name typed that is not listed, as the ticket's pickers word it. */
+function typedUse(name: string): string {
+  return `Use "${name}"`;
+}
+
+/** What a branch list shows: the names once read, or why they are not. */
+export type BranchListing = { data?: string[]; error: Error | null; isPending: boolean };
+
+/** Branches under a filter box; a name typed that is not listed can be used too (`typedLabel` words it). */
+export function BranchList({
   label,
-  ticketId,
+  listed,
   value,
   onPick,
+  typedLabel = typedUse,
 }: {
   label: string;
-  ticketId: number;
+  listed: BranchListing;
   value: string | null;
   onPick: (branch: string) => void;
+  typedLabel?: (name: string) => string;
 }): ReactElement {
   const [filter, setFilter] = useState('');
-  const listed = useQuery({
-    queryKey: ['branches', ticketId],
-    queryFn: () => api.branches(ticketId),
-    staleTime: BRANCHES_STALE_MS,
-  });
   const needle = filter.trim();
-  const branches = (listed.data?.branches ?? []).filter((branch) =>
+  const branches = (listed.data ?? []).filter((branch) =>
     branch.toLowerCase().includes(needle.toLowerCase()),
   );
   const typed = needle !== '' && !branches.includes(needle) ? [needle] : [];
@@ -63,10 +69,31 @@ export function BranchPicker({
                 onPick(branch);
               }}
             />
-            {typed.includes(branch) ? `Use "${branch}"` : branch}
+            {typed.includes(branch) ? typedLabel(branch) : branch}
           </label>
         ))}
       </fieldset>
     </div>
   );
+}
+
+/** A ticket's repository's branches under a filter box, to pick its base branch or a new target. */
+export function BranchPicker({
+  label,
+  ticketId,
+  value,
+  onPick,
+}: {
+  label: string;
+  ticketId: number;
+  value: string | null;
+  onPick: (branch: string) => void;
+}): ReactElement {
+  const listed = useQuery({
+    queryKey: ['branches', ticketId],
+    queryFn: () => api.branches(ticketId),
+    staleTime: BRANCHES_STALE_MS,
+    select: (data) => data.branches,
+  });
+  return <BranchList label={label} listed={listed} value={value} onPick={onPick} />;
 }

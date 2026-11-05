@@ -48,6 +48,23 @@ export function readFolder(projectId: number, folder: RepositoryEntry): Promise<
   return request('GET', `${base(projectId)}/tree?sha=${folder.sha}&prefix=${prefix}`);
 }
 
+/** Branches change as people push: read again after a minute. */
+const BRANCHES_STALE_MS = 60_000;
+
+/** The repository's branches, read once the picker opens. */
+export function useRepositoryBranches(
+  projectId: number,
+  enabled: boolean,
+): UseQueryResult<string[]> {
+  return useQuery({
+    queryKey: ['repository', projectId, 'branches'],
+    queryFn: (): Promise<{ branches: string[] }> => request('GET', `${base(projectId)}/branches`),
+    select: (data) => data.branches,
+    enabled,
+    staleTime: BRANCHES_STALE_MS,
+  });
+}
+
 /** Whether the tab reads the file at all: larger ones only show their size. */
 export function readable(entry: RepositoryEntry): boolean {
   return entry.type === 'file' && (entry.size ?? 0) <= REPOSITORY_FILE_LIMIT;

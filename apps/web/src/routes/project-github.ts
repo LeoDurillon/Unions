@@ -13,6 +13,6 @@ export function projectGitHubRoutes(
 ): Hono {
   const routes = new Hono();
   routes.route('/', ruleChoiceRoutes(db, github));
-  routes.route('/', repositoryRoutes(db, repository));
+  routes.route('/', repositoryRoutes(db, { github, repository }));
   return routes;
 }

@@ -1,5 +1,5 @@
 // `/api/projects/:projectId/repository`: the Repository tab's reads from GitHub: the commit a branch or sha
-// names, the tree at it, one file, and an image's own bytes for a rendered Markdown file.
+// names, the tree at it, one file, an image's own bytes for a rendered Markdown file, and the branches to pick.
 import { schema, type Db, type GitHubAuth } from '@union/core';
 import {
   REPOSITORY_FILE_LIMIT,
@@ -10,6 +10,7 @@ import {
 import { eq } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
 
+import type { OnboardingGitHub } from '../github-onboarding';
 import type { RepositoryGitHub } from '../github-repository';
 import { BAD_REQUEST, fail, NOT_FOUND, PAYLOAD_TOO_LARGE, requireId } from '../http';
 import type { RepositoryCommit } from '../repository-api-types';
@@ -119,9 +120,30 @@ async function raw(db: Db, github: RepositoryGitHub, c: Context): Promise<Respon
   });
 }
 
+/** The repository's branches for the tab's picker, and the base branch it opens on. */
+async function branches(
+  db: Db,
+  github: Pick<OnboardingGitHub, 'listBranches'>,
+  c: Context,
+): Promise<Response> {
+  const target = targetOf(db, c);
+  const names = await guarded(() => github.listBranches(target.auth, target.repo));
+  if (!names) {
+    throw fail(NOT_FOUND, `${target.repo.owner}/${target.repo.repo} is not reachable`);
+  }
+  return c.json({ branches: names, projectBase: target.baseBranch });
+}
+
 /** The Repository tab's reads from GitHub, under `/api/projects/:projectId/repository`. */
-export function repositoryRoutes(db: Db, github: RepositoryGitHub): Hono {
+export function repositoryRoutes(
+  db: Db,
+  {
+    github: branchReads,
+    repository: github,
+  }: { github: Pick<OnboardingGitHub, 'listBranches'>; repository: RepositoryGitHub },
+): Hono {
   const routes = new Hono();
+  routes.get('/:projectId/repository/branches', (c) => branches(db, branchReads, c));
   routes.get('/:projectId/repository/commit', (c) => commit(db, github, c));
   routes.get('/:projectId/repository/tree', (c) => tree(db, github, c));
   routes.get('/:projectId/repository/blob', (c) => blob(db, github, c));

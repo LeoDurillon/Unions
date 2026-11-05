@@ -1,5 +1,7 @@
 // A "⋯" button opening a short list of less frequent actions; a choice, Escape or a click outside closes it.
-import { useEffect, useRef, useState, type ReactElement, type RefObject } from 'react';
+import { useRef, useState, type ReactElement, type RefObject } from 'react';
+
+import { useDismiss } from '../lib/use-dismiss';
 
 export type MenuItem = {
   label: string;
@@ -24,24 +26,7 @@ function MenuPanel({
   items: MenuItem[];
   onClose: () => void;
 }): ReactElement {
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent): void => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    };
-    const onPointer = (event: PointerEvent): void => {
-      if (event.target instanceof Node && root.current?.contains(event.target) !== true) {
-        onClose();
-      }
-    };
-    globalThis.addEventListener('keydown', onKey);
-    globalThis.addEventListener('pointerdown', onPointer);
-    return () => {
-      globalThis.removeEventListener('keydown', onKey);
-      globalThis.removeEventListener('pointerdown', onPointer);
-    };
-  }, [root, onClose]);
+  useDismiss(root, onClose);
   return (
     <div
       role="menu"
