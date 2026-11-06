@@ -37,6 +37,10 @@ Under each output:
   session, so it remembers what it wrote.
 - **Edit** changes the output yourself, for example to fix a detail without spending a run. **Save new version**,
   then approve.
+- **Start over** runs the step again from scratch, after you confirm: the agent starts a new session and sees
+  neither the versions it wrote nor your feedback. Use it when a plan went the wrong way and revising it would keep
+  too much of it. The earlier versions stay in the version list. **Start over** also shows when a planning step
+  failed or hit the usage limit, beside **Retry**.
 
 ### Answer the intake questions
 

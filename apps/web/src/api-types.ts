@@ -81,25 +81,12 @@ export type TicketDetail = {
   size: TicketSize | null;
 };
 
-export type CommandType =
-  | 'start'
-  | 'approve'
-  | 'revise'
-  | 'retry'
-  | 'rebase'
-  | 'simplify'
-  | 'split'
-  | 'drop_split'
-  | 'restack'
-  | 'cancel'
-  | 'commit_anyway'
-  | 'drop_leftovers';
-
-export const COMMAND_TYPES: readonly CommandType[] = [
+export const COMMAND_TYPES = [
   'start',
   'approve',
   'revise',
   'retry',
+  'start_over',
   'rebase',
   'simplify',
   'split',
@@ -108,7 +95,9 @@ export const COMMAND_TYPES: readonly CommandType[] = [
   'cancel',
   'commit_anyway',
   'drop_leftovers',
-];
+] as const;
+
+export type CommandType = (typeof COMMAND_TYPES)[number];
 
 /** A page of a ticket's or an investigation's Log: its events and agent lines, in order. */
 export type LogPage = { entries: LogEntry[]; cursor: string };

@@ -168,6 +168,7 @@ function revise(db: Db, command: Command): void {
 const PLAIN_ACTIONS = [
   'start',
   'retry',
+  'start_over',
   'rebase',
   'simplify',
   'split',

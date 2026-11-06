@@ -5,6 +5,7 @@ import type { ReactElement } from 'react';
 import type { TicketDetail } from '../../src/api-types';
 import { useTicketCommands } from '../lib/use-ticket-commands';
 import { RefusedCommitPanel } from './refused-commit';
+import { StartOver } from './start-over';
 import { Button, ErrorText } from './ui';
 
 function Stalled({ detail, step }: { detail: TicketDetail; step: Step }): ReactElement | null {
@@ -21,15 +22,18 @@ function Stalled({ detail, step }: { detail: TicketDetail; step: Step }): ReactE
     <div className="space-y-2 rounded-lg border border-red-300 bg-red-50 p-3 dark:border-red-900 dark:bg-red-950/40">
       <p className="text-sm">{message}</p>
       <ErrorText error={command.error} />
-      <Button
-        variant="primary"
-        disabled={command.isPending}
-        onClick={() => {
-          command.mutate({ type: 'retry' });
-        }}
-      >
-        Retry
-      </Button>
+      <div className="flex flex-wrap gap-2">
+        <Button
+          variant="primary"
+          disabled={command.isPending}
+          onClick={() => {
+            command.mutate({ type: 'retry' });
+          }}
+        >
+          Retry
+        </Button>
+        <StartOver ticketId={id} phase={phase} />
+      </div>
     </div>
   );
 }

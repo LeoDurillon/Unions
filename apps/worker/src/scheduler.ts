@@ -159,7 +159,9 @@ export class Scheduler {
 
   private async runStep({ ticketId, step }: RunInfo): Promise<void> {
     const ticket = getTicket(this.db, ticketId);
-    const revision = revisionFor(this.db, ticketId, step);
+    // Started over: no earlier version, no feedback and no session to resume.
+    const fresh = ticket.phase.kind === 'running' && ticket.phase.fresh === true;
+    const revision = fresh ? null : revisionFor(this.db, ticketId, step);
     const run = this.db
       .insert(schema.runs)
       .values({ ticketId, step, model: modelFor(this.db, step), status: 'running' })

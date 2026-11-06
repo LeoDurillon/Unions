@@ -16,6 +16,10 @@
    or only those the ticket's flow keeps (none for a Quick ticket), with the user's [custom agents](custom-agents.md)
    where the flow places them (one may also run after the implementation, before the final review).
    After each, the user clicks **Approve** or **Revise** (with feedback). Revise resumes the agent session.
+   **Start over** (`start_over`, while the step awaits approval, failed or hit the usage limit) runs it again from
+   scratch: the phase carries `fresh`, so the run resumes no session and its prompt has no earlier version or
+   feedback; a fresh run that stops retries fresh. Earlier versions stay in the history. Planning and custom steps
+   only: they change no file.
    Each step's output is posted/edited as one issue comment.
 4. After the last planning step is approved (at once for a flow without planning): `implement` loop (agent turn → checks → back to the agent on red, up to the
    project's iteration limit), then the host measures the change (`size-trim.ts`): the lines of code added from

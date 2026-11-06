@@ -4,6 +4,7 @@ import { useState, type ReactElement } from 'react';
 
 import { useTicketCommands } from '../lib/use-ticket-commands';
 import { findingsOf, parseVerdict } from '../lib/verdict';
+import { StartOver } from './start-over';
 import { Button, ErrorText, inputClass } from './ui';
 
 type Mode = 'idle' | 'revise' | 'edit';
@@ -16,6 +17,7 @@ function approveLabel(step: Step): string {
 }
 
 function IdleButtons({
+  ticketId,
   busy,
   step,
   onApprove,
@@ -23,6 +25,7 @@ function IdleButtons({
   onSendFindings,
   onDrop,
 }: {
+  ticketId: number;
   busy: boolean;
   step: Step;
   onApprove: () => void;
@@ -54,6 +57,7 @@ function IdleButtons({
       >
         Edit
       </Button>
+      <StartOver ticketId={ticketId} phase={{ kind: 'awaiting_approval', step }} />
       {onDrop ? (
         <Button disabled={busy} onClick={onDrop}>
           Drop the split
@@ -219,6 +223,7 @@ export function ReviewBar({
       <div className="flex flex-wrap gap-2">
         {review.mode === 'idle' ? (
           <IdleButtons
+            ticketId={ticketId}
             busy={review.busy}
             step={step}
             onApprove={review.handleApprove}

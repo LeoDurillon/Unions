@@ -30,6 +30,7 @@ export type Phase =
   // finishes a run paused on a refused commit, without the agent
   // `thenDone`: a simplification or clean rebase asked once done goes back to done
   // `hostOnly`: a restack started on its own after a merge, which never calls an agent
+  // `fresh`: started over: no resumed session, no earlier version or feedback in the prompt
   | {
       kind: 'running';
       step: Step;
@@ -37,13 +38,15 @@ export type Phase =
       resume?: LeftoverResolution;
       thenDone?: true;
       hostOnly?: true;
+      fresh?: true;
     }
   // output written, waiting for the user; `thenDone`: a split plan asked once done
   | { kind: 'awaiting_approval'; step: Step; thenDone?: true }
   // the repository's hook refused the changes the agent left uncommitted; the user decides
   | { kind: 'commit_refused'; step: Step; thenRun?: Step; thenDone?: true }
-  | { kind: 'rate_limited'; step: Step; retryAt: number | null; thenDone?: true }
-  | { kind: 'failed'; step: Step; error: string; thenDone?: true }
+  // `fresh`: a started-over run stopped; its retry starts over too
+  | { kind: 'rate_limited'; step: Step; retryAt: number | null; thenDone?: true; fresh?: true }
+  | { kind: 'failed'; step: Step; error: string; thenDone?: true; fresh?: true }
   | { kind: 'done' }
   | { kind: 'cancelled' };
 
@@ -57,6 +60,8 @@ export type Action =
   | { type: 'approve' }
   | { type: 'revise' } // feedback is stored separately, then the same step re-runs
   | { type: 'retry' }
+  // Runs a planning or custom step again from scratch, forgetting its session and its versions.
+  | { type: 'start_over' }
   // Brings the branch up to date with its base; the caller checks the pull request is still open.
   | { type: 'rebase' }
   // Moves the branch's own commits onto another base (`tickets.retarget_branch`), then its PR.
@@ -94,6 +99,10 @@ export function backToReview(phase: { thenDone?: true }): Phase {
 
 export function thenDoneOf(phase: { thenDone?: true }): { thenDone?: true } {
   return phase.thenDone ? { thenDone: true } : {};
+}
+
+export function freshOf(phase: { fresh?: true }): { fresh?: true } {
+  return phase.fresh ? { fresh: true } : {};
 }
 
 export function thenRunOf(phase: { thenRun?: Step }): { thenRun?: Step } {

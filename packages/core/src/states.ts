@@ -2,6 +2,7 @@
 
 import {
   backToReview,
+  freshOf,
   PLANNING_STEPS,
   running,
   thenDoneOf,
@@ -15,6 +16,9 @@ import {
   type Step,
 } from './phases';
 import { stackTransition } from './stack-states';
+import { startOverTransition } from './start-over';
+
+export { canStartOver } from './start-over';
 
 export * from './phases';
 
@@ -155,7 +159,13 @@ function fromRunning(phase: PhaseOf<'running'>, action: Action): Phase | null {
     return backToReview(phase);
   }
   if (action.type === 'run_failed') {
-    return { kind: 'failed', step: phase.step, error: action.error, ...thenDoneOf(phase) };
+    return {
+      kind: 'failed',
+      step: phase.step,
+      error: action.error,
+      ...thenDoneOf(phase),
+      ...freshOf(phase),
+    };
   }
   if (action.type === 'rate_limited') {
     return {
@@ -163,6 +173,7 @@ function fromRunning(phase: PhaseOf<'running'>, action: Action): Phase | null {
       step: phase.step,
       retryAt: action.retryAt,
       ...thenDoneOf(phase),
+      ...freshOf(phase),
     };
   }
   if (action.type === 'commit_refused') {
@@ -229,13 +240,17 @@ function fromStalled(phase: PhaseOf<'failed' | 'rate_limited'>, action: Action):
     return null;
   }
   const next = running(phase.step);
-  return next.kind === 'running' ? { ...next, ...thenDoneOf(phase) } : next;
+  return next.kind === 'running' ? { ...next, ...thenDoneOf(phase), ...freshOf(phase) } : next;
 }
 
 function applyAction(phase: Phase, action: Action, flow: Flow): Phase | null {
   const stacked = stackTransition(phase, action);
   if (stacked !== undefined) {
     return stacked;
+  }
+  const startedOver = startOverTransition(phase, action);
+  if (startedOver !== undefined) {
+    return startedOver;
   }
   switch (phase.kind) {
     case 'backlog': {
