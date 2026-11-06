@@ -18,6 +18,7 @@ import {
 import { eq } from 'drizzle-orm';
 
 import type { ApprovedOutput } from './approved';
+import { archiveHint } from './archive-hint';
 
 export function isPlanningStep(step: Step): step is PlanningStep {
   return PLANNING_STEPS.some((planning) => planning === step);
@@ -38,6 +39,8 @@ export type PromptInput = {
   revision: { previous: string; feedback: string } | null;
   /** The files the user attached to the ticket (none for the rebase, which only replays commits). */
   attachments?: Attachment[];
+  /** The step's tools (`toolsFor`): attached archives get a hint when they allow unzip. */
+  tools?: readonly string[];
   /** The files the project puts in every workspace (none for the rebase). */
   projectFiles?: ProjectFile[];
   /** The step the prompt is for: the implementer and the final review are told what the flow skipped. */
@@ -85,13 +88,17 @@ function attachmentLine(attachment: Attachment): string {
 }
 
 /** The ticket's files, how to use them, and what must never leave the workspace. */
-export function attachmentsSection(attachments: Attachment[]): string {
+export function attachmentsSection(
+  attachments: Attachment[],
+  tools: readonly string[] = [],
+): string {
+  const hint = archiveHint(attachments, tools);
   return `# Attached files
 
 The user attached these files to the ticket. They are in \`${CONTAINER_ATTACHMENTS_DIR}/\`, outside the repository.
 
 ${attachments.map((attachment) => attachmentLine(attachment)).join('\n')}
-
+${hint === '' ? '' : `\n${hint}\n`}
 Use them to understand and reproduce what the ticket describes. When you change code, first reproduce the problem with these files, then check the change against the same files, and say in your report how you tested with them (or why you could not).
 
 Files marked "private" must not leave this workspace: do not copy them into the repository or commit them, and do not quote their contents in commits, reports or the pull request description. A push that contains one is refused. Build a minimal test fixture of your own when you need one. Files marked "may be added to the repository" can be used as test fixtures.`;
@@ -121,6 +128,7 @@ export function buildPrompt({
   approved,
   revision,
   attachments = [],
+  tools = [],
   projectFiles = [],
   step,
 }: PromptInput): string {
@@ -129,7 +137,7 @@ export function buildPrompt({
     parts.push(parentSection(parent, ticket, projectBase));
   }
   if (attachments.length > 0) {
-    parts.push(attachmentsSection(attachments));
+    parts.push(attachmentsSection(attachments, tools));
   }
   if (projectFiles.length > 0) {
     parts.push(projectFilesSection(projectFiles));

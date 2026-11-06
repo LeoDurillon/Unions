@@ -144,3 +144,17 @@ test('the implementer of a ticket that skipped planning is told so after its job
   expect(buildPrompt({ ticket: quick, ...input, step: 'rebase' })).not.toContain('# Flow');
   expect(buildPrompt({ ticket, ...input, step: 'implement' })).not.toContain('# Flow');
 });
+
+test('an attached spreadsheet gets the unzip hint only when the tools allow unzip', () => {
+  const sheet = {
+    name: 'PPC.xlsx',
+    size: 2048,
+    contentType: 'application/zip',
+    note: '',
+  } as Attachment;
+  const input = { ticket, shared: 's', instructions: 'i', approved: [], revision: null };
+  const allowed = buildPrompt({ ...input, attachments: [sheet], tools: ['Bash(unzip -p *)'] });
+  expect(allowed).toContain('`PPC.xlsx` is a zip archive');
+  expect(allowed.indexOf('zip archive')).toBeLessThan(allowed.indexOf('Use them to understand'));
+  expect(buildPrompt({ ...input, attachments: [sheet], tools: ['Read'] })).not.toContain('unzip');
+});

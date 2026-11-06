@@ -44,7 +44,8 @@ A pipeline step's prompt is built by `buildPrompt` (`apps/worker/src/prompts.ts`
    `reportLessonsPrompt`) after it.
 2. `# Task`: the ticket's title and body.
 3. `# Builds on`: the parent ticket and where to see its changes, when it has one.
-4. `# Attached files`, `# Project files`, when there are any.
+4. `# Attached files`, `# Project files`, when there are any. Attached Office files and zip archives get a hint on
+   reading them with `unzip -l` / `unzip -p` when the step's tools allow those commands (`archive-hint.ts`).
 5. `# Approved: <step>`: each earlier step's approved output, in the flow's order (`approved.ts`).
 6. `# Your job`: the agent's prompt, followed by what the worker appends (see "What Union reads back").
 7. The flow note (`flowNote`): what the flow skipped, for the implementer and the final review.

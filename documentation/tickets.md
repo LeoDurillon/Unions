@@ -44,6 +44,8 @@ Click **New ticket** in the project bar. The dialog has one tab per source:
 In every tab you can also:
 
 - attach **files** (screenshots, specs, sample data), which the agents can read;
+  spreadsheets, Word documents and zip files too, when the agent's tools include `Bash(unzip -l *)` and
+  `Bash(unzip -p *)` (Settings → Agents);
 - pick the ticket it **depends on** (see below);
 - pick its **flow** (see below).
 

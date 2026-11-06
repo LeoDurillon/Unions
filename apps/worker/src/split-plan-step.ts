@@ -37,6 +37,7 @@ function planPrompt(
     approved: approvedBefore(db, ticket.id, 'final_review'),
     revision: context.revision,
     attachments: listAttachments(db, ticket.id),
+    tools: toolsFor(db, 'split_plan'),
   });
 }
 

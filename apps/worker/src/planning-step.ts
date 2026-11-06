@@ -44,6 +44,7 @@ export async function runPlanningStep(
     const readChange = isCustomStep(step)
       ? await customStepContext({ db, runtime }, cloned, step, container.name)
       : '';
+    const tools = toolsFor(db, step);
     const prompt = buildPrompt({
       ticket: cloned,
       ...parentContext(db, cloned),
@@ -52,6 +53,7 @@ export async function runPlanningStep(
       approved: approvedBefore(db, ticket.id, step),
       revision: context.revision,
       attachments: listAttachments(db, ticket.id),
+      tools,
       projectFiles: listProjectFiles(db, ticket.projectId),
     });
     const run = {
@@ -60,7 +62,7 @@ export async function runPlanningStep(
       model: modelFor(db, step),
       effort: effortFor(db, step),
       prompt,
-      tools: toolsFor(db, step),
+      tools,
       resumeSessionId: context.resumeSessionId,
       signal: context.signal,
       onEvent: context.log,

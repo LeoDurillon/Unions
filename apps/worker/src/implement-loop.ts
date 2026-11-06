@@ -89,6 +89,7 @@ function freshPrompt(workspace: Workspace): string {
     revision: null,
     step: 'implement',
     attachments: listAttachments(deps.db, ticket.id),
+    tools: toolsFor(deps.db, 'implement'),
     projectFiles: listProjectFiles(deps.db, ticket.projectId),
   });
   const asked = revision ? `${prompt}\n\n${feedbackPrompt(revision.feedback)}` : prompt;
@@ -109,7 +110,9 @@ function firstPrompt(workspace: Workspace): string {
     feedbackPrompt(revision.feedback) +
     runningPreviewHint(workspace.deps.db, ticket.id, workspace.project) +
     (workspace.stackSection ?? '');
-  return attachments.length === 0 ? feedback : `${feedback}\n\n${attachmentsSection(attachments)}`;
+  return attachments.length === 0
+    ? feedback
+    : `${feedback}\n\n${attachmentsSection(attachments, toolsFor(workspace.deps.db, 'implement'))}`;
 }
 
 /** Another turn in the implementer's session, for a question the host has (where a commit goes). */

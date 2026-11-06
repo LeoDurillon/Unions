@@ -90,6 +90,7 @@ export async function runReviewStep(
         revision: null,
         step: 'final_review',
         attachments: listAttachments(db, ticket.id),
+        tools: toolsFor(db, 'final_review'),
         projectFiles: listProjectFiles(db, ticket.projectId),
       }),
       tools: toolsFor(db, 'final_review'),
