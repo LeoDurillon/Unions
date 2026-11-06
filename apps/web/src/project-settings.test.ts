@@ -126,6 +126,17 @@ function patchInstructions(instructions: unknown): Promise<Response> | Response 
   return send('PATCH', `/api/projects/${projectId}`, { instructions });
 }
 
+test('size settings: patterns replace the defaults and null restores them; the budget is a whole number', async () => {
+  const path = `/api/projects/${projectId}`;
+  await send('PATCH', path, { sizeIgnore: [' gen/ ', ''], sizeBudget: 300 });
+  expect(stored()?.config).toMatchObject({ sizeIgnore: ['gen/'], sizeBudget: 300 });
+  expect((await send('PATCH', path, { sizeBudget: 2.5 })).status).toBe(400);
+  expect((await send('PATCH', path, { sizeIgnore: 'gen/' })).status).toBe(400);
+  await send('PATCH', path, { sizeIgnore: null, sizeBudget: null });
+  expect(stored()?.config.sizeIgnore).toBeUndefined();
+  expect(stored()?.config.sizeBudget).toBeUndefined();
+});
+
 test('project instructions are trimmed, cleared by an empty string and size-limited', async () => {
   expect((await patchInstructions('  Use pnpm.\n')).status).toBe(200);
   expect(stored()?.config.instructions).toBe('Use pnpm.');

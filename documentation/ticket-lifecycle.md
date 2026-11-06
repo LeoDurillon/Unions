@@ -25,7 +25,7 @@ revision, Union edits that comment instead of adding another one.
 | ------------- | ------------- | --------------------------------------------------------------------------------------- |
 | **Intake**    | Haiku         | The questions the request leaves open, each followed by an `Answer:` line for you.      |
 | **Summary**   | Sonnet        | What the ticket asks for, with numbered acceptance criteria, decisions and assumptions. |
-| **Technical** | Opus          | The technical plan: the approach, the files to change, the risks. Diagrams welcome.     |
+| **Technical** | Opus          | The technical plan: the approach, the files to change, the risks, the estimated size.   |
 | **Test plan** | Sonnet        | The tests that prove the change works.                                                  |
 
 The agents read the repository but do not change it during planning. Each step reads the steps approved before it.
@@ -60,13 +60,32 @@ The tab then shows the agent's report: what changed, how the checks ended, and w
 The agent works in the ticket's own container and workspace, which stay between steps: a revision continues from
 where it was.
 
+### The size of a change
+
+Agents tend to write more code than a task needs. Union counts the lines of code each implementation adds, leaving
+out tests, lock files, migrations and docs, and shows it as **Size** in the ticket's Overview, for example "312 lines
+of code (+840 tests), for ~150 estimated". Hover it to see the files.
+
+The budget comes from the **Technical** step, which ends its plan with "Estimated size: 150 lines of code". To change
+the budget, **Edit** that line before you approve the plan. A flow without the Technical step uses the project's
+budget, if you set one (**Settings → Agents → Change size**); otherwise the size is only shown.
+
+When a ticket's first implementation, with its checks green, adds more than one and a half times its budget, the
+implementer gets one more turn to cut what the task does not need: options nobody asked for, code that is used once,
+cases that cannot happen. It runs the checks again and explains why what is left is needed. Its report shows the
+size before and after. If the checks fail after the cut, Union keeps the code as it was before.
+
+Nothing waits on the size: the final review reads it, and treats code the task does not need as a reason to request
+changes. Revisions are measured, never cut.
+
 ## Final review
 
 A separate agent (Opus by default) reads the branch and compares it with the approved plan. Its review starts with
 a verdict:
 
 - **APPROVED**: nothing blocks the change. Remarks that do not block are listed under "Optional".
-- **CHANGES REQUESTED**: bugs, missed acceptance criteria, missing planned tests, or risky changes.
+- **CHANGES REQUESTED**: bugs, missed acceptance criteria, missing planned tests, risky changes, or code the task
+  does not need.
 
 The reviewer does not run the checks again; it reports how they ended in the implementation. You decide what
 happens next, whatever the verdict:

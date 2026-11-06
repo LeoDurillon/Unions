@@ -4,24 +4,25 @@
 
 Open a project's **Settings** in the project bar. Most pages have one **Save** at the bottom.
 
-| Group             | Page             | What it holds                                                                                                                                 |
-| ----------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Project**       | General          | GitHub access (token or GitHub App installation) and the base branch.                                                                         |
-|                   | Files            | [Project files](previews.md#project-files) every workspace gets, kept out of git.                                                             |
-| **Agents**        | Instructions     | [Notes every agent of the project reads](agents.md#project-instructions).                                                                     |
-|                   | Memory           | [Feedback and lessons](agents.md#memory).                                                                                                     |
-|                   | Checks           | Install command, check command, iteration limit. See [Your first project](first-project.md#tell-the-agents-how-to-build-and-check-your-code). |
-|                   | Scripts          | Commands you run by name from a ticket's Preview tab.                                                                                         |
-|                   | Flows            | [Flow presets](tickets.md#flows) and the default one.                                                                                         |
-| **Pull requests** | Pull requests    | Open a draft pull request automatically; suggest replies to GitHub comments; split pull requests into stacks; check every slice.              |
-|                   | Review           | Hide lock files and other paths from the review page.                                                                                         |
-| **Previews**      | Services         | Compose file, exposed services, compose additions, profiles, services for the agent.                                                          |
-|                   | Variables        | Plain and secret environment variables for previews and the agent.                                                                            |
-|                   | End-to-end tests | The e2e command, and starting the preview for implementation steps.                                                                           |
-|                   | Limits           | Previews running at once, and the idle time after which a preview stops.                                                                      |
-| **Integrations**  | Notion           | The Notion integration secret and data source.                                                                                                |
-| **Events**        | Rules, Activity  | [Event rules](automation.md#event-rules) and what they did.                                                                                   |
-|                   | Danger zone      | Delete the project. Type the repository's name to confirm.                                                                                    |
+| Group             | Page             | What it holds                                                                                                                                      |
+| ----------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Project**       | General          | GitHub access (token or GitHub App installation) and the base branch.                                                                              |
+|                   | Files            | [Project files](previews.md#project-files) every workspace gets, kept out of git.                                                                  |
+| **Agents**        | Instructions     | [Notes every agent of the project reads](agents.md#project-instructions).                                                                          |
+|                   | Memory           | [Feedback and lessons](agents.md#memory).                                                                                                          |
+|                   | Checks           | Install command, check command, iteration limit. See [Your first project](first-project.md#tell-the-agents-how-to-build-and-check-your-code).      |
+|                   | Change size      | The budget of a ticket without an estimate, and the paths that are not code. See [The size of a change](ticket-lifecycle.md#the-size-of-a-change). |
+|                   | Scripts          | Commands you run by name from a ticket's Preview tab.                                                                                              |
+|                   | Flows            | [Flow presets](tickets.md#flows) and the default one.                                                                                              |
+| **Pull requests** | Pull requests    | Open a draft pull request automatically; suggest replies to GitHub comments; split pull requests into stacks; check every slice.                   |
+|                   | Review           | Hide lock files and other paths from the review page.                                                                                              |
+| **Previews**      | Services         | Compose file, exposed services, compose additions, profiles, services for the agent.                                                               |
+|                   | Variables        | Plain and secret environment variables for previews and the agent.                                                                                 |
+|                   | End-to-end tests | The e2e command, and starting the preview for implementation steps.                                                                                |
+|                   | Limits           | Previews running at once, and the idle time after which a preview stops.                                                                           |
+| **Integrations**  | Notion           | The Notion integration secret and data source.                                                                                                     |
+| **Events**        | Rules, Activity  | [Event rules](automation.md#event-rules) and what they did.                                                                                        |
+|                   | Danger zone      | Delete the project. Type the repository's name to confirm.                                                                                         |
 
 Deleting a project removes its tickets from Union, with their containers and volumes. Nothing is deleted on GitHub.
 

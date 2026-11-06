@@ -24,13 +24,15 @@ Changes apply from the next run, including on tickets already running.
 | General        | **Shared instructions**: sent first to every agent     | –                           |
 | Planning       | Intake, Summary, Technical, Test plan                  | Haiku, Sonnet, Opus, Sonnet |
 | Implementation | Implementation, Final review                           | Opus, Opus                  |
+| Size           | Trim                                                   | Implementation's            |
 | Pull requests  | PR description, Replies to GitHub comments, Split plan | Opus, Opus, Opus            |
 | Branch history | Rebase, Simplify history, Split into a stack           | Implementation's            |
 | Review         | Review comments, Group by spec, Explain, Spec report   | Opus, Sonnet, Haiku, Opus   |
 | Memory         | Lesson writer                                          | Haiku                       |
 
-Rebase, Simplify history and Split into a stack are only prompts: the implementation agent runs them in its own
-session, with the Implementation model and effort. A change of target and a restack use the Rebase prompt the same
+Rebase, Simplify history, Split into a stack and Trim are only prompts: the implementation agent runs them in its
+own session, with the Implementation model and effort. Trim is sent when a first implementation adds far more lines of
+code than its plan estimated (see [Ticket lifecycle](ticket-lifecycle.md#the-size-of-a-change)). A change of target and a restack use the Rebase prompt the same
 way.
 
 PR description and Replies to GitHub comments also continue the implementer's session, but they have a model and
@@ -61,11 +63,13 @@ On an agent's page:
 
 ### What Union reads from an answer
 
-Four prompts ask for a format that Union reads back. If you edit one of these prompts, keep its format: the
+Five prompts ask for a format that Union reads back. If you edit one of these prompts, keep its format: the
 agent's page warns you under the prompt when your edit drops it. You can still save it.
 
 - **Intake**: an `Answer:` line under each question. Each becomes a box where you answer the question. Without
   these lines you have nowhere to answer.
+- **Technical**: a last line `Estimated size: <n> lines of code`. It becomes the ticket's size budget. Without it
+  the ticket gets the project's budget, if you set one.
 - **Final review**: a first line `VERDICT: APPROVED` or `VERDICT: CHANGES_REQUESTED`. The ticket shows it as the
   verdict. Without it you only get the review's text.
 - **Split plan**: one `## Slice <n>: <title>` section per slice, each with a `**Spec:**` paragraph, and at least two

@@ -18,6 +18,7 @@ export const SETTINGS_GROUPS = [
       { id: 'instructions', label: 'Instructions' },
       { id: 'memory', label: 'Memory' },
       { id: 'checks', label: 'Checks' },
+      { id: 'size', label: 'Change size' },
       { id: 'scripts', label: 'Scripts' },
       { id: 'flows', label: 'Flows' },
     ],

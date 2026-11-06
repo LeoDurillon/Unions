@@ -25,6 +25,7 @@ import { publicProjectOf } from '../public-project';
 import { removeTicketFiles } from './attachments';
 import { removeProjectFiles } from './project-files';
 import { FLOW_FIELDS, flowsChange } from './project-flows';
+import { SIZE_FIELDS, sizeChange } from './project-size';
 
 const NO_CONTENT = 204;
 
@@ -158,6 +159,7 @@ function configChange(db: Db, project: Project, body: Record<string, unknown>): 
     suggestReplies: booleanChange(body, 'suggestReplies', config.suggestReplies),
     scripts: scriptsChange(body, config.scripts),
     ...flowsChange(db, body, config),
+    ...sizeChange(body, config),
   };
 }
 
@@ -194,6 +196,7 @@ const UPDATABLE = [
   'scripts',
   ...CHECK_FIELDS,
   ...FLOW_FIELDS,
+  ...SIZE_FIELDS,
 ];
 
 /** Updates the GitHub credentials, base branch and checks. Omitted fields are left as they are. */

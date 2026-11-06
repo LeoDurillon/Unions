@@ -60,6 +60,8 @@ export type Workspace = {
   container: string;
   /** A split ticket's `# Stack` section for the implementer (`stack-revise.ts`); empty otherwise. */
   stackSection?: string;
+  /** What the host asks of the resumed session instead of feedback (the trim pass, `size-trim.ts`). */
+  turn?: string;
 };
 
 /** Where the running preview answers; empty when it does not run. */
@@ -89,12 +91,16 @@ function freshPrompt(workspace: Workspace): string {
     attachments: listAttachments(deps.db, ticket.id),
     projectFiles: listProjectFiles(deps.db, ticket.projectId),
   });
-  return revision ? `${prompt}\n\n${feedbackPrompt(revision.feedback)}` : prompt;
+  const asked = revision ? `${prompt}\n\n${feedbackPrompt(revision.feedback)}` : prompt;
+  return workspace.turn === undefined ? asked : `${asked}\n\n${workspace.turn}`;
 }
 
 /** A resumed session already knows the task: only the feedback is sent, with the files as they are now. */
 function firstPrompt(workspace: Workspace): string {
   const { revision, resumeSessionId, ticket } = workspace.context;
+  if (workspace.turn !== undefined && resumeSessionId) {
+    return workspace.turn;
+  }
   if (!revision || !resumeSessionId) {
     return freshPrompt(workspace);
   }

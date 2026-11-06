@@ -85,6 +85,8 @@ code and docs, or **Union** when it is about how Union runs the agents:
   script named in the repository's `CLAUDE.md` saves those turns.
 - **Files read again on ticket after ticket**: a short note in the `CLAUDE.md` or `AGENTS.md` of their folder can
   spare reading them whole.
+- **Changes far larger than their plan**: tickets whose first implementation added over one and a half times the
+  lines of code the technical plan estimated (see [The size of a change](ticket-lifecycle.md#the-size-of-a-change)).
 - **Commands refused** and **Skills loaded again and again**: tell the agents in `CLAUDE.md` how to write commands,
   or put a skill used on every ticket into `CLAUDE.md`.
 

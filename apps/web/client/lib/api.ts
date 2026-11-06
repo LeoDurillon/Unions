@@ -159,6 +159,10 @@ export const api = {
       /** Null: back to the built-in presets. */
       flows?: FlowPreset[] | null;
       defaultFlow?: string;
+      /** Null: back to the default patterns. */
+      sizeIgnore?: string[] | null;
+      /** Null: no budget for a ticket whose plan gives no estimate. */
+      sizeBudget?: number | null;
     },
   ): Promise<PublicProject> => request('PATCH', `/api/projects/${id}`, change),
   deleteProject: (id: number): Promise<unknown> => request('DELETE', `/api/projects/${id}`),

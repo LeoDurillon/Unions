@@ -6,6 +6,7 @@ import type { Context } from 'hono';
 import type { TicketDetail, TicketSummary } from '../api-types';
 import { fail, NOT_FOUND, requireId } from '../http';
 import { publicProjectOf } from '../public-project';
+import { ticketSize } from '../ticket-size';
 import { childrenOf, findTicket, summarizeWithStack } from './ticket-links';
 
 export function loadTicket(db: Db, id: number): TicketSummary {
@@ -40,6 +41,7 @@ export function ticketDetail(db: Db, c: Context): Response {
       .orderBy(schema.stepOutputs.version)
       .all(),
     runs: db.select().from(schema.runs).where(eq(schema.runs.ticketId, id)).all(),
+    size: ticketSize(db, id, project.config),
   };
   return c.json(detail);
 }

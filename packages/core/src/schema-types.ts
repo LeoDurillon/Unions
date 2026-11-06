@@ -104,6 +104,10 @@ export type ProjectConfig = {
   sliceChecks?: boolean;
   /** After a revision on comments imported from GitHub, the implementer drafts a reply to each (default true). */
   suggestReplies?: boolean;
+  /** Gitignore-style patterns left out of a change's lines of code; absent: tests, lock files, migrations, docs. */
+  sizeIgnore?: string[];
+  /** Lines of code a change may add when its plan gives no estimate; absent: no budget. */
+  sizeBudget?: number;
 };
 
 /** One earlier question of an investigation and the answer it got. */

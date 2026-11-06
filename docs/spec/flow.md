@@ -18,7 +18,15 @@
    After each, the user clicks **Approve** or **Revise** (with feedback). Revise resumes the agent session.
    Each step's output is posted/edited as one issue comment.
 4. After the last planning step is approved (at once for a flow without planning): `implement` loop (agent turn → checks → back to the agent on red, up to the
-   project's iteration limit), then the host pushes the branch and opens a draft PR (`Closes #n`). Before opening
+   project's iteration limit), then the host measures the change (`size-trim.ts`): the lines of code added from
+   `git diff --numstat <base>...HEAD`, tests, lock files, migrations and Markdown counted apart (the project's
+   `sizeIgnore` patterns replace that list), against the budget: the approved technical plan's `Estimated size: <n>
+   lines of code`, else the project's `sizeBudget`, else none. Each measure is a `change_measured` event and a
+   **Size** line of the report. A first implementation (no revision, not a resumed run) with green checks over 1.5
+   times its budget gets one trim pass: its session is resumed with the figures and the `trim` prompt, the checks run
+   again, and it measures again; a trim pass that fails (agent error, usage limit, refused commit, red checks) is
+   undone with `git reset --hard` and the change goes on as implemented. Nothing blocks on the size. Then the host
+   pushes the branch and opens a draft PR (`Closes #n`). Before opening
    it, one more turn in the implementer's session writes the PR description: it fills in the repository's pull
    request template when there is one (`.github/`, root or `docs/`, any case, else the first file of
    `.github/PULL_REQUEST_TEMPLATE/`), in the template's language, else a short summary, changes and testing in the
@@ -28,7 +36,7 @@
 5. `final_review`: a fresh review agent (read-only plus `git diff/log/show/status`) compares the branch with the approved
    plan and starts its review with `VERDICT: APPROVED` or `VERDICT: CHANGES_REQUESTED`. It does not re-run the
    checks; it states the last result from the implementation report. Only bugs, missing acceptance criteria,
-   missing planned tests and risky changes request changes; other remarks go under "Optional". A review of a branch
+   missing planned tests, risky changes and code the task does not need request changes; other remarks go under "Optional". A review of a branch
    reviewed before is given the earlier review, what the user sent the implementer since, and the commits since
    the one it read: it says which earlier findings are fixed or still open, and does not raise again a point the
    user declined. The user decides: **Approve** marks the PR

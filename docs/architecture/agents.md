@@ -63,6 +63,7 @@ their own prompt from `sharedPrompt` and the agent's prompt, in the modules of t
 | `implement`                                           | ticket's                            | fresh; a revision resumes it   | yes     | `implement-loop.ts`                            |
 | `final_review`                                        | ticket's, on the branch             | fresh, told its earlier review | yes     | `review.ts`                                    |
 | `split_plan`                                          | ticket's                            | fresh; a revision resumes it   | yes     | `split-plan-step.ts`                           |
+| `trim`                                                | ticket's, in the implementation run | implementer's                  | no      | `size-trim.ts`                                 |
 | `rebase` (and retarget, restack)                      | ticket's                            | implementer's                  | no      | `rebase-agent.ts`                              |
 | `simplify`                                            | ticket's                            | implementer's                  | no      | `simplify-agent.ts`, `simplify-stack-agent.ts` |
 | `split`                                               | ticket's                            | implementer's                  | no      | `split-agent.ts`                               |
@@ -82,16 +83,17 @@ only the Claude login (`throwaway-container.ts`).
 
 ## What Union reads back
 
-Four formats are asked for only by the editable prompt. A user's edit can drop them, so the guide tells users to
+Five formats are asked for only by the editable prompt. A user's edit can drop them, so the guide tells users to
 keep them, the agent page warns when an edit drops one (`missingFormats`, `prompt-formats.ts`, browser-safe), and
 `agents.test.ts` keeps them in the defaults:
 
-| Agent          | Format                                               | Read by                            | Without it                            |
-| -------------- | ---------------------------------------------------- | ---------------------------------- | ------------------------------------- |
-| `intake`       | an `Answer:` line per question                       | `client/lib/answers.ts`            | no answer boxes                       |
-| `final_review` | first line `VERDICT: APPROVED` / `CHANGES_REQUESTED` | `client/lib/verdict.ts`            | no verdict shown                      |
-| `split_plan`   | `## Slice <n>: <title>` sections with `**Spec:**`    | `parseSplitPlan` (`split-plan.ts`) | asked once more, then the step fails  |
-| `split`        | a `Slice: <n>` trailer per commit                    | `stack-trailers.ts`                | the agent is asked to fix the history |
+| Agent          | Format                                               | Read by                                  | Without it                            |
+| -------------- | ---------------------------------------------------- | ---------------------------------------- | ------------------------------------- |
+| `intake`       | an `Answer:` line per question                       | `client/lib/answers.ts`                  | no answer boxes                       |
+| `technical`    | an `Estimated size: <n> lines of code` line          | `parseSizeEstimate` (`change-budget.ts`) | the project's budget, else none       |
+| `final_review` | first line `VERDICT: APPROVED` / `CHANGES_REQUESTED` | `client/lib/verdict.ts`                  | no verdict shown                      |
+| `split_plan`   | `## Slice <n>: <title>` sections with `**Spec:**`    | `parseSplitPlan` (`split-plan.ts`)       | asked once more, then the step fails  |
+| `split`        | a `Slice: <n>` trailer per commit                    | `stack-trailers.ts`                      | the agent is asked to fix the history |
 
 The worker appends every other format after the user's prompt, so an edit cannot break it:
 

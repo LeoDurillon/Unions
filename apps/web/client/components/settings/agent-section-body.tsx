@@ -1,4 +1,4 @@
-// The Agents group of the project settings: instructions, memory, checks, scripts and flows.
+// The Agents group of the project settings: instructions, memory, checks, change size, scripts and flows.
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
@@ -7,8 +7,16 @@ import { FlowsSection } from './flows-section';
 import { InstructionsSection } from './instructions-section';
 import { MemorySection } from './memory-section';
 import { ScriptsSection } from './scripts-section';
+import { SizeSection } from './size-section';
 
-export const AGENT_SECTIONS = ['instructions', 'memory', 'checks', 'scripts', 'flows'] as const;
+export const AGENT_SECTIONS = [
+  'instructions',
+  'memory',
+  'checks',
+  'size',
+  'scripts',
+  'flows',
+] as const;
 export type AgentSection = (typeof AGENT_SECTIONS)[number];
 
 /** What the agents are told and have learned, how their work is checked, the commands and the steps they run. */
@@ -23,6 +31,7 @@ export function AgentSectionBody({
     instructions: () => <InstructionsSection project={project} />,
     memory: () => <MemorySection project={project} />,
     checks: () => <ChecksSection project={project} />,
+    size: () => <SizeSection project={project} />,
     scripts: () => <ScriptsSection project={project} />,
     flows: () => <FlowsSection project={project} />,
   };

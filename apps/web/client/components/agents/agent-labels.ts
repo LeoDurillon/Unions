@@ -64,6 +64,11 @@ export const AGENT_LABELS: Record<BuiltInAgentId, AgentLabel> = {
     description:
       'Drafts a reply to each comment imported from GitHub once the implementer has worked on it and pushed: what changed and in which commit, or why not. It resumes the implementation session; you edit, send or discard each reply in the PR tab.',
   },
+  trim: {
+    title: 'Trim',
+    description:
+      "Prompt the implementation agent gets when its change adds more lines of code than the plan estimated (by half again): it cuts what the task does not need, runs the checks, and says why the rest is needed. Union adds the figures. It runs once, on a ticket's first implementation, in the implementer's own session with the Implementation model and effort.",
+  },
   rebase: {
     title: 'Rebase',
     description:

@@ -11,7 +11,8 @@ export type FindingKind =
   | 'check_variants'
   | 'repeated_reads'
   | 'denied'
-  | 'repeated_skills';
+  | 'repeated_skills'
+  | 'over_estimate';
 
 /**
  * One thing a finding names: a step, a ticket, a command, a file or a skill. `value` is the figure

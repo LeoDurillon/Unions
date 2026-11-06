@@ -1,7 +1,9 @@
-// Reads a project's agent calls and tool uses over a range of days, and says what they show to improve, for its Usage page.
+// Reads a project's agent calls, tool uses and change sizes over a range of days, and says what they show to improve, for its Usage page.
 import { and, eq, gte, inArray, or, sql, type SQL } from 'drizzle-orm';
 
 import type { Db } from './db';
+import { isEvent } from './event-catalog';
+import { sizeFindings, type SizeRecord } from './size-findings';
 import * as schema from './tables';
 import { toolFindings, type ToolRecord } from './tool-findings';
 import { callFindings, type CallRecord, type Finding } from './usage-findings';
@@ -62,6 +64,28 @@ function toolsOf(db: Db, projectId: number, from: number | null): ToolRecord[] {
     .all();
 }
 
+function sizesOf(db: Db, projectId: number, from: number | null): SizeRecord[] {
+  const { events } = schema;
+  return db
+    .select({ ticketId: events.ticketId, type: events.type, payload: events.payload })
+    .from(events)
+    .innerJoin(schema.tickets, eq(schema.tickets.id, events.ticketId))
+    .where(
+      and(
+        eq(events.type, 'change_measured'),
+        eq(schema.tickets.projectId, projectId),
+        from === null ? undefined : gte(events.at, from),
+      ),
+    )
+    .orderBy(events.seq)
+    .all()
+    .flatMap((event) =>
+      event.ticketId !== null && isEvent(event, 'change_measured')
+        ? [{ ticketId: event.ticketId, ...event.payload }]
+        : [],
+    );
+}
+
 function ticketsOf(db: Db, findings: Finding[]): Record<number, FindingTicket> {
   const ids = [
     ...new Set(findings.flatMap((found) => found.items.flatMap((item) => item.tickets))),
@@ -92,6 +116,7 @@ export function projectFindings(
   const findings = [
     ...callFindings(callsOf(db, projectId, from)),
     ...toolFindings(toolsOf(db, projectId, from)),
+    ...sizeFindings(sizesOf(db, projectId, from)),
   ];
   return { findings, tickets: ticketsOf(db, findings) };
 }

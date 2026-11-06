@@ -54,6 +54,15 @@ type TicketPayloads = {
   attachment_removed: { id: number; name: string };
   e2e_screenshots: { count: number };
   diff_updated: { headSha: string; files: number };
+  /** The host measured the change after an implementation (`implemented`) or after the implementer cut it (`trimmed`). */
+  change_measured: {
+    code: number;
+    removed: number;
+    tests: number;
+    other: number;
+    budget: number | null;
+    phase: 'implemented' | 'trimmed';
+  };
 };
 
 type RunPayloads = {

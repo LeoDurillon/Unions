@@ -56,6 +56,9 @@ and linked.
   GitHub writes, never the project's secrets for a fork. Built (branch `review-previews`).
 - [Spend fewer tokens per ticket](agent-token-savings.md): re-reviews that know the previous round, a size limit
   on the implementer's session, rebase, simplify and the PR description in fresh sessions. Planned (2026-10-17).
+- [A size budget for each change](change-budget.md): the technical step estimates the lines of code, the host
+  measures the change (tests and generated files left out), and over budget the implementer cuts once and says why
+  the rest is needed, shown at the review. Built (branch `change-budget`, 2026-11-06); the review page's header left.
 - [Ticket flows](ticket-flows.md): pick the steps a ticket runs (Full, Standard, Quick presets, or custom), so a
   small fix skips planning. Built (branch `ticket-flows`); a real Quick ticket run is left.
 - [Custom agents](custom-agents.md): the user describes an agent's role, the worker writes its prompt, the user

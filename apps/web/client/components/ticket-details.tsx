@@ -1,4 +1,4 @@
-// What the ticket is attached to: where it comes from, what it depends on, its files, its preview.
+// What the ticket is attached to: where it comes from, what it depends on, its size, its files, its preview.
 import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../src/api-types';
@@ -6,6 +6,7 @@ import { BaseBranchRow } from './base-branch-row';
 import { DetailRow } from './detail-row';
 import { FlowRow } from './flow-row';
 import { PreviewSummary } from './preview-summary';
+import { SizeRow } from './size-row';
 import { TicketAttachments } from './ticket-attachments';
 import { TicketLinks } from './ticket-links';
 import { TicketNotionRow } from './ticket-notion-row';
@@ -58,6 +59,7 @@ export function TicketDetails({
       <TicketLinks detail={detail} onOpen={onOpenTicket} />
       <BaseBranchRow detail={detail} />
       <FlowRow detail={detail} />
+      <SizeRow size={detail.size} />
       <TicketAttachments ticketId={ticket.id} />
       <PreviewSummary
         ticketId={ticket.id}

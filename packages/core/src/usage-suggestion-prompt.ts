@@ -40,6 +40,11 @@ const BRIEFS: Record<FindingKind, { title: string; figure: (item: FindingItem) =
     title: 'Files read again on ticket after ticket',
     figure: (item) => `${item.value} reads in ${item.calls} tickets`,
   },
+  over_estimate: {
+    title:
+      'Tickets whose first implementation added over 1.5 times the lines of code the technical plan estimated (tests and generated files left out; the implementer was then asked once to trim)',
+    figure: (item) => `${item.calls} lines of code, ${item.value}% of the estimate`,
+  },
   denied: {
     title: 'Commands the agents were refused (each costs a turn)',
     figure: (item) => `${item.value} refused`,

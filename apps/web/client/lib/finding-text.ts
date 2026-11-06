@@ -63,6 +63,13 @@ export const FINDING_TEXTS: Record<FindingKind, FindingText> = {
       'Each refusal costs a turn. Tell the agents in CLAUDE.md how to write commands (one per call, no cd, no $(…)), or allow the tool in the agent’s settings.',
     figure: (item) => `${item.value} refused`,
   },
+  over_estimate: {
+    title: 'Changes far larger than their plan',
+    advice:
+      'Their first implementation added over half again the lines of code the technical plan estimated. When the trim pass cuts a lot, the implementer writes more than needed; when it cuts little, the plan under-estimates.',
+    figure: (item) => `${item.calls} lines of code, ${item.value}% of the estimate`,
+    isTicket: true,
+  },
   repeated_skills: {
     title: 'Skills loaded again and again',
     advice:

@@ -14,6 +14,11 @@ const PROMPT_FORMATS: Readonly<Record<string, PromptFormat>> = {
     missing:
       'It no longer asks for an "Answer:" line under each question: you will have no box to answer the questions in.',
   },
+  technical: {
+    needs: [/Estimated size:/iu],
+    missing:
+      'It no longer asks for an "Estimated size: <n> lines of code" line: the ticket gets the project\'s size budget, if it has one, instead of an estimate.',
+  },
   final_review: {
     // The client reads the verdict line in any case (`verdict.ts`).
     needs: [/VERDICT:/iu, /\bAPPROVED\b/iu, /\bCHANGES_REQUESTED\b/iu],

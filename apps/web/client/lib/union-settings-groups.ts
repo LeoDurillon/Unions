@@ -5,7 +5,7 @@ import { customAgentId, isCustomStep, type CustomStep } from '@union/core/states
 export const UNION_SETTINGS_GROUPS = [
   { label: 'General', sections: ['shared', 'models'] },
   { label: 'Planning', sections: ['intake', 'summary', 'technical', 'test_plan'] },
-  { label: 'Implementation', sections: ['implement', 'final_review'] },
+  { label: 'Implementation', sections: ['implement', 'trim', 'final_review'] },
   {
     label: 'Pull requests',
     sections: ['pr_description', 'pr_replies', 'rebase', 'simplify', 'split_plan', 'split'],

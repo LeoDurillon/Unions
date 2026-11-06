@@ -13,7 +13,7 @@ import { listCustomAgents } from './custom-agents';
 import type { Db } from './db';
 import { DIAGRAM_INSTRUCTION } from './diagrams';
 import { LESSON_WRITER_PROMPT } from './lesson-writer';
-import { PR_REPLIES_PROMPT, SPLIT_PLAN_PROMPT, SPLIT_PROMPT } from './pr-prompts';
+import { PR_REPLIES_PROMPT, SPLIT_PLAN_PROMPT, SPLIT_PROMPT, TRIM_PROMPT } from './pr-prompts';
 import * as schema from './schema';
 import {
   customStep,
@@ -29,7 +29,7 @@ import {
 } from './states';
 
 /**
- * `shared` is prepended to every agent's prompt; most others are pipeline steps. `rebase` and `simplify` are
+ * `shared` is prepended to every agent's prompt; most others are pipeline steps. `rebase`, `simplify` and `trim` are
  * prompts only: the implementation agent runs them (resumed session, Implementation model).
  */
 export const AGENT_IDS = [
@@ -45,6 +45,7 @@ export const AGENT_IDS = [
   'pr_replies',
   'rebase',
   'simplify',
+  'trim',
   'split_plan',
   'split',
   'lesson_writer',
@@ -81,7 +82,8 @@ Read the code first. Name files and functions that exist, as \`path:line\`, and 
 Write only the parts that apply: leave out a heading rather than write "none".
 When the data model changes, say how existing data migrates and what stays compatible. Name an alternative only when the choice is not obvious, with why you did not take it.
 Stay within the summary's scope. Describe the change; do not write the code.
-Output one section starting with "## Technical implementation".`,
+Output one section starting with "## Technical implementation".
+End it with this line, in English whatever the ticket's language: "Estimated size: <n> lines of code", the lines of code the change adds (tests, generated files and docs left out), from the files you listed. The implementer is held to it: estimate honestly, neither padded nor squeezed.`,
   test_plan: `Write the smallest test plan that would catch a wrong implementation of this task.
 Plan a test only if it fails when an acceptance criterion or a decision in the summary is broken,
 or when a risk named in the technical implementation happens. For each test ask: would a real bug
@@ -108,7 +110,7 @@ Read the diff from the base branch. Check correctness, missing acceptance criter
 Do not run the checks: the implementation report states their last result; quote it.
 Output a markdown review starting with one line: "VERDICT: APPROVED" or "VERDICT: CHANGES_REQUESTED".
 Then list the findings, each with the file, the problem and the suggested fix.
-Request changes only for bugs, missing acceptance criteria, missing planned tests or risky changes. Put the rest (naming, structure, style) under a last "Optional" heading: those never change the verdict.`,
+Request changes only for bugs, missing acceptance criteria, missing planned tests, risky changes, or code the task does not need (options nobody asked for, single-use abstractions, handling of cases that cannot happen, duplicated helpers): the implementation report gives the change's size against its estimate. Put the rest (naming, structure, style) under a last "Optional" heading: those never change the verdict.`,
   review_comments: `Review the change as a careful senior reviewer and leave line comments on it, as a person reviewing a pull request would.
 Read the diff from the base branch, and the surrounding code wherever a change depends on it.
 Comment only on what matters: bugs, wrong behaviour, missing edge cases, security, data loss, races, misleading names, risky changes without tests.
@@ -149,6 +151,7 @@ There is no editor or terminal: \`git rebase -i\` and \`git add -p\` cannot be u
 Never push.
 Output a short markdown report: the new commits' subject lines, and what was merged, split or reordered.`,
   pr_replies: PR_REPLIES_PROMPT,
+  trim: TRIM_PROMPT,
   split_plan: SPLIT_PLAN_PROMPT,
   split: SPLIT_PROMPT,
   lesson_writer: LESSON_WRITER_PROMPT,
@@ -163,7 +166,7 @@ export type AgentConfig = {
   prompt: string;
   defaultModel: AgentModel | null;
   defaultPrompt: string;
-  /** Allowed tools; null for the agents that do not run on their own (`shared`, `rebase`, `simplify`). */
+  /** Allowed tools; null for the agents that do not run on their own (`shared`, `rebase`, `simplify`, `trim`). */
   tools: string[] | null;
   defaultTools: string[] | null;
   customized: boolean;

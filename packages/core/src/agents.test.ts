@@ -136,6 +136,8 @@ test("an effort is saved per agent with a model; the rebase and simplify use the
 test('default prompts ask for the formats Union reads back', () => {
   // The client's `answers.ts` turns each `Answer:` line into an input box.
   expect(DEFAULT_PROMPTS.intake).toContain('"Answer:"');
+  // `parseSizeEstimate` reads the plan's estimate, the ticket's size budget.
+  expect(DEFAULT_PROMPTS.technical).toContain('"Estimated size: <n> lines of code"');
   // The client's `verdict.ts` reads the first line.
   expect(DEFAULT_PROMPTS.final_review).toContain('"VERDICT: APPROVED"');
   expect(DEFAULT_PROMPTS.final_review).toContain('"VERDICT: CHANGES_REQUESTED"');

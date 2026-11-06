@@ -58,8 +58,10 @@ function capitalized(word: string): string {
 function expectedModels(): Map<string, string> {
   const db = createDb(':memory:');
   migrateDb(db);
+  // `trim` is a turn of the implementation run, not a run of its own: it is the implementer.
   const agents = AGENT_IDS.filter(
-    (agent): agent is Exclude<BuiltInAgentId, 'shared'> => agent !== 'shared',
+    (agent): agent is Exclude<BuiltInAgentId, 'shared' | 'trim'> =>
+      agent !== 'shared' && agent !== 'trim',
   );
   // An agent follows the implementer when its model moves with Implementation's, whatever that is.
   const withImplementer = (model: AgentModel): Set<string> => {
@@ -68,13 +70,14 @@ function expectedModels(): Map<string, string> {
   };
   const onHaiku = withImplementer('haiku');
   const onSonnet = withImplementer('sonnet');
-  return new Map(
-    agents.map((agent) => {
+  return new Map([
+    ...agents.map((agent): [string, string] => {
       const follows = agent !== 'implement' && onHaiku.has(agent) && onSonnet.has(agent);
       const model = resolveAgent(db, agent).defaultModel ?? '';
       return [AGENT_LABELS[agent].title, follows ? IMPLEMENTER : capitalized(model)];
     }),
-  );
+    [AGENT_LABELS.trim.title, IMPLEMENTER],
+  ]);
 }
 
 test("the guide's agent table names every agent with its default model", async () => {

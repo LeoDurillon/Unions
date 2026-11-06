@@ -20,6 +20,7 @@ import type { GitHubStack } from '@union/core/github-stacks';
 import type { StackPlace } from '@union/core/pr-stacks';
 
 import type { PublicIntegration } from './api-integration-types';
+import type { TicketSize } from './api-size-types';
 import type { StackView } from './api-stack-types';
 
 export type { PublicIntegration, SourceImport } from './api-integration-types';
@@ -76,6 +77,8 @@ export type TicketDetail = {
   base: TicketBaseView;
   outputs: StepOutput[];
   runs: Run[];
+  /** The change's lines of code against its budget; null before the first implementation. */
+  size: TicketSize | null;
 };
 
 export type CommandType =

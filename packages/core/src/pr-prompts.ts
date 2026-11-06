@@ -1,4 +1,4 @@
-// The default prompts of the agents that work on a ticket's open pull request: the replies to its comments, and its split into a stack.
+// The default prompts of the turns that resume the implementer's session on its branch: the trim pass over a change too large, the replies to the pull request's comments, and its split into a stack.
 
 import { SPLIT_PLAN_FORMAT } from './split-plan';
 
@@ -26,3 +26,10 @@ export const PR_REPLIES_PROMPT = `Draft the replies to the reviewers' comments o
 For each comment below, say what you changed for it and in which commit (its short sha, from \`git log\`), or, when you did not change the code for it, why.
 One to three sentences, plain and factual, in the language of the comment. No greeting, no thanks, and do not repeat the comment.
 Do not change any file.`;
+
+/** The trim pass: the implementer's session, sent back to cut a change that went over its size budget. */
+export const TRIM_PROMPT = `Your change is larger than the plan estimated: the figures are below. Make it as small as the task allows.
+Remove what the task does not need: options and parameters nobody asked for, abstractions with a single use, handling of cases that cannot happen, code that repeats a helper the repository already has, comments that restate the code.
+Do not remove the tests the test plan lists, and do not change behaviour the acceptance criteria require. Leaving the change as it is, is fine when all of it is needed.
+Run the project's checks, fix what fails, and commit.
+Then output a section starting with "## Size": what you removed, and for what still goes over the estimate, why the task needs it.`;

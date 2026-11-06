@@ -18,6 +18,8 @@ export * from './attachments';
 export * from './agents';
 export * from './diagrams';
 export * from './db';
+export * from './change-budget';
+export * from './change-size';
 export * from './diff';
 export * from './diff-hunks';
 export * from './diff-excerpt';

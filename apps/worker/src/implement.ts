@@ -6,6 +6,7 @@ import { implement, prepare, resume, type Implemented, type Prepared } from './i
 import { suggestReplies } from './pr-reply-suggestions';
 import { publishBranch, type PublishResult } from './publish';
 import type { StepContext, StepResult } from './scheduler';
+import { sizeAndTrim } from './size-trim';
 import { pushRevision, restackRevision, stackSection } from './stack-revise';
 import { commitsAhead } from './workspace-git';
 
@@ -116,7 +117,8 @@ export async function runImplementStep(
   const workspace = { ...prepared, stackSection: await stackSection(prepared) };
   try {
     const done = context.resume ? await resume(workspace) : await implement(workspace);
-    return 'loop' in done ? await publishAndReport(workspace, done) : done;
+    const sized = 'loop' in done ? await sizeAndTrim(workspace, done) : done;
+    return 'loop' in sized ? await publishAndReport(workspace, sized) : sized;
   } finally {
     await deps.runtime.stop(workspace.container);
   }
