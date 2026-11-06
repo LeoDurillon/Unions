@@ -135,7 +135,7 @@ Loose ends found while building, not planned yet (2026-10-15):
 - [Show older merged tickets](board-older-merged.md)
 - [Exclude merged PRs from the ticket view](exclude-merged-prs.md) (scope to clarify)
 - [Revise with guidance after a failed rebase](rebase-revise-with-guidance.md)
-- [Download attachments from GitHub and Notion on import](attachment-downloads.md) (Notion images done)
+- [Download attachments from GitHub and Notion on import](attachment-downloads.md) (Notion images and files done)
 - [Events v2](events-v2.md): more actions (GitHub comment built; labels, Project fields, Notion comment planned;
   webhook deferred), replay, filters, group triggers
 - [Names in the event rule preview](rule-preview-people.md) (small)

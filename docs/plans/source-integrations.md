@@ -194,7 +194,7 @@ Steps 1 to 3 are the bulk of the risk (data and worker); 4 and 5 are mostly rena
 - An action kind `jira_field` (set fields) and maybe `jira_transition` (move the issue's status), each a target
   in `event-actions/`; template variables are unchanged.
 - `'jira'` in `SPEC_SOURCES`, a settings form and an onboarding step under `integrations/jira/`.
-- Images: Jira attachments need the secret to download, unlike Notion's signed links; `fetchNotionImages` becomes
+- Images: Jira attachments need the secret to download, unlike Notion's signed links; `fetchNotionFiles` becomes
   a provider method then.
 
 If one of these needs a change to the interface of D3, that is the time to make it, not before.

@@ -37,7 +37,9 @@ Click **New ticket** in the project bar. The dialog has one tab per source:
 - **From GitHub**: the number or URL of an existing issue of the repository. The ticket uses that issue
   instead of creating one, and keeps following its title and description on GitHub.
 - **From Notion** (when the project is connected to Notion): a page of the connected data source. Union
-  copies its text and images. Click **Edit before creating** to change the text first.
+  copies its text, and keeps its images and attached files (PDFs and other uploads) as the ticket's files, which
+  the agents can read. Files above the size limits (25 MB each, 100 MB per ticket) stay as links to Notion,
+  which stop working after about an hour. Click **Edit before creating** to change the text first.
 
 In every tab you can also:
 

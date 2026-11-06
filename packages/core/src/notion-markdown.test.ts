@@ -73,3 +73,17 @@ test('clean markdown is left as it is, so cleaning twice changes nothing', () =>
   const once = notionMarkdown('<callout icon="💡">\n\tTip <span>x</span>\n</callout>');
   expect(notionMarkdown(once)).toBe(once);
 });
+
+test("Notion's file, PDF, video and audio blocks become links, named by caption or file name", () => {
+  const file =
+    'https://prod-files-secure.s3.us-west-2.amazonaws.com/a/b/Sp%C3%A9c%20(v2).pdf?X=1&Y=2';
+  expect(notionMarkdown(`<pdf src="${file.replace('&', '&amp;')}">La spec</pdf>`)).toBe(
+    '[La spec](https://prod-files-secure.s3.us-west-2.amazonaws.com/a/b/Sp%C3%A9c%20%28v2%29.pdf?X=1&Y=2)',
+  );
+  expect(notionMarkdown(`Voir <file source="https://x.example/f/notes.txt"></file> ici`)).toBe(
+    'Voir [notes.txt](https://x.example/f/notes.txt) ici',
+  );
+  expect(notionMarkdown('<video src="https://x.example/" color="blue"/>')).toBe(
+    '[Notion video](https://x.example/)',
+  );
+});

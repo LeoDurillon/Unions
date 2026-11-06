@@ -1,4 +1,4 @@
-// `POST /api/tickets`: a new ticket; one imported from a tracker (Notion) keeps the item's images as its files.
+// `POST /api/tickets`: a new ticket; one imported from a tracker (Notion) keeps the item's images and files as its own.
 import { createTicket, schema, type Db } from '@union/core';
 import type { Context } from 'hono';
 
@@ -6,10 +6,10 @@ import { BAD_REQUEST, CREATED, fail, optionalText, readObject, requireText } fro
 import { addAttachment } from './attachments';
 import { flowOf } from './ticket-flow';
 import { findTicket, linkParent, summarize } from './ticket-links';
-import { originOf, withOriginImages } from './ticket-origin';
+import { originOf, withOriginFiles } from './ticket-origin';
 
 /**
- * `POST /api/tickets`. A ticket imported from a tracker keeps the item's images as its own files,
+ * `POST /api/tickets`. A ticket imported from a tracker keeps the item's images and files as its own,
  * fetched before it is created (their links expire within the hour), so its text never points to
  * a link about to break.
  */
@@ -31,10 +31,7 @@ export async function addTicket(db: Db, c: Context): Promise<Response> {
   }
   const origin = originOf(body);
   const flow = flowOf(db, body) ?? null;
-  const { markdown, images, note } = await withOriginImages(
-    origin,
-    optionalText(body, 'body') ?? '',
-  );
+  const { markdown, files } = await withOriginFiles(origin, optionalText(body, 'body') ?? '');
   const ticket = createTicket(db, {
     projectId,
     title: requireText(body, 'title'),
@@ -42,9 +39,9 @@ export async function addTicket(db: Db, c: Context): Promise<Response> {
     flow,
     ...(origin ? { origin } : {}),
   });
-  for (const image of images) {
+  for (const file of files) {
     // oxlint-disable-next-line no-await-in-loop -- one at a time: each is checked against the ticket's total
-    await addAttachment(db, ticket.id, { ...image, note });
+    await addAttachment(db, ticket.id, file);
   }
   const linked = parentId === null ? ticket : linkParent(db, ticket.id, parentId);
   return c.json(summarize(linked, findTicket(db)), CREATED);

@@ -97,6 +97,7 @@ export * from './review-report-specs';
 export * from './review-spec-lists';
 export * from './review-specs';
 export * from './notion-markdown';
+export * from './notion-media';
 export * from './notifications';
 export {
   composeProblems,

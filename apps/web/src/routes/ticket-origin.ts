@@ -1,4 +1,4 @@
-// A new ticket's origin (the tracker item it is imported from), and that item's images kept as the ticket's files.
+// A new ticket's origin (the tracker item it is imported from), and that item's images and files kept as the ticket's.
 import {
   integrationKind,
   isIntegrationKindName,
@@ -7,13 +7,15 @@ import {
 } from '@union/core';
 
 import { BAD_REQUEST, fail } from '../http';
-import { fetchNotionImages, type NotionImage } from '../notion-images';
+import { fetchNotionFiles, type NotionFile } from '../notion-files';
 
-type WithImages = { markdown: string; images: NotionImage[] };
+/** A file of the tracker item, with the note it is kept with. */
+type OriginFile = { name: string; bytes: Uint8Array; contentType: string; note: string };
+type WithFiles = { markdown: string; files: NotionFile[] };
 
-/** Each kind's images, downloaded before the ticket exists: their links may expire (Notion's within the hour). */
-const IMAGES: Record<IntegrationKindName, (markdown: string) => Promise<WithImages>> = {
-  notion: (markdown) => fetchNotionImages(markdown),
+/** Each kind's images and files, downloaded before the ticket exists: their links may expire (Notion's within the hour). */
+const FILES: Record<IntegrationKindName, (markdown: string) => Promise<WithFiles>> = {
+  notion: (markdown) => fetchNotionFiles(markdown),
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -48,14 +50,23 @@ export function originOf(body: Record<string, unknown>): TicketOrigin | null {
   return { kind: kindName, id, url };
 }
 
-/** The text with the origin's images as the ticket's files; unchanged without an origin. */
-export async function withOriginImages(
+/** The text with the origin's images and files as the ticket's files; unchanged without an origin. */
+export async function withOriginFiles(
   origin: TicketOrigin | null,
   text: string,
-): Promise<WithImages & { note: string }> {
+): Promise<{ markdown: string; files: OriginFile[] }> {
   if (!origin) {
-    return { markdown: text, images: [], note: '' };
+    return { markdown: text, files: [] };
   }
   const { label, itemLabel } = integrationKind(origin.kind);
-  return { ...(await IMAGES[origin.kind](text)), note: `An image of the ${label} ${itemLabel}` };
+  const { markdown, files } = await FILES[origin.kind](text);
+  return {
+    markdown,
+    files: files.map(({ image, name, bytes, contentType }) => ({
+      name,
+      bytes,
+      contentType,
+      note: `${image ? 'An image' : 'A file'} of the ${label} ${itemLabel}`,
+    })),
+  };
 }
