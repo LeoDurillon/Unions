@@ -184,6 +184,7 @@ export function FeedbackInbox({
       <ErrorText error={actions.error} />
       <LessonSuggestions
         projectId={actions.projectId}
+        kind="feedback"
         lessons={actions.lessons}
         onAccept={onAccept}
       />

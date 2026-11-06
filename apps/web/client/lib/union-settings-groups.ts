@@ -14,7 +14,7 @@ export const UNION_SETTINGS_GROUPS = [
     label: 'Review',
     sections: ['review_comments', 'review_groups', 'review_explain', 'review_report'],
   },
-  { label: 'Memory', sections: ['lesson_writer'] },
+  { label: 'Memory', sections: ['lesson_writer', 'lesson_tidier'] },
   { label: 'Tools', sections: ['tools', 'connectors'] },
   { label: 'GitHub', sections: ['github-app'] },
 ] as const;

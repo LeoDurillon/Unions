@@ -1,4 +1,4 @@
-// The Memory page's data: lessons and feedback, saving them with the on/off switch, curating feedback, and the lesson writer's runs.
+// The Memory page's data: lessons and feedback, saving them with the on/off switch, curating feedback, and the lesson writer's and tidier's runs.
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 import type { FeedbackItem, Lesson, LessonSuggestion } from '@union/core';
 import type { LessonsSave } from '@union/core/lesson-input';
@@ -88,9 +88,13 @@ export function useLessonSuggestion(projectId: number): UseQueryResult<LessonSug
   });
 }
 
-/** Queues the lesson writer on some feedback (it uses the user's Claude usage), or dismisses its result. */
+/**
+ * Queues the lesson writer on some feedback or the tidier on the lessons (both use the user's Claude
+ * usage), or dismisses the result.
+ */
 export function useLessonWriter(projectId: number): {
   suggest: ReturnType<typeof useMutation<unknown, Error, number[]>>;
+  tidy: ReturnType<typeof useMutation<unknown, Error, void>>;
   dismiss: ReturnType<typeof useMutation<unknown, Error, number>>;
 } {
   const queryClient = useQueryClient();
@@ -101,10 +105,14 @@ export function useLessonWriter(projectId: number): {
       request('POST', suggestionPath(projectId), { feedbackIds }),
     onSuccess: refresh,
   });
+  const tidy = useMutation({
+    mutationFn: (): Promise<unknown> => request('POST', `/api/projects/${projectId}/lesson-tidy`),
+    onSuccess: refresh,
+  });
   const dismiss = useMutation({
     mutationFn: (id: number): Promise<unknown> =>
       request('POST', `${suggestionPath(projectId)}/${id}/dismiss`),
     onSuccess: refresh,
   });
-  return { suggest, dismiss };
+  return { suggest, tidy, dismiss };
 }

@@ -33,7 +33,7 @@ session, so a revision continues the same conversation). The container stops bet
 next one, and the volumes stay until the ticket is removed. That is why several tickets can run at once without
 seeing each other's changes.
 
-Investigations, Explain, agent reviews of pull requests and the lesson writer run in throwaway containers, removed
+Investigations, Explain, agent reviews of pull requests, the lesson writer and the lesson tidier run in throwaway containers, removed
 when they finish.
 
 Inside a container, the agent is the Claude Code CLI (`claude -p`), run with the prompt, model, effort and tools of

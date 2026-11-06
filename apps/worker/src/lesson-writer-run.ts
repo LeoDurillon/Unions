@@ -1,13 +1,15 @@
-// Runs the lesson writer the Memory page asks for, in a throwaway container with only the Claude login.
+// Runs the lesson writer and the lesson tidier the Memory page asks for, in a throwaway container with only the Claude login.
 import {
   claimLessonSuggestion,
   effortFor,
   finishLessonSuggestion,
+  lessonTidyPrompt,
   lessonWriterPrompt,
   listFeedback,
   listLessons,
   modelFor,
   parseLessonSuggestions,
+  parseTidyProposals,
   recoverLessonSuggestions,
   resolveAgent,
   toolsFor,
@@ -35,8 +37,19 @@ function containerFor(row: LessonSuggestion): {
   return { name, homeVolume: `${name}-home`, workspaceVolume: `${name}-ws` };
 }
 
+/** The agent a run is: the writer over feedback, the tidier over the lessons. */
+function agentOf(row: LessonSuggestion): 'lesson_writer' | 'lesson_tidier' {
+  return row.kind === 'tidy' ? 'lesson_tidier' : 'lesson_writer';
+}
+
 function promptFor(deps: LessonWriterDeps, row: LessonSuggestion): string {
   const { db } = deps;
+  if (row.kind === 'tidy') {
+    return lessonTidyPrompt({
+      guidance: resolveAgent(db, 'lesson_tidier').prompt,
+      lessons: listLessons(db, row.projectId),
+    });
+  }
   const feedback = listFeedback(db, row.projectId).filter((item) =>
     row.feedbackIds.includes(item.id),
   );
@@ -57,14 +70,15 @@ function write(
 ): Promise<LessonSuggestionOutcome> {
   const { db, runtime } = deps;
   const prompt = promptFor(deps, row);
+  const agent = agentOf(row);
   return inThrowaway(deps, containerFor(row), async (container) => {
     const outcome = await (deps.agent ?? runAgent)(runtime, {
       container,
       cwd: WORKSPACE,
-      model: modelFor(db, 'lesson_writer'),
-      effort: effortFor(db, 'lesson_writer'),
+      model: modelFor(db, agent),
+      effort: effortFor(db, agent),
       prompt,
-      tools: toolsFor(db, 'lesson_writer'),
+      tools: toolsFor(db, agent),
       signal,
       onEvent: () => {
         // Not logged: the run belongs to no ticket.
@@ -75,11 +89,12 @@ function write(
       return { status: 'failed', error: `${prefix}${outcome.message}` };
     }
     const kept = listLessons(db, row.projectId);
-    return { status: 'ready', suggestions: parseLessonSuggestions(outcome.text, kept) };
+    const parse = row.kind === 'tidy' ? parseTidyProposals : parseLessonSuggestions;
+    return { status: 'ready', suggestions: parse(outcome.text, kept) };
   });
 }
 
-/** Runs queued lesson writer runs, sharing the run slots with the ticket pipeline and the other side runs. */
+/** Runs queued lesson writer and tidier runs, sharing the run slots with the ticket pipeline and the other side runs. */
 export class LessonWriterRunner extends RunPool<LessonSuggestion, LessonSuggestionOutcome> {
   constructor(private readonly deps: LessonWriterDeps) {
     super({

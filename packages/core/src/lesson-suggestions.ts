@@ -3,6 +3,7 @@ import { and, asc, desc, eq, inArray } from 'drizzle-orm';
 
 import type { Db } from './db';
 import type { LessonProposal } from './lesson-input';
+import { isWriterStep } from './lesson-writer';
 import * as schema from './tables';
 
 export type LessonSuggestion = typeof schema.lessonSuggestions.$inferSelect;
@@ -39,6 +40,46 @@ export function latestLessonSuggestion(db: Db, projectId: number): LessonSuggest
   return row && row.status !== 'dismissed' ? row : null;
 }
 
+type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
+
+/** Refuses a second run while one is queued or running on the project: one at a time, either kind. */
+function refuseWhileActive(tx: Tx, projectId: number): void {
+  const active = tx
+    .select({ kind: schema.lessonSuggestions.kind })
+    .from(schema.lessonSuggestions)
+    .where(
+      and(
+        eq(schema.lessonSuggestions.projectId, projectId),
+        inArray(schema.lessonSuggestions.status, [...ACTIVE]),
+      ),
+    )
+    .get();
+  if (active) {
+    const who = active.kind === 'tidy' ? 'lesson tidier' : 'lesson writer';
+    throw new LessonSuggestionError(`The ${who} is already working on this project`);
+  }
+}
+
+/** Queues a run of the tidier over the project's lessons of the steps; one runs at a time per project. */
+export function queueLessonTidy(db: Db, projectId: number): LessonSuggestion {
+  return db.transaction((tx) => {
+    const lessons = tx
+      .select({ section: schema.lessons.section })
+      .from(schema.lessons)
+      .where(eq(schema.lessons.projectId, projectId))
+      .all();
+    if (!lessons.some((lesson) => isWriterStep(lesson.section))) {
+      throw new LessonSuggestionError('This project has no lessons to tidy');
+    }
+    refuseWhileActive(tx, projectId);
+    return tx
+      .insert(schema.lessonSuggestions)
+      .values({ projectId, kind: 'tidy', feedbackIds: [] })
+      .returning()
+      .get();
+  });
+}
+
 /** Queues a run over the project's feedback `feedbackIds`; one runs at a time per project. */
 export function queueLessonSuggestion(
   db: Db,
@@ -61,19 +102,7 @@ export function queueLessonSuggestion(
     if (known.length === 0) {
       throw new LessonSuggestionError('Pick feedback of this project');
     }
-    const active = tx
-      .select({ id: schema.lessonSuggestions.id })
-      .from(schema.lessonSuggestions)
-      .where(
-        and(
-          eq(schema.lessonSuggestions.projectId, projectId),
-          inArray(schema.lessonSuggestions.status, [...ACTIVE]),
-        ),
-      )
-      .get();
-    if (active) {
-      throw new LessonSuggestionError('The lesson writer is already working on this project');
-    }
+    refuseWhileActive(tx, projectId);
     return tx
       .insert(schema.lessonSuggestions)
       .values({ projectId, feedbackIds: known.map((row) => row.id).toReversed() })

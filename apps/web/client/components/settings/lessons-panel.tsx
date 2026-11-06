@@ -1,20 +1,27 @@
-// The Memory page's lessons part: whether they are sent to the agents, then the lessons by step.
+// The Memory page's lessons part: whether they are sent to the agents, Tidy lessons, then the lessons by step.
 import type { LessonInput } from '@union/core/lesson-input';
 import type { ReactElement } from 'react';
 
 import { Switch } from '../choice';
 import { LessonList, type Editing } from './lesson-list';
+import type { AcceptLessons } from './lesson-suggestions';
+import { TidyLessons } from './lesson-tidy';
 
 type Value = { enabled: boolean; lessons: LessonInput[] };
 
 /** Turned off, the lessons stay here, editable, but no agent gets them. */
 export function LessonsPanel({
+  projectId,
   value,
   onChange,
+  onAccept,
   editing,
 }: {
+  projectId: number;
   value: Value;
   onChange: (value: Partial<Value>) => void;
+  /** Applies the tidier's accepted proposals to the form. */
+  onAccept: AcceptLessons;
   editing: Editing;
 }): ReactElement {
   return (
@@ -37,6 +44,7 @@ export function LessonsPanel({
       >
         Send lessons to the agents
       </Switch>
+      <TidyLessons projectId={projectId} lessons={value.lessons} onAccept={onAccept} />
       <div className={value.enabled ? '' : 'opacity-60'}>
         <LessonList
           lessons={value.lessons}

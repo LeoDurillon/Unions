@@ -53,8 +53,20 @@ shown in project settings → Agents → **Memory**.
   other accepted proposal joins the lessons in the form. The run's feedback is curated when the page is saved. Nothing is kept before Save. A worker stopped during a run fails it; the user asks again.
 - Not recorded in token usage: the run belongs to no ticket or investigation.
 
+## Lesson tidier
+
+- **Tidy lessons**, above the lessons, queues a run of the `lesson_tidier` agent over the project's saved lessons of
+  the pipeline steps (a `lesson_suggestions` row of kind `tidy`, no feedback). It shares the one run a project has
+  at a time with the lesson writer, is refused when the project has no such lesson, and runs only on that click.
+- Same container, settings page (Union settings → Memory → Lesson tidier) and parts its prompt cannot edit as the
+  writer (the steps' roles, where a lesson goes, the lessons by id, fenced as data), on Sonnet by default: it weighs
+  every lesson against the others. It answers the writer's format; only proposals that replace kept lessons are kept.
+  An empty rule removes the lessons it replaces; `why` says what was wrong.
+- Its run shows under the lessons (the writer's under the feedback): **Replace** or **Remove** each change, or
+  **Accept all**, then Save; **Dismiss** drops the run.
+
 ## Manual by design
 
 Nothing changes the lessons on its own. Feedback is recorded automatically; a lesson exists only when the user writes
-one, makes one from a feedback, or accepts one the lesson writer proposed, and saves the page. Agents read the
-lessons but never write them, and the lesson writer runs only when the user asks.
+one, makes one from a feedback, or accepts what the lesson writer or tidier proposed, and saves the page. Agents read
+the lessons but never write them, and the lesson writer and tidier run only when the user asks.

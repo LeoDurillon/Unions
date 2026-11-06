@@ -12,10 +12,16 @@ export type LessonSection = PipelineStep | typeof REPORT_LESSONS;
 export type LessonInput = { id?: number; section: LessonSection; rule: string };
 
 /**
- * A lesson the lesson writer proposes: added, or put in place of the kept lessons `replaces` names
- * (a merge, a move to another step, a rewording). Runs from before `replaces` have none.
+ * A lesson the lesson writer or the tidier proposes: added, or put in place of the kept lessons
+ * `replaces` names (a merge, a move to another step, a rewording); an empty rule removes them. `why`
+ * says what is wrong with the lessons replaced. Runs from before `replaces` have neither.
  */
-export type LessonProposal = { section: LessonSection; rule: string; replaces?: number[] };
+export type LessonProposal = {
+  section: LessonSection;
+  rule: string;
+  replaces?: number[];
+  why?: string;
+};
 
 /** What a save holds: every lesson, and the feedback the new ones were made from. */
 export type LessonsSave = { lessons: LessonInput[]; curated: number[] };
@@ -105,7 +111,8 @@ export function parseLessonsSave(body: Record<string, unknown>): LessonsSave | s
 
 /**
  * `lessons` with `proposal` accepted: it takes the place of the first lesson it replaces (keeping
- * that lesson's id), the others it replaces go, and it is added at the end when none is left.
+ * that lesson's id), the others it replaces go, and it is added at the end when none is left. An
+ * empty rule only removes the lessons it replaces.
  */
 export function withProposal(
   lessons: readonly LessonInput[],
@@ -114,6 +121,9 @@ export function withProposal(
   const replaces = new Set(proposal.replaces);
   const lesson = { section: proposal.section, rule: proposal.rule };
   const at = lessons.findIndex((kept) => kept.id !== undefined && replaces.has(kept.id));
+  if (proposal.rule === '') {
+    return lessons.filter((kept) => kept.id === undefined || !replaces.has(kept.id));
+  }
   if (at === -1) {
     return [...lessons, lesson];
   }

@@ -96,3 +96,12 @@ test('the lesson writer is queued on feedback, one run at a time, and its result
   const id = typeof row === 'object' && row !== null && 'id' in row ? row.id : null;
   expect((await send('POST', `/lesson-suggestion/${String(id)}/dismiss`, {})).status).toBe(404);
 });
+
+test('the tidier is queued on the lessons, refused with none or while a run works', async () => {
+  expect((await send('POST', '/lesson-tidy', {})).status).toBe(409);
+  await send('PUT', '/lessons', { lessons: [{ section: 'implement', rule: 'Use bun.' }] });
+  const queued = await send('POST', '/lesson-tidy', {});
+  expect(queued.status).toBe(202);
+  expect(await queued.json()).toMatchObject({ kind: 'tidy', status: 'queued', feedbackIds: [] });
+  expect((await send('POST', '/lesson-tidy', {})).status).toBe(409);
+});

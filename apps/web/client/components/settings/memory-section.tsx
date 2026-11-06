@@ -103,14 +103,17 @@ function MemoryForm({
   );
   const [editingAt, setEditingAt] = useState<number | null>(null);
   const actions = useFeedbackActions(project.id, form, fresh, setEditingAt);
+  const { onAccept } = actions;
   const empty = form.value.lessons.some((lesson) => lesson.rule.trim() === '');
   return (
     <section className="space-y-6">
       <LessonsPanel
+        projectId={project.id}
         value={form.value}
         onChange={(value) => {
           form.set({ ...form.value, ...value });
         }}
+        onAccept={onAccept}
         editing={{ at: editingAt, open: setEditingAt }}
       />
       <div className="space-y-3">

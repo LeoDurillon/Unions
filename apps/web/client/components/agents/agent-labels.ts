@@ -79,6 +79,11 @@ export const AGENT_LABELS: Record<BuiltInAgentId, AgentLabel> = {
     description:
       "Proposes lessons from the feedback when you click Suggest lessons on a project's Memory page. It reads only the feedback and the lessons already kept (no repository, no tools); you accept or drop each proposal.",
   },
+  lesson_tidier: {
+    title: 'Lesson tidier',
+    description:
+      "Proposes fixes to a project's lessons when you click Tidy lessons on its Memory page: merging lessons that say the same thing, moving one to the right step, rewording ones that contradict each other, removing ones that held for one ticket. It reads only the lessons (no repository, no tools); you accept or drop each proposal.",
+  },
   split_plan: {
     title: 'Split plan',
     description:

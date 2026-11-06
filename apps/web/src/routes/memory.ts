@@ -1,9 +1,10 @@
-// `/api/projects/:projectId/lessons`, `/feedback` and `/lesson-suggestion`: the project's memory (the worker runs the lesson writer).
+// `/api/projects/:projectId/lessons`, `/feedback`, `/lesson-suggestion` and `/lesson-tidy`: the project's memory (the worker runs the lesson writer and tidier).
 import {
   dismissLessonSuggestion,
   latestLessonSuggestion,
   LessonSuggestionError,
   queueLessonSuggestion,
+  queueLessonTidy,
   listFeedback,
   listLessons,
   parseLessonsSave,
@@ -69,6 +70,16 @@ async function suggestLessons(db: Db, c: Context): Promise<Response> {
   }
 }
 
+/** `POST /lesson-tidy`: queues the tidier on the project's lessons (the worker runs it). */
+function tidyLessons(db: Db, c: Context): Response {
+  const projectId = projectIdOf(db, c);
+  try {
+    return c.json(queueLessonTidy(db, projectId), ACCEPTED);
+  } catch (error) {
+    throw error instanceof LessonSuggestionError ? fail(CONFLICT, error.message) : error;
+  }
+}
+
 function dismissSuggestion(db: Db, c: Context): Response {
   const projectId = projectIdOf(db, c);
   const id = requireId(c.req.param('suggestionId'), 'suggestion id');
@@ -78,7 +89,7 @@ function dismissSuggestion(db: Db, c: Context): Response {
   return c.json({ ok: true });
 }
 
-/** Under `/api/projects`: `/:projectId/lessons`, `/feedback` and `/lesson-suggestion`. */
+/** Under `/api/projects`: `/:projectId/lessons`, `/feedback`, `/lesson-suggestion` and `/lesson-tidy`. */
 export function memoryRoutes(db: Db): Hono {
   const routes = new Hono();
   routes.get('/:projectId/lessons', (c) => c.json(listLessons(db, projectIdOf(db, c))));
@@ -89,6 +100,7 @@ export function memoryRoutes(db: Db): Hono {
     c.json(latestLessonSuggestion(db, projectIdOf(db, c))),
   );
   routes.post('/:projectId/lesson-suggestion', (c) => suggestLessons(db, c));
+  routes.post('/:projectId/lesson-tidy', (c) => tidyLessons(db, c));
   routes.post('/:projectId/lesson-suggestion/:suggestionId/dismiss', (c) =>
     dismissSuggestion(db, c),
   );

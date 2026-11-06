@@ -28,7 +28,7 @@ Changes apply from the next run, including on tickets already running.
 | Pull requests  | PR description, Replies to GitHub comments, Split plan | Opus, Opus, Opus            |
 | Branch history | Rebase, Simplify history, Split into a stack           | Implementation's            |
 | Review         | Review comments, Group by spec, Explain, Spec report   | Opus, Sonnet, Haiku, Opus   |
-| Memory         | Lesson writer                                          | Haiku                       |
+| Memory         | Lesson writer, Lesson tidier                           | Haiku, Sonnet               |
 
 Rebase, Simplify history, Split into a stack and Trim are only prompts: the implementation agent runs them in its
 own session, with the Implementation model and effort. Trim is sent when a first implementation adds far more lines of
@@ -155,14 +155,18 @@ every run of this project.
   to fix lessons you already have: merge two that say the same thing, move one to the right step, or reword two
   that contradict each other. Such a proposal shows the lessons it replaces, struck through; **Replace** puts it in
   their place.
+- **Tidy lessons**, above the lessons, asks the lesson tidier to read all your saved lessons and fix them: merge the
+  ones that repeat each other, move a lesson to the step that must act on it, reword lessons that contradict each
+  other, remove the ones that only held for one ticket. Each change says why. **Replace** or **Remove** applies it to
+  the list, **Dismiss** drops them all. It uses your Claude usage, and runs one at a time with the lesson writer.
 - Write, edit, reorder or remove lessons by hand, grouped by step. Up to 500 characters each. The last group,
   **Spec report**, holds the rules the spec report reads: the ones you keep when you mark an item of its **Needs
   you** not useful, and any you add (for example "Flag a page shared by loan and subsidy campaigns").
 - Nothing is kept until you click **Save**.
 - **Send lessons to the agents** turns them off without deleting them.
 
-Lessons never change on their own: the agents read them but never write them, and the lesson writer only runs when
-you ask.
+Lessons never change on their own: the agents read them but never write them, and the lesson writer and the tidier
+only run when you ask.
 
 ## Flows
 

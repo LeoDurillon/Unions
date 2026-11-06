@@ -219,7 +219,8 @@
   undo it.
 - `throwaway-runs.ts`: the side runs that need no repository, in a throwaway container with only the Claude login:
   the connector check (`mcp-check.ts`) and the lesson writer (`lesson-writer-run.ts`, same slots as the agents),
-  which turns feedback the user picked into proposed lessons (`lesson_suggestions`; prompt and parsing in core
+  which turns feedback the user picked into proposed lessons, or, for a `tidy` row, runs the lesson tidier over the
+  project's lessons (`lesson_suggestions`; prompt and parsing in core
   `lesson-writer.ts`), and the prompt writer (`prompt-writer-run.ts`), which writes a queued custom agent's
   default prompt (`union-prompt-writer-<id>`, logs `custom_agent_prompt_ready` or `_failed`; a run cut by a stop
   goes back to the queue on start).

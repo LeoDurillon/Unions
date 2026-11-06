@@ -37,7 +37,7 @@ Deleting a project removes its tickets from Union, with their containers and vol
 | Implementation | Implementation, Final review                                                            |
 | Pull requests  | PR description, Replies to GitHub comments, Rebase, Simplify history, Split plan, Split |
 | Review         | Review comments, Group by spec, Explain                                                 |
-| Memory         | Lesson writer                                                                           |
+| Memory         | Lesson writer, Lesson tidier                                                            |
 | Custom agents  | Your own agents, and **New agent**                                                      |
 | Review agents  | Your own review agents, run from a review page                                          |
 | Tools          | Tools, Connectors                                                                       |

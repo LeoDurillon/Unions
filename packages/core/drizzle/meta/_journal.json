@@ -568,6 +568,13 @@
       "when": 1793878287239,
       "tag": "0080_agent_tool_usage",
       "breakpoints": true
+    },
+    {
+      "idx": 81,
+      "version": "6",
+      "when": 1793960936508,
+      "tag": "0081_lesson_suggestion_kind",
+      "breakpoints": true
     }
   ]
 }

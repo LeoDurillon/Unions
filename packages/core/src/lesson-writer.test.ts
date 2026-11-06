@@ -2,6 +2,7 @@ import { beforeEach, expect, test } from 'bun:test';
 
 import { DEFAULT_PROMPTS, modelFor } from './agents';
 import { createDb, migrateDb, type Db } from './db';
+import { LESSON_TIDIER_PROMPT, LESSON_WRITER_PROMPT } from './lesson-prompts';
 import {
   claimLessonSuggestion,
   dismissLessonSuggestion,
@@ -11,7 +12,7 @@ import {
   queueLessonSuggestion,
   recoverLessonSuggestions,
 } from './lesson-suggestions';
-import { lessonWriterPrompt, LESSON_WRITER_PROMPT, parseLessonSuggestions } from './lesson-writer';
+import { lessonWriterPrompt, parseLessonSuggestions } from './lesson-writer';
 import * as schema from './schema';
 
 let db: Db;
@@ -35,9 +36,11 @@ function insertFeedback(project: number, text: string): number {
     .get().id;
 }
 
-test('the lesson writer runs on Haiku with its own prompt', () => {
+test('the lesson writer runs on Haiku and the tidier on Sonnet, each with its own prompt', () => {
   expect(modelFor(db, 'lesson_writer')).toBe('haiku');
   expect(DEFAULT_PROMPTS.lesson_writer).toBe(LESSON_WRITER_PROMPT);
+  expect(modelFor(db, 'lesson_tidier')).toBe('sonnet');
+  expect(DEFAULT_PROMPTS.lesson_tidier).toBe(LESSON_TIDIER_PROMPT);
 });
 
 test('the prompt fences the feedback as data and lists the lessons kept, by id', () => {

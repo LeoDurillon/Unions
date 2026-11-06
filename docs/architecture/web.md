@@ -101,7 +101,9 @@
   from), and the feedback (`GET …/feedback`; Dismiss and Back to new `PATCH …/feedback/:id` at once).
   Suggest queues the lesson writer (`POST …/lesson-suggestion`, a `lesson_suggestions` row the worker claims); the
   page polls `GET …/lesson-suggestion` while it works and shows its proposals (`settings/lesson-suggestions.tsx`); one that
-  replaces kept lessons is applied to the form by `withProposal` (core).
+  replaces kept lessons is applied to the form by `withProposal` (core). Tidy lessons (`settings/lesson-tidy.tsx`)
+  queues the tidier (`POST …/lesson-tidy`, a `lesson_suggestions` row of kind `tidy`); its run shows under the
+  lessons, the writer's under the feedback.
 - Union settings (sidebar → Union settings) are the same frame (`settings/settings-frame.tsx`, `settings-nav.tsx`)
   over `?union=<section>`: one page per agent (`agents/agent-page.tsx`: prompt, model, effort, tools, one Save;
   Reset to default applies at once), Models (every agent's model and effort in a table, `union-settings/models-page.tsx`;

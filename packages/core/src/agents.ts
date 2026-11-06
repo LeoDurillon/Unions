@@ -12,7 +12,7 @@ import { customAgentDefaults, type CustomAgentInfo } from './custom-agent-config
 import { listCustomAgents } from './custom-agents';
 import type { Db } from './db';
 import { DIAGRAM_INSTRUCTION } from './diagrams';
-import { LESSON_WRITER_PROMPT } from './lesson-writer';
+import { LESSON_TIDIER_PROMPT, LESSON_WRITER_PROMPT } from './lesson-prompts';
 import { PR_REPLIES_PROMPT, SPLIT_PLAN_PROMPT, SPLIT_PROMPT, TRIM_PROMPT } from './pr-prompts';
 import * as schema from './schema';
 import {
@@ -49,6 +49,7 @@ export const AGENT_IDS = [
   'split_plan',
   'split',
   'lesson_writer',
+  'lesson_tidier',
 ] as const;
 export type BuiltInAgentId = (typeof AGENT_IDS)[number];
 /** A built-in agent, or a custom agent by its step (`agent_<id>`). */
@@ -155,6 +156,7 @@ Output a short markdown report: the new commits' subject lines, and what was mer
   split_plan: SPLIT_PLAN_PROMPT,
   split: SPLIT_PROMPT,
   lesson_writer: LESSON_WRITER_PROMPT,
+  lesson_tidier: LESSON_TIDIER_PROMPT,
 };
 
 export type AgentConfig = {
@@ -190,6 +192,8 @@ const MODEL_BY_AGENT: Record<BuiltInRunAgent, AgentModel> = {
   // It resumes the implementer's session, whose cache is the implementer's model's.
   pr_replies: MODEL_BY_STEP.implement,
   lesson_writer: 'haiku',
+  // It weighs every lesson against the others, on a click now and then.
+  lesson_tidier: 'sonnet',
 };
 const RUN_AGENTS: readonly BuiltInRunAgent[] = [
   ...STEPS,
@@ -201,6 +205,7 @@ const RUN_AGENTS: readonly BuiltInRunAgent[] = [
   'pr_replies',
   'split_plan',
   'lesson_writer',
+  'lesson_tidier',
 ];
 
 /** Agents with a model of their own: the pipeline steps and the reviewer (not `shared`). */

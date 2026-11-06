@@ -1,0 +1,1 @@
+ALTER TABLE `lesson_suggestions` ADD `kind` text DEFAULT 'feedback' NOT NULL;

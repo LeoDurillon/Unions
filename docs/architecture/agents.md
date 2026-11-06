@@ -74,7 +74,7 @@ their own prompt from `sharedPrompt` and the agent's prompt, in the modules of t
 | `review_explain`                                      | ticket's, or `union-e<id>` for a PR | a ticket's follow-up resumes   | no      | `review-explain.ts`                            |
 | `review_report`                                       | ticket's, or `union-s<id>` for a PR | fresh                          | its own | `review-report.ts`                             |
 | review agents (custom, of the review kind)            | `union-v<id>`, for a ticket too     | fresh                          | yes     | `review-agent-run.ts`                          |
-| `lesson_writer`                                       | throwaway, no repository            | fresh                          | no      | `lesson-writer-run.ts`                         |
+| `lesson_writer`, `lesson_tidier`                      | throwaway, no repository            | fresh                          | no      | `lesson-writer-run.ts`                         |
 
 Runs without an agent page: the prompt writer (Sonnet, throwaway, `prompt-writer-run.ts`), the connector check
 (`mcp-check.ts`), investigations (`union-i<id>`, or the ticket's container; model and tools from the form, the project's instructions via `projectInstructions`,
@@ -107,6 +107,7 @@ The worker appends every other format after the user's prompt, so an edit cannot
 | `review_report`         | a final `json` block: the report        | `review-report-format.ts`, `review-report-result.ts`     |
 | review agents           | markdown citing `path:line`             | `review-agent-prompt.ts`; links: `diff-links.ts` (core)  |
 | `lesson_writer`         | a JSON array of lessons and `replaces`  | `lesson-writer.ts` (core)                                |
+| `lesson_tidier`         | the same, each replacing kept lessons   | `lesson-tidier.ts` (core)                                |
 | `implement`, `simplify` | a last line `Refused commit: <message>` | `leftovers.ts`                                           |
 
 A new agent whose answer is parsed puts its format in the worker's part of the prompt, not in the editable one.

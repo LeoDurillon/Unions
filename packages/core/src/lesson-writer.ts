@@ -1,4 +1,4 @@
-// The lesson writer: its default prompt, the prompt it gets for some feedback, and its answer read back as lessons.
+// The lesson writer: the prompt it gets for some feedback, what it shares with the tidier, and its answer read back as lessons.
 import { MAX_LESSON_LENGTH, type LessonProposal } from './lesson-input';
 import { FULL_FLOW, STEP_TITLES, type PipelineStep } from './states';
 
@@ -11,11 +11,7 @@ export type FeedbackForWriter = {
 };
 
 /** A kept lesson as the writer reads it: its id is what a proposal replaces. */
-type KeptLesson = { id: number; section: string; rule: string };
-
-export const LESSON_WRITER_PROMPT = `You turn a user's feedback on an AI coding pipeline into lessons: short rules each agent of the pipeline follows on every later ticket of the project.
-Keep only what holds beyond the ticket it was written on: conventions, scope rules, what the user always or never wants, facts about the project. Leave out details of that one ticket (its files, its bug, its findings).
-One feedback can give no lesson, one, or several. Write each lesson as one imperative sentence of at most 300 characters, specific enough to act on.`;
+export type KeptLesson = { id: number; section: string; rule: string };
 
 /** What each step's agent decides, and what it cannot do: where a lesson can act. */
 const STEP_ROLES: Record<PipelineStep, string> = {
@@ -32,7 +28,12 @@ const STEP_ROLES: Record<PipelineStep, string> = {
     'reads the finished branch and asks for changes. It writes no code and cannot change the plans or the branch the ticket targets',
 };
 
-const PLACEMENT = `Union, not an agent, sets the branch a ticket starts from and targets, pushes it and opens the pull request. Each step reads only its own lessons.
+/** One proposal as the writer and the tidier answer it. */
+export const PROPOSAL_FORMAT =
+  '[{"section": "<step>", "rule": "<lesson>", "replaces": [<ids of kept lessons>], "why": "<what was wrong>"}]';
+
+/** Where a lesson goes, and how a proposal changes kept lessons: the writer's and the tidier's. */
+export const LESSON_PLACEMENT = `Union, not an agent, sets the branch a ticket starts from and targets, pushes it and opens the pull request. Each step reads only its own lessons.
 
 # Where a lesson goes
 
@@ -44,13 +45,15 @@ const PLACEMENT = `Union, not an agent, sets the branch a ticket starts from and
 
 # Changing the kept lessons
 
-Do not add a lesson that says what a kept lesson already says: two lessons that would make an agent do the same thing are one. Instead, propose one lesson that replaces the kept ones, with their ids in \`replaces\`. Do the same to move a kept lesson to the right step, to merge kept lessons that say the same thing, or to reword kept lessons that contradict each other, even when the feedback is not about them.`;
+Do not add a lesson that says what a kept lesson already says: two lessons that would make an agent do the same thing are one. Instead, propose one lesson that replaces the kept ones, with their ids in \`replaces\`. Do the same to move a kept lesson to the right step, to merge kept lessons that say the same thing, or to reword kept lessons that contradict each other, even when the feedback is not about them. To remove kept lessons that hold for one ticket only or are fully covered by another kept lesson, propose an empty rule with their ids in \`replaces\`. Say in \`why\` what was wrong with the lessons a proposal replaces.`;
 
-function isPipelineStep(value: unknown): value is PipelineStep {
+/** A step of the full pipeline: the lessons the writer and the tidier handle (not a custom step's, nor the spec report's). */
+export function isWriterStep(value: unknown): value is PipelineStep {
   return FULL_FLOW.some((step) => step === value);
 }
 
-function stepsSection(): string {
+/** Each step of the pipeline and what its agent decides. */
+export function stepsSection(): string {
   return FULL_FLOW.map((step) => `- \`${step}\` (${STEP_TITLES[step]}): ${STEP_ROLES[step]}.`).join(
     '\n',
   );
@@ -58,10 +61,11 @@ function stepsSection(): string {
 
 /** The kept lessons of the pipeline's steps, the only ones a proposal can replace. */
 function stepLessons<T extends { section: string }>(lessons: readonly T[]): T[] {
-  return lessons.filter((lesson) => isPipelineStep(lesson.section));
+  return lessons.filter((lesson) => isWriterStep(lesson.section));
 }
 
-function keptSection(lessons: readonly KeptLesson[]): string {
+/** The kept lessons of the steps, by id: what a proposal can replace. */
+export function keptSection(lessons: readonly KeptLesson[]): string {
   const kept = stepLessons(lessons);
   return kept.length === 0
     ? 'None yet.'
@@ -89,7 +93,7 @@ export function lessonWriterPrompt(input: {
 
 ${stepsSection()}
 
-${PLACEMENT}
+${LESSON_PLACEMENT}
 
 # Lessons the project already has
 
@@ -103,7 +107,7 @@ ${feedbackSection(input.feedback)}
 
 # Your answer
 
-Answer with a JSON array only, no other text: \`[{"section": "<step>", "rule": "<lesson>", "replaces": [<ids of kept lessons>]}]\`, with \`"replaces": []\` for a new lesson, and \`[]\` when no lesson holds beyond its ticket and no kept lesson needs a change. Do not use any tool.`;
+Answer with a JSON array only, no other text: \`${PROPOSAL_FORMAT}\`, with \`"replaces": []\` for a new lesson, and \`[]\` when no lesson holds beyond its ticket and no kept lesson needs a change. Do not use any tool.`;
 }
 
 /** The JSON array in the answer, fenced or not. */
@@ -129,24 +133,36 @@ function changesNothing(proposal: LessonProposal, kept: ReadonlyMap<number, Kept
   return others.length === 0 && old?.section === proposal.section && old.rule === proposal.rule;
 }
 
+function oneLine(value: string): string {
+  return value.replaceAll(/\s+/gu, ' ').trim().slice(0, MAX_LESSON_LENGTH);
+}
+
+/** The proposal's reason, when it gives one. */
+function whyOf(value: object): { why?: string } {
+  const why: unknown = 'why' in value ? value.why : null;
+  const line = typeof why === 'string' ? oneLine(why) : '';
+  return line === '' ? {} : { why: line };
+}
+
 function proposalOf(value: unknown, kept: ReadonlyMap<number, KeptLesson>): LessonProposal[] {
   if (typeof value !== 'object' || value === null) {
     return [];
   }
   const section: unknown = 'section' in value ? value.section : null;
   const rule: unknown = 'rule' in value ? value.rule : null;
-  if (!isPipelineStep(section) || typeof rule !== 'string') {
+  if (!isWriterStep(section) || typeof rule !== 'string') {
     return [];
   }
-  const line = rule.replaceAll(/\s+/gu, ' ').trim().slice(0, MAX_LESSON_LENGTH);
   const replaces = replacedIds('replaces' in value ? value.replaces : null, kept);
-  const proposal = { section, rule: line, replaces };
-  return line === '' || changesNothing(proposal, kept) ? [] : [proposal];
+  const proposal = { section, rule: oneLine(rule), replaces, ...whyOf(value) };
+  const empty = proposal.rule === '' && replaces.length === 0;
+  return empty || changesNothing(proposal, kept) ? [] : [proposal];
 }
 
 /**
- * The lessons in the writer's answer: unknown steps, empty rules and proposals that change nothing
- * dropped, rules on one line, `replaces` kept to the ids of `lessons` (the project's kept ones).
+ * The lessons in the writer's (or tidier's) answer: unknown steps, empty rules that remove nothing
+ * and proposals that change nothing dropped, rules on one line, `replaces` kept to the ids of
+ * `lessons` (the project's kept ones).
  */
 export function parseLessonSuggestions(
   text: string,
