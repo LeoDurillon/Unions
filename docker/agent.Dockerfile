@@ -1,7 +1,7 @@
 FROM oven/bun:1.4.1 AS bun
 
 FROM node:22-slim
-RUN apt-get update && apt-get install -y --no-install-recommends git ca-certificates curl \
+RUN apt-get update && apt-get install -y --no-install-recommends git ca-certificates curl unzip \
     && rm -rf /var/lib/apt/lists/*
 # Toolchains the implementation agent and the checks commonly need: node/npm (base image), Bun, and
 # pnpm/yarn through corepack. Projects on other stacks need their own image (see SPEC, previews).
