@@ -70,6 +70,9 @@ and linked.
 - [Notion comments on the ticket](notion-comments.md): a Notion tab lists the page's open discussions (page and
   inline); the user replies or starts one (the worker posts), or adds a discussion to the review for the
   implementer. Decisions confirmed; steps 1 to 5 built (2026-11-05, branch `notion-comments`); the optional step 6 left.
+- [Lessons on the right step, without repeats](lesson-quality.md): the lesson writer told what each step decides
+  and where a lesson goes, proposals that replace kept lessons (ids kept on save), and a Tidy lessons agent. Built,
+  steps 1 to 3 (2026-11-06); step 4 (checks on the Memory page that cost no Claude usage) planned.
 - [Link a review to its Notion page](review-notion-link.md): a pull request under review linked to a Notion page
   gets a Notion tab with the page's text, and Group by spec and Review with agent read that page without its URL
   again. Built, steps 1 to 3 (branch `review-notion-link`); D6 waits on Notion comments.
