@@ -1,5 +1,8 @@
-// The CI checks of the worker's GitHub client: a pull request's head commit and the overall state of its checks, and re-running an Actions job.
+// The CI checks of the worker's GitHub client: a pull request's head commit and the overall state of its checks, re-running an Actions job, and comparing two commits.
+import type { Comparison } from '@union/core';
+
 import type { ChecksState, PullRequestChecks, RepoRef } from './api';
+import { isNotFound } from './octokit-pull-request-changes';
 import { OctokitStacks } from './octokit-stacks';
 
 const CHECKS_ROLLUP = /* GraphQL */ `
@@ -68,6 +71,22 @@ export class OctokitChecks extends OctokitStacks {
       return checksOf(data);
     } catch (error) {
       if (isForbidden(error)) {
+        return null;
+      }
+      throw error;
+    }
+  }
+
+  async compareCommits(repo: RepoRef, base: string, head: string): Promise<Comparison | null> {
+    try {
+      const { data } = await this.octokit.rest.repos.compareCommitsWithBasehead({
+        ...repo,
+        basehead: `${base}...${head}`,
+        per_page: 1,
+      });
+      return data.status;
+    } catch (error) {
+      if (isNotFound(error)) {
         return null;
       }
       throw error;

@@ -5,6 +5,7 @@ import { emitEvent, listSlices, schema, type Db, type Ticket } from '@union/core
 import { eq } from 'drizzle-orm';
 
 import type { GitHubApi, PullRequestStatus, RepoRef } from './api';
+import { checkBranchMoved } from './branch-moved';
 import { followBase } from './follow-base';
 import { refreshChecks } from './pull-request-checks';
 import { pollStack, startRestack } from './stack-pull-requests';
@@ -59,16 +60,21 @@ function endDates(
 }
 
 type Polled = Pick<Ticket, 'prState' | 'prMergedAt' | 'prClosedAt' | 'behindBy'>;
+type Refs = { base?: string; headSha?: string };
+
+/** The branch the pull request targets and its head commit, when GitHub answered. */
+function refsOf(status: PullRequestStatus | null): Refs {
+  return {
+    ...(status?.base === undefined ? {} : { base: status.base }),
+    ...(status?.headSha === undefined ? {} : { headSha: status.headSha }),
+  };
+}
 
 /**
  * What GitHub says of the ticket's pull request now, with the branch it targets; what is known
  * already when it is settled.
  */
-async function polled(
-  api: GitHubApi,
-  repo: RepoRef,
-  ticket: Ticket,
-): Promise<Polled & { base?: string }> {
+async function polled(api: GitHubApi, repo: RepoRef, ticket: Ticket): Promise<Polled & Refs> {
   const settled = ticket.prState === 'merged' && ticket.prMergedAt !== null;
   const status =
     ticket.prNumber === null || settled
@@ -79,7 +85,7 @@ async function polled(
     prState,
     ...endDates(prState, status, ticket),
     behindBy: status?.behindBy ?? null,
-    ...(status?.base === undefined ? {} : { base: status.base }),
+    ...refsOf(status),
   };
 }
 
@@ -88,7 +94,8 @@ async function polled(
  * without a merge (`pr_closed_at`, polled still: it can be reopened) and, for tickets
  * that could be rebased, how far behind it is (`behind_by`) current. A merged pull request is final,
  * so once its merge date is known it is no longer asked about. An event is recorded only on a change,
- * so the panel and the board refresh. The open pull request's CI checks are read after.
+ * so the panel and the board refresh. A move of the branch away from Union's last push is noted
+ * (not for a stack: its slices move on their own). The open pull request's CI checks are read after.
  */
 export async function refreshPullRequest(
   db: Db,
@@ -100,19 +107,31 @@ export async function refreshPullRequest(
   const stack = settled
     ? null
     : await pollStack(db, api, { repo, ticket, behind: canRebase(ticket) });
-  const status = stack ?? (await polled(api, repo, ticket));
-  storeStatus(db, ticket, status);
-  if (stack === null && 'base' in status) {
-    await followBase(db, api, repo, { ticket: { ...ticket, ...status }, base: status.base });
+  if (stack === null) {
+    await refreshSingle(db, api, repo, ticket);
+    return;
   }
-  if (stack?.restack) {
+  storeStatus(db, ticket, stack);
+  if (stack.restack) {
     startRestack(db, ticket.id);
   }
   // A stack's top pull request may target a branch other than the default one: its Closes did nothing.
-  if (stack?.prState === 'merged' && ticket.issueNumber !== null) {
+  if (stack.prState === 'merged' && ticket.issueNumber !== null) {
     await api.closeIssue(repo, ticket.issueNumber);
   }
-  await refreshChecks(db, api, repo, { ...ticket, ...status });
+  await refreshChecks(db, api, repo, { ...ticket, ...stack });
+}
+
+/** A ticket not split: its pull request, the base GitHub moved it onto, a move of its branch, its checks. */
+async function refreshSingle(db: Db, api: GitHubApi, repo: RepoRef, ticket: Ticket): Promise<void> {
+  const { base, headSha, ...status } = await polled(api, repo, ticket);
+  storeStatus(db, ticket, status);
+  const current = { ...ticket, ...status };
+  if (base !== undefined) {
+    await followBase(db, api, repo, { ticket: current, base });
+  }
+  await checkBranchMoved(db, api, repo, { ticket: current, headSha });
+  await refreshChecks(db, api, repo, current);
 }
 
 function storeStatus(db: Db, ticket: Ticket, status: Polled): void {

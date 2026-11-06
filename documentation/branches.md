@@ -63,9 +63,28 @@ When the base branch moved on, the PR tab says how far behind the branch is ("4 
 2. If git stops on a conflict, or the checks fail after the rebase, the implementation agent resolves it, in its own
    session, and runs the checks. Union then pushes, and the final review runs again, since the code changed.
 3. If someone else pushed commits to the branch, Union stops before rewriting it, so their work is never lost.
+   Union usually notices first and asks you to resync (see below).
 
 Union pushes with `--force-with-lease`. If anything fails, the branch is put back exactly as it was, unpushed, and
 **Retry** runs the rebase again.
+
+## When someone else pushes to the branch
+
+When a co-worker pushes to the ticket's branch on GitHub, or rebases or force-pushes it, Union's copy of the branch is
+out of date. Union notices at its next check of GitHub. The card on the board shows **Branch moved**, and the PR tab
+says "New commits were pushed to `<branch>` on GitHub" or "`<branch>` was rewritten on GitHub", with the commit
+Union had and the one GitHub has now.
+
+Until you resync, **Rebase**, **Revise**, **Retry**, **Simplify history**, **Split into a stack** and **Change target**
+are unavailable: they would start from the old code, or their push would be refused.
+
+Click **Resync from GitHub**. Union fetches the branch and puts its copy on it, then updates the diff on the Review
+tab. Nothing is pushed, no agent runs, and the ticket stays where it is (at its final review, or Done). The next time
+the implementation agent works on the ticket, it is told the branch changed and reads the files again.
+
+If Union holds work it never pushed (a revision that stopped before its push, for example), the resync changes
+nothing and the PR tab lists those commits. Retry or revise the step first, so its work is pushed, or ask for help.
+A ticket split into a stack cannot be resynced yet.
 
 ## When the base moves on GitHub
 

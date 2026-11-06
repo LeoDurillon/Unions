@@ -33,6 +33,8 @@ export type CommandHooks = {
   sendPrDescription: (id: number) => void;
   /** Writes the title and description the user edited to the ticket's issue, then to the ticket. */
   editTicket: (ticketId: number, edit: TicketEdit) => void;
+  /** Resets the ticket's workspace onto its branch as GitHub has it, after it moved there. */
+  resyncBranch: (ticketId: number) => void;
   /** Asks GitHub to run a failed Actions job of the ticket's pull request again. */
   rerunCiJob: (ticketId: number, job: CiJob) => void;
   /** Posts a reply to a pull request comment; `commandId` ties its event to the command. */
@@ -72,6 +74,7 @@ export const NO_HOOKS: CommandHooks = {
   cancelContainerRun: ignore,
   sendPrDescription: ignore,
   editTicket: ignore,
+  resyncBranch: ignore,
   rerunCiJob: ignore,
   replyToPrComment: ignore,
   postNotionComment: ignore,

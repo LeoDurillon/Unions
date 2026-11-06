@@ -5,7 +5,7 @@ import type { TicketDetail } from '../../../src/api-types';
 import { useTicketCommands } from '../../lib/use-ticket-commands';
 import { HelpText } from '../help-text';
 import { Button, ErrorText } from '../ui';
-import { canRewrite } from './branch-status';
+import { canRewrite, rewriteBlock } from './branch-status';
 
 const HELP =
   "The implementation agent rewrites the branch's commits into fewer, clearer ones. The code must stay exactly the same, so the final review stands; the branch is then force-pushed. On failure it is left as it was.";
@@ -51,7 +51,7 @@ export function SimplifyHistory({ detail }: { detail: TicketDetail }): ReactElem
         </span>
         <Button
           disabled={!allowed || command.isPending}
-          title={allowed ? undefined : 'Available at the final review, or once done'}
+          title={rewriteBlock(detail) ?? undefined}
           onClick={() => {
             command.mutate({ type: 'simplify' });
           }}

@@ -36,7 +36,7 @@ const sideRuns = await startSideRuns({
   slots: scheduler.slots,
   apiFor,
 });
-const hooks = workerHooks({ db, runtime, ...sideRuns, apiFor });
+const hooks = workerHooks({ db, runtime, config: provisionConfig, ...sideRuns, apiFor });
 
 const shutdown = new AbortController();
 const stop = (): void => {

@@ -14,6 +14,7 @@ import {
   type Project,
   resolveAgent,
   stepSharedPrompt,
+  takeResyncedFrom,
   toolsFor,
 } from '@union/core';
 
@@ -27,6 +28,7 @@ import {
   givenOutputsPrompt,
   gateHint,
   previewHint,
+  resyncPrompt,
 } from './implement-prompts';
 import { askSession, COMMIT_HOOK_HINT, commitLeftovers, type Ask, type Refused } from './leftovers';
 import { attachmentsSection, buildPrompt, parentContext } from './prompts';
@@ -132,6 +134,14 @@ export function implementerAsk(workspace: Workspace, sessionId: string): Ask {
   });
 }
 
+/** A resumed session is told when the branch was resynced from GitHub since its last turn (once). */
+function withResync(workspace: Workspace, prompt: string): string {
+  const from = takeResyncedFrom(workspace.deps.db, workspace.context.ticket.id);
+  return from !== null && workspace.context.resumeSessionId
+    ? `${resyncPrompt(from)}\n\n${prompt}`
+    : prompt;
+}
+
 /** The prompt plus the outputs the user gave the agent, when there are any. */
 function withOutputs(prompt: string, outputs: string): string {
   return outputs === '' ? prompt : `${prompt}\n\n${outputs}`;
@@ -146,7 +156,7 @@ export async function implementLoop(workspace: Workspace): Promise<Loop> {
   const max = project.config.maxIterations ?? DEFAULT_MAX_ITERATIONS;
   const given = pendingAgentInputs(deps.db, context.ticket.id);
   const outputs = givenOutputsPrompt(given);
-  let prompt = withOutputs(firstPrompt(workspace), outputs);
+  let prompt = withOutputs(withResync(workspace, firstPrompt(workspace)), outputs);
   let sessionId = context.resumeSessionId;
   let gate: Checked['gate'] = null;
   const run = (): AgentRun => ({

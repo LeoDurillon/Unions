@@ -56,8 +56,9 @@ the agent back with guidance. See [When a step stops](ticket-lifecycle.md#when-a
 Union restarted (an update, a crash, `docker compose restart`) while it ran. Steps resume from their start.
 
 **The rebase stopped: "the pushed branch has commits the workspace lacks".**
-Someone pushed to the ticket's branch. Union refuses to rewrite it so their commits are not lost. Bring their
-commits in on GitHub or locally, or ask them to push elsewhere.
+Someone pushed to the ticket's branch. Union refuses to rewrite it so their commits are not lost. Click **Resync from
+GitHub** on the PR tab to bring their commits into Union's copy, then rebase again
+([When someone else pushes to the branch](branches.md#when-someone-else-pushes-to-the-branch)).
 
 ## Previews
 

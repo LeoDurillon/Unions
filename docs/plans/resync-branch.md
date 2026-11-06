@@ -1,6 +1,13 @@
 # Resync a branch someone else rewrote
 
-Status: planned (2026-11-06), not built.
+Status: built (2026-11-06, branch `resync-branch`), steps 1 to 6; spec in
+[`docs/spec/rebase.md`](../spec/rebase.md#branch-moved-on-github). D1 to D3 as proposed (button only; the phase stays;
+split tickets are not flagged at all, since their poll goes through the stack, rather than flagged and refused).
+D4 not built: the notice does not say who moved the branch. R1 is handled with the checks poll's last head
+(`pr_checks_sha`): a head behind the push is a move only when it was already the head at the poll before. `retry` is
+held back too. Revise and Retry are refused by the web with the reason rather than disabled in the UI. Tried on
+real Docker (ticket 9001, a local bare repository as GitHub): the refusal on an unpushed commit, then the resync.
+Ticket 24, which prompted this, was merged in the meantime.
 
 ## Why
 

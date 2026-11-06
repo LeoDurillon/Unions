@@ -2,6 +2,7 @@
 // outputs, and its report.
 import {
   previewUrlVariable,
+  shortSha,
   type AgentInputs,
   type AgentSetup,
   type CiOutput,
@@ -74,6 +75,11 @@ export function agentServicesHint(setup: AgentSetup | null | undefined): string 
 }
 
 /** Sent into the resumed session when the user asks for changes. */
+/** The branch was resynced from GitHub since the session's last turn: what it remembers may be stale. */
+export function resyncPrompt(from: string): string {
+  return `Note: since your last turn, someone else pushed to this branch or rewrote it on GitHub, and the workspace was reset onto it (it was at \`${shortSha(from)}\`). The files and the history may differ from what you remember: read them again before you change them.`;
+}
+
 export function feedbackPrompt(feedback: string): string {
   return `# Feedback from the user\n\n${feedback}\n\nAddress it in the code, run the checks, commit, and finish with an updated report.`;
 }

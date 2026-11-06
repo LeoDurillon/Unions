@@ -15,6 +15,8 @@ export * from './custom-agent-usage';
 export * from './custom-agents';
 export * from './mcp-connectors';
 export * from './attachments';
+export * from './branch-move';
+export * from './branch-moves';
 export * from './agents';
 export * from './diagrams';
 export * from './db';

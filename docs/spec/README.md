@@ -16,7 +16,7 @@ Everything the agent does is mirrored to the GitHub issue.
 - [Project instructions](project-instructions.md): free text sent to every agent run of a project.
 - [Memory](memory.md): lessons per agent step, curated from the user's feedback.
 - [Investigations](investigations.md): one-off agent runs on a custom prompt.
-- [Rebase](rebase.md): bringing a ticket's branch onto the latest base.
+- [Rebase](rebase.md): bringing a ticket's branch onto the latest base, and resyncing a branch someone else moved on GitHub.
 - [Change of target](retarget.md): moving a finished ticket's own commits onto another base, and its PR.
 - [Simplify history](simplify-history.md): rewriting a branch's commits for review.
 - [Stacks of pull requests](pr-stacks.md): a ticket's pull request split into stacked ones, one per part of its spec.

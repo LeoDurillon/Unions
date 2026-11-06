@@ -235,6 +235,9 @@ const OTHER_COMMANDS: Record<string, (db: Db, command: Command, hooks: CommandHo
   edit_ticket: (_db, command, hooks) => {
     hooks.editTicket(requireTicketId(command), ticketEditOf(command.payload));
   },
+  resync_branch: (_db, command, hooks) => {
+    hooks.resyncBranch(requireTicketId(command));
+  },
   rerun_ci_job: (_db, command, hooks) => {
     hooks.rerunCiJob(requireTicketId(command), ciJobOf(command.payload));
   },

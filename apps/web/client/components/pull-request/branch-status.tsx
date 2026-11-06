@@ -11,14 +11,22 @@ const HELP =
   'Git rebases the branch and the checks run, then it is force-pushed. The implementation agent is called only for conflicts or failing checks, and then the final review runs again. On failure the branch is left as it was.';
 
 /**
- * Where the branch can be rewritten (a rebase, a simpler history): the ticket waits on its final
- * review, or is done with the PR open.
+ * Why the branch cannot be rewritten now (a rebase, a simpler history, a split, a new target); null
+ * when it can: the ticket waits on its final review, or is done with the PR open, and the branch on
+ * GitHub is the one Union pushed.
  */
+export function rewriteBlock(detail: TicketDetail): string | null {
+  const { phase, remoteMoved } = detail.ticket;
+  if (remoteMoved !== null) {
+    return 'The branch moved on GitHub: resync it first';
+  }
+  const ready =
+    phase.kind === 'done' || (phase.kind === 'awaiting_approval' && phase.step === 'final_review');
+  return ready ? null : 'Available at the final review, or once done';
+}
+
 export function canRewrite(detail: TicketDetail): boolean {
-  const { phase } = detail.ticket;
-  return (
-    phase.kind === 'done' || (phase.kind === 'awaiting_approval' && phase.step === 'final_review')
-  );
+  return rewriteBlock(detail) === null;
 }
 
 /**
@@ -56,7 +64,7 @@ export function BranchStatus({ detail }: { detail: TicketDetail }): ReactElement
         </span>
         <Button
           disabled={!canRewrite(detail) || command.isPending}
-          title={canRewrite(detail) ? undefined : 'Available at the final review, or once done'}
+          title={rewriteBlock(detail) ?? undefined}
           onClick={() => {
             command.mutate({ type: 'rebase' });
           }}

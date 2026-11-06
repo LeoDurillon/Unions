@@ -7,29 +7,41 @@ import type { GitHubApi } from './github/api';
 import { gitHubHooks } from './github/hooks';
 import { removeContainers } from './janitor';
 import { notionHooks } from './notion/comment-post';
+import type { ProvisionConfig } from './provision';
+import { resyncBranch, type ResyncDeps } from './resync-branch';
 import type { SideRuns } from './side-runs';
 import { unionUpdateHooks } from './union-update';
 
+/** The ticket workspace's own commands: resyncing its branch from GitHub. */
+function workspaceHooks(deps: ResyncDeps): Pick<CommandHooks, 'resyncBranch'> {
+  return {
+    resyncBranch: (ticketId) => {
+      void resyncBranch(deps, ticketId);
+    },
+  };
+}
+
+type HookDeps = Pick<
+  SideRuns,
+  | 'investigations'
+  | 'agentReviews'
+  | 'reviewGroupings'
+  | 'reviewExplanations'
+  | 'reviewReports'
+  | 'reviewAgentRuns'
+  | 'prDescriptions'
+  | 'containerRuns'
+  | 'previews'
+  | 'updater'
+> & {
+  db: Db;
+  runtime: ContainerRuntime;
+  config: ProvisionConfig;
+  apiFor: (project: Project) => GitHubApi | null;
+};
+
 /** What the commands hand off to the running worker: all asynchronous, so draining stays synchronous. */
-export function workerHooks(
-  deps: Pick<
-    SideRuns,
-    | 'investigations'
-    | 'agentReviews'
-    | 'reviewGroupings'
-    | 'reviewExplanations'
-    | 'reviewReports'
-    | 'reviewAgentRuns'
-    | 'prDescriptions'
-    | 'containerRuns'
-    | 'previews'
-    | 'updater'
-  > & {
-    db: Db;
-    runtime: ContainerRuntime;
-    apiFor: (project: Project) => GitHubApi | null;
-  },
-): CommandHooks {
+export function workerHooks(deps: HookDeps): CommandHooks {
   const { db, runtime, investigations, agentReviews, reviewGroupings, prDescriptions, previews } =
     deps;
   const { apiFor, containerRuns, reviewExplanations, reviewReports, reviewAgentRuns, updater } =
@@ -65,6 +77,7 @@ export function workerHooks(
     preview: (owner, action, options) => {
       previews.run(owner, action, options);
     },
+    ...workspaceHooks({ db, runtime, config: deps.config }),
     ...notionHooks(db),
     ...gitHubHooks(db, apiFor),
     ...unionUpdateHooks(updater),

@@ -1,5 +1,5 @@
 // A draggable ticket card for the board: its title, its state, the ticket it builds on, its pull
-// request and CI checks, what its agent is doing while it runs, and Start while it waits in the
+// request, its CI checks and a branch moved on GitHub, what its agent is doing while it runs, and Start while it waits in the
 // backlog.
 import { useDraggable } from '@dnd-kit/core';
 import { flowName, resolveFlow } from '@union/core/flows';
@@ -35,6 +35,18 @@ function ChecksBadge({ ticket }: { ticket: TicketSummary }): ReactElement | null
 }
 
 /** How the ticket's pull request ended, for the Merged / Closed column; null while it has not. */
+/** The branch moved on GitHub since Union pushed it: the Pull request tab offers a resync. */
+function MovedBadge({ ticket }: { ticket: TicketSummary }): ReactElement | null {
+  if (ticket.prState !== 'open' || ticket.remoteMoved === null) {
+    return null;
+  }
+  return (
+    <Badge tone="amber" title="Resync it from the Pull request tab">
+      Branch moved
+    </Badge>
+  );
+}
+
 function PrEnd({ prState }: { prState: TicketSummary['prState'] }): ReactElement {
   return prState === 'merged' ? (
     <Badge tone="blue">Merged</Badge>
@@ -152,6 +164,7 @@ export function TicketCard({
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
         <CardStatus ticket={ticket} />
         <ChecksBadge ticket={ticket} />
+        <MovedBadge ticket={ticket} />
         {ticket.stack ? <StackBadge stack={ticket.stack} /> : null}
         {config ? <FlowBadge ticket={ticket} config={config} /> : null}
         {draggable && onStart ? (

@@ -51,6 +51,9 @@ test('remove_containers hands every container to the hook', () => {
     editTicket: () => {
       // Not under test.
     },
+    resyncBranch: () => {
+      // Not under test.
+    },
     rerunCiJob: () => {
       // Not under test.
     },

@@ -11,10 +11,11 @@ import {
 } from 'drizzle-orm/sqlite-core';
 
 import type { IntegrationKindName } from './integrations/kinds';
-import type { InvestigationExchange, LeftBase, ProjectConfig } from './schema-types';
+import type { BranchMove, InvestigationExchange, LeftBase, ProjectConfig } from './schema-types';
 import type { AgentEffort, AgentModel, BoardStatus, Phase, PipelineStep, Step } from './states';
 
 export type {
+  BranchMove,
   InvestigationExchange,
   LeftBase,
   ProjectConfig,
@@ -122,6 +123,12 @@ export const tickets = sqliteTable(
      */
     prChecksState: text('pr_checks_state', { enum: ['pending', 'success', 'failure'] }),
     prChecksSha: text('pr_checks_sha'),
+    /** The branch's commit as Union last pushed it; null: never pushed, or not known. */
+    pushedSha: text('pushed_sha'),
+    /** The branch moved on GitHub away from `pushed_sha`; null: it did not, or it was resynced. */
+    remoteMoved: text('remote_moved', { mode: 'json' }).$type<BranchMove>(),
+    /** The commit a resync left: the next agent run is told the branch changed under it. */
+    resyncedFrom: text('resynced_from'),
     containerName: text('container_name'),
     homeVolume: text('home_volume'),
     workspaceVolume: text('workspace_volume'),

@@ -1,6 +1,7 @@
 // The only surface of GitHub the worker uses, and the shapes it passes; tests substitute an
 // in-memory fake.
 import type {
+  Comparison,
   ProjectFieldInput,
   ProjectLocator,
   RemoteProjectField,
@@ -157,6 +158,8 @@ export type GitHubApi = {
     number: number,
     behind: boolean,
   ): Promise<PullRequestStatus | null>;
+  /** How `head` compares with `base` (`compare/<base>...<head>`); null when GitHub has not one of them. */
+  compareCommits(repo: RepoRef, base: string, head: string): Promise<Comparison | null>;
   /** The CI checks of the pull request's head commit; null when the pull request is gone. */
   pullRequestChecks(repo: RepoRef, number: number): Promise<PullRequestChecks | null>;
   /** Runs a GitHub Actions job (its check run id) again, with the jobs that depend on it. */

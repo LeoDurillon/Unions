@@ -3,6 +3,7 @@ import {
   InvalidTransition,
   isBranchName,
   listSlices,
+  movedBranchRefusal,
   schema,
   transition,
   type Db,
@@ -39,6 +40,10 @@ function assertRetargetable(db: Db, ticket: Ticket, project: Project, branch: st
   }
   if (listSlices(db, ticket.id).length > 0) {
     throw fail(CONFLICT, 'The ticket is split into a stack: split it again on the new base');
+  }
+  const moved = movedBranchRefusal(ticket, 'retarget');
+  if (moved) {
+    throw fail(CONFLICT, moved);
   }
   if (!isBranchName(branch) || branch === ticket.branch) {
     throw fail(CONFLICT, `"${branch}" cannot be the ticket's target`);

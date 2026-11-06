@@ -251,6 +251,9 @@ test('the cancel command cancels a queued run itself and hands a running one to 
     editTicket: () => {
       // Not under test.
     },
+    resyncBranch: () => {
+      // Not under test.
+    },
     rerunCiJob: () => {
       // Not under test.
     },

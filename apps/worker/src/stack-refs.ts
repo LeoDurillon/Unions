@@ -2,6 +2,7 @@
 import {
   openSlices,
   privatePushFiles,
+  recordPushed,
   schema,
   type ContainerRuntime,
   type TicketSlice,
@@ -12,7 +13,7 @@ import { mustRunIn } from './container-exec';
 import { REPO_DIR } from './provision';
 import { projectRemote } from './publish';
 import type { Rebase } from './rebase-agent';
-import { headCommit } from './rebase-git';
+import { branchTip, headCommit } from './rebase-git';
 import { setBranches } from './stack-git';
 import { pushStack } from './stack-push';
 
@@ -68,7 +69,7 @@ export async function recordTips(rebase: Rebase): Promise<void> {
 
 /**
  * Pushes the rewritten stack in one atomic push: each lower slice leased on its recorded tip (what
- * was last pushed), the ticket's branch on `lease`; then records the new tips.
+ * was last pushed), the ticket's branch on `lease`; then records the new tips and the ticket's push.
  */
 export async function pushRewrittenStack(rebase: Rebase, lease: string): Promise<void> {
   const { deps, container, project, context, branch } = rebase;
@@ -82,4 +83,5 @@ export async function pushRewrittenStack(rebase: Rebase, lease: string): Promise
     privateFiles: privatePushFiles(deps.db, context.ticket),
   });
   await recordTips(rebase);
+  recordPushed(deps.db, context.ticket.id, await branchTip(deps.runtime, container, branch));
 }

@@ -5,7 +5,7 @@ import type { TicketDetail } from '../../../src/api-types';
 import { useTicketCommands } from '../../lib/use-ticket-commands';
 import { HelpText } from '../help-text';
 import { Button, ErrorText } from '../ui';
-import { canRewrite } from './branch-status';
+import { canRewrite, rewriteBlock } from './branch-status';
 
 const HELP =
   'An agent proposes slices of the spec, each one a pull request on the one below. You edit and approve the plan in its Worker tab; the implementation agent then rewrites the commits into the slices, the code unchanged, and the stack is pushed and opened on GitHub.';
@@ -30,7 +30,7 @@ export function SplitStack({ detail }: { detail: TicketDetail }): ReactElement |
         <span>Too big to review in one piece?</span>
         <Button
           disabled={!allowed || command.isPending}
-          title={allowed ? undefined : 'Available at the final review, or once done'}
+          title={rewriteBlock(detail) ?? undefined}
           onClick={() => {
             command.mutate({ type: 'split' });
           }}

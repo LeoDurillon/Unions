@@ -131,3 +131,9 @@ export type PullRequestFile = {
  * merged and deleted, or edited there), and the base's merged pull request when it has one.
  */
 export type LeftBase = { branch: string; prNumber: number | null };
+
+/**
+ * The ticket's branch moved on GitHub away from what Union last pushed: `ahead` when commits were
+ * added on top of it, `diverged` when it was rewritten (a rebase, a force-push).
+ */
+export type BranchMove = { from: string; to: string; kind: 'ahead' | 'diverged' };

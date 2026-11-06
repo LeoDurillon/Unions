@@ -7,7 +7,7 @@ import { api } from '../../lib/api';
 import { BranchPicker } from '../branch-picker';
 import { HelpText } from '../help-text';
 import { Button, ErrorText } from '../ui';
-import { canRewrite } from './branch-status';
+import { canRewrite, rewriteBlock } from './branch-status';
 
 const HELP =
   "Only this ticket's commits move onto the new branch, then it is force-pushed and the pull request targets it. Git rebases them and the checks run; the implementation agent is called only for conflicts or failing checks, and then the final review runs again. On failure the branch is left as it was.";
@@ -78,7 +78,7 @@ export function ChangeTarget({ detail }: { detail: TicketDetail }): ReactElement
         </span>
         <Button
           disabled={!allowed || retarget.isPending}
-          title={allowed ? undefined : 'Available at the final review, or once done'}
+          title={rewriteBlock(detail) ?? undefined}
           onClick={() => {
             setPicking(!picking);
           }}

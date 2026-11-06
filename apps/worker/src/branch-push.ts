@@ -1,5 +1,5 @@
 // Force-pushes a rewritten branch with a lease: the ticket's alone, or every slice of its stack together.
-import { listSlices, privatePushFiles, type Project } from '@union/core';
+import { listSlices, privatePushFiles, recordPushed, type Project } from '@union/core';
 
 import { PrivateFilesError, projectRemote, pushBranch } from './publish';
 import type { Rebase } from './rebase-agent';
@@ -17,11 +17,12 @@ async function push(rebase: Rebase, lease: string): Promise<void> {
     await pushRewrittenStack(rebase, lease);
     return;
   }
-  await pushBranch(deps.runtime, container, await remoteOf(deps, project), {
+  const pushed = await pushBranch(deps.runtime, container, await remoteOf(deps, project), {
     branch,
     lease,
     privateFiles: privatePushFiles(deps.db, context.ticket),
   });
+  recordPushed(deps.db, context.ticket.id, pushed);
 }
 
 /**

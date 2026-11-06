@@ -1,6 +1,7 @@
 // What each type of event in the log carries, keyed by its `type`: the one place to add an event.
 import type { PortForward } from './agent-environment';
 import type { ReviewVerdict } from './pr-review-verdicts';
+import type { BranchMove } from './schema-types';
 import type { Action, BoardStatus, Phase, Step } from './states';
 import type * as tables from './tables';
 
@@ -35,6 +36,12 @@ type TicketPayloads = {
     prNumber: number | null;
     reason: 'merged' | 'edited';
   };
+  /** The branch on GitHub is no longer what Union pushed: commits were added, or it was rewritten. */
+  branch_moved: BranchMove;
+  /** The workspace was reset onto the branch as GitHub has it. */
+  branch_resynced: { from: string; to: string };
+  /** The resync was refused (work it would drop, a step on the branch) or failed: nothing changed. */
+  branch_resync_failed: Failure;
   /** A rebase moved the branch off the base it left: the notice goes. */
   left_base_dropped: { branch: string };
   ticket_flow_chosen: { flow: Column<typeof tables.tickets, 'flow'> };

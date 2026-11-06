@@ -1,4 +1,6 @@
-// The pull requests of the in-memory GitHub for tests, and their lookups by branch: the base of `FakeGitHubApi`.
+// The pull requests of the in-memory GitHub for tests, their lookups by branch and commit comparisons: the base of `FakeGitHubApi`.
+import type { Comparison } from '@union/core';
+
 import type { PullRequestRef, PullRequestState, RepoRef } from './api';
 import { FakeStacks } from './fake-stacks';
 
@@ -23,6 +25,17 @@ export type FakePull = PullRequestRef & {
 
 export abstract class FakePulls extends FakeStacks {
   readonly pulls: FakePull[] = [];
+  /** `compare/<base>...<head>` answers, keyed `base...head`; unset: identical for one commit, else ahead. */
+  readonly comparisons = new Map<string, Comparison | null>();
+
+  compareCommits(_repo: RepoRef, base: string, head: string): Promise<Comparison | null> {
+    this.calls.push('compareCommits');
+    const known = this.comparisons.get(`${base}...${head}`);
+    if (known !== undefined) {
+      return Promise.resolve(known);
+    }
+    return Promise.resolve(base === head ? 'identical' : 'ahead');
+  }
 
   findPullRequest(_repo: RepoRef, branch: string): Promise<PullRequestRef | null> {
     this.calls.push('findPullRequest');

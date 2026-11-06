@@ -23,6 +23,16 @@ export async function headCommit(runtime: ContainerRuntime, container: string): 
   return head.trim();
 }
 
+/** The commit `branch` is at in the workspace. */
+export async function branchTip(
+  runtime: ContainerRuntime,
+  container: string,
+  branch: string,
+): Promise<string> {
+  const tip = await mustRunIn(runtime, container, git(['rev-parse', `refs/heads/${branch}`]));
+  return tip.trim();
+}
+
 /** Whether `ancestor` is already part of `ref`'s history. */
 export function contains(
   runtime: ContainerRuntime,

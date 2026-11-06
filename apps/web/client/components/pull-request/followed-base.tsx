@@ -4,7 +4,7 @@ import type { ReactElement } from 'react';
 import type { TicketDetail } from '../../../src/api-types';
 import { useTicketCommands } from '../../lib/use-ticket-commands';
 import { Button, ErrorText } from '../ui';
-import { canRewrite } from './branch-status';
+import { canRewrite, rewriteBlock } from './branch-status';
 
 /** Rebase from the notice, for a branch up to date with its new base: the behind count offers none. */
 function RebaseButton({ detail }: { detail: TicketDetail }): ReactElement {
@@ -14,7 +14,7 @@ function RebaseButton({ detail }: { detail: TicketDetail }): ReactElement {
     <div>
       <Button
         disabled={!allowed || command.isPending}
-        title={allowed ? undefined : 'Available at the final review, or once done'}
+        title={rewriteBlock(detail) ?? undefined}
         onClick={() => {
           command.mutate({ type: 'rebase' });
         }}

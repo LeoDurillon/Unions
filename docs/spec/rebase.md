@@ -60,6 +60,26 @@ its branch, else from the workspace's last copy; with none of them, a plain reba
 pushed, `left_base` is cleared and the "Builds on" line removed from the description. A step that runs before that
 rebase (a revision, the final review) first gets the new base fetched into the workspace.
 
+## Branch moved on GitHub
+
+Union records the commit it last pushed for a ticket's branch (`tickets.pushed_sha`, set by every push: the
+implementation's, a revision's, a rebase's, a simplified history's, a stack's). During its regular pull the worker
+compares an open pull request's head with it (not for a split ticket, and not while a step runs or is paused):
+`compare/<pushed>...<head>` sorts the move into `ahead` (commits added on top) or `diverged` (the branch rewritten;
+also a head behind the push seen at two polls in a row, since right after a push GitHub may lag). The move is kept
+in `tickets.remote_moved` (`{ from, to, kind }`, event `branch_moved`); a head back on `pushed_sha`, or Union's next
+push, clears it.
+
+While it is set, the PR tab says so with **Resync from GitHub**, the board card shows "Branch moved", and the web
+refuses the actions that push the branch (rebase, revise, retry, simplify, split, restack, change of target).
+**Resync** queues `resync_branch`, a plain worker command (no state-machine action, the phase stays): the worker
+starts the container, fetches the base and the branch (`fetchIntoContainer`), refuses when the workspace is on
+another branch, has uncommitted changes, or holds commits that are neither the pushed commit nor part of GitHub's
+branch, then runs `git reset --hard origin/<branch>`, captures the review diff again and records the new head as
+pushed (`branch_resynced`; a refusal or failure is `branch_resync_failed`, nothing changed). Nothing is pushed and
+no agent runs. The next implementation turn in a resumed session is told the branch was resynced
+(`tickets.resynced_from`, read once). A split ticket is not resynced yet.
+
 ## Failure
 
 - Conflicts the agent cannot resolve, checks that still fail, or any other failure: the host aborts any rebase in

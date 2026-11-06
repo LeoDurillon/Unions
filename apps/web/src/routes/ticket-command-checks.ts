@@ -1,5 +1,5 @@
-// What a command needs besides a valid move of the state machine: no command already waiting, a startable ticket, an open pull request, stacks turned on.
-import { schema, type Db } from '@union/core';
+// What a command needs besides a valid move of the state machine: no command already waiting, a startable ticket, an open pull request, stacks turned on, a branch not moved on GitHub.
+import { movedBranchRefusal, schema, type Db } from '@union/core';
 import { and, eq, isNull } from 'drizzle-orm';
 
 import type { CommandType, TicketSummary } from '../api-types';
@@ -34,6 +34,10 @@ function assertSimplifiable(ticket: TicketSummary): void {
 export function assertCommandFits(db: Db, ticket: TicketSummary, type: CommandType): void {
   if (type === 'start') {
     assertStartable(db, ticket);
+  }
+  const moved = movedBranchRefusal(ticket, type);
+  if (moved) {
+    throw fail(CONFLICT, moved);
   }
   // The worker knows the PR is open (and how far behind it is) from GitHub: no count, no rebase.
   if (type === 'rebase' && (ticket.branch === null || ticket.behindBy === null)) {

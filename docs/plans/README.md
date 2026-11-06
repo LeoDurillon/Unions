@@ -88,7 +88,7 @@ and linked.
   commits, even after a squash merge. Built (branch `follow-merged-base`, 2026-10-23).
 - [Resync a branch someone else rewrote](resync-branch.md): the poll compares the PR's head with what Union
   pushed, the PR tab flags a move (added commits or a rewrite) and **Resync from GitHub** resets the workspace
-  onto it, with no push and no agent. Planned (2026-11-06, seen on ticket 24).
+  onto it, with no push and no agent. Built (branch `resync-branch`, 2026-11-06).
 - [Explain a selection of the diff](review-explain.md): select lines on the review page, an agent explains in a
   side panel how they work and which parts of the specs and repository docs they relate to; follow-ups resume
   its session. Built (branch `review-explain`), steps 1 to 4; a real run is left.

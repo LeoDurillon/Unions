@@ -8,6 +8,7 @@ import {
   getTicket,
   parentOf,
   privatePushFiles,
+  recordPushed,
   schema,
   ticketLabel,
   type ContainerRuntime,
@@ -68,14 +69,14 @@ export async function assertNoPrivateFiles(bare: string, files: PrivateFile[]): 
  * Takes the ticket's branch out of the container as a git bundle and pushes it from the host with the
  * project's token or GitHub App installation; the container never sees a credential. With `lease`
  * (the commit the remote branch must still be on) it force-pushes, for a rewritten history: if
- * someone pushed in between, GitHub refuses and nothing is overwritten.
+ * someone pushed in between, GitHub refuses and nothing is overwritten. Returns the commit pushed.
  */
 export async function pushBranch(
   runtime: ContainerRuntime,
   container: string,
   remote: { url: string; secret: string | null },
   target: { branch: string; lease?: string; privateFiles?: PrivateFile[] },
-): Promise<void> {
+): Promise<string> {
   const { branch, lease, privateFiles = [] } = target;
   const dir = await mkdtemp(path.join(tmpdir(), 'union-push-'));
   try {
@@ -101,6 +102,8 @@ export async function pushBranch(
       ],
       remote.secret,
     );
+    const pushed = await hostGit(['-C', bare, 'rev-parse', `refs/heads/${branch}`], null);
+    return pushed.trim();
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
@@ -189,10 +192,11 @@ export async function publishBranch(input: {
   const { db, project, ticket, branch, base } = input;
   try {
     const remote = await projectRemote(db, input.config.gitBaseUrl, project);
-    await pushBranch(input.runtime, input.container, remote, {
+    const pushed = await pushBranch(input.runtime, input.container, remote, {
       branch,
       privateFiles: privatePushFiles(db, ticket),
     });
+    recordPushed(db, ticket.id, pushed);
     emitEvent(db, { type: 'branch_pushed', ticketId: ticket.id, payload: { branch } });
     // Re-read: the user may have linked a PR while the agent was working. A linked PR is kept.
     const { prNumber } = getTicket(db, ticket.id);

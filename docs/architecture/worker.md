@@ -46,6 +46,13 @@
   one resumes as such: `pauseRebase` reads `context.step`). Once it succeeds, `left_base` is cleared
   (`left_base_dropped`) and the "Builds on" line removed. Before any step of a ticket with a `left_base`, the
   executor fetches the new base into the workspace when it has no local branch for it (`ensureFollowedBase`).
+- A branch moved on GitHub (`github/branch-moved.ts`, `resync-branch.ts`, pure part `branch-move.ts` and records
+  in `branch-moves.ts` in core): every push records `tickets.pushed_sha` (`pushBranch` returns the commit pushed;
+  `pushRewrittenStack` and the split's push read the branch's tip). The pull compares an open, unsplit PR's head
+  with it (`compareCommits`) when no step holds the branch, and keeps a move in `tickets.remote_moved`
+  (`branch_moved`). The `resync_branch` command (hook `resyncBranch`) fetches, refuses when the reset would drop
+  work, resets onto `origin/<branch>`, captures the diff and records the new head (`branch_resynced`, else
+  `branch_resync_failed`); the next resumed implementation turn gets `resyncPrompt` once (`takeResyncedFrom`).
 - `simplify.ts` (with `simplify-agent.ts`, `simplify-finish.ts`, `simplify-git.ts`, `simplify-push.ts`): the
   on-demand history simplification. Same fetch and implementer session as the rebase (`runInImplementerSession` in
   `rebase-agent.ts`), then the agent's leftovers are committed (`commitLeftovers`; a hook's refusal pauses the step
