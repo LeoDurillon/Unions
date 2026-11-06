@@ -47,7 +47,7 @@ test('the writer reads the asked feedback in a throwaway container on Haiku, and
     .values({ projectId, section: 'implement', text: 'Use dayjs for dates, not Intl.' })
     .returning()
     .get().id;
-  saveLessons(db, projectId, [{ section: 'test_plan', rule: 'No e2e.' }]);
+  const [kept] = saveLessons(db, projectId, [{ section: 'test_plan', rule: 'No e2e.' }]);
   const dir = await mkdtemp(path.join(tmpdir(), 'union-lesson-writer-'));
   const credentialsPath = path.join(dir, 'credentials.json');
   await writeFile(credentialsPath, JSON.stringify({ claudeAiOauth: { accessToken: 'x' } }));
@@ -63,7 +63,7 @@ test('the writer reads the asked feedback in a throwaway container on Haiku, and
       return Promise.resolve({
         kind: 'ok',
         sessionId: 's',
-        text: '[{"section": "implement", "rule": "Format dates with dayjs."}]',
+        text: `[{"section": "implement", "rule": "Format dates with dayjs.", "replaces": [${kept?.id}, 999]}]`,
       });
     },
   });
@@ -73,12 +73,14 @@ test('the writer reads the asked feedback in a throwaway container on Haiku, and
     await runner.idle();
     expect(runs[0]?.model).toBe('haiku');
     expect(runs[0]?.prompt).toContain('Use dayjs for dates, not Intl.');
-    expect(runs[0]?.prompt).toContain('- [test_plan] No e2e.');
+    expect(runs[0]?.prompt).toContain(`- #${kept?.id} [test_plan] No e2e.`);
     expect(calls).toContain(`create union-lesson-writer-${row.id}`);
     expect(calls.at(-1)).toBe(`remove union-lesson-writer-${row.id}`);
     expect(latestLessonSuggestion(db, projectId)).toMatchObject({
       status: 'ready',
-      suggestions: [{ section: 'implement', rule: 'Format dates with dayjs.' }],
+      suggestions: [
+        { section: 'implement', rule: 'Format dates with dayjs.', replaces: [kept?.id] },
+      ],
     });
   } finally {
     await rm(dir, { recursive: true, force: true });

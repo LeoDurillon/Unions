@@ -150,6 +150,11 @@ every run of this project.
 - On a feedback: **Make a lesson** (drafted from its first line, for you to edit), **Suggest with agent**, or
   **Dismiss**.
 - **Suggest lessons from new feedback** asks the lesson writer agent for proposals. **Accept** or dismiss each one.
+  The writer puts each lesson on the step whose agent must act on it, which is not always the step you gave the
+  feedback on: a question to ask goes to Intake, a fact about your infrastructure to Technical. It can also propose
+  to fix lessons you already have: merge two that say the same thing, move one to the right step, or reword two
+  that contradict each other. Such a proposal shows the lessons it replaces, struck through; **Replace** puts it in
+  their place.
 - Write, edit, reorder or remove lessons by hand, grouped by step. Up to 500 characters each. The last group,
   **Spec report**, holds the rules the spec report reads: the ones you keep when you mark an item of its **Needs
   you** not useful, and any you add (for example "Flag a page shared by loan and subsidy campaigns").

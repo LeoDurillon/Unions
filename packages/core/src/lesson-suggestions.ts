@@ -2,13 +2,13 @@
 import { and, asc, desc, eq, inArray } from 'drizzle-orm';
 
 import type { Db } from './db';
-import type { LessonInput } from './lesson-input';
+import type { LessonProposal } from './lesson-input';
 import * as schema from './tables';
 
 export type LessonSuggestion = typeof schema.lessonSuggestions.$inferSelect;
 
 export type LessonSuggestionOutcome =
-  | { status: 'ready'; suggestions: LessonInput[] }
+  | { status: 'ready'; suggestions: LessonProposal[] }
   | { status: 'failed'; error: string };
 
 /** Why a run is refused; the web answers 409 with the message. */

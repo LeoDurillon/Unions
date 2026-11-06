@@ -1,6 +1,12 @@
 // Project settings → Memory: the lessons each agent step gets, and the feedback they are made from.
 import type { FeedbackItem, Lesson } from '@union/core';
-import { MAX_LESSON_LENGTH, type LessonInput } from '@union/core/lesson-input';
+import {
+  isLessonSection,
+  MAX_LESSON_LENGTH,
+  withProposal,
+  type LessonInput,
+  type LessonProposal,
+} from '@union/core/lesson-input';
 import { FULL_FLOW, type PipelineStep } from '@union/core/states';
 import { useState, type ReactElement } from 'react';
 
@@ -42,16 +48,20 @@ function useFeedbackActions(
   const curate = useCurateFeedback(projectId);
   const { suggest } = useLessonWriter(projectId);
   const run = useLessonSuggestion(projectId).data;
-  const add = (lessons: LessonInput[], feedbackIds: readonly number[]): void => {
+  const add = (proposals: readonly LessonProposal[], feedbackIds: readonly number[]): void => {
     const curated = form.value.curated.filter((id) => !feedbackIds.includes(id));
     form.set({
       ...form.value,
-      lessons: [...form.value.lessons, ...lessons],
+      lessons: proposals.reduce(
+        (lessons, proposal) => withProposal(lessons, proposal),
+        form.value.lessons,
+      ),
       curated: [...curated, ...feedbackIds],
     });
   };
   return {
     projectId,
+    lessons: form.value.lessons,
     pending: form.value.curated.filter((id) => fresh.has(id)),
     makeLesson: (item) => {
       add([draftFrom(item)], [item.id]);
@@ -84,7 +94,9 @@ function MemoryForm({
   const form = useSettingsForm<MemorySave>(
     () => ({
       enabled: project.config.memory !== false,
-      lessons: lessons.map(({ section, rule }) => ({ section: stepOf(section), rule })),
+      lessons: lessons.flatMap(({ id, section, rule }) =>
+        isLessonSection(section) ? [{ id, section, rule }] : [],
+      ),
       curated: [],
     }),
     (save) => write({ ...save, curated: save.curated.filter((id) => fresh.has(id)) }),

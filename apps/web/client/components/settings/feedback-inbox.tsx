@@ -1,5 +1,6 @@
 // The feedback given on Revise and final reviews: made a lesson, given to the lesson writer, or dismissed; the curated ones on request.
 import type { FeedbackItem } from '@union/core';
+import type { LessonInput } from '@union/core/lesson-input';
 import { useState, type ReactElement } from 'react';
 
 import { STEP_TITLES } from '../../lib/labels';
@@ -11,6 +12,8 @@ import { LessonSuggestions, type AcceptLessons } from './lesson-suggestions';
 /** What the page does with feedback: start a lesson from it, ask the lesson writer, or curate it at once. */
 export type FeedbackActions = {
   projectId: number;
+  /** The lessons on the page, unsaved changes included: what the writer's proposals replace. */
+  lessons: readonly LessonInput[];
   /** Feedback already used by an unsaved lesson. */
   pending: readonly number[];
   makeLesson: (item: FeedbackItem) => void;
@@ -179,7 +182,11 @@ export function FeedbackInbox({
         </label>
       </div>
       <ErrorText error={actions.error} />
-      <LessonSuggestions projectId={actions.projectId} onAccept={onAccept} />
+      <LessonSuggestions
+        projectId={actions.projectId}
+        lessons={actions.lessons}
+        onAccept={onAccept}
+      />
       {shown.length === 0 ? (
         <p className="text-xs text-zinc-500">
           Nothing new: feedback lands here when you click Revise.

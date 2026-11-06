@@ -4,7 +4,7 @@ import { eq } from 'drizzle-orm';
 
 import { saveAgent } from './agents';
 import { createDb, migrateDb, type Db } from './db';
-import { parseLessonsSave } from './lesson-input';
+import { parseLessonsSave, withProposal } from './lesson-input';
 import {
   addLesson,
   lessonsPrompt,
@@ -84,6 +84,72 @@ test('feedback lists newest first with its ticket, and is curated or restored on
   expect(listFeedback(db, projectId)[1]?.curatedAt).toBeNumber();
   setFeedbackCurated(db, projectId, first, false);
   expect(listFeedback(db, projectId)[1]?.curatedAt).toBeNull();
+});
+
+test('a save keeps the ids of the lessons it names, adds the new ones and removes the others', () => {
+  const [kept, moved, gone] = saveLessons(db, projectId, [
+    { section: 'implement', rule: 'Use bun.' },
+    { section: 'summary', rule: 'Ask about the environment.' },
+    { section: 'implement', rule: 'Use dayjs.' },
+  ]);
+  const [theirs] = saveLessons(db, otherId, [{ section: 'implement', rule: 'Not mine.' }]);
+  if (!kept || !moved || !gone || !theirs) {
+    throw new Error('Lessons not saved');
+  }
+  const saved = saveLessons(db, projectId, [
+    { id: moved.id, section: 'intake', rule: 'Ask about the environment.' },
+    { id: kept.id, section: 'implement', rule: 'Use bun.' },
+    { id: theirs.id, section: 'implement', rule: 'Taken from another project.' },
+    { section: 'test_plan', rule: 'No e2e.' },
+  ]);
+  expect(saved.map(({ section, rule, position }) => ({ section, rule, position }))).toEqual([
+    { section: 'intake', rule: 'Ask about the environment.', position: 0 },
+    { section: 'implement', rule: 'Use bun.', position: 1 },
+    { section: 'implement', rule: 'Taken from another project.', position: 2 },
+    { section: 'test_plan', rule: 'No e2e.', position: 3 },
+  ]);
+  expect(saved[0]?.id).toBe(moved.id);
+  expect(saved[1]).toEqual({ ...kept, position: 1 });
+  expect(saved.map((lesson) => lesson.id)).not.toContain(gone.id);
+  expect(saved.map((lesson) => lesson.id)).not.toContain(theirs.id);
+  expect(listLessons(db, otherId)).toEqual([theirs]);
+});
+
+test('a save refuses a bad id and two lessons with the same id', () => {
+  const lesson = { section: 'implement', rule: 'Use bun.' } as const;
+  expect(parseLessonsSave({ lessons: [{ ...lesson, id: 1 }] })).toEqual({
+    lessons: [{ ...lesson, id: 1 }],
+    curated: [],
+  });
+  expect(parseLessonsSave({ lessons: [{ ...lesson, id: 'a' }] })).toBe('Lesson 1 has a bad id');
+  expect(
+    parseLessonsSave({
+      lessons: [
+        { ...lesson, id: 2 },
+        { ...lesson, id: 2 },
+      ],
+    }),
+  ).toBe('Two lessons have the same id');
+});
+
+test('an accepted proposal takes the place of the lessons it replaces, or is added', () => {
+  const lessons = [
+    { id: 1, section: 'implement', rule: 'Use dayjs.' },
+    { id: 2, section: 'summary', rule: 'Ask about the environment.' },
+    { section: 'implement', rule: 'Unsaved.' },
+    { id: 3, section: 'implement', rule: 'Format dates with dayjs.' },
+  ] as const;
+  expect(
+    withProposal(lessons, { section: 'implement', rule: 'Dates: dayjs.', replaces: [3, 1] }),
+  ).toEqual([{ id: 1, section: 'implement', rule: 'Dates: dayjs.' }, lessons[1], lessons[2]]);
+  expect(withProposal(lessons, { section: 'intake', rule: 'Ask.', replaces: [9] })).toEqual([
+    ...lessons,
+    { section: 'intake', rule: 'Ask.' },
+  ]);
+  expect(withProposal(lessons, { section: 'intake', rule: 'Old run.' }).at(-1)).toEqual({
+    section: 'intake',
+    rule: 'Old run.',
+  });
 });
 
 test("a step's prompt gets its own lessons after the project instructions, none when it has none", () => {

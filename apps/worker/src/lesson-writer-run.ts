@@ -74,7 +74,8 @@ function write(
       const prefix = outcome.kind === 'rate_limited' ? 'Usage limit reached: ' : '';
       return { status: 'failed', error: `${prefix}${outcome.message}` };
     }
-    return { status: 'ready', suggestions: parseLessonSuggestions(outcome.text) };
+    const kept = listLessons(db, row.projectId);
+    return { status: 'ready', suggestions: parseLessonSuggestions(outcome.text, kept) };
   });
 }
 

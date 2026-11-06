@@ -1,7 +1,7 @@
 // The lesson writer's runs: the feedback the user gave it and the lessons it proposed.
 import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
-import type { LessonInput } from './lesson-input';
+import type { LessonProposal } from './lesson-input';
 import { now, projects } from './schema';
 
 export const LESSON_SUGGESTION_STATUSES = [
@@ -26,7 +26,7 @@ export const lessonSuggestions = sqliteTable(
       .references(() => projects.id, { onDelete: 'cascade' }),
     feedbackIds: text('feedback_ids', { mode: 'json' }).$type<number[]>().notNull(),
     status: text('status', { enum: LESSON_SUGGESTION_STATUSES }).notNull().default('queued'),
-    suggestions: text('suggestions', { mode: 'json' }).$type<LessonInput[]>(),
+    suggestions: text('suggestions', { mode: 'json' }).$type<LessonProposal[]>(),
     error: text('error'),
     createdAt: integer('created_at').notNull().default(now),
     startedAt: integer('started_at'),

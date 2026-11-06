@@ -34,9 +34,36 @@ export function listLessons(db: Db, projectId: number): Lesson[] {
     .all();
 }
 
+type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
+
+/** Where a save writes: the project and its lessons before the save. */
+type SaveTarget = { tx: Tx; projectId: number; kept: ReadonlyMap<number, Lesson> };
+
+/** Writes `lesson` at `position`: the kept lesson it names updated, else a new one. */
+function writeLesson(
+  { tx, projectId, kept }: SaveTarget,
+  lesson: LessonInput,
+  position: number,
+): void {
+  const { section, rule } = lesson;
+  const old = lesson.id === undefined ? undefined : kept.get(lesson.id);
+  if (!old) {
+    tx.insert(schema.lessons).values({ projectId, section, rule, position }).run();
+    return;
+  }
+  const edited = old.section !== section || old.rule !== rule;
+  if (edited || old.position !== position) {
+    tx.update(schema.lessons)
+      .set({ section, rule, position, updatedAt: edited ? Date.now() : old.updatedAt })
+      .where(eq(schema.lessons.id, old.id))
+      .run();
+  }
+}
+
 /**
- * Replaces the project's lessons with `lessons`, and marks the feedback `curated` (the ones they
- * were made from) as curated, in one transaction.
+ * Makes `lessons` the project's lessons, in their order: a lesson with the id of one kept keeps
+ * that id, the others are added, the kept ones left out are removed. Marks the feedback `curated`
+ * (the ones they were made from) as curated, in the same transaction.
  */
 export function saveLessons(
   db: Db,
@@ -45,11 +72,21 @@ export function saveLessons(
   curated: readonly number[] = [],
 ): Lesson[] {
   db.transaction((tx) => {
-    tx.delete(schema.lessons).where(eq(schema.lessons.projectId, projectId)).run();
-    if (lessons.length > 0) {
-      tx.insert(schema.lessons)
-        .values(lessons.map((lesson, position) => ({ projectId, ...lesson, position })))
-        .run();
+    const kept = new Map(
+      tx
+        .select()
+        .from(schema.lessons)
+        .where(eq(schema.lessons.projectId, projectId))
+        .all()
+        .map((lesson) => [lesson.id, lesson]),
+    );
+    const named = new Set(lessons.flatMap((lesson) => lesson.id ?? []));
+    const gone = [...kept.keys()].filter((id) => !named.has(id));
+    if (gone.length > 0) {
+      tx.delete(schema.lessons).where(inArray(schema.lessons.id, gone)).run();
+    }
+    for (const [position, lesson] of lessons.entries()) {
+      writeLesson({ tx, projectId, kept }, lesson, position);
     }
     if (curated.length > 0) {
       tx.update(schema.feedbackEvents)
@@ -150,7 +187,12 @@ export function addLesson(db: Db, projectId: number, lesson: LessonInput): Lesso
   const last = listLessons(db, projectId).at(-1);
   return db
     .insert(schema.lessons)
-    .values({ projectId, ...lesson, position: (last?.position ?? -1) + 1 })
+    .values({
+      projectId,
+      section: lesson.section,
+      rule: lesson.rule,
+      position: (last?.position ?? -1) + 1,
+    })
     .returning()
     .get();
 }

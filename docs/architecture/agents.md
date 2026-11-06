@@ -106,7 +106,7 @@ The worker appends every other format after the user's prompt, so an edit cannot
 | `pr_replies`            | a final `json` block of replies         | `pr-reply-format.ts`                                     |
 | `review_report`         | a final `json` block: the report        | `review-report-format.ts`, `review-report-result.ts`     |
 | review agents           | markdown citing `path:line`             | `review-agent-prompt.ts`; links: `diff-links.ts` (core)  |
-| `lesson_writer`         | a JSON array of lessons                 | `lesson-writer.ts` (core)                                |
+| `lesson_writer`         | a JSON array of lessons and `replaces`  | `lesson-writer.ts` (core)                                |
 | `implement`, `simplify` | a last line `Refused commit: <message>` | `leftovers.ts`                                           |
 
 A new agent whose answer is parsed puts its format in the worker's part of the prompt, not in the editable one.
