@@ -34,8 +34,14 @@ const JIRA_FIELD_TYPES = [
   'labels',
 ] as const satisfies readonly JiraFieldType[];
 
-/** The ticket's text is Union's, the issue's the team's: a rule does not overwrite them. */
-const LEFT_OUT = new Set(['summary', 'description']);
+/**
+ * Jira's own fields a rule can set. The others are Jira's to set (Created, Updated, Resolved, the Σ
+ * totals, Work Ratio…), set through time tracking (the estimates), or left out on purpose: the
+ * summary and the description, as the ticket's text is Union's and the issue's the team's. `GET
+ * /field` does not say which fields can be edited, so the list is Union's.
+ */
+const SETTABLE_SYSTEM = new Set(['duedate', 'labels', 'environment']);
+const CUSTOM_PREFIX = 'customfield_';
 
 /** System fields that hold rich text (ADF in REST v3) though their schema says `string`. */
 const RICH_SYSTEM = new Set(['environment']);
@@ -50,19 +56,25 @@ const PLAIN_TYPES: Record<string, JiraFieldType> = {
   option: 'option',
 };
 
+/** A custom field, or one of Jira's own a rule can set. */
+export function isSettableFieldId(id: string): boolean {
+  return id.startsWith(CUSTOM_PREFIX) || SETTABLE_SYSTEM.has(id);
+}
+
 export function isJiraFieldType(value: unknown): value is JiraFieldType {
   return JIRA_FIELD_TYPES.some((type) => type === value);
 }
 
 /**
  * A field's rule type from its id and schema (`{ type, items, custom }`); null for the fields rules
- * leave out: users, versions, components, sprints, multi-selects, the summary and the description.
+ * leave out: Jira's own fields but the due date, labels and environment, and custom fields of users,
+ * versions, sprints and multi-selects.
  */
 export function fieldTypeOf(
   id: string,
   schema: { type: string; items: string; custom: string },
 ): JiraFieldType | null {
-  if (LEFT_OUT.has(id)) {
+  if (!isSettableFieldId(id)) {
     return null;
   }
   if (schema.type === 'string') {

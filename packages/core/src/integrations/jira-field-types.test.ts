@@ -28,6 +28,25 @@ test('the rule type of a field comes from its schema', () => {
   ).toBe('labels');
 });
 
+test("Jira's own fields are left out but the due date, labels and environment", () => {
+  for (const id of [
+    'created',
+    'updated',
+    'lastViewed',
+    'resolutiondate',
+    'statuscategorychangedate',
+    'workratio',
+    'timespent',
+    'timeestimate',
+    'timeoriginalestimate',
+    'aggregatetimespent',
+  ]) {
+    expect(fieldTypeOf(id, schema(id === 'workratio' ? 'number' : 'datetime'))).toBeNull();
+  }
+  expect(fieldTypeOf('duedate', schema('date'))).toBe('date');
+  expect(fieldTypeOf('customfield_10015', schema('date'))).toBe('date');
+});
+
 test('fields rules leave out have no type', () => {
   expect(fieldTypeOf('summary', schema('string'))).toBeNull();
   expect(fieldTypeOf('description', schema('string'))).toBeNull();

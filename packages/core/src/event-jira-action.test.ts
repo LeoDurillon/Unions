@@ -131,3 +131,14 @@ test('a project connected without reading Jira (the setup wizard) is asked to re
   expect(refusal(() => checkedJiraTransition(db, projectId, { statusId: '3' }))).toBe(message);
   expect(refusal(() => checkedJiraComment(db, projectId, { body: 'Hi' }))).toBe(message);
 });
+
+test('fields stored before rules knew which can be set are narrowed when read back', () => {
+  connect({
+    ...FIELDS,
+    fields: [...FIELDS.fields, { id: 'created', name: 'Created', type: 'datetime' }],
+  });
+  const refused = refusal(() =>
+    checkedJiraFields(db, projectId, { values: [{ fieldId: 'created', value: '{date.now}' }] }),
+  );
+  expect(refused).toBe('Pick a field of the Jira issue');
+});

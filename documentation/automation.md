@@ -57,8 +57,9 @@ The actions on Notion and on Jira are offered only when the project is connected
   transition of the issue's workflow that leads there; an issue already in that status is left as it is. If the
   workflow has no way there from the issue's status, or the transition asks for fields (often a Resolution on
   Done), the rule fails and its Activity line says why.
-- **Set fields of the ticket's Jira issue**: one-line or multi-line text, a number, a date, a select's option (by
-  its name, as Jira shows it), or labels to add. Union reads the Jira project's statuses and the fields a rule
+- **Set fields of the ticket's Jira issue**: your custom fields (one-line or multi-line text, a number, a date, a
+  select's option by its name as Jira shows it), and of Jira's own fields the due date, the labels (added) and the
+  environment. Fields Jira fills in itself (Created, Resolved, the time spent…) are not offered. Union reads the Jira project's statuses and the fields a rule
   can set when you save the Jira settings, or with **Refresh from Jira** above the rules (needed once for a project
   connected in the setup wizard, and after adding a field in Jira).
 - **Comment on the ticket's Jira issue**: plain text, links become links.

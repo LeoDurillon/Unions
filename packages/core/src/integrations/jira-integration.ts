@@ -1,6 +1,6 @@
 // A project's Jira integration as rules read it: the Jira project's statuses and the site's settable fields, as stored.
 import type { Db } from '../db';
-import { isJiraFieldType, type JiraFieldInfo } from './jira-field-types';
+import { isJiraFieldType, isSettableFieldId, type JiraFieldInfo } from './jira-field-types';
 import type { JiraProject, JiraStatus } from './jira-parse';
 import { integrationOf } from './store';
 
@@ -26,10 +26,12 @@ function isStatus(value: unknown): value is JiraStatus {
   );
 }
 
+/** A stored field a rule can still set: fields read before the settable list was narrowed are dropped here. */
 function isFieldInfo(value: unknown): value is JiraFieldInfo {
   return (
     isRecord(value) &&
     typeof value.id === 'string' &&
+    isSettableFieldId(value.id) &&
     typeof value.name === 'string' &&
     isJiraFieldType(value.type)
   );

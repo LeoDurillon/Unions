@@ -58,6 +58,10 @@ ticket not imported from Jira is skipped ("The ticket was not imported from Jira
   | `option` (single select)                 | an option's name (no variables)           | `{ value: name }`               |
   | `array` of `string` (labels)             | labels to add, comma-separated, templates | `update: { labels: [{ add }] }` |
 
+  As built (after the first real read, 2026-11-07): `GET /field` lists every field, read-only ones included
+  (Created, Updated, Resolved, the Σ totals, Work Ratio, the estimates, set only through time tracking), and says
+  nothing of which can be edited. So Jira's own fields are an allow-list (`duedate`, `labels`, `environment`) and
+  custom fields go by type; stored lists read before are narrowed when read back (`isSettableFieldId`).
   Users, versions, components, sprints and multi-selects are left out of v1: they need ids Union would have to
   list and keep. `summary` and `description` are left out too: the ticket's text is Union's, the issue's is the
   team's. The field list is stored with the project's statuses (`integrations.fields`, read by **Refresh**).
