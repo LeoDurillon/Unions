@@ -8,25 +8,25 @@ export type SpecEntry = { kind: SpecSource; ref: string | null; label: string; u
 
 /** What the list starts from, before the user changes it. */
 export type SpecOwnerFacts =
-  | { kind: 'ticket'; notionOrigin: { id: string; url: string | null } | null }
+  | {
+      kind: 'ticket';
+      /** The tracker item the ticket comes from (a Notion page, a Jira issue), read as a spec too. */
+      trackerOrigin: { kind: 'notion' | 'jira'; id: string; url: string | null } | null;
+    }
   | { kind: 'review'; prNumber: number };
 
-/** The ticket's text and the page it came from, or the pull request's description. */
+const ORIGIN_LABELS = { notion: 'Notion page', jira: 'Jira issue' } as const;
+
+/** The ticket's text and the tracker item it came from, or the pull request's description. */
 export function startingSpecs(facts: SpecOwnerFacts): SpecEntry[] {
   if (facts.kind === 'review') {
     return [{ kind: 'pr', ref: null, label: `PR #${facts.prNumber} description`, url: null }];
   }
-  const origin: SpecEntry[] = facts.notionOrigin
-    ? [
-        {
-          kind: 'notion',
-          ref: facts.notionOrigin.id,
-          label: 'Notion page',
-          url: facts.notionOrigin.url,
-        },
-      ]
+  const origin = facts.trackerOrigin;
+  const fromTracker: SpecEntry[] = origin
+    ? [{ kind: origin.kind, ref: origin.id, label: ORIGIN_LABELS[origin.kind], url: origin.url }]
     : [];
-  return [{ kind: 'ticket', ref: null, label: 'Ticket description', url: null }, ...origin];
+  return [{ kind: 'ticket', ref: null, label: 'Ticket description', url: null }, ...fromTracker];
 }
 
 /** Two entries name the same source. */

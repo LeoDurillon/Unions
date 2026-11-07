@@ -18,7 +18,7 @@ describe('startingSpecs', () => {
   test('a ticket from Notion starts from its text and its page', () => {
     const specs = startingSpecs({
       kind: 'ticket',
-      notionOrigin: { id: 'p1', url: 'https://n/p1' },
+      trackerOrigin: { kind: 'notion', id: 'p1', url: 'https://n/p1' },
     });
     expect(specs.map((spec) => [spec.kind, spec.ref])).toEqual([
       ['ticket', null],
@@ -29,7 +29,10 @@ describe('startingSpecs', () => {
 
 describe('missingStarts', () => {
   test('a start the list already had, even removed, is not added again', () => {
-    const starts = startingSpecs({ kind: 'ticket', notionOrigin: { id: 'p1', url: null } });
+    const starts = startingSpecs({
+      kind: 'ticket',
+      trackerOrigin: { kind: 'notion', id: 'p1', url: null },
+    });
     expect(missingStarts([{ kind: 'notion', ref: 'p1' }], starts).map((spec) => spec.kind)).toEqual(
       ['ticket'],
     );
@@ -85,4 +88,25 @@ describe('parseSavedSpecs', () => {
     });
     expect(parseSavedSpecs([{ kind: 'wiki', label: 'x' }])).toHaveProperty('error');
   });
+});
+
+test("a Jira ticket's specs start with its issue", () => {
+  expect(
+    startingSpecs({
+      kind: 'ticket',
+      trackerOrigin: {
+        kind: 'jira',
+        id: 'ABC-12',
+        url: 'https://acme.atlassian.net/browse/ABC-12',
+      },
+    }),
+  ).toEqual([
+    { kind: 'ticket', ref: null, label: 'Ticket description', url: null },
+    {
+      kind: 'jira',
+      ref: 'ABC-12',
+      label: 'Jira issue',
+      url: 'https://acme.atlassian.net/browse/ABC-12',
+    },
+  ]);
 });

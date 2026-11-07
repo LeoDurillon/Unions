@@ -1,7 +1,7 @@
 // `/api/projects/:projectId/pull-requests`: the repository's pull requests and stacks, read from
 // GitHub (kept a few minutes; `?refresh` reads them again), and under `/reviews` the ones the user
 // put under review.
-import { projectGitHubAuth, schema, type Db, type NotionApi } from '@union/core';
+import { projectGitHubAuth, schema, type Db } from '@union/core';
 import { stackPlaces } from '@union/core/pr-stacks';
 import { and, eq, isNotNull } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
@@ -94,10 +94,14 @@ async function list(
  * GitHub (kept a few minutes; `?refresh` reads them again), and
  * under `/reviews` the ones the user put under review.
  */
-export function pullRequestRoutes(db: Db, github: OnboardingGitHub, notion: NotionApi): Hono {
+export function pullRequestRoutes(
+  db: Db,
+  clients: Parameters<typeof currentReviewRoutes>[1],
+): Hono {
+  const { github } = clients;
   const routes = new Hono();
   const cache = new PullRequestCache();
   routes.get('/', (c) => list(db, github, cache, c));
-  routes.route('/reviews', currentReviewRoutes(db, github, notion));
+  routes.route('/reviews', currentReviewRoutes(db, clients));
   return routes;
 }

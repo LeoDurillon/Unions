@@ -3,7 +3,9 @@
 import type { ReactElement } from 'react';
 
 import type { ReviewSpecView } from '../../../src/review-spec-types';
+import { projectIntegration } from '../../lib/integrations-api';
 import type { ReviewTarget } from '../../lib/review-target';
+import { useActiveProject } from '../../lib/use-active-project';
 import { useReviewSpecs } from '../../lib/use-review-specs';
 import { specSources } from './spec-picker';
 import { SpecsDialog } from './specs-dialog';
@@ -36,6 +38,8 @@ export function SpecsBar({
   const { list } = useReviewSpecs(target);
   const editing = useSpecsEditing();
   const shown = (list.data ?? []).filter((spec) => !spec.removed);
+  const { project } = useActiveProject();
+  const jiraConnected = project !== null && projectIntegration(project, 'jira') !== null;
   return (
     <div className="flex items-center gap-2 border-b border-zinc-200 px-4 py-1.5 dark:border-zinc-800">
       <span className="text-xs font-medium text-zinc-500">Specs</span>
@@ -64,7 +68,7 @@ export function SpecsBar({
       {editing?.editing ? (
         <SpecsDialog
           target={target}
-          sources={specSources(target, hasPullRequest)}
+          sources={specSources(target, hasPullRequest, jiraConnected)}
           onClose={() => {
             editing.setEditing(false);
           }}

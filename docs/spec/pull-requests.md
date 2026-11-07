@@ -86,12 +86,14 @@ itself never fails on it. The implementer's report says how many replies it draf
 
 Every review page has one list of **specs**, in the **Specs** bar under its header, read by **Review with agent**,
 **Explain** and **Group by spec** ([plan](../plans/review-specs.md)). It starts, the first time the page reads it,
-with the ticket's text and the Notion page the ticket came from, or the pull request's description; a page linked to
+with the ticket's text and the Notion page or Jira issue the ticket came from (spec kind `jira`, `ref` the key),
+or the pull request's description; a page linked to
 a pull request is one of its specs (linking adds it, unlinking removes it). **Edit** opens the list: each spec's
 text (read from its source each time, so a page or a description edited meanwhile is read as it is now), **Edit**
 to change it (the edited text is kept on the review, for everyone and every later run, marked "edited"), **Use the
 source** to go back to reading it, **Remove**, and **Add a spec** from the PR description, the ticket, a GitHub issue
-or any Notion page (a page added there is linked like one added from the Description tab). A source that cannot be
+or any Notion page (a page added there is linked like one added from the Description tab), or, for a project
+connected to Jira, any issue of its site (its description converted as the import does, its comments left out). A source that cannot be
 read (a page no longer shared) shows in red and is left out of the runs. The list is kept in `review_specs`; a
 removed starting spec stays removed. **Review with agent** and **Group by spec** list the specs they will read, with
 **Edit the specs**; a stack's agent review reads every member's specs, each linked to its pull request, a page

@@ -1,5 +1,5 @@
-// Where a specification comes from (the PR description, the ticket, an issue, a Notion page): picking
-// it and reading it.
+// Where a specification comes from (the PR description, the ticket, an issue, a Notion page, a Jira issue):
+// picking it and reading it.
 import { useMutation } from '@tanstack/react-query';
 import type { SpecSource } from '@union/core';
 import { useState, type ReactElement } from 'react';
@@ -15,20 +15,30 @@ export const LABELS: Record<SpecSource, string> = {
   ticket: 'Ticket description',
   issue: 'GitHub issue',
   notion: 'Notion page',
+  jira: 'Jira issue',
 };
 
 const REF_HINTS: Partial<Record<SpecSource, string>> = {
   issue: 'Issue number or URL, e.g. 42',
   notion: 'Notion page URL',
+  jira: 'Issue key or link, e.g. ABC-12',
 };
 
-/** The sources this review can read: a PR description needs a PR, a ticket's text a ticket. */
-export function specSources(target: ReviewTarget, hasPullRequest: boolean): SpecSource[] {
+/**
+ * The sources this review can read: a PR description needs a PR, a ticket's text a ticket, a Jira issue
+ * a project connected to Jira.
+ */
+export function specSources(
+  target: ReviewTarget,
+  hasPullRequest: boolean,
+  jiraConnected: boolean,
+): SpecSource[] {
   return [
     ...(hasPullRequest ? (['pr'] as const) : []),
     ...(target.kind === 'ticket' ? (['ticket'] as const) : []),
     'issue',
     'notion',
+    ...(jiraConnected ? (['jira'] as const) : []),
   ];
 }
 

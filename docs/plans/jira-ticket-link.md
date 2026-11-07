@@ -1,6 +1,6 @@
 # Link a ticket to a Jira issue afterwards
 
-Status: built (branch `jira-ticket-link`, 2026-11-07), steps 1 to 3. Follows [Jira](jira.md). The Jira counterpart of the Overview's **Link a Notion page**
+Status: built and deployed (2026-11-07), steps 1 to 3; checked by the user on their instance. Follows [Jira](jira.md). The Jira counterpart of the Overview's **Link a Notion page**
 (`routes/ticket-notion-link.ts`, `ticket-notion-row.tsx`).
 
 ## Why

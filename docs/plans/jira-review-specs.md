@@ -1,6 +1,6 @@
 # Jira issues as review specs
 
-Status: planned (2026-11-07). Follows [Jira](jira.md) and [One set of specs per review](review-specs.md), built.
+Status: built (branch `jira-review-specs`, 2026-11-07), steps 1 to 4. Follows [Jira](jira.md) and [One set of specs per review](review-specs.md), built.
 The foundation of [Jira issues in reviews of other people's pull requests](jira-pr-reviews.md).
 
 ## Why
@@ -44,6 +44,16 @@ narrowed the scope), and a Jira issue cannot be added as a spec at all.
    its label, the spec's text, a Jira ticket's starting specs.
 4. **Docs.** `documentation/reviewing.md` (Specs), `docs/spec/pull-requests.md` if it lists the sources, this
    plan's status.
+
+Built: `SPEC_SOURCES` has `jira`; `startingSpecs` takes `trackerOrigin` (Notion or Jira). `spec-sources.ts`'s
+`jiraSpec` reads the issue with `JiraApi.issue` (not the provider's `item`, which keeps to the project: D2) and
+converts it with `issueMarkdown` (now exported by core). The readers carry a Jira client: the review routes'
+factories in `grouping-targets.ts` take one `SpecClients` object instead of the GitHub and Notion clients, and
+`projectRoutes`, `pullRequestRoutes` and `currentReviewRoutes` pass it down. The picker offers Jira issue for a
+project connected to Jira (`specSources`, the active project's integrations). Route tests in
+`jira-review-specs.test.ts`: an issue of another project of the site, refusals, and a Jira ticket's starting specs
+read from Jira. Not checked in a browser: the review page needs a ticket with a diff, which a scratch database does
+not have; checked by the user on a real ticket once deployed.
 
 ## Risks
 

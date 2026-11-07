@@ -79,6 +79,7 @@ export * from './notion-rich-text';
 export * from './integrations/adf-mention';
 export type { AdfRichDocument } from './integrations/adf-types';
 export * from './integrations/jira-api';
+export * from './integrations/jira-attachments';
 export * from './integrations/jira-comments';
 export * from './integrations/jira-config';
 export * from './integrations/jira-field-types';

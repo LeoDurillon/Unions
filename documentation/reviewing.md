@@ -138,11 +138,13 @@ ticket runs a step. On a pull request from a fork, nothing is installed and the 
 The **Specs** bar under the header lists what the change is supposed to do. Explain, Review with agent, Group by
 spec and the spec report all read it.
 
-- It starts with the ticket's description and the Notion page it came from, or the pull request's description.
+- It starts with the ticket's description and the Notion page or Jira issue it came from, or the pull request's
+  description.
 - **Edit** opens the list: edit a spec's text for this review (it is marked "edited"), go back to its source with
-  **Use the source**, remove it, or **Add a spec** from the pull request's description, the ticket, a GitHub issue
-  or a Notion page.
-- Sources are read again each time, so a page edited in Notion is read as it is now.
+  **Use the source**, remove it, or **Add a spec** from the pull request's description, the ticket, a GitHub issue,
+  a Notion page or, when the project is connected to Jira, a Jira issue (its key or link: any issue of your Jira
+  site the account can see, not only the project's). A Jira issue's spec is its description, without its comments.
+- Sources are read again each time, so a page edited in Notion or an issue edited in Jira is read as it is now.
 
 ## Review other people's pull requests
 

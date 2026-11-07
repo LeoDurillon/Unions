@@ -1,10 +1,9 @@
 // `/api/projects/:projectId/pull-requests/reviews`: pull requests the user reviews without a
 // ticket.
-import { schema, type Db, type NotionApi } from '@union/core';
+import { schema, type Db } from '@union/core';
 import { and, eq, inArray } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
 
-import type { OnboardingGitHub } from '../github-onboarding';
 import {
   BAD_REQUEST,
   CONFLICT,
@@ -26,6 +25,7 @@ import {
 import { prReviewRoutes } from './pr-review';
 import { forgetReviews, removeReviewFiles } from './review-removal';
 import { reviewWorkspaceRoutes } from './review-workspace';
+import type { SpecClients } from './spec-sources';
 
 function projectOf(db: Db, c: Context): number {
   const id = requireId(c.req.param('projectId'), 'project id');
@@ -183,18 +183,19 @@ async function removeStack(db: Db, c: Context): Promise<Response> {
 }
 
 /** `/api/projects/:projectId/pull-requests/reviews`: pull requests the user reviews without a ticket. */
-export function currentReviewRoutes(db: Db, github: OnboardingGitHub, notion: NotionApi): Hono {
+export function currentReviewRoutes(db: Db, clients: SpecClients): Hono {
+  const { github, notion } = clients;
   const routes = new Hono();
   routes.get('/', (c) => c.json(listedReviews(db, projectOf(db, c))));
   routes.post('/', (c) => add(db, c));
   routes.post('/stack', (c) => addStack(db, c));
   routes.post('/stack/remove', (c) => removeStack(db, c));
   routes.delete('/:number', (c) => remove(db, c));
-  routes.route('/:number/groupings', pullRequestGroupingRoutes(db, github, notion));
+  routes.route('/:number/groupings', pullRequestGroupingRoutes(db, clients));
   routes.route('/:number/explanations', pullRequestExplanationRoutes(db));
-  routes.route('/:number/specs', pullRequestSpecRoutes(db, github, notion));
-  routes.route('/:number/reports', pullRequestReportRoutes(db, github, notion));
-  routes.route('/:number/review-agents', pullRequestReviewAgentRoutes(db, github, notion));
+  routes.route('/:number/specs', pullRequestSpecRoutes(db, clients));
+  routes.route('/:number/reports', pullRequestReportRoutes(db, clients));
+  routes.route('/:number/review-agents', pullRequestReviewAgentRoutes(db, clients));
   routes.route('/:number', reviewWorkspaceRoutes(db, { github, notion }));
   routes.route('/:number', prReviewRoutes(db, github));
   return routes;

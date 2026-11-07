@@ -4,6 +4,7 @@ import {
   saveIntegration,
   schema,
   type Db,
+  type JiraApi,
   type NotionApi,
   type Project,
 } from '@union/core';
@@ -70,7 +71,12 @@ function insertProject(
   });
 }
 
-export function projectRoutes(db: Db, github: OnboardingGitHub, notion: NotionApi): Hono {
+export function projectRoutes(
+  db: Db,
+  github: OnboardingGitHub,
+  notion: NotionApi,
+  jira: JiraApi,
+): Hono {
   const routes = new Hono();
 
   routes.get('/', (c) =>
@@ -118,7 +124,7 @@ export function projectRoutes(db: Db, github: OnboardingGitHub, notion: NotionAp
   routes.patch('/:id', (c) => updateProject(db, c));
   routes.delete('/:id', (c) => deleteProject(db, c));
   routes.route('/:projectId/investigations', investigationRoutes(db));
-  routes.route('/:projectId/pull-requests', pullRequestRoutes(db, github, notion));
+  routes.route('/:projectId/pull-requests', pullRequestRoutes(db, { github, notion, jira }));
 
   return routes;
 }

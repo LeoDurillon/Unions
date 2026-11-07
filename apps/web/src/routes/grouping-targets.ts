@@ -1,23 +1,16 @@
 // The grouping, explanation, spec, report and review agent routes, under a ticket and under a pull
 // request under review.
-import {
-  getTicket,
-  notionMarkdown,
-  schema,
-  startingSpecs,
-  type Db,
-  type NotionApi,
-} from '@union/core';
+import { getTicket, notionMarkdown, schema, startingSpecs, type Db } from '@union/core';
 import { and, desc, eq } from 'drizzle-orm';
 import type { Context, Hono } from 'hono';
 
-import type { OnboardingGitHub } from '../github-onboarding';
 import { fail, NOT_FOUND, requireId } from '../http';
 import { reviewAgentRunRoutes } from './review-agent-runs';
 import { reviewExplanationRoutes } from './review-explanations';
 import { reviewGroupingRoutes, type GroupingTarget } from './review-groupings';
 import { reviewReportRoutes } from './review-reports';
 import { reviewSpecRoutes } from './review-specs';
+import type { SpecClients } from './spec-sources';
 
 function projectOf(db: Db, id: number): typeof schema.projects.$inferSelect {
   const project = db.select().from(schema.projects).where(eq(schema.projects.id, id)).get();
@@ -59,9 +52,9 @@ function ticketTarget(db: Db, c: Context): GroupingTarget {
     ticketText: ticket.originKind === 'notion' ? notionMarkdown(ticket.body) : ticket.body,
     starts: startingSpecs({
       kind: 'ticket',
-      notionOrigin:
-        ticket.originKind === 'notion' && ticket.originId
-          ? { id: ticket.originId, url: ticket.originUrl }
+      trackerOrigin:
+        ticket.originKind !== null && ticket.originId
+          ? { kind: ticket.originKind, id: ticket.originId, url: ticket.originUrl }
           : null,
     }),
     headSha: snapshot?.headSha ?? null,
@@ -110,17 +103,13 @@ function pullRequestTarget(db: Db, c: Context): GroupingTarget {
 }
 
 /** `/api/tickets/:id/groupings`. */
-export function ticketGroupingRoutes(db: Db, github: OnboardingGitHub, notion: NotionApi): Hono {
-  return reviewGroupingRoutes(db, { github, notion }, (c) => ticketTarget(db, c));
+export function ticketGroupingRoutes(db: Db, clients: SpecClients): Hono {
+  return reviewGroupingRoutes(db, clients, (c) => ticketTarget(db, c));
 }
 
 /** `/api/projects/:projectId/pull-requests/reviews/:number/groupings`. */
-export function pullRequestGroupingRoutes(
-  db: Db,
-  github: OnboardingGitHub,
-  notion: NotionApi,
-): Hono {
-  return reviewGroupingRoutes(db, { github, notion }, (c) => pullRequestTarget(db, c));
+export function pullRequestGroupingRoutes(db: Db, clients: SpecClients): Hono {
+  return reviewGroupingRoutes(db, clients, (c) => pullRequestTarget(db, c));
 }
 
 /** `/api/tickets/:id/explanations`. */
@@ -134,35 +123,31 @@ export function pullRequestExplanationRoutes(db: Db): Hono {
 }
 
 /** `/api/tickets/:id/specs`. */
-export function ticketSpecRoutes(db: Db, github: OnboardingGitHub, notion: NotionApi): Hono {
-  return reviewSpecRoutes({ db, github, notion }, (c) => ticketTarget(db, c));
+export function ticketSpecRoutes(db: Db, clients: SpecClients): Hono {
+  return reviewSpecRoutes({ db, ...clients }, (c) => ticketTarget(db, c));
 }
 
 /** `/api/projects/:projectId/pull-requests/reviews/:number/specs`. */
-export function pullRequestSpecRoutes(db: Db, github: OnboardingGitHub, notion: NotionApi): Hono {
-  return reviewSpecRoutes({ db, github, notion }, (c) => pullRequestTarget(db, c));
+export function pullRequestSpecRoutes(db: Db, clients: SpecClients): Hono {
+  return reviewSpecRoutes({ db, ...clients }, (c) => pullRequestTarget(db, c));
 }
 
 /** `/api/tickets/:id/reports`. */
-export function ticketReportRoutes(db: Db, github: OnboardingGitHub, notion: NotionApi): Hono {
-  return reviewReportRoutes({ db, github, notion }, (c) => ticketTarget(db, c));
+export function ticketReportRoutes(db: Db, clients: SpecClients): Hono {
+  return reviewReportRoutes({ db, ...clients }, (c) => ticketTarget(db, c));
 }
 
 /** `/api/projects/:projectId/pull-requests/reviews/:number/reports`. */
-export function pullRequestReportRoutes(db: Db, github: OnboardingGitHub, notion: NotionApi): Hono {
-  return reviewReportRoutes({ db, github, notion }, (c) => pullRequestTarget(db, c));
+export function pullRequestReportRoutes(db: Db, clients: SpecClients): Hono {
+  return reviewReportRoutes({ db, ...clients }, (c) => pullRequestTarget(db, c));
 }
 
 /** `/api/tickets/:id/review-agents`. */
-export function ticketReviewAgentRoutes(db: Db, github: OnboardingGitHub, notion: NotionApi): Hono {
-  return reviewAgentRunRoutes({ db, github, notion }, (c) => ticketTarget(db, c));
+export function ticketReviewAgentRoutes(db: Db, clients: SpecClients): Hono {
+  return reviewAgentRunRoutes({ db, ...clients }, (c) => ticketTarget(db, c));
 }
 
 /** `/api/projects/:projectId/pull-requests/reviews/:number/review-agents`. */
-export function pullRequestReviewAgentRoutes(
-  db: Db,
-  github: OnboardingGitHub,
-  notion: NotionApi,
-): Hono {
-  return reviewAgentRunRoutes({ db, github, notion }, (c) => pullRequestTarget(db, c));
+export function pullRequestReviewAgentRoutes(db: Db, clients: SpecClients): Hono {
+  return reviewAgentRunRoutes({ db, ...clients }, (c) => pullRequestTarget(db, c));
 }

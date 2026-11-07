@@ -17,7 +17,7 @@ export function apiRoutes(db: Db, services: ApiServices): Hono {
   const api = new Hono();
   api.get('/health', (c) => c.json({ ok: true }));
   api.route('/agents', agentRoutes(db));
-  api.route('/projects', projectRoutes(db, github, notion));
+  api.route('/projects', projectRoutes(db, github, notion, jira));
   api.route('/projects', projectSubroutes(db, services));
   api.route('/github', githubRoutes(db, github));
   api.route('/integrations', integrationRoutes({ notion, jira }));
