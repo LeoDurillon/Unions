@@ -169,3 +169,16 @@ test("an attachment's media id is read from its redirect, without following it",
     expect(await api.attachmentMediaId(AUTH, '10100')).toBeNull();
   }
 });
+
+test('reads the settable fields from GET /field', async () => {
+  const seen = answer(() =>
+    json([
+      { id: 'customfield_10050', name: 'PR link', schema: { type: 'string' } },
+      { id: 'assignee', name: 'Assignee', schema: { type: 'user' } },
+    ]),
+  );
+  expect(await new FetchJiraApi().fields(AUTH)).toEqual([
+    { id: 'customfield_10050', name: 'PR link', type: 'text' },
+  ]);
+  expect(seen[0]?.url).toBe('https://acme.atlassian.net/rest/api/3/field');
+});

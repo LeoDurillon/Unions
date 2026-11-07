@@ -1,4 +1,5 @@
-// Jira Cloud's REST v3 responses (project, statuses, issue) read into Union's shapes; anything unexpected reads as empty.
+// Jira Cloud's REST v3 responses (project, statuses, fields, issue) read into Union's shapes; anything unexpected reads as empty.
+import { fieldTypeOf, type JiraFieldInfo } from './jira-field-types';
 
 /** A Jira project: its key, name and issue types. */
 export type JiraProject = { key: string; name: string; issueTypes: { id: string; name: string }[] };
@@ -65,6 +66,22 @@ export function statusesOf(body: unknown): JiraStatus[] {
     }
   }
   return [...byId.values()];
+}
+
+/** `GET /field`: the fields a rule can set, by name; the others (users, versions…) are left out. */
+export function fieldsOf(body: unknown): JiraFieldInfo[] {
+  return records(body)
+    .flatMap((field) => {
+      const schema = isRecord(field.schema) ? field.schema : {};
+      const id = text(field, 'id');
+      const type = fieldTypeOf(id, {
+        type: text(schema, 'type'),
+        items: text(schema, 'items'),
+        custom: text(schema, 'custom'),
+      });
+      return id === '' || type === null ? [] : [{ id, name: text(field, 'name') || id, type }];
+    })
+    .toSorted((a, b) => a.name.localeCompare(b.name));
 }
 
 function attachmentOf(record: Record<string, unknown>): JiraAttachment {

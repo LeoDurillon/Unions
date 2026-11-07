@@ -2,16 +2,9 @@
 import type { JiraApi, JiraAuth } from './jira-api';
 import { issueMarkdown } from './jira-attachments';
 import { jiraConfigOf } from './jira-config';
+import type { JiraFields } from './jira-integration';
 import { attachmentsByMediaId, hasUnnamedMedia } from './jira-media-ids';
-import type { JiraProject, JiraStatus } from './jira-parse';
 import { ItemOutsideSourceError, type IntegrationProvider, type SourceItem } from './provider';
-
-/** What Union keeps of the Jira project (`integrations.fields`): its issue types and statuses. */
-type JiraFields = {
-  projectName: string;
-  issueTypes: JiraProject['issueTypes'];
-  statuses: JiraStatus[];
-};
 
 function authOf(token: string, config: unknown): { auth: JiraAuth; projectKey: string } {
   const { site, email, projectKey } = jiraConfigOf(config);
@@ -54,13 +47,14 @@ export function jiraProvider(jira: JiraApi): IntegrationProvider {
     },
     readFields: async (token, config): Promise<{ title: string; fields: JiraFields }> => {
       const { auth, projectKey } = authOf(token, config);
-      const [project, statuses] = await Promise.all([
+      const [project, statuses, fields] = await Promise.all([
         jira.project(auth, projectKey),
         jira.statuses(auth, projectKey),
+        jira.fields(auth),
       ]);
       return {
         title: project.name,
-        fields: { projectName: project.name, issueTypes: project.issueTypes, statuses },
+        fields: { projectName: project.name, issueTypes: project.issueTypes, statuses, fields },
       };
     },
     item: (token, config, key) => item(jira, token, config, key),

@@ -52,6 +52,7 @@ const jira: JiraApi = {
   },
   statuses: () => Promise.resolve([{ id: '1', name: 'To Do', category: 'new' }]),
   attachmentMediaId: () => Promise.resolve(null),
+  fields: () => Promise.resolve([{ id: 'customfield_10050', name: 'PR link', type: 'text' }]),
   issue: async (auth, key) => {
     await allowed(auth);
     const description = {

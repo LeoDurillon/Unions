@@ -1,8 +1,10 @@
 // The Jira Cloud calls Union makes (`JiraApi`), and the client that makes them over fetch (REST v3, API token).
 import { jiraSiteOf } from './jira-config';
 import { JiraError } from './jira-error';
+import type { JiraFieldInfo } from './jira-field-types';
 import {
   accountOf,
+  fieldsOf,
   mediaIdOf,
   errorMessageOf,
   issueOf,
@@ -31,6 +33,8 @@ export type JiraApi = {
   project(auth: JiraAuth, key: string): Promise<JiraProject>;
   /** The statuses of the project's workflows, each once. */
   statuses(auth: JiraAuth, key: string): Promise<JiraStatus[]>;
+  /** The site's fields a rule can set (`GET /field`), by name. */
+  fields(auth: JiraAuth): Promise<JiraFieldInfo[]>;
   issue(auth: JiraAuth, key: string): Promise<JiraIssue>;
   /**
    * The Media Services id of an attachment's file: what a file card in the description names it by.
@@ -94,6 +98,10 @@ export class FetchJiraApi implements JiraApi {
 
   async statuses(auth: JiraAuth, key: string): Promise<JiraStatus[]> {
     return statusesOf(await this.get(auth, `/project/${encodeURIComponent(key)}/statuses`));
+  }
+
+  async fields(auth: JiraAuth): Promise<JiraFieldInfo[]> {
+    return fieldsOf(await this.get(auth, '/field'));
   }
 
   async issue(auth: JiraAuth, key: string): Promise<JiraIssue> {

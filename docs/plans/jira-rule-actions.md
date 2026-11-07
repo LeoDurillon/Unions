@@ -1,6 +1,6 @@
 # Jira rule actions
 
-Status: planned (2026-11-07). Follows [Jira](jira.md) (built: connection and import, reads only). Scope: event
+Status: planned (2026-11-07); step 1 built (branch `jira-rules`, 2026-11-07). Follows [Jira](jira.md) (built: connection and import, reads only). Scope: event
 rules that move a Jira issue to a status, set its fields, and comment on it, for tickets imported from Jira.
 
 ## Why
@@ -120,6 +120,18 @@ Each step ships on its own; `bun run check` after each.
    `GET /field`, `jira-values.ts`, `text-adf.ts`. Tests: each type's values and errors, unknown variables, a field
    gone from the stored list, ADF of paragraphs, breaks and links. No worker or UI yet: the settings route refuses
    to save the new kinds until step 3 (the editor cannot build them).
+   Built, with one change of order: the three kinds are not in `ActionFields` yet. Registering a kind makes the
+   type checker ask for its worker target, preview and editor entries, so step 1 adds the actions' types and checks
+   on their own (`event-jira-action.ts`: `checkedJiraTransition`, `checkedJiraFields`, `checkedJiraComment`, each
+   throwing `EventRuleError` like Notion's), and step 2 registers them with their targets; `ACTION_KINDS` (what the
+   editor offers and the save accepts) gets them in step 3. The field types are `integrations/jira-field-types.ts`
+   (browser-safe, for the step 3 editor): `text`, `textarea` (custom textareas and the system `environment`, which
+   are rich text), `number`, `date`, `datetime`, `option`, `labels` (the system field and custom label fields).
+   `GET /field` is read by `readFields` with the project and its statuses (`fieldsOf`, sorted by name); fields read
+   before this have none, so a field action asks for a Refresh while a move still works on the stored statuses.
+   `jira-integration.ts` holds `JiraFields` and `jiraFieldsFor(db, projectId)`. Values: `jira-values.ts`
+   (`jiraFieldValue`, `jiraValueError`; an empty value clears the field, a datetime is sent as
+   `…T10:00:00.000+0000`). Comments are refused above 32 767 characters, Jira's limit.
 2. **Worker: the targets.** The `JiraApi` writes and their fake, the three targets, the dispatcher. Tests with the
    fake, as `event-dispatcher.test.ts` does for Notion: a ticket without a Jira origin skipped, a transition found,
    already there, missing, refused with 400; fields sent per type, an option not allowed by `editmeta`; a comment's

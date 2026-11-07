@@ -94,6 +94,7 @@ const jira: JiraApi = {
       { id: '1', name: 'To Do', category: 'new' },
       { id: '3', name: 'Done', category: 'done' },
     ]),
+  fields: () => Promise.resolve([{ id: 'customfield_10050', name: 'PR link', type: 'text' }]),
   attachmentMediaId: (auth, attachmentId) => {
     checked(auth);
     mediaLookups.push(attachmentId);
@@ -124,7 +125,7 @@ test('verify checks the email and token, then names the project', async () => {
   );
 });
 
-test('the fields are the project name, issue types and statuses', async () => {
+test('the fields are the project name, issue types, statuses and the settable fields', async () => {
   expect(await provider.readFields(TOKEN, CONFIG)).toEqual({
     title: 'Apollo',
     fields: {
@@ -134,6 +135,7 @@ test('the fields are the project name, issue types and statuses', async () => {
         { id: '1', name: 'To Do', category: 'new' },
         { id: '3', name: 'Done', category: 'done' },
       ],
+      fields: [{ id: 'customfield_10050', name: 'PR link', type: 'text' }],
     },
   });
 });
