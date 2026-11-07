@@ -11,7 +11,7 @@ import {
 } from '@union/core';
 import { eq } from 'drizzle-orm';
 
-import type { ProjectInfo, RemoteItem } from './api';
+import type { ProjectInfo, RemoteIssue, RemoteItem } from './api';
 import { stripTicketMarker } from './render';
 import { boardStatusFor, showsStatus } from './status';
 
@@ -24,8 +24,10 @@ function setSynced(db: Db, ticketId: number, status: Ticket['githubSyncedStatus'
     .run();
 }
 
+type RemoteText = Pick<RemoteIssue, 'title' | 'body' | 'updatedAt'>;
+
 /** The item was read before the issue's last reconciliation (an edit from Union written since). */
-function isStale(ticket: Ticket, item: RemoteItem): boolean {
+function isStale(ticket: Ticket, item: RemoteText): boolean {
   return (
     ticket.githubUpdatedAt !== null &&
     Date.parse(item.updatedAt) <= Date.parse(ticket.githubUpdatedAt)
@@ -33,7 +35,7 @@ function isStale(ticket: Ticket, item: RemoteItem): boolean {
 }
 
 /** GitHub wins for title and description. */
-function pullFields(db: Db, ticket: Ticket, item: RemoteItem): void {
+function pullFields(db: Db, ticket: Ticket, item: RemoteText): void {
   if (isStale(ticket, item)) {
     return;
   }
@@ -92,6 +94,11 @@ function pullStatus(
     payload: { remote, local: boardStatus(ticket.phase) },
   });
   setSynced(db, ticket.id, null);
+}
+
+/** An issue's title and description read from the repository, without a board. */
+export function applyRemoteIssue(db: Db, ticketId: number, issue: RemoteIssue): void {
+  pullFields(db, getTicket(db, ticketId), issue);
 }
 
 export function applyRemoteItem(

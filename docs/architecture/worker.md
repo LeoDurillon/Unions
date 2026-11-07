@@ -389,7 +389,10 @@
   `issue-sync.ts` opens the issue (when `mirrorsIssues`: `config.mirrorIssues`, default on, forced on with a
   Project) and keeps one comment per step on any ticket that has an issue; `board-sync.ts` (only when
   `hasGitHubProject`) resolves the Project's node id, adds the item, sets the Status field and pulls
-  title/description and "move to In Progress"; pull requests are refreshed whatever the layers. `close-cancelled.ts` closes a cancelled ticket's open pull requests and its issue, once (`tickets.github_closed_at`, set for tickets cancelled before this existed by the migration, so they are not closed retroactively); `dependency.ts` pushes a ticket's parent as "blocked by"), `queries.ts` the GraphQL. `clients.ts` builds each
+  title/description and "move to In Progress"; without a board, `issue-pull.ts` reads title/description edits
+  from the repository's issues (`listIssuesSince`, one listing per pull from an in-memory cursor; the first after
+  a start goes back to the oldest `github_updated_at` of the active tickets, done and cancelled ones left out);
+  pull requests are refreshed whatever the layers. `close-cancelled.ts` closes a cancelled ticket's open pull requests and its issue, once (`tickets.github_closed_at`, set for tickets cancelled before this existed by the migration, so they are not closed retroactively); `dependency.ts` pushes a ticket's parent as "blocked by"), `queries.ts` the GraphQL. `clients.ts` builds each
   project's API from its credentials (`projectGitHubAuth`); projects without any fall back to `GITHUB_TOKEN`, else
   their sync is off. GraphQL changes must be validated
   against GitHub's schema, and new sync behavior needs a test against the fake.

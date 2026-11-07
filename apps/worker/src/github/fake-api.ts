@@ -11,9 +11,11 @@ import type {
   PullRequestReview,
   PullRequestStatus,
   RemoteComment,
+  RemoteIssue,
   RemoteItem,
   RepoRef,
 } from './api';
+import { issuesSince } from './fake-issue-list';
 import type { StackPull } from './fake-stacks';
 import { FakeThreads } from './fake-threads';
 
@@ -40,6 +42,8 @@ const MS_PER_SECOND = 1000;
 /** In-memory GitHub for tests. `calls` records every method name, in order (`FakeProjectFields`). */
 export class FakeGitHubApi extends FakeThreads implements GitHubApi {
   readonly issues: FakeIssue[] = [];
+  /** The `since` of each issue listing, in order (listings are not in `calls`). */
+  readonly issueListings: (string | null)[] = [];
   /** Commit → the state of its checks; a commit missing has none. */
   readonly checks = new Map<string, ChecksState>();
   /** Reviews posted, in order. */
@@ -145,6 +149,11 @@ export class FakeGitHubApi extends FakeThreads implements GitHubApi {
       }
     }
     return Promise.resolve();
+  }
+
+  listIssuesSince(_repo: RepoRef, since: string | null): Promise<RemoteIssue[]> {
+    this.issueListings.push(since);
+    return Promise.resolve(issuesSince(this.issues, since));
   }
 
   listProjectItems(): Promise<RemoteItem[]> {

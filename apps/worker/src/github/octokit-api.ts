@@ -9,9 +9,11 @@ import type {
   PullRequestReview,
   PullRequestStatus,
   RemoteComment,
+  RemoteIssue,
   RemoteItem,
   RepoRef,
 } from './api';
+import { listIssuesSince } from './octokit-issue-list';
 import { isNotFound } from './octokit-pull-request-changes';
 import { OctokitThreads } from './octokit-threads';
 import {
@@ -136,6 +138,10 @@ export class OctokitGitHubApi extends OctokitThreads implements GitHubApi {
       fieldId: input.fieldId,
       optionId: input.optionId,
     });
+  }
+
+  listIssuesSince(repo: RepoRef, since: string | null): Promise<RemoteIssue[]> {
+    return listIssuesSince(this.octokit, repo, since);
   }
 
   async listComments(repo: RepoRef, issueNumber: number): Promise<RemoteComment[]> {

@@ -13,6 +13,7 @@ import type { GitHubApi, RepoRef } from './api';
 import { BoardSync } from './board-sync';
 import { closeWhenCancelled } from './close-cancelled';
 import { pushDependency } from './dependency';
+import { IssuePull } from './issue-pull';
 import { ensureIssue, pushComments } from './issue-sync';
 import { markReadyWhenDone, refreshPullRequest } from './pull-request';
 
@@ -26,11 +27,13 @@ function repoOf(project: Project): RepoRef {
  * Mirrors tickets to GitHub in layers: the repository (pull requests) always; issues and their step
  * comments when the project mirrors them (a ticket that has an issue keeps it either way); the board
  * only with a GitHub Project connected. GitHub owns title, description and the issue itself; the
- * local DB owns run state.
+ * local DB owns run state. Title and description edits come from the board's items, or from the
+ * repository's issues without a board.
  */
 export class GitHubSync {
   private readonly lastError = new Map<number, string>();
   private readonly board: BoardSync;
+  private readonly issues: IssuePull;
 
   constructor(
     private readonly db: Db,
@@ -38,6 +41,7 @@ export class GitHubSync {
     private readonly projectId: number,
   ) {
     this.board = new BoardSync(db, api);
+    this.issues = new IssuePull(db, api);
   }
 
   async push(): Promise<void> {
@@ -138,7 +142,10 @@ export class GitHubSync {
   private async pullProject(project: Project): Promise<void> {
     const tickets = this.ticketsOf(project);
     const nodeId = await this.boardNodeId(project);
-    if (nodeId !== null) {
+    // The board's items carry the issues' text; without one, the repository's issues do.
+    if (nodeId === null) {
+      await this.issues.pull(repoOf(project), tickets);
+    } else {
       await this.board.pull(project, nodeId, tickets);
     }
     for (const ticket of tickets) {

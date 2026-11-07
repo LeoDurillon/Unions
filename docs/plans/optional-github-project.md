@@ -1,6 +1,8 @@
 # The GitHub Project and issues as choices
 
-Status: step 1 built (2026-11-07, branch `optional-github-project`); steps 2 to 6 left. Relates to [One adapter per tracker](tracker-adapters.md) (its D7: GitHub Project
+Status: steps 1 and 2 built (2026-11-07, branch `optional-github-project`); steps 3 to 6 left. Step 2 reads
+the issues of active tickets only: a title edited on GitHub after a ticket is done or cancelled stays as it was in
+Union. Relates to [One adapter per tracker](tracker-adapters.md) (its D7: GitHub Project
 fields join the shared field types).
 
 ## Why

@@ -38,6 +38,9 @@ export type RemoteItem = {
   updatedAt: string;
 };
 
+/** An issue's text as last edited on GitHub, read from the repository rather than a board. */
+export type RemoteIssue = { number: number; title: string; body: string; updatedAt: string };
+
 export type RemoteComment = { id: string; body: string };
 
 export type PullRequestRef = { number: number; url: string };
@@ -109,6 +112,8 @@ export type GitHubApi = {
   createComment(repo: RepoRef, issueNumber: number, body: string): Promise<string>;
   updateComment(repo: RepoRef, commentId: string, body: string): Promise<void>;
   listProjectItems(projectNodeId: string): Promise<RemoteItem[]>;
+  /** The repository's issues (no pull requests) updated at or after `since` (ISO time); null: all. */
+  listIssuesSince(repo: RepoRef, since: string | null): Promise<RemoteIssue[]>;
   /** The open pull request whose head is `branch` in the same repository, if any. */
   findPullRequest(repo: RepoRef, branch: string): Promise<PullRequestRef | null>;
   /** The number of the last merged pull request from `branch`; null when none was merged. */
