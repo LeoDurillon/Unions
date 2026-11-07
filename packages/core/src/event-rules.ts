@@ -13,6 +13,7 @@ import {
   type EventAction,
 } from './event-actions';
 import { isEvent, type EventPayloads, type StoredEvent } from './event-catalog';
+import { checkedJiraComment, checkedJiraFields, checkedJiraTransition } from './event-jira-action';
 import { checkedNotionAction, EventRuleError } from './event-notion-action';
 import {
   BOARD_LABELS,
@@ -53,6 +54,9 @@ const ACTION_CHECKS: ActionChecks = {
   github_pull_request: (_db, _projectId, record) => thrown(checkGitHubPullRequest(record)),
   github_project_fields: (_db, _projectId, record) => thrown(checkGitHubProjectFields(record)),
   union_notification: (_db, _projectId, record) => thrown(checkUnionNotification(record)),
+  jira_transition: checkedJiraTransition,
+  jira_field: checkedJiraFields,
+  jira_comment: checkedJiraComment,
 };
 
 /** An action without a `kind` is a Notion one: rules saved before there were other kinds. */

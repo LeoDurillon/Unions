@@ -95,6 +95,13 @@ const jira: JiraApi = {
       { id: '3', name: 'Done', category: 'done' },
     ]),
   fields: () => Promise.resolve([{ id: 'customfield_10050', name: 'PR link', type: 'text' }]),
+  // Imports only read: the writes rules make are not used here.
+  transitions: () => Promise.resolve([]),
+  issueStatus: () => Promise.reject(new Error('Not used')),
+  editMeta: () => Promise.resolve({}),
+  transitionIssue: () => Promise.reject(new Error('Not used')),
+  updateIssue: () => Promise.reject(new Error('Not used')),
+  addComment: () => Promise.reject(new Error('Not used')),
   attachmentMediaId: (auth, attachmentId) => {
     checked(auth);
     mediaLookups.push(attachmentId);

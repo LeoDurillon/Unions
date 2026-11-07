@@ -1,6 +1,6 @@
 # Jira rule actions
 
-Status: planned (2026-11-07); step 1 built (branch `jira-rules`, 2026-11-07). Follows [Jira](jira.md) (built: connection and import, reads only). Scope: event
+Status: planned (2026-11-07); steps 1 and 2 built (branch `jira-rules`, 2026-11-07). Follows [Jira](jira.md) (built: connection and import, reads only). Scope: event
 rules that move a Jira issue to a status, set its fields, and comment on it, for tickets imported from Jira.
 
 ## Why
@@ -136,6 +136,21 @@ Each step ships on its own; `bun run check` after each.
    fake, as `event-dispatcher.test.ts` does for Notion: a ticket without a Jira origin skipped, a transition found,
    already there, missing, refused with 400; fields sent per type, an option not allowed by `editmeta`; a comment's
    ADF; 429 and 5xx retried, 403 failed naming the permission. ast-grep rule extended.
+   Built: the kinds are in `ActionFields` (labels, empty actions, `ACTION_CHECKS`), still not in `ACTION_KINDS`, so
+   nothing offers or saves them until step 3; the action types are `ActionOf<'jira_…'>` and `JiraFieldValue`
+   moved to the browser-safe `jira-field-types.ts` (`event-actions.ts` importing `event-jira-action.ts` made a
+   cycle through `event-notion-action.ts`). `JiraApi`: `issueStatus`, `transitions`, `transitionIssue`,
+   `editMeta` (a select's option names), `updateIssue`, `addComment`; writes send JSON and read 204 as done. A
+   move reads the issue's status first, so an issue already there gets no transition (it would only add history).
+   Worker: `event-actions/jira-target.ts` (the ticket's issue, credentials, variables; failures: not a
+   `JiraError`, 429 and 5xx retried with the queue's own backoff, not `Retry-After`; 403 names the permission),
+   `jira-transition.ts`, `jira-field.ts` (fills and shapes every value first, then checks them all against
+   `editmeta`, then one `PUT`), `jira-comment.ts`, and `jira.ts` (`jiraTargets`, `perTick` 2). `EventDispatcher`
+   takes a `JiraApi` (default `FetchJiraApi`). The web's previews answer "not available yet" and the editor shows
+   no fields for these kinds, both replaced in step 3; the rule sentences are done (`jira-action-text.tsx`).
+   ast-grep `web-reads-trackers-only` now refuses `transitionIssue`, `updateIssue` and a tracker client's
+   `addComment` in the web. `docs/architecture/integrations.md` still says Union writes nothing to Jira: true
+   until step 3 offers the actions; updated then.
 3. **Settings: editor, sentences, previews.** The components, the route's Jira fields, the previews. UI check
    (`scripts/ui-check/`, rules saved blocked): add each kind, its sentence, the preview on a Jira ticket.
 4. **Real check and docs.** Ask the user first (it writes to their Jira): one rule of each kind on a test issue

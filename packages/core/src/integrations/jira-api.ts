@@ -4,17 +4,23 @@ import { JiraError } from './jira-error';
 import type { JiraFieldInfo } from './jira-field-types';
 import {
   accountOf,
+  editMetaOf,
   fieldsOf,
+  statusOf,
+  transitionsOf,
   mediaIdOf,
   errorMessageOf,
   issueOf,
   projectOf,
   statusesOf,
   type JiraAccount,
+  type JiraEditField,
+  type JiraTransition,
   type JiraIssue,
   type JiraProject,
   type JiraStatus,
 } from './jira-parse';
+import type { AdfDocument } from './text-adf';
 
 const UNAUTHORIZED = 401;
 const FORBIDDEN = 403;
@@ -36,6 +42,19 @@ export type JiraApi = {
   /** The site's fields a rule can set (`GET /field`), by name. */
   fields(auth: JiraAuth): Promise<JiraFieldInfo[]>;
   issue(auth: JiraAuth, key: string): Promise<JiraIssue>;
+  /** The transitions the issue's workflow offers from its current status. */
+  transitions(auth: JiraAuth, key: string): Promise<JiraTransition[]>;
+  transitionIssue(auth: JiraAuth, key: string, transitionId: string): Promise<void>;
+  issueStatus(auth: JiraAuth, key: string): Promise<{ id: string; name: string }>;
+  /** The fields the issue's edit screen has, with a select's option names. */
+  editMeta(auth: JiraAuth, key: string): Promise<Record<string, JiraEditField>>;
+  /** Sets `fields` and applies `update` operations (labels added), in one request. */
+  updateIssue(
+    auth: JiraAuth,
+    key: string,
+    change: { fields: Record<string, unknown>; update: Record<string, unknown> },
+  ): Promise<void>;
+  addComment(auth: JiraAuth, key: string, body: AdfDocument): Promise<void>;
   /**
    * The Media Services id of an attachment's file: what a file card in the description names it by.
    * Read from where Jira redirects its download, without downloading; null when it does not say.
@@ -64,23 +83,47 @@ function failure(status: number, body: unknown, retryAfter: string | null): Jira
   }
 }
 
+function issuePath(key: string): string {
+  return `/issue/${encodeURIComponent(key)}`;
+}
+
 export class FetchJiraApi implements JiraApi {
-  private request(auth: JiraAuth, path: string, redirect: 'error' | 'manual'): Promise<Response> {
+  private request(
+    auth: JiraAuth,
+    path: string,
+    redirect: 'error' | 'manual',
+    write?: { method: 'POST' | 'PUT'; body: unknown },
+  ): Promise<Response> {
     // The token goes only to an atlassian.net site, whatever the stored config says.
     const site = jiraSiteOf(auth.site);
     if (site === null) {
       throw new JiraError('The Jira site is not an atlassian.net address.', NOT_FOUND);
     }
     const basic = Buffer.from(`${auth.email}:${auth.token}`).toString('base64');
+    const headers: Record<string, string> = {
+      authorization: `Basic ${basic}`,
+      accept: 'application/json',
+    };
     return fetch(`${site}/rest/api/3${path}`, {
-      headers: { authorization: `Basic ${basic}`, accept: 'application/json' },
+      ...(write
+        ? {
+            method: write.method,
+            body: JSON.stringify(write.body),
+            headers: { ...headers, 'content-type': 'application/json' },
+          }
+        : { headers }),
       redirect,
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
   }
 
-  private async get(auth: JiraAuth, path: string): Promise<unknown> {
-    const response = await this.request(auth, path, 'error');
+  /** A read, or a write when `write` is given; Jira answers most writes with 204 and no body. */
+  private async get(
+    auth: JiraAuth,
+    path: string,
+    write?: { method: 'POST' | 'PUT'; body: unknown },
+  ): Promise<unknown> {
+    const response = await this.request(auth, path, 'error', write);
     const body: unknown = await response.json().catch(() => null);
     if (!response.ok) {
       throw failure(response.status, body, response.headers.get('retry-after'));
@@ -107,6 +150,35 @@ export class FetchJiraApi implements JiraApi {
   async issue(auth: JiraAuth, key: string): Promise<JiraIssue> {
     const path = `/issue/${encodeURIComponent(key)}?fields=${ISSUE_FIELDS}`;
     return issueOf(await this.get(auth, path));
+  }
+
+  async transitions(auth: JiraAuth, key: string): Promise<JiraTransition[]> {
+    return transitionsOf(await this.get(auth, `${issuePath(key)}/transitions`));
+  }
+
+  async transitionIssue(auth: JiraAuth, key: string, transitionId: string): Promise<void> {
+    const body = { transition: { id: transitionId } };
+    await this.get(auth, `${issuePath(key)}/transitions`, { method: 'POST', body });
+  }
+
+  async issueStatus(auth: JiraAuth, key: string): Promise<{ id: string; name: string }> {
+    return statusOf(await this.get(auth, `${issuePath(key)}?fields=status`));
+  }
+
+  async editMeta(auth: JiraAuth, key: string): Promise<Record<string, JiraEditField>> {
+    return editMetaOf(await this.get(auth, `${issuePath(key)}/editmeta`));
+  }
+
+  async updateIssue(
+    auth: JiraAuth,
+    key: string,
+    change: { fields: Record<string, unknown>; update: Record<string, unknown> },
+  ): Promise<void> {
+    await this.get(auth, issuePath(key), { method: 'PUT', body: change });
+  }
+
+  async addComment(auth: JiraAuth, key: string, body: AdfDocument): Promise<void> {
+    await this.get(auth, `${issuePath(key)}/comment`, { method: 'POST', body: { body } });
   }
 
   async attachmentMediaId(auth: JiraAuth, attachmentId: string): Promise<string | null> {

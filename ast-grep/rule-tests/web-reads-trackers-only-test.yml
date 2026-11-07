@@ -8,6 +8,8 @@ valid:
     const comments = await notion.comments(token, pageId);
   - |
     await api.addComment(base, input, slice);
+  - |
+    const transitions = await jira.transitions(auth, key);
 invalid:
   - |
     await notion.updatePage(token, pageId, properties);
@@ -17,3 +19,9 @@ invalid:
     await notion.addComment(token, { pageId }, richText);
   - |
     await provider.createItem(secret, config, { title, markdown });
+  - |
+    await jira.transitionIssue(auth, key, transitionId);
+  - |
+    await jira.updateIssue(auth, key, { fields, update });
+  - |
+    await jira.addComment(auth, key, body);

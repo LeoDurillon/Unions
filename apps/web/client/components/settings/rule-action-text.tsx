@@ -9,6 +9,7 @@ import {
 import { describeChange } from '@union/core/event-pull-request';
 import type { ReactElement } from 'react';
 
+import { isJiraAction, JiraActionText } from '../integrations/jira/jira-action-text';
 import { PeopleNames } from './people-field';
 
 /** The properties a rule's row names in full; the others are counted. */
@@ -103,6 +104,9 @@ export function ActionText({
         notify you in Union: <code className="font-mono">{action.message}</code>
       </>
     );
+  }
+  if (isJiraAction(action)) {
+    return <JiraActionText action={action} />;
   }
   return (
     <>

@@ -182,3 +182,60 @@ test('reads the settable fields from GET /field', async () => {
   ]);
   expect(seen[0]?.url).toBe('https://acme.atlassian.net/rest/api/3/field');
 });
+
+test('writes send JSON, and read an empty 204 answer as done', async () => {
+  const api = new FetchJiraApi();
+  const seen = answer(() => new Response(null, { status: 204 }));
+  await api.transitionIssue(AUTH, 'ABC-1', '31');
+  await api.updateIssue(AUTH, 'ABC-1', { fields: { customfield_1: 'x' }, update: {} });
+  await api.addComment(AUTH, 'ABC-1', { type: 'doc', version: 1, content: [] });
+  expect(seen.map(({ url, init }) => [init?.method, url, init?.body])).toEqual([
+    [
+      'POST',
+      'https://acme.atlassian.net/rest/api/3/issue/ABC-1/transitions',
+      JSON.stringify({ transition: { id: '31' } }),
+    ],
+    [
+      'PUT',
+      'https://acme.atlassian.net/rest/api/3/issue/ABC-1',
+      JSON.stringify({ fields: { customfield_1: 'x' }, update: {} }),
+    ],
+    [
+      'POST',
+      'https://acme.atlassian.net/rest/api/3/issue/ABC-1/comment',
+      JSON.stringify({ body: { type: 'doc', version: 1, content: [] } }),
+    ],
+  ]);
+  expect(new Headers(seen[0]?.init?.headers).get('content-type')).toBe('application/json');
+});
+
+test("reads an issue's transitions, status and edit screen", async () => {
+  const api = new FetchJiraApi();
+  answer(() =>
+    json({
+      transitions: [{ id: '31', name: 'Start review', to: { id: '3', name: 'In Review' } }],
+    }),
+  );
+  expect(await api.transitions(AUTH, 'ABC-1')).toEqual([
+    { id: '31', name: 'Start review', toId: '3', toName: 'In Review' },
+  ]);
+  answer(() => json({ fields: { status: { id: '1', name: 'To Do' } } }));
+  expect(await api.issueStatus(AUTH, 'ABC-1')).toEqual({ id: '1', name: 'To Do' });
+  answer(() =>
+    json({
+      fields: {
+        customfield_3: {
+          allowedValues: [
+            { id: '10', value: 'Low' },
+            { id: '11', value: 'High' },
+          ],
+        },
+        labels: { schema: { type: 'array' } },
+      },
+    }),
+  );
+  expect(await api.editMeta(AUTH, 'ABC-1')).toEqual({
+    customfield_3: { allowedValues: ['Low', 'High'] },
+    labels: { allowedValues: null },
+  });
+});

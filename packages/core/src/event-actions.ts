@@ -6,6 +6,7 @@ import {
 } from './event-project-fields-action';
 import { checkPullRequestChanges, type PullRequestChange } from './event-pull-request-action';
 import { unknownVariables } from './event-rule-types';
+import type { JiraFieldValue } from './integrations/jira-field-types';
 
 /** Where a GitHub comment goes: the ticket's issue, or its pull request. */
 export type CommentTarget = 'issue' | 'pull_request';
@@ -25,6 +26,12 @@ type ActionFields = {
   github_project_fields: { item: ProjectItemTarget; values: ProjectFieldValue[] };
   /** Notifies the user in Union (the bell, desktop notifications); `message` is a template. */
   union_notification: { message: string };
+  /** Moves the ticket's Jira issue to this status, through whichever transition of its workflow leads there. */
+  jira_transition: { statusId: string; statusName: string };
+  /** Sets fields of the ticket's Jira issue, all in one request. */
+  jira_field: { values: JiraFieldValue[] };
+  /** Comments on the ticket's Jira issue; `body` is a template, sent as plain text. */
+  jira_comment: { body: string };
 };
 
 export type ActionKind = keyof ActionFields;
@@ -54,6 +61,9 @@ export const ACTION_LABELS: Record<ActionKind, string> = {
   github_pull_request: "Update the ticket's pull request",
   github_project_fields: "Set fields of the ticket's GitHub Project item",
   union_notification: 'Notify me in Union',
+  jira_transition: "Move the ticket's Jira issue",
+  jira_field: "Set fields of the ticket's Jira issue",
+  jira_comment: "Comment on the ticket's Jira issue",
 };
 
 export const COMMENT_TARGETS = [
@@ -82,6 +92,12 @@ const EMPTY_ACTIONS: { [K in ActionKind]: ActionOf<K> } = {
     values: [{ fieldId: '', fieldName: '', fieldType: 'text', value: '' }],
   },
   union_notification: { kind: 'union_notification', message: '' },
+  jira_transition: { kind: 'jira_transition', statusId: '', statusName: '' },
+  jira_field: {
+    kind: 'jira_field',
+    values: [{ fieldId: '', fieldName: '', fieldType: 'text', value: '' }],
+  },
+  jira_comment: { kind: 'jira_comment', body: '' },
 };
 
 /** A new action of `kind`, before the user fills it in. */

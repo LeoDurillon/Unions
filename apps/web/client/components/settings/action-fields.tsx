@@ -27,7 +27,7 @@ function KindFields({
   notion: NotionSchema | null;
   action: EventAction;
   onChange: (action: EventAction) => void;
-}): ReactElement {
+}): ReactElement | null {
   if (action.kind === 'notion_property') {
     return (
       <NotionActionFields
@@ -47,7 +47,11 @@ function KindFields({
   if (action.kind === 'github_project_fields') {
     return <ProjectFieldsFields projectId={projectId} action={action} onChange={onChange} />;
   }
-  return <GitHubCommentFields action={action} onChange={onChange} />;
+  if (action.kind === 'github_comment') {
+    return <GitHubCommentFields action={action} onChange={onChange} />;
+  }
+  // The Jira actions are not offered yet (`ACTION_KINDS`): their fields come with them.
+  return null;
 }
 
 export function ActionFields({

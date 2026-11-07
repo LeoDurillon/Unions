@@ -68,6 +68,47 @@ export function statusesOf(body: unknown): JiraStatus[] {
   return [...byId.values()];
 }
 
+/** A transition the issue's workflow offers from its current status, and the status it leads to. */
+export type JiraTransition = { id: string; name: string; toId: string; toName: string };
+
+/** A field of the issue's edit screen: a select's option names, null for a field without a list. */
+export type JiraEditField = { allowedValues: string[] | null };
+
+export function transitionsOf(body: unknown): JiraTransition[] {
+  const list = isRecord(body) ? records(body.transitions) : [];
+  return list.map((transition) => {
+    const to = isRecord(transition.to) ? transition.to : {};
+    return {
+      id: text(transition, 'id'),
+      name: text(transition, 'name'),
+      toId: text(to, 'id'),
+      toName: text(to, 'name'),
+    };
+  });
+}
+
+/** `GET /issue/{key}?fields=status`: the issue's current status. */
+export function statusOf(body: unknown): { id: string; name: string } {
+  const fields = isRecord(body) && isRecord(body.fields) ? body.fields : {};
+  const status = isRecord(fields.status) ? fields.status : {};
+  return { id: text(status, 'id'), name: text(status, 'name') };
+}
+
+/** `GET /issue/{key}/editmeta`: the fields the issue can be edited in, by id. */
+export function editMetaOf(body: unknown): Record<string, JiraEditField> {
+  const fields = isRecord(body) && isRecord(body.fields) ? body.fields : {};
+  return Object.fromEntries(
+    Object.entries(fields).map(([id, field]) => {
+      const allowed =
+        isRecord(field) && Array.isArray(field.allowedValues) ? field.allowedValues : null;
+      const names = allowed?.flatMap((value: unknown) =>
+        isRecord(value) && typeof value.value === 'string' ? [value.value] : [],
+      );
+      return [id, { allowedValues: names ?? null }];
+    }),
+  );
+}
+
 /** `GET /field`: the fields a rule can set, by name; the others (users, versions…) are left out. */
 export function fieldsOf(body: unknown): JiraFieldInfo[] {
   return records(body)

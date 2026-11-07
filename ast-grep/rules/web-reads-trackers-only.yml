@@ -1,19 +1,21 @@
 id: web-reads-trackers-only
 language: TypeScript
 severity: error
-message: The web server only reads Notion and the other trackers; pages, comments and items are written in the worker.
-note: AGENTS.md, Rules (Notion).
+message: The web server only reads Notion, Jira and the other trackers; pages, issues, comments and items are written in the worker.
+note: AGENTS.md, Rules (Notion, Jira).
 files:
   - apps/web/**
 rule:
   any:
     - pattern: $NOTION.createPage($$$)
     - pattern: $NOTION.updatePage($$$)
-    # Only on a Notion client: the review page's `api.addComment` adds a review comment.
-    - pattern: $NOTION_API.addComment($$$)
+    # Only on a tracker's client: the review page's `api.addComment` adds a review comment.
+    - pattern: $TRACKER_API.addComment($$$)
+    - pattern: $JIRA.transitionIssue($$$)
+    - pattern: $JIRA.updateIssue($$$)
     - pattern: $PROVIDER.createItem($$$)
 constraints:
-  NOTION_API:
-    regex: '(?i)notion'
+  TRACKER_API:
+    regex: '(?i)notion|jira'
 ignores:
   - '**/*.test.ts'

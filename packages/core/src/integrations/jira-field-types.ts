@@ -13,6 +13,17 @@ export type JiraFieldType =
 /** A field of the Jira site a rule can set: its id (`customfield_10042`, `labels`), name and type. */
 export type JiraFieldInfo = { id: string; name: string; type: JiraFieldType };
 
+/**
+ * One field a rule sets: its id, and its name and type as they were when the rule was saved (the
+ * sentence and the checks use them). `value` is a template; an option's is the option's name.
+ */
+export type JiraFieldValue = {
+  fieldId: string;
+  fieldName: string;
+  fieldType: JiraFieldType;
+  value: string;
+};
+
 const JIRA_FIELD_TYPES = [
   'text',
   'textarea',

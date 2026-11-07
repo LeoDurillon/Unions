@@ -1,35 +1,16 @@
 // The Jira actions of a rule (move the ticket's issue, set its fields, comment on it) and their checks against the
 // stored Jira project; what they send is built when they run.
 import type { Db } from './db';
+import type { ActionOf } from './event-actions';
 import { EventRuleError } from './event-notion-action';
 import { unknownVariables } from './event-rule-types';
-import type { JiraFieldType } from './integrations/jira-field-types';
+import type { JiraFieldValue } from './integrations/jira-field-types';
 import { jiraFieldsFor, type JiraFields } from './integrations/jira-integration';
 import { jiraValueError } from './integrations/jira-values';
 
-/** Moves the ticket's Jira issue to this status, through whichever transition of its workflow leads there. */
-export type JiraTransitionAction = {
-  kind: 'jira_transition';
-  statusId: string;
-  statusName: string;
-};
-
-/**
- * One field a rule sets: its id, and its name and type as they were when the rule was saved (the
- * sentence and the checks use them). `value` is a template; an option's is the option's name.
- */
-type JiraFieldValue = {
-  fieldId: string;
-  fieldName: string;
-  fieldType: JiraFieldType;
-  value: string;
-};
-
-/** Sets fields of the ticket's Jira issue, all in one request. */
-export type JiraFieldAction = { kind: 'jira_field'; values: JiraFieldValue[] };
-
-/** Comments on the ticket's Jira issue; `body` is a template, sent as plain text. */
-export type JiraCommentAction = { kind: 'jira_comment'; body: string };
+export type JiraTransitionAction = ActionOf<'jira_transition'>;
+export type JiraFieldAction = ActionOf<'jira_field'>;
+export type JiraCommentAction = ActionOf<'jira_comment'>;
 
 /** Jira refuses longer comments. */
 const MAX_COMMENT = 32_767;

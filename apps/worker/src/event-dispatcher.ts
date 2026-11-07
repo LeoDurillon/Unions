@@ -1,17 +1,20 @@
 // Follows the event log: writes the notifications, queues a delivery for each event a rule waits for, then does the due ones, a few per tick and one at a time.
 import {
+  FetchJiraApi,
   finishDelivery,
   nextDelivery,
   queueDeliveries,
   type ActionKind,
   type Db,
   type DeliveryOutcome,
+  type JiraApi,
   type NotionApi,
 } from '@union/core';
 
 import { gitHubCommentTarget, type GitHubApiFor } from './event-actions/github-comment';
 import { gitHubProjectFieldsTarget } from './event-actions/github-project-fields';
 import { gitHubPullRequestTarget } from './event-actions/github-pull-request';
+import { jiraTargets } from './event-actions/jira';
 import { notionTarget } from './event-actions/notion';
 import { deliverAction, type ActionTargets } from './event-actions/target';
 import { unionNotificationTarget } from './event-actions/union-notification';
@@ -31,6 +34,7 @@ export class EventDispatcher {
     private readonly db: Db,
     notion: NotionApi,
     apiFor: GitHubApiFor = () => null,
+    jira: JiraApi = new FetchJiraApi(),
   ) {
     this.targets = {
       notion_property: notionTarget(db, notion),
@@ -38,6 +42,7 @@ export class EventDispatcher {
       github_pull_request: gitHubPullRequestTarget(db, apiFor),
       github_project_fields: gitHubProjectFieldsTarget(db, apiFor),
       union_notification: unionNotificationTarget(db),
+      ...jiraTargets(db, jira),
     };
   }
 

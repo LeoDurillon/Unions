@@ -123,12 +123,20 @@ function gitHubProjectFieldsPreview(
   return { ok: true, kind: 'github_project_fields', item: action.item, number, fields };
 }
 
+/** The Jira actions are not offered yet (`ACTION_KINDS`): their previews come with their editor. */
+function jiraPreview(): RulePreview {
+  return { ok: false, error: 'Previews of Jira actions are not available yet' };
+}
+
 const PREVIEWS: Previews = {
   notion_property: notionPreview,
   github_comment: gitHubCommentPreview,
   github_pull_request: gitHubPullRequestPreview,
   github_project_fields: gitHubProjectFieldsPreview,
   union_notification: unionNotificationPreview,
+  jira_transition: jiraPreview,
+  jira_field: jiraPreview,
+  jira_comment: jiraPreview,
 };
 
 /** What the rule's action would do for the ticket; nothing is sent. */
