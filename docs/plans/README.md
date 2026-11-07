@@ -116,7 +116,7 @@ and linked.
 - [More Jira fields in rules](jira-more-fields.md): users, multi-selects and checkboxes, versions, components and
   sprints in **Set fields of the ticket's Jira issue**. Planned (2026-11-07).
 - [Formatted Jira comments](jira-comment-formatting.md): markdown in the Jira tab's comments through `markdownAdf`,
-  rule comments unchanged. Planned (2026-11-07).
+  rule comments unchanged. Built and deployed (2026-11-07), checked on a real site.
 - [Update Union from the sidebar](self-update.md): an Update button enabled when the checkout is behind the remote's
   `main`; the worker fetches `origin` (SSH through the host's `~/.ssh`, read-only), fast-forwards, reinstalls if
   needed, and web and worker exit for compose to start them again; Update anyway when something runs. Built
