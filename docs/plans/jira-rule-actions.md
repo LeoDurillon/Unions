@@ -1,6 +1,6 @@
 # Jira rule actions
 
-Status: planned (2026-11-07); steps 1 to 3 built (branch `jira-rules`, 2026-11-07). Follows [Jira](jira.md) (built: connection and import, reads only). Scope: event
+Status: built and deployed (2026-11-07), steps 1 to 4; checked on a real Jira Cloud site. Follows [Jira](jira.md) (built: connection and import, reads only). Scope: event
 rules that move a Jira issue to a status, set its fields, and comment on it, for tickets imported from Jira.
 
 ## Why
@@ -175,6 +175,14 @@ Each step ships on its own; `bun run check` after each.
    `documentation/automation.md` (the three actions, what the account needs), `docs/architecture/integrations.md`
    (Jira writes from the worker), AGENTS.md's rules (Jira writes in the worker, as Notion's), this plan's status
    and `docs/plans/README.md`.
+   Done on the user's site (project "Mon équipe informatique", SCRUM-1, 2026-11-07): three rules on "the ticket
+   moves to In progress", each delivered on the first attempt: "Moved SCRUM-1 from À faire to En cours", "Labels:
+   added Test, Due date set to "2026-11-07"", "Commented on SCRUM-1". Found before it, both fixed: a project
+   connected in the setup wizard had never read its Jira project, so the Events page hid the Jira actions and
+   Refresh (`cbbf64e`); and `GET /field` lists read-only fields, so Jira's own fields became an allow-list
+   (`4bd797f`). The editor also offers a tracker's actions only to projects connected to it (`cbbf64e`). Not
+   checked on the real site: a 403 (a missing permission), a transition screen with required fields, a select's
+   option checked against `editmeta`.
 
 ## Risks
 
