@@ -23,7 +23,13 @@ import { fetchDiscussion } from './github-discussion';
 import { fetchPullRequestFiles, type PullRequestFiles } from './github-pull-request-files';
 import { fetchPullRequests, type RemotePullRequest } from './github-pull-requests';
 import { CREATE_PROJECT, OWNER_PROJECTS } from './github-queries';
-import { OctokitRepoReads, orNull, type RuleChoices, type StackReads } from './github-repo-reads';
+import {
+  OctokitRepoReads,
+  orNull,
+  type RepositoryIds,
+  type RuleChoices,
+  type StackReads,
+} from './github-repo-reads';
 
 /**
  * GitHub calls the web server makes itself, because the UI needs the answer right away: the setup
@@ -39,6 +45,11 @@ export type OnboardingGitHub = StackReads & {
     auth: GitHubAuth,
     input: { ownerId: string; repositoryId: string; title: string },
   ): Promise<ProjectOption>;
+  /** The repository's and its owner's node ids; null when it is not reachable. */
+  repositoryIds(
+    auth: GitHubAuth,
+    repo: { owner: string; repo: string },
+  ): Promise<RepositoryIds | null>;
   /** Null when the repository has no pull request with that number. */
   getPullRequest(
     auth: GitHubAuth,

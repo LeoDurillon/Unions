@@ -1,17 +1,26 @@
-// The project's own settings and its pull requests'.
+// The project's own settings, its GitHub Project and its pull requests'.
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
+import { GitHubProjectSection } from '../integrations/github-project-section';
 import { BranchSection } from './branch-section';
 import { FilesSection } from './files-section';
 import { GitHubAccessSection } from './github-access-section';
+import { IssuesSection } from './issues-section';
 import { PullRequestSection } from './pull-request-section';
 import { ReviewSection } from './review-section';
 
-export const PROJECT_SECTIONS = ['general', 'files', 'pull-requests', 'review'] as const;
+/** Shown in their menu groups (`settings-sections.ts`); the GitHub Project is listed under Integrations. */
+export const PROJECT_SECTIONS = [
+  'general',
+  'files',
+  'github-project',
+  'pull-requests',
+  'review',
+] as const;
 export type ProjectSection = (typeof PROJECT_SECTIONS)[number];
 
-/** The project's own settings and its pull requests'. */
+/** The project's own settings, its GitHub Project and its pull requests'. */
 export function ProjectSectionBody({
   section,
   project,
@@ -24,9 +33,11 @@ export function ProjectSectionBody({
       <div className="space-y-6">
         <GitHubAccessSection project={project} />
         <BranchSection project={project} />
+        <IssuesSection project={project} />
       </div>
     ),
     files: () => <FilesSection project={project} />,
+    'github-project': () => <GitHubProjectSection project={project} />,
     'pull-requests': () => <PullRequestSection project={project} />,
     review: () => <ReviewSection project={project} />,
   };

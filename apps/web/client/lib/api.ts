@@ -152,6 +152,7 @@ export const api = {
       stacks?: boolean;
       sliceChecks?: boolean;
       suggestReplies?: boolean;
+      mirrorIssues?: boolean;
       hideLockFiles?: boolean;
       reviewIgnore?: string[];
       instructions?: string;

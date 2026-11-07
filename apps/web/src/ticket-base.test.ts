@@ -39,6 +39,7 @@ const github: OnboardingGitHub = {
   listInstallations: unused,
   listRuleChoices: unused,
   listProjectFields: unused,
+  repositoryIds: unused,
 };
 
 let db: Db;

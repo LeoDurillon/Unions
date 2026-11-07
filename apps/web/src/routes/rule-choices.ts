@@ -6,12 +6,19 @@ import { Hono, type Context } from 'hono';
 import type { OnboardingGitHub } from '../github-onboarding';
 import { CONFLICT, fail, NOT_FOUND, requireId } from '../http';
 
-function load(db: Db, c: Context): { project: Project; auth: GitHubAuth } {
+/** The project a `:projectId` route names. */
+export function projectOf(db: Db, c: Context): Project {
   const id = requireId(c.req.param('projectId'), 'project id');
   const project = db.select().from(schema.projects).where(eq(schema.projects.id, id)).get();
   if (!project) {
     throw fail(NOT_FOUND, 'Unknown project');
   }
+  return project;
+}
+
+/** The project a `:projectId` route names and the credentials to read GitHub with. */
+export function projectWithAuth(db: Db, c: Context): { project: Project; auth: GitHubAuth } {
+  const project = projectOf(db, c);
   const auth = projectGitHubAuth(db, project, process.env.GITHUB_TOKEN);
   if (!auth) {
     throw fail(CONFLICT, 'This project has no GitHub credentials');
@@ -20,7 +27,7 @@ function load(db: Db, c: Context): { project: Project; auth: GitHubAuth } {
 }
 
 async function ruleChoices(db: Db, github: OnboardingGitHub, c: Context): Promise<Response> {
-  const { project, auth } = load(db, c);
+  const { project, auth } = projectWithAuth(db, c);
   const choices = await github.listRuleChoices(auth, { owner: project.owner, repo: project.repo });
   if (!choices) {
     throw fail(NOT_FOUND, `${project.owner}/${project.repo} is not reachable`);
@@ -29,7 +36,7 @@ async function ruleChoices(db: Db, github: OnboardingGitHub, c: Context): Promis
 }
 
 async function projectFields(db: Db, github: OnboardingGitHub, c: Context): Promise<Response> {
-  const { project, auth } = load(db, c);
+  const { project, auth } = projectWithAuth(db, c);
   if (project.githubProjectNodeId === '') {
     throw fail(CONFLICT, 'This project has no GitHub Project');
   }

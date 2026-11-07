@@ -14,7 +14,8 @@ type Project = typeof schema.projects.$inferSelect;
  * before the worker has applied it.
  */
 export class BoardSync {
-  private info: ProjectInfo | null = null;
+  /** Keyed by node id: the settings can point the project at another board. */
+  private info: { nodeId: string; info: ProjectInfo } | null = null;
 
   constructor(
     private readonly db: Db,
@@ -75,11 +76,11 @@ export class BoardSync {
   }
 
   private async projectInfo(project: Project, nodeId: string): Promise<ProjectInfo> {
-    if (this.info) {
-      return this.info;
+    if (this.info?.nodeId === nodeId) {
+      return this.info.info;
     }
     const info = await this.api.getProjectInfo(nodeId);
-    this.info = info;
+    this.info = { nodeId, info };
     this.db
       .update(schema.projects)
       .set({ statusFieldId: info.statusFieldId })

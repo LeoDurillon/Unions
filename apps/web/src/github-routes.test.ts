@@ -70,6 +70,7 @@ function fakeGitHub(calls: Call[]): OnboardingGitHub {
     listInstallations: () => Promise.resolve([{ id: 7, account: 'acme', allRepositories: false }]),
     listRuleChoices: () => Promise.reject(new Error('unused')),
     listProjectFields: () => Promise.reject(new Error('unused')),
+    repositoryIds: () => Promise.resolve(null),
     listBranches: () => Promise.resolve(null),
     hasBranch: () => Promise.resolve(false),
   };

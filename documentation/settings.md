@@ -6,7 +6,7 @@ Open a project's **Settings** in the project bar. Most pages have one **Save** a
 
 | Group             | Page             | What it holds                                                                                                                                      |
 | ----------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Project**       | General          | GitHub access (token or GitHub App installation) and the base branch.                                                                              |
+| **Project**       | General          | GitHub access (token or GitHub App installation), the base branch, and whether tickets get GitHub issues.                                          |
 |                   | Files            | [Project files](previews.md#project-files) every workspace gets, kept out of git.                                                                  |
 | **Agents**        | Instructions     | [Notes every agent of the project reads](agents.md#project-instructions).                                                                          |
 |                   | Memory           | [Feedback and lessons](agents.md#memory).                                                                                                          |
@@ -20,12 +20,26 @@ Open a project's **Settings** in the project bar. Most pages have one **Save** a
 |                   | Variables        | Plain and secret environment variables for previews and the agent.                                                                                 |
 |                   | End-to-end tests | The e2e command, and starting the preview for implementation steps.                                                                                |
 |                   | Limits           | Previews running at once, and the idle time after which a preview stops.                                                                           |
-| **Integrations**  | Notion           | The Notion integration secret and data source.                                                                                                     |
+| **Integrations**  | GitHub Project   | The GitHub Project the board mirrors to: connect one (pick or create), change it or disconnect it.                                                 |
+|                   | Notion           | The Notion integration secret and data source.                                                                                                     |
 |                   | Jira             | The Jira site, account email, API token, project key and the issue type of new issues ([Connect Jira](first-project.md#connect-jira)).             |
 | **Events**        | Rules, Activity  | [Event rules](automation.md#event-rules) and what they did.                                                                                        |
 |                   | Danger zone      | Delete the project. Type the repository's name to confirm.                                                                                         |
 
 Deleting a project removes its tickets from Union, with their containers and volumes. Nothing is deleted on GitHub.
+
+### GitHub issues and the GitHub Project
+
+- **General → Mirror tickets as GitHub issues** (on by default): each ticket gets a GitHub issue with a comment per
+  step, and its pull request closes it. Turn it off when the team works in Notion or Jira, so tickets are not copied
+  a second time: a ticket written in Union or imported from a tracker then gets no issue, its step outputs stay in
+  Union, and reviewers read the agent's summary in the pull request. A ticket imported from a GitHub issue keeps it.
+  Turning it back on opens the missing issues. It stays on while a GitHub Project is connected.
+- **Integrations → GitHub Project**: pick one of the repository owner's Projects, or create one, and click
+  **Connect**; each ticket's issue is added to it as a card that follows the ticket's column, and moving a card to
+  In Progress on GitHub starts the ticket. **Change** moves the tickets to another Project. **Disconnect** stops
+  updating it; the Project and its cards stay on GitHub as they are. Without a Project, Union's board is the only
+  board.
 
 ## Union settings
 

@@ -21,6 +21,8 @@ export type { StackReads } from './github-stacks';
 
 type Repo = { owner: string; repo: string };
 
+export type RepositoryIds = { repositoryId: string; ownerId: string };
+
 const NOT_FOUND = 404;
 
 function isNotFound(error: unknown): boolean {
@@ -79,6 +81,14 @@ export class OctokitRepoReads {
 
   pullRequestStack(auth: GitHubAuth, repo: Repo, number: number): Promise<GitHubStack | null> {
     return orNull(() => fetchPullRequestStack(this.client(auth), repo, number));
+  }
+
+  /** The node ids a new GitHub Project linked to the repository is created with. */
+  repositoryIds(auth: GitHubAuth, repo: Repo): Promise<RepositoryIds | null> {
+    return orNull(async () => {
+      const { data } = await this.client(auth).rest.repos.get(repo);
+      return { repositoryId: data.node_id, ownerId: data.owner.node_id };
+    });
   }
 
   listRuleChoices(auth: GitHubAuth, repo: Repo): Promise<RuleChoices | null> {

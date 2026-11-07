@@ -28,6 +28,14 @@
   (and any with output), and a card names a flow that is not the full pipeline. Project settings → Agents → Flows
   (`settings/flows-section.tsx`) edits the presets and the default, saved as `flows` and `defaultFlow` through
   `PATCH /api/projects/:id` (checked by `flowSettingsChange` in core); the built-in presets are saved as none.
+- The GitHub layers (`docs/plans/optional-github-project.md`): General's **Mirror tickets as GitHub issues**
+  (`settings/issues-section.tsx`) saves `mirrorIssues` through `PATCH /api/projects/:id`, refused (409) while a
+  GitHub Project is connected. Integrations → GitHub Project (`integrations/github-project-section.tsx`, a project
+  section in `project-section-body.tsx` though listed under Integrations) lists the owner's Projects
+  (`GET /api/projects/:projectId/github-project/choices`), connects one picked or created by title
+  (`PUT …/github-project`; creation goes through `OnboardingGitHub.createProject`, as in the wizard) and
+  disconnects (`DELETE`). `github-project-link.ts` writes the columns, clears the tickets' items and synced
+  columns when the board changes, and turns `mirrorIssues` on with a Project; the worker does the rest.
 - Code review: after each implementation run the worker stores the branch diff (`diff-snapshot.ts`,
   `diff_snapshots`/`diff_files`, newest only). The web reads it from SQLite (`routes/review.ts`), never from Docker or
   GitHub; `components/review/` renders one file at a time, unified or split (`lib/split-rows.ts` pairs the lines),

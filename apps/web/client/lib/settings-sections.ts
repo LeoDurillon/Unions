@@ -42,6 +42,7 @@ export const SETTINGS_GROUPS = [
   {
     label: 'Integrations',
     sections: [
+      { id: 'github-project', label: 'GitHub Project' },
       { id: 'notion', label: 'Notion' },
       { id: 'jira', label: 'Jira' },
     ],

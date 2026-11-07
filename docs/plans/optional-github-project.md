@@ -1,9 +1,10 @@
 # The GitHub Project and issues as choices
 
-Status: steps 1 and 2 built (2026-11-07, branch `optional-github-project`); steps 3 to 6 left. Step 2 reads
+Status: steps 1 to 3 built (2026-11-07, branch `optional-github-project`); steps 4 to 6 left. Step 2 reads
 the issues of active tickets only: a title edited on GitHub after a ticket is done or cancelled stays as it was in
-Union. Relates to [One adapter per tracker](tracker-adapters.md) (its D7: GitHub Project
-fields join the shared field types).
+Union. Step 3 creates a new Project from the web server, as the wizard already does (`OnboardingGitHub`), rather
+than through the worker; connecting or changing the Project clears the tickets' items, so the worker adds them to
+the new board.
 
 ## Why
 

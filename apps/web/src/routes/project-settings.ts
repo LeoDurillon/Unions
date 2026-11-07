@@ -1,5 +1,6 @@
 // Updates a project's settings, or deletes the project (GitHub is left untouched).
 import {
+  hasGitHubProject,
   parseScripts,
   schema,
   ScriptsError,
@@ -141,6 +142,15 @@ function scriptsChange(
   }
 }
 
+/** A GitHub Project needs issues: mirroring cannot be turned off while one is connected. */
+function mirrorChange(project: Project, body: Record<string, unknown>): boolean | undefined {
+  const mirror = booleanChange(body, 'mirrorIssues', project.config.mirrorIssues);
+  if (mirror === false && hasGitHubProject(project)) {
+    throw fail(CONFLICT, 'Disconnect the GitHub Project first: its cards are the tickets’ issues');
+  }
+  return mirror;
+}
+
 function configChange(db: Db, project: Project, body: Record<string, unknown>): ProjectConfig {
   const { config } = project;
   return {
@@ -157,6 +167,7 @@ function configChange(db: Db, project: Project, body: Record<string, unknown>): 
     stacks: booleanChange(body, 'stacks', config.stacks),
     sliceChecks: booleanChange(body, 'sliceChecks', config.sliceChecks),
     suggestReplies: booleanChange(body, 'suggestReplies', config.suggestReplies),
+    mirrorIssues: mirrorChange(project, body),
     scripts: scriptsChange(body, config.scripts),
     ...flowsChange(db, body, config),
     ...sizeChange(body, config),
@@ -193,6 +204,7 @@ const UPDATABLE = [
   'stacks',
   'sliceChecks',
   'suggestReplies',
+  'mirrorIssues',
   'scripts',
   ...CHECK_FIELDS,
   ...FLOW_FIELDS,

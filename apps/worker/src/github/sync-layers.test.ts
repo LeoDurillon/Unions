@@ -141,3 +141,14 @@ test('a GitHub Project URL that cannot be read is reported; its issues are still
   expect(issueNumber).toBe(1);
   expect(projectItemId).toBeNull();
 });
+
+test('a project pointed at another board reads that board’s Status field', async () => {
+  const projectId = projectWith({});
+  db.update(schema.projects).set({ githubProjectNodeId: 'P_1' }).run();
+  createTicket(db, { projectId, title: 'Add search' });
+  await sync.push();
+  db.update(schema.projects).set({ githubProjectNodeId: 'P_2' }).run();
+  db.update(schema.tickets).set({ projectItemId: null, githubSyncedStatus: null }).run();
+  await sync.push();
+  expect(api.calls.filter((call) => call === 'getProjectInfo')).toHaveLength(2);
+});
