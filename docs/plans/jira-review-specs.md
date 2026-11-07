@@ -1,6 +1,6 @@
 # Jira issues as review specs
 
-Status: built (branch `jira-review-specs`, 2026-11-07), steps 1 to 4. Follows [Jira](jira.md) and [One set of specs per review](review-specs.md), built.
+Status: built and deployed (2026-11-07), steps 1 to 4. Follows [Jira](jira.md) and [One set of specs per review](review-specs.md), built.
 The foundation of [Jira issues in reviews of other people's pull requests](jira-pr-reviews.md).
 
 ## Why

@@ -67,7 +67,9 @@
   (`apps/web/src/jira-files.ts`, over the shared `tracker-files.ts` that Notion's `notion-files.ts` uses too: only
   that path of the configured site, with the token; Jira's redirect to its media host is followed by hand without
   it, and only to https) into private ticket files, within the attachment limits. Jira writes happen in the worker
-  only, from event rules on tickets imported from Jira (`event-actions/jira-*.ts`, `jiraTargets`): a move reads the
+  only, from event rules on tickets imported from Jira, or for `pr_review_posted` the Jira issues the review is
+  linked to (`event-actions/jira-*.ts`, `jiraTargets`; `jira-target.ts`'s `jiraIssueOf` gives the keys, `eachIssue`
+  runs the action on each in turn and joins their details): a move reads the
   issue's status and transitions and posts the one that leads to the rule's status; fields are checked against the
   issue's `editmeta`, then sent in one `PUT` (labels as `update` operations); comments go as ADF (core's
   `text-adf.ts`). The rules editor reads the stored statuses and settable fields (`GET /field`, kept in
@@ -78,6 +80,12 @@
   `POST /rest/api/3/issue` with the summary (255 characters at most) and the description converted by core's
   `markdown-adf.ts` (mdast with GitHub's extensions, from the `markdown` catalog; inline code keeps only a link
   mark, as ADF requires). Jira's refusal (a required field) is the investigation's `ticket_error`.
+- A review of someone else's pull request links Jira issues as its `jira` specs (core's `review-specs.ts`:
+  `linkJiraIssue`, `linkedJiraIssues`, `unlinkJiraIssue`). `routes/review-jira.ts` (under `<review>/jira`) reads
+  their descriptions and comments for the review's Jira tab, checks a key or link of the site (any project, as
+  specs), links and unlinks; `/suggestions` reads the keys the title, head branch and description name (core's
+  `jira-keys.ts`: the project's key prefix only, bare or as a `/browse/` link of the site), reads each (at most 10)
+  and drops the linked and unreadable ones. Nothing is written to Jira.
 - A Jira ticket's comments: the web reads them for its Jira tab (`routes/jira-comments.ts`, `GET
   /api/tickets/:id/jira-comments`; `JiraApi.comments`, newest first, 100 a page, 5 pages at most, shown oldest
   first; core's `jira-comments.ts` converts each with `adfMarkdown`, media by name, and names a role, group or

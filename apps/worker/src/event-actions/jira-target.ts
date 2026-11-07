@@ -1,8 +1,11 @@
-// What the Jira actions of rules share: the ticket's issue and the credentials to reach it, and Jira's failures as outcomes.
+// What the Jira actions of rules share: the issues they act on (a posted review's linked ones, else the ticket's), the
+// credentials to reach them, and Jira's failures as outcomes.
 import {
   getTicket,
   integrationOf,
+  isEvent,
   JiraError,
+  linkedJiraIssues,
   readJiraConfig,
   schema,
   templateValues,
@@ -29,17 +32,45 @@ export type JiraIssueTarget = {
   values: Partial<Record<TemplateVariable, string>>;
 };
 
-/** The issue the ticket was imported from, or why the action is skipped or fails. */
-export function jiraIssueOf(
-  db: Db,
-  { delivery, rule, event }: Due,
-): JiraIssueTarget | DeliveryOutcome {
-  const ticket = delivery.ticketId === null ? null : getTicket(db, delivery.ticketId);
-  if (!ticket) {
-    return noTicket(delivery);
+/** The issues an action acts on, who calls, and the rule's variables: one target per issue. */
+export type JiraIssueTargets = Omit<JiraIssueTarget, 'key'> & { keys: string[] };
+
+type Ticket = ReturnType<typeof getTicket>;
+
+/** The issues a posted review's pull request is linked to; none for other events. */
+function reviewIssues(db: Db, event: Due['event']): string[] {
+  if (!isEvent(event, 'pr_review_posted')) {
+    return [];
   }
-  if (ticket.originKind !== 'jira' || !ticket.originId) {
-    return { status: 'skipped', detail: 'The ticket was not imported from Jira' };
+  return linkedJiraIssues(db, { kind: 'review', id: event.payload.reviewId }).map(
+    (issue) => issue.id,
+  );
+}
+
+/** A review's own linked issues are the more precise ones; else the issue the ticket came from. */
+function keysOf(db: Db, due: Due, ticket: Ticket | null): string[] | DeliveryOutcome {
+  const linked = reviewIssues(db, due.event);
+  if (linked.length > 0) {
+    return linked;
+  }
+  if (isEvent(due.event, 'pr_review_posted') && !ticket) {
+    return { status: 'skipped', detail: 'The pull request is not linked to a Jira issue' };
+  }
+  if (!ticket) {
+    return noTicket(due.delivery);
+  }
+  return ticket.originKind === 'jira' && ticket.originId
+    ? [ticket.originId]
+    : { status: 'skipped', detail: 'The ticket was not imported from Jira' };
+}
+
+/** The issues the action acts on (the review's, else the ticket's), or why it is skipped or fails. */
+export function jiraIssueOf(db: Db, due: Due): JiraIssueTargets | DeliveryOutcome {
+  const { delivery, rule, event } = due;
+  const ticket = delivery.ticketId === null ? null : getTicket(db, delivery.ticketId);
+  const keys = keysOf(db, due, ticket);
+  if (!Array.isArray(keys)) {
+    return keys;
   }
   const project = db
     .select()
@@ -54,9 +85,33 @@ export function jiraIssueOf(
   const { site, email } = config.config;
   return {
     auth: { site, email, token: integration.secret },
-    key: ticket.originId,
+    keys,
     values: templateValues(project, ticket, event),
   };
+}
+
+/**
+ * Runs the action on each issue in turn; the first that does not succeed is the delivery's outcome
+ * (a retry runs them all again, which changes nothing on those done: a move already there is left).
+ */
+export async function eachIssue(
+  targets: JiraIssueTargets | DeliveryOutcome,
+  run: (target: JiraIssueTarget) => Promise<DeliveryOutcome>,
+): Promise<DeliveryOutcome> {
+  if ('status' in targets) {
+    return targets;
+  }
+  const details: string[] = [];
+  for (const key of targets.keys) {
+    // One issue after the other: Jira limits the account's requests.
+    // oxlint-disable-next-line no-await-in-loop
+    const outcome = await run({ auth: targets.auth, key, values: targets.values });
+    if (outcome.status !== 'succeeded') {
+      return outcome;
+    }
+    details.push(outcome.detail);
+  }
+  return { status: 'succeeded', detail: details.join('; ') };
 }
 
 /**

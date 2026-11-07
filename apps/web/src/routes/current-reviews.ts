@@ -184,7 +184,7 @@ async function removeStack(db: Db, c: Context): Promise<Response> {
 
 /** `/api/projects/:projectId/pull-requests/reviews`: pull requests the user reviews without a ticket. */
 export function currentReviewRoutes(db: Db, clients: SpecClients): Hono {
-  const { github, notion } = clients;
+  const { github } = clients;
   const routes = new Hono();
   routes.get('/', (c) => c.json(listedReviews(db, projectOf(db, c))));
   routes.post('/', (c) => add(db, c));
@@ -196,7 +196,7 @@ export function currentReviewRoutes(db: Db, clients: SpecClients): Hono {
   routes.route('/:number/specs', pullRequestSpecRoutes(db, clients));
   routes.route('/:number/reports', pullRequestReportRoutes(db, clients));
   routes.route('/:number/review-agents', pullRequestReviewAgentRoutes(db, clients));
-  routes.route('/:number', reviewWorkspaceRoutes(db, { github, notion }));
+  routes.route('/:number', reviewWorkspaceRoutes(db, clients));
   routes.route('/:number', prReviewRoutes(db, github));
   return routes;
 }

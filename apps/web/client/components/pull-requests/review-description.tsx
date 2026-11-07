@@ -1,4 +1,4 @@
-// A pull request review's Description tab: the row linking its Notion page, then the description from GitHub.
+// A pull request review's Description tab: the rows linking its Notion pages and Jira issues, then the description from GitHub.
 import { githubText } from '@union/core/github-text';
 import type { ReactElement } from 'react';
 
@@ -7,6 +7,7 @@ import type { ReviewTarget } from '../../lib/review-target';
 import { useReviewDiscussion } from '../../lib/use-review';
 import { Markdown } from '../markdown';
 import { ErrorText } from '../ui';
+import { ReviewJiraLinkRow } from './review-jira-link';
 import { ReviewNotionLinkRow } from './review-notion-link';
 
 export function ReviewLoading({ error }: { error: Error | null }): ReactElement {
@@ -32,7 +33,7 @@ function DescriptionText({ target }: { target: ReviewTarget }): ReactElement {
   );
 }
 
-/** The description, under the row that links the pull request to its Notion page. */
+/** The description, under the rows that link the pull request to its Notion pages and Jira issues. */
 export function ReviewDescription({
   target,
   review,
@@ -43,6 +44,7 @@ export function ReviewDescription({
   return (
     <div className="space-y-6">
       <ReviewNotionLinkRow review={review} />
+      <ReviewJiraLinkRow review={review} />
       <DescriptionText target={target} />
     </div>
   );

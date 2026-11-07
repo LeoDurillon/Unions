@@ -58,6 +58,9 @@ The actions on Notion and on Jira are offered only when the project is connected
   transition of the issue's workflow that leads there; an issue already in that status is left as it is. If the
   workflow has no way there from the issue's status, or the transition asks for fields (often a Resolution on
   Done), the rule fails and its Activity line says why.
+  For a pull request under review, the Jira actions on "You post a review" act on every Jira issue the review is
+  [linked to](reviewing.md#review-other-peoples-pull-requests), one after the other; a review linked to none is
+  skipped.
 - **Set fields of the ticket's Jira issue**: your custom fields (one-line or multi-line text, a number, a date, a
   select's option by its name as Jira shows it), and of Jira's own fields the due date, the labels (added) and the
   environment. Fields Jira fills in itself (Created, Resolved, the time spent…) are not offered. Union reads the Jira project's statuses and the fields a rule

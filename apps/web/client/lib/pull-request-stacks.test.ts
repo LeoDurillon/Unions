@@ -55,6 +55,7 @@ function review(prNumber: number, stack: [number, number] | null): CurrentReview
     submitStatus: null,
     submitError: null,
     notionPages: [],
+    jiraIssues: [],
     githubStackNumber: stack?.[0] ?? null,
     stackPosition: stack?.[1] ?? null,
     createdAt: 0,

@@ -3,7 +3,7 @@ import type { Db, JiraApi } from '@union/core';
 
 import { deliverJiraComment } from './jira-comment';
 import { deliverJiraFields } from './jira-field';
-import { JIRA_PER_TICK, jiraIssueOf } from './jira-target';
+import { eachIssue, JIRA_PER_TICK, jiraIssueOf } from './jira-target';
 import { deliverJiraTransition } from './jira-transition';
 import type { ActionTargets } from './target';
 
@@ -14,15 +14,18 @@ export function jiraTargets(
   return {
     jira_transition: {
       perTick: JIRA_PER_TICK,
-      deliver: (due, action) => deliverJiraTransition(jira, jiraIssueOf(db, due), action),
+      deliver: (due, action) =>
+        eachIssue(jiraIssueOf(db, due), (target) => deliverJiraTransition(jira, target, action)),
     },
     jira_field: {
       perTick: JIRA_PER_TICK,
-      deliver: (due, action) => deliverJiraFields(jira, jiraIssueOf(db, due), action),
+      deliver: (due, action) =>
+        eachIssue(jiraIssueOf(db, due), (target) => deliverJiraFields(jira, target, action)),
     },
     jira_comment: {
       perTick: JIRA_PER_TICK,
-      deliver: (due, action) => deliverJiraComment(jira, jiraIssueOf(db, due), action),
+      deliver: (due, action) =>
+        eachIssue(jiraIssueOf(db, due), (target) => deliverJiraComment(jira, target, action)),
     },
   };
 }

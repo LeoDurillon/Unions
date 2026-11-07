@@ -1,5 +1,5 @@
 // A review's specs in the database: the list (started with its sources the first time), saving the
-// user's list, and the Notion pages linked to it (its `notion` specs).
+// user's list, and the Notion pages and Jira issues linked to it (its `notion` and `jira` specs).
 import { and, asc, eq, max, type SQL } from 'drizzle-orm';
 
 import type { AgentReviewOwner } from './agent-reviews';
@@ -15,10 +15,15 @@ import * as schema from './tables';
 
 export type { ReviewSpecRow } from './schema-review-specs';
 
-/** A Notion page linked to a review. */
+/** A tracker's item linked to a review: a Notion page, a Jira issue (`id` its key). */
 export type LinkedPage = { id: string; title: string; url: string | null };
 
+/** The spec kinds that are a tracker's item, linked to a review. */
+type TrackerSpec = 'notion' | 'jira';
+
 const NOTION_PREFIX = 'Notion: ';
+/** A Jira spec's label, as `spec-sources.ts` reads it too: `Jira: KEY summary`. */
+const JIRA_PREFIX = 'Jira: ';
 
 function owns(owner: AgentReviewOwner): SQL {
   return owner.kind === 'ticket'
@@ -99,31 +104,37 @@ export function saveReviewSpecs(db: Db, owner: AgentReviewOwner, specs: SavedSpe
   });
 }
 
-/** The Notion pages linked to the review: its `notion` specs not removed. */
-export function linkedNotionPages(db: Db, owner: AgentReviewOwner): LinkedPage[] {
+/** A review's tracker items of one kind (its `notion` or `jira` specs) not removed, their title from the label. */
+function linkedItems(
+  db: Db,
+  owner: AgentReviewOwner,
+  kind: TrackerSpec,
+  prefix: string,
+): LinkedPage[] {
   return reviewSpecRows(db, owner).flatMap((row) =>
-    row.kind === 'notion' && !row.removed && row.ref !== null
-      ? [{ id: row.ref, title: pageTitle(row.label), url: row.url }]
+    row.kind === kind && !row.removed && row.ref !== null
+      ? [
+          {
+            id: row.ref,
+            title: row.label.startsWith(prefix) ? row.label.slice(prefix.length) : row.label,
+            url: row.url,
+          },
+        ]
       : [],
   );
 }
 
-/** A Notion spec's label (`Notion: <title>`) for a page. */
-function notionLabel(title: string): string {
-  return `${NOTION_PREFIX}${title}`;
-}
-
-function pageTitle(label: string): string {
-  return label.startsWith(NOTION_PREFIX) ? label.slice(NOTION_PREFIX.length) : label;
-}
-
-/** Links a page: its spec added at the end, or back if it was removed, with the title as read now. */
-export function linkNotionPage(db: Db, owner: AgentReviewOwner, page: LinkedPage): void {
-  const entry = { kind: 'notion' as const, ref: page.id };
+/** Links an item: its spec added at the end, or back if it was removed, with the label as read now. */
+function linkItem(
+  db: Db,
+  owner: AgentReviewOwner,
+  { kind, item, label }: { kind: TrackerSpec; item: LinkedPage; label: string },
+): void {
+  const entry = { kind, ref: item.id };
   const row = reviewSpecRows(db, owner).find((candidate) => sameSource(candidate, entry));
   if (row) {
     db.update(schema.reviewSpecs)
-      .set({ removed: false, label: notionLabel(page.title), url: page.url })
+      .set({ removed: false, label, url: item.url })
       .where(eq(schema.reviewSpecs.id, row.id))
       .run();
     return;
@@ -137,19 +148,46 @@ export function linkNotionPage(db: Db, owner: AgentReviewOwner, page: LinkedPage
     .values({
       ...ownerColumns(owner),
       ...entry,
-      label: notionLabel(page.title),
-      url: page.url,
+      label,
+      url: item.url,
       position: (last?.position ?? 0) + 1,
     })
     .run();
 }
 
-/** Unlinks a page: its spec is removed (kept removed, so a ticket's origin page is not added back). */
-export function unlinkNotionPage(db: Db, owner: AgentReviewOwner, pageId: string): void {
+/** Unlinks an item: its spec is removed (kept removed, so a ticket's origin item is not added back). */
+function unlinkItem(db: Db, owner: AgentReviewOwner, kind: TrackerSpec, ref: string): void {
   db.update(schema.reviewSpecs)
     .set({ removed: true })
-    .where(
-      and(owns(owner), eq(schema.reviewSpecs.kind, 'notion'), eq(schema.reviewSpecs.ref, pageId)),
-    )
+    .where(and(owns(owner), eq(schema.reviewSpecs.kind, kind), eq(schema.reviewSpecs.ref, ref)))
     .run();
+}
+
+/** The Notion pages linked to the review: its `notion` specs not removed. */
+export function linkedNotionPages(db: Db, owner: AgentReviewOwner): LinkedPage[] {
+  return linkedItems(db, owner, 'notion', NOTION_PREFIX);
+}
+
+/** Links a page: its spec added at the end, or back if it was removed, with the title as read now. */
+export function linkNotionPage(db: Db, owner: AgentReviewOwner, page: LinkedPage): void {
+  linkItem(db, owner, { kind: 'notion', item: page, label: `${NOTION_PREFIX}${page.title}` });
+}
+
+/** Unlinks a page: its spec is removed (kept removed, so a ticket's origin page is not added back). */
+export function unlinkNotionPage(db: Db, owner: AgentReviewOwner, pageId: string): void {
+  unlinkItem(db, owner, 'notion', pageId);
+}
+
+/** The Jira issues linked to the review: its `jira` specs not removed (`id` the key, `title` "KEY summary"). */
+export function linkedJiraIssues(db: Db, owner: AgentReviewOwner): LinkedPage[] {
+  return linkedItems(db, owner, 'jira', JIRA_PREFIX);
+}
+
+/** Links an issue (`title` "KEY summary"), as a page is. */
+export function linkJiraIssue(db: Db, owner: AgentReviewOwner, issue: LinkedPage): void {
+  linkItem(db, owner, { kind: 'jira', item: issue, label: `${JIRA_PREFIX}${issue.title}` });
+}
+
+export function unlinkJiraIssue(db: Db, owner: AgentReviewOwner, key: string): void {
+  unlinkItem(db, owner, 'jira', key);
 }

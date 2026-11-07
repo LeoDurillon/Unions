@@ -1,6 +1,6 @@
 // The pull requests under review of a project as the Pull requests tab lists them: without their
-// files, with their preview's state and their linked Notion pages.
-import { linkedNotionPages, schema, type Db } from '@union/core';
+// files, with their preview's state and their linked Notion pages and Jira issues.
+import { linkedJiraIssues, linkedNotionPages, schema, type Db } from '@union/core';
 import { desc, eq, getTableColumns } from 'drizzle-orm';
 
 import type { CurrentReview } from '../api-types';
@@ -8,7 +8,7 @@ import type { CurrentReview } from '../api-types';
 /** Everything but the files, which only the review page needs. */
 const { files: _files, ...LISTED } = getTableColumns(schema.currentReviews);
 
-/** The reviews, newest first, each with its preview's state and its linked Notion pages. */
+/** The reviews, newest first, each with its preview's state and its linked Notion pages and Jira issues. */
 export function listedReviews(db: Db, projectId: number): CurrentReview[] {
   return db
     .select({ ...LISTED, previewStatus: schema.previews.status })
@@ -18,6 +18,9 @@ export function listedReviews(db: Db, projectId: number): CurrentReview[] {
     .orderBy(desc(schema.currentReviews.id))
     .all()
     .map((row) =>
-      Object.assign(row, { notionPages: linkedNotionPages(db, { kind: 'review', id: row.id }) }),
+      Object.assign(row, {
+        notionPages: linkedNotionPages(db, { kind: 'review', id: row.id }),
+        jiraIssues: linkedJiraIssues(db, { kind: 'review', id: row.id }),
+      }),
     );
 }

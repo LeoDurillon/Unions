@@ -110,10 +110,9 @@ and linked.
   ticket from no tracker, with Change and Unlink, so the Jira tab and rules apply to it. Built and deployed
   (2026-11-07), checked on a real site.
 - [Jira issues as review specs](jira-review-specs.md): a `jira` spec kind, read from Jira each time; a Jira ticket's
-  specs start with its issue, **Add a spec** takes one. Built (2026-11-07).
+  specs start with its issue, **Add a spec** takes one. Built and deployed (2026-11-07).
 - [Jira issues in reviews of other people's pull requests](jira-pr-reviews.md): issues suggested from the keys a
-  pull request names, linked as specs, a review's Jira tab, review rules acting on them. Planned (2026-11-07);
-  needs Jira issues as review specs.
+  pull request names, linked as specs, a review's Jira tab, review rules acting on them. Built (2026-11-07).
 - [More Jira fields in rules](jira-more-fields.md): users, multi-selects and checkboxes, versions, components and
   sprints in **Set fields of the ticket's Jira issue**. Planned (2026-11-07).
 - [Formatted Jira comments](jira-comment-formatting.md): markdown in the Jira tab's comments through `markdownAdf`,

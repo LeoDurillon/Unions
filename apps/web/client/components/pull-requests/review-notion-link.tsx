@@ -3,6 +3,8 @@
 import { useState, type ReactElement } from 'react';
 
 import type { CurrentReview } from '../../../src/api-types';
+import { projectIntegration } from '../../lib/integrations-api';
+import { useActiveProject } from '../../lib/use-active-project';
 import { useReviewNotionLink } from '../../lib/use-review-notion';
 import { NotionLinkForm, NotionPageLink } from '../notion-link-form';
 import { Button, ErrorText } from '../ui';
@@ -39,11 +41,15 @@ function LinkedPage({
 
 /**
  * The linked pages, each with Unlink; Link another page (or, with none, the field at once) with the
- * description's suggestions. Each page is one of the review's specs.
+ * description's suggestions. Each page is one of the review's specs. Only for a project connected to Notion.
  */
-export function ReviewNotionLinkRow({ review }: { review: CurrentReview }): ReactElement {
+export function ReviewNotionLinkRow({ review }: { review: CurrentReview }): ReactElement | null {
+  const { project } = useActiveProject();
   const actions = useReviewNotionLink(review);
   const [adding, setAdding] = useState(false);
+  if (!project || projectIntegration(project, 'notion') === null) {
+    return null;
+  }
   const pages = review.notionPages;
   const done = (): void => {
     setAdding(false);

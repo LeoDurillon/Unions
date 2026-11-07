@@ -43,6 +43,7 @@ export * from './event-cursors';
 export * from './event-deliveries';
 export * from './event-jira-action';
 export * from './jira-comment-link';
+export * from './jira-keys';
 export * from './jira-comment-post';
 export * from './event-notion-action';
 export * from './event-project-fields-action';

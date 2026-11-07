@@ -1,6 +1,6 @@
 # Jira issues in reviews of other people's pull requests
 
-Status: planned (2026-11-07). Needs [Jira issues as review specs](jira-review-specs.md) (a review's linked issues are
+Status: built (branch `jira-pr-reviews`, 2026-11-07), steps 1 to 5. Needed [Jira issues as review specs](jira-review-specs.md) (a review's linked issues are
 its `jira` specs, as its linked Notion pages are its `notion` specs). The Jira counterpart of a review's Notion
 pages ([a review's Notion page](review-notion-link.md), built).
 
@@ -49,6 +49,14 @@ the page. Teams on Jira name the issue in the pull request instead, by habit: `A
 4. **Rules.** D3 in the worker; tests: a review event with two linked issues moves both, one with none skips.
 5. **Docs.** `documentation/reviewing.md` (Under review, the tabs), `documentation/automation.md` (rules on
    reviews), `docs/architecture/integrations.md`, this plan's status.
+
+Built: `review-specs.ts`'s Notion helpers made generic over the tracker (`linkedItems`, `linkItem`,
+`unlinkItem`), with the Jira ones beside them; `jira-keys.ts` (keys in text order, a link's trailing punctuation
+left out); `routes/review-jira.ts` and `review-trackers.ts` (mounts the Notion and Jira routes, so the review
+workspace keeps under the import limit). The worker's `jiraIssueOf` returns `keys`, the review's linked issues for
+`pr_review_posted` first; `eachIssue` stops at the first failure. Client: `use-review-jira.ts`,
+`review-jira-link.tsx` (the Description tab's part, only for a project connected to Jira), `review-jira-tab.tsx`. Found on the way: the Notion row showed on a project without Notion (its routes need a connected project): it now shows only for one.
+Tests: `jira-keys.test.ts`, `review-jira-routes.test.ts`, `jira-review.test.ts`.
 
 ## Risks
 

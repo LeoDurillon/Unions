@@ -159,11 +159,18 @@ newest first, with their author, branches, review state and size. Stacks of pull
 
 | Tab             | What it shows                                                                                                                            |
 | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| **Description** | The pull request's description, and the Notion pages it implements (**Link** a page here).                                               |
+| **Description** | The pull request's description, and the Notion pages and Jira issues it implements (**Link** them here).                                 |
 | **Comments**    | Its review summaries, conversation and line threads, each with **Reply** or **Quote reply**; a thread's file and lines open in the diff. |
 | **Notion**      | The text of the linked Notion pages, once there are some, each followed by its open comments (read only).                                |
+| **Jira**        | The description of the linked Jira issues, once there are some, each followed by its comments (read only; reply in Jira).                |
 | **Preview**     | A [preview](previews.md#previews-of-pull-requests-under-review) of the pull request's code.                                              |
 | **Diff**        | The diff, comments, Explain and Review with agent, as for a ticket.                                                                      |
+
+When the project is connected to Jira, the **Description** tab also has **Jira issues**. Issues of your Jira project
+that the pull request names, in its title, its branch (`feature/ABC-123-dark-mode`) or its description (the key or a
+link to the issue), are offered with **Link**. **Link a Jira issue** takes any issue's key or link by hand; **Check**
+shows its summary first. A linked issue has **Unlink**. Linked issues are specs of the review, and the rules on "You
+post a review" act on them (see [Automation](automation.md)). Nothing is written to Jira when you link or unlink.
 
 **Send review** posts one review on GitHub, signed by your token or the GitHub App: **Comment**, **Approve** or
 **Request changes**. Your overall note becomes its body, and each draft a line comment. Drafts on lines that are no
