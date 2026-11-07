@@ -5,11 +5,8 @@ import { Hono } from 'hono';
 import { ACCEPTED, CONFLICT, fail, NOT_FOUND, readObject } from '../http';
 import { pendingNotionComments, queueNotionComment } from '../notion-comment-commands';
 import { readDiscussions } from '../notion-discussions';
-import {
-  importedDiscussions,
-  importNotionDiscussion,
-  notionImportRefusal,
-} from '../notion-review-import';
+import { importedDiscussions, importNotionDiscussion } from '../notion-review-import';
+import { reviewImportRefusal } from '../review-import-refusal';
 import { notionTokenOf } from './notion';
 import { loadTicket } from './ticket-notion-link';
 
@@ -42,14 +39,14 @@ export function ticketNotionCommentRoutes(db: Db, notion: NotionApi): Hono {
       pending: pendingNotionComments(db, ticket.id),
       review: {
         importedIds: importedDiscussions(db, ticket.id, page.id, ids),
-        refusal: notionImportRefusal(ticket),
+        refusal: reviewImportRefusal(ticket),
       },
     });
   });
   routes.post('/:id/notion-comments/import', async (c) => {
     const ticket = loadTicket(db, c);
     const page = pageOf(ticket);
-    const refusal = notionImportRefusal(ticket);
+    const refusal = reviewImportRefusal(ticket);
     if (refusal !== null) {
       throw fail(CONFLICT, refusal);
     }

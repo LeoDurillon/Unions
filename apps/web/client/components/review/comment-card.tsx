@@ -1,5 +1,6 @@
 // One comment: drafts can be edited or deleted, the agent's suggestions also kept as they are; sent
 // ones are read-only.
+import { isJiraCommentUrl } from '@union/core/jira-comment-link';
 import { isNotionUrl } from '@union/core/notion-discussion-link';
 import { useState, type ReactElement } from 'react';
 
@@ -7,6 +8,14 @@ import type { CommentView } from '../../../src/api-types';
 import type { useCommentMutations } from '../../lib/use-review';
 import { Markdown } from '../markdown';
 import { Badge, Button, inputClass } from '../ui';
+
+/** Where an imported comment comes from, as its link reads. */
+function sourceLabel(url: string): string {
+  if (isNotionUrl(url)) {
+    return 'on Notion';
+  }
+  return isJiraCommentUrl(url) ? 'on Jira' : 'on GitHub';
+}
 
 function lines(comment: CommentView): string {
   if (comment.kind === 'general') {
@@ -39,7 +48,7 @@ function CommentHeader({ comment }: { comment: CommentView }): ReactElement {
           rel="noreferrer"
           className="ml-auto text-indigo-600 hover:underline dark:text-indigo-400"
         >
-          {isNotionUrl(comment.sourceUrl) ? 'on Notion' : 'on GitHub'}
+          {sourceLabel(comment.sourceUrl)}
         </a>
       ) : null}
     </div>

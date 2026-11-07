@@ -8,7 +8,7 @@ import type {
 } from '../../../src/notion-discussion-types';
 import type { NotionCommentSend } from '../../lib/use-notion-comments';
 import { Markdown } from '../markdown';
-import { Badge, Button } from '../ui';
+import { AddToReview, type ReviewImportState } from '../review/add-to-review';
 import { NotionReply } from './notion-reply';
 
 const CARD =
@@ -34,39 +34,11 @@ function Comment({ comment }: { comment: NotionCommentView }): ReactElement {
   );
 }
 
-/** Whether the discussion is in the ticket's review, why it cannot be added, and adding it. */
-type DiscussionReview = {
-  imported: boolean;
-  refusal: string | null;
-  adding: boolean;
-  onAdd: () => void;
-};
-
-function AddToReview({ review }: { review: DiscussionReview }): ReactElement {
-  if (review.imported) {
-    return <Badge tone="green">In the review</Badge>;
-  }
-  return (
-    <Button
-      size="sm"
-      disabled={review.refusal !== null || review.adding}
-      title={
-        review.refusal ?? 'A draft of the review, for the implementer with the next Send review'
-      }
-      onClick={() => {
-        review.onAdd();
-      }}
-    >
-      {review.adding ? 'Adding…' : 'Add to review'}
-    </Button>
-  );
-}
-
 /** What a ticket's tab adds to a discussion: its replies being sent, Reply, and Add to review. */
 export type DiscussionActions = {
   pending: PendingNotionComment[];
   sender: NotionCommentSend;
-  review: DiscussionReview;
+  review: ReviewImportState;
 };
 
 /** Without `actions` (a review's Notion tab), read only. */

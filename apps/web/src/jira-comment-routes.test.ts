@@ -15,6 +15,7 @@ import {
   type JiraComment,
   type NotionApi,
 } from '@union/core';
+import { eq } from 'drizzle-orm';
 import type { Hono } from 'hono';
 
 import { createApp } from './app';
@@ -81,6 +82,7 @@ test("the tab reads the issue's comments with the project's token", async () => 
     comments: [COMMENT],
     total: 1,
     pending: [],
+    review: { importedIds: [], refusal: 'Available once the ticket is implemented' },
   });
   expect(asked).toEqual([{ token: 'tok', key: 'ABC-1' }]);
 });
@@ -148,4 +150,40 @@ test('an empty comment, or one on a ticket not from Jira, is refused', async () 
   const written = createTicket(db, { projectId, title: 'Written in Union' }).id;
   expect((await post(written, { text: 'Hi' })).status).toBe(409);
   expect(db.select().from(schema.commands).all()).toEqual([]);
+});
+
+function importComment(ticketId: number, commentId: string): Response | Promise<Response> {
+  return app.request(`/api/tickets/${ticketId}/jira-comments/import`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ commentId }),
+  });
+}
+
+test('a comment goes into the review once the ticket is implemented, once, read again from Jira', async () => {
+  const ticketId = jiraTicket();
+  const early = await importComment(ticketId, '10010');
+  expect(early.status).toBe(409);
+  expect(await early.json()).toEqual({ error: 'Available once the ticket is implemented' });
+  db.update(schema.tickets)
+    .set({ branch: 'union/1-dark-mode' })
+    .where(eq(schema.tickets.id, ticketId))
+    .run();
+
+  expect(await (await importComment(ticketId, '10010')).json()).toEqual({ imported: true });
+  expect(await (await importComment(ticketId, '10010')).json()).toEqual({ imported: false });
+  expect(db.select().from(schema.reviewComments).all()).toMatchObject([
+    {
+      ticketId,
+      kind: 'general',
+      body: '**Ada Lovelace** commented on the Jira issue:\n\nIs it CSV or XLSX?',
+      sourceUrl: COMMENT.url,
+    },
+  ]);
+  const view = (await (await read(ticketId)).json()) as { review: unknown };
+  expect(view.review).toEqual({ importedIds: ['10010'], refusal: null });
+  expect((await importComment(ticketId, '99')).status).toBe(404);
+
+  db.update(schema.tickets).set({ prState: 'merged' }).where(eq(schema.tickets.id, ticketId)).run();
+  expect((await importComment(ticketId, '10010')).status).toBe(409);
 });

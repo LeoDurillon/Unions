@@ -16,4 +16,6 @@ export type JiraTabView = {
   comments: JiraComment[];
   total: number;
   pending: PendingJiraComment[];
+  /** Which comments are in the ticket's review, and why more cannot be added now (null: they can). */
+  review: { importedIds: string[]; refusal: string | null };
 };

@@ -1,4 +1,5 @@
 // A Jira issue's comments as the ticket's Jira tab shows them: author, times, who may see it, text as markdown, link.
+import { jiraCommentUrl } from '../jira-comment-link';
 import { adfMarkdown } from './adf-markdown';
 
 /** One comment of the issue; `markdown` is its rich text converted, its images and files by name. */
@@ -26,11 +27,6 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 function text(record: Record<string, unknown>, name: string): string {
   const value = record[name];
   return typeof value === 'string' || typeof value === 'number' ? String(value) : '';
-}
-
-/** Where Jira opens the comment: the issue, scrolled to it. */
-function jiraCommentUrl(site: string, key: string, commentId: string): string {
-  return `${site}/browse/${encodeURIComponent(key)}?focusedCommentId=${encodeURIComponent(commentId)}`;
 }
 
 /** A role or group restriction, or Jira Service Management's internal note; null when everyone sees it. */

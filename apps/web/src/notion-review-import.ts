@@ -10,14 +10,6 @@ const WHERE: Record<NotionDiscussionView['place'], string> = {
   block: 'on a block of the Notion page',
 };
 
-/** Why a discussion cannot go into the ticket's review now, or null when it can. */
-export function notionImportRefusal(ticket: Ticket): string | null {
-  if (ticket.branch === null) {
-    return 'Available once the ticket is implemented';
-  }
-  return ticket.prState === 'merged' ? 'The pull request is merged' : null;
-}
-
 /** The whole thread: who opened it and about what, then each reply. */
 function discussionBody(discussion: NotionDiscussionView): string {
   const about = discussion.quote === null ? '' : `, about "${discussion.quote}"`;

@@ -83,7 +83,7 @@ test('comments on the whole pull request come before the files, without lines or
   );
 });
 
-test('Notion discussions come under their own heading, after those on the pull request', () => {
+test('Notion discussions and Jira comments come under their own headings, after those on the pull request', () => {
   const general = {
     kind: 'general' as const,
     path: '',
@@ -106,6 +106,11 @@ test('Notion discussions come under their own heading, after those on the pull r
           sourceUrl: 'https://github.com/a/b#1',
         },
         { ...general, body: 'Mine.' },
+        {
+          ...general,
+          body: '**Bob** commented on the Jira issue:\n\nXLSX.',
+          sourceUrl: 'https://acme.atlassian.net/browse/ABC-1?focusedCommentId=10010',
+        },
       ],
       '',
     ),
@@ -117,6 +122,8 @@ test('Notion discussions come under their own heading, after those on the pull r
       'Mine.',
       '## On the spec (Notion comments)',
       '**Ada** on the Notion page:\n\nCSV too?',
+      '## On the spec (Jira comments)',
+      '**Bob** commented on the Jira issue:\n\nXLSX.',
     ].join('\n\n'),
   );
 });

@@ -8,11 +8,21 @@ import {
   useJiraCommentSend,
   type JiraCommentSend,
 } from '../../lib/use-jira-comments';
+import { useJiraReviewImport, type JiraReviewImport } from '../../lib/use-jira-review-import';
+import { AddToReview } from '../review/add-to-review';
 import { Button, ErrorText } from '../ui';
 import { JiraCommentCard } from './jira-comment';
 import { JiraReply } from './jira-reply';
 
-function Comments({ view, sender }: { view: JiraTabView; sender: JiraCommentSend }): ReactElement {
+function Comments({
+  view,
+  sender,
+  reviewImport,
+}: {
+  view: JiraTabView;
+  sender: JiraCommentSend;
+  reviewImport: JiraReviewImport;
+}): ReactElement {
   const left = view.total - view.comments.length;
   const pendingFor = (replyTo: string | null): JiraTabView['pending'] =>
     view.pending.filter((comment) => comment.replyTo === replyTo);
@@ -30,6 +40,16 @@ function Comments({ view, sender }: { view: JiraTabView; sender: JiraCommentSend
       ) : (
         view.comments.map((comment) => (
           <JiraCommentCard key={comment.id} comment={comment}>
+            <AddToReview
+              review={{
+                imported: view.review.importedIds.includes(comment.id),
+                refusal: view.review.refusal,
+                adding: reviewImport.adding === comment.id,
+                onAdd: () => {
+                  reviewImport.add(comment.id);
+                },
+              }}
+            />
             <JiraReply
               // An app's or anonymized author has no account to mention: the reply is a new comment then.
               replyTo={
@@ -52,6 +72,7 @@ function Comments({ view, sender }: { view: JiraTabView; sender: JiraCommentSend
 export function JiraTab({ ticketId }: { ticketId: number }): ReactElement {
   const comments = useJiraComments(ticketId);
   const sender = useJiraCommentSend(ticketId);
+  const reviewImport = useJiraReviewImport(ticketId);
   const { data } = comments;
   return (
     <div className="space-y-4">
@@ -76,11 +97,11 @@ export function JiraTab({ ticketId }: { ticketId: number }): ReactElement {
           {comments.isFetching ? 'Reading…' : 'Refresh'}
         </Button>
       </div>
-      <ErrorText error={comments.error} />
+      <ErrorText error={comments.error ?? reviewImport.error} />
       {!data && comments.isFetching ? (
         <p className="text-sm text-zinc-500">Reading the comments on Jira…</p>
       ) : null}
-      {data ? <Comments view={data} sender={sender} /> : null}
+      {data ? <Comments view={data} sender={sender} reviewImport={reviewImport} /> : null}
     </div>
   );
 }

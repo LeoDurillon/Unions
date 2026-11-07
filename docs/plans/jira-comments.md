@@ -1,6 +1,6 @@
 # Jira comments on the ticket
 
-Status: planned (2026-11-07); steps 1 and 2 deployed, step 3 built (branch `jira-comment-post`, 2026-11-07). Follows [Jira](jira.md) (import) and [Jira rule actions](jira-rule-actions.md)
+Status: planned (2026-11-07); steps 1 to 3 deployed, step 4 built (branch `jira-review-import`, 2026-11-07). Follows [Jira](jira.md) (import) and [Jira rule actions](jira-rule-actions.md)
 (the worker writes to Jira). Modeled on [Notion comments on the ticket](notion-comments.md), built: read the
 issue's comments in a ticket tab, post one from Union, add one to the ticket's review.
 
@@ -137,6 +137,17 @@ Each step ships on its own; `bun run check` after each.
    database reopening the box with the text and the reason.
 4. **Add to review.** The import route, the draft's body, D7's grouping and duplicate refusal. Tests as Notion's
    (`notion-review-import` tests): before a branch, after merge, twice, the feedback's heading.
+   Built: core's `jira-comment-link.ts` (`jiraCommentUrl`, moved from `jira-comments.ts`; `isJiraCommentUrl`;
+   `JIRA_COMMENT_URL_LIKE`; exported as `@union/core/jira-comment-link`). Web: `jira-review-import.ts` (the draft
+   "**Name** commented on the Jira issue (visible to …):" then the markdown), the route's `POST /import` (read
+   again, 404 when gone) and the tab's `review` state; the refusal is shared with Notion's
+   (`review-import-refusal.ts`). `review-feedback.ts` adds "On the spec (Jira comments)" after Notion's. Found on
+   the way: `markSent` asked a reply for every imported draft not from Notion, so a Jira comment would have been
+   asked a GitHub reply; it now leaves out Jira's links too (tested in `pr-comment-replies.test.ts`). Client:
+   Notion's Add to review moved to `components/review/add-to-review.tsx`, used by both tabs;
+   `useJiraReviewImport`; the review page's comment card reads "on Jira". UI check on a scratch database, the read
+   and the import stubbed: the button disabled with its reason before a branch, "In the review" after adding. The
+   review page's "on Jira" link was not checked in a browser (it needs a ticket with a diff).
 5. **Docs and status.** `documentation/tickets.md` (the Jira tab), `docs/spec/flow.md` (the ticket panel's tabs),
    `docs/architecture/integrations.md` (Jira reads and the comment write), this plan's status and
    `docs/plans/README.md`.

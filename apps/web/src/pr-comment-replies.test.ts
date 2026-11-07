@@ -187,12 +187,17 @@ test('suggestions are listed, edited (the user’s then), sent one by one or all
   ]);
 });
 
-test('Send review asks a reply for the drafts imported from GitHub (not Notion), unless the setting is off', async () => {
+test('Send review asks a reply for the drafts imported from GitHub (not Notion nor Jira), unless the setting is off', async () => {
   const imported = comment({ status: 'draft', replyStatus: null });
   const mine = comment({ status: 'draft', githubUrl: null, replyStatus: null });
   const fromNotion = comment({
     status: 'draft',
     githubUrl: 'https://www.notion.so/p?d=d',
+    replyStatus: null,
+  });
+  const fromJira = comment({
+    status: 'draft',
+    githubUrl: 'https://acme.atlassian.net/browse/ABC-1?focusedCommentId=10010',
     replyStatus: null,
   });
   db.update(schema.tickets)
@@ -202,6 +207,7 @@ test('Send review asks a reply for the drafts imported from GitHub (not Notion),
   expect((await send('POST', `/api/tickets/${ticketId}/review`, { summary: '' })).status).toBe(200);
   expect([row(imported)?.replyStatus, row(mine)?.replyStatus]).toEqual(['requested', null]);
   expect(row(fromNotion)?.replyStatus).toBeNull();
+  expect(row(fromJira)?.replyStatus).toBeNull();
 
   db.delete(schema.commands).run();
   db.update(schema.projects)

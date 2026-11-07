@@ -1,5 +1,5 @@
 // The review the user sends, as the implementer receives it.
-import { isNotionUrl, schema, type Db, type ReviewComment } from '@union/core';
+import { isJiraCommentUrl, isNotionUrl, schema, type Db, type ReviewComment } from '@union/core';
 import { and, desc, eq } from 'drizzle-orm';
 
 import { reviewSlices } from './slice-snapshot';
@@ -24,8 +24,8 @@ function lines(comment: Draft): string {
 }
 
 /**
- * The comments under headings of `level` (`##`): the general ones (those from the Notion page
- * apart, as they are about the spec), then each file's line comments.
+ * The comments under headings of `level` (`##`): the general ones (those from the Notion page and
+ * the Jira issue apart, as they are about the spec), then each file's line comments.
  */
 function commentParts(
   comments: readonly Draft[],
@@ -35,7 +35,10 @@ function commentParts(
   const parts: string[] = [];
   const general = comments.filter((comment) => comment.kind === 'general');
   const onSpec = general.filter((comment) => isNotionUrl(comment.sourceUrl ?? ''));
-  const onPull = general.filter((comment) => !onSpec.includes(comment));
+  const onIssue = general.filter((comment) => isJiraCommentUrl(comment.sourceUrl ?? ''));
+  const onPull = general.filter(
+    (comment) => !onSpec.includes(comment) && !onIssue.includes(comment),
+  );
   if (onPull.length > 0) {
     parts.push(`${level} On the pull request`, ...onPull.map((comment) => comment.body.trim()));
   }
@@ -43,6 +46,12 @@ function commentParts(
     parts.push(
       `${level} On the spec (Notion comments)`,
       ...onSpec.map((comment) => comment.body.trim()),
+    );
+  }
+  if (onIssue.length > 0) {
+    parts.push(
+      `${level} On the spec (Jira comments)`,
+      ...onIssue.map((comment) => comment.body.trim()),
     );
   }
   const onLines = comments.filter((comment) => comment.kind === 'line');

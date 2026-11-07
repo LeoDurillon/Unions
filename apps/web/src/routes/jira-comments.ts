@@ -3,9 +3,11 @@
 import { jiraAuthOf, type Db, type JiraApi, type Ticket } from '@union/core';
 import { Hono } from 'hono';
 
-import { ACCEPTED, CONFLICT, fail, readObject } from '../http';
+import { ACCEPTED, CONFLICT, fail, NOT_FOUND, readObject } from '../http';
 import { pendingJiraComments, queueJiraComment } from '../jira-comment-commands';
 import type { JiraTabView } from '../jira-comment-types';
+import { importedJiraComments, importJiraComment } from '../jira-review-import';
+import { reviewImportRefusal } from '../review-import-refusal';
 import { guarded } from './notion';
 import { loadTicket } from './ticket-notion-link';
 
@@ -28,7 +30,8 @@ function authFor(db: Db, ticket: Ticket): NonNullable<ReturnType<typeof jiraAuth
 
 /**
  * `GET` reads the comments from Jira on each call (the tab reads them once per opening, and on
- * Refresh), with those not posted yet. `POST` (`{ text, replyTo? }`) queues a comment.
+ * Refresh), with those not posted yet and those in the review. `POST` (`{ text, replyTo? }`) queues a
+ * comment; `POST /import` (`{ commentId }`) adds one to the review.
  */
 export function ticketJiraCommentRoutes(db: Db, jira: JiraApi): Hono {
   const routes = new Hono();
@@ -43,8 +46,34 @@ export function ticketJiraCommentRoutes(db: Db, jira: JiraApi): Hono {
       comments: read.comments,
       total: read.total,
       pending: pendingJiraComments(db, ticket.id),
+      review: {
+        importedIds: importedJiraComments(
+          db,
+          ticket.id,
+          { site: auth.site, key },
+          read.comments.map((comment) => comment.id),
+        ),
+        refusal: reviewImportRefusal(ticket),
+      },
     };
     return c.json(view);
+  });
+  routes.post('/:id/jira-comments/import', async (c) => {
+    const ticket = loadTicket(db, c);
+    const key = issueKeyOf(ticket);
+    const refusal = reviewImportRefusal(ticket);
+    if (refusal !== null) {
+      throw fail(CONFLICT, refusal);
+    }
+    const auth = authFor(db, ticket);
+    const { commentId } = await readObject(c.req.raw);
+    // Read again: the comment as it is now.
+    const read = await guarded(() => jira.comments(auth, key));
+    const comment = read.comments.find((one) => one.id === commentId);
+    if (!comment) {
+      throw fail(NOT_FOUND, 'This comment is not on the issue any more');
+    }
+    return c.json({ imported: importJiraComment(db, ticket, { site: auth.site, key }, comment) });
   });
   routes.post('/:id/jira-comments', async (c) => {
     const ticket = loadTicket(db, c);
