@@ -19,6 +19,7 @@ import {
 } from '@union/core';
 
 import type { RulePreview } from './event-api-types';
+import { jiraCommentPreview, jiraFieldPreview, jiraTransitionPreview } from './jira-rule-previews';
 
 function notionPreview(
   db: Db,
@@ -123,20 +124,15 @@ function gitHubProjectFieldsPreview(
   return { ok: true, kind: 'github_project_fields', item: action.item, number, fields };
 }
 
-/** The Jira actions are not offered yet (`ACTION_KINDS`): their previews come with their editor. */
-function jiraPreview(): RulePreview {
-  return { ok: false, error: 'Previews of Jira actions are not available yet' };
-}
-
 const PREVIEWS: Previews = {
   notion_property: notionPreview,
   github_comment: gitHubCommentPreview,
   github_pull_request: gitHubPullRequestPreview,
   github_project_fields: gitHubProjectFieldsPreview,
   union_notification: unionNotificationPreview,
-  jira_transition: jiraPreview,
-  jira_field: jiraPreview,
-  jira_comment: jiraPreview,
+  jira_transition: jiraTransitionPreview,
+  jira_field: jiraFieldPreview,
+  jira_comment: jiraCommentPreview,
 };
 
 /** What the rule's action would do for the ticket; nothing is sent. */

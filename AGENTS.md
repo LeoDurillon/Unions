@@ -109,6 +109,9 @@ files and uses `union.sqlite` here, which holds the user's real projects.
 - Notion: the web server only reads (`src/notion.ts` behind `NotionApi`); writes (page properties from event rules,
   pages for tickets written from investigations, comments from a ticket's Notion tab) happen in the worker. Its secret is a row of `integrations` and
   never reaches the browser (`toPublicIntegration`). Details: `docs/architecture/integrations.md`.
+- Jira: the web server only reads (verify, fields, import, behind `JiraApi`); writes (moving an issue, setting its
+  fields, commenting, from event rules) happen in the worker. Its API token is a row of `integrations`, sent only to
+  the configured `atlassian.net` site, and never reaches the browser.
 - A ticket's base branch is `ticketBase(project, ticket)`: the parent's branch it was cloned from, else the project's.
   Never use `project.config.baseBranch` directly in the worker. Starting goes through `dispatch`, which refuses a
   ticket whose parent is not done; check `blockingParent` before queueing or honouring a start anywhere else.

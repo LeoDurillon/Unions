@@ -22,6 +22,7 @@
     "./notion-markdown": "./src/notion-markdown.ts",
     "./notion-discussion-link": "./src/notion-discussion-link.ts",
     "./integration-kinds": "./src/integrations/kinds.ts",
+    "./jira-field-types": "./src/integrations/jira-field-types.ts",
     "./event-actions": "./src/event-actions.ts",
     "./event-catalog": "./src/event-catalog.ts",
     "./event-rules": "./src/event-rule-types.ts",

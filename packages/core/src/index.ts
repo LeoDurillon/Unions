@@ -76,6 +76,8 @@ export * from './notion-links';
 export * from './notion-rich-text';
 export * from './integrations/jira-api';
 export * from './integrations/jira-config';
+export * from './integrations/jira-field-types';
+export * from './integrations/jira-integration';
 export * from './integrations/jira-values';
 export * from './integrations/text-adf';
 export * from './integrations/jira-error';

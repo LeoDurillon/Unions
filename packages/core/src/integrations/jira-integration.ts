@@ -59,3 +59,25 @@ export function jiraFieldsFor(db: Db, projectId: number): JiraFields | null {
   const integration = integrationOf(db, projectId, 'jira');
   return integration ? jiraFieldsOf(integration.fields) : null;
 }
+
+/** What the rule editor knows of the Jira project: its name, when it was read, its statuses and settable fields. */
+export type JiraRuleSource = {
+  title: string;
+  readAt: number | null;
+  statuses: JiraStatus[];
+  fields: JiraFieldInfo[];
+};
+
+export function jiraRuleSourceOf(db: Db, projectId: number): JiraRuleSource | null {
+  const integration = integrationOf(db, projectId, 'jira');
+  const fields = integration ? jiraFieldsOf(integration.fields) : null;
+  if (!integration || !fields) {
+    return null;
+  }
+  return {
+    title: integration.title || fields.projectName,
+    readAt: integration.fieldsReadAt,
+    statuses: fields.statuses,
+    fields: fields.fields,
+  };
+}

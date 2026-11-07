@@ -53,6 +53,9 @@ export const ACTION_KINDS = [
   'github_pull_request',
   'github_project_fields',
   'union_notification',
+  'jira_transition',
+  'jira_field',
+  'jira_comment',
 ] as const satisfies readonly ActionKind[];
 
 export const ACTION_LABELS: Record<ActionKind, string> = {

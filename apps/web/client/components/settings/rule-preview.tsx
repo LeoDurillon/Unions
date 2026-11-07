@@ -7,6 +7,7 @@ import type { TicketSummary } from '../../../src/api-types';
 import type { RulePreview } from '../../../src/event-api-types';
 import { api } from '../../lib/api';
 import { eventRulesApi, type RuleDraft } from '../../lib/event-rules-api';
+import { JiraPreview } from '../integrations/jira/jira-preview';
 import { Button, ErrorText, inputClass } from '../ui';
 
 type Shown<K extends string> = Extract<RulePreview, { ok: true; kind: K }>;
@@ -72,6 +73,9 @@ function PreviewResult({ result }: { result: RulePreview | undefined }): ReactEl
   if (result.kind === 'github_pull_request') {
     return <PullRequestPreview result={result} />;
   }
+  if (result.kind === 'jira') {
+    return <JiraPreview result={result} />;
+  }
   if (result.kind === 'github_project_fields') {
     return <ProjectFieldsPreview result={result} />;
   }
@@ -115,6 +119,10 @@ function applicable(
   }
   if (action.kind === 'union_notification') {
     return { tickets, none: 'No ticket to try it on yet.' };
+  }
+  if (action.kind.startsWith('jira_')) {
+    const imported = tickets.filter((ticket) => ticket.originKind === 'jira');
+    return { tickets: imported, none: 'No ticket imported from Jira to try it on yet.' };
   }
   if (
     (action.kind === 'github_comment' && action.on === 'issue') ||

@@ -1,11 +1,18 @@
 // What the event rule routes answer with: the rules, their deliveries, previews and choices.
-import type { CommentTarget, EventRule, NotionSchema, ProjectItemTarget } from '@union/core';
+import type {
+  CommentTarget,
+  EventRule,
+  JiraRuleSource,
+  NotionSchema,
+  ProjectItemTarget,
+} from '@union/core';
 
-/** The Events settings: the rules, and the Notion columns they can set (null until read). */
+/** The Events settings: the rules, and the Notion columns and Jira fields they can set (null until read). */
 export type EventRulesResponse = {
   rules: EventRule[];
   notion: NotionSchema | null;
   hasNotion: boolean;
+  jira: JiraRuleSource | null;
 };
 
 /** A rule applied to an event, with what the settings list shows beside it. */
@@ -44,6 +51,17 @@ export type RulePreview =
       item: ProjectItemTarget;
       number: number;
       fields: { name: string; text: string }[];
+    }
+  /** A Jira action: what it would do on the issue (`title`), its fields (`lines`) or comment (`text`). */
+  | {
+      ok: true;
+      kind: 'jira';
+      key: string;
+      title: string;
+      lines: string[];
+      text: string | null;
+      /** What only the run can check (the workflow, the options): said under the preview. */
+      note: string | null;
     }
   | { ok: false; error: string };
 

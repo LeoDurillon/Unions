@@ -1,9 +1,10 @@
-// `/api/projects/:projectId/event-rules` and its deliveries, and the stored Notion columns.
+// `/api/projects/:projectId/event-rules` and its deliveries, and the stored Notion columns and Jira fields.
 import {
   checkRule,
   deleteRule,
   EventRuleError,
   getTicket,
+  jiraRuleSourceOf,
   listRules,
   notionAccessOf,
   notionSchemaOf,
@@ -59,6 +60,7 @@ function list(db: Db, c: Context): Response {
     rules: listRules(db, project.id),
     notion: notionSchemaOf(db, project.id),
     hasNotion: notionAccessOf(db, project.id) !== null,
+    jira: jiraRuleSourceOf(db, project.id),
   };
   return c.json(body);
 }

@@ -1,6 +1,6 @@
 # Jira rule actions
 
-Status: planned (2026-11-07); steps 1 and 2 built (branch `jira-rules`, 2026-11-07). Follows [Jira](jira.md) (built: connection and import, reads only). Scope: event
+Status: planned (2026-11-07); steps 1 to 3 built (branch `jira-rules`, 2026-11-07). Follows [Jira](jira.md) (built: connection and import, reads only). Scope: event
 rules that move a Jira issue to a status, set its fields, and comment on it, for tickets imported from Jira.
 
 ## Why
@@ -153,6 +153,19 @@ Each step ships on its own; `bun run check` after each.
    until step 3 offers the actions; updated then.
 3. **Settings: editor, sentences, previews.** The components, the route's Jira fields, the previews. UI check
    (`scripts/ui-check/`, rules saved blocked): add each kind, its sentence, the preview on a Jira ticket.
+   Built: the kinds are in `ACTION_KINDS`; the editor offers them once the project has Jira fields stored
+   (`useOfferedActionKinds`), or when the rule already has one. The editor, the bar and the previews read the Jira
+   project from the rules list (`jira: JiraRuleSource | null`, `jiraRuleSourceOf`, read by `useJiraRuleSource` on the
+   same query). Components under `components/integrations/jira/`: `jira-action-fields.tsx` (status select, field
+   rows, comment), `jira-field-row.tsx` (field select, value input by type with a hint, variables except for an
+   option), `jira-fields-bar.tsx` (beside Notion's columns, both in `settings/tracker-bars.tsx`, moved out of
+   `events-section.tsx`), `jira-preview.tsx`; the previews are `apps/web/src/jira-rule-previews.ts` (one result
+   kind, `jira`: a title, lines or a text, and a note on what only the run checks). "Add a field" waits until the
+   last row has a field (rows are keyed by field, as the other actions'). Route tests: `jira-rule-routes.test.ts`.
+   UI check on the worktree's server with a scratch database (saves blocked, previews let through): the bar, the
+   three kinds in the picker, each kind's editor and preview on a Jira ticket, the save's body, and the three
+   sentences in the list. The user guide (`automation.md`), `docs/architecture/integrations.md` and AGENTS.md's
+   rules (Jira writes in the worker) are updated here rather than in step 4, since the actions are now offered.
 4. **Real check and docs.** Ask the user first (it writes to their Jira): one rule of each kind on a test issue
    (SCRUM-1), triggered by a PR opened on its ticket; check the issue in Jira and the Activity list. Then
    `documentation/automation.md` (the three actions, what the account needs), `docs/architecture/integrations.md`

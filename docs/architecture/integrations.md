@@ -66,8 +66,14 @@
   "Attachments"), as `/rest/api/3/attachment/content/<id>` of the site; creating the ticket downloads them
   (`apps/web/src/jira-files.ts`, over the shared `tracker-files.ts` that Notion's `notion-files.ts` uses too: only
   that path of the configured site, with the token; Jira's redirect to its media host is followed by hand without
-  it, and only to https) into private ticket files, within the attachment limits. Union writes nothing
-  to Jira yet: it has no `createItem` (`createsItems: false`, so investigations do not offer it).
+  it, and only to https) into private ticket files, within the attachment limits. Jira writes happen in the worker
+  only, from event rules on tickets imported from Jira (`event-actions/jira-*.ts`, `jiraTargets`): a move reads the
+  issue's status and transitions and posts the one that leads to the rule's status; fields are checked against the
+  issue's `editmeta`, then sent in one `PUT` (labels as `update` operations); comments go as ADF (core's
+  `text-adf.ts`). The rules editor reads the stored statuses and settable fields (`GET /field`, kept in
+  `integrations.fields` by Refresh; `jira-field-types.ts`) from the rules list (`jiraRuleSourceOf`). The web calls
+  none of the writes (ast-grep `web-reads-trackers-only`). Jira has no `createItem` yet (`createsItems: false`, so
+  investigations do not offer it).
 - A project reaches GitHub with a token (`projects.github_token`) or an installation of the GitHub App
   (`projects.github_installation_id`; the app's ID and private key are one row of `github_app`). Both are stored in
   plain text (local single-user app, like the original Union) and never reach the browser: responses use

@@ -23,8 +23,8 @@ your browser tells you even when Union is in a background tab.
 
 ## Event rules
 
-Event rules do something elsewhere when something happens to a ticket: set a property of its Notion page, comment
-on GitHub, add a label, notify you. Set them up in the project's **Settings → Events → Rules**.
+Event rules do something elsewhere when something happens to a ticket: set a property of its Notion page, move its
+Jira issue, comment on GitHub, add a label, notify you. Set them up in the project's **Settings → Events → Rules**.
 
 A rule has a trigger and one or more actions.
 
@@ -50,6 +50,18 @@ A rule has a trigger and one or more actions.
 - **Update the ticket's pull request**: labels, reviewers, assignees, title or description.
 - **Set fields of the ticket's GitHub Project item**.
 - **Notify me in Union**.
+- **Move the ticket's Jira issue** to a status of the Jira project, for tickets imported from Jira. Union finds the
+  transition of the issue's workflow that leads there; an issue already in that status is left as it is. If the
+  workflow has no way there from the issue's status, or the transition asks for fields (often a Resolution on
+  Done), the rule fails and its Activity line says why.
+- **Set fields of the ticket's Jira issue**: one-line or multi-line text, a number, a date, a select's option (by
+  its name, as Jira shows it), or labels to add. Union reads the fields a rule can set when you connect Jira; a field
+  added in Jira later shows after **Refresh from Jira** above the rules.
+- **Comment on the ticket's Jira issue**: plain text, links become links.
+
+The Jira actions act as the Atlassian account whose API token the project uses: Jira shows the changes under its
+name, and the account needs the **Transition issues**, **Edit issues** or **Add comments** permission in the Jira
+project. A rule that lacks one fails, naming it.
 
 Text values are templates. Use these variables in them:
 

@@ -1,7 +1,6 @@
 // What a rule does: the kind of action, then that kind's own fields.
 import type { NotionSchema } from '@union/core';
 import {
-  ACTION_KINDS,
   ACTION_LABELS,
   emptyAction,
   isActionKind,
@@ -9,6 +8,7 @@ import {
 } from '@union/core/event-actions';
 import type { ReactElement } from 'react';
 
+import { JiraActionFields, useOfferedActionKinds } from '../integrations/jira/jira-action-fields';
 import { NotionActionFields } from '../integrations/notion/notion-action-fields';
 import { Field, inputClass } from '../ui';
 import { GitHubCommentFields } from './github-comment-fields';
@@ -27,7 +27,7 @@ function KindFields({
   notion: NotionSchema | null;
   action: EventAction;
   onChange: (action: EventAction) => void;
-}): ReactElement | null {
+}): ReactElement {
   if (action.kind === 'notion_property') {
     return (
       <NotionActionFields
@@ -50,8 +50,7 @@ function KindFields({
   if (action.kind === 'github_comment') {
     return <GitHubCommentFields action={action} onChange={onChange} />;
   }
-  // The Jira actions are not offered yet (`ACTION_KINDS`): their fields come with them.
-  return null;
+  return <JiraActionFields projectId={projectId} action={action} onChange={onChange} />;
 }
 
 export function ActionFields({
@@ -65,6 +64,7 @@ export function ActionFields({
   action: EventAction;
   onChange: (action: EventAction) => void;
 }): ReactElement {
+  const kinds = useOfferedActionKinds(projectId, action.kind);
   return (
     <>
       <Field label="Then">
@@ -78,7 +78,7 @@ export function ActionFields({
             }
           }}
         >
-          {ACTION_KINDS.map((kind) => (
+          {kinds.map((kind) => (
             <option key={kind} value={kind}>
               {ACTION_LABELS[kind]}
             </option>

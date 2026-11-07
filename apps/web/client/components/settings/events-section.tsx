@@ -7,45 +7,12 @@ import { useState, type ReactElement } from 'react';
 import type { PublicProject } from '../../../src/api-types';
 import type { EventRulesResponse } from '../../../src/event-api-types';
 import { eventRulesApi, newRule, type RuleDraft } from '../../lib/event-rules-api';
-import { integrationsApi } from '../../lib/integrations-api';
 import { Button, ErrorText } from '../ui';
 import { RuleEditor } from './rule-editor';
 import { RuleRow } from './rule-list';
+import { TrackerBars } from './tracker-bars';
 
 export { EventActivitySection } from './delivery-list';
-
-function NotionColumns({
-  projectId,
-  notion,
-  onRefreshed,
-}: {
-  projectId: number;
-  notion: NotionSchema | null;
-  onRefreshed: () => Promise<void>;
-}): ReactElement {
-  const refresh = useMutation({
-    mutationFn: () => integrationsApi.refreshFields(projectId, 'notion'),
-    onSuccess: onRefreshed,
-  });
-  return (
-    <div className="flex items-center gap-3 text-sm">
-      <p className="min-w-0 flex-1 text-zinc-500">
-        {notion
-          ? `Notion columns of “${notion.title}”, read ${new Date(notion.fetchedAt).toLocaleString()} (${notion.properties.length} properties).`
-          : 'The Notion columns are not read yet.'}
-      </p>
-      <ErrorText error={refresh.error} />
-      <Button
-        disabled={refresh.isPending}
-        onClick={() => {
-          refresh.mutate();
-        }}
-      >
-        {refresh.isPending ? 'Reading…' : 'Refresh from Notion'}
-      </Button>
-    </div>
-  );
-}
 
 function draftOf(rule: EventRule): RuleDraft {
   return { name: rule.name, enabled: rule.enabled, trigger: rule.trigger, action: rule.action };
@@ -135,9 +102,7 @@ function Rules({
   return (
     <>
       <ErrorText error={writes.remove.error} />
-      {data?.hasNotion ? (
-        <NotionColumns projectId={projectId} notion={notion} onRefreshed={() => writes.refresh()} />
-      ) : null}
+      <TrackerBars projectId={projectId} data={data} onRefreshed={() => writes.refresh()} />
       {editing === null ? null : (
         <RuleEditor
           projectId={projectId}
