@@ -73,6 +73,7 @@ export function Workspace({
           askedTicket={askedTicket}
           openedInvestigation={openedInvestigation}
           onOpenTicket={onOpenTicket}
+          onNewTicket={onNewTicket}
         />
       </main>
     </div>

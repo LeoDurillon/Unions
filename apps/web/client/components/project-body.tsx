@@ -3,6 +3,7 @@ import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../src/api-types';
 import { Board, BoardView } from './board';
+import { GettingStarted } from './getting-started';
 import { InvestigationsPage } from './investigations/investigations-page';
 import type { ProjectView } from './project-bar';
 import { PullRequestsPage } from './pull-requests/pull-requests-page';
@@ -20,6 +21,7 @@ export function ProjectBody({
   askedTicket,
   openedInvestigation,
   onOpenTicket,
+  onNewTicket,
 }: {
   project: PublicProject | null;
   view: ProjectView;
@@ -28,6 +30,7 @@ export function ProjectBody({
   /** An investigation opened from elsewhere (`?investigation=`). */
   openedInvestigation: number | null;
   onOpenTicket: (id: number) => void;
+  onNewTicket: () => void;
 }): ReactElement {
   if (!project) {
     return <BoardView tickets={[]} now={0} error={null} onOpen={onOpenTicket} onDrop={noop} />;
@@ -52,5 +55,12 @@ export function ProjectBody({
   if (view === 'pull-requests') {
     return <PullRequestsPage key={project.id} project={project} onOpenTicket={onOpenTicket} />;
   }
-  return <Board project={project} onOpen={onOpenTicket} />;
+  return (
+    <div className="flex h-full flex-col">
+      <GettingStarted key={project.id} project={project} onNewTicket={onNewTicket} />
+      <div className="min-h-0 flex-1">
+        <Board project={project} onOpen={onOpenTicket} />
+      </div>
+    </div>
+  );
 }

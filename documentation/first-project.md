@@ -21,7 +21,11 @@ you visit Union. Later, open it again from **+** next to **Projects** in the sid
 4. **Review**: check the base branch (the branch tickets start from and pull requests target), then create the
    project.
 
-The board opens. With a GitHub Project, Union mirrors its columns to the Project's **Status** field, to the options **Todo**, **In
+The board opens, with a **Getting started** list above it: set the check command, write a ticket, start it,
+answer the planning, and review the change. Each step ticks itself once you have done it, and its button takes you
+there. The list goes away when every step is done; **Hide** removes it sooner, for this project in this browser.
+
+With a GitHub Project, Union mirrors its columns to the Project's **Status** field, to the options **Todo**, **In
 Progress**, **In Review** and **Done** (in any case). A Project made from GitHub's default template has no In Review:
 tickets in review then show as In Progress on GitHub.
 
