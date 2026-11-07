@@ -51,6 +51,7 @@ const jira: JiraApi = {
     return { key, name: 'Apollo', issueTypes: [] };
   },
   statuses: () => Promise.resolve([{ id: '1', name: 'To Do', category: 'new' }]),
+  attachmentMediaId: () => Promise.resolve(null),
   issue: async (auth, key) => {
     await allowed(auth);
     const description = {

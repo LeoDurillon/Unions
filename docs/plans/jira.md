@@ -1,6 +1,6 @@
 # Jira
 
-Status: planned (2026-11-06); steps 1 to 4 built (branch `jira`, 2026-11-07). Scope: Jira Cloud, an API token, importing an issue as a ticket. Rule actions,
+Status: built and deployed (2026-11-07), steps 1 to 5; checked on a real Jira Cloud site (SCRUM-1: text, link card, table, a screenshot and an xlsx kept as ticket files). Scope: Jira Cloud, an API token, importing an issue as a ticket. Rule actions,
 creating issues from investigations and a comments tab are later plans (listed at the end).
 
 ## Why
@@ -57,6 +57,11 @@ reaches the browser.
   as an image (`![name](…)`) for images. Attachments no node matched are appended under an `## Attachments`
   heading, as links. So the editor shows every file, as Notion imports do, and `SourceItem` keeps its shape.
   A media node with no matching attachment becomes its name in italics.
+  As built (step 5): an image's media node has its file name as `alt`, but a file card (an xlsx, a PDF) has only
+  its Media Services id. That id is read from where Jira redirects the attachment's download
+  (`https://api.media.atlassian.com/file/<id>/binary?…`, `JiraApi.attachmentMediaId`, the redirect not followed),
+  only when the text has a media node no file name matches, four at a time and 30 at most
+  (`jira-media-ids.ts`). A media node is matched by that id first, then by name.
 - **D8. `FILES` takes the integration's access.** `routes/ticket-origin.ts` maps each kind to
   `(markdown) => files`; Notion's links are signed, Jira's need the token. The signature becomes
   `(markdown, access: { secret, config }) => files`, the route reading the project's integration row. Notion's
@@ -180,13 +185,18 @@ Each step ships on its own; `bun run check` after each.
    ticket files. Then `docs/architecture/integrations.md` (Jira reads, D2, D3, D8), `docs/spec/flow.md` if it
    names Notion as the only source, `documentation/` (a page on connecting Jira and importing an issue), this plan's
    status and `docs/plans/README.md`.
+   Done on the user's site: SCRUM-1 imported its heading, paragraphs, link card and table as markdown, and its
+   screenshot (matched by name) and an xlsx as ticket files. It showed two flaws, both fixed: a line break at the end
+   of a paragraph left a stray `\` (dropped since), and the xlsx's file card, which carries no name, read
+   _attachment_ in the text and was listed again under Attachments (matched by media id since, D7). Still unchecked
+   on a real site: the match by media id itself (import SCRUM-1 again), code blocks and checklists.
 
 ## Risks
 
 - **Media node ↔ attachment matching on file name (D7).** Two attachments with the same name, or an `alt` edited
   by hand, match the wrong one or none. Then the file is still listed under Attachments; only its place in the text
-  is lost. Check on the real site in step 5; if Jira gives a better key (`attrs.id` matching an attachment's
-  `mediaApiFileId`, not documented), use it.
+  is lost. On the real site, file cards had no `alt` at all: they are matched by media id now (D7, as built); the
+  redirect's address is not a documented API, so if Jira changes it, cards fall back to _attachment_ and the list.
 - **Rate limits.** Jira Cloud limits per user; an import is three or four calls, so only bulk use would hit it.
   The 429 message says to wait.
 - **Token scope.** Classic API tokens act with all of the user's permissions; Atlassian's scoped tokens

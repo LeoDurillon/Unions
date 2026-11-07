@@ -2,6 +2,7 @@
 import type { JiraApi, JiraAuth } from './jira-api';
 import { issueMarkdown } from './jira-attachments';
 import { jiraConfigOf } from './jira-config';
+import { attachmentsByMediaId, hasUnnamedMedia } from './jira-media-ids';
 import type { JiraProject, JiraStatus } from './jira-parse';
 import { ItemOutsideSourceError, type IntegrationProvider, type SourceItem } from './provider';
 
@@ -30,11 +31,14 @@ async function item(
       `This issue is not in the project's Jira project (${projectKey})`,
     );
   }
+  const byMediaId = hasUnnamedMedia(issue)
+    ? await attachmentsByMediaId(jira, auth, issue)
+    : new Map<string, string>();
   return {
     id: issue.key,
     title: issue.summary,
     url: `${auth.site}/browse/${issue.key}`,
-    markdown: issueMarkdown(issue, auth.site),
+    markdown: issueMarkdown(issue, auth.site, byMediaId),
     truncated: false,
   };
 }

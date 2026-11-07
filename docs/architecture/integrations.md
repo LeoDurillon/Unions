@@ -60,7 +60,9 @@
   The token is the integration's secret; the config is `{ site, email, projectKey }` (`jira-config.ts`), and the
   site must be `https://<name>.atlassian.net`: the client checks it again before each request, so the token never
   goes to another host. A pasted link of another site is refused (`IntegrationKind.refError`). The import links the
-  issue's attachments (`jira-attachments.ts`: a media node matched by file name, the rest listed under
+  issue's attachments (`jira-attachments.ts`: a media node matched by its Media Services id, read from where Jira
+  redirects the attachment's download when the text has a file card without a name (`jira-media-ids.ts`), else by
+  file name; the rest listed under
   "Attachments"), as `/rest/api/3/attachment/content/<id>` of the site; creating the ticket downloads them
   (`apps/web/src/jira-files.ts`, over the shared `tracker-files.ts` that Notion's `notion-files.ts` uses too: only
   that path of the configured site, with the token; Jira's redirect to its media host is followed by hand without

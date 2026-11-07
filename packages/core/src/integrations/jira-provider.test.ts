@@ -18,6 +18,7 @@ async function rejection(promise: Promise<unknown>): Promise<unknown> {
 }
 
 const TOKEN = 'token-ok';
+const MEDIA_ID = '0f1e2d3c-4b5a-4968-8778-695a4b3c2d1e';
 const CONFIG = { site: 'https://acme.atlassian.net', email: 'ada@acme.com', projectKey: 'ABC' };
 
 const DESCRIPTION = {
@@ -34,6 +35,29 @@ const ISSUES: Record<string, JiraIssue> = {
     description: DESCRIPTION,
     attachments: [],
   },
+  // A file card names its file only by its Media Services id; the screenshot by its name.
+  'ABC-3': {
+    key: 'ABC-3',
+    summary: 'With a file card',
+    projectKey: 'ABC',
+    description: {
+      type: 'doc',
+      content: [
+        {
+          type: 'mediaSingle',
+          content: [{ type: 'media', attrs: { id: MEDIA_ID.toUpperCase(), type: 'file' } }],
+        },
+        {
+          type: 'mediaSingle',
+          content: [{ type: 'media', attrs: { id: 'other', alt: 'screen.png', type: 'file' } }],
+        },
+      ],
+    },
+    attachments: [
+      { id: '10', filename: 'screen.png', mimeType: 'image/png', content: '' },
+      { id: '11', filename: 'Export.xlsx', mimeType: 'application/vnd.ms-excel', content: '' },
+    ],
+  },
   'XYZ-2': {
     key: 'XYZ-2',
     summary: 'Elsewhere',
@@ -44,6 +68,7 @@ const ISSUES: Record<string, JiraIssue> = {
 };
 
 const calls: string[] = [];
+let mediaLookups: string[] = [];
 
 function checked(auth: JiraAuth): void {
   if (auth.token !== TOKEN || auth.email !== CONFIG.email || auth.site !== CONFIG.site) {
@@ -69,6 +94,14 @@ const jira: JiraApi = {
       { id: '1', name: 'To Do', category: 'new' },
       { id: '3', name: 'Done', category: 'done' },
     ]),
+  attachmentMediaId: (auth, attachmentId) => {
+    checked(auth);
+    mediaLookups.push(attachmentId);
+    if (attachmentId === '10') {
+      return Promise.reject(new JiraError('Not found', 404));
+    }
+    return Promise.resolve(attachmentId === '11' ? MEDIA_ID : null);
+  },
   issue: (auth, key) => {
     checked(auth);
     const issue = ISSUES[key];
@@ -130,4 +163,20 @@ test('Jira cannot create issues yet, and its kind reads keys', () => {
   expect(kind.readConfig({ site: 'acme', email: 'a@b.c', projectKey: 'abc' })).toEqual({
     config: { site: 'https://acme.atlassian.net', email: 'a@b.c', projectKey: 'ABC' },
   });
+});
+
+test('a file card is matched by its media id, read from Jira only when a name does not match', async () => {
+  mediaLookups = [];
+  const { site } = CONFIG;
+  expect((await provider.item(TOKEN, CONFIG, 'ABC-3')).markdown).toBe(
+    [
+      `[Export.xlsx](${site}/rest/api/3/attachment/content/11)`,
+      // A lookup that fails (the screenshot's) leaves the match by name.
+      `![screen.png](${site}/rest/api/3/attachment/content/10)`,
+    ].join('\n\n'),
+  );
+  expect(mediaLookups.toSorted()).toEqual(['10', '11']);
+  mediaLookups = [];
+  await provider.item(TOKEN, CONFIG, 'ABC-1');
+  expect(mediaLookups).toEqual([]);
 });

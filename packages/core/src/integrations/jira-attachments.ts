@@ -26,20 +26,33 @@ function listed(site: string, attachment: Attachment): string {
 }
 
 /**
- * The description as markdown. A media node is matched to the attachment of the same file name (Jira
- * sets a media node's `alt` to it); an attachment nothing in the text shows is listed under
- * "Attachments", so every file reaches the ticket.
+ * The description as markdown. A media node is matched to its attachment by its Media Services id
+ * (`byMediaId`, read from Jira: a file card has nothing else), else by file name (Jira sets an
+ * image's `alt` to it); an attachment nothing in the text shows is listed under "Attachments", so
+ * every file reaches the ticket.
  */
-export function issueMarkdown(issue: JiraIssue, site: string): string {
+export function issueMarkdown(
+  issue: JiraIssue,
+  site: string,
+  byMediaId: ReadonlyMap<string, string> = new Map(),
+): string {
   const byName = new Map<string, Attachment>();
+  const byId = new Map(issue.attachments.map((attachment) => [attachment.id, attachment]));
   for (const attachment of issue.attachments) {
     if (!byName.has(attachment.filename)) {
       byName.set(attachment.filename, attachment);
     }
   }
   const shown = new Set<string>();
-  const media = ({ alt }: AdfMedia): { name: string; url: string; image: boolean } | null => {
-    const attachment = alt === null ? undefined : byName.get(alt);
+  const find = ({ id, alt }: AdfMedia): Attachment | undefined => {
+    const attachmentId = id === null ? undefined : byMediaId.get(id.toLowerCase());
+    return (
+      (attachmentId === undefined ? undefined : byId.get(attachmentId)) ??
+      (alt === null ? undefined : byName.get(alt))
+    );
+  };
+  const media = (node: AdfMedia): { name: string; url: string; image: boolean } | null => {
+    const attachment = find(node);
     if (!attachment) {
       return null;
     }

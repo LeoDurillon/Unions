@@ -96,8 +96,8 @@ and linked.
   moved to a generic `integrations` table and ticket origin, behind a provider per kind, so Jira or Linear is a
   second implementation. Refactor, built (branch `source-integrations`, 2026-10-24), steps 1 to 6.
 - [Jira](jira.md): connect a project to a Jira Cloud project with an API token, import an issue as a ticket (ADF
-  converted to markdown, attachments kept as ticket files). Planned (2026-11-06); rule actions and creating issues
-  later.
+  converted to markdown, attachments kept as ticket files), from the wizard's Integrations step or the settings.
+  Built and deployed (2026-11-07), checked on a real site; rule actions, creating issues and a comments tab later.
 - [Update Union from the sidebar](self-update.md): an Update button enabled when the checkout is behind the remote's
   `main`; the worker fetches `origin` (SSH through the host's `~/.ssh`, read-only), fast-forwards, reinstalls if
   needed, and web and worker exit for compose to start them again; Update anyway when something runs. Built

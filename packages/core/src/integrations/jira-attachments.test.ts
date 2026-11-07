@@ -65,3 +65,17 @@ test('two attachments with one name: the text shows the first, the other is list
     `![screen.png](${content('10')})\n\n## Attachments\n\n- ![screen.png](${content('20')})`,
   );
 });
+
+test('a media node without a name is matched by its media id when one is known', () => {
+  const card = {
+    type: 'mediaSingle',
+    content: [{ type: 'media', attrs: { id: 'AB-CD', type: 'file', collection: '' } }],
+  };
+  const description = { type: 'doc', content: [card] };
+  expect(issueMarkdown(issue(description, [SPEC]), SITE, new Map([['ab-cd', '11']]))).toBe(
+    `[spec (v2).pdf](${content('11')})`,
+  );
+  expect(issueMarkdown(issue(description, [SPEC]), SITE)).toBe(
+    `*attachment*\n\n## Attachments\n\n- [spec (v2).pdf](${content('11')})`,
+  );
+});

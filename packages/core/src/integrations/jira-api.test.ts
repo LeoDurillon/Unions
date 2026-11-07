@@ -147,3 +147,25 @@ test('failures say what is wrong, with their status', async () => {
     expect(String(failure)).toContain(message);
   }
 });
+
+test("an attachment's media id is read from its redirect, without following it", async () => {
+  const api = new FetchJiraApi();
+  const id = '0f1e2d3c-4b5a-4968-8778-695a4b3c2d1e';
+  const location = `https://api.media.atlassian.com/file/${id}/binary?token=t&client=c&dl=true`;
+  const seen = answer(() => new Response(null, { status: 303, headers: { location } }));
+  expect(await api.attachmentMediaId(AUTH, '10100')).toBe(id);
+  expect(seen[0]?.url).toBe('https://acme.atlassian.net/rest/api/3/attachment/content/10100');
+  expect(seen[0]?.init?.redirect).toBe('manual');
+  expect(new Headers(seen[0]?.init?.headers).get('authorization')).toStartWith('Basic ');
+  for (const other of [
+    new Response('bytes'),
+    new Response(null, { status: 303, headers: { location: 'https://example.com/elsewhere' } }),
+    new Response(null, {
+      status: 303,
+      headers: { location: `http://api.media.atlassian.com/file/${id}/binary` },
+    }),
+  ]) {
+    answer(() => other);
+    expect(await api.attachmentMediaId(AUTH, '10100')).toBeNull();
+  }
+});

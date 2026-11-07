@@ -91,6 +91,23 @@ export function issueOf(body: unknown): JiraIssue {
   };
 }
 
+/** A Media Services file id: what Jira's media host and a description's media nodes name a file by. */
+const MEDIA_FILE =
+  /^\/file\/(?<id>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\//iu;
+
+/**
+ * The file id in the address Jira redirects an attachment's download to
+ * (`https://api.media.atlassian.com/file/<id>/binary?…`); null for any other answer.
+ */
+export function mediaIdOf(location: string | null): string | null {
+  if (location === null || !URL.canParse(location)) {
+    return null;
+  }
+  const url = new URL(location);
+  const id = url.protocol === 'https:' ? MEDIA_FILE.exec(url.pathname)?.groups?.id : undefined;
+  return id?.toLowerCase() ?? null;
+}
+
 /** Jira's error body (`errorMessages`, `errors`) as one sentence; null when it has none. */
 export function errorMessageOf(body: unknown): string | null {
   if (!isRecord(body)) {

@@ -1,9 +1,11 @@
 # Flow
 
 0. First run: a setup wizard connects GitHub (token or GitHub App installation), picks the repository, and picks or creates the GitHub Project.
-1. Create a ticket (title, description), or import it from Notion when the project is connected (optional wizard
-   step or project settings: integration secret + data source; the page must be a row of that data source)
-   → GitHub issue added to the Project. Or import an existing issue of the repository (number or URL; pull requests
+1. Create a ticket (title, description), or import it from a tracker the project is connected to (the wizard's
+   optional Integrations step, or project settings): from Notion (integration secret + data source; the page must be
+   a row of that data source), or from Jira Cloud (site, account email, API token + project key; the issue must be
+   of that project, its description converted to markdown and its attachments kept as ticket files)
+   → GitHub issue added to the Project. Union only reads Jira. Or import an existing issue of the repository (number or URL; pull requests
    and issues already on a ticket are refused): the ticket is on that issue, which the sync adds to the Project
    instead of creating one, and its title and description keep following GitHub. A Notion page edited before
    creating (Edit before creating) stays linked to the ticket and still gets its images, unless unlinked in the form.

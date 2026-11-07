@@ -3,6 +3,7 @@ import { jiraSiteOf } from './jira-config';
 import { JiraError } from './jira-error';
 import {
   accountOf,
+  mediaIdOf,
   errorMessageOf,
   issueOf,
   projectOf,
@@ -31,6 +32,11 @@ export type JiraApi = {
   /** The statuses of the project's workflows, each once. */
   statuses(auth: JiraAuth, key: string): Promise<JiraStatus[]>;
   issue(auth: JiraAuth, key: string): Promise<JiraIssue>;
+  /**
+   * The Media Services id of an attachment's file: what a file card in the description names it by.
+   * Read from where Jira redirects its download, without downloading; null when it does not say.
+   */
+  attachmentMediaId(auth: JiraAuth, attachmentId: string): Promise<string | null>;
 };
 
 function failure(status: number, body: unknown, retryAfter: string | null): JiraError {
@@ -55,18 +61,22 @@ function failure(status: number, body: unknown, retryAfter: string | null): Jira
 }
 
 export class FetchJiraApi implements JiraApi {
-  private async get(auth: JiraAuth, path: string): Promise<unknown> {
+  private request(auth: JiraAuth, path: string, redirect: 'error' | 'manual'): Promise<Response> {
     // The token goes only to an atlassian.net site, whatever the stored config says.
     const site = jiraSiteOf(auth.site);
     if (site === null) {
       throw new JiraError('The Jira site is not an atlassian.net address.', NOT_FOUND);
     }
     const basic = Buffer.from(`${auth.email}:${auth.token}`).toString('base64');
-    const response = await fetch(`${site}/rest/api/3${path}`, {
+    return fetch(`${site}/rest/api/3${path}`, {
       headers: { authorization: `Basic ${basic}`, accept: 'application/json' },
-      redirect: 'error',
+      redirect,
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
+  }
+
+  private async get(auth: JiraAuth, path: string): Promise<unknown> {
+    const response = await this.request(auth, path, 'error');
     const body: unknown = await response.json().catch(() => null);
     if (!response.ok) {
       throw failure(response.status, body, response.headers.get('retry-after'));
@@ -89,5 +99,13 @@ export class FetchJiraApi implements JiraApi {
   async issue(auth: JiraAuth, key: string): Promise<JiraIssue> {
     const path = `/issue/${encodeURIComponent(key)}?fields=${ISSUE_FIELDS}`;
     return issueOf(await this.get(auth, path));
+  }
+
+  async attachmentMediaId(auth: JiraAuth, attachmentId: string): Promise<string | null> {
+    const path = `/attachment/content/${encodeURIComponent(attachmentId)}`;
+    const response = await this.request(auth, path, 'manual');
+    // Only the redirect's address is read: the file itself is downloaded when the ticket is created.
+    await response.body?.cancel();
+    return mediaIdOf(response.headers.get('location'));
   }
 }
