@@ -1,12 +1,12 @@
-// Right-hand side of the app: the running previews, the Union settings (`?union=`), the project's
-// settings (`?settings=`), or the project; and the keyboard shortcuts' list.
+// Right-hand side of the app: the running previews, the user guide (`?guide=`), the Union settings
+// (`?union=`), the project's settings (`?settings=`), or the project; and the keyboard shortcuts' list.
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../src/api-types';
 import { useSettingsSection } from '../lib/settings-sections';
 import { closeUnionSettings, useUnionSection } from '../lib/union-settings-sections';
 import type { Page } from '../lib/use-navigation';
-import { RunningPreviewsPage } from './previews/running-previews-page';
+import { GlobalPage } from './global-page';
 import { ProjectSettingsPage } from './settings/settings-page';
 import { ShortcutsHelp } from './shortcuts-help';
 import { UnionSettingsPage } from './union-settings/union-settings-page';
@@ -31,8 +31,8 @@ function MainPage({
   settingsSection,
 }: MainAreaProps & { settingsSection: ReturnType<typeof useSettingsSection> }): ReactElement {
   const unionSection = useUnionSection();
-  if (page === 'previews') {
-    return <RunningPreviewsPage onOpenTicket={onOpenProjectTicket} />;
+  if (page === 'previews' || page === 'guide') {
+    return <GlobalPage page={page} onOpenTicket={onOpenProjectTicket} />;
   }
   if (page === 'settings' && unionSection) {
     return (
@@ -51,8 +51,8 @@ function MainPage({
 }
 
 /**
- * Right-hand side of the app: the running previews, the Union settings (`?union=`), the project's
- * settings (`?settings=`), or the project. `c` writes a new ticket only on the project's own page.
+ * Right-hand side of the app: the running previews, the user guide (`?guide=`), the Union settings
+ * (`?union=`), the project's settings (`?settings=`), or the project. `c` writes a new ticket only on the project's own page.
  */
 export function MainArea(props: MainAreaProps): ReactElement {
   const settingsSection = useSettingsSection();

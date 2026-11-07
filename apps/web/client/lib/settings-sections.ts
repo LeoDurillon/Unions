@@ -88,7 +88,14 @@ export function openSettings(section: SettingsSection = 'general'): void {
   if (readParam('settings') === section || !confirmLeave()) {
     return;
   }
-  setParams({ settings: section, union: null, page: null, ticket: null, ...CLOSE_REVIEW });
+  setParams({
+    settings: section,
+    union: null,
+    page: null,
+    guide: null,
+    ticket: null,
+    ...CLOSE_REVIEW,
+  });
 }
 
 /** Leaves the settings page, asking first if it has unsaved changes; false when the user stays. */

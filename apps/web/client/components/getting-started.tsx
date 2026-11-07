@@ -10,32 +10,40 @@ import {
   GETTING_STARTED_STEPS,
   type GettingStartedStep,
 } from '../lib/getting-started';
+import { guideHref } from '../lib/guide-links';
+import { openGuide } from '../lib/guide-url';
 import { openSettings } from '../lib/settings-sections';
 import { useGettingStartedShown } from '../lib/use-getting-started-shown';
 import { Button } from './ui';
 
 type Action = { label: string; handleClick: () => void };
 
-const TEXT: Record<GettingStartedStep, { title: string; what: string }> = {
+/** A step's title, what it does, and the guide's page and heading on it. */
+const TEXT: Record<GettingStartedStep, { title: string; what: string; guide: [string, string] }> = {
   checks: {
     title: 'Set the check command',
     what: 'Your tests, lint or typecheck in one command. The agent works until it passes.',
+    guide: ['first-project', 'tell-the-agents-how-to-build-and-check-your-code'],
   },
   ticket: {
     title: 'Write a ticket',
     what: 'A title and the change you want, as you would write it for a colleague.',
+    guide: ['tickets', 'create-a-ticket'],
   },
   start: {
     title: 'Start it',
     what: 'Click Start on its card, or drag it into In progress. Agents run in Docker with your Claude account.',
+    guide: ['tickets', 'start-a-ticket'],
   },
   plan: {
     title: 'Answer the planning',
     what: 'Each planning step waits for you under Needs you (press n): approve it, or ask for a revision.',
+    guide: ['ticket-lifecycle', 'planning'],
   },
   review: {
     title: 'Review the change',
     what: 'Open Review changes on the ticket, comment or approve, then merge its pull request.',
+    guide: ['reviewing', 'review-a-tickets-branch'],
   },
 };
 
@@ -50,7 +58,7 @@ function StepItem({
   done: boolean;
   action?: Action;
 }): ReactElement {
-  const { title, what } = TEXT[step];
+  const { title, what, guide } = TEXT[step];
   return (
     <li className="flex gap-2.5">
       <span
@@ -64,7 +72,19 @@ function StepItem({
           {title}
           <span className="sr-only">{done ? ' (done)' : ''}</span>
         </p>
-        <p className="text-xs text-zinc-500">{what}</p>
+        <p className="text-xs text-zinc-500">
+          {what}{' '}
+          <a
+            href={guideHref(...guide)}
+            onClick={(event) => {
+              event.preventDefault();
+              openGuide(...guide);
+            }}
+            className="text-indigo-600 hover:underline dark:text-indigo-400"
+          >
+            Learn more
+          </a>
+        </p>
         {action && !done ? (
           <Button size="sm" onClick={action.handleClick}>
             {action.label}

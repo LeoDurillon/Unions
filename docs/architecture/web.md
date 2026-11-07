@@ -340,6 +340,12 @@
   `localStorage` (`lib/use-getting-started-shown.ts`). The sidebar's Help (`components/help-menu.tsx`) shows it
   again, complete or not, and opens the shortcuts list, through window events (`lib/help-requests.ts`) heard by
   the checklist, `lib/use-project-view.ts` (back to the Board tab) and `shortcuts-help.tsx`.
+- The user guide in the app: `routes/guide.ts` serves `documentation/` read-only (`GET /api/guide` the pages in
+  the index's order, `/guide/pages/:name`, `/guide/images/:name` from `docs/screenshots/`), serving only names
+  listed from those folders (`guide-pages.ts`). The Guide page (`?guide=<page>`, a heading as the hash;
+  `components/guide/`, routed by `global-page.tsx`) renders it with `Markdown anchors` (GitHub's heading ids,
+  `heading-anchors.tsx`); `lib/guide-links.ts` keeps links between pages in the app, loads the screenshots from
+  the API and sends `../` links (the code's docs) to GitHub. The checklist's Learn more links open it.
 - `client/` is the SPA: Tailwind v4, TanStack Query, dnd-kit. `app.tsx` is the shell, `components/` the UI,
   `lib/` the hooks and the typed `api.ts`. The browser keeps one event stream for all its Union tabs
   (`lib/event-hub.ts`: the tab holding the Web Lock `union-events` reads `/api/events` and relays each event

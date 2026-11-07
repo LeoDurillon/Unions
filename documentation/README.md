@@ -5,7 +5,9 @@ Project). You write a ticket and move it to
 **In progress**. Claude Code agents then plan the change with you, implement it until your checks pass, and open a
 pull request. A second agent reviews that pull request before you do.
 
-This guide explains how to install Union and use it day to day. To work on Union's own code, read
+This guide explains how to install Union and use it day to day. Inside Union, click **Help** in the sidebar, then
+**User guide**, to read it there; each step of the board's **Getting started** list has a **Learn more** link to
+its part. To work on Union's own code, read
 [`AGENTS.md`](../AGENTS.md) and the design notes in [`docs/`](../docs/spec/README.md) instead.
 
 ![The board](../docs/screenshots/board.png)

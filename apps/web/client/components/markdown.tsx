@@ -11,6 +11,7 @@ import ReactMarkdown, { defaultUrlTransform, type Components } from 'react-markd
 import remarkGfm from 'remark-gfm';
 
 import { GITHUB_REHYPE } from '../lib/github-markdown';
+import { HEADING_ANCHORS } from './heading-anchors';
 import { MermaidDiagram } from './mermaid-diagram';
 
 const ATTACHMENT = 'attachment:';
@@ -84,15 +85,16 @@ const COMPONENTS: Components = { img: Image, input: TaskBox, pre: CodeBlock, tab
 type RenderCode = (text: string) => ReactNode | null;
 
 /** The components with inline code given to `renderCode`; a block's code (it ends with a newline) is left alone. */
-function withCode(renderCode: RenderCode | undefined): Components {
+function withCode(renderCode: RenderCode | undefined, anchors: boolean): Components {
+  const base = anchors ? { ...COMPONENTS, ...HEADING_ANCHORS } : COMPONENTS;
   if (!renderCode) {
-    return COMPONENTS;
+    return base;
   }
   function Code({ children, ...props }: ComponentProps<'code'>): ReactNode {
     const inline = typeof children === 'string' && !children.includes('\n') && !props.className;
     return (inline ? renderCode?.(children) : null) ?? <code {...props}>{children}</code>;
   }
-  return { ...COMPONENTS, code: Code };
+  return { ...base, code: Code };
 }
 
 /**
@@ -106,6 +108,7 @@ export function Markdown({
   github = false,
   renderCode,
   resolveUrl,
+  anchors = false,
 }: {
   children: string;
   files?: Record<string, string>;
@@ -117,8 +120,10 @@ export function Markdown({
   renderCode?: RenderCode;
   /** Rewrites a link (`href`) or an image (`src`), as `key` says; undefined leaves it to the default. */
   resolveUrl?: (url: string, key: string) => string | undefined;
+  /** Headings get GitHub's ids, for links to `#heading` (the user guide). */
+  anchors?: boolean;
 }): ReactElement {
-  const components = useMemo(() => withCode(renderCode), [renderCode]);
+  const components = useMemo(() => withCode(renderCode, anchors), [renderCode, anchors]);
   const transform = (url: string, key: string): string => {
     if (url.startsWith(ATTACHMENT)) {
       return files?.[url.slice(ATTACHMENT.length)] ?? '';

@@ -2,13 +2,11 @@
 // shortcuts.
 import { useRef, useState, type ReactElement } from 'react';
 
+import { openGuide } from '../lib/guide-url';
 import { requestHelp } from '../lib/help-requests';
 import { askGettingStarted } from '../lib/use-getting-started-shown';
 import { MenuPanel, type MenuItem } from './overflow-menu';
 import { SIDE_ITEM, SIDE_LABEL } from './sidebar-classes';
-
-/** The user guide's index, until Union serves the guide itself. */
-const GUIDE_URL = 'https://github.com/LeoDurillon/Unions/blob/main/documentation/README.md';
 
 /** Above its button, so it stays on screen at the bottom of the sidebar. */
 const ABOVE = 'bottom-full left-0 mb-1 w-max';
@@ -40,7 +38,7 @@ function helpItems(projectId: number | null, onBoard: () => void): MenuItem[] {
     {
       label: 'User guide',
       onSelect: () => {
-        globalThis.open(GUIDE_URL, '_blank', 'noopener');
+        openGuide();
       },
     },
     {

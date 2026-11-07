@@ -1,7 +1,8 @@
 # Plan: getting started, the help menu and the guide in the app
 
-Status: steps 1 and 2 built (2026-11-07, branch `onboarding-help`), checked in headless Chromium against the live
-data (step 1 with no ticket and no check command stubbed; no write tried); steps 3 and 4 left.
+Status: steps 1 to 3 built (2026-11-07, branch `onboarding-help`), checked in headless Chromium against the live
+data (step 1 with no ticket and no check command stubbed; step 3 with the worktree's API serving the guide; no
+write tried). Left: Learn more links from the settings pages, and step 4.
 
 ## Idea
 
@@ -28,7 +29,7 @@ settings already say (no new table, no event):
 - The card shows while an item is left and the user has not hidden it. **Hide** is remembered per project in this
   browser (`localStorage`, `union.getting-started.hidden.<projectId>`), guarded like `use-folded-columns.ts`.
   A local, mostly single-user app: no need for a database setting.
-- Every item has a line saying what happens; links to the guide page that covers it wait for step 3.
+- Every item has a line saying what happens and a **Learn more** link to the guide's heading on it (step 3).
 - Hidden behind the first-run wizard (`BoardView` without `onStart`): the card belongs to `Board`.
 - Guide: `documentation/first-project.md` ("The board opens" → the checklist) and `tickets.md`.
 
@@ -38,7 +39,7 @@ Built. A **Help** entry under Union settings in the sidebar (a `?` on the rail),
 
 - **Getting started**: goes to the open project's board (the Board tab) and shows its checklist, even complete
   (clears its Hide). Disabled before there is a project.
-- **User guide**: the guide's index on GitHub (`GUIDE_URL` in `help-menu.tsx`), until step 3.
+- **User guide**: the guide's index, in the app (step 3).
 - **Keyboard shortcuts (?)**: the list `?` opens.
 - (Step 4) **Take the tour**.
 
@@ -46,6 +47,11 @@ The menu asks through window events (`lib/help-requests.ts`); the checklist, the
 (`lib/use-project-view.ts`, out of `workspace.tsx`) and `shortcuts-help.tsx` listen.
 
 ## Step 3: the user guide in the app
+
+Built, as below, except the settings pages' Learn more links (left). Links into `docs/` and `AGENTS.md` open
+`LeoDurillon/Unions` on GitHub (`REPO_URL` in `lib/guide-links.ts`). Headings get GitHub's ids
+(`lib/heading-slug.ts`); every `#heading` link of the guide resolves (checked over all pages). Two headings with
+the same text on one page would share an id; none does today.
 
 - The web server serves the pages of `documentation/` read-only (`GET /api/guide/:page`, names from a fixed
   list read at start, never a path from the request) and the screenshots they show.
