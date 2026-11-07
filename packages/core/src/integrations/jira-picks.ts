@@ -38,15 +38,23 @@ function project(key: string): string {
   return encodeURIComponent(key);
 }
 
-/** The active and future sprints of the project's first scrum board. */
+/**
+ * A board with sprints: company-managed projects have scrum boards, team-managed ones a "simple" board
+ * (with sprints when the project turned them on); kanban boards have none.
+ */
+const SPRINT_BOARDS = ['scrum', 'simple'];
+
+/** The active and future sprints of the project's first board with sprints (scrum first). */
 async function sprintsOf(jira: JiraApi, auth: JiraAuth, projectKey: string): Promise<JiraSprint[]> {
   const boards = items(
-    await jira.read(auth, `/rest/agile/1.0/board?projectKeyOrId=${project(projectKey)}&type=scrum`),
+    await jira.read(auth, `/rest/agile/1.0/board?projectKeyOrId=${project(projectKey)}`),
   );
-  const [board] = boards;
+  const board = SPRINT_BOARDS.map((type) =>
+    boards.find((each) => text(each, 'type') === type),
+  ).find((each) => each !== undefined);
   if (!board) {
     throw new JiraError(
-      `The Jira project ${projectKey} has no scrum board: sprints need one`,
+      `The Jira project ${projectKey} has no board with sprints (a scrum board, or sprints turned on)`,
       CONFLICT,
     );
   }

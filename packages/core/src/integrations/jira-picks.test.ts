@@ -25,10 +25,16 @@ async function failure(read: Promise<unknown>): Promise<string> {
   }
 }
 
-const BOARD = '/rest/agile/1.0/board?projectKeyOrId=ABC&type=scrum';
+const BOARD = '/rest/agile/1.0/board?projectKeyOrId=ABC';
 const SPRINTS = '/rest/agile/1.0/board/7/sprint?state=active,future';
 const BOARD_SPRINTS = {
-  [BOARD]: { values: [{ id: 7, name: 'ABC board' }] },
+  // A kanban board has no sprints; a team-managed project's board is "simple".
+  [BOARD]: {
+    values: [
+      { id: 3, name: 'ABC kanban', type: 'kanban' },
+      { id: 7, name: 'ABC board', type: 'simple' },
+    ],
+  },
   [SPRINTS]: {
     values: [
       { id: 41, name: 'Sprint 12', state: 'active' },
@@ -61,9 +67,9 @@ test("sprints start with the active and the next one, then the board's", async (
     { id: '41', name: 'Sprint 12' },
     { id: '42', name: 'Sprint 13' },
   ]);
-  const noBoard = fake({ [BOARD]: { values: [] } });
+  const noBoard = fake({ [BOARD]: { values: [{ id: 3, type: 'kanban' }] } });
   expect(await failure(jiraPicks(noBoard, auth, 'ABC', 'sprint'))).toBe(
-    'The Jira project ABC has no scrum board: sprints need one',
+    'The Jira project ABC has no board with sprints (a scrum board, or sprints turned on)',
   );
 });
 

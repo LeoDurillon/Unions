@@ -75,7 +75,7 @@
   `text-adf.ts`). Picked fields (`user`, `versions`, `components`, `sprint`; `jira-field-types.ts`) store their
   picks' ids with their names; the editor reads the lists from `GET /api/projects/:id/jira/picks/:type`
   (`routes/jira-picks.ts`, core's `jira-picks.ts` over `JiraApi.read`: assignable users, the project's versions and
-  components, the first scrum board's active and future sprints through Jira Software's `/rest/agile/1.0`), never
+  components, the first board with sprints' active and future sprints (scrum, else a team-managed project's "simple" board) through Jira Software's `/rest/agile/1.0`), never
   stored. "The active sprint" and "the next sprint" are resolved at delivery (`worker/event-actions/jira-field-picks.ts`).
   Multi-selects are typed as option names and checked against `editmeta` as single selects are. The rules editor reads the stored statuses and settable fields (`GET /field`, kept in
   `integrations.fields` by Refresh; `jira-field-types.ts`) from the rules list (`jiraRuleSourceOf`). The web calls

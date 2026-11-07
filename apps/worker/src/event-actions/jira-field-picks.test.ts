@@ -5,7 +5,7 @@ import type { JiraApi, JiraFieldAction } from '@union/core';
 import { deliverJiraFields } from './jira-field';
 import type { JiraIssueTarget } from './jira-target';
 
-const BOARD = '/rest/agile/1.0/board?projectKeyOrId=ABC&type=scrum';
+const BOARD = '/rest/agile/1.0/board?projectKeyOrId=ABC';
 const SPRINTS = '/rest/agile/1.0/board/7/sprint?state=active,future';
 
 let sent: unknown[];
@@ -14,7 +14,7 @@ let sprints: { id: number; name: string; state: string }[];
 const jira = {
   read: (_auth, path) => {
     if (path === BOARD) {
-      return Promise.resolve({ values: [{ id: 7 }] });
+      return Promise.resolve({ values: [{ id: 7, type: 'scrum' }] });
     }
     return path === SPRINTS
       ? Promise.resolve({ values: sprints })

@@ -58,7 +58,7 @@ rule runs. `jira-values.ts`'s `jiraPickedValue` (D3), `jira-picks.ts` (the lists
 `resolveSprint`), `routes/jira-picks.ts`, the worker's `jira-field-picks.ts`. Client: `jira-pick-field.tsx` (a
 select for a person or a sprint, boxes for versions and components; a pick no longer listed stays so it can be
 removed), `use-jira-picks.ts`. Tests: field types, values, `jira-picks.test.ts`, the save checks,
-`jira-field-picks.test.ts` (worker), `jira-pick-routes.test.ts`. UI check on a scratch database with Jira's lists stubbed: each picker, the preview, the save (checked by the server) and the rule's sentence. Not yet checked on a real site.
+`jira-field-picks.test.ts` (worker), `jira-pick-routes.test.ts`. UI check on a scratch database with Jira's lists stubbed: each picker, the preview, the save (checked by the server) and the rule's sentence. Checked on the user's site after deploying (the lists only, read): a team-managed project's board is of type "simple", not "scrum", and has sprints, so a board with sprints is the first scrum board, else the first simple one.
 
 ## Risks
 

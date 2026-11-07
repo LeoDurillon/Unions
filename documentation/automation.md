@@ -67,7 +67,7 @@ The actions on Notion and on Jira are offered only when the project is connected
   affects versions and the components. A person is picked from those who can be assigned in the Jira project, and
   versions and components from the project's; they replace what the issue had, and picking none empties the field.
   For a sprint, pick **The active sprint** or **The next sprint** (the board's when the rule runs, so the rule keeps
-  working from sprint to sprint), or one sprint by name; sprints need a scrum board in the Jira project. Fields Jira
+  working from sprint to sprint), or one sprint by name; sprints need a board with sprints in the Jira project (a scrum board, or a team-managed project with sprints turned on). Fields Jira
   fills in itself (Created, Resolved, the time spent…) are not offered, nor the summary and description. Union reads the Jira project's statuses and the fields a rule
   can set when you save the Jira settings, or with **Refresh from Jira** above the rules (needed once for a project
   connected in the setup wizard, and after adding a field in Jira).
