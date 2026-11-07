@@ -93,9 +93,9 @@ test('a ticket is asked in Notion only when the project has a Notion data source
   expect(() => requestTicket(db, id, '', { target: 'notion' })).toThrow(
     'not connected to a Notion',
   );
-  // Union cannot create Jira issues yet: refused before the worker would fail.
+  // Refused before the worker would fail.
   expect(() => requestTicket(db, id, '', { target: 'jira' })).toThrow(
-    'cannot create Jira issues yet',
+    'The project is not connected to Jira',
   );
   const { projectId } = getInvestigation(db, id);
   saveNotionConnection(db, projectId, { token: 'secret', dataSourceId: 'source' });

@@ -2,12 +2,21 @@
 import { asc, eq } from 'drizzle-orm';
 
 import type { Db } from './db';
+import { jiraAuthOf } from './integrations/jira-integration';
 import { integrationKind, type IntegrationKindName } from './integrations/kinds';
 import { notionAccessOf } from './integrations/notion-integration';
 import { getInvestigation, InvestigationError, type Investigation } from './investigations';
 import * as schema from './schema';
 import { setParent } from './ticket-links';
 import { createTicket, emitEvent, type TicketOrigin } from './tickets';
+
+/** Why the project cannot take an item in the tracker now, or null when it is connected to it. */
+const NOT_CONNECTED: Record<IntegrationKindName, (db: Db, projectId: number) => string | null> = {
+  notion: (db, projectId) =>
+    notionAccessOf(db, projectId) ? null : 'The project is not connected to a Notion data source',
+  jira: (db, projectId) =>
+    jiraAuthOf(db, projectId) ? null : 'The project is not connected to Jira',
+};
 
 /**
  * Asks for a ticket written from an answered investigation, with what the user wants it to cover.
@@ -25,8 +34,9 @@ export function requestTicket(
       `Union cannot create ${integrationKind(target).label} ${integrationKind(target).itemLabel}s yet`,
     );
   }
-  if (target === 'notion' && !notionAccessOf(db, current.projectId)) {
-    throw new InvestigationError('The project is not connected to a Notion data source');
+  const unconnected = target === null ? null : NOT_CONNECTED[target](db, current.projectId);
+  if (unconnected !== null) {
+    throw new InvestigationError(unconnected);
   }
   if (current.status !== 'succeeded' || current.result === null) {
     throw new InvestigationError('Only an answered investigation can become a ticket');

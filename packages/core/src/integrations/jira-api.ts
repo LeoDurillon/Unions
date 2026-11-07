@@ -1,4 +1,6 @@
 // The Jira Cloud calls Union makes (`JiraApi`), and the client that makes them over fetch (REST v3, API token).
+
+import type { AdfRichDocument } from './adf-types';
 import { commentPageOf, type JiraComment, type JiraCommentPage } from './jira-comments';
 import { jiraSiteOf } from './jira-config';
 import { JiraError } from './jira-error';
@@ -34,6 +36,14 @@ const COMMENTS_PER_PAGE = 100;
 /** 500 comments: an issue with more is read in Jira for its oldest ones. */
 const MAX_COMMENT_PAGES = 5;
 
+/** An issue Union creates: in which project, of which type, its summary and its description. */
+export type NewJiraIssue = {
+  projectKey: string;
+  issueTypeId: string;
+  summary: string;
+  description: AdfRichDocument;
+};
+
 /** Who calls: the site, and the account's email and API token (Basic auth). */
 export type JiraAuth = { site: string; email: string; token: string };
 
@@ -59,6 +69,8 @@ export type JiraApi = {
     key: string,
     change: { fields: Record<string, unknown>; update: Record<string, unknown> },
   ): Promise<void>;
+  /** Creates an issue in the project; its key, as Jira gave it (`ABC-12`). */
+  createIssue(auth: JiraAuth, issue: NewJiraIssue): Promise<{ key: string }>;
   /** Adds a comment to the issue; its id, as Jira gave it. */
   addComment(auth: JiraAuth, key: string, body: AdfDocument): Promise<{ id: string }>;
   /**
@@ -186,6 +198,19 @@ export class FetchJiraApi implements JiraApi {
     change: { fields: Record<string, unknown>; update: Record<string, unknown> },
   ): Promise<void> {
     await this.get(auth, issuePath(key), { method: 'PUT', body: change });
+  }
+
+  async createIssue(auth: JiraAuth, issue: NewJiraIssue): Promise<{ key: string }> {
+    const fields = {
+      project: { key: issue.projectKey },
+      issuetype: { id: issue.issueTypeId },
+      summary: issue.summary,
+      description: issue.description,
+    };
+    const created = await this.get(auth, '/issue', { method: 'POST', body: { fields } });
+    const key =
+      typeof created === 'object' && created !== null && 'key' in created ? created.key : '';
+    return { key: typeof key === 'string' ? key : '' };
   }
 
   async addComment(auth: JiraAuth, key: string, body: AdfDocument): Promise<{ id: string }> {

@@ -83,3 +83,14 @@ test('a pasted link must be on the configured site; a bare key always is', () =>
   );
   expect(jiraRefSiteError('https://evil.example/browse/ABC-1', config)).not.toBeNull();
 });
+
+test('the issue type of new issues is kept when it is an id, refused otherwise, absent when empty', () => {
+  const base = { site: 'acme', email: 'a@b.c', projectKey: 'ABC' };
+  expect(readJiraConfig({ ...base, issueTypeId: '10002' })).toMatchObject({
+    config: { issueTypeId: '10002' },
+  });
+  expect(readJiraConfig({ ...base, issueTypeId: '' })).toEqual({
+    config: { site: 'https://acme.atlassian.net', email: 'a@b.c', projectKey: 'ABC' },
+  });
+  expect(readJiraConfig({ ...base, issueTypeId: 'Task' })).toHaveProperty('error');
+});

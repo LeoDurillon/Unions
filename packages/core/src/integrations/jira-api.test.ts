@@ -77,7 +77,7 @@ test('reads a project, its statuses once each, and an issue', async () => {
   expect(await api.project(AUTH, 'ABC')).toEqual({
     key: 'ABC',
     name: 'Apollo',
-    issueTypes: [{ id: '10001', name: 'Story' }],
+    issueTypes: [{ id: '10001', name: 'Story', subtask: false }],
   });
   const todo = { id: '1', name: 'To Do', statusCategory: { key: 'new' } };
   const done = { id: '3', name: 'Done', statusCategory: { key: 'done' } };
@@ -282,4 +282,28 @@ test('a new comment comes back with the id Jira gave it', async () => {
   ).toEqual({
     id: '10200',
   });
+});
+
+test('an issue is created with its project, type, summary and description, and found at its key', async () => {
+  const seen = answer(() => json({ id: '10100', key: 'ABC-12', self: 'x' }, 201));
+  const description = { type: 'doc' as const, version: 1 as const, content: [] };
+  const created = await new FetchJiraApi().createIssue(AUTH, {
+    projectKey: 'ABC',
+    issueTypeId: '10002',
+    summary: 'Fix login',
+    description,
+  });
+  expect(created).toEqual({ key: 'ABC-12' });
+  expect(seen[0]?.init?.method).toBe('POST');
+  expect(seen[0]?.url).toBe('https://acme.atlassian.net/rest/api/3/issue');
+  expect(seen[0]?.init?.body).toBe(
+    JSON.stringify({
+      fields: {
+        project: { key: 'ABC' },
+        issuetype: { id: '10002' },
+        summary: 'Fix login',
+        description,
+      },
+    }),
+  );
 });

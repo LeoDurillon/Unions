@@ -49,9 +49,11 @@ function jiraFieldsOf(fields: unknown): JiraFields | null {
   const issueTypes = Array.isArray(fields.issueTypes) ? fields.issueTypes : [];
   return {
     projectName: fields.projectName,
-    issueTypes: issueTypes.filter(
-      (type): type is { id: string; name: string } =>
-        isRecord(type) && typeof type.id === 'string' && typeof type.name === 'string',
+    // Types read before the sub-task flag was kept count as plain types.
+    issueTypes: issueTypes.flatMap((type: unknown) =>
+      isRecord(type) && typeof type.id === 'string' && typeof type.name === 'string'
+        ? [{ id: type.id, name: type.name, subtask: type.subtask === true }]
+        : [],
     ),
     statuses,
     fields: settable,

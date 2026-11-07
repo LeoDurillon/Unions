@@ -11,12 +11,15 @@ import {
   finishInvestigation,
   getInvestigation,
   getTicket,
+  JiraError,
   migrateDb,
   requestTicket,
+  saveIntegration,
   saveNotionConnection,
   schema,
   type ContainerRuntime,
   type Db,
+  type JiraApi,
   type NotionApi,
   type Project,
 } from '@union/core';
@@ -75,7 +78,7 @@ beforeEach(async () => {
   answered('Dans auth.ts, ligne 40.');
 });
 
-function runner(agent: AgentFn, notion?: NotionApi): InvestigationRunner {
+function runner(agent: AgentFn, notion?: NotionApi, jira?: JiraApi): InvestigationRunner {
   return new InvestigationRunner({
     db,
     runtime,
@@ -83,6 +86,7 @@ function runner(agent: AgentFn, notion?: NotionApi): InvestigationRunner {
     slots: new RunSlots(2),
     agent,
     notion,
+    jira,
   });
 }
 
@@ -198,6 +202,75 @@ test('a Notion failure still creates the ticket, and says why it has no page', a
   expect(investigation.ticketStatus).toBeNull();
   expect(investigation.ticketError).toBe(
     'The ticket was created, but not in Notion: Notion: validation error',
+  );
+  expect(getTicket(db, investigation.ticketId ?? 0).originKind).toBeNull();
+});
+
+function connectJira(): void {
+  const config = { site: 'https://acme.atlassian.net', email: 'a@b.c', projectKey: 'ABC' };
+  saveIntegration(db, project.id, 'jira', { secret: 'tok', config });
+}
+
+/** A Jira that creates issues (`created`), or refuses them with `refusal`. */
+function fakeJira(created: unknown[], refusal: Error | null = null): JiraApi {
+  return {
+    project: (_auth, key) =>
+      Promise.resolve({
+        key,
+        name: 'Apollo',
+        issueTypes: [
+          { id: '10003', name: 'Story', subtask: false },
+          { id: '10002', name: 'Task', subtask: false },
+          { id: '10004', name: 'Sub-task', subtask: true },
+        ],
+      }),
+    createIssue: (auth, issue) => {
+      if (refusal) {
+        return Promise.reject(refusal);
+      }
+      created.push({ token: auth.token, ...issue });
+      return Promise.resolve({ key: 'ABC-12' });
+    },
+  } satisfies Partial<JiraApi> as unknown as JiraApi;
+}
+
+test('asked in Jira, the ticket is created as an issue of the project, of type Task, and linked to it', async () => {
+  connectJira();
+  requestTicket(db, id, '', { target: 'jira' });
+  const created: unknown[] = [];
+  const investigations = runner(writesTicket, undefined, fakeJira(created));
+  investigations.tick();
+  await investigations.idle();
+
+  expect(created).toMatchObject([
+    {
+      token: 'tok',
+      projectKey: 'ABC',
+      issueTypeId: '10002',
+      summary: 'Fix login',
+      description: { type: 'doc' },
+    },
+  ]);
+  const investigation = getInvestigation(db, id);
+  expect(investigation.ticketError).toBeNull();
+  expect(getTicket(db, investigation.ticketId ?? 0)).toMatchObject({
+    originKind: 'jira',
+    originId: 'ABC-12',
+    originUrl: 'https://acme.atlassian.net/browse/ABC-12',
+  });
+});
+
+test("Jira's refusal still creates the ticket, and says why it has no issue", async () => {
+  connectJira();
+  requestTicket(db, id, '', { target: 'jira' });
+  const refusal = new JiraError('Jira: Component/s is required.', 400);
+  const investigations = runner(writesTicket, undefined, fakeJira([], refusal));
+  investigations.tick();
+  await investigations.idle();
+
+  const investigation = getInvestigation(db, id);
+  expect(investigation.ticketError).toBe(
+    'The ticket was created, but not in Jira: Jira: Component/s is required.',
   );
   expect(getTicket(db, investigation.ticketId ?? 0).originKind).toBeNull();
 });

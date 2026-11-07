@@ -1,7 +1,9 @@
-// Jira Cloud as an `IntegrationProvider`: verify, read the project's types and statuses, and import an issue of it.
+// Jira Cloud as an `IntegrationProvider`: verify, read the project's types and statuses, import an issue of it, and
+// create one (a ticket written from an investigation).
 import type { JiraApi, JiraAuth } from './jira-api';
 import { issueMarkdown } from './jira-attachments';
 import { jiraConfigOf } from './jira-config';
+import { createJiraIssue } from './jira-create';
 import type { JiraFields } from './jira-integration';
 import { attachmentsByMediaId, hasUnnamedMedia } from './jira-media-ids';
 import { ItemOutsideSourceError, type IntegrationProvider, type SourceItem } from './provider';
@@ -58,5 +60,6 @@ export function jiraProvider(jira: JiraApi): IntegrationProvider {
       };
     },
     item: (token, config, key) => item(jira, token, config, key),
+    createItem: (token, config, content) => createJiraIssue(jira, token, config, content),
   };
 }

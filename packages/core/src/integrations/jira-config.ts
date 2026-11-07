@@ -1,7 +1,13 @@
 // A Jira integration's config (site, account email, project key) and issue keys, parsed from what users paste; browser-safe.
 
 /** The config of a Jira Cloud integration; the API token is its secret, not config. */
-export type JiraConfig = { site: string; email: string; projectKey: string };
+export type JiraConfig = {
+  site: string;
+  email: string;
+  projectKey: string;
+  /** The type of the issues Union creates (from investigations); absent: Task, else the project's first. */
+  issueTypeId?: string;
+};
 
 /** Jira Cloud's hosts: the token is only ever sent to one of them. */
 const SITE_HOST = /^[a-z0-9][a-z0-9-]*\.atlassian\.net$/u;
@@ -10,6 +16,7 @@ const PROJECT_KEY = /^[A-Z][A-Z0-9_]{0,49}$/u;
 const ISSUE_KEY = /^[A-Z][A-Z0-9_]*-[1-9]\d*$/u;
 const BROWSE_PATH = /\/browse\/(?<key>[^/?#]+)/u;
 const EMAIL = /^[^\s@]+@[^\s@]+$/u;
+const ISSUE_TYPE_ID = /^\d+$/u;
 
 /** A site as `https://<name>.atlassian.net`, from that URL, its host, a page of it or the bare name; null otherwise. */
 export function jiraSiteOf(input: string): string | null {
@@ -81,7 +88,11 @@ export function readJiraConfig(input: unknown): { config: JiraConfig } | { error
   if (!PROJECT_KEY.test(projectKey)) {
     return { error: 'That is not a Jira project key (the ABC of ABC-123)' };
   }
-  return { config: { site, email, projectKey } };
+  const issueTypeId = field(input, 'issueTypeId');
+  if (issueTypeId !== '' && !ISSUE_TYPE_ID.test(issueTypeId)) {
+    return { error: 'That is not an issue type of the Jira project' };
+  }
+  return { config: { site, email, projectKey, ...(issueTypeId === '' ? {} : { issueTypeId }) } };
 }
 
 /** The config of a stored integration; throws when it is not a Jira one. */

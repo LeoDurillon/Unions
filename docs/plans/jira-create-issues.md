@@ -1,6 +1,6 @@
 # Create Jira issues from investigations
 
-Status: planned (2026-11-07); step 1 built (branch `markdown-adf`, 2026-11-07). Follows [Jira](jira.md), [Jira rule actions](jira-rule-actions.md) and
+Status: planned (2026-11-07); steps 1 and 2 built (branch `jira-create-issue`, 2026-11-07). Follows [Jira](jira.md), [Jira rule actions](jira-rule-actions.md) and
 [Jira comments on the ticket](jira-comments.md), all built. Scope: "Also create it in Jira" when an investigation
 writes a ticket, as "Also create it in Notion" does.
 
@@ -97,6 +97,16 @@ Each step ships on its own; `bun run check` after each.
    `subtask`, `createsItems`, the connection check. Tests: the request's body, the default type, D4's error as
    `originError` (worker `investigation-ticket.test.ts` with a fake), D5's cuts, a project not connected refused by
    `requestTicket`.
+   Built, with one change to D3: the provider has no database, so `createItem` reads the project's issue types
+   from Jira when it creates (one more request; never stale), and picks the configured type if the project still
+   has it, else Task, else its first type, sub-tasks left out (`jira-create.ts`: `issueTypeFor`,
+   `cutDescription`, `createJiraIssue`). `JiraApi.createIssue` posts `fields: { project, issuetype, summary,
+   description }` and returns the key. `JiraConfig.issueTypeId` is optional and an id (digits); `projectOf` and
+   the stored types keep `subtask` (types read before count as plain ones). `requestTicket`'s connection check is
+   a map per kind (`NOT_CONNECTED`). The worker's `withTargetItem` takes the `IntegrationApis`, and the
+   investigation deps a `jira` client (a fake in `investigation-ticket.test.ts`). Once deployed, the
+   investigation's switch offers Jira already (it lists the kinds that create items), with the default type
+   until step 3's setting.
 3. **Settings and the switch.** The issue type select; the switch shows for a Jira project. UI check
    (`scripts/ui-check/`): the select after Refresh, the switch beside Notion's, one on at a time.
 4. **Real check and docs.** Ask the user first (it creates an issue in their Jira): an investigation on the SCRUM

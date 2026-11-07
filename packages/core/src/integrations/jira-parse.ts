@@ -1,8 +1,12 @@
 // Jira Cloud's REST v3 responses (project, statuses, fields, issue) read into Union's shapes; anything unexpected reads as empty.
 import { fieldTypeOf, type JiraFieldInfo } from './jira-field-types';
 
-/** A Jira project: its key, name and issue types. */
-export type JiraProject = { key: string; name: string; issueTypes: { id: string; name: string }[] };
+/** A Jira project: its key, name and issue types (`subtask`: a sub-task type, which needs a parent issue). */
+export type JiraProject = {
+  key: string;
+  name: string;
+  issueTypes: { id: string; name: string; subtask: boolean }[];
+};
 
 /** A status of the project's workflows, and its category (`new`, `indeterminate`, `done`). */
 export type JiraStatus = { id: string; name: string; category: string };
@@ -49,6 +53,7 @@ export function projectOf(body: unknown): JiraProject {
     issueTypes: records(record.issueTypes).map((type) => ({
       id: text(type, 'id'),
       name: text(type, 'name'),
+      subtask: type.subtask === true,
     })),
   };
 }

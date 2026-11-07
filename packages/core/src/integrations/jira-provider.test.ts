@@ -86,7 +86,11 @@ const jira: JiraApi = {
     calls.push(`project ${key}`);
     checked(auth);
     return key === 'ABC'
-      ? Promise.resolve({ key, name: 'Apollo', issueTypes: [{ id: '10001', name: 'Story' }] })
+      ? Promise.resolve({
+          key,
+          name: 'Apollo',
+          issueTypes: [{ id: '10001', name: 'Story', subtask: false }],
+        })
       : Promise.reject(new JiraError('Not found', 404));
   },
   statuses: () =>
@@ -101,6 +105,7 @@ const jira: JiraApi = {
   editMeta: () => Promise.resolve({}),
   transitionIssue: () => Promise.reject(new Error('Not used')),
   updateIssue: () => Promise.reject(new Error('Not used')),
+  createIssue: () => Promise.reject(new Error('Not used')),
   addComment: () => Promise.reject(new Error('Not used')),
   comments: () => Promise.resolve({ comments: [], total: 0 }),
   attachmentMediaId: (auth, attachmentId) => {
@@ -138,7 +143,7 @@ test('the fields are the project name, issue types, statuses and the settable fi
     title: 'Apollo',
     fields: {
       projectName: 'Apollo',
-      issueTypes: [{ id: '10001', name: 'Story' }],
+      issueTypes: [{ id: '10001', name: 'Story', subtask: false }],
       statuses: [
         { id: '1', name: 'To Do', category: 'new' },
         { id: '3', name: 'Done', category: 'done' },
@@ -165,8 +170,8 @@ test('an issue of another project, or a missing one, is refused', async () => {
   expect(String(await rejection(provider.item(TOKEN, CONFIG, 'ABC-404')))).toContain('Not found');
 });
 
-test('Jira cannot create issues yet, and its kind reads keys', () => {
-  expect('createItem' in provider).toBe(false);
+test('Jira creates issues, and its kind reads keys', () => {
+  expect(integrationKind('jira').createsItems).toBe(true);
   const kind = integrationKind('jira');
   expect(kind.parseRef('https://acme.atlassian.net/browse/abc-1')).toBe('ABC-1');
   expect(kind.cleanMarkdown('**kept**')).toBe('**kept**');

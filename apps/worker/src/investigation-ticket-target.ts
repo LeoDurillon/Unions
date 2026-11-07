@@ -1,13 +1,13 @@
-// Creates a ticket drafted from an investigation as an item of the tracker the user picked too (a Notion page).
+// Creates a ticket drafted from an investigation as an item of the tracker the user picked too (a Notion page, a
+// Jira issue).
 import {
-  FetchJiraApi,
   integrationKind,
   integrationOf,
   integrationProvider,
   type Db,
   type DraftedTicket,
+  type IntegrationApis,
   type Investigation,
-  type NotionApi,
   type TicketDraft,
 } from '@union/core';
 
@@ -17,7 +17,7 @@ import {
  */
 export async function withTargetItem(
   db: Db,
-  notion: NotionApi,
+  apis: IntegrationApis,
   investigation: Investigation,
   draft: TicketDraft,
 ): Promise<DraftedTicket> {
@@ -26,7 +26,7 @@ export async function withTargetItem(
     return { draft };
   }
   const integration = integrationOf(db, investigation.projectId, kind);
-  const provider = integrationProvider(kind, { notion, jira: new FetchJiraApi() });
+  const provider = integrationProvider(kind, apis);
   if (!integration || !provider.createItem) {
     return {
       draft,

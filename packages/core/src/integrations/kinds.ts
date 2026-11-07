@@ -59,7 +59,7 @@ const KINDS: Record<IntegrationKindName, IntegrationKind> = {
     cleanMarkdown: (markdown) => markdown,
     readConfig: readJiraConfig,
     refError: jiraRefSiteError,
-    createsItems: false,
+    createsItems: true,
   },
 };
 

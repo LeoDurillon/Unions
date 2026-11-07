@@ -2,6 +2,7 @@
 import {
   claimTicketDraft,
   failInterruptedTicketDrafts,
+  FetchJiraApi,
   FetchNotionApi,
   finishTicketDraft,
   schema,
@@ -111,7 +112,11 @@ function draftTicket(deps: InvestigationDeps, investigation: Investigation): Pro
         return { error: outcome.message };
       }
       const draft = parseTicketDraft(outcome.text, investigation);
-      return withTargetItem(deps.db, deps.notion ?? new FetchNotionApi(), investigation, draft);
+      const apis = {
+        notion: deps.notion ?? new FetchNotionApi(),
+        jira: deps.jira ?? new FetchJiraApi(),
+      };
+      return withTargetItem(deps.db, apis, investigation, draft);
     },
     investigation.id,
   );

@@ -10,6 +10,7 @@ import {
   finishInvestigation,
   type Investigation,
   type InvestigationOutcome,
+  type JiraApi,
   type NotionApi,
   type Project,
   projectInstructions,
@@ -91,6 +92,8 @@ export type InvestigationDeps = {
   agent?: AgentFn;
   /** Notion, for tickets written from investigations; tests substitute a fake. */
   notion?: NotionApi;
+  /** The Jira client tickets written from investigations create issues with; tests substitute a fake. */
+  jira?: JiraApi;
 };
 
 function toOutcome(outcome: AgentOutcome, cancelled: boolean): InvestigationOutcome {
