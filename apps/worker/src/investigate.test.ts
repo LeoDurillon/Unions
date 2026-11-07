@@ -263,6 +263,9 @@ test('the cancel command cancels a queued run itself and hands a running one to 
     postNotionComment: () => {
       // Not under test.
     },
+    postJiraComment: () => {
+      // Not under test.
+    },
     preview: () => {
       // Not under test.
     },

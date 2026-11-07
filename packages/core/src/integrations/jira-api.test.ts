@@ -274,3 +274,12 @@ test('a long issue keeps its last 500 comments and says how many it has', async 
   expect(read.comments).toHaveLength(500);
   expect([read.comments[0]?.id, read.comments.at(-1)?.id]).toEqual(['151', '650']);
 });
+
+test('a new comment comes back with the id Jira gave it', async () => {
+  answer(() => json({ id: '10200', body: { type: 'doc', content: [] } }, 201));
+  expect(
+    await new FetchJiraApi().addComment(AUTH, 'ABC-1', { type: 'doc', version: 1, content: [] }),
+  ).toEqual({
+    id: '10200',
+  });
+});

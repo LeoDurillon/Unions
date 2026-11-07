@@ -1,5 +1,11 @@
 // What the commands hand off to the running worker (all asynchronous), and the no-op set for tests and tools.
-import type { NotionCommentPost, PrCommentReply, ReviewVerdict, WorkspaceOwner } from '@union/core';
+import type {
+  JiraCommentPost,
+  NotionCommentPost,
+  PrCommentReply,
+  ReviewVerdict,
+  WorkspaceOwner,
+} from '@union/core';
 
 import type { CiJob } from './github/ci-rerun';
 import type { TicketEdit } from './github/ticket-edit';
@@ -41,6 +47,7 @@ export type CommandHooks = {
   replyToPrComment: (commandId: number, reply: PrCommentReply) => void;
   /** Posts a comment on a ticket's Notion page; `commandId` ties its event to the command. */
   postNotionComment: (commandId: number, post: NotionCommentPost) => void;
+  postJiraComment: (commandId: number, post: JiraCommentPost) => void;
   /**
    * Starts, stops, resets, reads the logs of, or generates the compose file of a ticket's or a pull
    * request's preview; `update` moves a pull request's checkout to the commit its review reads.
@@ -78,6 +85,7 @@ export const NO_HOOKS: CommandHooks = {
   rerunCiJob: ignore,
   replyToPrComment: ignore,
   postNotionComment: ignore,
+  postJiraComment: ignore,
   preview: ignore,
   checkUnionUpdate: ignore,
   updateUnion: ignore,

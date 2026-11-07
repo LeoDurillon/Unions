@@ -23,6 +23,7 @@
     "./notion-discussion-link": "./src/notion-discussion-link.ts",
     "./integration-kinds": "./src/integrations/kinds.ts",
     "./jira-field-types": "./src/integrations/jira-field-types.ts",
+    "./jira-comment-post": "./src/jira-comment-post.ts",
     "./event-actions": "./src/event-actions.ts",
     "./event-catalog": "./src/event-catalog.ts",
     "./event-rules": "./src/event-rule-types.ts",

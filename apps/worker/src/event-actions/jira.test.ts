@@ -53,7 +53,7 @@ const jira = {
   },
   addComment: (auth, key, body) => {
     calls.push({ call: 'addComment', key, detail: { body, token: auth.token } });
-    return failure ? Promise.reject(failure) : Promise.resolve();
+    return failure ? Promise.reject(failure) : Promise.resolve({ id: '10100' });
   },
 } satisfies Partial<JiraApi> as unknown as JiraApi;
 

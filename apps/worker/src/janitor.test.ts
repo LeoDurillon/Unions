@@ -63,6 +63,9 @@ test('remove_containers hands every container to the hook', () => {
     postNotionComment: () => {
       // Not under test.
     },
+    postJiraComment: () => {
+      // Not under test.
+    },
     preview: () => {
       // Not under test.
     },

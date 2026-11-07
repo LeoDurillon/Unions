@@ -144,6 +144,10 @@ type GitHubPayloads = {
     text: string;
     error: string;
   };
+  /** A comment posted on the ticket's Jira issue (`commentId`, Jira's). */
+  jira_comment_posted: { commandId: number; commentId: string };
+  /** `text` is the comment that was not posted, so its box gets it back; `replyTo` the comment it answered. */
+  jira_comment_failed: { commandId: number; replyTo: string | null; text: string; error: string };
   /** The implementer drafted replies to the imported comments of a revision. */
   pr_replies_suggested: PullRequestNumber & { count: number };
   pr_description_changed: {

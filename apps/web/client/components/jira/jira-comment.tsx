@@ -1,6 +1,7 @@
-// One comment of a ticket's Jira issue: who wrote it and when, who may see it, its text, and where it is in Jira.
+// One comment of a ticket's Jira issue: who wrote it and when, who may see it, its text, where it is in Jira, and
+// what can be done with it (Reply).
 import type { JiraComment } from '@union/core';
-import type { ReactElement } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 
 import { Markdown } from '../markdown';
 import { Badge } from '../ui';
@@ -8,7 +9,14 @@ import { Badge } from '../ui';
 const CARD =
   'space-y-2 rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm dark:border-zinc-800 dark:bg-zinc-900';
 
-export function JiraCommentCard({ comment }: { comment: JiraComment }): ReactElement {
+export function JiraCommentCard({
+  comment,
+  children,
+}: {
+  comment: JiraComment;
+  /** Under the text: Reply, what is being sent in answer. */
+  children?: ReactNode;
+}): ReactElement {
   return (
     <article className={CARD}>
       <div className="flex flex-wrap items-baseline gap-2">
@@ -28,6 +36,7 @@ export function JiraCommentCard({ comment }: { comment: JiraComment }): ReactEle
         </a>
       </div>
       <Markdown compact>{comment.markdown === '' ? '*(empty)*' : comment.markdown}</Markdown>
+      {children}
     </article>
   );
 }

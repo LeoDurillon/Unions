@@ -1,6 +1,6 @@
 # Jira comments on the ticket
 
-Status: planned (2026-11-07); steps 1 and 2 built (branch `jira-comments`, 2026-11-07). Follows [Jira](jira.md) (import) and [Jira rule actions](jira-rule-actions.md)
+Status: planned (2026-11-07); steps 1 and 2 deployed, step 3 built (branch `jira-comment-post`, 2026-11-07). Follows [Jira](jira.md) (import) and [Jira rule actions](jira-rule-actions.md)
 (the worker writes to Jira). Modeled on [Notion comments on the ticket](notion-comments.md), built: read the
 issue's comments in a ticket tab, post one from Union, add one to the ticket's review.
 
@@ -117,11 +117,24 @@ Each step ships on its own; `bun run check` after each.
    picks the fifth tab (Jira for a Jira ticket, else Notion, disabled without a page), and key 5 opens it
    (`ticket-panel-keys.ts`, a `tracker` key). UI check on the worktree's server with a scratch database, the tabs'
    reads stubbed in the browser: the tabs of a Jira, a Notion and a written ticket, key 5, the tab's note, badge and
-   "edited". The read on SCRUM-1 waits for the deploy (the worktree has no token).
+   "edited". Deployed (`051f68b`): the live API read SCRUM-1's two comments (one posted by a rule), both with an
+   account id to mention.
 3. **Posting.** The command, `textAdf`'s mention, the worker's handler, the events, New comment and Reply with
    their pending and failed states. Tests: the payload checks, the ADF with a mention, the worker with the fake (a
    post, a 403, a 429 retried as the command queue does). UI check with the posts blocked. A real post on SCRUM-1
    only after asking the user (it writes to their Jira).
+   Built: core's `jira-comment-post.ts` (payload with `replyTo: { commentId, accountId, name } | null`, checks;
+   exported as `@union/core/jira-comment-post` for the client), `textAdf(text, mention)`, the two events, and
+   `JiraApi.addComment` returning the new comment's id. Worker: `jira/comment-post.ts` (`postJiraComment`, 403
+   naming "Add comments", 404 for a moved or deleted issue), behind `tracker-hooks.ts` with Notion's (`hooks.ts`
+   was at its import limit), and the `post_jira_comment` command. Web: `jira-comment-commands.ts`, the route's
+   `POST`, the tab's `pending`; the pending lookup is shared with Notion's (`pending-comments.ts`, Notion's module
+   moved onto it, its tests unchanged). Client: `useJiraCommentSend`, `components/jira/jira-reply.tsx` (says the
+   comment starts with the mention and is visible to everyone who can see the issue), Reply in each card and New
+   comment at the bottom. A reply to an author without an account goes as a new comment (its pending and failure
+   show at the bottom). UI check on a scratch database, the read and the post stubbed: Reply's box and note, the
+   body sent, "Sending to Jira…" under the comment, and a `jira_comment_failed` event written to the scratch
+   database reopening the box with the text and the reason.
 4. **Add to review.** The import route, the draft's body, D7's grouping and duplicate refusal. Tests as Notion's
    (`notion-review-import` tests): before a branch, after merge, twice, the feedback's heading.
 5. **Docs and status.** `documentation/tickets.md` (the Jira tab), `docs/spec/flow.md` (the ticket panel's tabs),

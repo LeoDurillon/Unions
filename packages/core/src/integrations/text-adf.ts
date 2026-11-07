@@ -2,7 +2,9 @@
 // paragraphs from blank lines, line breaks, and https links. No markdown: rule texts are written for Jira's readers.
 
 type AdfText = { type: 'text'; text: string; marks?: { type: 'link'; attrs: { href: string } }[] };
-type AdfInline = AdfText | { type: 'hardBreak' };
+/** A mention of a Jira user: Jira shows `@Name` and notifies them. */
+type AdfMention = { type: 'mention'; attrs: { id: string; text: string } };
+type AdfInline = AdfText | AdfMention | { type: 'hardBreak' };
 type AdfParagraph = { type: 'paragraph'; content: AdfInline[] };
 
 /** What a comment's `body` or a rich text field takes. */
@@ -43,12 +45,27 @@ function paragraph(block: string): AdfParagraph {
   return { type: 'paragraph', content };
 }
 
-/** The text as an ADF document; an empty text gives an empty document. */
-export function textAdf(text: string): AdfDocument {
+/**
+ * The text as an ADF document; an empty text gives an empty document. With `mention`, the first
+ * paragraph starts with a mention of that user (a reply: Jira comments have no threads).
+ */
+export function textAdf(
+  text: string,
+  mention: { accountId: string; name: string } | null = null,
+): AdfDocument {
   const blocks = text
     .replaceAll('\r\n', '\n')
     .split(BLANK_LINES)
     .map((block) => block.trim())
     .filter((block) => block !== '');
-  return { type: 'doc', version: 1, content: blocks.map((block) => paragraph(block)) };
+  const content = blocks.map((block) => paragraph(block));
+  const [first] = content;
+  if (mention && first) {
+    const at: AdfMention = {
+      type: 'mention',
+      attrs: { id: mention.accountId, text: `@${mention.name}` },
+    };
+    first.content.unshift(at, { type: 'text', text: ' ' });
+  }
+  return { type: 'doc', version: 1, content };
 }

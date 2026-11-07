@@ -9,6 +9,7 @@ import {
   transition,
   emitEvent,
   recordValidation,
+  jiraCommentOf,
   notionCommentOf,
   replyOf,
   schema,
@@ -246,6 +247,9 @@ const OTHER_COMMANDS: Record<string, (db: Db, command: Command, hooks: CommandHo
   },
   post_notion_comment: (_db, command, hooks) => {
     hooks.postNotionComment(command.id, notionCommentOf(command.payload));
+  },
+  post_jira_comment: (_db, command, hooks) => {
+    hooks.postJiraComment(command.id, jiraCommentOf(command.payload));
   },
   remove_containers: (_db, command, hooks) => {
     hooks.removeContainers(containersOf(command.payload));

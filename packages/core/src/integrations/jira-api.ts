@@ -59,7 +59,8 @@ export type JiraApi = {
     key: string,
     change: { fields: Record<string, unknown>; update: Record<string, unknown> },
   ): Promise<void>;
-  addComment(auth: JiraAuth, key: string, body: AdfDocument): Promise<void>;
+  /** Adds a comment to the issue; its id, as Jira gave it. */
+  addComment(auth: JiraAuth, key: string, body: AdfDocument): Promise<{ id: string }>;
   /**
    * The Media Services id of an attachment's file: what a file card in the description names it by.
    * Read from where Jira redirects its download, without downloading; null when it does not say.
@@ -187,8 +188,13 @@ export class FetchJiraApi implements JiraApi {
     await this.get(auth, issuePath(key), { method: 'PUT', body: change });
   }
 
-  async addComment(auth: JiraAuth, key: string, body: AdfDocument): Promise<void> {
-    await this.get(auth, `${issuePath(key)}/comment`, { method: 'POST', body: { body } });
+  async addComment(auth: JiraAuth, key: string, body: AdfDocument): Promise<{ id: string }> {
+    const created = await this.get(auth, `${issuePath(key)}/comment`, {
+      method: 'POST',
+      body: { body },
+    });
+    const id = typeof created === 'object' && created !== null && 'id' in created ? created.id : '';
+    return { id: typeof id === 'string' || typeof id === 'number' ? String(id) : '' };
   }
 
   async comments(auth: JiraAuth, key: string): Promise<JiraCommentPage> {

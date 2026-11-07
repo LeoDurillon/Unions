@@ -6,10 +6,10 @@ import type { CommandHooks } from './command-hooks';
 import type { GitHubApi } from './github/api';
 import { gitHubHooks } from './github/hooks';
 import { removeContainers } from './janitor';
-import { notionHooks } from './notion/comment-post';
 import type { ProvisionConfig } from './provision';
 import { resyncBranch, type ResyncDeps } from './resync-branch';
 import type { SideRuns } from './side-runs';
+import { trackerHooks } from './tracker-hooks';
 import { unionUpdateHooks } from './union-update';
 
 /** The ticket workspace's own commands: resyncing its branch from GitHub. */
@@ -78,7 +78,7 @@ export function workerHooks(deps: HookDeps): CommandHooks {
       previews.run(owner, action, options);
     },
     ...workspaceHooks({ db, runtime, config: deps.config }),
-    ...notionHooks(db),
+    ...trackerHooks(db),
     ...gitHubHooks(db, apiFor),
     ...unionUpdateHooks(updater),
   };

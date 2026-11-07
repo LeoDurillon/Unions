@@ -4,6 +4,7 @@ import { beforeEach, expect, test } from 'bun:test';
 import {
   createDb,
   createTicket,
+  emitEvent,
   JiraError,
   migrateDb,
   removeIntegration,
@@ -79,6 +80,7 @@ test("the tab reads the issue's comments with the project's token", async () => 
     issueUrl: `${SITE}/browse/ABC-1`,
     comments: [COMMENT],
     total: 1,
+    pending: [],
   });
   expect(asked).toEqual([{ token: 'tok', key: 'ABC-1' }]);
 });
@@ -104,4 +106,46 @@ test("Jira's refusals reach the tab as their status and message", async () => {
   expect(await rejected.json()).toEqual({ error: 'Jira rejected this email and API token.' });
   failure = new JiraError('Not found, or not visible to this Jira account.', 404);
   expect((await read(ticketId)).status).toBe(404);
+});
+
+function post(ticketId: number, body: unknown): Response | Promise<Response> {
+  return app.request(`/api/tickets/${ticketId}/jira-comments`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+}
+
+test('a comment is queued for the worker and shown pending until it is posted', async () => {
+  const ticketId = jiraTicket();
+  const replyTo = { commentId: '10010', accountId: '557058:ada', name: 'Ada Lovelace' };
+  const queued = await post(ticketId, { text: ' Done, see the PR ', replyTo });
+  expect(queued.status).toBe(202);
+  const { id } = (await queued.json()) as { id: number };
+  const command = db.select().from(schema.commands).get();
+  expect(command).toMatchObject({
+    type: 'post_jira_comment',
+    ticketId,
+    payload: { projectId, ticketId, key: 'ABC-1', text: 'Done, see the PR', replyTo },
+  });
+  const pending = (await (await read(ticketId)).json()) as { pending: unknown[] };
+  expect(pending.pending).toMatchObject([
+    { commandId: id, replyTo: '10010', text: 'Done, see the PR' },
+  ]);
+  emitEvent(db, {
+    type: 'jira_comment_posted',
+    ticketId,
+    payload: { commandId: id, commentId: '10200' },
+  });
+  const posted = (await (await read(ticketId)).json()) as { pending: unknown[] };
+  expect(posted.pending).toEqual([]);
+});
+
+test('an empty comment, or one on a ticket not from Jira, is refused', async () => {
+  const empty = await post(jiraTicket(), { text: '  ' });
+  expect(empty.status).toBe(400);
+  expect(await empty.json()).toEqual({ error: 'Write a comment first' });
+  const written = createTicket(db, { projectId, title: 'Written in Union' }).id;
+  expect((await post(written, { text: 'Hi' })).status).toBe(409);
+  expect(db.select().from(schema.commands).all()).toEqual([]);
 });
