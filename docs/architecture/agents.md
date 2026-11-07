@@ -82,6 +82,35 @@ Runs without an agent page: the prompt writer (Sonnet, throwaway, `prompt-writer
 `investigate.ts`) and the ticket drafts written from them (`investigation-ticket.ts`). Throwaway containers hold
 only the Claude login (`throwaway-container.ts`).
 
+## The image
+
+Every container starts from the base agent image (`union-agent:local`, `UNION_AGENT_IMAGE`,
+`docker/agent.Dockerfile`), unless its project has its own (Settings → Agents → Agent image,
+`docs/plans/project-agent-image.md`). `ProvisionConfig.imageFor` (`AgentImages.imageFor`,
+`apps/worker/src/agent-image/images.ts`) gives the image for a project; `projectImage` asks it where a container
+of the project is created: the ticket's (`provision.ts`), investigations (`ThrowawayDeps.projectId`), agent reviews'
+and review agents' checkouts (`throwawayCheckout`) and a pull request's own container (`review-checkout.ts`). Runs
+with no repository (the lesson writer, the prompt writer, the connector check, ticket drafts) keep the base image.
+
+- **What a project can choose** (`agent-image-source.ts` in core): the default, a Dockerfile whose first
+  instruction is `FROM union-agent` (every such `FROM` is rewritten to the base image the worker has,
+  `buildableDockerfile`), or an image built elsewhere (pulled). The Dockerfile is a setting in the database, never a
+  file of the repository: an agent or a fork's pull request cannot change the sandbox. It is built with no context
+  (`docker build -`), so no repository file and no secret goes into it.
+- **Saving builds** (`agent_images` row, `agent-images.ts`): the web writes `pending`, status `queued`, and a
+  `sync_agent_image` command; the worker builds (or pulls), runs `check.ts` in a helper container of the image (the
+  claude CLI runs, git, uid 1000, `HOME` is `/home/node` and writable, `/workspace`, `sleep`) and only then moves it
+  to `applied`. A failure keeps `applied`, sets `failed` and the error; the output's tail is in the row, rewritten
+  once a second. Every worker write names the `savedAt` it started from, so a newer save or a discard (which stops
+  the build) is never overwritten. A stopped worker's unfinished saves are built again at start (`recover`).
+- **Tags by content**: `union-agent-p<project>:<hash of the base image id and the Dockerfile>`. An unchanged
+  Dockerfile does not build again; a rebuilt base image changes the hash, so `imageFor` builds the applied
+  Dockerfile again first (shared by the runs that wait on it), and a failure there fails the step with the build's
+  last lines, with no fallback to the base image. A stopped ticket container moves onto a new image at its next step
+  (`DockerCli.create` recreates it on the same volumes); a running one finishes on the old one.
+- **Cleanup**: after each apply the project's other tags are removed (one a container still uses stays); deleting
+  the project queues `sync_agent_image`, which removes them all.
+
 ## What Union reads back
 
 Five formats are asked for only by the editable prompt. A user's edit can drop them, so the guide tells users to

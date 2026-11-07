@@ -141,6 +141,33 @@ Its tools start with Bash, so it can run those commands. It can never edit files
 **Settings → Instructions** is free Markdown that every agent of the project reads, after the shared instructions:
 conventions, where things live, commands to use, what never to touch. Investigations read it too.
 
+## The agent image
+
+The agents work in a container made from an image that has Node, Bun, pnpm and yarn, git, the Claude CLI and what
+Playwright's browsers need. When your project needs more (Python, Go, Java, a system library, a database client),
+give it its own image in **Settings → Agents → Agent image**:
+
+- **Default image**: what every project starts with.
+- **Dockerfile**: write one that starts with `FROM union-agent`, switch to `USER root` to install what you need, and
+  end with `USER node`. The page starts you with an example.
+- **Existing image**: the name of an image you built yourself on top of `union-agent` and pushed to a registry.
+
+Click **Save and build**. Union builds the image (or pulls it), then checks that the agents can still work in it:
+the Claude CLI runs, git is there, the user is `node` with its home folder. The build log shows under the editor
+while it runs. The new image is used only once the check passes: until then, and if it fails, the agents keep the
+image they had, and the page says why. **Cancel the build** stops it; **Drop this change** forgets a save that
+failed.
+
+Tickets move onto the new image at their next step; a step already running finishes on the old one. Investigations
+and agent reviews of the project use it too.
+
+Good to know:
+
+- The Dockerfile is built without your repository's files: `COPY` works only from another stage of the same
+  Dockerfile. Install what you need with `RUN`.
+- The Dockerfile lives in Union's settings, not in your repository, so an agent cannot change the image it runs in.
+- When Union's own image is updated, your Dockerfile is built again on it the first time a ticket needs it.
+
 ## Memory
 
 Every time you ask for a revision with text, Union records it as **feedback**: the project, the ticket, the step and

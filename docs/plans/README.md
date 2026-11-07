@@ -145,6 +145,9 @@ and linked.
 - [A project's Repository tab](repository-view.md): the whole repository at a branch or commit, read from GitHub:
   a folder tree with a path filter, files highlighted with line links, Markdown and images rendered; links in from
   the review page. Steps 1 and 2 built (2026-11-05, branch `repository-view`); steps 3 to 5 left.
+- [A custom agent image per project](project-agent-image.md): a Dockerfile in the project settings, extending
+  `union-agent`, built and checked on **Save and build** and applied only when it passes; tickets, investigations
+  and reviews run on it. Built (branch `project-agent-image`, 2026-11-07); the page not yet seen in a browser.
 
 ## Open items
 

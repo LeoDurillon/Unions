@@ -4,6 +4,7 @@ export * from './schema';
 export * from './schema-agent-log';
 export * from './schema-agent-usage';
 export * from './schema-agent-tool-usage';
+export * from './schema-agent-images';
 export * from './schema-attachments';
 export * from './schema-ci-outputs';
 export * from './schema-container-runs';

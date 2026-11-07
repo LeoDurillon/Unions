@@ -78,3 +78,27 @@ export type ContainerRuntime = {
   connectNetwork(network: string, container: string): Promise<void>;
   disconnectNetwork(network: string, container: string): Promise<void>;
 };
+
+/** An image as `docker image inspect` reports it. */
+export type ImageInfo = { id: string; sizeBytes: number };
+
+/** What the worker needs from Docker for the projects' own agent images (`DockerImages`). */
+export type ImageRuntime = {
+  /** Null when there is no image by that name. */
+  inspect(ref: string): Promise<ImageInfo | null>;
+  /**
+   * Builds `dockerfile` with no context (`docker build -`), tagged `tag`; streams the output, stdout
+   * and stderr together. Aborting `signal` stops the build.
+   */
+  build(spec: {
+    tag: string;
+    dockerfile: string;
+    signal: AbortSignal;
+  }): AsyncGenerator<string, ExecResult>;
+  /** Pulls an image built elsewhere; streams the output. */
+  pull(ref: string, signal: AbortSignal): AsyncGenerator<string, ExecResult>;
+  /** The tags of a repository's images (`union-agent-p3:<hash>`). */
+  tags(repository: string): Promise<string[]>;
+  /** Removes a tag; one a container still uses is kept, and that is not an error. */
+  remove(ref: string): Promise<void>;
+};

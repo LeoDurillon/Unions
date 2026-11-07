@@ -13,6 +13,7 @@ import {
   notionCommentOf,
   replyOf,
   schema,
+  SYNC_AGENT_IMAGE,
   type Db,
   type WorkspaceOwner,
 } from '@union/core';
@@ -250,6 +251,9 @@ const OTHER_COMMANDS: Record<string, (db: Db, command: Command, hooks: CommandHo
   },
   post_jira_comment: (_db, command, hooks) => {
     hooks.postJiraComment(command.id, jiraCommentOf(command.payload));
+  },
+  [SYNC_AGENT_IMAGE]: (_db, command, hooks) => {
+    hooks.syncAgentImage(numberField(command, 'projectId'));
   },
   remove_containers: (_db, command, hooks) => {
     hooks.removeContainers(containersOf(command.payload));

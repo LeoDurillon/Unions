@@ -17,6 +17,7 @@ import { clonePullRequest } from './pr-checkout';
 import {
   cloneSource,
   ensureTicketContainer,
+  projectImage,
   seedCredentials,
   type CloneSource,
   type ProvisionConfig,
@@ -125,7 +126,7 @@ export async function throwawayCheckout(
   const close = (): Promise<void> =>
     runtime.remove(names.name, { home: names.homeVolume, workspace: names.workspaceVolume });
   try {
-    await runtime.create({ ...names, image: config.image });
+    await runtime.create({ ...names, image: await projectImage(config, project.id) });
     await runtime.start(names.name);
     await seedCredentials(runtime, names.name, config.credentialsPath);
     const token = await projectGitToken(db, project);

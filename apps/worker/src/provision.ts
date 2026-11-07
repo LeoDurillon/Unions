@@ -17,7 +17,10 @@ export const AGENT_HOME = '/home/node';
 export const REPO_DIR = AGENT_REPO_DIR;
 
 export type ProvisionConfig = {
+  /** The base agent image; a project with its own runs on what `imageFor` gives. */
   image: string;
+  /** The image a project's agents run on (`AgentImages.imageFor`); absent: `image` for all. */
+  imageFor?: (projectId: number) => Promise<string>;
   /** Base URL repositories are cloned from: `<base>/<owner>/<repo>.git`. */
   gitBaseUrl: string;
   /** Host path of the Claude credentials file to seed from. */
@@ -31,6 +34,11 @@ export function defaultProvisionConfig(): ProvisionConfig {
     credentialsPath:
       process.env.UNION_CLAUDE_CREDENTIALS ?? path.join(homedir(), '.claude', '.credentials.json'),
   };
+}
+
+/** The image the project's containers run from: its own agent image, built first when needed. */
+export function projectImage(config: ProvisionConfig, projectId: number): Promise<string> {
+  return config.imageFor ? config.imageFor(projectId) : Promise.resolve(config.image);
 }
 
 export type TicketContainer = { name: string; homeVolume: string; workspaceVolume: string };
@@ -158,7 +166,7 @@ export async function ensureTicketContainer(
   if (!project) {
     throw new Error(`Project ${ticket.projectId} not found`);
   }
-  await runtime.create({ ...names, image: config.image });
+  await runtime.create({ ...names, image: await projectImage(config, project.id) });
   if (!(await runtime.isRunning(names.name))) {
     await runtime.start(names.name);
   }

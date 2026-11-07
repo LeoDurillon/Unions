@@ -53,6 +53,8 @@ export type CommandHooks = {
    * request's preview; `update` moves a pull request's checkout to the commit its review reads.
    */
   preview: (owner: WorkspaceOwner, action: PreviewAction, options?: PreviewOptions) => void;
+  /** Builds the project's saved agent image, stops a build no longer wanted, or drops a deleted project's. */
+  syncAgentImage: (projectId: number) => void;
   /** Fetches Union's own remote and records how far behind the checkout is. */
   checkUnionUpdate: () => void;
   /** Pulls Union's new commits and restarts it; `force` even while work is in progress. */
@@ -87,6 +89,7 @@ export const NO_HOOKS: CommandHooks = {
   postNotionComment: ignore,
   postJiraComment: ignore,
   preview: ignore,
+  syncAgentImage: ignore,
   checkUnionUpdate: ignore,
   updateUnion: ignore,
 };

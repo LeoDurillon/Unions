@@ -1,13 +1,13 @@
 // The worker's entry point: opens the database and starts the scheduler and the GitHub loop.
 import { DockerCli, migrateDb, openDb } from '@union/core';
 
+import { agentImageProvision } from './agent-image/images';
 import { drainCommands } from './commands';
 import { createExecutor } from './executor';
 import { githubApis } from './github/clients';
 import { runGitHubLoop } from './github/loop';
 import { GitHubMirror } from './github/mirror';
 import { workerHooks } from './hooks';
-import { defaultProvisionConfig } from './provision';
 import { Scheduler } from './scheduler';
 import { startSideRuns } from './side-runs';
 
@@ -20,7 +20,8 @@ migrateDb(db);
 
 const maxConcurrent = Number(process.env.UNION_MAX_CONCURRENT ?? DEFAULT_MAX_CONCURRENT);
 const runtime = new DockerCli();
-const provisionConfig = defaultProvisionConfig();
+const { config: provisionConfig, agentImages } = agentImageProvision(db, runtime);
+agentImages.recover();
 
 const apiFor = githubApis(db);
 
@@ -36,12 +37,20 @@ const sideRuns = await startSideRuns({
   slots: scheduler.slots,
   apiFor,
 });
-const hooks = workerHooks({ db, runtime, config: provisionConfig, ...sideRuns, apiFor });
+const hooks = workerHooks({
+  db,
+  runtime,
+  config: provisionConfig,
+  ...sideRuns,
+  apiFor,
+  agentImages,
+});
 
 const shutdown = new AbortController();
 const stop = (): void => {
   scheduler.stop();
   sideRuns.stop();
+  agentImages.stop();
   shutdown.abort();
 };
 process.on('SIGINT', stop);
@@ -66,6 +75,6 @@ while (!shutdown.signal.aborted) {
   }
   await Bun.sleep(POLL_MS);
 }
-await Promise.all([scheduler.idle(), sideRuns.idle(), githubLoop]);
+await Promise.all([scheduler.idle(), sideRuns.idle(), githubLoop, agentImages.idle()]);
 // Exit explicitly: under `bun --watch` the process would otherwise stay alive after a signal.
 process.exit(0);

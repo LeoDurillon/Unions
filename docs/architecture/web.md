@@ -291,6 +291,11 @@
   `explanation-answer.tsx`, `explanation-progress.tsx`, `lib/use-explanations.ts` (polled while one is active).
   Opening an explanation's lines picks the file in `diff-body.tsx` and selects them in `open-file.tsx` until the
   user picks or selects another; Copy as comment starts the comment editor with the answer quoted.
+- Agent image: project settings → Agents → Agent image (`agent-image-section.tsx`, `agent-image-status.tsx`,
+  `lib/use-agent-image.ts`, polled while a save builds; `routes/agent-image.ts`, mounted with the preview settings
+  and the project files by `routes/workspace-settings.ts`). A save writes the `agent_images` row's `pending` and a
+  `sync_agent_image` command; `DELETE …/agent-image/pending` drops the save (and stops its build). The web never
+  builds: the worker does (`docs/architecture/agents.md`, The image).
 - Previews: project settings → Preview (`routes/preview-settings.ts`, `config.preview`: compose file, service,
   port, plain variables) and the ticket Overview's Preview section (`preview-section.tsx`, `routes/preview.ts`,
   state in the `previews` table). Start, stop, reset and logs are commands; the worker owns Docker. What a ticket's and a

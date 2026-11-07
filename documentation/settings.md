@@ -14,6 +14,7 @@ Open a project's **Settings** in the project bar. Most pages have one **Save** a
 |                   | Change size      | The budget of a ticket without an estimate, and the paths that are not code. See [The size of a change](ticket-lifecycle.md#the-size-of-a-change). |
 |                   | Scripts          | Commands you run by name from a ticket's Preview tab.                                                                                              |
 |                   | Flows            | [Flow presets](tickets.md#flows) and the default one.                                                                                              |
+|                   | Agent image      | [The image the project's agents run in](agents.md#the-agent-image): the default, your own Dockerfile, or an image you built.                       |
 | **Pull requests** | Pull requests    | Open a draft pull request automatically; suggest replies to GitHub comments; split pull requests into stacks; check every slice.                   |
 |                   | Review           | Hide lock files and other paths from the review page.                                                                                              |
 | **Previews**      | Services         | Compose file, exposed services, compose additions, profiles, services for the agent.                                                               |
@@ -76,7 +77,7 @@ without Compose. Under Compose, variables set in your shell do not reach Union, 
 | `UNION_ATTACHMENTS_DIR`     | `attachments/` in the checkout | Where ticket and preview files are kept                                    |
 | `UNION_MAX_PROJECT_FILE_MB` | `2048`                         | The largest project file                                                   |
 | `UNION_CLAUDE_CREDENTIALS`  | `~/.claude/.credentials.json`  | The Claude login given to the agents (set by `compose.yaml` under Compose) |
-| `UNION_AGENT_IMAGE`         | `union-agent:local`            | The image agents run in                                                    |
+| `UNION_AGENT_IMAGE`         | `union-agent:local`            | The image agents run in, and the one a project's Dockerfile starts from    |
 
 Read by `compose.yaml`:
 

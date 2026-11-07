@@ -3,6 +3,7 @@ import { spawn } from 'node:child_process';
 
 import { CONTAINER_FORMAT, parseProjectContainers } from './compose-containers';
 import { helperArgs, removeOnAbort } from './docker-helper';
+import { mergedLines } from './merged-lines';
 import type {
   ContainerRuntime,
   ExecOptions,
@@ -17,7 +18,7 @@ const WORKSPACE = '/workspace';
 
 type Captured = { code: number; stdout: string; stderr: string };
 
-function run(args: string[], stdin?: string): Promise<Captured> {
+export function run(args: string[], stdin?: string): Promise<Captured> {
   return new Promise((resolve, reject) => {
     const child = spawn('docker', args, { stdio: ['pipe', 'pipe', 'pipe'] });
     let stdout = '';
@@ -44,18 +45,24 @@ async function ok(args: string[], stdin?: string): Promise<string> {
   return r.stdout;
 }
 
-/** Runs `docker <args>`, yielding stdout line by line; returns the exit code and stderr. */
-async function* stream(
+/**
+ * Runs `docker <args>`, yielding stdout line by line (with stderr's lines too when `merge`); returns
+ * the exit code and stderr (empty when merged).
+ */
+export async function* stream(
   args: string[],
   stdin: string | undefined,
   signal?: AbortSignal,
+  merge = false,
 ): AsyncGenerator<string, ExecResult> {
   const child = spawn('docker', args, { stdio: ['pipe', 'pipe', 'pipe'], signal });
   child.stdin.end(stdin ?? '');
   let stderr = '';
-  child.stderr.on('data', (chunk: Buffer) => {
-    stderr += chunk.toString('utf8');
-  });
+  if (!merge) {
+    child.stderr.on('data', (chunk: Buffer) => {
+      stderr += chunk.toString('utf8');
+    });
+  }
   const exited = new Promise<number>((resolve) => {
     child.on('error', () => {
       resolve(1);
@@ -64,19 +71,10 @@ async function* stream(
       resolve(code ?? 1);
     });
   });
-  let pending = '';
-  const stdout: AsyncIterable<Buffer | string> = child.stdout;
-  for await (const chunk of stdout) {
-    pending += typeof chunk === 'string' ? chunk : chunk.toString('utf8');
-    const lines = pending.split('\n');
-    pending = lines.pop() ?? '';
-    for (const line of lines) {
-      yield line;
-    }
-  }
-  if (pending) {
-    yield pending;
-  }
+  const sources: AsyncIterable<Buffer | string>[] = merge
+    ? [child.stdout, child.stderr]
+    : [child.stdout];
+  yield* mergedLines(sources);
   return { exitCode: await exited, stderr };
 }
 

@@ -4,6 +4,9 @@
 
 `apps/worker`: long-running Bun process. Drains the `commands` table, drives state machines, runs agents, syncs GitHub, writes `events`.
 
+- `agent-image/`: the projects' own agent images (`AgentImages`): `sync_agent_image` builds or pulls what the
+  settings saved, checks it (`check.ts`) and applies it; `imageFor` gives each container its project's image and
+  builds an applied Dockerfile again on a newer base image. See `docs/architecture/agents.md`, The image.
 - `commands.ts` maps UI commands to state-machine actions; `scheduler.ts` runs one step per ticket with a
   concurrency cap through an injected `StepExecutor`; `executor.ts` is the real one (planning, implement, review
   and rebase steps).

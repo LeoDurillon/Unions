@@ -75,6 +75,9 @@ test('remove_containers hands every container to the hook', () => {
     updateUnion: () => {
       // Not under test.
     },
+    syncAgentImage: () => {
+      // Not under test.
+    },
   });
   expect(removed).toEqual(['union-t1']);
   expect(db.select().from(schema.commands).get()?.error).toBeNull();

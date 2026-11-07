@@ -1,6 +1,8 @@
 // Updates a project's settings, or deletes the project (GitHub is left untouched).
 import {
   hasGitHubProject,
+  queueAgentImageCommand,
+  readAgentImage,
   parseScripts,
   schema,
   ScriptsError,
@@ -273,6 +275,10 @@ export async function deleteProject(db: Db, c: Context): Promise<Response> {
       tx.insert(schema.commands)
         .values({ type: 'remove_containers', payload: { containers } })
         .run();
+    }
+    // The worker removes the images built for it once the row is gone with the project.
+    if (readAgentImage(tx, project.id)) {
+      queueAgentImageCommand(tx, project.id);
     }
     tx.delete(schema.projects).where(eq(schema.projects.id, project.id)).run();
   });

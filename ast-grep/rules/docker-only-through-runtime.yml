@@ -2,7 +2,7 @@ id: docker-only-through-runtime
 language: TypeScript
 severity: error
 message: Reach Docker only through ContainerRuntime.
-note: DockerCli (packages/core/src/docker-cli.ts) is the one place that runs the docker command line (AGENTS.md, Rules).
+note: DockerCli (packages/core/src/docker-cli.ts) is the one place that runs the docker command line; DockerImages uses its helpers (AGENTS.md, Rules).
 files:
   - apps/**
   - packages/**

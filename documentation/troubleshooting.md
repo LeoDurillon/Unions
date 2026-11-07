@@ -17,6 +17,18 @@ again, then **Retry** the step.
 Compose builds it on start. Without Compose, build it:
 `docker build -t union-agent:local -f docker/agent.Dockerfile docker`.
 
+**The project's agent image does not build, or fails its check.**
+Open **Settings → Agents → Agent image**: the build log is under the editor, and the reason above it. The agents keep
+the image they had until a save passes. "Runs as user 0": end the Dockerfile with `USER node`. "COPY failed": the
+Dockerfile is built without the repository's files, so install what you need with `RUN` instead.
+
+**A step fails with "could not be built again on the new base image".**
+After `union-agent:local` is rebuilt (an update of Union), each project's Dockerfile is built again on it the first
+time a ticket needs it. Open the Agent image page, fix the Dockerfile and save, then **Retry** the step.
+
+**An agent says a tool is missing (python, go, a system library).**
+Give the project its own [agent image](agents.md#the-agent-image) with that tool installed.
+
 ## GitHub
 
 **The wizard does not list my Project.**

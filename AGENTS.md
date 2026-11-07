@@ -118,7 +118,8 @@ files and uses `union.sqlite` here, which holds the user's real projects.
   ticket whose parent is not done; check `blockingParent` before queueing or honouring a start anywhere else.
 - Keep `states.ts` pure: no I/O, no clock, no DB. The worker persists whatever `transition` returns. New phases
   or actions need a test in `states.test.ts`.
-- Reach Docker only through `ContainerRuntime`. Do not call `docker` from anywhere else.
+- Reach Docker only through `ContainerRuntime` (and `ImageRuntime` for the projects' agent images). Do not call
+  `docker` from anywhere else: `docker-cli.ts` is the one file that runs it.
 - Never mount a ticket's HOME volume read-only: `claude --resume` needs to write session files there. Seed only the
   `claudeAiOauth` credential. Never copy `mcpOAuth` or history into a container.
 - SSE handlers use Hono's `streamSSE` and loop on `!stream.aborted`. Event ids are `events.seq`, so resume works

@@ -275,6 +275,9 @@ test('the cancel command cancels a queued run itself and hands a running one to 
     updateUnion: () => {
       // Not under test.
     },
+    syncAgentImage: () => {
+      // Not under test.
+    },
   });
   expect(cancelled).toEqual([running.id]);
   expect(getInvestigation(db, queued.id).status).toBe('cancelled');

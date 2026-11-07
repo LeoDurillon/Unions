@@ -5,7 +5,7 @@ import { eq } from 'drizzle-orm';
 import { loadProject, type TargetDeps } from './agent-review-target';
 import { projectGitToken } from './credentials';
 import { clonePullRequest } from './pr-checkout';
-import { cloneSource, hostGit, type TicketContainer } from './provision';
+import { cloneSource, hostGit, projectImage, type TicketContainer } from './provision';
 
 export type Review = typeof schema.currentReviews.$inferSelect;
 
@@ -79,10 +79,12 @@ async function checkOut(deps: TargetDeps, review: Review, names: TicketContainer
  */
 async function whileRunning(
   deps: TargetDeps,
+  review: Review,
   names: TicketContainer,
   work: () => Promise<void>,
 ): Promise<void> {
-  await deps.runtime.create({ ...names, image: deps.config.image });
+  const image = await projectImage(deps.config, review.projectId);
+  await deps.runtime.create({ ...names, image });
   if (!(await deps.runtime.isRunning(names.name))) {
     await deps.runtime.start(names.name);
   }
@@ -104,7 +106,7 @@ export async function ensureReviewCheckout(
   const names = reviewContainerNames(reviewId);
   const review = loadReview(deps.db, reviewId);
   if (review.checkoutSha === null) {
-    await whileRunning(deps, names, () => checkOut(deps, review, names));
+    await whileRunning(deps, review, names, () => checkOut(deps, review, names));
   }
   return names;
 }
@@ -121,7 +123,7 @@ export async function updateReviewCheckout(
 ): Promise<void> {
   const names = reviewContainerNames(reviewId);
   const review = loadReview(deps.db, reviewId);
-  await whileRunning(deps, names, async () => {
+  await whileRunning(deps, review, names, async () => {
     await clear(names.workspaceVolume);
     await checkOut(deps, review, names);
   });

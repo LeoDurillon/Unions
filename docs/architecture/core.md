@@ -35,7 +35,11 @@ yet (`split-plan.ts` holds the plan's format and parser, `pr-prompts.ts` their p
 the slice records); `restack` still answers "Unknown step".
 Drizzle schema and migrations, the pure ticket state machine (`states.ts`), ticket dependencies
 (`ticket-links.ts`: `setParent`, `ticketBase`; the start gate `blockingParent` is in `tickets.ts`), the
-`ContainerRuntime` interface and its Docker CLI implementation.
+`ContainerRuntime` interface and its Docker CLI implementation, and `ImageRuntime` (`DockerImages`,
+`docker-images.ts`) for the projects' own agent images: inspect, build with no context, pull, list a repository's
+tags, remove. `agent-image-source.ts` checks what the settings send (a Dockerfile `FROM union-agent`, an image
+name) and tags a build by content; `agent-images.ts` holds the `agent_images` row's writes (see
+`docs/architecture/agents.md`, The image).
 A ticket's **flow** (`flows.ts`, browser-safe) is the pipeline steps it runs, in order, always ending with
 `implement` and `final_review` (`flowProblems`). `transition(phase, action, flow)` follows it on `start` and
 `approve` (the full pipeline when omitted); `dispatch` resolves it on start (`resolveFlow`: the ticket's own, else

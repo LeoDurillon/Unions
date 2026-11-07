@@ -134,7 +134,7 @@ function investigate(
   }
   const names = investigationContainer(investigation.id);
   return inThrowaway(
-    deps,
+    { ...deps, projectId: project.id },
     names,
     async (container): Promise<InvestigationOutcome> => {
       if (investigation.scope === 'repository') {

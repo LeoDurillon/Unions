@@ -21,6 +21,7 @@ export const SETTINGS_GROUPS = [
       { id: 'size', label: 'Change size' },
       { id: 'scripts', label: 'Scripts' },
       { id: 'flows', label: 'Flows' },
+      { id: 'agent-image', label: 'Agent image' },
     ],
   },
   {

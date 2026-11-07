@@ -38,6 +38,8 @@ type HookDeps = Pick<
   runtime: ContainerRuntime;
   config: ProvisionConfig;
   apiFor: (project: Project) => GitHubApi | null;
+  /** The projects' own agent images (`AgentImages`). */
+  agentImages: { sync: (projectId: number) => void };
 };
 
 /** What the commands hand off to the running worker: all asynchronous, so draining stays synchronous. */
@@ -76,6 +78,9 @@ export function workerHooks(deps: HookDeps): CommandHooks {
     },
     preview: (owner, action, options) => {
       previews.run(owner, action, options);
+    },
+    syncAgentImage: (projectId) => {
+      deps.agentImages.sync(projectId);
     },
     ...workspaceHooks({ db, runtime, config: deps.config }),
     ...trackerHooks(db),
