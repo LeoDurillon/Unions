@@ -1,6 +1,6 @@
 # Jira
 
-Status: built and deployed (2026-11-07), steps 1 to 5; checked on a real Jira Cloud site (SCRUM-1: text, link card, table, a screenshot and an xlsx kept as ticket files). Scope: Jira Cloud, an API token, importing an issue as a ticket. Rule actions,
+Status: built and deployed (2026-11-07), steps 1 to 5; checked on a real Jira Cloud site (SCRUM-1: text, link card, table, a screenshot and an xlsx kept as ticket files, each in its place in the text). Scope: Jira Cloud, an API token, importing an issue as a ticket. Rule actions,
 creating issues from investigations and a comments tab are later plans (listed at the end).
 
 ## Why
@@ -188,15 +188,17 @@ Each step ships on its own; `bun run check` after each.
    Done on the user's site: SCRUM-1 imported its heading, paragraphs, link card and table as markdown, and its
    screenshot (matched by name) and an xlsx as ticket files. It showed two flaws, both fixed: a line break at the end
    of a paragraph left a stray `\` (dropped since), and the xlsx's file card, which carries no name, read
-   _attachment_ in the text and was listed again under Attachments (matched by media id since, D7). Still unchecked
-   on a real site: the match by media id itself (import SCRUM-1 again), code blocks and checklists.
+   _attachment_ in the text and was listed again under Attachments (matched by media id since, D7). Imported again
+   (ticket 49), the xlsx shows by name where its card is and is no longer listed: the redirect's file id is the
+   card's. Still unchecked on a real site: code blocks, checklists and panels (covered by the converter's tests only).
 
 ## Risks
 
 - **Media node ↔ attachment matching on file name (D7).** Two attachments with the same name, or an `alt` edited
   by hand, match the wrong one or none. Then the file is still listed under Attachments; only its place in the text
-  is lost. On the real site, file cards had no `alt` at all: they are matched by media id now (D7, as built); the
-  redirect's address is not a documented API, so if Jira changes it, cards fall back to _attachment_ and the list.
+  is lost. On the real site, file cards had no `alt` at all: they are matched by media id now (D7, as built), which
+  the real site confirmed. The redirect's address is not a documented API: if Jira changes it, cards fall back to
+  _attachment_ and the list.
 - **Rate limits.** Jira Cloud limits per user; an import is three or four calls, so only bulk use would hit it.
   The 429 message says to wait.
 - **Token scope.** Classic API tokens act with all of the user's permissions; Atlassian's scoped tokens
