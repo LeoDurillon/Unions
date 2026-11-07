@@ -3,6 +3,7 @@ import {
   integrationKind,
   integrationOf,
   ItemOutsideSourceError,
+  JiraError,
   NotionError,
   type Db,
 } from '@union/core';
@@ -18,7 +19,21 @@ import {
   UNAUTHORIZED,
 } from '../http';
 
-/** Notion failures become messages the UI shows next to the field. */
+/** A tracker's own answer (bad secret, not found) kept as the status; anything else is the tracker failing. */
+function trackerStatus(
+  error: unknown,
+): typeof CONFLICT | typeof UNAUTHORIZED | typeof NOT_FOUND | typeof BAD_GATEWAY {
+  if (error instanceof ItemOutsideSourceError) {
+    return CONFLICT;
+  }
+  const status = error instanceof NotionError || error instanceof JiraError ? error.status : null;
+  if (status === UNAUTHORIZED || status === NOT_FOUND) {
+    return status;
+  }
+  return BAD_GATEWAY;
+}
+
+/** Tracker (Notion, Jira) failures become messages the UI shows next to the field. */
 export async function guarded<T>(work: () => Promise<T>): Promise<T> {
   try {
     return await work();
@@ -26,16 +41,8 @@ export async function guarded<T>(work: () => Promise<T>): Promise<T> {
     if (error instanceof HTTPException) {
       throw error;
     }
-    if (error instanceof NotionError && error.status === UNAUTHORIZED) {
-      throw fail(UNAUTHORIZED, error.message);
-    }
-    if (error instanceof NotionError && error.status === NOT_FOUND) {
-      throw fail(NOT_FOUND, error.message);
-    }
-    if (error instanceof ItemOutsideSourceError) {
-      throw fail(CONFLICT, error.message);
-    }
-    throw fail(BAD_GATEWAY, error instanceof Error ? error.message : 'Notion request failed');
+    const message = error instanceof Error ? error.message : 'The tracker request failed';
+    throw fail(trackerStatus(error), message);
   }
 }
 

@@ -1,0 +1,64 @@
+// Jira Cloud as an `IntegrationProvider`: verify, read the project's types and statuses, and import an issue of it.
+import { adfMarkdown } from './adf-markdown';
+import type { JiraApi, JiraAuth } from './jira-api';
+import { jiraConfigOf } from './jira-config';
+import type { JiraProject, JiraStatus } from './jira-parse';
+import { ItemOutsideSourceError, type IntegrationProvider, type SourceItem } from './provider';
+
+/** What Union keeps of the Jira project (`integrations.fields`): its issue types and statuses. */
+type JiraFields = {
+  projectName: string;
+  issueTypes: JiraProject['issueTypes'];
+  statuses: JiraStatus[];
+};
+
+function authOf(token: string, config: unknown): { auth: JiraAuth; projectKey: string } {
+  const { site, email, projectKey } = jiraConfigOf(config);
+  return { auth: { site, email, token }, projectKey };
+}
+
+async function item(
+  jira: JiraApi,
+  token: string,
+  config: unknown,
+  key: string,
+): Promise<SourceItem> {
+  const { auth, projectKey } = authOf(token, config);
+  const issue = await jira.issue(auth, key);
+  if (issue.projectKey !== projectKey) {
+    throw new ItemOutsideSourceError(
+      `This issue is not in the project's Jira project (${projectKey})`,
+    );
+  }
+  return {
+    id: issue.key,
+    title: issue.summary,
+    url: `${auth.site}/browse/${issue.key}`,
+    markdown: adfMarkdown(issue.description),
+    truncated: false,
+  };
+}
+
+export function jiraProvider(jira: JiraApi): IntegrationProvider {
+  return {
+    verify: async (token, config) => {
+      const { auth, projectKey } = authOf(token, config);
+      // Checks the email and token first: a bad pair would otherwise read as a missing project.
+      await jira.myself(auth);
+      const project = await jira.project(auth, projectKey);
+      return { title: project.name };
+    },
+    readFields: async (token, config): Promise<{ title: string; fields: JiraFields }> => {
+      const { auth, projectKey } = authOf(token, config);
+      const [project, statuses] = await Promise.all([
+        jira.project(auth, projectKey),
+        jira.statuses(auth, projectKey),
+      ]);
+      return {
+        title: project.name,
+        fields: { projectName: project.name, issueTypes: project.issueTypes, statuses },
+      };
+    },
+    item: (token, config, key) => item(jira, token, config, key),
+  };
+}

@@ -1,5 +1,6 @@
 // Creates a ticket drafted from an investigation as an item of the tracker the user picked too (a Notion page).
 import {
+  FetchJiraApi,
   integrationKind,
   integrationOf,
   integrationProvider,
@@ -25,7 +26,7 @@ export async function withTargetItem(
     return { draft };
   }
   const integration = integrationOf(db, investigation.projectId, kind);
-  const provider = integrationProvider(kind, { notion });
+  const provider = integrationProvider(kind, { notion, jira: new FetchJiraApi() });
   if (!integration || !provider.createItem) {
     return {
       draft,

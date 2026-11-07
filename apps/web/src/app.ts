@@ -1,5 +1,5 @@
 // Builds the web server's Hono app: error handling and the API routes, wired to the database and GitHub.
-import { FetchNotionApi, type Db, type NotionApi } from '@union/core';
+import { FetchJiraApi, FetchNotionApi, type Db, type JiraApi, type NotionApi } from '@union/core';
 import { Hono, type Context } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 
@@ -28,13 +28,14 @@ export function createApp(
   db: Db,
   github: OnboardingGitHub = new OctokitOnboarding(WEB_GITHUB_LIMITS),
   notion: NotionApi = new FetchNotionApi(),
-  more: { ci?: CiGitHub; repository?: RepositoryGitHub } = {},
+  more: { ci?: CiGitHub; repository?: RepositoryGitHub; jira?: JiraApi } = {},
 ): Hono {
   const ci = more.ci ?? new OctokitCi(WEB_GITHUB_LIMITS);
+  const jira = more.jira ?? new FetchJiraApi();
   const repository =
     more.repository ?? new CachedRepository(new OctokitRepository(WEB_GITHUB_LIMITS));
   const app = new Hono();
-  app.route('/api', apiRoutes(db, { github, notion, ci, repository }));
+  app.route('/api', apiRoutes(db, { github, notion, jira, ci, repository }));
   app.onError(toErrorResponse);
   return app;
 }

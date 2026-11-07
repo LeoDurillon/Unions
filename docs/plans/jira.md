@@ -1,6 +1,6 @@
 # Jira
 
-Status: planned (2026-11-06); step 1 built (branch `jira`, 2026-11-07). Scope: Jira Cloud, an API token, importing an issue as a ticket. Rule actions,
+Status: planned (2026-11-06); steps 1 and 2 built (branch `jira`, 2026-11-07). Scope: Jira Cloud, an API token, importing an issue as a ticket. Rule actions,
 creating issues from investigations and a comments tab are later plans (listed at the end).
 
 ## Why
@@ -137,6 +137,15 @@ Each step ships on its own; `bun run check` after each.
    `jira-integration.ts`, the `kinds.ts` entry and `createsItems`, `providers.ts`. Tests with the fake: verify
    (good, 401, unknown project), fields, item (in the project, outside it, missing), key parsing, config checks
    (non-atlassian host refused). Fill `FILES` with a Jira entry that keeps the links (no download) until step 4.
+   Built, with these changes to the design above: `JiraApi` takes a `JiraAuth` (site, email, token) on each call,
+   as `NotionApi` takes a token, so `IntegrationApis.jira` is one client, not a factory; the client also refuses
+   a site that is not `atlassian.net` and redirects (`redirect: 'error'`). Key and config parsing are
+   `jira-config.ts` (not `jira-ref.ts`), with `jiraConfigOf`; responses are read by `jira-parse.ts`; errors are
+   `JiraError`. No `jira-integration.ts` and no `jiraFieldsOf` yet: nothing reads Jira's stored fields until the
+   rule actions. No truncation (`truncated: false`): Union sets no limit on an imported text. The web's
+   `guarded` (`routes/notion.ts`) maps a `JiraError`'s 401 and 404 as it does Notion's. `createsItems` (D9) is
+   left to step 3, with the switch that reads it. The fake is inline in `jira-provider.test.ts`; the fetch
+   client is tested with a faked `fetch` (`jira-api.test.ts`).
 3. **Settings, onboarding and import.** The client components, the apis in the web, the origin filter, D9.
    Route tests in `integration-routes.test.ts` (Jira verify, save, import, an issue from another project, a ticket
    with a Jira origin; its existing `kind: 'jira'` → 404 cases change to an unknown kind). UI check with

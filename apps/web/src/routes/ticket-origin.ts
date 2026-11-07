@@ -16,6 +16,8 @@ type WithFiles = { markdown: string; files: NotionFile[] };
 /** Each kind's images and files, downloaded before the ticket exists: their links may expire (Notion's within the hour). */
 const FILES: Record<IntegrationKindName, (markdown: string) => Promise<WithFiles>> = {
   notion: (markdown) => fetchNotionFiles(markdown),
+  // Jira's files need the token: kept as links until its downloader exists.
+  jira: (markdown) => Promise.resolve({ markdown, files: [] }),
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {

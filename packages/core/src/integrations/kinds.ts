@@ -1,8 +1,9 @@
-// The kinds of ticket source Union connects to (Notion), and what the UI needs to know about each; browser-safe.
+// The kinds of ticket source Union connects to (Notion, Jira), and what the UI needs to know about each; browser-safe.
 import { parseNotionId } from '../notion-id';
 import { notionMarkdown } from '../notion-markdown';
+import { parseJiraKey, readJiraConfig } from './jira-config';
 
-export type IntegrationKindName = 'notion';
+export type IntegrationKindName = 'notion' | 'jira';
 
 /** What the UI and the routes need to know about a kind; no secret, no network. */
 export type IntegrationKind = {
@@ -42,6 +43,16 @@ const KINDS: Record<IntegrationKindName, IntegrationKind> = {
     parseRef: parseNotionId,
     cleanMarkdown: (markdown) => notionMarkdown(markdown),
     readConfig: readNotionConfig,
+  },
+  jira: {
+    kind: 'jira',
+    label: 'Jira',
+    itemLabel: 'issue',
+    sourceLabel: 'project',
+    parseRef: parseJiraKey,
+    // The provider converts an issue's ADF to markdown already.
+    cleanMarkdown: (markdown) => markdown,
+    readConfig: readJiraConfig,
   },
 };
 

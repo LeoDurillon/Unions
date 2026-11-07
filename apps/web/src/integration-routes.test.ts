@@ -91,7 +91,7 @@ test('verify checks the secret and the data source, accepting a URL', async () =
   expect((await verify('secret_ok', OTHER)).status).toBe(404);
   expect((await verify('secret_ok', 'nope')).status).toBe(400);
   expect(
-    (await call('POST', '/api/integrations/jira/verify', { secret: 's', config: {} })).status,
+    (await call('POST', '/api/integrations/linear/verify', { secret: 's', config: {} })).status,
   ).toBe(404);
 });
 
@@ -199,7 +199,7 @@ test('event rules use the stored Notion columns; a ticket from an import preview
       origin,
     });
   const origin = { kind: 'notion', id: imported.id, url: imported.url };
-  expect((await newTicket({ ...origin, kind: 'jira' })).status).toBe(400);
+  expect((await newTicket({ ...origin, kind: 'linear' })).status).toBe(400);
   expect((await newTicket({ ...origin, id: 'nope' })).status).toBe(400);
   expect((await newTicket({ ...origin, url: 'http://www.notion.so/x' })).status).toBe(400);
   const ticket = (await (await newTicket(origin)).json()) as {

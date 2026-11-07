@@ -1,0 +1,107 @@
+// Jira Cloud's REST v3 responses (project, statuses, issue) read into Union's shapes; anything unexpected reads as empty.
+
+/** A Jira project: its key, name and issue types. */
+export type JiraProject = { key: string; name: string; issueTypes: { id: string; name: string }[] };
+
+/** A status of the project's workflows, and its category (`new`, `indeterminate`, `done`). */
+export type JiraStatus = { id: string; name: string; category: string };
+
+/** A file attached to an issue; `content` is the URL that downloads it, with the token. */
+type JiraAttachment = { id: string; filename: string; mimeType: string; content: string };
+
+/** An issue as Union reads it: `description` is ADF (or null), converted by the provider. */
+export type JiraIssue = {
+  key: string;
+  summary: string;
+  projectKey: string;
+  description: unknown;
+  attachments: JiraAttachment[];
+};
+
+/** The account an email and token belong to. */
+export type JiraAccount = { accountId: string; displayName: string };
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function text(record: Record<string, unknown>, name: string): string {
+  const value = record[name];
+  return typeof value === 'string' || typeof value === 'number' ? String(value) : '';
+}
+
+function records(value: unknown): Record<string, unknown>[] {
+  return Array.isArray(value) ? value.filter((item) => isRecord(item)) : [];
+}
+
+export function accountOf(body: unknown): JiraAccount {
+  const record = isRecord(body) ? body : {};
+  const accountId = text(record, 'accountId');
+  return { accountId, displayName: text(record, 'displayName') || accountId };
+}
+
+export function projectOf(body: unknown): JiraProject {
+  const record = isRecord(body) ? body : {};
+  return {
+    key: text(record, 'key'),
+    name: text(record, 'name'),
+    issueTypes: records(record.issueTypes).map((type) => ({
+      id: text(type, 'id'),
+      name: text(type, 'name'),
+    })),
+  };
+}
+
+/** `GET /project/{key}/statuses` lists statuses per issue type; each status once. */
+export function statusesOf(body: unknown): JiraStatus[] {
+  const byId = new Map<string, JiraStatus>();
+  for (const type of records(body)) {
+    for (const status of records(type.statuses)) {
+      const category = isRecord(status.statusCategory) ? text(status.statusCategory, 'key') : '';
+      const id = text(status, 'id');
+      if (id !== '' && !byId.has(id)) {
+        byId.set(id, { id, name: text(status, 'name'), category });
+      }
+    }
+  }
+  return [...byId.values()];
+}
+
+function attachmentOf(record: Record<string, unknown>): JiraAttachment {
+  return {
+    id: text(record, 'id'),
+    filename: text(record, 'filename'),
+    mimeType: text(record, 'mimeType'),
+    content: text(record, 'content'),
+  };
+}
+
+export function issueOf(body: unknown): JiraIssue {
+  const record = isRecord(body) ? body : {};
+  const fields = isRecord(record.fields) ? record.fields : {};
+  const project = isRecord(fields.project) ? fields.project : {};
+  return {
+    key: text(record, 'key'),
+    summary: text(fields, 'summary'),
+    projectKey: text(project, 'key'),
+    description: fields.description ?? null,
+    attachments: records(fields.attachment)
+      .map((attachment) => attachmentOf(attachment))
+      .filter((attachment) => attachment.id !== ''),
+  };
+}
+
+/** Jira's error body (`errorMessages`, `errors`) as one sentence; null when it has none. */
+export function errorMessageOf(body: unknown): string | null {
+  if (!isRecord(body)) {
+    return null;
+  }
+  const messages = Array.isArray(body.errorMessages)
+    ? body.errorMessages.filter((message) => typeof message === 'string')
+    : [];
+  const fieldErrors = isRecord(body.errors)
+    ? Object.values(body.errors).filter((message) => typeof message === 'string')
+    : [];
+  const all = [...messages, ...fieldErrors];
+  return all.length > 0 ? all.join(' ') : null;
+}
