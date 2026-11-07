@@ -145,3 +145,15 @@ test('without a pull request, or an issue on the Project, the rule is skipped', 
     "The ticket's issue is not on the GitHub Project",
   );
 });
+
+test('a project disconnected from its GitHub Project skips the rule, saying so', async () => {
+  db.update(schema.projects).set({ githubProjectNodeId: '', githubProjectUrl: null }).run();
+  fieldsRule('pull_request', [SPRINT]);
+  openPullRequest({});
+  await dispatch();
+  expect(api.calls).not.toContain('setProjectField');
+  expect(recentDeliveries(db, projectId)[0]).toMatchObject({
+    status: 'skipped',
+    detail: 'The project has no GitHub Project',
+  });
+});

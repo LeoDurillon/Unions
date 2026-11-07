@@ -1,6 +1,7 @@
 // The GitHub Project fields action of a rule: sets fields of the ticket's issue item, or of its pull request's (added to the Project).
 import {
   getTicket,
+  hasGitHubProject,
   projectFieldInput,
   projectFieldsText,
   renderTemplate,
@@ -37,8 +38,12 @@ function load(db: Db, apiFor: GitHubApiFor, { delivery, rule }: Due): Loaded | D
   if (!ticket || !project) {
     return noTicket(delivery);
   }
+  // Disconnected since the rule was written: nothing to set, as for a ticket with no issue.
+  if (!hasGitHubProject(project)) {
+    return { status: 'skipped', detail: 'The project has no GitHub Project' };
+  }
   if (project.githubProjectNodeId === '') {
-    return { status: 'failed', error: 'The project has no GitHub Project' };
+    return { status: 'failed', error: 'The GitHub Project is not resolved yet' };
   }
   const api = apiFor(project);
   return api

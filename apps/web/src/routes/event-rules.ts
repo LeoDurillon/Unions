@@ -1,5 +1,7 @@
 // `/api/projects/:projectId/event-rules` and its deliveries, and the stored Notion columns and Jira fields.
 import {
+  hasGitHubProject,
+  mirrorsIssues,
   checkRule,
   deleteRule,
   EventRuleError,
@@ -61,6 +63,7 @@ function list(db: Db, c: Context): Response {
     notion: notionSchemaOf(db, project.id),
     hasNotion: notionAccessOf(db, project.id) !== null,
     jira: jiraRuleSourceOf(db, project.id),
+    github: { project: hasGitHubProject(project), issues: mirrorsIssues(project) },
   };
   return c.json(body);
 }

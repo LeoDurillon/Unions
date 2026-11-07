@@ -49,9 +49,12 @@ The actions on Notion and on Jira are offered only when the project is connected
 - **Set properties of the ticket's Notion page**: a status, a URL, a date… for tickets imported from Notion or
   [linked to a page](tickets.md#link-a-ticket-to-its-notion-page-or-jira-issue), and for pull requests under review linked to a
   Notion page.
-- **Comment on GitHub**, on the issue or the pull request.
+- **Comment on GitHub**, on the issue or the pull request. The issue is offered only when the project mirrors
+  tickets as GitHub issues (**Settings → General**); a ticket that has no issue is skipped, and its Activity line
+  says why.
 - **Update the ticket's pull request**: labels, reviewers, assignees, title or description.
-- **Set fields of the ticket's GitHub Project item**.
+- **Set fields of the ticket's GitHub Project item**, offered only while a GitHub Project is connected. A rule
+  written before the Project was disconnected is skipped.
 - **Notify me in Union**.
 - **Move the ticket's Jira issue** to a status of the Jira project, for tickets imported from Jira or
   [linked to an issue](tickets.md#link-a-ticket-to-its-notion-page-or-jira-issue). Union finds the

@@ -120,6 +120,22 @@ test('a ticket without an issue is skipped', async () => {
   ]);
 });
 
+test('without issues mirrored, a comment on the issue is skipped, saying why', async () => {
+  db.update(schema.projects)
+    .set({ config: { baseBranch: 'main', mirrorIssues: false } })
+    .run();
+  commentRule('issue');
+  openPullRequest(null);
+  await dispatch();
+  expect(comments).toEqual([]);
+  expect(recentDeliveries(db, projectId)).toMatchObject([
+    {
+      status: 'skipped',
+      detail: 'The ticket has no GitHub issue: the project does not mirror tickets as issues',
+    },
+  ]);
+});
+
 test('a rate limit is tried again later; a refusal fails at once', async () => {
   commentRule('pull_request');
   openPullRequest();

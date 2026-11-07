@@ -43,7 +43,7 @@ function KindFields({
     return <ProjectFieldsFields projectId={projectId} action={action} onChange={onChange} />;
   }
   if (action.kind === 'github_comment') {
-    return <GitHubCommentFields action={action} onChange={onChange} />;
+    return <GitHubCommentFields projectId={projectId} action={action} onChange={onChange} />;
   }
   return <JiraActionFields projectId={projectId} action={action} onChange={onChange} />;
 }

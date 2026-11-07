@@ -1,6 +1,7 @@
 // The GitHub comment action of a rule: comments on the ticket's issue or pull request.
 import {
   getTicket,
+  mirrorsIssues,
   renderTemplate,
   schema,
   templateValues,
@@ -22,9 +23,16 @@ const PER_TICK = 1;
 export type GitHubApiFor = (project: Project) => GitHubApi | null;
 
 /** The issue or pull request number the comment goes on, or why there is none. */
-function numberOf(ticket: Ticket, action: GitHubCommentAction): number | DeliveryOutcome {
+function numberOf(
+  project: Project,
+  ticket: Ticket,
+  action: GitHubCommentAction,
+): number | DeliveryOutcome {
   if (action.on === 'issue') {
-    return ticket.issueNumber ?? { status: 'skipped', detail: 'The ticket has no issue yet' };
+    const detail = mirrorsIssues(project)
+      ? 'The ticket has no issue yet'
+      : 'The ticket has no GitHub issue: the project does not mirror tickets as issues';
+    return ticket.issueNumber ?? { status: 'skipped', detail };
   }
   return ticket.prNumber ?? { status: 'skipped', detail: 'The ticket has no pull request' };
 }
@@ -44,7 +52,7 @@ async function deliver(
   if (!ticket || !project) {
     return noTicket(delivery);
   }
-  const number = numberOf(ticket, action);
+  const number = numberOf(project, ticket, action);
   if (typeof number !== 'number') {
     return number;
   }

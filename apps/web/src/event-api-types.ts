@@ -13,6 +13,8 @@ export type EventRulesResponse = {
   notion: NotionSchema | null;
   hasNotion: boolean;
   jira: JiraRuleSource | null;
+  /** The optional GitHub layers: a GitHub Project connected, new tickets mirrored as issues. */
+  github: { project: boolean; issues: boolean };
 };
 
 /** A rule applied to an event, with what the settings list shows beside it. */

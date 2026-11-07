@@ -1,11 +1,13 @@
 # The GitHub Project and issues as choices
 
-Status: steps 1 to 4 built (2026-11-07, branch `optional-github-project`); steps 5 and 6 left. Step 2 reads
+Status: steps 1 to 5 built (2026-11-07, branch `optional-github-project`); step 6 (the remaining docs) left. Step 2 reads
 the issues of active tickets only: a title edited on GitHub after a ticket is done or cancelled stays as it was in
 Union. Step 3 creates a new Project from the web server, as the wizard already does (`OnboardingGitHub`), rather
 than through the worker; connecting or changing the Project clears the tickets' items, so the worker adds them to
 the new board. Step 4 leaves the scope check to the client (`verify` still reports `project` missing); the
-settings' token check asks for it only while a Project is connected.
+settings' token check asks for it only while a Project is connected. Step 5 also skips (rather than fails) a
+Project fields rule once the Project is disconnected, and a new comment action on a project without issues starts
+on the pull request.
 
 ## Why
 
