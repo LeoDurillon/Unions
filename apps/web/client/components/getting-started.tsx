@@ -11,7 +11,7 @@ import {
   type GettingStartedStep,
 } from '../lib/getting-started';
 import { openSettings } from '../lib/settings-sections';
-import { useGettingStartedHidden } from '../lib/use-getting-started-hidden';
+import { useGettingStartedShown } from '../lib/use-getting-started-shown';
 import { Button } from './ui';
 
 type Action = { label: string; handleClick: () => void };
@@ -75,7 +75,7 @@ function StepItem({
   );
 }
 
-/** The checklist above the board, or nothing once every step is done or the user hid it. */
+/** The checklist above the board, or nothing once the user hid it, or every step is done and it was not asked for. */
 export function GettingStarted({
   project,
   onNewTicket,
@@ -87,13 +87,13 @@ export function GettingStarted({
     queryKey: ['tickets', project.id],
     queryFn: () => api.tickets(project.id),
   });
-  const [hidden, hide] = useGettingStartedHidden(project.id);
-  if (hidden || !tickets.data) {
+  const [shown, hide] = useGettingStartedShown(project.id);
+  if (shown === 'hidden' || !tickets.data) {
     return null;
   }
   const done = gettingStarted(tickets.data, project.config);
   const count = GETTING_STARTED_STEPS.filter((step) => done[step]).length;
-  if (count === GETTING_STARTED_STEPS.length) {
+  if (count === GETTING_STARTED_STEPS.length && shown !== 'asked') {
     return null;
   }
   const actions: Partial<Record<GettingStartedStep, Action>> = {

@@ -170,7 +170,7 @@ badge says how many there are). Use it after approving a step to go straight to 
 
 ## Keyboard shortcuts
 
-Press **?** to see them in Union. They do nothing while you type in a text field or while a dialog is open, and
+Press **?** to see them in Union, or click **Help** in the sidebar, then **Keyboard shortcuts**. They do nothing while you type in a text field or while a dialog is open, and
 Ctrl, ⌘ and Alt combinations stay the browser's.
 
 | Where       | Key       | What it does                                                |

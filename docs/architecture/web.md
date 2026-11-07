@@ -335,6 +335,11 @@
   `activeWork`) and queues `union_update_check` or `union_update`. `src/restart-watch.ts` (under compose only,
   `UNION_SUPERVISED`) ends the web's container on `union_restart`. The page reloads itself once the status is
   `idle` on a new commit.
+- Getting started and Help, client only: `components/getting-started.tsx` sits above a project's board and
+  ticks its steps from the tickets and the config (`lib/getting-started.ts`, pure); Hide is per project in
+  `localStorage` (`lib/use-getting-started-shown.ts`). The sidebar's Help (`components/help-menu.tsx`) shows it
+  again, complete or not, and opens the shortcuts list, through window events (`lib/help-requests.ts`) heard by
+  the checklist, `lib/use-project-view.ts` (back to the Board tab) and `shortcuts-help.tsx`.
 - `client/` is the SPA: Tailwind v4, TanStack Query, dnd-kit. `app.tsx` is the shell, `components/` the UI,
   `lib/` the hooks and the typed `api.ts`. The browser keeps one event stream for all its Union tabs
   (`lib/event-hub.ts`: the tab holding the Web Lock `union-events` reads `/api/events` and relays each event

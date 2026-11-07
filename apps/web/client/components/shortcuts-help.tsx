@@ -1,6 +1,7 @@
-// The keyboard shortcuts: ? lists them anywhere, c writes a new ticket from the board.
+// The keyboard shortcuts: ? (or the Help menu) lists them anywhere, c writes a new ticket from the board.
 import { useState, type ReactElement } from 'react';
 
+import { useHelpRequest } from '../lib/help-requests';
 import { useShortcuts } from '../lib/shortcuts';
 import { useUrlParam } from '../lib/url-state';
 import { Dialog } from './ui';
@@ -74,6 +75,9 @@ export function ShortcutsHelp({ onNewTicket }: { onNewTicket?: () => void }): Re
       setOpen(true);
     },
     c: covered ? undefined : onNewTicket,
+  });
+  useHelpRequest('shortcuts', () => {
+    setOpen(true);
   });
   return (
     <Dialog

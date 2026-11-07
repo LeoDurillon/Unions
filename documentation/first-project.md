@@ -24,6 +24,7 @@ you visit Union. Later, open it again from **+** next to **Projects** in the sid
 The board opens, with a **Getting started** list above it: set the check command, write a ticket, start it,
 answer the planning, and review the change. Each step ticks itself once you have done it, and its button takes you
 there. The list goes away when every step is done; **Hide** removes it sooner, for this project in this browser.
+To see it again, click **Help** at the bottom of the sidebar, then **Getting started**.
 
 With a GitHub Project, Union mirrors its columns to the Project's **Status** field, to the options **Todo**, **In
 Progress**, **In Review** and **Done** (in any case). A Project made from GitHub's default template has no In Review:

@@ -16,21 +16,27 @@ function itemClass(danger: boolean): string {
   return `block w-full px-3 py-1.5 text-left text-sm hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-zinc-800 ${tone}`;
 }
 
+/** Under its button, right-aligned: the default place of the list. */
+const BELOW = 'right-0 mt-1';
+
 /** The open list: Escape or a click outside `root` (the button and the list) closes it. */
-function MenuPanel({
+export function MenuPanel({
   root,
   items,
   onClose,
+  placement = BELOW,
 }: {
   root: RefObject<HTMLDivElement | null>;
   items: MenuItem[];
   onClose: () => void;
+  /** Where the list sits against its button (Tailwind position classes). */
+  placement?: string;
 }): ReactElement {
   useDismiss(root, onClose);
   return (
     <div
       role="menu"
-      className="absolute right-0 z-10 mt-1 min-w-44 rounded-md border border-zinc-200 bg-white py-1 shadow-lg dark:border-zinc-700 dark:bg-zinc-900"
+      className={`absolute z-10 ${placement} min-w-44 rounded-md border border-zinc-200 bg-white py-1 shadow-lg dark:border-zinc-700 dark:bg-zinc-900`}
     >
       {items.map((item) => (
         <button

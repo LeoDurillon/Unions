@@ -1,7 +1,7 @@
 # Plan: getting started, the help menu and the guide in the app
 
-Status: step 1 built (2026-11-07, branch `onboarding-help`), checked in headless Chromium against the live data
-with no ticket and no check command stubbed (no write tried); steps 2 to 4 left.
+Status: steps 1 and 2 built (2026-11-07, branch `onboarding-help`), checked in headless Chromium against the live
+data (step 1 with no ticket and no check command stubbed; no write tried); steps 3 and 4 left.
 
 ## Idea
 
@@ -34,13 +34,16 @@ settings already say (no new table, no event):
 
 ## Step 2: a help menu in the sidebar
 
-A **Help** entry at the bottom of the sidebar (a `?` on the rail), opening a short menu:
+Built. A **Help** entry under Union settings in the sidebar (a `?` on the rail), opening a short menu above it:
 
-- **Getting started**: shows the checklist again on the open project (clears its Hide).
-- **User guide**: the guide (step 3; until then, the guide's index on GitHub).
-- **Keyboard shortcuts**: the list `?` opens today (`shortcuts-help.tsx`); its open state moves to a small shared
-  hook so both the key and the menu open it.
+- **Getting started**: goes to the open project's board (the Board tab) and shows its checklist, even complete
+  (clears its Hide). Disabled before there is a project.
+- **User guide**: the guide's index on GitHub (`GUIDE_URL` in `help-menu.tsx`), until step 3.
+- **Keyboard shortcuts (?)**: the list `?` opens.
 - (Step 4) **Take the tour**.
+
+The menu asks through window events (`lib/help-requests.ts`); the checklist, the project view
+(`lib/use-project-view.ts`, out of `workspace.tsx`) and `shortcuts-help.tsx` listen.
 
 ## Step 3: the user guide in the app
 

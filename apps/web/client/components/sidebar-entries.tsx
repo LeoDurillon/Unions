@@ -3,6 +3,7 @@
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../src/api-types';
+import { HelpMenu } from './help-menu';
 import { RAIL_ONLY, SIDE_ITEM, SIDE_LABEL } from './sidebar-classes';
 import { Button } from './ui';
 
@@ -110,13 +111,7 @@ function GearIcon(): ReactElement {
 }
 
 /** The settings every project shares, below the projects. */
-export function SettingsLink({
-  active,
-  onOpen,
-}: {
-  active: boolean;
-  onOpen: () => void;
-}): ReactElement {
+function SettingsLink({ active, onOpen }: { active: boolean; onOpen: () => void }): ReactElement {
   return (
     <button
       type="button"
@@ -128,5 +123,25 @@ export function SettingsLink({
       <GearIcon />
       <span className={SIDE_LABEL}>Union settings</span>
     </button>
+  );
+}
+
+/** Union settings, then Help. */
+export function SidebarLinks({
+  settingsActive,
+  projectId,
+  onSettings,
+  onBoard,
+}: {
+  settingsActive: boolean;
+  projectId: number | null;
+  onSettings: () => void;
+  onBoard: () => void;
+}): ReactElement {
+  return (
+    <div>
+      <SettingsLink active={settingsActive} onOpen={onSettings} />
+      <HelpMenu projectId={projectId} onBoard={onBoard} />
+    </div>
   );
 }
