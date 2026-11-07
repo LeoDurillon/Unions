@@ -81,7 +81,8 @@ export function TicketNotionRow({
   const [editing, setEditing] = useState(false);
   const connected = projectIntegration(project, 'notion') !== null;
   const linkedUrl = ticket.originKind === 'notion' ? ticket.originUrl : null;
-  if (!linkedUrl && !connected) {
+  // A ticket from another tracker (Jira) cannot be linked to a page too: it has one origin.
+  if (!linkedUrl && (!connected || ticket.originKind !== null)) {
     return null;
   }
   const close = (): void => {

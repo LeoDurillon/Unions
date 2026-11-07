@@ -61,7 +61,7 @@ To change the title or description later, use **Edit** in the ticket's **Overvie
 issue, unless someone changed the issue on GitHub after you started editing: then nothing is written, and Union
 says so. Steps that already ran do not run again.
 
-## Link a ticket to its Notion page
+## Link a ticket to its Notion page or Jira issue
 
 A ticket written in Union (or imported from GitHub) can be linked to its Notion page afterwards, when the project
 is connected to Notion. In the ticket's **Overview**, the **Notion** row has **Link a Notion page**: paste the
@@ -72,6 +72,14 @@ The ticket's description stays as you wrote it. From then on the ticket behaves 
 [event rules](automation.md) set its properties, and the page is one of the specs when you group a diff by spec or
 review with an agent. **Change** links another page, **Unlink** removes the link; neither touches the page in
 Notion.
+
+The same works for Jira, when the project is connected to Jira: the **Jira** row has **Link a Jira issue**. Paste
+the issue's key (`ABC-12`) or link, **Check** shows its summary, then **Link**. The issue must be of the project's
+Jira project. From then on the ticket has its **Jira** tab and your Jira rules apply to it; **Change** and
+**Unlink** work as for Notion, and leave the issue as it is in Jira.
+
+A ticket comes from one tracker: a ticket linked to a Notion page has no **Link a Jira issue**, and the other way
+round. Unlink it first to link it to the other tracker.
 
 ## Start a ticket
 
@@ -140,7 +148,8 @@ Click a card to open its panel:
   **Read comments** and **Insert comments** capabilities (in Notion, the integration's settings, then
   **Capabilities**); without them the tab says which.
 - **Jira**, in the Notion tab's place for a ticket imported from Jira (the Overview's **Jira** row links the issue,
-  and once the tab has read them says how many comments it has): the issue's comments, oldest first, each with
+  and once the tab has read them says how many comments it has; see
+  [Link a ticket to its Notion page or Jira issue](#link-a-ticket-to-its-notion-page-or-jira-issue)): the issue's comments, oldest first, each with
   its author, time ("edited" when changed), **Open in Jira**, and a badge when not everyone can see it (a role or
   group, or an internal note). **Refresh** reads them again; an issue with more than 500 comments shows the latest 500. **Reply** under a comment posts a new comment that starts with a mention of its author, so Jira notifies
   them (Jira comments have no threads); **New comment** at the bottom posts a plain one. You can write

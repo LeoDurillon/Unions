@@ -6,6 +6,7 @@ import { Hono } from 'hono';
 import type { ApiServices } from '../services';
 import { ticketJiraCommentRoutes } from './jira-comments';
 import { ticketNotionCommentRoutes } from './notion-comments';
+import { ticketJiraLinkRoutes } from './ticket-jira-link';
 import { ticketNotionRoutes } from './ticket-notion-link';
 import { linkPullRequest, unlinkPullRequest } from './ticket-pull-request';
 
@@ -17,5 +18,6 @@ export function ticketOutsideLinkRoutes(db: Db, { github, notion, jira }: ApiSer
   routes.route('/', ticketNotionRoutes(db, notion));
   routes.route('/', ticketNotionCommentRoutes(db, notion));
   routes.route('/', ticketJiraCommentRoutes(db, jira));
+  routes.route('/', ticketJiraLinkRoutes(db, jira));
   return routes;
 }

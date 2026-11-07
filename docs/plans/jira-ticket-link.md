@@ -1,6 +1,6 @@
 # Link a ticket to a Jira issue afterwards
 
-Status: planned (2026-11-07). Follows [Jira](jira.md). The Jira counterpart of the Overview's **Link a Notion page**
+Status: built (branch `jira-ticket-link`, 2026-11-07), steps 1 to 3. Follows [Jira](jira.md). The Jira counterpart of the Overview's **Link a Notion page**
 (`routes/ticket-notion-link.ts`, `ticket-notion-row.tsx`).
 
 ## Why
@@ -38,6 +38,16 @@ hand in each. Notion tickets have **Link a Notion page** in the Overview for thi
 2. **Overview.** The Jira row's Link, Change and Unlink; the link form shared with Notion's (D4). UI check
    (`scripts/ui-check/`): link, change, unlink, the Jira tab enabled after linking.
 3. **Docs.** `documentation/tickets.md` (the Overview's Jira row), `docs/spec/flow.md`, this plan's status.
+
+Built: `routes/ticket-jira-link.ts` (the check reads the issue through `jiraProvider(…).item`, now exported by
+core), `ticket-origin-guard.ts` (`requireFreeOrigin`, `requireOrigin`). Found on the way: Notion's link replaced
+any origin and its unlink cleared any, so on a project connected to both trackers a Jira ticket could lose its
+issue; both trackers' routes now refuse with 409 (D1 on both sides), and the Notion row hides Link a Notion page
+on a ticket from Jira. Client: `tracker-link-form.tsx` (Notion's form generalized; `NotionLinkForm` is a wrapper,
+so its two callers are unchanged), `use-ticket-jira.ts`, `ticket-jira-row.tsx` (Link, Change, Unlink; linking
+forgets the Jira tab's cached comments). Route tests in `jira-ticket-link-routes.test.ts`. UI check on a scratch
+database, Jira's calls stubbed: the rows of a ticket written in Union (both links), from Jira (Change, Unlink, no
+Notion link), from Notion (no Jira link), and the check, link and unlink requests.
 
 ## Later
 

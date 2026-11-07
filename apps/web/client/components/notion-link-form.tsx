@@ -1,21 +1,12 @@
 // A Notion URL field: the page it names is read (its title shown) before it is linked.
 import type { UseMutationResult } from '@tanstack/react-query';
-import { useState, type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 import type { ReviewNotionLink } from '../../src/review-notion-types';
-import { Button, ErrorText, inputClass } from './ui';
+import { ItemLink, TrackerLinkForm } from './tracker-link-form';
 
 export function NotionPageLink({ title, url }: { title: string; url: string }): ReactElement {
-  return (
-    <a
-      href={url}
-      target="_blank"
-      rel="noreferrer"
-      className="font-medium text-indigo-600 hover:underline dark:text-indigo-400"
-    >
-      {title}
-    </a>
-  );
+  return <ItemLink title={title} url={url} />;
 }
 
 /** A URL field; the page it names is read (its title shown) before `onLink` links it. */
@@ -32,48 +23,17 @@ export function NotionLinkForm({
   onLink: (pageId: string) => void;
   onCancel: (() => void) | null;
 }): ReactElement {
-  const [page, setPage] = useState('');
-  const found = check.data;
+  const page = check.data;
   return (
-    <div className="space-y-2">
-      <div className="flex gap-2">
-        <input
-          className={`${inputClass} font-mono`}
-          aria-label="Notion page URL"
-          placeholder="Link a Notion page: its URL or ID"
-          value={page}
-          onChange={(event) => {
-            setPage(event.target.value);
-            check.reset();
-          }}
-        />
-        <Button
-          disabled={page.trim() === '' || check.isPending}
-          onClick={() => {
-            check.mutate(page.trim());
-          }}
-        >
-          {check.isPending ? 'Reading…' : 'Check'}
-        </Button>
-        {onCancel ? <Button onClick={onCancel}>Cancel</Button> : null}
-      </div>
-      {found ? (
-        <div className="flex items-center gap-2 text-sm">
-          <span>
-            Link <NotionPageLink title={found.title} url={found.url} />?
-          </span>
-          <Button
-            variant="primary"
-            disabled={linking}
-            onClick={() => {
-              onLink(found.pageId);
-            }}
-          >
-            {linking ? 'Linking…' : 'Link'}
-          </Button>
-        </div>
-      ) : null}
-      <ErrorText error={check.error ?? linkError} />
-    </div>
+    <TrackerLinkForm
+      label="Notion page URL"
+      placeholder="Link a Notion page: its URL or ID"
+      check={check}
+      found={page ? { ref: page.pageId, title: page.title, url: page.url } : null}
+      linking={linking}
+      linkError={linkError}
+      onLink={onLink}
+      onCancel={onCancel}
+    />
   );
 }

@@ -4,6 +4,7 @@ import { Hono, type Context } from 'hono';
 
 import { NOT_FOUND, fail, readObject, requireId } from '../http';
 import type { ReviewNotionLink } from '../review-notion-types';
+import { requireFreeOrigin, requireOrigin } from '../ticket-origin-guard';
 import { guarded, notionTokenOf, requireNotionId } from './notion';
 import { findTicket } from './ticket-links';
 
@@ -28,6 +29,7 @@ async function readPage(db: Db, notion: NotionApi, c: Context): Promise<ReviewNo
 
 /** The page becomes the ticket's origin, as if imported from it; its description is kept as written. */
 async function link(db: Db, notion: NotionApi, c: Context): Promise<Response> {
+  requireFreeOrigin(loadTicket(db, c), 'notion');
   const found = await readPage(db, notion, c);
   setTicketOrigin(db, loadTicket(db, c).id, { kind: 'notion', id: found.pageId, url: found.url });
   return c.json(found);
@@ -35,7 +37,9 @@ async function link(db: Db, notion: NotionApi, c: Context): Promise<Response> {
 
 /** Forgets the link; the page itself is left untouched in Notion. */
 function unlink(db: Db, c: Context): Response {
-  setTicketOrigin(db, loadTicket(db, c).id, null);
+  const ticket = loadTicket(db, c);
+  requireOrigin(ticket, 'notion');
+  setTicketOrigin(db, ticket.id, null);
   return c.json({ ok: true });
 }
 

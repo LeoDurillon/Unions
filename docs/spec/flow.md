@@ -61,6 +61,10 @@
    final review and the ticket goes back to In progress).
    **Explain** asks an agent about selected lines, a hunk or a file, in a side panel (see
    [Pull requests](pull-requests.md#explain)); it is refused while the ticket runs.
+   A ticket written in Union or imported from GitHub can be linked afterwards, from the Overview, to a Notion page
+   or to an issue of the project's Jira project (`routes/ticket-*-link.ts`): it becomes the ticket's origin, as if
+   imported, its text unchanged; a ticket has one origin, so linking the other tracker's item or unlinking it is
+   refused (409).
    The ticket panel's tabs: **Overview** (description, links, actions, runs), **Preview**, **Worker** (one tab per
    step, then the Log; it follows the running step), **Notion** (the open discussions of the ticket's Notion page,
    read when the tab opens, with Reply in each and New comment, which the worker posts; enabled for a ticket linked

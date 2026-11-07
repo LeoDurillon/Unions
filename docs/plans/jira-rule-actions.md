@@ -33,7 +33,7 @@ ticket not imported from Jira is skipped ("The ticket was not imported from Jira
 
 - **D1. The issue is the ticket's origin.** `origin_kind = 'jira'`, `origin_id` the key. Tickets written in Union
   or imported from GitHub have none: skipped. Linking an existing ticket to a Jira issue afterwards (as
-  [Notion's link](../../documentation/tickets.md#link-a-ticket-to-its-notion-page)) is a later plan.
+  [Notion's link](../../documentation/tickets.md#link-a-ticket-to-its-notion-page-or-jira-issue)) is a later plan.
 - **D2. One action kind per thing it does**, as Events v2 decided: `jira_transition`, `jira_field`,
   `jira_comment`. A status move and a field edit are different Jira calls with different failures; a rule that
   needs both is two rules on the same trigger.
