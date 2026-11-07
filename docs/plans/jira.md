@@ -212,5 +212,6 @@ Each step ships on its own; `bun run check` after each.
   (`event-actions/jira.ts`, a slow `perTick`), with their rule fields under `components/integrations/jira/`.
 - **Investigations create issues**: `createItem` (`POST /rest/api/3/issue`, markdown → ADF converter),
   `createsItems: true`; generalize `event-deliveries.ts`'s `originKind: 'notion'`.
-- **A Jira tab** with the issue's comments, and posting one from the worker, as Notion's.
+- **A Jira tab** (planned in [Jira comments on the ticket](jira-comments.md)) with the issue's comments, and
+  posting one from the worker, as Notion's.
 - **`'jira'` in `SPEC_SOURCES`**, so a review can read an issue as its spec.

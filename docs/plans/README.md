@@ -100,6 +100,8 @@ and linked.
   Built and deployed (2026-11-07), checked on a real site; rule actions, creating issues and a comments tab later.
 - [Jira rule actions](jira-rule-actions.md): event rules that move the ticket's Jira issue to a status, set its
   fields and comment on it, written by the worker. Built and deployed (2026-11-07), checked on a real site.
+- [Jira comments on the ticket](jira-comments.md): a Jira tab on the ticket panel with the issue's comments, New
+  comment and Reply (a mention of the author) posted by the worker, and Add to review. Planned (2026-11-07).
 - [Update Union from the sidebar](self-update.md): an Update button enabled when the checkout is behind the remote's
   `main`; the worker fetches `origin` (SSH through the host's `~/.ssh`, read-only), fast-forwards, reinstalls if
   needed, and web and worker exit for compose to start them again; Update anyway when something runs. Built
