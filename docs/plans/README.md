@@ -139,7 +139,8 @@ and linked.
   header. Built (2026-11-04); Approve / Revise keys left out on purpose.
 - [Getting started, help menu and the guide in the app](getting-started.md): a checklist on the board that ticks
   itself, a Help menu in the sidebar, the user guide served by Union, then maybe a tour. Steps 1 to 3
-  built (2026-11-07, branch `onboarding-help`); settings pages' Learn more links and the tour left.
+  built (2026-11-07, branch `onboarding-help`); Learn more on every
+  settings page; the tour left.
 - [Live progress on board cards](card-progress.md): a running card's elapsed time and its agent's last tool call or
   message, polled every 3 s. Built (2026-11-04); not yet seen during a real run.
 - [Claude usage meter and a project's Usage tab](usage-meter.md): the subscription's 5-hour and weekly windows in

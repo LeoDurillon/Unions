@@ -2,7 +2,7 @@
 
 Status: steps 1 to 3 built (2026-11-07, branch `onboarding-help`), checked in headless Chromium against the live
 data (step 1 with no ticket and no check command stubbed; step 3 with the worktree's API serving the guide; no
-write tried). Left: Learn more links from the settings pages, and step 4.
+write tried). Settings pages' Learn more links built after (2026-11-07). Left: step 4.
 
 ## Idea
 
@@ -48,7 +48,8 @@ The menu asks through window events (`lib/help-requests.ts`); the checklist, the
 
 ## Step 3: the user guide in the app
 
-Built, as below, except the settings pages' Learn more links (left). Links into `docs/` and `AGENTS.md` open
+Built, as below. Every page of both settings areas has Learn more under its name (`lib/settings-guide.ts`; a
+test fails when a target heading disappears from the guide). Links into `docs/` and `AGENTS.md` open
 `LeoDurillon/Unions` on GitHub (`REPO_URL` in `lib/guide-links.ts`). Headings get GitHub's ids
 (`lib/heading-slug.ts`); every `#heading` link of the guide resolves (checked over all pages). Two headings with
 the same text on one page would share an id; none does today.

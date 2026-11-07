@@ -2,7 +2,8 @@
 
 ## Project settings
 
-Open a project's **Settings** in the project bar. Most pages have one **Save** at the bottom.
+Open a project's **Settings** in the project bar. Most pages have one **Save** at the bottom. **Learn more**, under
+the page's name, opens the part of this guide about it; Union settings pages have it too.
 
 | Group             | Page             | What it holds                                                                                                                                      |
 | ----------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |

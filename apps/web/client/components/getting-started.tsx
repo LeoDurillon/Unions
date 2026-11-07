@@ -10,16 +10,16 @@ import {
   GETTING_STARTED_STEPS,
   type GettingStartedStep,
 } from '../lib/getting-started';
-import { guideHref } from '../lib/guide-links';
-import { openGuide } from '../lib/guide-url';
+import type { GuideTarget } from '../lib/settings-guide';
 import { openSettings } from '../lib/settings-sections';
 import { useGettingStartedShown } from '../lib/use-getting-started-shown';
+import { GuideLink } from './guide/guide-link';
 import { Button } from './ui';
 
 type Action = { label: string; handleClick: () => void };
 
 /** A step's title, what it does, and the guide's page and heading on it. */
-const TEXT: Record<GettingStartedStep, { title: string; what: string; guide: [string, string] }> = {
+const TEXT: Record<GettingStartedStep, { title: string; what: string; guide: GuideTarget }> = {
   checks: {
     title: 'Set the check command',
     what: 'Your tests, lint or typecheck in one command. The agent works until it passes.',
@@ -73,17 +73,7 @@ function StepItem({
           <span className="sr-only">{done ? ' (done)' : ''}</span>
         </p>
         <p className="text-xs text-zinc-500">
-          {what}{' '}
-          <a
-            href={guideHref(...guide)}
-            onClick={(event) => {
-              event.preventDefault();
-              openGuide(...guide);
-            }}
-            className="text-indigo-600 hover:underline dark:text-indigo-400"
-          >
-            Learn more
-          </a>
+          {what} <GuideLink target={guide} />
         </p>
         {action && !done ? (
           <Button size="sm" onClick={action.handleClick}>

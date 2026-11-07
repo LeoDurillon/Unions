@@ -1,6 +1,9 @@
-// The frame of both settings areas: a title, the open page's name and a way back, the menu on the left, the page on the right.
+// The frame of both settings areas: a title, the open page's name with its Learn more link and a way back, the
+// menu on the left, the page on the right.
 import type { ReactElement, ReactNode } from 'react';
 
+import type { GuideTarget } from '../../lib/settings-guide';
+import { GuideLink } from '../guide/guide-link';
 import { Button } from '../ui';
 
 export function SettingsFrame({
@@ -9,10 +12,13 @@ export function SettingsFrame({
   pageKey,
   nav,
   onBack,
+  guide,
   children,
 }: {
   title: string;
   subtitle: string;
+  /** The part of the user guide on the open page, for its Learn more link. */
+  guide: GuideTarget;
   /** Remounts the page when it changes, so a form starts from what is saved. */
   pageKey: string;
   nav: ReactNode;
@@ -24,7 +30,9 @@ export function SettingsFrame({
       <header className="flex items-center gap-3 border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
         <div className="min-w-0 flex-1">
           <h2 className="truncate text-base font-semibold">{title}</h2>
-          <p className="text-xs text-zinc-500">{subtitle}</p>
+          <p className="text-xs text-zinc-500">
+            {subtitle} · <GuideLink target={guide} />
+          </p>
         </div>
         <Button onClick={onBack}>Back to the board</Button>
       </header>

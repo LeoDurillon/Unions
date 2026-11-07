@@ -345,7 +345,9 @@
   listed from those folders (`guide-pages.ts`). The Guide page (`?guide=<page>`, a heading as the hash;
   `components/guide/`, routed by `global-page.tsx`) renders it with `Markdown anchors` (GitHub's heading ids,
   `heading-anchors.tsx`); `lib/guide-links.ts` keeps links between pages in the app, loads the screenshots from
-  the API and sends `../` links (the code's docs) to GitHub. The checklist's Learn more links open it.
+  the API and sends `../` links (the code's docs) to GitHub. Learn more links (`guide/guide-link.tsx`) open it
+  from the checklist and from every settings page's header (`SettingsFrame`'s `guide`, from
+  `lib/settings-guide.ts`, whose test checks each target is a heading of the guide).
 - `client/` is the SPA: Tailwind v4, TanStack Query, dnd-kit. `app.tsx` is the shell, `components/` the UI,
   `lib/` the hooks and the typed `api.ts`. The browser keeps one event stream for all its Union tabs
   (`lib/event-hub.ts`: the tab holding the Web Lock `union-events` reads `/api/events` and relays each event

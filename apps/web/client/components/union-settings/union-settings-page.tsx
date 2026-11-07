@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 
 import { api } from '../../lib/api';
+import { unionSettingsGuide } from '../../lib/settings-guide';
 import type { UnionSection } from '../../lib/union-settings-groups';
 import { SettingsFrame } from '../settings/settings-frame';
 import { UnionSectionBody } from './union-section-body';
@@ -23,6 +24,7 @@ export function UnionSettingsPage({
       title="Union settings"
       subtitle={unionSectionLabel(section, agents)}
       pageKey={section}
+      guide={unionSettingsGuide(section)}
       nav={<UnionSettingsNav agents={agents} section={section} />}
       onBack={onBack}
     >

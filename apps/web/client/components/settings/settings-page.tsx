@@ -2,6 +2,7 @@
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
+import { PROJECT_GUIDE } from '../../lib/settings-guide';
 import {
   closeSettings,
   openSettings,
@@ -52,6 +53,7 @@ export function ProjectSettingsPage({
       title={`${project.owner}/${project.repo} settings`}
       subtitle={sectionLabel(section)}
       pageKey={`${project.id}:${section}`}
+      guide={PROJECT_GUIDE[section]}
       nav={
         <SettingsNav
           label="Project settings"
