@@ -48,18 +48,3 @@ test('an empty text is an empty document; markdown stays as typed', () => {
   expect(adf('  \n\n ')).toEqual({ type: 'doc', version: 1, content: [] });
   expect(firstParagraph('**bold**')).toEqual([text('**bold**')]);
 });
-
-test('a reply starts with a mention of the author, then the text', () => {
-  expect(firstParagraph('Done, see the PR.')).toEqual([text('Done, see the PR.')]);
-  expect(
-    textAdf('Done.\n\nThanks', { accountId: '557058:ada', name: 'Ada' }).content.map(
-      (paragraph) => paragraph.content.length,
-    ),
-  ).toEqual([3, 1]);
-  expect(textAdf('Done.', { accountId: '557058:ada', name: 'Ada' }).content[0]?.content[0]).toEqual(
-    {
-      type: 'mention',
-      attrs: { id: '557058:ada', text: '@Ada' },
-    },
-  );
-});

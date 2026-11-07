@@ -23,7 +23,6 @@ import {
   type JiraProject,
   type JiraStatus,
 } from './jira-parse';
-import type { AdfDocument } from './text-adf';
 
 const UNAUTHORIZED = 401;
 const FORBIDDEN = 403;
@@ -72,7 +71,7 @@ export type JiraApi = {
   /** Creates an issue in the project; its key, as Jira gave it (`ABC-12`). */
   createIssue(auth: JiraAuth, issue: NewJiraIssue): Promise<{ key: string }>;
   /** Adds a comment to the issue; its id, as Jira gave it. */
-  addComment(auth: JiraAuth, key: string, body: AdfDocument): Promise<{ id: string }>;
+  addComment(auth: JiraAuth, key: string, body: AdfRichDocument): Promise<{ id: string }>;
   /**
    * The Media Services id of an attachment's file: what a file card in the description names it by.
    * Read from where Jira redirects its download, without downloading; null when it does not say.
@@ -213,7 +212,7 @@ export class FetchJiraApi implements JiraApi {
     return { key: typeof key === 'string' ? key : '' };
   }
 
-  async addComment(auth: JiraAuth, key: string, body: AdfDocument): Promise<{ id: string }> {
+  async addComment(auth: JiraAuth, key: string, body: AdfRichDocument): Promise<{ id: string }> {
     const created = await this.get(auth, `${issuePath(key)}/comment`, {
       method: 'POST',
       body: { body },

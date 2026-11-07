@@ -1,6 +1,6 @@
 # Formatted Jira comments
 
-Status: planned (2026-11-07). Follows [Jira comments on the ticket](jira-comments.md) and [Create Jira issues from
+Status: planned (2026-11-07); step 1 built (branch `jira-comment-markdown`, 2026-11-07). Follows [Jira comments on the ticket](jira-comments.md) and [Create Jira issues from
 investigations](jira-create-issues.md), built: the second brought `markdownAdf`, a markdown to Jira rich text
 converter.
 
@@ -35,6 +35,11 @@ issue's description now exists: comments can use it.
 
 1. **The post.** D1 in the worker, `ADF` types shared (`adf-types.ts`'s document for both `addComment` and
    `createIssue`); tests: a reply with a mention before a paragraph and before a list, code, a link.
+   Built: core's `integrations/adf-mention.ts` (`withLeadingMention`: at the start of the first paragraph, else a
+   paragraph holding it first; an empty comment is the mention alone); `textAdf` lost its `mention` (rules never
+   used it) and is back to rule texts only; `JiraApi.addComment` takes `AdfRichDocument`, which `textAdf`'s
+   paragraphs fit. The worker's `jira/comment-post.ts` converts with `markdownAdf`, so a bare link is still a link
+   (GitHub's autolinks). Rule comments (`event-actions/jira-comment.ts`) still use `textAdf` (D2).
 2. **The tab.** The box's hint, the pending comment rendered (D4). UI check with the post stubbed; a real comment on
    the user's SCRUM-1 after asking.
 3. **Docs.** `documentation/tickets.md` (the Jira tab: what a comment can hold), this plan's status.

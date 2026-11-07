@@ -7,7 +7,7 @@ import {
   migrateDb,
   saveIntegration,
   schema,
-  type AdfDocument,
+  type AdfRichDocument,
   type Db,
   type JiraApi,
   type JiraCommentPost,
@@ -17,7 +17,7 @@ import { postJiraComment } from './comment-post';
 
 let db: Db;
 let post: JiraCommentPost;
-let sent: { key: string; body: AdfDocument }[];
+let sent: { key: string; body: AdfRichDocument }[];
 let failure: Error | null;
 
 const jira = {
@@ -46,6 +46,12 @@ beforeEach(() => {
   failure = null;
 });
 
+/** The first block's inline content, when it is a paragraph. */
+function firstParagraph(): unknown[] {
+  const block = sent[0]?.body.content[0];
+  return block?.type === 'paragraph' ? block.content : [];
+}
+
 function logged(): { type: string; payload: unknown }[] {
   return db
     .select()
@@ -59,7 +65,19 @@ test('a new comment is posted as rich text, and logged with its id', async () =>
   await postJiraComment(db, jira, 5, post);
   expect(sent).toHaveLength(1);
   expect(sent[0]?.key).toBe('ABC-1');
-  expect(sent[0]?.body.content[0]?.content.map((part) => part.type)).toEqual(['text', 'text']);
+  expect(sent[0]?.body.content).toEqual([
+    {
+      type: 'paragraph',
+      content: [
+        { type: 'text', text: 'Done in ' },
+        {
+          type: 'text',
+          text: 'https://x.y/pr/7',
+          marks: [{ type: 'link', attrs: { href: 'https://x.y/pr/7' } }],
+        },
+      ],
+    },
+  ]);
   expect(logged()).toEqual([
     { type: 'jira_comment_posted', payload: { commandId: 5, commentId: '10200' } },
   ]);
@@ -68,10 +86,23 @@ test('a new comment is posted as rich text, and logged with its id', async () =>
 test('a reply starts with a mention of the author', async () => {
   const replyTo = { commentId: '10010', accountId: '557058:ada', name: 'Ada' };
   await postJiraComment(db, jira, 6, { ...post, replyTo });
-  expect(sent[0]?.body.content[0]?.content[0]).toEqual({
-    type: 'mention',
-    attrs: { id: '557058:ada', text: '@Ada' },
+  expect(firstParagraph().slice(0, 2)).toEqual([
+    { type: 'mention', attrs: { id: '557058:ada', text: '@Ada' } },
+    { type: 'text', text: ' ' },
+  ]);
+});
+
+test('a comment is markdown: bold, code and lists keep their shape in Jira', async () => {
+  await postJiraComment(db, jira, 9, {
+    ...post,
+    text: 'The fix is in **`auth.ts`**:\n\n- first\n- second',
   });
+  expect(firstParagraph()).toEqual([
+    { type: 'text', text: 'The fix is in ' },
+    { type: 'text', text: 'auth.ts', marks: [{ type: 'code' }] },
+    { type: 'text', text: ':' },
+  ]);
+  expect(sent[0]?.body.content[1]?.type).toBe('bulletList');
 });
 
 test('a refusal is logged with the text, the comment answered and the permission it needs', async () => {

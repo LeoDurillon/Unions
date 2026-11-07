@@ -1,10 +1,12 @@
-// Posts a comment on a ticket's Jira issue (a reply mentions the comment's author) and logs how it went.
+// Posts a comment on a ticket's Jira issue, its markdown as Jira's rich text (a reply mentions the comment's author
+// first), and logs how it went.
 import {
   emitEvent,
   FetchJiraApi,
   jiraAuthOf,
   JiraError,
-  textAdf,
+  markdownAdf,
+  withLeadingMention,
   type Db,
   type JiraApi,
   type JiraCommentPost,
@@ -34,10 +36,15 @@ async function attempt(db: Db, jira: JiraApi, post: JiraCommentPost): Promise<Ou
     return { error: 'This project is not connected to Jira' };
   }
   try {
-    const mention = post.replyTo
-      ? { accountId: post.replyTo.accountId, name: post.replyTo.name }
-      : null;
-    const created = await jira.addComment(auth, post.key, textAdf(post.text, mention));
+    const body = markdownAdf(post.text);
+    const { replyTo } = post;
+    const created = await jira.addComment(
+      auth,
+      post.key,
+      replyTo
+        ? withLeadingMention(body, { accountId: replyTo.accountId, name: replyTo.name })
+        : body,
+    );
     return { commentId: created.id };
   } catch (error) {
     return { error: reasonOf(error) };
