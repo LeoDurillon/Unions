@@ -1,6 +1,6 @@
 # Create Jira issues from investigations
 
-Status: planned (2026-11-07). Follows [Jira](jira.md), [Jira rule actions](jira-rule-actions.md) and
+Status: planned (2026-11-07); step 1 built (branch `markdown-adf`, 2026-11-07). Follows [Jira](jira.md), [Jira rule actions](jira-rule-actions.md) and
 [Jira comments on the ticket](jira-comments.md), all built. Scope: "Also create it in Jira" when an investigation
 writes a ticket, as "Also create it in Notion" does.
 
@@ -85,6 +85,14 @@ Each step ships on its own; `bun run check` after each.
    lockfile has them), `markdown-adf.ts` and its tests: each node kind, nesting (a list in a quote, a code block in
    a list), task lists, tables, a link with emphasis inside, raw HTML, and a round trip through `adfMarkdown` that
    gives back the same markdown for an agent-style draft.
+   Built: the `markdown` catalog holds `mdast-util-from-markdown` 2.1.0, `mdast-util-gfm` 3.1.0,
+   `micromark-extension-gfm` 3.0.0 and, for the types, `@types/mdast` 4.0.4 (a dev dependency of core), all at the
+   lockfile's versions: the lockfile gained only the references. `integrations/adf-types.ts` (the nodes Union
+   writes), `markdown-adf-inline.ts` (marks; code keeps only a link, as ADF requires; soft breaks as spaces;
+   images and references as links; HTML as its text), `markdown-adf-lists.ts` (lists, task lists with
+   `union-<n>` local ids in document order, tables, and the blocks a list item or quote may hold, others as
+   their text), `markdown-adf.ts` (`markdownAdf`). Tests in `markdown-adf.test.ts`, the round trip through
+   `adfMarkdown` included. Nothing calls it until step 2.
 2. **Creating the issue.** `createIssue` and its fake, the provider's `createItem`, `issueTypeId` and the default,
    `subtask`, `createsItems`, the connection check. Tests: the request's body, the default type, D4's error as
    `originError` (worker `investigation-ticket.test.ts` with a fake), D5's cuts, a project not connected refused by

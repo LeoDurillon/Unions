@@ -46,9 +46,13 @@
   "dependencies": {
     "@octokit/auth-app": "catalog:github",
     "drizzle-orm": "catalog:database",
+    "mdast-util-from-markdown": "catalog:markdown",
+    "mdast-util-gfm": "catalog:markdown",
+    "micromark-extension-gfm": "catalog:markdown",
     "octokit": "catalog:github"
   },
   "devDependencies": {
+    "@types/mdast": "catalog:markdown",
     "drizzle-kit": "catalog:database"
   }
 }
