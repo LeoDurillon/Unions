@@ -103,6 +103,9 @@ and linked.
 - [Jira comments on the ticket](jira-comments.md): a Jira tab on the ticket panel with the issue's comments, New
   comment and Reply (a mention of the author) posted by the worker, and Add to review. Built and deployed
   (2026-11-07), checked on a real site.
+- [Create Jira issues from investigations](jira-create-issues.md): "Also create it in Jira" when an investigation
+  writes a ticket: the draft's markdown as Jira rich text, the issue type from the settings, the ticket linked to
+  the issue. Planned (2026-11-07).
 - [Update Union from the sidebar](self-update.md): an Update button enabled when the checkout is behind the remote's
   `main`; the worker fetches `origin` (SSH through the host's `~/.ssh`, read-only), fast-forwards, reinstalls if
   needed, and web and worker exit for compose to start them again; Update anyway when something runs. Built

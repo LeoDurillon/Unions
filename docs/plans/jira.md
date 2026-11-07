@@ -210,7 +210,7 @@ Each step ships on its own; `bun run check` after each.
 - **Rule actions** (planned in [Jira rule actions](jira-rule-actions.md)) `jira_field` (set fields, typed from `GET /rest/api/3/field` schemas) and `jira_transition`
   (move the status: `GET`/`POST /issue/{key}/transitions`, picked by target status), in the worker
   (`event-actions/jira.ts`, a slow `perTick`), with their rule fields under `components/integrations/jira/`.
-- **Investigations create issues**: `createItem` (`POST /rest/api/3/issue`, markdown → ADF converter),
+- **Investigations create issues** (planned in [Create Jira issues from investigations](jira-create-issues.md)): `createItem` (`POST /rest/api/3/issue`, markdown → ADF converter),
   `createsItems: true`; generalize `event-deliveries.ts`'s `originKind: 'notion'`.
 - **A Jira tab** (planned in [Jira comments on the ticket](jira-comments.md)) with the issue's comments, and
   posting one from the worker, as Notion's.
