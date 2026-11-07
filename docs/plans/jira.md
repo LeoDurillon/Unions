@@ -207,7 +207,7 @@ Each step ships on its own; `bun run check` after each.
 
 ## Later (separate plans)
 
-- **Rule actions** `jira_field` (set fields, typed from `GET /rest/api/3/field` schemas) and `jira_transition`
+- **Rule actions** (planned in [Jira rule actions](jira-rule-actions.md)) `jira_field` (set fields, typed from `GET /rest/api/3/field` schemas) and `jira_transition`
   (move the status: `GET`/`POST /issue/{key}/transitions`, picked by target status), in the worker
   (`event-actions/jira.ts`, a slow `perTick`), with their rule fields under `components/integrations/jira/`.
 - **Investigations create issues**: `createItem` (`POST /rest/api/3/issue`, markdown → ADF converter),
