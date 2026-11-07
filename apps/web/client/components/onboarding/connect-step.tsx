@@ -3,6 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 
 import { api } from '../../lib/api';
+import { blockingScopes } from '../../lib/github-project-api';
 import { AccessMethodTabs } from '../github-app/access-method';
 import { InstallationPicker } from '../github-app/installation-picker';
 import { Button, ErrorText, Field, inputClass } from '../ui';
@@ -10,14 +11,30 @@ import { EMPTY_DRAFT, type StepProps } from './draft';
 
 const TOKEN_URL = 'https://github.com/settings/tokens/new?description=union&scopes=repo,project';
 
-export function Scopes({ missing }: { missing: string[] }): ReactElement | null {
+/** Missing `repo` stops the setup; missing `project` only rules out a GitHub Project board (`board`: one is connected). */
+export function Scopes({
+  missing,
+  board = false,
+}: {
+  missing: string[];
+  board?: boolean;
+}): ReactElement | null {
+  const blocking = blockingScopes(missing, board);
+  if (blocking.length > 0) {
+    return (
+      <p className="rounded-md bg-amber-50 p-2 text-sm text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
+        This token is missing the <strong>{blocking.join(', ')}</strong> scope. Create one with{' '}
+        <code>repo</code> access (and <code>project</code> to use a GitHub Project board).
+      </p>
+    );
+  }
   if (missing.length === 0) {
     return null;
   }
   return (
-    <p className="rounded-md bg-amber-50 p-2 text-sm text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
-      This token is missing the <strong>{missing.join(', ')}</strong> scope. Create one with{' '}
-      <code>repo</code> and <code>project</code> access.
+    <p className="text-xs text-zinc-500">
+      This token has no <code>project</code> scope: fine without a GitHub Project board. Add it to
+      the token to use one.
     </p>
   );
 }
@@ -68,7 +85,7 @@ function TokenConnect({ draft, patch }: StepProps): ReactElement {
     <div className="space-y-4">
       <Field
         label="Personal access token"
-        hint="Needs the repo and project scopes (classic) or the matching repository and project permissions (fine-grained; reading CI checks also needs Checks, Commit statuses and Actions, re-running a job Actions write)."
+        hint="Needs the repo scope (classic) or the matching repository permissions (fine-grained), and the project scope only for a GitHub Project board (a board owned by a user account needs a classic token). Reading CI checks also needs Checks, Commit statuses and Actions; re-running a job, Actions write."
       >
         <TokenInput
           value={draft.token}

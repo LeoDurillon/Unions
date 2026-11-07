@@ -73,11 +73,14 @@ test('projects: created from a URL with the default branch, duplicates and bad i
       })
     ).status,
   ).toBe(409);
-  expect((await send('POST', '/api/projects', { owner: 'a', repo: 'b' })).status).toBe(400);
   expect(
     (await send('POST', '/api/projects', { owner: 'a', repo: 'b', projectUrl: 'nope' })).status,
   ).toBe(400);
   expect(((await (await send('GET', '/api/projects')).json()) as Project[]).length).toBe(1);
+  // Without a GitHub Project: Union's board is the only one.
+  const bare = await send('POST', '/api/projects', { owner: 'a', repo: 'b' });
+  expect(bare.status).toBe(201);
+  expect(await bare.json()).toMatchObject({ githubProjectNodeId: '', githubProjectUrl: null });
 });
 
 test('tickets: create, list by project, detail, validation', async () => {

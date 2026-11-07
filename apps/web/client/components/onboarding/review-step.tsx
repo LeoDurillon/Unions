@@ -2,7 +2,14 @@
 import type { ReactElement, ReactNode } from 'react';
 
 import { Field, inputClass } from '../ui';
-import type { StepProps } from './draft';
+import type { ProjectChoice, StepProps } from './draft';
+
+function projectLabel(project: ProjectChoice): string {
+  if (project === null) {
+    return 'None';
+  }
+  return project.kind === 'existing' ? project.project.title : `${project.title} (new)`;
+}
 
 function Row({ label, children }: { label: string; children: ReactNode }): ReactElement {
   return (
@@ -26,9 +33,7 @@ export function ReviewStep({ draft, patch }: StepProps): ReactElement {
         <Row label="Repository">{draft.repo?.fullName}</Row>
         <Row label="Notion">{draft.trackers.notion.title ?? 'Not connected'}</Row>
         <Row label="Jira">{draft.trackers.jira.title ?? 'Not connected'}</Row>
-        <Row label="GitHub Project">
-          {project?.kind === 'existing' ? project.project.title : `${project?.title ?? ''} (new)`}
-        </Row>
+        <Row label="GitHub Project">{projectLabel(project)}</Row>
       </dl>
       <Field label="Base branch" hint="Tickets are implemented on branches created from this one.">
         <input

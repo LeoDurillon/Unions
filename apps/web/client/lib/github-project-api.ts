@@ -19,3 +19,8 @@ export const githubProjectApi = {
 export function hasBoard(project: PublicProject): boolean {
   return project.githubProjectNodeId !== '' || (project.githubProjectUrl ?? '') !== '';
 }
+
+/** The missing token scopes that matter: `project` only with a GitHub Project. */
+export function blockingScopes(missing: readonly string[], board: boolean): string[] {
+  return missing.filter((scope) => board || scope !== 'project');
+}

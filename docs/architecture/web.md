@@ -6,8 +6,11 @@
 
 - `src/app.ts` is `createApp(db)`; routes live in `src/routes/` (`projects`, `tickets`, `events`); `src/server.ts`
   only wires the DB and `Bun.serve`. `src/api-types.ts` holds the response shapes shared with the client.
-- Setup is a wizard (`components/onboarding/`: Connect, Repository, Project, Notion, Review) shown over the board
-  on first run and from "Add project". Connect takes a token or an installation of the GitHub App
+- Setup is a wizard (`components/onboarding/`: Connect, Repository, Integrations, Review) shown over the board
+  on first run and from "Add project". Integrations offers the GitHub Project (`project-step.tsx`, none by default)
+  beside Notion and Jira; a token missing only the `project` scope passes Connect, and blocks only a picked
+  Project (`draft.ts`, `blockingScopes` in `lib/github-project-api.ts`, also used by Settings → General's token
+  check). Connect takes a token or an installation of the GitHub App
   (`components/github-app/`, also a page of the Union settings). The board columns fill the viewport height; each column scrolls itself.
   A ticket whose PR is merged or closed (`pr_state`, polled by the worker) is in the Union-only Merged / Closed column
   (`boardColumn`), its card tagged Merged or Closed, for 21 days after `pr_merged_at` or `pr_closed_at`, then leaves the

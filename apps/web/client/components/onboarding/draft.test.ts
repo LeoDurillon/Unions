@@ -2,6 +2,8 @@ import { expect, test } from 'bun:test';
 
 import { canContinue, EMPTY_DRAFT, STEPS, verifiedTrackers, type Draft } from './draft';
 
+const CONNECT_STEP = STEPS.findIndex((step) => step.label === 'Connect');
+
 const INTEGRATIONS_STEP = STEPS.findIndex((step) => step.label === 'Integrations');
 
 const JIRA_CONFIG = { site: ' acme ', email: 'ada@acme.com', projectKey: 'ABC' };
@@ -32,4 +34,37 @@ test('only verified trackers are sent with the new project, trimmed', () => {
       config: { site: 'acme', email: 'ada@acme.com', projectKey: 'ABC' },
     },
   ]);
+});
+
+const BOARD = {
+  id: 'PVT_1',
+  number: 1,
+  title: 'Board',
+  url: 'https://github.com/orgs/o/projects/1',
+};
+
+function connected(missingScopes: string[]): Draft {
+  return { ...EMPTY_DRAFT, viewer: { login: 'ada', missingScopes } };
+}
+
+test('a token without the project scope connects; only a GitHub Project then needs it', () => {
+  expect(canContinue(CONNECT_STEP, connected(['project']))).toBe(true);
+  expect(canContinue(CONNECT_STEP, connected(['repo', 'project']))).toBe(false);
+  const none = connected(['project']);
+  expect(canContinue(INTEGRATIONS_STEP, none)).toBe(true);
+  const picked: Draft = { ...none, project: { kind: 'existing', project: BOARD } };
+  expect(canContinue(INTEGRATIONS_STEP, picked)).toBe(false);
+  expect(
+    canContinue(INTEGRATIONS_STEP, { ...picked, viewer: { login: 'ada', missingScopes: [] } }),
+  ).toBe(true);
+});
+
+test('a new GitHub Project needs a title', () => {
+  const draft = connected([]);
+  expect(canContinue(INTEGRATIONS_STEP, { ...draft, project: { kind: 'new', title: ' ' } })).toBe(
+    false,
+  );
+  expect(
+    canContinue(INTEGRATIONS_STEP, { ...draft, project: { kind: 'new', title: 'Board' } }),
+  ).toBe(true);
 });

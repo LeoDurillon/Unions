@@ -135,7 +135,8 @@ export const api = {
       owner: string;
       repo: string;
       baseBranch: string;
-      githubProjectNodeId: string;
+      /** Absent: no GitHub Project. */
+      githubProjectNodeId?: string;
       integrations?: NewIntegration[];
     } & GitHubCredential,
   ): Promise<PublicProject> => request('POST', '/api/projects', input),

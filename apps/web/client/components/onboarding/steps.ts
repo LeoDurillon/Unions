@@ -4,7 +4,6 @@ import type { ReactElement } from 'react';
 import { IntegrationsStep } from '../integrations/integrations-step';
 import { ConnectStep } from './connect-step';
 import type { StepProps } from './draft';
-import { ProjectStep } from './project-step';
 import { RepositoryStep } from './repository-step';
 import { ReviewStep } from './review-step';
 
@@ -12,7 +11,6 @@ import { ReviewStep } from './review-step';
 export const STEP_VIEWS: readonly ((props: StepProps) => ReactElement)[] = [
   ConnectStep,
   RepositoryStep,
-  ProjectStep,
   IntegrationsStep,
   ReviewStep,
 ];

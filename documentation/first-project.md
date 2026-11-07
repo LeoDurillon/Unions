@@ -1,40 +1,43 @@
 # Your first project
 
-A project is one GitHub repository and the GitHub Project its board mirrors. The setup wizard opens the first time
+A project is one GitHub repository, and optionally a GitHub Project its board mirrors. The setup wizard opens the first time
 you visit Union. Later, open it again from **+** next to **Projects** in the sidebar.
 
 ## The setup wizard
 
 1. **Connect**: paste a GitHub token and click **Verify**, or switch to **GitHub App** (see below).
 2. **Repository**: pick the repository the agents work on.
-3. **Project**: pick an existing GitHub Project, or let Union create one.
-4. **Integrations** (optional): pick **Notion** or **Jira** at the top to set it up; you can set up both, or
-   neither. A tracker you connect shows a ✓. To skip one, leave its fields empty; Next waits until each one you
-   filled in is verified.
+3. **Integrations** (optional): pick **GitHub Project**, **Notion** or **Jira** at the top to set it up; you can
+   set up all of them, or none. One you set up shows a ✓. To skip a tracker, leave its fields empty; Next waits
+   until each one you filled in is verified.
+   - **GitHub Project**: **No GitHub Project** (the default), an existing Project, or **Create a new project**.
+     With a Project, each ticket's issue is a card on it. Without one, Union's board is the only board; you can
+     connect one later in **Settings → Integrations → GitHub Project**. A token without the `project` scope works
+     for a project with none.
    - **Notion**: an integration secret and the ID of the data source to import tickets from. The integration
      needs the capabilities listed in [Installation](installation.md).
    - **Jira**: your Jira site, the email of your Atlassian account, an API token and the key of the project to
      import tickets from. See [Connect Jira](#connect-jira).
-5. **Review**: check the base branch (the branch tickets start from and pull requests target), then create the
+4. **Review**: check the base branch (the branch tickets start from and pull requests target), then create the
    project.
 
-The board opens. Union mirrors its columns to the Project's **Status** field, to the options **Todo**, **In
+The board opens. With a GitHub Project, Union mirrors its columns to the Project's **Status** field, to the options **Todo**, **In
 Progress**, **In Review** and **Done** (in any case). A Project made from GitHub's default template has no In Review:
 tickets in review then show as In Progress on GitHub.
 
 ## Connect GitHub
 
-Union needs to read and write issues, comments, branches and pull requests, and to move items on the Project
-board. Pick one of three kinds of access:
+Union needs to read and write issues, comments, branches and pull requests, and, with a GitHub Project, to move
+items on its board. Pick one of three kinds of access:
 
 | Access             | When to use it                                    | What it needs                                                                                                                           |
 | ------------------ | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | Fine-grained token | A repository and Project owned by an organization | Resource owner: the organization. Repository: Contents, Issues, Pull requests (read and write). Organization: Projects (read and write) |
-| Classic token      | A Project owned by a **user** account             | Scopes `repo` and `project`                                                                                                             |
+| Classic token      | A Project owned by a **user** account             | Scope `repo`, and `project` for a GitHub Project                                                                                        |
 | GitHub App         | An organization, with actions signed by the app   | Set up from Union, see below                                                                                                            |
 
 Fine-grained tokens and GitHub Apps cannot reach a Project that belongs to a user account: use a classic token for
-those.
+those, or set the project up with no GitHub Project. Without one, no Projects permission or `project` scope is needed.
 
 If you set `GITHUB_TOKEN` in Union's environment, projects with no access of their own use it.
 

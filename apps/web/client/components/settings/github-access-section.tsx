@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 
 import type { GitHubAccess, InstallationOption, PublicProject } from '../../../src/api-types';
-import { api } from '../../lib/api';
+import { saveInstallation, saveToken } from '../../lib/github-access-save';
 import type { Tone } from '../../lib/labels';
 import { useLeaveGuard } from '../../lib/leave-guard';
 import { AccessMethodTabs, type AccessMethod } from '../github-app/access-method';
@@ -17,23 +17,11 @@ const ACCESS_BADGE: Record<GitHubAccess, { tone: Tone; label: string }> = {
   none: { tone: 'red', label: 'missing' },
 };
 
-/** Verifies a new token against GitHub before storing it, so a typo never replaces a working one. */
-async function verifyAndSave(
-  project: PublicProject,
-  token: string,
-): Promise<{ login: string; missing: string[] }> {
-  const viewer = await api.github.verify({ token });
-  if (viewer.missingScopes.length === 0) {
-    await api.updateProject(project.id, { token });
-  }
-  return { login: viewer.login, missing: viewer.missingScopes };
-}
-
 function TokenForm({ project }: { project: PublicProject }): ReactElement {
   const queryClient = useQueryClient();
   const [token, setToken] = useState('');
   const save = useMutation({
-    mutationFn: () => verifyAndSave(project, token.trim()),
+    mutationFn: () => saveToken(project, token.trim()),
     onSuccess: async (result) => {
       if (result.missing.length === 0) {
         setToken('');
@@ -62,7 +50,8 @@ function TokenForm({ project }: { project: PublicProject }): ReactElement {
         {save.isPending ? 'Verifying…' : 'Verify and save'}
       </Button>
       <ErrorText error={save.error} />
-      <Scopes missing={save.data?.missing ?? []} />
+      {/* `saveToken` already left out what this project does not need. */}
+      <Scopes missing={save.data?.missing ?? []} board />
       {saved ? (
         <p className="text-sm text-green-700 dark:text-green-400">Saved. Connected as {saved}.</p>
       ) : null}
@@ -75,10 +64,7 @@ function AppForm({ project }: { project: PublicProject }): ReactElement {
   const [choice, setChoice] = useState<InstallationOption | null>(null);
   const selected = choice?.id ?? project.githubInstallationId;
   const save = useMutation({
-    mutationFn: async (installationId: number) => {
-      await api.github.verify({ installationId });
-      await api.updateProject(project.id, { installationId });
-    },
+    mutationFn: (installationId: number) => saveInstallation(project, installationId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['projects'] }),
   });
   const otherOwner = choice !== null && choice.account !== project.owner;

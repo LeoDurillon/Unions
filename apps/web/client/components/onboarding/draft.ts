@@ -3,12 +3,14 @@ import { isIntegrationKindName, type IntegrationKindName } from '@union/core/int
 
 import type { ProjectOption, RepoOption, Viewer } from '../../../src/api-types';
 import type { GitHubCredential } from '../../lib/api';
+import { blockingScopes as blocking } from '../../lib/github-project-api';
 import type { NewIntegration } from '../../lib/integrations-api';
 import type { AccessMethod } from '../github-app/access-method';
 
 /** A tracker in the wizard: optional; all empty skips it, otherwise `title` is set once verified. */
 export type TrackerDraft = { secret: string; config: Record<string, string>; title: string | null };
 
+/** Null: no GitHub Project, Union's board is the only one. */
 export type ProjectChoice =
   | { kind: 'existing'; project: ProjectOption }
   | { kind: 'new'; title: string }
@@ -54,15 +56,10 @@ export const STEPS = [
     description: 'The agent works on a clone of this repository.',
   },
   {
-    label: 'Project',
-    title: 'GitHub Project',
-    description: 'Tickets are mirrored to a GitHub Project board.',
-  },
-  {
     label: 'Integrations',
     title: 'Integrations (optional)',
     description:
-      'Import tickets from Notion or Jira. Pick one to set it up, or leave its fields empty to skip it.',
+      'Show the tickets on a GitHub Project board, or import them from Notion or Jira. Pick one to set it up; each can be skipped.',
   },
   {
     label: 'Review',
@@ -85,8 +82,26 @@ export type StepProps = {
 
 type StepLabel = (typeof STEPS)[number]['label'];
 
-function projectChosen({ project }: Draft): boolean {
-  return project?.kind === 'existing' || (project?.kind === 'new' && project.title.trim() !== '');
+/** Needed only for a GitHub Project: a token without it still sets up a project with none. */
+const PROJECT_SCOPE = 'project';
+
+/** The missing scopes that stop the setup: all but `project`, which only a GitHub Project needs. */
+function blockingScopes(draft: Draft): string[] {
+  return blocking(draft.viewer?.missingScopes ?? [], false);
+}
+
+/** A GitHub Project is picked but the token cannot reach Projects. */
+export function projectScopeMissing(draft: Draft): boolean {
+  return draft.project !== null && (draft.viewer?.missingScopes ?? []).includes(PROJECT_SCOPE);
+}
+
+/** No GitHub Project, one picked, or a new one with a title; and the token can reach it. */
+export function projectSettled(draft: Draft): boolean {
+  const { project } = draft;
+  if (project?.kind === 'new' && project.title.trim() === '') {
+    return false;
+  }
+  return !projectScopeMissing(draft);
 }
 
 /** Whether the tracker is left empty (skipped). */
@@ -117,10 +132,10 @@ export function verifiedTrackers(draft: Draft): NewIntegration[] {
 
 /** What each step needs before Next (or Create) is enabled. */
 const READY: Record<StepLabel, (draft: Draft) => boolean> = {
-  Connect: (draft) => draft.viewer !== null && draft.viewer.missingScopes.length === 0,
+  Connect: (draft) => draft.viewer !== null && blockingScopes(draft).length === 0,
   Repository: (draft) => draft.repo !== null,
-  Project: projectChosen,
-  Integrations: (draft) => trackerKinds(draft).every((kind) => trackerSettled(draft, kind)),
+  Integrations: (draft) =>
+    projectSettled(draft) && trackerKinds(draft).every((kind) => trackerSettled(draft, kind)),
   Review: (draft) => draft.baseBranch.trim() !== '',
 };
 

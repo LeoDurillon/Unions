@@ -95,9 +95,6 @@ export function projectRoutes(
     const repo = requireText(body, 'repo');
     const projectUrl = optionalText(body, 'projectUrl');
     const nodeId = optionalText(body, 'githubProjectNodeId');
-    if (!projectUrl && !nodeId) {
-      throw fail(BAD_REQUEST, 'Give a GitHub Project URL or a project node id');
-    }
     if (projectUrl && !parseProjectUrl(projectUrl)) {
       throw fail(
         BAD_REQUEST,

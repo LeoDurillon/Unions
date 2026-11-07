@@ -19,28 +19,35 @@ import { STEP_VIEWS } from './steps';
 
 const LAST = STEPS.length - 1;
 
-async function createFrom(draft: Draft): Promise<number> {
+/** The new project's GitHub Project node id: none, the one picked, or one created now. */
+async function boardOf(draft: Draft): Promise<string | undefined> {
   const { repo, project } = draft;
-  if (!repo || !project) {
-    throw new Error('Pick a repository and a project first.');
+  if (!repo || project === null) {
+    return undefined;
   }
-  let githubProjectNodeId = '';
   if (project.kind === 'existing') {
-    githubProjectNodeId = project.project.id;
-  } else {
-    const created = await api.github.createProject(credentialOf(draft), {
-      ownerId: repo.ownerNodeId,
-      repositoryId: repo.nodeId,
-      title: project.title.trim(),
-    });
-    githubProjectNodeId = created.id;
+    return project.project.id;
   }
+  const created = await api.github.createProject(credentialOf(draft), {
+    ownerId: repo.ownerNodeId,
+    repositoryId: repo.nodeId,
+    title: project.title.trim(),
+  });
+  return created.id;
+}
+
+async function createFrom(draft: Draft): Promise<number> {
+  const { repo } = draft;
+  if (!repo) {
+    throw new Error('Pick a repository first.');
+  }
+  const githubProjectNodeId = await boardOf(draft);
   const created = await api.createProject({
     owner: repo.owner,
     repo: repo.name,
     baseBranch: draft.baseBranch.trim(),
     ...credentialOf(draft),
-    githubProjectNodeId,
+    ...(githubProjectNodeId === undefined ? {} : { githubProjectNodeId }),
     integrations: verifiedTrackers(draft),
   });
   return created.id;
