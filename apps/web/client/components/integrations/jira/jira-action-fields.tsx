@@ -1,7 +1,6 @@
-// A Jira action's fields in the rule editor: the status to move to, the fields to set, or the comment; and which
-// kinds of action the editor offers (the Jira ones once the project is connected to Jira).
+// A Jira action's fields in the rule editor: the status to move to, the fields to set, or the comment.
 import type { JiraRuleSource } from '@union/core';
-import { ACTION_KINDS, type ActionKind, type EventAction } from '@union/core/event-actions';
+import type { ActionKind, EventAction } from '@union/core/event-actions';
 import type { JiraFieldValue } from '@union/core/jira-field-types';
 import type { ReactElement } from 'react';
 
@@ -13,17 +12,8 @@ import { JiraFieldRow } from './jira-field-row';
 type Action<K extends ActionKind> = Extract<EventAction, { kind: K }>;
 type JiraAction = Action<'jira_transition' | 'jira_field' | 'jira_comment'>;
 
-const JIRA_KINDS = new Set<ActionKind>(['jira_transition', 'jira_field', 'jira_comment']);
 const EMPTY_FIELD: JiraFieldValue = { fieldId: '', fieldName: '', fieldType: 'text', value: '' };
 const COMMENT_ROWS = 4;
-
-/** The kinds the editor offers: the Jira ones once the project is connected (or when the rule has one). */
-export function useOfferedActionKinds(projectId: number, current: ActionKind): ActionKind[] {
-  const source = useJiraRuleSource(projectId);
-  return ACTION_KINDS.filter(
-    (kind) => !JIRA_KINDS.has(kind) || source !== null || kind === current,
-  );
-}
 
 function StatusField({
   source,
@@ -34,6 +24,13 @@ function StatusField({
   action: Action<'jira_transition'>;
   onChange: (action: EventAction) => void;
 }): ReactElement {
+  if (source.statuses.length === 0) {
+    return (
+      <p className="text-sm text-amber-700 dark:text-amber-400">
+        Union has not read the Jira project yet: click Refresh from Jira above.
+      </p>
+    );
+  }
   return (
     <Field
       label="Move it to"

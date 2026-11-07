@@ -1,16 +1,11 @@
 // What a rule does: the kind of action, then that kind's own fields.
 import type { NotionSchema } from '@union/core';
-import {
-  ACTION_LABELS,
-  emptyAction,
-  isActionKind,
-  type EventAction,
-} from '@union/core/event-actions';
+import type { EventAction } from '@union/core/event-actions';
 import type { ReactElement } from 'react';
 
-import { JiraActionFields, useOfferedActionKinds } from '../integrations/jira/jira-action-fields';
+import { JiraActionFields } from '../integrations/jira/jira-action-fields';
 import { NotionActionFields } from '../integrations/notion/notion-action-fields';
-import { Field, inputClass } from '../ui';
+import { ActionKindSelect } from './action-kind-select';
 import { GitHubCommentFields } from './github-comment-fields';
 import { ProjectFieldsFields } from './project-fields-fields';
 import { PullRequestFields } from './pull-request-fields';
@@ -64,27 +59,9 @@ export function ActionFields({
   action: EventAction;
   onChange: (action: EventAction) => void;
 }): ReactElement {
-  const kinds = useOfferedActionKinds(projectId, action.kind);
   return (
     <>
-      <Field label="Then">
-        <select
-          className={inputClass}
-          value={action.kind}
-          onChange={(event) => {
-            // Another kind holds other fields: it starts empty.
-            if (isActionKind(event.target.value)) {
-              onChange(emptyAction(event.target.value));
-            }
-          }}
-        >
-          {kinds.map((kind) => (
-            <option key={kind} value={kind}>
-              {ACTION_LABELS[kind]}
-            </option>
-          ))}
-        </select>
-      </Field>
+      <ActionKindSelect projectId={projectId} action={action} onChange={onChange} />
       <KindFields projectId={projectId} notion={notion} action={action} onChange={onChange} />
     </>
   );

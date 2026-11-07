@@ -19,12 +19,12 @@ export function JiraFieldsBar({
     mutationFn: () => integrationsApi.refreshFields(projectId, 'jira'),
     onSuccess: onRefreshed,
   });
-  const read = source.readAt === null ? '' : `, read ${new Date(source.readAt).toLocaleString()}`;
   return (
     <div className="flex items-center gap-3 text-sm">
       <p className="min-w-0 flex-1 text-zinc-500">
-        Jira project “{source.title}”{read} ({source.statuses.length} statuses,{' '}
-        {source.fields.length} fields rules can set).
+        {source.readAt === null
+          ? 'The Jira project is not read yet: read it to pick its statuses and fields in rules.'
+          : `Jira project “${source.title}”, read ${new Date(source.readAt).toLocaleString()} (${source.statuses.length} statuses, ${source.fields.length} fields rules can set).`}
       </p>
       <ErrorText error={refresh.error} />
       <Button

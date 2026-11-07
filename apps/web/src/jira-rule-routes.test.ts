@@ -153,3 +153,10 @@ test('a preview says what the action would do on the ticket’s issue, without c
     error: 'This ticket was not imported from Jira',
   });
 });
+
+test('a project connected without reading Jira lists it as not read, so the editor offers Refresh', async () => {
+  const config = { site: 'https://acme.atlassian.net', email: 'a@b.c', projectKey: 'ABC' };
+  saveIntegration(db, projectId, 'jira', { secret: 'tok', config });
+  const listed = (await (await send('GET', base)).json()) as EventRulesResponse;
+  expect(listed.jira).toEqual({ title: '', readAt: null, statuses: [], fields: [] });
+});

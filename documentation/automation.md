@@ -28,6 +28,9 @@ Jira issue, comment on GitHub, add a label, notify you. Set them up in the proje
 
 A rule has a trigger and one or more actions.
 
+The actions on Notion and on Jira are offered only when the project is connected to that tracker
+(**Settings → Integrations**).
+
 **Triggers**
 
 - The ticket is created
@@ -55,8 +58,9 @@ A rule has a trigger and one or more actions.
   workflow has no way there from the issue's status, or the transition asks for fields (often a Resolution on
   Done), the rule fails and its Activity line says why.
 - **Set fields of the ticket's Jira issue**: one-line or multi-line text, a number, a date, a select's option (by
-  its name, as Jira shows it), or labels to add. Union reads the fields a rule can set when you connect Jira; a field
-  added in Jira later shows after **Refresh from Jira** above the rules.
+  its name, as Jira shows it), or labels to add. Union reads the Jira project's statuses and the fields a rule
+  can set when you save the Jira settings, or with **Refresh from Jira** above the rules (needed once for a project
+  connected in the setup wizard, and after adding a field in Jira).
 - **Comment on the ticket's Jira issue**: plain text, links become links.
 
 The Jira actions act as the Atlassian account whose API token the project uses: Jira shows the changes under its

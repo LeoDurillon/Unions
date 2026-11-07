@@ -7,6 +7,7 @@ import { unknownVariables } from './event-rule-types';
 import type { JiraFieldValue } from './integrations/jira-field-types';
 import { jiraFieldsFor, type JiraFields } from './integrations/jira-integration';
 import { jiraValueError } from './integrations/jira-values';
+import { integrationOf } from './integrations/store';
 
 export type JiraTransitionAction = ActionOf<'jira_transition'>;
 export type JiraFieldAction = ActionOf<'jira_field'>;
@@ -22,9 +23,12 @@ function text(record: object, key: string): string {
 
 /** The stored Jira project, or why a Jira action cannot be saved without it. */
 function storedFields(db: Db, projectId: number): JiraFields {
+  if (!integrationOf(db, projectId, 'jira')) {
+    throw new EventRuleError('Connect the project to Jira first (Settings → Integrations → Jira)');
+  }
   const fields = jiraFieldsFor(db, projectId);
   if (!fields) {
-    throw new EventRuleError('Connect the project to Jira first (Settings → Integrations → Jira)');
+    throw new EventRuleError('Read the Jira project first (Refresh from Jira, above the rules)');
   }
   return fields;
 }

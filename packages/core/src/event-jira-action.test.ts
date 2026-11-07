@@ -123,3 +123,11 @@ test('a comment is written, within the limit, with known variables', () => {
     'at most',
   );
 });
+
+test('a project connected without reading Jira (the setup wizard) is asked to read it first', () => {
+  const config = { site: 'https://acme.atlassian.net', email: 'a@b.c', projectKey: 'ABC' };
+  saveIntegration(db, projectId, 'jira', { secret: 'tok', config });
+  const message = 'Read the Jira project first (Refresh from Jira, above the rules)';
+  expect(refusal(() => checkedJiraTransition(db, projectId, { statusId: '3' }))).toBe(message);
+  expect(refusal(() => checkedJiraComment(db, projectId, { body: 'Hi' }))).toBe(message);
+});

@@ -7,6 +7,7 @@ import {
 import { checkPullRequestChanges, type PullRequestChange } from './event-pull-request-action';
 import { unknownVariables } from './event-rule-types';
 import type { JiraFieldValue } from './integrations/jira-field-types';
+import type { IntegrationKindName } from './integrations/kinds';
 
 /** Where a GitHub comment goes: the ticket's issue, or its pull request. */
 export type CommentTarget = 'issue' | 'pull_request';
@@ -67,6 +68,18 @@ export const ACTION_LABELS: Record<ActionKind, string> = {
   jira_transition: "Move the ticket's Jira issue",
   jira_field: "Set fields of the ticket's Jira issue",
   jira_comment: "Comment on the ticket's Jira issue",
+};
+
+/** The tracker each kind acts on: offered only to projects connected to it. Null: GitHub or Union itself. */
+export const ACTION_TRACKERS: Record<ActionKind, IntegrationKindName | null> = {
+  notion_property: 'notion',
+  github_comment: null,
+  github_pull_request: null,
+  github_project_fields: null,
+  union_notification: null,
+  jira_transition: 'jira',
+  jira_field: 'jira',
+  jira_comment: 'jira',
 };
 
 export const COMMENT_TARGETS = [
