@@ -199,14 +199,6 @@ test('a project created from a URL gets its node id resolved before syncing', as
   expect(api.calls).toContain('resolveProject');
 });
 
-test('a project with neither node id nor valid URL is reported, not synced', async () => {
-  db.insert(schema.projects)
-    .values({ owner: 'o', repo: 'bad', config: { baseBranch: 'main' } })
-    .run();
-  await sync.push();
-  expect(eventTypes()).toContain('github_sync_error');
-});
-
 test('each project syncs with its own token; a project without one is reported', async () => {
   const other = new FakeGitHubApi();
   db.insert(schema.projects)

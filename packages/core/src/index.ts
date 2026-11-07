@@ -19,6 +19,7 @@ export * from './branch-move';
 export * from './branch-moves';
 export * from './agents';
 export * from './diagrams';
+export * from './github-layers';
 export * from './db';
 export * from './change-budget';
 export * from './change-size';

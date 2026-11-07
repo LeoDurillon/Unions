@@ -108,6 +108,8 @@ export type ProjectConfig = {
   sizeIgnore?: string[];
   /** Lines of code a change may add when its plan gives no estimate; absent: no budget. */
   sizeBudget?: number;
+  /** New tickets get a GitHub issue (default true); always on while a GitHub Project is connected. */
+  mirrorIssues?: boolean;
 };
 
 /** One earlier question of an investigation and the answer it got. */

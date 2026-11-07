@@ -1,6 +1,6 @@
 # The GitHub Project and issues as choices
 
-Status: planned (2026-11-07). Relates to [One adapter per tracker](tracker-adapters.md) (its D7: GitHub Project
+Status: step 1 built (2026-11-07, branch `optional-github-project`); steps 2 to 6 left. Relates to [One adapter per tracker](tracker-adapters.md) (its D7: GitHub Project
 fields join the shared field types).
 
 ## Why
