@@ -9,7 +9,7 @@ import { PreviewSummary } from './preview-summary';
 import { SizeRow } from './size-row';
 import { TicketAttachments } from './ticket-attachments';
 import { TicketLinks } from './ticket-links';
-import { TicketNotionRow } from './ticket-notion-row';
+import { TicketTrackerRows } from './ticket-tracker-rows';
 
 function SourceRow({ detail }: { detail: TicketDetail }): ReactElement {
   const { ticket, project } = detail;
@@ -44,18 +44,13 @@ export function TicketDetails({
 }: {
   detail: TicketDetail;
   onOpenTicket: (id: number) => void;
-  onOpenTab: (tab: 'preview' | 'notion') => void;
+  onOpenTab: (tab: 'preview' | 'notion' | 'jira') => void;
 }): ReactElement {
   const { ticket } = detail;
   return (
     <div className="space-y-3 rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
       <SourceRow detail={detail} />
-      <TicketNotionRow
-        detail={detail}
-        onOpenComments={() => {
-          onOpenTab('notion');
-        }}
-      />
+      <TicketTrackerRows detail={detail} onOpenTab={onOpenTab} />
       <TicketLinks detail={detail} onOpen={onOpenTicket} />
       <BaseBranchRow detail={detail} />
       <FlowRow detail={detail} />

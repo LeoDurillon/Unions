@@ -21,7 +21,7 @@ export function OverviewTab({
   /** After a cancelled ticket is removed: the panel closes. */
   onRemoved: () => void;
   /** The Preview and Notion tabs, from their summaries here. */
-  onOpenTab: (tab: 'preview' | 'notion') => void;
+  onOpenTab: (tab: 'preview' | 'notion' | 'jira') => void;
 }): ReactElement {
   const { ticket, runs } = detail;
   const blocked = isBlocked(ticket);

@@ -139,7 +139,8 @@ Click a card to open its panel:
   text and the reason. Comments appear in Notion under your integration's name. Your Notion integration needs the
   **Read comments** and **Insert comments** capabilities (in Notion, the integration's settings, then
   **Capabilities**); without them the tab says which.
-- **Jira**, in the Notion tab's place for a ticket imported from Jira: the issue's comments, oldest first, each with
+- **Jira**, in the Notion tab's place for a ticket imported from Jira (the Overview's **Jira** row links the issue,
+  and once the tab has read them says how many comments it has): the issue's comments, oldest first, each with
   its author, time ("edited" when changed), **Open in Jira**, and a badge when not everyone can see it (a role or
   group, or an internal note). **Refresh** reads them again; an issue with more than 500 comments shows the latest 500. **Reply** under a comment posts a new comment that starts with a mention of its author, so Jira notifies
   them (Jira comments have no threads); **New comment** at the bottom posts a plain one. Comments are plain text
