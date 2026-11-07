@@ -49,13 +49,22 @@
 
 ## GitHub mapping
 
-| Local         | GitHub                                                                                      |
-| ------------- | ------------------------------------------------------------------------------------------- |
-| ticket        | issue + Project item                                                                        |
-| ticket status | Project `Status` single-select field                                                        |
-| step output   | one issue comment per step, found by hidden marker `<!-- union:ticket=<id> step=<step> -->` |
-| branch        | `<issue#>-<slug>`, pushed by the host                                                       |
-| PR            | draft PR, `Closes #n`                                                                       |
-| parent ticket | the child issue is "blocked by" the parent issue (issue dependencies)                       |
+| Local         | GitHub                                                                                          | Layer      |
+| ------------- | ----------------------------------------------------------------------------------------------- | ---------- |
+| ticket        | issue                                                                                           | issues     |
+| ticket        | Project item                                                                                    | Project    |
+| ticket status | Project `Status` single-select field                                                            | Project    |
+| step output   | one issue comment per step, found by hidden marker `<!-- union:ticket=<id> step=<step> -->`     | issues     |
+| branch        | `<issue#>-<slug>`, or `union-<ticket id>-<slug>` for a ticket with no issue, pushed by the host | repository |
+| PR            | draft PR, with `Closes #n` when the ticket has an issue                                         | repository |
+| parent ticket | the child issue is "blocked by" the parent issue (issue dependencies)                           | issues     |
 
-GitHub is the source of truth for title, description and status; the local DB owns run state.
+The repository layer is always on. Issues follow `ProjectConfig.mirrorIssues` (absent: on; always on with a
+Project): off, new tickets get none, and tickets that have one (imported from a GitHub issue, or opened while it
+was on) keep it and its comments. The Project layer is on while `projects.github_project_url` or
+`github_project_node_id` is set (`hasGitHubProject`, `mirrorsIssues` in `github-layers.ts`).
+
+The source of truth follows the layers. With a Project, GitHub wins for title, description and status (read from
+the board's items). With issues and no Project, GitHub wins for title and description (read from the repository's
+issues, `issue-pull.ts`), Union for status. With neither, Union (or the ticket's tracker, for an imported ticket)
+owns everything. The local DB always owns run state.

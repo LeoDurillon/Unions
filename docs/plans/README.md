@@ -120,9 +120,8 @@ and linked.
   contract test suite and an ast-grep guard, so a new tracker is an adapter and its settings. Planned (2026-11-07).
 - [The GitHub Project and issues as choices](optional-github-project.md): the GitHub Project becomes an
   optional integration and mirroring tickets as GitHub issues a project setting (on by default), so a team on Jira
-  or Notion skips the duplicate issues and board, and the classic-token requirement. Steps 1 to 5 (the sync
-  in two parts, issue edits without the board, the settings, the wizard, the rules) built (branch
-  `optional-github-project`); step 6 (docs) left.
+  or Notion skips the duplicate issues and board, and the classic-token requirement. Built, steps 1 to 6
+  (branch `optional-github-project`, 2026-11-07); a real check against GitHub left.
 - [Formatted Jira comments](jira-comment-formatting.md): markdown in the Jira tab's comments through `markdownAdf`,
   rule comments unchanged. Built and deployed (2026-11-07), checked on a real site.
 - [Update Union from the sidebar](self-update.md): an Update button enabled when the checkout is behind the remote's

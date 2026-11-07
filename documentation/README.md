@@ -1,6 +1,7 @@
 # Union user guide
 
-Union is a Kanban board that runs on your own machine, on top of a GitHub Project. You write a ticket and move it to
+Union is a Kanban board that runs on your own machine, on top of a GitHub repository (and, if you want, a GitHub
+Project). You write a ticket and move it to
 **In progress**. Claude Code agents then plan the change with you, implement it until your checks pass, and open a
 pull request. A second agent reviews that pull request before you do.
 
@@ -42,13 +43,13 @@ This guide explains how to install Union and use it day to day. To work on Union
 
 ## Words used in this guide
 
-| Word              | Meaning                                                                                               |
-| ----------------- | ----------------------------------------------------------------------------------------------------- |
-| **Project**       | One repository and the GitHub Project its board mirrors.                                              |
-| **Ticket**        | One change to make. It has a GitHub issue, and later a branch and a pull request.                     |
-| **Step**          | One agent's turn on a ticket: Intake, Summary, Technical, Test plan, Implementation, Final review…    |
-| **Flow**          | The steps a ticket runs, in order.                                                                    |
-| **Run**           | One agent execution. A step can take several runs when you ask for revisions.                         |
-| **Workspace**     | The ticket's copy of the repository, inside its own Docker volume.                                    |
-| **Investigation** | A one-off agent run on a question of yours, with no ticket and nothing posted to GitHub.              |
-| **Lesson**        | A rule you keep for one step of a project's agents, often written from feedback you gave on a ticket. |
+| Word              | Meaning                                                                                                          |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------- |
+| **Project**       | One repository, and optionally the GitHub Project its board mirrors.                                             |
+| **Ticket**        | One change to make. It has a GitHub issue (unless the project turns them off), then a branch and a pull request. |
+| **Step**          | One agent's turn on a ticket: Intake, Summary, Technical, Test plan, Implementation, Final review…               |
+| **Flow**          | The steps a ticket runs, in order.                                                                               |
+| **Run**           | One agent execution. A step can take several runs when you ask for revisions.                                    |
+| **Workspace**     | The ticket's copy of the repository, inside its own Docker volume.                                               |
+| **Investigation** | A one-off agent run on a question of yours, with no ticket and nothing posted to GitHub.                         |
+| **Lesson**        | A rule you keep for one step of a project's agents, often written from feedback you gave on a ticket.            |

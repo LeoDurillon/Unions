@@ -1,6 +1,6 @@
 # AGENTS.md
 
-union-next: a local Kanban over a GitHub Project. Moving a ticket to In Progress spawns a Docker container that runs
+union-next: a local Kanban over a GitHub repository, optionally mirrored to a GitHub Project. Moving a ticket to In Progress spawns a Docker container that runs
 an agent pipeline on the project's repo with the user's Claude Max subscription. Read the spec (`docs/spec/`, index in `docs/spec/README.md`) before changing
 behavior; this file covers how to work in the repo.
 

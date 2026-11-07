@@ -1,6 +1,8 @@
 # The board and tickets
 
-Each project has a board with five columns. Union keeps it in step with the GitHub Project in both directions.
+Each project has a board with five columns. With a GitHub Project connected (**Settings → Integrations → GitHub
+Project**), Union keeps it in step with the Project in both directions: each ticket's issue is a card there, and
+moving a card to In Progress on GitHub starts the ticket. Without one, Union's board is the only board.
 
 | Column              | What is in it                                                                    |
 | ------------------- | -------------------------------------------------------------------------------- |
@@ -10,7 +12,7 @@ Each project has a board with five columns. Union keeps it in step with the GitH
 | **Done**            | Tickets whose final review you approved. Their pull request is ready for review. |
 | **Merged / Closed** | Done tickets whose pull request was merged or closed in the last three weeks.    |
 
-Each card shows the ticket's state ("Needs review · Technical", "Running · Implementation"), its issue number, the
+Each card shows the ticket's state ("Needs review · Technical", "Running · Implementation"), its issue number (when it has an issue), the
 ticket it depends on, and the CI checks of its pull request. Fold a column you do not need with its arrow.
 
 While an agent works on a ticket, its card also shows how long the run has gone and the last thing the agent did:

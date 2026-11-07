@@ -1,11 +1,13 @@
 # Flow
 
-0. First run: a setup wizard connects GitHub (token or GitHub App installation), picks the repository, and picks or creates the GitHub Project.
+0. First run: a setup wizard connects GitHub (token or GitHub App installation), picks the repository, and under
+   Integrations optionally picks or creates the GitHub Project (none by default; the `project` scope is checked only
+   then) beside Notion and Jira.
 1. Create a ticket (title, description), or import it from a tracker the project is connected to (the wizard's
    optional Integrations step, or project settings): from Notion (integration secret + data source; the page must be
    a row of that data source), or from Jira Cloud (site, account email, API token + project key; the issue must be
    of that project, its description converted to markdown and its attachments kept as ticket files)
-   → GitHub issue added to the Project. Union only reads Jira. Or import an existing issue of the repository (number or URL; pull requests
+   → GitHub issue (when the project mirrors issues) added to the Project (when it has one). Union only reads Jira. Or import an existing issue of the repository (number or URL; pull requests
    and issues already on a ticket are refused): the ticket is on that issue, which the sync adds to the Project
    instead of creating one, and its title and description keep following GitHub. A Notion page edited before
    creating (Edit before creating) stays linked to the ticket and still gets its images, unless unlinked in the form.
@@ -22,7 +24,7 @@
    scratch: the phase carries `fresh`, so the run resumes no session and its prompt has no earlier version or
    feedback; a fresh run that stops retries fresh. Earlier versions stay in the history. Planning and custom steps
    only: they change no file.
-   Each step's output is posted/edited as one issue comment.
+   Each step's output is posted/edited as one issue comment, on a ticket that has an issue; else it stays in Union.
 4. After the last planning step is approved (at once for a flow without planning): `implement` loop (agent turn → checks → back to the agent on red, up to the
    project's iteration limit), then the host measures the change (`size-trim.ts`): the lines of code added from
    `git diff --numstat <base>...HEAD`, tests, lock files, migrations and Markdown counted apart (the project's

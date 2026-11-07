@@ -2,9 +2,14 @@
 
 <!-- Moved from AGENTS.md: read the file for the area you change; keep it current when behavior changes. -->
 
+- The GitHub layers: the repository always, issues by project setting (`config.mirrorIssues`, default on), the
+  GitHub Project when one is connected (`projects.github_project_url` / `github_project_node_id`; not a row of
+  `integrations`, it uses the project's GitHub credentials). `github-layers.ts` in core says which are on; the
+  worker's sync runs each part only when its layer is (`docs/architecture/worker.md`, `github/`).
 - All GitHub writes for tickets (issues, comments, Project status, push, PR) happen in the worker. Containers never
   hold GitHub credentials. The only GitHub calls the web server makes are the ones the UI needs answered right away:
-  the setup wizard (verify the token, list repositories and Projects, create a Project), checking and listing the
+  the setup wizard and Settings → Integrations → GitHub Project (verify the token, list repositories and Projects,
+  create a Project; `routes/github-project-link.ts` then writes the columns, the worker adds the items), checking and listing the
   GitHub App's installations (`/api/github/app`), looking up a pull request a user links to a ticket, reading an
   issue to create a ticket on it (`routes/issue-import.ts`), reading a linked pull request's discussion (PR tab,
   review import), a reviewed pull request's files and commits, and listing the repository's pull requests and stacks (project bar → Pull requests,
