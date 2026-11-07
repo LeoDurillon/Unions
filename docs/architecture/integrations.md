@@ -72,8 +72,12 @@
   issue's `editmeta`, then sent in one `PUT` (labels as `update` operations); comments go as ADF (core's
   `text-adf.ts`). The rules editor reads the stored statuses and settable fields (`GET /field`, kept in
   `integrations.fields` by Refresh; `jira-field-types.ts`) from the rules list (`jiraRuleSourceOf`). The web calls
-  none of the writes (ast-grep `web-reads-trackers-only`). Jira has no `createItem` yet (`createsItems: false`, so
-  investigations do not offer it).
+  none of the writes (ast-grep `web-reads-trackers-only`). Jira's `createItem` (`jira-create.ts`, called by the
+  worker's `withTargetItem` for a ticket written from an investigation) reads the project's issue types, picks the
+  configured `issueTypeId` if the project still has it, else Task, else its first type (never a sub-task), and posts
+  `POST /rest/api/3/issue` with the summary (255 characters at most) and the description converted by core's
+  `markdown-adf.ts` (mdast with GitHub's extensions, from the `markdown` catalog; inline code keeps only a link
+  mark, as ADF requires). Jira's refusal (a required field) is the investigation's `ticket_error`.
 - A Jira ticket's comments: the web reads them for its Jira tab (`routes/jira-comments.ts`, `GET
   /api/tickets/:id/jira-comments`; `JiraApi.comments`, newest first, 100 a page, 5 pages at most, shown oldest
   first; core's `jira-comments.ts` converts each with `adfMarkdown`, media by name, and names a role, group or

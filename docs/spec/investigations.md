@@ -30,5 +30,9 @@ A one-off agent run on a custom prompt, outside the ticket pipeline (project bar
   When the project has a Notion data source, **Also create it in Notion** (`ticket_target` `notion`) makes the worker add a
   page with the ticket's title and description to that data source and link the ticket to it (its origin, `origin_kind` and `origin_id`, so
   the Notion event rules apply). If Notion refuses, the ticket is still created and `ticket_error` says why it has no
-  page.
+  page. For a project connected to Jira, **Also create it in Jira** (`ticket_target` `jira`) makes the worker create
+  an issue in the Jira project (the configured `issueTypeId`, else Task, else the first type, never a sub-task),
+  the summary from the title (255 characters at most), the description converted from markdown to ADF (cut with a
+  note past 30 000 characters), and link the ticket to it (`origin_kind` `jira`, `origin_id` the key). Jira's
+  refusal becomes `ticket_error`, the ticket created all the same.
 - **Not yet:** resuming the agent's own session on a follow-up, choosing another branch.

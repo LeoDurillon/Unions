@@ -48,4 +48,10 @@ change, acceptance criteria and the useful findings, in the language of your que
 ticket must cover. It runs on the investigation's model.
 
 The ticket lands in Backlog, with its GitHub issue, and the investigation links to it. When the project is
-connected to Notion, **Also create it in Notion** adds a page for it in the Notion data source too.
+connected to Notion, **Also create it in Notion** adds a page for it in the Notion data source too. When it is
+connected to Jira, **Also create it in Jira** creates an issue for it in the Jira project, of the type picked in
+the Jira settings (Task by default), with the ticket's title as its summary and its description as Jira's rich text
+(headings, lists, checklists, tables and code keep their shape; inline code cannot be bold in Jira, so bold around it
+is dropped). The ticket is then linked to the issue: its Jira tab and your Jira rules apply to it. One of the two at
+most: a ticket comes from one tracker. If Jira refuses the issue (a field the project requires, a missing
+permission), the ticket is still created and the investigation says why it has no issue.

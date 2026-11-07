@@ -1,6 +1,6 @@
 # Create Jira issues from investigations
 
-Status: planned (2026-11-07); steps 1 to 3 built (branch `jira-create-issue`, 2026-11-07). Follows [Jira](jira.md), [Jira rule actions](jira-rule-actions.md) and
+Status: built and deployed (2026-11-07), steps 1 to 4; checked on a real Jira Cloud site (ticket 50 created as SCRUM-5). Follows [Jira](jira.md), [Jira rule actions](jira-rule-actions.md) and
 [Jira comments on the ticket](jira-comments.md), all built. Scope: "Also create it in Jira" when an investigation
 writes a ticket, as "Also create it in Notion" does.
 
@@ -121,6 +121,18 @@ Each step ships on its own; `bun run check` after each.
    type) and the ticket linked to it. Then `documentation/investigations.md`, `documentation/first-project.md`'s
    Connect Jira (the issue type), `docs/spec/investigations.md`, `docs/architecture/integrations.md`, this plan's
    status and `docs/plans/README.md`.
+   Done on the user's site (2026-11-07): an investigation wrote ticket 50 with **Also create it in Jira**; it is
+   linked to SCRUM-5, its description (about 7 000 characters: headings, a 13-row table, code blocks, nested
+   lists) not cut. Read back through the import's converter, SCRUM-5 gives the ticket's 75 lines but for three
+   things: the table's separator row is `| --- |` rather than `|---|`, a blank line appears between a heading and the
+   code block under it (both only formatting), and bold on inline code is lost: ADF lets code take no mark but a
+   link, so a bold phrase made of code and punctuation (the names `@types/vscode` and `engines.vscode` joined by
+   " + " and ended by ".", all in bold) shows in Jira as plain code with only the "+" and the "." in bold.
+   Left as it is on the user's call (2026-11-07): nothing is lost, it only reads oddly; dropping the bold on the
+   punctuation around such code would be the fix if it is wanted later. Docs: `documentation/investigations.md`
+   (the switch, the type, what Jira's rich text keeps), `first-project.md` (the issue type in Connect Jira, and
+   what Union does in Jira), `settings.md`, `docs/spec/investigations.md`, `docs/architecture/integrations.md`,
+   AGENTS.md's Jira rule.
 
 ## Risks
 

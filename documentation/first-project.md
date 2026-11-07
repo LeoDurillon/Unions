@@ -55,8 +55,9 @@ permissions, accept them on GitHub before they apply.
 
 ## Connect Jira
 
-Union imports Jira Cloud issues as tickets (Jira Data Center and Server are not supported). It reads Jira as your
-Atlassian account, with an API token:
+Union imports Jira Cloud issues as tickets (Jira Data Center and Server are not supported). It acts in Jira as your
+Atlassian account, with an API token: it reads the project's issues, and moves, comments on or creates them only
+when your rules, comments or investigations ask it to.
 
 1. Open [id.atlassian.com → Security → API tokens](https://id.atlassian.com/manage-profile/security/api-tokens) and
    click **Create API token** (not the one with scopes). Copy it.
@@ -66,6 +67,9 @@ Atlassian account, with an API token:
    - **API token**: the token you copied;
    - **Project key**: the letters before an issue's number, `ABC` for `ABC-123`.
 3. Click **Verify** (in the settings, **Verify and save**). Union shows the project's name when Jira accepts them.
+4. Optionally, in the settings, pick the **Issue type for new issues**: the type of the issues an investigation
+   creates with **Also create it in Jira** (see [Investigations](investigations.md)). By default, Task, or the
+   project's first type.
 
 Your account must be able to see the project's issues. The token stays on this machine; to stop, click
 **Disconnect** in the settings.
