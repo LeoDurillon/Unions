@@ -5,17 +5,18 @@ import { useState, type ReactElement } from 'react';
 
 import type { PendingJiraComment } from '../../../src/jira-comment-types';
 import { jiraReplyKey, type JiraCommentSend } from '../../lib/use-jira-comments';
+import { Markdown } from '../markdown';
 import { ReplyBox } from '../pull-request/reply-box';
 import { Button } from '../ui';
 
 const POSTS_AS =
-  'Posts as the Atlassian account of the Jira connection, visible to everyone who can see the issue';
+  'Markdown: **bold**, `code`, [links](https://…), lists. Posts as the Atlassian account of the Jira connection, visible to everyone who can see the issue';
 
 function Sending({ comment }: { comment: PendingJiraComment }): ReactElement {
   return (
     <div className="space-y-1 opacity-70">
       <span className="text-xs text-zinc-500">Sending to Jira…</span>
-      <p className="text-sm whitespace-pre-wrap">{comment.text}</p>
+      <Markdown compact>{comment.text}</Markdown>
     </div>
   );
 }

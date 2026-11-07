@@ -143,8 +143,9 @@ Click a card to open its panel:
   and once the tab has read them says how many comments it has): the issue's comments, oldest first, each with
   its author, time ("edited" when changed), **Open in Jira**, and a badge when not everyone can see it (a role or
   group, or an internal note). **Refresh** reads them again; an issue with more than 500 comments shows the latest 500. **Reply** under a comment posts a new comment that starts with a mention of its author, so Jira notifies
-  them (Jira comments have no threads); **New comment** at the bottom posts a plain one. Comments are plain text
-  (links become links), posted as the Atlassian account of the project's Jira connection and visible to everyone
+  them (Jira comments have no threads); **New comment** at the bottom posts a plain one. You can write
+  markdown: `**bold**`, `` `code` ``, `[links](https://…)`, lists, code blocks and quotes keep their shape in Jira
+  (inline code cannot be bold in Jira, so bold around it is dropped). Comments are posted as the Atlassian account of the project's Jira connection and visible to everyone
   who can see the issue. The comment shows "Sending to Jira…" until Jira has it; if Jira refuses it, the box opens
   again with your text and the reason (the account needs the **Add comments** permission in the Jira project).
   **Add to review** puts the comment in the ticket's review, for the implementer with your next **Send review**;

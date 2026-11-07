@@ -1,6 +1,6 @@
 # Formatted Jira comments
 
-Status: planned (2026-11-07); step 1 built (branch `jira-comment-markdown`, 2026-11-07). Follows [Jira comments on the ticket](jira-comments.md) and [Create Jira issues from
+Status: planned (2026-11-07); steps 1 to 3 built (branch `jira-comment-markdown`, 2026-11-07). Follows [Jira comments on the ticket](jira-comments.md) and [Create Jira issues from
 investigations](jira-create-issues.md), built: the second brought `markdownAdf`, a markdown to Jira rich text
 converter.
 
@@ -42,4 +42,9 @@ issue's description now exists: comments can use it.
    (GitHub's autolinks). Rule comments (`event-actions/jira-comment.ts`) still use `textAdf` (D2).
 2. **The tab.** The box's hint, the pending comment rendered (D4). UI check with the post stubbed; a real comment on
    the user's SCRUM-1 after asking.
+   Built: the hint is the start of the box's note (the reply box's `postsAs` line: "Markdown: **bold**, `code`,
+   [links](https://…), lists. Posts as …"); "Sending to Jira…" renders the text with `Markdown`. UI check on a
+   scratch database, the read and the post stubbed: the note, and a pending comment shown with its code and list,
+   no raw `**`. The real comment on SCRUM-1 waits for the deploy and the user's go-ahead.
 3. **Docs.** `documentation/tickets.md` (the Jira tab: what a comment can hold), this plan's status.
+   Done with step 2 (the guide changes with what the user sees).
