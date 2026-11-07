@@ -139,6 +139,15 @@ Click a card to open its panel:
   text and the reason. Comments appear in Notion under your integration's name. Your Notion integration needs the
   **Read comments** and **Insert comments** capabilities (in Notion, the integration's settings, then
   **Capabilities**); without them the tab says which.
+- **Jira**, in the Notion tab's place for a ticket imported from Jira: the issue's comments, oldest first, each with
+  its author, time ("edited" when changed), **Open in Jira**, and a badge when not everyone can see it (a role or
+  group, or an internal note). **Refresh** reads them again; an issue with more than 500 comments shows the latest 500. **Reply** under a comment posts a new comment that starts with a mention of its author, so Jira notifies
+  them (Jira comments have no threads); **New comment** at the bottom posts a plain one. Comments are plain text
+  (links become links), posted as the Atlassian account of the project's Jira connection and visible to everyone
+  who can see the issue. The comment shows "Sending to Jira…" until Jira has it; if Jira refuses it, the box opens
+  again with your text and the reason (the account needs the **Add comments** permission in the Jira project).
+  **Add to review** puts the comment in the ticket's review, for the implementer with your next **Send review**;
+  it shows **In the review** after.
 
 **Investigate** in the panel header asks an agent a question about this ticket's workspace (see
 [Investigations](investigations.md)). **Review changes** opens the diff (see [Reviewing changes](reviewing.md)).
@@ -151,17 +160,17 @@ badge says how many there are). Use it after approving a step to go straight to 
 Press **?** to see them in Union. They do nothing while you type in a text field or while a dialog is open, and
 Ctrl, ⌘ and Alt combinations stay the browser's.
 
-| Where       | Key       | What it does                                       |
-| ----------- | --------- | -------------------------------------------------- |
-| Anywhere    | **?**     | List the shortcuts.                                |
-| Board       | **/**     | Jump to the search.                                |
-| Board       | **c**     | Write a new ticket.                                |
-| Board       | **n**     | Open the first ticket that needs you.              |
-| Ticket      | **n / p** | Open the next or previous ticket that needs you.   |
-| Ticket      | **r**     | Review the changes.                                |
-| Ticket      | **1 – 5** | Switch to Overview, Preview, Worker, PR or Notion. |
-| Ticket      | **Esc**   | Close the panel.                                   |
-| Review page | **j / k** | Open the next or previous file.                    |
+| Where       | Key       | What it does                                                |
+| ----------- | --------- | ----------------------------------------------------------- |
+| Anywhere    | **?**     | List the shortcuts.                                         |
+| Board       | **/**     | Jump to the search.                                         |
+| Board       | **c**     | Write a new ticket.                                         |
+| Board       | **n**     | Open the first ticket that needs you.                       |
+| Ticket      | **n / p** | Open the next or previous ticket that needs you.            |
+| Ticket      | **r**     | Review the changes.                                         |
+| Ticket      | **1 – 5** | Switch to Overview, Preview, Worker, PR, or Notion or Jira. |
+| Ticket      | **Esc**   | Close the panel.                                            |
+| Review page | **j / k** | Open the next or previous file.                             |
 
 ## Cancel and remove
 

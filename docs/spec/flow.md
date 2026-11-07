@@ -64,7 +64,10 @@
    The ticket panel's tabs: **Overview** (description, links, actions, runs), **Preview**, **Worker** (one tab per
    step, then the Log; it follows the running step), **Notion** (the open discussions of the ticket's Notion page,
    read when the tab opens, with Reply in each and New comment, which the worker posts; enabled for a ticket linked
-   to a page) and **PR** (link the pull request, then its GitHub discussion, with
+   to a page) or, in its place for a ticket imported from Jira, **Jira** (the issue's comments, the latest 500, read
+   when the tab opens, with Reply, a new comment mentioning the author, and New comment, which the worker posts;
+   Add to review makes one a `general` draft, sent under "On the spec (Jira comments)" and asked no reply) and
+   **PR** (link the pull request, then its GitHub discussion, with
    Reply, Quote reply and the implementer's suggested replies: see
    [Replies to comments](pull-requests.md#replies-to-comments)). From the PR tab or the review header, **Import** adds the unresolved line-comment threads as drafts,
    replies folded in with their authors; each lands on its lines of the current diff, or reads as outdated with

@@ -74,6 +74,16 @@
   `integrations.fields` by Refresh; `jira-field-types.ts`) from the rules list (`jiraRuleSourceOf`). The web calls
   none of the writes (ast-grep `web-reads-trackers-only`). Jira has no `createItem` yet (`createsItems: false`, so
   investigations do not offer it).
+- A Jira ticket's comments: the web reads them for its Jira tab (`routes/jira-comments.ts`, `GET
+  /api/tickets/:id/jira-comments`; `JiraApi.comments`, newest first, 100 a page, 5 pages at most, shown oldest
+  first; core's `jira-comments.ts` converts each with `adfMarkdown`, media by name, and names a role, group or
+  internal restriction), with the comments not posted yet (`pending-comments.ts`, shared with Notion's) and those in
+  the review. Posting is the `post_jira_comment` command (`{ projectId, ticketId, key, text, replyTo }`, core's
+  `jira-comment-post.ts`); the worker's `jira/comment-post.ts` sends the text as ADF, a reply starting with a
+  mention of the author (`textAdf(text, mention)`), and logs `jira_comment_posted` or `jira_comment_failed` (403
+  names "Add comments"). Add to review (`POST …/jira-comments/import`, `jira-review-import.ts`) reads the comment
+  again and adds a `general` draft whose `source_url` is the comment's link (`jira-comment-link.ts`); sending the
+  review never asks such a draft a GitHub reply (`markSent` leaves out Notion's and Jira's links).
 - A project reaches GitHub with a token (`projects.github_token`) or an installation of the GitHub App
   (`projects.github_installation_id`; the app's ID and private key are one row of `github_app`). Both are stored in
   plain text (local single-user app, like the original Union) and never reach the browser: responses use

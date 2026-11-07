@@ -1,6 +1,6 @@
 # Jira comments on the ticket
 
-Status: planned (2026-11-07); steps 1 to 3 deployed, step 4 built (branch `jira-review-import`, 2026-11-07). Follows [Jira](jira.md) (import) and [Jira rule actions](jira-rule-actions.md)
+Status: built and deployed (2026-11-07), steps 1 to 5; checked on a real Jira Cloud site (SCRUM-1: comments read, a reply posted with its mention). Follows [Jira](jira.md) (import) and [Jira rule actions](jira-rule-actions.md)
 (the worker writes to Jira). Modeled on [Notion comments on the ticket](notion-comments.md), built: read the
 issue's comments in a ticket tab, post one from Union, add one to the ticket's review.
 
@@ -151,6 +151,8 @@ Each step ships on its own; `bun run check` after each.
 5. **Docs and status.** `documentation/tickets.md` (the Jira tab), `docs/spec/flow.md` (the ticket panel's tabs),
    `docs/architecture/integrations.md` (Jira reads and the comment write), this plan's status and
    `docs/plans/README.md`.
+   Done; AGENTS.md's Jira rule also names the tab's reads and writes. The ticket panel's key table says 5 opens
+   Notion or Jira.
 
 ## Risks
 
