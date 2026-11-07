@@ -233,3 +233,14 @@ test('unknown nodes keep their text; strings and non-documents', () => {
   expect(adfMarkdown({ content: [] })).toBe('');
   expect(adfMarkdown(doc(p(), p(text('only'))))).toBe('only');
 });
+
+test('line breaks at the edge of a paragraph are dropped, those inside kept', () => {
+  const br = { type: 'hardBreak' };
+  // As Jira stores "My file :" then Shift+Enter, before an image.
+  expect(adfMarkdown(doc(p(text('My file :'), br), p(text('next'))))).toBe('My file :\n\nnext');
+  expect(adfMarkdown(doc(p(br, text('a'), br, text('b'), br, text(' '))))).toBe('a\\\nb');
+  expect(adfMarkdown(doc(p(br, br), p(text('only'))))).toBe('only');
+  expect(
+    adfMarkdown(doc({ type: 'heading', attrs: { level: 1 }, content: [text('Title'), br] })),
+  ).toBe('# Title');
+});

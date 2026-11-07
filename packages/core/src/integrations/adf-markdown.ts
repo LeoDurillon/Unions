@@ -41,9 +41,27 @@ function codeBlock(node: AdfNode): string {
   return `${fence}${stringAttr(node.attrs, 'language') ?? ''}\n${code}\n${fence}`;
 }
 
+/** A line break or blank text: nothing to show at a paragraph's edge. */
+function isEdgeFiller(node: AdfNode): boolean {
+  return node.type === 'hardBreak' || (node.type === 'text' && node.text.trim() === '');
+}
+
+/**
+ * The inline content without line breaks (and blank text) at its start or end: Jira keeps a
+ * Shift+Enter typed before an image, and markdown would show its `\` with nothing after it.
+ */
+function trimmedInline(nodes: AdfNode[]): AdfNode[] {
+  const start = nodes.findIndex((node) => !isEdgeFiller(node));
+  if (start === -1) {
+    return [];
+  }
+  const end = nodes.findLastIndex((node) => !isEdgeFiller(node));
+  return nodes.slice(start, end + 1);
+}
+
 function heading(node: AdfNode, context: AdfContext): string {
   const level = Math.min(HEADING_LEVELS, Math.max(1, numberAttr(node.attrs, 'level') ?? 1));
-  return `${'#'.repeat(level)} ${inlineMarkdown(node.content, context)}`;
+  return `${'#'.repeat(level)} ${inlineMarkdown(trimmedInline(node.content), context)}`;
 }
 
 function panel(node: AdfNode, context: AdfContext): string {
@@ -73,7 +91,7 @@ function card(node: AdfNode): string {
 type BlockRender = (node: AdfNode, context: AdfContext) => string;
 
 const BLOCKS: Record<string, BlockRender> = {
-  paragraph: (node, context) => inlineMarkdown(node.content, context),
+  paragraph: (node, context) => inlineMarkdown(trimmedInline(node.content), context),
   heading,
   bulletList: (node, context) => bulletList(node, context, renderBlocks),
   orderedList: (node, context) => orderedList(node, context, renderBlocks),
