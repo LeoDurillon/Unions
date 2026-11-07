@@ -1,4 +1,4 @@
-// The onboarding step that connects a Jira Cloud project with an account's API token.
+// The setup wizard's Jira form (under Integrations): a Jira Cloud project and an account's API token.
 import type { ReactElement } from 'react';
 
 import type { StepProps } from '../../onboarding/draft';

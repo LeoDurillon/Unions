@@ -59,14 +59,10 @@ export const STEPS = [
     description: 'Tickets are mirrored to a GitHub Project board.',
   },
   {
-    label: 'Notion',
-    title: 'Notion (optional)',
-    description: 'Import tickets from a Notion data source. Leave both fields empty to skip.',
-  },
-  {
-    label: 'Jira',
-    title: 'Jira (optional)',
-    description: 'Import tickets from a Jira Cloud project. Leave every field empty to skip.',
+    label: 'Integrations',
+    title: 'Integrations (optional)',
+    description:
+      'Import tickets from Notion or Jira. Pick one to set it up, or leave its fields empty to skip it.',
   },
   {
     label: 'Review',
@@ -98,22 +94,25 @@ export function trackerSkipped({ secret, config }: TrackerDraft): boolean {
   return [secret, ...Object.values(config)].every((value) => value.trim() === '');
 }
 
-function trackerSettled(draft: Draft, kind: IntegrationKindName): boolean {
+export function trackerSettled(draft: Draft, kind: IntegrationKindName): boolean {
   const tracker = draft.trackers[kind];
   return trackerSkipped(tracker) || tracker.title !== null;
 }
 
+/** The trackers the wizard offers, in its order. */
+export function trackerKinds(draft: Draft): IntegrationKindName[] {
+  return Object.keys(draft.trackers).filter((kind) => isIntegrationKindName(kind));
+}
+
 /** The trackers verified in the wizard, as the new project takes them. */
 export function verifiedTrackers(draft: Draft): NewIntegration[] {
-  return Object.keys(draft.trackers)
-    .filter((kind) => isIntegrationKindName(kind))
-    .flatMap((kind) => {
-      const { secret, config, title } = draft.trackers[kind];
-      const trimmed = Object.fromEntries(
-        Object.entries(config).map(([name, value]) => [name, value.trim()]),
-      );
-      return title === null ? [] : [{ kind, secret: secret.trim(), config: trimmed }];
-    });
+  return trackerKinds(draft).flatMap((kind) => {
+    const { secret, config, title } = draft.trackers[kind];
+    const trimmed = Object.fromEntries(
+      Object.entries(config).map(([name, value]) => [name, value.trim()]),
+    );
+    return title === null ? [] : [{ kind, secret: secret.trim(), config: trimmed }];
+  });
 }
 
 /** What each step needs before Next (or Create) is enabled. */
@@ -121,8 +120,7 @@ const READY: Record<StepLabel, (draft: Draft) => boolean> = {
   Connect: (draft) => draft.viewer !== null && draft.viewer.missingScopes.length === 0,
   Repository: (draft) => draft.repo !== null,
   Project: projectChosen,
-  Notion: (draft) => trackerSettled(draft, 'notion'),
-  Jira: (draft) => trackerSettled(draft, 'jira'),
+  Integrations: (draft) => trackerKinds(draft).every((kind) => trackerSettled(draft, kind)),
   Review: (draft) => draft.baseBranch.trim() !== '',
 };
 

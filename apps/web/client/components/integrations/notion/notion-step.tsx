@@ -1,4 +1,4 @@
-// The onboarding step that connects a Notion data source with its token, and how to get both.
+// The setup wizard's Notion form (under Integrations): a data source and its token, and how to get both.
 import type { ReactElement } from 'react';
 
 import { TokenInput } from '../../onboarding/connect-step';
