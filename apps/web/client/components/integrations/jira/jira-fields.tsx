@@ -5,11 +5,24 @@ import { TokenInput } from '../../onboarding/connect-step';
 import { Field, inputClass } from '../../ui';
 
 /** What the user types to connect Jira; the token is the secret, the rest its config. */
-export type JiraForm = { site: string; email: string; token: string; projectKey: string };
+export type JiraForm = {
+  site: string;
+  email: string;
+  token: string;
+  projectKey: string;
+  /** The type of the issues Union creates; empty: Task, else the project's first type. */
+  issueTypeId: string;
+};
 
 /** The config the server checks, from the form. */
 export function jiraConfigOf(form: JiraForm): Record<string, string> {
-  return { site: form.site.trim(), email: form.email.trim(), projectKey: form.projectKey.trim() };
+  const issueTypeId = form.issueTypeId.trim();
+  return {
+    site: form.site.trim(),
+    email: form.email.trim(),
+    projectKey: form.projectKey.trim(),
+    ...(issueTypeId === '' ? {} : { issueTypeId }),
+  };
 }
 
 /** The form from a saved config (no token: the browser never has it). */
@@ -18,7 +31,13 @@ export function jiraFormOf(config: Record<string, unknown> | undefined): JiraFor
     const value = config?.[name];
     return typeof value === 'string' ? value : '';
   };
-  return { site: text('site'), email: text('email'), token: '', projectKey: text('projectKey') };
+  return {
+    site: text('site'),
+    email: text('email'),
+    token: '',
+    projectKey: text('projectKey'),
+    issueTypeId: text('issueTypeId'),
+  };
 }
 
 export function JiraHelp(): ReactElement {
@@ -39,7 +58,8 @@ export function JiraHelp(): ReactElement {
       </li>
       <li>The project key is the letters before an issue&apos;s number: ABC for ABC-123.</li>
       <li>
-        Union only reads Jira, as that account: it must be able to see the project&apos;s issues.
+        Union acts in Jira as that account: it reads the project&apos;s issues, and moves, comments
+        on or creates them only when your rules, comments or investigations ask it to.
       </li>
     </ol>
   );

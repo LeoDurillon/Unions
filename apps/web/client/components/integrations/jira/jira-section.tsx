@@ -3,11 +3,13 @@ import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../../src/api-types';
 import { integrationsApi, projectIntegration } from '../../../lib/integrations-api';
+import { useJiraRuleSource } from '../../../lib/jira-rule-source';
 import { useSettingsForm } from '../../../lib/use-settings-form';
 import { SaveBar } from '../../settings/save-bar';
 import { Badge } from '../../ui';
 import { Disconnect } from '../disconnect';
 import { JiraFields, JiraHelp, jiraConfigOf, jiraFormOf, type JiraForm } from './jira-fields';
+import { JiraIssueTypeField } from './jira-issue-type-field';
 
 /** Jira is read with them before they are saved, so a typo never replaces a working connection. */
 async function connect(project: PublicProject, form: JiraForm): Promise<JiraForm> {
@@ -33,6 +35,7 @@ function invalidReason(connected: boolean, form: JiraForm): string | null {
 export function JiraSection({ project }: { project: PublicProject }): ReactElement {
   const integration = projectIntegration(project, 'jira');
   const connected = integration !== null;
+  const source = useJiraRuleSource(project.id);
   const form = useSettingsForm(
     () => jiraFormOf(integration?.config),
     (value) => connect(project, value),
@@ -57,6 +60,13 @@ export function JiraSection({ project }: { project: PublicProject }): ReactEleme
         }
         onChange={(value) => {
           form.set(value);
+        }}
+      />
+      <JiraIssueTypeField
+        types={source?.issueTypes ?? null}
+        value={form.value.issueTypeId}
+        onChange={(issueTypeId) => {
+          form.set({ ...form.value, issueTypeId });
         }}
       />
       <SaveBar state={form} label="Verify and save" invalid={invalidReason(connected, form.value)}>

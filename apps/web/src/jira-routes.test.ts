@@ -214,3 +214,17 @@ test("a ticket made from an import keeps the issue's attachments as its files", 
     ['screen.png', 'An image of the Jira issue'],
   ]);
 });
+
+test('the issue type of new issues is saved with the connection, and read back', async () => {
+  const created = await jiraProject();
+  const base = `/api/projects/${created.id}/integrations/jira`;
+  const saved = await send('PUT', base, { config: { ...CONFIG, issueTypeId: '10002' } });
+  expect(await saved.json()).toMatchObject({ config: { issueTypeId: '10002' } });
+  expect(db.select().from(schema.integrations).get()?.config).toMatchObject({
+    issueTypeId: '10002',
+  });
+  const refused = await send('PUT', base, { config: { ...CONFIG, issueTypeId: 'Task' } });
+  expect(refused.status).toBe(400);
+  const cleared = await send('PUT', base, { config: CONFIG });
+  expect(await cleared.json()).not.toHaveProperty('config.issueTypeId');
+});

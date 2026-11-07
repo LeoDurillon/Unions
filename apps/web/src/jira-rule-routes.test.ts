@@ -158,5 +158,11 @@ test('a project connected without reading Jira lists it as not read, so the edit
   const config = { site: 'https://acme.atlassian.net', email: 'a@b.c', projectKey: 'ABC' };
   saveIntegration(db, projectId, 'jira', { secret: 'tok', config });
   const listed = (await (await send('GET', base)).json()) as EventRulesResponse;
-  expect(listed.jira).toEqual({ title: '', readAt: null, statuses: [], fields: [] });
+  expect(listed.jira).toEqual({
+    title: '',
+    readAt: null,
+    statuses: [],
+    fields: [],
+    issueTypes: [],
+  });
 });

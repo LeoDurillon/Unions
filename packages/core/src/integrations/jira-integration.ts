@@ -86,6 +86,8 @@ export type JiraRuleSource = {
   readAt: number | null;
   statuses: JiraStatus[];
   fields: JiraFieldInfo[];
+  /** For the settings' issue type of new issues. */
+  issueTypes: JiraProject['issueTypes'];
 };
 
 export function jiraRuleSourceOf(db: Db, projectId: number): JiraRuleSource | null {
@@ -99,5 +101,6 @@ export function jiraRuleSourceOf(db: Db, projectId: number): JiraRuleSource | nu
     readAt: fields ? integration.fieldsReadAt : null,
     statuses: fields?.statuses ?? [],
     fields: fields?.fields ?? [],
+    issueTypes: fields?.issueTypes ?? [],
   };
 }

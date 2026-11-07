@@ -1,6 +1,6 @@
 # Create Jira issues from investigations
 
-Status: planned (2026-11-07); steps 1 and 2 built (branch `jira-create-issue`, 2026-11-07). Follows [Jira](jira.md), [Jira rule actions](jira-rule-actions.md) and
+Status: planned (2026-11-07); steps 1 to 3 built (branch `jira-create-issue`, 2026-11-07). Follows [Jira](jira.md), [Jira rule actions](jira-rule-actions.md) and
 [Jira comments on the ticket](jira-comments.md), all built. Scope: "Also create it in Jira" when an investigation
 writes a ticket, as "Also create it in Notion" does.
 
@@ -109,6 +109,13 @@ Each step ships on its own; `bun run check` after each.
    until step 3's setting.
 3. **Settings and the switch.** The issue type select; the switch shows for a Jira project. UI check
    (`scripts/ui-check/`): the select after Refresh, the switch beside Notion's, one on at a time.
+   Built: `jira-issue-type-field.tsx` in the Jira settings (not in the setup wizard: the types are not known
+   before connecting), the default as an empty value; the types come from the rules list's Jira source
+   (`JiraRuleSource.issueTypes`, read by `useJiraRuleSource`), sub-tasks left out, the select disabled until the
+   project is read. `JiraForm` carries `issueTypeId`, sent only when set. The settings' help no longer says
+   Union only reads Jira. UI check on a scratch database (writes blocked): the select's options (Story and Task,
+   not the sub-task), the saved config with `issueTypeId`, both switches on an answered investigation, one on at a
+   time, and the request with `target: "jira"`.
 4. **Real check and docs.** Ask the user first (it creates an issue in their Jira): an investigation on the SCRUM
    project with **Also create it in Jira**; check the issue in Jira (summary, description's headings and lists,
    type) and the ticket linked to it. Then `documentation/investigations.md`, `documentation/first-project.md`'s
