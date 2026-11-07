@@ -1,6 +1,6 @@
 # Jira
 
-Status: planned (2026-11-06); steps 1 to 3 built (branch `jira`, 2026-11-07). Scope: Jira Cloud, an API token, importing an issue as a ticket. Rule actions,
+Status: planned (2026-11-06); steps 1 to 4 built (branch `jira`, 2026-11-07). Scope: Jira Cloud, an API token, importing an issue as a ticket. Rule actions,
 creating issues from investigations and a comments tab are later plans (listed at the end).
 
 ## Why
@@ -168,6 +168,13 @@ Each step ships on its own; `bun run check` after each.
 4. **Attachments (D7, D8).** The converter's attachment links, `jira-files.ts`, the `FILES` signature change.
    Tests: links matched and unmatched, a link to another site or path not fetched, the redirect fetched without
    `Authorization`.
+   Built: the matching is core's `integrations/jira-attachments.ts` (`issueMarkdown`, called by the provider); only
+   PNG, JPEG, GIF and WebP attachments are images (as Notion's), SVG and others files. The converter now writes
+   plain link targets (`[name](url)`, not `(<url>)`), which the web's link scan reads. Notion's downloader moved to
+   `apps/web/src/tracker-files.ts` (a `FileSource` per tracker: which links, how to fetch, how files are named);
+   `notion-files.ts` keeps its behaviour and tests. `jira-files.ts` names files by their link text (Jira's file
+   names) when the download gives none. `withOriginFiles` takes the database and project to read the integration.
+   Checked against Bun's real `fetch` that `redirect: 'manual'` gives the 303 and its `Location`.
 5. **Real check and docs.** Against a real Jira Cloud site (a free one is enough; ask the user for a test site
    and token): connect, import an issue with a table, a code block, an image and a PDF; check the markdown and the
    ticket files. Then `docs/architecture/integrations.md` (Jira reads, D2, D3, D8), `docs/spec/flow.md` if it

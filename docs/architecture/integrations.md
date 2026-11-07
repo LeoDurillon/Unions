@@ -59,7 +59,12 @@
   (`integrations/jira-api.ts`, behind `JiraApi`; Basic auth with `email:token`, a 30 s timeout, redirects refused).
   The token is the integration's secret; the config is `{ site, email, projectKey }` (`jira-config.ts`), and the
   site must be `https://<name>.atlassian.net`: the client checks it again before each request, so the token never
-  goes to another host. A pasted link of another site is refused (`IntegrationKind.refError`). Union writes nothing
+  goes to another host. A pasted link of another site is refused (`IntegrationKind.refError`). The import links the
+  issue's attachments (`jira-attachments.ts`: a media node matched by file name, the rest listed under
+  "Attachments"), as `/rest/api/3/attachment/content/<id>` of the site; creating the ticket downloads them
+  (`apps/web/src/jira-files.ts`, over the shared `tracker-files.ts` that Notion's `notion-files.ts` uses too: only
+  that path of the configured site, with the token; Jira's redirect to its media host is followed by hand without
+  it, and only to https) into private ticket files, within the attachment limits. Union writes nothing
   to Jira yet: it has no `createItem` (`createsItems: false`, so investigations do not offer it).
 - A project reaches GitHub with a token (`projects.github_token`) or an installation of the GitHub App
   (`projects.github_installation_id`; the app's ID and private key are one row of `github_app`). Both are stored in

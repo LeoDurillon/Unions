@@ -218,8 +218,8 @@ test('media go through the resolver, unknown ones keep their name', () => {
   );
   expect(markdown).toBe(
     [
-      '![screen.png](<https://acme.atlassian.net/rest/api/3/attachment/content/1>)',
-      String.raw`[spec \[v2\].pdf](<https://acme.atlassian.net/rest/api/3/attachment/content/2>)`,
+      '![screen.png](https://acme.atlassian.net/rest/api/3/attachment/content/1)',
+      String.raw`[spec \[v2\].pdf](https://acme.atlassian.net/rest/api/3/attachment/content/2)`,
       '*lost.txt*',
     ].join('\n\n'),
   );

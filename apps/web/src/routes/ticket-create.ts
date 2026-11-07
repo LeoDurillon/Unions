@@ -31,7 +31,12 @@ export async function addTicket(db: Db, c: Context): Promise<Response> {
   }
   const origin = originOf(body);
   const flow = flowOf(db, body) ?? null;
-  const { markdown, files } = await withOriginFiles(origin, optionalText(body, 'body') ?? '');
+  const { markdown, files } = await withOriginFiles(
+    db,
+    projectId,
+    origin,
+    optionalText(body, 'body') ?? '',
+  );
   const ticket = createTicket(db, {
     projectId,
     title: requireText(body, 'title'),

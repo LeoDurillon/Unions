@@ -19,7 +19,8 @@ export function mediaMarkdown(node: AdfNode, context: AdfContext): string {
     return `*${(media.alt ?? 'attachment').replaceAll(LINK_TEXT, (c) => `\\${c}`)}*`;
   }
   const name = link.name.replaceAll(LINK_TEXT, (c) => `\\${c}`);
-  return `${link.image ? '!' : ''}[${name}](<${link.url}>)`;
+  // A plain target: the web finds the links to download by it (the resolver's URLs hold no spaces).
+  return `${link.image ? '!' : ''}[${name}](${link.url})`;
 }
 
 /** A `mediaSingle` or `mediaGroup`: its media nodes, separated by spaces (a caption is dropped). */

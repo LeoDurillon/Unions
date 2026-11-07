@@ -1,4 +1,7 @@
-import { beforeEach, expect, test } from 'bun:test';
+import { afterAll, beforeEach, expect, test } from 'bun:test';
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 
 import {
   createDb,
@@ -16,7 +19,16 @@ import type { PublicProject, SourceImport } from './api-types';
 import { createApp } from './app';
 import type { OnboardingGitHub } from './github-onboarding';
 
+const root = await mkdtemp(path.join(tmpdir(), 'union-jira-routes-'));
+process.env.UNION_ATTACHMENTS_DIR = root;
+
+afterAll(async () => {
+  await rm(root, { recursive: true, force: true });
+});
+
 const SITE = 'https://acme.atlassian.net';
+const SCREEN = { id: '10', filename: 'screen.png', mimeType: 'image/png', content: '' };
+const PNG = new Uint8Array([137, 80, 78, 71]);
 const CONFIG = { site: 'acme', email: 'ada@acme.com', projectKey: 'abc' };
 const JIRA = { kind: 'jira', secret: 'token-ok', config: CONFIG };
 
@@ -50,7 +62,8 @@ const jira: JiraApi = {
       summary: 'Add dark mode',
       projectKey: key.split('-')[0] ?? '',
       description,
-      attachments: [],
+      // ABC-5 has a screenshot the text does not show: it is listed, then kept as a ticket file.
+      attachments: key === 'ABC-5' ? [SCREEN] : [],
     };
   },
 };
@@ -64,9 +77,9 @@ beforeEach(() => {
   app = createApp(db, {} as OnboardingGitHub, {} as NotionApi, { jira });
 });
 
-function send(method: string, path: string, body?: unknown): Response | Promise<Response> {
+function send(method: string, apiPath: string, body?: unknown): Response | Promise<Response> {
   const init = { method, headers: { 'content-type': 'application/json' } };
-  return app.request(path, body === undefined ? init : { ...init, body: JSON.stringify(body) });
+  return app.request(apiPath, body === undefined ? init : { ...init, body: JSON.stringify(body) });
 }
 
 function verify(secret: string, config: unknown): Response | Promise<Response> {
@@ -147,4 +160,46 @@ test('an issue of the project is imported by key or link, and becomes the ticket
     originId: 'ABC-1',
     originUrl: `${SITE}/browse/ABC-1`,
   });
+});
+
+test("a ticket made from an import keeps the issue's attachments as its files", async () => {
+  const created = await jiraProject();
+  const imported = (await (
+    await send('POST', `/api/projects/${created.id}/integrations/jira/import`, { ref: 'ABC-5' })
+  ).json()) as SourceImport;
+  const url = `${SITE}/rest/api/3/attachment/content/10`;
+  expect(imported.body).toContain(`## Attachments\n\n- ![screen.png](${url})`);
+  const realFetch = globalThis.fetch;
+  const asked: (string | null)[] = [];
+  globalThis.fetch = Object.assign(
+    (input: string | URL | Request, init?: RequestInit) => {
+      asked.push(new Headers(init?.headers).get('authorization'));
+      const target = input instanceof Request ? input.url : input.toString();
+      return Promise.resolve(
+        target === url
+          ? new Response(PNG, { headers: { 'content-type': 'image/png' } })
+          : new Response('gone', { status: 404 }),
+      );
+    },
+    { preconnect: realFetch.preconnect },
+  );
+  try {
+    const response = await send('POST', '/api/tickets', {
+      projectId: created.id,
+      title: imported.title,
+      body: imported.body,
+      origin: { kind: 'jira', id: imported.id, url: imported.url },
+    });
+    expect(response.status).toBe(201);
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+  expect(asked).toEqual([`Basic ${Buffer.from('ada@acme.com:token-ok').toString('base64')}`]);
+  expect(db.select().from(schema.tickets).get()?.body).toContain(
+    '- ![screen.png](attachment:screen.png)',
+  );
+  const files = db.select().from(schema.ticketAttachments).all();
+  expect(files.map(({ name, note }) => [name, note])).toEqual([
+    ['screen.png', 'An image of the Jira issue'],
+  ]);
 });

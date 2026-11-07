@@ -1,6 +1,6 @@
 // Jira Cloud as an `IntegrationProvider`: verify, read the project's types and statuses, and import an issue of it.
-import { adfMarkdown } from './adf-markdown';
 import type { JiraApi, JiraAuth } from './jira-api';
+import { issueMarkdown } from './jira-attachments';
 import { jiraConfigOf } from './jira-config';
 import type { JiraProject, JiraStatus } from './jira-parse';
 import { ItemOutsideSourceError, type IntegrationProvider, type SourceItem } from './provider';
@@ -34,7 +34,7 @@ async function item(
     id: issue.key,
     title: issue.summary,
     url: `${auth.site}/browse/${issue.key}`,
-    markdown: adfMarkdown(issue.description),
+    markdown: issueMarkdown(issue, auth.site),
     truncated: false,
   };
 }

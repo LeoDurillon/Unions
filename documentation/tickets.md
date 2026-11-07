@@ -42,8 +42,9 @@ Click **New ticket** in the project bar. The dialog has one tab per source:
   which stop working after about an hour. Click **Edit before creating** to change the text first.
 - **From Jira** (when the project is connected to Jira): the key (`ABC-123`) or link of an issue of the connected
   Jira project. A board link with the issue open works too. Union copies its summary as the title and its
-  description as Markdown, with tables, code blocks, checklists and panels. Images and attached files are not kept
-  as ticket files yet: they show by name in the text. The ticket links back to the issue. Union only reads Jira:
+  description as Markdown, with tables, code blocks, checklists and panels. It keeps the issue's images and
+  attached files as the ticket's files, which the agents can read: those the description shows stay in place, the
+  others are listed under **Attachments** at the end. Files above the size limits stay as links to Jira. The ticket links back to the issue. Union only reads Jira:
   nothing is written there.
 
 In every tab you can also:
