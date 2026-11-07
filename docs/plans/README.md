@@ -114,7 +114,10 @@ and linked.
 - [Jira issues in reviews of other people's pull requests](jira-pr-reviews.md): issues suggested from the keys a
   pull request names, linked as specs, a review's Jira tab, review rules acting on them. Built and deployed (2026-11-07).
 - [More Jira fields in rules](jira-more-fields.md): users, multi-selects and checkboxes, versions, components and
-  sprints in **Set fields of the ticket's Jira issue**. Built (2026-11-07).
+  sprints in **Set fields of the ticket's Jira issue**. Built and deployed (2026-11-07); the editor's lists checked on a real site.
+- [One adapter per tracker](tracker-adapters.md): what Notion and Jira do (comments, statuses, fields, links,
+  specs, reviews, files) behind one `TrackerAdapter` with capabilities, shared field types and rule actions, one
+  contract test suite and an ast-grep guard, so a new tracker is an adapter and its settings. Planned (2026-11-07).
 - [Formatted Jira comments](jira-comment-formatting.md): markdown in the Jira tab's comments through `markdownAdf`,
   rule comments unchanged. Built and deployed (2026-11-07), checked on a real site.
 - [Update Union from the sidebar](self-update.md): an Update button enabled when the checkout is behind the remote's

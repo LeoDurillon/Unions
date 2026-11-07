@@ -1,6 +1,6 @@
 # More Jira fields in rules
 
-Status: built (branch `jira-more-fields`, 2026-11-07), steps 1 to 4 but the real check. Follows [Jira rule actions](jira-rule-actions.md), built (text, multi-line text,
+Status: built and deployed (2026-11-07), steps 1 to 4; the editor's lists checked on the user's site, a rule's run not yet. Follows [Jira rule actions](jira-rule-actions.md), built (text, multi-line text,
 number, date, date and time, single select, labels).
 
 ## Why
