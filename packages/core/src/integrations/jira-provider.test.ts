@@ -102,6 +102,7 @@ const jira: JiraApi = {
   transitionIssue: () => Promise.reject(new Error('Not used')),
   updateIssue: () => Promise.reject(new Error('Not used')),
   addComment: () => Promise.reject(new Error('Not used')),
+  comments: () => Promise.resolve({ comments: [], total: 0 }),
   attachmentMediaId: (auth, attachmentId) => {
     checked(auth);
     mediaLookups.push(attachmentId);

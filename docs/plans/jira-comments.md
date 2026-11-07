@@ -1,6 +1,6 @@
 # Jira comments on the ticket
 
-Status: planned (2026-11-07). Follows [Jira](jira.md) (import) and [Jira rule actions](jira-rule-actions.md)
+Status: planned (2026-11-07); step 1 built (branch `jira-comments`, 2026-11-07). Follows [Jira](jira.md) (import) and [Jira rule actions](jira-rule-actions.md)
 (the worker writes to Jira). Modeled on [Notion comments on the ticket](notion-comments.md), built: read the
 issue's comments in a ticket tab, post one from Union, add one to the ticket's review.
 
@@ -101,6 +101,11 @@ Each step ships on its own; `bun run check` after each.
 1. **Core: reading comments.** `JiraApi.comments` with paging and its fake, `commentsOf`, restriction badges, media
    by name. Tests on comment bodies with paragraphs, mentions, code, media, a restricted and an internal comment,
    paging past 500.
+   Built: `integrations/jira-comments.ts` (`commentPageOf`, `JiraComment`: author, `accountId` or null, created,
+   updated, `edited`, `restriction`, markdown through `adfMarkdown` with media by name, the comment's link) and
+   `JiraApi.comments` (`FetchJiraApi`: `orderBy=-created`, 100 a page, at most 5 pages, then reversed so the tab
+   lists oldest first; `total` is the issue's count, so the tab can say how many it leaves out). The test fakes of
+   the import gained it. `jiraCommentUrl` stays in the file until step 4's review import needs it.
 2. **The tab, read only.** The route's `GET`, the tab, D1's tab choice. Route tests with the fake. UI check
    (`scripts/ui-check/`): the tab on a Jira ticket, Refresh, the Notion tab unchanged on a Notion ticket. Then a
    read-only check on the user's SCRUM-1 (reading only: no need to ask).

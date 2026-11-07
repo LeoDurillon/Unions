@@ -239,3 +239,38 @@ test("reads an issue's transitions, status and edit screen", async () => {
     labels: { allowedValues: null },
   });
 });
+
+/** A page of `count` comments, newest first from `first` down, of an issue that has `total`. */
+function commentPage(first: number, count: number, total: number): unknown {
+  const comments = Array.from({ length: count }, (_, index) => ({
+    id: String(first - index),
+    author: { displayName: 'Ada' },
+    body: { type: 'doc', content: [] },
+    created: '2026-11-07T09:00:00.000+0000',
+  }));
+  return { startAt: 0, maxResults: 100, total, comments };
+}
+
+test("an issue's comments are read newest first, then shown oldest first", async () => {
+  const seen = answer(() => json(commentPage(3, 3, 3)));
+  const read = await new FetchJiraApi().comments(AUTH, 'ABC-1');
+  expect(read.comments.map((comment) => comment.id)).toEqual(['1', '2', '3']);
+  expect(read.total).toBe(3);
+  expect(seen.map((request) => request.url)).toEqual([
+    'https://acme.atlassian.net/rest/api/3/issue/ABC-1/comment?orderBy=-created&startAt=0&maxResults=100',
+  ]);
+});
+
+test('a long issue keeps its last 500 comments and says how many it has', async () => {
+  let page = 0;
+  const seen = answer(() => {
+    const newest = 650 - page * 100;
+    page += 1;
+    return json(commentPage(newest, 100, 650));
+  });
+  const read = await new FetchJiraApi().comments(AUTH, 'ABC-1');
+  expect(seen).toHaveLength(5);
+  expect(read.total).toBe(650);
+  expect(read.comments).toHaveLength(500);
+  expect([read.comments[0]?.id, read.comments.at(-1)?.id]).toEqual(['151', '650']);
+});

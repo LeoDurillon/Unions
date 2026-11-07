@@ -1,4 +1,5 @@
 // The Jira Cloud calls Union makes (`JiraApi`), and the client that makes them over fetch (REST v3, API token).
+import { commentPageOf, type JiraComment, type JiraCommentPage } from './jira-comments';
 import { jiraSiteOf } from './jira-config';
 import { JiraError } from './jira-error';
 import type { JiraFieldInfo } from './jira-field-types';
@@ -28,6 +29,10 @@ const NOT_FOUND = 404;
 const TOO_MANY_REQUESTS = 429;
 const REQUEST_TIMEOUT_MS = 30_000;
 const ISSUE_FIELDS = 'summary,description,attachment,project';
+/** Jira's largest page of comments. */
+const COMMENTS_PER_PAGE = 100;
+/** 500 comments: an issue with more is read in Jira for its oldest ones. */
+const MAX_COMMENT_PAGES = 5;
 
 /** Who calls: the site, and the account's email and API token (Basic auth). */
 export type JiraAuth = { site: string; email: string; token: string };
@@ -60,6 +65,11 @@ export type JiraApi = {
    * Read from where Jira redirects its download, without downloading; null when it does not say.
    */
   attachmentMediaId(auth: JiraAuth, attachmentId: string): Promise<string | null>;
+  /**
+   * The issue's comments, oldest first: the last `MAX_COMMENT_PAGES` pages of them when it has more,
+   * with how many it has (`total`), so the tab can say how many it leaves out.
+   */
+  comments(auth: JiraAuth, key: string): Promise<JiraCommentPage>;
 };
 
 function failure(status: number, body: unknown, retryAfter: string | null): JiraError {
@@ -179,6 +189,26 @@ export class FetchJiraApi implements JiraApi {
 
   async addComment(auth: JiraAuth, key: string, body: AdfDocument): Promise<void> {
     await this.get(auth, `${issuePath(key)}/comment`, { method: 'POST', body: { body } });
+  }
+
+  async comments(auth: JiraAuth, key: string): Promise<JiraCommentPage> {
+    const site = jiraSiteOf(auth.site) ?? auth.site;
+    const comments: JiraComment[] = [];
+    let total = 0;
+    // Newest first, so a long issue keeps its latest comments; shown oldest first.
+    for (let page = 0; page < MAX_COMMENT_PAGES; page += 1) {
+      const query = `orderBy=-created&startAt=${page * COMMENTS_PER_PAGE}&maxResults=${COMMENTS_PER_PAGE}`;
+      // Pages follow one another: each starts where the one before ended.
+      // oxlint-disable-next-line no-await-in-loop
+      const body = await this.get(auth, `${issuePath(key)}/comment?${query}`);
+      const read = commentPageOf(body, site, key);
+      comments.push(...read.comments);
+      ({ total } = read);
+      if (read.comments.length < COMMENTS_PER_PAGE || comments.length >= total) {
+        break;
+      }
+    }
+    return { comments: comments.toReversed(), total: Math.max(total, comments.length) };
   }
 
   async attachmentMediaId(auth: JiraAuth, attachmentId: string): Promise<string | null> {

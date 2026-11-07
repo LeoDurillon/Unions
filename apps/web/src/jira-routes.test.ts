@@ -59,6 +59,7 @@ const jira: JiraApi = {
   transitionIssue: () => Promise.reject(new Error('Not used')),
   updateIssue: () => Promise.reject(new Error('Not used')),
   addComment: () => Promise.reject(new Error('Not used')),
+  comments: () => Promise.resolve({ comments: [], total: 0 }),
   fields: () => Promise.resolve([{ id: 'customfield_10050', name: 'PR link', type: 'text' }]),
   issue: async (auth, key) => {
     await allowed(auth);
