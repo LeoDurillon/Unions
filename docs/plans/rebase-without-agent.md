@@ -1,6 +1,6 @@
 # Plan: rebase without an agent when there is no conflict
 
-Status: built (2026-10-17, not committed yet). Decisions taken (2026-10-17): the host tries the rebase first,
+Status: built (2026-10-17, commit `a0499bd`). Decisions taken (2026-10-17): the host tries the rebase first,
 and the agent runs only on a conflict or when the checks fail after a clean rebase. The final review runs again
 only when an agent wrote code. Built as planned, except: the host attempt is in `rebase-host.ts` and the attempt's
 paths in `rebase-attempt.ts` (`rebase.ts` was at the import limit); the Log lines are one `union_note` event type

@@ -44,7 +44,8 @@ it would remove. None of them touch GitHub or Notion.
 | A ticket's code and agent session                                         | Container `union-t<id>`, volumes `union-t<id>-home` and `union-t<id>-ws` |
 | A preview's containers and data                                           | Compose project `union-t<id>` (or `union-r<id>` for a pull request)      |
 
-GitHub stays the reference for each ticket's title, description and column; Union owns the state of its runs.
+A ticket's GitHub issue stays the reference for its title and description, and a connected GitHub Project for its
+column; Union owns the state of its runs.
 
 Containers and volumes of a ticket, and its preview with the images it built, are removed once its pull request is
 merged or the ticket is cancelled, and when you remove the ticket, delete the project or reset the database. A Done

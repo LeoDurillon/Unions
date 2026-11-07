@@ -2,7 +2,8 @@
 
 Status: ideas left out of Events v1 (`9bfae3b`). "More actions" is planned below: step 1 (one handler per
 action kind) and its first new target (a GitHub comment on the issue or the PR, the rule picks) are done; targets
-2 to 5 and the rest are not started.
+2 and 3 are built for the pull request (labels) and the GitHub Project (fields), below; labels on the issue, the
+webhook (deferred), the Notion comment and the rest are not started.
 
 Events v1: rules on a project, triggered by ticket events, setting one property of the ticket's Notion page (tickets
 imported from Notion only), applied to events logged after the rule's creation.

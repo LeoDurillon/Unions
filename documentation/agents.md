@@ -24,9 +24,9 @@ Changes apply from the next run, including on tickets already running.
 | General        | **Shared instructions**: sent first to every agent     | –                           |
 | Planning       | Intake, Summary, Technical, Test plan                  | Haiku, Sonnet, Opus, Sonnet |
 | Implementation | Implementation, Final review                           | Opus, Opus                  |
-| Size           | Trim                                                   | Implementation's            |
+|                | Trim                                                   | Implementation's            |
 | Pull requests  | PR description, Replies to GitHub comments, Split plan | Opus, Opus, Opus            |
-| Branch history | Rebase, Simplify history, Split into a stack           | Implementation's            |
+|                | Rebase, Simplify history, Split into a stack           | Implementation's            |
 | Review         | Review comments, Group by spec, Explain, Spec report   | Opus, Sonnet, Haiku, Opus   |
 | Memory         | Lesson writer, Lesson tidier                           | Haiku, Sonnet               |
 

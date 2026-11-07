@@ -1,5 +1,5 @@
 // The ticket panel's keys: Escape closes it, n / p open the next or previous ticket that needs the
-// user, r opens the review, 1 to 4 switch its tabs.
+// user, r opens the review, 1 to 5 switch its tabs.
 import { useQuery } from '@tanstack/react-query';
 
 import type { TicketDetail, TicketSummary } from '../../src/api-types';

@@ -1,7 +1,8 @@
 # Plan: project settings as a page
 
 Status: steps 1 to 5 built (from step 4, the deep link from a ticket's Preview section only); step 6 (a shared
-"Union settings" area) not started. The layout below is as built, with the sections added since
+"Union settings" area) built as [Union settings as a page](union-settings-page.md). Left: the two links from step 4
+(a failed rule delivery, the setup wizard's last step). The layout below is as built, with the sections added since
 (Files, compose additions, profiles, agent services).
 
 ## Why
@@ -90,4 +91,4 @@ one with design decisions.
 
 ## Decisions open
 
-- **Step 6**: planned in [Union settings as a page](union-settings-page.md), as a separate area with the same shell.
+- **Step 6**: built in [Union settings as a page](union-settings-page.md), as a separate area with the same shell.

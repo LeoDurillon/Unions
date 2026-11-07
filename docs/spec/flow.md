@@ -7,7 +7,7 @@
    optional Integrations step, or project settings): from Notion (integration secret + data source; the page must be
    a row of that data source), or from Jira Cloud (site, account email, API token + project key; the issue must be
    of that project, its description converted to markdown and its attachments kept as ticket files)
-   → GitHub issue (when the project mirrors issues) added to the Project (when it has one). Union only reads Jira. Or import an existing issue of the repository (number or URL; pull requests
+   → GitHub issue (when the project mirrors issues) added to the Project (when it has one). Union writes to Jira only from the worker: event rules move the issue, set its fields or comment, the Jira tab posts comments, and an investigation can create an issue. Or import an existing issue of the repository (number or URL; pull requests
    and issues already on a ticket are refused): the ticket is on that issue, which the sync adds to the Project
    instead of creating one, and its title and description keep following GitHub. A Notion page edited before
    creating (Edit before creating) stays linked to the ticket and still gets its images, unless unlinked in the form.
@@ -19,7 +19,7 @@
 3. Planning steps, each a tab on the ticket: `intake` (Haiku) → `summary` (Sonnet) → `technical` (Opus) → `test_plan` (Sonnet),
    or only those the ticket's flow keeps (none for a Quick ticket), with the user's [custom agents](custom-agents.md)
    where the flow places them (one may also run after the implementation, before the final review).
-   After each, the user clicks **Approve** or **Revise** (with feedback). Revise resumes the agent session.
+   After each, the user clicks **Approve** or **Request revision** (with feedback), which resumes the agent session.
    **Start over** (`start_over`, while the step awaits approval, failed or hit the usage limit) runs it again from
    scratch: the phase carries `fresh`, so the run resumes no session and its prompt has no earlier version or
    feedback; a fresh run that stops retries fresh. Earlier versions stay in the history. Planning and custom steps
@@ -40,7 +40,8 @@
    `.github/PULL_REQUEST_TEMPLATE/`), in the template's language, else a short summary, changes and testing in the
    ticket's language. The host adds `Closes #n` (and the stacked-PR note) below it; if the turn fails, the PR gets
    that default body. An existing PR is never redescribed. Install and check commands are set per project. Reviewer
-   agents and the refactor pass are not built yet.
+   agents are the user's [custom agents](custom-agents.md): a step placed after the implementation, or a review
+   agent run from a review page. The refactor pass is not built yet.
 5. `final_review`: a fresh review agent (read-only plus `git diff/log/show/status`) compares the branch with the approved
    plan and starts its review with `VERDICT: APPROVED` or `VERDICT: CHANGES_REQUESTED`. It does not re-run the
    checks; it states the last result from the implementation report. Only bugs, missing acceptance criteria,
@@ -68,14 +69,14 @@
    imported, its text unchanged; a ticket has one origin, so linking the other tracker's item or unlinking it is
    refused (409).
    The ticket panel's tabs: **Overview** (description, links, actions, runs), **Preview**, **Worker** (one tab per
-   step, then the Log; it follows the running step), **Notion** (the open discussions of the ticket's Notion page,
-   read when the tab opens, with Reply in each and New comment, which the worker posts; enabled for a ticket linked
-   to a page) or, in its place for a ticket imported from Jira, **Jira** (the issue's comments, the latest 500, read
-   when the tab opens, with Reply, a new comment mentioning the author, and New comment, which the worker posts;
-   Add to review makes one a `general` draft, sent under "On the spec (Jira comments)" and asked no reply) and
-   **PR** (link the pull request, then its GitHub discussion, with
+   step, then the Log; it follows the running step), **PR** (link the pull request, then its GitHub discussion, with
    Reply, Quote reply and the implementer's suggested replies: see
-   [Replies to comments](pull-requests.md#replies-to-comments)). From the PR tab or the review header, **Import** adds the unresolved line-comment threads as drafts,
+   [Replies to comments](pull-requests.md#replies-to-comments)), then **Notion** (the open discussions of the
+   ticket's Notion page, read when the tab opens, with Reply in each and New comment, which the worker posts;
+   enabled for a ticket linked to a page) or, in its place for a ticket imported from Jira, **Jira** (the issue's
+   comments, the latest 500, read when the tab opens, with Reply, a new comment mentioning the author, and New
+   comment, which the worker posts; Add to review makes one a `general` draft, sent under "On the spec (Jira
+   comments)" and asked no reply). From the PR tab or the review header, **Import** adds the unresolved line-comment threads as drafts,
    replies folded in with their authors; each lands on its lines of the current diff, or reads as outdated with
    GitHub's excerpt when those lines are gone. Review summaries and conversation comments are added one by one
    (**Add to review**), since bots post many of them: they become `general` drafts (no file or lines), sent under

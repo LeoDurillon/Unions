@@ -1,13 +1,13 @@
 # Plans and ideas
 
-Features discussed but not built yet. Each file says its status; designs already in the spec (`docs/spec/`) are summarized there
-and linked.
+Features discussed, planned or built. Each entry gives its status (built, partly built, planned), as does each
+file; designs already in the spec (`docs/spec/`) are summarized there and linked.
 
 ## Planned in detail
 
 - [What the agents' logs say to improve](usage-insights.md): findings on the Usage tab from each call's tokens
   and tool uses (part 1 built), then a Claude run that proposes the changes (part 2 built, branch
-  `usage-suggestions`).
+  `usage-suggestions`); part 3 (comparing the figures before and after a change) planned.
 - [UI/UX review](ui-review.md): built (2026-10-24), steps 1 to 5: quick wins, action hierarchy,
   navigation, the board and per-page fixes.
 - [One set of specs per review](review-specs.md): a Specs bar read by Review with agent, Explain and Group by
@@ -22,8 +22,8 @@ and linked.
   steps 1 to 5 (branch `pr-checks`).
 - [Split a PR into a stack](pr-stack.md): a ticket's PR cut into stacked PRs, one per part of the spec, still one
   ticket; revise, rebase and merge keep the stack in order. Split after the fact first, then slices from the plan.
-  Risks resolved; part A built (branch `pr-stack`, 2026-10-20, spec in `docs/spec/pr-stacks.md`), behind a
-  project setting; part B (slices from the plan) left.
+  Risks resolved; part A built (branch `pr-stack`, 2026-10-20, spec in `docs/spec/pr-stacks.md`), still behind a
+  project setting that is off by default; part B (slices from the plan) left.
 - [Stacked PRs in Pull requests and Current reviews](stacked-pr-reviews.md): a stack shows as one item, its review
   page picks a PR in a segmented control, and the agent reviews the whole stack against several specs linked to its
   PRs. Built, steps 1 to 4 (branch `stacked-pr-reviews`); one v1 item left (the size warning).
@@ -36,7 +36,8 @@ and linked.
   (branch `github-stack-reads`, 2026-10-21).
 - [MCP servers for agents](mcp-servers.md): claude.ai connectors built (Figma); HTTP and stdio servers left.
 - [Preview environments](preview-environments.md): compose-based previews with e2e tests (built, phases 1 to 4).
-- [Project settings as a page](project-settings-page.md): grouped side menu instead of the nine-tab modal (steps 1 to 5 built).
+- [Project settings as a page](project-settings-page.md): grouped side menu instead of the nine-tab modal (steps 1 to 5
+  built; step 6 built as [Union settings as a page](union-settings-page.md)); two links from step 4 left.
 - [Union settings as a page](union-settings-page.md): Agent settings and GitHub App in the same shell, one page per
   agent, and a Models page. Built (branch `union-settings`).
 - [Notifications in Union](notifications.md): an inbox of what needs you (approvals, failures, usage limit, merged
@@ -48,14 +49,15 @@ and linked.
   (branch `run-token-usage`).
 - [Rebase without an agent](rebase-without-agent.md): the host rebases first; the agent runs only on a conflict or
   when the checks fail after a clean rebase, and the final review runs again only when the agent changed code.
-  Built (2026-10-17).
+  Built (2026-10-17, commit `a0499bd`).
 - [Reset a preview](preview-reset.md): drop a preview's containers, volumes (agent services included) and built
   images, and the data folders git ignores the user ticks, then start it fresh; the code is kept. Built, steps 1 to 6.
 - [Previews of pull requests under review](review-previews.md): a review's own preview at the reviewed commit
   (`union-r<id>`, `r<id>.localhost`), with its e2e tests and Commands, in a container of its own; no agent, no
   GitHub writes, never the project's secrets for a fork. Built (branch `review-previews`).
 - [Spend fewer tokens per ticket](agent-token-savings.md): re-reviews that know the previous round, a size limit
-  on the implementer's session, rebase, simplify and the PR description in fresh sessions. Planned (2026-10-17).
+  on the implementer's session, rebase, simplify and the PR description in fresh sessions. Step 1 built
+  (2026-10-17, commit `7ab1d85`); steps 2 to 5 planned.
 - [A size budget for each change](change-budget.md): the technical step estimates the lines of code, the host
   measures the change (tests and generated files left out), and over budget the implementer cuts once and says why
   the rest is needed, shown at the review. Built (branch `change-budget`, 2026-11-06); the review page's header left.
@@ -75,7 +77,8 @@ and linked.
   steps 1 to 3 (2026-11-06); step 4 (checks on the Memory page that cost no Claude usage) planned.
 - [Link a review to its Notion page](review-notion-link.md): a pull request under review linked to a Notion page
   gets a Notion tab with the page's text, and Group by spec and Review with agent read that page without its URL
-  again. Built, steps 1 to 3 (branch `review-notion-link`); D6 waits on Notion comments.
+  again. Built, steps 1 to 3 (branch `review-notion-link`); D6 (the page's discussions in the tab) built read only
+  with step 5 of Notion comments.
 - [Reply to pull request comments](pr-comment-replies.md): Reply on a line thread and Quote reply on a
   conversation comment, from a review's Comments tab and a ticket's PR tab; the worker posts. After a revision on
   imported GitHub comments, the implementer suggests a reply to each, a draft until the user sends it. Built,
@@ -97,7 +100,8 @@ and linked.
   second implementation. Refactor, built (branch `source-integrations`, 2026-10-24), steps 1 to 6.
 - [Jira](jira.md): connect a project to a Jira Cloud project with an API token, import an issue as a ticket (ADF
   converted to markdown, attachments kept as ticket files), from the wizard's Integrations step or the settings.
-  Built and deployed (2026-11-07), checked on a real site; rule actions, creating issues and a comments tab later.
+  Built and deployed (2026-11-07), checked on a real site; rule actions, creating issues and a comments tab built
+  since, as their own plans below.
 - [Jira rule actions](jira-rule-actions.md): event rules that move the ticket's Jira issue to a status, set its
   fields and comment on it, written by the worker. Built and deployed (2026-11-07), checked on a real site.
 - [Jira comments on the ticket](jira-comments.md): a Jira tab on the ticket panel with the issue's comments, New
@@ -130,7 +134,9 @@ and linked.
   (branch `self-update`, 2026-10-21).
 - [A spec report on a review](review-report.md): on request, an agent compares the change with the review's specs
   and writes a full report (the important files to read first; each requirement done, partial, missing or
-  different, with its code and tests; what the spec did not ask for; risks, questions, docs), in a Report tab. Steps 1 to 5 built (branches `review-report` to `review-report-5`), decisions to confirm.
+  different, with its code and tests; what the spec did not ask for; risks, questions, docs), in a Report tab.
+  Steps 1 to 9 built (2026-10-27, branches `review-report` to `review-report-9`; 7 to 9 make it a triage),
+  decisions to confirm.
 - [Code quality](code-quality.md): a coverage floor and a check for untested files, tests for the client's hooks,
   import boundaries with dependency-cruiser, mutation testing of the state machine, splitting the files at the
   300-line limit, and smaller checks. Planned (2026-10-23), decisions to confirm.
@@ -148,7 +154,9 @@ and linked.
   model and ticket. Built (2026-11-04); dark mode not looked at.
 - [A project's Repository tab](repository-view.md): the whole repository at a branch or commit, read from GitHub:
   a folder tree with a path filter, files highlighted with line links, Markdown and images rendered; links in from
-  the review page. Steps 1 and 2 built (2026-11-05, branch `repository-view`); steps 3 to 5 left.
+  the review page. Steps 1 and 2 built (2026-11-05, branch `repository-view`), and most of step 3 (the branch
+  picker, Markdown, images); left: folder READMEs, line selection and Copy link (step 3), the links in (step 4),
+  search (step 5).
 - [A custom agent image per project](project-agent-image.md): a Dockerfile in the project settings, extending
   `union-agent`, built and checked on **Save and build** and applied only when it passes; tickets, investigations
   and reviews run on it. Built (branch `project-agent-image`, 2026-11-07); the page not yet seen in a browser.
@@ -164,7 +172,7 @@ Loose ends found while building, not planned yet (2026-10-15):
 - Ticket 7 (PR #1603) builds on the branch of #1582, which was closed: the user may want to retarget it to the base
   branch (Overview → base branch).
 - Project settings as a page: the two links left from step 4 ([the plan](project-settings-page.md)); step 6 is
-  planned in [Union settings as a page](union-settings-page.md).
+  built as [Union settings as a page](union-settings-page.md).
 - The check and e2e timeouts stop `docker exec` but leave the command running in the container; the Commands runner
   kills its process group (`container-run.ts`), the gate and e2e should too.
 - The web UI on 5173 is reachable from the local network (compose publishes it on all addresses); restrict it to
@@ -178,9 +186,9 @@ Loose ends found while building, not planned yet (2026-10-15):
 - [Show older merged tickets](board-older-merged.md)
 - [Exclude merged PRs from the ticket view](exclude-merged-prs.md) (scope to clarify)
 - [Revise with guidance after a failed rebase](rebase-revise-with-guidance.md)
-- [Download attachments from GitHub and Notion on import](attachment-downloads.md) (Notion images and files done)
-- [Events v2](events-v2.md): more actions (GitHub comment built; labels, Project fields, Notion comment planned;
-  webhook deferred), replay, filters, group triggers
+- [Download attachments from GitHub and Notion on import](attachment-downloads.md) (Notion and Jira files done, GitHub left)
+- [Events v2](events-v2.md): more actions (GitHub comment, pull request labels and GitHub Project fields built;
+  Notion comment planned; webhook deferred), replay, filters, group triggers
 - [Names in the event rule preview](rule-preview-people.md) (small)
 
 ## Chores

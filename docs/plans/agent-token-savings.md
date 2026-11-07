@@ -1,6 +1,6 @@
 # Plan: spend fewer tokens per ticket
 
-Status: step 1 built (2026-10-17, branch `token-savings`); steps 2 to 5 planned.
+Status: step 1 built (2026-10-17, branch `token-savings`, commit `7ab1d85`); steps 2 to 5 planned.
 
 ## Problem
 

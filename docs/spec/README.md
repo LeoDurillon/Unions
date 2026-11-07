@@ -49,8 +49,10 @@ project mirrors tickets as issues (the default).
   simplification and the split into a stack resume the implementer's session with its model and effort
   (`IMPLEMENTER_SESSION` in `agents.ts`). The PR description and the replies resume it too, but have their own
   settings, which start on the Implementation default model (Opus).
-  Only four default prompts carry a format a parser reads (Intake's `Answer:` lines, the final review's `VERDICT:`
-  line, the split plan's `## Slice <n>:` sections, the split's `Slice: <n>` trailers); `agents.test.ts` keeps them.
+  Only five default prompts carry a format a parser reads (Intake's `Answer:` lines, the technical plan's
+  `Estimated size: <n> lines of code`, the final review's `VERDICT:` line, the split plan's `## Slice <n>:`
+  sections, the split's `Slice: <n>` trailers); `agents.test.ts` keeps them, and the agent's page warns when an
+  edit drops one (`prompt-formats.ts`).
   The worker appends every other output format after the user's prompt, so an edit cannot break it.
 - Final review: the user decides on `CHANGES_REQUESTED` (no automatic loop); the reviewer states the last check result
   instead of re-running the checks.

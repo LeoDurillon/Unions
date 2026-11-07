@@ -46,6 +46,8 @@ its step.
 - **GitHub**: tokens and the GitHub App's key stay in the database. They never reach the browser nor the agents'
   containers. The worker clones, fetches and pushes for the agents, from the host. The agents cannot push.
 - **Notion**: the integration secret stays in the database, and only the worker writes to Notion.
+- **Jira**: the API token stays in the database and is sent only to your Jira site. Only the worker writes to
+  Jira.
 - **Preview secrets**: kept on the server, given to the preview's services, never to the agent.
 
 Credentials are stored in plain text in `union.sqlite`, like any local application's settings: protect the file
@@ -67,7 +69,7 @@ on the Anthropic API. A Max subscription does not bill that amount; it helps com
 an agent runs. What you use elsewhere (Claude Code, claude.ai) shows at the next agent call, and the meter says how
 old its figures are when no agent has run for a while. Folded, the sidebar shows the higher of the two shares.
 
-A project's **Usage** tab (beside **Pull requests**) has two tabs, both over the last 7, 30 or 90 days, or since
+A project's **Usage** tab (beside **Repository**) has two tabs, both over the last 7, 30 or 90 days, or since
 the start. **Cost** adds up what its agents used: the API-equivalent cost, the agent calls and the tokens, a bar per week (hover one for its
 figures), then the cost per step, per model and for the most expensive tickets (click one to open it), with the
 investigations on their own line.
@@ -106,13 +108,15 @@ To use less:
 
 ## What GitHub sees
 
-| In Union            | On GitHub                                                 |
-| ------------------- | --------------------------------------------------------- |
-| A ticket            | An issue, added to the Project                            |
-| The ticket's column | The Project item's **Status**                             |
-| A step's output     | One comment on the issue, edited when the step is revised |
-| The ticket's branch | `<issue number>-<slug>`, pushed by the worker             |
-| The pull request    | A draft pull request that closes the issue                |
-| A parent ticket     | The child's issue is "blocked by" the parent's            |
+| In Union            | On GitHub                                                               |
+| ------------------- | ----------------------------------------------------------------------- |
+| A ticket            | An issue, unless the project turned issues off                          |
+| The ticket's column | With a GitHub Project connected, its item's **Status**                  |
+| A step's output     | One comment on the issue, edited when the step is revised               |
+| The ticket's branch | `<issue number>-<slug>`, or `union-<ticket id>-<slug>` without an issue |
+| The pull request    | A draft pull request, pushed by the worker, that closes the issue       |
+| A parent ticket     | The child's issue is "blocked by" the parent's                          |
 
-GitHub is the reference for a ticket's title, description and column: change them on GitHub and Union follows.
+A ticket's issue is the reference for its title and description: change them on GitHub and Union follows. With a
+GitHub Project connected, so is the item's Status: moving it on GitHub moves the ticket. Without an issue or a
+Project, Union is the only place they live.

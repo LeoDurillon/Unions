@@ -7,7 +7,7 @@
 | DB            | SQLite (`bun:sqlite`, WAL) + Drizzle, shared by web and worker                                |
 | Docker        | CLI behind a `ContainerRuntime` interface                                                     |
 | Agent         | `claude -p --output-format stream-json` via `docker exec`, `--resume` between steps           |
-| GitHub        | Octokit (GraphQL for Projects v2), fine-grained PAT, polling + refresh after own writes       |
+| GitHub        | Octokit (GraphQL for Projects v2), token or GitHub App, polling + refresh after own writes    |
 | Orchestration | Hand-rolled state machine, persisted runs, semaphore for concurrent agent runs                |
 
 ## Process model

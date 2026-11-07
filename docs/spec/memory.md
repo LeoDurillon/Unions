@@ -23,14 +23,15 @@ shown in project settings → Agents → **Memory**.
   They stay on the page, editable, and feedback is still recorded. Saved with the page's Save
   (`PATCH /api/projects/:id` with `memory`).
 - Rules of one paragraph (at most 500 characters, 200 per project), grouped by pipeline step (Intake, Summary,
-  Technical, Test plan, Implementation, Final review). Each is a card showing its whole text, wrapped. The pencil
+  Technical, Test plan, Implementation, Final review), then **Spec report** (`review_report`). Each is a card showing its whole text, wrapped. The pencil
   opens a multiline field (Enter, Escape or the check closes it; closed empty, the lesson is removed). Added, moved
   up or down within their step and removed in the page's form; one Save writes them all. A save keeps the id of
   every lesson it keeps (edited or moved to another step included): only new lessons get new ids.
 - Sent to every run of their step on that project, under `# Lessons from past tickets`, after the shared and project
   instructions. Read on every run, so an edit applies from the next run. A resumed session (Revise on the
-  implementation) does not get them again; investigations, reviews of pull requests, rebases and the history
-  simplification get none.
+  implementation) does not get them again; investigations, rebases and the history simplification get none.
+  Reviews read their own: a spec report gets the **Spec report** lessons (`# Lessons from past reports`), a review
+  agent those of its `agent_<id>` section.
 
 ## Lesson writer
 

@@ -17,7 +17,7 @@ Read the file for the area you change before changing it, and keep it current wh
   → `docs/architecture/worker.md`
 - Agent runs: settings, prompts, containers, sessions, the formats Union reads back →
   `docs/architecture/agents.md`
-- GitHub and Notion access, credentials → `docs/architecture/integrations.md`
+- GitHub, Notion and Jira access, credentials → `docs/architecture/integrations.md`
 - Database file, migrations, backup/restore/reset → `docs/architecture/database.md`
 - `docker/agent.Dockerfile`: the agent images: the minimal `union-agent-base:local` (stage `base`: git, the claude
   CLI, the node user) and the default `union-agent:local` (the base and the JavaScript toolchains). Build with
@@ -92,10 +92,10 @@ files and uses `union.sqlite` here, which holds the user's real projects.
 
 - Bun and TypeScript only. Use `bun`, `bun test`, `bun:sqlite`, `Bun.sleep`. No Node-only tooling, no `ts-node`.
 - Every dependency version lives in the root `package.json` under `catalogs`, grouped by usage (`development`, `ui`,
-  `server`, `database`; add `test` etc. when needed). Workspace `package.json` files only reference them as
-  `"catalog:<name>"`. Add dependencies with `bun add --catalog=<name> <pkg>` from the workspace that uses it, then
-  check the root catalog got the entry and the workspace uses `catalog:<name>`. A package belongs to exactly one
-  catalog.
+  `server`, `database`, `github`, `markdown`; add `test` etc. when needed). Workspace `package.json` files only
+  reference them as `"catalog:<name>"`. Add dependencies with `bun add --catalog=<name> <pkg>` from the workspace
+  that uses it, then check the root catalog got the entry and the workspace uses `catalog:<name>`. A package belongs
+  to exactly one catalog.
 - Catalog versions are exact: no `latest`, `^` or `~`. `bunfig.toml` sets `exact = true`. Only `workspace:*` is
   allowed besides `catalog:` references.
 - The web app never runs agents or touches Docker or GitHub. Anything that drives the state machine (start,
@@ -108,9 +108,10 @@ files and uses `union.sqlite` here, which holds the user's real projects.
   `projectGitHubAuth` and build clients with `@union/core/github-client`; never build an Octokit from a token by
   hand. Tokens and the App's key never reach the browser (`toPublicProject`). Details:
   `docs/architecture/integrations.md`.
-- Notion: the web server only reads (`src/notion.ts` behind `NotionApi`); writes (page properties from event rules,
-  pages for tickets written from investigations, comments from a ticket's Notion tab) happen in the worker. Its secret is a row of `integrations` and
-  never reaches the browser (`toPublicIntegration`). Details: `docs/architecture/integrations.md`.
+- Notion: the web server only reads (behind core's `NotionApi`, `notion-api.ts`); writes (page properties from
+  event rules, pages for tickets written from investigations, comments from a ticket's Notion tab) happen in the
+  worker. Its secret is a row of `integrations` and never reaches the browser (`toPublicIntegration`). Details:
+  `docs/architecture/integrations.md`.
 - Jira: the web server only reads (verify, fields, import, a ticket's comments, behind `JiraApi`); writes (moving
   an issue, setting its fields, commenting, from event rules and from a ticket's Jira tab; creating one for a ticket
   written from an investigation) happen in the worker. Its API token is a row of `integrations`, sent only to
@@ -120,8 +121,8 @@ files and uses `union.sqlite` here, which holds the user's real projects.
   ticket whose parent is not done; check `blockingParent` before queueing or honouring a start anywhere else.
 - Keep `states.ts` pure: no I/O, no clock, no DB. The worker persists whatever `transition` returns. New phases
   or actions need a test in `states.test.ts`.
-- Reach Docker only through `ContainerRuntime` (and `ImageRuntime` for the projects' agent images). Do not call
-  `docker` from anywhere else: `docker-cli.ts` is the one file that runs it.
+- In `apps/` and `packages/`, reach Docker only through `ContainerRuntime` (and `ImageRuntime` for the projects'
+  agent images). Do not call `docker` from anywhere else there: `docker-cli.ts` is the one file that runs it.
 - Never mount a ticket's HOME volume read-only: `claude --resume` needs to write session files there. Seed only the
   `claudeAiOauth` credential. Never copy `mcpOAuth` or history into a container.
 - SSE handlers use Hono's `streamSSE` and loop on `!stream.aborted`. Event ids are `events.seq`, so resume works

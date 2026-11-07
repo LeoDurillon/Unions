@@ -1,4 +1,4 @@
-# GitHub and Notion
+# GitHub, Notion and Jira
 
 <!-- Moved from AGENTS.md: read the file for the area you change; keep it current when behavior changes. -->
 
@@ -28,7 +28,7 @@
   `notion/comment-post.ts` converts the text (core's `notion-rich-text.ts`: links, `**bold**`, `` `code` ``) and
   posts it with `addComment` (`POST /v1/comments`, in the discussion or on the page), under the integration's name,
   and logs `notion_comment_posted` or `notion_comment_failed` (403 names the "Insert comments" capability).
-- Trackers a project is connected to (Notion now) are rows of `integrations`, one per kind: secret, config, the
+- Trackers a project is connected to (Notion, Jira) are rows of `integrations`, one per kind: secret, config, the
   tracker's columns as read. Each kind has a browser-safe entry (`@union/core/integration-kinds`: label, ID parsing,
   config check) and a provider over its API client (`integrationProvider`, `integrations/providers.ts`). The web
   routes are generic (`routes/integrations.ts`): `POST /api/integrations/:kind/verify` (no project: onboarding),
@@ -43,7 +43,8 @@
   investigation one "Also create it in …" switch per integration, and each kind's own screens (settings,
   onboarding step, rule action fields) live in `components/integrations/<kind>/`.
 - Notion reads, from the web server: verifying a project's integration secret and data source, and importing
-  a page of that data source as a ticket (`src/notion.ts` behind `NotionApi`, through the Notion
+  a page of that data source as a ticket (core's `notion-api.ts` behind `NotionApi`, the routes' shared parts in
+  `routes/notion.ts`, through the Notion
   `IntegrationProvider`), the pages a pull
   request under review is linked to and the review's Notion specs (any page shared with the integration;
   `routes/review-notion.ts`, `routes/review-specs.ts`, their text (and in the review's Notion tab, their open discussions) read fresh each time, mention titles from core's `integrations/notion-mentions.ts`), and the open
@@ -126,7 +127,8 @@
   accept added permissions on GitHub (Settings → GitHub Apps → the request) before they apply; until then the CI
   reads answer 403, which `routes/pr-checks.ts` turns into a message naming them. Replies to comments need only
   Pull requests read and write (the issue-comments endpoint takes Issues or Pull requests); a refusal (a 403, or
-  GraphQL's "Resource not accessible") is reported naming it. A classic token needs `repo` and `project`.
+  GraphQL's "Resource not accessible") is reported naming it. A classic token needs `repo`, and `project` only with a
+  GitHub Project (`blockingScopes` in the client's `lib/github-project-api.ts`).
 
 ## Union's own remote
 

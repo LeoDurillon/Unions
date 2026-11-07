@@ -47,18 +47,18 @@ Deleting a project removes its tickets from Union, with their containers and vol
 
 **Union settings**, at the bottom of the sidebar, holds what every project shares:
 
-| Group          | Pages                                                                                   |
-| -------------- | --------------------------------------------------------------------------------------- |
-| General        | Shared instructions, Models                                                             |
-| Planning       | Intake, Summary, Technical, Test plan                                                   |
-| Implementation | Implementation, Final review                                                            |
-| Pull requests  | PR description, Replies to GitHub comments, Rebase, Simplify history, Split plan, Split |
-| Review         | Review comments, Group by spec, Explain                                                 |
-| Memory         | Lesson writer, Lesson tidier                                                            |
-| Custom agents  | Your own agents, and **New agent**                                                      |
-| Review agents  | Your own review agents, run from a review page                                          |
-| Tools          | Tools, Connectors                                                                       |
-| GitHub         | GitHub App                                                                              |
+| Group          | Pages                                                                                                |
+| -------------- | ---------------------------------------------------------------------------------------------------- |
+| General        | Shared instructions, Models                                                                          |
+| Planning       | Intake, Summary, Technical, Test plan                                                                |
+| Implementation | Implementation, Trim, Final review                                                                   |
+| Pull requests  | PR description, Replies to GitHub comments, Rebase, Simplify history, Split plan, Split into a stack |
+| Review         | Review comments, Group by spec, Explain, Spec report                                                 |
+| Memory         | Lesson writer, Lesson tidier                                                                         |
+| Custom agents  | Your own agents, and **New agent**                                                                   |
+| Review agents  | Your own review agents, run from a review page                                                       |
+| Tools          | Tools, Connectors                                                                                    |
+| GitHub         | GitHub App                                                                                           |
 
 See [Agents, flows and memory](agents.md) for what each page does.
 

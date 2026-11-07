@@ -138,7 +138,10 @@
   Project item (`tickets.project_item_id`) or of the PR's (added with `addToProject`, which returns the item it
   has): it reads the Project's fields and checks every value first, so a field or option gone fails it before
   anything is set, `union-notification.ts` writes a notification through the notifier's
-  `recordNotification`), one at a time and at most the target's `perTick` per tick (Notion 3, GitHub 1).
+  `recordNotification`, `jira.ts` the Jira actions on the ticket's issue or a posted review's linked ones
+  (`jira-target.ts`): `jira-transition.ts` moves it, `jira-field.ts` sets its fields (picks resolved by
+  `jira-field-picks.ts`), `jira-comment.ts` comments), one at a time and at most the target's `perTick` per tick
+  (Notion 3, Jira 2, GitHub 1, notifications 50).
   A target says when to retry (rate limits, 5xx and network errors); retries back off, up to 5 attempts; each outcome is logged as `event_rule_applied` (the
   ticket's Log tab). `github/pull-request.ts` logs `pull_request_merged`/`pull_request_closed`,
   `github/pull-request-checks.ts` logs `pull_request_checks_failed` when the open PR's checks turn red, and linking
@@ -219,6 +222,8 @@
   are in `github/octokit-threads.ts` (and `fake-threads.ts` for tests). `notion/comment-post.ts` handles
   `post_notion_comment` (through its `notionHooks`): it posts the comment with the project's Notion secret and logs
   `notion_comment_posted` or `notion_comment_failed` (with the text, which the tab puts back in its box).
+  `jira/comment-post.ts` handles `post_jira_comment` the same way for a Jira ticket's issue: the text as Jira's
+  rich text, a reply starting with a mention of its author, logged as `jira_comment_posted` or `jira_comment_failed`.
   `github/ci-rerun.ts` handles `rerun_ci_job`: GitHub runs the failed Actions job again; it logs `ci_job_rerun` or
   `ci_job_rerun_failed` (which notifies). `github/ticket-edit.ts` handles `edit_ticket` (the title and description
   edited on the Overview): it writes them to the issue only if GitHub still has the text the edit started from

@@ -150,7 +150,11 @@
   pull request link by `ticket-outside-links.ts`; the client's `ticket-notion-row.tsx`; older imports are
   linked from their "Imported from Notion:" line by `backfillNotionPages` at worker start). Notion rules point at
   properties by id in the stored copy of the data source's columns (`integrations.fields`, read again on connect
-  or "Refresh from Notion") and are checked against it on save. Triggers, variables and Notion value shapes are in
+  or "Refresh from Notion") and are checked against it on save. On a ticket linked to a Jira issue (the import, or
+  later its **Jira** row: `routes/ticket-jira-link.ts`, `POST /:id/jira/check`, `PUT` and `DELETE /:id/jira`), a
+  rule can also move the issue to a status, set its fields or comment on it (`jira_transition`, `jira_field`,
+  `jira_comment`; `event-jira-action.ts`, checked against the stored statuses and fields; the field pickers read
+  `routes/jira-picks.ts`; details in `integrations.md`). Triggers, variables and Notion value shapes are in
   the browser-safe `@union/core/event-rules`; matching and the delivery queue in `event-rules.ts` and
   `event-deliveries.ts`. Rules apply only to events logged after their creation (no replay).
 - Notifications: the bell above the projects in the sidebar (`components/notifications/`) shows the unread count

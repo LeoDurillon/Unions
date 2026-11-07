@@ -30,9 +30,9 @@ in `stack-states.ts`, which `transition` asks first; the step, phase and action 
 (re-exported by `states.ts`) so both can use them. The pure rules: `stack-trailers.ts` (`Slice: <n>` trailers,
 `fixup! <sha>` targets, each slice's tip), `stack-restack.ts` (the `git rebase -i` todo moving a revision's
 commits into their slices), `stack-description.ts` (each slice's PR text, the issue comment) and `stack-status.ts`
-(merged only when every slice merged into the base; the range and PR base of a slice). The worker runs `split_plan` and `split`
-yet (`split-plan.ts` holds the plan's format and parser, `pr-prompts.ts` their prompts, with the replies agent's, `ticket-slices.ts`
-the slice records); `restack` still answers "Unknown step".
+(merged only when every slice merged into the base; the range and PR base of a slice). The worker runs all three
+(`split-plan.ts` holds the plan's format and parser, `pr-prompts.ts` their prompts, with the replies agent's,
+`ticket-slices.ts` the slice records); `restack` runs as a rebase (`docs/architecture/worker.md`, `restack.ts`).
 Drizzle schema and migrations, the pure ticket state machine (`states.ts`), ticket dependencies
 (`ticket-links.ts`: `setParent`, `ticketBase`; the start gate `blockingParent` is in `tickets.ts`), the
 `ContainerRuntime` interface and its Docker CLI implementation, and `ImageRuntime` (`DockerImages`,
@@ -52,8 +52,9 @@ takes a `NewEvent` from `event-catalog.ts`, so a new event type is added there f
 Readers of the log (rule deliveries, notifications) keep their place in `event_cursors` through
 `event-cursors.ts` (`unreadEvents` starts a new reader at the end of the log). `notifications.ts` is the pure
 `notificationFor(event, subject)`: which events notify the user (a step waiting for approval, failed, refused or
-paused by the usage limit, a blocked start, a merged or closed PR, an investigation that ended, a failed rule) and
-with what text; `STEP_TITLES` (in `states.ts`) names the steps for it and for the UI.
+paused by the usage limit, a blocked start, a merged or closed PR, a PR's checks that failed, a CI job re-run that
+failed, an investigation that ended, a failed rule) and with what text; `STEP_TITLES` (in `states.ts`) names the
+steps for it and for the UI.
 The agents' raw output is not an event: `appendAgentLine` writes it to `agent_log` (`agent-log.ts`), each line
 with the last `events.seq` at the time, and `readLog` merges both tables into one Log in that order.
 When the line is a call's `result`, it also records what the call consumed in `agent_usage`, a row per model
@@ -71,5 +72,9 @@ A preview and a container run belong to a **workspace owner** (`workspace-owner.
 `review_id` (a check constraint). `previews.ts` and `container-runs.ts` take the owner; names come from
 `ownerKey` (`union-t12`, `union-r3`) and hosts from it too (`t12.union.localhost`, `api-r3.union.localhost`: `previewServiceHost`); `ownerHostId` (`12`, `r3`) is what `{ticket.id}` renders. Only a
 ticket's preview changes are events (`preview_changed`); a review's page polls. `previews.project_id` is the
-owner's project (the per-project cap). The worker and the web still act on tickets' previews and commands only:
-reviews' come with `docs/plans/review-previews.md`, steps 2 to 5.
+owner's project (the per-project cap). The worker and the web act on both owners' previews and commands
+(`docs/plans/review-previews.md`; a review's in `docs/architecture/worker.md` and `web.md`).
+The trackers (`integrations/`): `kinds.ts` (browser-safe, `@union/core/integration-kinds`) the kinds (`notion`,
+`jira`), `providers.ts` a provider per kind over its API client (`notion-api.ts`, `integrations/jira-api.ts`),
+`store.ts` the `integrations` rows, `adf-markdown.ts` and `markdown-adf.ts` Jira's rich text both ways. Which GitHub
+layers a project uses (issues, a GitHub Project) is `github-layers.ts`. Details: `docs/architecture/integrations.md`.

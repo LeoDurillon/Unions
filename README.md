@@ -20,10 +20,10 @@ Write a ticket, drag it to _In Progress_, and review a pull request.
 
 ---
 
-Union sits on top of a **GitHub Project**. Each ticket you move to **In Progress** gets its own Docker container in
-which **Claude Code**, running on your Claude Max subscription, plans the change with you, implements it until the
-project's checks pass, and has it reviewed by a second agent. You stay in control at every step: nothing moves forward
-until you approve it.
+Union sits on top of a **GitHub repository**, optionally mirrored to a **GitHub Project**. Each ticket you move to
+**In Progress** gets its own Docker container in which **Claude Code**, running on your Claude Max subscription,
+plans the change with you, implements it until the project's checks pass, and has it reviewed by a second agent. You
+stay in control at every step: nothing moves forward until you approve it.
 
 Everything runs on your machine. Credentials stay in a local SQLite database and never reach the agent containers.
 
@@ -31,8 +31,8 @@ Everything runs on your machine. Credentials stay in a local SQLite database and
 
 ## Features
 
-- 🗂️ **Kanban over GitHub Projects**: one board per project, mirrored both ways: one issue per ticket, one comment
-  per step, the ticket's column on the Project board, and "blocked by" links between issues.
+- 🗂️ **Kanban over GitHub**: one board per repository. Tickets can be mirrored as issues (one comment per step,
+  "blocked by" links between issues), and the board as a GitHub Project's Status column, both ways.
 - 🧭 **Planning with you in the loop**: intake (clarifying questions you answer inline), summary, technical plan and
   test plan. **Approve** each step or **Revise** it with feedback.
 - 🛠️ **Implementation that passes your checks**: the agent writes the code and loops on your check command (for
@@ -50,7 +50,7 @@ Everything runs on your machine. Credentials stay in a local SQLite database and
 - 🧠 **Memory**: lessons per agent step, curated from your feedback and reused on the next tickets.
 - ⚙️ **Configurable agents**: edit each step's prompt, model, thinking effort and tools, write your own agents, and
   choose which steps a ticket's flow runs.
-- 📥 **Notion import**: pull tickets from a Notion database.
+- 📥 **Notion and Jira**: import tickets from a Notion database or a Jira Cloud project, and update them from Union.
 - ⚡ **Parallel by default**: each ticket keeps its own container and volumes, so work survives between steps and
   several tickets run at once, up to a concurrency limit.
 
@@ -111,12 +111,14 @@ Under the hood, Union is two Bun processes sharing one SQLite database:
 - **Linux or WSL2** with **Docker** (Compose v2).
 - **Claude Code** logged in on the host with your Claude Max account. Union seeds each container with the credential
   from `~/.claude/.credentials.json`; run `claude` once and log in if that file does not exist.
-- A **GitHub repository** with a GitHub Project (the setup wizard can create one), and one of:
+- A **GitHub repository**, optionally with a GitHub Project (the setup wizard can create one), and one of:
   - a **fine-grained token** for an organization repository: resource owner = the organization; repository
-    permissions Contents, Issues and Pull requests read and write; organization permission Projects read and write;
-  - a **classic token** with the `repo` and `project` scopes (required when the Project belongs to a user account);
+    permissions Contents, Issues and Pull requests read and write; organization permission Projects read and write
+    (only with a GitHub Project);
+  - a **classic token** with the `repo` scope, and `project` with a GitHub Project (required when the Project
+    belongs to a user account);
   - a **GitHub App** installed on the organization ([see below](#using-a-github-app)).
-- Optional: a **Notion** internal integration to import tickets.
+- Optional: a **Notion** internal integration or a **Jira Cloud** API token, to import tickets.
 
 ### Run it
 
@@ -126,8 +128,8 @@ cd Unions
 bun run compose        # or: docker compose up --build
 ```
 
-The first start installs the dependencies, builds the agent image (`union-agent:local`), then starts the web app and
-the worker. Open **<http://localhost:5173>**.
+The first start installs the dependencies, builds the agent images (`union-agent-base:local` and the default
+`union-agent:local`), then starts the web app and the worker. Open **<http://localhost:5173>**.
 
 > [!TIP]
 > If the worker cannot reach Docker, set the group of the Docker socket (and your user id if it is not 1000) in a
@@ -163,9 +165,9 @@ The setup wizard opens on first run (later: **+ Add project** in the sidebar):
 
 1. **Connect**: paste a token and click **Verify**, or switch to **GitHub App**.
 2. **Repository**: pick the repository the agents work on.
-3. **Project**: pick an existing GitHub Project or create one.
-4. **Notion** (optional): integration secret and data source ID.
-5. **Review**: check the base branch and create the project.
+3. **Integrations** (optional): a GitHub Project (an existing one or a new one), Notion (integration secret and
+   data source ID) or Jira (site, email, API token and project). Each can be skipped.
+4. **Review**: check the base branch and create the project.
 
 Then open the project's **Settings** and set the install and check commands (for example `bun install` and
 `bun run check`): the implementation step loops on the check command until it passes.
@@ -218,8 +220,8 @@ Compose.
 ## Security model
 
 - Union runs on your machine only. There is no authentication on the web UI: do not expose it.
-- GitHub tokens, the GitHub App key and the Notion secret stay in the local database. They never reach the browser
-  or the agent containers: the host does every clone, push and GitHub call.
+- GitHub tokens, the GitHub App key, the Notion secret and the Jira API token stay in the local database. They never
+  reach the browser or the agent containers: the host does every clone, push and GitHub, Notion or Jira call.
 - A ticket's container gets only the `claudeAiOauth` credential, not your Claude history or MCP logins. Known risks
   are listed in the [spec](docs/spec/README.md#open-risks).
 

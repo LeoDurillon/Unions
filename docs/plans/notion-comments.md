@@ -1,6 +1,7 @@
 # Notion comments on the ticket
 
-Status: planned (2026-10-18, updated 2026-11-05 against `main`). Decisions D1 to D6 confirmed (2026-11-05). Steps 1
+Status: steps 1 to 5 built (2026-11-05, branch `notion-comments`); the optional step 6 (a trigger for new
+comments) not started. Planned 2026-10-18, updated 2026-11-05 against `main`. Decisions D1 to D6 confirmed (2026-11-05). Steps 1
 and 2 built and deployed (checked read only against a real ticket's page); step 3, replies, deployed; step 4, Add to review, deployed; step 5, the review's tab, built (branch `notion-comments`).
 
 ## Why

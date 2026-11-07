@@ -26,6 +26,8 @@ Above the board:
 - **Search** finds tickets by title, issue number (`#36`) or pull request number.
 - **Needs you** shows only the tickets waiting for you, with their count: a step to approve, a question to answer,
   a failed run.
+- Once some tickets came from Notion or Jira, **All**, **From Notion**, **From Jira** and **From GitHub** show only
+  the tickets of one origin. **From GitHub** keeps the tickets written in Union or imported from a GitHub issue.
 
 Press **/** to jump to the search, **c** to write a new ticket, and **n** to open the first ticket that needs you.
 Press **?** anywhere for the list of [keyboard shortcuts](#keyboard-shortcuts).
@@ -34,30 +36,33 @@ Press **?** anywhere for the list of [keyboard shortcuts](#keyboard-shortcuts).
 
 Click **New ticket** in the project bar. The dialog has one tab per source:
 
-- **Write**: a title and a description in Markdown. The description becomes the GitHub issue's body, so write it
-  for the agents and for your colleagues: the problem, what you expect, and anything they must not change.
-- **From GitHub**: the number or URL of an existing issue of the repository. The ticket uses that issue
+- **Write**: a title and a description in Markdown. The description becomes the GitHub issue's body (when the
+  project mirrors tickets as issues), so write it for the agents and for your colleagues: the problem, what you
+  expect, and anything they must not change.
+- **Import from GitHub**: the number or URL of an existing issue of the repository. The ticket uses that issue
   instead of creating one, and keeps following its title and description on GitHub.
-- **From Notion** (when the project is connected to Notion): a page of the connected data source. Union
+- **Import from Notion** (when the project is connected to Notion): a page of the connected data source. Union
   copies its text, and keeps its images and attached files (PDFs and other uploads) as the ticket's files, which
   the agents can read. Files above the size limits (25 MB each, 100 MB per ticket) stay as links to Notion,
   which stop working after about an hour. Click **Edit before creating** to change the text first.
-- **From Jira** (when the project is connected to Jira): the key (`ABC-123`) or link of an issue of the connected
-  Jira project. A board link with the issue open works too. Union copies its summary as the title and its
+- **Import from Jira** (when the project is connected to Jira): the key (`ABC-123`) or link of an issue of the
+  connected Jira project. A board link with the issue open works too. Union copies its summary as the title and its
   description as Markdown, with tables, code blocks, checklists and panels. It keeps the issue's images and
   attached files as the ticket's files, which the agents can read: those the description shows stay in place, the
-  others are listed under **Attachments** at the end. Files above the size limits stay as links to Jira. The ticket links back to the issue. Union only reads Jira:
-  nothing is written there.
+  others are listed under **Attachments** at the end. Files above the size limits stay as links to Jira. The ticket
+  links back to the issue. Importing only reads the issue: Union writes to Jira only when you comment from the
+  ticket's **Jira** tab, or when one of your [event rules](automation.md#event-rules) acts on it.
 
 In every tab you can also:
 
 - attach **files** (screenshots, specs, sample data), which the agents can read;
   spreadsheets, Word documents and zip files too, when the agent's tools include `Bash(unzip -l *)` and
-  `Bash(unzip -p *)` (Settings → Agents);
+  `Bash(unzip -p *)` (select them under **Tools** on the agent's page in **Union settings**);
 - pick the ticket it **depends on** (see below);
 - pick its **flow** (see below).
 
-The new ticket lands in Backlog, and Union creates its GitHub issue and adds it to the Project.
+The new ticket lands in Backlog. Union creates its GitHub issue, unless the project turned issues off (**Settings →
+General → Mirror tickets as GitHub issues**), and adds it to the GitHub Project when one is connected.
 
 To change the title or description later, use **Edit** in the ticket's **Overview**. Union writes the change to the
 issue, unless someone changed the issue on GitHub after you started editing: then nothing is written, and Union
@@ -85,8 +90,8 @@ round. Unlink it first to link it to the other tracker.
 
 ## Start a ticket
 
-Drag the card to **In progress**, or click **Start** on the card or in the ticket's Overview. Moving the item to In
-Progress on GitHub works too.
+Drag the card to **In progress**, or click **Start** on the card or in the ticket's Overview. With a GitHub
+Project connected, moving the ticket's card to In Progress there works too.
 
 Union creates the ticket's container and volumes, clones the repository into it, and runs the first step of the
 ticket's flow. What happens next is in [From ticket to pull request](ticket-lifecycle.md).
@@ -184,6 +189,7 @@ Ctrl, ⌘ and Alt combinations stay the browser's.
 | Ticket      | **1 – 5** | Switch to Overview, Preview, Worker, PR, or Notion or Jira. |
 | Ticket      | **Esc**   | Close the panel.                                            |
 | Review page | **j / k** | Open the next or previous file.                             |
+| Repository  | **/**     | Jump to **Go to file**.                                     |
 
 ## Cancel and remove
 

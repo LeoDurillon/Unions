@@ -1,7 +1,7 @@
 # Jira
 
 Status: built and deployed (2026-11-07), steps 1 to 5; checked on a real Jira Cloud site (SCRUM-1: text, link card, table, a screenshot and an xlsx kept as ticket files, each in its place in the text). Scope: Jira Cloud, an API token, importing an issue as a ticket. Rule actions,
-creating issues from investigations and a comments tab are later plans (listed at the end).
+creating issues from investigations and a comments tab were later plans (listed at the end), all built since.
 
 ## Why
 

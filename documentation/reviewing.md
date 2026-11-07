@@ -164,6 +164,8 @@ newest first, with their author, branches, review state and size. Stacks of pull
 | **Notion**      | The text of the linked Notion pages, once there are some, each followed by its open comments (read only).                                |
 | **Jira**        | The description of the linked Jira issues, once there are some, each followed by its comments (read only; reply in Jira).                |
 | **Preview**     | A [preview](previews.md#previews-of-pull-requests-under-review) of the pull request's code.                                              |
+| **Report**      | The [spec report](#spec-report), as for a ticket.                                                                                        |
+| **Agents**      | [Your review agents](#your-review-agents), as for a ticket.                                                                              |
 | **Diff**        | The diff, comments, Explain and Review with agent, as for a ticket.                                                                      |
 
 When the project is connected to Jira, the **Description** tab also has **Jira issues**. Issues of your Jira project
