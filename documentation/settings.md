@@ -77,7 +77,8 @@ without Compose. Under Compose, variables set in your shell do not reach Union, 
 | `UNION_ATTACHMENTS_DIR`     | `attachments/` in the checkout | Where ticket and preview files are kept                                    |
 | `UNION_MAX_PROJECT_FILE_MB` | `2048`                         | The largest project file                                                   |
 | `UNION_CLAUDE_CREDENTIALS`  | `~/.claude/.credentials.json`  | The Claude login given to the agents (set by `compose.yaml` under Compose) |
-| `UNION_AGENT_IMAGE`         | `union-agent:local`            | The image agents run in, and the one a project's Dockerfile starts from    |
+| `UNION_AGENT_IMAGE`         | `union-agent:local`            | The image agents run in, and `FROM union-agent` in a project's Dockerfile  |
+| `UNION_AGENT_BASE_IMAGE`    | `union-agent-base:local`       | The minimal image: `FROM union-agent-base` in a project's Dockerfile       |
 
 Read by `compose.yaml`:
 

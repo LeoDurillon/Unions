@@ -35,7 +35,19 @@ services:
     command: ['bun', 'install', '--frozen-lockfile']
     restart: 'no'
 
-  # Builds the image agent containers run from (union-agent:local), then exits.
+  # Builds the minimal agent image (union-agent-base:local: git, the claude CLI, the node user), the one a
+  # project's own Dockerfile may start from instead of the default, then exits.
+  agent-base-image:
+    build:
+      context: docker
+      dockerfile: agent.Dockerfile
+      target: base
+    image: union-agent-base:local
+    entrypoint: ['true']
+    restart: 'no'
+
+  # Builds the default image agent containers run from (union-agent:local: the base and the JavaScript
+  # toolchains), then exits.
   agent-image:
     build:
       context: docker
@@ -89,6 +101,8 @@ services:
       install:
         condition: service_completed_successfully
       agent-image:
+        condition: service_completed_successfully
+      agent-base-image:
         condition: service_completed_successfully
 
   # Serves ticket previews: each preview's exposed service is labelled with its host

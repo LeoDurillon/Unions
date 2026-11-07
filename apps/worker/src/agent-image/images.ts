@@ -76,7 +76,7 @@ export class AgentImages {
   async imageFor(projectId: number): Promise<string> {
     const applied = readAgentImage(this.db, projectId)?.applied ?? null;
     if (!applied) {
-      return this.deps.baseImage;
+      return this.deps.baseImages['union-agent'];
     }
     if (applied.kind === 'image') {
       if (!(await this.deps.images.inspect(applied.ref))) {
@@ -202,7 +202,10 @@ export function agentImageProvision(
   const agentImages = new AgentImages(db, {
     runtime,
     images: new DockerImages(),
-    baseImage: base.image,
+    baseImages: {
+      'union-agent': base.image,
+      'union-agent-base': process.env.UNION_AGENT_BASE_IMAGE ?? 'union-agent-base:local',
+    },
   });
   return {
     config: { ...base, imageFor: (projectId) => agentImages.imageFor(projectId) },

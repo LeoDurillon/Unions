@@ -88,9 +88,10 @@ Open the project's **Settings → Checks** before you start a ticket:
 - **Iteration limit**: how many times the agent may go back to fix failing checks before the step stops (3 by
   default).
 
-The agents run inside a Linux container with Bun, git and the Claude Code CLI. If your project needs other tools
-(another language's toolchain, a database for its tests), see [Preview environments](previews.md#services-for-the-agent)
-for databases and other services, or add the tools to `docker/agent.Dockerfile` and rebuild the image.
+The agents run inside a Linux container with Node, Bun, pnpm, yarn, git and the Claude Code CLI. If your project needs
+other tools (another language's toolchain, a database for its tests), see
+[Preview environments](previews.md#services-for-the-agent) for databases and other services, or give the project
+[its own agent image](agents.md#the-agent-image).
 
 ## Optional, but worth a look
 

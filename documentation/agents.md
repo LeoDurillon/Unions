@@ -147,10 +147,14 @@ The agents work in a container made from an image that has Node, Bun, pnpm and y
 Playwright's browsers need. When your project needs more (Python, Go, Java, a system library, a database client),
 give it its own image in **Settings → Agents → Agent image**:
 
-- **Default image**: what every project starts with.
-- **Dockerfile**: write one that starts with `FROM union-agent`, switch to `USER root` to install what you need, and
-  end with `USER node`. The page starts you with an example.
-- **Existing image**: the name of an image you built yourself on top of `union-agent` and pushed to a registry.
+- **Default image**: what every project starts with. The page shows the Dockerfile it is built from, read-only.
+- **Dockerfile**: write one that starts from one of Union's two images, switch to `USER root` to install what you
+  need, and end with `USER node`. **Start from** fills the editor with an example for JavaScript, Python, Rust, Go or PHP.
+  - `FROM union-agent`: the default image, with Node, Bun, pnpm, yarn and the browsers' libraries.
+  - `FROM union-agent-base`: only git, the Claude CLI and the `node` user, less than half the size. Start a
+    project on another stack (Rust, Go, Python, PHP…) from it.
+- **Existing image**: the name of an image you built yourself on top of `union-agent` or `union-agent-base` and
+  pushed to a registry.
 
 Click **Save and build**. Union builds the image (or pulls it), then checks that the agents can still work in it:
 the Claude CLI runs, git is there, the user is `node` with its home folder. The build log shows under the editor
@@ -167,6 +171,8 @@ Good to know:
   Dockerfile. Install what you need with `RUN`.
 - The Dockerfile lives in Union's settings, not in your repository, so an agent cannot change the image it runs in.
 - When Union's own image is updated, your Dockerfile is built again on it the first time a ticket needs it.
+- On `union-agent-base` there is no Node: [MCP servers](#tools-and-connectors) started with `npx` or `bunx` need
+  `union-agent`, or Node installed in your Dockerfile.
 
 ## Memory
 

@@ -3,20 +3,13 @@ import { useState, type ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
 import type { AgentImageView } from '../../../src/routes/agent-image';
+import { FIRST_STARTER } from '../../lib/agent-image-starters';
 import { useLeaveGuard } from '../../lib/leave-guard';
 import { isBuilding, useAgentImage, type AgentImageChoice } from '../../lib/use-agent-image';
 import { Segmented } from '../choice';
 import { Button, ErrorText, Field, inputClass } from '../ui';
+import { DefaultDockerfile, StarterPicker } from './agent-image-starters';
 import { AgentImageStatus } from './agent-image-status';
-
-const STARTER = `FROM union-agent
-# The base image has node, Bun, pnpm and yarn, git, the claude CLI and Playwright's libraries.
-# Add what this project's install, checks and tests need, as root, then go back to the node user.
-USER root
-RUN apt-get update && apt-get install -y --no-install-recommends python3 python3-pip \\
-    && rm -rf /var/lib/apt/lists/*
-USER node
-`;
 
 type Kind = AgentImageChoice['kind'];
 type Draft = { kind: Kind; dockerfile: string; ref: string };
@@ -32,7 +25,7 @@ function draftOf(view: AgentImageView): Draft {
   const choice = view.pending ?? view.applied ?? { kind: 'default' as const };
   return {
     kind: choice.kind,
-    dockerfile: choice.kind === 'dockerfile' ? choice.dockerfile : STARTER,
+    dockerfile: choice.kind === 'dockerfile' ? choice.dockerfile : FIRST_STARTER,
     ref: choice.kind === 'image' ? choice.ref : '',
   };
 }
@@ -49,34 +42,44 @@ function sameChoice(a: AgentImageChoice, b: AgentImageChoice): boolean {
 }
 
 function SourceFields({
+  projectId,
   draft,
   onChange,
 }: {
+  projectId: number;
   draft: Draft;
   onChange: (draft: Draft) => void;
-}): ReactElement | null {
+}): ReactElement {
   if (draft.kind === 'dockerfile') {
     return (
-      <Field
-        label="Dockerfile"
-        hint="Starts with FROM union-agent. Built with no files from the repository: COPY works only from another stage."
-      >
-        <textarea
-          className={`${inputClass} min-h-72 font-mono text-xs`}
-          spellCheck={false}
-          value={draft.dockerfile}
-          onChange={(event) => {
-            onChange({ ...draft, dockerfile: event.target.value });
+      <div className="space-y-2">
+        <StarterPicker
+          text={draft.dockerfile}
+          onPick={(dockerfile) => {
+            onChange({ ...draft, dockerfile });
           }}
         />
-      </Field>
+        <Field
+          label="Dockerfile"
+          hint="The last stage starts FROM union-agent (Node, Bun, pnpm, yarn) or FROM union-agent-base (git and the claude CLI only). Install into system paths, not /home/node. Built with no files from the repository."
+        >
+          <textarea
+            className={`${inputClass} min-h-72 font-mono text-xs`}
+            spellCheck={false}
+            value={draft.dockerfile}
+            onChange={(event) => {
+              onChange({ ...draft, dockerfile: event.target.value });
+            }}
+          />
+        </Field>
+      </div>
     );
   }
   if (draft.kind === 'image') {
     return (
       <Field
         label="Image"
-        hint="Pulled on save, then checked: it must be built on union-agent (the claude CLI, git, the node user)."
+        hint="Pulled on save, then checked: built on union-agent or union-agent-base (the claude CLI, git, the node user)."
       >
         <input
           className={`${inputClass} font-mono`}
@@ -89,7 +92,7 @@ function SourceFields({
       </Field>
     );
   }
-  return null;
+  return <DefaultDockerfile projectId={projectId} />;
 }
 
 function ImageForm({ projectId, view }: { projectId: number; view: AgentImageView }): ReactElement {
@@ -109,7 +112,7 @@ function ImageForm({ projectId, view }: { projectId: number; view: AgentImageVie
           setDraft({ ...draft, kind });
         }}
       />
-      <SourceFields draft={draft} onChange={setDraft} />
+      <SourceFields projectId={projectId} draft={draft} onChange={setDraft} />
       <div className="flex flex-wrap items-center gap-2">
         <Button
           variant="primary"

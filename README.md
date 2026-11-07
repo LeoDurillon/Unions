@@ -148,6 +148,7 @@ Needs **Bun 1.4.1** and git on the host.
 
 ```sh
 bun install
+docker build --target base -t union-agent-base:local -f docker/agent.Dockerfile docker
 docker build -t union-agent:local -f docker/agent.Dockerfile docker
 bun run dev            # web on http://localhost:5173 and the worker, with reload
 ```
@@ -194,6 +195,7 @@ Environment variables (in a `.env` file at the repository root), all optional; t
 | `DB_PATH`                  | `union.sqlite` at the repository root | Database file shared by web and worker                   |
 | `UNION_CLAUDE_CREDENTIALS` | `~/.claude/.credentials.json`         | Claude credential seeded into containers                 |
 | `UNION_AGENT_IMAGE`        | `union-agent:local`                   | Image agent containers run from                          |
+| `UNION_AGENT_BASE_IMAGE`   | `union-agent-base:local`              | Minimal image a project's Dockerfile can start from      |
 
 Agent prompts, models, thinking effort and allowed tools are edited in **Union settings** in the sidebar and stored
 in the database.

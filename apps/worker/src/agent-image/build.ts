@@ -1,7 +1,9 @@
-// Makes a project's agent image from what the user saved: the Dockerfile built on the base image, or the image pulled, then checked.
+// Makes a project's agent image from what the user saved: the Dockerfile built on the base images, or the image pulled, then checked.
 import {
   agentImageTag,
   buildableDockerfile,
+  dockerfileBases,
+  type AgentImageBase,
   type AgentImageSource,
   type AppliedAgentImage,
   type ContainerRuntime,
@@ -14,8 +16,11 @@ import { checkAgentImage } from './check';
 export type ImageDeps = {
   runtime: ContainerRuntime;
   images: ImageRuntime;
-  /** The base agent image the Dockerfiles start from (`union-agent:local`). */
-  baseImage: string;
+  /**
+   * The images a Dockerfile's `FROM union-agent` and `FROM union-agent-base` start from
+   * (`union-agent:local`, `union-agent-base:local`); `union-agent` is also the default image.
+   */
+  baseImages: Readonly<Record<AgentImageBase, string>>;
 };
 
 type OwnSource = Exclude<AgentImageSource, { kind: 'default' }>;
@@ -36,19 +41,26 @@ async function drain(
   }
 }
 
-/** The tag a Dockerfile builds to on the current base image; the base must exist. */
+/** The id of a base image, which must exist. */
+async function baseImageId(deps: ImageDeps, base: AgentImageBase): Promise<string> {
+  const image = deps.baseImages[base];
+  const info = await deps.images.inspect(image);
+  if (!info) {
+    throw new Error(
+      `The base agent image ${image} is missing: build it first (docker/agent.Dockerfile)`,
+    );
+  }
+  return info.id;
+}
+
+/** The tag a Dockerfile builds to on the base images it uses as they are now; they must exist. */
 export async function dockerfileTag(
   deps: ImageDeps,
   projectId: number,
   dockerfile: string,
 ): Promise<string> {
-  const base = await deps.images.inspect(deps.baseImage);
-  if (!base) {
-    throw new Error(
-      `The base agent image ${deps.baseImage} is missing: build it first (docker/agent.Dockerfile)`,
-    );
-  }
-  return agentImageTag(projectId, dockerfile, base.id);
+  const ids = await Promise.all(dockerfileBases(dockerfile).map((base) => baseImageId(deps, base)));
+  return agentImageTag(projectId, dockerfile, ids);
 }
 
 /** Builds the Dockerfile unless its tag exists already; returns the tag. */
@@ -65,7 +77,7 @@ async function buildDockerfile(
   }
   const output = deps.images.build({
     tag,
-    dockerfile: buildableDockerfile(target.dockerfile, deps.baseImage),
+    dockerfile: buildableDockerfile(target.dockerfile, deps.baseImages),
     signal,
   });
   await drain(output, onLine, 'The build');

@@ -294,7 +294,8 @@
 - Agent image: project settings → Agents → Agent image (`agent-image-section.tsx`, `agent-image-status.tsx`,
   `lib/use-agent-image.ts`, polled while a save builds; `routes/agent-image.ts`, mounted with the preview settings
   and the project files by `routes/workspace-settings.ts`). A save writes the `agent_images` row's `pending` and a
-  `sync_agent_image` command; `DELETE …/agent-image/pending` drops the save (and stops its build). The web never
+  `sync_agent_image` command; `DELETE …/agent-image/pending` drops the save (and stops its build); `GET …/agent-image/default` reads
+  `docker/agent.Dockerfile` from Union's checkout, shown read-only under Default image. The web never
   builds: the worker does (`docs/architecture/agents.md`, The image).
 - Previews: project settings → Preview (`routes/preview-settings.ts`, `config.preview`: compose file, service,
   port, plain variables) and the ticket Overview's Preview section (`preview-section.tsx`, `routes/preview.ts`,

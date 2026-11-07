@@ -55,6 +55,7 @@ You need **Bun 1.4.1** and git on the machine, and Docker for the agents.
 
 ```sh
 bun install
+docker build --target base -t union-agent-base:local -f docker/agent.Dockerfile docker
 docker build -t union-agent:local -f docker/agent.Dockerfile docker
 bun run dev            # web app on http://localhost:5173 and the worker, reloaded when files change
 ```

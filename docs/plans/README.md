@@ -148,6 +148,10 @@ and linked.
 - [A custom agent image per project](project-agent-image.md): a Dockerfile in the project settings, extending
   `union-agent`, built and checked on **Save and build** and applied only when it passes; tickets, investigations
   and reviews run on it. Built (branch `project-agent-image`, 2026-11-07); the page not yet seen in a browser.
+- [A minimal base agent image](agent-image-layers.md): `union-agent-base` (git, the claude CLI as its release
+  binary, the node user) and the default `union-agent` built on it with the JavaScript toolchains; a project's
+  Dockerfile starts from either, with starters for JavaScript, Python, Rust, Go and PHP. Built (branch
+  `agent-image-layers`, 2026-11-07); a real ticket step on the new default image left.
 
 ## Open items
 

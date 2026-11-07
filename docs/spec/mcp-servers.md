@@ -48,7 +48,7 @@ accepts this per server when adding it, and the narrowing below applies. Buildin
   in the worker; the container only ever sees a token that dies with the run. Agent containers get
   `--add-host host.docker.internal:host-gateway`; in compose the worker publishes the port to the host.
 - **stdio servers run inside the container**, started by Claude Code with the configured command (`npx` and `bunx` are
-  in the agent image; Python servers need `uvx`, so a project image). Their `env` secrets are therefore visible to the
+  in the default agent image, not in `union-agent-base`; Python servers need `uvx`, so a project image). Their `env` secrets are therefore visible to the
   agent: the settings page marks such a server "credentials visible to the agent", and an HTTP server (or an HTTP
   bridge) is preferred whenever the server needs a secret.
 - **Never GitHub write access**: a GitHub MCP server with a token would let an agent write to GitHub around the

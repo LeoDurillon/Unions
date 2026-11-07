@@ -1,4 +1,6 @@
-// `/api/projects/:projectId/agent-image`: the image the project's agents run on, a new one saved (and built by the worker), or the save dropped.
+// `/api/projects/:projectId/agent-image`: the image the project's agents run on, a new one saved (and built by the worker), or the save dropped; and the default image's Dockerfile, to read.
+import path from 'node:path';
+
 import {
   AgentImageError,
   discardPendingAgentImage,
@@ -27,6 +29,28 @@ const NONE: AgentImageView = {
   startedAt: null,
   finishedAt: null,
 };
+
+/** The Dockerfile the default images are built from, in Union's own checkout. */
+const DEFAULT_DOCKERFILE = path.resolve(
+  import.meta.dir,
+  '..',
+  '..',
+  '..',
+  '..',
+  'docker',
+  'agent.Dockerfile',
+);
+
+/** What the default image holds, shown read-only; null when the file cannot be read. */
+export type DefaultDockerfileView = { dockerfile: string | null };
+
+async function defaultDockerfile(): Promise<DefaultDockerfileView> {
+  try {
+    return { dockerfile: await Bun.file(DEFAULT_DOCKERFILE).text() };
+  } catch {
+    return { dockerfile: null };
+  }
+}
 
 function projectId(db: Db, c: Context): number {
   const id = requireId(c.req.param('projectId'), 'project id');
@@ -58,6 +82,10 @@ export function agentImageRoutes(db: Db): Hono {
   routes.get('/:projectId/agent-image', (c) =>
     c.json(viewOf(readAgentImage(db, projectId(db, c)))),
   );
+  routes.get('/:projectId/agent-image/default', async (c) => {
+    projectId(db, c);
+    return c.json(await defaultDockerfile());
+  });
   routes.put('/:projectId/agent-image', async (c) => {
     const id = projectId(db, c);
     const body = await readObject(c.req.raw);

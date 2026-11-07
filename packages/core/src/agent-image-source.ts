@@ -1,7 +1,11 @@
-// A project's own agent image: the Dockerfile or image the user gives, checked, rewritten onto the base image, and tagged by content.
+// A project's own agent image: the Dockerfile or image the user gives, checked, rewritten onto the base images, and tagged by content.
 
-/** The name a project's Dockerfile starts from (`FROM union-agent`): the base agent image. */
-const AGENT_IMAGE_BASE_NAME = 'union-agent';
+/**
+ * The names a project's Dockerfile starts from: `union-agent` (the default image, with the JavaScript
+ * toolchains) or `union-agent-base` (only what Union needs: git, the claude CLI, the node user).
+ */
+const AGENT_IMAGE_BASES = ['union-agent', 'union-agent-base'] as const;
+export type AgentImageBase = (typeof AGENT_IMAGE_BASES)[number];
 const MAX_DOCKERFILE_CHARS = 100_000;
 const MAX_REF_CHARS = 255;
 const TAG_HASH_CHARS = 16;
@@ -24,13 +28,11 @@ export type AppliedAgentImage = OwnImageSource & {
 /** A Dockerfile or image reference refused before anything is built. */
 export class AgentImageError extends Error {}
 
-const BASE_FROM = /^\s*FROM\s+union-agent(?<stage>\s+AS\s+[A-Za-z0-9_.-]+)?\s*$/iu;
+const BASE_FROM =
+  /^\s*FROM\s+(?<base>union-agent(?:-base)?)(?<stage>\s+AS\s+[A-Za-z0-9_.-]+)?\s*$/iu;
 const IMAGE_REF = /^[a-zA-Z0-9][a-zA-Z0-9._/:@-]*$/u;
 
-function isInstruction(line: string): boolean {
-  const trimmed = line.trim();
-  return trimmed !== '' && !trimmed.startsWith('#');
-}
+const ANY_FROM = /^\s*FROM\s/iu;
 
 function checkDockerfile(text: string): string {
   if (text.trim() === '') {
@@ -39,10 +41,11 @@ function checkDockerfile(text: string): string {
   if (text.length > MAX_DOCKERFILE_CHARS) {
     throw new AgentImageError(`The Dockerfile can be at most ${MAX_DOCKERFILE_CHARS} characters`);
   }
-  const first = text.split('\n').find((line) => isInstruction(line)) ?? '';
-  if (!BASE_FROM.test(first)) {
+  // Earlier stages may start from anything (a toolchain to copy from); the image the agents run is the last.
+  const last = text.split('\n').findLast((line) => ANY_FROM.test(line)) ?? '';
+  if (!BASE_FROM.test(last)) {
     throw new AgentImageError(
-      `Start the Dockerfile with "FROM ${AGENT_IMAGE_BASE_NAME}": the agents need what the base image has`,
+      'Start the last stage with "FROM union-agent" or "FROM union-agent-base": the agents need what they have',
     );
   }
   return text.endsWith('\n') ? text : `${text}\n`;
@@ -79,13 +82,31 @@ export function parseAgentImageSource(input: Record<string, unknown>): AgentImag
   }
 }
 
-/** The Dockerfile as built: every `FROM union-agent` starts from the base image the worker has. */
-export function buildableDockerfile(text: string, baseImage: string): string {
+function baseOf(match: RegExpExecArray): AgentImageBase {
+  return match.groups?.base?.toLowerCase() === 'union-agent-base'
+    ? 'union-agent-base'
+    : 'union-agent';
+}
+
+/** The bases the Dockerfile starts stages from, each once, in order. */
+export function dockerfileBases(text: string): AgentImageBase[] {
+  const found = text.split('\n').flatMap((line) => {
+    const match = BASE_FROM.exec(line);
+    return match ? [baseOf(match)] : [];
+  });
+  return [...new Set(found)];
+}
+
+/** The Dockerfile as built: every `FROM union-agent[-base]` starts from that image as the worker has it. */
+export function buildableDockerfile(
+  text: string,
+  images: Readonly<Record<AgentImageBase, string>>,
+): string {
   return text
     .split('\n')
     .map((line) => {
       const match = BASE_FROM.exec(line);
-      return match ? `FROM ${baseImage}${match.groups?.stage ?? ''}` : line;
+      return match ? `FROM ${images[baseOf(match)]}${match.groups?.stage ?? ''}` : line;
     })
     .join('\n');
 }
@@ -95,8 +116,17 @@ export function agentImageRepository(projectId: number): string {
   return `union-agent-p${projectId}`;
 }
 
-/** The tag of the Dockerfile built on this base image: a change to either is a new tag. */
-export function agentImageTag(projectId: number, dockerfile: string, baseImageId: string): string {
-  const hash = new Bun.CryptoHasher('sha256').update(`${baseImageId}\n${dockerfile}`).digest('hex');
+/**
+ * The tag of the Dockerfile built on these base images (the ids of the ones it uses, in order): a change
+ * to the Dockerfile or to one of them is a new tag.
+ */
+export function agentImageTag(
+  projectId: number,
+  dockerfile: string,
+  baseImageIds: readonly string[],
+): string {
+  const hash = new Bun.CryptoHasher('sha256')
+    .update(`${baseImageIds.join('\n')}\n${dockerfile}`)
+    .digest('hex');
   return `${agentImageRepository(projectId)}:${hash.slice(0, TAG_HASH_CHARS)}`;
 }

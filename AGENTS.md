@@ -19,8 +19,10 @@ Read the file for the area you change before changing it, and keep it current wh
   `docs/architecture/agents.md`
 - GitHub and Notion access, credentials → `docs/architecture/integrations.md`
 - Database file, migrations, backup/restore/reset → `docs/architecture/database.md`
-- `docker/agent.Dockerfile`: the agent image (`union-agent:local`, build with
-  `docker build -t union-agent:local -f docker/agent.Dockerfile docker`).
+- `docker/agent.Dockerfile`: the agent images: the minimal `union-agent-base:local` (stage `base`: git, the claude
+  CLI, the node user) and the default `union-agent:local` (the base and the JavaScript toolchains). Build with
+  `docker build --target base -t union-agent-base:local -f docker/agent.Dockerfile docker`, then
+  `docker build -t union-agent:local -f docker/agent.Dockerfile docker`.
 - Plans and ideas not built yet: `docs/plans/README.md`.
 - The user guide, for people who use Union rather than work on it: `documentation/` (index in
   `documentation/README.md`). `docs/` is for working on the code. When a change alters what a user sees or does (a

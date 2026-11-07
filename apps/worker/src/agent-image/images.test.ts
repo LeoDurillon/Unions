@@ -20,6 +20,7 @@ import { drainCommands } from '../commands';
 import { AgentImages } from './images';
 
 const BASE = 'union-agent:local';
+const MINIMAL = 'union-agent-base:local';
 const DOCKERFILE = 'FROM union-agent\nRUN apt-get install -y python3\n';
 
 let db: Db;
@@ -88,7 +89,11 @@ function holdBuilds(): () => void {
 }
 
 function service(): AgentImages {
-  return new AgentImages(db, { runtime, images: fakeImages(), baseImage: BASE });
+  return new AgentImages(db, {
+    runtime,
+    images: fakeImages(),
+    baseImages: { 'union-agent': BASE, 'union-agent-base': MINIMAL },
+  });
 }
 
 beforeEach(() => {
@@ -99,7 +104,10 @@ beforeEach(() => {
     .values({ owner: 'o', repo: 'r', config: { baseBranch: 'main' } })
     .returning()
     .get().id;
-  existing = new Map([[BASE, 'sha256:base1']]);
+  existing = new Map([
+    [BASE, 'sha256:base1'],
+    [MINIMAL, 'sha256:minimal1'],
+  ]);
   built = [];
   removed = [];
   buildExit = 0;
@@ -203,6 +211,29 @@ test('going back to the default drops the built images; a deleted project drops 
   images.sync(projectId);
   await Bun.sleep(5);
   expect(removed).toContain(`union-agent-p${projectId}:old`);
+});
+
+test('a Dockerfile on the minimal base is rebuilt only when that base changes', async () => {
+  const images = service();
+  saveAgentImage(db, projectId, { kind: 'dockerfile', dockerfile: 'FROM union-agent-base\n' });
+  images.sync(projectId);
+  await images.idle();
+  expect(built[0]?.dockerfile).toBe(`FROM ${MINIMAL}\n`);
+  const first = await images.imageFor(projectId);
+  existing.set(BASE, 'sha256:base2');
+  expect(await images.imageFor(projectId)).toBe(first);
+  existing.set(MINIMAL, 'sha256:minimal2');
+  expect(await images.imageFor(projectId)).not.toBe(first);
+  expect(built).toHaveLength(2);
+});
+
+test('a missing base image fails the build with how to build it', async () => {
+  const images = service();
+  existing.delete(MINIMAL);
+  saveAgentImage(db, projectId, { kind: 'dockerfile', dockerfile: 'FROM union-agent-base\n' });
+  images.sync(projectId);
+  await images.idle();
+  expect(readAgentImage(db, projectId)?.error).toContain(`${MINIMAL} is missing`);
 });
 
 test('a project without its own image runs on the base image', async () => {

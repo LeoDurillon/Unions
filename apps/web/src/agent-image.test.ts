@@ -80,3 +80,9 @@ test('an unknown project is a 404', async () => {
   const response = await app.request('/api/projects/999/agent-image');
   expect(response.status).toBe(404);
 });
+
+test('the default image Dockerfile is readable, both stages', async () => {
+  const response = await app.request(url('/default'));
+  const body = (await response.json()) as { dockerfile: string | null };
+  expect(body.dockerfile).toContain('AS base');
+});

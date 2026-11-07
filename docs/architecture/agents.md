@@ -84,17 +84,22 @@ only the Claude login (`throwaway-container.ts`).
 
 ## The image
 
-Every container starts from the base agent image (`union-agent:local`, `UNION_AGENT_IMAGE`,
-`docker/agent.Dockerfile`), unless its project has its own (Settings → Agents → Agent image,
+Every container starts from the default agent image (`union-agent:local`, `UNION_AGENT_IMAGE`, the last stage of
+`docker/agent.Dockerfile`: the `base` stage plus node/npm, Bun, corepack and Playwright's libraries), unless its
+project has its own (Settings → Agents → Agent image,
 `docs/plans/project-agent-image.md`). `ProvisionConfig.imageFor` (`AgentImages.imageFor`,
 `apps/worker/src/agent-image/images.ts`) gives the image for a project; `projectImage` asks it where a container
 of the project is created: the ticket's (`provision.ts`), investigations (`ThrowawayDeps.projectId`), agent reviews'
 and review agents' checkouts (`throwawayCheckout`) and a pull request's own container (`review-checkout.ts`). Runs
 with no repository (the lesson writer, the prompt writer, the connector check, ticket drafts) keep the base image.
 
+- **The base stage** (`union-agent-base:local`, `UNION_AGENT_BASE_IMAGE`) holds only what Union needs: git, the
+  `claude` CLI and the `node` user (uid 1000) with `/workspace`. The CLI is its release binary at the pinned version,
+  checked against the release's manifest, in `/usr/local/bin` (not `install.sh`, which installs under HOME, the
+  volume), with `DISABLE_AUTOUPDATER=1`. `docs/plans/agent-image-layers.md`.
 - **What a project can choose** (`agent-image-source.ts` in core): the default, a Dockerfile whose first
-  instruction is `FROM union-agent` (every such `FROM` is rewritten to the base image the worker has,
-  `buildableDockerfile`), or an image built elsewhere (pulled). The Dockerfile is a setting in the database, never a
+  instruction is `FROM union-agent` or `FROM union-agent-base` (each such `FROM` is rewritten to the image the
+  worker has, `buildableDockerfile`; `dockerfileBases` lists the ones used), or an image built elsewhere (pulled). The Dockerfile is a setting in the database, never a
   file of the repository: an agent or a fork's pull request cannot change the sandbox. It is built with no context
   (`docker build -`), so no repository file and no secret goes into it.
 - **Saving builds** (`agent_images` row, `agent-images.ts`): the web writes `pending`, status `queued`, and a
@@ -103,8 +108,8 @@ with no repository (the lesson writer, the prompt writer, the connector check, t
   to `applied`. A failure keeps `applied`, sets `failed` and the error; the output's tail is in the row, rewritten
   once a second. Every worker write names the `savedAt` it started from, so a newer save or a discard (which stops
   the build) is never overwritten. A stopped worker's unfinished saves are built again at start (`recover`).
-- **Tags by content**: `union-agent-p<project>:<hash of the base image id and the Dockerfile>`. An unchanged
-  Dockerfile does not build again; a rebuilt base image changes the hash, so `imageFor` builds the applied
+- **Tags by content**: `union-agent-p<project>:<hash of the ids of the bases it uses and the Dockerfile>`. An
+  unchanged Dockerfile does not build again; rebuilding a base it uses changes the hash, so `imageFor` builds the applied
   Dockerfile again first (shared by the runs that wait on it), and a failure there fails the step with the build's
   last lines, with no fallback to the base image. A stopped ticket container moves onto a new image at its next step
   (`DockerCli.create` recreates it on the same volumes); a running one finishes on the old one.

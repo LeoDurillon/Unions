@@ -1,7 +1,7 @@
 // A project's agent image on its settings page: what runs, what was saved, its build (polled while the worker builds), and saving or dropping a choice.
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 
-import type { AgentImageView } from '../../src/routes/agent-image';
+import type { AgentImageView, DefaultDockerfileView } from '../../src/routes/agent-image';
 import { request } from './api';
 
 const BUILD_POLL_MS = 1500;
@@ -40,4 +40,14 @@ export function useAgentImage(projectId: number): {
     onSuccess: update,
   });
   return { image, save, discard };
+}
+
+/** The default image's Dockerfile, read once: it changes only with Union itself. */
+export function useDefaultDockerfile(projectId: number): UseQueryResult<DefaultDockerfileView> {
+  return useQuery({
+    queryKey: ['agent-image-default'],
+    queryFn: (): Promise<DefaultDockerfileView> =>
+      request('GET', `/api/projects/${projectId}/agent-image/default`),
+    staleTime: Infinity,
+  });
 }

@@ -13,8 +13,9 @@ Set `DOCKER_GID` to the socket's group, and `UNION_UID`/`UNION_GID` to your user
 Union gives the agents the Claude login from `~/.claude/.credentials.json`. Run `claude` on the host and log in
 again, then **Retry** the step.
 
-**The image `union-agent:local` is missing.**
-Compose builds it on start. Without Compose, build it:
+**The image `union-agent:local` (or `union-agent-base:local`) is missing.**
+Compose builds both on start. Without Compose, build them:
+`docker build --target base -t union-agent-base:local -f docker/agent.Dockerfile docker`, then
 `docker build -t union-agent:local -f docker/agent.Dockerfile docker`.
 
 **The project's agent image does not build, or fails its check.**
@@ -23,8 +24,8 @@ the image they had until a save passes. "Runs as user 0": end the Dockerfile wit
 Dockerfile is built without the repository's files, so install what you need with `RUN` instead.
 
 **A step fails with "could not be built again on the new base image".**
-After `union-agent:local` is rebuilt (an update of Union), each project's Dockerfile is built again on it the first
-time a ticket needs it. Open the Agent image page, fix the Dockerfile and save, then **Retry** the step.
+After `union-agent:local` or `union-agent-base:local` is rebuilt (an update of Union), each project's Dockerfile on
+it is built again the first time a ticket needs it. Open the Agent image page, fix the Dockerfile and save, then **Retry** the step.
 
 **An agent says a tool is missing (python, go, a system library).**
 Give the project its own [agent image](agents.md#the-agent-image) with that tool installed.
