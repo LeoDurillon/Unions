@@ -16,6 +16,7 @@
     "@tanstack/react-query": "catalog:ui",
     "@union/core": "workspace:*",
     "drizzle-orm": "catalog:database",
+    "highlight.js": "catalog:ui",
     "hono": "catalog:server",
     "lowlight": "catalog:ui",
     "mermaid": "catalog:ui",

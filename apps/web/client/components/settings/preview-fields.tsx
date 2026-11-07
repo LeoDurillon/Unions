@@ -3,6 +3,7 @@
 import { PREVIEW_TEMPLATES } from '@union/core/preview';
 import type { ReactElement } from 'react';
 
+import { CodeTextarea } from '../code-textarea';
 import { Field, inputClass } from '../ui';
 
 export function TextField({
@@ -104,14 +105,12 @@ export function AdditionsField({
       label="Compose additions"
       hint={`Optional. Merged over ${composeFile || 'the compose file'} like a second -f file: new services, or keys added to existing ones. Relative paths start from that file's folder. Never written to the repository; checked like the rest.`}
     >
-      <textarea
-        className={`${inputClass} h-96 resize-y font-mono text-xs`}
+      <CodeTextarea
+        language="yaml"
+        className="h-96 resize-y"
         value={value}
-        spellCheck={false}
         placeholder={ADDITIONS_PLACEHOLDER}
-        onChange={(event) => {
-          onChange(event.target.value);
-        }}
+        onChange={onChange}
       />
     </Field>
   );

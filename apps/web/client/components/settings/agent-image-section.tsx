@@ -8,7 +8,7 @@ import { useLeaveGuard } from '../../lib/leave-guard';
 import { isBuilding, useAgentImage, type AgentImageChoice } from '../../lib/use-agent-image';
 import { Segmented } from '../choice';
 import { Button, ErrorText, Field, inputClass } from '../ui';
-import { DefaultDockerfile, StarterPicker } from './agent-image-starters';
+import { DefaultDockerfile, DockerfileEditor } from './agent-image-starters';
 import { AgentImageStatus } from './agent-image-status';
 
 type Kind = AgentImageChoice['kind'];
@@ -52,27 +52,12 @@ function SourceFields({
 }): ReactElement {
   if (draft.kind === 'dockerfile') {
     return (
-      <div className="space-y-2">
-        <StarterPicker
-          text={draft.dockerfile}
-          onPick={(dockerfile) => {
-            onChange({ ...draft, dockerfile });
-          }}
-        />
-        <Field
-          label="Dockerfile"
-          hint="The last stage starts FROM union-agent (Node, Bun, pnpm, yarn) or FROM union-agent-base (git and the claude CLI only). Install into system paths, not /home/node. Built with no files from the repository."
-        >
-          <textarea
-            className={`${inputClass} min-h-72 font-mono text-xs`}
-            spellCheck={false}
-            value={draft.dockerfile}
-            onChange={(event) => {
-              onChange({ ...draft, dockerfile: event.target.value });
-            }}
-          />
-        </Field>
-      </div>
+      <DockerfileEditor
+        text={draft.dockerfile}
+        onChange={(dockerfile) => {
+          onChange({ ...draft, dockerfile });
+        }}
+      />
     );
   }
   if (draft.kind === 'image') {

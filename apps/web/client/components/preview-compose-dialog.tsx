@@ -5,6 +5,7 @@ import { useState, type ReactElement } from 'react';
 
 import type { PreviewView } from '../../src/api-types';
 import { previewCalls, previewKey, type PreviewTarget } from '../lib/preview-target';
+import { CodeTextarea } from './code-textarea';
 import { Button, Dialog, ErrorText } from './ui';
 
 /** "ticket" or "pull request": whose file it is. */
@@ -112,14 +113,12 @@ function Editor({ target, view }: { target: PreviewTarget; view: PreviewView }):
       {refused ? (
         <pre className="text-xs whitespace-pre-wrap text-red-600 dark:text-red-400">{refused}</pre>
       ) : null}
-      <textarea
+      <CodeTextarea
+        language="yaml"
         aria-label="Compose file"
-        className="h-[60vh] w-full rounded-md border border-zinc-300 bg-white p-2 font-mono text-xs dark:border-zinc-700 dark:bg-zinc-950"
+        className="h-[60vh]"
         value={text}
-        spellCheck={false}
-        onChange={(event) => {
-          setText(event.target.value);
-        }}
+        onChange={setText}
       />
       <ErrorText error={actions.error} />
       <FileButtons view={view} text={text} shown={shown} actions={actions} whose={whose} />

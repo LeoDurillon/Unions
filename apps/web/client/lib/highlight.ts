@@ -1,5 +1,6 @@
-// Syntax highlighting for the review's diffs, with highlight.js.
+// Syntax highlighting for the review's diffs, the repository's files and the code fields, with highlight.js.
 import type { DiffLine } from '@union/core/diff';
+import dockerfile from 'highlight.js/lib/languages/dockerfile';
 import { common, createLowlight } from 'lowlight';
 
 /**
@@ -8,7 +9,8 @@ import { common, createLowlight } from 'lowlight';
  */
 export type Token = { text: string; className: string; start: number };
 
-const lowlight = createLowlight(common);
+// `common` lacks Dockerfiles, which the agent image page and repositories hold.
+const lowlight = createLowlight({ ...common, dockerfile });
 
 type Tree = ReturnType<typeof lowlight.highlight>;
 type Node = Tree['children'][number];
@@ -28,7 +30,7 @@ export function languageFor(path: string): string | null {
   const byName = BY_NAME[name] ?? (name.startsWith('dockerfile') ? 'dockerfile' : undefined);
   const extension = name.includes('.') ? (name.split('.').at(-1) ?? '') : '';
   const language = byName ?? extension;
-  // `common` lacks some named languages (dockerfile, cmake): highlighting one throws.
+  // Some named languages are not registered (cmake): highlighting one throws.
   return language !== '' && lowlight.registered(language) ? language : null;
 }
 

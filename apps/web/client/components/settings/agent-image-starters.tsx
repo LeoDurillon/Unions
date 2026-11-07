@@ -1,12 +1,13 @@
-// The agent image page's Dockerfile helpers: "Start from" (the JavaScript, Python, Rust, Go or PHP example) and the default image's Dockerfile, read-only.
+// The agent image page's Dockerfile fields: the project's, highlighted, with "Start from" (the JavaScript, Python, Rust, Go or PHP example), and the default image's, read-only.
 import type { ReactElement } from 'react';
 
 import { STARTERS } from '../../lib/agent-image-starters';
 import { useDefaultDockerfile } from '../../lib/use-agent-image';
-import { Button, ErrorText, inputClass } from '../ui';
+import { CodeTextarea } from '../code-textarea';
+import { Button, ErrorText, Field } from '../ui';
 
 /** Replaces the text with a starter; asks first when the text is the user's own (not empty, not a starter). */
-export function StarterPicker({
+function StarterPicker({
   text,
   onPick,
 }: {
@@ -34,6 +35,32 @@ export function StarterPicker({
   );
 }
 
+/** The project's Dockerfile, with the starters above it. */
+export function DockerfileEditor({
+  text,
+  onChange,
+}: {
+  text: string;
+  onChange: (dockerfile: string) => void;
+}): ReactElement {
+  return (
+    <div className="space-y-2">
+      <StarterPicker text={text} onPick={onChange} />
+      <Field
+        label="Dockerfile"
+        hint="The last stage starts FROM union-agent (Node, Bun, pnpm, yarn) or FROM union-agent-base (git and the claude CLI only). Install into system paths, not /home/node. Built with no files from the repository."
+      >
+        <CodeTextarea
+          language="dockerfile"
+          className="min-h-72 resize-y"
+          value={text}
+          onChange={onChange}
+        />
+      </Field>
+    </div>
+  );
+}
+
 /** What the default images are built from (`docker/agent.Dockerfile`), to read: Union's, not the project's. */
 export function DefaultDockerfile({ projectId }: { projectId: number }): ReactElement {
   const { data, error } = useDefaultDockerfile(projectId);
@@ -41,12 +68,10 @@ export function DefaultDockerfile({ projectId }: { projectId: number }): ReactEl
     <div className="space-y-1">
       <p className="text-sm font-medium">Dockerfile of the default image (read-only)</p>
       {data?.dockerfile ? (
-        <textarea
-          readOnly
-          wrap="off"
+        <CodeTextarea
+          language="dockerfile"
           aria-label="Dockerfile of the default image"
-          className={`${inputClass} min-h-72 cursor-default bg-zinc-50 font-mono text-xs text-zinc-600 dark:bg-zinc-950 dark:text-zinc-400`}
-          spellCheck={false}
+          className="min-h-72 resize-y"
           value={data.dockerfile}
         />
       ) : (

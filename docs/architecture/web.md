@@ -42,7 +42,8 @@
 - Code review: after each implementation run the worker stores the branch diff (`diff-snapshot.ts`,
   `diff_snapshots`/`diff_files`, newest only). The web reads it from SQLite (`routes/review.ts`), never from Docker or
   GitHub; `components/review/` renders one file at a time, unified or split (`lib/split-rows.ts` pairs the lines),
-  highlighted by lowlight per hunk side (`lib/highlight.ts`). Line comments are drafts in `review_comments` until
+  highlighted by lowlight per hunk side (`lib/highlight.ts`, which adds the Dockerfile grammar to `common`; the
+  Dockerfile and compose fields use it too, through `components/code-textarea.tsx`). Line comments are drafts in `review_comments` until
   sent; sending formats them (`review-feedback.ts`) into a normal `revise` command. The ticket panel's PR tab
   (`pull-request-tab.tsx`, `pull-request/`) shows the linked PR's discussion (`OnboardingGitHub.getDiscussion`,
   `github-discussion.ts`); `routes/review-import.ts` and `review-import.ts` import threads (line drafts) and single

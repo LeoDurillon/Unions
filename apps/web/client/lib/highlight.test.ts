@@ -7,9 +7,11 @@ import { highlightDiff, languageFor, tokenize } from './highlight';
 test('the language comes from the extension or a well-known file name', () => {
   expect(languageFor('apps/web/src/app.tsx')).toBe('tsx');
   expect(languageFor('scripts/run.py')).toBe('py');
-  // Not in lowlight's `common` grammars: highlighting it would throw.
-  expect(languageFor('docker/Dockerfile.agent')).toBeNull();
-  expect(languageFor('georeno/traefik/Dockerfile')).toBeNull();
+  expect(languageFor('docker/Dockerfile.agent')).toBe('dockerfile');
+  expect(languageFor('georeno/traefik/Dockerfile')).toBe('dockerfile');
+  expect(languageFor('compose.yaml')).toBe('yaml');
+  // Not registered: highlighting it would throw.
+  expect(languageFor('CMakeLists.txt')).toBeNull();
   expect(languageFor('Makefile')).toBe('makefile');
   expect(languageFor('LICENSE')).toBeNull();
   expect(languageFor('data.unknownext')).toBeNull();
