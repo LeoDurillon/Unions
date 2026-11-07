@@ -1,6 +1,6 @@
 # Jira
 
-Status: planned (2026-11-06). Scope: Jira Cloud, an API token, importing an issue as a ticket. Rule actions,
+Status: planned (2026-11-06); step 1 built (branch `jira`, 2026-11-07). Scope: Jira Cloud, an API token, importing an issue as a ticket. Rule actions,
 creating issues from investigations and a comments tab are later plans (listed at the end).
 
 ## Why
@@ -130,6 +130,9 @@ Each step ships on its own; `bun run check` after each.
 
 1. **Converter.** `adf-markdown.ts` and its tests, from real ADF samples (a description with each node type,
    copied from a test issue's `GET /issue` response, scrubbed of names). No wiring.
+   Built: `integrations/adf-markdown.ts` over `adf-node.ts`, `adf-inline.ts`, `adf-lists.ts`, `adf-table.ts` and
+   `adf-media.ts` (media through a resolver the caller passes; panels as GitHub alerts). The test samples follow
+   the documented ADF node shapes; check them against a real issue's response in step 5.
 2. **Client and provider in core.** `jira-api.ts` and its fake, `jira-ref.ts`, `jira-provider.ts`,
    `jira-integration.ts`, the `kinds.ts` entry and `createsItems`, `providers.ts`. Tests with the fake: verify
    (good, 401, unknown project), fields, item (in the project, outside it, missing), key parsing, config checks
