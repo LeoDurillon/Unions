@@ -72,7 +72,12 @@
   runs the action on each in turn and joins their details): a move reads the
   issue's status and transitions and posts the one that leads to the rule's status; fields are checked against the
   issue's `editmeta`, then sent in one `PUT` (labels as `update` operations); comments go as ADF (core's
-  `text-adf.ts`). The rules editor reads the stored statuses and settable fields (`GET /field`, kept in
+  `text-adf.ts`). Picked fields (`user`, `versions`, `components`, `sprint`; `jira-field-types.ts`) store their
+  picks' ids with their names; the editor reads the lists from `GET /api/projects/:id/jira/picks/:type`
+  (`routes/jira-picks.ts`, core's `jira-picks.ts` over `JiraApi.read`: assignable users, the project's versions and
+  components, the first scrum board's active and future sprints through Jira Software's `/rest/agile/1.0`), never
+  stored. "The active sprint" and "the next sprint" are resolved at delivery (`worker/event-actions/jira-field-picks.ts`).
+  Multi-selects are typed as option names and checked against `editmeta` as single selects are. The rules editor reads the stored statuses and settable fields (`GET /field`, kept in
   `integrations.fields` by Refresh; `jira-field-types.ts`) from the rules list (`jiraRuleSourceOf`). The web calls
   none of the writes (ast-grep `web-reads-trackers-only`). Jira's `createItem` (`jira-create.ts`, called by the
   worker's `withTargetItem` for a ticket written from an investigation) reads the project's issue types, picks the

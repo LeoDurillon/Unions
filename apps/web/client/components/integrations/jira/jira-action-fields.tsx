@@ -58,10 +58,12 @@ function StatusField({
 }
 
 function FieldRows({
+  projectId,
   source,
   action,
   onChange,
 }: {
+  projectId: number;
   source: JiraRuleSource;
   action: Action<'jira_field'>;
   onChange: (action: EventAction) => void;
@@ -81,6 +83,7 @@ function FieldRows({
       {action.values.map((entry, index) => (
         <JiraFieldRow
           key={entry.fieldId}
+          projectId={projectId}
           fields={source.fields}
           entry={entry}
           onChange={(changed) => {
@@ -152,7 +155,7 @@ export function JiraActionFields({
     return <StatusField source={source} action={action} onChange={onChange} />;
   }
   if (action.kind === 'jira_field') {
-    return <FieldRows source={source} action={action} onChange={onChange} />;
+    return <FieldRows projectId={projectId} source={source} action={action} onChange={onChange} />;
   }
   return <CommentField action={action} onChange={onChange} />;
 }

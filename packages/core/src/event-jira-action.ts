@@ -4,7 +4,13 @@ import type { Db } from './db';
 import type { ActionOf } from './event-actions';
 import { EventRuleError } from './event-notion-action';
 import { unknownVariables } from './event-rule-types';
-import type { JiraFieldValue } from './integrations/jira-field-types';
+import {
+  isPickedType,
+  isSinglePick,
+  type JiraFieldInfo,
+  type JiraFieldValue,
+  type JiraPick,
+} from './integrations/jira-field-types';
 import { jiraFieldsFor, type JiraFields } from './integrations/jira-integration';
 import { jiraValueError } from './integrations/jira-values';
 import { integrationOf } from './integrations/store';
@@ -47,12 +53,39 @@ export function checkedJiraTransition(
   return { kind: 'jira_transition', statusId: status.id, statusName: status.name };
 }
 
-function valuesOf(record: object): { fieldId: string; value: string }[] {
-  const list: unknown = 'values' in record ? record.values : [];
-  return (Array.isArray(list) ? list : []).map((entry: unknown) => {
-    const item = typeof entry === 'object' && entry !== null ? entry : {};
-    return { fieldId: text(item, 'fieldId'), value: text(item, 'value') };
-  });
+type Entry = { fieldId: string; value: string; picks: JiraPick[] };
+
+function listOf(record: object, key: string): object[] {
+  const list: unknown = key in record ? Reflect.get(record, key) : [];
+  return (Array.isArray(list) ? list : []).map((entry: unknown) =>
+    typeof entry === 'object' && entry !== null ? entry : {},
+  );
+}
+
+function valuesOf(record: object): Entry[] {
+  return listOf(record, 'values').map((item) => ({
+    fieldId: text(item, 'fieldId'),
+    value: text(item, 'value'),
+    picks: listOf(item, 'picks')
+      .map((pick) => ({ id: text(pick, 'id'), name: text(pick, 'name') }))
+      .filter((pick) => pick.id !== ''),
+  }));
+}
+
+/** One field's value as the rule stores it: typed, or picked (its names as the value, for the sentence). */
+function checkedValue(field: JiraFieldInfo, { value, picks }: Entry): JiraFieldValue {
+  const base = { fieldId: field.id, fieldName: field.name, fieldType: field.type };
+  if (isPickedType(field.type)) {
+    if (isSinglePick(field.type) && picks.length > 1) {
+      throw new EventRuleError(`${field.name}: pick one`);
+    }
+    return { ...base, value: picks.map((pick) => pick.name || pick.id).join(', '), picks };
+  }
+  const error = jiraValueError(field.type, value);
+  if (error !== null) {
+    throw new EventRuleError(`${field.name}: ${error}`);
+  }
+  return { ...base, value };
 }
 
 /** A "Set fields of the ticket's Jira issue" action as sent by the settings page, checked against the stored fields. */
@@ -66,8 +99,8 @@ export function checkedJiraFields(db: Db, projectId: number, record: object): Ji
     throw new EventRuleError('Pick a field of the Jira issue');
   }
   const seen = new Set<string>();
-  const values = entries.map(({ fieldId, value }): JiraFieldValue => {
-    const field = fields.find((candidate) => candidate.id === fieldId);
+  const values = entries.map((entry): JiraFieldValue => {
+    const field = fields.find((candidate) => candidate.id === entry.fieldId);
     if (!field) {
       throw new EventRuleError('Pick a field of the Jira issue');
     }
@@ -75,11 +108,7 @@ export function checkedJiraFields(db: Db, projectId: number, record: object): Ji
       throw new EventRuleError(`${field.name} is set twice: keep one`);
     }
     seen.add(field.id);
-    const error = jiraValueError(field.type, value);
-    if (error !== null) {
-      throw new EventRuleError(`${field.name}: ${error}`);
-    }
-    return { fieldId: field.id, fieldName: field.name, fieldType: field.type, value };
+    return checkedValue(field, entry);
   });
   return { kind: 'jira_field', values };
 }

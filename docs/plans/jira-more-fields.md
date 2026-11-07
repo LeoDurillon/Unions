@@ -1,6 +1,6 @@
 # More Jira fields in rules
 
-Status: planned (2026-11-07). Follows [Jira rule actions](jira-rule-actions.md), built (text, multi-line text,
+Status: built (branch `jira-more-fields`, 2026-11-07), steps 1 to 4 but the real check. Follows [Jira rule actions](jira-rule-actions.md), built (text, multi-line text,
 number, date, date and time, single select, labels).
 
 ## Why
@@ -50,6 +50,15 @@ In a Jira fields rule, these fields can be picked, each with a value input that 
 4. **The worker.** The active and next sprint resolved at delivery (D3), the delivery's text; worker tests. Real
    check on the user's site after asking (it writes to their Jira), then `documentation/automation.md` and this
    plan's status.
+
+Built: `jira-field-types.ts` gains the five types (D2) and `picks` on a field's value (`value` holds their names,
+for the sentence and preview). A multi-select is typed as option names rather than picked, as a single select is:
+Jira gives a field's options only on an issue's edit screen or to admins, and the edit screen checks them when the
+rule runs. `jira-values.ts`'s `jiraPickedValue` (D3), `jira-picks.ts` (the lists over one new `JiraApi.read`, and
+`resolveSprint`), `routes/jira-picks.ts`, the worker's `jira-field-picks.ts`. Client: `jira-pick-field.tsx` (a
+select for a person or a sprint, boxes for versions and components; a pick no longer listed stays so it can be
+removed), `use-jira-picks.ts`. Tests: field types, values, `jira-picks.test.ts`, the save checks,
+`jira-field-picks.test.ts` (worker), `jira-pick-routes.test.ts`. UI check on a scratch database with Jira's lists stubbed: each picker, the preview, the save (checked by the server) and the rule's sentence. Not yet checked on a real site.
 
 ## Risks
 

@@ -34,6 +34,8 @@ const ISSUE_FIELDS = 'summary,description,attachment,project';
 const COMMENTS_PER_PAGE = 100;
 /** 500 comments: an issue with more is read in Jira for its oldest ones. */
 const MAX_COMMENT_PAGES = 5;
+const API = '/rest/api/3';
+const AGILE = '/rest/agile/1.0/';
 
 /** An issue Union creates: in which project, of which type, its summary and its description. */
 export type NewJiraIssue = {
@@ -82,6 +84,11 @@ export type JiraApi = {
    * with how many it has (`total`), so the tab can say how many it leaves out.
    */
   comments(auth: JiraAuth, key: string): Promise<JiraCommentPage>;
+  /**
+   * A read of the REST API (a path under `/rest/api/3`), or of Jira Software's (a path starting
+   * `/rest/agile/1.0`); the body as Jira sent it, parsed by the caller (`jira-picks.ts`).
+   */
+  read(auth: JiraAuth, path: string): Promise<unknown>;
 };
 
 function failure(status: number, body: unknown, retryAfter: string | null): JiraError {
@@ -126,7 +133,8 @@ export class FetchJiraApi implements JiraApi {
       authorization: `Basic ${basic}`,
       accept: 'application/json',
     };
-    return fetch(`${site}/rest/api/3${path}`, {
+    const url = path.startsWith(AGILE) ? `${site}${path}` : `${site}${API}${path}`;
+    return fetch(url, {
       ...(write
         ? {
             method: write.method,
@@ -151,6 +159,10 @@ export class FetchJiraApi implements JiraApi {
       throw failure(response.status, body, response.headers.get('retry-after'));
     }
     return body;
+  }
+
+  read(auth: JiraAuth, path: string): Promise<unknown> {
+    return this.get(auth, path);
   }
 
   async myself(auth: JiraAuth): Promise<JiraAccount> {

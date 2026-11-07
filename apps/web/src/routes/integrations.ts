@@ -27,6 +27,7 @@ import {
   requireText,
 } from '../http';
 import { toPublicIntegration } from '../public-project';
+import { jiraPickRoutes } from './jira-picks';
 import { guarded } from './notion';
 
 function kindOf(c: Context): IntegrationKindName {
@@ -164,5 +165,6 @@ export function projectIntegrationRoutes(db: Db, apis: IntegrationApis): Hono {
   });
   routes.post('/:projectId/integrations/:kind/fields', (c) => refreshFields(db, apis, c));
   routes.post('/:projectId/integrations/:kind/import', (c) => importItem(db, apis, c));
+  routes.route('/', jiraPickRoutes(db, apis.jira));
   return routes;
 }

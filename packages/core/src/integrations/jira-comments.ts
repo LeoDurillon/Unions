@@ -1,6 +1,7 @@
 // A Jira issue's comments as the ticket's Jira tab shows them: author, times, who may see it, text as markdown, link.
 import { jiraCommentUrl } from '../jira-comment-link';
 import { adfMarkdown } from './adf-markdown';
+import { isRecord, text } from './jira-parse';
 
 /** One comment of the issue; `markdown` is its rich text converted, its images and files by name. */
 export type JiraComment = {
@@ -19,15 +20,6 @@ export type JiraComment = {
 
 /** A page of comments as `GET /issue/{key}/comment` answers, read: the comments and how many the issue has. */
 export type JiraCommentPage = { comments: JiraComment[]; total: number };
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
-function text(record: Record<string, unknown>, name: string): string {
-  const value = record[name];
-  return typeof value === 'string' || typeof value === 'number' ? String(value) : '';
-}
 
 /** A role or group restriction, or Jira Service Management's internal note; null when everyone sees it. */
 function restrictionOf(comment: Record<string, unknown>): string | null {

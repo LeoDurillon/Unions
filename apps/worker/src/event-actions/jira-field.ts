@@ -1,6 +1,7 @@
 // The "Set fields of the ticket's Jira issue" action of a rule: its values filled in, checked against the issue's edit
-// screen, then sent in one request (labels added, the other fields set).
+// screen, then sent in one request (labels added, the other fields set; picked ones resolved first).
 import {
+  isPickedType,
   jiraFieldValue,
   renderTemplate,
   type DeliveryOutcome,
@@ -8,6 +9,7 @@ import {
   type JiraFieldAction,
 } from '@union/core';
 
+import { pickedValue } from './jira-field-picks';
 import { jiraFailure, type JiraIssueTarget } from './jira-target';
 
 type Entry = JiraFieldAction['values'][number];
@@ -15,18 +17,45 @@ type Entry = JiraFieldAction['values'][number];
 type Prepared = { entry: Entry; text: string; value: { set: unknown } | { add: string[] } };
 type Change = { fields: Record<string, unknown>; update: Record<string, unknown> };
 
-/** Each value filled in and shaped for its type; the first one that cannot be fails the delivery. */
-function prepare(action: JiraFieldAction, target: JiraIssueTarget): Prepared[] | { error: string } {
-  const prepared: Prepared[] = [];
-  for (const entry of action.values) {
-    const text = renderTemplate(entry.value, target.values);
-    const value = jiraFieldValue(entry.fieldType, text);
-    if ('error' in value) {
-      return { error: `${entry.fieldName}: ${value.error}` };
-    }
-    prepared.push({ entry, text: text.trim(), value });
+/** One value filled in (or its picks resolved) and shaped for its type, or why it cannot be. */
+async function prepareOne(
+  jira: JiraApi,
+  target: JiraIssueTarget,
+  entry: Entry,
+): Promise<Prepared | { error: string }> {
+  const type = entry.fieldType;
+  if (isPickedType(type)) {
+    return { entry, ...(await pickedValue(jira, target, { ...entry, fieldType: type })) };
   }
-  return prepared;
+  const text = renderTemplate(entry.value, target.values);
+  const value = jiraFieldValue(type, text);
+  return 'error' in value
+    ? { error: `${entry.fieldName}: ${value.error}` }
+    : { entry, text: text.trim(), value };
+}
+
+/** Each value shaped for its type; the first one that cannot be fails the delivery. */
+async function prepare(
+  jira: JiraApi,
+  action: JiraFieldAction,
+  target: JiraIssueTarget,
+): Promise<Prepared[] | { error: string }> {
+  const all = await Promise.all(action.values.map((entry) => prepareOne(jira, target, entry)));
+  const failed = all.find((each) => 'error' in each);
+  return failed && 'error' in failed ? failed : all.filter((each) => 'entry' in each);
+}
+
+/** The option names a value gives: one for a select, several for a multi-select. */
+function optionNames(entry: Entry, text: string): string[] {
+  if (entry.fieldType === 'option') {
+    return text === '' ? [] : [text];
+  }
+  return entry.fieldType === 'multi_option'
+    ? text
+        .split(',')
+        .map((name) => name.trim())
+        .filter((name) => name !== '')
+    : [];
 }
 
 /** Why the issue's edit screen refuses a value: the field is not on it, or an option is not one of its own. */
@@ -40,8 +69,9 @@ function screenError(
       return `${entry.fieldName} is not on the issue's edit screen`;
     }
     const options = field.allowedValues;
-    if (entry.fieldType === 'option' && text !== '' && options && !options.includes(text)) {
-      return `${entry.fieldName}: "${text}" is not one of its options (${options.join(', ')})`;
+    const unknown = optionNames(entry, text).find((name) => options && !options.includes(name));
+    if (options && unknown !== undefined) {
+      return `${entry.fieldName}: "${unknown}" is not one of its options (${options.join(', ')})`;
     }
   }
   return null;
@@ -78,7 +108,13 @@ export async function deliverJiraFields(
   if ('status' in target) {
     return target;
   }
-  const prepared = prepare(action, target);
+  const prepared = await prepare(jira, action, target).catch((error: unknown) =>
+    // Reading the board's sprints failed: no board, no active sprint, or Jira refused.
+    jiraFailure(error, 'Browse projects', action.values.map((entry) => entry.fieldName).join(', ')),
+  );
+  if ('status' in prepared) {
+    return prepared;
+  }
   if ('error' in prepared) {
     return { status: 'failed', error: prepared.error };
   }

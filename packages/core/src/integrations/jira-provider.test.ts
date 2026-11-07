@@ -77,6 +77,7 @@ function checked(auth: JiraAuth): void {
 }
 
 const jira: JiraApi = {
+  read: () => Promise.reject(new Error('Not used')),
   myself: (auth) => {
     calls.push('myself');
     checked(auth);

@@ -1,6 +1,6 @@
 # Jira issues in reviews of other people's pull requests
 
-Status: built (branch `jira-pr-reviews`, 2026-11-07), steps 1 to 5. Needed [Jira issues as review specs](jira-review-specs.md) (a review's linked issues are
+Status: built and deployed (2026-11-07), steps 1 to 5. Needed [Jira issues as review specs](jira-review-specs.md) (a review's linked issues are
 its `jira` specs, as its linked Notion pages are its `notion` specs). The Jira counterpart of a review's Notion
 pages ([a review's Notion page](review-notion-link.md), built).
 

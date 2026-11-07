@@ -62,8 +62,13 @@ The actions on Notion and on Jira are offered only when the project is connected
   [linked to](reviewing.md#review-other-peoples-pull-requests), one after the other; a review linked to none is
   skipped.
 - **Set fields of the ticket's Jira issue**: your custom fields (one-line or multi-line text, a number, a date, a
-  select's option by its name as Jira shows it), and of Jira's own fields the due date, the labels (added) and the
-  environment. Fields Jira fills in itself (Created, Resolved, the time spent…) are not offered. Union reads the Jira project's statuses and the fields a rule
+  select's option by its name as Jira shows it, a multi-select's or checkboxes' options by their names, a person,
+  a sprint), and of Jira's own fields the due date, the labels (added), the environment, the assignee, the fix and
+  affects versions and the components. A person is picked from those who can be assigned in the Jira project, and
+  versions and components from the project's; they replace what the issue had, and picking none empties the field.
+  For a sprint, pick **The active sprint** or **The next sprint** (the board's when the rule runs, so the rule keeps
+  working from sprint to sprint), or one sprint by name; sprints need a scrum board in the Jira project. Fields Jira
+  fills in itself (Created, Resolved, the time spent…) are not offered, nor the summary and description. Union reads the Jira project's statuses and the fields a rule
   can set when you save the Jira settings, or with **Refresh from Jira** above the rules (needed once for a project
   connected in the setup wizard, and after adding a field in Jira).
 - **Comment on the ticket's Jira issue**: plain text, links become links.

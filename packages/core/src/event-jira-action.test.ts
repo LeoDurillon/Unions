@@ -20,6 +20,8 @@ const FIELDS = {
     { id: 'customfield_10050', name: 'PR link', type: 'text' },
     { id: 'customfield_10051', name: 'Points', type: 'number' },
     { id: 'customfield_10052', name: 'Priority level', type: 'option' },
+    { id: 'assignee', name: 'Assignee', type: 'user' },
+    { id: 'fixVersions', name: 'Fix versions', type: 'versions' },
   ],
 };
 
@@ -141,4 +143,39 @@ test('fields stored before rules knew which can be set are narrowed when read ba
     checkedJiraFields(db, projectId, { values: [{ fieldId: 'created', value: '{date.now}' }] }),
   );
   expect(refused).toBe('Pick a field of the Jira issue');
+});
+
+test('picked fields keep their picks, their names as the value; a person is one', () => {
+  connect(FIELDS);
+  const ada = { id: 'u1', name: 'Ada' };
+  expect(
+    checkedJiraFields(db, projectId, {
+      values: [
+        { fieldId: 'assignee', value: 'ignored', picks: [ada] },
+        {
+          fieldId: 'fixVersions',
+          picks: [{ id: '10', name: '2.4' }, { id: '11', name: '2.5' }, { id: '' }],
+        },
+      ],
+    }).values,
+  ).toEqual([
+    { fieldId: 'assignee', fieldName: 'Assignee', fieldType: 'user', value: 'Ada', picks: [ada] },
+    {
+      fieldId: 'fixVersions',
+      fieldName: 'Fix versions',
+      fieldType: 'versions',
+      value: '2.4, 2.5',
+      picks: [
+        { id: '10', name: '2.4' },
+        { id: '11', name: '2.5' },
+      ],
+    },
+  ]);
+  expect(
+    refusal(() =>
+      checkedJiraFields(db, projectId, {
+        values: [{ fieldId: 'assignee', picks: [ada, { id: 'u2', name: 'Bo' }] }],
+      }),
+    ),
+  ).toBe('Assignee: pick one');
 });

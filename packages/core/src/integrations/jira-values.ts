@@ -1,7 +1,7 @@
 // A rule's value for a Jira field as Jira takes it, by the field's type, or why it cannot be one; checked when the
 // rule is saved (values without variables) and when it runs (filled in).
 import { unknownVariables } from '../event-rule-types';
-import type { JiraFieldType } from './jira-field-types';
+import type { JiraPickedType, JiraTypedType } from './jira-field-types';
 import { textAdf } from './text-adf';
 
 /** Set the field to this (`fields`, null clears it), or add these labels (`update`). */
@@ -34,11 +34,15 @@ function datetime(text: string): Shaped {
     : { set: new Date(time).toISOString().replace(ISO_UTC, '+0000') };
 }
 
-function labels(text: string): Shaped {
-  const list = text
+function commaList(text: string): string[] {
+  return text
     .split(',')
-    .map((label) => label.trim())
-    .filter((label) => label !== '');
+    .map((item) => item.trim())
+    .filter((item) => item !== '');
+}
+
+function labels(text: string): Shaped {
+  const list = commaList(text);
   const spaced = list.find((label) => WHITESPACE.test(label));
   if (spaced !== undefined) {
     return { error: `A Jira label has no spaces: "${spaced}"` };
@@ -46,7 +50,7 @@ function labels(text: string): Shaped {
   return list.length === 0 ? { error: 'Give the labels to add' } : { add: list };
 }
 
-const SHAPES: Record<JiraFieldType, (text: string) => Shaped> = {
+const SHAPES: Record<JiraTypedType, (text: string) => Shaped> = {
   text: (text) =>
     text.length > MAX_TEXT
       ? { error: `A one-line Jira text holds at most ${MAX_TEXT} characters` }
@@ -57,10 +61,11 @@ const SHAPES: Record<JiraFieldType, (text: string) => Shaped> = {
   datetime,
   option: (text) => ({ set: { value: text } }),
   labels,
+  multi_option: (text) => ({ set: commaList(text).map((value) => ({ value })) }),
 };
 
 /** The filled-in value as Jira takes it; an empty value clears the field (labels have nothing to add). */
-export function jiraFieldValue(type: JiraFieldType, value: string): Shaped {
+export function jiraFieldValue(type: JiraTypedType, value: string): Shaped {
   const text = value.trim();
   if (text === '' && type !== 'labels') {
     return { set: null };
@@ -69,14 +74,31 @@ export function jiraFieldValue(type: JiraFieldType, value: string): Shaped {
 }
 
 /** Why a rule's value cannot be saved for a field of this type, or null; variables are checked once filled in. */
-export function jiraValueError(type: JiraFieldType, value: string): string | null {
+export function jiraValueError(type: JiraTypedType, value: string): string | null {
   const unknown = unknownVariables(value);
   if (unknown.length > 0) {
     return `Unknown variable: {${unknown.join('}, {')}}`;
   }
   if (value.includes('{')) {
-    return type === 'option' ? 'An option is picked by its name, not with variables' : null;
+    return type === 'option' || type === 'multi_option'
+      ? 'An option is picked by its name, not with variables'
+      : null;
   }
   const shaped = jiraFieldValue(type, value);
   return 'error' in shaped ? shaped.error : null;
+}
+
+/**
+ * What was picked as Jira takes it (`ids`: a sprint's id once "the active sprint" is resolved); none
+ * clears the field.
+ */
+export function jiraPickedValue(type: JiraPickedType, ids: string[]): { set: unknown } {
+  const [first] = ids;
+  if (type === 'versions' || type === 'components') {
+    return { set: ids.map((id) => ({ id })) };
+  }
+  if (first === undefined) {
+    return { set: null };
+  }
+  return { set: type === 'user' ? { accountId: first } : Number(first) };
 }

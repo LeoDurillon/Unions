@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test';
 
-import { jiraFieldValue, jiraValueError } from './jira-values';
+import { jiraFieldValue, jiraPickedValue, jiraValueError } from './jira-values';
 
 test('each type gives what Jira takes; an empty value clears the field', () => {
   expect(jiraFieldValue('text', ' https://x.y/pr/1 ')).toEqual({ set: 'https://x.y/pr/1' });
@@ -40,4 +40,19 @@ test('a saved value is checked now without variables, when filled in with them',
     'An option is picked by its name, not with variables',
   );
   expect(jiraValueError('labels', 'deployed,{ticket.branch}')).toBeNull();
+});
+
+test('a multi-select takes option names; picked values take ids; none clears', () => {
+  expect(jiraFieldValue('multi_option', 'Web, iOS ,')).toEqual({
+    set: [{ value: 'Web' }, { value: 'iOS' }],
+  });
+  expect(jiraValueError('multi_option', '{pr.url}')).toBe(
+    'An option is picked by its name, not with variables',
+  );
+  expect(jiraPickedValue('user', ['557058:1'])).toEqual({ set: { accountId: '557058:1' } });
+  expect(jiraPickedValue('user', [])).toEqual({ set: null });
+  expect(jiraPickedValue('sprint', ['42'])).toEqual({ set: 42 });
+  expect(jiraPickedValue('sprint', [])).toEqual({ set: null });
+  expect(jiraPickedValue('versions', ['1', '2'])).toEqual({ set: [{ id: '1' }, { id: '2' }] });
+  expect(jiraPickedValue('components', [])).toEqual({ set: [] });
 });

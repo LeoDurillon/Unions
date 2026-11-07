@@ -39,6 +39,7 @@ function allowed(auth: JiraAuth): Promise<void> {
 }
 
 const jira: JiraApi = {
+  read: () => Promise.reject(new Error('Not used')),
   myself: async (auth) => {
     await allowed(auth);
     return { accountId: '557058:1', displayName: 'Ada' };

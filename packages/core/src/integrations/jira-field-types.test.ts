@@ -50,10 +50,23 @@ test("Jira's own fields are left out but the due date, labels and environment", 
 test('fields rules leave out have no type', () => {
   expect(fieldTypeOf('summary', schema('string'))).toBeNull();
   expect(fieldTypeOf('description', schema('string'))).toBeNull();
-  expect(fieldTypeOf('assignee', schema('user'))).toBeNull();
-  expect(fieldTypeOf('fixVersions', schema('array', { items: 'version' }))).toBeNull();
-  expect(fieldTypeOf('customfield_7', schema('array', { items: 'option' }))).toBeNull();
+  expect(fieldTypeOf('reporter', schema('user'))).toBeNull();
   expect(fieldTypeOf('customfield_8', schema('array', { items: 'string' }))).toBeNull();
+  expect(fieldTypeOf('customfield_9', schema('array', { items: 'user' }))).toBeNull();
+  expect(fieldTypeOf('customfield_10', schema('option-with-child'))).toBeNull();
+});
+
+test('people, multi-selects, versions, components and the sprint have their own types', () => {
+  const sprint = 'com.pyxis.greenhopper.jira:gh-sprint';
+  expect(fieldTypeOf('assignee', schema('user'))).toBe('user');
+  expect(fieldTypeOf('customfield_11', schema('user'))).toBe('user');
+  expect(fieldTypeOf('customfield_7', schema('array', { items: 'option' }))).toBe('multi_option');
+  expect(fieldTypeOf('fixVersions', schema('array', { items: 'version' }))).toBe('versions');
+  expect(fieldTypeOf('versions', schema('array', { items: 'version' }))).toBe('versions');
+  expect(fieldTypeOf('components', schema('array', { items: 'component' }))).toBe('components');
+  expect(fieldTypeOf('customfield_10020', schema('array', { items: 'json', custom: sprint }))).toBe(
+    'sprint',
+  );
 });
 
 test('GET /field is read into the settable fields, sorted by name', () => {
@@ -66,7 +79,7 @@ test('GET /field is read into the settable fields, sorted by name', () => {
         name: 'Labels',
         schema: { type: 'array', items: 'string', system: 'labels' },
       },
-      { id: 'assignee', name: 'Assignee', schema: { type: 'user' } },
+      { id: 'reporter', name: 'Reporter', schema: { type: 'user' } },
       { id: 'customfield_10060', name: 'Shipped on', schema: { type: 'date' } },
       { name: 'No id' },
       'not a field',

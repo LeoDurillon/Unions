@@ -26,11 +26,12 @@ export type JiraIssue = {
 /** The account an email and token belong to. */
 export type JiraAccount = { accountId: string; displayName: string };
 
-function isRecord(value: unknown): value is Record<string, unknown> {
+export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-function text(record: Record<string, unknown>, name: string): string {
+/** A string or number property as text; '' when it is neither. */
+export function text(record: Record<string, unknown>, name: string): string {
   const value = record[name];
   return typeof value === 'string' || typeof value === 'number' ? String(value) : '';
 }

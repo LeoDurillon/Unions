@@ -174,7 +174,7 @@ test('reads the settable fields from GET /field', async () => {
   const seen = answer(() =>
     json([
       { id: 'customfield_10050', name: 'PR link', schema: { type: 'string' } },
-      { id: 'assignee', name: 'Assignee', schema: { type: 'user' } },
+      { id: 'reporter', name: 'Reporter', schema: { type: 'user' } },
     ]),
   );
   expect(await new FetchJiraApi().fields(AUTH)).toEqual([
