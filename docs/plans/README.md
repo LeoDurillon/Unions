@@ -106,6 +106,17 @@ and linked.
 - [Create Jira issues from investigations](jira-create-issues.md): "Also create it in Jira" when an investigation
   writes a ticket: the draft's markdown as Jira rich text, the issue type from the settings, the ticket linked to
   the issue. Built and deployed (2026-11-07), checked on a real site.
+- [Link a ticket to a Jira issue afterwards](jira-ticket-link.md): **Link a Jira issue** in the Overview for a
+  ticket from no tracker, with Change and Unlink, so the Jira tab and rules apply to it. Planned (2026-11-07).
+- [Jira issues as review specs](jira-review-specs.md): a `jira` spec kind, read from Jira each time; a Jira ticket's
+  specs start with its issue, **Add a spec** takes one. Planned (2026-11-07).
+- [Jira issues in reviews of other people's pull requests](jira-pr-reviews.md): issues suggested from the keys a
+  pull request names, linked as specs, a review's Jira tab, review rules acting on them. Planned (2026-11-07);
+  needs Jira issues as review specs.
+- [More Jira fields in rules](jira-more-fields.md): users, multi-selects and checkboxes, versions, components and
+  sprints in **Set fields of the ticket's Jira issue**. Planned (2026-11-07).
+- [Formatted Jira comments](jira-comment-formatting.md): markdown in the Jira tab's comments through `markdownAdf`,
+  rule comments unchanged. Planned (2026-11-07).
 - [Update Union from the sidebar](self-update.md): an Update button enabled when the checkout is behind the remote's
   `main`; the worker fetches `origin` (SSH through the host's `~/.ssh`, read-only), fast-forwards, reinstalls if
   needed, and web and worker exit for compose to start them again; Update anyway when something runs. Built
