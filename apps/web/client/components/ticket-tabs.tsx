@@ -1,35 +1,31 @@
-// The panel's top tabs: the ticket, its preview, the agents' work, its pull request and its Notion page's
-// comments.
+// The panel's top tabs: the ticket, its preview, the agents' work, its pull request and the comments of the
+// tracker item it came from (its Notion page's, or its Jira issue's).
 import type { ReactElement } from 'react';
 
-import type { TicketDetail, TicketSummary } from '../../src/api-types';
+import type { TicketDetail } from '../../src/api-types';
 import { useCustomAgentNames } from '../lib/use-custom-agents';
 import { workerTabsFor, type WorkerTab } from '../lib/worker-tabs';
 import { LogTab } from './log-tab';
-import { NotionTab } from './notion/notion-tab';
 import { OverviewTab } from './overview-tab';
 import { PreviewTab } from './preview-tab';
 import { PullRequestTab } from './pull-request-tab';
 import { StepTab } from './step-tab';
+import { TRACKER_LABELS, TrackerTab, trackerSection } from './tracker-tab';
 
-/** The panel's top tabs: the ticket, its preview, the agents' work, its pull request, its Notion page. */
-export type Section = 'overview' | 'preview' | 'worker' | 'pull-request' | 'notion';
+/** The panel's top tabs: the ticket, its preview, the agents' work, its pull request, its tracker item. */
+export type Section = 'overview' | 'preview' | 'worker' | 'pull-request' | 'notion' | 'jira';
 export { latestWorkerTab, type WorkerTab } from '../lib/worker-tabs';
 type TabEntry<T> = { id: T; label: string; enabled: boolean };
 
-/** Imported from a Notion page, created as one, or linked to one: its comments can be read. */
-export function hasNotionPage(ticket: TicketSummary): boolean {
-  return ticket.originKind === 'notion' && ticket.originId !== null;
-}
-
 function sectionsFor(detail: TicketDetail): TabEntry<Section>[] {
   const { prNumber } = detail.ticket;
+  const tracker = trackerSection(detail.ticket);
   return [
     { id: 'overview', label: 'Overview', enabled: true },
     { id: 'preview', label: 'Preview', enabled: true },
     { id: 'worker', label: 'Worker', enabled: true },
     { id: 'pull-request', label: prNumber === null ? 'PR' : `PR #${prNumber}`, enabled: true },
-    { id: 'notion', label: 'Notion', enabled: hasNotionPage(detail.ticket) },
+    { ...tracker, label: TRACKER_LABELS[tracker.id] },
   ];
 }
 
@@ -164,8 +160,9 @@ export function PanelBody({
   if (section === 'pull-request') {
     return <PullRequestTab detail={detail} />;
   }
-  if (section === 'notion' && hasNotionPage(detail.ticket)) {
-    return <NotionTab key={detail.ticket.id} ticketId={detail.ticket.id} />;
+  const tracker = trackerSection(detail.ticket);
+  if (section === tracker.id && tracker.enabled) {
+    return <TrackerTab ticketId={detail.ticket.id} section={tracker.id} />;
   }
   return <WorkerBody detail={detail} tab={workerTab} onTab={onWorkerTab} />;
 }

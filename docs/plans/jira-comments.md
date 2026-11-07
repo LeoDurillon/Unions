@@ -1,6 +1,6 @@
 # Jira comments on the ticket
 
-Status: planned (2026-11-07); step 1 built (branch `jira-comments`, 2026-11-07). Follows [Jira](jira.md) (import) and [Jira rule actions](jira-rule-actions.md)
+Status: planned (2026-11-07); steps 1 and 2 built (branch `jira-comments`, 2026-11-07). Follows [Jira](jira.md) (import) and [Jira rule actions](jira-rule-actions.md)
 (the worker writes to Jira). Modeled on [Notion comments on the ticket](notion-comments.md), built: read the
 issue's comments in a ticket tab, post one from Union, add one to the ticket's review.
 
@@ -109,6 +109,15 @@ Each step ships on its own; `bun run check` after each.
 2. **The tab, read only.** The route's `GET`, the tab, D1's tab choice. Route tests with the fake. UI check
    (`scripts/ui-check/`): the tab on a Jira ticket, Refresh, the Notion tab unchanged on a Notion ticket. Then a
    read-only check on the user's SCRUM-1 (reading only: no need to ask).
+   Built: `routes/jira-comments.ts` (`GET`; 409 for a ticket not from Jira or a project not connected, Jira's 401
+   and 404 through `guarded`), core's `jiraAuthOf(db, projectId)` for the credentials, `jira-comment-types.ts`
+   (`JiraTabView`: key, issue link, comments, total). Client: `components/jira/jira-tab.tsx` (Open in Jira,
+   Refresh, the note on comments left out), `jira-comment.tsx` (author, time, "edited", restriction badge,
+   markdown, Open in Jira), `lib/use-jira-comments.ts`. D1 is `components/tracker-tab.tsx`: `trackerSection`
+   picks the fifth tab (Jira for a Jira ticket, else Notion, disabled without a page), and key 5 opens it
+   (`ticket-panel-keys.ts`, a `tracker` key). UI check on the worktree's server with a scratch database, the tabs'
+   reads stubbed in the browser: the tabs of a Jira, a Notion and a written ticket, key 5, the tab's note, badge and
+   "edited". The read on SCRUM-1 waits for the deploy (the worktree has no token).
 3. **Posting.** The command, `textAdf`'s mention, the worker's handler, the events, New comment and Reply with
    their pending and failed states. Tests: the payload checks, the ADF with a mention, the worker with the fake (a
    post, a 403, a 429 retried as the command queue does). UI check with the posts blocked. A real post on SCRUM-1

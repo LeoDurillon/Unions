@@ -1,5 +1,7 @@
 // A project's Jira integration as rules read it: the Jira project's statuses and the site's settable fields, as stored.
 import type { Db } from '../db';
+import type { JiraAuth } from './jira-api';
+import { readJiraConfig } from './jira-config';
 import { isJiraFieldType, isSettableFieldId, type JiraFieldInfo } from './jira-field-types';
 import type { JiraProject, JiraStatus } from './jira-parse';
 import { integrationOf } from './store';
@@ -54,6 +56,16 @@ function jiraFieldsOf(fields: unknown): JiraFields | null {
     statuses,
     fields: settable,
   };
+}
+
+/** Who calls Jira for the project: its site, account email and token; null when it is not connected. */
+export function jiraAuthOf(db: Db, projectId: number): JiraAuth | null {
+  const integration = integrationOf(db, projectId, 'jira');
+  const read = integration ? readJiraConfig(integration.config) : null;
+  if (!integration || !read || 'error' in read) {
+    return null;
+  }
+  return { site: read.config.site, email: read.config.email, token: integration.secret };
 }
 
 /** The project's Jira fields as last read; null when it is not connected to Jira or nothing was read. */

@@ -6,7 +6,8 @@ import type { TicketDetail, TicketSummary } from '../../src/api-types';
 import { api } from '../lib/api';
 import { nextNeedingYou, othersNeedingYou } from '../lib/next-needing';
 import { useShortcuts } from '../lib/shortcuts';
-import { hasNotionPage, type Section } from './ticket-tabs';
+import type { Section } from './ticket-tabs';
+import { trackerSection } from './tracker-tab';
 
 /** The tickets around the open one that need the user, from the board's list (shared with the board). */
 export type NeedingYou = {
@@ -31,13 +32,23 @@ function useNeedingYou(ticket: TicketSummary | undefined): NeedingYou {
   };
 }
 
-const SECTION_KEYS: Record<string, Section> = {
+/** `tracker`: the fifth tab, the Notion or Jira one the ticket has (`trackerSection`). */
+const SECTION_KEYS: Record<string, Section | 'tracker'> = {
   '1': 'overview',
   '2': 'preview',
   '3': 'worker',
   '4': 'pull-request',
-  '5': 'notion',
+  '5': 'tracker',
 };
+
+/** The tab a key opens on this ticket, or null when it is disabled. */
+function keySection(section: Section | 'tracker', ticket: TicketSummary): Section | null {
+  if (section !== 'tracker') {
+    return section;
+  }
+  const tracker = trackerSection(ticket);
+  return tracker.enabled ? tracker.id : null;
+}
 
 /** Listens while the panel shows (not its review page); returns the tickets `n` and `p` open. */
 export function usePanelKeys({
@@ -62,14 +73,17 @@ export function usePanelKeys({
         }
       : undefined;
   const sections = Object.fromEntries(
-    Object.entries(SECTION_KEYS).map(([key, section]) => [
-      key,
-      detail && (section !== 'notion' || hasNotionPage(detail.ticket))
-        ? () => {
-            onSection(section);
-          }
-        : undefined,
-    ]),
+    Object.entries(SECTION_KEYS).map(([key, section]) => {
+      const opened = detail ? keySection(section, detail.ticket) : null;
+      return [
+        key,
+        opened === null
+          ? undefined
+          : () => {
+              onSection(opened);
+            },
+      ];
+    }),
   );
   useShortcuts(
     {
