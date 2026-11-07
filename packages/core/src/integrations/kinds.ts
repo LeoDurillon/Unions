@@ -1,7 +1,7 @@
 // The kinds of ticket source Union connects to (Notion, Jira), and what the UI needs to know about each; browser-safe.
 import { parseNotionId } from '../notion-id';
 import { notionMarkdown } from '../notion-markdown';
-import { parseJiraKey, readJiraConfig } from './jira-config';
+import { jiraRefSiteError, parseJiraKey, readJiraConfig } from './jira-config';
 
 export type IntegrationKindName = 'notion' | 'jira';
 
@@ -16,6 +16,10 @@ export type IntegrationKind = {
   sourceLabel: string;
   /** An item's id from a URL or a bare id; null when the input holds none. */
   parseRef(input: string): string | null;
+  /** Why a pasted link cannot be an item of this integration (another site); null when it can. */
+  refError?(input: string, config: unknown): string | null;
+  /** Whether Union can add an item to the source (a ticket written from an investigation). */
+  createsItems: boolean;
   /** The tracker's markdown as plain GitHub-flavored markdown. */
   cleanMarkdown(markdown: string): string;
   /** A config as sent by the browser, checked and normalized; or what is wrong with it. */
@@ -43,6 +47,7 @@ const KINDS: Record<IntegrationKindName, IntegrationKind> = {
     parseRef: parseNotionId,
     cleanMarkdown: (markdown) => notionMarkdown(markdown),
     readConfig: readNotionConfig,
+    createsItems: true,
   },
   jira: {
     kind: 'jira',
@@ -53,6 +58,8 @@ const KINDS: Record<IntegrationKindName, IntegrationKind> = {
     // The provider converts an issue's ADF to markdown already.
     cleanMarkdown: (markdown) => markdown,
     readConfig: readJiraConfig,
+    refError: jiraRefSiteError,
+    createsItems: false,
   },
 };
 

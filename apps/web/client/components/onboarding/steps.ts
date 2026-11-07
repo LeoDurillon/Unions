@@ -1,6 +1,7 @@
 // The setup wizard's views, one per entry of `STEPS`, in the same order.
 import type { ReactElement } from 'react';
 
+import { JiraStep } from '../integrations/jira/jira-step';
 import { NotionStep } from '../integrations/notion/notion-step';
 import { ConnectStep } from './connect-step';
 import type { StepProps } from './draft';
@@ -14,5 +15,6 @@ export const STEP_VIEWS: readonly ((props: StepProps) => ReactElement)[] = [
   RepositoryStep,
   ProjectStep,
   NotionStep,
+  JiraStep,
   ReviewStep,
 ];

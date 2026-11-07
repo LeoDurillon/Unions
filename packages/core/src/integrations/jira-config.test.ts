@@ -1,6 +1,12 @@
 import { expect, test } from 'bun:test';
 
-import { jiraConfigOf, jiraSiteOf, parseJiraKey, readJiraConfig } from './jira-config';
+import {
+  jiraConfigOf,
+  jiraRefSiteError,
+  jiraSiteOf,
+  parseJiraKey,
+  readJiraConfig,
+} from './jira-config';
 
 test('a site is an atlassian.net origin, from a URL, a host, a page of it or the bare name', () => {
   expect(jiraSiteOf('https://acme.atlassian.net')).toBe('https://acme.atlassian.net');
@@ -66,4 +72,14 @@ test('a config from the browser is checked and normalized', () => {
   );
   expect(readJiraConfig(null)).toHaveProperty('error');
   expect(() => jiraConfigOf({ dataSourceId: 'x' })).toThrow('incomplete');
+});
+
+test('a pasted link must be on the configured site; a bare key always is', () => {
+  const config = { site: 'https://acme.atlassian.net', email: 'a@b.c', projectKey: 'ABC' };
+  expect(jiraRefSiteError('ABC-1', config)).toBeNull();
+  expect(jiraRefSiteError('https://acme.atlassian.net/browse/ABC-1', config)).toBeNull();
+  expect(jiraRefSiteError('https://other.atlassian.net/browse/ABC-1', config)).toBe(
+    "That link is not on the project's Jira site (https://acme.atlassian.net)",
+  );
+  expect(jiraRefSiteError('https://evil.example/browse/ABC-1', config)).not.toBeNull();
 });

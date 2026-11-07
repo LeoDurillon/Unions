@@ -41,7 +41,10 @@ export const SETTINGS_GROUPS = [
   },
   {
     label: 'Integrations',
-    sections: [{ id: 'notion', label: 'Notion' }],
+    sections: [
+      { id: 'notion', label: 'Notion' },
+      { id: 'jira', label: 'Jira' },
+    ],
   },
   {
     label: 'Events',

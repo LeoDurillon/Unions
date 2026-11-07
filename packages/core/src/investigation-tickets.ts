@@ -20,6 +20,11 @@ export function requestTicket(
   { target = null }: { target?: IntegrationKindName | null } = {},
 ): Investigation {
   const current = getInvestigation(db, id);
+  if (target !== null && !integrationKind(target).createsItems) {
+    throw new InvestigationError(
+      `Union cannot create ${integrationKind(target).label} ${integrationKind(target).itemLabel}s yet`,
+    );
+  }
   if (target === 'notion' && !notionAccessOf(db, current.projectId)) {
     throw new InvestigationError('The project is not connected to a Notion data source');
   }

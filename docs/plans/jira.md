@@ -1,6 +1,6 @@
 # Jira
 
-Status: planned (2026-11-06); steps 1 and 2 built (branch `jira`, 2026-11-07). Scope: Jira Cloud, an API token, importing an issue as a ticket. Rule actions,
+Status: planned (2026-11-06); steps 1 to 3 built (branch `jira`, 2026-11-07). Scope: Jira Cloud, an API token, importing an issue as a ticket. Rule actions,
 creating issues from investigations and a comments tab are later plans (listed at the end).
 
 ## Why
@@ -150,6 +150,21 @@ Each step ships on its own; `bun run check` after each.
    Route tests in `integration-routes.test.ts` (Jira verify, save, import, an issue from another project, a ticket
    with a Jira origin; its existing `kind: 'jira'` → 404 cases change to an unknown kind). UI check with
    `scripts/ui-check/` and a faked `JiraApi`: settings, the import tab, the created ticket's origin link.
+   Built: settings `components/integrations/jira/jira-section.tsx` (fields and help shared with the onboarding step in
+   `jira-fields.tsx`), behind `tracker-section.tsx` (one settings body per kind); Disconnect moved to
+   `integrations/disconnect.tsx` for both kinds. The onboarding draft holds `trackers: Record<kind, { secret, config,
+   title }>` instead of Notion's three fields, with a Jira step after Notion's; both verify through
+   `integrations/tracker-verify.tsx`. The settings header shows the Jira project's name, not its types and statuses
+   (nothing uses them yet). D5's site check is `IntegrationKind.refError` (Jira: `jiraRefSiteError`), called by the
+   import route. D9 as planned (`createsItems`; the switch reads `creatingKinds`). The origin filter lists the
+   trackers the board's tickets came from (`originOptions`); "From GitHub" now means no tracker origin. Route tests
+   are a new `jira-routes.test.ts` (the Notion file is near 300 lines). gitleaks: the default `atlassian-api-token`
+   rule matches only 192-character tokens, so `.gitleaks.toml` adds `atlassian-api-token-any-length`. The ast-grep
+   rule is now `web-reads-trackers-only`. User guide: `tickets.md` (From Jira), `first-project.md` (the wizard step,
+   Connect Jira), `settings.md`. UI check on the worktree's web server with a scratch database, the Jira and GitHub
+   calls stubbed in the browser: the board filter, settings (Verify and save sends the new token and config), the
+   import (preview, then the ticket with origin `jira`/`ABC-7`), and the wizard step (skippable while empty, Next
+   waits for Verify once a field is typed, the site comes back normalized, the summary lists Jira).
 4. **Attachments (D7, D8).** The converter's attachment links, `jira-files.ts`, the `FILES` signature change.
    Tests: links matched and unmatched, a link to another site or path not fetched, the redirect fetched without
    `Authorization`.

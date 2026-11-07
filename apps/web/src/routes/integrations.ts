@@ -126,9 +126,14 @@ async function importItem(db: Db, apis: IntegrationApis, c: Context): Promise<Re
   const integration = readyIntegration(db, c);
   const kind = integrationKind(integration.kind);
   const body = await readObject(c.req.raw);
-  const id = kind.parseRef(requireText(body, 'ref'));
+  const ref = requireText(body, 'ref');
+  const id = kind.parseRef(ref);
   if (!id) {
     throw fail(BAD_REQUEST, `That is not a ${kind.label} ${kind.itemLabel} ID or URL`);
+  }
+  const refError = kind.refError?.(ref, integration.config) ?? null;
+  if (refError !== null) {
+    throw fail(BAD_REQUEST, refError);
   }
   const provider = integrationProvider(integration.kind, apis);
   const item = await guarded(() => provider.item(integration.secret, integration.config, id));

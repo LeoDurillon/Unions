@@ -5,7 +5,15 @@ import { useState, type ReactElement } from 'react';
 import { api } from '../../lib/api';
 import { Button, CloseButton, ErrorText } from '../ui';
 import { ConnectStep } from './connect-step';
-import { canContinue, credentialOf, EMPTY_DRAFT, STEPS, type Draft, type StepProps } from './draft';
+import {
+  canContinue,
+  credentialOf,
+  EMPTY_DRAFT,
+  STEPS,
+  verifiedTrackers,
+  type Draft,
+  type StepProps,
+} from './draft';
 import { Stepper } from './stepper';
 import { STEP_VIEWS } from './steps';
 
@@ -33,17 +41,7 @@ async function createFrom(draft: Draft): Promise<number> {
     baseBranch: draft.baseBranch.trim(),
     ...credentialOf(draft),
     githubProjectNodeId,
-    ...(draft.notionTitle === null
-      ? {}
-      : {
-          integrations: [
-            {
-              kind: 'notion',
-              secret: draft.notionToken.trim(),
-              config: { dataSourceId: draft.notionDataSourceId.trim() },
-            },
-          ],
-        }),
+    integrations: verifiedTrackers(draft),
   });
   return created.id;
 }

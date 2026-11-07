@@ -15,3 +15,9 @@ id = "notion-legacy-secret"
 description = "Notion integration secret with the legacy secret_ prefix"
 regex = '''\bsecret_[A-Za-z0-9]{43}\b'''
 keywords = ["secret_"]
+
+[[rules]]
+id = "atlassian-api-token-any-length"
+description = "Atlassian (Jira Cloud) API token, the secret of a Jira integration, whatever its length (the default rule wants exactly 192 characters)"
+regex = '''\bATATT3[A-Za-z0-9_\-=]{100,}'''
+keywords = ["ATATT3"]

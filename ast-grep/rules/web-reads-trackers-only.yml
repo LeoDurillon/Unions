@@ -1,4 +1,4 @@
-id: web-reads-notion-only
+id: web-reads-trackers-only
 language: TypeScript
 severity: error
 message: The web server only reads Notion and the other trackers; pages, comments and items are written in the worker.

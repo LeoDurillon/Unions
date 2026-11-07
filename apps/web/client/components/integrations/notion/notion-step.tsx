@@ -1,11 +1,10 @@
-// The onboarding step that connects a Notion data source with its token.
-import { useMutation, type UseMutationResult } from '@tanstack/react-query';
+// The onboarding step that connects a Notion data source with its token, and how to get both.
 import type { ReactElement } from 'react';
 
-import { integrationsApi } from '../../../lib/integrations-api';
 import { TokenInput } from '../../onboarding/connect-step';
 import type { StepProps } from '../../onboarding/draft';
-import { Button, ErrorText, Field, inputClass } from '../../ui';
+import { Field, inputClass } from '../../ui';
+import { changeTracker, TrackerVerify } from '../tracker-verify';
 
 export function NotionHelp(): ReactElement {
   return (
@@ -34,71 +33,35 @@ export function NotionHelp(): ReactElement {
   );
 }
 
-type Verified = { title: string; config: Record<string, unknown> };
-
-/** Checks the secret and data source; the step is done once Notion answers with its title. */
-function useVerify({ draft, patch }: StepProps): UseMutationResult<Verified, Error, void> {
-  return useMutation({
-    mutationFn: () =>
-      integrationsApi.verify('notion', draft.notionToken.trim(), {
-        dataSourceId: draft.notionDataSourceId.trim(),
-      }),
-    onSuccess: (result) => {
-      const { dataSourceId } = result.config;
-      patch({
-        notionDataSourceId: typeof dataSourceId === 'string' ? dataSourceId : '',
-        notionTitle: result.title || 'Untitled data source',
-      });
-    },
-  });
-}
-
-export function NotionStep({ draft, patch }: StepProps): ReactElement {
-  const verify = useVerify({ draft, patch });
-  const change = (fields: Partial<StepProps['draft']>): void => {
-    patch({ ...fields, notionTitle: null });
-    verify.reset();
-  };
+export function NotionStep(props: StepProps): ReactElement {
+  const { secret, config } = props.draft.trackers.notion;
+  const dataSourceId = config.dataSourceId ?? '';
   return (
     <div className="space-y-4">
       <NotionHelp />
       <Field label="Integration secret">
         <TokenInput
           placeholder="ntn_…"
-          value={draft.notionToken}
-          onChange={(notionToken) => {
-            change({ notionToken });
+          value={secret}
+          onChange={(value) => {
+            changeTracker(props, 'notion', { secret: value });
           }}
         />
       </Field>
       <Field label="Data source ID or URL">
         <input
           className={`${inputClass} font-mono`}
-          value={draft.notionDataSourceId}
+          value={dataSourceId}
           onChange={(event) => {
-            change({ notionDataSourceId: event.target.value });
+            changeTracker(props, 'notion', { config: { dataSourceId: event.target.value } });
           }}
         />
       </Field>
-      <Button
-        variant="primary"
-        disabled={
-          draft.notionToken.trim() === '' ||
-          draft.notionDataSourceId.trim() === '' ||
-          verify.isPending
-        }
-        onClick={() => {
-          verify.mutate();
-        }}
-      >
-        {verify.isPending ? 'Verifying…' : 'Verify'}
-      </Button>
-      <ErrorText error={verify.error} />
-      {draft.notionTitle ? (
-        <p className="text-sm text-green-700 dark:text-green-400">
-          Connected to “{draft.notionTitle}”.
-        </p>
-      ) : null}
+      <TrackerVerify
+        kind="notion"
+        props={props}
+        complete={secret.trim() !== '' && dataSourceId.trim() !== ''}
+      />
     </div>
   );
 }

@@ -1,5 +1,4 @@
 // The project settings section for the Notion connection, verified when saved.
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../../src/api-types';
@@ -7,7 +6,8 @@ import { integrationsApi, projectIntegration } from '../../../lib/integrations-a
 import { useSettingsForm } from '../../../lib/use-settings-form';
 import { TokenInput } from '../../onboarding/connect-step';
 import { SaveBar } from '../../settings/save-bar';
-import { Badge, Button, ErrorText, Field, inputClass } from '../../ui';
+import { Badge, Field, inputClass } from '../../ui';
+import { Disconnect } from '../disconnect';
 import { NotionHelp } from './notion-step';
 
 /** Notion is read with them before they are saved, so a typo never replaces a working connection. */
@@ -17,31 +17,6 @@ async function connect(project: PublicProject, token: string, dataSource: string
     config: { dataSourceId: dataSource },
   });
   return saved.title || 'Untitled data source';
-}
-
-/** Applies at once: the integration secret is dropped and imports stop. */
-function Disconnect({ project }: { project: PublicProject }): ReactElement | null {
-  const queryClient = useQueryClient();
-  const disconnect = useMutation({
-    mutationFn: () => integrationsApi.remove(project.id, 'notion'),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['projects'] }),
-  });
-  if (!projectIntegration(project, 'notion')) {
-    return null;
-  }
-  return (
-    <>
-      <ErrorText error={disconnect.error} />
-      <Button
-        disabled={disconnect.isPending}
-        onClick={() => {
-          disconnect.mutate();
-        }}
-      >
-        Disconnect
-      </Button>
-    </>
-  );
 }
 
 /** A connected project keeps its stored secret when none is pasted. */
@@ -100,7 +75,7 @@ export function NotionSection({ project }: { project: PublicProject }): ReactEle
         label="Verify and save"
         invalid={invalidReason(connected, token, dataSource)}
       >
-        <Disconnect project={project} />
+        <Disconnect project={project} kind="notion" />
       </SaveBar>
     </section>
   );

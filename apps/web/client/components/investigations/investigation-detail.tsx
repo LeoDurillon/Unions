@@ -1,7 +1,9 @@
 // One investigation: its questions, the latest answer, the agent's live log and a follow-up form.
-import type { IntegrationKindName, Investigation } from '@union/core';
+import type { Investigation } from '@union/core';
 import type { ReactElement } from 'react';
 
+import type { PublicProject } from '../../../src/api-types';
+import { creatingKinds } from '../../lib/integrations-api';
 import { MODEL_LABELS } from '../agents/agent-labels';
 import { Badge } from '../ui';
 import { Actions } from './investigation-actions';
@@ -12,13 +14,13 @@ import { EarlierExchanges, LatestQuestion, NextSteps } from './investigation-thr
 /** One investigation: its questions, the latest answer, the agent's live log and a follow-up form. */
 export function InvestigationDetail({
   investigation,
-  targets,
+  project,
   onDeleted,
   onOpenTicket,
 }: {
   investigation: Investigation;
-  /** The trackers the project is connected to: the ticket can be created in one of them too. */
-  targets: IntegrationKindName[];
+  /** Its project: the ticket can be created in one of its trackers too. */
+  project: PublicProject;
   onDeleted: () => void;
   onOpenTicket: (id: number) => void;
 }): ReactElement {
@@ -40,7 +42,11 @@ export function InvestigationDetail({
       <LatestQuestion investigation={investigation} />
       <InvestigationTabs investigation={investigation} />
       {investigation.status === 'succeeded' ? (
-        <NextSteps investigation={investigation} targets={targets} onOpenTicket={onOpenTicket} />
+        <NextSteps
+          investigation={investigation}
+          targets={creatingKinds(project)}
+          onOpenTicket={onOpenTicket}
+        />
       ) : null}
     </article>
   );

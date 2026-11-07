@@ -10,7 +10,9 @@ you visit Union. Later, open it again from **+** next to **Projects** in the sid
 3. **Project**: pick an existing GitHub Project, or let Union create one.
 4. **Notion** (optional): an integration secret and the ID of the data source to import tickets from. The
    integration needs the capabilities listed in [Installation](installation.md).
-5. **Review**: check the base branch (the branch tickets start from and pull requests target), then create the
+5. **Jira** (optional): your Jira site, the email of your Atlassian account, an API token and the key of the
+   project to import tickets from. See [Connect Jira](#connect-jira).
+6. **Review**: check the base branch (the branch tickets start from and pull requests target), then create the
    project.
 
 The board opens. Union mirrors its columns to the Project's **Status** field, to the options **Todo**, **In
@@ -47,6 +49,23 @@ an hour.
 The app also asks for read access to Checks and Commit statuses, and read and write access to Actions, so Union can
 show your pull requests' CI checks and re-run failed jobs. When an app you installed earlier asks for new
 permissions, accept them on GitHub before they apply.
+
+## Connect Jira
+
+Union imports Jira Cloud issues as tickets (Jira Data Center and Server are not supported). It reads Jira as your
+Atlassian account, with an API token:
+
+1. Open [id.atlassian.com → Security → API tokens](https://id.atlassian.com/manage-profile/security/api-tokens) and
+   click **Create API token** (not the one with scopes). Copy it.
+2. In the wizard's **Jira** step, or later in the project's settings under **Integrations → Jira**, fill in:
+   - **Site**: the address you open Jira at, `https://<name>.atlassian.net` (the name alone works too);
+   - **Account email**: the email of the Atlassian account the token belongs to;
+   - **API token**: the token you copied;
+   - **Project key**: the letters before an issue's number, `ABC` for `ABC-123`.
+3. Click **Verify** (in the settings, **Verify and save**). Union shows the project's name when Jira accepts them.
+
+Your account must be able to see the project's issues. The token stays on this machine; to stop, click
+**Disconnect** in the settings.
 
 ## Tell the agents how to build and check your code
 

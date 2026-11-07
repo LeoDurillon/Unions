@@ -1,5 +1,5 @@
 // Above the board: the search, "Needs you" with its count, where the tickets came from (when some
-// came from Notion), how many the filter shows, and how to start one while the backlog has any.
+// came from a tracker), how many the filter shows, and how to start one while the backlog has any.
 import { useRef, type ReactElement } from 'react';
 
 import type { TicketSummary } from '../../src/api-types';
@@ -7,19 +7,13 @@ import {
   isFiltering,
   needsYou,
   NO_FILTER,
+  originOptions,
   type BoardFilter,
-  type OriginFilter,
 } from '../lib/board-filter';
 import { isStartable } from '../lib/labels';
 import { useBoardKeys } from '../lib/use-board-keys';
 import { Segmented } from './choice';
 import { inputClass } from './ui';
-
-const ORIGINS: { value: OriginFilter; label: string }[] = [
-  { value: 'all', label: 'All' },
-  { value: 'notion', label: 'From Notion' },
-  { value: 'github', label: 'From GitHub' },
-];
 
 function NeedsYouToggle({
   on,
@@ -60,13 +54,14 @@ function OriginPicker({
   filter: BoardFilter;
   onFilter: (filter: BoardFilter) => void;
 }): ReactElement | null {
-  if (!tickets.some((ticket) => ticket.originKind === 'notion')) {
+  const options = originOptions(tickets);
+  if (options.length === 0) {
     return null;
   }
   return (
     <Segmented
       legend="Where the tickets came from"
-      options={ORIGINS}
+      options={options}
       value={filter.origin}
       onChange={(origin) => {
         onFilter({ ...filter, origin });

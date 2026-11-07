@@ -1,9 +1,11 @@
 // Which tickets the board shows: a text search (title, issue or PR number), only those that need the
 // user, and where they came from.
+import { integrationKind, type IntegrationKindName } from '@union/core/integration-kinds';
+
 import type { TicketSummary } from '../../src/api-types';
 
-/** `github`: imported from a GitHub issue or written in Union (both have an issue); `notion`: imported from Notion. */
-export type OriginFilter = 'all' | 'notion' | 'github';
+/** `github`: imported from a GitHub issue or written in Union (both have an issue); a kind: imported from that tracker. */
+export type OriginFilter = 'all' | 'github' | IntegrationKindName;
 
 export type BoardFilter = { text: string; needsYou: boolean; origin: OriginFilter };
 
@@ -42,7 +44,24 @@ function matchesOrigin(ticket: Filterable, origin: OriginFilter): boolean {
   if (origin === 'all') {
     return true;
   }
-  return origin === 'notion' ? ticket.originKind === 'notion' : ticket.originKind !== 'notion';
+  return origin === 'github' ? ticket.originKind === null : ticket.originKind === origin;
+}
+
+/** The origin filter's choices: one per tracker some ticket came from; none when no ticket did. */
+export function originOptions(
+  tickets: Pick<TicketSummary, 'originKind'>[],
+): { value: OriginFilter; label: string }[] {
+  const kinds = [
+    ...new Set(tickets.flatMap((ticket) => (ticket.originKind ? [ticket.originKind] : []))),
+  ].toSorted();
+  if (kinds.length === 0) {
+    return [];
+  }
+  return [
+    { value: 'all', label: 'All' },
+    ...kinds.map((kind) => ({ value: kind, label: `From ${integrationKind(kind).label}` })),
+    { value: 'github', label: 'From GitHub' },
+  ];
 }
 
 /** The tickets the filter keeps, in their order. */

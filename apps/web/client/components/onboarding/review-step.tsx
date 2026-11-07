@@ -24,7 +24,8 @@ export function ReviewStep({ draft, patch }: StepProps): ReactElement {
             : draft.viewer?.login}
         </Row>
         <Row label="Repository">{draft.repo?.fullName}</Row>
-        <Row label="Notion">{draft.notionTitle ?? 'Not connected'}</Row>
+        <Row label="Notion">{draft.trackers.notion.title ?? 'Not connected'}</Row>
+        <Row label="Jira">{draft.trackers.jira.title ?? 'Not connected'}</Row>
         <Row label="GitHub Project">
           {project?.kind === 'existing' ? project.project.title : `${project?.title ?? ''} (new)`}
         </Row>

@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 
-import { filterTickets, needsYou, NO_FILTER } from './board-filter';
+import { filterTickets, needsYou, NO_FILTER, originOptions } from './board-filter';
 
 type T = Parameters<typeof needsYou>[0];
 
@@ -29,6 +29,7 @@ describe('filterTickets', () => {
   const tickets = [
     ticket({ title: 'Fix the CSV export', issueNumber: 12 }),
     ticket({ title: 'Seuil RFR', issueNumber: 30, prNumber: 31, originKind: 'notion' }),
+    ticket({ title: 'Dark mode', issueNumber: 40, originKind: 'jira' }),
   ];
 
   test('every word of the text must match the title or a number', () => {
@@ -36,10 +37,21 @@ describe('filterTickets', () => {
     expect(filterTickets(tickets, { ...NO_FILTER, text: '#31' })[0]?.title).toBe('Seuil RFR');
   });
 
-  test('the origin keeps Notion imports, or the others', () => {
+  test('the origin keeps the imports of one tracker, or the tickets from GitHub', () => {
     expect(filterTickets(tickets, { ...NO_FILTER, origin: 'notion' })).toHaveLength(1);
-    expect(filterTickets(tickets, { ...NO_FILTER, origin: 'github' })[0]?.title).toBe(
-      'Fix the CSV export',
-    );
+    expect(filterTickets(tickets, { ...NO_FILTER, origin: 'jira' })[0]?.title).toBe('Dark mode');
+    expect(
+      filterTickets(tickets, { ...NO_FILTER, origin: 'github' }).map((kept) => kept.title),
+    ).toEqual(['Fix the CSV export']);
+  });
+
+  test('the origin choices are the trackers the tickets came from', () => {
+    expect(originOptions(tickets).map((option) => option.label)).toEqual([
+      'All',
+      'From Jira',
+      'From Notion',
+      'From GitHub',
+    ]);
+    expect(originOptions([{ originKind: null }])).toEqual([]);
   });
 });

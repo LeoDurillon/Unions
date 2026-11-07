@@ -1,4 +1,4 @@
-id: web-reads-notion-only
+id: web-reads-trackers-only
 valid:
   - |
     const page = await notion.page(token, pageId);

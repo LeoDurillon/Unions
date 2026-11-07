@@ -1,7 +1,13 @@
 // The setup wizard's draft: what it collects, its steps, and when the user may move on.
+import { isIntegrationKindName, type IntegrationKindName } from '@union/core/integration-kinds';
+
 import type { ProjectOption, RepoOption, Viewer } from '../../../src/api-types';
 import type { GitHubCredential } from '../../lib/api';
+import type { NewIntegration } from '../../lib/integrations-api';
 import type { AccessMethod } from '../github-app/access-method';
+
+/** A tracker in the wizard: optional; all empty skips it, otherwise `title` is set once verified. */
+export type TrackerDraft = { secret: string; config: Record<string, string>; title: string | null };
 
 export type ProjectChoice =
   | { kind: 'existing'; project: ProjectOption }
@@ -18,10 +24,8 @@ export type Draft = {
   repo: RepoOption | null;
   project: ProjectChoice;
   baseBranch: string;
-  /** Optional: both empty skips Notion; otherwise `notionTitle` is set once verified. */
-  notionToken: string;
-  notionDataSourceId: string;
-  notionTitle: string | null;
+  /** The trackers to import tickets from, each optional. */
+  trackers: Record<IntegrationKindName, TrackerDraft>;
 };
 
 export const EMPTY_DRAFT: Draft = {
@@ -32,9 +36,10 @@ export const EMPTY_DRAFT: Draft = {
   repo: null,
   project: null,
   baseBranch: 'main',
-  notionToken: '',
-  notionDataSourceId: '',
-  notionTitle: null,
+  trackers: {
+    notion: { secret: '', config: { dataSourceId: '' }, title: null },
+    jira: { secret: '', config: { site: '', email: '', projectKey: '' }, title: null },
+  },
 };
 
 export const STEPS = [
@@ -57,6 +62,11 @@ export const STEPS = [
     label: 'Notion',
     title: 'Notion (optional)',
     description: 'Import tickets from a Notion data source. Leave both fields empty to skip.',
+  },
+  {
+    label: 'Jira',
+    title: 'Jira (optional)',
+    description: 'Import tickets from a Jira Cloud project. Leave every field empty to skip.',
   },
   {
     label: 'Review',
@@ -83,9 +93,27 @@ function projectChosen({ project }: Draft): boolean {
   return project?.kind === 'existing' || (project?.kind === 'new' && project.title.trim() !== '');
 }
 
-function notionSettled(draft: Draft): boolean {
-  const skipped = draft.notionToken.trim() === '' && draft.notionDataSourceId.trim() === '';
-  return skipped || draft.notionTitle !== null;
+/** Whether the tracker is left empty (skipped). */
+export function trackerSkipped({ secret, config }: TrackerDraft): boolean {
+  return [secret, ...Object.values(config)].every((value) => value.trim() === '');
+}
+
+function trackerSettled(draft: Draft, kind: IntegrationKindName): boolean {
+  const tracker = draft.trackers[kind];
+  return trackerSkipped(tracker) || tracker.title !== null;
+}
+
+/** The trackers verified in the wizard, as the new project takes them. */
+export function verifiedTrackers(draft: Draft): NewIntegration[] {
+  return Object.keys(draft.trackers)
+    .filter((kind) => isIntegrationKindName(kind))
+    .flatMap((kind) => {
+      const { secret, config, title } = draft.trackers[kind];
+      const trimmed = Object.fromEntries(
+        Object.entries(config).map(([name, value]) => [name, value.trim()]),
+      );
+      return title === null ? [] : [{ kind, secret: secret.trim(), config: trimmed }];
+    });
 }
 
 /** What each step needs before Next (or Create) is enabled. */
@@ -93,7 +121,8 @@ const READY: Record<StepLabel, (draft: Draft) => boolean> = {
   Connect: (draft) => draft.viewer !== null && draft.viewer.missingScopes.length === 0,
   Repository: (draft) => draft.repo !== null,
   Project: projectChosen,
-  Notion: notionSettled,
+  Notion: (draft) => trackerSettled(draft, 'notion'),
+  Jira: (draft) => trackerSettled(draft, 'jira'),
   Review: (draft) => draft.baseBranch.trim() !== '',
 };
 

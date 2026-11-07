@@ -1,5 +1,5 @@
 // The browser's client for the integration endpoints, and a project's integration of a kind.
-import type { IntegrationKindName } from '@union/core/integration-kinds';
+import { integrationKind, type IntegrationKindName } from '@union/core/integration-kinds';
 
 import type { PublicIntegration, PublicProject, SourceImport } from '../../src/api-types';
 import { request } from './api';
@@ -45,4 +45,11 @@ export function projectIntegration(
     project.integrations.map((integration) => [integration.kind, integration]),
   );
   return byKind.get(kind) ?? null;
+}
+
+/** The project's ready trackers Union can add an item to (an investigation's "Also create it in …"). */
+export function creatingKinds(project: PublicProject): IntegrationKindName[] {
+  return project.integrations
+    .filter((integration) => integration.ready && integrationKind(integration.kind).createsItems)
+    .map((integration) => integration.kind);
 }

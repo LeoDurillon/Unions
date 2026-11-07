@@ -54,6 +54,19 @@ function field(input: unknown, name: string): string {
   return typeof value === 'string' ? value.trim() : '';
 }
 
+/** Why a pasted link is not of the integration's site; null for a bare key, a link of the site, or no config. */
+export function jiraRefSiteError(input: string, config: unknown): string | null {
+  const value = input.trim();
+  const read = readJiraConfig(config);
+  if (!URL.canParse(value) || 'error' in read) {
+    return null;
+  }
+  const site = jiraSiteOf(value);
+  return site === read.config.site
+    ? null
+    : `That link is not on the project's Jira site (${read.config.site})`;
+}
+
 /** A config as the browser sends it, checked and normalized; or what is wrong with it. */
 export function readJiraConfig(input: unknown): { config: JiraConfig } | { error: string } {
   const site = jiraSiteOf(field(input, 'site'));

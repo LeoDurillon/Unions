@@ -21,6 +21,7 @@ Open a project's **Settings** in the project bar. Most pages have one **Save** a
 |                   | End-to-end tests | The e2e command, and starting the preview for implementation steps.                                                                                |
 |                   | Limits           | Previews running at once, and the idle time after which a preview stops.                                                                           |
 | **Integrations**  | Notion           | The Notion integration secret and data source.                                                                                                     |
+|                   | Jira             | The Jira site, account email, API token and project key ([Connect Jira](first-project.md#connect-jira)).                                           |
 | **Events**        | Rules, Activity  | [Event rules](automation.md#event-rules) and what they did.                                                                                        |
 |                   | Danger zone      | Delete the project. Type the repository's name to confirm.                                                                                         |
 

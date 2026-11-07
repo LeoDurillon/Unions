@@ -83,9 +83,7 @@ function Detail({
     <InvestigationDetail
       key={`${current.id}-${current.status}`}
       investigation={current}
-      targets={project.integrations
-        .filter((integration) => integration.ready)
-        .map((integration) => integration.kind)}
+      project={project}
       onDeleted={() => {
         onSelect('new');
       }}

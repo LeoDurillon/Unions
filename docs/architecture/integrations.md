@@ -32,7 +32,7 @@
   item of the source as a ticket preview). A new project takes `integrations: [{ kind, secret, config }]`. The
   browser sees `PublicProject.integrations` (`toPublicIntegration`, `public-project.ts`: kind, title, config,
   `ready`), never a secret. The web server never calls a provider's `createItem`, nor Notion's `createPage`, `updatePage` or
-  `addComment` (ast-grep `web-reads-notion-only`). A new ticket takes `origin: { kind, id, url }` (`routes/ticket-origin.ts`, which also
+  `addComment` (ast-grep `web-reads-trackers-only`). A new ticket takes `origin: { kind, id, url }` (`routes/ticket-origin.ts`, which also
   keeps the item's images per kind), and an investigation's ticket `target: kind`. In the client, the New ticket
   dialog has one "Import from …" tab per ready integration (`components/integrations/source-import.tsx`), the
   investigation one "Also create it in …" switch per integration, and each kind's own screens (settings,
@@ -52,6 +52,15 @@
   `notion_data_sources`; `0071_drop_legacy_notion` dropped them with `tickets.notion_page_id` and
   `investigations.ticket_in_notion`.) A ticket's page is its
   origin (`tickets.origin_kind`, `origin_id`, `origin_url`). Pages outside the configured data source are refused. The page's markdown is cleaned at import (`notionMarkdown` in the browser-safe `@union/core/notion-markdown`: mentions become links titled from Notion, callouts quotes, comment and color spans their text, toggle children are dedented, file, PDF, video and audio blocks (`<file src="…">`, `source=` in Notion-flavored markdown) become links named by their caption or file name); the ticket panel cleans older imports as it shows them. Creating a ticket from a page downloads its images and the files it links (`notion-files.ts`; Notion's signed links expire within the hour; only Notion's file hosts, images first, raster images only, then files of any type named after the upload, four at a time, within the attachment limits) into private ticket files referenced as `attachment:<name>`. The panel shows images inline (`?inline`, raster images only) and links other files as downloads; a file not kept keeps its Notion link.
+- Jira reads (Jira Cloud only), from the web server: verifying a site, account email and API token
+  (`GET /rest/api/3/myself`, then the project), reading the project's name, issue types and statuses
+  (`integrations.fields`), and importing an issue of the configured project as a ticket (`GET /issue/{key}`, its
+  ADF description converted by core's `integrations/adf-markdown.ts`). The client is `FetchJiraApi`
+  (`integrations/jira-api.ts`, behind `JiraApi`; Basic auth with `email:token`, a 30 s timeout, redirects refused).
+  The token is the integration's secret; the config is `{ site, email, projectKey }` (`jira-config.ts`), and the
+  site must be `https://<name>.atlassian.net`: the client checks it again before each request, so the token never
+  goes to another host. A pasted link of another site is refused (`IntegrationKind.refError`). Union writes nothing
+  to Jira yet: it has no `createItem` (`createsItems: false`, so investigations do not offer it).
 - A project reaches GitHub with a token (`projects.github_token`) or an installation of the GitHub App
   (`projects.github_installation_id`; the app's ID and private key are one row of `github_app`). Both are stored in
   plain text (local single-user app, like the original Union) and never reach the browser: responses use
