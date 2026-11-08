@@ -14,7 +14,7 @@ import {
   type Ticket,
 } from '@union/core';
 
-import type { AgentFn, AgentOutcome, AgentRun } from '../agent';
+import type { AgentFn, AgentOutcome, AgentRun } from '../agent/agent';
 import { approvedBefore } from '../approved';
 import type { ImplementDeps } from '../implement-loop';
 import { buildPrompt, parentContext } from '../prompts';

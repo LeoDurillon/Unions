@@ -10,7 +10,7 @@ import {
 } from '@union/core';
 import { eq } from 'drizzle-orm';
 
-import type { AgentFn, AgentRun } from './agent';
+import type { AgentFn, AgentRun } from './agent/agent';
 import { suggestReplies, type ReplyWriter } from './pr-reply-suggestions';
 
 const runtime = {} as unknown as ContainerRuntime;

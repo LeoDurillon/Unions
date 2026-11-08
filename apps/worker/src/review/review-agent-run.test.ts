@@ -19,7 +19,7 @@ import {
   type ExecResult,
 } from '@union/core';
 
-import type { AgentFn, AgentRun } from '../agent';
+import type { AgentFn, AgentRun } from '../agent/agent';
 import { hostGit } from '../provision';
 import { RunSlots } from '../slots';
 import { ReviewAgentRunner } from './review-agent-run';

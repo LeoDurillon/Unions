@@ -1,4 +1,5 @@
 // Writes the tickets asked from investigations, each in a throwaway container removed afterwards.
+
 import {
   claimTicketDraft,
   failInterruptedTicketDrafts,
@@ -13,7 +14,7 @@ import {
 } from '@union/core';
 import { eq } from 'drizzle-orm';
 
-import { runAgent } from './agent';
+import { runAgent } from './agent/agent';
 import type { InvestigationDeps } from './investigate';
 import { withTargetItem } from './investigation-ticket-target';
 import type { TicketContainer } from './provision';

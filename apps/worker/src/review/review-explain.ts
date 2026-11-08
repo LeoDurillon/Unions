@@ -18,7 +18,13 @@ import {
   type SpecPart,
 } from '@union/core';
 
-import { agentFailure, runAgent, runResumable, type AgentFn, type AgentOutcome } from '../agent';
+import {
+  agentFailure,
+  runAgent,
+  runResumable,
+  type AgentFn,
+  type AgentOutcome,
+} from '../agent/agent';
 import { runIn } from '../container-exec';
 import { REPO_DIR } from '../provision';
 import type { AgentReviewDeps } from './agent-review';

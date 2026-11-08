@@ -1,5 +1,6 @@
 // Asks the implementer for a pull request's description (from the repository's template, if any)
 // and reads it back.
+
 import {
   IMPLEMENT_DENIED,
   type ContainerRuntime,
@@ -10,7 +11,7 @@ import {
   toolsFor,
 } from '@union/core';
 
-import type { AgentFn } from './agent';
+import type { AgentFn } from './agent/agent';
 import { runIn } from './container-exec';
 import { REPO_DIR } from './provision';
 

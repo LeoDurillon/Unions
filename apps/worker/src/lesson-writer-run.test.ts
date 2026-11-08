@@ -15,7 +15,7 @@ import {
   type Db,
 } from '@union/core';
 
-import type { AgentRun } from './agent';
+import type { AgentRun } from './agent/agent';
 import { LessonWriterRunner } from './lesson-writer-run';
 import type { ProvisionConfig } from './provision';
 import { RunSlots } from './slots';

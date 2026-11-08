@@ -21,7 +21,7 @@ import {
 } from '@union/core';
 import { eq } from 'drizzle-orm';
 
-import type { AgentFn, AgentOutcome, AgentRun } from '../agent';
+import type { AgentFn, AgentOutcome, AgentRun } from '../agent/agent';
 import { REPO_DIR } from '../provision';
 import { RunSlots } from '../slots';
 import { ReviewExplainRunner } from './review-explain';

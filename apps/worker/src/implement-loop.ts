@@ -1,4 +1,5 @@
 // Agent turn, then checks; on red checks the same session gets the failure, up to the limit.
+
 import {
   IMPLEMENT_DENIED,
   type AgentSetup,
@@ -18,7 +19,7 @@ import {
   toolsFor,
 } from '@union/core';
 
-import { runResumable, type AgentFn, type AgentOutcome, type AgentRun } from './agent';
+import { runResumable, type AgentFn, type AgentOutcome, type AgentRun } from './agent/agent';
 import { approvedBefore } from './approved';
 import type { GitHubApi } from './github/api';
 import { check, type Checked } from './implement-checks';

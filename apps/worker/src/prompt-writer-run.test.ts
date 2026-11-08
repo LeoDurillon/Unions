@@ -14,7 +14,7 @@ import {
   type ContainerRuntime,
 } from '@union/core';
 
-import type { AgentFn, AgentOutcome, AgentRun } from './agent';
+import type { AgentFn, AgentOutcome, AgentRun } from './agent/agent';
 import { PromptWriterRunner } from './prompt-writer-run';
 import type { ProvisionConfig } from './provision';
 import { RunSlots } from './slots';

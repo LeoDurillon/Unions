@@ -12,7 +12,7 @@ import {
   type ReviewAgentRunOutcome,
 } from '@union/core';
 
-import { agentFailure, runAgent } from '../agent';
+import { agentFailure, runAgent } from '../agent/agent';
 import { REPO_DIR } from '../provision';
 import { SideReviewRunner, STANDARD_ENDS, type SideReviewKind } from './engine';
 import { openReviewAgentTarget } from './review-agent-checkout';

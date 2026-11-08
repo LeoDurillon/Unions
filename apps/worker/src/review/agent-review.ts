@@ -18,7 +18,7 @@ import {
   type Db,
 } from '@union/core';
 
-import { agentFailure, runAgent, type AgentFn } from '../agent';
+import { agentFailure, runAgent, type AgentFn } from '../agent/agent';
 import { REPO_DIR, type TicketContainer } from '../provision';
 import type { RunSlots } from '../slots';
 import { FINDINGS_FORMAT, parseFindings, toDrafts, type Findings } from './agent-review-findings';

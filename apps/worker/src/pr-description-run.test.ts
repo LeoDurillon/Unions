@@ -17,7 +17,7 @@ import {
   type ExecResult,
 } from '@union/core';
 
-import type { AgentFn, AgentRun } from './agent';
+import type { AgentFn, AgentRun } from './agent/agent';
 import { FakeGitHubApi } from './github/fake-api';
 import { sendPrDescription } from './github/pr-description-send';
 import { PrDescriptionRunner } from './pr-description-runner';

@@ -11,7 +11,7 @@ import {
   type CustomAgent,
 } from '@union/core';
 
-import { agentFailure, runAgent, type AgentFn } from './agent';
+import { agentFailure, runAgent, type AgentFn } from './agent/agent';
 import type { TargetDeps } from './review/agent-review-target';
 import { RunPool, WORKER_STOPPED } from './run-pool';
 import type { RunSlots } from './slots';

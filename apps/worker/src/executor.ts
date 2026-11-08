@@ -3,8 +3,8 @@
 
 import { isCustomStep, type ContainerRuntime, type Db } from '@union/core';
 
-import { runAgent } from './agent';
 import { runCodeStep } from './agent-services-step';
+import { runAgent } from './agent/agent';
 import { isHistoryStep, runHistoryStep } from './history-steps';
 import { runPlanningStep } from './planning-step';
 import { isPlanningStep } from './prompts';

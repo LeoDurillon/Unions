@@ -1,5 +1,6 @@
 // Runs a `ticket` investigation in the ticket's own container, on the workspace as the agent left
 // it.
+
 import {
   appendAgentLine,
   emitEvent,
@@ -12,7 +13,7 @@ import {
   ticketBase,
 } from '@union/core';
 
-import { agentFailure, runAgent, type AgentFn, type AgentOutcome } from './agent';
+import { agentFailure, runAgent, type AgentFn, type AgentOutcome } from './agent/agent';
 import { runIn } from './container-exec';
 import type { InvestigationDeps } from './investigate';
 import { parentSection } from './prompts';

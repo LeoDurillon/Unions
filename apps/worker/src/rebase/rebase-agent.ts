@@ -13,7 +13,7 @@ import {
 } from '@union/core';
 import { and, desc, eq, inArray, isNotNull } from 'drizzle-orm';
 
-import { runResumable, type AgentOutcome, type AgentRun } from '../agent';
+import { runResumable, type AgentOutcome, type AgentRun } from '../agent/agent';
 import { approvedBefore } from '../approved';
 import type { GateResult } from '../gate';
 import type { Workspace } from '../implement-loop';

@@ -3,7 +3,7 @@
 import { schema, type ReviewAgentRun } from '@union/core';
 import { eq } from 'drizzle-orm';
 
-import type { AgentFn } from '../agent';
+import type { AgentFn } from '../agent/agent';
 import { runInstall } from '../gate';
 import { syncProjectFiles } from '../project-files-sync';
 import type { AgentReviewDeps } from './agent-review';

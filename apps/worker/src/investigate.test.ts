@@ -18,7 +18,7 @@ import {
   type Project,
 } from '@union/core';
 
-import type { AgentFn, AgentOutcome, AgentRun } from './agent';
+import type { AgentFn, AgentOutcome, AgentRun } from './agent/agent';
 import { drainCommands } from './commands';
 import { InvestigationRunner, investigationPrompt } from './investigate';
 import { RunSlots } from './slots';

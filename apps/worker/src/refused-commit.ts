@@ -1,4 +1,5 @@
 // Records the refusal and stops the run there: the user decides what to do with the changes.
+
 import {
   latestRefusal,
   markRefusalResolved,
@@ -8,7 +9,7 @@ import {
   type ResumeState,
 } from '@union/core';
 
-import type { AgentOutcome } from './agent';
+import type { AgentOutcome } from './agent/agent';
 import { applyDecision, type Refused } from './leftovers';
 import type { StepResult } from './scheduler';
 

@@ -1,6 +1,6 @@
 // Pushes a stack's simplified history: the lower slices' branches set at their new tips, every branch pushed together.
 
-import type { AgentOutcome } from '../agent';
+import type { AgentOutcome } from '../agent/agent';
 import type { Rebase } from '../rebase/rebase-agent';
 import type { StepResult } from '../scheduler';
 import { setBranches } from '../stack/stack-git';

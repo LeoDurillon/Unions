@@ -2,7 +2,7 @@
 
 import type { PlannedSlice } from '@union/core';
 
-import type { AgentOutcome } from '../agent';
+import type { AgentOutcome } from '../agent/agent';
 import {
   continueTask,
   runInImplementerSession,

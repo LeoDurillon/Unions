@@ -11,7 +11,7 @@ import {
   type ReviewReport,
 } from '@union/core';
 
-import { agentFailure, type AgentRun } from '../agent';
+import { agentFailure, type AgentRun } from '../agent/agent';
 import { REPO_DIR } from '../provision';
 import type { AgentReviewDeps } from './agent-review';
 import { openTarget } from './agent-review-target';

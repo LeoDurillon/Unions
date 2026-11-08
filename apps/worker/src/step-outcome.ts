@@ -1,7 +1,8 @@
 // A step's result from an agent call that hit the usage limit, and when the scheduler retries it.
+
 import { latestClaudeLimits, type Db, type LimitWindow } from '@union/core';
 
-import type { AgentOutcome } from './agent';
+import type { AgentOutcome } from './agent/agent';
 import type { StepResult } from './scheduler';
 
 /** The runners' result types, with the helpers that build them: one import for both. */

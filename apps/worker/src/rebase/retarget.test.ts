@@ -14,7 +14,7 @@ import {
 } from '@union/core';
 import { eq } from 'drizzle-orm';
 
-import type { AgentFn, AgentRun } from '../agent';
+import type { AgentFn, AgentRun } from '../agent/agent';
 import type { GitHubApi, PullRequestState } from '../github/api';
 import { AGENT_HOME, REPO_DIR } from '../provision';
 import { runRetargetStep } from './retarget';

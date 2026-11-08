@@ -19,7 +19,7 @@ import {
   type ReviewReportResult,
 } from '@union/core';
 
-import type { AgentFn, AgentRun } from '../agent';
+import type { AgentFn, AgentRun } from '../agent/agent';
 import { REPO_DIR } from '../provision';
 import { RunSlots } from '../slots';
 import { ReviewReportRunner } from './review-report';

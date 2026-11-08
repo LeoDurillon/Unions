@@ -18,7 +18,7 @@ import {
   withoutUnionLinks,
 } from '@union/core';
 
-import { agentFailure, runAgent, runResumable, type AgentFn } from './agent';
+import { agentFailure, runAgent, runResumable, type AgentFn } from './agent/agent';
 import type { GitHubApi } from './github/api';
 import { descriptionOf, findTemplate, rewritePrompt, type Template } from './pr-description';
 import { ensureTicketContainer, REPO_DIR } from './provision';

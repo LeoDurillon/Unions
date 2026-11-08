@@ -16,7 +16,7 @@ import {
 } from '@union/core';
 import { eq } from 'drizzle-orm';
 
-import type { AgentFn } from '../agent';
+import type { AgentFn } from '../agent/agent';
 import { AGENT_HOME, REPO_DIR } from '../provision';
 import type { StepContext, StepResult } from '../scheduler';
 import { runRebaseStep } from './rebase';

@@ -9,7 +9,7 @@ import {
   type ContainerRuntime,
 } from '@union/core';
 
-import { claudeArgs, connectorEnv } from './agent';
+import { claudeArgs, connectorEnv } from './agent/agent';
 import { ConnectorChecker } from './mcp-check';
 import type { ProvisionConfig } from './provision';
 

@@ -16,7 +16,7 @@ import {
 } from '@union/core';
 import { eq } from 'drizzle-orm';
 
-import type { AgentFn, AgentRun } from '../agent';
+import type { AgentFn, AgentRun } from '../agent/agent';
 import { FakeGitHubApi } from '../github/fake-api';
 import { AGENT_HOME, REPO_DIR } from '../provision';
 import { runSplitStep } from './split';

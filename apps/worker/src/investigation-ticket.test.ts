@@ -24,7 +24,7 @@ import {
   type Project,
 } from '@union/core';
 
-import type { AgentFn, AgentRun } from './agent';
+import type { AgentFn, AgentRun } from './agent/agent';
 import { InvestigationRunner } from './investigate';
 import { parseTicketDraft, ticketPrompt } from './investigation-ticket';
 import { RunSlots } from './slots';

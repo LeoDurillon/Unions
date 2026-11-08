@@ -2,7 +2,7 @@
 
 import { markRefusalResolved, type RefusedCommit } from '@union/core';
 
-import type { AgentOutcome } from '../agent';
+import type { AgentOutcome } from '../agent/agent';
 import { commitLeftovers } from '../leftovers';
 import { askInSession, runInImplementerSession, type Rebase } from '../rebase/rebase-agent';
 import { branchProblem, headCommit, restoreBranch } from '../rebase/rebase-git';

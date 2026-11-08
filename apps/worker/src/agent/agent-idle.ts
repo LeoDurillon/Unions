@@ -1,7 +1,8 @@
 // Stops a `claude` process that ended its turn, with no background task left, but does not exit.
+
 import type { ContainerRuntime } from '@union/core';
 
-import { runIn } from './container-exec';
+import { runIn } from '../container-exec';
 
 /** Quiet time after the final result before the agent counts as idle. */
 export const IDLE_GRACE_MS = 30_000;

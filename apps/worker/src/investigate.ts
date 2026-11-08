@@ -1,5 +1,6 @@
 // Runs queued investigations, each in a throwaway container (`union-i<id>`), and builds their
 // prompt.
+
 import {
   appendAgentLine,
   claimInvestigation,
@@ -18,7 +19,7 @@ import {
 } from '@union/core';
 import { eq } from 'drizzle-orm';
 
-import { agentFailure, runAgent, type AgentFn, type AgentOutcome } from './agent';
+import { agentFailure, runAgent, type AgentFn, type AgentOutcome } from './agent/agent';
 import { projectGitToken } from './credentials';
 import { runOnTicket } from './investigate-ticket';
 import { TicketDrafter } from './investigation-ticket';

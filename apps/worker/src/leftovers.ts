@@ -1,8 +1,9 @@
 // What the agent left uncommitted: staged, committed with its message, or refused by a hook for the
 // user to decide.
+
 import type { ContainerRuntime } from '@union/core';
 
-import type { AgentFn, AgentRun } from './agent';
+import type { AgentFn, AgentRun } from './agent/agent';
 import { mustRunIn, runIn } from './container-exec';
 import { REPO_DIR } from './provision';
 

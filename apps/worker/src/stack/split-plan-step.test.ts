@@ -2,7 +2,7 @@ import { expect, test } from 'bun:test';
 
 import type { ContainerRuntime } from '@union/core';
 
-import type { AgentFn, AgentRun } from '../agent';
+import type { AgentFn, AgentRun } from '../agent/agent';
 import { settlePlan } from './split-plan-step';
 
 const runtime = {} as ContainerRuntime;

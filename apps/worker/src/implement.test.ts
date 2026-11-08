@@ -19,7 +19,7 @@ import {
   type Project,
 } from '@union/core';
 
-import type { AgentOutcome, AgentRun } from './agent';
+import type { AgentOutcome, AgentRun } from './agent/agent';
 import { implementLoop, type ImplementDeps, type Workspace } from './implement-loop';
 import { renderImplementReport } from './implement-prompts';
 import type { StepContext } from './scheduler';
