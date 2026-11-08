@@ -13,7 +13,7 @@ import {
 } from '@union/core';
 
 /** The checkout web and worker run from. */
-export const UNION_ROOT = path.resolve(import.meta.dir, '..', '..', '..');
+export const UNION_ROOT = path.resolve(import.meta.dir, '..', '..', '..', '..');
 
 const FETCH_TIMEOUT_MS = 60_000;
 const READ_TIMEOUT_MS = 10_000;

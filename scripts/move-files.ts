@@ -88,6 +88,14 @@ for (const list of await scan(PATH_LISTS)) {
     console.log(`Edit by hand: ${list} names ${named.join(', ')}`);
   }
 }
+for (const to of moves.values()) {
+  const source = await readFile(path.join(ROOT, to), 'utf8');
+  if (source.includes('import.meta')) {
+    console.log(
+      `Check by hand: ${to} uses import.meta, so a path from its own folder may be one level off`,
+    );
+  }
+}
 console.log(
   `Moved ${moves.size} files into ${folder}; rewrote imports in ${rewritten.size} files.`,
 );
