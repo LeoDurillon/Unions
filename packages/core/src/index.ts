@@ -52,6 +52,7 @@ export * from './event-pull-request-action';
 export * from './event-rule-types';
 export * from './event-rules';
 export * from './compose-containers';
+export { CopyRefused } from './copied-file';
 export { DockerCli } from './docker-cli';
 export { DockerImages } from './docker-images';
 export * from './agent-image-source';

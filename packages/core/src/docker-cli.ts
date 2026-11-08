@@ -2,6 +2,7 @@
 import { spawn } from 'node:child_process';
 
 import { CONTAINER_FORMAT, parseProjectContainers } from './compose-containers';
+import { checkCopiedFile } from './copied-file';
 import { helperArgs, removeOnAbort } from './docker-helper';
 import { mergedLines } from './merged-lines';
 import type {
@@ -257,8 +258,14 @@ export class DockerCli implements ContainerRuntime {
     }
   }
 
-  async copyOut(name: string, containerPath: string, hostPath: string): Promise<void> {
+  async copyOut(
+    name: string,
+    containerPath: string,
+    hostPath: string,
+    maxBytes?: number,
+  ): Promise<void> {
     await ok(['cp', `${name}:${containerPath}`, hostPath]);
+    await checkCopiedFile(hostPath, maxBytes);
   }
 
   async writeFile(

@@ -61,8 +61,11 @@ export type ContainerRuntime = {
     image: string,
     files: { hostPath: string; volumePath: string }[],
   ): Promise<void>;
-  /** Copies one file out of the container to a host path. */
-  copyOut(name: string, containerPath: string, hostPath: string): Promise<void>;
+  /**
+   * Copies one file out of the container to a host path. Throws `CopyRefused` (and leaves nothing
+   * there) when it is not a regular file, or is larger than `maxBytes`.
+   */
+  copyOut(name: string, containerPath: string, hostPath: string, maxBytes?: number): Promise<void>;
   /** Writes a file inside the container (used to seed credentials into the HOME volume). */
   writeFile(name: string, containerPath: string, content: string, mode?: string): Promise<void>;
   /** Runs a helper container; streams its output (stdout and stderr) line by line. */

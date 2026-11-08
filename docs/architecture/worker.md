@@ -344,6 +344,10 @@
   the ticket's container and preview, installs the browser at the repository's Playwright version, runs the command
   with `previewEnv` (`BASE_URL`, `UNION_URL_<SERVICE>`), keeps the result on the preview (`previews.e2e_*`) and up to 5 failure screenshots as private
   ticket files (`replaceE2eScreenshots`). The panel sends a failure to the agent as a normal revision.
+  Screenshots are collected by `e2e-screenshots.ts`: regular `*.png` files under `test-results` only, each
+  copied with `copyOut`'s size cap (5 MiB) and kept only when it starts with the PNG signature; a skipped one
+  adds a line to the output. `copyOut` itself refuses (`CopyRefused`) and removes anything that is not a regular
+  file on the host, since `docker cp` keeps symlinks and reading one would follow it to a worker file.
 - `container-run.ts`: commands the user runs in a ticket's workspace (Preview tab → Commands, `container_runs`,
   `routes/container-runs.ts`). Refused during a step and while another runs on the ticket; up to 3 across tickets.
   Runs `setsid -w sh -c` in the checkout as `node` (with `PREVIEW_URL`/`BASE_URL` while the preview runs), keeps

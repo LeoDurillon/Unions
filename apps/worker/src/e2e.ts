@@ -1,8 +1,4 @@
 // Runs the project's e2e command against the owner's preview, after its checks passed.
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import path from 'node:path';
-
 import {
   replaceE2eScreenshots,
   replaceReviewScreenshots,
@@ -13,16 +9,12 @@ import {
 } from '@union/core';
 
 import { runIn } from './container-exec';
+import { collectScreenshots, type Screenshot, type Screenshots } from './e2e-screenshots';
 import { GATE_TIMEOUT_MS, tail } from './gate';
 import { baseUrl, previewEnv } from './preview-env';
 import { previewSettings } from './preview/compose';
 import { startPreview, type PreviewDeps } from './preview/run';
 import { REPO_DIR } from './provision';
-
-/** Failure screenshots kept: enough to see what broke, few enough to read. */
-const MAX_SCREENSHOTS = 5;
-/** `find -size` counts in 1 KiB blocks: 5 MiB. */
-const MAX_SCREENSHOT_KIB = 5120;
 
 export type E2eResult =
   | {
@@ -63,43 +55,8 @@ async function installBrowser(run: E2eRun): Promise<void> {
   );
 }
 
-/** The newest failure screenshots of the run (Playwright writes them under `test-results`). */
-async function screenshots(run: E2eRun): Promise<{ name: string; bytes: Uint8Array }[]> {
-  const listed = await runIn(
-    run.runtime,
-    run.container,
-    [
-      'sh',
-      '-c',
-      `find test-results -name '*.png' -size -${MAX_SCREENSHOT_KIB}k 2>/dev/null | head -${MAX_SCREENSHOTS}`,
-    ],
-    { cwd: REPO_DIR },
-  );
-  const files = listed.stdout.split('\n').filter((line) => line.trim() !== '');
-  if (files.length === 0) {
-    return [];
-  }
-  const dir = await mkdtemp(path.join(tmpdir(), 'union-e2e-'));
-  try {
-    const kept: { name: string; bytes: Uint8Array }[] = [];
-    for (const [index, file] of files.entries()) {
-      const local = path.join(dir, `${index}.png`);
-      await run.runtime.copyOut(run.container, `${REPO_DIR}/${file}`, local);
-      // `test-results/<test folder>/test-failed-1.png`: the folder names the test.
-      kept.push({ name: `${path.basename(path.dirname(file))}.png`, bytes: await readFile(local) });
-    }
-    return kept;
-  } finally {
-    await rm(dir, { recursive: true, force: true });
-  }
-}
-
 /** A ticket's go with its files (the final review reads them); a pull request's, with its preview. */
-function keepScreenshots(
-  db: Db,
-  owner: WorkspaceOwner,
-  files: { name: string; bytes: Uint8Array }[],
-): Promise<void> {
+function keepScreenshots(db: Db, owner: WorkspaceOwner, files: Screenshot[]): Promise<void> {
   return 'ticketId' in owner
     ? replaceE2eScreenshots(db, owner.ticketId, files)
     : replaceReviewScreenshots(db, owner.reviewId, files);
@@ -141,13 +98,16 @@ export async function runE2e(run: E2eRun): Promise<E2eResult | null> {
     signal: run.signal ? AbortSignal.any([run.signal, timeout]) : timeout,
   });
   const green = result.exitCode === 0;
-  const kept = green ? [] : await screenshots(run).catch(() => []);
+  const none: Screenshots = { kept: [], skipped: [] };
+  const { kept, skipped } = green
+    ? none
+    : await collectScreenshots(run.runtime, run.container).catch(() => none);
   await keepScreenshots(run.db, run.owner, kept);
   return {
     status: green ? 'green' : 'red',
     command,
     exitCode: result.exitCode,
-    tail: tail(result.stdout),
+    tail: [tail(result.stdout), ...skipped].join('\n'),
     screenshots: kept.length,
   };
 }

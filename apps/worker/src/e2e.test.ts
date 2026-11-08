@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 
 import {
+  CopyRefused,
   createDb,
   createTicket,
   getPreview,
@@ -38,6 +39,7 @@ let ticketId: number;
 let execs: { command: string; env?: Record<string, string>; user?: string }[];
 let testExit: number;
 let screenshots: string[];
+const PNG = Buffer.from('89504E470D0A1A0A', 'hex');
 let resolved: unknown;
 
 let stopped: string[];
@@ -89,8 +91,11 @@ const runtime = {
     }
     return { exitCode: 0, stderr: '' };
   },
-  async copyOut(_name: string, _from: string, to: string): Promise<void> {
-    await writeFile(to, new Uint8Array([137, 80, 78, 71]));
+  async copyOut(_name: string, from: string, to: string): Promise<void> {
+    if (from.includes('linked')) {
+      throw new CopyRefused(to, 'is not a regular file');
+    }
+    await writeFile(to, from.includes('not-png') ? 'text' : PNG);
   },
 } as unknown as ContainerRuntime;
 
@@ -189,6 +194,26 @@ test('a red run keeps its failure screenshots as ticket files; a green one clear
   testExit = 0;
   expect((await e2e())?.status).toBe('green');
   expect(listAttachments(db, ticketId)).toEqual([]);
+});
+
+test('a screenshot that is no plain file, or no PNG, is skipped with a line in the output', async () => {
+  testExit = 1;
+  screenshots = [
+    'test-results/linked/test-failed-1.png',
+    'test-results/checkout-pays/test-failed-1.png',
+    'test-results/not-png/test-failed-1.png',
+  ];
+  const red = await e2e();
+  expect(red).toMatchObject({ status: 'red', screenshots: 1 });
+  expect(listAttachments(db, ticketId).map((file) => file.name)).toEqual(['e2e-checkout-pays.png']);
+  const lines = red?.status === 'red' ? red.tail.split('\n').slice(-2) : [];
+  expect(lines).toEqual([
+    'Union skipped the screenshot test-results/linked/test-failed-1.png: the copy is not a regular file',
+    'Union skipped the screenshot test-results/not-png/test-failed-1.png: not a PNG image',
+  ]);
+  expect(execs.find((exec) => exec.command.includes('find test-results'))?.command).toContain(
+    '-type f',
+  );
 });
 
 test('a preview that cannot run now skips the tests; one the code broke counts as red', async () => {
