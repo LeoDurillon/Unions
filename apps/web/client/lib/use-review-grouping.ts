@@ -6,8 +6,8 @@ import type { GroupingView } from '../../src/routes/review-groupings';
 import { reviewGroupingApi } from './review-grouping-api';
 import { reviewBase, type ReviewTarget } from './review-target';
 
-/** While the agent works, its status is polled (a pull request review has no live events). */
-const ACTIVE_POLL_MS = 3000;
+/** Live events refresh it as the run moves; this slow poll only covers a live stream that is down. */
+const SAFETY_POLL_MS = 30_000;
 
 export function isGrouping(grouping: GroupingView | null | undefined): boolean {
   return grouping?.status === 'queued' || grouping?.status === 'running';
@@ -27,7 +27,7 @@ export function useReviewGrouping(target: ReviewTarget): {
   const grouping = useQuery({
     queryKey,
     queryFn: () => reviewGroupingApi.latest(base),
-    refetchInterval: (query) => (isGrouping(query.state.data) ? ACTIVE_POLL_MS : false),
+    refetchInterval: (query) => (isGrouping(query.state.data) ? SAFETY_POLL_MS : false),
   });
   const refresh = (): Promise<void> => queryClient.invalidateQueries({ queryKey });
   return {

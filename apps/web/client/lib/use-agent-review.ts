@@ -6,8 +6,8 @@ import type { AgentReviewView } from '../../src/api-types';
 import { agentReviewApi, type AgentReviewStart } from './agent-review-api';
 import { reviewBase, type ReviewTarget } from './review-target';
 
-/** While the agent works, its status is polled (a pull request review has no live events). */
-const ACTIVE_POLL_MS = 3000;
+/** Live events refresh it as the run moves; this slow poll only covers a live stream that is down. */
+const SAFETY_POLL_MS = 30_000;
 
 export function isActive(review: AgentReviewView | null | undefined): boolean {
   return review?.status === 'queued' || review?.status === 'running';
@@ -36,7 +36,7 @@ export function useAgentReview(target: ReviewTarget): {
   const review = useQuery({
     queryKey,
     queryFn: () => agentReviewApi.latest(base),
-    refetchInterval: (query) => (isActive(query.state.data) ? ACTIVE_POLL_MS : false),
+    refetchInterval: (query) => (isActive(query.state.data) ? SAFETY_POLL_MS : false),
   });
   const active = isActive(review.data);
   const wasActive = useRef(active);

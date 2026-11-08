@@ -2,7 +2,7 @@
 // change.
 import { useQueryClient } from '@tanstack/react-query';
 
-import { invalidationKeys } from './live-invalidation-keys';
+import { invalidationKeys, reviewRunFilter } from './live-invalidation-keys';
 import { useEvents } from './use-event-stream';
 
 /** Refetches board, ticket, investigation and notification data whenever the worker records a change. */
@@ -11,6 +11,10 @@ export function useLiveInvalidation(): void {
   useEvents((event) => {
     for (const queryKey of invalidationKeys(event)) {
       void queryClient.invalidateQueries({ queryKey });
+    }
+    const reviewRun = reviewRunFilter(event);
+    if (reviewRun !== null) {
+      void queryClient.invalidateQueries(reviewRun);
     }
   });
 }

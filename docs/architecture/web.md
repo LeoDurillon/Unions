@@ -270,7 +270,7 @@
   row with the review's readable specs (`readableSpecs`, shared with the report, none needed; 409 when busy, 400
   for an agent that is not a ready review agent); `POST /:runId/cancel` queues `cancel_review_agent_run`. The
   client: the **Agents** tab after Report (`review/review-agents-tab.tsx`, `review-agent-run-card.tsx`,
-  `lib/use-review-agents.ts`, polled while a run works), its answer in `Markdown` with `renderCode`
+  `lib/use-review-agents.ts`, refreshed by its events), its answer in `Markdown` with `renderCode`
   (`review/diff-link-code.tsx`: a changed file's reference opens the Diff tab through `useOpenLines`).
 - Spec report: `routes/review-reports.ts` (mounted beside the groupings from `grouping-targets.ts`, on the same
   `GroupingTarget` and its refusal): `GET /reports` the newest report (the specs it read by name, the result, the
@@ -288,7 +288,7 @@
   `report-sections.tsx`; `report-open.tsx` opens a file at lines (or a draft comment on
   them) through the Explain focus (`explain.show`), `report-marks.tsx` gives the file rows the current report's
   important files (the **Key** badge in `file-row.tsx`, provided by `file-list.tsx`). `lib/use-review-report.ts`
-  polls while a report is queued or running; labels and Copy as markdown come from the browser-safe
+  refreshes on its events while a report is queued or running; labels and Copy as markdown come from the browser-safe
   `@union/core/review-report-markdown`.
 - Explain: `routes/review-explanations.ts` (mounted beside the groupings from `grouping-targets.ts`, on the same
   `GroupingTarget` and its refusal) lists a review's explanations with their spec parts and `outdated`, queues one
@@ -297,7 +297,7 @@
   serves its agent lines (`/log`). The client: `explain-context.tsx` (provided by `ReviewPage`: the panel's open
   state, the review's specs, asking, and the lines to show), the panel
   `explain-panel.tsx` beside the diff in `diff-area.tsx`, `explanation-card.tsx` (a thread),
-  `explanation-answer.tsx`, `explanation-progress.tsx`, `lib/use-explanations.ts` (polled while one is active).
+  `explanation-answer.tsx`, `explanation-progress.tsx`, `lib/use-explanations.ts` (refreshed by its events; the answer's log is polled while it runs, agent output is not on the stream).
   Opening an explanation's lines picks the file in `diff-body.tsx` and selects them in `open-file.tsx` until the
   user picks or selects another; Copy as comment starts the comment editor with the answer quoted.
 - Agent image: project settings → Agents → Agent image (`agent-image-section.tsx`, `agent-image-status.tsx`,
@@ -366,7 +366,11 @@
   named `ping` every 15 s while quiet: when only the API restarts, Vite's proxy keeps the page's connection open
   with nothing behind it, and the page closes and reopens a stream silent for 45 s. `lib/stream-status.ts` holds `live` / `reconnecting`, relayed to the other tabs,
   and the sidebar shows "Reconnecting…" after 3 s of it (`stream-pill.tsx`). The board and ticket panel refetch
-  on its events (`live-invalidation-keys.ts`; `preview_output` refetches nothing); the Log tabs
+  on its events (`live-invalidation-keys.ts`; `preview_output` refetches nothing). The review page's side runs
+  (agent review, grouping, report, explanations, review agents) refresh from their `*_changed` events in every
+  review open, matched by the key's part (`reviewRunFilter`): a pull request's events carry its review id, not
+  the project and number its queries are keyed by. Their hooks keep a 30 s poll while a run is active, only for
+  a stream that is down. The Log tabs
   poll `/api/events/log` every second while open (`use-log.ts`): the ticket's or investigation's events and its
   agents' output (`agent_log`) in one order, from a cursor. Agent output is not on the stream. Events are sent unnamed: a new event type reaches
   the client without being listed. A call's `result` line shows its tokens, and each run's header their sum

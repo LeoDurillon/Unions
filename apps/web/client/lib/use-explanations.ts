@@ -5,8 +5,10 @@ import type { ExplanationLogView, ExplanationView } from '../../src/routes/revie
 import { explanationApi, type ExplanationAsk } from './explanation-api';
 import { reviewBase, type ReviewTarget } from './review-target';
 
-/** A pull request review has no live events: the panel polls while the agent works. */
-const ACTIVE_POLL_MS = 3000;
+/** Live events refresh it as the run moves; this slow poll only covers a live stream that is down. */
+const SAFETY_POLL_MS = 30_000;
+/** An explanation's agent output is not on the live stream: its log is polled while it runs. */
+const LOG_POLL_MS = 3000;
 
 export function isExplaining(explanation: ExplanationView): boolean {
   return explanation.status === 'queued' || explanation.status === 'running';
@@ -24,7 +26,7 @@ export function useExplanations(target: ReviewTarget): {
     queryKey,
     queryFn: () => explanationApi.list(base),
     refetchInterval: (query) =>
-      query.state.data?.some((row) => isExplaining(row)) ? ACTIVE_POLL_MS : false,
+      query.state.data?.some((row) => isExplaining(row)) ? SAFETY_POLL_MS : false,
   });
   const refresh = (): Promise<void> => queryClient.invalidateQueries({ queryKey });
   return {
@@ -51,6 +53,6 @@ export function useExplanationLog(
     queryKey: ['review', base, 'explanations', id, 'log'],
     queryFn: () => explanationApi.log(base, id),
     enabled: running,
-    refetchInterval: running ? ACTIVE_POLL_MS : false,
+    refetchInterval: running ? LOG_POLL_MS : false,
   });
 }

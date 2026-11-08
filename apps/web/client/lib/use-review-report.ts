@@ -6,8 +6,8 @@ import type { ReportView } from '../../src/routes/review-reports';
 import { reviewReportApi } from './review-report-api';
 import { reviewBase, type ReviewTarget } from './review-target';
 
-/** While the agent works, its status is polled (a pull request review has no live events). */
-const ACTIVE_POLL_MS = 3000;
+/** Live events refresh it as the run moves; this slow poll only covers a live stream that is down. */
+const SAFETY_POLL_MS = 30_000;
 
 export function isReporting(report: ReportView | null | undefined): boolean {
   return report?.status === 'queued' || report?.status === 'running';
@@ -27,7 +27,7 @@ export function useReviewReport(target: ReviewTarget): {
   const report = useQuery({
     queryKey,
     queryFn: () => reviewReportApi.latest(base),
-    refetchInterval: (query) => (isReporting(query.state.data) ? ACTIVE_POLL_MS : false),
+    refetchInterval: (query) => (isReporting(query.state.data) ? SAFETY_POLL_MS : false),
   });
   const refresh = (): Promise<void> => queryClient.invalidateQueries({ queryKey });
   return {

@@ -5,8 +5,8 @@ import type { ReviewAgentRunView, ReviewAgentsView } from '../../src/routes/revi
 import { reviewAgentsApi } from './review-agents-api';
 import { reviewBase, type ReviewTarget } from './review-target';
 
-/** While an agent works, its status is polled (a pull request review has no live events). */
-const ACTIVE_POLL_MS = 3000;
+/** Live events refresh it as the run moves; this slow poll only covers a live stream that is down. */
+const SAFETY_POLL_MS = 30_000;
 
 export function isActive(run: Pick<ReviewAgentRunView, 'status'>): boolean {
   return run.status === 'queued' || run.status === 'running';
@@ -24,7 +24,7 @@ export function useReviewAgents(target: ReviewTarget): {
     queryKey,
     queryFn: () => reviewAgentsApi.list(base),
     refetchInterval: (query) =>
-      query.state.data?.runs.some(isActive) === true ? ACTIVE_POLL_MS : false,
+      query.state.data?.runs.some(isActive) === true ? SAFETY_POLL_MS : false,
   });
   const show = (view: ReviewAgentsView): void => {
     queryClient.setQueryData(queryKey, view);
