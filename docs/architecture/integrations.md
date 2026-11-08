@@ -12,10 +12,10 @@
   create a Project; `routes/github-project-link.ts` then writes the columns, the worker adds the items), checking and listing the
   GitHub App's installations (`/api/github/app`), looking up a pull request a user links to a ticket, reading an
   issue to create a ticket on it (`routes/issue-import.ts`), reading a pull request to import, with the issues it
-  closes and their comments, in one GraphQL query (`github-pr-import.ts`, `routes/pr-import.ts`), reading a linked pull request's discussion (PR tab,
+  closes and their comments, in one GraphQL query (`github-pr-import.ts`, `routes/pull-requests/pr-import.ts`), reading a linked pull request's discussion (PR tab,
   review import), a reviewed pull request's files and commits, and listing the repository's pull requests and stacks (project bar → Pull requests,
-  `routes/pull-requests.ts`; the Under review part's records are local, under `/pull-requests/reviews`,
-  `routes/current-reviews.ts`), all read only (`src/github-onboarding.ts`, behind the `OnboardingGitHub` interface
+  `routes/pull-requests/pull-requests.ts`; the Under review part's records are local, under `/pull-requests/reviews`,
+  `routes/review/current-reviews.ts`), all read only (`src/github-onboarding.ts`, behind the `OnboardingGitHub` interface
   so tests use a fake), and a linked pull request's CI checks (PR tab: check runs, statuses, bot comments, the
   annotations and job logs of a pick; `src/github-checks.ts` behind `CiGitHub`). Posting a pull request review is a write: it goes through the `submit_pr_review` command
   and the worker (`github/pr-review.ts`). So is replying to a pull request's comments: the `reply_pr_comment`
@@ -38,7 +38,7 @@
   item of the source as a ticket preview). A new project takes `integrations: [{ kind, secret, config }]`. The
   browser sees `PublicProject.integrations` (`toPublicIntegration`, `public-project.ts`: kind, title, config,
   `ready`), never a secret. The web server never calls a provider's `createItem`, nor Notion's `createPage`, `updatePage` or
-  `addComment` (ast-grep `web-reads-trackers-only`). A new ticket takes `origin: { kind, id, url }` (`routes/ticket-origin.ts`, which also
+  `addComment` (ast-grep `web-reads-trackers-only`). A new ticket takes `origin: { kind, id, url }` (`routes/tickets/ticket-origin.ts`, which also
   keeps the item's images per kind), and an investigation's ticket `target: kind`. In the client, the New ticket
   dialog has one "Import from …" tab per ready integration (`components/integrations/source-import.tsx`), the
   investigation one "Also create it in …" switch per integration, and each kind's own screens (settings,
@@ -48,7 +48,7 @@
   `routes/notion.ts`, through the Notion
   `IntegrationProvider`), the pages a pull
   request under review is linked to and the review's Notion specs (any page shared with the integration;
-  `routes/review-notion.ts`, `routes/review-specs.ts`, their text (and in the review's Notion tab, their open discussions) read fresh each time, mention titles from core's `integrations/notion-mentions.ts`), and the open
+  `routes/review/review-notion.ts`, `routes/review/review-specs.ts`, their text (and in the review's Notion tab, their open discussions) read fresh each time, mention titles from core's `integrations/notion-mentions.ts`), and the open
   discussions of a ticket's page (`routes/notion-comments.ts`, `GET /api/tickets/:id/notion-comments`; `src/notion-discussions.ts`
   reads the page's comments, then those of each block its markdown marks as commented, one block at a time and at
   most 30; core's `notion-comments.ts` groups them and quotes the commented text; needs the integration's "Read
@@ -93,7 +93,7 @@
   `markdown-adf.ts` (mdast with GitHub's extensions, from the `markdown` catalog; inline code keeps only a link
   mark, as ADF requires). Jira's refusal (a required field) is the investigation's `ticket_error`.
 - A review of someone else's pull request links Jira issues as its `jira` specs (core's `review-specs.ts`:
-  `linkJiraIssue`, `linkedJiraIssues`, `unlinkJiraIssue`). `routes/review-jira.ts` (under `<review>/jira`) reads
+  `linkJiraIssue`, `linkedJiraIssues`, `unlinkJiraIssue`). `routes/review/review-jira.ts` (under `<review>/jira`) reads
   their descriptions and comments for the review's Jira tab, checks a key or link of the site (any project, as
   specs), links and unlinks; `/suggestions` reads the keys the title, head branch and description name (core's
   `jira-keys.ts`: the project's key prefix only, bare or as a `/browse/` link of the site), reads each (at most 10)
@@ -126,7 +126,7 @@
   check runs and annotations, commit statuses, job logs; the worker's poll of the PR's checks rollup, which reads as
   unknown without them; write only to re-run a failed job), organization Projects read and write. An existing installation must
   accept added permissions on GitHub (Settings → GitHub Apps → the request) before they apply; until then the CI
-  reads answer 403, which `routes/pr-checks.ts` turns into a message naming them. Replies to comments need only
+  reads answer 403, which `routes/pull-requests/pr-checks.ts` turns into a message naming them. Replies to comments need only
   Pull requests read and write (the issue-comments endpoint takes Issues or Pull requests); a refusal (a 403, or
   GraphQL's "Resource not accessible") is reported naming it. A classic token needs `repo`, and `project` only with a
   GitHub Project (`blockingScopes` in the client's `lib/github-project-api.ts`).
