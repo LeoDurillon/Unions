@@ -4,7 +4,7 @@ import { listSlices, privatePushFiles, recordPushed, type Project } from '@union
 
 import { PrivateFilesError, projectRemote, pushBranch } from './publish';
 import type { Rebase } from './rebase/rebase-agent';
-import { pushRewrittenStack } from './stack-refs';
+import { pushRewrittenStack } from './stack/stack-refs';
 
 /** The project's repository with its credentials, for the fetch and the push. */
 export function remoteOf(deps: Rebase['deps'], project: Project): ReturnType<typeof projectRemote> {

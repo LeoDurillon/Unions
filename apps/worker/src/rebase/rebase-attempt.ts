@@ -2,7 +2,7 @@
 
 import { remoteOf } from '../branch-push';
 import { install } from '../implement-checks';
-import { lowerSlices, syncLowerBranches } from '../stack-refs';
+import { lowerSlices, syncLowerBranches } from '../stack/stack-refs';
 import { rateLimited, type StepResult } from '../step-outcome';
 import { runRebaseAgent, type Pushed, type Rebase } from './rebase-agent';
 import { pushClean, upToDate } from './rebase-clean';

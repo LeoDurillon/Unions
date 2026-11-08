@@ -1,4 +1,5 @@
 // Implements the approved plan on the ticket's branch, checks it, pushes it, opens the draft PR.
+
 import { captureDiff } from './diff-snapshot';
 import { implementerAsk, type ImplementDeps } from './implement-loop';
 import { renderImplementReport } from './implement-prompts';
@@ -7,7 +8,7 @@ import { suggestReplies } from './pr-reply-suggestions';
 import { publishBranch, type PublishResult } from './publish';
 import type { StepContext, StepResult } from './scheduler';
 import { sizeAndTrim } from './size-trim';
-import { pushRevision, restackRevision, stackSection } from './stack-revise';
+import { pushRevision, restackRevision, stackSection } from './stack/stack-revise';
 import { commitsAhead } from './workspace-git';
 
 export type { ImplementDeps } from './implement-loop';

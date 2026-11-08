@@ -15,7 +15,7 @@ import type { ImplementDeps } from './implement-checks';
 import { runRebaseStep } from './rebase/rebase';
 import { loadProject } from './review';
 import type { StepContext, StepResult } from './scheduler';
-import { followGitHub } from './stack-follow';
+import { followGitHub } from './stack/stack-follow';
 
 /** The tip of the last slice merged into the base under the open ones: where the rest starts. */
 function mergedTip(db: Db, ticket: Ticket, base: string): string | null {

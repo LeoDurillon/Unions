@@ -1,13 +1,14 @@
 // The steps that rewrite a reviewed branch's history, the code unchanged: simplify, and the split into a stack.
+
 import { listSlices, openSlices, type Step } from '@union/core';
 
 import { withAgentServices } from './agent-services-step';
 import type { ImplementDeps } from './implement-checks';
 import type { StepContext, StepResult } from './scheduler';
-import { runSimplifyStep } from './simplify';
-import { runStackSimplifyStep } from './simplify-stack';
-import { runSplitStep } from './split';
-import { runSplitPlanStep } from './split-plan-step';
+import { runSimplifyStep } from './simplify/simplify';
+import { runStackSimplifyStep } from './simplify/simplify-stack';
+import { runSplitStep } from './stack/split';
+import { runSplitPlanStep } from './stack/split-plan-step';
 
 const HISTORY_STEPS = ['simplify', 'split_plan', 'split'] as const;
 type HistoryStep = (typeof HISTORY_STEPS)[number];
