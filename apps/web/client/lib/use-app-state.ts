@@ -1,6 +1,7 @@
 // What the root layout runs on: live refetching, the projects, the open ticket, navigation, and opening notifications.
 import { useDesktopNotifications } from './desktop-notifications';
 import { useNotificationOpener, type NotificationTarget } from './open-notification';
+import { useTabListKeys } from './tab-keys';
 import { useActiveProject } from './use-active-project';
 import { useLiveInvalidation } from './use-live-invalidation';
 import { useNavigation } from './use-navigation';
@@ -21,6 +22,7 @@ export type AppState = ReturnType<typeof useActiveProject> &
 /** Also shows the desktop notifications, when the user turned them on. */
 export function useAppState(): AppState {
   useLiveInvalidation();
+  useTabListKeys();
   const projects = useActiveProject();
   const [ticketId, openTicket] = useSelectedTicket();
   const navigation = useNavigation();

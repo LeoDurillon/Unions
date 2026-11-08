@@ -10,6 +10,7 @@ import {
   type PullRequestList,
 } from '../../../src/api-types';
 import { api } from '../../lib/api';
+import { formatWhen } from '../../lib/relative-time';
 import { Button, ErrorText } from '../ui';
 import { PullRequestRows } from './pull-request-rows';
 import { UnderReview } from './under-review';
@@ -86,7 +87,7 @@ function Toolbar({
       </span>
       <div className="flex-1" />
       {list ? (
-        <span className="text-xs text-zinc-500" title={new Date(list.fetchedAt).toLocaleString()}>
+        <span className="text-xs text-zinc-500" title={formatWhen(list.fetchedAt)}>
           Read from GitHub {age(list.fetchedAt, receivedAt)}
         </span>
       ) : null}

@@ -3,6 +3,7 @@
 import { useState, type ReactElement } from 'react';
 
 import { SINCE_REVIEW, type CommitsResponse, type ReviewCommit } from '../../../src/api-types';
+import { formatWhen } from '../../lib/relative-time';
 import { useCommits } from '../../lib/use-commits';
 import { ErrorText } from '../ui';
 
@@ -28,7 +29,7 @@ function CommitRow({
   on: boolean;
   onPick: () => void;
 }): ReactElement {
-  const date = commit.date ? ` · ${new Date(commit.date).toLocaleString()}` : '';
+  const date = commit.date ? ` · ${formatWhen(commit.date)}` : '';
   return (
     <button
       type="button"

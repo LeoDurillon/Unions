@@ -83,7 +83,7 @@ function LinesChip({
     <button
       type="button"
       title={`Open ${path} at ${linesLabel(lines)} in the diff`}
-      className="rounded bg-indigo-50 px-1.5 font-mono text-[11px] text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/50 dark:text-indigo-300 dark:hover:bg-indigo-900/60"
+      className="rounded bg-indigo-50 px-1.5 font-mono text-xs text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/50 dark:text-indigo-300 dark:hover:bg-indigo-900/60"
       onClick={() => {
         onOpen(path, lines);
       }}

@@ -80,9 +80,9 @@ export function FileRow({
       </span>
       <FileLabel label={label} />
       <KeyBadge path={file.path} />
-      {note ? <span className="shrink-0 text-[10px] text-zinc-500">{note}</span> : null}
+      {note ? <span className="shrink-0 text-xs text-zinc-500">{note}</span> : null}
       {drafts > 0 ? (
-        <span className="rounded-full bg-indigo-600 px-1.5 text-[10px] text-white">{drafts}</span>
+        <span className="rounded-full bg-indigo-600 px-1.5 text-xs text-white">{drafts}</span>
       ) : null}
       <span className="text-green-600">+{file.additions}</span>
       <span className="text-red-600">−{file.deletions}</span>

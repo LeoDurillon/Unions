@@ -62,7 +62,7 @@ export function RepoFilterResults({
   return (
     <div className="space-y-1">
       {partial ? (
-        <p className="px-2 text-[11px] text-zinc-500">
+        <p className="px-2 text-xs text-zinc-500">
           A large repository: only the folders opened so far are searched.
         </p>
       ) : null}
@@ -79,13 +79,13 @@ export function RepoFilterResults({
               className="flex w-full min-w-0 flex-col rounded-md px-2 py-1 text-left font-mono text-xs hover:bg-zinc-200/70 dark:hover:bg-zinc-800"
             >
               <span className="truncate">{nameOf(path)}</span>
-              <span className="truncate text-[10px] text-zinc-500">{parentOf(path) || '/'}</span>
+              <span className="truncate text-xs text-zinc-500">{parentOf(path) || '/'}</span>
             </button>
           </li>
         ))}
       </ul>
       {found.length === FILTER_LIMIT ? (
-        <p className="px-2 text-[11px] text-zinc-500">
+        <p className="px-2 text-xs text-zinc-500">
           The first {FILTER_LIMIT}: type more to narrow it.
         </p>
       ) : null}

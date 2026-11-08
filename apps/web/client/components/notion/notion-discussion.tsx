@@ -8,6 +8,7 @@ import type {
   PendingNotionComment,
 } from '../../../src/notion-discussion-types';
 import type { NotionCommentSend } from '../../lib/integrations/use-notion-comments';
+import { formatWhen } from '../../lib/relative-time';
 import { Markdown } from '../markdown';
 import { AddToReview, type ReviewImportState } from '../review/add-to-review';
 import { NotionReply } from './notion-reply';
@@ -26,9 +27,7 @@ function Comment({ comment }: { comment: NotionCommentView }): ReactElement {
     <div className="space-y-1">
       <div className="flex items-baseline gap-2">
         <span className="font-medium">{comment.author}</span>
-        <span className="text-xs text-zinc-500">
-          {new Date(comment.createdAt).toLocaleString()}
-        </span>
+        <span className="text-xs text-zinc-500">{formatWhen(comment.createdAt)}</span>
       </div>
       <Markdown compact>{comment.markdown}</Markdown>
     </div>

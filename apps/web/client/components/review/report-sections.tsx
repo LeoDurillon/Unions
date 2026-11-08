@@ -43,7 +43,7 @@ export function ReportSection({
   const heading = (
     <>
       {title}
-      {counted ? <span className="text-sm font-normal text-zinc-400">{count}</span> : null}
+      {counted ? <span className="text-sm font-normal text-zinc-500">{count}</span> : null}
     </>
   );
   if (collapsed) {

@@ -2,6 +2,7 @@
 import type { ReactElement } from 'react';
 
 import type { CurrentReview } from '../../../src/api-types';
+import { formatWhen } from '../../lib/relative-time';
 import { ConfirmButton } from '../confirm-button';
 import { TrashIcon } from '../icon-button';
 import { Badge, Button } from '../ui';
@@ -30,8 +31,7 @@ export function ReviewItem({
         </a>
         <p className="flex flex-wrap items-center gap-x-2 text-xs text-zinc-500">
           <span>
-            #{review.prNumber} by @{review.author} · added{' '}
-            {new Date(review.createdAt).toLocaleString()}
+            #{review.prNumber} by @{review.author} · added {formatWhen(review.createdAt)}
           </span>
           <span className="truncate font-mono">
             {review.headBranch} → {review.baseBranch}

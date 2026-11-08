@@ -7,6 +7,7 @@ import { groupNotifications } from '../../lib/notification-groups';
 import type { NotificationTarget } from '../../lib/open-notification';
 import type { Notifications } from '../../lib/use-notifications';
 import { Switch } from '../choice';
+import { ConfirmButton } from '../confirm-button';
 import { Button, ErrorText } from '../ui';
 import { NotificationGroupItem } from './notification-group';
 
@@ -88,17 +89,15 @@ function PanelHeader({ notifications }: { notifications: Notifications }): React
       >
         Mark all read
       </Button>
-      <Button
+      <ConfirmButton
+        label="Delete all"
+        question="Delete every notification? They cannot be brought back."
+        confirmLabel="Delete all"
         disabled={notifications.items.length === 0}
-        title="Delete every notification"
-        onClick={() => {
-          if (globalThis.confirm('Delete every notification? They cannot be brought back.')) {
-            notifications.clearAll();
-          }
+        onConfirm={() => {
+          notifications.clearAll();
         }}
-      >
-        Delete all
-      </Button>
+      />
     </div>
   );
 }

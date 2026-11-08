@@ -3,7 +3,7 @@ import type { Preview } from '@union/core';
 import type { ReactElement } from 'react';
 
 import type { Tone } from '../lib/labels';
-import { timeAgo } from '../lib/relative-time';
+import { formatWhen, timeAgo } from '../lib/relative-time';
 import { stripAnsi } from '../lib/strip-ansi';
 import { useNow } from '../lib/use-now';
 import { Badge } from './ui';
@@ -36,7 +36,7 @@ export function LastResult({
     <>
       <Badge tone={status.tone}>{status.label}</Badge>
       {preview.e2eAt ? (
-        <span className="text-xs text-zinc-500" title={new Date(preview.e2eAt).toLocaleString()}>
+        <span className="text-xs text-zinc-500" title={formatWhen(preview.e2eAt)}>
           {timeAgo(preview.e2eAt, now)}
         </span>
       ) : null}

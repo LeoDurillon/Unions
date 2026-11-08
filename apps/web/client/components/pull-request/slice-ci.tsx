@@ -30,7 +30,7 @@ export function SliceCi({ counts }: { counts: CheckCounts | null | undefined }):
   }
   if (counts === null) {
     return (
-      <span className="text-xs text-zinc-400" title="GitHub has no such pull request">
+      <span className="text-xs text-zinc-500" title="GitHub has no such pull request">
         —
       </span>
     );

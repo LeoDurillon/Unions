@@ -5,6 +5,7 @@ import type { ReactElement } from 'react';
 
 import type { EventRulesResponse } from '../../../src/event-api-types';
 import { integrationsApi } from '../../lib/integrations-api';
+import { formatWhen } from '../../lib/relative-time';
 import { JiraFieldsBar } from '../integrations/jira/jira-fields-bar';
 import { Button, ErrorText } from '../ui';
 
@@ -25,7 +26,7 @@ function NotionColumns({
     <div className="flex items-center gap-3 text-sm">
       <p className="min-w-0 flex-1 text-zinc-500">
         {notion
-          ? `Notion columns of “${notion.title}”, read ${new Date(notion.fetchedAt).toLocaleString()} (${notion.properties.length} properties).`
+          ? `Notion columns of “${notion.title}”, read ${formatWhen(notion.fetchedAt)} (${notion.properties.length} properties).`
           : 'The Notion columns are not read yet.'}
       </p>
       <ErrorText error={refresh.error} />

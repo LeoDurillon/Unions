@@ -2,6 +2,7 @@
 import type { ReactElement } from 'react';
 
 import type { PrDescriptionDraft, PrDescriptionView } from '../../../src/api-types';
+import { formatWhen } from '../../lib/relative-time';
 import { usePrDescription, type DescriptionActions } from '../../lib/use-pr-description';
 import { Button, ErrorText } from '../ui';
 import { DescriptionDraft } from './description-draft';
@@ -34,7 +35,7 @@ function RewriteButton({
 /** What the latest rewrite left to say, when it is not a draft to edit. */
 function lastOutcome(draft: PrDescriptionDraft | null): string | null {
   if (draft?.status === 'sent' && draft.sentAt !== null) {
-    return `Rewritten and updated on GitHub ${new Date(draft.sentAt).toLocaleString()}.`;
+    return `Rewritten and updated on GitHub ${formatWhen(draft.sentAt)}.`;
   }
   return draft?.status === 'cancelled' ? 'The last rewrite was cancelled.' : null;
 }

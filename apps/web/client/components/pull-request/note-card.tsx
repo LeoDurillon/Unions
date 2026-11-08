@@ -4,6 +4,7 @@ import { githubTitle } from '@union/core/github-text';
 import { useState, type ReactElement, type ReactNode } from 'react';
 
 import type { PullRequestNote, PullRequestThread } from '../../../src/api-types';
+import { formatWhen } from '../../lib/relative-time';
 import { openDiffLines, type DiffLines, type ReviewPageKind } from '../../lib/review/review-url';
 import { Badge, Button } from '../ui';
 import { CommentBody } from './comment-body';
@@ -26,7 +27,7 @@ function When({ at, url }: { at: string; url: string }): ReactElement {
       rel="noreferrer"
       className="ml-auto shrink-0 text-zinc-500 hover:underline"
     >
-      {new Date(at).toLocaleString()}
+      {formatWhen(at)}
     </a>
   );
 }
@@ -68,7 +69,7 @@ function NoteSummary({
       onClick={onToggle}
       className="flex min-w-0 flex-1 items-center gap-2 text-left"
     >
-      <span aria-hidden className="w-2 text-zinc-400">
+      <span aria-hidden className="w-2 text-zinc-500">
         {open ? '▾' : '▸'}
       </span>
       <span className="shrink-0 font-medium">@{note.author}</span>

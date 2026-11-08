@@ -1,6 +1,13 @@
 // Step-by-step project setup, shown over the board (the first thing a new user sees).
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState, type ReactElement } from 'react';
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ReactElement,
+  type ReactNode,
+  type RefObject,
+} from 'react';
 
 import { api } from '../../lib/api';
 import { Button, CloseButton, ErrorText } from '../ui';
@@ -95,6 +102,45 @@ function Footer({
 }
 
 /** Step-by-step project setup, shown over the board (the first thing a new user sees). */
+/** Opens the dialog as a modal once mounted, and closes it on unmount. */
+function useModal(): RefObject<HTMLDialogElement | null> {
+  const ref = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const dialog = ref.current;
+    if (dialog && !dialog.open) {
+      dialog.showModal();
+    }
+    return () => {
+      dialog?.close();
+    };
+  }, []);
+  return ref;
+}
+
+/** The wizard's frame: a modal dialog (focus kept inside, the page behind inert), closed by Escape when it can be. */
+function WizardDialog({
+  onClose,
+  children,
+}: {
+  onClose?: () => void;
+  children: ReactNode;
+}): ReactElement {
+  const dialog = useModal();
+  return (
+    <dialog
+      ref={dialog}
+      aria-labelledby="wizard-title"
+      onCancel={(event) => {
+        event.preventDefault();
+        onClose?.();
+      }}
+      className="m-0 h-full max-h-none w-full max-w-none bg-transparent p-0 text-zinc-900 backdrop:bg-black/10 backdrop:backdrop-blur-sm dark:text-zinc-100"
+    >
+      <div className="flex min-h-full flex-col items-center gap-5 px-4 pt-16 pb-8">{children}</div>
+    </dialog>
+  );
+}
+
 export function Wizard({
   onFinished,
   onClose,
@@ -115,14 +161,16 @@ export function Wizard({
   };
 
   return (
-    <section className="fixed inset-0 z-20 flex flex-col items-center gap-5 overflow-y-auto bg-black/10 px-4 pt-16 pb-8 backdrop-blur-sm">
+    <WizardDialog onClose={onClose}>
       <div className="w-full max-w-2xl rounded-xl bg-white p-4 shadow dark:bg-zinc-900">
         <Stepper current={step} />
       </div>
       <div className="flex w-full max-w-2xl flex-col gap-5 rounded-xl bg-white p-6 shadow dark:bg-zinc-900">
         <header className="flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-xl font-semibold">{header.title}</h2>
+            <h2 id="wizard-title" className="text-xl font-semibold">
+              {header.title}
+            </h2>
             <p className="text-sm text-zinc-500">{header.description}</p>
           </div>
           {onClose ? <CloseButton onClick={onClose} /> : null}
@@ -145,6 +193,6 @@ export function Wizard({
           }}
         />
       </div>
-    </section>
+    </WizardDialog>
   );
 }

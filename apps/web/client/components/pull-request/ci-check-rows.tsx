@@ -3,6 +3,7 @@ import type { ReactElement } from 'react';
 
 import type { BotComment, CiPick, PullRequestCheck } from '../../../src/ci-api-types';
 import type { Tone } from '../../lib/labels';
+import { formatWhen } from '../../lib/relative-time';
 import type { CiRerun } from '../../lib/use-ci-rerun';
 import { Badge, Button } from '../ui';
 
@@ -177,9 +178,7 @@ export function BotCommentRow({
         >
           {comment.author}
         </a>
-        <span className="ml-2 text-xs text-zinc-500">
-          {new Date(comment.updatedAt).toLocaleString()}
-        </span>
+        <span className="ml-2 text-xs text-zinc-500">{formatWhen(comment.updatedAt)}</span>
         <p className="truncate text-xs text-zinc-500">{comment.excerpt.split('\n')[0]}</p>
       </div>
     </li>

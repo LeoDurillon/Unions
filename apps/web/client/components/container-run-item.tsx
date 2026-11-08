@@ -64,7 +64,7 @@ function RunLine({
         className="flex min-w-0 flex-1 items-center gap-2 rounded-md px-1 py-0.5 text-left hover:bg-zinc-100 dark:hover:bg-zinc-800"
         onClick={onToggle}
       >
-        <span className="w-3 shrink-0 text-zinc-400">{open ? '▾' : '▸'}</span>
+        <span className="w-3 shrink-0 text-zinc-500">{open ? '▾' : '▸'}</span>
         <RunBadge run={run} />
         {run.scriptName === null ? null : <Badge tone="neutral">{run.scriptName}</Badge>}
         <code className="min-w-0 flex-1 truncate" title={run.command}>

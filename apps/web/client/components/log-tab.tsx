@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
 import { summarizeAgentEvent, type LogLine } from '../lib/agent-events';
 import { stepTitle } from '../lib/labels';
 import { groupRuns, type LogRun } from '../lib/log-runs';
+import { formatWhen } from '../lib/relative-time';
 import { sumTokens, tokensText, type CallTokens } from '../lib/token-counts';
 import { useCustomAgentNames } from '../lib/use-custom-agents';
 import { useLog } from '../lib/use-log';
@@ -77,7 +78,7 @@ function entriesFor(entry: LogEntry, names: CustomAgentNames): Entry[] {
     return [{ key, kind: 'run', text }];
   }
   if (isEvent(event, 'investigation_started')) {
-    const time = new Date(event.at).toLocaleString();
+    const time = formatWhen(event.at);
     return [{ key, kind: 'run', text: `Run started ${time}` }];
   }
   return [];

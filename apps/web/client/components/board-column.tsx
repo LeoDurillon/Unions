@@ -67,7 +67,7 @@ function EmptyColumn({ status, view }: { status: BoardColumn; view: ColumnView }
     return <Placeholders />;
   }
   return (
-    <p className="py-6 text-center text-xs text-zinc-400 dark:text-zinc-500">
+    <p className="py-6 text-center text-xs text-zinc-500 dark:text-zinc-500">
       {view.filtering ? 'None matches the filter' : EMPTY[status]}
     </p>
   );

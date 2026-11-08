@@ -12,7 +12,7 @@ const STATE_TONE = { open: 'green', merged: 'blue', closed: 'red' } as const;
 
 function PullLink({ slice, project }: { slice: Slice; project: PublicProject }): ReactElement {
   if (slice.prNumber === null) {
-    return <span className="text-zinc-400">—</span>;
+    return <span className="text-zinc-500">—</span>;
   }
   return (
     <a

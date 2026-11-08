@@ -1,5 +1,5 @@
 // The agent image page's Dockerfile fields: the project's, highlighted, with "Start from" (the JavaScript, Python, Rust, Go or PHP example), and the default image's, read-only.
-import type { ReactElement } from 'react';
+import { useState, type ReactElement } from 'react';
 
 import { STARTERS } from '../../lib/agent-image-starters';
 import { useDefaultDockerfile } from '../../lib/use-agent-image';
@@ -15,6 +15,32 @@ function StarterPicker({
   onPick: (dockerfile: string) => void;
 }): ReactElement {
   const own = text.trim() !== '' && !STARTERS.some((starter) => starter.dockerfile === text);
+  const [asked, setAsked] = useState<(typeof STARTERS)[number] | null>(null);
+  if (asked) {
+    return (
+      <div role="alert" className="flex flex-wrap items-center gap-2 text-xs">
+        <span>Replace your Dockerfile with the {asked.label} example?</span>
+        <Button
+          size="sm"
+          variant="danger"
+          onClick={() => {
+            onPick(asked.dockerfile);
+            setAsked(null);
+          }}
+        >
+          Replace
+        </Button>
+        <Button
+          size="sm"
+          onClick={() => {
+            setAsked(null);
+          }}
+        >
+          Keep mine
+        </Button>
+      </div>
+    );
+  }
   return (
     <div className="flex flex-wrap items-center gap-1.5 text-xs text-zinc-500">
       <span>Start from:</span>
@@ -23,7 +49,9 @@ function StarterPicker({
           key={starter.id}
           size="sm"
           onClick={() => {
-            if (!own || globalThis.confirm('Replace your Dockerfile with this example?')) {
+            if (own) {
+              setAsked(starter);
+            } else {
               onPick(starter.dockerfile);
             }
           }}

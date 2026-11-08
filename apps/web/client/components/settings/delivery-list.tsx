@@ -8,6 +8,7 @@ import type { PublicProject } from '../../../src/api-types';
 import type { DeliveryView } from '../../../src/event-api-types';
 import { eventRulesApi } from '../../lib/event-rules-api';
 import { useNotionUsers } from '../../lib/integrations/use-notion-users';
+import { formatWhen } from '../../lib/relative-time';
 import { Badge } from '../ui';
 
 const DELIVERIES_POLL_MS = 10_000;
@@ -36,7 +37,7 @@ function DeliveryRow({
     <li className="border-b border-zinc-200 py-2 text-sm last:border-b-0 dark:border-zinc-800">
       <div className={`${COLUMNS} items-center`}>
         <span className="text-xs whitespace-nowrap text-zinc-500">
-          {new Date(delivery.createdAt).toLocaleString()}
+          {formatWhen(delivery.createdAt)}
         </span>
         <span>
           <Badge tone={STATUS_TONES[delivery.status]}>{delivery.status}</Badge>

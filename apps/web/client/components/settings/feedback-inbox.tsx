@@ -4,6 +4,7 @@ import type { LessonInput } from '@union/core/lesson-input';
 import { useState, type ReactElement } from 'react';
 
 import { STEP_TITLES } from '../../lib/labels';
+import { formatWhen } from '../../lib/relative-time';
 import { closeSettings } from '../../lib/settings-sections';
 import { setParams } from '../../lib/url-state';
 import { Badge, Button, ErrorText } from '../ui';
@@ -125,7 +126,7 @@ function FeedbackCard({
       <div className="flex flex-wrap items-center gap-2 text-xs">
         <Badge tone={item.curatedAt === null ? 'blue' : 'neutral'}>{stepTitle(item.section)}</Badge>
         <TicketLink item={item} />
-        <span className="text-zinc-500">{new Date(item.createdAt).toLocaleString()}</span>
+        <span className="text-zinc-500">{formatWhen(item.createdAt)}</span>
       </div>
       <button
         type="button"

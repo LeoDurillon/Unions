@@ -3,6 +3,7 @@ import type { AgentConfig, CustomAgentInfo } from '@union/core';
 import { useState, type ReactElement } from 'react';
 
 import { useCustomAgent, type CustomAgentActions } from '../../lib/use-custom-agent';
+import { ConfirmButton } from '../confirm-button';
 import { Badge, Button, ErrorText, Field, inputClass } from '../ui';
 
 const ROLE_ROWS = 3;
@@ -97,16 +98,15 @@ function DeleteAgent({
           ? `Deleting ${name} removes it from the menus and from Run agent on review pages. The answers it already gave stay there.`
           : `Deleting ${name} removes it from the menus and the flow pickers. Finished tickets keep its tab.`}
       </p>
-      <Button
+      <ConfirmButton
+        label="Delete agent"
+        question={`Delete ${name}?`}
+        confirmLabel="Delete"
         disabled={actions.remove.isPending}
-        onClick={() => {
-          if (globalThis.confirm(`Delete ${name}?`)) {
-            actions.remove.mutate();
-          }
+        onConfirm={() => {
+          actions.remove.mutate();
         }}
-      >
-        Delete agent
-      </Button>
+      />
       <ErrorText error={actions.remove.error} />
     </div>
   );

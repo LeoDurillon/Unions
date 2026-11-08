@@ -64,7 +64,7 @@ function WindowRow({
           style={{ width: `${over ? 0 : Math.min(percent, PERCENT)}%` }}
         />
       </div>
-      <div className="text-[11px] text-zinc-500">
+      <div className="text-xs text-zinc-500">
         {over ? `started over ${reset}` : `resets ${reset}`}
       </div>
     </div>
@@ -88,7 +88,7 @@ function Windows({ limits, now }: { limits: ClaudeLimits; now: number }): ReactE
         <WindowRow label="Week" window={limits.sevenDay} rejected={rejected} now={now} long />
       ) : null}
       {now - limits.at > STALE_MS ? (
-        <p className="text-[11px] text-zinc-500">As of {timeAgo(limits.at, now)}</p>
+        <p className="text-xs text-zinc-500">As of {timeAgo(limits.at, now)}</p>
       ) : null}
     </>
   );

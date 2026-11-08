@@ -51,7 +51,7 @@ export function TextView({ text, path }: { text: string; path: string }): ReactE
         <tbody>
           {numbered.map(({ number, line }) => (
             <tr key={number} id={`L${number}`}>
-              <td className="w-px select-none px-3 text-right align-top text-zinc-400 tabular-nums">
+              <td className="w-px select-none px-3 text-right align-top text-zinc-500 tabular-nums">
                 {number}
               </td>
               <td className="whitespace-pre pr-4">

@@ -3,6 +3,7 @@
 import type { ReactElement } from 'react';
 
 import type { ConnectorsResponse } from '../../../src/api-types';
+import { formatWhen } from '../../lib/relative-time';
 import { useConnectors } from '../../lib/use-connectors';
 import { Button, ErrorText } from '../ui';
 
@@ -22,11 +23,7 @@ function CheckStatus({
     return <p className="text-xs text-red-600">The last check failed: {check.error}</p>;
   }
   if (check?.finishedAt) {
-    return (
-      <p className="text-xs text-zinc-500">
-        Checked {new Date(check.finishedAt).toLocaleString()}.
-      </p>
-    );
+    return <p className="text-xs text-zinc-500">Checked {formatWhen(check.finishedAt)}.</p>;
   }
   return null;
 }

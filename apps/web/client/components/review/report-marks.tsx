@@ -47,7 +47,7 @@ export function KeyBadge({ path }: { path: string }): ReactElement | null {
     return (
       <span
         title={`Skim: ${mark.why}`}
-        className="shrink-0 rounded-full bg-zinc-100 px-1.5 text-[10px] font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400"
+        className="shrink-0 rounded-full bg-zinc-100 px-1.5 text-xs font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400"
       >
         Skim
       </span>
@@ -56,7 +56,7 @@ export function KeyBadge({ path }: { path: string }): ReactElement | null {
   return (
     <span
       title={`Read first (${mark.position}): ${mark.why}`}
-      className="shrink-0 rounded-full bg-amber-100 px-1.5 text-[10px] font-medium text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+      className="shrink-0 rounded-full bg-amber-100 px-1.5 text-xs font-medium text-amber-800 dark:bg-amber-950 dark:text-amber-300"
     >
       Key {mark.position}
     </span>

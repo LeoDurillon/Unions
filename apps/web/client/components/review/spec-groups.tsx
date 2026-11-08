@@ -5,6 +5,7 @@ import type { ReactElement } from 'react';
 
 import type { DiffFileSummary } from '../../../src/api-types';
 import type { GroupingView } from '../../../src/routes/review/review-groupings';
+import { formatWhen } from '../../lib/relative-time';
 import { partialCount, UNRELATED_PART } from '../../lib/spec-hunks';
 import { FileRows, type RowOptions } from './file-rows';
 
@@ -26,7 +27,7 @@ function Group({
         title={hint}
       >
         <span className="min-w-0 flex-1 truncate">{title}</span>
-        <span className="font-normal text-zinc-400">{files.length}</span>
+        <span className="font-normal text-zinc-500">{files.length}</span>
       </summary>
       <div className="mt-0.5 mb-2">
         <FileRows files={files} {...rows} />
@@ -45,7 +46,7 @@ function GroupingFooter({ grouping }: { grouping: GroupingView }): ReactElement 
   return (
     <p className="px-2 pt-1 text-xs text-zinc-500">
       Grouped by {grouping.sourceLabel}
-      {grouping.finishedAt ? `, ${new Date(grouping.finishedAt).toLocaleString()}` : ''}
+      {grouping.finishedAt ? `, ${formatWhen(grouping.finishedAt)}` : ''}
       {grouping.outdated ? (
         <span className="text-amber-700 dark:text-amber-400">
           {' '}

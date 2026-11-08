@@ -56,7 +56,7 @@ function Step({
   const nodes = flow.nodes.filter((node) => step.nodes.includes(node.id) && node.changed);
   return (
     <li className="flex gap-3 px-3 py-2">
-      <span className="w-4 shrink-0 text-right text-zinc-400 tabular-nums">{position}</span>
+      <span className="w-4 shrink-0 text-right text-zinc-500 tabular-nums">{position}</span>
       <div className="min-w-0 flex-1 space-y-1">
         <p className="font-medium">{step.title}</p>
         {step.what === '' ? null : <p>{step.what}</p>}

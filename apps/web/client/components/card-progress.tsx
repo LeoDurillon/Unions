@@ -36,7 +36,7 @@ function ProgressLine({ ticket }: { ticket: TicketSummary }): ReactElement | nul
         ) : null}
       </div>
       <p
-        className={`truncate ${latest?.kind === 'tool' ? 'font-mono' : ''} ${latest ? '' : 'text-zinc-400'}`}
+        className={`truncate ${latest?.kind === 'tool' ? 'font-mono' : ''} ${latest ? '' : 'text-zinc-500'}`}
         title={latest?.text}
       >
         {latest ? firstLine(latest.text) : 'Starting…'}

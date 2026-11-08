@@ -1,0 +1,11 @@
+id: no-native-confirm
+valid:
+  - |
+    <ConfirmButton label="Delete" question="Delete it?" confirmLabel="Delete" onConfirm={remove} />
+  - |
+    const asked = useState(false);
+invalid:
+  - |
+    if (globalThis.confirm('Delete every notification?')) { clearAll(); }
+  - |
+    if (window.confirm('Delete?')) { remove(); }

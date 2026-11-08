@@ -2,6 +2,7 @@
 import type { Investigation } from '@union/core';
 import { useState, type ReactElement } from 'react';
 
+import { formatWhen } from '../../lib/relative-time';
 import { useInvestigationUsage } from '../../lib/use-usage';
 import { AgentLog } from '../log-tab';
 import { Markdown } from '../markdown';
@@ -35,7 +36,7 @@ function InvestigationUsage({ investigation }: { investigation: Investigation })
   }
   const rows = groups.map((group, index) => ({
     key: group.key,
-    cells: [`#${index + 1}`, new Date(group.calls[0]?.at ?? 0).toLocaleString()],
+    cells: [`#${index + 1}`, formatWhen(group.calls[0]?.at ?? 0)],
     group,
   }));
   return <UsageTable columns={['Call', 'Ended']} rows={rows} total={usage.data?.total} />;

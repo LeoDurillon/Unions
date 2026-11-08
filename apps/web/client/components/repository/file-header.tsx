@@ -28,7 +28,7 @@ function Crumbs({
       </button>
       {crumbs.map((crumb, index) => (
         <span key={crumb.at} className="flex items-center gap-1">
-          <span className="text-zinc-400">/</span>
+          <span className="text-zinc-500">/</span>
           {index === crumbs.length - 1 ? (
             <span className="font-medium">{crumb.name}</span>
           ) : (

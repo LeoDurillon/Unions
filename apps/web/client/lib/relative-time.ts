@@ -57,3 +57,28 @@ export function timeOfDay(at: number, now: number): string {
   const sameDay = new Date(at).toDateString() === new Date(now).toDateString();
   return sameDay ? time : `${new Date(at).toLocaleDateString([], { weekday: 'short' })} ${time}`;
 }
+
+export type WhenStyle = 'datetime' | 'date' | 'time';
+
+const FORMATS: Record<WhenStyle, Intl.DateTimeFormatOptions> = {
+  datetime: { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' },
+  date: { day: 'numeric', month: 'short' },
+  time: { hour: '2-digit', minute: '2-digit' },
+};
+
+/**
+ * A moment as the panels write it, in the browser's language: "8 Nov, 21:05", "8 Nov", "21:05". The
+ * year shows only when it is not this one. One format everywhere instead of each panel's own.
+ */
+export function formatWhen(
+  at: number | string | Date,
+  style: WhenStyle = 'datetime',
+  now: number = Date.now(),
+): string {
+  const date = new Date(at);
+  const otherYear = style !== 'time' && date.getFullYear() !== new Date(now).getFullYear();
+  return new Intl.DateTimeFormat(undefined, {
+    ...FORMATS[style],
+    ...(otherYear ? { year: 'numeric' } : {}),
+  }).format(date);
+}

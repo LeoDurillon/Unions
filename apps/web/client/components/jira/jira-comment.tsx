@@ -3,6 +3,7 @@
 import type { JiraComment } from '@union/core';
 import type { ReactElement, ReactNode } from 'react';
 
+import { formatWhen } from '../../lib/relative-time';
 import { Markdown } from '../markdown';
 import { Badge } from '../ui';
 
@@ -22,7 +23,7 @@ export function JiraCommentCard({
       <div className="flex flex-wrap items-baseline gap-2">
         <span className="font-medium">{comment.author}</span>
         <span className="text-xs text-zinc-500">
-          {new Date(comment.created).toLocaleString()}
+          {formatWhen(comment.created)}
           {comment.edited ? ' · edited' : ''}
         </span>
         {comment.restriction === null ? null : <Badge tone="amber">{comment.restriction}</Badge>}

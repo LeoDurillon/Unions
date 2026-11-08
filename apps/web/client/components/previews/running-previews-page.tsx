@@ -5,6 +5,7 @@ import type { ReactElement } from 'react';
 import type { RunningPreview } from '../../../src/running-previews-types';
 import { PREVIEW_STATUS } from '../../lib/preview/preview-status';
 import { useRunningPreviews, useStopPreview } from '../../lib/preview/use-running-previews';
+import { formatWhen } from '../../lib/relative-time';
 import { Badge, Button, ErrorText } from '../ui';
 
 const LINK = 'text-indigo-600 hover:underline dark:text-indigo-400';
@@ -88,7 +89,7 @@ function Row({
         </div>
         <p className="text-xs text-zinc-500">
           {preview.project.owner}/{preview.project.repo}
-          {preview.startedAt ? ` · started ${new Date(preview.startedAt).toLocaleString()}` : ''}
+          {preview.startedAt ? ` · started ${formatWhen(preview.startedAt)}` : ''}
         </p>
         <Links preview={preview} />
       </div>

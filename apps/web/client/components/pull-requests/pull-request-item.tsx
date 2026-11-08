@@ -3,6 +3,7 @@
 import type { ReactElement } from 'react';
 
 import type { PullRequestListItem } from '../../../src/api-types';
+import { formatWhen } from '../../lib/relative-time';
 import { Badge, Button } from '../ui';
 
 type Tone = 'green' | 'red' | 'amber' | 'blue' | 'neutral';
@@ -93,7 +94,7 @@ export function PullRequestItem({
         </a>
         <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-zinc-500">
           <span>
-            #{pull.number} by @{pull.author} · updated {new Date(pull.updatedAt).toLocaleString()}
+            #{pull.number} by @{pull.author} · updated {formatWhen(pull.updatedAt)}
           </span>
           <span className="truncate font-mono">
             {pull.headBranch} → {pull.baseBranch}

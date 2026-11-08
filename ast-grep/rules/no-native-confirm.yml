@@ -1,0 +1,14 @@
+id: no-native-confirm
+language: Tsx
+severity: error
+message: Ask before a destructive action with `ConfirmButton` (or an inline question), not the browser's `confirm`.
+note: AGENTS.md, Rules. Only the leave guard (`lib/leave-guard.ts`) uses the native dialog, as it runs on navigation.
+files:
+  - apps/web/client/**
+rule:
+  any:
+    - pattern: globalThis.confirm($$$)
+    - pattern: window.confirm($$$)
+    - pattern: confirm($$$)
+ignores:
+  - apps/web/client/lib/leave-guard.ts

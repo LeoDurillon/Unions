@@ -8,6 +8,7 @@ import type { PublicProject } from '../../../src/api-types';
 import type { ProjectFileView } from '../../../src/routes/project-files';
 import { useLeaveGuard } from '../../lib/leave-guard';
 import { projectFilesApi } from '../../lib/project-files-api';
+import { formatWhen } from '../../lib/relative-time';
 import { Dropzone } from '../dropzone';
 import { Button, ErrorText, inputClass } from '../ui';
 
@@ -33,9 +34,7 @@ function FileList({
           <li key={file.id} className="flex items-center gap-3 px-3 py-1.5">
             <span className="min-w-0 flex-1 truncate font-mono text-xs">{file.path}</span>
             <span className="text-xs text-zinc-500">{formatBytes(file.size)}</span>
-            <span className="text-xs text-zinc-500">
-              {new Date(file.updatedAt).toLocaleString()}
-            </span>
+            <span className="text-xs text-zinc-500">{formatWhen(file.updatedAt)}</span>
             <button
               type="button"
               className="text-xs text-red-600 hover:underline disabled:opacity-50 dark:text-red-400"

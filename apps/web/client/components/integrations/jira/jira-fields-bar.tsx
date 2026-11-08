@@ -4,6 +4,7 @@ import type { JiraRuleSource } from '@union/core';
 import type { ReactElement } from 'react';
 
 import { integrationsApi } from '../../../lib/integrations-api';
+import { formatWhen } from '../../../lib/relative-time';
 import { Button, ErrorText } from '../../ui';
 
 export function JiraFieldsBar({
@@ -24,7 +25,7 @@ export function JiraFieldsBar({
       <p className="min-w-0 flex-1 text-zinc-500">
         {source.readAt === null
           ? 'The Jira project is not read yet: read it to pick its statuses and fields in rules.'
-          : `Jira project “${source.title}”, read ${new Date(source.readAt).toLocaleString()} (${source.statuses.length} statuses, ${source.fields.length} fields rules can set).`}
+          : `Jira project “${source.title}”, read ${formatWhen(source.readAt)} (${source.statuses.length} statuses, ${source.fields.length} fields rules can set).`}
       </p>
       <ErrorText error={refresh.error} />
       <Button

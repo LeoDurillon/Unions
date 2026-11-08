@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test';
 
-import { clock, timeAgo, timeOfDay, timeUntil } from './relative-time';
+import { clock, formatWhen, timeAgo, timeOfDay, timeUntil } from './relative-time';
 
 const NOW = 864_000_000;
 
@@ -37,4 +37,17 @@ test('the time of day, with the weekday when it is not today', () => {
   expect(timeOfDay(tuesday.getTime(), today)).toBe(
     `${tuesday.toLocaleDateString([], { weekday: 'short' })} ${time}`,
   );
+});
+
+test('a moment is written the same way everywhere, with the year only when it is not this one', () => {
+  const now = new Date(2026, 10, 8, 21, 5).getTime();
+  const sameYear = new Date(2026, 2, 3, 9, 7);
+  const datetime = formatWhen(sameYear, 'datetime', now);
+  expect(datetime).not.toContain('2026');
+  expect(datetime).not.toMatch(/:\d\d:\d\d/u);
+  expect(formatWhen(new Date(2025, 2, 3), 'date', now)).toContain('2025');
+  expect(formatWhen(sameYear.getTime(), 'time', now)).toBe(
+    sameYear.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }),
+  );
+  expect(formatWhen(sameYear.toISOString(), 'date', now)).toBe(formatWhen(sameYear, 'date', now));
 });

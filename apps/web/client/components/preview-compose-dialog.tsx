@@ -6,6 +6,7 @@ import { useState, type ReactElement } from 'react';
 
 import type { PreviewView } from '../../src/api-types';
 import { previewCalls, previewKey, type PreviewTarget } from '../lib/preview/preview-target';
+import { formatWhen } from '../lib/relative-time';
 import { CodeTextarea } from './code-textarea';
 import { Button, Dialog, ErrorText } from './ui';
 
@@ -17,10 +18,10 @@ function whoseOf(target: PreviewTarget): string {
 /** Where the file shown comes from, and what Start will do with it. */
 function sourceLine(preview: Preview | null, composeFile: string, whose: string): string {
   if (preview?.override && preview.overrideAt) {
-    return `Your file for this ${whose}, saved ${new Date(preview.overrideAt).toLocaleString()}. Start runs it as it is: changes to ${composeFile} in the branch are not used while it is set.`;
+    return `Your file for this ${whose}, saved ${formatWhen(preview.overrideAt)}. Start runs it as it is: changes to ${composeFile} in the branch are not used while it is set.`;
   }
   if (preview?.composeYaml && preview.composeAt) {
-    return `Generated ${new Date(preview.composeAt).toLocaleString()} from ${composeFile}. Start generates it again from the branch; save an edit to keep your own version.`;
+    return `Generated ${formatWhen(preview.composeAt)} from ${composeFile}. Start generates it again from the branch; save an edit to keep your own version.`;
   }
   const from = whose === 'ticket' ? "the ticket's workspace" : "the pull request's checkout";
   return `Not generated yet: Generate reads ${composeFile} from ${from} without starting anything.`;

@@ -3,6 +3,7 @@ import type { PreviewService } from '@union/core';
 import type { ReactElement } from 'react';
 
 import type { PreviewSettingsView } from '../../../src/api-types';
+import { formatWhen } from '../../lib/relative-time';
 import { Button, inputClass } from '../ui';
 
 export type ServiceRow = { name: string; port: string; prefix: string };
@@ -102,7 +103,7 @@ export function PreviewServicesField({
         </Button>
         {found ? (
           <span className="text-zinc-500">
-            In the compose file (ticket {found.ticketId}, {new Date(found.at).toLocaleString()}):
+            In the compose file (ticket {found.ticketId}, {formatWhen(found.at)}):
           </span>
         ) : null}
         {missing.map((name) => (

@@ -5,6 +5,7 @@ import { useEffect, useRef, type ReactElement } from 'react';
 
 import type { PreviewTarget } from '../lib/preview/preview-target';
 import type { PreviewCalls } from '../lib/preview/use-preview';
+import { formatWhen } from '../lib/relative-time';
 import { stripAnsi } from '../lib/strip-ansi';
 import { useStartOutput } from '../lib/use-start-output';
 import type { Act } from './preview-controls';
@@ -60,7 +61,7 @@ function LogTail({
     <details className="text-xs" open={preview.status === 'failed'}>
       <summary className="cursor-pointer text-zinc-500">
         Services&apos; output
-        {preview.logAt ? ` (read ${new Date(preview.logAt).toLocaleTimeString()})` : ''}
+        {preview.logAt ? ` (read ${formatWhen(preview.logAt, 'time')})` : ''}
       </summary>
       <pre className={OUTPUT_CLASS}>{stripAnsi(preview.logTail ?? 'Nothing yet.')}</pre>
       {preview.status === 'running' ? (

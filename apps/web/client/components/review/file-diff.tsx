@@ -72,7 +72,7 @@ function Row({
       <Gutter value={oldNumber} onPick={anchor?.side === 'old' ? onPick : null} />
       <Gutter value={newNumber} onPick={anchor?.side === 'new' ? onPick : null} marked />
       <td className="whitespace-pre px-2">
-        <span className="select-none text-zinc-400">{SIGN[line.kind]} </span>
+        <span className="select-none text-zinc-500">{SIGN[line.kind]} </span>
         <Code line={line} tokens={tokens} />
         <HunkTags line={line} tags={hunkTags} onHunk={onHunk} />
       </td>

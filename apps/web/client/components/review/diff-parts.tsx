@@ -14,7 +14,7 @@ export const ROW_TONE = {
   del: 'bg-red-50 dark:bg-red-950/40',
   context: '',
   hunk: 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300',
-  meta: 'text-zinc-400',
+  meta: 'text-zinc-500',
 } as const;
 export const SELECTED_TONE = 'bg-yellow-100 dark:bg-yellow-900/40';
 export const SIGN = { add: '+', del: '−', context: ' ', hunk: '', meta: '' } as const;
@@ -69,7 +69,7 @@ export function Gutter({
   const cell = `w-12 select-none px-2 text-right align-top ${mark ? 'relative border-r-2 border-red-400' : ''}`;
   if (value === null || !onPick) {
     return (
-      <td className={`${cell} text-zinc-400`}>
+      <td className={`${cell} text-zinc-500`}>
         {mark ? <Mark mark={mark} /> : null}
         {value ?? ''}
       </td>
@@ -80,7 +80,7 @@ export function Gutter({
       {mark ? <Mark mark={mark} /> : null}
       <button
         type="button"
-        className="text-zinc-400 hover:text-indigo-600"
+        className="text-zinc-500 hover:text-indigo-600"
         aria-label={`Comment on line ${value}`}
         onClick={(event) => {
           onPick(event.shiftKey);
@@ -121,7 +121,7 @@ export function HunkTags({
       {names.map((name) => (
         <span
           key={name}
-          className="ml-2 rounded bg-indigo-100 px-1.5 font-sans text-[10px] text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200"
+          className="ml-2 rounded bg-indigo-100 px-1.5 font-sans text-xs text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200"
         >
           {name}
         </span>
@@ -131,7 +131,7 @@ export function HunkTags({
           type="button"
           title="Explain this hunk"
           aria-label="Explain this hunk"
-          className="ml-2 rounded border border-indigo-300 px-1.5 font-sans text-[10px] text-indigo-700 hover:bg-indigo-50 dark:border-indigo-800 dark:text-indigo-300 dark:hover:bg-indigo-950"
+          className="ml-2 rounded border border-indigo-300 px-1.5 font-sans text-xs text-indigo-700 hover:bg-indigo-50 dark:border-indigo-800 dark:text-indigo-300 dark:hover:bg-indigo-950"
           onClick={() => {
             onHunk(line.text);
           }}

@@ -38,7 +38,7 @@ export function SettingsNav<S extends string>({
           className={group.label ? '' : 'border-t border-zinc-200 pt-4 dark:border-zinc-800'}
         >
           {group.label ? (
-            <p className="px-3 pb-1 text-xs font-semibold tracking-wide text-zinc-400 uppercase">
+            <p className="px-3 pb-1 text-xs font-semibold tracking-wide text-zinc-500 uppercase">
               {group.label}
             </p>
           ) : null}

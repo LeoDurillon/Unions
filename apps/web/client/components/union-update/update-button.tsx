@@ -3,6 +3,7 @@
 import { useState, type ReactElement } from 'react';
 
 import type { UnionUpdateView } from '../../../src/union-update-types';
+import { formatWhen } from '../../lib/relative-time';
 import { useCheckNow, useUnionUpdate } from '../../lib/use-union-update';
 import { SIDE_LABEL } from '../sidebar-classes';
 import { UpdateDialog } from './update-dialog';
@@ -21,7 +22,7 @@ function stateOf(update: Update | null): { label: string; title: string; ready: 
     return { label: 'Update unavailable', title: update.refusal, ready: false };
   }
   if (update.behind === 0) {
-    const checked = new Date(update.checkedAt).toLocaleTimeString();
+    const checked = formatWhen(update.checkedAt, 'time');
     return { label: 'Up to date', title: `Checked at ${checked}`, ready: false };
   }
   return {

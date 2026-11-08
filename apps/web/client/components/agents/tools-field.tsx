@@ -30,7 +30,7 @@ function ToolChip({
     >
       {tool.name}
       {tool.source === 'built-in' ? null : (
-        <span className="ml-1 text-zinc-400">·{tool.source}</span>
+        <span className="ml-1 text-zinc-500">·{tool.source}</span>
       )}
     </CheckChip>
   );
