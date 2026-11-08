@@ -1,7 +1,7 @@
 # Change the target branch of a ticket
 
 Status: built (2026-10-22, branch `retarget`); decisions D1 to D7 confirmed. Spec in
-[`docs/spec/retarget.md`](../spec/retarget.md). Built as planned, except: the web queues it with its own route
+[`docs/spec/retarget.md`](../../spec/retarget.md). Built as planned, except: the web queues it with its own route
 (`POST /api/tickets/:id/retarget`, which reads GitHub for the branch) rather than the generic commands route; the
 old base's commits are checked by commit and by patch (`git cherry`) rather than by count, since the agent may add
 a fix commit; the Overview row only says where to change the target; `retarget_branch` is not cleared on cancel
@@ -9,7 +9,7 @@ a fix commit; the Overview row only says where to change the target; `retarget_b
 
 ## Why
 
-A ticket's base is fixed at its first clone (`tickets.base_branch`, [ticket dependencies](../spec/ticket-dependencies.md)):
+A ticket's base is fixed at its first clone (`tickets.base_branch`, [ticket dependencies](../../spec/ticket-dependencies.md)):
 Overview lets the user choose it only in Backlog. A small fix built on `develop` sometimes turns critical and must
 ship as a hotfix on `main`. Today the user moves the commits by hand and edits the PR's base on GitHub, and Union
 still believes the ticket is on `develop` (behind count, review diff, later rebases).
@@ -29,7 +29,7 @@ still believes the ticket is on `develop` (behind count, review diff, later reba
   final review runs again.
 - On any failure the branch is left as it was, unpushed, and the PR still targets the old base.
 
-It is the [rebase](../spec/rebase.md) with a different base and `--onto`: the code path already exists for a
+It is the [rebase](../../spec/rebase.md) with a different base and `--onto`: the code path already exists for a
 restack (`Rebase.restack.upstream`, `tryHostRebase`'s `onto`).
 
 ## Decisions (proposed)

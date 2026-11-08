@@ -85,7 +85,7 @@ itself never fails on it. The implementer's report says how many replies it draf
 ### Specs
 
 Every review page has one list of **specs**, in the **Specs** bar under its header, read by **Review with agent**,
-**Explain** and **Group by spec** ([plan](../plans/review-specs.md)). It starts, the first time the page reads it,
+**Explain** and **Group by spec** ([plan](../plans/archive/review-specs.md)). It starts, the first time the page reads it,
 with the ticket's text and the Notion page or Jira issue the ticket came from (spec kind `jira`, `ref` the key),
 or the pull request's description; a page linked to
 a pull request is one of its specs (linking adds it, unlinking removes it). **Edit** opens the list: each spec's
@@ -124,7 +124,7 @@ is one agent run on the user's Claude usage; nothing is written to GitHub or Not
 ### Spec report
 
 On either review page, the **Report** tab (a ticket's review has it too, after its PR tab) holds the newest spec
-report of the change ([plan](../plans/review-report.md)). Without one, it says what a report is, lists the specs it
+report of the change ([plan](../plans/archive/review-report.md)). Without one, it says what a report is, lists the specs it
 will read (the review's **Specs** bar, with **Edit the specs**) and offers **Write the report**, which queues one run
 (`POST …/reports`; refused while the ticket runs, without a readable spec, over 10 specs or a spec over 50,000
 characters). While it waits or runs, the tab says so, with **Cancel**. A failed run shows why, and the agent's
@@ -163,7 +163,7 @@ with the items' numbers where a cited range starts. The agent is `review_report`
 read-only tools and git reads); each report is one run on the user's Claude usage; nothing is written to GitHub or
 Notion.
 
-**CI checks** of a ticket's pull request ([`docs/plans/pr-checks.md`](../plans/pr-checks.md)), in the PR tab under the branch status, while
+**CI checks** of a ticket's pull request ([`docs/plans/archive/pr-checks.md`](../plans/archive/pr-checks.md)), in the PR tab under the branch status, while
 the PR is not merged (read when the tab opens, every 30 s while a check runs, and on Refresh): the web reads the head commit's check runs and commit statuses and the PR's bot comments. The user picks failed checks, other
 GitHub Actions jobs of the head (their findings may be there) and bot comments; each is read again into text (a
 failed check's link, annotations and failed step's log; a job's log without the scripts its steps echo; a comment's

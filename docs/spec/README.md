@@ -30,7 +30,7 @@ project mirrors tickets as issues (the default).
 - One repo per project. GitHub in three layers: the repository (branches, pull requests, CI, reviews) is required;
   issues (a ticket's issue, a comment per step, `Closes #n`, "blocked by") are a project setting, on by default;
   the GitHub Project (an item per issue, its Status column, starting from GitHub's board) is an optional
-  integration, at most one per project, and needs issues (plan: `docs/plans/optional-github-project.md`).
+  integration, at most one per project, and needs issues (plan: `docs/plans/archive/optional-github-project.md`).
 - Planning runs first; implementation starts only after the last planning step the ticket runs is approved. A
   ticket's flow says which planning steps it runs; implementation and final review always run (see [Ticket flows](ticket-flows.md)).
 - One GitHub comment per step, edited in place on revision (on a ticket that has an issue).

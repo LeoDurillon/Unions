@@ -186,8 +186,8 @@ Not tested:
 
 - **Post all**: one posting per PR with drafts, from the stack.
 - Ticket stacks (tickets with a parent) as tabs on the ticket review page, through `parentTicketId`: belongs with
-  [splitting a PR into a stack](pr-stack.md) (a split ticket's slices).
-- Restacking: [splitting a PR into a stack](pr-stack.md).
+  [splitting a PR into a stack](../pr-stack.md) (a split ticket's slices).
+- Restacking: [splitting a PR into a stack](../pr-stack.md).
 
 ## Decisions
 

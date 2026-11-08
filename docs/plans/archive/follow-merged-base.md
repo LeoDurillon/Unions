@@ -1,7 +1,7 @@
 # Follow a base branch that was merged
 
 Status: built (2026-10-23, branch `follow-merged-base`); decisions D1 to D6 confirmed. Spec in
-[`docs/spec/rebase.md`](../spec/rebase.md#base-moved-on-github). Built as planned, except: the left base is read
+[`docs/spec/rebase.md`](../../spec/rebase.md#base-moved-on-github). Built as planned, except: the left base is read
 from its merged PR's pull ref first, its branch only without one (what was merged is what to leave behind); a
 rebase that finds no trace of the left base still clears `left_base` (event `left_base_dropped`); R2 is handled by
 the executor fetching the new base before any step of a followed ticket that lacks it (`followed-base-ref.ts`).
@@ -12,7 +12,7 @@ with the new base (the behind count then offers none). Not tried yet on a ticket
 ## Why
 
 A ticket built on another branch (a parent ticket's, or one chosen in Overview) keeps that branch as its base
-(`tickets.base_branch`) until a [change of target](../spec/retarget.md). When that base's own pull request merges and
+(`tickets.base_branch`) until a [change of target](../../spec/retarget.md). When that base's own pull request merges and
 GitHub deletes the branch (`delete_branch_on_merge`, on for Senova), GitHub moves the ticket's PR onto the base's
 target by itself. Union does not notice:
 

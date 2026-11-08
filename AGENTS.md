@@ -55,6 +55,9 @@ remove the file), then run `bun run map` to update the maps.
   rules: add a rule there for any new kind of secret Union handles. Never run it without `--redact`.
 - `bun run map`: regenerates `docs/map/` after adding, removing or re-describing files; `bun run map:check` (part of
   `check`) fails when a map is out of date or a source file has no top comment.
+- `bun run docs:check`: fails when a link in `docs/`, `documentation/`, `AGENTS.md` or `README.md` points at a
+  file that does not exist (part of `check` and the pre-commit hook). Built plans live in `docs/plans/archive/`;
+  move a plan there once built and run it.
 - `bun run active`: says whether anything runs on the live instance (exit 1 if so); see "Working on the live
   instance".
 - `bun run lint` (`lint:fix` to autofix), `bun run fmt` (`fmt:check` to verify), `bun run typecheck`.

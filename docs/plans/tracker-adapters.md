@@ -1,6 +1,6 @@
 # One adapter per tracker
 
-Status: planned (2026-11-07). Follows [Jira](jira.md) and its gap plans, built and deployed; prepares a later
+Status: planned (2026-11-07). Follows [Jira](archive/jira.md) and its gap plans, built and deployed; prepares a later
 tracker (Linear, GitHub Issues as a source, Asana…).
 
 ## Why

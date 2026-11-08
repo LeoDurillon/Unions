@@ -13,7 +13,7 @@ The plans for [Notion comments](notion-comments.md) and [a review's Notion page]
 Notion-only fields on the same path.
 
 The pieces already generic stay as they are: event rule actions are one handler per kind
-([Events v2](events-v2.md) step 1), the delivery queue and its retries, the template variables, ticket flows, and
+([Events v2](../events-v2.md) step 1), the delivery queue and its retries, the template variables, ticket flows, and
 everything downstream of a ticket existing. What is missing is a model for "a project connected to an outside
 tracker" and "a ticket that came from one".
 

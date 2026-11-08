@@ -6,6 +6,7 @@ fi
 gitleaks git --staged --redact --no-banner --log-level warn
 bun run fmt:check
 bun run map:check
+bun run docs:check
 bun run lint:changed
 bun run sg
 bun run knip

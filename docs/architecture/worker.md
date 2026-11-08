@@ -284,7 +284,7 @@
 - `planning-step.ts`: the planning steps and the custom agents' steps (`executor.ts` routes them there);
   `custom-step.ts` gives a custom step placed after the implementation the branch and how to read the diff.
   `approved.ts` passes the approved outputs in the ticket's flow order, a custom step's under its agent's name.
-- `preview/`: ticket previews (phase 1 of `docs/plans/preview-environments.md`). `PreviewManager` runs the
+- `preview/`: ticket previews (phase 1 of `docs/plans/archive/preview-environments.md`). `PreviewManager` runs the
   `preview_start`/`preview_stop`/`preview_reset`/`preview_logs` commands, one at a time per ticket; a
   `preview_stop` while a start runs aborts it (`PreviewDeps.signal`, honoured by `compose up` and the readiness
   wait): the start takes down what it brought up and records `stopped`. `health.ts` asks Docker every 30 seconds
@@ -324,7 +324,7 @@
   addresses answer in that container: a router on their port, and their names in its `/etc/hosts` (written as
   root, lines marked `# union-preview`), since Node's resolver, unlike a browser's, does not take `*.localhost`
   for the container itself.
-- Previews of pull requests under review (`docs/plans/review-previews.md`): the preview code takes a
+- Previews of pull requests under review (`docs/plans/archive/review-previews.md`): the preview code takes a
   `WorkspaceOwner` (`{ ticketId }` or `{ reviewId }`). A review's preview runs as `union-r<id>` at
   `r<id>.union.localhost`, from the workspace of its own container `union-r<id>` (`review-checkout.ts`): created on its
   first start, the pull request cloned on the host at `review.headSha` like an agent review's checkout, never given

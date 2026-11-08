@@ -22,7 +22,7 @@
    closes, if any, and runs the Quick flow. The pull request's description is the implementation's output; the
    worker (`adopt_pull_request`) moves the ticket to awaiting approval at Implementation, then checks the branch
    out and captures its diff (no agent). Approve runs the final review; Revise runs the implementer on the branch,
-   with no session. Plan: `docs/plans/pr-import.md`.
+   with no session. Plan: `docs/plans/archive/pr-import.md`.
 2. Move to In Progress (drag the card, or its **Start** button) → the worker creates volumes + container, clones the repo into the workspace volume.
    A ticket that depends on another one cannot start before it is done (see [Ticket dependencies](ticket-dependencies.md)).
 3. Planning steps, each a tab on the ticket: `intake` (Haiku) → `summary` (Sonnet) → `technical` (Opus) → `test_plan` (Sonnet),

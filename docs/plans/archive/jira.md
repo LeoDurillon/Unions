@@ -54,7 +54,7 @@ reaches the browser.
   the attachment's id; the attachment list (`fields.attachment`) carries the id, file name, type and size. The
   converter is given the attachment list and turns each media node into a link to
   `https://<site>/rest/api/3/attachment/content/{id}`, matched on file name (`attrs.alt`, which Jira sets to it),
-  as an image (`![name](…)`) for images. Attachments no node matched are appended under an `## Attachments`
+  as an image (`![name](../…)`) for images. Attachments no node matched are appended under an `## Attachments`
   heading, as links. So the editor shows every file, as Notion imports do, and `SourceItem` keeps its shape.
   A media node with no matching attachment becomes its name in italics.
   As built (step 5): an image's media node has its file name as `alt`, but a file card (an xlsx, a PDF) has only
@@ -175,7 +175,7 @@ Each step ships on its own; `bun run check` after each.
    `Authorization`.
    Built: the matching is core's `integrations/jira-attachments.ts` (`issueMarkdown`, called by the provider); only
    PNG, JPEG, GIF and WebP attachments are images (as Notion's), SVG and others files. The converter now writes
-   plain link targets (`[name](url)`, not `(<url>)`), which the web's link scan reads. Notion's downloader moved to
+   plain link targets (`[name](../url)`, not `(<url>)`), which the web's link scan reads. Notion's downloader moved to
    `apps/web/src/tracker-files.ts` (a `FileSource` per tracker: which links, how to fetch, how files are named);
    `notion-files.ts` keeps its behaviour and tests. `jira-files.ts` names files by their link text (Jira's file
    names) when the download gives none. `withOriginFiles` takes the database and project to read the integration.

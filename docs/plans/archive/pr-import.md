@@ -1,7 +1,7 @@
 # Import a pull request as a ticket
 
 Status: built (branch `pr-import`, 2026-11-08), steps 1 to 4; not yet run against a real pull request.
-Replaces [Prefill steps on GitHub issue import](issue-import-prefill.md): picking up Union's earlier work on an
+Replaces the plan "Prefill steps on GitHub issue import" (deleted, in the git history): picking up Union's earlier work on an
 issue is done through the pull request that closes it.
 
 ## Why

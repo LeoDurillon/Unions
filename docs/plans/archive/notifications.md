@@ -1,6 +1,6 @@
 # Plan: notifications in Union
 
-Status: built (2026-10-16), steps 1 to 5. Replaces the outgoing webhook of [Events v2](events-v2.md) for now: no
+Status: built (2026-10-16), steps 1 to 5. Replaces the outgoing webhook of [Events v2](../events-v2.md) for now: no
 external service to connect, and what needs the user is told inside Union.
 
 ## Why

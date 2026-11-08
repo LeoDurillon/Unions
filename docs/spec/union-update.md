@@ -1,7 +1,7 @@
 # Updating Union
 
 The sidebar's **Update** entry pulls Union's new commits and restarts it. Plan and decisions:
-[`docs/plans/self-update.md`](../plans/self-update.md).
+[`docs/plans/archive/self-update.md`](../plans/archive/self-update.md).
 
 ## What the user sees
 

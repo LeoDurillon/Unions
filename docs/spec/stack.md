@@ -23,7 +23,7 @@
   and the default `union-agent` (the base plus node/npm, Bun, pnpm/yarn and Playwright's libraries), two stages of
   `docker/agent.Dockerfile`. A project may run on its own image instead: a Dockerfile in its settings that starts
   `FROM union-agent` or `FROM union-agent-base`, or an image built on one elsewhere, built (or pulled) and checked when
-  saved and used only once it passes (`docs/plans/project-agent-image.md`).
+  saved and used only once it passes (`docs/plans/archive/project-agent-image.md`).
 - Host clones the repo into the ticket's workspace volume.
 - HOME volume is **writable** and seeded with only the `claudeAiOauth` credential and
   `{"hasCompletedOnboarding":true}`. A read-only HOME breaks `--resume`.

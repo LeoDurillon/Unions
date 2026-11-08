@@ -1,7 +1,7 @@
 # Union settings as a page
 
 Status: built, steps 1 and 2 (branch `union-settings`, 2026-10-17). Step 6 of
-[Project settings as a page](project-settings-page.md).
+[Project settings as a page](../project-settings-page.md).
 
 ## Why
 

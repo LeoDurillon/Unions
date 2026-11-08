@@ -73,7 +73,7 @@ A preview and a container run belong to a **workspace owner** (`workspace-owner.
 `ownerKey` (`union-t12`, `union-r3`) and hosts from it too (`t12.union.localhost`, `api-r3.union.localhost`: `previewServiceHost`); `ownerHostId` (`12`, `r3`) is what `{ticket.id}` renders. Only a
 ticket's preview changes are events (`preview_changed`); a review's page polls. `previews.project_id` is the
 owner's project (the per-project cap). The worker and the web act on both owners' previews and commands
-(`docs/plans/review-previews.md`; a review's in `docs/architecture/worker.md` and `web.md`).
+(`docs/plans/archive/review-previews.md`; a review's in `docs/architecture/worker.md` and `web.md`).
 The trackers (`integrations/`): `kinds.ts` (browser-safe, `@union/core/integration-kinds`) the kinds (`notion`,
 `jira`), `providers.ts` a provider per kind over its API client (`notion-api.ts`, `integrations/jira-api.ts`),
 `store.ts` the `integrations` rows, `adf-markdown.ts` and `markdown-adf.ts` Jira's rich text both ways. Which GitHub

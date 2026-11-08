@@ -1,6 +1,6 @@
 # Preview environments
 
-Built (phases 1 to 4). Full design and what was built: [`docs/plans/preview-environments.md`](../plans/preview-environments.md). In short:
+Built (phases 1 to 4). Full design and what was built: [`docs/plans/archive/preview-environments.md`](../plans/archive/preview-environments.md). In short:
 
 - A ticket's branch runs from the repository's own Docker Compose file (path set per project), so apps with a
   database or a queue work. Each ticket is its own compose project (`union-t<id>`): its own containers, network and
@@ -46,7 +46,7 @@ Built (phases 1 to 4). Full design and what was built: [`docs/plans/preview-envi
   `build --no-cache`, then a start. The workspace is kept, except the data folders the user ticks: the repository
   folders the compose file mounts that git ignores whole and tracks nothing in, found at each start
   (`previews.data_folders`). Refused during a step, an e2e run or a command; Restart
-  keeps updating in place, data kept. Design: [`docs/plans/preview-reset.md`](../plans/preview-reset.md).
+  keeps updating in place, data kept. Design: [`docs/plans/archive/preview-reset.md`](../plans/archive/preview-reset.md).
 - **Previews** (in the sidebar, with the number running): every project's previews that hold containers, tickets'
   and pull requests' under review, with their links and **Stop**; a ticket's opens its panel.
 - Served to this machine only (the proxy's port is published on `127.0.0.1`). A running preview nobody visited for
@@ -63,7 +63,7 @@ Built (phases 1 to 4). Full design and what was built: [`docs/plans/preview-envi
 
 ## Previews of pull requests under review
 
-Design and steps: [`docs/plans/review-previews.md`](../plans/review-previews.md). A pull request under review
+Design and steps: [`docs/plans/archive/review-previews.md`](../plans/archive/review-previews.md). A pull request under review
 gets what a ticket's Preview tab has, on its review page's **Preview** tab, without a ticket. No agent runs (no
 Claude usage) and nothing is written to GitHub: the worker only fetches the pull request.
 

@@ -13,7 +13,7 @@ the agent review already does.
 
 ## What exists
 
-- A ticket's preview (`docs/plans/preview-environments.md`) runs from the ticket's workspace volume
+- A ticket's preview (`docs/plans/archive/preview-environments.md`) runs from the ticket's workspace volume
   (`union-t<id>-ws`), as compose project `union-t<id>`, at `http://<id>.localhost:8080`. Its row in `previews` is
   keyed by `ticket_id`; every change is a `preview_changed` event on the ticket.
 - Its e2e tests (`e2e.ts`) and Commands (`container-run.ts`, `container_runs`) run in the ticket's container

@@ -2,7 +2,7 @@
 
 Status: partly built. Images and file blocks (files, PDFs, videos, audio) of a Notion page are downloaded when the
 ticket is created and kept as private ticket files (`notion-files.ts`; the blocks become links in `notion-media.ts`).
-A Jira issue's images and attachments are kept as ticket files too (built with [Jira](jira.md)). Left: GitHub issue attachments (`user-attachments` links, which need the project's credentials for private repositories).
+A Jira issue's images and attachments are kept as ticket files too (built with [Jira](archive/jira.md)). Left: GitHub issue attachments (`user-attachments` links, which need the project's credentials for private repositories).
 
 Ticket attachments exist: files uploaded in the Overview tab are stored under `attachments/t<ticket>/` and copied to
 `/workspace/attachments` before every step. Importing a GitHub issue or a Notion page does not bring the files

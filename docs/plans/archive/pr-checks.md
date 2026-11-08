@@ -9,7 +9,7 @@ per send.
 
 The ticket's Pull request tab lists the CI checks of the PR's head commit (GitHub Actions and other CI), with their
 state. When some fail, the user picks them and gives them to the implementer, as with a command's output
-([container commands](container-commands.md)): kept for its next run, or sent now as a revision with a note.
+([container commands](../container-commands.md)): kept for its next run, or sent now as a revision with a note.
 
 ## What GitHub gives (checked in the REST docs, 2026-10-16)
 

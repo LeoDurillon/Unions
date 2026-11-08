@@ -1,7 +1,7 @@
 # Custom agents
 
-Built. Design and steps: [`docs/plans/custom-agents.md`](../plans/custom-agents.md) (ticket steps) and
-[`docs/plans/custom-review-agents.md`](../plans/custom-review-agents.md) (review agents). In short:
+Built. Design and steps: [`docs/plans/archive/custom-agents.md`](../plans/archive/custom-agents.md) (ticket steps) and
+[`docs/plans/archive/custom-review-agents.md`](../plans/archive/custom-review-agents.md) (review agents). In short:
 
 - The user adds an agent of their own (Union settings → New agent): a **kind**, a name and a role in their words
   ("Check the plan for security risks"). The kind is fixed at creation (`custom_agents.kind`): a **ticket step**,

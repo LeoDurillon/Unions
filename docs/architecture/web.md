@@ -35,7 +35,7 @@
   (and any with output), and a card names a flow that is not the full pipeline. Project settings → Agents → Flows
   (`settings/flows-section.tsx`) edits the presets and the default, saved as `flows` and `defaultFlow` through
   `PATCH /api/projects/:id` (checked by `flowSettingsChange` in core); the built-in presets are saved as none.
-- The GitHub layers (`docs/plans/optional-github-project.md`): General's **Mirror tickets as GitHub issues**
+- The GitHub layers (`docs/plans/archive/optional-github-project.md`): General's **Mirror tickets as GitHub issues**
   (`settings/issues-section.tsx`) saves `mirrorIssues` through `PATCH /api/projects/:id`, refused (409) while a
   GitHub Project is connected. Integrations → GitHub Project (`integrations/github-project-section.tsx`, a project
   section in `project-section-body.tsx` though listed under Integrations) lists the owner's Projects

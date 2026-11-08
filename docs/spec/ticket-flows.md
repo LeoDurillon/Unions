@@ -1,6 +1,6 @@
 # Ticket flows
 
-Built. Design and steps: [`docs/plans/ticket-flows.md`](../plans/ticket-flows.md). In short:
+Built. Design and steps: [`docs/plans/archive/ticket-flows.md`](../plans/archive/ticket-flows.md). In short:
 
 - A flow is the pipeline steps a ticket runs, in order: any of the four planning steps, the user's
   [custom agents](custom-agents.md) anywhere before the final review, and always `implement` and `final_review` (the final review's approval is what marks the PR ready, and every rebase and revision leads back

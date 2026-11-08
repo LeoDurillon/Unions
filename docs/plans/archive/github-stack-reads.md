@@ -2,7 +2,7 @@
 
 Status: built (2026-10-21, branch `github-stack-reads`), decisions taken as recommended, except decision 3 (see
 "Not built"). Follows [Stacked PRs in Pull requests and Current
-reviews](stacked-pr-reviews.md) and [Split a PR into a stack](pr-stack.md).
+reviews](stacked-pr-reviews.md) and [Split a PR into a stack](../pr-stack.md).
 
 ## Idea
 

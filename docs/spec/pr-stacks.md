@@ -92,7 +92,7 @@ While the pull request is open, the PR tab shows **Split into a stack**, usable 
 - **Import from the stack** (the review header of a split ticket) reads the unresolved threads of every open
   slice's pull request, each landing on its slice's own diff as GitHub shows it, and says what each pull request
   gave; merged and closed slices are skipped. The PR tab's import of one slice's pull request lands the same way.
-  Plan and what is left: [slice-reviews.md](../plans/slice-reviews.md).
+  Plan and what is left: [slice-reviews.md](../plans/archive/slice-reviews.md).
 - **Review with agent** on a split ticket gets each slice's range (`git diff <below>...<tip>`) and part of the
   spec, and is asked to start each finding with its slice.
 

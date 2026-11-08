@@ -5,7 +5,7 @@ from a review with slice sections (it uses the user's Claude usage). "Not in v1"
 
 ## Idea
 
-A ticket split into a stack ([spec](../spec/pr-stacks.md)) is reviewed on GitHub one pull request per slice, but
+A ticket split into a stack ([spec](../../spec/pr-stacks.md)) is reviewed on GitHub one pull request per slice, but
 Union reviews it as one diff: comments are written on the whole stack's change, slices are read only in the commit
 picker, and **Import from #n** reads only the ticket's own (top) pull request. The review page should follow the
 stack: a slice picker, comments written on a slice's own diff, and the import pulling every slice's pull request,
