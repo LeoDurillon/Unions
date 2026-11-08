@@ -8,6 +8,7 @@ import { OctokitOnboarding, type OnboardingGitHub } from './github-onboarding';
 import { OctokitRepository, type RepositoryGitHub } from './github-repository';
 import { INTERNAL_ERROR } from './http';
 import { CachedRepository } from './repository-cache';
+import { requestGuard } from './request-guard';
 import { apiRoutes } from './routes/api';
 
 /**
@@ -35,6 +36,7 @@ export function createApp(
   const repository =
     more.repository ?? new CachedRepository(new OctokitRepository(WEB_GITHUB_LIMITS));
   const app = new Hono();
+  app.use('/api/*', requestGuard());
   app.route('/api', apiRoutes(db, { github, notion, jira, ci, repository }));
   app.onError(toErrorResponse);
   return app;

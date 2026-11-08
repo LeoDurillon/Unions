@@ -64,7 +64,8 @@ services:
       UNION_DEV_HOST: 0.0.0.0
       UNION_SUPERVISED: '1'
     ports:
-      - '${UNION_WEB_PORT:-5173}:5173'
+      # Loopback only: the API has no login, so neither the network nor containers may reach it.
+      - '127.0.0.1:${UNION_WEB_PORT:-5173}:5173'
     depends_on:
       install:
         condition: service_completed_successfully

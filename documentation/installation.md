@@ -72,8 +72,13 @@ yourself. Previews also need the proxy that Compose starts (see [Preview environ
 | <http://localhost:5173>             | Union (`UNION_WEB_PORT` changes it)                                  |
 | `http://t<id>.union.localhost:8080` | A ticket's preview, through the preview proxy (`UNION_PREVIEW_PORT`) |
 
-The preview proxy listens on this machine only (`127.0.0.1`), since previews run code no one has reviewed yet.
-Union's own port is published like any Compose port. Union has no login screen: keep that port away from networks
-you do not trust (a firewall, or `127.0.0.1:` in front of the port in `compose.yaml`).
+Union and the preview proxy listen on this machine only (`127.0.0.1`). Union has no login screen, and previews
+run code no one has reviewed yet, so neither is reachable from your network or from the containers Union starts.
+On Windows with WSL, the Windows browser still opens <http://localhost:5173>.
+
+Union also refuses requests that come from another website, or that name another host: a page you visit cannot
+act on Union through your browser. To open Union from another machine anyway, publish its port on that network in
+`compose.yaml` and add the name you will use to `UNION_ALLOWED_HOSTS` (for example `UNION_ALLOWED_HOSTS=desk.lan`).
+Anyone who can reach the port can then use Union.
 
 Next: [Your first project](first-project.md).

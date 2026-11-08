@@ -83,10 +83,11 @@ without Compose. Under Compose, variables set in your shell do not reach Union, 
 
 Read by `compose.yaml`:
 
-| Variable                 | Default  | Purpose                                    |
-| ------------------------ | -------- | ------------------------------------------ |
-| `UNION_WEB_PORT`         | `5173`   | Union's port                               |
-| `UNION_PREVIEW_PORT`     | `8080`   | The preview proxy's port                   |
-| `UNION_UID`, `UNION_GID` | `1000`   | The user and group Union runs as           |
-| `DOCKER_GID`             | `1001`   | The group that owns `/var/run/docker.sock` |
-| `UNION_SSH_DIR`          | `~/.ssh` | SSH keys used to fetch Union's own updates |
+| Variable                 | Default  | Purpose                                                                           |
+| ------------------------ | -------- | --------------------------------------------------------------------------------- |
+| `UNION_WEB_PORT`         | `5173`   | Union's port                                                                      |
+| `UNION_ALLOWED_HOSTS`    | none     | Host names Union answers to besides `localhost` and `127.0.0.1` (comma-separated) |
+| `UNION_PREVIEW_PORT`     | `8080`   | The preview proxy's port                                                          |
+| `UNION_UID`, `UNION_GID` | `1000`   | The user and group Union runs as                                                  |
+| `DOCKER_GID`             | `1001`   | The group that owns `/var/run/docker.sock`                                        |
+| `UNION_SSH_DIR`          | `~/.ssh` | SSH keys used to fetch Union's own updates                                        |

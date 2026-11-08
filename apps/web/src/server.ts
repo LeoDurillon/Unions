@@ -24,6 +24,8 @@ if (process.env.NODE_ENV === 'production') {
 
 export default {
   port: Number(process.env.PORT ?? DEFAULT_PORT),
+  // This machine only: compose publishes Vite's port on loopback the same way.
+  hostname: process.env.UNION_HOST ?? '127.0.0.1',
   idleTimeout: 0, // SSE streams are long-lived
   maxRequestBodySize: maxProjectFileBytes() + REQUEST_ENVELOPE_BYTES,
   fetch: app.fetch,

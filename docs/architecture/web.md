@@ -5,7 +5,11 @@
 `apps/web`: Hono API and React/Vite SPA, served by one Bun process in production.
 
 - `src/app.ts` is `createApp(db)`; routes live in `src/routes/` (`projects`, `tickets`, `events`); `src/server.ts`
-  only wires the DB and `Bun.serve`. `src/api-types.ts` holds the response shapes shared with the client.
+  only wires the DB and `Bun.serve`, on `127.0.0.1` (`UNION_HOST`); compose publishes Vite's port on `127.0.0.1`.
+- There is no login: `src/request-guard.ts` runs before every `/api` route and refuses a `Host` that is not loopback
+  or in `UNION_ALLOWED_HOSTS` (DNS rebinding, the Docker gateway), an `Origin` other than the request's own (CSRF,
+  previews), and a write whose `Content-Type` is not JSON, multipart or bytes (the types a browser sends cross-site
+  without a preflight). Vite's proxy keeps the browser's `Host` (`changeOrigin: false`) for the origin check. `src/api-types.ts` holds the response shapes shared with the client.
 - Setup is a wizard (`components/onboarding/`: Connect, Repository, Integrations, Review) shown over the board
   on first run and from "Add project". Integrations offers the GitHub Project (`project-step.tsx`, none by default)
   beside Notion and Jira; a token missing only the `project` scope passes Connect, and blocks only a picked

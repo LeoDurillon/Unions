@@ -192,7 +192,9 @@ Environment variables (in a `.env` file at the repository root), all optional; t
 | `GITHUB_TOKEN`             | none                                  | Token for projects that have no credentials of their own |
 | `UNION_MAX_CONCURRENT`     | `2`                                   | Agent runs at the same time, tickets and investigations  |
 | `UNION_GITHUB_PULL_MS`     | `30000`                               | How often changes made on GitHub are pulled              |
-| `UNION_WEB_PORT`           | `5173`                                | Port of the web app (Compose)                            |
+| `UNION_WEB_PORT`           | `5173`                                | Port of the web app (Compose), on `127.0.0.1`            |
+| `UNION_ALLOWED_HOSTS`      | none                                  | Host names the API answers to besides loopback           |
+| `UNION_HOST`               | `127.0.0.1`                           | Address the API server listens on (`bun run start`)      |
 | `UNION_PREVIEW_PORT`       | `8080`                                | Port of the preview environments' proxy (Compose)        |
 | `DB_PATH`                  | `union.sqlite` at the repository root | Database file shared by web and worker                   |
 | `UNION_CLAUDE_CREDENTIALS` | `~/.claude/.credentials.json`         | Claude credential seeded into containers                 |

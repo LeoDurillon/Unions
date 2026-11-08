@@ -11,6 +11,8 @@ export default defineConfig({
     host: process.env.UNION_DEV_HOST ?? 'localhost',
     port: 5173,
     strictPort: true,
-    proxy: { '/api': 'http://localhost:3000' },
+    // Hono listens on IPv4 loopback only (`localhost` may resolve to ::1 first). The browser's Host
+    // is kept: the API checks the request's origin against it.
+    proxy: { '/api': { target: 'http://127.0.0.1:3000', changeOrigin: false } },
   },
 });
