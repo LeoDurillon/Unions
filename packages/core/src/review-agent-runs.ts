@@ -1,10 +1,16 @@
 // Review agents' runs on a review's change: queued by the web, one at a time per change, claimed and finished by the worker.
-import { and, asc, desc, eq, inArray, type SQL } from 'drizzle-orm';
+import { and, desc, eq, inArray, type SQL } from 'drizzle-orm';
 
 import type { AgentReviewOwner } from './agent-reviews';
 import { findCustomAgent } from './custom-agents';
 import type { Db } from './db';
 import type { ReportSpec } from './review-report-types';
+import {
+  cancelQueuedReviewRun,
+  claimReviewRun,
+  failInterruptedReviewRuns,
+  type ReviewRunLife,
+} from './review-run-lifecycle';
 import * as tables from './tables';
 import { emitEvent } from './tickets';
 
@@ -106,27 +112,9 @@ export function latestReviewAgentRuns(db: Db, owner: AgentReviewOwner): ReviewAg
   return [...newest.values()].toSorted((a, b) => a.agentId - b.agentId);
 }
 
-/** The oldest queued run, now running; null when none waits. */
+/** The next queued run that can start, now running; null when none can. */
 export function claimReviewAgentRun(db: Db): ReviewAgentRun | null {
-  return db.transaction((tx) => {
-    const queued = tx
-      .select({ id: runs.id })
-      .from(runs)
-      .where(eq(runs.status, 'queued'))
-      .orderBy(asc(runs.id))
-      .get();
-    return queued
-      ? logged(
-          tx,
-          tx
-            .update(runs)
-            .set({ status: 'running', startedAt: Date.now() })
-            .where(eq(runs.id, queued.id))
-            .returning()
-            .get(),
-        )
-      : null;
-  });
+  return claimReviewRun(db, life);
 }
 
 export function finishReviewAgentRun(db: Db, id: number, outcome: ReviewAgentRunOutcome): void {
@@ -146,28 +134,25 @@ export function finishReviewAgentRun(db: Db, id: number, outcome: ReviewAgentRun
   logged(db, run);
 }
 
-/** Cancels a run still waiting for a slot; false once it started (the runner stops it then). */
+/** Cancels a run still waiting for a slot; false when it already started (the runner stops it). */
 export function cancelQueuedReviewAgentRun(db: Db, id: number): boolean {
-  const cancelled = db
-    .update(runs)
-    .set({ status: 'cancelled', finishedAt: Date.now() })
-    .where(and(eq(runs.id, id), eq(runs.status, 'queued')))
-    .returning()
-    .all();
-  for (const run of cancelled) {
-    logged(db, run);
-  }
-  return cancelled.length > 0;
+  return cancelQueuedReviewRun(db, life, id);
 }
 
-/** Fails the runs a stopped worker left running, and returns them for their containers to go. */
+/** Fails the runs a stopped worker left running, and returns them. */
 export function failInterruptedReviewAgentRuns(db: Db): ReviewAgentRun[] {
-  const left = db.select().from(runs).where(eq(runs.status, 'running')).all();
-  for (const run of left) {
-    finishReviewAgentRun(db, run.id, {
-      status: 'failed',
-      error: 'The worker stopped during the run',
-    });
-  }
-  return left;
+  return failInterruptedReviewRuns(db, life);
 }
+
+const life: ReviewRunLife<ReviewAgentRun> = {
+  table: tables.reviewAgentRuns,
+  load: (db, id) =>
+    db.select().from(tables.reviewAgentRuns).where(eq(tables.reviewAgentRuns.id, id)).get(),
+  changed: (db, row) => {
+    logged(db, row);
+  },
+  fail: (db, id, error) => {
+    finishReviewAgentRun(db, id, { status: 'failed', error });
+  },
+  noun: 'run',
+};

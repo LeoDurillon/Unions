@@ -4,6 +4,12 @@ import { and, asc, desc, eq, inArray, sql, type SQL } from 'drizzle-orm';
 
 import type { AgentReviewSpec } from './agent-review-specs';
 import type { Db } from './db';
+import {
+  cancelQueuedReviewRun,
+  claimReviewRun,
+  failInterruptedReviewRuns,
+  type ReviewRunLife,
+} from './review-run-lifecycle';
 import * as schema from './tables';
 import { emitEvent } from './tickets';
 
@@ -142,27 +148,9 @@ export function agentReviewStack(
     .all();
 }
 
-/** The oldest queued review, now running; null when none waits. */
+/** The next queued review that can start, now running; null when none can. */
 export function claimAgentReview(db: Db): AgentReview | null {
-  return db.transaction((tx) => {
-    const next = tx
-      .select()
-      .from(schema.agentReviews)
-      .where(eq(schema.agentReviews.status, 'queued'))
-      .orderBy(asc(schema.agentReviews.id))
-      .get();
-    if (!next) {
-      return null;
-    }
-    const review = tx
-      .update(schema.agentReviews)
-      .set({ status: 'running', startedAt: Date.now() })
-      .where(eq(schema.agentReviews.id, next.id))
-      .returning()
-      .get();
-    changed(tx, review);
-    return review;
-  });
+  return claimReviewRun(db, life);
 }
 
 /** The agent's drafts the user did not keep or edit (`author` still `agent`) give way to new ones. */
@@ -226,31 +214,21 @@ export function finishAgentReview(db: Db, id: number, outcome: AgentReviewOutcom
 
 /** Cancels a review still waiting for a slot; false when it already started (the runner stops it). */
 export function cancelQueuedAgentReview(db: Db, id: number): boolean {
-  const [review] = db
-    .update(schema.agentReviews)
-    .set({ status: 'cancelled', finishedAt: Date.now() })
-    .where(and(eq(schema.agentReviews.id, id), eq(schema.agentReviews.status, 'queued')))
-    .returning()
-    .all();
-  if (!review) {
-    return false;
-  }
-  changed(db, review);
-  return true;
+  return cancelQueuedReviewRun(db, life, id);
 }
 
 /** Fails the reviews a stopped worker left running, and returns them. */
 export function failInterruptedAgentReviews(db: Db): AgentReview[] {
-  const running = db
-    .select()
-    .from(schema.agentReviews)
-    .where(eq(schema.agentReviews.status, 'running'))
-    .all();
-  for (const review of running) {
-    finishAgentReview(db, review.id, {
-      status: 'failed',
-      error: 'The worker stopped during the review',
-    });
-  }
-  return running;
+  return failInterruptedReviewRuns(db, life);
 }
+
+const life: ReviewRunLife<AgentReview> = {
+  table: schema.agentReviews,
+  load: (db, id) =>
+    db.select().from(schema.agentReviews).where(eq(schema.agentReviews.id, id)).get(),
+  changed,
+  fail: (db, id, error) => {
+    finishAgentReview(db, id, { status: 'failed', error });
+  },
+  noun: 'review',
+};

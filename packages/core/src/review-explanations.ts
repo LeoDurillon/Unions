@@ -4,6 +4,12 @@ import { and, asc, desc, eq, gt, inArray, type SQL } from 'drizzle-orm';
 import type { AgentReviewSpec } from './agent-review-specs';
 import type { AgentReviewOwner } from './agent-reviews';
 import type { Db } from './db';
+import {
+  cancelQueuedReviewRun,
+  claimReviewRun,
+  failInterruptedReviewRuns,
+  type ReviewRunLife,
+} from './review-run-lifecycle';
 import type { ExplanationResult } from './schema-review-explanations';
 import * as schema from './tables';
 import { emitEvent } from './tickets';
@@ -147,32 +153,9 @@ function ownerKey(explanation: ReviewExplanation): string {
   return explanation.ticketId === null ? `r${explanation.reviewId}` : `t${explanation.ticketId}`;
 }
 
-/** The oldest queued explanation whose review has none running, now running; null when none can start. */
+/** The next queued explanation that can start, now running; null when none can. */
 export function claimExplanation(db: Db): ReviewExplanation | null {
-  return db.transaction((tx) => {
-    const table = schema.reviewExplanations;
-    const waiting = tx
-      .select()
-      .from(table)
-      .where(inArray(table.status, ACTIVE))
-      .orderBy(asc(table.id))
-      .all();
-    const busy = new Set(
-      waiting.filter((row) => row.status === 'running').map((row) => ownerKey(row)),
-    );
-    const next = waiting.find((row) => row.status === 'queued' && !busy.has(ownerKey(row)));
-    if (!next) {
-      return null;
-    }
-    const explanation = tx
-      .update(table)
-      .set({ status: 'running', startedAt: Date.now() })
-      .where(eq(table.id, next.id))
-      .returning()
-      .get();
-    changed(tx, explanation);
-    return explanation;
-  });
+  return claimReviewRun(db, life);
 }
 
 export function finishExplanation(db: Db, id: number, outcome: ExplanationOutcome): void {
@@ -192,36 +175,14 @@ export function finishExplanation(db: Db, id: number, outcome: ExplanationOutcom
   changed(db, explanation);
 }
 
-/** Cancels an explanation still waiting for a slot; false when it already started (the runner stops it). */
+/** Cancels a explanation still waiting for a slot; false when it already started (the runner stops it). */
 export function cancelQueuedExplanation(db: Db, id: number): boolean {
-  const table = schema.reviewExplanations;
-  const [explanation] = db
-    .update(table)
-    .set({ status: 'cancelled', finishedAt: Date.now() })
-    .where(and(eq(table.id, id), eq(table.status, 'queued')))
-    .returning()
-    .all();
-  if (!explanation) {
-    return false;
-  }
-  changed(db, explanation);
-  return true;
+  return cancelQueuedReviewRun(db, life, id);
 }
 
 /** Fails the explanations a stopped worker left running, and returns them. */
 export function failInterruptedExplanations(db: Db): ReviewExplanation[] {
-  const running = db
-    .select()
-    .from(schema.reviewExplanations)
-    .where(eq(schema.reviewExplanations.status, 'running'))
-    .all();
-  for (const explanation of running) {
-    finishExplanation(db, explanation.id, {
-      status: 'failed',
-      error: 'The worker stopped during the explanation',
-    });
-  }
-  return running;
+  return failInterruptedReviewRuns(db, life);
 }
 
 /** The agent's output lines of an explanation after line `after`, oldest first. */
@@ -237,3 +198,21 @@ export function explanationLines(
     .orderBy(asc(schema.agentLog.id))
     .all();
 }
+
+const life: ReviewRunLife<ReviewExplanation> = {
+  table: schema.reviewExplanations,
+  load: (db, id) =>
+    db.select().from(schema.reviewExplanations).where(eq(schema.reviewExplanations.id, id)).get(),
+  changed,
+  fail: (db, id, error) => {
+    finishExplanation(db, id, { status: 'failed', error });
+  },
+  noun: 'explanation',
+  // One explanation at a time per review: the oldest queued one whose review has none running.
+  pick: (active) => {
+    const busy = new Set(
+      active.filter((row) => row.status === 'running').map((row) => ownerKey(row)),
+    );
+    return active.find((row) => row.status === 'queued' && !busy.has(ownerKey(row)));
+  },
+};

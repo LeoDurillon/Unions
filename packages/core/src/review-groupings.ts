@@ -1,9 +1,15 @@
 // Groupings of a review's files by spec: queued, claimed, finished and cancelled, one at a time per
 // change.
-import { and, asc, desc, eq, inArray, type SQL } from 'drizzle-orm';
+import { and, desc, eq, inArray, type SQL } from 'drizzle-orm';
 
 import type { AgentReviewOwner } from './agent-reviews';
 import type { Db } from './db';
+import {
+  cancelQueuedReviewRun,
+  claimReviewRun,
+  failInterruptedReviewRuns,
+  type ReviewRunLife,
+} from './review-run-lifecycle';
 import type { GroupingResult, SpecSource } from './schema-review-groupings';
 import * as schema from './tables';
 import { emitEvent } from './tickets';
@@ -96,25 +102,7 @@ export function queueGrouping(db: Db, owner: AgentReviewOwner, spec: GroupingSpe
 
 /** The oldest queued grouping, now running; null when none waits. */
 export function claimGrouping(db: Db): ReviewGrouping | null {
-  return db.transaction((tx) => {
-    const next = tx
-      .select()
-      .from(schema.reviewGroupings)
-      .where(eq(schema.reviewGroupings.status, 'queued'))
-      .orderBy(asc(schema.reviewGroupings.id))
-      .get();
-    if (!next) {
-      return null;
-    }
-    const grouping = tx
-      .update(schema.reviewGroupings)
-      .set({ status: 'running', startedAt: Date.now() })
-      .where(eq(schema.reviewGroupings.id, next.id))
-      .returning()
-      .get();
-    changed(tx, grouping);
-    return grouping;
-  });
+  return claimReviewRun(db, groupingLife);
 }
 
 export function finishGrouping(db: Db, id: number, outcome: GroupingOutcome): void {
@@ -135,31 +123,21 @@ export function finishGrouping(db: Db, id: number, outcome: GroupingOutcome): vo
 
 /** Cancels a grouping still waiting for a slot; false when it already started (the runner stops it). */
 export function cancelQueuedGrouping(db: Db, id: number): boolean {
-  const [grouping] = db
-    .update(schema.reviewGroupings)
-    .set({ status: 'cancelled', finishedAt: Date.now() })
-    .where(and(eq(schema.reviewGroupings.id, id), eq(schema.reviewGroupings.status, 'queued')))
-    .returning()
-    .all();
-  if (!grouping) {
-    return false;
-  }
-  changed(db, grouping);
-  return true;
+  return cancelQueuedReviewRun(db, groupingLife, id);
 }
 
 /** Fails the groupings a stopped worker left running, and returns them. */
 export function failInterruptedGroupings(db: Db): ReviewGrouping[] {
-  const running = db
-    .select()
-    .from(schema.reviewGroupings)
-    .where(eq(schema.reviewGroupings.status, 'running'))
-    .all();
-  for (const grouping of running) {
-    finishGrouping(db, grouping.id, {
-      status: 'failed',
-      error: 'The worker stopped during the grouping',
-    });
-  }
-  return running;
+  return failInterruptedReviewRuns(db, groupingLife);
 }
+
+const groupingLife: ReviewRunLife<ReviewGrouping> = {
+  table: schema.reviewGroupings,
+  load: (db, id) =>
+    db.select().from(schema.reviewGroupings).where(eq(schema.reviewGroupings.id, id)).get(),
+  changed,
+  fail: (db, id, error) => {
+    finishGrouping(db, id, { status: 'failed', error });
+  },
+  noun: 'grouping',
+};

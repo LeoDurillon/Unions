@@ -1,9 +1,15 @@
 // Spec reports of a review: queued, claimed, finished and cancelled, one at a time per change.
-import { and, asc, desc, eq, inArray, type SQL } from 'drizzle-orm';
+import { and, desc, eq, inArray, type SQL } from 'drizzle-orm';
 
 import type { AgentReviewOwner } from './agent-reviews';
 import type { Db } from './db';
 import type { ReportSpec, ReviewReportResult } from './review-report-types';
+import {
+  cancelQueuedReviewRun,
+  claimReviewRun,
+  failInterruptedReviewRuns,
+  type ReviewRunLife,
+} from './review-run-lifecycle';
 import * as schema from './tables';
 import { emitEvent } from './tickets';
 
@@ -103,27 +109,9 @@ export function queueReport(db: Db, owner: AgentReviewOwner, specs: ReportSpec[]
   });
 }
 
-/** The oldest queued report, now running; null when none waits. */
+/** The next queued report that can start, now running; null when none can. */
 export function claimReport(db: Db): ReviewReport | null {
-  return db.transaction((tx) => {
-    const next = tx
-      .select({ id: schema.reviewReports.id })
-      .from(schema.reviewReports)
-      .where(eq(schema.reviewReports.status, 'queued'))
-      .orderBy(asc(schema.reviewReports.id))
-      .get();
-    if (!next) {
-      return null;
-    }
-    const report = tx
-      .update(schema.reviewReports)
-      .set({ status: 'running', startedAt: Date.now() })
-      .where(eq(schema.reviewReports.id, next.id))
-      .returning()
-      .get();
-    changed(tx, report);
-    return report;
-  });
+  return claimReviewRun(db, life);
 }
 
 export function finishReport(db: Db, id: number, outcome: ReportOutcome): void {
@@ -145,33 +133,12 @@ export function finishReport(db: Db, id: number, outcome: ReportOutcome): void {
 
 /** Cancels a report still waiting for a slot; false when it already started (the runner stops it). */
 export function cancelQueuedReport(db: Db, id: number): boolean {
-  const [report] = db
-    .update(schema.reviewReports)
-    .set({ status: 'cancelled', finishedAt: Date.now() })
-    .where(and(eq(schema.reviewReports.id, id), eq(schema.reviewReports.status, 'queued')))
-    .returning()
-    .all();
-  if (!report) {
-    return false;
-  }
-  changed(db, report);
-  return true;
+  return cancelQueuedReviewRun(db, life, id);
 }
 
 /** Fails the reports a stopped worker left running, and returns them. */
 export function failInterruptedReports(db: Db): ReviewReport[] {
-  const running = db
-    .select()
-    .from(schema.reviewReports)
-    .where(eq(schema.reviewReports.status, 'running'))
-    .all();
-  for (const report of running) {
-    finishReport(db, report.id, {
-      status: 'failed',
-      error: 'The worker stopped during the report',
-    });
-  }
-  return running;
+  return failInterruptedReviewRuns(db, life);
 }
 
 /**
@@ -198,3 +165,14 @@ export function markNotUseful(db: Db, reportId: number, index: number): ReviewRe
   changed(db, updated);
   return filled(updated);
 }
+
+const life: ReviewRunLife<ReviewReport> = {
+  table: schema.reviewReports,
+  load: (db, id) =>
+    db.select().from(schema.reviewReports).where(eq(schema.reviewReports.id, id)).get(),
+  changed,
+  fail: (db, id, error) => {
+    finishReport(db, id, { status: 'failed', error });
+  },
+  noun: 'report',
+};
