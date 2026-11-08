@@ -1,6 +1,7 @@
 // A rule's value for a Jira field as Jira takes it, by the field's type, or why it cannot be one; checked when the
 // rule is saved (values without variables) and when it runs (filled in).
-import { unknownVariables } from '../event-rule-types';
+
+import { unknownVariables } from '../event/event-rule-types';
 import type { JiraPickedType, JiraTypedType } from './jira-field-types';
 import { textAdf } from './text-adf';
 

@@ -2,7 +2,10 @@ import { beforeEach, expect, test } from 'bun:test';
 
 import { eq } from 'drizzle-orm';
 
-import { createDb, migrateDb, type Db } from './db';
+import { createDb, migrateDb, type Db } from '../db';
+import { saveNotionConnection, storeNotionSchema } from '../integrations/notion-integration';
+import * as schema from '../tables';
+import { createTicket, emitEvent, getTicket } from '../tickets';
 import {
   backfillNotionPages,
   finishDelivery,
@@ -13,9 +16,6 @@ import {
 import { EventRuleError, notionSets } from './event-notion-action';
 import { isTrigger, notionPropertyValue, renderTemplate } from './event-rule-types';
 import { type EventRule, saveRule, templateValues, triggerMatches } from './event-rules';
-import { saveNotionConnection, storeNotionSchema } from './integrations/notion-integration';
-import * as schema from './tables';
-import { createTicket, emitEvent, getTicket } from './tickets';
 
 let db: Db;
 let projectId: number;

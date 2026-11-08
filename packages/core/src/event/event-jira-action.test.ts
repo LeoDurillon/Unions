@@ -1,10 +1,10 @@
 import { beforeEach, expect, test } from 'bun:test';
 
-import { createDb, migrateDb, type Db } from './db';
+import { createDb, migrateDb, type Db } from '../db';
+import { saveIntegration, storeFields } from '../integrations/store';
+import * as schema from '../tables';
 import { checkedJiraComment, checkedJiraFields, checkedJiraTransition } from './event-jira-action';
 import { EventRuleError } from './event-notion-action';
-import { saveIntegration, storeFields } from './integrations/store';
-import * as schema from './tables';
 
 let db: Db;
 let projectId: number;

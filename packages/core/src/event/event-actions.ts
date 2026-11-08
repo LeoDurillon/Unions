@@ -1,4 +1,7 @@
 // The kinds of event rule action and what each holds; browser-safe, for the settings page and the worker.
+
+import type { JiraFieldValue } from '../integrations/jira-field-types';
+import type { IntegrationKindName } from '../integrations/kinds';
 import {
   checkProjectFields,
   type ProjectFieldValue,
@@ -6,8 +9,6 @@ import {
 } from './event-project-fields-action';
 import { checkPullRequestChanges, type PullRequestChange } from './event-pull-request-action';
 import { unknownVariables } from './event-rule-types';
-import type { JiraFieldValue } from './integrations/jira-field-types';
-import type { IntegrationKindName } from './integrations/kinds';
 
 /** Where a GitHub comment goes: the ticket's issue, or its pull request. */
 export type CommentTarget = 'issue' | 'pull_request';

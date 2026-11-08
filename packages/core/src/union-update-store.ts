@@ -3,7 +3,7 @@
 import { desc, eq } from 'drizzle-orm';
 
 import type { Db } from './db';
-import { isEvent, type EventPayloads } from './event-catalog';
+import { isEvent, type EventPayloads } from './event/event-catalog';
 import { events } from './schema/schema';
 import { unionUpdate } from './schema/schema-union-update';
 

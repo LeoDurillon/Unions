@@ -3,7 +3,7 @@
 import { desc, eq } from 'drizzle-orm';
 
 import type { Db } from './db';
-import type { NewEvent } from './event-catalog';
+import type { NewEvent } from './event/event-catalog';
 import { resolveFlow } from './flows';
 import type { IntegrationKindName } from './integrations/kinds';
 import * as schema from './schema/schema';

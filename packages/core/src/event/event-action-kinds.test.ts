@@ -1,11 +1,12 @@
 // Tests how a rule's action is read: its kind, a missing kind as Notion's, and the checks of a GitHub comment and a notification.
+
 import { beforeEach, expect, test } from 'bun:test';
 
-import { createDb, migrateDb, type Db } from './db';
+import { createDb, migrateDb, type Db } from '../db';
+import { saveNotionConnection, storeNotionSchema } from '../integrations/notion-integration';
+import * as schema from '../tables';
 import { EventRuleError } from './event-notion-action';
 import { checkRule } from './event-rules';
-import { saveNotionConnection, storeNotionSchema } from './integrations/notion-integration';
-import * as schema from './tables';
 
 let db: Db;
 let projectId: number;

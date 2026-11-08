@@ -8,7 +8,7 @@ import {
   finishCustomAgentPrompt,
 } from '../custom-agents';
 import { createDb, migrateDb, type Db } from '../db';
-import { isEvent } from '../event-catalog';
+import { isEvent } from '../event/event-catalog';
 import * as tables from '../tables';
 import { createTicket } from '../tickets';
 import {

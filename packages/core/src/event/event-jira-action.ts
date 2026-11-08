@@ -1,19 +1,20 @@
 // The Jira actions of a rule (move the ticket's issue, set its fields, comment on it) and their checks against the
 // stored Jira project; what they send is built when they run.
-import type { Db } from './db';
-import type { ActionOf } from './event-actions';
-import { EventRuleError } from './event-notion-action';
-import { unknownVariables } from './event-rule-types';
+
+import type { Db } from '../db';
 import {
   isPickedType,
   isSinglePick,
   type JiraFieldInfo,
   type JiraFieldValue,
   type JiraPick,
-} from './integrations/jira-field-types';
-import { jiraFieldsFor, type JiraFields } from './integrations/jira-integration';
-import { jiraValueError } from './integrations/jira-values';
-import { integrationOf } from './integrations/store';
+} from '../integrations/jira-field-types';
+import { jiraFieldsFor, type JiraFields } from '../integrations/jira-integration';
+import { jiraValueError } from '../integrations/jira-values';
+import { integrationOf } from '../integrations/store';
+import type { ActionOf } from './event-actions';
+import { EventRuleError } from './event-notion-action';
+import { unknownVariables } from './event-rule-types';
 
 export type JiraTransitionAction = ActionOf<'jira_transition'>;
 export type JiraFieldAction = ActionOf<'jira_field'>;

@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test';
 
-import type { NewEvent } from './event-catalog';
+import type { NewEvent } from './event/event-catalog';
 import { notificationFor } from './notifications';
 
 const ticket = { title: 'Search page' };

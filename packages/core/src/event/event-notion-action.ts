@@ -1,5 +1,8 @@
 // The Notion action of a rule: the properties it sets, checked against the stored Notion columns, and what it sends.
-import type { Db } from './db';
+
+import type { Db } from '../db';
+import { notionSchemaOf } from '../integrations/notion-integration';
+import type { NotionProperty } from '../notion-api';
 import type { NotionPropertyAction, NotionValue } from './event-actions';
 import {
   notionPropertyValue,
@@ -7,8 +10,6 @@ import {
   unknownVariables,
   type TemplateVariable,
 } from './event-rule-types';
-import { notionSchemaOf } from './integrations/notion-integration';
-import type { NotionProperty } from './notion-api';
 
 /** A rule the checks refuse: an unknown trigger or variable, a missing or unsupported property. */
 export class EventRuleError extends Error {}

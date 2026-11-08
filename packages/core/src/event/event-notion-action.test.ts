@@ -1,12 +1,13 @@
 // Tests a Notion action setting several properties: its checks, and the values it sends, all or nothing.
+
 import { beforeEach, expect, test } from 'bun:test';
 
-import { createDb, migrateDb, type Db } from './db';
+import { createDb, migrateDb, type Db } from '../db';
+import { saveNotionConnection, storeNotionSchema } from '../integrations/notion-integration';
+import type { NotionProperty } from '../notion-api';
+import * as schema from '../tables';
 import type { NotionValue } from './event-actions';
 import { checkedNotionAction, notionSets, notionSetsText } from './event-notion-action';
-import { saveNotionConnection, storeNotionSchema } from './integrations/notion-integration';
-import type { NotionProperty } from './notion-api';
-import * as schema from './tables';
 
 let db: Db;
 let projectId: number;

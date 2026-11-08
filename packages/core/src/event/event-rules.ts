@@ -1,7 +1,11 @@
 // Event rules: checking and saving them, and matching events and templates.
+
 import { and, eq } from 'drizzle-orm';
 
-import type { Db } from './db';
+import type { Db } from '../db';
+import { boardStatus } from '../states';
+import * as schema from '../tables';
+import type { Ticket } from '../tickets';
 import {
   checkGitHubComment,
   checkGitHubProjectFields,
@@ -22,9 +26,6 @@ import {
   type EventTrigger,
   type TemplateVariable,
 } from './event-rule-types';
-import { boardStatus } from './states';
-import * as schema from './tables';
-import type { Ticket } from './tickets';
 
 export type EventRule = typeof schema.eventRules.$inferSelect;
 

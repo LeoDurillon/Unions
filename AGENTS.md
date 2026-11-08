@@ -133,7 +133,7 @@ files and uses `union.sqlite` here, which holds the user's real projects.
   `claudeAiOauth` credential. Never copy `mcpOAuth` or history into a container.
 - SSE handlers use Hono's `streamSSE` and loop on `!stream.aborted`. Event ids are `events.seq`, so resume works
   through `Last-Event-ID`. Keep `idleTimeout: 0` on `Bun.serve`.
-- `events` is append-only. Do not update or delete rows. Every event type and its payload is declared in `packages/core/src/event-payloads.ts`;
+- `events` is append-only. Do not update or delete rows. Every event type and its payload is declared in `packages/core/src/event/event-payloads.ts`;
   read rows with `isEvent`.
 - Memory (feedback and lessons) lives in the database, per project. Do not reintroduce markdown inbox files.
 - Lint and format are strict and enforced by `bun run check`: oxlint (type-aware, `--deny-warnings`) and oxfmt

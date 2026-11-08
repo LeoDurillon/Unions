@@ -1,14 +1,15 @@
 // Reads the events logged since the last call and queues one delivery per matching enabled rule of
 // the project it is about (`eventProjects`).
+
 import { and, asc, desc, eq, inArray, isNotNull, isNull, like, lte } from 'drizzle-orm';
 
-import type { Db } from './db';
+import type { Db } from '../db';
+import { parseNotionId } from '../notion-id';
+import * as schema from '../tables';
+import { emitEvent } from '../tickets';
 import { isEvent, type StoredEvent } from './event-catalog';
 import { moveCursor, unreadEvents } from './event-cursors';
 import { triggerMatches } from './event-rules';
-import { parseNotionId } from './notion-id';
-import * as schema from './tables';
-import { emitEvent } from './tickets';
 
 export type EventDelivery = typeof schema.eventDeliveries.$inferSelect;
 

@@ -1,8 +1,9 @@
 // Reads a project's agent calls, tool uses and change sizes over a range of days, and says what they show to improve, for its Usage page.
+
 import { and, eq, gte, inArray, or, sql, type SQL } from 'drizzle-orm';
 
 import type { Db } from './db';
-import { isEvent } from './event-catalog';
+import { isEvent } from './event/event-catalog';
 import { sizeFindings, type SizeRecord } from './size-findings';
 import * as schema from './tables';
 import { toolFindings, type ToolRecord } from './tool-findings';

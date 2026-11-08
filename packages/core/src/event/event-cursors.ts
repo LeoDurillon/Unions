@@ -1,8 +1,9 @@
 // Readers that follow the event log (the rule deliveries, the notifications) and how far each got.
+
 import { asc, desc, eq, gt } from 'drizzle-orm';
 
-import type { Db } from './db';
-import * as schema from './tables';
+import type { Db } from '../db';
+import * as schema from '../tables';
 
 type Event = typeof schema.events.$inferSelect;
 
