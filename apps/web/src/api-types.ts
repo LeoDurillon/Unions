@@ -23,6 +23,8 @@ import type { PublicIntegration } from './api-integration-types';
 import type { TicketSize } from './api-size-types';
 import type { StackView } from './api-stack-types';
 
+export type { PullRequestImport, PullRequestSource } from './api-pr-import-types';
+
 export type { PublicIntegration, SourceImport } from './api-integration-types';
 export type { StackView } from './api-stack-types';
 

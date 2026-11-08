@@ -11,6 +11,7 @@ import type {
   InstallationOption,
   ProjectOption,
   PullRequestInfo,
+  PullRequestSource,
   GitHubIssue,
   PullRequestDiscussion,
   ReviewCommit,
@@ -100,6 +101,12 @@ export type OnboardingGitHub = StackReads & {
     repo: { owner: string; repo: string },
     number: number,
   ): Promise<GitHubIssue | null>;
+  /** A pull request to import as a ticket, with the issues it closes; null when there is none. */
+  getPullRequestSource(
+    auth: GitHubAuth,
+    repo: { owner: string; repo: string },
+    number: number,
+  ): Promise<PullRequestSource | null>;
   /** The labels and assignable users a pull request rule picks from; null when the repo is not reachable. */
   listRuleChoices(
     auth: GitHubAuth,

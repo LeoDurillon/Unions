@@ -11,7 +11,8 @@
   the setup wizard and Settings → Integrations → GitHub Project (verify the token, list repositories and Projects,
   create a Project; `routes/github-project-link.ts` then writes the columns, the worker adds the items), checking and listing the
   GitHub App's installations (`/api/github/app`), looking up a pull request a user links to a ticket, reading an
-  issue to create a ticket on it (`routes/issue-import.ts`), reading a linked pull request's discussion (PR tab,
+  issue to create a ticket on it (`routes/issue-import.ts`), reading a pull request to import, with the issues it
+  closes and their comments, in one GraphQL query (`github-pr-import.ts`, `routes/pr-import.ts`), reading a linked pull request's discussion (PR tab,
   review import), a reviewed pull request's files and commits, and listing the repository's pull requests and stacks (project bar → Pull requests,
   `routes/pull-requests.ts`; the Under review part's records are local, under `/pull-requests/reviews`,
   `routes/current-reviews.ts`), all read only (`src/github-onboarding.ts`, behind the `OnboardingGitHub` interface

@@ -54,6 +54,9 @@ test('remove_containers hands every container to the hook', () => {
     resyncBranch: () => {
       // Not under test.
     },
+    showAdoptedPullRequest: () => {
+      // Not under test.
+    },
     rerunCiJob: () => {
       // Not under test.
     },

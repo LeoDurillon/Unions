@@ -51,6 +51,7 @@ const github: OnboardingGitHub = {
   listReviewCommits: () => Promise.resolve(null),
   getCommitFiles: () => Promise.resolve(null),
   getIssue: () => Promise.resolve(null),
+  getPullRequestSource: () => Promise.resolve(null),
   verifyApp: () => Promise.reject(new Error('unused')),
   listInstallations: () => Promise.reject(new Error('unused')),
   listRuleChoices: () => Promise.reject(new Error('unused')),

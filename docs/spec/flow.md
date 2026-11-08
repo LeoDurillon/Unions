@@ -14,6 +14,15 @@
    The Overview's **Edit** changes the title and description afterwards: the worker writes them to the issue, unless
    it changed on GitHub since the edit was opened (then nothing is written and the edit says so); the Notion page is
    not changed, and steps already done do not run again.
+   Or import an open pull request of the repository (number or URL; one from a fork, closed, merged, or already on
+   a ticket, or whose issue is, is refused): the ticket is on the pull request's branch and base, linked to it, its
+   head recorded as pushed. When the pull request closes an issue holding Union's step comments, the ticket is on
+   that issue and its planning steps are prefilled from them (version, validation, comment kept and edited later);
+   its flow is those steps, then implementation and final review; else it is on the first issue the pull request
+   closes, if any, and runs the Quick flow. The pull request's description is the implementation's output; the
+   worker (`adopt_pull_request`) moves the ticket to awaiting approval at Implementation, then checks the branch
+   out and captures its diff (no agent). Approve runs the final review; Revise runs the implementer on the branch,
+   with no session. Plan: `docs/plans/pr-import.md`.
 2. Move to In Progress (drag the card, or its **Start** button) → the worker creates volumes + container, clones the repo into the workspace volume.
    A ticket that depends on another one cannot start before it is done (see [Ticket dependencies](ticket-dependencies.md)).
 3. Planning steps, each a tab on the ticket: `intake` (Haiku) → `summary` (Sonnet) → `technical` (Opus) → `test_plan` (Sonnet),

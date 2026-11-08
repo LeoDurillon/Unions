@@ -60,6 +60,7 @@ function fakeGitHub(calls: Call[]): OnboardingGitHub {
     listReviewCommits: () => Promise.resolve(null),
     getCommitFiles: () => Promise.resolve(null),
     getIssue: () => Promise.resolve(null),
+    getPullRequestSource: () => Promise.resolve(null),
     verifyApp: (app) => {
       calls.push({ method: 'verifyApp', args: [app.appId] });
       if (app.appId === '0') {

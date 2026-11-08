@@ -42,6 +42,8 @@ type TicketPayloads = {
   branch_resynced: { from: string; to: string };
   /** The resync was refused (work it would drop, a step on the branch) or failed: nothing changed. */
   branch_resync_failed: Failure;
+  /** An imported pull request's branch could not be checked out or its diff read: the ticket waits all the same. */
+  pull_request_adopt_failed: Failure;
   /** A rebase moved the branch off the base it left: the notice goes. */
   left_base_dropped: { branch: string };
   ticket_flow_chosen: { flow: Column<typeof tables.tickets, 'flow'> };

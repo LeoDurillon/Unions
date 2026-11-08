@@ -52,6 +52,8 @@ export type Phase =
 
 export type Action =
   | { type: 'start' } // moved to In Progress
+  // A ticket imported from a pull request: its implementation exists, waiting for approval.
+  | { type: 'adopt' }
   | { type: 'run_finished' }
   // The host rebased the branch with no conflict and the checks passed: no agent changed code.
   | { type: 'rebased_clean' }

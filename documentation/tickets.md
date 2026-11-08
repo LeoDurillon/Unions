@@ -39,8 +39,16 @@ Click **New ticket** in the project bar. The dialog has one tab per source:
 - **Write**: a title and a description in Markdown. The description becomes the GitHub issue's body (when the
   project mirrors tickets as issues), so write it for the agents and for your colleagues: the problem, what you
   expect, and anything they must not change.
-- **Import from GitHub**: the number or URL of an existing issue of the repository. The ticket uses that issue
-  instead of creating one, and keeps following its title and description on GitHub.
+- **Import from GitHub**: choose **Issue** or **Pull request**, then give its number or URL.
+  - An **issue**: the ticket uses that issue instead of creating one, and keeps following its title and
+    description on GitHub.
+  - An open **pull request**: the ticket works on the pull request's own branch, so whatever the agent does is
+    pushed to it. If the pull request closes an issue Union already worked on, the ticket takes that issue and
+    picks up the planning steps Union wrote there; otherwise it takes the pull request's title and description and
+    runs the Quick flow. Click **Fetch** to see which issue, steps and flow the ticket gets before you create it.
+    The ticket waits for you at Implementation, with the pull request's changes in its Changes tab: **Approve**
+    runs the final review, **Request revision** has the implementer change the pull request. Pull requests from
+    forks, and closed or merged ones, cannot be imported.
 - **Import from Notion** (when the project is connected to Notion): a page of the connected data source. Union
   copies its text, and keeps its images and attached files (PDFs and other uploads) as the ticket's files, which
   the agents can read. Files above the size limits (25 MB each, 100 MB per ticket) stay as links to Notion,

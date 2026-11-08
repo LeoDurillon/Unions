@@ -56,6 +56,11 @@
   (`branch_moved`). The `resync_branch` command (hook `resyncBranch`) fetches, refuses when the reset would drop
   work, resets onto `origin/<branch>`, captures the diff and records the new head (`branch_resynced`, else
   `branch_resync_failed`); the next resumed implementation turn gets `resyncPrompt` once (`takeResyncedFrom`).
+- A pull request imported as a ticket (`pr-adopt.ts`): the `adopt_pull_request` command applies `adopt` (backlog
+  to awaiting approval at Implementation), then the hook `showAdoptedPullRequest` checks the branch out in the
+  ticket's container and captures its diff (`pull_request_adopt_failed` when it cannot). The web wrote the ticket,
+  its branch, base, pull request, `pushed_sha` and prefilled outputs; outputs keep the issue's old comment ids, so
+  the next sync edits those comments.
 - `simplify.ts` (with `simplify-agent.ts`, `simplify-finish.ts`, `simplify-git.ts`, `simplify-push.ts`): the
   on-demand history simplification. Same fetch and implementer session as the rebase (`runInImplementerSession` in
   `rebase-agent.ts`), then the agent's leftovers are committed (`commitLeftovers`; a hook's refusal pauses the step

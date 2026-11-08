@@ -12,6 +12,7 @@ import type { Octokit } from 'octokit';
 
 import type { GitHubIssue } from './api-types';
 import type { RuleChoices } from './event-api-types';
+import { fetchPullRequestSource, type PullRequestSource } from './github-pr-import';
 import { fetchBranch, fetchBranchNames, fetchIssue } from './github-repo';
 import { fetchRuleChoices } from './github-rule-choices';
 import { fetchPullRequestStack, fetchStacks } from './github-stacks';
@@ -73,6 +74,15 @@ export class OctokitRepoReads {
 
   getIssue(auth: GitHubAuth, repo: Repo, number: number): Promise<GitHubIssue | null> {
     return orNull(() => fetchIssue(this.client(auth), repo, number));
+  }
+
+  /** A pull request to import, with the issues it closes and their comments. */
+  getPullRequestSource(
+    auth: GitHubAuth,
+    repo: Repo,
+    number: number,
+  ): Promise<PullRequestSource | null> {
+    return orNull(() => fetchPullRequestSource(this.client(auth), repo, number));
   }
 
   listStacks(auth: GitHubAuth, repo: Repo): Promise<GitHubStack[] | null> {

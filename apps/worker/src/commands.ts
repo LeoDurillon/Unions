@@ -237,6 +237,11 @@ const OTHER_COMMANDS: Record<string, (db: Db, command: Command, hooks: CommandHo
   edit_ticket: (_db, command, hooks) => {
     hooks.editTicket(requireTicketId(command), ticketEditOf(command.payload));
   },
+  adopt_pull_request: (db, command, hooks) => {
+    const ticketId = requireTicketId(command);
+    dispatch(db, ticketId, { type: 'adopt' });
+    hooks.showAdoptedPullRequest(ticketId);
+  },
   resync_branch: (_db, command, hooks) => {
     hooks.resyncBranch(requireTicketId(command));
   },

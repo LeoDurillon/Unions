@@ -7,19 +7,10 @@ import type { GitHubApi } from './github/api';
 import { gitHubHooks } from './github/hooks';
 import { removeContainers } from './janitor';
 import type { ProvisionConfig } from './provision';
-import { resyncBranch, type ResyncDeps } from './resync-branch';
 import type { SideRuns } from './side-runs';
 import { trackerHooks } from './tracker-hooks';
 import { unionUpdateHooks } from './union-update';
-
-/** The ticket workspace's own commands: resyncing its branch from GitHub. */
-function workspaceHooks(deps: ResyncDeps): Pick<CommandHooks, 'resyncBranch'> {
-  return {
-    resyncBranch: (ticketId) => {
-      void resyncBranch(deps, ticketId);
-    },
-  };
-}
+import { workspaceHooks } from './workspace-hooks';
 
 type HookDeps = Pick<
   SideRuns,

@@ -1,6 +1,7 @@
 # Idea: prefill steps when importing a GitHub issue Union already worked on
 
-Status: idea, not started.
+Status: replaced by [Import a pull request as a ticket](pr-import.md), which prefills the steps from the
+issue a pull request closes. Kept for the issue-only case, not planned.
 
 ## Today
 

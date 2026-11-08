@@ -66,6 +66,7 @@ export * from './github-auth';
 export * from './github-project-fields';
 export * from './github-text';
 export * from './investigation-tickets';
+export * from './issue-step-comments';
 export * from './investigations';
 export * from './lesson-input';
 export * from './lesson-suggestions';

@@ -160,6 +160,9 @@ file; designs already in the spec (`docs/spec/`) are summarized there and linked
 - [A custom agent image per project](project-agent-image.md): a Dockerfile in the project settings, extending
   `union-agent`, built and checked on **Save and build** and applied only when it passes; tickets, investigations
   and reviews run on it. Built (branch `project-agent-image`, 2026-11-07), the page checked in a browser.
+- [Import a pull request as a ticket](pr-import.md): the ticket takes the pull request's branch and waits for
+  approval at Implementation; the steps Union wrote on the issue it closes are prefilled, else the Quick flow.
+  Built (branch `pr-import`, 2026-11-08); a real run left.
 - [A minimal base agent image](agent-image-layers.md): `union-agent-base` (git, the claude CLI as its release
   binary, the node user) and the default `union-agent` built on it with the JavaScript toolchains; a project's
   Dockerfile starts from either, with starters for JavaScript, Python, Rust, Go and PHP. Built (branch
@@ -182,7 +185,7 @@ Loose ends found while building, not planned yet (2026-10-15):
 
 ## Ideas
 
-- [Prefill steps on GitHub issue import](issue-import-prefill.md)
+- [Prefill steps on GitHub issue import](issue-import-prefill.md): replaced by the pull request import below.
 - [Show older merged tickets](board-older-merged.md)
 - [Exclude merged PRs from the ticket view](exclude-merged-prs.md) (scope to clarify)
 - [Revise with guidance after a failed rebase](rebase-revise-with-guidance.md)

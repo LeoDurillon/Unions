@@ -140,6 +140,9 @@ type PhaseOf<K extends Phase['kind']> = Extract<Phase, { kind: K }>;
 
 // Every valid flow has `implement`: the fallback only covers an empty one.
 function fromBacklog(action: Action, flow: Flow): Phase | null {
+  if (action.type === 'adopt') {
+    return { kind: 'awaiting_approval', step: 'implement' };
+  }
   return action.type === 'start' ? { kind: 'running', step: flow[0] ?? 'implement' } : null;
 }
 

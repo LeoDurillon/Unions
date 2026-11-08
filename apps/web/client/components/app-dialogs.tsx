@@ -3,10 +3,10 @@ import { integrationKind, type IntegrationKindName } from '@union/core/integrati
 import type { PipelineStep } from '@union/core/states';
 import { useState, type ReactElement } from 'react';
 
-import type { PublicProject } from '../../src/api-types';
+import type { PublicProject, SourceImport } from '../../src/api-types';
 import type { Overlay } from '../lib/use-navigation';
 import { FlowPicker } from './flow-picker';
-import { GitHubIssueImportPanel } from './github-issue-import';
+import { GitHubImportPanel } from './github-import';
 import { SourceImportPanel } from './integrations/source-import';
 import { TicketForm, type SourceRef } from './ticket-form';
 import { Dialog } from './ui';
@@ -75,7 +75,13 @@ function FlowField({
   );
 }
 
-/** New ticket: written by hand, or imported from a GitHub issue or a tracker's item (a Notion page). */
+/** A tracker's item opened in the form, still linked to it. */
+function editedDraft(kind: IntegrationKindName, item: SourceImport, previous: Draft): Draft {
+  const source = { kind, id: item.id, url: item.url, title: item.title };
+  return { title: item.title, body: item.body, source, key: previous.key + 1 };
+}
+
+/** New ticket: written by hand, or imported from a GitHub issue or pull request, or a tracker's item (a Notion page). */
 function TicketBody({
   project,
   onCreated,
@@ -106,10 +112,16 @@ function TicketBody({
   return (
     <div className="space-y-4">
       <TicketTabs tabs={tabs} tab={tab} onChange={setTab} />
-      {tab === 'write' ? form : picker}
+      {tab === 'write' ? form : null}
       {tab === 'github' ? (
-        <GitHubIssueImportPanel projectId={project.id} flow={flow} onCreated={onCreated} />
+        <GitHubImportPanel
+          projectId={project.id}
+          flow={flow}
+          flowField={picker}
+          onCreated={onCreated}
+        />
       ) : null}
+      {tab === 'write' || tab === 'github' ? null : picker}
       {tab === 'write' || tab === 'github' ? null : (
         <SourceImportPanel
           key={tab}
@@ -118,12 +130,7 @@ function TicketBody({
           flow={flow}
           onCreated={onCreated}
           onEdit={(item) => {
-            setDraft((previous) => ({
-              title: item.title,
-              body: item.body,
-              source: { kind: tab, id: item.id, url: item.url, title: item.title },
-              key: previous.key + 1,
-            }));
+            setDraft((previous) => editedDraft(tab, item, previous));
             setTab('write');
           }}
         />

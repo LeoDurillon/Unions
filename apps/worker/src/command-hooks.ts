@@ -41,6 +41,8 @@ export type CommandHooks = {
   editTicket: (ticketId: number, edit: TicketEdit) => void;
   /** Resets the ticket's workspace onto its branch as GitHub has it, after it moved there. */
   resyncBranch: (ticketId: number) => void;
+  /** Checks an imported pull request's branch out in the ticket's workspace and captures its diff. */
+  showAdoptedPullRequest: (ticketId: number) => void;
   /** Asks GitHub to run a failed Actions job of the ticket's pull request again. */
   rerunCiJob: (ticketId: number, job: CiJob) => void;
   /** Posts a reply to a pull request comment; `commandId` ties its event to the command. */
@@ -84,6 +86,7 @@ export const NO_HOOKS: CommandHooks = {
   sendPrDescription: ignore,
   editTicket: ignore,
   resyncBranch: ignore,
+  showAdoptedPullRequest: ignore,
   rerunCiJob: ignore,
   replyToPrComment: ignore,
   postNotionComment: ignore,

@@ -254,6 +254,9 @@ test('the cancel command cancels a queued run itself and hands a running one to 
     resyncBranch: () => {
       // Not under test.
     },
+    showAdoptedPullRequest: () => {
+      // Not under test.
+    },
     rerunCiJob: () => {
       // Not under test.
     },

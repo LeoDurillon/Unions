@@ -35,6 +35,7 @@ const github: OnboardingGitHub = {
   listReviewCommits: unused,
   getCommitFiles: unused,
   getIssue: unused,
+  getPullRequestSource: unused,
   verifyApp: unused,
   listInstallations: unused,
   listRuleChoices: unused,
