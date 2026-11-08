@@ -3,7 +3,7 @@
 import type { ReactElement } from 'react';
 
 import { useGuidePage } from '../lib/guide/guide-url';
-import { GuidePage } from './guide/guide-page';
+import { GuidePage } from './lazy-pages';
 import { RunningPreviewsPage } from './previews/running-previews-page';
 
 /** The running previews (`?page=previews`) or the user guide (`?guide=`). */

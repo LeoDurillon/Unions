@@ -5,10 +5,10 @@ import type { PublicProject } from '../../src/api-types';
 import { Board, BoardView } from './board';
 import { GettingStarted } from './getting-started';
 import { InvestigationsPage } from './investigations/investigations-page';
+import { UsagePage } from './lazy-pages';
 import type { ProjectView } from './project-bar';
 import { PullRequestsPage } from './pull-requests/pull-requests-page';
 import { RepositoryPage } from './repository/repository-page';
-import { UsagePage } from './usage/usage-page';
 
 /** The open view of the project; the empty board behind the first-run wizard when there is none. */
 export function ProjectBody({

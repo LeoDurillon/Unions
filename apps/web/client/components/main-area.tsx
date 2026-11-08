@@ -7,9 +7,8 @@ import { useSettingsSection } from '../lib/settings-sections';
 import { closeUnionSettings, useUnionSection } from '../lib/union-settings-sections';
 import type { Page } from '../lib/use-navigation';
 import { GlobalPage } from './global-page';
-import { ProjectSettingsPage } from './settings/settings-page';
+import { ProjectSettingsPage, UnionSettingsPage } from './lazy-pages';
 import { ShortcutsHelp } from './shortcuts-help';
-import { UnionSettingsPage } from './union-settings/union-settings-page';
 import { Workspace } from './workspace';
 
 type MainAreaProps = {

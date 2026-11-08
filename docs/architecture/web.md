@@ -356,7 +356,8 @@
   the API and sends `../` links (the code's docs) to GitHub. Learn more links (`guide/guide-link.tsx`) open it
   from the checklist and from every settings page's header (`SettingsFrame`'s `guide`, from
   `lib/guide/settings-guide.ts`, whose test checks each target is a heading of the guide).
-- `client/` is the SPA: Tailwind v4, TanStack Query, dnd-kit. `app.tsx` is the shell, `components/` the UI,
+- `client/` is the SPA: Tailwind v4, TanStack Query. The review page, both settings, usage and the guide load on first
+  open (`components/lazy-pages.tsx`, same names and props as the pages), so the board starts on a smaller bundle. `app.tsx` is the shell, `components/` the UI,
   `lib/` the hooks and the typed `api.ts`. The browser keeps one event stream for all its Union tabs
   (`lib/event-hub.ts`: the tab holding the Web Lock `union-events` reads `/api/events` and relays each event
   over a BroadcastChannel; browsers allow six connections per host, and a stream per tab or log used to leave

@@ -105,6 +105,33 @@ function runTotal(run: LogRun<Entry>): string {
   return `${calls.length} calls${used ? ` · ${used}` : ''}`;
 }
 
+/** The lines a long run shows at first: its end, where it stands now; the rest on a click. */
+const SHOWN_LINES = 500;
+
+/** A run's lines: the last 500 of a long one, with a button for the earlier ones. */
+function RunLines({ lines }: { lines: LogRun<Entry>['lines'] }): ReactElement {
+  const [all, setAll] = useState(false);
+  const hidden = all ? 0 : Math.max(0, lines.length - SHOWN_LINES);
+  return (
+    <div className="mt-1 space-y-1">
+      {hidden > 0 ? (
+        <button
+          type="button"
+          className="text-xs text-indigo-700 hover:underline dark:text-indigo-300"
+          onClick={() => {
+            setAll(true);
+          }}
+        >
+          Show the {hidden} earlier lines
+        </button>
+      ) : null}
+      {lines.slice(hidden).map((entry) => (
+        <Line key={entry.key} entry={entry} />
+      ))}
+    </div>
+  );
+}
+
 /** One run, folded unless it is the last one or the user opened it. */
 function RunSection({
   run,
@@ -141,13 +168,7 @@ function RunSection({
           </span>
         </span>
       </summary>
-      {open ? (
-        <div className="mt-1 space-y-1">
-          {run.lines.map((entry) => (
-            <Line key={entry.key} entry={entry} />
-          ))}
-        </div>
-      ) : null}
+      {open ? <RunLines lines={run.lines} /> : null}
     </details>
   );
 }

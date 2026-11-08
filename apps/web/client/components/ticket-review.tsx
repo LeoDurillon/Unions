@@ -5,11 +5,11 @@ import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../src/api-types';
 import { useReviewTab } from '../lib/review/review-url';
+import { ReviewPage, type ReviewSection } from './lazy-pages';
 import { PreviewTab } from './preview-tab';
 import { PullRequestTab } from './pull-request-tab';
 import { ReportTab } from './review/report-tab';
 import { ReviewAgentsTab } from './review/review-agents-tab';
-import { ReviewPage, type ReviewSection } from './review/review-page';
 import { TicketDescription } from './ticket-description';
 
 function sectionsOf(detail: TicketDetail): ReviewSection[] {
