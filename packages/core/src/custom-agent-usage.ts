@@ -1,11 +1,12 @@
 // What still runs a custom agent: project flow presets that name it, tickets not yet done whose flow has
 // it, and its review runs waiting or running.
+
 import { and, eq, inArray } from 'drizzle-orm';
 
 import type { Db } from './db';
 import { projectPresets } from './flows';
-import * as schema from './schema';
-import { reviewAgentRuns } from './schema-review-agent-runs';
+import * as schema from './schema/schema';
+import { reviewAgentRuns } from './schema/schema-review-agent-runs';
 import { customAgentId, type CustomStep } from './states';
 
 function presetUsers(db: Db, step: CustomStep): string[] {

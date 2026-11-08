@@ -13,7 +13,7 @@ import {
   recoverLessonSuggestions,
 } from './lesson-suggestions';
 import { lessonWriterPrompt, parseLessonSuggestions } from './lesson-writer';
-import * as schema from './schema';
+import * as schema from './schema/schema';
 
 let db: Db;
 let projectId: number;

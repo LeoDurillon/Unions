@@ -9,7 +9,13 @@ import { detachHeader, rewriteImports } from './move-files-lib';
 const ROOT = path.resolve(import.meta.dir, '..');
 const SOURCES = ['apps/**/*.{ts,tsx}', 'packages/**/*.{ts,tsx}', 'scripts/**/*.ts'];
 /** Files that name source paths by hand: printed when they name a moved file, to edit. */
-const PATH_LISTS = ['ast-grep/rules/*.yml', '.oxlintrc.json', 'knip.json', '.jscpd.json'];
+const PATH_LISTS = [
+  'ast-grep/rules/*.yml',
+  '.oxlintrc.json',
+  'knip.json',
+  '.jscpd.json',
+  'packages/core/drizzle.config.ts',
+];
 const CORE_PACKAGE = 'packages/core/package.json';
 
 const [folder, ...moving] = process.argv.slice(2);
@@ -73,7 +79,11 @@ await writeFile(path.join(ROOT, CORE_PACKAGE), pkg);
 
 for (const list of await scan(PATH_LISTS)) {
   const text = await readFile(path.join(ROOT, list), 'utf8');
-  const named = [...moves.keys()].filter((file) => text.includes(file));
+  // A package's own config names its files from the package: `./src/schema.ts`.
+  const named = [...moves.keys()].filter(
+    (file) =>
+      text.includes(file) || text.includes(`./${file.replace(/^(?:apps|packages)\/[^/]+\//u, '')}`),
+  );
   if (named.length > 0) {
     console.log(`Edit by hand: ${list} names ${named.join(', ')}`);
   }

@@ -1,11 +1,12 @@
 // A project's own agent image in the database: saved by the web, then built, applied or failed by the worker.
+
 import { and, eq } from 'drizzle-orm';
 
 import type { AgentImageSource, AppliedAgentImage } from './agent-image-source';
 import { outputTail } from './container-runs';
 import type { Db } from './db';
-import { commands } from './schema';
-import { agentImages } from './schema-agent-images';
+import { commands } from './schema/schema';
+import { agentImages } from './schema/schema-agent-images';
 
 export type AgentImageRow = typeof agentImages.$inferSelect;
 

@@ -13,7 +13,7 @@ import {
   type AgentId,
 } from './agents';
 import { createDb, migrateDb, type Db } from './db';
-import * as schema from './schema';
+import * as schema from './schema/schema';
 import { SPLIT_PLAN_FORMAT } from './split-plan';
 
 let db: Db;

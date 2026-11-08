@@ -1,6 +1,7 @@
 // The parts of a grouping by spec that selected lines of a file touch, without asking an agent. Pure.
+
 import { hunksOf, type Hunk } from './diff-hunks';
-import type { GroupingResult } from './schema-review-groupings';
+import type { GroupingResult } from './schema/schema-review-groupings';
 
 /** A part of the spec the lines belong to, as the grouping named and quoted it. */
 export type SpecPart = { key: string; title: string; spec: string };

@@ -15,7 +15,7 @@ import {
   setFeedbackCurated,
   stepSharedPrompt,
 } from './lessons';
-import * as schema from './schema';
+import * as schema from './schema/schema';
 
 let db: Db;
 let projectId: number;

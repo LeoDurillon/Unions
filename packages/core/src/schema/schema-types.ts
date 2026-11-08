@@ -1,7 +1,8 @@
 // Plain types stored in JSON columns, kept apart so schema.ts holds the tables.
-import type { DiffStatus } from './diff';
-import type { FlowPreset } from './flows';
-import type { BoardStatus } from './states';
+
+import type { DiffStatus } from '../diff';
+import type { FlowPreset } from '../flows';
+import type { BoardStatus } from '../states';
 
 /** A service the proxy serves: at `t<id>.union.localhost` when `prefix` is empty, else `<prefix>-t<id>.union.localhost`. */
 export type PreviewService = { name: string; port: number; prefix: string };

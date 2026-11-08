@@ -1,13 +1,14 @@
 // The agent's grouping of a review's changed files by the parts of a specification, run when the
 // user asks: for a ticket's branch or a pull request under review (`review_comments` owners).
+
 import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
+import { SPEC_SOURCES } from '../spec-source-kinds';
 import { now } from './schema';
 import { reviewOwnerColumns, runStatusColumn } from './schema-review-runs';
-import { SPEC_SOURCES } from './spec-source-kinds';
 
 // Where the specification came from: the text sent is kept in `spec`, whatever the source.
-export { SPEC_SOURCES, type SpecSource } from './spec-source-kinds';
+export { SPEC_SOURCES, type SpecSource } from '../spec-source-kinds';
 
 /** A part of the specification and the changed files that implement it. */
 export type SpecGroup = {

@@ -1,4 +1,5 @@
 // The package's public API: re-exports every core module.
+
 export * from './active-work';
 export * from './agent-inputs';
 export * from './agent-review-specs';
@@ -140,7 +141,7 @@ export * from './e2e-staleness';
 export * from './previews';
 export * from './project-url';
 export * from './refused-commits';
-export type { ResumeState } from './schema-refused-commits';
+export type { ResumeState } from './schema/schema-refused-commits';
 export type * from './runtime';
 export * as schema from './tables';
 export type {
@@ -149,7 +150,7 @@ export type {
   PreviewService,
   ProjectScript,
   PullRequestFile,
-} from './schema-types';
+} from './schema/schema-types';
 export * from './split-plan';
 export * from './stack-description';
 export * from './stack-restack';

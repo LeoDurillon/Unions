@@ -15,7 +15,7 @@ import {
   finishInvestigation,
   getInvestigation,
 } from './investigations';
-import * as schema from './schema';
+import * as schema from './schema/schema';
 import { getTicket } from './tickets';
 
 let db: Db;

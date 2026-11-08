@@ -1,4 +1,5 @@
 // The explanations of a review's lines: queued by the web, claimed and finished by the worker.
+
 import { and, asc, desc, eq, gt, inArray, type SQL } from 'drizzle-orm';
 
 import type { AgentReviewSpec } from './agent-review-specs';
@@ -10,12 +11,16 @@ import {
   failInterruptedReviewRuns,
   type ReviewRunLife,
 } from './review-run-lifecycle';
-import type { ExplanationResult } from './schema-review-explanations';
+import type { ExplanationResult } from './schema/schema-review-explanations';
 import * as schema from './tables';
 import { emitEvent } from './tickets';
 
 export type ReviewExplanation = typeof schema.reviewExplanations.$inferSelect;
-export type { ExplainedDoc, ExplainedSpec, ExplanationResult } from './schema-review-explanations';
+export type {
+  ExplainedDoc,
+  ExplainedSpec,
+  ExplanationResult,
+} from './schema/schema-review-explanations';
 
 export type ExplanationOutcome =
   | { status: 'succeeded'; result: ExplanationResult; sessionId: string }

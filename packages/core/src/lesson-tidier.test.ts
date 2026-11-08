@@ -5,7 +5,7 @@ import { withProposal, type LessonInput } from './lesson-input';
 import { queueLessonSuggestion, queueLessonTidy } from './lesson-suggestions';
 import { lessonTidyPrompt, parseTidyProposals } from './lesson-tidier';
 import { saveLessons } from './lessons';
-import * as schema from './schema';
+import * as schema from './schema/schema';
 
 let db: Db;
 let projectId: number;

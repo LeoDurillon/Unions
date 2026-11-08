@@ -1,12 +1,13 @@
 // Tickets: reading, creating and labelling them, the event log they write to, and dispatching state-machine actions.
+
 import { desc, eq } from 'drizzle-orm';
 
 import type { Db } from './db';
 import type { NewEvent } from './event-catalog';
 import { resolveFlow } from './flows';
 import type { IntegrationKindName } from './integrations/kinds';
-import * as schema from './schema';
-import type { reviewComments } from './schema-reviews';
+import * as schema from './schema/schema';
+import type { reviewComments } from './schema/schema-reviews';
 import {
   boardStatus,
   FULL_FLOW,

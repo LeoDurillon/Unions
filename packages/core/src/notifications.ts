@@ -1,7 +1,8 @@
 // Which events of the log notify the user, and with what text; pure, the worker writes the rows.
+
 import { MAX_NOTIFICATION } from './event-actions';
 import { isEvent, type StoredEvent } from './event-catalog';
-import type { notifications } from './schema-notifications';
+import type { notifications } from './schema/schema-notifications';
 import type { Phase } from './states';
 import { stepTitle, type CustomAgentNames } from './step-titles';
 

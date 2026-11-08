@@ -1,10 +1,11 @@
 // Choosing the steps a ticket runs: only before it starts, since the start fixes them.
+
 import { eq } from 'drizzle-orm';
 
 import { flowReadySteps } from './custom-agents';
 import type { Db } from './db';
 import { flowProblems } from './flows';
-import * as schema from './schema';
+import * as schema from './schema/schema';
 import type { PipelineStep } from './states';
 import { emitEvent, getTicket, type Ticket } from './tickets';
 

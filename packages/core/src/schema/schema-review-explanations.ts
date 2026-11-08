@@ -1,7 +1,8 @@
 // The table of the explanations an agent gives of lines of a review's diff, and what one holds.
+
 import { index, integer, sqliteTable, text, type AnySQLiteColumn } from 'drizzle-orm/sqlite-core';
 
-import type { AgentReviewSpec } from './agent-review-specs';
+import type { AgentReviewSpec } from '../agent-review-specs';
 import { now } from './schema';
 import { reviewOwnerColumns, runStatusColumn } from './schema-review-runs';
 

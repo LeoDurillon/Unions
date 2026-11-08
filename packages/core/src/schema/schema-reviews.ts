@@ -1,4 +1,5 @@
 // Pull requests the user put under review from the Pull requests tab, without a ticket.
+
 import {
   index,
   integer,
@@ -8,7 +9,7 @@ import {
   type AnySQLiteColumn,
 } from 'drizzle-orm/sqlite-core';
 
-import type { AgentReviewSpec } from './agent-review-specs';
+import type { AgentReviewSpec } from '../agent-review-specs';
 import { now, projects, tickets } from './schema';
 import type { PullRequestFile } from './schema-types';
 

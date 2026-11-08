@@ -1,6 +1,7 @@
 // The prompt writer: the prompt that turns a custom agent's name and role into its instructions, and its answer read back.
+
 import { DEFAULT_PROMPTS } from './agents';
-import type { CustomAgentKind } from './schema-custom-agents';
+import type { CustomAgentKind } from './schema/schema-custom-agents';
 import type { AgentModel } from './states';
 
 /** A written prompt longer than this is refused: the built-in ones are under 1,500 characters. */

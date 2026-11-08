@@ -1,10 +1,11 @@
 // What the user gave the implementer's next run: command outputs and CI outputs, read together and marked read together.
+
 import { and, asc, eq, inArray } from 'drizzle-orm';
 
 import type { CiOutput } from './ci-outputs';
 import { markSentToAgent, pendingForAgent, type ContainerRun } from './container-runs';
 import type { Db } from './db';
-import { ciOutputs } from './schema-ci-outputs';
+import { ciOutputs } from './schema/schema-ci-outputs';
 
 export type AgentInputs = { commands: ContainerRun[]; ci: CiOutput[] };
 

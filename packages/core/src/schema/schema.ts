@@ -1,5 +1,6 @@
 // The main tables: projects, the GitHub App, tickets, runs, outputs, events, commands, memory,
 // agents and investigations.
+
 import { sql } from 'drizzle-orm';
 import {
   index,
@@ -10,9 +11,9 @@ import {
   type AnySQLiteColumn,
 } from 'drizzle-orm/sqlite-core';
 
-import type { IntegrationKindName } from './integrations/kinds';
+import type { IntegrationKindName } from '../integrations/kinds';
+import type { AgentEffort, AgentModel, BoardStatus, Phase, PipelineStep, Step } from '../states';
 import type { BranchMove, InvestigationExchange, LeftBase, ProjectConfig } from './schema-types';
-import type { AgentEffort, AgentModel, BoardStatus, Phase, PipelineStep, Step } from './states';
 
 export type {
   BranchMove,

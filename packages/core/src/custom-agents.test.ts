@@ -14,7 +14,7 @@ import {
   requeueCustomAgentPrompts,
 } from './custom-agents';
 import { createDb, migrateDb, type Db } from './db';
-import * as schema from './schema';
+import * as schema from './schema/schema';
 import { customStep } from './states';
 
 let db: Db;

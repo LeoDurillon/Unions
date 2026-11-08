@@ -1,8 +1,9 @@
 // A ticket's slices once split into a stack: read bottom first, and replaced by a new split.
+
 import { asc, eq } from 'drizzle-orm';
 
 import type { Db } from './db';
-import { ticketSlices } from './schema-ticket-slices';
+import { ticketSlices } from './schema/schema-ticket-slices';
 
 export type TicketSlice = typeof ticketSlices.$inferSelect;
 export type NewTicketSlice = Omit<

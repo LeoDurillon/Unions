@@ -1,5 +1,6 @@
 // A review's specs in the database: the list (started with its sources the first time), saving the
 // user's list, and the Notion pages and Jira issues linked to it (its `notion` and `jira` specs).
+
 import { and, asc, eq, max, type SQL } from 'drizzle-orm';
 
 import type { AgentReviewOwner } from './agent-reviews';
@@ -10,10 +11,10 @@ import {
   type SavedSpecEntry,
   type SpecEntry,
 } from './review-spec-lists';
-import type { ReviewSpecRow } from './schema-review-specs';
+import type { ReviewSpecRow } from './schema/schema-review-specs';
 import * as schema from './tables';
 
-export type { ReviewSpecRow } from './schema-review-specs';
+export type { ReviewSpecRow } from './schema/schema-review-specs';
 
 /** A tracker's item linked to a review: a Notion page, a Jira issue (`id` its key). */
 export type LinkedPage = { id: string; title: string; url: string | null };

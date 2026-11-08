@@ -1,5 +1,6 @@
 // Ticket flows: the steps a ticket runs, the presets a project offers, and what agents are told of skipped steps.
-import type { ProjectConfig } from './schema-types';
+
+import type { ProjectConfig } from './schema/schema-types';
 import {
   FULL_FLOW,
   isCustomStep,

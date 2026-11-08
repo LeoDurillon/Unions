@@ -3,7 +3,7 @@ import { beforeEach, expect, test } from 'bun:test';
 import { eq } from 'drizzle-orm';
 
 import { createDb, migrateDb, type Db } from './db';
-import * as schema from './schema';
+import * as schema from './schema/schema';
 import {
   createTicket,
   dispatch,

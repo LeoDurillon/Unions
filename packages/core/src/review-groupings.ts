@@ -1,5 +1,6 @@
 // Groupings of a review's files by spec: queued, claimed, finished and cancelled, one at a time per
 // change.
+
 import { and, desc, eq, inArray, type SQL } from 'drizzle-orm';
 
 import type { AgentReviewOwner } from './agent-reviews';
@@ -10,7 +11,7 @@ import {
   failInterruptedReviewRuns,
   type ReviewRunLife,
 } from './review-run-lifecycle';
-import type { GroupingResult, SpecSource } from './schema-review-groupings';
+import type { GroupingResult, SpecSource } from './schema/schema-review-groupings';
 import * as schema from './tables';
 import { emitEvent } from './tickets';
 
@@ -20,8 +21,8 @@ export type {
   SpecGroup,
   SpecSource,
   UnrelatedChange,
-} from './schema-review-groupings';
-export { SPEC_SOURCES } from './schema-review-groupings';
+} from './schema/schema-review-groupings';
+export { SPEC_SOURCES } from './schema/schema-review-groupings';
 
 export type GroupingOutcome =
   | { status: 'succeeded'; headSha: string; result: GroupingResult }

@@ -1,10 +1,11 @@
 // The `union_update` row: the worker's checks and the update's state, read by the sidebar.
+
 import { desc, eq } from 'drizzle-orm';
 
 import type { Db } from './db';
 import { isEvent, type EventPayloads } from './event-catalog';
-import { events } from './schema';
-import { unionUpdate } from './schema-union-update';
+import { events } from './schema/schema';
+import { unionUpdate } from './schema/schema-union-update';
 
 export type UnionUpdate = typeof unionUpdate.$inferSelect;
 export type UnionUpdateStatus = UnionUpdate['status'];

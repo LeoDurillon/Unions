@@ -1,8 +1,9 @@
 // Tests the parts of a grouping by spec that selected lines touch.
+
 import { expect, test } from 'bun:test';
 
 import { explanationSpecParts } from './explanation-spec-parts';
-import type { GroupingResult, SpecGroup } from './schema-review-groupings';
+import type { GroupingResult, SpecGroup } from './schema/schema-review-groupings';
 
 const PATCH = [
   '@@ -1,2 +1,3 @@',

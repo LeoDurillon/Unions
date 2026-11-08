@@ -1,6 +1,7 @@
 // The project's saved scripts: checked as the settings store them, and the run each one queues.
+
 import { ContainerRunError, MAX_COMMAND_CHARS, MAX_RUN_TIMEOUT_SEC } from './container-runs';
-import type { ProjectConfig, ProjectScript } from './schema-types';
+import type { ProjectConfig, ProjectScript } from './schema/schema-types';
 
 /** Saved scripts the settings refuse: not a list, a name taken twice, a command too long. */
 export class ScriptsError extends Error {}

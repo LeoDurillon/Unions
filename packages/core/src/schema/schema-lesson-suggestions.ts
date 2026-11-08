@@ -1,7 +1,8 @@
 // The lesson writer's and tidier's runs: the feedback the user gave the writer, and the lessons proposed.
+
 import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
-import type { LessonProposal } from './lesson-input';
+import type { LessonProposal } from '../lesson-input';
 import { now, projects } from './schema';
 
 export const LESSON_SUGGESTION_STATUSES = [

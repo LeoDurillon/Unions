@@ -1,4 +1,5 @@
 // The agents' default prompts, models, efforts and tools, the user's overrides, and how a run resolves them.
+
 import { eq } from 'drizzle-orm';
 
 import {
@@ -14,7 +15,7 @@ import type { Db } from './db';
 import { DIAGRAM_INSTRUCTION } from './diagrams';
 import { LESSON_TIDIER_PROMPT, LESSON_WRITER_PROMPT } from './lesson-prompts';
 import { PR_REPLIES_PROMPT, SPLIT_PLAN_PROMPT, SPLIT_PROMPT, TRIM_PROMPT } from './pr-prompts';
-import * as schema from './schema';
+import * as schema from './schema/schema';
 import {
   customStep,
   isAgentEffort,

@@ -1,7 +1,7 @@
 import { beforeEach, expect, test } from 'bun:test';
 
 import { createDb, migrateDb, type Db } from './db';
-import * as schema from './schema';
+import * as schema from './schema/schema';
 import { chooseFlow, FlowChangeRefused } from './ticket-flow';
 import { createTicket, dispatch, getTicket } from './tickets';
 

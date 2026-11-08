@@ -1,4 +1,5 @@
 // Asks for a ticket written from an answered investigation, with what the user wants it to cover.
+
 import { asc, eq } from 'drizzle-orm';
 
 import type { Db } from './db';
@@ -6,7 +7,7 @@ import { jiraAuthOf } from './integrations/jira-integration';
 import { integrationKind, type IntegrationKindName } from './integrations/kinds';
 import { notionAccessOf } from './integrations/notion-integration';
 import { getInvestigation, InvestigationError, type Investigation } from './investigations';
-import * as schema from './schema';
+import * as schema from './schema/schema';
 import { setParent } from './ticket-links';
 import { createTicket, emitEvent, type TicketOrigin } from './tickets';
 

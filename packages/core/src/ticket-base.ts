@@ -1,8 +1,9 @@
 // The branch the ticket starts from and why; before it starts, the one it would take now.
+
 import { eq } from 'drizzle-orm';
 
 import type { Db } from './db';
-import * as schema from './schema';
+import * as schema from './schema/schema';
 import { transition } from './states';
 import { TicketLinkError } from './ticket-links';
 import { emitEvent, getTicket, type Ticket } from './tickets';

@@ -1,7 +1,8 @@
 // A project's own agent image: the one its agents run on, the one saved and not applied yet, and its build's state and log.
+
 import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
-import type { AgentImageSource, AppliedAgentImage } from './agent-image-source';
+import type { AgentImageSource, AppliedAgentImage } from '../agent-image-source';
 import { now, projects } from './schema';
 
 export const AGENT_IMAGE_STATUSES = [

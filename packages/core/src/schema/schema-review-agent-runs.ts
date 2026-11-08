@@ -1,7 +1,8 @@
 // A review agent's runs on a review's change, asked from its review page: the markdown it answered, or why it failed.
+
 import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
-import type { ReportSpec } from './review-report-types';
+import type { ReportSpec } from '../review-report-types';
 import { now } from './schema';
 import { customAgents } from './schema-custom-agents';
 import { reviewOwnerColumns, runStatusColumn } from './schema-review-runs';

@@ -1,9 +1,10 @@
 // How a project reaches GitHub: the stored GitHub App, and the credentials `projectGitHubAuth`
 // resolves.
+
 import { eq } from 'drizzle-orm';
 
 import type { Db } from './db';
-import * as schema from './schema';
+import * as schema from './schema/schema';
 
 export type GitHubAppRow = typeof schema.githubApp.$inferSelect;
 export type GitHubAppCredentials = { appId: string; privateKey: string };

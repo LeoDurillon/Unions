@@ -1,8 +1,9 @@
 // What Union knows of the ticket's branch on GitHub: the commit it last pushed, a move away from it, and a resync onto it.
+
 import { eq } from 'drizzle-orm';
 
 import type { Db } from './db';
-import type { BranchMove } from './schema-types';
+import type { BranchMove } from './schema/schema-types';
 import * as schema from './tables';
 import { emitEvent, getTicket } from './tickets';
 

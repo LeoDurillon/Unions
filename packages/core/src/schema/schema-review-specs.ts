@@ -1,10 +1,11 @@
 // The specs a review checks its change against (a ticket's or a pull request's under review): the
 // list the Specs bar shows, read by Review with agent, Explain and Group by spec.
+
 import { index, integer, sqliteTable, text, type AnySQLiteColumn } from 'drizzle-orm/sqlite-core';
 
+import { SPEC_SOURCES } from '../spec-source-kinds';
 import { now, tickets } from './schema';
 import { currentReviews } from './schema-reviews';
-import { SPEC_SOURCES } from './spec-source-kinds';
 
 /**
  * One spec of a review (`ticketId` or `reviewId`). Its text is read from its source each time unless

@@ -1,8 +1,9 @@
 // Tests telling how a ticket's branch moved on GitHub, and what that holds back until a resync.
+
 import { expect, test } from 'bun:test';
 
 import { movedBranchRefusal, moveKind, resyncRefusal } from './branch-move';
-import type { BranchMove } from './schema-types';
+import type { BranchMove } from './schema/schema-types';
 
 const MOVED: BranchMove = { from: 'aaa', to: 'bbb', kind: 'diverged' };
 

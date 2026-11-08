@@ -1,10 +1,11 @@
 // Commands the user runs in a workspace: queued, their output kept, and handed to the implementer.
+
 import { and, asc, desc, eq, inArray, type SQL } from 'drizzle-orm';
 
 import { stripAnsi } from './ansi';
 import type { Db } from './db';
-import { commands } from './schema';
-import * as schema from './schema-container-runs';
+import { commands } from './schema/schema';
+import * as schema from './schema/schema-container-runs';
 import { transition, type Phase } from './states';
 import { getTicket } from './tickets';
 import { ownerColumns, type WorkspaceOwner } from './workspace-owner';

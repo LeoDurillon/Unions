@@ -1,7 +1,8 @@
 // The agent's environment settings as sent (`agentVariables`, `forwardPorts`,
 // `startForImplementation`), checked; only what differs from the defaults is kept.
+
 import { isRecord } from './preview-compose-check';
-import type { AgentVariables } from './schema-types';
+import type { AgentVariables } from './schema/schema-types';
 
 /**
  * Where the preview's file keeps the ports a service publishes on the machine: Union drops `ports`

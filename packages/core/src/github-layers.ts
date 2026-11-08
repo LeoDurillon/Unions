@@ -1,5 +1,6 @@
 // Which optional GitHub layers a project uses: its GitHub Project (the board) and issues mirroring its tickets.
-import type { ProjectConfig } from './schema-types';
+
+import type { ProjectConfig } from './schema/schema-types';
 
 type ProjectLayers = {
   githubProjectNodeId: string;

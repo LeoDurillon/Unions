@@ -13,7 +13,7 @@ import {
 } from './ci-outputs';
 import { finishContainerRun, keepForAgent, queueContainerRun } from './container-runs';
 import { createDb, migrateDb, type Db } from './db';
-import * as schema from './schema';
+import * as schema from './schema/schema';
 import { createTicket, type Ticket } from './tickets';
 
 let db: Db;

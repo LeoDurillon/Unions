@@ -1,8 +1,9 @@
 // Parent links between tickets, and the branch a ticket starts from (`ticketBase`).
+
 import { eq } from 'drizzle-orm';
 
 import type { Db } from './db';
-import * as schema from './schema';
+import * as schema from './schema/schema';
 import { emitEvent, getTicket, ticketLabel, type Project, type Ticket } from './tickets';
 
 /** A parent link the rules refuse: wrong project, a cycle, or a ticket that already started. */

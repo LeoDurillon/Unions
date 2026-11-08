@@ -1,6 +1,7 @@
 // When a ticket's branch moved on GitHub away from what Union last pushed, and what that holds back until a resync; browser-safe.
+
 import type { Phase } from './phases';
-import type { BranchMove } from './schema-types';
+import type { BranchMove } from './schema/schema-types';
 
 /** GitHub's comparison of what Union pushed with the branch's head now (`compare/<pushed>...<head>`). */
 export type Comparison = 'ahead' | 'behind' | 'diverged' | 'identical';

@@ -1,7 +1,8 @@
 // The outside trackers a project is connected to (Notion): secret, config and the tracker's columns as read.
+
 import { integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
-import type { IntegrationKindName } from './integrations/kinds';
+import type { IntegrationKindName } from '../integrations/kinds';
 import { now, projects } from './schema';
 
 /**

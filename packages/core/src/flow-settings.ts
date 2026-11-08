@@ -1,6 +1,7 @@
 // A project's flow presets as the settings send them, checked: unique ids and names, valid steps, a default among them.
+
 import { BUILT_IN_PRESETS, flowProblems, isPipelineStep, type FlowPreset } from './flows';
-import type { ProjectConfig } from './schema-types';
+import type { ProjectConfig } from './schema/schema-types';
 import type { CustomStep } from './states';
 
 export class FlowSettingsError extends Error {}

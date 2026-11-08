@@ -16,7 +16,7 @@ import {
   rerunInvestigation,
   type NewInvestigation,
 } from './investigations';
-import * as schema from './schema';
+import * as schema from './schema/schema';
 
 let db: Db;
 let input: NewInvestigation;

@@ -1,11 +1,12 @@
 // The tools agents run with: the defaults, Claude Code's built-in ones, and the list the user adds
 // to.
+
 import { asc, eq } from 'drizzle-orm';
 
 import type { Db } from './db';
 import { connectorTool, listConnectors } from './mcp-connectors';
-import * as schema from './schema';
-import { customAgents, type CustomAgentKind } from './schema-custom-agents';
+import * as schema from './schema/schema';
+import { customAgents, type CustomAgentKind } from './schema/schema-custom-agents';
 import { customAgentId, isCustomStep, type BuiltInStep, type CustomStep } from './states';
 
 /** Where the worker checks out the repository inside an agent container. */

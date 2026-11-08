@@ -1,10 +1,11 @@
 // Investigation records: created, queued, claimed by the worker, finished, followed up and
 // cancelled.
+
 import { and, asc, desc, eq } from 'drizzle-orm';
 
 import { validateTools } from './agent-tools';
 import type { Db } from './db';
-import * as schema from './schema';
+import * as schema from './schema/schema';
 import { isAgentModel } from './states';
 import { emitEvent } from './tickets';
 

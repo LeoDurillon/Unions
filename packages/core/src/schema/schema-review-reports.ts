@@ -1,8 +1,9 @@
 // The agent's report comparing a review's change with its specs, run when the user asks: for a
 // ticket's branch or a pull request under review (`review_comments` owners).
+
 import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
-import type { ReportSpec, ReviewReportResult } from './review-report-types';
+import type { ReportSpec, ReviewReportResult } from '../review-report-types';
 import { now } from './schema';
 import { reviewOwnerColumns, runStatusColumn } from './schema-review-runs';
 

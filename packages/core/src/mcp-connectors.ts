@@ -1,9 +1,10 @@
 // The account's claude.ai connectors: their tool rules and hints, and the checks that read them
 // (`claude mcp list`).
+
 import { asc, desc, eq, inArray } from 'drizzle-orm';
 
 import type { Db } from './db';
-import * as schema from './schema-mcp';
+import * as schema from './schema/schema-mcp';
 
 export type McpConnector = typeof schema.mcpConnectors.$inferSelect;
 export type McpConnectorCheck = typeof schema.mcpConnectorChecks.$inferSelect;

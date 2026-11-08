@@ -1,17 +1,18 @@
 // Custom agents: created and edited by the web, their prompts written by the worker's prompt writer, deleted softly.
+
 import { and, asc, eq, isNull } from 'drizzle-orm';
 
 import { customAgentUsers } from './custom-agent-usage';
 import type { Db } from './db';
-import * as schema from './schema';
-import { CUSTOM_AGENT_KINDS, type CustomAgentKind } from './schema-custom-agents';
+import * as schema from './schema/schema';
+import { CUSTOM_AGENT_KINDS, type CustomAgentKind } from './schema/schema-custom-agents';
 import { customStep, type CustomStep } from './states';
 import type { CustomAgentNames } from './step-titles';
 import * as tables from './tables';
 import { emitEvent } from './tickets';
 
 export type CustomAgent = typeof tables.customAgents.$inferSelect;
-export type { CustomAgentKind } from './schema-custom-agents';
+export type { CustomAgentKind } from './schema/schema-custom-agents';
 
 /** Why a change is refused: the web answers 400, 404 or 409 by `reason`, with the message. */
 export class CustomAgentError extends Error {

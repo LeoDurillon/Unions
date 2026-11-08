@@ -1,11 +1,12 @@
 // CI output given to the implementer: kept for its next run, or sent now as a revision with the user's note.
+
 import { and, desc, eq, inArray } from 'drizzle-orm';
 
 import { MAX_CI_TEXT_CHARS } from './ci-output-text';
 import { revisesImplementer } from './container-runs';
 import type { Db } from './db';
-import { commands } from './schema';
-import * as schema from './schema-ci-outputs';
+import { commands } from './schema/schema';
+import * as schema from './schema/schema-ci-outputs';
 import { getTicket } from './tickets';
 
 export type CiOutput = typeof schema.ciOutputs.$inferSelect;
