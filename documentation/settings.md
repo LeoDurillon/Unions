@@ -16,8 +16,8 @@ the page's name, opens the part of this guide about it; Union settings pages hav
 |                   | Scripts          | Commands you run by name from a ticket's Preview tab.                                                                                              |
 |                   | Flows            | [Flow presets](tickets.md#flows) and the default one.                                                                                              |
 |                   | Agent image      | [The image the project's agents run in](agents.md#the-agent-image): the default, your own Dockerfile, or an image you built.                       |
-| **Pull requests** | Pull requests    | Open a draft pull request automatically; suggest replies to GitHub comments; split pull requests into stacks; check every slice.                   |
-|                   | Review           | Hide lock files and other paths from the review page.                                                                                              |
+| **Pull requests** | Creation         | Open a draft pull request automatically; suggest replies to GitHub comments; split pull requests into stacks; check every slice.                   |
+|                   | Diff display     | Hide lock files and other paths from the review page.                                                                                              |
 | **Previews**      | Services         | Compose file, exposed services, compose additions, profiles, services for the agent.                                                               |
 |                   | Variables        | Plain and secret environment variables for previews and the agent.                                                                                 |
 |                   | End-to-end tests | The e2e command, and starting the preview for implementation steps.                                                                                |
@@ -47,18 +47,18 @@ Deleting a project removes its tickets from Union, with their containers and vol
 
 **Union settings**, at the bottom of the sidebar, holds what every project shares:
 
-| Group          | Pages                                                                                                |
-| -------------- | ---------------------------------------------------------------------------------------------------- |
-| General        | Shared instructions, Models                                                                          |
-| Planning       | Intake, Summary, Technical, Test plan                                                                |
-| Implementation | Implementation, Trim, Final review                                                                   |
-| Pull requests  | PR description, Replies to GitHub comments, Rebase, Simplify history, Split plan, Split into a stack |
-| Review         | Review comments, Group by spec, Explain, Spec report                                                 |
-| Memory         | Lesson writer, Lesson tidier                                                                         |
-| Custom agents  | Your own agents, and **New agent**                                                                   |
-| Review agents  | Your own review agents, run from a review page                                                       |
-| Tools          | Tools, Connectors                                                                                    |
-| GitHub         | GitHub App                                                                                           |
+| Group                | Pages                                                                                                |
+| -------------------- | ---------------------------------------------------------------------------------------------------- |
+| General              | Shared instructions, Models                                                                          |
+| Planning             | Intake, Summary, Technical, Test plan                                                                |
+| Implementation       | Implementation, Trim, Final review                                                                   |
+| Pull requests        | PR description, Replies to GitHub comments, Rebase, Simplify history, Split plan, Split into a stack |
+| Review page agents   | Review comments, Group by spec, Explain, Spec report                                                 |
+| Memory               | Lesson writer, Lesson tidier                                                                         |
+| Custom agents        | Your own agents, and **New agent**                                                                   |
+| Custom review agents | Your own review agents, run from a review page                                                       |
+| Tools                | Tools, Connectors                                                                                    |
+| GitHub               | GitHub App                                                                                           |
 
 See [Agents, flows and memory](agents.md) for what each page does.
 

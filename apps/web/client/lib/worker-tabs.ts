@@ -1,4 +1,4 @@
-// The Worker tab's own tabs: a step's in the ticket's flow order (custom agents named), the on-demand ones, the log.
+// The Steps tab's own tabs: a step's in the ticket's flow order (custom agents named), the on-demand ones, the log.
 import type { CustomAgentNames } from '@union/core';
 import { withPlanning } from '@union/core/flow-edit';
 import { resolveFlow } from '@union/core/flows';
@@ -8,7 +8,7 @@ import { stepTitle } from '@union/core/step-titles';
 import type { TicketDetail } from '../../src/api-types';
 import { currentStep } from './labels';
 
-/** The Worker tab's own tabs: one per step, then the log. */
+/** The Steps tab's own tabs: one per step, then the log. */
 export type WorkerTab = 'log' | Step;
 
 export type WorkerTabEntry = { id: WorkerTab; label: string; enabled: boolean };

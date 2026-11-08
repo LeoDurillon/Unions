@@ -106,7 +106,7 @@ For either kind:
    prompt…" until it is done. Read the prompt before you use the agent.
 3. **Regenerate** writes the prompt again from the role.
 
-Ticket steps are listed under **Custom agents** in Union settings, review agents under **Review agents**.
+Ticket steps are listed under **Custom agents** in Union settings, review agents under **Custom review agents**.
 
 ### Ticket steps
 

@@ -1,6 +1,6 @@
 # Troubleshooting
 
-Start with the **Log** tab of the ticket's Worker tab: it shows what the agent and Union did, in order. The
+Start with the **Log** tab of the ticket's Steps tab: it shows what the agent and Union did, in order. The
 Compose logs (`bun run compose:logs`) show the web app and the worker.
 
 ## Installation

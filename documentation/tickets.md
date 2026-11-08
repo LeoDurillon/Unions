@@ -12,7 +12,7 @@ moving a card to In Progress on GitHub starts the ticket. Without one, Union's b
 | **Done**            | Tickets whose final review you approved. Their pull request is ready for review. |
 | **Merged / Closed** | Done tickets whose pull request was merged or closed in the last three weeks.    |
 
-Each card shows the ticket's state ("Needs review · Technical", "Running · Implementation"), its issue number (when it has an issue), the
+Each card shows the ticket's state ("Waiting for you · Technical", "Running · Implementation"), its issue number (when it has an issue), the
 ticket it depends on, and the CI checks of its pull request. Fold a column you do not need with its arrow.
 
 While an agent works on a ticket, its card also shows how long the run has gone and the last thing the agent did:
@@ -149,7 +149,7 @@ Click a card to open its panel:
   files, the base branch and flow, the **Start** and **Cancel ticket** buttons, and every run with its model,
   duration and token usage.
 - **Preview**: the ticket's [preview environment](previews.md), its end-to-end tests and commands.
-- **Worker**: one tab per step with the agent's output, then the **Log**, which shows what the agent does live.
+- **Steps**: one tab per step with the agent's output, then the **Log**, which shows what the agent does live.
 - **PR**: the ticket's pull request, its CI checks and branch operations. See
   [Branches and pull requests](branches.md).
 - **Notion**: the open comments of the ticket's Notion page, for a ticket imported from Notion or linked to a page.

@@ -11,9 +11,8 @@ import { StepNotices } from './step-notices';
 import { Badge } from './ui';
 import { VerdictBadge } from './verdict-badge';
 
-const VALIDATION_TONE = { pending: 'amber', approved: 'green', revise: 'neutral' } as const;
+const VALIDATION_TONE = { approved: 'green', revise: 'neutral' } as const;
 const VALIDATION_LABEL = {
-  pending: 'awaiting review',
   approved: 'approved',
   revise: 'revision requested',
 } as const;
@@ -29,7 +28,10 @@ function VersionBar({
 }): ReactElement {
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <Badge tone={VALIDATION_TONE[shown.validation]}>{VALIDATION_LABEL[shown.validation]}</Badge>
+      {/* A version still to approve says nothing here: the ticket's badge already says "Waiting for you". */}
+      {shown.validation === 'pending' ? null : (
+        <Badge tone={VALIDATION_TONE[shown.validation]}>{VALIDATION_LABEL[shown.validation]}</Badge>
+      )}
       {versions.length > 1 ? (
         <select
           className="rounded-md border border-zinc-300 bg-white px-2 py-0.5 text-xs dark:border-zinc-700 dark:bg-zinc-900"

@@ -63,8 +63,8 @@ test('review agents get their own group, after the custom agents and before Tool
   const groups = navGroups([SECURITY, MERGE]);
   const labels = groups.map((group) => group.label);
   expect(labels.indexOf('Custom agents')).toBe(labels.indexOf('Tools') - 2);
-  expect(labels.indexOf('Review agents')).toBe(labels.indexOf('Tools') - 1);
-  expect(groups.find((group) => group.label === 'Review agents')?.sections).toEqual([
+  expect(labels.indexOf('Custom review agents')).toBe(labels.indexOf('Tools') - 1);
+  expect(groups.find((group) => group.label === 'Custom review agents')?.sections).toEqual([
     { id: 'agent_3', label: 'Merge readiness' },
   ]);
   expect(navGroups([MERGE]).map((group) => group.label)).not.toContain('Custom agents');

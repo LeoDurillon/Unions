@@ -43,7 +43,7 @@ export function describePhase(phase: Phase, names: CustomAgentNames = {}): Phase
       return stepPhase('Running', phase.step, 'blue', names);
     }
     case 'awaiting_approval': {
-      return stepPhase('Needs review', phase.step, 'amber', names);
+      return stepPhase('Waiting for you', phase.step, 'amber', names);
     }
     case 'commit_refused': {
       return stepPhase('Commit refused', phase.step, 'amber', names);

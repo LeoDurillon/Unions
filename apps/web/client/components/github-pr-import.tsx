@@ -9,7 +9,7 @@ import { Badge, Button, ErrorText, Field, inputClass } from './ui';
 
 const VALIDATIONS = {
   approved: 'approved',
-  pending: 'awaiting review',
+  pending: 'waiting for you',
   revise: 'revision requested',
 } as const;
 

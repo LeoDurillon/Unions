@@ -27,7 +27,7 @@ While the pull request is open, the PR tab shows **Split into a stack**, usable 
    session) reads the spec, the diff and the commits, and writes one `## Slice <n>: <title>` section per slice with
    its `**Spec:**` (the slice's PR description), `**Changes:**` and `**Stands alone:**` (why it builds on the slices
    below and is safe to ship before those above). A plan the host cannot read gets one more turn in its session.
-   It waits in the Worker tab: **Approve and split**, **Request revision**, **Edit**, or **Drop the split** (back
+   It waits in the Steps tab: **Approve and split**, **Request revision**, **Edit**, or **Drop the split** (back
    to where it was asked).
 2. **Split:** the implementer's session is resumed with the `split` prompt and the approved plan. It rewrites the
    commits into the slices, each commit ending with a `Slice: <n>` trailer, in order. The host first fetches the

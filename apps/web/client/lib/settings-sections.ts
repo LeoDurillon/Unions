@@ -28,8 +28,8 @@ export const SETTINGS_GROUPS = [
   {
     label: 'Pull requests',
     sections: [
-      { id: 'pull-requests', label: 'Pull requests' },
-      { id: 'review', label: 'Review' },
+      { id: 'pull-requests', label: 'Creation' },
+      { id: 'review', label: 'Diff display' },
     ],
   },
   {

@@ -14,7 +14,7 @@ flowchart LR
     R -. request changes .-> I
 ```
 
-Each step's output is a tab in the ticket's **Worker** tab, and a comment on the GitHub issue. When you ask for a
+Each step's output is a tab in the ticket's **Steps** tab, and a comment on the GitHub issue. When you ask for a
 revision, Union edits that comment instead of adding another one.
 
 ![A technical plan waiting for approval](../docs/screenshots/ticket-plan.png)
@@ -135,7 +135,7 @@ When a hook refuses a commit, the panel shows the changes and what the hook said
 
 ## Watch an agent work
 
-The **Log** tab in the Worker tab shows what the agent does as it does it: the files it reads, the commands it runs,
+The **Log** tab in the Steps tab shows what the agent does as it does it: the files it reads, the commands it runs,
 its messages. The Overview lists every run with its model, duration and tokens used.
 
 The token usage shows what the same tokens would cost on the Anthropic API. A Claude Max subscription does not bill

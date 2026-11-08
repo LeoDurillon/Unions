@@ -11,7 +11,7 @@ export const UNION_SETTINGS_GROUPS = [
     sections: ['pr_description', 'pr_replies', 'rebase', 'simplify', 'split_plan', 'split'],
   },
   {
-    label: 'Review',
+    label: 'Review page agents',
     sections: ['review_comments', 'review_groups', 'review_explain', 'review_report'],
   },
   { label: 'Memory', sections: ['lesson_writer', 'lesson_tidier'] },

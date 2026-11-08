@@ -29,7 +29,7 @@ export function navGroups(agents: readonly AgentConfig[]): NavGroup<UnionSection
   }));
   const added = [
     { label: 'Custom agents', sections: entriesOf(agents, 'step') },
-    { label: 'Review agents', sections: entriesOf(agents, 'review') },
+    { label: 'Custom review agents', sections: entriesOf(agents, 'review') },
   ].filter((group) => group.sections.length > 0);
   groups.splice(TOOLS_GROUP, 0, ...added);
   return groups;

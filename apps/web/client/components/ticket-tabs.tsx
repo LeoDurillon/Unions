@@ -23,7 +23,7 @@ function sectionsFor(detail: TicketDetail): TabEntry<Section>[] {
   return [
     { id: 'overview', label: 'Overview', enabled: true },
     { id: 'preview', label: 'Preview', enabled: true },
-    { id: 'worker', label: 'Worker', enabled: true },
+    { id: 'worker', label: 'Steps', enabled: true },
     { id: 'pull-request', label: prNumber === null ? 'PR' : `PR #${prNumber}`, enabled: true },
     { ...tracker, label: TRACKER_LABELS[tracker.id] },
   ];
