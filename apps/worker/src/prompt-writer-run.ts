@@ -10,7 +10,7 @@ import {
   type CustomAgent,
 } from '@union/core';
 
-import { runAgent, type AgentFn } from './agent';
+import { agentFailure, runAgent, type AgentFn } from './agent';
 import type { TargetDeps } from './agent-review-target';
 import { RunPool, WORKER_STOPPED } from './run-pool';
 import type { RunSlots } from './slots';
@@ -48,8 +48,7 @@ function write(deps: PromptWriterDeps, agent: CustomAgent, signal: AbortSignal):
       },
     });
     if (outcome.kind !== 'ok') {
-      const prefix = outcome.kind === 'rate_limited' ? 'Usage limit reached: ' : '';
-      return { error: `${prefix}${outcome.message}` };
+      return { error: agentFailure(outcome) };
     }
     return { prompt: parseWrittenPrompt(outcome.text) };
   });

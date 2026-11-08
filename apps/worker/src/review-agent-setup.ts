@@ -7,8 +7,8 @@ import type { AgentReviewDeps } from './agent-review';
 import { loadProject, type ReviewTarget } from './agent-review-target';
 import { runInstall } from './gate';
 import { syncProjectFiles } from './project-files-sync';
-import { reviewAgentContainer } from './review-agent-checkout';
 import type { CheckoutSetup } from './review-agent-prompt';
+import { sideReviewContainer } from './side-review/names';
 
 export type Deps = AgentReviewDeps & { agent?: AgentFn };
 
@@ -34,7 +34,7 @@ export async function prepare(
   if (fromFork(deps, run)) {
     return { kind: 'fork' };
   }
-  const names = reviewAgentContainer(run.id);
+  const names = sideReviewContainer('v', run.id);
   await syncProjectFiles(deps.db, deps.runtime, target.projectId, {
     volume: names.workspaceVolume,
     image: deps.config.image,

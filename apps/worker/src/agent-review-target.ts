@@ -104,14 +104,6 @@ async function ticketTarget(deps: TargetDeps, ticketId: number): Promise<ReviewT
   };
 }
 
-export function agentReviewContainer(id: number): TicketContainer {
-  return {
-    name: `union-a${id}`,
-    homeVolume: `union-a${id}-home`,
-    workspaceVolume: `union-a${id}-ws`,
-  };
-}
-
 /**
  * A throwaway container named `names` for the project, with what `clone` checks out in it; the
  * returned `close` removes it. A failure on the way removes it too.

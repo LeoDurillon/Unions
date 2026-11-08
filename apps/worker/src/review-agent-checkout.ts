@@ -15,15 +15,6 @@ import {
 import { hostGit, REPO_DIR, type TicketContainer } from './provision';
 import { exportBranch } from './workspace-git';
 
-/** A review agent's run never shares a container: it may build and test, which nothing keeps. */
-export function reviewAgentContainer(id: number): TicketContainer {
-  return {
-    name: `union-v${id}`,
-    homeVolume: `union-v${id}-home`,
-    workspaceVolume: `union-v${id}-ws`,
-  };
-}
-
 /**
  * The host clones the ticket's branch and its base from a bundle of the ticket container's
  * repository (the base may be a parent's branch GitHub does not have), checks out the reviewed
@@ -77,12 +68,15 @@ async function ticketCopy(
   }
 }
 
-/** Checks the run's change out in `union-v<id>`; the target's `close` removes the container. */
+/**
+ * Checks the run's change out in its own throwaway container (`union-v<id>`), even for a ticket: a
+ * review agent may build and test, which nothing keeps. The target's `close` removes it.
+ */
 export function openReviewAgentTarget(
   deps: TargetDeps,
   run: Pick<ReviewAgentRun, 'id' | 'ticketId' | 'reviewId'>,
+  names: TicketContainer,
 ): Promise<ReviewTarget> {
-  const names = reviewAgentContainer(run.id);
   return run.ticketId === null
     ? openTarget(deps, run, names)
     : ticketCopy(deps, run.ticketId, names);

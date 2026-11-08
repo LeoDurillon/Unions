@@ -18,7 +18,7 @@ import {
 } from '@union/core';
 import { eq } from 'drizzle-orm';
 
-import { runAgent, type AgentFn, type AgentOutcome } from './agent';
+import { agentFailure, runAgent, type AgentFn, type AgentOutcome } from './agent';
 import { projectGitToken } from './credentials';
 import { runOnTicket } from './investigate-ticket';
 import { TicketDrafter } from './investigation-ticket';
@@ -103,8 +103,7 @@ function toOutcome(outcome: AgentOutcome, cancelled: boolean): InvestigationOutc
   if (outcome.kind === 'ok') {
     return { status: 'succeeded', result: outcome.text };
   }
-  const prefix = outcome.kind === 'rate_limited' ? 'Usage limit reached: ' : '';
-  return { status: 'failed', error: `${prefix}${outcome.message}` };
+  return { status: 'failed', error: agentFailure(outcome) };
 }
 
 function investigate(

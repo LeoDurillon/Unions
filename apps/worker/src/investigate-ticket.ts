@@ -12,7 +12,7 @@ import {
   ticketBase,
 } from '@union/core';
 
-import { runAgent, type AgentFn, type AgentOutcome } from './agent';
+import { agentFailure, runAgent, type AgentFn, type AgentOutcome } from './agent';
 import { runIn } from './container-exec';
 import type { InvestigationDeps } from './investigate';
 import { parentSection } from './prompts';
@@ -91,8 +91,7 @@ function toOutcome(outcome: AgentOutcome, cancelled: boolean): InvestigationOutc
   if (outcome.kind === 'ok') {
     return { status: 'succeeded', result: outcome.text };
   }
-  const prefix = outcome.kind === 'rate_limited' ? 'Usage limit reached: ' : '';
-  return { status: 'failed', error: `${prefix}${outcome.message}` };
+  return { status: 'failed', error: agentFailure(outcome) };
 }
 
 /** Where the agent stands, with the ticket's parent (heading one level down, under the ticket). */

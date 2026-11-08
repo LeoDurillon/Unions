@@ -194,6 +194,13 @@ export async function runAgent(runtime: ContainerRuntime, run: AgentRun): Promis
 
 export type AgentFn = (runtime: ContainerRuntime, run: AgentRun) => Promise<AgentOutcome>;
 
+/** The error of an agent call that did not finish, a usage limit named as such. */
+export function agentFailure(outcome: Exclude<AgentOutcome, { kind: 'ok' }>): string {
+  return outcome.kind === 'rate_limited'
+    ? `Usage limit reached: ${outcome.message}`
+    : outcome.message;
+}
+
 const MISSING_SESSION = /No conversation found with session ID/u;
 
 /**

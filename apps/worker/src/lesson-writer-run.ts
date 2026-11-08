@@ -17,7 +17,7 @@ import {
   type LessonSuggestionOutcome,
 } from '@union/core';
 
-import { runAgent, type AgentFn } from './agent';
+import { agentFailure, runAgent, type AgentFn } from './agent';
 import type { TargetDeps } from './agent-review-target';
 import { RunPool, WORKER_STOPPED } from './run-pool';
 import type { RunSlots } from './slots';
@@ -85,8 +85,7 @@ function write(
       },
     });
     if (outcome.kind !== 'ok') {
-      const prefix = outcome.kind === 'rate_limited' ? 'Usage limit reached: ' : '';
-      return { status: 'failed', error: `${prefix}${outcome.message}` };
+      return { status: 'failed', error: agentFailure(outcome) };
     }
     const kept = listLessons(db, row.projectId);
     const parse = row.kind === 'tidy' ? parseTidyProposals : parseLessonSuggestions;

@@ -17,7 +17,7 @@ import {
   withoutUnionLinks,
 } from '@union/core';
 
-import { runAgent, runResumable, type AgentFn } from './agent';
+import { agentFailure, runAgent, runResumable, type AgentFn } from './agent';
 import { loadProject, type TargetDeps } from './agent-review-target';
 import type { GitHubApi } from './github/api';
 import { descriptionOf, findTemplate, rewritePrompt, type Template } from './pr-description';
@@ -109,8 +109,7 @@ async function runRewrite(
     `${sharedPrompt(db, project.id)}\n\n${prompt}`,
   );
   if (outcome.kind !== 'ok') {
-    const prefix = outcome.kind === 'rate_limited' ? 'Usage limit reached: ' : '';
-    return { status: 'failed', error: `${prefix}${outcome.message}` };
+    return { status: 'failed', error: agentFailure(outcome) };
   }
   const text = descriptionOf(outcome.text);
   return text === ''

@@ -15,24 +15,16 @@ import {
   type AgentReviewSpec,
   type AgentReviewOutcome,
   type Db,
-  reviewRunExists,
 } from '@union/core';
 
-import { runAgent, type AgentFn } from './agent';
+import { agentFailure, runAgent, type AgentFn } from './agent';
 import { FINDINGS_FORMAT, parseFindings, toDrafts, type Findings } from './agent-review-findings';
 import { openStackTarget, stackOutcome, stackReviewPrompt } from './agent-review-stack';
-import {
-  agentReviewContainer,
-  openTarget,
-  type ReviewTarget,
-  type TargetDeps,
-} from './agent-review-target';
-import { removeRunContainers } from './janitor';
-import { REPO_DIR } from './provision';
-import { RunPool } from './run-pool';
+import { openTarget, type ReviewTarget, type TargetDeps } from './agent-review-target';
+import { REPO_DIR, type TicketContainer } from './provision';
+import { SideReviewRunner, STANDARD_ENDS, type SideReviewKind } from './side-review/engine';
+import { missingBlock } from './side-review/outcome-text';
 import type { RunSlots } from './slots';
-
-const ANSWER_TAIL_CHARS = 2000;
 
 export type AgentReviewDeps = TargetDeps & { slots: RunSlots; agent?: AgentFn };
 
@@ -64,8 +56,11 @@ type Checkout = {
 };
 
 /** One change (a ticket's or a pull request's), or the pull requests of a stack together. */
-async function openCheckout(deps: AgentReviewDeps, review: AgentReview): Promise<Checkout> {
-  const names = agentReviewContainer(review.id);
+async function openCheckout(
+  deps: AgentReviewDeps,
+  review: AgentReview,
+  names: TicketContainer,
+): Promise<Checkout> {
   const stack = agentReviewStack(deps.db, review.id);
   if (stack.length > 1) {
     const target = await openStackTarget(
@@ -97,18 +92,20 @@ async function openCheckout(deps: AgentReviewDeps, review: AgentReview): Promise
   };
 }
 
-/** The agent reads the change and its findings become drafts on the diffs the user reviews. */
-async function reviewChange(
-  deps: AgentReviewDeps,
-  review: AgentReview,
-  signal: AbortSignal,
-): Promise<AgentReviewOutcome> {
-  const { db, runtime } = deps;
-  const checkout = await openCheckout(deps, review);
-  try {
-    if (signal.aborted) {
-      return { status: 'cancelled' };
-    }
+/** The agent reads the change, and its findings become drafts on the diffs the user reviews. */
+const agentReview: SideReviewKind<AgentReview, AgentReviewOutcome, Checkout> = {
+  kind: 'agent_review',
+  letter: 'a',
+  claim: ({ db }) => claimAgentReview(db),
+  finish: ({ db }, row, outcome) => {
+    finishAgentReview(db, row.id, outcome);
+  },
+  failInterrupted: ({ db }) => failInterruptedAgentReviews(db),
+  open: openCheckout,
+  ...STANDARD_ENDS,
+  hunkIndex: false,
+  work: async (deps, { target: checkout, signal }) => {
+    const { db, runtime } = deps;
     const outcome = await (deps.agent ?? runAgent)(runtime, {
       container: checkout.container,
       cwd: REPO_DIR,
@@ -120,45 +117,21 @@ async function reviewChange(
       onEvent: checkout.log,
     });
     if (outcome.kind !== 'ok') {
-      const prefix = outcome.kind === 'rate_limited' ? 'Usage limit reached: ' : '';
-      return { status: 'failed', error: `${prefix}${outcome.message}` };
+      return { status: 'failed', error: agentFailure(outcome) };
     }
     const findings = parseFindings(outcome.text);
-    if (!findings) {
-      return {
-        status: 'failed',
-        error: `The agent's answer has no comments block. Its end:\n\n${outcome.text.slice(-ANSWER_TAIL_CHARS)}`,
-      };
-    }
-    return checkout.outcome(findings);
-  } finally {
-    await checkout.close();
-  }
-}
+    return findings
+      ? checkout.outcome(findings)
+      : { status: 'failed', error: missingBlock('comments', outcome.text) };
+  },
+};
 
 /**
  * Runs queued agent reviews, sharing the run slots with the ticket pipeline and the investigations:
  * a ticket's in its own container, a pull request's in a throwaway one (`union-a<id>`).
  */
-export class AgentReviewRunner extends RunPool<AgentReview, AgentReviewOutcome> {
-  constructor(private readonly deps: AgentReviewDeps) {
-    super({
-      slots: deps.slots,
-      claim: () => claimAgentReview(deps.db),
-      run: (review, signal) => reviewChange(deps, review, signal),
-      failed: (error) => ({ status: 'failed', error }),
-      stopped: { status: 'cancelled' },
-      finish: (review, outcome) => {
-        finishAgentReview(deps.db, review.id, outcome);
-      },
-      exists: (id) => reviewRunExists(deps.db, 'agent_review', id),
-    });
-  }
-
-  /** Fails the reviews a stopped worker left running and removes their pull request containers. */
-  async recover(): Promise<void> {
-    const left = failInterruptedAgentReviews(this.deps.db).filter((run) => run.reviewId !== null);
-    const containers = left.map((run) => agentReviewContainer(run.id));
-    await removeRunContainers(this.deps.db, this.deps.runtime, containers);
+export class AgentReviewRunner extends SideReviewRunner<AgentReview, AgentReviewOutcome, Checkout> {
+  constructor(deps: AgentReviewDeps) {
+    super(deps, agentReview);
   }
 }

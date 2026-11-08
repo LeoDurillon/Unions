@@ -1,4 +1,4 @@
-// Runs the explanations of a review's lines on the shared run slots, a pull request's in a throwaway container.
+// Explains a review's lines as users ask, one per review at a time: a ticket's in its own container, a pull request's in a throwaway one (`union-e<id>`).
 import {
   appendAgentLine,
   claimExplanation,
@@ -15,31 +15,20 @@ import {
   type ExplanationOutcome,
   type ReviewExplanation,
   type SpecPart,
-  reviewRunExists,
 } from '@union/core';
 
-import { runAgent, runResumable, type AgentFn, type AgentOutcome } from './agent';
+import { agentFailure, runAgent, runResumable, type AgentFn, type AgentOutcome } from './agent';
 import type { AgentReviewDeps } from './agent-review';
 import { openTarget, type ReviewTarget } from './agent-review-target';
 import { runIn } from './container-exec';
-import { removeRunContainers } from './janitor';
-import { REPO_DIR, type TicketContainer } from './provision';
+import { REPO_DIR } from './provision';
 import { explainPrompt, followUpPrompt } from './review-explain-prompt';
 import { keepDocs, parseExplanation } from './review-explain-result';
-import { RunPool } from './run-pool';
+import { SideReviewRunner, STANDARD_ENDS, type SideReviewKind } from './side-review/engine';
+import { missingBlock } from './side-review/outcome-text';
 
-const ANSWER_TAIL_CHARS = 2000;
 /** Prints back each path read on stdin that exists in the checkout. */
 const EXISTING = String.raw`while IFS= read -r p; do [ -e "$p" ] && printf "%s\n" "$p"; done; true`;
-
-/** A pull request's explanation runs in its own throwaway container. */
-function explanationContainer(id: number): TicketContainer {
-  return {
-    name: `union-e${id}`,
-    homeVolume: `union-e${id}-home`,
-    workspaceVolume: `union-e${id}-ws`,
-  };
-}
 
 /** The parts of the review's newest grouping the lines touch (an outdated one still counts). */
 function specParts(db: Db, target: ReviewTarget, explanation: ReviewExplanation): SpecPart[] {
@@ -88,77 +77,53 @@ function ask(
   return runResumable(agent, deps.runtime, resumed, run.prompt);
 }
 
-async function explain(
-  deps: AgentReviewDeps,
-  explanation: ReviewExplanation,
-  signal: AbortSignal,
-): Promise<ExplanationOutcome> {
-  const { db } = deps;
-  const target = await openTarget(deps, explanation, explanationContainer(explanation.id));
-  try {
-    const thread = explanationThread(db, explanation);
+const explanation: SideReviewKind<ReviewExplanation, ExplanationOutcome> = {
+  kind: 'explanation',
+  letter: 'e',
+  claim: ({ db }) => claimExplanation(db),
+  finish: ({ db }, row, outcome) => {
+    finishExplanation(db, row.id, outcome);
+  },
+  failInterrupted: ({ db }) => failInterruptedExplanations(db),
+  open: openTarget,
+  ...STANDARD_ENDS,
+  hunkIndex: false,
+  work: async (deps, { row, target, signal }) => {
+    const { db } = deps;
+    const thread = explanationThread(db, row);
     const outcome = await ask(deps, target, thread, {
       container: target.container,
       cwd: REPO_DIR,
       model: modelFor(db, 'review_explain'),
       effort: effortFor(db, 'review_explain'),
-      prompt: explainPrompt(db, target, thread, specParts(db, target, explanation)),
+      prompt: explainPrompt(db, target, thread, specParts(db, target, row)),
       tools: toolsFor(db, 'review_explain'),
       signal,
       // A ticket's lines are its own too, so its usage counts them, as for its agent reviews.
       onEvent: (event) => {
         appendAgentLine(db, {
-          explanationId: explanation.id,
-          ticketId: explanation.ticketId ?? undefined,
+          explanationId: row.id,
+          ticketId: row.ticketId ?? undefined,
           payload: event,
         });
       },
     });
     if (outcome.kind !== 'ok') {
-      const prefix = outcome.kind === 'rate_limited' ? 'Usage limit reached: ' : '';
-      return { status: 'failed', error: `${prefix}${outcome.message}` };
+      return { status: 'failed', error: agentFailure(outcome) };
     }
-    const parsed = parseExplanation(outcome.text, explanation.specs);
+    const parsed = parseExplanation(outcome.text, row.specs);
     if (!parsed) {
-      return {
-        status: 'failed',
-        error: `The agent's answer has no explanation block. Its end:\n\n${outcome.text.slice(-ANSWER_TAIL_CHARS)}`,
-      };
+      return { status: 'failed', error: missingBlock('explanation', outcome.text) };
     }
-    const found = await existing(
-      deps,
-      target.container,
-      parsed.docs.map((doc) => doc.path),
-    );
+    const docs = parsed.docs.map((doc) => doc.path);
+    const found = await existing(deps, target.container, docs);
     return { status: 'succeeded', result: keepDocs(parsed, found), sessionId: outcome.sessionId };
-  } finally {
-    await target.close();
-  }
-}
+  },
+};
 
-/**
- * Runs the explanations users asked for, one per review at a time, on the same run slots as the
- * pipeline: a ticket's in its own container, a pull request's in a throwaway one (`union-e<id>`).
- */
-export class ReviewExplainRunner extends RunPool<ReviewExplanation, ExplanationOutcome> {
-  constructor(private readonly deps: AgentReviewDeps & { agent?: AgentFn }) {
-    super({
-      slots: deps.slots,
-      claim: () => claimExplanation(deps.db),
-      run: (explanation, signal) => explain(deps, explanation, signal),
-      failed: (error) => ({ status: 'failed', error }),
-      stopped: { status: 'cancelled' },
-      finish: (explanation, outcome) => {
-        finishExplanation(deps.db, explanation.id, outcome);
-      },
-      exists: (id) => reviewRunExists(deps.db, 'explanation', id),
-    });
-  }
-
-  /** Fails the explanations a stopped worker left running and removes their pull request containers. */
-  async recover(): Promise<void> {
-    const left = failInterruptedExplanations(this.deps.db).filter((run) => run.reviewId !== null);
-    const containers = left.map((run) => explanationContainer(run.id));
-    await removeRunContainers(this.deps.db, this.deps.runtime, containers);
+/** Runs the explanations users asked for, one per review at a time, on the run slots the pipeline shares. */
+export class ReviewExplainRunner extends SideReviewRunner<ReviewExplanation, ExplanationOutcome> {
+  constructor(deps: AgentReviewDeps) {
+    super(deps, explanation);
   }
 }
