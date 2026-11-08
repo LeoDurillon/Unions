@@ -4,7 +4,7 @@
 import { and, asc, desc, eq, inArray, isNotNull, isNull, like, lte } from 'drizzle-orm';
 
 import type { Db } from '../db';
-import { parseNotionId } from '../notion-id';
+import { parseNotionId } from '../integrations/notion-id';
 import * as schema from '../tables';
 import { emitEvent } from '../tickets';
 import { isEvent, type StoredEvent } from './event-catalog';

@@ -1,7 +1,8 @@
 // The titles of the Notion pages a page's markdown mentions, so its links read as titles.
-import type { NotionApi } from '../notion-api';
-import { parseNotionId } from '../notion-id';
-import { mentionedUrls } from '../notion-markdown';
+
+import type { NotionApi } from './notion-api';
+import { parseNotionId } from './notion-id';
+import { mentionedUrls } from './notion-markdown';
 
 const MAX_TITLED_MENTIONS = 10;
 

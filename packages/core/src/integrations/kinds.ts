@@ -1,7 +1,8 @@
 // The kinds of ticket source Union connects to (Notion, Jira), and what the UI needs to know about each; browser-safe.
-import { parseNotionId } from '../notion-id';
-import { notionMarkdown } from '../notion-markdown';
+
 import { jiraRefSiteError, parseJiraKey, readJiraConfig } from './jira-config';
+import { parseNotionId } from './notion-id';
+import { notionMarkdown } from './notion-markdown';
 
 export type IntegrationKindName = 'notion' | 'jira';
 

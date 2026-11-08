@@ -1,5 +1,6 @@
 // A comment on a ticket's Notion page, as the web queues it (`post_notion_comment`) and the worker posts it; browser-safe.
-import { isRecord } from './agent-activity';
+
+import { isRecord } from '../agent-activity';
 import { MAX_TEXT_OBJECTS, toRichText } from './notion-rich-text';
 
 /** A comment longer than this is better written in Notion. */

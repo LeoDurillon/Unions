@@ -1,7 +1,8 @@
 // Notion as an `IntegrationProvider`: a thin adapter over `NotionApi`, limited to the integration's data source.
-import type { NotionApi, NotionDataSource } from '../notion-api';
-import { notionMarkdown } from '../notion-markdown';
+
+import type { NotionApi, NotionDataSource } from './notion-api';
 import { notionConfigOf } from './notion-integration';
+import { notionMarkdown } from './notion-markdown';
 import { mentionTitles } from './notion-mentions';
 import { ItemOutsideSourceError, type IntegrationProvider, type SourceItem } from './provider';
 

@@ -1,8 +1,8 @@
 // The Notion action of a rule: the properties it sets, checked against the stored Notion columns, and what it sends.
 
 import type { Db } from '../db';
+import type { NotionProperty } from '../integrations/notion-api';
 import { notionSchemaOf } from '../integrations/notion-integration';
-import type { NotionProperty } from '../notion-api';
 import type { NotionPropertyAction, NotionValue } from './event-actions';
 import {
   notionPropertyValue,

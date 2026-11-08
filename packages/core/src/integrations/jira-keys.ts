@@ -1,6 +1,7 @@
 // The Jira issues a pull request names, by habit: keys (ABC-123) in its title, branch or description, and links of
 // the project's site; only the project's own keys, so `UTF-8` or `SHA-256` are not taken for issues. Pure.
-import { parseJiraKey } from './integrations/jira-config';
+
+import { parseJiraKey } from './jira-config';
 
 const KEY = /\b(?<key>[A-Za-z][A-Za-z0-9_]*-[1-9]\d*)\b/gu;
 const LINK = /https:\/\/[^\s)>\]"']+/gu;

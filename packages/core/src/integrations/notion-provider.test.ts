@@ -1,8 +1,8 @@
 import { expect, test } from 'bun:test';
 
-import type { NotionApi, NotionPage } from '../notion-api';
-import { NotionError } from '../notion-error';
 import { integrationKind, isIntegrationKindName } from './kinds';
+import type { NotionApi, NotionPage } from './notion-api';
+import { NotionError } from './notion-error';
 import { notionProvider } from './notion-provider';
 import { ItemOutsideSourceError } from './provider';
 

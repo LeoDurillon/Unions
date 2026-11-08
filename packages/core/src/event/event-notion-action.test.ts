@@ -3,8 +3,8 @@
 import { beforeEach, expect, test } from 'bun:test';
 
 import { createDb, migrateDb, type Db } from '../db';
+import type { NotionProperty } from '../integrations/notion-api';
 import { saveNotionConnection, storeNotionSchema } from '../integrations/notion-integration';
-import type { NotionProperty } from '../notion-api';
 import * as schema from '../tables';
 import type { NotionValue } from './event-actions';
 import { checkedNotionAction, notionSets, notionSetsText } from './event-notion-action';

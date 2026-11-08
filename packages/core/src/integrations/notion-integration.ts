@@ -1,6 +1,7 @@
 // A project's Notion integration: its config, secret and data source columns, read from and saved to `integrations`.
+
 import type { Db } from '../db';
-import type { NotionDataSource, NotionProperty } from '../notion-api';
+import type { NotionDataSource, NotionProperty } from './notion-api';
 import { integrationOf, removeIntegration, saveIntegration, storeFields } from './store';
 
 /** A Notion integration's config: the data source tickets come from. */

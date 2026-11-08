@@ -1,8 +1,9 @@
 // The provider of each kind of tracker, built over the API clients the process has.
-import type { NotionApi } from '../notion-api';
+
 import type { JiraApi } from './jira-api';
 import { jiraProvider } from './jira-provider';
 import type { IntegrationKindName } from './kinds';
+import type { NotionApi } from './notion-api';
 import { notionProvider } from './notion-provider';
 import type { IntegrationProvider } from './provider';
 

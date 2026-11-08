@@ -1,6 +1,7 @@
 // A Jira issue's comments as the ticket's Jira tab shows them: author, times, who may see it, text as markdown, link.
-import { jiraCommentUrl } from '../jira-comment-link';
+
 import { adfMarkdown } from './adf-markdown';
+import { jiraCommentUrl } from './jira-comment-link';
 import { isRecord, text } from './jira-parse';
 
 /** One comment of the issue; `markdown` is its rich text converted, its images and files by name. */
