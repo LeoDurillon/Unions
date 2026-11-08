@@ -96,7 +96,7 @@ export function FlowPicker({
     ...presets.map((option) => ({
       value: option.id,
       label: option.name,
-      title: flowSteps(option.steps, names),
+      title: [option.description, flowSteps(option.steps, names)].filter(Boolean).join('\n'),
     })),
     { value: CUSTOM, label: 'Custom', title: 'Choose the planning steps and custom agents' },
   ];
@@ -114,6 +114,7 @@ export function FlowPicker({
           }
         }}
       />
+      {preset?.description ? <p className="text-sm">{preset.description}</p> : null}
       {preset === null ? <PlanningChips flow={flow} onChange={choose} /> : null}
       <p className="text-xs text-zinc-500">
         {flowSteps(flow, names)}

@@ -36,3 +36,19 @@ test('repeated names, steps that are no flow and an unknown default are refused'
     expect(() => flowSettingsChange(body, {})).toThrow(FlowSettingsError);
   }
 });
+
+test('a flow keeps what it is for, trimmed; an empty one is dropped and a long one refused', () => {
+  const saved = flowSettingsChange(
+    {
+      flows: [
+        { ...typo, description: '  Typos and wording.  ' },
+        { ...planned, description: ' ' },
+      ],
+    },
+    {},
+  );
+  expect(saved.flows).toEqual([{ ...typo, description: 'Typos and wording.' }, planned]);
+  expect(() =>
+    flowSettingsChange({ flows: [{ ...typo, description: 'x'.repeat(201) }] }, {}),
+  ).toThrow(FlowSettingsError);
+});

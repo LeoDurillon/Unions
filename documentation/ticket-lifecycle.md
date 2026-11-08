@@ -32,7 +32,8 @@ The agents read the repository but do not change it during planning. Each step r
 
 Under each output:
 
-- **Approve** runs the next step.
+- **Approve** runs the next step: the button says which one and on which model, for example **Approve → Test plan
+  (Sonnet)**.
 - **Request revision** asks for changes: write what is wrong, and the same agent revises its output, in the same
   session, so it remembers what it wrote.
 - **Edit** changes the output yourself, for example to fix a detail without spending a run. **Save new version**,

@@ -1,6 +1,7 @@
 // The shapes the API answers with, as the browser sees them: tokens and keys never leave the
 // server.
 import type {
+  AfterApproval,
   AgentReviewSpec,
   BoardColumn,
   ContainerRun,
@@ -81,6 +82,8 @@ export type TicketDetail = {
   runs: Run[];
   /** The change's lines of code against its budget; null before the first implementation. */
   size: TicketSize | null;
+  /** What approving the step that waits would start, and on which model; null when it starts nothing. */
+  afterApproval: AfterApproval | null;
 };
 
 export const COMMAND_TYPES = [

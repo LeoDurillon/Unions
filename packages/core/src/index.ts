@@ -54,6 +54,7 @@ export * from './event/event-rule-types';
 export * from './event/event-rules';
 export * from './compose-containers';
 export { CopyRefused } from './copied-file';
+export * from './approval-next';
 export { recoverGitHubSends } from './github-sends-recovery';
 export * from './review/review-run-rows';
 export { DockerCli } from './docker-cli';

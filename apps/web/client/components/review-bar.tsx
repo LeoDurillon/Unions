@@ -1,7 +1,9 @@
 // Approve, ask for a revision, or edit the output by hand (for example to answer questions).
-import type { Step } from '@union/core';
+import type { AfterApproval, Step } from '@union/core';
+import { stepTitle } from '@union/core/step-titles';
 import { useState, type ReactElement } from 'react';
 
+import { useCustomAgentNames } from '../lib/use-custom-agents';
 import { useTicketCommands } from '../lib/use-ticket-commands';
 import { findingsOf, parseVerdict } from '../lib/verdict';
 import { StartOver } from './start-over';
@@ -9,17 +11,28 @@ import { Button, ErrorText, inputClass } from './ui';
 
 type Mode = 'idle' | 'revise' | 'edit';
 
-function approveLabel(step: Step): string {
+/** What Approve says: what it finishes, or the step it starts and its model ("Approve → Test plan (Sonnet)"). */
+function useApproveLabel(step: Step, next: AfterApproval | null): string {
+  const names = useCustomAgentNames();
   if (step === 'final_review') {
     return 'Approve and mark PR ready';
   }
-  return step === 'split_plan' ? 'Approve and split' : 'Approve';
+  if (step === 'split_plan') {
+    return 'Approve and split';
+  }
+  return next ? `Approve → ${stepTitle(next.step, names)} (${modelName(next.model)})` : 'Approve';
+}
+
+/** A model as the button names it: `sonnet` → Sonnet. */
+function modelName(model: AfterApproval['model']): string {
+  return model.charAt(0).toUpperCase() + model.slice(1);
 }
 
 function IdleButtons({
   ticketId,
   busy,
   step,
+  next,
   onApprove,
   onChoose,
   onSendFindings,
@@ -28,6 +41,7 @@ function IdleButtons({
   ticketId: number;
   busy: boolean;
   step: Step;
+  next: AfterApproval | null;
   onApprove: () => void;
   onChoose: (mode: Mode) => void;
   onSendFindings: (() => void) | null;
@@ -35,10 +49,11 @@ function IdleButtons({
   onDrop: (() => void) | null;
 }): ReactElement {
   const finalReview = step === 'final_review';
+  const label = useApproveLabel(step, next);
   return (
     <>
       <Button variant="primary" disabled={busy} onClick={onApprove}>
-        {approveLabel(step)}
+        {label}
       </Button>
       {onSendFindings ? (
         <Button onClick={onSendFindings}>Send findings to the implementer</Button>
@@ -187,16 +202,27 @@ function useReview({ ticketId, step, saved, pending, onEditing }: ReviewInput): 
   };
 }
 
+function FinalReviewReviseHint(): ReactElement {
+  return (
+    <p className="text-xs text-zinc-600 dark:text-zinc-400">
+      The implementation agent makes these changes, then the final review runs again.
+    </p>
+  );
+}
+
 /** Approve, ask for a revision, or edit the output by hand (for example to answer questions). */
 export function ReviewBar({
   ticketId,
   step,
+  next = null,
   content,
   pending = content,
   onEditing,
 }: {
   ticketId: number;
   step: Step;
+  /** What approving starts (the step and its model); null: the plain label. */
+  next?: AfterApproval | null;
   /** The saved latest output. */
   content: string;
   /** The output with unsaved changes (typed answers); saved before Approve or Revise. */
@@ -213,11 +239,7 @@ export function ReviewBar({
     <div
       className={`space-y-3 rounded-lg border border-amber-300 bg-amber-50 p-3 dark:border-amber-900 dark:bg-amber-950 ${review.mode === 'idle' ? 'sticky bottom-0 z-[1] shadow-[0_-4px_12px_rgb(0_0_0/0.06)]' : ''}`}
     >
-      {finalReview && review.mode === 'revise' ? (
-        <p className="text-xs text-zinc-600 dark:text-zinc-400">
-          The implementation agent makes these changes, then the final review runs again.
-        </p>
-      ) : null}
+      {finalReview && review.mode === 'revise' ? <FinalReviewReviseHint /> : null}
       <DraftArea mode={review.mode} text={review.text} onChange={review.handleChange} />
       <ErrorText error={review.error} />
       <div className="flex flex-wrap gap-2">
@@ -226,6 +248,7 @@ export function ReviewBar({
             ticketId={ticketId}
             busy={review.busy}
             step={step}
+            next={next}
             onApprove={review.handleApprove}
             onDrop={step === 'split_plan' ? review.handleDrop : null}
             onChoose={review.handleChoose}

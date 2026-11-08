@@ -1,4 +1,4 @@
-// One flow preset in the settings: its name, its planning steps and custom agents, whether new tickets get it, and Remove.
+// One flow preset in the settings: its name, what it is for, its planning steps and custom agents, whether new tickets get it, and Remove.
 import type { FlowPreset } from '@union/core/flows';
 import type { ReactElement } from 'react';
 
@@ -46,6 +46,16 @@ export function FlowPresetRow({
           Remove
         </Button>
       </div>
+      <input
+        aria-label="What this flow is for"
+        placeholder="What this flow is for (shown when a ticket's flow is picked)"
+        className={inputClass}
+        maxLength={200}
+        value={preset.description ?? ''}
+        onChange={(event) => {
+          onChange({ ...preset, description: event.target.value });
+        }}
+      />
       <PlanningChips
         flow={preset.steps}
         onChange={(steps) => {

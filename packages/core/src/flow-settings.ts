@@ -8,12 +8,27 @@ export class FlowSettingsError extends Error {}
 
 const MAX_PRESETS = 12;
 const MAX_NAME_CHARS = 40;
+const MAX_DESCRIPTION_CHARS = 200;
 const ID_PATTERN = /^[a-z0-9-]{1,40}$/u;
 
 type FlowSettings = Pick<ProjectConfig, 'flows' | 'defaultFlow'>;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/** An optional description: trimmed, dropped when empty. */
+function descriptionOf(value: unknown, name: string): { description?: string } {
+  if (value === undefined || value === null) {
+    return {};
+  }
+  const text = typeof value === 'string' ? value.trim() : null;
+  if (text === null || text.length > MAX_DESCRIPTION_CHARS) {
+    throw new FlowSettingsError(
+      `${name}: a description is at most ${MAX_DESCRIPTION_CHARS} characters`,
+    );
+  }
+  return text === '' ? {} : { description: text };
 }
 
 function presetOf(value: unknown, customSteps: readonly CustomStep[]): FlowPreset {
@@ -32,7 +47,12 @@ function presetOf(value: unknown, customSteps: readonly CustomStep[]): FlowPrese
   if (problems.length > 0 || !Array.isArray(steps)) {
     throw new FlowSettingsError(`${trimmed}: ${problems.join('; ')}`);
   }
-  return { id, name: trimmed, steps: steps.filter((step) => isPipelineStep(step)) };
+  return {
+    id,
+    name: trimmed,
+    steps: steps.filter((step) => isPipelineStep(step)),
+    ...descriptionOf(value.description, trimmed),
+  };
 }
 
 function presetsOf(value: unknown, customSteps: readonly CustomStep[]): FlowPreset[] {

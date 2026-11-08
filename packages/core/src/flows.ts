@@ -14,13 +14,34 @@ import {
 } from './states';
 import { stepTitle } from './step-titles';
 
-/** A named flow the user picks for a ticket; `id` is what `ProjectConfig.defaultFlow` names. */
-export type FlowPreset = { id: string; name: string; steps: PipelineStep[] };
+/**
+ * A named flow the user picks for a ticket; `id` is what `ProjectConfig.defaultFlow` names.
+ * `description`: what kind of ticket it is for, shown where the flow is picked.
+ */
+export type FlowPreset = { id: string; name: string; steps: PipelineStep[]; description?: string };
 
 export const BUILT_IN_PRESETS: readonly FlowPreset[] = [
-  { id: 'full', name: 'Full', steps: [...FULL_FLOW] },
-  { id: 'standard', name: 'Standard', steps: ['technical', 'implement', 'final_review'] },
-  { id: 'quick', name: 'Quick', steps: ['implement', 'final_review'] },
+  {
+    id: 'full',
+    name: 'Full',
+    steps: [...FULL_FLOW],
+    description:
+      'A feature nobody has thought through yet, the most common case: every planning step.',
+  },
+  {
+    id: 'standard',
+    name: 'Standard',
+    steps: ['technical', 'implement', 'final_review'],
+    description:
+      'A feature already thought through, or a small one (a new button with one API call): the technical plan, then the code.',
+  },
+  {
+    id: 'quick',
+    name: 'Quick',
+    steps: ['implement', 'final_review'],
+    description:
+      'A really small fix that needs no thinking (a typo, a wording change): straight to the code.',
+  },
 ];
 
 const DEFAULT_PRESET = 'full';
@@ -75,8 +96,20 @@ export function flowProblems(value: unknown, customSteps: readonly CustomStep[] 
 }
 
 /** The project's presets: its own list when it has one, else the built-in ones. */
+/**
+ * The project's flows, or the built-in ones. A saved flow without a description takes the built-in's of
+ * the same id: flows saved before descriptions existed keep theirs.
+ */
 export function projectPresets(config: ProjectConfig): readonly FlowPreset[] {
-  return config.flows ?? BUILT_IN_PRESETS;
+  if (!config.flows) {
+    return BUILT_IN_PRESETS;
+  }
+  return config.flows.map((preset) => {
+    const builtIn = BUILT_IN_PRESETS.find((each) => each.id === preset.id)?.description;
+    return preset.description === undefined && builtIn !== undefined
+      ? { ...preset, description: builtIn }
+      : preset;
+  });
 }
 
 export function sameFlow(a: Flow, b: Flow): boolean {

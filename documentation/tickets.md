@@ -109,11 +109,11 @@ ticket's flow. What happens next is in [From ticket to pull request](ticket-life
 A flow is the list of steps a ticket runs. Implementation and the final review always run; the planning steps and
 your [custom agents](agents.md#custom-agents) are optional. Steps a flow skips never run, so they cost nothing.
 
-| Preset       | Steps                                                               |
-| ------------ | ------------------------------------------------------------------- |
-| **Full**     | Intake, Summary, Technical, Test plan, Implementation, Final review |
-| **Standard** | Technical, Implementation, Final review                             |
-| **Quick**    | Implementation, Final review                                        |
+| Preset       | For                                                                           | Steps                                                               |
+| ------------ | ----------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| **Full**     | A feature nobody has thought through yet: the most common case, the default   | Intake, Summary, Technical, Test plan, Implementation, Final review |
+| **Standard** | A feature already thought through, or a small one (a button with an API call) | Technical, Implementation, Final review                             |
+| **Quick**    | A really small fix that needs no thinking: a typo, a wording change           | Implementation, Final review                                        |
 
 - Pick a flow in the New ticket dialog, or in the **Flow** row of the Overview while the ticket is in Backlog.
   **Custom** lets you choose the planning steps one by one and place custom agents.
@@ -121,8 +121,8 @@ your [custom agents](agents.md#custom-agents) are optional. Steps a flow skips n
 - Edit the presets and choose the default in **Settings → Flows**.
 - Starting a ticket fixes its flow: changing a preset later never changes a ticket that already started.
 
-Use Quick for small, well-described changes, and Full when the request is vague and you want the agent to ask
-questions first.
+The flow picker shows what the chosen flow is for. In **Settings → Flows** you can write that line for your own
+presets too.
 
 ## Dependencies
 

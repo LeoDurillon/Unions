@@ -1,6 +1,6 @@
 // A ticket as the API answers with it: its summary, and the detail the ticket panel opens with.
 
-import { describeTicketBase, getTicket, schema, type Db } from '@union/core';
+import { afterApproval, describeTicketBase, getTicket, schema, type Db } from '@union/core';
 import { eq } from 'drizzle-orm';
 import type { Context } from 'hono';
 
@@ -43,6 +43,7 @@ export function ticketDetail(db: Db, c: Context): Response {
       .all(),
     runs: db.select().from(schema.runs).where(eq(schema.runs.ticketId, id)).all(),
     size: ticketSize(db, id, project.config),
+    afterApproval: afterApproval(db, getTicket(db, id)),
   };
   return c.json(detail);
 }

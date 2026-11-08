@@ -86,6 +86,7 @@ function Footer({
         <ReviewBar
           ticketId={detail.ticket.id}
           step={step}
+          next={detail.afterApproval}
           content={latest.content}
           pending={pending}
           onEditing={onEditing}
