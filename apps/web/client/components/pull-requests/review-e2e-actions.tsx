@@ -2,7 +2,7 @@
 
 import type { ReactElement } from 'react';
 
-import { previewPath } from '../../lib/preview-target';
+import { previewPath } from '../../lib/preview/preview-target';
 import {
   useAddToReview,
   useReviewPreview,

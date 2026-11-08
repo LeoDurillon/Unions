@@ -1,10 +1,11 @@
 // The project's secret variables: written here, never shown again.
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 
 import type { PreviewSettingsView } from '../../../src/api-types';
 import { useLeaveGuard } from '../../lib/leave-guard';
-import { previewApi } from '../../lib/preview-api';
+import { previewApi } from '../../lib/preview/preview-api';
 import { Button, ErrorText, inputClass } from '../ui';
 
 type Save = (run: () => Promise<PreviewSettingsView>) => void;

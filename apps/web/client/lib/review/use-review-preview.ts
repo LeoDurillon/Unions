@@ -4,7 +4,12 @@ import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tan
 
 import type { ReviewPreviewView } from '../../../src/review-preview-types';
 import { request } from '../api';
-import { previewKey, previewPath, previewPoll, type PreviewTarget } from '../preview-target';
+import {
+  previewKey,
+  previewPath,
+  previewPoll,
+  type PreviewTarget,
+} from '../preview/preview-target';
 import { reviewBase } from './review-target';
 
 export type PullRequestTarget = Extract<PreviewTarget, { kind: 'pull-request' }>;

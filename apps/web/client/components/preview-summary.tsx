@@ -1,9 +1,10 @@
 // The preview in one line of the Overview: its state, where it answers, the way to its tab.
+
 import { useQuery } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 
-import { previewApi } from '../lib/preview-api';
-import { PREVIEW_STATUS } from '../lib/preview-status';
+import { previewApi } from '../lib/preview/preview-api';
+import { PREVIEW_STATUS } from '../lib/preview/preview-status';
 import { openSettings } from '../lib/settings-sections';
 import { DetailRow } from './detail-row';
 import { Badge } from './ui';

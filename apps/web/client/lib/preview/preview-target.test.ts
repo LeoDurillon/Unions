@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test';
 
-import type { PreviewView } from '../../src/api-types';
+import type { PreviewView } from '../../../src/api-types';
 import { previewKey, previewPath, previewPoll, runsPath } from './preview-target';
 
 const REVIEW = { kind: 'pull-request', projectId: 1, number: 7 } as const;

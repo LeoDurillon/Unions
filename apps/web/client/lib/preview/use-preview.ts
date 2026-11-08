@@ -1,7 +1,8 @@
 // A ticket's or a pull request's preview as its section reads it, and the commands that act on it.
+
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 
-import type { PreviewView } from '../../src/api-types';
+import type { PreviewView } from '../../../src/api-types';
 import { previewCalls, previewKey, previewPoll, type PreviewTarget } from './preview-target';
 
 export type PreviewCalls = ReturnType<typeof previewCalls>;

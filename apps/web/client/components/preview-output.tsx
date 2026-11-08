@@ -1,10 +1,11 @@
 // What a preview printed: its start as it goes (a ticket's), and its services' last lines.
+
 import type { Preview } from '@union/core';
 import { useEffect, useRef, type ReactElement } from 'react';
 
-import type { PreviewTarget } from '../lib/preview-target';
+import type { PreviewTarget } from '../lib/preview/preview-target';
+import type { PreviewCalls } from '../lib/preview/use-preview';
 import { stripAnsi } from '../lib/strip-ansi';
-import type { PreviewCalls } from '../lib/use-preview';
 import { useStartOutput } from '../lib/use-start-output';
 import type { Act } from './preview-controls';
 import { Button } from './ui';

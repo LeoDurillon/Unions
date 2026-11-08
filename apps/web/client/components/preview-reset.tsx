@@ -1,9 +1,10 @@
 // The preview's Reset: drops its containers, volumes and built images, and the data folders the user
 // ticks (the mounted folders git ignores), then starts it fresh, after a confirmation.
+
 import { useState, type ReactElement } from 'react';
 
 import type { PreviewView } from '../../src/api-types';
-import type { PreviewCalls } from '../lib/use-preview';
+import type { PreviewCalls } from '../lib/preview/use-preview';
 import type { Act } from './preview-controls';
 import { Button } from './ui';
 

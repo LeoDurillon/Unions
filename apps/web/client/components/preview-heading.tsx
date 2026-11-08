@@ -1,9 +1,10 @@
 // The preview's title line: its status, how long a start has run, and the less frequent actions.
+
 import type { Preview } from '@union/core';
 import type { ReactElement } from 'react';
 
 import type { PreviewView } from '../../src/api-types';
-import { PREVIEW_STATUS } from '../lib/preview-status';
+import { PREVIEW_STATUS } from '../lib/preview/preview-status';
 import { clock } from '../lib/relative-time';
 import { openSettings } from '../lib/settings-sections';
 import { useNow } from '../lib/use-now';

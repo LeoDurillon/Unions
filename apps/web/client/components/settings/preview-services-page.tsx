@@ -1,9 +1,10 @@
 // What runs as a ticket's preview: the compose file, what Union adds to it, and what is served.
+
 import { useQuery } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 
 import type { PreviewSettingsView, PublicProject } from '../../../src/api-types';
-import { previewApi } from '../../lib/preview-api';
+import { previewApi } from '../../lib/preview/preview-api';
 import { AgentEnvironment } from './agent-variables-field';
 import { PreviewChoicesField } from './preview-choices-field';
 import { AdditionsField, TextField } from './preview-fields';

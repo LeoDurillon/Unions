@@ -1,9 +1,10 @@
 // What every service of a preview gets: plain variables, secrets, and the variables as a file.
+
 import { useQuery } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
-import { previewApi } from '../../lib/preview-api';
+import { previewApi } from '../../lib/preview/preview-api';
 import { TextField, Variables } from './preview-fields';
 import { PreviewSave, usePreviewForm, type Form } from './preview-form';
 import { PreviewSecrets } from './preview-secrets';

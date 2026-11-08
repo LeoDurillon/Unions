@@ -1,10 +1,11 @@
 // The project's end-to-end tests against the preview, run when the user asks (a browser and a whole
 // environment take a lot of memory): never on their own.
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 
 import type { PreviewView } from '../../src/api-types';
-import { previewCalls, previewKey, type PreviewTarget } from '../lib/preview-target';
+import { previewCalls, previewKey, type PreviewTarget } from '../lib/preview/preview-target';
 import { Details, LastResult } from './preview-e2e-result';
 import { ReviewE2eActions } from './pull-requests/review-e2e-actions';
 import { TicketE2eActions } from './ticket-e2e-actions';

@@ -1,10 +1,11 @@
 // The preview's addresses and buttons: Start (Cancel while it starts; Restart, data kept, and Stop
 // while it runs).
+
 import type { Preview } from '@union/core';
 import type { ReactElement } from 'react';
 
 import type { PreviewView } from '../../src/api-types';
-import type { PreviewCalls } from '../lib/use-preview';
+import type { PreviewCalls } from '../lib/preview/use-preview';
 import { Button } from './ui';
 
 export type Act = (call: () => Promise<PreviewView>) => void;

@@ -1,10 +1,11 @@
 // The commands run in the target's workspace (polled while one is on), and running or stopping one.
+
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 
 import type { ContainerRunsView } from '../../src/api-types';
 import type { ReviewRunsView } from '../../src/review-preview-types';
 import { request } from './api';
-import { runsKey, runsPath, type PreviewTarget } from './preview-target';
+import { runsKey, runsPath, type PreviewTarget } from './preview/preview-target';
 
 /** A command typed in the box, or a saved script by name. */
 export type RunInput = { command: string } | { scriptName: string };

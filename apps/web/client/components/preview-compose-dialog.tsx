@@ -1,10 +1,11 @@
 // The compose file a preview runs, to read and to edit for this ticket or pull request.
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { Preview } from '@union/core';
 import { useState, type ReactElement } from 'react';
 
 import type { PreviewView } from '../../src/api-types';
-import { previewCalls, previewKey, type PreviewTarget } from '../lib/preview-target';
+import { previewCalls, previewKey, type PreviewTarget } from '../lib/preview/preview-target';
 import { CodeTextarea } from './code-textarea';
 import { Button, Dialog, ErrorText } from './ui';
 

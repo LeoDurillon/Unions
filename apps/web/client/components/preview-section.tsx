@@ -1,9 +1,10 @@
 // A ticket's or a pull request's preview: its compose environment run from the workspace, opened
 // through the proxy.
+
 import { useState, type ReactElement, type ReactNode } from 'react';
 
-import type { PreviewTarget } from '../lib/preview-target';
-import { usePreview } from '../lib/use-preview';
+import type { PreviewTarget } from '../lib/preview/preview-target';
+import { usePreview } from '../lib/preview/use-preview';
 import { PreviewComposeDialog } from './preview-compose-dialog';
 import { Controls } from './preview-controls';
 import { PreviewE2e } from './preview-e2e';

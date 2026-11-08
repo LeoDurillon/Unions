@@ -1,7 +1,8 @@
 // The sidebar's Previews entry: how many previews hold containers now, across projects.
+
 import type { ReactElement } from 'react';
 
-import { useRunningPreviews } from '../../lib/use-running-previews';
+import { useRunningPreviews } from '../../lib/preview/use-running-previews';
 import { SIDE_BADGE, SIDE_ITEM, SIDE_LABEL } from '../sidebar-classes';
 
 function PlayIcon(): ReactElement {

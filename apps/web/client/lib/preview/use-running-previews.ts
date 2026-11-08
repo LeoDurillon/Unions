@@ -1,8 +1,9 @@
 // The previews running across projects (read again every few seconds: a pull request's send no events), and stopping one.
+
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 
-import type { RunningPreview } from '../../src/running-previews-types';
-import { request } from './api';
+import type { RunningPreview } from '../../../src/running-previews-types';
+import { request } from '../api';
 
 const RUNNING_PREVIEWS_KEY = ['previews', 'running'];
 const POLL_MS = 5000;

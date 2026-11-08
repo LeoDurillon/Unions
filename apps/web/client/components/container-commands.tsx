@@ -1,10 +1,11 @@
 // Commands the user runs in a workspace (a ticket's container as the agent, or a pull request's own
 // checkout), with the preview's address while it runs, typed or saved in the project settings; one
 // at a time.
+
 import type { ContainerRun, ProjectScript } from '@union/core';
 import { useState, type ReactElement, type ReactNode } from 'react';
 
-import type { PreviewTarget } from '../lib/preview-target';
+import type { PreviewTarget } from '../lib/preview/preview-target';
 import { useContainerRuns, type RunInput, type RunsView } from '../lib/use-container-runs';
 import { RunItem } from './container-run-item';
 import { AddRunToReview } from './pull-requests/review-run-actions';

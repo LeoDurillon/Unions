@@ -1,8 +1,8 @@
 // Where a ticket's or a pull request's preview and commands live in the API, and their query keys.
 
-import type { PreviewView } from '../../src/api-types';
-import { request } from './api';
-import { reviewBase, type ReviewTarget } from './review/review-target';
+import type { PreviewView } from '../../../src/api-types';
+import { request } from '../api';
+import { reviewBase, type ReviewTarget } from '../review/review-target';
 
 /** A preview's owner as the pages know it: the same targets as a review page's. */
 export type PreviewTarget = ReviewTarget;
