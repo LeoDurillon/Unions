@@ -1,4 +1,5 @@
 // The API routes for projects: creating, reading and updating them.
+
 import {
   parseProjectUrl,
   saveIntegration,
@@ -25,7 +26,7 @@ import { publicProjectOf } from '../public-project';
 import { newIntegrationsOf } from './integrations';
 import { investigationRoutes } from './investigations';
 import { deleteProject, updateProject } from './project-settings';
-import { pullRequestRoutes } from './pull-requests';
+import { pullRequestRoutes } from './pull-requests/pull-requests';
 
 const DEFAULT_BRANCH = 'main';
 

@@ -5,9 +5,9 @@ import type { Db } from '@union/core';
 import { Hono } from 'hono';
 
 import type { ApiServices } from '../../services';
-import { prChecksRoutes } from '../pr-checks';
-import { ticketReplyRoutes } from '../pr-comment-replies';
-import { prDescriptionRoutes } from '../pr-description';
+import { prChecksRoutes } from '../pull-requests/pr-checks';
+import { ticketReplyRoutes } from '../pull-requests/pr-comment-replies';
+import { prDescriptionRoutes } from '../pull-requests/pr-description';
 import { refusedCommit } from '../refused-commit';
 import {
   ticketExplanationRoutes,

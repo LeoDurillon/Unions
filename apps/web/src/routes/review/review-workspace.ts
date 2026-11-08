@@ -5,8 +5,8 @@ import type { Db, JiraApi, NotionApi } from '@union/core';
 import { Hono } from 'hono';
 
 import type { OnboardingGitHub } from '../../github-onboarding';
-import { reviewReplyRoutes } from '../pr-comment-replies';
-import { prCommitRoutes } from '../pr-commits';
+import { reviewReplyRoutes } from '../pull-requests/pr-comment-replies';
+import { prCommitRoutes } from '../pull-requests/pr-commits';
 import { reviewPreviewRoutes } from './review-preview';
 import { reviewRunRoutes } from './review-runs';
 import { reviewTrackerRoutes } from './review-trackers';

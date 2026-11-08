@@ -1,12 +1,13 @@
 // `<review>/commits`: the pull request's commits, and one commit's files and patches, to read the
 // change one commit at a time.
+
 import { isIgnoredPath, type Db, type PullRequestFile } from '@union/core';
 import { Hono, type Context } from 'hono';
 
-import type { CommitDiffResponse, CommitsResponse } from '../api-types';
-import type { OnboardingGitHub } from '../github-onboarding';
-import { BAD_REQUEST, fail, NOT_FOUND, requireId } from '../http';
-import { guarded } from './github-errors';
+import type { CommitDiffResponse, CommitsResponse } from '../../api-types';
+import type { OnboardingGitHub } from '../../github-onboarding';
+import { BAD_REQUEST, fail, NOT_FOUND, requireId } from '../../http';
+import { guarded } from '../github-errors';
 import { authOf, load, type Project } from './pr-review-load';
 
 const SHA = /^[0-9a-f]{40}$/u;

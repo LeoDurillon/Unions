@@ -1,11 +1,12 @@
 // Replies to a pull request's comments: a ticket's (`/api/tickets/:id/pr-replies`, with its suggestions) and a current review's (`<review>/replies`).
+
 import { schema, type Db, type PrCommentReply, type Ticket } from '@union/core';
 import { eq } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
 
-import { loadTicket } from '../ci-load';
-import { ACCEPTED, BAD_REQUEST, fail, NOT_FOUND, readObject, requireId } from '../http';
-import { repliesOf } from '../pr-replies';
+import { loadTicket } from '../../ci-load';
+import { ACCEPTED, BAD_REQUEST, fail, NOT_FOUND, readObject, requireId } from '../../http';
+import { repliesOf } from '../../pr-replies';
 import {
   checkedBody,
   discardSuggestion,
@@ -13,8 +14,8 @@ import {
   editSuggestion,
   queueReply,
   sendSuggestions,
-} from '../pr-reply-commands';
-import { pickedPullRequest } from '../ticket-pull-request';
+} from '../../pr-reply-commands';
+import { pickedPullRequest } from '../../ticket-pull-request';
 import { load } from './pr-review-load';
 
 type Target = Extract<PrCommentReply['target'], { kind: 'thread' | 'note' }>;

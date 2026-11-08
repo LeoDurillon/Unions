@@ -18,7 +18,7 @@ import { readObject } from '../../http';
 import { discussionsOfPage } from '../../notion-discussions';
 import type { ReviewNotionLink, ReviewNotionPage } from '../../review-notion-types';
 import { guarded, notionTokenOf, requireNotionId } from '../notion';
-import { load, type Review } from '../pr-review-load';
+import { load, type Review } from '../pull-requests/pr-review-load';
 
 /** Any page the integration can read: reading it is the check that it is shared. */
 async function readLink(

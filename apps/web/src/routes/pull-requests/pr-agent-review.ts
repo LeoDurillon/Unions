@@ -4,16 +4,16 @@ import { schema, type AgentReviewSpec, type Db } from '@union/core';
 import { and, eq, inArray } from 'drizzle-orm';
 import type { Context, Hono } from 'hono';
 
-import type { OnboardingGitHub } from '../github-onboarding';
-import { BAD_REQUEST, CONFLICT, fail, NOT_FOUND } from '../http';
-import { guarded } from './github-errors';
-import { authOf, load, readReviewFiles, type Project, type Review } from './pr-review-load';
+import type { OnboardingGitHub } from '../../github-onboarding';
+import { BAD_REQUEST, CONFLICT, fail, NOT_FOUND } from '../../http';
+import { guarded } from '../github-errors';
 import {
   cancelAgentReview,
   getAgentReview,
   readAgentReviewBody,
   startAgentReview,
-} from './review/agent-review';
+} from '../review/agent-review';
+import { authOf, load, readReviewFiles, type Project, type Review } from './pr-review-load';
 
 /** The reviews of these pull requests; refused when one is not under review. */
 function underReview(db: Db, project: Project, numbers: number[]): Review[] {

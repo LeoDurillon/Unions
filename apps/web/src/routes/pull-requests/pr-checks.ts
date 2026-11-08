@@ -1,4 +1,5 @@
 // `/api/tickets/:id/pr-checks`: the pull request's CI checks read from GitHub, the failed ones (with related jobs and bot comments) given to the implementer, a failed Actions job run again, each open slice's checks counted.
+
 import {
   CiOutputError,
   dropCiOutput,
@@ -14,13 +15,13 @@ import {
 import { and, eq, isNull } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
 
-import type { CiGivenView, CiPreview, PrChecksView } from '../ci-api-types';
-import { listing, load, loadTicket, readGitHub, type Loaded } from '../ci-load';
-import { parsePicks, readPicks } from '../ci-picks';
-import { queueRerun } from '../ci-rerun';
-import type { CiGitHub } from '../github-checks';
-import { ACCEPTED, CONFLICT, fail, readObject, requireId } from '../http';
-import { stackChecks } from '../stack-checks';
+import type { CiGivenView, CiPreview, PrChecksView } from '../../ci-api-types';
+import { listing, load, loadTicket, readGitHub, type Loaded } from '../../ci-load';
+import { parsePicks, readPicks } from '../../ci-picks';
+import { queueRerun } from '../../ci-rerun';
+import type { CiGitHub } from '../../github-checks';
+import { ACCEPTED, CONFLICT, fail, readObject, requireId } from '../../http';
+import { stackChecks } from '../../stack-checks';
 
 const DEFAULT_NOTE = 'The CI checks below failed on the pull request; fix what they show.';
 

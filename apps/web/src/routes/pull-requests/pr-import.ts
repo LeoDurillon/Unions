@@ -3,14 +3,22 @@
 import { projectGitHubAuth, type Db, type Project } from '@union/core';
 import { Hono, type Context } from 'hono';
 
-import type { PullRequestImport, PullRequestSource } from '../api-types';
-import type { OnboardingGitHub } from '../github-onboarding';
-import { BAD_REQUEST, CONFLICT, CREATED, fail, NOT_FOUND, readObject, requireText } from '../http';
-import { planPullRequestImport, type PullRequestPlan } from '../pr-import-plan';
-import { createImportedTicket, existingTicket, loadProject } from '../pr-import-ticket';
-import { parsePullRequestRef } from '../pull-request-ref';
-import { guarded } from './github-errors';
-import { findTicket, summarize } from './tickets/ticket-links';
+import type { PullRequestImport, PullRequestSource } from '../../api-types';
+import type { OnboardingGitHub } from '../../github-onboarding';
+import {
+  BAD_REQUEST,
+  CONFLICT,
+  CREATED,
+  fail,
+  NOT_FOUND,
+  readObject,
+  requireText,
+} from '../../http';
+import { planPullRequestImport, type PullRequestPlan } from '../../pr-import-plan';
+import { createImportedTicket, existingTicket, loadProject } from '../../pr-import-ticket';
+import { parsePullRequestRef } from '../../pull-request-ref';
+import { guarded } from '../github-errors';
+import { findTicket, summarize } from '../tickets/ticket-links';
 
 type Read = { project: Project; source: PullRequestSource; plan: PullRequestPlan };
 

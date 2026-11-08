@@ -12,7 +12,7 @@ import type { Context } from 'hono';
 import type { OnboardingGitHub } from '../../github-onboarding';
 import type { ReviewNotionLink } from '../../review-notion-types';
 import { guarded } from '../github-errors';
-import { authOf, type Project, type Review } from '../pr-review-load';
+import { authOf, type Project, type Review } from '../pull-requests/pr-review-load';
 
 /** A description rarely names more; each one is a Notion read. */
 const MAX_SUGGESTIONS = 5;

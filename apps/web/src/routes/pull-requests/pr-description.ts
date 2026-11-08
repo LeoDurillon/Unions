@@ -1,6 +1,7 @@
 // `/api/tickets/:id/pr-description`: the agent rewrites the PR's description (each open slice's,
 // for a split ticket) into drafts the user edits; sending one is a command (the worker writes to
 // GitHub).
+
 import {
   discardPrDescription,
   getPrDescription,
@@ -18,9 +19,9 @@ import {
 } from '@union/core';
 import { Hono, type Context } from 'hono';
 
-import type { PrDescriptionDraft, PrDescriptionView } from '../api-types';
-import { ACCEPTED, CONFLICT, fail, NOT_FOUND, readObject, requireId } from '../http';
-import { pickedPullRequest } from '../ticket-pull-request';
+import type { PrDescriptionDraft, PrDescriptionView } from '../../api-types';
+import { ACCEPTED, CONFLICT, fail, NOT_FOUND, readObject, requireId } from '../../http';
+import { pickedPullRequest } from '../../ticket-pull-request';
 
 function loadTicket(db: Db, c: Context): Ticket {
   const id = requireId(c.req.param('id'), 'ticket id');

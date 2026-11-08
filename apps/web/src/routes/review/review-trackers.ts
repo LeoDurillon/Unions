@@ -4,7 +4,7 @@ import type { Db, JiraApi, NotionApi } from '@union/core';
 import { Hono } from 'hono';
 
 import type { OnboardingGitHub } from '../../github-onboarding';
-import { load } from '../pr-review-load';
+import { load } from '../pull-requests/pr-review-load';
 import { reviewJiraRoutes } from './review-jira';
 import { reviewNotionRoutes } from './review-notion';
 import { notionSuggestions } from './review-notion-suggestions';

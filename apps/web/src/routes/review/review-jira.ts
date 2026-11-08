@@ -21,7 +21,7 @@ import type { OnboardingGitHub } from '../../github-onboarding';
 import { BAD_REQUEST, CONFLICT, fail, readObject, requireText } from '../../http';
 import type { ReviewJiraIssue, ReviewJiraLink } from '../../review-jira-types';
 import { guarded } from '../notion';
-import { authOf, load, type Project } from '../pr-review-load';
+import { authOf, load, type Project } from '../pull-requests/pr-review-load';
 
 /** A description rarely names more; each is a Jira read. */
 const MAX_SUGGESTIONS = 10;

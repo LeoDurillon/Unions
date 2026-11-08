@@ -12,12 +12,18 @@ import {
 import { eq } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
 
-import type { DiffResponse, DiscussionResponse } from '../api-types';
-import type { OnboardingGitHub } from '../github-onboarding';
-import { ACCEPTED, BAD_REQUEST, CONFLICT, fail, NOT_FOUND, readObject, requireId } from '../http';
-import { guarded } from './github-errors';
-import { prAgentReviewRoutes } from './pr-agent-review';
-import { authOf, load, readReviewFiles } from './pr-review-load';
+import type { DiffResponse, DiscussionResponse } from '../../api-types';
+import type { OnboardingGitHub } from '../../github-onboarding';
+import {
+  ACCEPTED,
+  BAD_REQUEST,
+  CONFLICT,
+  fail,
+  NOT_FOUND,
+  readObject,
+  requireId,
+} from '../../http';
+import { guarded } from '../github-errors';
 import {
   addComment,
   deleteComment,
@@ -27,7 +33,9 @@ import {
   listComments,
   type CommentDiff,
   type CommentOwner,
-} from './review/review-comments';
+} from '../review/review-comments';
+import { prAgentReviewRoutes } from './pr-agent-review';
+import { authOf, load, readReviewFiles } from './pr-review-load';
 
 type Review = typeof schema.currentReviews.$inferSelect;
 

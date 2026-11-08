@@ -12,7 +12,7 @@ import { Hono, type Context } from 'hono';
 import { ACCEPTED, CONFLICT, CREATED, fail, NOT_FOUND, readObject, requireId } from '../../http';
 import { addGeneralDraft, outputComment } from '../../review-output-comment';
 import type { ReviewRunsView } from '../../review-preview-types';
-import { load, type Review } from '../pr-review-load';
+import { load, type Review } from '../pull-requests/pr-review-load';
 import { queueFromBody } from '../run-input';
 
 function view(db: Db, review: Review): ReviewRunsView {

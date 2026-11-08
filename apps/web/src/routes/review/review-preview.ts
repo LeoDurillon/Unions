@@ -15,7 +15,6 @@ import { Hono, type Context } from 'hono';
 import { ACCEPTED, CONFLICT, CREATED, fail, NOT_FOUND } from '../../http';
 import { addGeneralDraft, outputComment } from '../../review-output-comment';
 import type { ReviewPreviewView } from '../../review-preview-types';
-import { load, type Review } from '../pr-review-load';
 import { queueReset } from '../preview-reset';
 import {
   e2eRefusal,
@@ -29,6 +28,7 @@ import {
   stopRefusal,
   type PreviewSubject,
 } from '../preview-subject';
+import { load, type Review } from '../pull-requests/pr-review-load';
 
 /** Its start checks it out: it needs the commit its files were read at. */
 function subjectOf(review: Review): PreviewSubject {

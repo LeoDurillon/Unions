@@ -15,7 +15,7 @@ import {
   requireId,
   requireText,
 } from '../../http';
-import { prReviewRoutes } from '../pr-review';
+import { prReviewRoutes } from '../pull-requests/pr-review';
 import type { SpecClients } from '../spec-sources';
 import { listedReviews } from './current-review-list';
 import {

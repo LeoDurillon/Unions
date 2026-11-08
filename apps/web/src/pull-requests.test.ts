@@ -9,7 +9,7 @@ import type { PullRequestFilter, PullRequestList } from './api-types';
 import { createApp } from './app';
 import type { OnboardingGitHub } from './github-onboarding';
 import { toPullRequest, type RemotePullRequest } from './github-pull-requests';
-import { PULL_REQUEST_CACHE_MS, PullRequestCache } from './routes/pull-request-cache';
+import { PULL_REQUEST_CACHE_MS, PullRequestCache } from './routes/pull-requests/pull-request-cache';
 
 function pull(number: number, state: RemotePullRequest['state']): RemotePullRequest {
   return {

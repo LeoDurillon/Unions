@@ -5,11 +5,11 @@ import type { GitHubStack } from '@union/core/github-stacks';
 import { stackPlaces } from '@union/core/pr-stacks';
 import { eq } from 'drizzle-orm';
 
-import type { PullRequestFilter } from '../api-types';
-import type { OnboardingGitHub } from '../github-onboarding';
-import type { RemotePullRequest } from '../github-pull-requests';
-import { guarded } from './github-errors';
-import { removeClosedReviews } from './review/closed-reviews';
+import type { PullRequestFilter } from '../../api-types';
+import type { OnboardingGitHub } from '../../github-onboarding';
+import type { RemotePullRequest } from '../../github-pull-requests';
+import { guarded } from '../github-errors';
+import { removeClosedReviews } from '../review/closed-reviews';
 
 /** What one read finds: the newest pull requests of the filter, and the open stacks (null: none on GitHub). */
 export type Listing = {
