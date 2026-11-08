@@ -16,6 +16,8 @@ flowchart LR
     D --> C1[ticket container]
     D --> C2[ticket container]
     D --> P[previews]
+    B -->|preview address| X[proxy]
+    X --> P
 ```
 
 - **web** serves the page and an API. It reads the database and streams changes to your browser as they happen. It
@@ -24,6 +26,8 @@ flowchart LR
 - **worker** handles those commands. It runs each ticket's steps, starts the containers, runs the agents, and does
   every GitHub write: issues, comments, Project status, pushes and pull requests. It reads GitHub every 30 seconds
   for changes made there.
+- **proxy** sends a preview's address (`http://t<id>.union.localhost:8080`) to that preview's containers. Compose
+  starts it beside the web and the worker; it reads Docker to find the previews, on this machine only.
 - **union.sqlite** holds everything both share. Restarting the web or the worker never touches running containers.
 
 ## Containers

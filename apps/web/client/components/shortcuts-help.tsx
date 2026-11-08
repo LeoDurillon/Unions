@@ -32,6 +32,10 @@ const GROUPS: Group[] = [
     ],
   },
   {
+    title: 'Repository',
+    keys: [['/', 'Go to file']],
+  },
+  {
     title: 'Review',
     keys: [
       ['j', 'Next file'],

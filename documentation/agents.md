@@ -44,6 +44,8 @@ Three kinds of runs have no page in Union settings:
 - **Investigations**, and the tickets written from them with **Create ticket**: you pick the model and tools in the
   investigation's form (Opus, reading the code and the web, to start with), and the ticket is written on the same
   model. See [Investigations](investigations.md).
+  **Suggest improvements**, in a project's usage, starts one of them on Opus (see
+  [Usage and cost](how-it-works.md#usage-and-cost)).
 - **The prompt writer** writes a custom agent's prompt from its role, on Sonnet, when you create the agent or click
   **Regenerate**.
 - **Read connectors** and **Check again** (Union settings → Connectors) only read your connectors: no model runs, so
@@ -106,6 +108,9 @@ For either kind:
 2. An agent writes the prompt from that role, in the style of the built-in ones. The page says "Writing the
    prompt…" until it is done. Read the prompt before you use the agent.
 3. **Regenerate** writes the prompt again from the role.
+
+A custom agent starts on Sonnet, with tools for its kind: a ticket step reads the code, a review agent can also run
+commands. Change them on its page like any agent's.
 
 Ticket steps are listed under **Custom agents** in Union settings, review agents under **Custom review agents**.
 
@@ -193,7 +198,8 @@ every run of this project.
   ones that repeat each other, move a lesson to the step that must act on it, reword lessons that contradict each
   other, remove the ones that only held for one ticket. Each change says why. **Replace** or **Remove** applies it to
   the list, **Dismiss** drops them all. It uses your Claude usage, and runs one at a time with the lesson writer.
-- Write, edit, reorder or remove lessons by hand, grouped by step. Up to 500 characters each. The last group,
+- Write, edit, reorder or remove lessons by hand, grouped by step. Up to 500 characters each, and 200 lessons per
+  project. The last group,
   **Spec report**, holds the rules the spec report reads: the ones you keep when you mark an item of its **Needs
   you** not useful, and any you add (for example "Flag a page shared by loan and subsidy campaigns").
 - Nothing is kept until you click **Save**.

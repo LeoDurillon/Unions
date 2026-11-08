@@ -9,6 +9,9 @@ The simplest way to run all of it is Docker Compose.
   socket.
 - **Claude Code**, logged in on this machine with a Claude Max account. Union gives each ticket's container the
   login from `~/.claude/.credentials.json`. If that file does not exist, run `claude` once and log in.
+- An **`~/.ssh` folder**. Compose gives it to the worker, read-only, so the sidebar's **Update** can fetch Union's
+  own repository when you cloned it over SSH. Compose does not start if the folder is missing: create it
+  (`mkdir -p ~/.ssh`), or set `UNION_SSH_DIR` in `.env` to another folder.
 - **GitHub access** to the repository you want the agents to work on. You can paste a token or set up a GitHub App
   later, in the setup wizard; see [Your first project](first-project.md#connect-github).
 - Optional: a **Notion** internal integration, to import tickets from a Notion database. In its **Capabilities**,
@@ -79,6 +82,8 @@ On Windows with WSL, the Windows browser still opens <http://localhost:5173>.
 Union also refuses requests that come from another website, or that name another host: a page you visit cannot
 act on Union through your browser. To open Union from another machine anyway, publish its port on that network in
 `compose.yaml` and add the name you will use to `UNION_ALLOWED_HOSTS` (for example `UNION_ALLOWED_HOSTS=desk.lan`).
-Anyone who can reach the port can then use Union.
+With `bun run start`, also set `UNION_HOST` (for example `UNION_HOST=0.0.0.0`) so Union listens beyond this
+machine (see the [settings reference](settings.md#environment-variables)). Anyone who can reach the port can then
+use Union.
 
 Next: [Your first project](first-project.md).

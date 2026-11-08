@@ -10,10 +10,15 @@ moving a card to In Progress on GitHub starts the ticket. Without one, Union's b
 | **In progress**     | Tickets whose planning or implementation is running or waiting for you.          |
 | **In review**       | Tickets at the final review, or running a rebase or another branch operation.    |
 | **Done**            | Tickets whose final review you approved. Their pull request is ready for review. |
-| **Merged / Closed** | Done tickets whose pull request was merged or closed in the last three weeks.    |
+| **Merged / Closed** | Tickets whose pull request was merged or closed in the last three weeks.         |
 
 Each card shows the ticket's state ("Waiting for you · Technical", "Running · Implementation"), its issue number (when it has an issue), the
-ticket it depends on, and the CI checks of its pull request. Fold a column you do not need with its arrow.
+ticket it depends on, and the CI checks of its pull request. It also shows the flow's name when it is not Full, a split
+ticket's stack ("Stack of 3 · 1 merged"), **Branch moved** when someone pushed to its branch on GitHub, and, in Merged / Closed,
+**Merged** or **Closed**. "Rate limited" means the step waits for your Claude usage limit to reset; "Commit refused"
+means a git hook of the repository refused the agent's changes (see
+[When a step stops](ticket-lifecycle.md#when-a-step-stops)). Fold a column you do not need with its arrow; Merged /
+Closed starts folded.
 
 While an agent works on a ticket, its card also shows how long the run has gone and the last thing the agent did:
 the tool it called (`Edit src/api/client.ts`, `Bash bun test`) or the first line of what it wrote. The line
@@ -25,7 +30,7 @@ Above the board:
 
 - **Search** finds tickets by title, issue number (`#36`) or pull request number.
 - **Needs you** shows only the tickets waiting for you, with their count: a step to approve, a question to answer,
-  a failed run.
+  a failed run, a refused commit, or failed CI checks on an open pull request.
 - Once some tickets came from Notion or Jira, **All**, **From Notion**, **From Jira** and **From GitHub** show only
   the tickets of one origin. **From GitHub** keeps the tickets written in Union or imported from a GitHub issue.
 
@@ -65,13 +70,17 @@ Click **New ticket** in the project bar. The dialog has one tab per source:
   links back to the issue. Importing only reads the issue: Union writes to Jira only when you comment from the
   ticket's **Jira** tab, or when one of your [event rules](automation.md#event-rules) acts on it.
 
-In every tab you can also:
+Every tab except the pull request import lets you pick the ticket's **flow** (see below). The **Write** tab also
+lets you:
 
 - attach **files** (screenshots, specs, sample data), which the agents can read;
   spreadsheets, Word documents and zip files too, when the agent's tools include `Bash(unzip -l *)` and
   `Bash(unzip -p *)` (select them under **Tools** on the agent's page in **Union settings**);
-- pick the ticket it **depends on** (see below);
-- pick its **flow** (see below).
+- pick the ticket it **depends on** (see below).
+
+To attach files to an imported Notion page or Jira issue, or give it a parent, click **Edit before creating**: the
+ticket opens in the **Write** tab, still linked to its page or issue. You can also add files later, in the ticket's
+Overview.
 
 The new ticket lands in Backlog. Union creates its GitHub issue, unless the project turned issues off (**Settings →
 General → Mirror tickets as GitHub issues**), and adds it to the GitHub Project when one is connected.
@@ -92,12 +101,12 @@ The ticket's description stays as you wrote it. From then on the ticket behaves 
 review with an agent. **Change** links another page, **Unlink** removes the link; neither touches the page in
 Notion.
 
-The same works for Jira, when the project is connected to Jira: the **Jira** row has **Link a Jira issue**. Paste
-the issue's key (`ABC-12`) or link, **Check** shows its summary, then **Link**. The issue must be of the project's
-Jira project. From then on the ticket has its **Jira** tab and your Jira rules apply to it; **Change** and
+The same works for Jira, when the project is connected to Jira: the **Jira** row has a **Link a Jira issue** field.
+Paste the issue's key (`ABC-12`) or link in it, **Check** shows its summary, then **Link**. The issue must be of
+the project's Jira project. From then on the ticket has its **Jira** tab and your Jira rules apply to it; **Change** and
 **Unlink** work as for Notion, and leave the issue as it is in Jira.
 
-A ticket comes from one tracker: a ticket linked to a Notion page has no **Link a Jira issue**, and the other way
+A ticket comes from one tracker: a ticket linked to a Notion page has no **Link a Jira issue** field, and the other way
 round. Unlink it first to link it to the other tracker.
 
 ## Start a ticket
@@ -206,10 +215,11 @@ Ctrl, ⌘ and Alt combinations stay the browser's.
 
 ## Cancel and remove
 
-**Cancel ticket** stops the ticket: a running step is stopped (the agent too, within a few seconds), nothing it
-does after is kept or pushed, and the card goes back to Backlog marked **Cancelled**; its run shows **Cancelled**
-in the Log. Its open pull requests are closed on GitHub, and its issue is closed as not planned; a merged pull
+**Cancel ticket**, in the Overview of a ticket that is not Done, stops the ticket: a running step is stopped (the
+agent too, within a few seconds), nothing it does after is kept or pushed, and the card goes back to Backlog marked
+**Cancelled**; its run shows **Cancelled** in the Log. Its open pull requests are closed on GitHub (so a ticket that
+had one moves on to **Merged / Closed**, marked **Closed**), and its issue is closed as not planned; a merged pull
 request stays as it is, the branch is kept, and you can reopen either on GitHub, which Union leaves alone. Once the
-agent stopped, Union removes the ticket's preview, container and workspace (the branch on GitHub stays). A
-cancelled ticket can then leave Union with **Remove for good**, in its Overview: its runs, outputs
-and files are deleted. Nothing brings it back.
+agent stopped, Union removes the ticket's preview, container and workspace (the branch on GitHub stays). A cancelled
+ticket can then leave Union with **Remove for good**, in its Overview: its runs, outputs and files are deleted.
+Nothing brings it back.

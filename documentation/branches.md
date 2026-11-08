@@ -75,8 +75,8 @@ out of date. Union notices at its next check of GitHub. The card on the board sh
 says "New commits were pushed to `<branch>` on GitHub" or "`<branch>` was rewritten on GitHub", with the commit
 Union had and the one GitHub has now.
 
-Until you resync, **Rebase**, **Revise**, **Retry**, **Simplify history**, **Split into a stack** and **Change target**
-are unavailable: they would start from the old code, or their push would be refused.
+Until you resync, **Rebase**, **Revise**, **Retry**, **Simplify history**, **Split into a stack**, **Restack** and
+**Change target** are unavailable: they would start from the old code, or their push would be refused.
 
 Click **Resync from GitHub**. Union fetches the branch and puts its copy on it, then updates the diff on the Review
 tab. Nothing is pushed, no agent runs, and the ticket stays where it is (at its final review, or Done). The next time
@@ -93,10 +93,17 @@ parent's pull request is merged and GitHub deletes that branch, GitHub moves the
 parent's target. Union follows: the PR tab says "`<old>` was merged (#n): the pull request now targets `<new>`", and
 the next **Rebase** moves only the ticket's own commits onto the new base, even after a squash merge.
 
+## More actions
+
+While the pull request is open, **More actions** above the CI checks folds the operations you need less often:
+**Change target**, **Simplify history** and, when stacks are turned on, **Split into a stack**. Click it to unfold
+them. A ticket split into a stack has none of them there: its [stack panel](#the-stack-panel) holds its own.
+
 ## Change target
 
 To move a finished ticket onto another base, for example a fix built on `develop` that must ship as a hotfix on
-`main`, open **Change target** in the PR tab, pick the branch, then **Retarget onto `<branch>`**.
+`main`, open **More actions** in the PR tab and click **Change target**. Pick the branch (the button reads **Pick a
+branch** until you do), then click **Retarget onto `<branch>`**.
 
 Union moves only the ticket's own commits onto the new branch (the old base's commits stay behind), pushes, and
 changes the pull request's base on GitHub. As with a rebase, an agent runs only on a conflict or failing checks, and
@@ -110,6 +117,10 @@ read commit by commit: fix-ups folded in, one commit per logical change, message
 The code must not change, and Union checks it: the final tree must be identical to the one before, from the same
 fork point. Then Union pushes, and the ticket goes back to where it was (final review or Done). If a git hook
 refuses a commit, you choose between committing without the hooks and keeping the old history.
+
+On a ticket split into a stack, **Simplify history** is in the stack panel and works slice by slice: each slice's
+commits are rewritten, but no change moves to another slice, and every slice must end with the same code as before.
+After a slice was merged into the base, click **Restack** first.
 
 ## Split into a stack
 
@@ -131,3 +142,26 @@ request ready. The review page shows each slice as a tab, and **Review with agen
 Merge the slices from the bottom, on GitHub. After each merge, Union brings the slices above onto the base (GitHub
 does it itself for a GitHub stack). If that hits a conflict, the step fails without pushing anything; click
 **Restack** and the agent resolves it. The ticket counts as merged once every slice is merged.
+
+### The stack panel
+
+Once the ticket is split, its PR tab shows the stack as one panel, bottom slice first (slice 1 merges first). Each
+line is a slice: its pull request, its state, its title and its CI in one word (failed, running or passed; hover it
+for the counts). The CI is read again every 30 seconds while a check runs.
+
+Under the slices, the panel says how far the stack is behind its base, and offers:
+
+- **Rebase stack** (when the stack is behind): moves every slice onto the base at once, runs the checks and pushes them together. As with a
+  [rebase](#rebase), an agent runs only on a conflict or failing checks.
+- **Restack**: shown once a slice was merged; brings the slices above onto the base.
+- **Simplify history**: see [Simplify history](#simplify-history).
+- **Split again**: an agent plans new slices from the same code, and they replace the current stack.
+- **Rewrite all descriptions**: the agent rewrites each open slice's description, one after the other. Review and
+  send each draft from that slice's pull request below.
+
+The panel warns when the stack cannot go on as it is: a slice merged into another slice's branch instead of the base
+(its code is not in the base: merge the slices below it, or revert it on GitHub), or a slice closed without a merge
+(the stack stops there). **How the stack merges** at its foot explains the merge order for this stack.
+
+Below the panel, pick which slice's pull request the CI checks, the description and the discussion are about. They
+start on the top one, the ticket's own pull request.

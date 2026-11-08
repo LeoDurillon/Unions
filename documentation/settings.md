@@ -16,7 +16,7 @@ the page's name, opens the part of this guide about it; Union settings pages hav
 | **Pull requests** | Creation         | Open a draft pull request automatically; suggest replies to GitHub comments; split pull requests into stacks; check every slice.                   |
 |                   | Diff display     | Hide lock files and other paths from the review page.                                                                                              |
 | **Previews**      | Services         | Compose file, exposed services, compose additions, profiles, services for the agent.                                                               |
-|                   | Variables        | Plain and secret environment variables for previews and the agent.                                                                                 |
+|                   | Variables        | Plain and secret environment variables for previews and the agent, and a file to write them to for apps that read one.                             |
 |                   | End-to-end tests | The e2e command, and starting the preview for implementation steps.                                                                                |
 |                   | Limits           | Previews running at once, and the idle time after which a preview stops.                                                                           |
 | **Integrations**  | GitHub Project   | The GitHub Project the board mirrors to: connect one (pick or create), change it or disconnect it.                                                 |
@@ -66,26 +66,29 @@ All are optional. Put them in a `.env` file at the root of Union's checkout: Bun
 without Compose. Under Compose, variables set in your shell do not reach Union, except `GITHUB_TOKEN` and the ones
 `compose.yaml` itself reads (ports, user and group ids).
 
-| Variable                    | Default                        | Purpose                                                                    |
-| --------------------------- | ------------------------------ | -------------------------------------------------------------------------- |
-| `GITHUB_TOKEN`              | none                           | Token for projects that have no GitHub access of their own                 |
-| `UNION_MAX_CONCURRENT`      | `2`                            | Agent runs at the same time, tickets and investigations                    |
-| `UNION_MAX_PREVIEWS`        | `3`                            | Previews running at the same time, across projects                         |
-| `UNION_GITHUB_PULL_MS`      | `30000`                        | How often Union reads the changes made on GitHub                           |
-| `DB_PATH`                   | `union.sqlite` in the checkout | The database file                                                          |
-| `UNION_ATTACHMENTS_DIR`     | `attachments/` in the checkout | Where ticket and preview files are kept                                    |
-| `UNION_MAX_PROJECT_FILE_MB` | `2048`                         | The largest project file                                                   |
-| `UNION_CLAUDE_CREDENTIALS`  | `~/.claude/.credentials.json`  | The Claude login given to the agents (set by `compose.yaml` under Compose) |
-| `UNION_AGENT_IMAGE`         | `union-agent:local`            | The image agents run in, and `FROM union-agent` in a project's Dockerfile  |
-| `UNION_AGENT_BASE_IMAGE`    | `union-agent-base:local`       | The minimal image: `FROM union-agent-base` in a project's Dockerfile       |
+| Variable                    | Default                        | Purpose                                                                                                          |
+| --------------------------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| `GITHUB_TOKEN`              | none                           | Token for projects that have no GitHub access of their own                                                       |
+| `UNION_MAX_CONCURRENT`      | `2`                            | Agent runs at the same time, tickets and investigations                                                          |
+| `UNION_MAX_PREVIEWS`        | `3`                            | Previews running at the same time, across projects                                                               |
+| `UNION_GITHUB_PULL_MS`      | `30000`                        | How often Union reads the changes made on GitHub                                                                 |
+| `DB_PATH`                   | `union.sqlite` in the checkout | The database file                                                                                                |
+| `UNION_ATTACHMENTS_DIR`     | `attachments/` in the checkout | Where ticket and preview files are kept                                                                          |
+| `UNION_MAX_PROJECT_FILE_MB` | `2048`                         | The largest project file                                                                                         |
+| `UNION_CLAUDE_CREDENTIALS`  | `~/.claude/.credentials.json`  | The Claude login given to the agents (set by `compose.yaml` under Compose)                                       |
+| `UNION_AGENT_IMAGE`         | `union-agent:local`            | The image agents run in, and `FROM union-agent` in a project's Dockerfile                                        |
+| `UNION_AGENT_BASE_IMAGE`    | `union-agent-base:local`       | The minimal image: `FROM union-agent-base` in a project's Dockerfile                                             |
+| `UNION_ALLOWED_HOSTS`       | none                           | Host names Union answers to besides `localhost` and `127.0.0.1`, for both the page and the API (comma-separated) |
+| `UNION_GIT_BASE_URL`        | `https://github.com`           | Where agents clone the repositories from                                                                         |
+| `PORT`                      | `3000`                         | Union's port with `bun run start`                                                                                |
+| `UNION_HOST`                | `127.0.0.1`                    | The address Union listens on with `bun run start`                                                                |
 
 Read by `compose.yaml`:
 
-| Variable                 | Default  | Purpose                                                                           |
-| ------------------------ | -------- | --------------------------------------------------------------------------------- |
-| `UNION_WEB_PORT`         | `5173`   | Union's port                                                                      |
-| `UNION_ALLOWED_HOSTS`    | none     | Host names Union answers to besides `localhost` and `127.0.0.1` (comma-separated) |
-| `UNION_PREVIEW_PORT`     | `8080`   | The preview proxy's port                                                          |
-| `UNION_UID`, `UNION_GID` | `1000`   | The user and group Union runs as                                                  |
-| `DOCKER_GID`             | `1001`   | The group that owns `/var/run/docker.sock`                                        |
-| `UNION_SSH_DIR`          | `~/.ssh` | SSH keys used to fetch Union's own updates                                        |
+| Variable                 | Default  | Purpose                                                               |
+| ------------------------ | -------- | --------------------------------------------------------------------- |
+| `UNION_WEB_PORT`         | `5173`   | Union's port                                                          |
+| `UNION_PREVIEW_PORT`     | `8080`   | The preview proxy's port (read by Union too, for the previews' links) |
+| `UNION_UID`, `UNION_GID` | `1000`   | The user and group Union runs as                                      |
+| `DOCKER_GID`             | `1001`   | The group that owns `/var/run/docker.sock`                            |
+| `UNION_SSH_DIR`          | `~/.ssh` | SSH keys used to fetch Union's own updates                            |

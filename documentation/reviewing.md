@@ -15,12 +15,18 @@ Click **Review changes** in a ticket's panel. The page opens on the **Diff** tab
 - On the right, one file at a time, with syntax highlighting, **Unified** or **Split** (side by side). Union
   remembers your choice in this browser.
 - The commit picker shows all the changes, the changes since your last review, or one commit at a time.
-- Lock files are hidden by default. Hide other paths in the project's **Settings → Review**.
+- Lock files are listed apart, folded, at the end of the file list. Fold other paths the same way in the project's
+  **Settings → Pull requests → Diff display**.
 
 The other tabs show the ticket, its preview, its pull request, its [spec report](#spec-report) and your
 [review agents](#your-review-agents), so you can check
 the change against the request without leaving the page. The browser's Back and Forward buttons move between the
 tabs you opened, and reloading the page keeps the tab you are on.
+
+On a ticket [split into a stack](branches.md#split-into-a-stack), a row of tabs under the header picks what the
+page shows: **All**, or one slice with its pull request and its number of drafts. A comment goes on the diff of the
+slice you are on, and **Send review** gives the implementer a section per slice. The PR tab follows the slice you
+pick.
 
 The diff is a snapshot Union takes after each implementation run, so it shows what the agent left, even before the
 branch is pushed.
@@ -29,12 +35,16 @@ branch is pushed.
 
 1. Click a line number to comment on that line. Shift-click another line number to extend it to a block.
 2. Your comments stay drafts in Union until you send them.
-3. **Send review** sends them all to the implementer, as a revision. When it is done, the final review runs again.
+3. **Send review** sends them all to the implementer, as a revision.
 
 You can send a review while the ticket waits for you at the implementation or the final review, or once it is Done
-(its pull request open and not merged); from Done, the ticket goes back to In progress.
+(its pull request open and not merged). Sent at the implementation, the revised code waits for you there again. Sent
+at the final review or from Done, the final review runs again once the implementer is done; from Done, the ticket
+goes back to In progress.
 
 To bring in what people wrote on GitHub, click **Import from #\<PR\>** in the header (or **Import** in the PR tab).
+On a split ticket, the header's **Import from the stack** imports the comments of every open slice's pull request,
+each onto its own slice.
 Unresolved line comments become drafts on their lines, with the replies folded in. Review summaries and
 conversation comments are offered one by one with **Add to review**, since bots post many of them. Comments whose
 lines no longer exist show as outdated, with GitHub's excerpt. Once the implementer has worked on imported
@@ -64,14 +74,16 @@ ticket runs a step.
 
 ## Review with agent
 
-**Review with agent** asks an agent to read the change against its specs and leave line comments. They arrive as
-drafts, like yours: keep, edit or delete each one before you send the review.
+**Review with agent** asks an agent (Opus by default) to read the change against its specs and leave line comments.
+They arrive as drafts, like yours: keep, edit or delete each one before you send the review. The agent may also
+leave a remark on the whole change, and findings about code outside the diff, shown above the files. Once it has
+run, the button reads **Review again with agent**. On a split ticket, it reviews slice by slice.
 
 ## Spec report
 
 The **Report** tab tells you, before you read the diff, what needs your attention and what you can skim, judged
 against the change's specs. Click **Write the report**: an agent reads the specs listed there (the [Specs](#specs)
-bar's) and the whole change, and writes:
+bar's; with no spec, the button stays off) and the whole change, and writes:
 
 - **How it works**: a small map of the change's main path (click a part to open it in the diff; the grey ones are
   not changed; the red numbers are the **Needs you** items about that part), and a walkthrough in a few steps:
@@ -95,7 +107,8 @@ bar's) and the whole change, and writes:
 
 Not every item will be worth your time on every project. **Not useful** on an item hides it, and proposes a rule
 for the next reports of this project ("Do not raise …"): edit it to cover the kind of item, or clear it to only hide
-this one. The rule is kept on the Memory page under **Spec report**, where you can edit or remove it.
+this one, then click **Hide it and keep the rule**, or **Hide it** with the rule cleared. The rule is kept on the
+Memory page under **Spec report**, where you can edit or remove it.
 
 In the Diff tab, while the report is current, the open file starts with what the report says about it (**Read
 first**, **Skim**, and the **Needs you** items about it), and the lines an item points at carry a red bar with the
@@ -160,12 +173,12 @@ newest first, with their author, branches, review state and size. Stacks of pull
 | Tab             | What it shows                                                                                                                            |
 | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | **Description** | The pull request's description, and the Notion pages and Jira issues it implements (**Link** them here).                                 |
-| **Comments**    | Its review summaries, conversation and line threads, each with **Reply** or **Quote reply**; a thread's file and lines open in the diff. |
 | **Notion**      | The text of the linked Notion pages, once there are some, each followed by its open comments (read only).                                |
 | **Jira**        | The description of the linked Jira issues, once there are some, each followed by its comments (read only; reply in Jira).                |
-| **Preview**     | A [preview](previews.md#previews-of-pull-requests-under-review) of the pull request's code.                                              |
+| **Comments**    | Its review summaries, conversation and line threads, each with **Reply** or **Quote reply**; a thread's file and lines open in the diff. |
 | **Report**      | The [spec report](#spec-report), as for a ticket.                                                                                        |
 | **Agents**      | [Your review agents](#your-review-agents), as for a ticket.                                                                              |
+| **Preview**     | A [preview](previews.md#previews-of-pull-requests-under-review) of the pull request's code.                                              |
 | **Diff**        | The diff, comments, Explain and Review with agent, as for a ticket.                                                                      |
 
 When the project is connected to Jira, the **Description** tab also has **Jira issues**. Issues of your Jira project
@@ -179,10 +192,15 @@ post a review" act on them (see [Automation](automation.md)). Nothing is written
 longer in the diff are quoted in the body instead. If GitHub refuses (for example, an approval of your own pull
 request), your drafts stay, with GitHub's reason.
 
+A pull request that is part of a stack opens with a tab per pull request of the stack, bottom first, each with its
+number of drafts. There, **Review with agent** asks whether to review **The whole stack** or **This pull request
+only**.
+
 The browser's Back and Forward buttons move between the pull requests and tabs you opened, Back again closes the
 review page, and reloading the page keeps the pull request and tab you are on.
 
-Removing a pull request from Under review deletes its drafts and stops its preview.
+**Stop reviewing #\<PR\>** on its row removes a pull request from Under review, after you confirm: its drafts are
+deleted and its preview stopped.
 A pull request that is merged or closed on GitHub leaves Under review on its own, the same way, the next time the
 list is read.
 

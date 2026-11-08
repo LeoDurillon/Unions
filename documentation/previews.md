@@ -44,6 +44,15 @@ sidebar's **Previews** entry lists every preview running, across projects, with 
   data and the images it built.
 - At most 3 previews run at once (`UNION_MAX_PREVIEWS`); a project can allow fewer.
 
+### Edit the Compose file for one ticket
+
+**Compose file** in the **⋯** menu shows the file the preview runs: the repository's, with what Union adds.
+**Generate** (or **Generate again**) reads it from the branch without starting anything. To try a change on this
+ticket only, edit it and click **Save as this ticket's file**: the menu then reads **Compose file (yours)**, and
+**Start** and **Restart** run your version as it is, ignoring changes the branch makes to the Compose file. **Use
+the generated file again** goes back. Your file is checked like the generated one (see below), and changes apply at
+the next Start or Restart. A pull request's preview has the same menu.
+
 ### Start over with a fresh preview
 
 **Restart** updates a running preview in place: its data, such as its database, is kept. When that data is broken (a
@@ -67,7 +76,8 @@ names, or leave them unnamed.
 
 ## End-to-end tests
 
-Set the command in **Settings → Previews → End-to-end tests**, for example `npx playwright test`. Then click **Run
+Set the command in **Settings → Previews → End-to-end tests**, for example `npx playwright test`. It can take several
+lines, for example a setup line before the tests. Then click **Run
 e2e tests** in a ticket's Preview tab (**Run again** once there is a result).
 The result shows how long ago it ran; open **Output** for its last lines, or **Command** for what ran. The tests run in the ticket's container, against the running preview; the
 browser they need is installed on first use, at your repository's Playwright version.
