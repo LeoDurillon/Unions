@@ -1,10 +1,11 @@
 // Runs a review agent's work on the change's files with their hunk index written in the checkout, then
 // removes it and closes the target.
+
 import type { ContainerRuntime } from '@union/core';
 
+import { mustRunIn } from '../container-exec';
+import { REPO_DIR } from '../provision';
 import type { ReviewTarget } from './agent-review-target';
-import { mustRunIn } from './container-exec';
-import { REPO_DIR } from './provision';
 import { HUNK_INDEX, hunkIndex } from './review-grouping-format';
 
 /** A changed file and its patch. */

@@ -1,12 +1,13 @@
 // One runner for the review side runs: claims within the run slots, checks the change out, runs the kind's work with the hunk index, finishes, recovers.
+
 import { reviewRunExists, type ReviewRunKind } from '@union/core';
 
-import type { AgentReviewDeps } from '../agent-review';
-import type { ReviewRun, ReviewTarget } from '../agent-review-target';
-import { withHunkIndex, type ChangedFile } from '../hunk-index-file';
 import { removeRunContainers } from '../janitor';
 import type { TicketContainer } from '../provision';
 import { RunPool } from '../run-pool';
+import type { AgentReviewDeps } from './agent-review';
+import type { ReviewRun, ReviewTarget } from './agent-review-target';
+import { withHunkIndex, type ChangedFile } from './hunk-index-file';
 import { sideReviewContainer, type SideReviewLetter } from './names';
 
 /** What every checkout gives the engine: where the agent runs, and how it goes. */

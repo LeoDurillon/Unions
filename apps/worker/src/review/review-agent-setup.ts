@@ -1,14 +1,15 @@
 // Prepares a review agent's checkout before it runs: the project's files and its install command, never for a fork's pull request.
+
 import { schema, type ReviewAgentRun } from '@union/core';
 import { eq } from 'drizzle-orm';
 
-import type { AgentFn } from './agent';
+import type { AgentFn } from '../agent';
+import { runInstall } from '../gate';
+import { syncProjectFiles } from '../project-files-sync';
 import type { AgentReviewDeps } from './agent-review';
 import { loadProject, type ReviewTarget } from './agent-review-target';
-import { runInstall } from './gate';
-import { syncProjectFiles } from './project-files-sync';
+import { sideReviewContainer } from './names';
 import type { CheckoutSetup } from './review-agent-prompt';
-import { sideReviewContainer } from './side-review/names';
 
 export type Deps = AgentReviewDeps & { agent?: AgentFn };
 

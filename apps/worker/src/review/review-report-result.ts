@@ -1,6 +1,7 @@
 // Reads the report block at the end of the agent's answer: quotes checked against the specs sent,
 // paths against the change, the gaps and unasked behaviours always among what needs the reviewer, the
 // changed files it says nothing about listed; what it cannot back is dropped and counted.
+
 import {
   REPORT_VERDICTS,
   type ReportRequirement,
@@ -9,7 +10,7 @@ import {
   type ReviewReportResult,
 } from '@union/core';
 
-import { lastJsonBlock } from './json-block';
+import { lastJsonBlock } from '../json-block';
 import { oneOf, text, texts } from './review-report-fields';
 import { flowOf } from './review-report-flow';
 import { docsOf, importantFilesOf, requirementsOf, risksOf } from './review-report-items';

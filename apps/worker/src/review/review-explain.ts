@@ -1,4 +1,5 @@
 // Explains a review's lines as users ask, one per review at a time: a ticket's in its own container, a pull request's in a throwaway one (`union-e<id>`).
+
 import {
   appendAgentLine,
   claimExplanation,
@@ -17,15 +18,15 @@ import {
   type SpecPart,
 } from '@union/core';
 
-import { agentFailure, runAgent, runResumable, type AgentFn, type AgentOutcome } from './agent';
+import { agentFailure, runAgent, runResumable, type AgentFn, type AgentOutcome } from '../agent';
+import { runIn } from '../container-exec';
+import { REPO_DIR } from '../provision';
 import type { AgentReviewDeps } from './agent-review';
 import { openTarget, type ReviewTarget } from './agent-review-target';
-import { runIn } from './container-exec';
-import { REPO_DIR } from './provision';
+import { SideReviewRunner, STANDARD_ENDS, type SideReviewKind } from './engine';
+import { missingBlock } from './outcome-text';
 import { explainPrompt, followUpPrompt } from './review-explain-prompt';
 import { keepDocs, parseExplanation } from './review-explain-result';
-import { SideReviewRunner, STANDARD_ENDS, type SideReviewKind } from './side-review/engine';
-import { missingBlock } from './side-review/outcome-text';
 
 /** Prints back each path read on stdin that exists in the checkout. */
 const EXISTING = String.raw`while IFS= read -r p; do [ -e "$p" ] && printf "%s\n" "$p"; done; true`;

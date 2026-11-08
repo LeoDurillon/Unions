@@ -15,9 +15,9 @@ import {
 } from '@union/core';
 import { eq } from 'drizzle-orm';
 
-import type { AgentFn, AgentRun } from './agent';
+import type { AgentFn, AgentRun } from '../agent';
+import { RunSlots } from '../slots';
 import { AgentReviewRunner } from './agent-review';
-import { RunSlots } from './slots';
 
 let root: string;
 let db: Db;

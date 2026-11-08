@@ -1,5 +1,6 @@
 // Checks out the change an agent review reads: the ticket's branch, or a pull request in a
 // throwaway container.
+
 import {
   appendAgentLine,
   type ContainerRuntime,
@@ -12,8 +13,8 @@ import {
 } from '@union/core';
 import { desc, eq } from 'drizzle-orm';
 
-import { projectGitToken } from './credentials';
-import { clonePullRequest } from './pr-checkout';
+import { projectGitToken } from '../credentials';
+import { clonePullRequest } from '../pr-checkout';
 import {
   cloneSource,
   ensureTicketContainer,
@@ -22,8 +23,8 @@ import {
   type CloneSource,
   type ProvisionConfig,
   type TicketContainer,
-} from './provision';
-import { ensureBranch } from './workspace-git';
+} from '../provision';
+import { ensureBranch } from '../workspace-git';
 
 export type TargetDeps = { db: Db; runtime: ContainerRuntime; config: ProvisionConfig };
 

@@ -1,4 +1,5 @@
 // Runs the review agents the user asked for on a review's change: each in its own throwaway checkout (`union-v<id>`), installed first.
+
 import {
   claimReviewAgentRun,
   customStep,
@@ -11,12 +12,12 @@ import {
   type ReviewAgentRunOutcome,
 } from '@union/core';
 
-import { agentFailure, runAgent } from './agent';
-import { REPO_DIR } from './provision';
+import { agentFailure, runAgent } from '../agent';
+import { REPO_DIR } from '../provision';
+import { SideReviewRunner, STANDARD_ENDS, type SideReviewKind } from './engine';
 import { openReviewAgentTarget } from './review-agent-checkout';
 import { reviewAgentPrompt } from './review-agent-prompt';
 import { prepare, type Deps } from './review-agent-setup';
-import { SideReviewRunner, STANDARD_ENDS, type SideReviewKind } from './side-review/engine';
 
 const reviewAgent: SideReviewKind<ReviewAgentRun, ReviewAgentRunOutcome> = {
   kind: 'review_agent_run',

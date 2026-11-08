@@ -145,10 +145,10 @@
   `ReviewRunLife` each kind declares (its table, a typed `load`, its `changed` event, its failing finish, and
   for explanations a `pick` that keeps one running per review). Each kind keeps its public functions
   (`claimGrouping`, ...) and its own queue (busy rules) and finish (result columns).
-- On the worker side they share one engine, `side-review/engine.ts`: `SideReviewRunner` (a `RunPool`) over a
+- On the worker side they share one engine, `review/engine.ts` (the review page's side runs and their helpers all live in `review/`): `SideReviewRunner` (a `RunPool`) over a
   `SideReviewKind`, which gives:
   - its rows (claim, finish, fail the interrupted);
-  - its container letter (`side-review/names.ts`: `union-a` agent review, `g` grouping, `s` report,
+  - its container letter (`review/names.ts`: `union-a` agent review, `g` grouping, `s` report,
     `e` explanation, `v` review agent);
   - its checkout (`open`: `openTarget`, the stack checkout for agent reviews, `openReviewAgentTarget`);
   - whether it uses the hunk index;
@@ -158,7 +158,7 @@
   meanwhile, always closes the checkout, and on start fails the interrupted runs and removes their throwaway
   containers (those on a pull request, or every one for review agents, `throwaway: 'all'`). `agentFailure`
   (`agent.ts`) words an agent error for every side run ("Usage limit reached: …"); `missingBlock`
-  (`side-review/outcome-text.ts`) the answer without its block.
+  (`review/outcome-text.ts`) the answer without its block.
 
 - On start, `recoverGitHubSends` (core) puts a pull request review or a reply left `sending` back to the user
   (the review `failed`, the reply a draft) with a note to check GitHub before sending again, unless its command

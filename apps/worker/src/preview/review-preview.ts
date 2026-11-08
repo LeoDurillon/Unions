@@ -1,8 +1,9 @@
 // A pull request's preview: its checkout made before a start, and moved to a newer reviewed commit on request.
+
 import { getPreview, PREVIEW_REPO_DIR, updatePreview, type WorkspaceOwner } from '@union/core';
 
-import type { TargetDeps } from '../agent-review-target';
 import { ensureReviewCheckout, updateReviewCheckout } from '../review-checkout';
+import type { TargetDeps } from '../review/agent-review-target';
 import { startPreview, takeDown, type PreviewDeps, type StartOutcome } from './run';
 import { PreviewError } from './target';
 

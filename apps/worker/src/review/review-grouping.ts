@@ -1,4 +1,5 @@
 // Groups a review's files by spec, as the user asked: a ticket's in its own container, a pull request's in a throwaway one (`union-g<id>`).
+
 import {
   claimGrouping,
   effortFor,
@@ -10,14 +11,14 @@ import {
   type ReviewGrouping,
 } from '@union/core';
 
-import { agentFailure, runAgent } from './agent';
+import { agentFailure, runAgent } from '../agent';
+import { REPO_DIR } from '../provision';
 import type { AgentReviewDeps } from './agent-review';
 import { openTarget } from './agent-review-target';
-import { REPO_DIR } from './provision';
+import { SideReviewRunner, STANDARD_ENDS, type SideReviewKind } from './engine';
+import { missingBlock } from './outcome-text';
 import { groupingPrompt } from './review-grouping-prompt';
 import { parseGrouping } from './review-grouping-result';
-import { SideReviewRunner, STANDARD_ENDS, type SideReviewKind } from './side-review/engine';
-import { missingBlock } from './side-review/outcome-text';
 
 const grouping: SideReviewKind<ReviewGrouping, GroupingOutcome> = {
   kind: 'grouping',

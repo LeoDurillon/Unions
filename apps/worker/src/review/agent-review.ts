@@ -1,5 +1,6 @@
 // Runs queued agent reviews of a ticket's change or a pull request, sharing the run slots with the
 // pipeline.
+
 import {
   agentReviewStack,
   claimAgentReview,
@@ -17,14 +18,14 @@ import {
   type Db,
 } from '@union/core';
 
-import { agentFailure, runAgent, type AgentFn } from './agent';
+import { agentFailure, runAgent, type AgentFn } from '../agent';
+import { REPO_DIR, type TicketContainer } from '../provision';
+import type { RunSlots } from '../slots';
 import { FINDINGS_FORMAT, parseFindings, toDrafts, type Findings } from './agent-review-findings';
 import { openStackTarget, stackOutcome, stackReviewPrompt } from './agent-review-stack';
 import { openTarget, type ReviewTarget, type TargetDeps } from './agent-review-target';
-import { REPO_DIR, type TicketContainer } from './provision';
-import { SideReviewRunner, STANDARD_ENDS, type SideReviewKind } from './side-review/engine';
-import { missingBlock } from './side-review/outcome-text';
-import type { RunSlots } from './slots';
+import { SideReviewRunner, STANDARD_ENDS, type SideReviewKind } from './engine';
+import { missingBlock } from './outcome-text';
 
 export type AgentReviewDeps = TargetDeps & { slots: RunSlots; agent?: AgentFn };
 

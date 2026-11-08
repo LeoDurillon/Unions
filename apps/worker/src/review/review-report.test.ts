@@ -19,10 +19,10 @@ import {
   type ReviewReportResult,
 } from '@union/core';
 
-import type { AgentFn, AgentRun } from './agent';
-import { REPO_DIR } from './provision';
+import type { AgentFn, AgentRun } from '../agent';
+import { REPO_DIR } from '../provision';
+import { RunSlots } from '../slots';
 import { ReviewReportRunner } from './review-report';
-import { RunSlots } from './slots';
 
 let root: string;
 let db: Db;

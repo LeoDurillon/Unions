@@ -1,4 +1,5 @@
 // Writes the spec reports the user asked for: a ticket's in its own container, a pull request's in a throwaway one (`union-s<id>`).
+
 import {
   claimReport,
   effortFor,
@@ -10,13 +11,13 @@ import {
   type ReviewReport,
 } from '@union/core';
 
-import { agentFailure, type AgentRun } from './agent';
+import { agentFailure, type AgentRun } from '../agent';
+import { REPO_DIR } from '../provision';
 import type { AgentReviewDeps } from './agent-review';
 import { openTarget } from './agent-review-target';
-import { REPO_DIR } from './provision';
+import { SideReviewRunner, STANDARD_ENDS, type SideReviewKind } from './engine';
 import { askReport, reportPrompt } from './review-report-ask';
 import { commitMessages, keepInCheckout, lineCounts, reportPaths } from './review-report-checkout';
-import { SideReviewRunner, STANDARD_ENDS, type SideReviewKind } from './side-review/engine';
 
 const report: SideReviewKind<ReviewReport, ReportOutcome> = {
   kind: 'report',

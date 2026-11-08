@@ -1,10 +1,13 @@
 // A review agent's change in its own throwaway container (`union-v<id>`): a pull request cloned from GitHub, a ticket's branch from a bundle of its container's.
+
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
 import { getTicket, type ReviewAgentRun } from '@union/core';
 
+import { hostGit, REPO_DIR, type TicketContainer } from '../provision';
+import { exportBranch } from '../workspace-git';
 import {
   loadProject,
   openTarget,
@@ -12,8 +15,6 @@ import {
   type ReviewTarget,
   type TargetDeps,
 } from './agent-review-target';
-import { hostGit, REPO_DIR, type TicketContainer } from './provision';
-import { exportBranch } from './workspace-git';
 
 /**
  * The host clones the ticket's branch and its base from a bundle of the ticket container's

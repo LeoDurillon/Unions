@@ -31,9 +31,13 @@ const files = new Set(await scan(SOURCES));
 const moves = new Map(
   moving.map((file) => [file, path.posix.join(folder, path.posix.basename(file))]),
 );
-for (const file of moves.keys()) {
+for (const [file, target] of moves) {
   if (!files.has(file)) {
     console.error(`Not a source file: ${file}`);
+    process.exit(1);
+  }
+  if (files.has(target) || [...moves.values()].filter((other) => other === target).length > 1) {
+    console.error(`${target} would be overwritten`);
     process.exit(1);
   }
 }

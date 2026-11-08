@@ -1,8 +1,9 @@
 // Asks the report agent and reads its report, asking once more in the same session when the answer
 // has no block.
+
 import type { ContainerRuntime, ReviewReportResult } from '@union/core';
 
-import { runAgent, type AgentFn, type AgentOutcome, type AgentRun } from './agent';
+import { runAgent, type AgentFn, type AgentOutcome, type AgentRun } from '../agent';
 import type { WhyTexts } from './review-report-flow';
 import { REPORT_AGAIN } from './review-report-prompt';
 import { parseReport } from './review-report-result';

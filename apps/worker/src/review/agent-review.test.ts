@@ -17,10 +17,10 @@ import {
   type ExecResult,
 } from '@union/core';
 
-import type { AgentFn, AgentRun } from './agent';
+import type { AgentFn, AgentRun } from '../agent';
+import { REPO_DIR } from '../provision';
+import { RunSlots } from '../slots';
 import { AgentReviewRunner } from './agent-review';
-import { REPO_DIR } from './provision';
-import { RunSlots } from './slots';
 
 const PATCH = '@@ -1,2 +1,2 @@\n const a = 1;\n-const b = 2;\n+const b = 3;';
 

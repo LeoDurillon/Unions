@@ -1,4 +1,5 @@
 // Tests of the review side-run engine: a run cancelled before its work, a target always closed, and what recovery removes.
+
 import { beforeEach, expect, test } from 'bun:test';
 
 import {
@@ -10,10 +11,10 @@ import {
   type Db,
 } from '@union/core';
 
-import type { AgentReviewDeps } from '../agent-review';
-import type { ReviewRun } from '../agent-review-target';
 import type { ProvisionConfig } from '../provision';
 import { RunSlots } from '../slots';
+import type { AgentReviewDeps } from './agent-review';
+import type { ReviewRun } from './agent-review-target';
 import { SideReviewRunner, type SideReviewKind } from './engine';
 
 type Row = ReviewRun & { status: string };

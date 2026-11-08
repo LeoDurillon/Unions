@@ -1,6 +1,7 @@
 // The report's map of how the change works, read from the agent's block: nodes on paths of the
 // checkout, edges between them, and a walkthrough whose every why is checked against the source it
 // names (a spec, a commit message, a comment the diff adds), else marked inferred.
+
 import {
   quoteKey,
   WHY_SOURCES,
@@ -12,7 +13,7 @@ import {
   type WhySource,
 } from '@union/core';
 
-import { isRecord } from './json-block';
+import { isRecord } from '../json-block';
 import { oneOf, pathOf, rangeOf, records, text, texts } from './review-report-fields';
 import { MAX_FLOW_EDGES, MAX_FLOW_NODES, MAX_FLOW_STEPS } from './review-report-format';
 

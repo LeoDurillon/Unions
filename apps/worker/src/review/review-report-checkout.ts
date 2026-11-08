@@ -1,10 +1,11 @@
 // Reads what the report is checked against in the container: the files it names must exist (a deleted
 // file of the change aside), its line ranges are cut to the file's length; and the change's commit
 // messages.
+
 import type { ContainerRuntime, ReportFlow, ReportLines, ReviewReportResult } from '@union/core';
 
-import { runIn } from './container-exec';
-import { REPO_DIR } from './provision';
+import { runIn } from '../container-exec';
+import { REPO_DIR } from '../provision';
 
 /** Each path read from stdin that is a file, with its number of lines (a last line without `\n` counts). */
 const LINE_COUNTS = String.raw`while IFS= read -r p; do [ -f "$p" ] && printf "%s\t%s\n" "$p" "$(awk 'END { print NR }' "$p")"; done; true`;

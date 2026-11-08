@@ -17,11 +17,11 @@ import {
   type ExecResult,
 } from '@union/core';
 
-import type { AgentFn, AgentRun } from './agent';
-import { REPO_DIR } from './provision';
+import type { AgentFn, AgentRun } from '../agent';
+import { REPO_DIR } from '../provision';
+import { RunSlots } from '../slots';
 import { ReviewGroupingRunner } from './review-grouping';
 import { parseGrouping } from './review-grouping-result';
-import { RunSlots } from './slots';
 
 let root: string;
 let db: Db;

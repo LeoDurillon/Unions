@@ -1,4 +1,5 @@
 // Tests the explanation runner with a fake agent: answers, failures, follow-ups and the pull request container.
+
 import { afterEach, beforeEach, expect, test } from 'bun:test';
 import { cp, mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -20,10 +21,10 @@ import {
 } from '@union/core';
 import { eq } from 'drizzle-orm';
 
-import type { AgentFn, AgentOutcome, AgentRun } from './agent';
-import { REPO_DIR } from './provision';
+import type { AgentFn, AgentOutcome, AgentRun } from '../agent';
+import { REPO_DIR } from '../provision';
+import { RunSlots } from '../slots';
 import { ReviewExplainRunner } from './review-explain';
-import { RunSlots } from './slots';
 
 const PATCH = '@@ -1,2 +1,2 @@\n const a = 1;\n-const b = 2;\n+const b = 3;';
 const DOC = 'docs/spec/export.md';

@@ -8,12 +8,12 @@ import {
   type ContainerRuntime,
 } from '@union/core';
 
-import type { TargetDeps } from './agent-review-target';
 import { previewSettings } from './preview/compose';
 import { previewEnv } from './preview/preview-env';
 import { loadTarget } from './preview/target';
 import { ensureTicketContainer } from './provision';
 import { openReviewContainer } from './review-checkout';
+import type { TargetDeps } from './review/agent-review-target';
 import { startServicesRun } from './services-run';
 
 /** A running container to exec in, the variables its command gets, and what to do once it ends. */

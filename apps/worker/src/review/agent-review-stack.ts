@@ -1,4 +1,5 @@
 // A stack's agent review: its pull requests checked out together, the prompt that lists them, and the findings split per pull request.
+
 import {
   resolveAgent,
   schema,
@@ -11,10 +12,10 @@ import {
 } from '@union/core';
 import { inArray } from 'drizzle-orm';
 
+import { clonePullRequests, pullRef } from '../pr-checkout';
+import type { TicketContainer } from '../provision';
 import { STACK_FINDINGS_FORMAT, toDrafts, type Findings } from './agent-review-findings';
 import { loadProject, patches, throwawayCheckout, type TargetDeps } from './agent-review-target';
-import { clonePullRequests, pullRef } from './pr-checkout';
-import type { TicketContainer } from './provision';
 
 /** A pull request of the stack as the agent compares it: its own change is `base...ref`. */
 export type StackMember = {

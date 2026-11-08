@@ -1,11 +1,12 @@
 // A pull request's own container (`union-r<id>`): its checkout at the reviewed commit, for its preview, tests and commands.
+
 import { ownerContainerNames, schema, type Db } from '@union/core';
 import { eq } from 'drizzle-orm';
 
-import { loadProject, type TargetDeps } from './agent-review-target';
 import { projectGitToken } from './credentials';
 import { clonePullRequest } from './pr-checkout';
 import { cloneSource, hostGit, projectImage, type TicketContainer } from './provision';
+import { loadProject, type TargetDeps } from './review/agent-review-target';
 
 export type Review = typeof schema.currentReviews.$inferSelect;
 

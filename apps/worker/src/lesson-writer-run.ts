@@ -1,4 +1,5 @@
 // Runs the lesson writer and the lesson tidier the Memory page asks for, in a throwaway container with only the Claude login.
+
 import {
   claimLessonSuggestion,
   effortFor,
@@ -18,7 +19,7 @@ import {
 } from '@union/core';
 
 import { agentFailure, runAgent, type AgentFn } from './agent';
-import type { TargetDeps } from './agent-review-target';
+import type { TargetDeps } from './review/agent-review-target';
 import { RunPool, WORKER_STOPPED } from './run-pool';
 import type { RunSlots } from './slots';
 import { inThrowaway } from './throwaway-container';

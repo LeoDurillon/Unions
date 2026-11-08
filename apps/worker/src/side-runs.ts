@@ -9,7 +9,7 @@ import type { GitHubApi } from './github/api';
 import { InvestigationRunner, type InvestigationDeps } from './investigate';
 import { PrDescriptionRunner } from './pr-description-runner';
 import { startPreviewRuns, type PreviewRuns } from './preview/preview-runs';
-import { reviewRunners, startReviewRuns, type ReviewRuns } from './review-runs';
+import { reviewRunners, startReviewRuns, type ReviewRuns } from './review/review-runs';
 import { ThrowawayRuns } from './throwaway-runs';
 import { UnionUpdater } from './union-update';
 
