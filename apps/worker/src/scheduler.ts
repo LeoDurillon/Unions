@@ -7,6 +7,7 @@ import {
   getTicket,
   type LeftoverResolution,
   modelFor,
+  type Phase,
   saveOutput,
   schema,
   type Step,
@@ -15,6 +16,14 @@ import {
 import { eq } from 'drizzle-orm';
 
 import { revisionFor } from './revision';
+import {
+  CANCELLED,
+  CANCELLED_ERROR,
+  INTERRUPTED,
+  recordEndedRun,
+  runEnd,
+  SHUTDOWN,
+} from './run-end';
 import { RunSlots } from './slots';
 import { retryTime } from './step-outcome';
 
@@ -62,12 +71,12 @@ const RUN_STATUS = {
   rate_limited: 'rate_limited',
 } as const satisfies Record<StepResult['kind'], string>;
 
-const INTERRUPTED = 'Interrupted: the worker stopped during the run (it runs the step again).';
+/** A run in flight, with what stops it. */
+type ActiveRun = { promise: Promise<void>; controller: AbortController };
 
 /** Runs one agent step per ticket in `running` phase, within the shared run slots. */
 export class Scheduler {
-  private readonly active = new Map<number, Promise<void>>();
-  private readonly abort = new AbortController();
+  private readonly active = new Map<number, ActiveRun>();
   /** Shared with the other agent runs (investigations). */
   readonly slots: RunSlots;
 
@@ -91,17 +100,7 @@ export class Scheduler {
       .where(eq(schema.runs.status, 'running'))
       .all();
     for (const run of orphans) {
-      this.db
-        .update(schema.runs)
-        .set({ status: 'failed', finishedAt: Date.now(), error: INTERRUPTED })
-        .where(eq(schema.runs.id, run.id))
-        .run();
-      emitEvent(this.db, {
-        type: 'run_finished',
-        ticketId: run.ticketId,
-        runId: run.id,
-        payload: { step: run.step, status: 'failed' },
-      });
+      recordEndedRun(this.db, run, INTERRUPTED);
     }
     for (const ticketId of new Set(orphans.map((run) => run.ticketId))) {
       const name = getTicket(this.db, ticketId).containerName;
@@ -125,6 +124,7 @@ export class Scheduler {
         dispatch(this.db, ticket.id, { type: 'retry' });
       }
     }
+    this.abortCancelled();
     for (const ticket of this.db.select().from(schema.tickets).all()) {
       if (ticket.phase.kind === 'running' && !this.active.has(ticket.id)) {
         if (!this.slots.tryTake()) {
@@ -135,30 +135,60 @@ export class Scheduler {
     }
   }
 
-  /** Resolves when no run is in flight. */
-  async idle(): Promise<void> {
-    await Promise.all(this.active.values());
+  /** A ticket that left `running` during its run (Cancel): its agent is stopped, and nothing it does next is kept. */
+  private abortCancelled(): void {
+    for (const [ticketId, run] of this.active) {
+      if (this.phaseOf(ticketId)?.kind !== 'running') {
+        run.controller.abort(CANCELLED);
+      }
+    }
   }
 
+  /** The ticket's phase; null once it was removed. */
+  private phaseOf(ticketId: number): Phase | null {
+    const row = this.db
+      .select({ phase: schema.tickets.phase })
+      .from(schema.tickets)
+      .where(eq(schema.tickets.id, ticketId))
+      .get();
+    return row?.phase ?? null;
+  }
+
+  /** Resolves when no run is in flight. */
+  async idle(): Promise<void> {
+    await Promise.all([...this.active.values()].map((run) => run.promise));
+  }
+
+  /** Stops every run; those that do not finish leave their ticket `running` for the next worker. */
   stop(): void {
-    this.abort.abort();
+    for (const run of this.active.values()) {
+      run.controller.abort(SHUTDOWN);
+    }
   }
 
   private launch(info: RunInfo): void {
-    const promise = this.runTracked(info);
-    this.active.set(info.ticketId, promise);
+    const controller = new AbortController();
+    const promise = this.runTracked(info, controller.signal);
+    this.active.set(info.ticketId, { promise, controller });
   }
 
-  private async runTracked(info: RunInfo): Promise<void> {
+  /** Never rejects: a throw in the run's bookkeeping is recorded, not left unhandled. */
+  private async runTracked(info: RunInfo, signal: AbortSignal): Promise<void> {
     try {
-      await this.runStep(info);
+      await this.runStep(info, signal);
+    } catch (error) {
+      emitEvent(this.db, {
+        type: 'worker_error',
+        ticketId: info.ticketId,
+        payload: { error: error instanceof Error ? error.message : String(error) },
+      });
     } finally {
       this.active.delete(info.ticketId);
       this.slots.release();
     }
   }
 
-  private async runStep({ ticketId, step }: RunInfo): Promise<void> {
+  private async runStep({ ticketId, step }: RunInfo, signal: AbortSignal): Promise<void> {
     const ticket = getTicket(this.db, ticketId);
     // Started over: no earlier version, no feedback and no session to resume.
     const fresh = ticket.phase.kind === 'running' && ticket.phase.fresh === true;
@@ -180,10 +210,16 @@ export class Scheduler {
       revision,
       resumeSessionId,
       log,
-      signal: this.abort.signal,
+      signal,
       resume: ticket.phase.kind === 'running' ? (ticket.phase.resume ?? null) : null,
     };
-    this.finish(run.id, ticketId, step, await this.execute(context));
+    const result = await this.execute(context);
+    const end = runEnd(this.phaseOf(ticketId), signal, result);
+    if (end === 'finished') {
+      this.finish(run.id, ticketId, step, result);
+    } else {
+      recordEndedRun(this.db, run, end === 'cancelled' ? CANCELLED_ERROR : INTERRUPTED);
+    }
   }
 
   private async execute(context: StepContext): Promise<StepResult> {

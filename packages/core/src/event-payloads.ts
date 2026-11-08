@@ -78,6 +78,8 @@ type RunPayloads = {
   run_started: { step: Step };
   run_finished: { step: Step; status: Column<typeof tables.runs, 'status'> };
   container_stop_failed: Failure;
+  /** A run's bookkeeping threw (it ended without a result): the ticket may need a Retry. */
+  worker_error: Failure;
   container_cleanup_failed: { container: string; error: string };
   /** Its pull request merged or the ticket cancelled: its preview, container and volumes went. */
   ticket_workspace_removed: { reason: 'merged' | 'cancelled'; message: string };

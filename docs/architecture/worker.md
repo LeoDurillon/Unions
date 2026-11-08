@@ -10,6 +10,13 @@
 - `commands.ts` maps UI commands to state-machine actions; `scheduler.ts` runs one step per ticket with a
   concurrency cap through an injected `StepExecutor`; `executor.ts` is the real one (planning, implement, review
   and rebase steps).
+- Each run has its own `AbortController` (`StepContext.signal`). `tick` aborts the run of a ticket that left
+  `running` (Cancel) with the reason `cancelled`; `stop()` aborts all with `shutdown`. `run-end.ts` decides how
+  the run ends: a ticket no longer `running` (or removed) takes nothing (run `failed`, "Cancelled", no dispatch);
+  a `shutdown` run that did not finish is recorded `Interrupted` and the ticket stays `running`, so the next
+  worker runs the step again (as `recover` does after a crash). `runAgent` stops `claude` inside the container on
+  abort (SIGTERM, then SIGKILL after 3 s, by `RUN_MARKER`); `publishBranch` checks the signal before the push and
+  before the PR. A throw in a run's bookkeeping, and any unhandled rejection, is recorded as `worker_error`.
 - Usage limits: `rate-limit.ts` tells one from other agent errors (a `rate_limit_event` with status `rejected`, or
   the CLI's wordings) and reads the reset (the event's `resetsAt`, else "resets 6:20pm (UTC)");
   `step-outcome.ts` turns it into the step's `rate_limited` result (`retryAt` = reset + 2 min) for every runner,

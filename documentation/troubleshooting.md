@@ -68,7 +68,9 @@ The repository's pre-commit hook refused the agent's changes. Commit without hoo
 the agent back with guidance. See [When a step stops](ticket-lifecycle.md#when-a-step-stops).
 
 **A step restarted from the beginning.**
-Union restarted (an update, a crash, `docker compose restart`) while it ran. Steps resume from their start.
+Union restarted (an update, a crash, `docker compose restart`) while it ran. The step is not failed: Union runs
+it again from its start, on its own, and the interrupted run shows **Interrupted** in the Log. This uses Claude
+usage again, so wait for running steps to finish before restarting Union when you can.
 
 **The rebase stopped: "the pushed branch has commits the workspace lacks".**
 Someone pushed to the ticket's branch. Union refuses to rewrite it so their commits are not lost. Click **Resync from

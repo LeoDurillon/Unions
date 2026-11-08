@@ -201,8 +201,9 @@ Ctrl, ⌘ and Alt combinations stay the browser's.
 
 ## Cancel and remove
 
-**Cancel ticket** stops the ticket: a running step is stopped, and the card goes back to Backlog marked
-**Cancelled**. Its open pull requests are closed on GitHub, and its issue is closed as not planned; a merged pull
+**Cancel ticket** stops the ticket: a running step is stopped (the agent too, within a few seconds), nothing it
+does after is kept or pushed, and the card goes back to Backlog marked **Cancelled**; its run shows **Cancelled**
+in the Log. Its open pull requests are closed on GitHub, and its issue is closed as not planned; a merged pull
 request stays as it is, the branch is kept, and you can reopen either on GitHub, which Union leaves alone. Once the
 agent stopped, Union removes the ticket's preview, container and workspace (the branch on GitHub stays). A
 cancelled ticket can then leave Union with **Remove for good**, in its Overview: its runs, outputs

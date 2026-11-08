@@ -1,5 +1,5 @@
 // The worker's entry point: opens the database and starts the scheduler and the GitHub loop.
-import { DockerCli, migrateDb, openDb } from '@union/core';
+import { DockerCli, emitEvent, migrateDb, openDb } from '@union/core';
 
 import { agentImageProvision } from './agent-image/images';
 import { drainCommands } from './commands';
@@ -17,6 +17,17 @@ const DEFAULT_GITHUB_PULL_MS = 30_000;
 
 const db = openDb();
 migrateDb(db);
+
+// A promise nobody awaited that failed: logged and recorded, so it neither goes unseen nor stops the worker.
+process.on('unhandledRejection', (reason: unknown) => {
+  const error = reason instanceof Error ? (reason.stack ?? reason.message) : String(reason);
+  console.error('unhandled rejection in the worker:', error);
+  try {
+    emitEvent(db, { type: 'worker_error', payload: { error } });
+  } catch {
+    // The database itself failed: the log line above is all there is.
+  }
+});
 
 const maxConcurrent = Number(process.env.UNION_MAX_CONCURRENT ?? DEFAULT_MAX_CONCURRENT);
 const runtime = new DockerCli();

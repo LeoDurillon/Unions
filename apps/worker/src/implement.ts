@@ -49,6 +49,7 @@ async function publish(
     container,
     branch,
     base,
+    signal: context.signal,
     describer: {
       db: deps.db,
       agent: deps.agent,

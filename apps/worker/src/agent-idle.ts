@@ -75,6 +75,24 @@ async function signalAgent(
   }
 }
 
+/** How long an aborted agent gets to stop on SIGTERM before SIGKILL: short, a stopping worker waits on it. */
+const ABORT_KILL_AFTER_MS = 3000;
+
+/**
+ * Stops an aborted run's processes inside the container: ending `docker exec` leaves `claude`
+ * running there. SIGTERM, then SIGKILL to whatever is left (the script kills nothing once all are gone).
+ */
+export async function stopAborted(
+  runtime: ContainerRuntime,
+  options: Omit<WatchOptions, 'graceMs'>,
+): Promise<void> {
+  const watch = { ...options, graceMs: 0 };
+  options.onEvent({ type: 'union_agent_aborted' });
+  await signalAgent(runtime, watch, 'TERM');
+  await Bun.sleep(ABORT_KILL_AFTER_MS);
+  await signalAgent(runtime, watch, 'KILL');
+}
+
 /**
  * Watches the agent's events; once the turn ended with nothing left in the background and nothing
  * came for `graceMs`, stops the agent's processes so its exec ends and the last result is used.

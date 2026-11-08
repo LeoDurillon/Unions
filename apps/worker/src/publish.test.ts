@@ -11,11 +11,13 @@ import {
   migrateDb,
   schema,
   setParent,
+  type ContainerRuntime,
 } from '@union/core';
 import { eq } from 'drizzle-orm';
 
-import { hostGit } from './provision';
-import { assertNoPrivateFiles, pullRequestBody } from './publish';
+import type { GitHubApi } from './github/api';
+import { hostGit, type ProvisionConfig } from './provision';
+import { assertNoPrivateFiles, publishBranch, pullRequestBody } from './publish';
 
 test('a PR stacked on the parent branch names the parent PR', () => {
   const db = createDb(':memory:');
@@ -70,4 +72,42 @@ test('a branch holding a private attachment is refused before the push', async (
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
+});
+
+test('a stopped run pushes nothing and opens no pull request', async () => {
+  const db = createDb(':memory:');
+  migrateDb(db);
+  const project = db
+    .insert(schema.projects)
+    .values({ owner: 'o', repo: 'r', config: { baseBranch: 'main' } })
+    .returning()
+    .get();
+  const ticket = createTicket(db, { projectId: project.id, title: 't' });
+  const touched: string[] = [];
+  const recorder = new Proxy(
+    {},
+    {
+      get: (_target, name) => {
+        touched.push(String(name));
+        return () => Promise.reject(new Error('touched'));
+      },
+    },
+  );
+  const controller = new AbortController();
+  controller.abort('cancelled');
+  const result = await publishBranch({
+    db,
+    runtime: recorder as ContainerRuntime,
+    config: { gitBaseUrl: 'https://github.com' } as ProvisionConfig,
+    github: recorder as GitHubApi,
+    project,
+    ticket,
+    container: 'union-t9001',
+    branch: 'union/t1',
+    base: 'main',
+    signal: controller.signal,
+  });
+  expect(result).toMatchObject({ pushed: false, pullRequest: null });
+  expect(result.error).toBe('The run was stopped before the push.');
+  expect(touched).toEqual([]);
 });

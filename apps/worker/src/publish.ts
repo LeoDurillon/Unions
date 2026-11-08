@@ -174,6 +174,13 @@ export async function ensurePullRequest({
   return pull.number;
 }
 
+/** Stops the publish once the run was cancelled or the worker is stopping: nothing more reaches GitHub. */
+function stopIfAborted(signal: AbortSignal | undefined, before: string): void {
+  if (signal?.aborted) {
+    throw new Error(`The run was stopped before ${before}.`);
+  }
+}
+
 /** Push, then open the draft PR once. Failures are reported, not thrown: the agent's work stays in the container. */
 export async function publishBranch(input: {
   db: Db;
@@ -188,9 +195,12 @@ export async function publishBranch(input: {
   base: string;
   /** The implementer's session, to describe a new pull request; without it the PR gets the default body. */
   describer?: Describer;
+  /** The run's signal: once aborted, nothing more is pushed or opened. */
+  signal?: AbortSignal;
 }): Promise<PublishResult> {
   const { db, project, ticket, branch, base } = input;
   try {
+    stopIfAborted(input.signal, 'the push');
     const remote = await projectRemote(db, input.config.gitBaseUrl, project);
     const pushed = await pushBranch(input.runtime, input.container, remote, {
       branch,
@@ -201,6 +211,7 @@ export async function publishBranch(input: {
     // Re-read: the user may have linked a PR while the agent was working. A linked PR is kept.
     const { prNumber } = getTicket(db, ticket.id);
     const manualPullRequest = project.config.createPullRequest === false;
+    stopIfAborted(input.signal, 'the pull request was opened');
     const pullRequest =
       prNumber ??
       (input.github && !manualPullRequest

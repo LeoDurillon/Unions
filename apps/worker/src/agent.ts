@@ -8,7 +8,7 @@ import {
   type ExecResult,
 } from '@union/core';
 
-import { IDLE_GRACE_MS, RUN_MARKER, watchIdle } from './agent-idle';
+import { IDLE_GRACE_MS, RUN_MARKER, stopAborted, watchIdle } from './agent-idle';
 import { RATE_LIMIT, rejectedResetAt, resetFromMessage } from './rate-limit';
 
 export type AgentRun = {
@@ -182,6 +182,9 @@ export async function runAgent(runtime: ContainerRuntime, run: AgentRun): Promis
   }).finally(() => {
     idle.stop();
   });
+  if (run.signal?.aborted) {
+    await stopAborted(runtime, { container: run.container, token, onEvent: run.onEvent });
+  }
   if (result) {
     return toOutcome(result, rejectedReset);
   }
