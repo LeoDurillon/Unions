@@ -6,12 +6,12 @@ import { backfillNotionPages, FetchNotionApi, type Project } from '@union/core';
 import { ContainerRunner } from './container-run';
 import { EventDispatcher } from './event-dispatcher';
 import type { GitHubApi } from './github/api';
-import { InvestigationRunner, type InvestigationDeps } from './investigate';
+import { InvestigationRunner, type InvestigationDeps } from './investigation/investigate';
 import { startPreviewRuns, type PreviewRuns } from './preview/preview-runs';
 import { PrDescriptionRunner } from './pull-request/pr-description-runner';
 import { reviewRunners, startReviewRuns, type ReviewRuns } from './review/review-runs';
 import { ThrowawayRuns } from './throwaway-runs';
-import { UnionUpdater } from './union-update';
+import { UnionUpdater } from './union-update/union-update';
 
 /**
  * The work outside the ticket pipeline: investigations, the review page's agents (`ReviewRuns`), PR

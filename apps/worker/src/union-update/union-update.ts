@@ -1,4 +1,5 @@
 // Union's own update: checks the checkout against `origin/main` every few minutes, and starts the update the user asked for.
+
 import path from 'node:path';
 
 import {
@@ -16,7 +17,7 @@ import {
   type UnionUpdate,
 } from '@union/core';
 
-import type { CommandHooks } from './command-hooks';
+import type { CommandHooks } from '../command-hooks';
 import { checkCheckout, UNION_ROOT } from './union-update-git';
 
 /** Runs apart from the worker: the pull reloads the worker (`bun --watch`), and the update must outlive that. */

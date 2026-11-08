@@ -14,12 +14,12 @@ import {
 } from '@union/core';
 import { eq } from 'drizzle-orm';
 
-import { runAgent } from './agent/agent';
+import { runAgent } from '../agent/agent';
+import type { TicketContainer } from '../provision';
+import { RunPool } from '../run-pool';
+import { inThrowaway, removeThrowaway } from '../throwaway-container';
 import type { InvestigationDeps } from './investigate';
 import { withTargetItem } from './investigation-ticket-target';
-import type { TicketContainer } from './provision';
-import { RunPool } from './run-pool';
-import { inThrowaway, removeThrowaway } from './throwaway-container';
 
 type DraftOutcome = DraftedTicket | { error: string };
 

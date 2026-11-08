@@ -1,5 +1,6 @@
 // What the commands hand off to the running worker: all asynchronous, so draining stays
 // synchronous.
+
 import type { ContainerRuntime, Db, Project } from '@union/core';
 
 import type { CommandHooks } from './command-hooks';
@@ -9,7 +10,7 @@ import { removeContainers } from './janitor';
 import type { ProvisionConfig } from './provision';
 import type { SideRuns } from './side-runs';
 import { trackerHooks } from './tracker-hooks';
-import { unionUpdateHooks } from './union-update';
+import { unionUpdateHooks } from './union-update/union-update';
 import { workspaceHooks } from './workspace-hooks';
 
 type HookDeps = Pick<

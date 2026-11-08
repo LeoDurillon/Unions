@@ -9,13 +9,13 @@ import {
   type WorkspaceOwner,
 } from '@union/core';
 
-import { runIn } from './container-exec';
+import { runIn } from '../container-exec';
+import { GATE_TIMEOUT_MS, tail } from '../gate';
+import { REPO_DIR } from '../provision';
+import { previewSettings } from './compose';
 import { collectScreenshots, type Screenshot, type Screenshots } from './e2e-screenshots';
-import { GATE_TIMEOUT_MS, tail } from './gate';
-import { previewSettings } from './preview/compose';
-import { baseUrl, previewEnv } from './preview/preview-env';
-import { startPreview, type PreviewDeps } from './preview/run';
-import { REPO_DIR } from './provision';
+import { baseUrl, previewEnv } from './preview-env';
+import { startPreview, type PreviewDeps } from './run';
 
 export type E2eResult =
   | {

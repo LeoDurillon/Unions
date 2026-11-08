@@ -1,4 +1,5 @@
 // Runs the preview commands, one at a time per ticket (a start and a stop never overlap).
+
 import {
   emitEvent,
   ownerKey,
@@ -9,9 +10,9 @@ import {
 } from '@union/core';
 
 import type { PreviewAction, PreviewOptions } from '../commands';
-import { runRequestedE2e } from '../e2e-request';
 import { previewSettings } from './compose';
 import { generatePreviewFile } from './compose-file';
+import { runRequestedE2e } from './e2e-request';
 import { failStoppedPreview, HealthWatcher } from './health';
 import { IdleWatcher, readProxyMetrics } from './idle';
 import { removeFinishedPreview, resetPreview } from './reset';

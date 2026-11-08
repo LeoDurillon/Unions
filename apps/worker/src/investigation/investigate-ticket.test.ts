@@ -23,10 +23,10 @@ import {
 } from '@union/core';
 import { eq } from 'drizzle-orm';
 
-import type { AgentFn, AgentRun } from './agent/agent';
+import type { AgentFn, AgentRun } from '../agent/agent';
+import { RunSlots } from '../slots';
 import { InvestigationRunner } from './investigate';
 import { TICKET_INVESTIGATION_DENIED } from './investigate-ticket';
-import { RunSlots } from './slots';
 
 let root: string;
 let db: Db;

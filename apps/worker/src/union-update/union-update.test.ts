@@ -14,8 +14,8 @@ import {
   type UpdateCheck,
 } from '@union/core';
 
-import { NO_HOOKS } from './command-hooks';
-import { drainCommands } from './commands';
+import { NO_HOOKS } from '../command-hooks';
+import { drainCommands } from '../commands';
 import { startRefusal, UnionUpdater } from './union-update';
 
 let db: Db;

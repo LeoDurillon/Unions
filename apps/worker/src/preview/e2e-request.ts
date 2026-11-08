@@ -1,4 +1,5 @@
 // The e2e tests the user asks for, from a ticket or a pull request, in its own container.
+
 import {
   getTicket,
   hasActiveContainerRun,
@@ -10,10 +11,10 @@ import {
 } from '@union/core';
 import { eq } from 'drizzle-orm';
 
+import { ensureTicketContainer, type ProvisionConfig } from '../provision';
+import { loadReview, openReviewContainer } from '../review-checkout';
 import { runE2e, type E2eResult } from './e2e';
-import type { PreviewDeps } from './preview/run';
-import { ensureTicketContainer, type ProvisionConfig } from './provision';
-import { loadReview, openReviewContainer } from './review-checkout';
+import type { PreviewDeps } from './run';
 
 function previewConfigOf(db: Db, owner: WorkspaceOwner): PreviewConfig | undefined {
   const projectId =

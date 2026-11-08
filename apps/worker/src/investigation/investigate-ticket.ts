@@ -13,11 +13,11 @@ import {
   ticketBase,
 } from '@union/core';
 
-import { agentFailure, runAgent, type AgentFn, type AgentOutcome } from './agent/agent';
-import { runIn } from './container-exec';
+import { agentFailure, runAgent, type AgentFn, type AgentOutcome } from '../agent/agent';
+import { runIn } from '../container-exec';
+import { parentSection } from '../prompts';
+import { ensureTicketContainer, REPO_DIR } from '../provision';
 import type { InvestigationDeps } from './investigate';
-import { parentSection } from './prompts';
-import { ensureTicketContainer, REPO_DIR } from './provision';
 
 /**
  * Never allowed on a ticket's workspace, whatever tools the investigation has: it reads the branch

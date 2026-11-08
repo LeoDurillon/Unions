@@ -18,10 +18,10 @@ import {
   type Project,
 } from '@union/core';
 
-import type { AgentFn, AgentOutcome, AgentRun } from './agent/agent';
-import { drainCommands } from './commands';
+import type { AgentFn, AgentOutcome, AgentRun } from '../agent/agent';
+import { drainCommands } from '../commands';
+import { RunSlots } from '../slots';
 import { InvestigationRunner, investigationPrompt } from './investigate';
-import { RunSlots } from './slots';
 
 let db: Db;
 let project: Project;

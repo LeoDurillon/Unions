@@ -1,12 +1,13 @@
 // Collects an e2e run's failure screenshots from the container: regular PNG files only, a few, small.
+
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
 import { CopyRefused, type ContainerRuntime } from '@union/core';
 
-import { runIn } from './container-exec';
-import { REPO_DIR } from './provision';
+import { runIn } from '../container-exec';
+import { REPO_DIR } from '../provision';
 
 /** Failure screenshots kept: enough to see what broke, few enough to read. */
 const MAX_SCREENSHOTS = 5;

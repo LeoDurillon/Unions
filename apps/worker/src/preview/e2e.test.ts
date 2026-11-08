@@ -23,7 +23,7 @@ import { eq } from 'drizzle-orm';
 
 import { runE2e } from './e2e';
 import { runRequestedE2e } from './e2e-request';
-import { PreviewManager } from './preview/manager';
+import { PreviewManager } from './manager';
 
 const PREVIEW: PreviewConfig = {
   composeFile: 'compose.yaml',

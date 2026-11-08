@@ -19,20 +19,20 @@ import {
 } from '@union/core';
 import { eq } from 'drizzle-orm';
 
-import { agentFailure, runAgent, type AgentFn, type AgentOutcome } from './agent/agent';
-import { projectGitToken } from './credentials';
-import { runOnTicket } from './investigate-ticket';
-import { TicketDrafter } from './investigation-ticket';
+import { agentFailure, runAgent, type AgentFn, type AgentOutcome } from '../agent/agent';
+import { projectGitToken } from '../credentials';
 import {
   cloneInto,
   cloneSource,
   REPO_DIR,
   type ProvisionConfig,
   type TicketContainer,
-} from './provision';
-import { RunPool } from './run-pool';
-import type { RunSlots } from './slots';
-import { inThrowaway, removeThrowaway } from './throwaway-container';
+} from '../provision';
+import { RunPool } from '../run-pool';
+import type { RunSlots } from '../slots';
+import { inThrowaway, removeThrowaway } from '../throwaway-container';
+import { runOnTicket } from './investigate-ticket';
+import { TicketDrafter } from './investigation-ticket';
 
 /** Where a global investigation runs: the empty workspace volume, no repository. */
 const GLOBAL_DIR = '/workspace';

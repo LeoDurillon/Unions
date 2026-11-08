@@ -24,10 +24,10 @@ import {
   type Project,
 } from '@union/core';
 
-import type { AgentFn, AgentRun } from './agent/agent';
+import type { AgentFn, AgentRun } from '../agent/agent';
+import { RunSlots } from '../slots';
 import { InvestigationRunner } from './investigate';
 import { parseTicketDraft, ticketPrompt } from './investigation-ticket';
-import { RunSlots } from './slots';
 
 let db: Db;
 let project: Project;

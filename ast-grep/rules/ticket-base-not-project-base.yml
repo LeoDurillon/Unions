@@ -12,8 +12,8 @@ rule:
   pattern: $PROJECT.config.baseBranch
 ignores:
   - '**/*.test.ts'
-  - apps/worker/src/investigate.ts
-  - apps/worker/src/investigate-ticket.ts
+  - apps/worker/src/investigation/investigate.ts
+  - apps/worker/src/investigation/investigate-ticket.ts
   - apps/worker/src/provision.ts
   - apps/worker/src/prompts.ts
   - apps/worker/src/github/follow-base.ts
