@@ -1,8 +1,9 @@
 // Replying in a Notion discussion, or starting one on the page: the comments being sent, then a button that opens the box.
+
 import { useState, type ReactElement } from 'react';
 
 import type { PendingNotionComment } from '../../../src/notion-discussion-types';
-import { replyKey, type NotionCommentSend } from '../../lib/use-notion-comments';
+import { replyKey, type NotionCommentSend } from '../../lib/integrations/use-notion-comments';
 import { Markdown } from '../markdown';
 import { ReplyBox } from '../pull-request/reply-box';
 import { Button } from '../ui';

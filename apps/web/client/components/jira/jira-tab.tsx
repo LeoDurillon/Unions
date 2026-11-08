@@ -1,5 +1,6 @@
 // A ticket's Jira tab: the comments of the issue it was imported from, read once per opening, with Refresh, Reply
 // on each and New comment, which the worker posts.
+
 import type { ReactElement } from 'react';
 
 import type { JiraTabView } from '../../../src/jira-comment-types';
@@ -7,8 +8,11 @@ import {
   useJiraComments,
   useJiraCommentSend,
   type JiraCommentSend,
-} from '../../lib/use-jira-comments';
-import { useJiraReviewImport, type JiraReviewImport } from '../../lib/use-jira-review-import';
+} from '../../lib/integrations/use-jira-comments';
+import {
+  useJiraReviewImport,
+  type JiraReviewImport,
+} from '../../lib/integrations/use-jira-review-import';
 import { AddToReview } from '../review/add-to-review';
 import { Button, ErrorText } from '../ui';
 import { JiraCommentCard } from './jira-comment';

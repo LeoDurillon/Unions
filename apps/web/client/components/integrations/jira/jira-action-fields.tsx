@@ -1,10 +1,11 @@
 // A Jira action's fields in the rule editor: the status to move to, the fields to set, or the comment.
+
 import type { JiraRuleSource } from '@union/core';
 import type { ActionKind, EventAction } from '@union/core/event-actions';
 import type { JiraFieldValue } from '@union/core/jira-field-types';
 import type { ReactElement } from 'react';
 
-import { useJiraRuleSource } from '../../../lib/jira-rule-source';
+import { useJiraRuleSource } from '../../../lib/integrations/jira-rule-source';
 import { VariableChips } from '../../settings/variable-chips';
 import { Button, Field, inputClass } from '../../ui';
 import { JiraFieldRow } from './jira-field-row';

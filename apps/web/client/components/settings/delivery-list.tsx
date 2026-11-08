@@ -1,4 +1,5 @@
 // What the event rules did lately, as a table: when, status, rule and ticket, then what it set or why it failed.
+
 import { useQuery } from '@tanstack/react-query';
 import type { NotionUser } from '@union/core';
 import type { ReactElement } from 'react';
@@ -6,7 +7,7 @@ import type { ReactElement } from 'react';
 import type { PublicProject } from '../../../src/api-types';
 import type { DeliveryView } from '../../../src/event-api-types';
 import { eventRulesApi } from '../../lib/event-rules-api';
-import { useNotionUsers } from '../../lib/use-notion-users';
+import { useNotionUsers } from '../../lib/integrations/use-notion-users';
 import { Badge } from '../ui';
 
 const DELIVERIES_POLL_MS = 10_000;

@@ -1,9 +1,10 @@
 // The value of a picked Jira field in the rule editor: a person or a sprint from a list, versions or components as
 // boxes; what was picked before and is no longer listed stays, so it can be removed.
+
 import { isSinglePick, type JiraPick, type JiraPickedType } from '@union/core/jira-field-types';
 import type { ReactElement } from 'react';
 
-import { useJiraPicks } from '../../../lib/use-jira-picks';
+import { useJiraPicks } from '../../../lib/integrations/use-jira-picks';
 import { CheckChip, ChipGroup } from '../../choice';
 import { ErrorText, inputClass } from '../../ui';
 

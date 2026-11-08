@@ -2,9 +2,9 @@
 
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 
-import type { ReviewNotionLink } from '../../src/review-notion-types';
-import { request } from './api';
-import { specsKey } from './review/use-review-specs';
+import type { ReviewNotionLink } from '../../../src/review-notion-types';
+import { request } from '../api';
+import { specsKey } from '../review/use-review-specs';
 
 const SPECS = specsKey('').at(-1);
 

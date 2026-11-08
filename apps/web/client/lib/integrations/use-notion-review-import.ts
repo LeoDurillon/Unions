@@ -2,9 +2,9 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import type { NotionTabView } from '../../src/notion-discussion-types';
-import { request } from './api';
-import { ticketReviewBase } from './review/review-target';
+import type { NotionTabView } from '../../../src/notion-discussion-types';
+import { request } from '../api';
+import { ticketReviewBase } from '../review/review-target';
 
 export type NotionReviewImport = {
   add: (discussionId: string) => void;

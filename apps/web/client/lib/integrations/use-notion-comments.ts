@@ -1,10 +1,11 @@
 // The open discussions of a ticket's Notion page, read from Notion once per opening of its tab, and the comments sent to it.
+
 import { useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 import { useState } from 'react';
 
-import type { NotionTabView } from '../../src/notion-discussion-types';
-import { request } from './api';
-import { useEvents } from './use-event-stream';
+import type { NotionTabView } from '../../../src/notion-discussion-types';
+import { request } from '../api';
+import { useEvents } from '../use-event-stream';
 
 /** A comment Notion refused: why, and its text for the box. */
 type NotionCommentFailure = { error: string; text: string };

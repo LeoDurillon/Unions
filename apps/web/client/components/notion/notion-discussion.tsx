@@ -1,4 +1,5 @@
 // One open discussion of a Notion page: the text it is about, its comments oldest first, then Reply; Add to review sends it to the implementer.
+
 import type { ReactElement } from 'react';
 
 import type {
@@ -6,7 +7,7 @@ import type {
   NotionDiscussionView,
   PendingNotionComment,
 } from '../../../src/notion-discussion-types';
-import type { NotionCommentSend } from '../../lib/use-notion-comments';
+import type { NotionCommentSend } from '../../lib/integrations/use-notion-comments';
 import { Markdown } from '../markdown';
 import { AddToReview, type ReviewImportState } from '../review/add-to-review';
 import { NotionReply } from './notion-reply';

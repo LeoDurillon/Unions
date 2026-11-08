@@ -1,11 +1,12 @@
 // The ticket's Notion page: a link with Change and Unlink and, once read, its open discussions' count;
 // or Link a Notion page when it has none.
+
 import { useState, type ReactElement } from 'react';
 
 import type { TicketDetail } from '../../src/api-types';
 import { projectIntegration } from '../lib/integrations-api';
-import { useNotionDiscussionCount } from '../lib/use-notion-comments';
-import { useTicketNotion, type TicketNotionActions } from '../lib/use-ticket-notion';
+import { useNotionDiscussionCount } from '../lib/integrations/use-notion-comments';
+import { useTicketNotion, type TicketNotionActions } from '../lib/integrations/use-ticket-notion';
 import { DetailRow } from './detail-row';
 import { NotionLinkForm, NotionPageLink } from './notion-link-form';
 import { Button, ErrorText } from './ui';

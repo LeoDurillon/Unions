@@ -1,11 +1,12 @@
 // The comments of a ticket's Jira issue, read from Jira once per opening of its tab, and the comments sent to it.
+
 import { useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 import type { JiraReplyTo } from '@union/core/jira-comment-post';
 import { useState } from 'react';
 
-import type { JiraTabView } from '../../src/jira-comment-types';
-import { request } from './api';
-import { useEvents } from './use-event-stream';
+import type { JiraTabView } from '../../../src/jira-comment-types';
+import { request } from '../api';
+import { useEvents } from '../use-event-stream';
 
 /** A comment Jira refused: why, and its text for the box. */
 type JiraCommentFailure = { error: string; text: string };

@@ -1,10 +1,11 @@
 // A new comment on a ticket's Jira issue, or a reply to one (it mentions the author): what is being sent, then a
 // button that opens the box. A refused comment opens the box again with its text.
+
 import type { JiraReplyTo } from '@union/core/jira-comment-post';
 import { useState, type ReactElement } from 'react';
 
 import type { PendingJiraComment } from '../../../src/jira-comment-types';
-import { jiraReplyKey, type JiraCommentSend } from '../../lib/use-jira-comments';
+import { jiraReplyKey, type JiraCommentSend } from '../../lib/integrations/use-jira-comments';
 import { Markdown } from '../markdown';
 import { ReplyBox } from '../pull-request/reply-box';
 import { Button } from '../ui';

@@ -1,9 +1,10 @@
 // The project settings section for the Jira connection, verified when saved.
+
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../../src/api-types';
 import { integrationsApi, projectIntegration } from '../../../lib/integrations-api';
-import { useJiraRuleSource } from '../../../lib/jira-rule-source';
+import { useJiraRuleSource } from '../../../lib/integrations/jira-rule-source';
 import { useSettingsForm } from '../../../lib/use-settings-form';
 import { SaveBar } from '../../settings/save-bar';
 import { Badge } from '../../ui';

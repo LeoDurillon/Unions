@@ -1,12 +1,13 @@
 // The ticket's Jira issue in its Overview: the key linking to the issue, its comments' count once read, Change and
 // Unlink; or Link a Jira issue for a ticket from no tracker, in a project connected to Jira.
+
 import { useQuery } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 
 import type { TicketDetail } from '../../src/api-types';
 import type { JiraTabView } from '../../src/jira-comment-types';
 import { projectIntegration } from '../lib/integrations-api';
-import { useTicketJira, type TicketJiraActions } from '../lib/use-ticket-jira';
+import { useTicketJira, type TicketJiraActions } from '../lib/integrations/use-ticket-jira';
 import { DetailRow } from './detail-row';
 import { ItemLink, TrackerLinkForm } from './tracker-link-form';
 import { Button, ErrorText } from './ui';

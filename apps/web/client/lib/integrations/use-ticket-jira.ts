@@ -1,8 +1,9 @@
 // A ticket's Jira issue linked after creation: checking an issue, linking it, unlinking it.
+
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 
-import type { JiraIssueLink } from '../../src/routes/ticket-jira-link';
-import { request } from './api';
+import type { JiraIssueLink } from '../../../src/routes/ticket-jira-link';
+import { request } from '../api';
 
 export type TicketJiraActions = {
   check: UseMutationResult<JiraIssueLink, Error, string>;

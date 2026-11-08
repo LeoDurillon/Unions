@@ -1,4 +1,5 @@
 // A ticket's Notion tab: the open discussions of its page, read once per opening, with Refresh, replies and New comment.
+
 import type { ReactElement } from 'react';
 
 import type { NotionTabView } from '../../../src/notion-discussion-types';
@@ -6,8 +7,11 @@ import {
   useNotionComments,
   useNotionCommentSend,
   type NotionCommentSend,
-} from '../../lib/use-notion-comments';
-import { useNotionReviewImport, type NotionReviewImport } from '../../lib/use-notion-review-import';
+} from '../../lib/integrations/use-notion-comments';
+import {
+  useNotionReviewImport,
+  type NotionReviewImport,
+} from '../../lib/integrations/use-notion-review-import';
 import { Button, ErrorText } from '../ui';
 import { NotionDiscussion } from './notion-discussion';
 import { NotionReply } from './notion-reply';
