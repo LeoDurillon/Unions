@@ -11,7 +11,7 @@ import {
 } from '@union/core';
 import { and, eq } from 'drizzle-orm';
 
-import type { ImplementDeps } from './implement-checks';
+import type { ImplementDeps } from './implement/implement-checks';
 import { runRebaseStep } from './rebase/rebase';
 import { loadProject } from './review';
 import type { StepContext, StepResult } from './scheduler';

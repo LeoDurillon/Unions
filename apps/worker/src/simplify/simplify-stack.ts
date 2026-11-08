@@ -2,7 +2,7 @@
 
 import { openSlices } from '@union/core';
 
-import type { ImplementDeps } from '../implement-checks';
+import type { ImplementDeps } from '../implement/implement-checks';
 import { prepareBranch, restorePrepared } from '../rebase/rebase-prepare';
 import type { StepContext, StepResult } from '../scheduler';
 import { lowerSlices, syncLowerBranches } from '../stack/stack-refs';

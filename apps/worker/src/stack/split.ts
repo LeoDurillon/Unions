@@ -8,7 +8,7 @@ import {
   type PlannedSlice,
 } from '@union/core';
 
-import type { ImplementDeps } from '../implement-checks';
+import type { ImplementDeps } from '../implement/implement-checks';
 import type { Rebase } from '../rebase/rebase-agent';
 import { prepareBranch, restorePrepared } from '../rebase/rebase-prepare';
 import type { StepContext, StepResult } from '../scheduler';

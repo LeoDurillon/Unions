@@ -11,7 +11,7 @@ import {
   type TicketSlice,
 } from '@union/core';
 
-import type { Prepared } from '../implement-run';
+import type { Prepared } from '../implement/implement-run';
 import type { Ask } from '../leftovers';
 import type { PublishResult } from '../publish';
 import { setBranches, stackCommits } from './stack-git';

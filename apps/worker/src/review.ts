@@ -1,5 +1,6 @@
 // Runs the final review step: a fresh session reviews the branch against the approved plan, never
 // editing.
+
 import {
   type Db,
   effortFor,
@@ -17,7 +18,7 @@ import {
 import { eq } from 'drizzle-orm';
 
 import { approvedBefore } from './approved';
-import type { ImplementDeps } from './implement-loop';
+import type { ImplementDeps } from './implement/implement-loop';
 import { buildPrompt, parentContext } from './prompts';
 import { ensureTicketContainer, REPO_DIR } from './provision';
 import { previousReview, previousReviewSection, type ReviewedCommit } from './review-previous';

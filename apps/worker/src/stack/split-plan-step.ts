@@ -16,7 +16,7 @@ import {
 
 import type { AgentFn, AgentOutcome, AgentRun } from '../agent/agent';
 import { approvedBefore } from '../approved';
-import type { ImplementDeps } from '../implement-loop';
+import type { ImplementDeps } from '../implement/implement-loop';
 import { buildPrompt, parentContext } from '../prompts';
 import { ensureTicketContainer, REPO_DIR } from '../provision';
 import { loadProject, reviewContext } from '../review';

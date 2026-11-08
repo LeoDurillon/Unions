@@ -3,8 +3,8 @@
 
 import { hasActiveContainerRun } from '@union/core';
 
-import { runImplementStep } from './implement';
-import type { ImplementDeps } from './implement-checks';
+import { runImplementStep } from './implement/implement';
+import type { ImplementDeps } from './implement/implement-checks';
 import { startStepPreview, withPreviewEnv } from './preview/step-preview';
 import { runRebaseStep } from './rebase/rebase';
 import { runRetargetStep } from './rebase/retarget';

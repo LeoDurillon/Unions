@@ -3,7 +3,7 @@
 import { listSlices, openSlices, type Step } from '@union/core';
 
 import { withAgentServices } from './agent-services-step';
-import type { ImplementDeps } from './implement-checks';
+import type { ImplementDeps } from './implement/implement-checks';
 import type { StepContext, StepResult } from './scheduler';
 import { runSimplifyStep } from './simplify/simplify';
 import { runStackSimplifyStep } from './simplify/simplify-stack';

@@ -19,10 +19,10 @@ import {
   type Project,
 } from '@union/core';
 
-import type { AgentOutcome, AgentRun } from './agent/agent';
+import type { AgentOutcome, AgentRun } from '../agent/agent';
+import type { StepContext } from '../scheduler';
 import { implementLoop, type ImplementDeps, type Workspace } from './implement-loop';
 import { renderImplementReport } from './implement-prompts';
-import type { StepContext } from './scheduler';
 
 type Reply = { exitCode: number; lines: string[] };
 

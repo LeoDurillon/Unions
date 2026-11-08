@@ -12,9 +12,9 @@ import {
 } from '@union/core';
 import { eq } from 'drizzle-orm';
 
-import type { AgentOutcome, AgentRun } from './agent/agent';
+import type { AgentOutcome, AgentRun } from '../agent/agent';
+import type { StepContext } from '../scheduler';
 import type { Implemented, Prepared } from './implement-run';
-import type { StepContext } from './scheduler';
 import { sizeAndTrim } from './size-trim';
 
 let db: Db;

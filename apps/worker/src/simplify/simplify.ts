@@ -1,7 +1,7 @@
 // Rewrites the ticket's commits into a simpler history with the implementer's own session, checks the code did not change and force-pushes it with a lease.
 
 import { remoteOf } from '../branch-push';
-import type { ImplementDeps } from '../implement-checks';
+import type { ImplementDeps } from '../implement/implement-checks';
 import type { Rebase } from '../rebase/rebase-agent';
 import { fetchIntoContainer } from '../rebase/rebase-fetch';
 import { contains, restoreBranch } from '../rebase/rebase-git';

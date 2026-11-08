@@ -5,7 +5,7 @@ import { eq } from 'drizzle-orm';
 
 import { remoteOf } from '../branch-push';
 import type { GitHubApi } from '../github/api';
-import type { ImplementDeps } from '../implement-checks';
+import type { ImplementDeps } from '../implement/implement-checks';
 import { retargetSource } from '../left-base';
 import { loadProject } from '../review';
 import type { StepContext, StepResult } from '../scheduler';

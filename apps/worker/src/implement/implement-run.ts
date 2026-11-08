@@ -1,22 +1,23 @@
 // The implementation before it is published: the agent's turns and the checks, or the end of a run
 // paused on a refused commit.
+
 import { getTicket, schema, ticketBase, type Db, type Project } from '@union/core';
 import { eq } from 'drizzle-orm';
 
-import { branchName } from './branch';
-import { runGate } from './gate';
-import { install } from './implement-checks';
-import { implementLoop, type ImplementDeps, type Loop, type Workspace } from './implement-loop';
-import { ensureTicketContainer } from './provision';
+import { branchName } from '../branch';
+import { runGate } from '../gate';
+import { ensureTicketContainer } from '../provision';
 import {
   outcomeOf,
   pauseOnRefusal,
   pendingRefusal,
   resolutionNote,
   resumeRefusal,
-} from './refused-commit';
-import { rateLimited, type StepContext, type StepResult } from './step-outcome';
-import { ensureBranch } from './workspace-git';
+} from '../refused-commit';
+import { rateLimited, type StepContext, type StepResult } from '../step-outcome';
+import { ensureBranch } from '../workspace-git';
+import { install } from './implement-checks';
+import { implementLoop, type ImplementDeps, type Loop, type Workspace } from './implement-loop';
 
 export type Prepared = Workspace & { branch: string; base: string };
 /** A finished agent loop to publish, with a note on the refused commit when the run was paused. */

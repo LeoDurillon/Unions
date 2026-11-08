@@ -15,14 +15,14 @@ import {
   type ProjectConfig,
 } from '@union/core';
 
-import { approvedBefore } from './approved';
-import { mustRunIn } from './container-exec';
+import { approvedBefore } from '../approved';
+import { mustRunIn } from '../container-exec';
+import { REPO_DIR } from '../provision';
+import { restoreBranch } from '../rebase/rebase-git';
+import type { StepResult } from '../scheduler';
+import { headCommit } from '../workspace-git';
 import { implementLoop, type Loop } from './implement-loop';
 import type { Implemented, Prepared } from './implement-run';
-import { REPO_DIR } from './provision';
-import { restoreBranch } from './rebase/rebase-git';
-import type { StepResult } from './scheduler';
-import { headCommit } from './workspace-git';
 
 /** The files named to the implementer, largest first: enough to show where the lines went. */
 const MAX_FILES = 15;

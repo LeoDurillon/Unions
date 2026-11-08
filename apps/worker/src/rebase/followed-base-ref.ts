@@ -4,7 +4,7 @@ import { getTicket, schema, ticketBase } from '@union/core';
 import { eq } from 'drizzle-orm';
 
 import { remoteOf } from '../branch-push';
-import type { ImplementDeps } from '../implement-checks';
+import type { ImplementDeps } from '../implement/implement-checks';
 import { ensureTicketContainer } from '../provision';
 import type { StepContext } from '../scheduler';
 import { refExists } from '../workspace-git';

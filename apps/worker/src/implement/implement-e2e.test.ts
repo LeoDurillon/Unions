@@ -16,7 +16,7 @@ import {
 } from '@union/core';
 import { eq } from 'drizzle-orm';
 
-import type { AgentOutcome, AgentRun } from './agent/agent';
+import type { AgentOutcome, AgentRun } from '../agent/agent';
 import { implementLoop, type Workspace } from './implement-loop';
 import { agentServicesHint } from './implement-prompts';
 

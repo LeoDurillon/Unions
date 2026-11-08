@@ -3,7 +3,7 @@
 import { getTicket, schema, ticketBase, type Db, type Project } from '@union/core';
 import { eq } from 'drizzle-orm';
 
-import type { ImplementDeps } from '../implement-checks';
+import type { ImplementDeps } from '../implement/implement-checks';
 import { ensureTicketContainer } from '../provision';
 import type { StepContext } from '../scheduler';
 import { ensureBranch } from '../workspace-git';

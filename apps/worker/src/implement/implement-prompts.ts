@@ -11,9 +11,9 @@ import {
   type PreviewConfig,
 } from '@union/core';
 
-import type { GateResult } from './gate';
-import { baseUrl } from './preview/preview-env';
-import type { PublishResult } from './publish';
+import type { GateResult } from '../gate';
+import { baseUrl } from '../preview/preview-env';
+import type { PublishResult } from '../publish';
 
 /** Appended to the first implement prompt so the agent knows how its work is checked. */
 export function gateHint(command: string | undefined): string {

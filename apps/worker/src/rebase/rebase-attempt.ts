@@ -1,7 +1,7 @@
 // One rebase attempt: git's own rebase first, the implementer's session only when it stops or breaks the checks.
 
 import { remoteOf } from '../branch-push';
-import { install } from '../implement-checks';
+import { install } from '../implement/implement-checks';
 import { lowerSlices, syncLowerBranches } from '../stack/stack-refs';
 import { rateLimited, type StepResult } from '../step-outcome';
 import { runRebaseAgent, type Pushed, type Rebase } from './rebase-agent';

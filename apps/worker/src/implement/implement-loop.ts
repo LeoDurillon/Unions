@@ -19,9 +19,19 @@ import {
   toolsFor,
 } from '@union/core';
 
-import { runResumable, type AgentFn, type AgentOutcome, type AgentRun } from './agent/agent';
-import { approvedBefore } from './approved';
-import type { GitHubApi } from './github/api';
+import { runResumable, type AgentFn, type AgentOutcome, type AgentRun } from '../agent/agent';
+import { approvedBefore } from '../approved';
+import type { GitHubApi } from '../github/api';
+import {
+  askSession,
+  COMMIT_HOOK_HINT,
+  commitLeftovers,
+  type Ask,
+  type Refused,
+} from '../leftovers';
+import { attachmentsSection, buildPrompt, parentContext } from '../prompts';
+import { REPO_DIR, type ProvisionConfig } from '../provision';
+import type { StepContext } from '../scheduler';
 import { check, type Checked } from './implement-checks';
 import {
   agentServicesHint,
@@ -31,10 +41,6 @@ import {
   previewHint,
   resyncPrompt,
 } from './implement-prompts';
-import { askSession, COMMIT_HOOK_HINT, commitLeftovers, type Ask, type Refused } from './leftovers';
-import { attachmentsSection, buildPrompt, parentContext } from './prompts';
-import { REPO_DIR, type ProvisionConfig } from './provision';
-import type { StepContext } from './scheduler';
 
 /** Branch moves and history rewrites belong to the host (rebase has its own step). */
 const DEFAULT_MAX_ITERATIONS = 3;
