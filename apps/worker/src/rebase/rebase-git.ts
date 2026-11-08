@@ -1,9 +1,10 @@
 // The git checks around a rebase: what a branch's history holds, what the agent left, and putting
 // the branch back.
+
 import type { ContainerRuntime } from '@union/core';
 
-import { mustRunIn, runIn } from './container-exec';
-import { REPO_DIR } from './provision';
+import { mustRunIn, runIn } from '../container-exec';
+import { REPO_DIR } from '../provision';
 
 function git(args: string[]): string[] {
   return ['git', '-C', REPO_DIR, ...args];

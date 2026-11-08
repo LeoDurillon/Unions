@@ -1,9 +1,10 @@
 // The branch's history since it left its base, and why a rewritten one cannot be pushed.
+
 import type { ContainerRuntime } from '@union/core';
 
 import { mustRunIn, runIn } from './container-exec';
 import { REPO_DIR } from './provision';
-import { branchProblem } from './rebase-git';
+import { branchProblem } from './rebase/rebase-git';
 
 const SHORT_SHA = 7;
 

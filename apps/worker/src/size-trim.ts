@@ -1,4 +1,5 @@
 // Measures an implementation against its size budget and, when a first one went too far over, sends the implementer's session back once to cut it.
+
 import {
   changeBudget,
   describeSize,
@@ -19,7 +20,7 @@ import { mustRunIn } from './container-exec';
 import { implementLoop, type Loop } from './implement-loop';
 import type { Implemented, Prepared } from './implement-run';
 import { REPO_DIR } from './provision';
-import { restoreBranch } from './rebase-git';
+import { restoreBranch } from './rebase/rebase-git';
 import type { StepResult } from './scheduler';
 import { headCommit } from './workspace-git';
 

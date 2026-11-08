@@ -1,8 +1,9 @@
 // Checks a split before it is pushed: the same content, every commit in its slice, each slice's checks.
+
 import { sliceTips } from '@union/core';
 
 import { runGate } from './gate';
-import type { Rebase } from './rebase-agent';
+import type { Rebase } from './rebase/rebase-agent';
 import { simplifyProblem, type History } from './simplify-git';
 import { checkout, stackCommits } from './stack-git';
 

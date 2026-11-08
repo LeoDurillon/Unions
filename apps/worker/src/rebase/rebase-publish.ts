@@ -1,16 +1,17 @@
 // Checks the result, runs the project's checks, then pushes; returns why it could not, the hook's
 // refusal of the agent's leftover changes, or the gate.
+
 import { emitEvent, openSlices, schema, type Db, type RefusedCommit } from '@union/core';
 import { eq } from 'drizzle-orm';
 
-import { forcePush } from './branch-push';
-import { captureDiff } from './diff-snapshot';
-import { runGate, type GateResult } from './gate';
-import { commitLeftovers, type Refused } from './leftovers';
+import { forcePush } from '../branch-push';
+import { captureDiff } from '../diff-snapshot';
+import { runGate, type GateResult } from '../gate';
+import { commitLeftovers, type Refused } from '../leftovers';
+import { outcomeOf, pauseOnRefusal, pendingRefusal, resumeRefusal } from '../refused-commit';
+import type { StepResult } from '../scheduler';
 import { askRebaseAgent, renderRebaseReport, type Pushed, type Rebase } from './rebase-agent';
 import { carriedOver, headCommit, rebaseProblem, stackMoveProblem } from './rebase-git';
-import { outcomeOf, pauseOnRefusal, pendingRefusal, resumeRefusal } from './refused-commit';
-import type { StepResult } from './scheduler';
 
 /**
  * Checks the result, runs the project's checks, then pushes; returns why it could not, the hook's

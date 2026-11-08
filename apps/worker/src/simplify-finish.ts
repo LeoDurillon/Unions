@@ -1,10 +1,11 @@
 // After the agent: its leftover commit (a hook may refuse it and pause the run), the checks on the new history, the push.
+
 import { markRefusalResolved, type RefusedCommit } from '@union/core';
 
 import type { AgentOutcome } from './agent';
 import { commitLeftovers } from './leftovers';
-import { askInSession, runInImplementerSession, type Rebase } from './rebase-agent';
-import { branchProblem, headCommit, restoreBranch } from './rebase-git';
+import { askInSession, runInImplementerSession, type Rebase } from './rebase/rebase-agent';
+import { branchProblem, headCommit, restoreBranch } from './rebase/rebase-git';
 import { outcomeOf, pauseOnRefusal, resolutionNote, resumeRefusal } from './refused-commit';
 import type { StepResult } from './scheduler';
 import { renderSimplifyReport, simplifyTask } from './simplify-agent';

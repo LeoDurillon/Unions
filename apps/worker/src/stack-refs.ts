@@ -1,4 +1,5 @@
 // A split ticket's slice branches in its workspace: set from the recorded tips, checked, pushed together, recorded again.
+
 import {
   openSlices,
   privatePushFiles,
@@ -12,8 +13,8 @@ import { eq } from 'drizzle-orm';
 import { mustRunIn } from './container-exec';
 import { REPO_DIR } from './provision';
 import { projectRemote } from './publish';
-import type { Rebase } from './rebase-agent';
-import { branchTip, headCommit } from './rebase-git';
+import type { Rebase } from './rebase/rebase-agent';
+import { branchTip, headCommit } from './rebase/rebase-git';
 import { setBranches } from './stack-git';
 import { pushStack } from './stack-push';
 

@@ -1,14 +1,15 @@
 // Every step: planning and custom agents, implementation, final review, and the rebase, simplify
 // and split asked on demand.
+
 import { isCustomStep, type ContainerRuntime, type Db } from '@union/core';
 
 import { runAgent } from './agent';
 import { runCodeStep } from './agent-services-step';
-import { ensureFollowedBase } from './followed-base-ref';
 import { isHistoryStep, runHistoryStep } from './history-steps';
 import { runPlanningStep } from './planning-step';
 import { isPlanningStep } from './prompts';
 import type { ProvisionConfig } from './provision';
+import { ensureFollowedBase } from './rebase/followed-base-ref';
 import { runReviewStep } from './review';
 import type { StepContext, StepExecutor, StepResult } from './scheduler';
 

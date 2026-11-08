@@ -1,7 +1,9 @@
 // One rebase attempt: git's own rebase first, the implementer's session only when it stops or breaks the checks.
 
-import { remoteOf } from './branch-push';
-import { install } from './implement-checks';
+import { remoteOf } from '../branch-push';
+import { install } from '../implement-checks';
+import { lowerSlices, syncLowerBranches } from '../stack-refs';
+import { rateLimited, type StepResult } from '../step-outcome';
 import { runRebaseAgent, type Pushed, type Rebase } from './rebase-agent';
 import { pushClean, upToDate } from './rebase-clean';
 import { fetchIntoContainer } from './rebase-fetch';
@@ -15,8 +17,6 @@ import {
   tryHostRebase,
 } from './rebase-host';
 import { pauseRebase, verifyAndPush } from './rebase-publish';
-import { lowerSlices, syncLowerBranches } from './stack-refs';
-import { rateLimited, type StepResult } from './step-outcome';
 
 /** The base a move leaves, read but not checked like the slices; none when the workspace's copy serves. */
 function leftRefs(retarget: Rebase['retarget']): { left?: { name: string; source: string } } {

@@ -1,8 +1,9 @@
 // One simplification of a stack: the fetch and its safety checks, the agent's turns until the host accepts the result, the push.
+
 import type { TicketSlice } from '@union/core';
 
-import type { Rebase } from './rebase-agent';
-import { fetchChecked } from './rebase-attempt';
+import type { Rebase } from './rebase/rebase-agent';
+import { fetchChecked } from './rebase/rebase-attempt';
 import type { StepResult } from './scheduler';
 import { historyOf } from './simplify-git';
 import { stackFixTask, stackSimplifyTask, type SliceHistory } from './simplify-stack-agent';

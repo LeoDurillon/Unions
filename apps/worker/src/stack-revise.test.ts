@@ -19,7 +19,7 @@ import { eq } from 'drizzle-orm';
 
 import { captureDiff } from './diff-snapshot';
 import { AGENT_HOME, REPO_DIR } from './provision';
-import { runRebaseStep } from './rebase';
+import { runRebaseStep } from './rebase/rebase';
 import { pushRevision, restackRevision, stackSection } from './stack-revise';
 
 const INBOX = '/tmp/union-fetch';

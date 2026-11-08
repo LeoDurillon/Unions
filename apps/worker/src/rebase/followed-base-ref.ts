@@ -1,13 +1,14 @@
 // Before a step of a ticket whose base was followed: the new base brought into the workspace, which may never have had it.
+
 import { getTicket, schema, ticketBase } from '@union/core';
 import { eq } from 'drizzle-orm';
 
-import { remoteOf } from './branch-push';
-import type { ImplementDeps } from './implement-checks';
-import { ensureTicketContainer } from './provision';
+import { remoteOf } from '../branch-push';
+import type { ImplementDeps } from '../implement-checks';
+import { ensureTicketContainer } from '../provision';
+import type { StepContext } from '../scheduler';
+import { refExists } from '../workspace-git';
 import { fetchIntoContainer } from './rebase-fetch';
-import type { StepContext } from './scheduler';
-import { refExists } from './workspace-git';
 
 /**
  * The steps diff against the local `<base>`. After GitHub moved the pull request onto another

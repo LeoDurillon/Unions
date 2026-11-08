@@ -1,13 +1,14 @@
 // The ticket's container put on its branch before a rebase, a simplification or a split, with the commit to restore.
+
 import { getTicket, schema, ticketBase, type Db, type Project } from '@union/core';
 import { eq } from 'drizzle-orm';
 
-import type { ImplementDeps } from './implement-checks';
-import { ensureTicketContainer } from './provision';
+import type { ImplementDeps } from '../implement-checks';
+import { ensureTicketContainer } from '../provision';
+import type { StepContext } from '../scheduler';
+import { ensureBranch } from '../workspace-git';
 import type { Rebase } from './rebase-agent';
 import { headCommit, restoreBranch } from './rebase-git';
-import type { StepContext } from './scheduler';
-import { ensureBranch } from './workspace-git';
 
 function loadProject(db: Db, projectId: number): Project {
   const project = db.select().from(schema.projects).where(eq(schema.projects.id, projectId)).get();

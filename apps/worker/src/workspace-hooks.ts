@@ -1,7 +1,8 @@
 // The ticket workspace's own commands: resyncing its branch from GitHub, showing an imported pull request.
+
 import type { CommandHooks } from './command-hooks';
 import { showAdoptedPullRequest } from './pr-adopt';
-import { resyncBranch, type ResyncDeps } from './resync-branch';
+import { resyncBranch, type ResyncDeps } from './rebase/resync-branch';
 
 /** The ticket workspace's own commands: resyncing its branch from GitHub, showing an imported PR. */
 export function workspaceHooks(

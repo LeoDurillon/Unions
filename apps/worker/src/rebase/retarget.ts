@@ -1,15 +1,16 @@
 // Moves a finished ticket's own commits onto another base branch, then points its pull request at it.
+
 import { emitEvent, listSlices, schema, ticketBase, type Project, type Ticket } from '@union/core';
 import { eq } from 'drizzle-orm';
 
-import { remoteOf } from './branch-push';
-import type { GitHubApi } from './github/api';
-import type { ImplementDeps } from './implement-checks';
-import { retargetSource } from './left-base';
+import { remoteOf } from '../branch-push';
+import type { GitHubApi } from '../github/api';
+import type { ImplementDeps } from '../implement-checks';
+import { retargetSource } from '../left-base';
+import { loadProject } from '../review';
+import type { StepContext, StepResult } from '../scheduler';
 import { runRebaseStep } from './rebase';
 import { currentBase, missingBranches, moveOnGitHub } from './retarget-github';
-import { loadProject } from './review';
-import type { StepContext, StepResult } from './scheduler';
 
 type Move = {
   api: GitHubApi;

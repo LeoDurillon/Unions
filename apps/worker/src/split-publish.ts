@@ -1,11 +1,12 @@
 // The split's way to and from GitHub: the stack's branches fetched with their leases, then pushed and opened.
+
 import { emitEvent, recordPushed, type Ticket } from '@union/core';
 
 import { remoteOf } from './branch-push';
 import { captureDiff } from './diff-snapshot';
-import type { Rebase } from './rebase-agent';
-import { fetchIntoContainer } from './rebase-fetch';
-import { branchTip, contains } from './rebase-git';
+import type { Rebase } from './rebase/rebase-agent';
+import { fetchIntoContainer } from './rebase/rebase-fetch';
+import { branchTip, contains } from './rebase/rebase-git';
 import type { PublishedSlice } from './split-agent';
 import { remoteSliceBranches, setBranches } from './stack-git';
 import { publishStack } from './stack-publish';

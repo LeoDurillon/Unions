@@ -1,12 +1,13 @@
 // A rebase git did alone: the branch already up to date, or rebased with no conflict, checked and pushed.
+
 import { schema } from '@union/core';
 import { eq } from 'drizzle-orm';
 
-import { forcePush } from './branch-push';
-import { runGate } from './gate';
+import { forcePush } from '../branch-push';
+import { runGate } from '../gate';
+import type { StepResult } from '../scheduler';
 import { renderCleanReport, type Rebase } from './rebase-agent';
 import { afterPush } from './rebase-publish';
-import type { StepResult } from './scheduler';
 
 /** Checks that fail after a clean rebase: the agent fixes what the base's changes broke. */
 export type ChecksFailed = { checksFailed: { command: string; exitCode: number; tail: string } };

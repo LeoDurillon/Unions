@@ -1,13 +1,14 @@
 // After a slice of a GitHub stack merged, GitHub rebases the rest itself: the workspace takes its branches as they are.
+
 import { emitEvent, openSlices, schema, shortSha, type TicketSlice } from '@union/core';
 import { eq } from 'drizzle-orm';
 
 import { remoteOf } from './branch-push';
 import { captureDiff } from './diff-snapshot';
-import type { Rebase } from './rebase-agent';
-import { fetchIntoContainer } from './rebase-fetch';
-import { contains, headCommit, restoreBranch } from './rebase-git';
-import { prepareBranch } from './rebase-prepare';
+import type { Rebase } from './rebase/rebase-agent';
+import { fetchIntoContainer } from './rebase/rebase-fetch';
+import { contains, headCommit, restoreBranch } from './rebase/rebase-git';
+import { prepareBranch } from './rebase/rebase-prepare';
 import type { StepContext, StepResult } from './scheduler';
 import { recordTips, takeRemoteBranches } from './stack-refs';
 

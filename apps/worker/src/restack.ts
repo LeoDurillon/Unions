@@ -1,4 +1,5 @@
 // Moves the rest of a stack onto the base after a slice merged, then targets the base with the new bottom pull request.
+
 import {
   listSlices,
   openSlices,
@@ -11,7 +12,7 @@ import {
 import { and, eq } from 'drizzle-orm';
 
 import type { ImplementDeps } from './implement-checks';
-import { runRebaseStep } from './rebase';
+import { runRebaseStep } from './rebase/rebase';
 import { loadProject } from './review';
 import type { StepContext, StepResult } from './scheduler';
 import { followGitHub } from './stack-follow';

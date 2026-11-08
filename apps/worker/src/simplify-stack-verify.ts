@@ -1,8 +1,9 @@
 // Checks a stack's simplified history before it is pushed: every commit in its slice, every slice's tip with the same content.
+
 import { shortSha, sliceTrailer, sliceTips, type StackCommit, type TicketSlice } from '@union/core';
 
-import type { Rebase } from './rebase-agent';
-import { contains, headCommit } from './rebase-git';
+import type { Rebase } from './rebase/rebase-agent';
+import { contains, headCommit } from './rebase/rebase-git';
 import { simplifyProblem, type History } from './simplify-git';
 import { stackCommits } from './stack-git';
 import { treeOf } from './stack-revise-git';

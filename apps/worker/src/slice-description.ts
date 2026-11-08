@@ -1,4 +1,5 @@
 // A slice's pull request description: written by the split's session from the repository's template, or rewritten later.
+
 import { listSlices, resolveAgent, type Db, type Ticket, type TicketSlice } from '@union/core';
 
 import {
@@ -8,7 +9,7 @@ import {
   templateInstructions,
   type Template,
 } from './pr-description';
-import type { Rebase } from './rebase-agent';
+import type { Rebase } from './rebase/rebase-agent';
 import type { PublishedSlice } from './split-agent';
 
 type Slice = Pick<PublishedSlice, 'position' | 'title' | 'spec' | 'tipSha'>;

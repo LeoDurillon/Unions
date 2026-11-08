@@ -1,4 +1,5 @@
 // The agent's turns at rewriting a stack: its first try, then the host's problems sent back until the result passes.
+
 import type { PlannedSlice } from '@union/core';
 
 import type { AgentOutcome } from './agent';
@@ -7,7 +8,7 @@ import {
   runInImplementerSession,
   type Rebase,
   type SessionTask,
-} from './rebase-agent';
+} from './rebase/rebase-agent';
 import type { StepResult } from './scheduler';
 import type { History } from './simplify-git';
 import { fixTask, splitTask } from './split-agent';

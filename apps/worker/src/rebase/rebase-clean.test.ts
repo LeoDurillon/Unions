@@ -14,10 +14,10 @@ import {
 } from '@union/core';
 import { eq } from 'drizzle-orm';
 
-import type { AgentFn, AgentRun } from './agent';
-import { AGENT_HOME, REPO_DIR } from './provision';
+import type { AgentFn, AgentRun } from '../agent';
+import { AGENT_HOME, REPO_DIR } from '../provision';
+import type { StepContext, StepResult } from '../scheduler';
 import { runRebaseStep } from './rebase';
-import type { StepContext, StepResult } from './scheduler';
 
 const INBOX = '/tmp/union-fetch';
 

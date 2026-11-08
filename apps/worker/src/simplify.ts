@@ -2,10 +2,10 @@
 
 import { remoteOf } from './branch-push';
 import type { ImplementDeps } from './implement-checks';
-import type { Rebase } from './rebase-agent';
-import { fetchIntoContainer } from './rebase-fetch';
-import { contains, restoreBranch } from './rebase-git';
-import { prepareBranch } from './rebase-prepare';
+import type { Rebase } from './rebase/rebase-agent';
+import { fetchIntoContainer } from './rebase/rebase-fetch';
+import { contains, restoreBranch } from './rebase/rebase-git';
+import { prepareBranch } from './rebase/rebase-prepare';
 import { pendingRefusal } from './refused-commit';
 import { finishSimplify, resumeSimplify, runSimplifyAgent } from './simplify-finish';
 import { historyOf } from './simplify-git';

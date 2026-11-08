@@ -1,13 +1,14 @@
 // Rebases the ticket's branch onto its base (git alone when there is no conflict, else the
 // implementer's own session), checks it and force-pushes it with a lease.
-import type { ImplementDeps } from './implement-checks';
-import { afterFollowed, followedMove } from './left-base';
+
+import type { ImplementDeps } from '../implement-checks';
+import { afterFollowed, followedMove } from '../left-base';
+import type { StepContext, StepResult } from '../scheduler';
 import type { Rebase } from './rebase-agent';
 import { attempt } from './rebase-attempt';
 import { restoreBranch } from './rebase-git';
 import { prepareBranch } from './rebase-prepare';
 import { pausedRebase, published, resumeRebase } from './rebase-publish';
-import type { StepContext, StepResult } from './scheduler';
 
 /** A restack, or a change of target onto `to`; neither: a plain rebase onto the ticket's base. */
 export type RebaseOptions = {

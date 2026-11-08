@@ -1,7 +1,8 @@
 // The implementer's session asked to rewrite its commits, and the report the step leaves.
+
 import { deniedFor, resolveAgent, type Db } from '@union/core';
 
-import type { Rebase, SessionTask } from './rebase-agent';
+import type { Rebase, SessionTask } from './rebase/rebase-agent';
 import type { History } from './simplify-git';
 
 const SHORT_SHA = 7;

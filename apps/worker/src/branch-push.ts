@@ -1,8 +1,9 @@
 // Force-pushes a rewritten branch with a lease: the ticket's alone, or every slice of its stack together.
+
 import { listSlices, privatePushFiles, recordPushed, type Project } from '@union/core';
 
 import { PrivateFilesError, projectRemote, pushBranch } from './publish';
-import type { Rebase } from './rebase-agent';
+import type { Rebase } from './rebase/rebase-agent';
 import { pushRewrittenStack } from './stack-refs';
 
 /** The project's repository with its credentials, for the fetch and the push. */

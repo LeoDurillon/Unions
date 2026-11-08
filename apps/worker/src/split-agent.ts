@@ -1,7 +1,8 @@
 // The implementer's session asked to rewrite its commits into the approved slices, and the split's report.
+
 import { deniedFor, resolveAgent, shortSha, type Db, type PlannedSlice } from '@union/core';
 
-import type { Rebase, SessionTask } from './rebase-agent';
+import type { Rebase, SessionTask } from './rebase/rebase-agent';
 import type { History } from './simplify-git';
 
 const HOOK_HINT =

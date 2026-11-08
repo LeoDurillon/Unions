@@ -1,8 +1,9 @@
 // Simplifies a split ticket's history slice by slice with the implementer's session, each slice's content unchanged, and force-pushes the stack.
+
 import { openSlices } from '@union/core';
 
 import type { ImplementDeps } from './implement-checks';
-import { prepareBranch, restorePrepared } from './rebase-prepare';
+import { prepareBranch, restorePrepared } from './rebase/rebase-prepare';
 import type { StepContext, StepResult } from './scheduler';
 import { simplifyStack } from './simplify-stack-run';
 import { lowerSlices, syncLowerBranches } from './stack-refs';

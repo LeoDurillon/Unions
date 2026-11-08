@@ -1,4 +1,5 @@
 // Rewrites the ticket's commits into the approved slices with the implementer's session, checks them, pushes the stack and opens it on GitHub.
+
 import {
   latestOutput,
   parseSplitPlan,
@@ -8,8 +9,8 @@ import {
 } from '@union/core';
 
 import type { ImplementDeps } from './implement-checks';
-import type { Rebase } from './rebase-agent';
-import { prepareBranch, restorePrepared } from './rebase-prepare';
+import type { Rebase } from './rebase/rebase-agent';
+import { prepareBranch, restorePrepared } from './rebase/rebase-prepare';
 import type { StepContext, StepResult } from './scheduler';
 import { historyOf } from './simplify-git';
 import { describeSlices } from './slice-description';

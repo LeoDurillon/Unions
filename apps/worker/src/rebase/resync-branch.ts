@@ -1,4 +1,5 @@
 // Puts the ticket's workspace on its branch as GitHub has it, after someone else pushed to it or rewrote it: no push, no agent.
+
 import {
   emitEvent,
   getTicket,
@@ -11,13 +12,13 @@ import {
   type Db,
 } from '@union/core';
 
-import { mustRunIn } from './container-exec';
-import { captureDiff } from './diff-snapshot';
-import { ensureTicketContainer, REPO_DIR, type ProvisionConfig } from './provision';
-import { projectRemote } from './publish';
+import { mustRunIn } from '../container-exec';
+import { captureDiff } from '../diff-snapshot';
+import { ensureTicketContainer, REPO_DIR, type ProvisionConfig } from '../provision';
+import { projectRemote } from '../publish';
+import { loadProject } from '../review';
 import { fetchIntoContainer } from './rebase-fetch';
 import { contains, headCommit } from './rebase-git';
-import { loadProject } from './review';
 
 export type ResyncDeps = { db: Db; runtime: ContainerRuntime; config: ProvisionConfig };
 

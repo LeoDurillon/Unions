@@ -6,9 +6,9 @@ import { hasActiveContainerRun } from '@union/core';
 import { runImplementStep } from './implement';
 import type { ImplementDeps } from './implement-checks';
 import { startStepPreview, withPreviewEnv } from './preview/step-preview';
-import { runRebaseStep } from './rebase';
+import { runRebaseStep } from './rebase/rebase';
+import { runRetargetStep } from './rebase/retarget';
 import { runRestackStep } from './restack';
-import { runRetargetStep } from './retarget';
 import type { StepContext, StepResult } from './scheduler';
 import { startServicesRun } from './services-run';
 

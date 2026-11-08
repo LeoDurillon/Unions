@@ -1,12 +1,13 @@
 // Where the base a ticket left is read from: its merged pull request's ref, else its branch, else the workspace's last copy.
+
 import { emitEvent, schema, type LeftBase } from '@union/core';
 import { eq } from 'drizzle-orm';
 
 import { remoteOf } from './branch-push';
 import type { GitHubApi, RepoRef } from './github/api';
 import type { CloneSource } from './provision';
-import type { Rebase } from './rebase-agent';
-import { dropBuildsOn, missingBranches } from './retarget-github';
+import type { Rebase } from './rebase/rebase-agent';
+import { dropBuildsOn, missingBranches } from './rebase/retarget-github';
 import type { StepResult } from './scheduler';
 import { refExists } from './workspace-git';
 

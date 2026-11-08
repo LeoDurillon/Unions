@@ -1,7 +1,8 @@
 // The implementer's session asked to simplify a split ticket's commits slice by slice, and the step's report.
+
 import { deniedFor, resolveAgent, shortSha, type Db, type TicketSlice } from '@union/core';
 
-import type { Rebase, SessionTask } from './rebase-agent';
+import type { Rebase, SessionTask } from './rebase/rebase-agent';
 import type { History } from './simplify-git';
 
 const HOOK_HINT =

@@ -1,9 +1,10 @@
 // The host's own `git rebase` onto the base, tried before any agent: up to date, clean, or stopped.
+
 import type { ContainerRuntime } from '@union/core';
 
-import { runIn } from './container-exec';
-import { tail } from './gate';
-import { REPO_DIR } from './provision';
+import { runIn } from '../container-exec';
+import { tail } from '../gate';
+import { REPO_DIR } from '../provision';
 import { contains, restoreBranch } from './rebase-git';
 
 const DETAIL_LINES = 20;

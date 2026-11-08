@@ -1,8 +1,9 @@
 // A change of target on GitHub: the base the pull request has now, the branches that exist, and the pull request moved onto the new base.
+
 import { BUILDS_ON_LINK, type Project } from '@union/core';
 
-import type { GitHubApi, RepoRef } from './github/api';
-import { hostGit, type CloneSource } from './provision';
+import type { GitHubApi, RepoRef } from '../github/api';
+import { hostGit, type CloneSource } from '../provision';
 
 function repoOf(project: Project): RepoRef {
   return { owner: project.owner, repo: project.repo };
