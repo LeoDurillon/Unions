@@ -116,7 +116,7 @@ not planned.)
 | Active work, shared                 | move `ACTIVE` from `scripts/active.ts` to core (`active-work.ts`), both use it      |
 | Table, migration                    | `union_update` in `schema.ts`, `drizzle-kit generate`                               |
 | Events                              | `union_update_changed`, `union_restart` in `event-payloads.ts`                      |
-| Worker: check loop, update command  | `apps/worker/src/union-update.ts`, `union-update-git.ts` (git calls)                |
+| Worker: check loop, update command  | `apps/worker/src/union-update/union-update.ts`, `union-update-git.ts` (git calls)   |
 | Worker: pause claims while updating | the drain loop                                                                      |
 | Web: read, commands, exit, version  | `apps/web/src/routes/union-update.ts`                                               |
 | Client                              | `components/update-button.tsx`, `lib/use-union-update.ts`, version reload           |

@@ -8,7 +8,7 @@ with a text (shown by the Log), not four event types; the up-to-date check runs 
 
 ## Problem
 
-Today every **Rebase** click resumes the implementer's session (`runRebaseAgent` in `apps/worker/src/rebase.ts`),
+Today every **Rebase** click resumes the implementer's session (`runRebaseAgent` in `apps/worker/src/rebase/rebase.ts`),
 then always chains into a new `final_review` (`running('rebase')` sets `thenRun: 'final_review'` in
 `packages/core/src/states.ts`). That makes two agent runs even when `git rebase` alone would have worked, which is
 the usual case. Most of the tokens go on rebases that need no judgment at all.
@@ -90,7 +90,7 @@ workspace lacks, install. Then:
   again" becomes "only when the agent ran"), State machine (`rebased_clean`, `thenDone` from Done).
 - `docs/architecture/worker.md`: the rebase flow.
 
-## Tests (`apps/worker/src/rebase.test.ts`, real git, counts `agentCalls`)
+## Tests (`apps/worker/src/rebase/rebase.test.ts`, real git, counts `agentCalls`)
 
 - Clean, checks green: `agentCalls === 0`, the remote branch contains the base, the result is `ok` with `clean`,
   and the report says "cleanly".

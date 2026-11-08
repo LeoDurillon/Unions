@@ -12,7 +12,7 @@ most", and "is the context close to full".
 
 ## What exists today
 
-- `runAgent` (`apps/worker/src/agent.ts`) reads the `result` event of `claude -p --output-format stream-json`, keeps
+- `runAgent` (`apps/worker/src/agent/agent.ts`) reads the `result` event of `claude -p --output-format stream-json`, keeps
   `total_cost_usd` in `AgentOutcome.costUsd`, and nobody reads it.
 - `runs.cost_micro_usd` exists in the schema but is never written (0 of 176 runs on the live database).
 - Every stream-json event already lands in `agent_log` through `appendAgentLine` (core), with `runId` for ticket

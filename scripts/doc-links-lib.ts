@@ -20,6 +20,14 @@ function outsideCode(markdown: string): string {
     .join('\n');
 }
 
+/** A source file named by its repository path, in prose or code: `apps/worker/src/agent/agent.ts`. */
+const SOURCE_PATH = /\b(?:apps|packages|scripts)\/[\w./-]+\.tsx?\b/gu;
+
+/** The repository paths of source files a text names. */
+export function sourcePaths(markdown: string): string[] {
+  return [...new Set(markdown.match(SOURCE_PATH))];
+}
+
 /** The relative link targets of a markdown text, without anchors; external and anchor-only links left out. */
 export function relativeLinks(markdown: string): string[] {
   const targets: string[] = [];

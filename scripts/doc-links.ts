@@ -1,13 +1,16 @@
-// Fails when a link in the docs, the user guide, AGENTS.md or README.md points at a file that does not exist.
+// Fails when a link in the docs, the user guide, AGENTS.md or README.md points at a file that does not exist, or a living doc names a source path that is gone.
 import { access, readFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import { Glob } from 'bun';
 
-import { relativeLinks } from './doc-links-lib';
+import { relativeLinks, sourcePaths } from './doc-links-lib';
 
 const ROOT = path.resolve(import.meta.dir, '..');
 const FILES = ['docs/**/*.md', 'documentation/**/*.md', 'AGENTS.md', 'README.md'];
+/** Where a named source path must still exist: not the archived plans, which keep the paths of their time. */
+const LIVING =
+  /^(?:docs\/(?:architecture|spec)\/|documentation\/|AGENTS\.md|README\.md|docs\/plans\/README\.md)/u;
 
 function exists(target: string): Promise<boolean> {
   return access(target).then(
@@ -27,7 +30,13 @@ async function brokenIn(file: string): Promise<string[]> {
       return (await exists(resolved)) ? null : `${file}: ${target}`;
     }),
   );
-  return checked.filter((line) => line !== null);
+  const named = LIVING.test(file) ? sourcePaths(text) : [];
+  const paths = await Promise.all(
+    named.map(async (source) =>
+      (await exists(path.join(ROOT, source))) ? null : `${file}: names ${source}`,
+    ),
+  );
+  return [...checked, ...paths].filter((line) => line !== null);
 }
 
 const files: string[] = [];

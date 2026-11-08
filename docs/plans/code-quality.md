@@ -25,7 +25,7 @@ Measured on `main` at `a3e9435` with `bun test --coverage` (Bun lists only the f
 
 All loaded files: 82.72% of functions, 87.09% of lines. Among the least covered server files:
 `apps/web/src/github-onboarding.ts` (10%), `apps/web/src/github-rule-choices.ts` (0%),
-`apps/worker/src/github/octokit-project-fields.ts` (10%), `apps/worker/src/implement-run.ts` (19%),
+`apps/worker/src/github/octokit-project-fields.ts` (10%), `apps/worker/src/implement/implement-run.ts` (19%),
 `packages/core/src/docker-cli.ts` (3%, checked against real Docker instead, `docs/architecture/testing.md`).
 
 No `as unknown as` outside tests. Files within about 30 lines of the 300-line limit (non-blank, non-comment lines):

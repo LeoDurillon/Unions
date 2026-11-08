@@ -68,7 +68,7 @@ Shipping this alone shows how often changes are larger than expected before anyt
 ### 3. The trim pass
 
 After the implementation's checks are green and before the push (`implement.ts`, between `implement()` and
-`publish()`), in a new `apps/worker/src/size-trim.ts`:
+`publish()`), in a new `apps/worker/src/implement/size-trim.ts`:
 
 - Measure with the same rule on `git diff --numstat <base>...HEAD` in the container (the snapshot is taken after
   this). Within `budget × SIZE_TOLERANCE` (1.5, since estimates are rough): nothing happens.

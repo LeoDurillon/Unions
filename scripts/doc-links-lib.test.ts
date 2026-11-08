@@ -1,7 +1,7 @@
 // Tests of the doc-link check's link reader: relative targets only, anchors dropped, code left out.
 import { expect, test } from 'bun:test';
 
-import { relativeLinks } from './doc-links-lib';
+import { relativeLinks, sourcePaths } from './doc-links-lib';
 
 test('relative links and images are read, without their anchor', () => {
   expect(
@@ -17,4 +17,12 @@ test('external links, anchors alone and links in code are left out', () => {
     '```',
   ].join('\n');
   expect(relativeLinks(text)).toEqual([]);
+});
+
+test('source paths named in prose and code are read once each', () => {
+  expect(
+    sourcePaths(
+      'See `apps/worker/src/agent/agent.ts` and apps/worker/src/agent/agent.ts, not apps/x.md.',
+    ),
+  ).toEqual(['apps/worker/src/agent/agent.ts']);
 });
