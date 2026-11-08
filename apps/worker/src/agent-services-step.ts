@@ -1,15 +1,16 @@
 // A step that runs code (implementation, rebase), with the project's agent services beside it and,
 // while the preview runs, its addresses in the environment.
+
 import { hasActiveContainerRun } from '@union/core';
 
 import { runImplementStep } from './implement';
 import type { ImplementDeps } from './implement-checks';
+import { startStepPreview, withPreviewEnv } from './preview/step-preview';
 import { runRebaseStep } from './rebase';
 import { runRestackStep } from './restack';
 import { runRetargetStep } from './retarget';
 import type { StepContext, StepResult } from './scheduler';
 import { startServicesRun } from './services-run';
-import { startStepPreview, withPreviewEnv } from './step-preview';
 
 /**
  * A step that runs code (implementation, rebase), with the project's agent services beside it and,

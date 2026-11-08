@@ -58,6 +58,9 @@ remove the file), then run `bun run map` to update the maps.
 - `bun run docs:check`: fails when a link in `docs/`, `documentation/`, `AGENTS.md` or `README.md` points at a
   file that does not exist (part of `check` and the pre-commit hook). Built plans live in `docs/plans/archive/`;
   move a plan there once built and run it.
+- `bun scripts/move-files.ts <folder> <file>...`: moves source files into a folder (`git mv`) and rewrites every
+  relative import to and from them, and core's `exports` map; it prints the rule files that name a moved path,
+  then formats and regenerates the maps.
 - `bun run active`: says whether anything runs on the live instance (exit 1 if so); see "Working on the live
   instance".
 - `bun run lint` (`lint:fix` to autofix), `bun run fmt` (`fmt:check` to verify), `bun run typecheck`.

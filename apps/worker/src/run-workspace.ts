@@ -1,4 +1,5 @@
 // Where a user's command runs: the ticket's container with the agent's services, or the pull request's own.
+
 import {
   agentVariables,
   getPreview,
@@ -8,8 +9,8 @@ import {
 } from '@union/core';
 
 import type { TargetDeps } from './agent-review-target';
-import { previewEnv } from './preview-env';
 import { previewSettings } from './preview/compose';
+import { previewEnv } from './preview/preview-env';
 import { loadTarget } from './preview/target';
 import { ensureTicketContainer } from './provision';
 import { openReviewContainer } from './review-checkout';

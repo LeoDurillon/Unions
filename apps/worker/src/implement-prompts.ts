@@ -1,5 +1,6 @@
 // The implementer's prompts past the first: check and preview hints, feedback, failed checks, given
 // outputs, and its report.
+
 import {
   previewUrlVariable,
   shortSha,
@@ -11,7 +12,7 @@ import {
 } from '@union/core';
 
 import type { GateResult } from './gate';
-import { baseUrl } from './preview-env';
+import { baseUrl } from './preview/preview-env';
 import type { PublishResult } from './publish';
 
 /** Appended to the first implement prompt so the agent knows how its work is checked. */

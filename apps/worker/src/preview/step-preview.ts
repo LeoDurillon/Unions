@@ -1,4 +1,5 @@
 // Installs and starts the ticket's preview before an implementation step when the project asks for it, and gives a step's commands its addresses.
+
 import {
   getPreview,
   getTicket,
@@ -9,12 +10,12 @@ import {
 } from '@union/core';
 import { eq } from 'drizzle-orm';
 
-import { runInstall } from './gate';
+import { runInstall } from '../gate';
+import { containerNames, ensureTicketContainer, type ProvisionConfig } from '../provision';
+import { withEnvironment } from './background';
+import { previewSettings } from './compose';
 import { previewEnv } from './preview-env';
-import { withEnvironment } from './preview/background';
-import { previewSettings } from './preview/compose';
-import { startPreview } from './preview/run';
-import { containerNames, ensureTicketContainer, type ProvisionConfig } from './provision';
+import { startPreview } from './run';
 
 type StepDeps = { db: Db; runtime: ContainerRuntime; config: ProvisionConfig };
 

@@ -1,4 +1,5 @@
 // Runs the project's e2e command against the owner's preview, after its checks passed.
+
 import {
   replaceE2eScreenshots,
   replaceReviewScreenshots,
@@ -11,8 +12,8 @@ import {
 import { runIn } from './container-exec';
 import { collectScreenshots, type Screenshot, type Screenshots } from './e2e-screenshots';
 import { GATE_TIMEOUT_MS, tail } from './gate';
-import { baseUrl, previewEnv } from './preview-env';
 import { previewSettings } from './preview/compose';
+import { baseUrl, previewEnv } from './preview/preview-env';
 import { startPreview, type PreviewDeps } from './preview/run';
 import { REPO_DIR } from './provision';
 

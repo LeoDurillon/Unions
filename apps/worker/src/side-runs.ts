@@ -1,5 +1,6 @@
 // Starts the work outside the ticket pipeline (investigations, review agents, PR descriptions),
 // after failing what a stopped worker left running.
+
 import { backfillNotionPages, FetchNotionApi, type Project } from '@union/core';
 
 import { ContainerRunner } from './container-run';
@@ -7,7 +8,7 @@ import { EventDispatcher } from './event-dispatcher';
 import type { GitHubApi } from './github/api';
 import { InvestigationRunner, type InvestigationDeps } from './investigate';
 import { PrDescriptionRunner } from './pr-description-runner';
-import { startPreviewRuns, type PreviewRuns } from './preview-runs';
+import { startPreviewRuns, type PreviewRuns } from './preview/preview-runs';
 import { reviewRunners, startReviewRuns, type ReviewRuns } from './review-runs';
 import { ThrowawayRuns } from './throwaway-runs';
 import { UnionUpdater } from './union-update';
