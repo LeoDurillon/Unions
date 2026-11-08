@@ -1,5 +1,6 @@
 // Agent review records: queued, claimed, finished and cancelled, with the draft comments they
 // leave.
+
 import { and, asc, desc, eq, inArray, sql, type SQL } from 'drizzle-orm';
 
 import type { AgentReviewSpec } from './agent-review-specs';
@@ -9,7 +10,7 @@ import {
   claimReviewRun,
   failInterruptedReviewRuns,
   type ReviewRunLife,
-} from './review-run-lifecycle';
+} from './review/review-run-lifecycle';
 import * as schema from './tables';
 import { emitEvent } from './tickets';
 
