@@ -18,14 +18,14 @@ import {
   withoutUnionLinks,
 } from '@union/core';
 
-import { agentFailure, runAgent, runResumable, type AgentFn } from './agent/agent';
-import type { GitHubApi } from './github/api';
+import { agentFailure, runAgent, runResumable, type AgentFn } from '../agent/agent';
+import type { GitHubApi } from '../github/api';
+import { ensureTicketContainer, REPO_DIR } from '../provision';
+import { loadProject, type TargetDeps } from '../review/agent-review-target';
+import type { RunSlots } from '../slots';
+import { rewriteTarget, sliceRewritePrompt, type RewriteTarget } from '../stack/slice-description';
+import { ensureBranch } from '../workspace-git';
 import { descriptionOf, findTemplate, rewritePrompt, type Template } from './pr-description';
-import { ensureTicketContainer, REPO_DIR } from './provision';
-import { loadProject, type TargetDeps } from './review/agent-review-target';
-import type { RunSlots } from './slots';
-import { rewriteTarget, sliceRewritePrompt, type RewriteTarget } from './stack/slice-description';
-import { ensureBranch } from './workspace-git';
 
 export type PrDescriptionDeps = TargetDeps & {
   slots: RunSlots;

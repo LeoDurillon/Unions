@@ -12,8 +12,8 @@ import {
 } from '@union/core';
 import { inArray } from 'drizzle-orm';
 
-import { clonePullRequests, pullRef } from '../pr-checkout';
 import type { TicketContainer } from '../provision';
+import { clonePullRequests, pullRef } from '../pull-request/pr-checkout';
 import { STACK_FINDINGS_FORMAT, toDrafts, type Findings } from './agent-review-findings';
 import { loadProject, patches, throwawayCheckout, type TargetDeps } from './agent-review-target';
 

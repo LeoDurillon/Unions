@@ -1,12 +1,13 @@
 // Checks pull requests out at their reviewed commits: the host clones and fetches, the container
 // gets the files.
+
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
 import type { ContainerRuntime } from '@union/core';
 
-import { hostGit, REPO_DIR, type CloneSource } from './provision';
+import { hostGit, REPO_DIR, type CloneSource } from '../provision';
 
 const SHORT_SHA = 7;
 

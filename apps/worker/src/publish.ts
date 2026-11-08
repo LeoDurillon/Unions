@@ -1,4 +1,5 @@
 // Pushes the ticket's branch from the host (never with a private file) and opens its draft PR once.
+
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -20,8 +21,8 @@ import { eq } from 'drizzle-orm';
 
 import { projectGitToken } from './credentials';
 import type { GitHubApi } from './github/api';
-import { writeDescription, type Describer } from './pr-description';
 import { cloneSource, hostGit, type CloneSource, type ProvisionConfig } from './provision';
+import { writeDescription, type Describer } from './pull-request/pr-description';
 import { exportBranch } from './workspace-git';
 
 export type PublishResult = {

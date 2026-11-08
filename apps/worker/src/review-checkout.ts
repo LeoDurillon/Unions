@@ -4,8 +4,8 @@ import { ownerContainerNames, schema, type Db } from '@union/core';
 import { eq } from 'drizzle-orm';
 
 import { projectGitToken } from './credentials';
-import { clonePullRequest } from './pr-checkout';
 import { cloneSource, hostGit, projectImage, type TicketContainer } from './provision';
+import { clonePullRequest } from './pull-request/pr-checkout';
 import { loadProject, type TargetDeps } from './review/agent-review-target';
 
 export type Review = typeof schema.currentReviews.$inferSelect;

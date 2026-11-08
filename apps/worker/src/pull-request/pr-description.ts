@@ -11,9 +11,9 @@ import {
   toolsFor,
 } from '@union/core';
 
-import type { AgentFn } from './agent/agent';
-import { runIn } from './container-exec';
-import { REPO_DIR } from './provision';
+import type { AgentFn } from '../agent/agent';
+import { runIn } from '../container-exec';
+import { REPO_DIR } from '../provision';
 
 /** Where GitHub looks for a pull request template, in its order; the names are case-insensitive. */
 const TEMPLATE_FILES = [

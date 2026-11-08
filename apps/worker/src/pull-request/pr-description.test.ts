@@ -11,10 +11,10 @@ import {
 } from '@union/core';
 import { eq } from 'drizzle-orm';
 
-import type { AgentFn, AgentRun } from './agent/agent';
-import { FakeGitHubApi } from './github/fake-api';
+import type { AgentFn, AgentRun } from '../agent/agent';
+import { FakeGitHubApi } from '../github/fake-api';
+import { ensurePullRequest, pullRequestBody } from '../publish';
 import { descriptionOf, descriptionPrompt, pickTemplate, writeDescription } from './pr-description';
-import { ensurePullRequest, pullRequestBody } from './publish';
 
 const TEMPLATE =
   '## Description\n\n## Type de changement\n\n- [ ] Correctif\n- [ ] Fonctionnalité\n';

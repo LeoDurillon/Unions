@@ -15,9 +15,9 @@ import {
 } from '@union/core';
 import { and, eq, inArray } from 'drizzle-orm';
 
-import type { AgentFn } from './agent/agent';
+import type { AgentFn } from '../agent/agent';
+import { REPO_DIR } from '../provision';
 import { importedNote, repliesOf, repliesPrompt, type SuggestedReply } from './pr-reply-format';
-import { REPO_DIR } from './provision';
 
 /** What the replies turn needs: the implementer's session to resume, and where it logs. */
 export type ReplyWriter = {

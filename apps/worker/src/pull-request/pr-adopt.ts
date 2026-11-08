@@ -2,11 +2,11 @@
 
 import { emitEvent, getTicket, stepHoldsBranch, ticketBase } from '@union/core';
 
-import { captureDiff } from './diff-snapshot';
-import { ensureTicketContainer } from './provision';
-import type { ResyncDeps } from './rebase/resync-branch';
-import { loadProject } from './review';
-import { ensureBranch } from './workspace-git';
+import { captureDiff } from '../diff-snapshot';
+import { ensureTicketContainer } from '../provision';
+import type { ResyncDeps } from '../rebase/resync-branch';
+import { loadProject } from '../review';
+import { ensureBranch } from '../workspace-git';
 
 /**
  * Checks the pull request's branch out and captures its diff, in the ticket's container (stopped

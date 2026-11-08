@@ -14,7 +14,6 @@ import {
 import { desc, eq } from 'drizzle-orm';
 
 import { projectGitToken } from '../credentials';
-import { clonePullRequest } from '../pr-checkout';
 import {
   cloneSource,
   ensureTicketContainer,
@@ -24,6 +23,7 @@ import {
   type ProvisionConfig,
   type TicketContainer,
 } from '../provision';
+import { clonePullRequest } from '../pull-request/pr-checkout';
 import { ensureBranch } from '../workspace-git';
 
 export type TargetDeps = { db: Db; runtime: ContainerRuntime; config: ProvisionConfig };

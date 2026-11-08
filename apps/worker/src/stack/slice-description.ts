@@ -8,7 +8,7 @@ import {
   OUTPUT_RULES,
   templateInstructions,
   type Template,
-} from '../pr-description';
+} from '../pull-request/pr-description';
 import type { Rebase } from '../rebase/rebase-agent';
 import type { PublishedSlice } from './split-agent';
 

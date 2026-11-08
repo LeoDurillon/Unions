@@ -1,11 +1,12 @@
 // A ticket imported from a pull request: `adopt_pull_request` waits for approval at implementation, then Approve and Revise run as usual.
+
 import { beforeEach, expect, test } from 'bun:test';
 
 import { createDb, createTicket, getTicket, migrateDb, schema, type Db } from '@union/core';
 
-import { NO_HOOKS } from './command-hooks';
-import { drainCommands } from './commands';
-import { Scheduler, type StepContext, type StepExecutor } from './scheduler';
+import { NO_HOOKS } from '../command-hooks';
+import { drainCommands } from '../commands';
+import { Scheduler, type StepContext, type StepExecutor } from '../scheduler';
 
 let db: Db;
 let ticketId: number;

@@ -1,5 +1,6 @@
 // Runs queued rewrites of pull request descriptions, sharing the run slots with the ticket
 // pipeline, the investigations and the agent reviews.
+
 import {
   claimPrDescription,
   finishPrDescription,
@@ -8,8 +9,8 @@ import {
   type PrDescriptionOutcome,
 } from '@union/core';
 
+import { RunPool } from '../run-pool';
 import { rewrite, type PrDescriptionDeps } from './pr-description-run';
-import { RunPool } from './run-pool';
 
 /**
  * Runs queued rewrites of pull request descriptions, sharing the run slots with the ticket pipeline,

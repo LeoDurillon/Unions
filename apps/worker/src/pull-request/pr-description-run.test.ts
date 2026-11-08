@@ -17,11 +17,11 @@ import {
   type ExecResult,
 } from '@union/core';
 
-import type { AgentFn, AgentRun } from './agent/agent';
-import { FakeGitHubApi } from './github/fake-api';
-import { sendPrDescription } from './github/pr-description-send';
+import type { AgentFn, AgentRun } from '../agent/agent';
+import { FakeGitHubApi } from '../github/fake-api';
+import { sendPrDescription } from '../github/pr-description-send';
+import { RunSlots } from '../slots';
 import { PrDescriptionRunner } from './pr-description-runner';
-import { RunSlots } from './slots';
 
 const REPO = { owner: 'acme', repo: 'shop' };
 /** More than the slices any test splits into. */
