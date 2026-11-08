@@ -41,6 +41,9 @@ items on its board. Pick one of three kinds of access:
 | Classic token      | A Project owned by a **user** account             | Scope `repo`, and `project` for a GitHub Project                                                                                        |
 | GitHub App         | An organization, with actions signed by the app   | Set up from Union, see below                                                                                                            |
 
+To show your pull requests' CI checks, a token also needs read access to Checks, Commit statuses and Actions
+(the `repo` scope covers them for a classic token); to re-run failed jobs, write access to Actions.
+
 Fine-grained tokens and GitHub Apps cannot reach a Project that belongs to a user account: use a classic token for
 those, or set the project up with no GitHub Project. Without one, no Projects permission or `project` scope is needed.
 

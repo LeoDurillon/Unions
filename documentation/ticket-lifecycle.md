@@ -14,8 +14,14 @@ flowchart LR
     R -. request changes .-> I
 ```
 
-Each step's output is a tab in the ticket's **Worker** tab, and a comment on the GitHub issue. When you ask for a
-revision, Union edits that comment instead of adding another one.
+Each step's output is a tab in the ticket's **Worker** tab and, when the project mirrors tickets as GitHub issues,
+a comment on the issue. When you ask for a revision, Union edits that comment instead of adding another one.
+
+### Diagrams
+
+When an agent draws a diagram in its output (a flowchart, a sequence of calls), Union shows it as a picture. Under
+it, **SVG** and **PNG** download it, and **Copy source** copies its text, to paste into a document or a pull request.
+A diagram Union cannot draw shows as its text.
 
 ![A technical plan waiting for approval](../docs/screenshots/ticket-plan.png)
 
@@ -33,14 +39,15 @@ The agents read the repository but do not change it during planning. Each step r
 Under each output:
 
 - **Approve** runs the next step.
-- **Request revision** asks for changes: write what is wrong, and the same agent revises its output, in the same
-  session, so it remembers what it wrote.
+- **Request revision** asks for changes: write what is wrong, then **Send feedback**. The same agent revises its
+  output, in the same session, so it remembers what it wrote.
 - **Edit** changes the output yourself, for example to fix a detail without spending a run. **Save new version**,
   then approve.
 - **Start over** runs the step again from scratch, after you confirm: the agent starts a new session and sees
   neither the versions it wrote nor your feedback. Use it when a plan went the wrong way and revising it would keep
   too much of it. The earlier versions stay in the version list. **Start over** also shows when a planning step
-  failed or hit the usage limit, beside **Retry**.
+  failed or hit the usage limit, beside **Retry**. Steps of your [custom agents](agents.md#custom-agents) have it
+  too.
 
 ### Answer the intake questions
 
@@ -109,7 +116,8 @@ A Done ticket keeps its container, workspace and branch, so you can still:
 
 - run its [preview](previews.md);
 - send more comments from **Review changes**, which takes it back to In progress, then the final review;
-- [rebase it, change its target, simplify its history or split it](branches.md) while its pull request is open.
+- [rebase it, change its target, simplify its history or split it](branches.md) while its pull request is open. A
+  split first shows its plan in the Worker tab, with **Approve and split** or **Drop the split**.
 
 Merge the pull request on GitHub as usual. Once it is merged or closed, the ticket moves to **Merged / Closed**.
 
@@ -120,11 +128,11 @@ reopened.
 
 ## When a step stops
 
-| What you see                                  | What it means                                                         | What to do                                                                                          |
-| --------------------------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| **Run failed:** and an error                  | The run ended with an error (a crash, a timeout, a Docker problem).   | Read the **Log**, fix the cause if it is on your side, then **Retry**.                              |
-| **Claude usage limit reached**                | Your Claude subscription hit its usage limit.                         | Nothing: Union retries by itself after the reset, at the time shown. **Retry now** runs it at once. |
-| **A git hook refused to commit some changes** | A pre-commit hook of the repository refused the agent's last changes. | See below.                                                                                          |
+| What you see                                  | What it means                                                         | What to do                                                                                                                                                                                          |
+| --------------------------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Run failed:** and an error                  | The run ended with an error (a crash, a timeout, a Docker problem).   | Read the **Log**, fix the cause if it is on your side, then **Retry**.                                                                                                                              |
+| **Claude usage limit reached**                | Your Claude subscription hit its usage limit.                         | Nothing: Union retries by itself after the reset, at the time shown. **Retry now** runs it at once. When no time is shown, Union could not read when the limit resets: click **Retry** once it has. |
+| **A git hook refused to commit some changes** | A pre-commit hook of the repository refused the agent's last changes. | See below.                                                                                                                                                                                          |
 
 When a hook refuses a commit, the panel shows the changes and what the hook said. You can:
 

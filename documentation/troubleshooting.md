@@ -24,7 +24,8 @@ the image they had until a save passes. "Runs as user 0": end the Dockerfile wit
 Dockerfile is built without the repository's files, so install what you need with `RUN` instead.
 
 **A step fails with "could not be built again on the new base image".**
-After `union-agent:local` or `union-agent-base:local` is rebuilt (an update of Union), each project's Dockerfile on
+After `union-agent:local` or `union-agent-base:local` is rebuilt (by `bun run compose` after an update of Union
+that changed them), each project's Dockerfile on
 it is built again the first time a ticket needs it. Open the Agent image page, fix the Dockerfile and save, then **Retry** the step.
 
 **An agent says a tool is missing (python, go, a system library).**
