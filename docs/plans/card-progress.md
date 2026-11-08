@@ -1,8 +1,8 @@
 # Plan: live progress on board cards
 
 Status: built (2026-11-04, commit `8c6b833`). Checked on a copy of the live database with one run marked running
-(the clock ticks, three polls in about seven seconds, only that card shows the line, no write tried). Left: seen
-during a real agent run.
+(the clock ticks, three polls in about seven seconds, only that card shows the line, no write tried). Seen
+during a real agent run since.
 
 ## Idea
 

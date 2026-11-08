@@ -2,7 +2,7 @@
 
 Status: built (2026-11-03, branch `custom-review-agents`), steps 1 to 6; summarized in
 `docs/spec/custom-agents.md`. Step 2's checkout checked on real Docker with a stand-in agent, step 5 with a UI
-check on a scratch database; no run with Claude yet. Decisions D1 to D6 confirmed
+check on a scratch database; run with Claude since. Decisions D1 to D6 confirmed
 (2026-11-03).
 
 ## Why

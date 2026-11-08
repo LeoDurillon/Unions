@@ -1,6 +1,6 @@
 # Ticket flows: choose the steps a ticket runs
 
-Status: built (branch `ticket-flows`, 2026-10-17); not yet run end to end on a real ticket. The three decisions below were confirmed.
+Status: built (branch `ticket-flows`, 2026-10-17); run end to end on a real ticket since. The three decisions below were confirmed.
 
 ## Why
 

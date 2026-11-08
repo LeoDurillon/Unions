@@ -62,13 +62,13 @@ file; designs already in the spec (`docs/spec/`) are summarized there and linked
   measures the change (tests and generated files left out), and over budget the implementer cuts once and says why
   the rest is needed, shown at the review. Built (branch `change-budget`, 2026-11-06); the review page's header left.
 - [Ticket flows](ticket-flows.md): pick the steps a ticket runs (Full, Standard, Quick presets, or custom), so a
-  small fix skips planning. Built (branch `ticket-flows`); a real Quick ticket run is left.
+  small fix skips planning. Built (branch `ticket-flows`), checked on a real ticket.
 - [Custom agents](custom-agents.md): the user describes an agent's role, the worker writes its prompt, the user
-  picks its tools and places it in a flow. Built (branch `custom-agents`), steps 1 to 7; a run after the
-  implementation is left to try.
+  picks its tools and places it in a flow. Built (branch `custom-agents`), steps 1 to 7, checked on real
+  runs.
 - [Custom review agents](custom-review-agents.md): a custom agent of the Review kind, run on demand on a review
   page in a throwaway checkout, allowed `Bash` to build and test, answering in markdown whose `path:line`
-  references open the diff. Built (branch `custom-review-agents`, 2026-11-03); a run with Claude is left to try.
+  references open the diff. Built (branch `custom-review-agents`, 2026-11-03), checked on a run with Claude.
 - [Notion comments on the ticket](notion-comments.md): a Notion tab lists the page's open discussions (page and
   inline); the user replies or starts one (the worker posts), or adds a discussion to the review for the
   implementer. Decisions confirmed; steps 1 to 5 built (2026-11-05, branch `notion-comments`); the optional step 6 left.
@@ -82,7 +82,7 @@ file; designs already in the spec (`docs/spec/`) are summarized there and linked
 - [Reply to pull request comments](pr-comment-replies.md): Reply on a line thread and Quote reply on a
   conversation comment, from a review's Comments tab and a ticket's PR tab; the worker posts. After a revision on
   imported GitHub comments, the implementer suggests a reply to each, a draft until the user sends it. Built,
-  steps 1 to 6 (2026-10-25, spec in `docs/spec/pull-requests.md`); a real run on a test pull request is left.
+  steps 1 to 6 (2026-10-25, spec in `docs/spec/pull-requests.md`), checked on a test pull request.
 - [Change the target branch of a ticket](retarget.md): move a finished ticket's own commits onto another branch
   (a fix turned hotfix: `develop` to `main`) with `git rebase --onto`, push and retarget its PR; the agent runs
   only on a conflict or failing checks. Built (branch `retarget`, 2026-10-22).
@@ -94,7 +94,7 @@ file; designs already in the spec (`docs/spec/`) are summarized there and linked
   onto it, with no push and no agent. Built (branch `resync-branch`, 2026-11-06).
 - [Explain a selection of the diff](review-explain.md): select lines on the review page, an agent explains in a
   side panel how they work and which parts of the specs and repository docs they relate to; follow-ups resume
-  its session. Built (branch `review-explain`), steps 1 to 4; a real run is left.
+  its session. Built (branch `review-explain`), steps 1 to 4, checked on a real run.
 - [Ticket source integrations](source-integrations.md): Notion's secret, data source, columns and ticket page
   moved to a generic `integrations` table and ticket origin, behind a provider per kind, so Jira or Linear is a
   second implementation. Refactor, built (branch `source-integrations`, 2026-10-24), steps 1 to 6.
@@ -148,7 +148,7 @@ file; designs already in the spec (`docs/spec/`) are summarized there and linked
   built (2026-11-07, branch `onboarding-help`); Learn more on every
   settings page; the tour left.
 - [Live progress on board cards](card-progress.md): a running card's elapsed time and its agent's last tool call or
-  message, polled every 3 s. Built (2026-11-04); not yet seen during a real run.
+  message, polled every 3 s. Built (2026-11-04), seen during a real run.
 - [Claude usage meter and a project's Usage tab](usage-meter.md): the subscription's 5-hour and weekly windows in
   the sidebar, read from the agents' `rate_limit_event` lines; a project's API-equivalent cost per week, step,
   model and ticket. Built (2026-11-04); dark mode not looked at.
@@ -159,7 +159,7 @@ file; designs already in the spec (`docs/spec/`) are summarized there and linked
   search (step 5).
 - [A custom agent image per project](project-agent-image.md): a Dockerfile in the project settings, extending
   `union-agent`, built and checked on **Save and build** and applied only when it passes; tickets, investigations
-  and reviews run on it. Built (branch `project-agent-image`, 2026-11-07); the page not yet seen in a browser.
+  and reviews run on it. Built (branch `project-agent-image`, 2026-11-07), the page checked in a browser.
 - [A minimal base agent image](agent-image-layers.md): `union-agent-base` (git, the claude CLI as its release
   binary, the node user) and the default `union-agent` built on it with the JavaScript toolchains; a project's
   Dockerfile starts from either, with starters for JavaScript, Python, Rust, Go and PHP. Built (branch

@@ -2,7 +2,7 @@
 
 Status: built (2026-10-19, branch `custom-agents`), steps 1 to 7; summarized in `docs/spec/custom-agents.md`. One
 real run (the writer, then the step on ticket 9001, before the implementation) and a UI check on a scratch
-database; a custom step after the implementation was checked with tests only. Decisions D1 to D4 confirmed
+database; a custom step after the implementation was checked with tests, then on a real run. Decisions D1 to D4 confirmed
 (2026-10-18).
 
 ## Why

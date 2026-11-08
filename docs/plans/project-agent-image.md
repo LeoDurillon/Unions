@@ -1,8 +1,8 @@
 # Plan: a custom agent image per project
 
 Status: built (2026-11-07, branch `project-agent-image`), steps 1 to 7; checked against real Docker (a build, a
-failed check, a failed build, a ticket container from the built image, the cleanup), not yet on the settings page
-in a browser. Decisions taken: the Dockerfile is a project setting (not a file in the repository), it extends the
+failed check, a failed build, a ticket container from the built image, the cleanup), and the settings page
+seen in a browser since. Decisions taken: the Dockerfile is a project setting (not a file in the repository), it extends the
 base image (`FROM union-agent`), and saving it builds and checks it right away. Only an image that built and passed
 the check is applied; a failed save leaves the tickets on the previous image.
 

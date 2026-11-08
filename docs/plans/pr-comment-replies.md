@@ -1,7 +1,7 @@
 # Reply to pull request comments
 
 Status: built, steps 1 to 6 (2026-10-25, on `main`; spec in `docs/spec/pull-requests.md#replies-to-comments`).
-Step 7, a real reply and a real revision with suggestions on a test pull request, is left.
+Step 7, a real reply and a real revision with suggestions on a test pull request, done since.
 
 ## Why
 

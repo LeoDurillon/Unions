@@ -1,7 +1,7 @@
 # Explain a selection of the diff
 
-Status: built (2026-10-19, branch `review-explain`), steps 1 to 4, checked with tests on a fake agent; no real run
-yet (it uses the user's Claude usage). Differences from the plan below: the agent's default effort is the CLI's
+Status: built (2026-10-19, branch `review-explain`), steps 1 to 4, checked with tests on a fake agent, then on a real
+run. Differences from the plan below: the agent's default effort is the CLI's
 (none of the agents has a default effort); the panel names its specs but has no **Change** link (they are changed in
 **Review with agent**); a ticket's explanation lines are also the ticket's own, so its usage counts them (they show
 in its Log, as an agent review's do).
