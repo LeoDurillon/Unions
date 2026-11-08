@@ -1,4 +1,5 @@
 // Links a ticket to a pull request (looked up on GitHub, read only), or unlinks it.
+
 import {
   emitEvent,
   getTicket,
@@ -11,8 +12,8 @@ import {
 import { eq } from 'drizzle-orm';
 import type { Context } from 'hono';
 
-import type { PullRequestInfo } from '../api-types';
-import type { OnboardingGitHub } from '../github-onboarding';
+import type { PullRequestInfo } from '../../api-types';
+import type { OnboardingGitHub } from '../../github-onboarding';
 import {
   BAD_REQUEST,
   CONFLICT,
@@ -21,8 +22,8 @@ import {
   readObject,
   requireId,
   requireText,
-} from '../http';
-import { parsePullRequestRef } from '../pull-request-ref';
+} from '../../http';
+import { parsePullRequestRef } from '../../pull-request-ref';
 
 export type LinkResult = PullRequestInfo & { warning: string | null };
 

@@ -1,8 +1,9 @@
 // The API route that asks the worker to reset a ticket's workspace onto its branch as GitHub has it, after it moved there.
+
 import { listSlices, resyncRefusal, schema, type Db } from '@union/core';
 import { Hono, type Context } from 'hono';
 
-import { ACCEPTED, CONFLICT, fail } from '../http';
+import { ACCEPTED, CONFLICT, fail } from '../../http';
 import { load } from './ticket-base';
 import { hasPendingCommand } from './ticket-command-checks';
 

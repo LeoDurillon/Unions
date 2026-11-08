@@ -1,4 +1,5 @@
 // `/api/tickets/:id/notion-comments`: the open discussions of the ticket's Notion page, read now, and the comments the user sends to it.
+
 import type { Db, NotionApi, Ticket } from '@union/core';
 import { Hono } from 'hono';
 
@@ -8,7 +9,7 @@ import { readDiscussions } from '../notion-discussions';
 import { importedDiscussions, importNotionDiscussion } from '../notion-review-import';
 import { reviewImportRefusal } from '../review-import-refusal';
 import { notionTokenOf } from './notion';
-import { loadTicket } from './ticket-notion-link';
+import { loadTicket } from './tickets/ticket-notion-link';
 
 const NOT_LINKED = 'This ticket is not linked to a Notion page';
 

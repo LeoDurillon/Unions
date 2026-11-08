@@ -1,4 +1,5 @@
 // The API routes that show and change the branch a ticket is based on.
+
 import {
   chooseBaseBranch,
   getTicket,
@@ -13,8 +14,8 @@ import {
 import { eq } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
 
-import type { OnboardingGitHub } from '../github-onboarding';
-import { BAD_REQUEST, CONFLICT, fail, NOT_FOUND, readObject, requireId } from '../http';
+import type { OnboardingGitHub } from '../../github-onboarding';
+import { BAD_REQUEST, CONFLICT, fail, NOT_FOUND, readObject, requireId } from '../../http';
 import { findTicket, summarize } from './ticket-links';
 
 export function load(db: Db, c: Context): { ticket: Ticket; project: Project } {

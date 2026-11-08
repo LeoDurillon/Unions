@@ -1,4 +1,5 @@
 // The browser's client for the `/api` routes, and the errors they answer with.
+
 import type {
   AgentConfig,
   AgentEffort,
@@ -36,7 +37,7 @@ import type {
   TicketSummary,
   Viewer,
 } from '../../src/api-types';
-import type { LinkResult } from '../../src/routes/ticket-pull-request';
+import type { LinkResult } from '../../src/routes/tickets/ticket-pull-request';
 import type { NewIntegration } from './integrations-api';
 
 export type CommandExtra = { feedback?: string; message?: string; refusalId?: number };

@@ -1,12 +1,13 @@
 // A ticket as the API answers with it: its summary, and the detail the ticket panel opens with.
+
 import { describeTicketBase, getTicket, schema, type Db } from '@union/core';
 import { eq } from 'drizzle-orm';
 import type { Context } from 'hono';
 
-import type { TicketDetail, TicketSummary } from '../api-types';
-import { fail, NOT_FOUND, requireId } from '../http';
-import { publicProjectOf } from '../public-project';
-import { ticketSize } from '../ticket-size';
+import type { TicketDetail, TicketSummary } from '../../api-types';
+import { fail, NOT_FOUND, requireId } from '../../http';
+import { publicProjectOf } from '../../public-project';
+import { ticketSize } from '../../ticket-size';
 import { childrenOf, findTicket, summarizeWithStack } from './ticket-links';
 
 export function loadTicket(db: Db, id: number): TicketSummary {

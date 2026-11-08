@@ -1,4 +1,5 @@
 // Ticket summaries and parent links: the stack, the children, and the check before a start.
+
 import {
   blockingParent,
   boardColumn,
@@ -13,8 +14,8 @@ import {
 import { eq } from 'drizzle-orm';
 import type { Context } from 'hono';
 
-import type { TicketRef, TicketSummary } from '../api-types';
-import { BAD_REQUEST, CONFLICT, fail, NOT_FOUND, readObject, requireId } from '../http';
+import type { TicketRef, TicketSummary } from '../../api-types';
+import { BAD_REQUEST, CONFLICT, fail, NOT_FOUND, readObject, requireId } from '../../http';
 import { stackView } from './ticket-stack';
 
 function ticketRef(ticket: Ticket): TicketRef {

@@ -1,4 +1,5 @@
 // `/api/tickets/github-pull-request`: a ticket from an open pull request of the project's repository, on its branch.
+
 import { projectGitHubAuth, type Db, type Project } from '@union/core';
 import { Hono, type Context } from 'hono';
 
@@ -9,7 +10,7 @@ import { planPullRequestImport, type PullRequestPlan } from '../pr-import-plan';
 import { createImportedTicket, existingTicket, loadProject } from '../pr-import-ticket';
 import { parsePullRequestRef } from '../pull-request-ref';
 import { guarded } from './github-errors';
-import { findTicket, summarize } from './ticket-links';
+import { findTicket, summarize } from './tickets/ticket-links';
 
 type Read = { project: Project; source: PullRequestSource; plan: PullRequestPlan };
 

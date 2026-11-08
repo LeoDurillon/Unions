@@ -1,4 +1,5 @@
 // A split ticket's stack as the API shows it: its slices, what merged where, and whether a restack is due.
+
 import {
   listSlices,
   schema,
@@ -10,7 +11,7 @@ import {
 } from '@union/core';
 import { eq } from 'drizzle-orm';
 
-import type { StackView } from '../api-types';
+import type { StackView } from '../../api-types';
 
 /** The ticket's stack; null when it is not split. */
 export function stackView(db: Db, ticket: Ticket): StackView | null {

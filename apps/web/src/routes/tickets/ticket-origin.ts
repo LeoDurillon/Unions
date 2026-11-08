@@ -1,4 +1,5 @@
 // A new ticket's origin (the tracker item it is imported from), and that item's images and files kept as the ticket's.
+
 import {
   integrationKind,
   integrationOf,
@@ -9,10 +10,10 @@ import {
   type TicketOrigin,
 } from '@union/core';
 
-import { BAD_REQUEST, fail } from '../http';
-import { fetchJiraFiles } from '../jira-files';
-import { fetchNotionFiles } from '../notion-files';
-import type { TrackerFile } from '../tracker-files';
+import { BAD_REQUEST, fail } from '../../http';
+import { fetchJiraFiles } from '../../jira-files';
+import { fetchNotionFiles } from '../../notion-files';
+import type { TrackerFile } from '../../tracker-files';
 
 /** A file of the tracker item, with the note it is kept with. */
 type OriginFile = { name: string; bytes: Uint8Array; contentType: string; note: string };

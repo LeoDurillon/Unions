@@ -1,11 +1,12 @@
 // `/api/tickets/:id/notion`: links a ticket to its Notion page after creation, or unlinks it.
+
 import { setTicketOrigin, type Db, type NotionApi, type Ticket } from '@union/core';
 import { Hono, type Context } from 'hono';
 
-import { NOT_FOUND, fail, readObject, requireId } from '../http';
-import type { ReviewNotionLink } from '../review-notion-types';
-import { requireFreeOrigin, requireOrigin } from '../ticket-origin-guard';
-import { guarded, notionTokenOf, requireNotionId } from './notion';
+import { NOT_FOUND, fail, readObject, requireId } from '../../http';
+import type { ReviewNotionLink } from '../../review-notion-types';
+import { requireFreeOrigin, requireOrigin } from '../../ticket-origin-guard';
+import { guarded, notionTokenOf, requireNotionId } from '../notion';
 import { findTicket } from './ticket-links';
 
 /** The ticket of `:id`; 404 when there is none. */

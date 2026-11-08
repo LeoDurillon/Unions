@@ -1,9 +1,10 @@
 // What a command needs besides a valid move of the state machine: no command already waiting, a startable ticket, an open pull request, stacks turned on, a branch not moved on GitHub.
+
 import { movedBranchRefusal, schema, type Db } from '@union/core';
 import { and, eq, isNull } from 'drizzle-orm';
 
-import type { CommandType, TicketSummary } from '../api-types';
-import { CONFLICT, fail } from '../http';
+import type { CommandType, TicketSummary } from '../../api-types';
+import { CONFLICT, fail } from '../../http';
 import { assertStartable } from './ticket-links';
 
 /** Split into a stack is offered only on projects that turned stacks on, while they are built. */

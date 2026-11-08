@@ -1,11 +1,12 @@
 // Removes a cancelled ticket from Union: its runs, outputs, reviews and files go with it, and the
 // worker is asked to remove its container (the web never calls Docker).
+
 import { emitEvent, schema, type Db } from '@union/core';
 import { and, eq, isNull } from 'drizzle-orm';
 import type { Context } from 'hono';
 
-import { CONFLICT, fail, NOT_FOUND, requireId } from '../http';
-import { removeTicketFiles } from './attachments';
+import { CONFLICT, fail, NOT_FOUND, requireId } from '../../http';
+import { removeTicketFiles } from '../attachments';
 
 const NO_CONTENT = 204;
 

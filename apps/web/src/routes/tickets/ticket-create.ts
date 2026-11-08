@@ -1,9 +1,10 @@
 // `POST /api/tickets`: a new ticket; one imported from a tracker (Notion) keeps the item's images and files as its own.
+
 import { createTicket, schema, type Db } from '@union/core';
 import type { Context } from 'hono';
 
-import { BAD_REQUEST, CREATED, fail, optionalText, readObject, requireText } from '../http';
-import { addAttachment } from './attachments';
+import { BAD_REQUEST, CREATED, fail, optionalText, readObject, requireText } from '../../http';
+import { addAttachment } from '../attachments';
 import { flowOf } from './ticket-flow';
 import { findTicket, linkParent, summarize } from './ticket-links';
 import { originOf, withOriginFiles } from './ticket-origin';

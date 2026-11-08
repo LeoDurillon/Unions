@@ -1,4 +1,5 @@
 // `/api/tickets/github-issue`: a ticket from an existing issue of the project's repository.
+
 import { createTicket, projectGitHubAuth, schema, type Db, type Project } from '@union/core';
 import { and, eq } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
@@ -8,8 +9,8 @@ import type { OnboardingGitHub } from '../github-onboarding';
 import { BAD_REQUEST, CONFLICT, CREATED, fail, NOT_FOUND, readObject, requireText } from '../http';
 import { parseIssueRef } from '../pull-request-ref';
 import { guarded } from './github-errors';
-import { flowOf } from './ticket-flow';
-import { findTicket, summarize } from './ticket-links';
+import { flowOf } from './tickets/ticket-flow';
+import { findTicket, summarize } from './tickets/ticket-links';
 
 /** The project and the issue the body names, read from GitHub; pull requests are refused. */
 async function fetchIssue(

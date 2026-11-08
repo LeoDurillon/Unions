@@ -1,4 +1,5 @@
 // Every `/api` route, with the outside services they may call.
+
 import type { Db } from '@union/core';
 import { Hono } from 'hono';
 
@@ -9,7 +10,7 @@ import { integrationRoutes } from './integrations';
 import { liveRoutes } from './live';
 import { projectSubroutes } from './project-subroutes';
 import { projectRoutes } from './projects';
-import { ticketRoutes } from './tickets';
+import { ticketRoutes } from './tickets/tickets';
 
 /** Every `/api` route, with the outside services they may call. */
 export function apiRoutes(db: Db, services: ApiServices): Hono {

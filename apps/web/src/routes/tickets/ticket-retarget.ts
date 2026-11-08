@@ -1,4 +1,5 @@
 // The API route that asks the worker to move a finished ticket's commits onto another base branch.
+
 import {
   InvalidTransition,
   isBranchName,
@@ -13,8 +14,8 @@ import {
 import { and, eq, isNull } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
 
-import type { OnboardingGitHub } from '../github-onboarding';
-import { ACCEPTED, CONFLICT, fail, NOT_FOUND, readObject, requireText } from '../http';
+import type { OnboardingGitHub } from '../../github-onboarding';
+import { ACCEPTED, CONFLICT, fail, NOT_FOUND, readObject, requireText } from '../../http';
 import { authOf, load } from './ticket-base';
 
 function hasPendingCommand(db: Db, ticketId: number): boolean {

@@ -1,5 +1,6 @@
 // `/api/tickets/:id/commits`: the commits stored with the ticket's diff snapshot, the change since
 // the last review, a split ticket's slices, and their files.
+
 import { getTicket, isIgnoredPath, listSlices, schema, type Db, type Ticket } from '@union/core';
 import { and, asc, desc, eq } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
@@ -9,8 +10,8 @@ import {
   slicePosition,
   type CommitDiffResponse,
   type CommitsResponse,
-} from '../api-types';
-import { fail, NOT_FOUND, requireId } from '../http';
+} from '../../api-types';
+import { fail, NOT_FOUND, requireId } from '../../http';
 
 type CommitRow = typeof schema.diffCommits.$inferSelect;
 

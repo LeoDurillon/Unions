@@ -1,5 +1,6 @@
 // `/api/tickets/:id/jira-comments`: the comments of the Jira issue a ticket was imported from, read now, and those
 // the user sends to it (posted by the worker).
+
 import { jiraAuthOf, type Db, type JiraApi, type Ticket } from '@union/core';
 import { Hono } from 'hono';
 
@@ -9,7 +10,7 @@ import type { JiraTabView } from '../jira-comment-types';
 import { importedJiraComments, importJiraComment } from '../jira-review-import';
 import { reviewImportRefusal } from '../review-import-refusal';
 import { guarded } from './notion';
-import { loadTicket } from './ticket-notion-link';
+import { loadTicket } from './tickets/ticket-notion-link';
 
 /** The issue the ticket was imported from. */
 function issueKeyOf(ticket: Ticket): string {

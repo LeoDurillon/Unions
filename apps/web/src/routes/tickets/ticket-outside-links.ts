@@ -1,11 +1,12 @@
 // A ticket's links to what lives outside Union: its pull request on GitHub, its Notion page and the
 // page's discussions, its Jira issue's comments.
+
 import type { Db } from '@union/core';
 import { Hono } from 'hono';
 
-import type { ApiServices } from '../services';
-import { ticketJiraCommentRoutes } from './jira-comments';
-import { ticketNotionCommentRoutes } from './notion-comments';
+import type { ApiServices } from '../../services';
+import { ticketJiraCommentRoutes } from '../jira-comments';
+import { ticketNotionCommentRoutes } from '../notion-comments';
 import { ticketJiraLinkRoutes } from './ticket-jira-link';
 import { ticketNotionRoutes } from './ticket-notion-link';
 import { linkPullRequest, unlinkPullRequest } from './ticket-pull-request';

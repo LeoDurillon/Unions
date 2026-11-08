@@ -1,5 +1,6 @@
 // `/api/tickets/:id/attachments`: a ticket's files, checked against the limits and stored on the
 // host.
+
 import { mkdir, rename, rm } from 'node:fs/promises';
 import path from 'node:path';
 
@@ -24,7 +25,7 @@ import { Hono, type Context } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
 
 import { BAD_REQUEST, CREATED, fail, NOT_FOUND, readObject, requireId } from '../http';
-import { findTicket } from './ticket-links';
+import { findTicket } from './tickets/ticket-links';
 
 const NO_CONTENT = 204;
 const PAYLOAD_TOO_LARGE = 413;

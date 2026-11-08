@@ -1,5 +1,6 @@
 // `/api/projects/:projectId/repository`: the Repository tab's reads from GitHub: the commit a branch or sha
 // names, the tree at it, one file, an image's own bytes for a rendered Markdown file, and the branches to pick.
+
 import { schema, type Db, type GitHubAuth } from '@union/core';
 import {
   REPOSITORY_FILE_LIMIT,
@@ -15,7 +16,7 @@ import type { RepositoryGitHub } from '../github-repository';
 import { BAD_REQUEST, fail, NOT_FOUND, PAYLOAD_TOO_LARGE, requireId } from '../http';
 import type { RepositoryCommit } from '../repository-api-types';
 import { guarded } from './github-errors';
-import { authOf } from './ticket-base';
+import { authOf } from './tickets/ticket-base';
 
 type Target = { auth: GitHubAuth; repo: { owner: string; repo: string }; baseBranch: string };
 

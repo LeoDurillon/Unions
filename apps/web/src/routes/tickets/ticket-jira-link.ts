@@ -1,4 +1,5 @@
 // `/api/tickets/:id/jira`: links a ticket to a Jira issue after creation, or unlinks it; Jira is only read.
+
 import {
   integrationKind,
   integrationOf,
@@ -9,9 +10,9 @@ import {
 } from '@union/core';
 import { Hono, type Context } from 'hono';
 
-import { BAD_REQUEST, CONFLICT, fail, readObject, requireText } from '../http';
-import { requireFreeOrigin, requireOrigin } from '../ticket-origin-guard';
-import { guarded } from './notion';
+import { BAD_REQUEST, CONFLICT, fail, readObject, requireText } from '../../http';
+import { requireFreeOrigin, requireOrigin } from '../../ticket-origin-guard';
+import { guarded } from '../notion';
 import { loadTicket } from './ticket-notion-link';
 
 /** An issue found for linking: its key, summary and link. */

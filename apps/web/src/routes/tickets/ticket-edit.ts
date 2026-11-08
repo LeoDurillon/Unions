@@ -1,9 +1,18 @@
 // `PUT /api/tickets/:id/text`: the user's new title and description, queued for the worker, which writes them to the issue.
+
 import { isRecord, schema, type Db } from '@union/core';
 import { and, eq, isNull } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
 
-import { ACCEPTED, BAD_REQUEST, CONFLICT, fail, NOT_FOUND, readObject, requireId } from '../http';
+import {
+  ACCEPTED,
+  BAD_REQUEST,
+  CONFLICT,
+  fail,
+  NOT_FOUND,
+  readObject,
+  requireId,
+} from '../../http';
 import { findTicket } from './ticket-links';
 
 type TicketText = { title: string; body: string };
