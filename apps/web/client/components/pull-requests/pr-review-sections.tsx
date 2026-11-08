@@ -1,9 +1,10 @@
 // The tabs a pull request review shows before its diff: Notion and Jira once it is linked, then the
 // spec report and the review agents last.
+
 import type { ReactElement } from 'react';
 
 import type { CurrentReview } from '../../../src/api-types';
-import type { ReviewTarget } from '../../lib/review-target';
+import type { ReviewTarget } from '../../lib/review/review-target';
 import { ReportTab } from '../review/report-tab';
 import { ReviewAgentsTab } from '../review/review-agents-tab';
 import type { ReviewSection } from '../review/review-page';

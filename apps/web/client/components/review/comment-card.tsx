@@ -1,11 +1,12 @@
 // One comment: drafts can be edited or deleted, the agent's suggestions also kept as they are; sent
 // ones are read-only.
+
 import { isJiraCommentUrl } from '@union/core/jira-comment-link';
 import { isNotionUrl } from '@union/core/notion-discussion-link';
 import { useState, type ReactElement } from 'react';
 
 import type { CommentView } from '../../../src/api-types';
-import type { useCommentMutations } from '../../lib/use-review';
+import type { useCommentMutations } from '../../lib/review/use-review';
 import { Markdown } from '../markdown';
 import { Badge, Button, inputClass } from '../ui';
 

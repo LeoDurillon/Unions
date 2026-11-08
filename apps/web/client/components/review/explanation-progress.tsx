@@ -1,10 +1,11 @@
 // While an explanation waits or runs: its status, the agent's last steps (the files it reads) and Cancel.
+
 import type { ReactElement } from 'react';
 
 import type { ExplanationView } from '../../../src/routes/review-explanations';
 import { summarizeAgentEvent } from '../../lib/agent-events';
-import type { ReviewTarget } from '../../lib/review-target';
-import { useExplanationLog } from '../../lib/use-explanations';
+import type { ReviewTarget } from '../../lib/review/review-target';
+import { useExplanationLog } from '../../lib/review/use-explanations';
 import { Button } from '../ui';
 
 const SHOWN_STEPS = 5;

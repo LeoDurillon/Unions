@@ -1,9 +1,10 @@
 // One review agent's newest run on the change: its state (Cancel while it works), why it failed, or its answer with links to the diff, Copy and Run again.
+
 import type { ReactElement, ReactNode } from 'react';
 
 import type { ReviewAgentRunView } from '../../../src/routes/review-agent-runs';
 import type { Tone } from '../../lib/labels';
-import { isActive } from '../../lib/use-review-agents';
+import { isActive } from '../../lib/review/use-review-agents';
 import { Markdown } from '../markdown';
 import { Badge, Button } from '../ui';
 import { CopyMarkdownButton } from './copy-markdown-button';

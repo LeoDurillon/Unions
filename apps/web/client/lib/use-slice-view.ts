@@ -1,7 +1,8 @@
 // The slice a split ticket's review page shows: its tabs, its target, its files and its comments.
+
 import type { CommentView, CommitsResponse, DiffResponse } from '../../src/api-types';
-import { reviewBase, type ReviewTarget } from './review-target';
-import { useReviewSlice } from './review-url';
+import { reviewBase, type ReviewTarget } from './review/review-target';
+import { useReviewSlice } from './review/review-url';
 import { onSliceTab } from './slice-view';
 import { useCommits, useSliceDiff } from './use-commits';
 

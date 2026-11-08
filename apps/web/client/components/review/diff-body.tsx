@@ -1,9 +1,10 @@
 // The touched files on the left, the picked one on the right.
+
 import { useState, type ReactElement, type ReactNode } from 'react';
 
 import type { CommentView, DiffResponse } from '../../../src/api-types';
-import type { ReviewTarget } from '../../lib/review-target';
-import type { useCommentMutations } from '../../lib/use-review';
+import type { ReviewTarget } from '../../lib/review/review-target';
+import type { useCommentMutations } from '../../lib/review/use-review';
 import { ErrorText } from '../ui';
 import { useExplain, type ExplainFocus } from './explain-context';
 import type { DiffView } from './file-diff';

@@ -1,6 +1,7 @@
 // The Union settings page open in the URL (`?union=implement`), and opening or leaving it.
+
 import { confirmLeave } from './leave-guard';
-import { CLOSE_REVIEW } from './review-url';
+import { CLOSE_REVIEW } from './review/review-url';
 import { isUnionSection, type UnionSection } from './union-settings-groups';
 import { readParam, setParams, useUrlParam } from './url-state';
 

@@ -1,8 +1,9 @@
 // The newest grouping by spec of the review, with starting and cancelling one.
+
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 import type { SpecSource } from '@union/core';
 
-import type { GroupingView } from '../../src/routes/review-groupings';
+import type { GroupingView } from '../../../src/routes/review-groupings';
 import { reviewGroupingApi } from './review-grouping-api';
 import { reviewBase, type ReviewTarget } from './review-target';
 

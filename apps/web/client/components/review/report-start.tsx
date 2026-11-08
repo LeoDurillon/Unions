@@ -1,9 +1,10 @@
 // Starts a spec report: what it does, the specs it will read (the Specs bar's), and Start.
+
 import type { ReactElement } from 'react';
 
-import type { ReviewTarget } from '../../lib/review-target';
-import { useReviewReport } from '../../lib/use-review-report';
-import { useReviewSpecs } from '../../lib/use-review-specs';
+import type { ReviewTarget } from '../../lib/review/review-target';
+import { useReviewReport } from '../../lib/review/use-review-report';
+import { useReviewSpecs } from '../../lib/review/use-review-specs';
 import { Button, ErrorText } from '../ui';
 import { SpecSummary } from './spec-summary';
 

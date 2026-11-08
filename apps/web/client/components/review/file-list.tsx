@@ -1,9 +1,10 @@
 // The touched files, as a list or a tree; ignored ones (lock files, project patterns) are listed
 // apart, collapsed.
+
 import { useState, type ReactElement } from 'react';
 
 import type { CommentView, DiffFileSummary } from '../../../src/api-types';
-import { reviewSlice, type ReviewTarget } from '../../lib/review-target';
+import { reviewSlice, type ReviewTarget } from '../../lib/review/review-target';
 import { Segmented, type SegmentOption } from '../choice';
 import { draftCounts } from './file-row';
 import { FileRows, type RowOptions, type Layout } from './file-rows';

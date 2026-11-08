@@ -1,5 +1,6 @@
 // The Notion pages of a pull request under review: their text, the description's suggestions,
 // checking, linking one more and unlinking one.
+
 import {
   useMutation,
   useQuery,
@@ -8,9 +9,9 @@ import {
   type UseQueryResult,
 } from '@tanstack/react-query';
 
-import type { CurrentReview } from '../../src/api-types';
-import type { ReviewNotionLink, ReviewNotionPage } from '../../src/review-notion-types';
-import { request } from './api';
+import type { CurrentReview } from '../../../src/api-types';
+import type { ReviewNotionLink, ReviewNotionPage } from '../../../src/review-notion-types';
+import { request } from '../api';
 import { reviewBase } from './review-target';
 import { specsKey } from './use-review-specs';
 

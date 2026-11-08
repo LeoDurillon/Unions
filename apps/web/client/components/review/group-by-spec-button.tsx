@@ -1,10 +1,11 @@
 // The file panel's "By spec" switch: shows the files under the parts of a specification, and the
 // first time (or Regroup) asks an agent to group them; where the grouping stands, under the switch.
+
 import { useState, type ReactElement } from 'react';
 
 import type { GroupingView } from '../../../src/routes/review-groupings';
-import type { ReviewTarget } from '../../lib/review-target';
-import { isGrouping, useReviewGrouping } from '../../lib/use-review-grouping';
+import type { ReviewTarget } from '../../lib/review/review-target';
+import { isGrouping, useReviewGrouping } from '../../lib/review/use-review-grouping';
 import { Button, ErrorText } from '../ui';
 import { GroupBySpecDialog } from './group-by-spec-dialog';
 

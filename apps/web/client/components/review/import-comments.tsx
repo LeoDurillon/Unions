@@ -1,11 +1,12 @@
 // Pulls the linked pull request's unresolved review threads in as draft comments; on a split
 // ticket, every open slice's pull request, each onto its slice.
+
 import type { ReactElement } from 'react';
 
 import type { ReviewImportResult, StackImportResult } from '../../../src/api-types';
-import { ticketReviewBase } from '../../lib/review-target';
+import { ticketReviewBase } from '../../lib/review/review-target';
+import { useImportMutations, useStackImport } from '../../lib/review/use-review';
 import { useCommits } from '../../lib/use-commits';
-import { useImportMutations, useStackImport } from '../../lib/use-review';
 import { Button, ErrorText } from '../ui';
 
 function counts(result: ReviewImportResult): string | null {

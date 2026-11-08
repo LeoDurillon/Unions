@@ -1,12 +1,13 @@
 // Review with agent: the review's specs (a stack's from each of its pull requests), the scope (this
 // pull request or the whole stack), and the start.
+
 import type { AgentReviewSpec } from '@union/core';
 import { useState, type ReactElement } from 'react';
 
-import { useReviewStack, type StackPull } from '../../lib/review-stack';
-import type { ReviewTarget } from '../../lib/review-target';
-import { useAgentReview } from '../../lib/use-agent-review';
-import { useReviewSpecs, useStackSpecs } from '../../lib/use-review-specs';
+import { useReviewStack, type StackPull } from '../../lib/review/review-stack';
+import type { ReviewTarget } from '../../lib/review/review-target';
+import { useAgentReview } from '../../lib/review/use-agent-review';
+import { useReviewSpecs, useStackSpecs } from '../../lib/review/use-review-specs';
 import { Segmented } from '../choice';
 import { Button, Dialog, ErrorText } from '../ui';
 import { SpecSummary } from './spec-summary';

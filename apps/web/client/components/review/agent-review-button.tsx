@@ -1,9 +1,10 @@
 // Asks the review agent for draft comments on the change, and shows where it stands.
+
 import { useState, type ReactElement } from 'react';
 
 import type { AgentReviewView } from '../../../src/api-types';
-import type { ReviewTarget } from '../../lib/review-target';
-import { isActive, useAgentReview } from '../../lib/use-agent-review';
+import type { ReviewTarget } from '../../lib/review/review-target';
+import { isActive, useAgentReview } from '../../lib/review/use-agent-review';
 import { Button, ErrorText } from '../ui';
 import { AgentReviewDialog } from './agent-review-dialog';
 

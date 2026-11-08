@@ -1,12 +1,13 @@
 // The review's specs under its header: one chip each (edited ones marked, unreadable ones in red),
 // and Edit, which opens the dialog that changes them for every agent action.
+
 import type { ReactElement } from 'react';
 
 import type { ReviewSpecView } from '../../../src/review-spec-types';
 import { projectIntegration } from '../../lib/integrations-api';
-import type { ReviewTarget } from '../../lib/review-target';
+import type { ReviewTarget } from '../../lib/review/review-target';
+import { useReviewSpecs } from '../../lib/review/use-review-specs';
 import { useActiveProject } from '../../lib/use-active-project';
-import { useReviewSpecs } from '../../lib/use-review-specs';
 import { specSources } from './spec-picker';
 import { SpecsDialog } from './specs-dialog';
 import { useSpecsEditing } from './specs-editing';

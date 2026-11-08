@@ -1,8 +1,9 @@
 // The explanation routes of a review, under its API root (`reviewBase`).
+
 import type { AgentReviewSpec } from '@union/core';
 
-import type { ExplanationLogView, ExplanationView } from '../../src/routes/review-explanations';
-import { request } from './api';
+import type { ExplanationLogView, ExplanationView } from '../../../src/routes/review-explanations';
+import { request } from '../api';
 
 /** New lines to explain, or a follow-up (`parentId` and `question`) on an explanation. */
 export type ExplanationAsk =

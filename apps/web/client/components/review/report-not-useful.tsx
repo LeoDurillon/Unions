@@ -1,10 +1,11 @@
 // "Not useful" on an item of what needs the reviewer: hides it from the report and, with a rule, keeps
 // the rule as a lesson of the project's spec reports, so the next ones stop raising that kind of item.
+
 import type { AttentionItem } from '@union/core';
 import { useState, type ReactElement } from 'react';
 
-import type { ReviewTarget } from '../../lib/review-target';
-import { useReviewReport } from '../../lib/use-review-report';
+import type { ReviewTarget } from '../../lib/review/review-target';
+import { useReviewReport } from '../../lib/review/use-review-report';
 import { Button, ErrorText, inputClass } from '../ui';
 
 /** A first draft of the rule, for the reviewer to widen to the kind of item. */

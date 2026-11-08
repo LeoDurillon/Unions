@@ -1,8 +1,9 @@
 // One explanation and its follow-ups: the lines asked about, their spec parts, each answer, and what to do next.
+
 import { useState, type ReactElement } from 'react';
 
 import type { ExplanationView } from '../../../src/routes/review-explanations';
-import type { useExplanations } from '../../lib/use-explanations';
+import type { useExplanations } from '../../lib/review/use-explanations';
 import { Badge, Button, ErrorText, inputClass } from '../ui';
 import type { ExplainState } from './explain-context';
 import { ExplanationAnswer } from './explanation-answer';

@@ -1,9 +1,10 @@
 // One commit of the change against its first parent (or the change since the last review): its
 // files on the left, the picked one on the right, read only.
+
 import { useState, type ReactElement, type ReactNode } from 'react';
 
 import { SINCE_REVIEW, type DiffFileSummary } from '../../../src/api-types';
-import type { ReviewTarget } from '../../lib/review-target';
+import type { ReviewTarget } from '../../lib/review/review-target';
 import { useCommitDiff, useCommitFile } from '../../lib/use-commits';
 import { Button, ErrorText } from '../ui';
 import { FileDiff, type DiffView } from './file-diff';

@@ -1,8 +1,9 @@
 // What a command's output in a pull request's checkout can become: a draft comment on the review.
+
 import type { ContainerRun } from '@union/core';
 import type { ReactElement } from 'react';
 
-import { useAddToReview, type PullRequestTarget } from '../../lib/use-review-preview';
+import { useAddToReview, type PullRequestTarget } from '../../lib/review/use-review-preview';
 import { Button, ErrorText } from '../ui';
 
 export function AddRunToReview({

@@ -1,15 +1,16 @@
 // The pull request's GitHub discussion (`pr`: the ticket's or a slice's), and what of it goes to
 // the implementer.
+
 import type { ReactElement } from 'react';
 
 import type { CommentView, DiscussionResponse } from '../../../src/api-types';
-import { ticketRepliesBase, usePrReplies, type PrReplies } from '../../lib/use-pr-replies';
 import {
   useCommentMutations,
   useComments,
   useDiscussion,
   useImportMutations,
-} from '../../lib/use-review';
+} from '../../lib/review/use-review';
+import { ticketRepliesBase, usePrReplies, type PrReplies } from '../../lib/use-pr-replies';
 import { CommentCard } from '../review/comment-card';
 import { ImportComments } from '../review/import-comments';
 import { ErrorText } from '../ui';

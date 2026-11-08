@@ -1,9 +1,10 @@
 // Add to review on a Jira comment: the server reads it again and adds it to the ticket's review as a draft.
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import type { JiraTabView } from '../../src/jira-comment-types';
 import { request } from './api';
-import { ticketReviewBase } from './review-target';
+import { ticketReviewBase } from './review/review-target';
 
 export type JiraReviewImport = {
   add: (commentId: string) => void;

@@ -1,10 +1,11 @@
 // The review's Report tab: the newest spec report, the agent writing one (with Cancel), why the last
 // one failed, or what a report is and Start.
+
 import { useState, type ReactElement } from 'react';
 
 import type { ReportView } from '../../../src/routes/review-reports';
-import type { ReviewTarget } from '../../lib/review-target';
-import { isReporting, useReviewReport } from '../../lib/use-review-report';
+import type { ReviewTarget } from '../../lib/review/review-target';
+import { isReporting, useReviewReport } from '../../lib/review/use-review-report';
 import { Button, ErrorText } from '../ui';
 import { ReportBody } from './report-body';
 import { useOpenLines } from './report-open';

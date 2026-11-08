@@ -1,9 +1,10 @@
 // Drafts about the whole change rather than lines of a file: the agent's overall remark, and its
 // findings outside the diff.
+
 import type { ReactElement } from 'react';
 
 import type { CommentView } from '../../../src/api-types';
-import type { useCommentMutations } from '../../lib/use-review';
+import type { useCommentMutations } from '../../lib/review/use-review';
 import { ReviewCommentCard } from './comment-card';
 
 type Mutations = ReturnType<typeof useCommentMutations>;

@@ -1,9 +1,10 @@
 // Add to review on a Notion discussion: the server reads it again and adds it to the ticket's review as a draft.
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import type { NotionTabView } from '../../src/notion-discussion-types';
 import { request } from './api';
-import { ticketReviewBase } from './review-target';
+import { ticketReviewBase } from './review/review-target';
 
 export type NotionReviewImport = {
   add: (discussionId: string) => void;

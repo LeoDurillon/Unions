@@ -1,9 +1,10 @@
 // A ticket's review page: the diff, with the ticket's description, preview, pull request, spec
 // report and review agents as tabs beside it, as a pull request review has; it opens on the diff. The tab is kept in the URL.
+
 import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../src/api-types';
-import { useReviewTab } from '../lib/review-url';
+import { useReviewTab } from '../lib/review/review-url';
 import { PreviewTab } from './preview-tab';
 import { PullRequestTab } from './pull-request-tab';
 import { ReportTab } from './review/report-tab';

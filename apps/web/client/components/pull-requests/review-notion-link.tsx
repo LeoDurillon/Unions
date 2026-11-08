@@ -1,11 +1,12 @@
 // The Notion pages of a review's Description tab: link one or more (each title checked first),
 // unlink one.
+
 import { useState, type ReactElement } from 'react';
 
 import type { CurrentReview } from '../../../src/api-types';
 import { projectIntegration } from '../../lib/integrations-api';
+import { useReviewNotionLink } from '../../lib/review/use-review-notion';
 import { useActiveProject } from '../../lib/use-active-project';
-import { useReviewNotionLink } from '../../lib/use-review-notion';
 import { NotionLinkForm, NotionPageLink } from '../notion-link-form';
 import { Button, ErrorText } from '../ui';
 import { LinkStackButton, NotionSuggestions } from './review-notion-offers';

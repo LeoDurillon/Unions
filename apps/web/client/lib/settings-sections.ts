@@ -1,6 +1,7 @@
 // The project settings pages by group, and opening or closing them through `?settings=`.
+
 import { confirmLeave } from './leave-guard';
-import { CLOSE_REVIEW } from './review-url';
+import { CLOSE_REVIEW } from './review/review-url';
 import { readParam, setParams, useUrlParam } from './url-state';
 
 /** The project settings pages, in menu order, by group; the id is what `?settings=` holds. */

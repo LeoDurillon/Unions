@@ -1,9 +1,10 @@
 // Which cached queries an event makes stale: the board, a ticket, investigations, notifications, the review page's side runs.
+
 import type { InvalidateQueryFilters, QueryKey } from '@tanstack/react-query';
 
 import type { EventRow } from '../../src/api-types';
 import { NOTIFICATIONS_KEY } from './notifications-api';
-import { ticketReviewBase } from './review-target';
+import { ticketReviewBase } from './review/review-target';
 
 /** Events read straight from the stream and changing no query: a preview build prints thousands of lines. */
 const STREAM_ONLY = new Set(['preview_output']);

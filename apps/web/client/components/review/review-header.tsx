@@ -1,10 +1,11 @@
 // Back, what is reviewed and at which commit, the GitHub import (tickets), Explain and the layout
 // switch, then the agent review and Send.
+
 import type { ReactElement } from 'react';
 
 import type { DiffResponse } from '../../../src/api-types';
-import type { ReviewCopy, ReviewTarget } from '../../lib/review-target';
-import type { useCommentMutations } from '../../lib/use-review';
+import type { ReviewCopy, ReviewTarget } from '../../lib/review/review-target';
+import type { useCommentMutations } from '../../lib/review/use-review';
 import { Button } from '../ui';
 import { AgentReviewButton } from './agent-review-button';
 import type { DiffView } from './file-diff';

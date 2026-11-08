@@ -1,8 +1,9 @@
 // The top of a review page: its header, then the review's specs.
+
 import type { ComponentProps, ReactElement } from 'react';
 
 import type { CommentView } from '../../../src/api-types';
-import { hasPullRequest } from '../../lib/review-target';
+import { hasPullRequest } from '../../lib/review/review-target';
 import { ReviewHeader } from './review-header';
 import { SpecsBar } from './specs-bar';
 

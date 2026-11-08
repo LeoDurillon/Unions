@@ -1,9 +1,13 @@
 // What the Notion pages row offers in one click: the pages the description links to, and a page for the whole stack.
+
 import type { ReactElement } from 'react';
 
 import type { CurrentReview } from '../../../src/api-types';
-import { useReviewStack } from '../../lib/review-stack';
-import { useReviewNotionSuggestions, type useReviewNotionLink } from '../../lib/use-review-notion';
+import { useReviewStack } from '../../lib/review/review-stack';
+import {
+  useReviewNotionSuggestions,
+  type useReviewNotionLink,
+} from '../../lib/review/use-review-notion';
 import { Button } from '../ui';
 
 type LinkActions = ReturnType<typeof useReviewNotionLink>;

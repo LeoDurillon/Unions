@@ -1,9 +1,10 @@
 // A review summary or a conversation comment, with its Add to review action when there is one; a line thread, its place a link to the diff; each with its replies below.
+
 import { githubTitle } from '@union/core/github-text';
 import { useState, type ReactElement, type ReactNode } from 'react';
 
 import type { PullRequestNote, PullRequestThread } from '../../../src/api-types';
-import { openDiffLines, type DiffLines, type ReviewPageKind } from '../../lib/review-url';
+import { openDiffLines, type DiffLines, type ReviewPageKind } from '../../lib/review/review-url';
 import { Badge, Button } from '../ui';
 import { CommentBody } from './comment-body';
 

@@ -1,8 +1,9 @@
 // The open ticket, and whether its review is open, live in the URL (`?ticket=3&review=1`), so they
 // survive reloads and back/forward.
+
 import { useCallback } from 'react';
 
-import { CLOSE_REVIEW } from './review-url';
+import { CLOSE_REVIEW } from './review/review-url';
 import { setParams, useUrlParam } from './url-state';
 
 function ticketIdOf(value: string | null): number | null {

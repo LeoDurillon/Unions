@@ -1,10 +1,11 @@
 // A pull request under review opened full page; one of a stack gets a tab per pull request of it, to switch between them.
+
 import type { ProjectScript } from '@union/core';
 import type { ReactElement } from 'react';
 
 import type { CurrentReview } from '../../../src/api-types';
-import { ReviewStackContext } from '../../lib/review-stack';
-import { useReviewTab } from '../../lib/review-url';
+import { ReviewStackContext } from '../../lib/review/review-stack';
+import { useReviewTab } from '../../lib/review/review-url';
 import { ReviewPage } from '../review/review-page';
 import { prReviewSections } from './pr-review-sections';
 import { reviewPreviewSection } from './review-preview-tab';

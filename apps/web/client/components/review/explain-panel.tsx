@@ -1,8 +1,9 @@
 // The Explain side panel of the review: the specs explanations use, and the threads, newest first.
+
 import type { ReactElement } from 'react';
 
 import type { ExplanationView } from '../../../src/routes/review-explanations';
-import { useExplanations } from '../../lib/use-explanations';
+import { useExplanations } from '../../lib/review/use-explanations';
 import { ErrorText } from '../ui';
 import { useExplain, type ExplainState } from './explain-context';
 import { ExplanationThread, linesLabel } from './explanation-card';

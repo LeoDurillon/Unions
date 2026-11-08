@@ -1,10 +1,11 @@
 // The review page's slice and section tab in the URL (`?slice=2&tab=pull-request`), the lines its
 // diff opens on (`?lines=new:12-30:src/a.ts`), and the pull request reviewed without a ticket
 // (`?review-pr=42`), so Back and Forward move between them and a reload keeps them.
+
 import { useCallback } from 'react';
 
-import type { Selection } from './diff-selection';
-import { readParam, setParams, useUrlParam } from './url-state';
+import type { Selection } from '../diff-selection';
+import { readParam, setParams, useUrlParam } from '../url-state';
 
 /** Spread into `setParams` wherever the review closes, so its slice, tab and lines do not outlive it. */
 export const CLOSE_REVIEW = {

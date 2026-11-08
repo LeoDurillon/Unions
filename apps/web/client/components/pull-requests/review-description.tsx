@@ -1,10 +1,11 @@
 // A pull request review's Description tab: the rows linking its Notion pages and Jira issues, then the description from GitHub.
+
 import { githubText } from '@union/core/github-text';
 import type { ReactElement } from 'react';
 
 import type { CurrentReview } from '../../../src/api-types';
-import type { ReviewTarget } from '../../lib/review-target';
-import { useReviewDiscussion } from '../../lib/use-review';
+import type { ReviewTarget } from '../../lib/review/review-target';
+import { useReviewDiscussion } from '../../lib/review/use-review';
 import { Markdown } from '../markdown';
 import { ErrorText } from '../ui';
 import { ReviewJiraLinkRow } from './review-jira-link';

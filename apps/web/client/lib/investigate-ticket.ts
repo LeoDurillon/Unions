@@ -1,6 +1,7 @@
 // Opens Investigations with a new investigation on the ticket ready to write (`?investigate=<id>`).
+
 import { confirmLeave } from './leave-guard';
-import { CLOSE_REVIEW } from './review-url';
+import { CLOSE_REVIEW } from './review/review-url';
 import { setParams, useUrlParam } from './url-state';
 
 /** Opens Investigations with a new investigation on the ticket ready to write (`?investigate=<id>`). */

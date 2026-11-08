@@ -1,15 +1,16 @@
 // The Jira issues of a review's Description tab, for a project connected to Jira: the linked ones with Unlink, the
 // issues the pull request names to link in one click, and Link a Jira issue by key or link.
+
 import { useState, type ReactElement } from 'react';
 
 import type { CurrentReview } from '../../../src/api-types';
 import { projectIntegration } from '../../lib/integrations-api';
-import { useActiveProject } from '../../lib/use-active-project';
 import {
   useReviewJiraLink,
   useReviewJiraSuggestions,
   type ReviewJiraActions,
-} from '../../lib/use-review-jira';
+} from '../../lib/review/use-review-jira';
+import { useActiveProject } from '../../lib/use-active-project';
 import { ItemLink, TrackerLinkForm } from '../tracker-link-form';
 import { Button, ErrorText } from '../ui';
 

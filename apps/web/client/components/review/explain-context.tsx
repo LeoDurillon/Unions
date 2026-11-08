@@ -1,4 +1,5 @@
 // The review page's Explain state: the side panel, the specs an explanation is checked against, and the lines to show.
+
 import type { AgentReviewSpec } from '@union/core';
 import {
   createContext,
@@ -11,11 +12,11 @@ import {
 } from 'react';
 
 import { fileSelection, hunkSelection, type Selection } from '../../lib/diff-selection';
-import type { ReviewTarget } from '../../lib/review-target';
-import { diffLinesOf } from '../../lib/review-url';
+import type { ReviewTarget } from '../../lib/review/review-target';
+import { diffLinesOf } from '../../lib/review/review-url';
+import { useExplanations } from '../../lib/review/use-explanations';
+import { useReviewSpecs } from '../../lib/review/use-review-specs';
 import { useUrlParam } from '../../lib/url-state';
-import { useExplanations } from '../../lib/use-explanations';
-import { useReviewSpecs } from '../../lib/use-review-specs';
 
 const STORAGE_KEY = 'union.review.explain';
 

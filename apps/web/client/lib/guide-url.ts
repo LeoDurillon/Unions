@@ -1,6 +1,7 @@
 // The user guide's page in the URL (`?guide=<page>`, a heading as the `#hash`), and opening it.
+
 import { confirmLeave } from './leave-guard';
-import { CLOSE_REVIEW } from './review-url';
+import { CLOSE_REVIEW } from './review/review-url';
 import { NAVIGATED, readParam, useUrlParam } from './url-state';
 
 /** The guide's index page, `documentation/README.md`. */

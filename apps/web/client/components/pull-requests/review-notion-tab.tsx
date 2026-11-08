@@ -1,9 +1,10 @@
 // A review's Notion tab: each linked page's text as Notion has it now, folded when long, then its open discussions (read only), with Refresh.
+
 import type { ReactElement } from 'react';
 
 import type { CurrentReview } from '../../../src/api-types';
 import type { ReviewNotionPage } from '../../../src/review-notion-types';
-import { useReviewNotionPages } from '../../lib/use-review-notion';
+import { useReviewNotionPages } from '../../lib/review/use-review-notion';
 import { FoldedMarkdown } from '../folded-markdown';
 import { NotionDiscussion } from '../notion/notion-discussion';
 import { Button, ErrorText } from '../ui';

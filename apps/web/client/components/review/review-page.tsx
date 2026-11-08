@@ -1,8 +1,9 @@
 // The review page, with its Explain panel's state.
+
 import { useState, type ReactElement, type ReactNode } from 'react';
 
-import type { ReviewTarget } from '../../lib/review-target';
-import { useReviewData } from '../../lib/use-review-data';
+import type { ReviewTarget } from '../../lib/review/review-target';
+import { useReviewData } from '../../lib/review/use-review-data';
 import { DiffArea } from './diff-area';
 import { ExplainOff, ExplainProvider } from './explain-context';
 import { ReviewTop } from './review-top';

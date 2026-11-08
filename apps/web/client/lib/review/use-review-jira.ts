@@ -1,4 +1,5 @@
 // The Jira issues of a pull request under review: their text and comments, the suggestions, checking, linking, unlinking.
+
 import {
   useMutation,
   useQuery,
@@ -7,9 +8,9 @@ import {
   type UseQueryResult,
 } from '@tanstack/react-query';
 
-import type { CurrentReview } from '../../src/api-types';
-import type { ReviewJiraIssue, ReviewJiraLink } from '../../src/review-jira-types';
-import { request } from './api';
+import type { CurrentReview } from '../../../src/api-types';
+import type { ReviewJiraIssue, ReviewJiraLink } from '../../../src/review-jira-types';
+import { request } from '../api';
 import { reviewBase } from './review-target';
 import { specsKey } from './use-review-specs';
 

@@ -1,12 +1,13 @@
 // A file opened under a part of the spec (By spec): only the hunks of that part, with a bar to show
 // them all, and each hunk header tagged with the parts it serves.
+
 import { hunksOf, keepHunks } from '@union/core/diff-hunks';
 import { useState, type ReactElement, type ReactNode } from 'react';
 
 import type { CommentView } from '../../../src/api-types';
-import type { ReviewTarget } from '../../lib/review-target';
+import type { ReviewTarget } from '../../lib/review/review-target';
+import { useReviewGrouping } from '../../lib/review/use-review-grouping';
 import { focusOf, hunkTags, inHunks, type Focus } from '../../lib/spec-hunks';
-import { useReviewGrouping } from '../../lib/use-review-grouping';
 
 function FocusBar({
   focus,

@@ -1,10 +1,11 @@
 // A file's diff with what the review's current spec report says about it: a note above (read first,
 // skim, what needs the reviewer here) and marks on the lines an item points at.
+
 import type { ReviewReportResult } from '@union/core';
 import { useMemo, type ComponentProps, type ReactElement } from 'react';
 
-import type { ReviewTarget } from '../../lib/review-target';
-import { useReviewReport } from '../../lib/use-review-report';
+import type { ReviewTarget } from '../../lib/review/review-target';
+import { useReviewReport } from '../../lib/review/use-review-report';
 import { FileDiff } from './file-diff';
 import { LineMarksProvider, type FileItem } from './report-line-marks';
 

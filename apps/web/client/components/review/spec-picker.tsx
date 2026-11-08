@@ -1,12 +1,13 @@
 // Where a specification comes from (the PR description, the ticket, an issue, a Notion page, a Jira issue):
 // picking it and reading it.
+
 import { useMutation } from '@tanstack/react-query';
 import type { SpecSource } from '@union/core';
 import { useState, type ReactElement } from 'react';
 
 import type { SpecText } from '../../../src/routes/spec-sources';
-import { reviewGroupingApi } from '../../lib/review-grouping-api';
-import { reviewBase, type ReviewTarget } from '../../lib/review-target';
+import { reviewGroupingApi } from '../../lib/review/review-grouping-api';
+import { reviewBase, type ReviewTarget } from '../../lib/review/review-target';
 import { Segmented } from '../choice';
 import { Button, ErrorText, inputClass } from '../ui';
 

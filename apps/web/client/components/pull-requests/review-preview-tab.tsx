@@ -1,4 +1,5 @@
 // A pull request under review's Preview tab: its own checkout's preview, end-to-end tests and commands.
+
 import type { ProjectScript } from '@union/core';
 import { useState, type ReactElement } from 'react';
 
@@ -7,7 +8,7 @@ import {
   useCheckoutUpdate,
   useReviewPreview,
   type PullRequestTarget,
-} from '../../lib/use-review-preview';
+} from '../../lib/review/use-review-preview';
 import { ContainerCommands } from '../container-commands';
 import { PreviewSection } from '../preview-section';
 import type { ReviewSection } from '../review/review-page';

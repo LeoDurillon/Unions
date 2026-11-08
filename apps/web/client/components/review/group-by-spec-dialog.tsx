@@ -1,11 +1,12 @@
 // Groups the change by the review's specs: they are read together, each a titled section, so the
 // parts can come from any of them; then the agent starts.
+
 import { groupingLabel, groupingText } from '@union/core/review-spec-lists';
 import type { ReactElement } from 'react';
 
-import type { ReviewTarget } from '../../lib/review-target';
-import { useReviewGrouping } from '../../lib/use-review-grouping';
-import { useReviewSpecs } from '../../lib/use-review-specs';
+import type { ReviewTarget } from '../../lib/review/review-target';
+import { useReviewGrouping } from '../../lib/review/use-review-grouping';
+import { useReviewSpecs } from '../../lib/review/use-review-specs';
 import { Button, Dialog, ErrorText } from '../ui';
 import { SpecSummary } from './spec-summary';
 

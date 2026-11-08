@@ -1,8 +1,9 @@
 // Sends the drafts and an optional overall note to the implementer, from a panel under the button.
+
 import type { ReviewVerdict } from '@union/core';
 import { useEffect, useRef, useState, type ReactElement, type RefObject } from 'react';
 
-import type { ReviewCopy } from '../../lib/review-target';
+import type { ReviewCopy } from '../../lib/review/review-target';
 import { Button, ErrorText, inputClass } from '../ui';
 
 type SendProps = {

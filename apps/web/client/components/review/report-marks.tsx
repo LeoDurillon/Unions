@@ -1,9 +1,10 @@
 // The files of the review's current spec report the file list marks (to read first, or to skim):
 // provided once by the list, read by each row.
+
 import { createContext, useContext, useMemo, type ReactElement, type ReactNode } from 'react';
 
-import type { ReviewTarget } from '../../lib/review-target';
-import { useReviewReport } from '../../lib/use-review-report';
+import type { ReviewTarget } from '../../lib/review/review-target';
+import { useReviewReport } from '../../lib/review/use-review-report';
 
 /** A file to read first (its place in the reading order, from 1), or one to skim (`position` null); and why. */
 type ImportantMark = { position: number | null; why: string };

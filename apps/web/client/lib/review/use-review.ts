@@ -1,4 +1,5 @@
 // A pull request under review: its description and discussion, read from GitHub once per opening.
+
 import {
   useMutation,
   useQueries,
@@ -15,9 +16,9 @@ import {
   type DiscussionResponse,
   type ReviewImportResult,
   type StackImportResult,
-} from '../../src/api-types';
+} from '../../../src/api-types';
+import { api, request } from '../api';
 import { agentReviewApi } from './agent-review-api';
-import { api, request } from './api';
 import { reviewBase, reviewSlice, ticketReviewBase, type ReviewTarget } from './review-target';
 
 /** A pull request's review carries a verdict; a ticket's goes to the implementer without one. */

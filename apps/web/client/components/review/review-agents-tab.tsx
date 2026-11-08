@@ -1,9 +1,10 @@
 // The review's Agents tab: Run agent (the user's review agents, one run at a time on the change), then each agent's newest run with its answer.
+
 import { useState, type ReactElement } from 'react';
 
 import type { ReviewAgentsView } from '../../../src/routes/review-agent-runs';
-import type { ReviewTarget } from '../../lib/review-target';
-import { isActive, useReviewAgents } from '../../lib/use-review-agents';
+import type { ReviewTarget } from '../../lib/review/review-target';
+import { isActive, useReviewAgents } from '../../lib/review/use-review-agents';
 import { Button, ErrorText, inputClass } from '../ui';
 import { NewAgentButton } from '../union-settings/new-agent-dialog';
 import { useDiffLinks } from './diff-link-code';

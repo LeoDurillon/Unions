@@ -1,9 +1,10 @@
 // API calls for a review's grouping by spec, under the review's API root (`reviewBase`).
+
 import type { SpecSource } from '@union/core';
 
-import type { GroupingView } from '../../src/routes/review-groupings';
-import type { SpecText } from '../../src/routes/spec-sources';
-import { request } from './api';
+import type { GroupingView } from '../../../src/routes/review-groupings';
+import type { SpecText } from '../../../src/routes/spec-sources';
+import { request } from '../api';
 
 /** `base` is the review's API root (`reviewBase`). */
 export const reviewGroupingApi = {

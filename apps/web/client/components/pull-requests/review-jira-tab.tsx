@@ -1,9 +1,10 @@
 // A review's Jira tab: each linked issue's description as Jira has it now, then its comments (read only), with Refresh.
+
 import type { ReactElement } from 'react';
 
 import type { CurrentReview } from '../../../src/api-types';
 import type { ReviewJiraIssue } from '../../../src/review-jira-types';
-import { useReviewJiraIssues } from '../../lib/use-review-jira';
+import { useReviewJiraIssues } from '../../lib/review/use-review-jira';
 import { FoldedMarkdown } from '../folded-markdown';
 import { JiraCommentCard } from '../jira/jira-comment';
 import { Button, ErrorText } from '../ui';

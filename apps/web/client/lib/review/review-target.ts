@@ -1,5 +1,6 @@
 // Where the target's diff, comments and send live; also the root of its query keys.
-import type { DiffResponse } from '../../src/api-types';
+
+import type { DiffResponse } from '../../../src/api-types';
 
 /**
  * What a review page reviews: a ticket's branch (with `slice`, one slice's own change of a split

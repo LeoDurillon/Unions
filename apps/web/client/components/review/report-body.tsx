@@ -1,10 +1,11 @@
 // A finished spec report, in the order a reviewer uses it: its header (verdict, summary, actions), how
 // the change works, what needs them, the files to read first and to skim, the requirements to check
 // (the done ones closed), then the other sections.
+
 import type { ReactElement } from 'react';
 
 import type { ReportView } from '../../../src/routes/review-reports';
-import type { ReviewTarget } from '../../lib/review-target';
+import type { ReviewTarget } from '../../lib/review/review-target';
 import { ReportAttention } from './report-attention';
 import { ReportFlowSection } from './report-flow';
 import { ReportHeader } from './report-header';

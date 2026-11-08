@@ -1,8 +1,9 @@
 // The pull requests of a stack under review as a segmented control, bottom first: the picked one is reviewed below, each shows its drafts.
+
 import type { ReactElement } from 'react';
 
 import type { CurrentReview } from '../../../src/api-types';
-import { useDraftCounts } from '../../lib/use-review';
+import { useDraftCounts } from '../../lib/review/use-review';
 import { Segmented } from '../choice';
 import { Badge } from '../ui';
 

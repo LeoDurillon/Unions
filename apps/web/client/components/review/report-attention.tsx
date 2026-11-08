@@ -1,11 +1,12 @@
 // What needs the reviewer, at the top of the spec report: the items in the report's order, each with its
 // lines and a draft comment to start on them; or a word that nothing does.
+
 import type { AttentionItem, AttentionKind, ReviewReportResult } from '@union/core';
 import { ATTENTION_LABELS } from '@union/core/review-report-markdown';
 import type { ReactElement } from 'react';
 
 import type { Tone } from '../../lib/labels';
-import type { ReviewTarget } from '../../lib/review-target';
+import type { ReviewTarget } from '../../lib/review/review-target';
 import { Badge } from '../ui';
 import { NotUseful } from './report-not-useful';
 import { byFile, DraftButton, FileRef, type OpenLines } from './report-open';

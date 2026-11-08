@@ -1,9 +1,10 @@
 // The comments ending on one line, and the editor when the selection ends there.
+
 import type { ReactElement } from 'react';
 
 import type { CommentView } from '../../../src/api-types';
 import type { Selection } from '../../lib/diff-selection';
-import type { useCommentMutations } from '../../lib/use-review';
+import type { useCommentMutations } from '../../lib/review/use-review';
 import { ReviewCommentCard } from './comment-card';
 import { CommentEditor } from './comment-editor';
 

@@ -1,4 +1,5 @@
 // What a pull request's end-to-end result can become: a draft comment on the review; its failure screenshots.
+
 import type { ReactElement } from 'react';
 
 import { previewPath } from '../../lib/preview-target';
@@ -6,7 +7,7 @@ import {
   useAddToReview,
   useReviewPreview,
   type PullRequestTarget,
-} from '../../lib/use-review-preview';
+} from '../../lib/review/use-review-preview';
 import { Button, ErrorText } from '../ui';
 
 export function ReviewE2eActions({ target }: { target: PullRequestTarget }): ReactElement | null {

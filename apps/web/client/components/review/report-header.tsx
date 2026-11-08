@@ -1,5 +1,6 @@
 // The top of a finished spec report: the verdict, the counts, its actions (add the gaps to the review,
 // copy it, run it again), the summary, the specs it read, and whether the change moved since.
+
 import {
   reportCounts,
   reportGaps,
@@ -10,8 +11,8 @@ import type { ReactElement } from 'react';
 
 import type { ReportView } from '../../../src/routes/review-reports';
 import type { Tone } from '../../lib/labels';
-import type { ReviewTarget } from '../../lib/review-target';
-import { useReviewReport } from '../../lib/use-review-report';
+import type { ReviewTarget } from '../../lib/review/review-target';
+import { useReviewReport } from '../../lib/review/use-review-report';
 import { Badge, Button, ErrorText } from '../ui';
 import { CopyMarkdownButton } from './copy-markdown-button';
 

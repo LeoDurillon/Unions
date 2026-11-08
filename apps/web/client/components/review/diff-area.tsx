@@ -1,8 +1,9 @@
 // The whole change, or one of its commits or the change since the last review (read only), with the
 // Explain panel on the right.
+
 import { useState, type ReactElement } from 'react';
 
-import { reviewBase, reviewSlice } from '../../lib/review-target';
+import { reviewBase, reviewSlice } from '../../lib/review/review-target';
 import { CommitDiffBody } from './commit-diff';
 import { CommitPicker } from './commit-picker';
 import { DiffBody } from './diff-body';

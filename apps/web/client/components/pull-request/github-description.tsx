@@ -1,7 +1,8 @@
 // A pull request's description as GitHub has it now, folded when long: the same for the ticket's PR and each slice's.
+
 import type { ReactElement } from 'react';
 
-import { useDiscussion } from '../../lib/use-review';
+import { useDiscussion } from '../../lib/review/use-review';
 import { FoldedMarkdown } from '../folded-markdown';
 import { ErrorText } from '../ui';
 

@@ -1,9 +1,10 @@
 // A pull request's preview as its Preview tab reads it (its checkout, its screenshots), and adding an output to the review.
+
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 
-import type { ReviewPreviewView } from '../../src/review-preview-types';
-import { request } from './api';
-import { previewKey, previewPath, previewPoll, type PreviewTarget } from './preview-target';
+import type { ReviewPreviewView } from '../../../src/review-preview-types';
+import { request } from '../api';
+import { previewKey, previewPath, previewPoll, type PreviewTarget } from '../preview-target';
 import { reviewBase } from './review-target';
 
 export type PullRequestTarget = Extract<PreviewTarget, { kind: 'pull-request' }>;

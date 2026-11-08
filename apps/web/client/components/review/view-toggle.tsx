@@ -1,7 +1,8 @@
 // The Explain panel's toggle, then the Unified / Split switch for the review diff.
+
 import { useState, type ReactElement } from 'react';
 
-import { isExplaining, useExplanations } from '../../lib/use-explanations';
+import { isExplaining, useExplanations } from '../../lib/review/use-explanations';
 import { Segmented, type SegmentOption } from '../choice';
 import { useExplain, type ExplainState } from './explain-context';
 import type { DiffView } from './file-diff';

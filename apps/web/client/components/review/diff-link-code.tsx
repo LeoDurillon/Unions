@@ -1,9 +1,10 @@
 // Inline code naming a file of the change (`path`, `path:12`, `path:12-30`) as a link that opens it in the diff, at those lines.
+
 import { diffLinkOf } from '@union/core/diff-links';
 import { useCallback, useMemo, type ReactNode } from 'react';
 
-import type { ReviewTarget } from '../../lib/review-target';
-import { useDiff } from '../../lib/use-review';
+import type { ReviewTarget } from '../../lib/review/review-target';
+import { useDiff } from '../../lib/review/use-review';
 import { useOpenLines } from './report-open';
 
 /** For `Markdown`'s `renderCode`: a link for a changed file's reference, null for any other code. */

@@ -1,10 +1,11 @@
 // The Pull requests tab's "Under review" part: pull requests put under review without a ticket, stacks
 // first; Open review opens the review page (a stack's with a tab per pull request).
+
 import type { ReactElement } from 'react';
 
 import type { CurrentReview, PublicProject } from '../../../src/api-types';
 import { reviewStacks } from '../../lib/pull-request-stacks';
-import { useReviewedPullRequest } from '../../lib/review-url';
+import { useReviewedPullRequest } from '../../lib/review/review-url';
 import { useCurrentReviewMutations, useCurrentReviews } from '../../lib/use-current-reviews';
 import { ErrorText } from '../ui';
 import { Part } from './list-part';
