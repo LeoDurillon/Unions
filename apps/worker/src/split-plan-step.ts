@@ -20,6 +20,7 @@ import { buildPrompt, parentContext } from './prompts';
 import { ensureTicketContainer, REPO_DIR } from './provision';
 import { loadProject, reviewContext } from './review';
 import type { StepContext, StepResult } from './scheduler';
+import { notFinished } from './step-outcome';
 import { ensureBranch } from './workspace-git';
 
 function planPrompt(
@@ -47,9 +48,7 @@ function fixPrompt(problems: readonly string[]): string {
 }
 
 function failure(outcome: Exclude<AgentOutcome, { kind: 'ok' }>): StepResult {
-  return outcome.kind === 'rate_limited'
-    ? { kind: 'rate_limited', retryAt: null }
-    : { kind: 'error', error: outcome.message };
+  return notFinished(outcome);
 }
 
 /** The plan the agent answered; one more turn in its session when the host cannot read it. */

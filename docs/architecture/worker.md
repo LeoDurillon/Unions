@@ -10,6 +10,11 @@
 - `commands.ts` maps UI commands to state-machine actions; `scheduler.ts` runs one step per ticket with a
   concurrency cap through an injected `StepExecutor`; `executor.ts` is the real one (planning, implement, review
   and rebase steps).
+- Usage limits: `rate-limit.ts` tells one from other agent errors (a `rate_limit_event` with status `rejected`, or
+  the CLI's wordings) and reads the reset (the event's `resetsAt`, else "resets 6:20pm (UTC)");
+  `step-outcome.ts` turns it into the step's `rate_limited` result (`retryAt` = reset + 2 min) for every runner,
+  and `retryTime` fills an unknown one when the scheduler records it (a full window's reset in
+  `latestClaudeLimits`, else now + 30 min). `Scheduler.tick` retries once `retryAt` passes.
 - `implement.ts` / `implement-loop.ts`: the implementation step. The host checks out the ticket branch
   (`branch.ts`, `workspace-git.ts`), runs the project's install command, then loops agent turn → leftover commit →
   check command (`gate.ts`), resuming the same session with the failure until green or `maxIterations`.

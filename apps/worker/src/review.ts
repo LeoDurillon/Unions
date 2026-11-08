@@ -22,6 +22,7 @@ import { buildPrompt, parentContext } from './prompts';
 import { ensureTicketContainer, REPO_DIR } from './provision';
 import { previousReview, previousReviewSection, type ReviewedCommit } from './review-previous';
 import type { StepContext, StepResult } from './scheduler';
+import { notFinished } from './step-outcome';
 import { ensureBranch, headCommit, inHistory } from './workspace-git';
 
 /** Reading the change needs git; the default review tools allow the read-only git commands. */
@@ -100,9 +101,7 @@ export async function runReviewStep(
     if (outcome.kind === 'ok') {
       return { kind: 'ok', output: outcome.text, sessionId: outcome.sessionId, headSha };
     }
-    return outcome.kind === 'rate_limited'
-      ? { kind: 'rate_limited', retryAt: null }
-      : { kind: 'error', error: outcome.message };
+    return notFinished(outcome);
   } finally {
     await runtime.stop(name);
   }

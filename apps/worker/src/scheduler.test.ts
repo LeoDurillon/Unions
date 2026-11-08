@@ -115,6 +115,21 @@ test('rate limited tickets resume after retryAt', async () => {
   expect(getTicket(db, ticketId).phase.kind).toBe('awaiting_approval');
 });
 
+test('a usage limit with no known reset is retried later, not left for a click', async () => {
+  const scheduler = new Scheduler(
+    db,
+    () => Promise.resolve({ kind: 'rate_limited', retryAt: null }),
+    1,
+  );
+  command('start');
+  const before = Date.now();
+  scheduler.tick(before);
+  await scheduler.idle();
+  const { phase } = getTicket(db, ticketId);
+  const retryAt = phase.kind === 'rate_limited' ? phase.retryAt : null;
+  expect(retryAt).toBeGreaterThanOrEqual(before + 30 * 60_000);
+});
+
 test('maxConcurrent caps parallel runs', async () => {
   const second = createTicket(db, { projectId: 1, title: 'second' }).id;
   let running = 0;

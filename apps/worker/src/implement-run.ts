@@ -15,7 +15,7 @@ import {
   resolutionNote,
   resumeRefusal,
 } from './refused-commit';
-import type { StepContext, StepResult } from './scheduler';
+import { rateLimited, type StepContext, type StepResult } from './step-outcome';
 import { ensureBranch } from './workspace-git';
 
 export type Prepared = Workspace & { branch: string; base: string };
@@ -51,7 +51,7 @@ export async function implement(workspace: Prepared): Promise<StepResult | Imple
   const loop = await implementLoop(workspace);
   const { outcome } = loop;
   if (outcome.kind === 'rate_limited') {
-    return { kind: 'rate_limited', retryAt: null };
+    return rateLimited(outcome);
   }
   if (outcome.kind === 'error') {
     return { kind: 'error', error: outcome.message };

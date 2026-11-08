@@ -32,3 +32,28 @@ export function clock(ms: number): string {
     ? `${hours}:${String(minutes).padStart(PAD, '0')}:${seconds}`
     : `${minutes}:${seconds}`;
 }
+
+/** How long until `at`, to the minute: "in 5 min", "in 1 h 40 min", "in 3 days"; "now" once it passed. */
+export function timeUntil(at: number, now: number): string {
+  const left = Math.ceil((at - now) / MINUTE) * MINUTE;
+  if (left <= 0) {
+    return 'now';
+  }
+  if (left >= DAY) {
+    const days = Math.round(left / DAY);
+    return `in ${days} ${days > 1 ? 'days' : 'day'}`;
+  }
+  const hours = Math.floor(left / HOUR);
+  const minutes = Math.round((left % HOUR) / MINUTE);
+  if (hours === 0) {
+    return `in ${minutes} min`;
+  }
+  return minutes === 0 ? `in ${hours} h` : `in ${hours} h ${minutes} min`;
+}
+
+/** The time of day `at` falls on, with its weekday when it is not today: "18:22", "Tue 09:05". */
+export function timeOfDay(at: number, now: number): string {
+  const time = new Date(at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const sameDay = new Date(at).toDateString() === new Date(now).toDateString();
+  return sameDay ? time : `${new Date(at).toLocaleDateString([], { weekday: 'short' })} ${time}`;
+}

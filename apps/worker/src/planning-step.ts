@@ -21,6 +21,7 @@ import { customStepContext } from './custom-step';
 import { buildPrompt, parentContext } from './prompts';
 import { ensureTicketContainer, REPO_DIR, type ProvisionConfig } from './provision';
 import type { StepContext, StepResult } from './scheduler';
+import { notFinished } from './step-outcome';
 
 type PlanningDeps = { db: Db; runtime: ContainerRuntime; config: ProvisionConfig };
 
@@ -71,9 +72,7 @@ export async function runPlanningStep(
     if (outcome.kind === 'ok') {
       return { kind: 'ok', output: outcome.text, sessionId: outcome.sessionId };
     }
-    return outcome.kind === 'rate_limited'
-      ? { kind: 'rate_limited', retryAt: null }
-      : { kind: 'error', error: outcome.message };
+    return notFinished(outcome);
   } finally {
     await runtime.stop(container.name);
   }

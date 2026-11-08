@@ -184,7 +184,7 @@ test('a revision resumes the previous session with the user feedback', async () 
 test('an agent failure stops the loop before the checks run', async () => {
   const { runtime, commands } = fakeRuntime(() => ({ exitCode: 0, lines: [] }));
   const loop = await implementLoop(
-    workspace(runtime, [{ kind: 'rate_limited', message: 'limit' }]),
+    workspace(runtime, [{ kind: 'rate_limited', message: 'limit', resetsAt: null }]),
   );
   expect(loop.outcome.kind).toBe('rate_limited');
   expect(commands.some((command) => isGate(command))).toBe(false);
@@ -261,10 +261,14 @@ test('with automatic pull requests off, the report says how to link one', () => 
 
 test('the outputs the user gave go with the first turn, and count as read once it ran', async () => {
   const { runtime } = fakeRuntime(() => ({ exitCode: 0, lines: [] }));
-  const ws = workspace(runtime, [{ kind: 'rate_limited', message: 'limit' }, ok(1)], {
-    previous: 'old report',
-    feedback: 'Fix the import.',
-  });
+  const ws = workspace(
+    runtime,
+    [{ kind: 'rate_limited', message: 'limit', resetsAt: null }, ok(1)],
+    {
+      previous: 'old report',
+      feedback: 'Fix the import.',
+    },
+  );
   const run = queueContainerRun(db, {
     owner: { ticketId: ws.context.ticket.id },
     command: 'npm run import',

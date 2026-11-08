@@ -16,6 +16,7 @@ import { eq } from 'drizzle-orm';
 
 import { revisionFor } from './revision';
 import { RunSlots } from './slots';
+import { retryTime } from './step-outcome';
 
 export type StepContext = {
   ticket: Ticket;
@@ -254,7 +255,10 @@ export class Scheduler {
       this.saveResult(ticketId, step, result);
       dispatch(this.db, ticketId, { type: finishedAction(result) });
     } else if (result.kind === 'rate_limited') {
-      dispatch(this.db, ticketId, { type: 'rate_limited', retryAt: result.retryAt });
+      dispatch(this.db, ticketId, {
+        type: 'rate_limited',
+        retryAt: retryTime(this.db, result.retryAt),
+      });
     } else {
       dispatch(this.db, ticketId, { type: 'run_failed', error: result.error });
     }

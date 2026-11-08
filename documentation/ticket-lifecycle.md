@@ -120,11 +120,11 @@ reopened.
 
 ## When a step stops
 
-| What you see                                  | What it means                                                         | What to do                                                             |
-| --------------------------------------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| **Run failed:** and an error                  | The run ended with an error (a crash, a timeout, a Docker problem).   | Read the **Log**, fix the cause if it is on your side, then **Retry**. |
-| **Claude usage limit reached**                | Your Claude subscription hit its usage limit.                         | Wait until it resets, then **Retry**.                                  |
-| **A git hook refused to commit some changes** | A pre-commit hook of the repository refused the agent's last changes. | See below.                                                             |
+| What you see                                  | What it means                                                         | What to do                                                                                          |
+| --------------------------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| **Run failed:** and an error                  | The run ended with an error (a crash, a timeout, a Docker problem).   | Read the **Log**, fix the cause if it is on your side, then **Retry**.                              |
+| **Claude usage limit reached**                | Your Claude subscription hit its usage limit.                         | Nothing: Union retries by itself after the reset, at the time shown. **Retry now** runs it at once. |
+| **A git hook refused to commit some changes** | A pre-commit hook of the repository refused the agent's last changes. | See below.                                                                                          |
 
 When a hook refuses a commit, the panel shows the changes and what the hook said. You can:
 

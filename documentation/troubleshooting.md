@@ -52,8 +52,10 @@ The issue changed on GitHub after you opened the edit. Union does not overwrite 
 ## Runs
 
 **"Claude usage limit reached."**
-Your subscription's usage limit was reached. **Claude usage** in the sidebar says which window is full and when it
-starts over. Wait until it resets, then click **Retry**. To use it more slowly,
+Your subscription's usage limit was reached. The step is paused, and Union runs it again by itself a couple of
+minutes after the limit resets: the notice says when. **Retry now** runs it at once (it stops again if the limit
+is still reached). **Claude usage** in the sidebar says which window is full and when it starts over. When Union
+cannot tell the reset time, it tries again every 30 minutes or so. To use it more slowly,
 lower `UNION_MAX_CONCURRENT` or pick lighter models in **Union settings → Models**.
 
 **The implementation stops after a few attempts with failing checks.**

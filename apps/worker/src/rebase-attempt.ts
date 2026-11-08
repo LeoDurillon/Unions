@@ -15,8 +15,8 @@ import {
   tryHostRebase,
 } from './rebase-host';
 import { pauseRebase, verifyAndPush } from './rebase-publish';
-import type { StepResult } from './scheduler';
 import { lowerSlices, syncLowerBranches } from './stack-refs';
+import { rateLimited, type StepResult } from './step-outcome';
 
 /** The base a move leaves, read but not checked like the slices; none when the workspace's copy serves. */
 function leftRefs(retarget: Rebase['retarget']): { left?: { name: string; source: string } } {
@@ -147,7 +147,7 @@ async function withAgent(
 ): Promise<StepResult | Pushed> {
   const outcome = await runRebaseAgent(rebase, why);
   if (outcome.kind === 'rate_limited') {
-    return { kind: 'rate_limited', retryAt: null };
+    return rateLimited(outcome);
   }
   if (outcome.kind === 'error') {
     return { kind: 'error', error: outcome.message };

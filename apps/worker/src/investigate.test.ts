@@ -152,7 +152,7 @@ test('a failure is saved with its message and frees the slot', async () => {
   const second = queue();
   const slots = new RunSlots(1);
   const investigations = runner(
-    () => Promise.resolve({ kind: 'rate_limited', message: 'usage limit' }),
+    () => Promise.resolve({ kind: 'rate_limited', message: 'usage limit', resetsAt: null }),
     slots,
   );
   investigations.tick();

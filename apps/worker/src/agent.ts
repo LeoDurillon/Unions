@@ -9,6 +9,7 @@ import {
 } from '@union/core';
 
 import { IDLE_GRACE_MS, RUN_MARKER, watchIdle } from './agent-idle';
+import { RATE_LIMIT, rejectedResetAt, resetFromMessage } from './rate-limit';
 
 export type AgentRun = {
   container: string;
@@ -29,10 +30,10 @@ export type AgentRun = {
 
 export type AgentOutcome =
   | { kind: 'ok'; text: string; sessionId: string }
-  | { kind: 'rate_limited'; message: string }
+  /** `resetsAt`: when the limit resets, in ms, when the CLI said so. */
+  | { kind: 'rate_limited'; message: string; resetsAt: number | null }
   | { kind: 'error'; message: string };
 
-const RATE_LIMIT = /usage limit|rate limit|limit reached|too many requests/iu;
 /** Always denied: the host owns the remote; the container has no credentials anyway. */
 type ResultEvent = {
   type: 'result';
@@ -104,7 +105,22 @@ export function connectorEnv(tools: readonly string[]): Record<string, string> {
   };
 }
 
-function toOutcome(result: ResultEvent): AgentOutcome {
+/**
+ * A failed call is a usage limit when the CLI reported its limit rejected, or its message says so.
+ * The reset comes from the report, else from the message ("resets 6:20pm (UTC)").
+ */
+function failure(message: string, rejectedReset: number | null): AgentOutcome {
+  if (rejectedReset === null && !RATE_LIMIT.test(message)) {
+    return { kind: 'error', message };
+  }
+  return {
+    kind: 'rate_limited',
+    message,
+    resetsAt: rejectedReset ?? resetFromMessage(message, Date.now()),
+  };
+}
+
+function toOutcome(result: ResultEvent, rejectedReset: number | null): AgentOutcome {
   if (!result.is_error) {
     return {
       kind: 'ok',
@@ -112,17 +128,23 @@ function toOutcome(result: ResultEvent): AgentOutcome {
       sessionId: result.session_id,
     };
   }
-  return RATE_LIMIT.test(result.result)
-    ? { kind: 'rate_limited', message: result.result }
-    : { kind: 'error', message: result.result };
+  return failure(result.result, rejectedReset);
 }
 
-/** Reads the agent's events to the end: its last result, and how the process exited. */
+type Read = {
+  result: ResultEvent | undefined;
+  /** When the limit resets, from the last `rate_limit_event` that reported it rejected. */
+  rejectedReset: number | null;
+  exit: ExecResult;
+};
+
+/** Reads the agent's events to the end: its last result, a rejected limit, and how the process exited. */
 async function readEvents(
   stream: AsyncGenerator<string, ExecResult>,
   onEvent: (event: unknown) => void,
-): Promise<{ result: ResultEvent | undefined; exit: ExecResult }> {
+): Promise<Read> {
   let result: ResultEvent | undefined = undefined;
+  let rejectedReset: number | null = null;
   let next = await stream.next();
   while (!next.done) {
     const event = parseLine(next.value);
@@ -131,10 +153,11 @@ async function readEvents(
       if (isResultEvent(event)) {
         result = event;
       }
+      rejectedReset = rejectedResetAt(event) ?? rejectedReset;
     }
     next = await stream.next();
   }
-  return { result, exit: next.value };
+  return { result, rejectedReset, exit: next.value };
 }
 
 /** Runs `claude -p` inside the ticket's container and streams its events to `onEvent`. */
@@ -153,18 +176,17 @@ export async function runAgent(runtime: ContainerRuntime, run: AgentRun): Promis
     graceMs: run.idleGraceMs ?? IDLE_GRACE_MS,
     onEvent: run.onEvent,
   });
-  const { result, exit } = await readEvents(stream, (event) => {
+  const { result, rejectedReset, exit } = await readEvents(stream, (event) => {
     run.onEvent(event);
     idle.observe(event);
   }).finally(() => {
     idle.stop();
   });
   if (result) {
-    return toOutcome(result);
+    return toOutcome(result, rejectedReset);
   }
   const { exitCode, stderr } = exit;
-  const message = `claude exited with ${exitCode} and no result: ${stderr.trim()}`;
-  return RATE_LIMIT.test(stderr) ? { kind: 'rate_limited', message } : { kind: 'error', message };
+  return failure(`claude exited with ${exitCode} and no result: ${stderr.trim()}`, rejectedReset);
 }
 
 export type AgentFn = (runtime: ContainerRuntime, run: AgentRun) => Promise<AgentOutcome>;

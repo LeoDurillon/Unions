@@ -146,7 +146,7 @@ test('the ticket is written in a throwaway container and lands in the backlog', 
 test('a failed agent keeps the error and no ticket is made', async () => {
   requestTicket(db, id, '');
   const investigations = runner(() =>
-    Promise.resolve({ kind: 'rate_limited', message: 'usage limit' }),
+    Promise.resolve({ kind: 'rate_limited', message: 'usage limit', resetsAt: null }),
   );
   investigations.tick();
   await investigations.idle();

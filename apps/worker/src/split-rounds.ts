@@ -12,6 +12,7 @@ import type { StepResult } from './scheduler';
 import type { History } from './simplify-git';
 import { fixTask, splitTask } from './split-agent';
 import { verifySplit, type Verified } from './split-verify';
+import { notFinished } from './step-outcome';
 
 /** Rounds the agent gets to fix what the host refused, after its first try. */
 const FIX_ROUNDS = 2;
@@ -27,9 +28,7 @@ export type Rounds<V extends { ok: true }> = {
 };
 
 function failed(outcome: Exclude<AgentOutcome, Ok>): StepResult {
-  return outcome.kind === 'rate_limited'
-    ? { kind: 'rate_limited', retryAt: null }
-    : { kind: 'error', error: outcome.message };
+  return notFinished(outcome);
 }
 
 function isRefused(verified: { ok: true } | Refused): verified is Refused {

@@ -7,9 +7,9 @@ import { fetchIntoContainer } from './rebase-fetch';
 import { contains, restoreBranch } from './rebase-git';
 import { prepareBranch } from './rebase-prepare';
 import { pendingRefusal } from './refused-commit';
-import type { StepContext, StepResult } from './scheduler';
 import { finishSimplify, resumeSimplify, runSimplifyAgent } from './simplify-finish';
 import { historyOf } from './simplify-git';
+import { notFinished, type StepContext, type StepResult } from './step-outcome';
 
 /** Fetch, safety check, agent, then its leftovers, the checks on the result and the push. */
 async function attempt(rebase: Rebase): Promise<StepResult> {
@@ -25,9 +25,7 @@ async function attempt(rebase: Rebase): Promise<StepResult> {
   const start = await historyOf(deps.runtime, container, { base });
   const outcome = await runSimplifyAgent(rebase, start);
   if (outcome.kind !== 'ok') {
-    return outcome.kind === 'rate_limited'
-      ? { kind: 'rate_limited', retryAt: null }
-      : { kind: 'error', error: outcome.message };
+    return notFinished(outcome);
   }
   return finishSimplify(rebase, { lease, start, outcome });
 }
