@@ -19,10 +19,7 @@ export const SETTINGS_GROUPS = [
       { id: 'instructions', label: 'Instructions' },
       { id: 'memory', label: 'Memory' },
       { id: 'checks', label: 'Checks' },
-      { id: 'size', label: 'Change size' },
-      { id: 'scripts', label: 'Scripts' },
       { id: 'flows', label: 'Flows' },
-      { id: 'agent-image', label: 'Agent image' },
     ],
   },
   {
@@ -51,9 +48,16 @@ export const SETTINGS_GROUPS = [
   },
   {
     label: 'Events',
+    sections: [{ id: 'event-rules', label: 'Rules' }],
+  },
+  {
+    // Pages most projects set once or never.
+    label: 'Advanced',
     sections: [
-      { id: 'event-rules', label: 'Rules' },
-      { id: 'event-activity', label: 'Activity' },
+      { id: 'scripts', label: 'Scripts' },
+      { id: 'size', label: 'Change size' },
+      { id: 'agent-image', label: 'Agent image' },
+      { id: 'event-activity', label: 'Event activity' },
     ],
   },
   { label: null, sections: [{ id: 'danger', label: 'Danger zone' }] },

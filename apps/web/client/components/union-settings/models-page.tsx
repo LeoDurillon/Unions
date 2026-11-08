@@ -1,69 +1,13 @@
-// Every agent's model and effort in a table, with one Save.
+// All agents in one table: each one's model and effort with one Save, whether it was customized, and a link to its page.
 import { useQuery } from '@tanstack/react-query';
 import type { AgentConfig } from '@union/core';
 import type { ReactElement } from 'react';
 
 import { api } from '../../lib/api';
-import { modelRows, useModelsForm, type ModelChoice } from '../../lib/use-models-form';
-import { agentLabel, EFFORT_LABELS, MODEL_LABELS } from '../agents/agent-labels';
-import { EffortField } from '../agents/effort-field';
-import { ModelField } from '../agents/model-field';
+import { modelRows, useModelsForm } from '../../lib/use-models-form';
 import { SaveBar } from '../settings/save-bar';
 import { ErrorText } from '../ui';
-
-const CELL = 'py-1.5 pr-3';
-
-function ImplementationsChoice({ choice }: { choice: ModelChoice | undefined }): ReactElement {
-  const effort = choice?.effort ? EFFORT_LABELS[choice.effort] : 'Default';
-  return (
-    <td colSpan={2} className={`${CELL} text-xs text-zinc-500`}>
-      Uses Implementation’s{choice ? `: ${MODEL_LABELS[choice.model]}, ${effort} effort` : ''}
-    </td>
-  );
-}
-
-function ModelRow({
-  config,
-  choice,
-  implementation,
-  onChange,
-}: {
-  config: AgentConfig;
-  choice: ModelChoice | undefined;
-  implementation: ModelChoice | undefined;
-  onChange: (choice: ModelChoice) => void;
-}): ReactElement {
-  const { title } = agentLabel(config);
-  return (
-    <tr className="border-t border-zinc-200 dark:border-zinc-800">
-      <td className={`${CELL} font-medium`}>{title}</td>
-      {choice === undefined ? (
-        <ImplementationsChoice choice={implementation} />
-      ) : (
-        <>
-          <td className={CELL}>
-            <ModelField
-              ariaLabel={`${title} model`}
-              model={choice.model}
-              onChange={(model) => {
-                onChange({ ...choice, model });
-              }}
-            />
-          </td>
-          <td className={CELL}>
-            <EffortField
-              ariaLabel={`${title} effort`}
-              effort={choice.effort}
-              onChange={(effort) => {
-                onChange({ ...choice, effort });
-              }}
-            />
-          </td>
-        </>
-      )}
-    </tr>
-  );
-}
+import { CELL, ModelRow } from './agent-row';
 
 function ModelsForm({ configs }: { configs: AgentConfig[] }): ReactElement {
   const form = useModelsForm(configs);
@@ -71,10 +15,10 @@ function ModelsForm({ configs }: { configs: AgentConfig[] }): ReactElement {
   return (
     <section className="space-y-3">
       <header>
-        <h3 className="text-sm font-semibold">Models</h3>
+        <h3 className="text-sm font-semibold">All agents</h3>
         <p className="text-xs text-zinc-500">
-          Every agent’s model and effort in one place. Each agent’s page has the same fields;
-          changes apply to the next run of that step.
+          Every agent’s model and effort in one place, changes applying to the next run of that
+          step. Click an agent for its prompt and tools; a dot marks one you customized.
         </p>
       </header>
       <table className="w-full text-left text-sm">
@@ -104,7 +48,7 @@ function ModelsForm({ configs }: { configs: AgentConfig[] }): ReactElement {
   );
 }
 
-/** Every agent's model and effort in a table, with one Save. */
+/** All agents in one table, with one Save for their models and efforts. */
 export function ModelsPage(): ReactElement {
   const agents = useQuery({ queryKey: ['agents'], queryFn: api.agents });
   if (agents.data === undefined) {

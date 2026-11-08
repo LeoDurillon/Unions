@@ -1,36 +1,38 @@
-// The Union settings menu's groups: the fixed pages, and the custom agents' and review agents' groups before Tools.
-import type { AgentConfig, CustomAgentKind } from '@union/core';
+// The Union settings menu: the shared instructions, All agents (and the agent page open), Tools and the GitHub App.
+import type { AgentConfig } from '@union/core';
+import { isCustomStep } from '@union/core/states';
 
 import { UNION_SETTINGS_GROUPS, type UnionSection } from '../../lib/union-settings-groups';
+import { isAgentId } from '../agents/agent-labels';
 import type { NavGroup } from '../settings/settings-nav';
 import { unionSectionLabel } from './union-section-labels';
 
-/** The index of the Tools group: the custom agents' group goes before it, after the built-in agents. */
-const TOOLS_GROUP = UNION_SETTINGS_GROUPS.findIndex((group) => group.label === 'Tools');
+/** The groups after the agents, as they are. */
+const AFTER_AGENTS = new Set(['Tools', 'GitHub']);
 
-/** The live custom agents of `kind`, as menu entries. */
-function entriesOf(
+function entry(
+  id: UnionSection,
   agents: readonly AgentConfig[],
-  kind: CustomAgentKind,
-): NavGroup<UnionSection>['sections'] {
-  return agents.flatMap((agent) =>
-    agent.custom?.kind === kind ? [{ id: agent.agent, label: agent.custom.name }] : [],
-  );
+): NavGroup<UnionSection>['sections'][number] {
+  return { id, label: unionSectionLabel(id, agents) };
 }
 
 /**
- * The fixed groups, with a "Custom agents" group of the ticket-step ones and a "Review agents" group,
- * each when it has some.
+ * The menu. Every agent, built-in or custom, is reached from **All agents** (its table links to each
+ * page); the agent page open shows under it, so the menu says where you are.
  */
-export function navGroups(agents: readonly AgentConfig[]): NavGroup<UnionSection>[] {
-  const groups: NavGroup<UnionSection>[] = UNION_SETTINGS_GROUPS.map((group) => ({
-    label: group.label,
-    sections: group.sections.map((id) => ({ id, label: unionSectionLabel(id) })),
-  }));
-  const added = [
-    { label: 'Custom agents', sections: entriesOf(agents, 'step') },
-    { label: 'Custom review agents', sections: entriesOf(agents, 'review') },
-  ].filter((group) => group.sections.length > 0);
-  groups.splice(TOOLS_GROUP, 0, ...added);
-  return groups;
+export function navGroups(
+  agents: readonly AgentConfig[],
+  open: UnionSection | null = null,
+): NavGroup<UnionSection>[] {
+  const isAgentPage = open !== null && open !== 'shared' && (isAgentId(open) || isCustomStep(open));
+  const agentPage = open !== null && isAgentPage ? [entry(open, agents)] : [];
+  return [
+    { label: 'General', sections: [entry('shared', agents)] },
+    { label: 'Agents', sections: [entry('models', agents), ...agentPage] },
+    ...UNION_SETTINGS_GROUPS.filter((group) => AFTER_AGENTS.has(group.label)).map((group) => ({
+      label: group.label,
+      sections: group.sections.map((id) => entry(id, agents)),
+    })),
+  ];
 }

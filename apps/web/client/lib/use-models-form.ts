@@ -1,4 +1,4 @@
-// The Models page's form: every agent's model and effort, each changed one saved with its prompt and tools as they are.
+// The All agents table's form: every agent's model and effort, each changed one saved with its prompt and tools as they are.
 import { useQueryClient } from '@tanstack/react-query';
 import type { AgentConfig, AgentEffort, AgentModel } from '@union/core';
 

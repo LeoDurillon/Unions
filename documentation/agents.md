@@ -59,7 +59,8 @@ On an agent's page:
   commands.
 - **Reset to default** brings back Union's prompt.
 
-**Models** shows every agent's model and effort in one table.
+**All agents**, in Union settings' menu, lists every agent, yours included: its model and effort, changed in place with
+one **Save**, and a dot on the ones whose settings you changed. Click an agent's name to open its page (prompt, tools).
 
 ### What Union reads from an answer
 

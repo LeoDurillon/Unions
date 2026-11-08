@@ -1,4 +1,4 @@
-// The Union settings menu: the fixed pages, the custom agents' group, and New agent.
+// The Union settings menu: the shared instructions, All agents, Tools, the GitHub App, and New agent.
 import type { AgentConfig } from '@union/core';
 import type { ReactElement } from 'react';
 
@@ -19,7 +19,7 @@ export function UnionSettingsNav({
     <div className="space-y-3">
       <SettingsNav
         label="Union settings"
-        groups={navGroups(agents)}
+        groups={navGroups(agents, section)}
         section={section}
         onOpen={openUnionSettings}
       />

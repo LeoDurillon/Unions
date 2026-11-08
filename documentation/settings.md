@@ -12,10 +12,7 @@ the page's name, opens the part of this guide about it; Union settings pages hav
 | **Agents**        | Instructions     | [Notes every agent of the project reads](agents.md#project-instructions).                                                                          |
 |                   | Memory           | [Feedback and lessons](agents.md#memory).                                                                                                          |
 |                   | Checks           | Install command, check command, iteration limit. See [Your first project](first-project.md#tell-the-agents-how-to-build-and-check-your-code).      |
-|                   | Change size      | The budget of a ticket without an estimate, and the paths that are not code. See [The size of a change](ticket-lifecycle.md#the-size-of-a-change). |
-|                   | Scripts          | Commands you run by name from a ticket's Preview tab.                                                                                              |
 |                   | Flows            | [Flow presets](tickets.md#flows) and the default one.                                                                                              |
-|                   | Agent image      | [The image the project's agents run in](agents.md#the-agent-image): the default, your own Dockerfile, or an image you built.                       |
 | **Pull requests** | Creation         | Open a draft pull request automatically; suggest replies to GitHub comments; split pull requests into stacks; check every slice.                   |
 |                   | Diff display     | Hide lock files and other paths from the review page.                                                                                              |
 | **Previews**      | Services         | Compose file, exposed services, compose additions, profiles, services for the agent.                                                               |
@@ -25,7 +22,11 @@ the page's name, opens the part of this guide about it; Union settings pages hav
 | **Integrations**  | GitHub Project   | The GitHub Project the board mirrors to: connect one (pick or create), change it or disconnect it.                                                 |
 |                   | Notion           | The Notion integration secret and data source.                                                                                                     |
 |                   | Jira             | The Jira site, account email, API token, project key and the issue type of new issues ([Connect Jira](first-project.md#connect-jira)).             |
-| **Events**        | Rules, Activity  | [Event rules](automation.md#event-rules) and what they did.                                                                                        |
+| **Events**        | Rules            | [Event rules](automation.md#event-rules).                                                                                                          |
+| **Advanced**      | Scripts          | Commands you run by name from a ticket's Preview tab.                                                                                              |
+|                   | Change size      | The budget of a ticket without an estimate, and the paths that are not code. See [The size of a change](ticket-lifecycle.md#the-size-of-a-change). |
+|                   | Agent image      | [The image the project's agents run in](agents.md#the-agent-image): the default, your own Dockerfile, or an image you built.                       |
+|                   | Event activity   | What the [event rules](automation.md#event-rules) did.                                                                                             |
 |                   | Danger zone      | Delete the project. Type the repository's name to confirm.                                                                                         |
 
 Deleting a project removes its tickets from Union, with their containers and volumes. Nothing is deleted on GitHub.
@@ -47,18 +48,15 @@ Deleting a project removes its tickets from Union, with their containers and vol
 
 **Union settings**, at the bottom of the sidebar, holds what every project shares:
 
-| Group                | Pages                                                                                                |
-| -------------------- | ---------------------------------------------------------------------------------------------------- |
-| General              | Shared instructions, Models                                                                          |
-| Planning             | Intake, Summary, Technical, Test plan                                                                |
-| Implementation       | Implementation, Trim, Final review                                                                   |
-| Pull requests        | PR description, Replies to GitHub comments, Rebase, Simplify history, Split plan, Split into a stack |
-| Review page agents   | Review comments, Group by spec, Explain, Spec report                                                 |
-| Memory               | Lesson writer, Lesson tidier                                                                         |
-| Custom agents        | Your own agents, and **New agent**                                                                   |
-| Custom review agents | Your own review agents, run from a review page                                                       |
-| Tools                | Tools, Connectors                                                                                    |
-| GitHub               | GitHub App                                                                                           |
+| Menu    | Pages                                                                                                  |
+| ------- | ------------------------------------------------------------------------------------------------------ |
+| General | Shared instructions                                                                                    |
+| Agents  | **All agents**: every agent, yours included, with its model and effort; click one to open its own page |
+| Tools   | Tools, Connectors                                                                                      |
+| GitHub  | GitHub App                                                                                             |
+
+**New agent**, under the menu, creates a custom agent. Each agent's page (opened from All agents, and shown under it
+in the menu while open) holds its prompt, model, effort and tools.
 
 See [Agents, flows and memory](agents.md) for what each page does.
 

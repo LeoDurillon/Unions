@@ -6,7 +6,7 @@ import type { UnionSection } from '../../lib/union-settings-groups';
 import { AGENT_LABELS, isAgentId } from '../agents/agent-labels';
 
 const OTHER_LABELS: Record<Exclude<UnionSection, AgentId>, string> = {
-  models: 'Models',
+  models: 'All agents',
   tools: 'Tools',
   connectors: 'Connectors',
   'github-app': 'GitHub App',

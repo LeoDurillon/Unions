@@ -50,22 +50,21 @@ test('a custom agent has a page, after the built-in agents, named after it', () 
   expect(unionSectionLabel('agent_3', [SECURITY])).toBe('Custom agent');
 });
 
-test('the menu shows a Custom agents group before Tools only when there are some', () => {
-  expect(navGroups([]).map((group) => group.label)).not.toContain('Custom agents');
-  const labels = navGroups([SECURITY]).map((group) => group.label);
-  expect(labels.indexOf('Custom agents')).toBe(labels.indexOf('Tools') - 1);
-  expect(navGroups([SECURITY]).find((group) => group.label === 'Custom agents')?.sections).toEqual([
-    { id: 'agent_2', label: 'Security pass' },
-  ]);
+test('the menu lists All agents instead of a page per agent, then Tools and the GitHub App', () => {
+  const groups = navGroups([SECURITY, MERGE]);
+  expect(groups.map((group) => group.label)).toEqual(['General', 'Agents', 'Tools', 'GitHub']);
+  expect(groups[1]?.sections).toEqual([{ id: 'models', label: 'All agents' }]);
 });
 
-test('review agents get their own group, after the custom agents and before Tools', () => {
-  const groups = navGroups([SECURITY, MERGE]);
-  const labels = groups.map((group) => group.label);
-  expect(labels.indexOf('Custom agents')).toBe(labels.indexOf('Tools') - 2);
-  expect(labels.indexOf('Custom review agents')).toBe(labels.indexOf('Tools') - 1);
-  expect(groups.find((group) => group.label === 'Custom review agents')?.sections).toEqual([
-    { id: 'agent_3', label: 'Merge readiness' },
+test('the agent page open shows under All agents, a custom one by its name', () => {
+  expect(navGroups([SECURITY], 'test_plan')[1]?.sections).toEqual([
+    { id: 'models', label: 'All agents' },
+    { id: 'test_plan', label: 'Test plan' },
   ]);
-  expect(navGroups([MERGE]).map((group) => group.label)).not.toContain('Custom agents');
+  expect(navGroups([SECURITY], 'agent_2')[1]?.sections.at(-1)).toEqual({
+    id: 'agent_2',
+    label: 'Security pass',
+  });
+  expect(navGroups([SECURITY], 'tools')[1]?.sections).toHaveLength(1);
+  expect(navGroups([SECURITY], 'shared')[1]?.sections).toHaveLength(1);
 });

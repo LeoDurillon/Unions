@@ -1,4 +1,4 @@
-// The Union settings pages, in menu order, by group: one page per agent, the models, the tools, the GitHub App.
+// The Union settings pages, by group: the order of the All agents table and of `?union=` pages; the menu shows All agents for the agents.
 import { customAgentId, isCustomStep, type CustomStep } from '@union/core/states';
 
 /** The fixed pages; the custom agents' (`agent_<id>`) come after the built-in agents' groups. */
