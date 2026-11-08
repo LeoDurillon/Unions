@@ -3,7 +3,8 @@ import { integrationKind, schema, type Db, type Integration, type Project } from
 import { eq } from 'drizzle-orm';
 
 import type { PublicIntegration } from './api-integration-types';
-import { toPublicProject, type PublicProject } from './api-types';
+import { toPublicProject, type ListedProject, type PublicProject } from './api-types';
+import { countsOf, projectCounts } from './project-counts';
 
 /** The secret is left out here and only here, as `toPublicProject` leaves out the GitHub token. */
 export function toPublicIntegration(integration: Integration): PublicIntegration {
@@ -28,4 +29,16 @@ function publicIntegrationsOf(db: Db, projectId: number): PublicIntegration[] {
 /** The project as the browser sees it, with its integrations. */
 export function publicProjectOf(db: Db, project: Project): PublicProject {
   return toPublicProject(project, publicIntegrationsOf(db, project.id));
+}
+
+/** Every project as the browser may see it, with its tickets waiting on the user and running (the sidebar's). */
+export function listedProjects(db: Db): ListedProject[] {
+  const counts = projectCounts(db);
+  return db
+    .select()
+    .from(schema.projects)
+    .all()
+    .map((project) =>
+      Object.assign(publicProjectOf(db, project), { counts: countsOf(counts, project.id) }),
+    );
 }

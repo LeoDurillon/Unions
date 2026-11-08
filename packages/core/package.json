@@ -5,6 +5,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./states": "./src/states.ts",
+    "./needs-you": "./src/needs-you.ts",
     "./flows": "./src/flows.ts",
     "./issue-step-comments": "./src/issue-step-comments.ts",
     "./flow-edit": "./src/flow-edit.ts",

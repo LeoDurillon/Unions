@@ -1,6 +1,7 @@
 // Which tickets the board shows: a text search (title, issue or PR number), only those that need the
 // user, and where they came from.
 import { integrationKind, type IntegrationKindName } from '@union/core/integration-kinds';
+import { needsYou as waitsOnUser } from '@union/core/needs-you';
 
 import type { TicketSummary } from '../../src/api-types';
 
@@ -16,13 +17,9 @@ type Filterable = Pick<
   'title' | 'issueNumber' | 'prNumber' | 'phase' | 'prState' | 'prChecksState' | 'originKind'
 >;
 
-/** It waits on the user: a step to approve, a failure or a refused commit, red CI checks. */
+/** It waits on the user (core's rule, shared with the sidebar's counts). */
 export function needsYou(ticket: Filterable): boolean {
-  const { kind } = ticket.phase;
-  if (kind === 'awaiting_approval' || kind === 'failed' || kind === 'commit_refused') {
-    return true;
-  }
-  return ticket.prState === 'open' && ticket.prChecksState === 'failure';
+  return waitsOnUser(ticket);
 }
 
 function matchesText(ticket: Filterable, text: string): boolean {

@@ -26,6 +26,7 @@ test("a preview build's output refetches nothing: the log reads it from the stre
 test("a ticket's event refetches the board, the ticket and its review", () => {
   expect(invalidationKeys(event('run_finished', { ticketId: 4 }))).toEqual([
     ['tickets'],
+    ['projects'],
     ['ticket', 4],
     ['review', '/api/tickets/4'],
   ]);

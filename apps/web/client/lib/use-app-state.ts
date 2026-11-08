@@ -4,6 +4,7 @@ import { useNotificationOpener, type NotificationTarget } from './open-notificat
 import { useActiveProject } from './use-active-project';
 import { useLiveInvalidation } from './use-live-invalidation';
 import { useNavigation } from './use-navigation';
+import { useProjectJump } from './use-project-jump';
 import { useSelectedTicket } from './use-selected-ticket';
 
 export type AppState = ReturnType<typeof useActiveProject> &
@@ -13,6 +14,8 @@ export type AppState = ReturnType<typeof useActiveProject> &
     openNotification: (target: NotificationTarget) => void;
     /** A ticket of any project, from a page listing several projects' (the running previews). */
     openProjectTicket: (projectId: number, ticketId: number) => void;
+    /** Another project's board, as the sidebar opens it (unsaved changes asked about first). */
+    selectProject: (id: number) => void;
   };
 
 /** Also shows the desktop notifications, when the user turned them on. */
@@ -35,5 +38,26 @@ export function useAppState(): AppState {
       openTicket(id);
     }
   };
-  return { ...projects, ...navigation, ticketId, openTicket, openNotification, openProjectTicket };
+  const selectProject = (id: number): void => {
+    if (navigation.leave()) {
+      projects.select(id);
+      navigation.goTo('board')();
+    }
+  };
+  const current = projects.projects.find((listed) => listed.id === projects.project?.id) ?? null;
+  useProjectJump(
+    projects.projects,
+    current,
+    selectProject,
+    navigation.page === 'board' && ticketId === null,
+  );
+  return {
+    ...projects,
+    ...navigation,
+    ticketId,
+    openTicket,
+    openNotification,
+    openProjectTicket,
+    selectProject,
+  };
 }

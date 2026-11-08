@@ -22,7 +22,7 @@ import {
   readObject,
   requireText,
 } from '../http';
-import { publicProjectOf } from '../public-project';
+import { listedProjects, publicProjectOf } from '../public-project';
 import { newIntegrationsOf } from './integrations';
 import { investigationRoutes } from './investigations';
 import { deleteProject, updateProject } from './project-settings';
@@ -80,15 +80,7 @@ export function projectRoutes(
 ): Hono {
   const routes = new Hono();
 
-  routes.get('/', (c) =>
-    c.json(
-      db
-        .select()
-        .from(schema.projects)
-        .all()
-        .map((project) => publicProjectOf(db, project)),
-    ),
-  );
+  routes.get('/', (c) => c.json(listedProjects(db)));
 
   routes.post('/', async (c) => {
     const body = await readObject(c.req.raw);

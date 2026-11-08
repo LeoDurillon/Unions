@@ -52,5 +52,11 @@ export function invalidationKeys(event: EventRow): QueryKey[] {
   if (event.ticketId === null) {
     return [['tickets']];
   }
-  return [['tickets'], ['ticket', event.ticketId], ['review', ticketReviewBase(event.ticketId)]];
+  // The projects list carries each project's counts (needs you, running) for the sidebar.
+  return [
+    ['tickets'],
+    ['projects'],
+    ['ticket', event.ticketId],
+    ['review', ticketReviewBase(event.ticketId)],
+  ];
 }

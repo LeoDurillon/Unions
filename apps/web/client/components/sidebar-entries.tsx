@@ -2,20 +2,43 @@
 // shows the first two letters of its name.
 import type { ReactElement } from 'react';
 
-import type { PublicProject } from '../../src/api-types';
+import type { ListedProject } from '../../src/api-types';
 import { HelpMenu } from './help-menu';
-import { RAIL_ONLY, SIDE_ITEM, SIDE_LABEL } from './sidebar-classes';
+import { RAIL_ONLY, SIDE_BADGE, SIDE_ITEM, SIDE_LABEL } from './sidebar-classes';
 import { Button } from './ui';
 
 const ACTIVE = 'bg-indigo-100 font-medium text-indigo-900 dark:bg-indigo-950 dark:text-indigo-200';
 const IDLE = 'hover:bg-zinc-200/70 dark:hover:bg-zinc-800';
+
+/** What a project's entry says of its tickets: how many wait on you (a badge), and a dot while any runs. */
+function ProjectSignal({ counts }: Pick<ListedProject, 'counts'>): ReactElement {
+  const running = counts.running > 0;
+  return (
+    <>
+      {running ? (
+        <span
+          title={`${counts.running} running`}
+          className="size-1.5 shrink-0 animate-pulse rounded-full bg-blue-500 group-data-[compact]/side:absolute group-data-[compact]/side:bottom-1 group-data-[compact]/side:left-1"
+        >
+          <span className="sr-only">, {counts.running} running</span>
+        </span>
+      ) : null}
+      {counts.needsYou > 0 ? (
+        <span title={`${counts.needsYou} waiting for you`} className={`${SIDE_BADGE} bg-amber-600`}>
+          {counts.needsYou}
+          <span className="sr-only"> waiting for you</span>
+        </span>
+      ) : null}
+    </>
+  );
+}
 
 function ProjectItem({
   project,
   active,
   onSelect,
 }: {
-  project: PublicProject;
+  project: ListedProject;
   active: boolean;
   onSelect: (id: number) => void;
 }): ReactElement {
@@ -38,6 +61,7 @@ function ProjectItem({
           <span className="text-zinc-500">{project.owner}/</span>
           {project.repo}
         </span>
+        <ProjectSignal counts={project.counts} />
       </button>
     </li>
   );
@@ -50,7 +74,7 @@ export function ProjectNav({
   onSelect,
   onNewProject,
 }: {
-  projects: PublicProject[];
+  projects: ListedProject[];
   activeId: number | null;
   onSelect: (id: number) => void;
   onNewProject: () => void;

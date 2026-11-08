@@ -36,6 +36,7 @@ import type {
   TicketDetail,
   TicketSummary,
   Viewer,
+  ListedProject,
 } from '../../src/api-types';
 import type { LinkResult } from '../../src/routes/tickets/ticket-pull-request';
 import type { NewIntegration } from './integrations-api';
@@ -130,7 +131,7 @@ export const api = {
     request('POST', `${investigationPath(investigation)}/cancel`),
   deleteInvestigation: (investigation: Investigation): Promise<unknown> =>
     request('DELETE', investigationPath(investigation)),
-  projects: (): Promise<PublicProject[]> => request('GET', '/api/projects'),
+  projects: (): Promise<ListedProject[]> => request('GET', '/api/projects'),
   createProject: (
     input: {
       owner: string;

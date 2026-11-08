@@ -1,13 +1,13 @@
 // The project list plus the remembered selection, falling back to the first project.
 import { useQuery } from '@tanstack/react-query';
 
-import type { PublicProject } from '../../src/api-types';
+import type { ListedProject, PublicProject } from '../../src/api-types';
 import { api } from './api';
 import { useStoredNumber } from './use-stored-number';
 
 /** The project list plus the remembered selection, falling back to the first project. */
 export function useActiveProject(): {
-  projects: PublicProject[];
+  projects: ListedProject[];
   project: PublicProject | null;
   select: (id: number) => void;
   loading: boolean;

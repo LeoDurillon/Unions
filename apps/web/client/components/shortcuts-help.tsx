@@ -18,7 +18,7 @@ const GROUPS: Group[] = [
     keys: [
       ['/', 'Search the tickets'],
       ['c', 'New ticket'],
-      ['n', 'Open the first ticket that needs you'],
+      ['n', 'Open the first ticket that needs you, else go to the next project with one'],
     ],
   },
   {

@@ -9,21 +9,16 @@ import { WizardHost } from './components/wizard-host';
 import { useAppState } from './lib/use-app-state';
 
 export function App(): ReactElement {
-  const { projects, project, select, loading, ticketId, openTicket, openNotification, ...nav } =
-    useAppState();
-  const { page, overlay, show, goTo, close, leave, openProjectTicket } = nav;
+  const state = useAppState();
+  const { projects, project, ticketId, openTicket, page, overlay, show, goTo, close } = state;
+  const { selectProject, openNotification, openProjectTicket } = state;
 
   return (
     <div className="flex h-full">
       <Sidebar
         projects={projects}
         projectId={project?.id ?? null}
-        onSelect={(id) => {
-          if (leave()) {
-            select(id);
-            goTo('board')();
-          }
-        }}
+        onSelect={selectProject}
         onNewProject={show('wizard')}
         page={page}
         onPage={(next) => {
@@ -39,10 +34,10 @@ export function App(): ReactElement {
         onNewTicket={show('ticket')}
       />
       <WizardHost
-        firstRun={!loading && projects.length === 0}
+        firstRun={!state.loading && projects.length === 0}
         open={overlay === 'wizard'}
         onFinished={(id) => {
-          select(id);
+          state.select(id);
           close();
         }}
         onClose={close}

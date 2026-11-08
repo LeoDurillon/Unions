@@ -2,7 +2,7 @@
 // usage and Union's Update, always visible on the left; folds to an icon rail.
 import type { ReactElement } from 'react';
 
-import type { PublicProject } from '../../src/api-types';
+import type { ListedProject } from '../../src/api-types';
 import type { NotificationTarget } from '../lib/open-notification';
 import { useCompactSidebar } from '../lib/use-compact-sidebar';
 import type { Page } from '../lib/use-navigation';
@@ -46,7 +46,7 @@ export function Sidebar({
   onPage,
   onOpenNotification,
 }: {
-  projects: PublicProject[];
+  projects: ListedProject[];
   projectId: number | null;
   onSelect: (id: number) => void;
   onNewProject: () => void;

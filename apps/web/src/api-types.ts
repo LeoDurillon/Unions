@@ -23,6 +23,7 @@ import type { StackPlace } from '@union/core/pr-stacks';
 import type { PublicIntegration } from './api-integration-types';
 import type { TicketSize } from './api-size-types';
 import type { StackView } from './api-stack-types';
+import type { ProjectCounts } from './project-counts';
 
 export type { PullRequestImport, PullRequestSource } from './api-pr-import-types';
 
@@ -33,6 +34,9 @@ export type { StackView } from './api-stack-types';
 export type GitHubAccess = 'token' | 'app' | 'none';
 
 /** A project as the browser sees it: the GitHub token and the integrations' secrets never leave the server. */
+/** A project as the projects list gives it: with its tickets waiting on the user and running, for the sidebar. */
+export type ListedProject = PublicProject & { counts: ProjectCounts };
+
 export type PublicProject = Omit<Project, 'githubToken'> & {
   /** `app` wins when both are set, like in the worker. */
   githubAccess: GitHubAccess;
