@@ -1,13 +1,14 @@
 // A pull request's e2e failure screenshots: files under its own folder, listed in `preview_screenshots`.
+
 import { mkdir, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import { asc, eq } from 'drizzle-orm';
 
-import { attachmentsRoot, safeFileName, uniqueFileName } from './attachments';
-import type { Db } from './db';
-import { updatePreview } from './previews';
-import * as schema from './tables';
+import { attachmentsRoot, safeFileName, uniqueFileName } from '../attachments';
+import type { Db } from '../db';
+import { updatePreview } from '../previews';
+import * as schema from '../tables';
 
 export type PreviewScreenshot = typeof schema.previewScreenshots.$inferSelect;
 

@@ -1,7 +1,7 @@
 // The agent's environment settings as sent (`agentVariables`, `forwardPorts`,
 // `startForImplementation`), checked; only what differs from the defaults is kept.
 
-import { isRecord } from './preview-compose-check';
+import { isRecord } from './preview/preview-compose-check';
 import type { AgentVariables } from './schema/schema-types';
 
 /**

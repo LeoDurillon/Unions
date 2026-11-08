@@ -1,13 +1,13 @@
 // Preview settings and their templates. Browser-safe: the settings page uses the same reading and
 // checks as the worker.
 
-import type { PreviewConfig, PreviewService } from './schema/schema-types';
-import { ownerHostId, ownerKey, type WorkspaceOwner } from './workspace-owner';
+import type { PreviewConfig, PreviewService } from '../schema/schema-types';
+import { ownerHostId, ownerKey, type WorkspaceOwner } from '../workspace-owner';
 
 /** Minutes without a visit before a running preview stops, when the settings do not say. */
 export const DEFAULT_IDLE_STOP_MINUTES = 60;
 
-export type { AgentVariables, PreviewConfig, PreviewService } from './schema/schema-types';
+export type { AgentVariables, PreviewConfig, PreviewService } from '../schema/schema-types';
 
 /** What a variable's value can use, as `{name}`; `X` is a service name. */
 export const PREVIEW_TEMPLATES = [

@@ -3,9 +3,10 @@
 // traffic), the repository's mounts taken from the workspace volume, the project's variables in
 // every service (and as a file in one, if asked), and the exposed services labelled for Traefik on
 // the preview's own proxy network.
+
 import path from 'node:path';
 
-import { PUBLISHED_PORTS_KEY } from './agent-environment';
+import { PUBLISHED_PORTS_KEY } from '../agent-environment';
 import {
   isRecord,
   PREVIEW_ENV_FILE,

@@ -1,8 +1,9 @@
 // The names of the project's secret preview variables: all the browser ever sees of them.
+
 import { and, asc, eq } from 'drizzle-orm';
 
-import type { Db } from './db';
-import * as schema from './tables';
+import type { Db } from '../db';
+import * as schema from '../tables';
 
 /** The names of the project's secret preview variables: all the browser ever sees of them. */
 export function previewSecretNames(db: Db, projectId: number): string[] {

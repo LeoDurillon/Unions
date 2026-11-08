@@ -1,5 +1,6 @@
 // A reply to a pull request comment, as the web queues it and the worker posts it; browser-safe.
-import { isRecord } from './preview-compose-check';
+
+import { isRecord } from './preview/preview-compose-check';
 
 /** GitHub refuses a comment body longer than this. */
 export const MAX_REPLY_LENGTH = 65_536;

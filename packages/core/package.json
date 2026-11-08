@@ -33,7 +33,7 @@
     "./event-project-fields": "./src/event/event-project-fields-action.ts",
     "./pr-comment-reply": "./src/pr-comment-reply.ts",
     "./pr-review-verdicts": "./src/pr-review-verdicts.ts",
-    "./preview": "./src/preview-config.ts",
+    "./preview": "./src/preview/preview-config.ts",
     "./github-client": "./src/github-client.ts",
     "./github-text": "./src/github-text.ts",
     "./investigation-defaults": "./src/investigation-defaults.ts",

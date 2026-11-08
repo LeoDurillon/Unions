@@ -1,9 +1,10 @@
 // Preview records: compose project and host, state, generated or user file, e2e results, and
 // recovery after a stop.
+
 import { eq, inArray } from 'drizzle-orm';
 
 import type { Db } from './db';
-import { previewServiceHost } from './preview-config';
+import { previewServiceHost } from './preview/preview-config';
 import * as schema from './tables';
 import { emitEvent, getTicket } from './tickets';
 import {

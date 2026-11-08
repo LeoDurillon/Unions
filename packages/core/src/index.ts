@@ -109,11 +109,11 @@ export * from './integrations/providers';
 export * from './integrations/store';
 export * from './pr-descriptions';
 export * from './pr-description-outdated';
-export * from './preview-compose';
-export * from './preview-config';
-export * from './preview-proxy-network';
-export * from './preview-screenshots';
-export * from './preview-secrets';
+export * from './preview/preview-compose';
+export * from './preview/preview-config';
+export * from './preview/preview-proxy-network';
+export * from './preview/preview-screenshots';
+export * from './preview/preview-secrets';
 export * from './project-files';
 export * from './prompt-writer';
 export * from './project-scripts';
@@ -134,7 +134,7 @@ export {
   PREVIEW_ADDITIONS_FILE,
   PREVIEW_REPO_DIR,
   type ComposeJson,
-} from './preview-compose-check';
+} from './preview/preview-compose-check';
 export * from './pr-comment-reply';
 export * from './pr-review-verdicts';
 export * from './e2e-staleness';

@@ -3,14 +3,14 @@ import { mkdtemp, readdir, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
-import { createDb, migrateDb, type Db } from './db';
+import { createDb, migrateDb, type Db } from '../db';
+import { getPreview } from '../previews';
+import * as schema from '../tables';
 import {
   listReviewScreenshots,
   replaceReviewScreenshots,
   reviewScreenshotsDir,
 } from './preview-screenshots';
-import { getPreview } from './previews';
-import * as schema from './tables';
 
 let db: Db;
 let reviewId: number;
