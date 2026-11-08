@@ -8,6 +8,13 @@ import { BAD_REQUEST } from '../http';
 
 const POLL_MS = 200;
 const BATCH = 200;
+const OPENED = ': open\n\n';
+/**
+ * A quiet stream says it is alive this often, as a named `ping` event (unnamed listeners never see
+ * it): a proxy can keep the page's connection open after the server behind it is gone, and the page
+ * reopens a stream it has heard nothing on for three of these.
+ */
+const HEARTBEAT_MS = 15_000;
 
 function latestSeq(db: Db): number {
   const row = db
@@ -51,7 +58,8 @@ function logOwner(ticket: string | undefined, investigation: string | undefined)
   return investigation ? { investigationId: Number(investigation) } : null;
 }
 
-export function eventRoutes(db: Db): Hono {
+/** `heartbeatMs`: tests shorten it. */
+export function eventRoutes(db: Db, heartbeatMs = HEARTBEAT_MS): Hono {
   const routes = new Hono();
 
   /** Where a new board subscriber should start, so it does not replay the whole history. */
@@ -92,6 +100,10 @@ export function eventRoutes(db: Db): Hono {
     const filter = eventFilter(c.req.query('ticket'), c.req.query('investigation'));
 
     return streamSSE(c, async (stream) => {
+      // A comment the browser ignores: it sends the headers now, so the page knows the stream is open
+      // (and stops showing "Reconnecting…") before the next event, which may be minutes away.
+      await stream.write(OPENED);
+      let quietSince = Date.now();
       while (!stream.aborted) {
         const rows = db
           .select()
@@ -103,6 +115,12 @@ export function eventRoutes(db: Db): Hono {
         for (const row of rows) {
           cursor = row.seq;
           await stream.writeSSE({ id: String(row.seq), data: JSON.stringify(row) });
+        }
+        if (rows.length > 0) {
+          quietSince = Date.now();
+        } else if (Date.now() - quietSince >= heartbeatMs) {
+          await stream.writeSSE({ event: 'ping', data: 'alive' });
+          quietSince = Date.now();
         }
         if (rows.length < BATCH) {
           await stream.sleep(POLL_MS);

@@ -3,9 +3,7 @@ import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-q
 import type { Notification } from '@union/core';
 import { useEffect } from 'react';
 
-import { notificationsApi } from './notifications-api';
-
-export const NOTIFICATIONS_KEY = ['notifications'];
+import { NOTIFICATIONS_KEY, notificationsApi } from './notifications-api';
 
 /** The server's page size: a shorter page is the last one. */
 const PAGE = 30;

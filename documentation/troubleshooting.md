@@ -75,6 +75,12 @@ Someone pushed to the ticket's branch. Union refuses to rewrite it so their comm
 GitHub** on the PR tab to bring their commits into Union's copy, then rebase again
 ([When someone else pushes to the branch](branches.md#when-someone-else-pushes-to-the-branch)).
 
+**The sidebar says "Reconnecting…".**
+Union lost its live connection to its server: the server is restarting, or stopped. Union tries again on its own
+(every few seconds, then every 30 seconds) and, once it is back, the board catches up with what changed in
+between; you do not need to reload. If it stays, check that Union is still running (`docker compose ps`), and
+start it again if it stopped.
+
 ## Previews
 
 **The preview address does not answer.**

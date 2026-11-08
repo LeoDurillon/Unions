@@ -4,9 +4,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import type { Notification } from '@union/core';
 import { useCallback } from 'react';
 
-import { notificationsApi } from './notifications-api';
+import { NOTIFICATIONS_KEY, notificationsApi } from './notifications-api';
 import { openInvestigation } from './opened-investigation';
-import { NOTIFICATIONS_KEY } from './use-notifications';
 
 /**
  * What opening a notification needs to know about it; `alsoRead`: the other unread notifications

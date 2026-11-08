@@ -106,6 +106,8 @@ test('the event stream can follow one investigation', async () => {
   emitEvent(db, { type: 'ticket_updated_from_github', ticketId: 7, payload: {} });
   const response = await send('GET', `/api/events?investigation=${id}&after=0`);
   const reader = response.body?.getReader();
+  // Past the opening comment.
+  await reader?.read();
   const chunk = await reader?.read();
   await reader?.cancel();
   const text = new TextDecoder().decode(chunk?.value);

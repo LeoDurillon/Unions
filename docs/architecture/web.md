@@ -360,7 +360,13 @@
   `lib/` the hooks and the typed `api.ts`. The browser keeps one event stream for all its Union tabs
   (`lib/event-hub.ts`: the tab holding the Web Lock `union-events` reads `/api/events` and relays each event
   over a BroadcastChannel; browsers allow six connections per host, and a stream per tab or log used to leave
-  clicks waiting). The board and ticket panel refetch on its events (`use-live-invalidation.ts`); the Log tabs
+  clicks waiting). A stream the server closes (a 502 from Vite's proxy while the API restarts) is reopened by
+  the leading tab after a backoff (1 s, doubling, at most 30 s; at once when the tab comes back or goes online)
+  from the last event seen. `/api/events` opens with an SSE comment (so `open` fires before any event) and sends a
+  named `ping` every 15 s while quiet: when only the API restarts, Vite's proxy keeps the page's connection open
+  with nothing behind it, and the page closes and reopens a stream silent for 45 s. `lib/stream-status.ts` holds `live` / `reconnecting`, relayed to the other tabs,
+  and the sidebar shows "Reconnecting…" after 3 s of it (`stream-pill.tsx`). The board and ticket panel refetch
+  on its events (`live-invalidation-keys.ts`; `preview_output` refetches nothing); the Log tabs
   poll `/api/events/log` every second while open (`use-log.ts`): the ticket's or investigation's events and its
   agents' output (`agent_log`) in one order, from a cursor. Agent output is not on the stream. Events are sent unnamed: a new event type reaches
   the client without being listed. A call's `result` line shows its tokens, and each run's header their sum

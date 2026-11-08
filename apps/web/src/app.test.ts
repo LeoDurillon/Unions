@@ -283,12 +283,16 @@ test('events: cursor reports the latest seq and the stream filters by ticket and
 
   const latest = await app.request('/api/events?after=latest');
   const latestReader = latest.body?.getReader();
+  // The opening comment, then nothing: no history is replayed.
+  const opening = await latestReader?.read();
+  expect(new TextDecoder().decode(opening?.value)).toBe(': open\n\n');
   const early = await Promise.race([latestReader?.read(), Bun.sleep(300).then(() => 'idle')]);
   await latestReader?.cancel();
   expect(early).toBe('idle');
 
   const response = await app.request(`/api/events?ticket=${second.id}&after=0`);
   const reader = response.body?.getReader();
+  await reader?.read();
   const chunk = await reader?.read();
   await reader?.cancel();
   const text = new TextDecoder().decode(chunk?.value);

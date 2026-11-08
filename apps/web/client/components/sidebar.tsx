@@ -9,8 +9,7 @@ import type { Page } from '../lib/use-navigation';
 import { NotificationBell } from './notifications/notification-bell';
 import { PreviewsButton } from './previews/previews-button';
 import { ProjectNav, SidebarLinks } from './sidebar-entries';
-import { UpdateButton } from './union-update/update-button';
-import { ClaudeMeter } from './usage/claude-meter';
+import { SidebarFooter } from './sidebar-footer';
 
 /** The name, and the button that folds the sidebar to its rail or unfolds it. */
 function SidebarTitle({
@@ -85,8 +84,7 @@ export function Sidebar({
           onPage('board');
         }}
       />
-      <ClaudeMeter />
-      <UpdateButton />
+      <SidebarFooter />
     </aside>
   );
 }

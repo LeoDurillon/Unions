@@ -4,6 +4,9 @@ import { request } from './api';
 
 const BASE = '/api/notifications';
 
+/** The notifications' cached query. */
+export const NOTIFICATIONS_KEY = ['notifications'];
+
 export const notificationsApi = {
   /** Newest first; `before` continues after the oldest one shown. */
   page: (before: number | null): Promise<NotificationPage> =>
