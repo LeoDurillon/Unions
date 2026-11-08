@@ -1,11 +1,12 @@
 // The routes under a pull request under review about its own checkout, commits and links: preview,
 // commands, commits, replies to its comments, Notion pages, Jira issues.
+
 import type { Db, JiraApi, NotionApi } from '@union/core';
 import { Hono } from 'hono';
 
-import type { OnboardingGitHub } from '../github-onboarding';
-import { reviewReplyRoutes } from './pr-comment-replies';
-import { prCommitRoutes } from './pr-commits';
+import type { OnboardingGitHub } from '../../github-onboarding';
+import { reviewReplyRoutes } from '../pr-comment-replies';
+import { prCommitRoutes } from '../pr-commits';
 import { reviewPreviewRoutes } from './review-preview';
 import { reviewRunRoutes } from './review-runs';
 import { reviewTrackerRoutes } from './review-trackers';

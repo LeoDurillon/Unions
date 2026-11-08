@@ -2,7 +2,7 @@
 
 import type { SpecSource } from '@union/core';
 
-import type { GroupingView } from '../../../src/routes/review-groupings';
+import type { GroupingView } from '../../../src/routes/review/review-groupings';
 import type { SpecText } from '../../../src/routes/spec-sources';
 import { request } from '../api';
 

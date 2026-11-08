@@ -2,7 +2,10 @@
 
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 
-import type { ReviewAgentRunView, ReviewAgentsView } from '../../../src/routes/review-agent-runs';
+import type {
+  ReviewAgentRunView,
+  ReviewAgentsView,
+} from '../../../src/routes/review/review-agent-runs';
 import { reviewAgentsApi } from './review-agents-api';
 import { reviewBase, type ReviewTarget } from './review-target';
 

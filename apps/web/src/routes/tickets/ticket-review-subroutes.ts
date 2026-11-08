@@ -5,18 +5,18 @@ import type { Db } from '@union/core';
 import { Hono } from 'hono';
 
 import type { ApiServices } from '../../services';
+import { prChecksRoutes } from '../pr-checks';
+import { ticketReplyRoutes } from '../pr-comment-replies';
+import { prDescriptionRoutes } from '../pr-description';
+import { refusedCommit } from '../refused-commit';
 import {
   ticketExplanationRoutes,
   ticketGroupingRoutes,
   ticketReportRoutes,
   ticketReviewAgentRoutes,
   ticketSpecRoutes,
-} from '../grouping-targets';
-import { prChecksRoutes } from '../pr-checks';
-import { ticketReplyRoutes } from '../pr-comment-replies';
-import { prDescriptionRoutes } from '../pr-description';
-import { refusedCommit } from '../refused-commit';
-import { reviewRoutes } from '../review';
+} from '../review/grouping-targets';
+import { reviewRoutes } from '../review/review';
 import { ticketCommitRoutes } from './ticket-commits';
 
 /**

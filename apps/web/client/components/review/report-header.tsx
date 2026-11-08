@@ -9,7 +9,7 @@ import {
 } from '@union/core/review-report-markdown';
 import type { ReactElement } from 'react';
 
-import type { ReportView } from '../../../src/routes/review-reports';
+import type { ReportView } from '../../../src/routes/review/review-reports';
 import type { Tone } from '../../lib/labels';
 import type { ReviewTarget } from '../../lib/review/review-target';
 import { useReviewReport } from '../../lib/review/use-review-report';

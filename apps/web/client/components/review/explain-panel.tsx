@@ -2,7 +2,7 @@
 
 import type { ReactElement } from 'react';
 
-import type { ExplanationView } from '../../../src/routes/review-explanations';
+import type { ExplanationView } from '../../../src/routes/review/review-explanations';
 import { useExplanations } from '../../lib/review/use-explanations';
 import { ErrorText } from '../ui';
 import { useExplain, type ExplainState } from './explain-context';

@@ -1,7 +1,8 @@
 // Which pull requests under review a listing shows closed or merged.
+
 import { describe, expect, test } from 'bun:test';
 
-import { closedReviewNumbers } from './routes/closed-reviews';
+import { closedReviewNumbers } from './routes/review/closed-reviews';
 
 const pull = (
   number: number,

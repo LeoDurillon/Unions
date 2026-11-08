@@ -1,6 +1,7 @@
 // Under a review's base (`/api/tickets/:id`, `/api/projects/:projectId/pull-requests/reviews/:number`):
 // `/specs`, the review's specs, started the first time, each read from its source unless edited;
 // `PUT /specs` saves the list as the Specs bar edits it.
+
 import {
   parseNotionId,
   parseSavedSpecs,
@@ -15,10 +16,10 @@ import {
 import { eq } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
 
-import { BAD_REQUEST, fail, readObject } from '../http';
-import type { ReviewSpecView } from '../review-spec-types';
+import { BAD_REQUEST, fail, readObject } from '../../http';
+import type { ReviewSpecView } from '../../review-spec-types';
+import { readSpec, type SpecReaders } from '../spec-sources';
 import type { GroupingTarget } from './review-groupings';
-import { readSpec, type SpecReaders } from './spec-sources';
 
 /** The label and URL as read now, kept on the row so the bar lists them without reading again. */
 function refreshSnapshot(db: Db, row: ReviewSpecRow, label: string, url: string | null): void {

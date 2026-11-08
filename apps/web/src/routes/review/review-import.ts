@@ -1,4 +1,5 @@
 // The PR tab's routes: the discussion, and importing its threads and notes as draft comments.
+
 import {
   listSlices,
   projectGitHubAuth,
@@ -10,13 +11,13 @@ import {
 import { eq } from 'drizzle-orm';
 import type { Context } from 'hono';
 
-import type { DiscussionResponse, PullRequestDiscussion, StackImportResult } from '../api-types';
-import type { OnboardingGitHub } from '../github-onboarding';
-import { CONFLICT, CREATED, fail, NOT_FOUND, readObject, requireText } from '../http';
-import { importedUrls, importNote, importThreads } from '../review-import';
-import { importAnchor } from '../slice-snapshot';
-import { pickedPullRequest } from '../ticket-pull-request';
-import { guarded } from './github-errors';
+import type { DiscussionResponse, PullRequestDiscussion, StackImportResult } from '../../api-types';
+import type { OnboardingGitHub } from '../../github-onboarding';
+import { CONFLICT, CREATED, fail, NOT_FOUND, readObject, requireText } from '../../http';
+import { importedUrls, importNote, importThreads } from '../../review-import';
+import { importAnchor } from '../../slice-snapshot';
+import { pickedPullRequest } from '../../ticket-pull-request';
+import { guarded } from '../github-errors';
 
 type Fetched = { number: number; url: string; discussion: PullRequestDiscussion };
 type Access = { auth: GitHubAuth; owner: string; repo: string };

@@ -1,4 +1,5 @@
 // The text of a specification, from where the user points: the PR, the ticket, a GitHub issue, a Notion page, a Jira issue.
+
 import {
   integrationKind,
   integrationOf,
@@ -20,7 +21,7 @@ import { BAD_REQUEST, CONFLICT, fail, NOT_FOUND } from '../http';
 import { parseIssueRef } from '../pull-request-ref';
 import { guarded } from './github-errors';
 import { guarded as notionGuarded, notionTokenOf } from './notion';
-import type { GroupingTarget } from './review-groupings';
+import type { GroupingTarget } from './review/review-groupings';
 
 /** What the services the specification can come from are read with: all read only. */
 export type SpecReaders = { db: Db; github: OnboardingGitHub; notion: NotionApi; jira: JiraApi };

@@ -3,7 +3,7 @@
 
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 
-import type { ReportView } from '../../../src/routes/review-reports';
+import type { ReportView } from '../../../src/routes/review/review-reports';
 import { reviewReportApi } from './review-report-api';
 import { reviewBase, type ReviewTarget } from './review-target';
 

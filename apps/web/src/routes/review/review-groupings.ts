@@ -2,6 +2,7 @@
 // `/api/projects/:projectId/pull-requests/reviews/:number`): `/groupings` (the newest),
 // `/groupings/source` (a specification's text, for the user to check and edit), `POST /groupings`
 // (queue the agent), `/groupings/cancel`.
+
 import {
   GroupingBusyError,
   latestGrouping,
@@ -18,8 +19,8 @@ import {
 } from '@union/core';
 import { Hono, type Context } from 'hono';
 
-import { ACCEPTED, BAD_REQUEST, CONFLICT, fail, readObject, requireText } from '../http';
-import { readSpec, type SpecReaders } from './spec-sources';
+import { ACCEPTED, BAD_REQUEST, CONFLICT, fail, readObject, requireText } from '../../http';
+import { readSpec, type SpecReaders } from '../spec-sources';
 
 const MAX_SPEC_CHARS = 50_000;
 

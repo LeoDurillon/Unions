@@ -1,9 +1,10 @@
 // The files under the parts of the specification they implement (a file can be under several, with
 // only some of its hunks), then the changes no part covers, then the parts nothing implements.
+
 import type { ReactElement } from 'react';
 
 import type { DiffFileSummary } from '../../../src/api-types';
-import type { GroupingView } from '../../../src/routes/review-groupings';
+import type { GroupingView } from '../../../src/routes/review/review-groupings';
 import { partialCount, UNRELATED_PART } from '../../lib/spec-hunks';
 import { FileRows, type RowOptions } from './file-rows';
 

@@ -2,7 +2,7 @@
 
 import type { ReactElement, ReactNode } from 'react';
 
-import type { ReviewAgentRunView } from '../../../src/routes/review-agent-runs';
+import type { ReviewAgentRunView } from '../../../src/routes/review/review-agent-runs';
 import type { Tone } from '../../lib/labels';
 import { isActive } from '../../lib/review/use-review-agents';
 import { Markdown } from '../markdown';

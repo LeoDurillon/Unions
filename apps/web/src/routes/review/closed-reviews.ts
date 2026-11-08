@@ -1,9 +1,10 @@
 // Pull requests under review that a read from GitHub shows closed or merged: removed with what they hold.
+
 import { schema, type Db } from '@union/core';
 import { and, eq, inArray } from 'drizzle-orm';
 
-import type { PullRequestFilter } from '../api-types';
-import type { RemotePullRequest } from '../github-pull-requests';
+import type { PullRequestFilter } from '../../api-types';
+import type { RemotePullRequest } from '../../github-pull-requests';
 import { forgetReviews, removeReviewFiles } from './review-removal';
 
 /**

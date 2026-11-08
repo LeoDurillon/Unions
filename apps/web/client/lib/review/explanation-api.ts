@@ -2,7 +2,10 @@
 
 import type { AgentReviewSpec } from '@union/core';
 
-import type { ExplanationLogView, ExplanationView } from '../../../src/routes/review-explanations';
+import type {
+  ExplanationLogView,
+  ExplanationView,
+} from '../../../src/routes/review/review-explanations';
 import { request } from '../api';
 
 /** New lines to explain, or a follow-up (`parentId` and `question`) on an explanation. */

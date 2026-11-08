@@ -1,6 +1,6 @@
 // API calls for a review's review agents, under the review's API root (`reviewBase`): the agents it can run, each one's newest run, run one, cancel.
 
-import type { ReviewAgentsView } from '../../../src/routes/review-agent-runs';
+import type { ReviewAgentsView } from '../../../src/routes/review/review-agent-runs';
 import { request } from '../api';
 
 /** `base` is the review's API root (`reviewBase`). */

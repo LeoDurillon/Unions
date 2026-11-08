@@ -2,7 +2,10 @@
 
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 
-import type { ExplanationLogView, ExplanationView } from '../../../src/routes/review-explanations';
+import type {
+  ExplanationLogView,
+  ExplanationView,
+} from '../../../src/routes/review/review-explanations';
 import { explanationApi, type ExplanationAsk } from './explanation-api';
 import { reviewBase, type ReviewTarget } from './review-target';
 

@@ -1,7 +1,8 @@
 // Tests grouping explanations into threads and finding the code an answer cites.
+
 import { expect, test } from 'bun:test';
 
-import type { ExplanationView } from '../../../src/routes/review-explanations';
+import type { ExplanationView } from '../../../src/routes/review/review-explanations';
 import { threadsOf } from './explain-panel';
 import { citationsOf } from './explanation-answer';
 

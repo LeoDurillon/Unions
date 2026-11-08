@@ -1,9 +1,10 @@
 // The pull requests under review of a project as the Pull requests tab lists them: without their
 // files, with their preview's state and their linked Notion pages and Jira issues.
+
 import { linkedJiraIssues, linkedNotionPages, schema, type Db } from '@union/core';
 import { desc, eq, getTableColumns } from 'drizzle-orm';
 
-import type { CurrentReview } from '../api-types';
+import type { CurrentReview } from '../../api-types';
 
 /** Everything but the files, which only the review page needs. */
 const { files: _files, ...LISTED } = getTableColumns(schema.currentReviews);

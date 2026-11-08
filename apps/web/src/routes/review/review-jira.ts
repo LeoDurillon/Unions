@@ -1,5 +1,6 @@
 // `<review>/jira`: the Jira issues a pull request under review is linked to (its `jira` specs): their description and
 // comments, read only; checking one, linking it, unlinking it; and the issues the pull request names, suggested.
+
 import {
   integrationKind,
   integrationOf,
@@ -16,11 +17,11 @@ import {
 } from '@union/core';
 import { Hono, type Context } from 'hono';
 
-import type { OnboardingGitHub } from '../github-onboarding';
-import { BAD_REQUEST, CONFLICT, fail, readObject, requireText } from '../http';
-import type { ReviewJiraIssue, ReviewJiraLink } from '../review-jira-types';
-import { guarded } from './notion';
-import { authOf, load, type Project } from './pr-review-load';
+import type { OnboardingGitHub } from '../../github-onboarding';
+import { BAD_REQUEST, CONFLICT, fail, readObject, requireText } from '../../http';
+import type { ReviewJiraIssue, ReviewJiraLink } from '../../review-jira-types';
+import { guarded } from '../notion';
+import { authOf, load, type Project } from '../pr-review-load';
 
 /** A description rarely names more; each is a Jira read. */
 const MAX_SUGGESTIONS = 10;

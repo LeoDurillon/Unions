@@ -1,5 +1,6 @@
 // Review comments of a ticket or of a pull request under review: drafts, edits, outdated marks and
 // sending.
+
 import {
   diffExcerpt,
   JIRA_COMMENT_URL_LIKE,
@@ -11,7 +12,7 @@ import {
 import { and, eq, isNotNull, notLike, type SQL } from 'drizzle-orm';
 import type { Context } from 'hono';
 
-import type { CommentView } from '../api-types';
+import type { CommentView } from '../../api-types';
 import {
   BAD_REQUEST,
   CONFLICT,
@@ -21,8 +22,8 @@ import {
   readObject,
   requireId,
   requireText,
-} from '../http';
-import { loadSnapshot, sliceSnapshot, sliceTips } from '../slice-snapshot';
+} from '../../http';
+import { loadSnapshot, sliceSnapshot, sliceTips } from '../../slice-snapshot';
 
 type Comment = typeof schema.reviewComments.$inferSelect;
 type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];

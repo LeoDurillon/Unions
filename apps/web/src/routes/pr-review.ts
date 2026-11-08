@@ -1,5 +1,6 @@
 // `/api/projects/:projectId/pull-requests/reviews/:number`: the description and discussion, the
 // diff, the comments, and posting them.
+
 import {
   isIgnoredPath,
   isReviewVerdict,
@@ -26,7 +27,7 @@ import {
   listComments,
   type CommentDiff,
   type CommentOwner,
-} from './review-comments';
+} from './review/review-comments';
 
 type Review = typeof schema.currentReviews.$inferSelect;
 

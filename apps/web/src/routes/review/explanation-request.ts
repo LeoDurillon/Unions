@@ -1,4 +1,5 @@
 // Reads a request to explain lines of the diff, or to follow up on an explanation, into what is queued.
+
 import {
   diffExcerpt,
   explanationOwner,
@@ -9,7 +10,7 @@ import {
   type ExplanationRequest,
 } from '@union/core';
 
-import { BAD_REQUEST, CONFLICT, fail, NOT_FOUND, optionalText, requireText } from '../http';
+import { BAD_REQUEST, CONFLICT, fail, NOT_FOUND, optionalText, requireText } from '../../http';
 import type { GroupingTarget } from './review-groupings';
 
 const MAX_QUESTION_CHARS = 2000;

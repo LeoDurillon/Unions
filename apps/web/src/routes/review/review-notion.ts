@@ -1,5 +1,6 @@
 // `<review>/notion`: the Notion pages a pull request under review is linked to (its `notion` specs):
 // their text and open discussions, linking one more, unlinking one.
+
 import {
   linkedNotionPages,
   linkNotionPage,
@@ -13,11 +14,11 @@ import {
 import { and, eq, ne } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
 
-import { readObject } from '../http';
-import { discussionsOfPage } from '../notion-discussions';
-import type { ReviewNotionLink, ReviewNotionPage } from '../review-notion-types';
-import { guarded, notionTokenOf, requireNotionId } from './notion';
-import { load, type Review } from './pr-review-load';
+import { readObject } from '../../http';
+import { discussionsOfPage } from '../../notion-discussions';
+import type { ReviewNotionLink, ReviewNotionPage } from '../../review-notion-types';
+import { guarded, notionTokenOf, requireNotionId } from '../notion';
+import { load, type Review } from '../pr-review-load';
 
 /** Any page the integration can read: reading it is the check that it is shared. */
 async function readLink(

@@ -2,7 +2,7 @@
 
 import { useState, type ReactElement } from 'react';
 
-import type { ReviewAgentsView } from '../../../src/routes/review-agent-runs';
+import type { ReviewAgentsView } from '../../../src/routes/review/review-agent-runs';
 import type { ReviewTarget } from '../../lib/review/review-target';
 import { isActive, useReviewAgents } from '../../lib/review/use-review-agents';
 import { Button, ErrorText, inputClass } from '../ui';

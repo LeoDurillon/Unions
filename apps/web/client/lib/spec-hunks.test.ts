@@ -2,7 +2,7 @@ import { expect, test } from 'bun:test';
 
 import { hunksOf } from '@union/core/diff-hunks';
 
-import type { GroupingView } from '../../src/routes/review-groupings';
+import type { GroupingView } from '../../src/routes/review/review-groupings';
 import { focusOf, headerKey, hunkTags, inHunks, partialCount, UNRELATED_PART } from './spec-hunks';
 
 const PATCH = `@@ -10,3 +10,4 @@

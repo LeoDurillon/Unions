@@ -1,6 +1,7 @@
 // `/api/projects/:projectId/pull-requests`: the repository's pull requests and stacks, read from
 // GitHub (kept a few minutes; `?refresh` reads them again), and under `/reviews` the ones the user
 // put under review.
+
 import { projectGitHubAuth, schema, type Db } from '@union/core';
 import { stackPlaces } from '@union/core/pr-stacks';
 import { and, eq, isNotNull } from 'drizzle-orm';
@@ -9,9 +10,9 @@ import { Hono, type Context } from 'hono';
 import { PULL_REQUEST_FILTERS, type PullRequestFilter, type PullRequestList } from '../api-types';
 import type { OnboardingGitHub } from '../github-onboarding';
 import { BAD_REQUEST, CONFLICT, fail, NOT_FOUND, requireId } from '../http';
-import { currentReviewRoutes } from './current-reviews';
 import { PullRequestCache } from './pull-request-cache';
 import { readListing } from './pull-request-listing';
+import { currentReviewRoutes } from './review/current-reviews';
 
 function filterOf(c: Context): PullRequestFilter {
   const value = c.req.query('state') ?? 'open';

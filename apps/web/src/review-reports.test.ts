@@ -17,7 +17,7 @@ import type { Hono } from 'hono';
 import { createApp } from './app';
 import type { OnboardingGitHub } from './github-onboarding';
 import type { ReviewSpecView } from './review-spec-types';
-import type { ReportView } from './routes/review-reports';
+import type { ReportView } from './routes/review/review-reports';
 
 const github = {
   getDiscussion: () =>

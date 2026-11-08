@@ -19,7 +19,7 @@ import type { Hono } from 'hono';
 import { createApp } from './app';
 import type { OnboardingGitHub } from './github-onboarding';
 import type { ReviewSpecView } from './review-spec-types';
-import type { ReviewAgentsView } from './routes/review-agent-runs';
+import type { ReviewAgentsView } from './routes/review/review-agent-runs';
 
 let db: Db;
 let app: Hono;

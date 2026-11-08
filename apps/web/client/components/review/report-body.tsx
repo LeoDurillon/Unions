@@ -4,7 +4,7 @@
 
 import type { ReactElement } from 'react';
 
-import type { ReportView } from '../../../src/routes/review-reports';
+import type { ReportView } from '../../../src/routes/review/review-reports';
 import type { ReviewTarget } from '../../lib/review/review-target';
 import { ReportAttention } from './report-attention';
 import { ReportFlowSection } from './report-flow';

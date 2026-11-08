@@ -2,7 +2,7 @@
 
 import type { ReactElement } from 'react';
 
-import type { ExplanationView } from '../../../src/routes/review-explanations';
+import type { ExplanationView } from '../../../src/routes/review/review-explanations';
 import { summarizeAgentEvent } from '../../lib/agent-events';
 import type { ReviewTarget } from '../../lib/review/review-target';
 import { useExplanationLog } from '../../lib/review/use-explanations';

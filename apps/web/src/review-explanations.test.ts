@@ -1,4 +1,5 @@
 // Tests the explanation routes: lines checked against the diff, the running ticket refused, spec parts, follow-ups, cancel.
+
 import { beforeEach, expect, test } from 'bun:test';
 
 import {
@@ -15,7 +16,7 @@ import { eq } from 'drizzle-orm';
 import type { Hono } from 'hono';
 
 import { createApp } from './app';
-import type { ExplanationView } from './routes/review-explanations';
+import type { ExplanationView } from './routes/review/review-explanations';
 
 const PATCH = '@@ -1,2 +1,3 @@\n const a = 1;\n+const b = 2;\n const c = 3;';
 const SPECS = [{ kind: 'pr', label: 'PR description', text: 'Add b.' }];

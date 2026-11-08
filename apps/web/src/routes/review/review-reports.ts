@@ -2,6 +2,7 @@
 // `/reports` (the newest spec report), `POST /reports` (queue one on the review's specs), `/reports/cancel`,
 // `/reports/gaps` (a draft asking for the requirements it found not met), `/reports/attention/:index/not-useful`
 // (an item hidden, its rule kept as a lesson).
+
 import {
   addLesson,
   distinctSpecs,
@@ -23,12 +24,12 @@ import {
 import { reportGaps } from '@union/core/review-report-markdown';
 import { Hono, type Context } from 'hono';
 
-import { ACCEPTED, BAD_REQUEST, CONFLICT, CREATED, fail, NOT_FOUND, readObject } from '../http';
-import { addGeneralDraft } from '../review-output-comment';
-import type { ReviewSpecView } from '../review-spec-types';
+import { ACCEPTED, BAD_REQUEST, CONFLICT, CREATED, fail, NOT_FOUND, readObject } from '../../http';
+import { addGeneralDraft } from '../../review-output-comment';
+import type { ReviewSpecView } from '../../review-spec-types';
+import type { SpecReaders } from '../spec-sources';
 import type { GroupingTarget } from './review-groupings';
 import { readReviewSpecs } from './review-specs';
-import type { SpecReaders } from './spec-sources';
 
 /** What the review page shows of the newest report: the specs it read by name, not their text. */
 export type ReportView = Pick<

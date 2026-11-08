@@ -3,7 +3,7 @@
 
 import { useState, type ReactElement } from 'react';
 
-import type { GroupingView } from '../../../src/routes/review-groupings';
+import type { GroupingView } from '../../../src/routes/review/review-groupings';
 import type { ReviewTarget } from '../../lib/review/review-target';
 import { isGrouping, useReviewGrouping } from '../../lib/review/use-review-grouping';
 import { Button, ErrorText } from '../ui';
