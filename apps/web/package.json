@@ -10,7 +10,6 @@
     "start": "NODE_ENV=production bun src/server.ts"
   },
   "dependencies": {
-    "@dnd-kit/core": "catalog:ui",
     "@hono/bun": "catalog:server",
     "@tailwindcss/vite": "catalog:ui",
     "@tanstack/react-query": "catalog:ui",

@@ -23,7 +23,7 @@
    worker (`adopt_pull_request`) moves the ticket to awaiting approval at Implementation, then checks the branch
    out and captures its diff (no agent). Approve runs the final review; Revise runs the implementer on the branch,
    with no session. Plan: `docs/plans/archive/pr-import.md`.
-2. Move to In Progress (drag the card, or its **Start** button) → the worker creates volumes + container, clones the repo into the workspace volume.
+2. Move to In Progress (the card's or the Overview's **Start** button; the card moves at once, "Starting…") → the worker creates volumes + container, clones the repo into the workspace volume.
    A ticket that depends on another one cannot start before it is done (see [Ticket dependencies](ticket-dependencies.md)).
 3. Planning steps, each a tab on the ticket: `intake` (Haiku) → `summary` (Sonnet) → `technical` (Opus) → `test_plan` (Sonnet),
    or only those the ticket's flow keeps (none for a Quick ticket), with the user's [custom agents](custom-agents.md)

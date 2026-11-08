@@ -153,7 +153,7 @@ export function BoardToolbar({
       ) : null}
       {startable && !filtering ? (
         <span className="ml-auto text-xs text-zinc-500">
-          Start a backlog ticket with its Start button, or drag it into In progress.
+          Start a backlog ticket with its Start button.
         </span>
       ) : null}
     </div>

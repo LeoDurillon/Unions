@@ -1,7 +1,5 @@
-// A draggable ticket card for the board: its title, its state, the ticket it builds on, its pull
-// request, its CI checks and a branch moved on GitHub, what its agent is doing while it runs, and Start while it waits in the
-// backlog.
-import { useDraggable } from '@dnd-kit/core';
+// A ticket card for the board: its title, its state, the ticket it builds on, its pull request, its CI checks and a
+// branch moved on GitHub, what its agent is doing while it runs, and Start while it waits in the backlog.
 import { flowName, resolveFlow } from '@union/core/flows';
 import { FULL_FLOW } from '@union/core/states';
 import type { ReactElement } from 'react';
@@ -121,35 +119,47 @@ function StartButton({ onStart }: { onStart: () => void }): ReactElement {
   );
 }
 
+/** Start while the ticket waits in the backlog; "Starting…" once clicked, until the worker takes it. */
+function StartAction({
+  ticket,
+  starting,
+  onStart,
+}: {
+  ticket: TicketSummary;
+  starting: boolean;
+  onStart?: (id: number) => void;
+}): ReactElement | null {
+  if (starting) {
+    return <Badge tone="blue">Starting…</Badge>;
+  }
+  return isStartable(ticket) && onStart ? (
+    <StartButton
+      onStart={() => {
+        onStart(ticket.id);
+      }}
+    />
+  ) : null;
+}
+
 export function TicketCard({
   ticket,
   config,
   onOpen,
   onStart,
+  starting = false,
+  startError = null,
 }: {
   ticket: TicketSummary;
   config?: PublicProject['config'];
   onOpen: (id: number) => void;
   onStart?: (id: number) => void;
+  /** Start was clicked and the worker has not taken the ticket yet. */
+  starting?: boolean;
+  /** Why the last Start was refused. */
+  startError?: string | null;
 }): ReactElement {
-  const draggable = isStartable(ticket);
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
-    id: ticket.id,
-    disabled: !draggable,
-  });
-  const style = transform
-    ? { transform: `translate(${transform.x}px, ${transform.y}px)` }
-    : undefined;
-  const dragProps = draggable ? { ...listeners, ...attributes } : {};
-  const state = isDragging ? 'opacity-60 shadow-lg' : 'hover:border-indigo-400';
-
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      {...dragProps}
-      className={`relative space-y-2 rounded-lg border border-zinc-200 bg-white p-3 shadow-sm transition dark:border-zinc-800 dark:bg-zinc-900 ${draggable ? 'cursor-grab' : ''} ${state}`}
-    >
+    <div className="relative space-y-2 rounded-lg border border-zinc-200 bg-white p-3 shadow-sm transition hover:border-indigo-400 dark:border-zinc-800 dark:bg-zinc-900">
       <button
         type="button"
         onClick={() => {
@@ -167,17 +177,16 @@ export function TicketCard({
         <MovedBadge ticket={ticket} />
         {ticket.stack ? <StackBadge stack={ticket.stack} /> : null}
         {config ? <FlowBadge ticket={ticket} config={config} /> : null}
-        {draggable && onStart ? (
-          <StartButton
-            onStart={() => {
-              onStart(ticket.id);
-            }}
-          />
-        ) : null}
+        <StartAction ticket={ticket} starting={starting} onStart={onStart} />
         <span className="ml-auto text-xs whitespace-nowrap text-zinc-500">
           {ticket.issueNumber === null ? 'not on GitHub yet' : `#${ticket.issueNumber}`}
         </span>
       </div>
+      {startError ? (
+        <p role="alert" className="text-xs text-red-600 dark:text-red-400">
+          Not started: {startError}
+        </p>
+      ) : null}
       <CardProgress ticket={ticket} />
     </div>
   );

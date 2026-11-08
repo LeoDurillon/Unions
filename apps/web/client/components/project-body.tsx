@@ -10,10 +10,6 @@ import { PullRequestsPage } from './pull-requests/pull-requests-page';
 import { RepositoryPage } from './repository/repository-page';
 import { UsagePage } from './usage/usage-page';
 
-function noop(): void {
-  // The empty board behind the first-run wizard is display only.
-}
-
 /** The open view of the project; the empty board behind the first-run wizard when there is none. */
 export function ProjectBody({
   project,
@@ -33,7 +29,7 @@ export function ProjectBody({
   onNewTicket: () => void;
 }): ReactElement {
   if (!project) {
-    return <BoardView tickets={[]} now={0} error={null} onOpen={onOpenTicket} onDrop={noop} />;
+    return <BoardView tickets={[]} now={0} error={null} onOpen={onOpenTicket} />;
   }
   if (view === 'investigations') {
     return (

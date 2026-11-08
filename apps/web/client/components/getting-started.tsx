@@ -33,7 +33,7 @@ const TEXT: Record<GettingStartedStep, { title: string; what: string; guide: Gui
   },
   start: {
     title: 'Start it',
-    what: 'Click Start on its card, or drag it into In progress. Agents run in Docker with your Claude account.',
+    what: 'Click Start on its card: it moves to In progress. Agents run in Docker with your Claude account.',
     guide: ['tickets', 'start-a-ticket'],
   },
   plan: {

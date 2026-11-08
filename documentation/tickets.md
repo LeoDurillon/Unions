@@ -102,7 +102,8 @@ round. Unlink it first to link it to the other tracker.
 
 ## Start a ticket
 
-Drag the card to **In progress**, or click **Start** on the card or in the ticket's Overview. With a GitHub
+Click **Start** on the card or in the ticket's Overview: the card moves to **In progress** at once and says
+**Starting…** until the agent begins. If the start is refused, the card goes back to Backlog with the reason on it. With a GitHub
 Project connected, moving the ticket's card to In Progress there works too.
 
 Union creates the ticket's container and volumes, clones the repository into it, and runs the first step of the
@@ -133,7 +134,7 @@ presets too.
 A ticket can depend on one other ticket of the same project, its **parent**. Set it in the New ticket dialog, or in
 the Overview while the ticket is in Backlog.
 
-- The ticket cannot start until its parent is **Done**. Its card says "Waiting for parent" and cannot be dragged.
+- The ticket cannot start until its parent is **Done**. Its card says "Waiting for parent" and has no **Start** button.
 - It then starts from the parent's branch while the parent's pull request is open, and its own pull request targets
   that branch. If the parent's pull request is already merged, it starts from the project's base branch.
 - Every agent of the ticket reads the parent's title and description.

@@ -1,38 +1,17 @@
-// The board: its search and filters, then the columns down to the bottom edge; any can fold to a strip.
-import { DndContext, PointerSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+// The board: its search and filters, then the columns down to the bottom edge; any can fold to a strip. Start moves a card at once.
+import { useQuery } from '@tanstack/react-query';
 import { leftBoard } from '@union/core/states';
 import { useState, type ReactElement } from 'react';
 
 import type { PublicProject, TicketSummary } from '../../src/api-types';
 import { api } from '../lib/api';
 import { filterTickets, isFiltering, NO_FILTER } from '../lib/board-filter';
+import { asStarted, useStartTickets, type StartState } from '../lib/use-start-tickets';
 import { BoardColumns } from './board-column';
 import { BoardToolbar } from './board-toolbar';
 import { ErrorText } from './ui';
 
-const DRAG_DISTANCE_PX = 6;
-
 type Config = PublicProject['config'];
-
-/** Starting a backlog ticket: dropped into In progress, or its Start button. */
-function useStart(): {
-  onDrop: (event: DragEndEvent) => void;
-  start: (ticketId: number) => void;
-  error: Error | null;
-} {
-  const queryClient = useQueryClient();
-  const mutation = useMutation({
-    mutationFn: (ticketId: number) => api.command(ticketId, 'start'),
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ['tickets'] }),
-  });
-  const onDrop = (event: DragEndEvent): void => {
-    if (event.over?.id === 'in_progress' && typeof event.active.id === 'number') {
-      mutation.mutate(event.active.id);
-    }
-  };
-  return { onDrop, start: mutation.mutate, error: mutation.error };
-}
 
 /**
  * The columns, filling the screen down to the bottom edge. Merged / Closed keeps a ticket three weeks
@@ -44,8 +23,8 @@ export function BoardView({
   error,
   config,
   onOpen,
-  onDrop,
-  onStart,
+  started,
+  loading = false,
 }: {
   tickets: TicketSummary[];
   /** The project's flows, to name a ticket's on its card. */
@@ -54,16 +33,17 @@ export function BoardView({
   now: number;
   error: Error | null;
   onOpen: (id: number) => void;
-  onDrop: (event: DragEndEvent) => void;
-  /** A backlog card's Start button; none behind the first-run wizard. */
-  onStart?: (id: number) => void;
+  /** A backlog card's Start button and what it started; none behind the first-run wizard. */
+  started?: StartState;
+  /** The tickets are not read yet: placeholder cards, not the empty columns' texts. */
+  loading?: boolean;
 }): ReactElement {
-  const onBoard = tickets.filter((ticket) => !leftBoard(ticket, now));
+  const onBoard = asStarted(
+    tickets.filter((ticket) => !leftBoard(ticket, now)),
+    started?.starting ?? new Set(),
+  );
   const [filter, setFilter] = useState(NO_FILTER);
   const shown = filterTickets(onBoard, filter);
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: DRAG_DISTANCE_PX } }),
-  );
   return (
     <div className="flex h-full flex-col gap-3 px-4 pt-3 pb-4">
       <BoardToolbar
@@ -71,19 +51,18 @@ export function BoardView({
         shown={shown.length}
         filter={filter}
         onFilter={setFilter}
-        canStart={onStart !== undefined}
+        canStart={started !== undefined}
         onOpen={onOpen}
       />
       <ErrorText error={error} />
-      <DndContext sensors={sensors} onDragEnd={onDrop}>
-        <BoardColumns
-          tickets={shown}
-          config={config}
-          filtering={isFiltering(filter)}
-          onOpen={onOpen}
-          onStart={onStart}
-        />
-      </DndContext>
+      <BoardColumns
+        tickets={shown}
+        config={config}
+        filtering={isFiltering(filter)}
+        loading={loading}
+        onOpen={onOpen}
+        started={started}
+      />
     </div>
   );
 }
@@ -99,16 +78,16 @@ export function Board({
     queryKey: ['tickets', project.id],
     queryFn: () => api.tickets(project.id),
   });
-  const { onDrop, start, error } = useStart();
+  const started = useStartTickets();
   return (
     <BoardView
       tickets={tickets.data ?? []}
       now={tickets.dataUpdatedAt}
-      error={error ?? tickets.error}
+      error={tickets.error}
       config={project.config}
       onOpen={onOpen}
-      onDrop={onDrop}
-      onStart={start}
+      started={started}
+      loading={tickets.isPending}
     />
   );
 }

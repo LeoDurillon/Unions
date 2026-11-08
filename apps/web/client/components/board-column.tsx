@@ -1,12 +1,12 @@
-// The board's columns: each its title, count and fold button over its cards, a drop target (or, folded,
-// a narrow strip that unfolds on a click); empty ones say so.
-import { useDroppable } from '@dnd-kit/core';
+// The board's columns: each its title, count and fold button over its cards (or, folded, a narrow strip
+// that unfolds on a click); empty ones say so, and placeholder cards stand in while the board loads.
 import type { BoardColumn } from '@union/core';
 import type { ReactElement } from 'react';
 
 import type { PublicProject, TicketSummary } from '../../src/api-types';
 import { COLUMNS } from '../lib/labels';
 import { useFoldedColumns } from '../lib/use-folded-columns';
+import type { StartState } from '../lib/use-start-tickets';
 import { TicketCard } from './ticket-card';
 
 type Config = PublicProject['config'];
@@ -47,32 +47,58 @@ function FoldedColumn({
   );
 }
 
+/** Two grey cards that pulse while the board's tickets are read. */
+function Placeholders(): ReactElement {
+  return (
+    <div aria-hidden className="flex flex-col gap-2">
+      {[0, 1].map((key) => (
+        <div
+          key={key}
+          className="h-20 animate-pulse rounded-lg bg-zinc-200/80 dark:bg-zinc-800/80"
+        />
+      ))}
+    </div>
+  );
+}
+
+/** What a column with no card shows: placeholders while loading, else why it is empty. */
+function EmptyColumn({ status, view }: { status: BoardColumn; view: ColumnView }): ReactElement {
+  if (view.loading) {
+    return <Placeholders />;
+  }
+  return (
+    <p className="py-6 text-center text-xs text-zinc-400 dark:text-zinc-500">
+      {view.filtering ? 'None matches the filter' : EMPTY[status]}
+    </p>
+  );
+}
+
+/** How the board is shown: filtered, still loading, and what the Start buttons started. */
+type ColumnView = {
+  filtering: boolean;
+  loading: boolean;
+  config?: Config;
+  started?: StartState;
+};
+
 function Column({
   status,
   title,
   tickets,
-  config,
-  filtering,
+  view,
   onOpen,
-  onStart,
   onFold,
 }: {
   status: BoardColumn;
   title: string;
   tickets: TicketSummary[];
-  config?: Config;
-  /** The board's filter is on: an empty column says so. */
-  filtering: boolean;
+  view: ColumnView;
   onOpen: (id: number) => void;
-  onStart?: (id: number) => void;
   onFold: () => void;
 }): ReactElement {
-  const { setNodeRef, isOver } = useDroppable({ id: status });
+  const { started } = view;
   return (
-    <section
-      ref={setNodeRef}
-      className={`flex h-full min-w-52 flex-1 flex-col gap-2 rounded-xl p-3 transition ${isOver ? 'bg-indigo-100 dark:bg-indigo-950' : 'bg-zinc-100 dark:bg-zinc-900/60'}`}
-    >
+    <section className="flex h-full min-w-52 flex-1 flex-col gap-2 rounded-xl bg-zinc-100 p-3 dark:bg-zinc-900/60">
       <h2 className="flex items-center gap-2 text-sm font-semibold">
         <span className="min-w-0 flex-1 truncate">{title}</span>
         <span className="text-xs font-normal text-zinc-500">{tickets.length}</span>
@@ -87,18 +113,16 @@ function Column({
         </button>
       </h2>
       <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto">
-        {tickets.length === 0 ? (
-          <p className="py-6 text-center text-xs text-zinc-400 dark:text-zinc-500">
-            {filtering ? 'None matches the filter' : EMPTY[status]}
-          </p>
-        ) : null}
+        {tickets.length === 0 ? <EmptyColumn status={status} view={view} /> : null}
         {tickets.map((ticket) => (
           <TicketCard
             key={ticket.id}
             ticket={ticket}
-            config={config}
+            config={view.config}
             onOpen={onOpen}
-            onStart={onStart}
+            onStart={started?.start}
+            starting={started?.starting.has(ticket.id) === true}
+            startError={started?.failures.get(ticket.id) ?? null}
           />
         ))}
       </div>
@@ -111,15 +135,18 @@ export function BoardColumns({
   tickets,
   config,
   filtering,
+  loading,
   onOpen,
-  onStart,
+  started,
 }: {
   tickets: TicketSummary[];
   config?: Config;
   filtering: boolean;
+  loading: boolean;
   onOpen: (id: number) => void;
-  onStart?: (id: number) => void;
+  started?: StartState;
 }): ReactElement {
+  const view: ColumnView = { filtering, loading, config, started };
   const columns = useFoldedColumns();
   return (
     <div className="flex min-h-0 flex-1 gap-4 overflow-x-auto">
@@ -136,10 +163,8 @@ export function BoardColumns({
             status={status}
             title={title}
             tickets={inColumn}
-            config={config}
-            filtering={filtering}
+            view={view}
             onOpen={onOpen}
-            onStart={onStart}
             onFold={toggle}
           />
         );
