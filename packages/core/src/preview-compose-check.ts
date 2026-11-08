@@ -2,6 +2,8 @@
 // it.
 import path from 'node:path';
 
+import { buildTagProblems, foreignNameProblems } from './preview-compose-reserved';
+
 /** Where the ticket's repository is in its workspace volume, as the compose helper mounts it. */
 export const PREVIEW_REPO_DIR = '/workspace/repo';
 /** The keys Union adds to a compose file; the repository's own file may not use them. */
@@ -20,7 +22,7 @@ export const PREVIEW_ADDITIONS_FILE = '/union/compose.additions.yml';
 export const PREVIEW_NETWORK = 'union-preview';
 
 /** A file Union wrote (or the user edited from it) may use Union's keys, pointing at these. */
-export type UnionKeys = { workspaceVolume: string };
+export type UnionKeys = { workspaceVolume: string; proxyNetwork: string };
 
 const HOST_NAMESPACES = ['pid', 'ipc', 'uts', 'userns_mode', 'cgroup'] as const;
 /** Settings that give a container power over the host, refused whatever their value. */
@@ -33,6 +35,8 @@ const POWERS = [
   'runtime',
   'cgroup_parent',
   'gpus',
+  // Compose runs a provider's binary itself, in the helper that holds the Docker socket.
+  'provider',
 ] as const;
 const MOUNT_TYPES = new Set(['bind', 'volume', 'tmpfs']);
 
@@ -218,11 +222,28 @@ function reservedProblems(config: ComposeJson): string[] {
     .map((key) => `"${key}" is a name Union uses`);
 }
 
+/** Volumes or networks the project creates: the external ones are refused by name above. */
+function owned(value: unknown): [string, Record<string, unknown>][] {
+  return entries(value).filter(([, item]) => item.external !== true);
+}
+
+/** Volumes and networks named like another preview's or Union's own. */
+function nameProblems(config: ComposeJson, union?: UnionKeys): string[] {
+  const allowed: Record<string, string> = union
+    ? { [PREVIEW_WORKSPACE_KEY]: union.workspaceVolume, [PREVIEW_NETWORK_KEY]: union.proxyNetwork }
+    : {};
+  return [
+    ...foreignNameProblems('volume', owned(config.volumes), config.name, allowed),
+    ...foreignNameProblems('network', owned(config.networks), config.name, allowed),
+  ];
+}
+
 /** Top-level volumes, networks, configs and secrets: nothing shared with other previews or read from the host. */
 function topLevelProblems(config: ComposeJson, union?: UnionKeys): string[] {
   return [
     ...volumeProblems(config, union),
     ...networkProblems(config),
+    ...nameProblems(config, union),
     ...fileProblems(config),
     // Checked above when the file is Union's: they must point at this ticket's volume and network.
     ...(union ? [] : reservedProblems(config)),
@@ -245,6 +266,7 @@ export function composeProblems(config: unknown, union?: UnionKeys): string[] {
   for (const [name, service] of entries(config.services)) {
     problems.push(
       ...serviceSettings(name, service),
+      ...buildTagProblems(name, service),
       ...buildProblems(name, service.build),
       ...envFileProblems(name, service.env_file, union),
     );

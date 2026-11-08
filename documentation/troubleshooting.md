@@ -80,8 +80,10 @@ Check that the `proxy` service runs (`docker compose ps`) and use the port in th
 (`http://t<id>.union.localhost:8080`). Look at the services' output in the Preview tab: a service may have crashed.
 
 **Union refuses my Compose file.**
-Previews refuse privileged containers, the host network, the Docker socket, mounts outside the repository and
-external volumes. Move what you need into **compose additions**, or drop those settings for previews.
+Previews refuse privileged containers, the host network, the Docker socket, mounts outside the repository,
+external volumes, builds tagged with the name of an image Union runs (such as `node:22` or `union-agent`), and
+volumes or networks named `union-…`. The message says which service or volume. Move what you need into **compose
+additions**, rename it, or drop those settings for previews.
 
 **The preview stopped by itself.**
 Nobody opened it for the project's idle time (an hour by default). Change it in **Settings → Previews → Limits**.

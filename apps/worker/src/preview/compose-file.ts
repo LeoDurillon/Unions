@@ -7,6 +7,7 @@ import {
   getPreview,
   isRecord,
   previewCompose,
+  previewProxyNetwork,
   saveGeneratedCompose,
   composeServices,
   tidyCompose,
@@ -201,7 +202,10 @@ async function ownFile(deps: PreviewDeps, target: Target, yaml: string): Promise
     name: target.project,
   };
   refuse(
-    composeProblems(file, { workspaceVolume: target.workspaceVolume }),
+    composeProblems(file, {
+      workspaceVolume: target.workspaceVolume,
+      proxyNetwork: previewProxyNetwork(target.project),
+    }),
     'Your compose file cannot run as a preview',
   );
   return file;

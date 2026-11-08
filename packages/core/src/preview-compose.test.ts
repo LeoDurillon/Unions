@@ -51,7 +51,7 @@ const TARGET: PreviewTarget = {
 };
 
 function withService(service: Record<string, unknown>): ComposeJson {
-  return { services: { app: { image: 'node:22', ...service } } };
+  return { services: { app: { image: 'my-app:dev', ...service } } };
 }
 
 test('a plain web app and its database can run as a preview', () => {
@@ -161,18 +161,23 @@ test('the exposed service must exist and have its own network', () => {
 
 test("Union's own file passes the checks for its ticket only, and keeps them otherwise", () => {
   const file = previewCompose(resolved(), TARGET);
-  expect(composeProblems(file, { workspaceVolume: 'union-t12-ws' })).toEqual([]);
+  expect(
+    composeProblems(file, { workspaceVolume: 'union-t12-ws', proxyNetwork: 'union-t12-proxy' }),
+  ).toEqual([]);
   // Another ticket's workspace: refused as any external volume.
-  expect(composeProblems(file, { workspaceVolume: 'union-t13-ws' })).toEqual([
+  expect(
+    composeProblems(file, { workspaceVolume: 'union-t13-ws', proxyNetwork: 'union-t13-proxy' }),
+  ).toEqual([
     'volume "union_workspace" is external: previews would share it',
+    'network "union_preview" is named "union-t12-proxy", a name Union uses',
   ]);
   // In the repository's own file, Union's names are refused.
   expect(composeProblems(file)).toContain('"union_workspace" is a name Union uses');
   // An edit stays checked.
   const edited = { ...file, services: { web: { image: 'x', privileged: true } } };
-  expect(composeProblems(edited, { workspaceVolume: 'union-t12-ws' })).toEqual([
-    'web: privileged containers are not allowed',
-  ]);
+  expect(
+    composeProblems(edited, { workspaceVolume: 'union-t12-ws', proxyNetwork: 'union-t12-proxy' }),
+  ).toEqual(['web: privileged containers are not allowed']);
 });
 
 test('the settings Docker prints as unset are left out of the file people read', () => {
@@ -213,7 +218,9 @@ test('each exposed service gets its own route; the variables can also be a file 
   expect(services.db?.configs).toEqual([{ source: 'union_env', target: '/etc/app/.env' }]);
   expect(services.web?.configs).toBeUndefined();
   expect(file.configs).toEqual({ union_env: { content: 'API_URL=http://api:8080\n' } });
-  expect(composeProblems(file, { workspaceVolume: 'union-t12-ws' })).toEqual([]);
+  expect(
+    composeProblems(file, { workspaceVolume: 'union-t12-ws', proxyNetwork: 'union-t12-proxy' }),
+  ).toEqual([]);
   // The repository's own file may not take the name.
   expect(composeProblems({ ...withService({}), configs: { union_env: { content: '' } } })).toEqual([
     '"union_env" is a name Union uses',
@@ -262,7 +269,7 @@ function workspaceMountOf(volume: Record<string, unknown>): ComposeJson {
 }
 
 test("a mount of the workspace may only reach its repository, never the ticket's files", () => {
-  const union = { workspaceVolume: 'union-t12-ws' };
+  const union = { workspaceVolume: 'union-t12-ws', proxyNetwork: 'union-t12-proxy' };
   expect(composeProblems(workspaceMountOf({ subpath: 'repo/src' }), union)).toEqual([]);
   expect(composeProblems(workspaceMountOf({ subpath: 'attachments' }), union)).toEqual([
     'app: mounts the workspace outside its repository ("attachments")',
@@ -275,7 +282,9 @@ test("a mount of the workspace may only reach its repository, never the ticket's
 
 test("only Union's own file may read its env file; a repository file may not", () => {
   const file = previewCompose(resolved(), TARGET);
-  expect(composeProblems(file, { workspaceVolume: 'union-t12-ws' })).toEqual([]);
+  expect(
+    composeProblems(file, { workspaceVolume: 'union-t12-ws', proxyNetwork: 'union-t12-proxy' }),
+  ).toEqual([]);
   expect(composeProblems(withService({ env_file: ['/union/preview.env'] }))).toEqual([
     'app: reads an env file outside the repository',
   ]);

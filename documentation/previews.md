@@ -61,6 +61,9 @@ while a command runs. A pull request's preview has the same button.
 
 Union checks the Compose file before it runs anything and refuses settings that would reach outside the preview:
 privileged containers, the host network, the Docker socket, mounts outside the repository, and external volumes.
+It also refuses a service built under the name of an image Union itself runs (`union-…`, `docker`, `traefik`,
+`oven/bun`, `node`, `debian`), and volumes or networks named `union-…`: give your built images and volumes your own
+names, or leave them unnamed.
 
 ## End-to-end tests
 

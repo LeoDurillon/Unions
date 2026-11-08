@@ -4,8 +4,12 @@ import { PREVIEW_REPO_DIR, type ContainerRuntime } from '@union/core';
 
 import { workspaceScript } from './workspace-script';
 
-/** The Docker CLI image (with the compose plugin) the helper containers run. */
-const COMPOSE_IMAGE = 'docker:29.0.0-cli';
+/**
+ * The Docker CLI image (with the compose plugin) the helper containers run. Pinned by digest: the
+ * helpers hold the Docker socket, and a tag could be taken over locally by a build.
+ */
+const COMPOSE_IMAGE =
+  'docker:29.0.0-cli@sha256:87858a6dd14149240f4a2c33e0ec0f32a5ac1bb2548c04f5a20694ea25cb6157';
 const SOCKET = '/var/run/docker.sock';
 const DEFAULT_PROXY_PORT = 8080;
 const DEFAULT_MAX_PREVIEWS = 3;

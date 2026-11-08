@@ -9,7 +9,8 @@ Built (phases 1 to 4). Full design and what was built: [`docs/plans/preview-envi
 - It runs from the ticket's workspace volume (the agent's live working copy), through a short-lived helper
   container that holds the Docker socket; the agent's container never does. The worker resolves the file with
   `docker compose config`, refuses dangerous settings (privileged, host network, Docker socket, mounts leaving the
-  repository, external volumes), turns source mounts into mounts of the workspace volume, and writes a new file with
+  repository, external volumes, builds tagged as an image Union runs, `union-…` volume and network names, `provider`
+  services), turns source mounts into mounts of the workspace volume, and writes a new file with
   Traefik labels on the exposed services: `http://t<id>.union.localhost`, `http://api-t<id>.union.localhost`.
   Every preview's hosts end with `union.localhost`, so a browser files the logins it saves on one preview under the
   same site and offers them on the others.

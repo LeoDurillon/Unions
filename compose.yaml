@@ -109,7 +109,8 @@ services:
   # (t<ticket>.union.localhost) and joins its preview's own network (union-t<ticket>-proxy), which
   # the worker connects this proxy to: no preview shares a network with another.
   proxy:
-    image: traefik:v3.6.2
+    # Pinned by digest: it reads the Docker socket, and a tag could be taken over locally by a build.
+    image: traefik:v3.6.2@sha256:aaf0f6185419a50c74651448c1a5bf4606bd2d2ddb7b8749eed505d55bf8b8ea
     # Like web and worker: back after Docker or WSL restarts, or previews never answer.
     restart: unless-stopped
     command:

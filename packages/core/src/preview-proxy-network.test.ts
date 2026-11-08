@@ -24,9 +24,9 @@ test('each preview has its own proxy network', () => {
 });
 
 test("an edited file moves off the shared network, which no preview's file may join any more", () => {
-  expect(composeProblems(EDITED, { workspaceVolume: 'union-t12-ws' })).toEqual([
-    'network "union_preview" is external: previews would share it',
-  ]);
+  expect(
+    composeProblems(EDITED, { workspaceVolume: 'union-t12-ws', proxyNetwork: 'union-t12-proxy' }),
+  ).toEqual(['network "union_preview" is external: previews would share it']);
   const moved = withProxyNetwork(EDITED, 'union-t12');
   expect(moved.networks).toEqual({ default: null, union_preview: { name: 'union-t12-proxy' } });
   const services = moved.services as Record<string, Record<string, unknown>>;
@@ -35,7 +35,9 @@ test("an edited file moves off the shared network, which no preview's file may j
     'traefik.docker.network': 'union-t12-proxy',
   });
   expect(services.db).toEqual({ image: 'postgres', networks: { default: null } });
-  expect(composeProblems(moved, { workspaceVolume: 'union-t12-ws' })).toEqual([]);
+  expect(
+    composeProblems(moved, { workspaceVolume: 'union-t12-ws', proxyNetwork: 'union-t12-proxy' }),
+  ).toEqual([]);
 });
 
 test('a file without the shared network is left as it is', () => {

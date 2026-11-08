@@ -264,7 +264,8 @@
   in a throwaway helper container (`runtime.runHelper`, `docker:*-cli` image) holding the Docker socket and the
   ticket's workspace volume; the agent's container never holds the socket. The repository's compose file is
   resolved (`compose config --format json`), checked (`composeProblems` in `@union/core`: no privileged or
-  host-namespace settings, no mounts or builds outside `/workspace/repo`, no external volumes or networks), and
+  host-namespace settings, no mounts or builds outside `/workspace/repo`, no external volumes or networks; from `preview-compose-reserved.ts`: no build tagged as an image Union runs, no
+  `union-…` volume or network name other than the project's own or Union's keys for this ticket), and
   rewritten (`previewCompose`: project `union-t<id>`, no `container_name` or host ports, repository mounts become
   workspace-volume sub-path mounts, project variables in every service, Traefik labels on the exposed service),
   then given to `up` on stdin. The `proxy` service of `compose.yaml` (Traefik, home network `union-preview`) serves it at
