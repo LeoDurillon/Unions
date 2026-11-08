@@ -2,6 +2,21 @@
 
 <!-- Moved from AGENTS.md: read the file for the area you change; keep it current when behavior changes. -->
 
+## Who reads and who writes
+
+The web server only reads, for what the UI needs answered right away; every write happens in the worker
+(`AGENTS.md`, Rules; enforced by the ast-grep rules `web-reads-github-only`, `web-reads-trackers-only` and
+`octokit-only-in-github-client`).
+
+|        | The web reads                                                  | The worker writes                                                                                                                           |
+| ------ | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| GitHub | through `OnboardingGitHub` (`src/github-onboarding.ts`)        | issues, comments, Project status, push, PR, posting a review                                                                                |
+| Notion | through core's `NotionApi` (`notion-api.ts`)                   | page properties from event rules, pages for tickets written from investigations, comments from a ticket's Notion tab                        |
+| Jira   | verify, fields, import, a ticket's comments, through `JiraApi` | moving an issue, setting its fields, commenting (event rules, a ticket's Jira tab), creating one for a ticket written from an investigation |
+
+Containers never hold GitHub credentials. Tokens, the App's key and integration secrets never reach the browser
+(`toPublicProject`, `toPublicIntegration`); the Jira token is sent only to the configured `atlassian.net` site.
+
 - The GitHub layers: the repository always, issues by project setting (`config.mirrorIssues`, default on), the
   GitHub Project when one is connected (`projects.github_project_url` / `github_project_node_id`; not a row of
   `integrations`, it uses the project's GitHub credentials). `github-layers.ts` in core says which are on; the

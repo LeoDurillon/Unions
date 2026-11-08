@@ -108,20 +108,11 @@ files and uses `union.sqlite` here, which holds the user's real projects.
   approve, revise, retry, cancel) is a row in `commands`, handled by the worker. The web may write plain records
   directly: creating projects and tickets, and saving an edited step output. It reads state from SQLite and
   streams `events` over SSE.
-- GitHub: all writes for tickets (issues, comments, Project status, push, PR, posting a review) happen in the worker.
-  The web server only reads what the UI needs answered right away, through `OnboardingGitHub`
-  (`src/github-onboarding.ts`). Containers never hold GitHub credentials. Resolve credentials with
-  `projectGitHubAuth` and build clients with `@union/core/github-client`; never build an Octokit from a token by
-  hand. Tokens and the App's key never reach the browser (`toPublicProject`). Details:
-  `docs/architecture/integrations.md`.
-- Notion: the web server only reads (behind core's `NotionApi`, `notion-api.ts`); writes (page properties from
-  event rules, pages for tickets written from investigations, comments from a ticket's Notion tab) happen in the
-  worker. Its secret is a row of `integrations` and never reaches the browser (`toPublicIntegration`). Details:
-  `docs/architecture/integrations.md`.
-- Jira: the web server only reads (verify, fields, import, a ticket's comments, behind `JiraApi`); writes (moving
-  an issue, setting its fields, commenting, from event rules and from a ticket's Jira tab; creating one for a ticket
-  written from an investigation) happen in the worker. Its API token is a row of `integrations`, sent only to
-  the configured `atlassian.net` site, and never reaches the browser.
+- GitHub, Notion, Jira: the web server only reads, for what the UI needs answered right away (`OnboardingGitHub`,
+  `NotionApi`, `JiraApi`); every write happens in the worker. Secrets (tokens, the GitHub App key, integration
+  secrets) never reach the browser (`toPublicProject`, `toPublicIntegration`), and containers never hold GitHub
+  credentials. Build GitHub clients with `@union/core/github-client` from `projectGitHubAuth`, never from a token by
+  hand. Who reads and writes what: `docs/architecture/integrations.md`.
 - A ticket's base branch is `ticketBase(project, ticket)`: the parent's branch it was cloned from, else the project's.
   Never use `project.config.baseBranch` directly in the worker. Starting goes through `dispatch`, which refuses a
   ticket whose parent is not done; check `blockingParent` before queueing or honouring a start anywhere else.
