@@ -11,6 +11,11 @@ export type RunPoolSpec<Row extends { id: number }, Outcome> = {
   /** The outcome of a run stopped by `cancel` or `stop`; without it, the run's own outcome stands. */
   stopped?: Outcome;
   finish: (row: Row, outcome: Outcome) => void;
+  /**
+   * Whether the row is still there. A row deleted during its run (its pull request removed from
+   * Union) has its run stopped on the next tick and takes no finish: there is nothing to record.
+   */
+  exists?: (id: number) => boolean;
 };
 
 /** Runs claimed rows while a slot is free; each run gives its slot back once finished. */
@@ -20,6 +25,7 @@ export class RunPool<Row extends { id: number }, Outcome> {
   constructor(private readonly spec: RunPoolSpec<Row, Outcome>) {}
 
   tick(): void {
+    this.stopRemoved();
     while (this.spec.slots.tryTake()) {
       const row = this.spec.claim();
       if (!row) {
@@ -28,6 +34,18 @@ export class RunPool<Row extends { id: number }, Outcome> {
       }
       const abort = new AbortController();
       this.active.set(row.id, { abort, done: this.runTracked(row, abort.signal) });
+    }
+  }
+
+  private stopRemoved(): void {
+    const { exists } = this.spec;
+    if (!exists) {
+      return;
+    }
+    for (const [id, run] of this.active) {
+      if (!exists(id)) {
+        run.abort.abort();
+      }
     }
   }
 
@@ -59,6 +77,9 @@ export class RunPool<Row extends { id: number }, Outcome> {
     const { spec } = this;
     try {
       const outcome = await this.outcomeOf(row, signal);
+      if (spec.exists && !spec.exists(row.id)) {
+        return;
+      }
       spec.finish(row, signal.aborted && spec.stopped ? spec.stopped : outcome);
     } finally {
       this.active.delete(row.id);

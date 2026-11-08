@@ -138,6 +138,11 @@
   gives the slot back once the row is finished. `idle()` waits for the runs in flight. The investigations, ticket
   drafts, agent reviews, explanations, groupings, description rewrites, lesson and prompt writers and container runs
   use it; the connector check (one at a time, no slots) does not.
+  A runner may give `exists(id)`: the five review side runs do (`reviewRunExists` in core), so a run whose row
+  was deleted (its pull request removed from Union) is aborted on the next tick and takes no finish.
+- On start, `recoverGitHubSends` (core) puts a pull request review or a reply left `sending` back to the user
+  (the review `failed`, the reply a draft) with a note to check GitHub before sending again, unless its command
+  is still queued: it may or may not have reached GitHub, and posting it twice is worse than one more click.
 - `investigate.ts`: `InvestigationRunner` runs queued investigations in throwaway `union-i<id>` containers
   (removed after each run; a `ticket` investigation runs in the ticket's own container instead, `investigate-ticket.ts`:
   never during a step, writing tools always denied, `git status` and HEAD compared before and after, the container

@@ -99,4 +99,35 @@ describe('RunPool', () => {
     await runs.idle();
     expect(finished.get(1)).toEqual({ status: 'ended' });
   });
+
+  test('a row removed during its run is stopped on the next tick and takes no finish', async () => {
+    const live = new Set([1, 2]);
+    const finished = new Map<number, Outcome>();
+    const queue = [{ id: 1 }, { id: 2 }];
+    const signals = new Map<number, AbortSignal>();
+    const slots = new RunSlots(2);
+    const runs = new RunPool<Row, Outcome>({
+      slots,
+      claim: () => queue.shift() ?? null,
+      run: (row, signal) => {
+        signals.set(row.id, signal);
+        return untilAborted(signal);
+      },
+      failed: (error) => ({ status: `failed: ${error}` }),
+      stopped: { status: 'cancelled' },
+      finish: (row, outcome) => {
+        finished.set(row.id, outcome);
+      },
+      exists: (id) => live.has(id),
+    });
+    runs.tick();
+    live.delete(1);
+    runs.tick();
+    expect(signals.get(1)?.aborted).toBe(true);
+    expect(signals.get(2)?.aborted).toBe(false);
+    runs.cancel(2);
+    await runs.idle();
+    expect([...finished.keys()]).toEqual([2]);
+    expect(slots.tryTake()).toBe(true);
+  });
 });

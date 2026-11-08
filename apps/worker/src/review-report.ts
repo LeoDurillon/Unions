@@ -9,6 +9,7 @@ import {
   toolsFor,
   type ReportOutcome,
   type ReviewReport,
+  reviewRunExists,
 } from '@union/core';
 
 import type { AgentFn, AgentRun } from './agent';
@@ -88,6 +89,7 @@ export class ReviewReportRunner extends RunPool<ReviewReport, ReportOutcome> {
       finish: (report, outcome) => {
         finishReport(deps.db, report.id, outcome);
       },
+      exists: (id) => reviewRunExists(deps.db, 'report', id),
     });
   }
 

@@ -9,6 +9,7 @@ import {
   toolsFor,
   type ReviewAgentRun,
   type ReviewAgentRunOutcome,
+  reviewRunExists,
 } from '@union/core';
 
 import { runAgent } from './agent';
@@ -65,6 +66,7 @@ export class ReviewAgentRunner extends RunPool<ReviewAgentRun, ReviewAgentRunOut
       finish: (row, outcome) => {
         finishReviewAgentRun(deps.db, row.id, outcome);
       },
+      exists: (id) => reviewRunExists(deps.db, 'review_agent_run', id),
     });
   }
 

@@ -53,6 +53,8 @@ export * from './event-rule-types';
 export * from './event-rules';
 export * from './compose-containers';
 export { CopyRefused } from './copied-file';
+export { recoverGitHubSends } from './github-sends-recovery';
+export * from './review-run-rows';
 export { DockerCli } from './docker-cli';
 export { DockerImages } from './docker-images';
 export * from './agent-image-source';

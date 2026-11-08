@@ -15,6 +15,7 @@ import {
   type AgentReviewSpec,
   type AgentReviewOutcome,
   type Db,
+  reviewRunExists,
 } from '@union/core';
 
 import { runAgent, type AgentFn } from './agent';
@@ -150,6 +151,7 @@ export class AgentReviewRunner extends RunPool<AgentReview, AgentReviewOutcome> 
       finish: (review, outcome) => {
         finishAgentReview(deps.db, review.id, outcome);
       },
+      exists: (id) => reviewRunExists(deps.db, 'agent_review', id),
     });
   }
 

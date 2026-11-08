@@ -9,6 +9,7 @@ import {
   toolsFor,
   type GroupingOutcome,
   type ReviewGrouping,
+  reviewRunExists,
 } from '@union/core';
 
 import { runAgent, type AgentFn } from './agent';
@@ -83,6 +84,7 @@ export class ReviewGroupingRunner extends RunPool<ReviewGrouping, GroupingOutcom
       finish: (grouping, outcome) => {
         finishGrouping(deps.db, grouping.id, outcome);
       },
+      exists: (id) => reviewRunExists(deps.db, 'grouping', id),
     });
   }
 

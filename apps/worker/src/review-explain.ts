@@ -15,6 +15,7 @@ import {
   type ExplanationOutcome,
   type ReviewExplanation,
   type SpecPart,
+  reviewRunExists,
 } from '@union/core';
 
 import { runAgent, runResumable, type AgentFn, type AgentOutcome } from './agent';
@@ -150,6 +151,7 @@ export class ReviewExplainRunner extends RunPool<ReviewExplanation, ExplanationO
       finish: (explanation, outcome) => {
         finishExplanation(deps.db, explanation.id, outcome);
       },
+      exists: (id) => reviewRunExists(deps.db, 'explanation', id),
     });
   }
 

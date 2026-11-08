@@ -1,5 +1,5 @@
 // The worker's entry point: opens the database and starts the scheduler and the GitHub loop.
-import { DockerCli, emitEvent, migrateDb, openDb } from '@union/core';
+import { DockerCli, emitEvent, migrateDb, openDb, recoverGitHubSends } from '@union/core';
 
 import { agentImageProvision } from './agent-image/images';
 import { drainCommands } from './commands';
@@ -39,6 +39,8 @@ const apiFor = githubApis(db);
 const executor = createExecutor(db, runtime, provisionConfig, apiFor);
 const scheduler = new Scheduler(db, executor, maxConcurrent);
 await scheduler.recover((name) => runtime.stop(name));
+// A review or reply cut off mid-post goes back to the user, to check GitHub and send again.
+recoverGitHubSends(db);
 // Investigations, agent reviews and description rewrites take their runs from the scheduler's slots:
 // UNION_MAX_CONCURRENT caps all.
 const sideRuns = await startSideRuns({
