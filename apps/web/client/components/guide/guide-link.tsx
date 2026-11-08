@@ -1,9 +1,10 @@
 // A "Learn more" link to a heading of the user guide, opened on the Guide page.
+
 import type { ReactElement } from 'react';
 
-import { guideHref } from '../../lib/guide-links';
-import { openGuide } from '../../lib/guide-url';
-import type { GuideTarget } from '../../lib/settings-guide';
+import { guideHref } from '../../lib/guide/guide-links';
+import { openGuide } from '../../lib/guide/guide-url';
+import type { GuideTarget } from '../../lib/guide/settings-guide';
 
 /** Opens the guide at `target` (a page and a heading of it). */
 export function GuideLink({ target }: { target: GuideTarget }): ReactElement {

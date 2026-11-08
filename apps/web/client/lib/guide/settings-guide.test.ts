@@ -1,11 +1,11 @@
 import { describe, expect, test } from 'bun:test';
 import path from 'node:path';
 
-import { headingSlug } from './heading-slug';
+import { headingSlug } from '../heading-slug';
+import { UNION_SETTINGS_GROUPS } from '../union-settings-groups';
 import { PROJECT_GUIDE, unionSettingsGuide, type GuideTarget } from './settings-guide';
-import { UNION_SETTINGS_GROUPS } from './union-settings-groups';
 
-const GUIDE = path.join(import.meta.dir, '../../../../documentation');
+const GUIDE = path.join(import.meta.dir, '../../../../../documentation');
 
 /** The heading ids of a guide page, as the Guide page gives them. */
 async function anchors(page: string): Promise<string[]> {

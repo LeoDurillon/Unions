@@ -1,8 +1,9 @@
 // The sidebar's Help: a menu showing the getting-started checklist again, the user guide and the keyboard
 // shortcuts.
+
 import { useRef, useState, type ReactElement } from 'react';
 
-import { openGuide } from '../lib/guide-url';
+import { openGuide } from '../lib/guide/guide-url';
 import { requestHelp } from '../lib/help-requests';
 import { askGettingStarted } from '../lib/use-getting-started-shown';
 import { MenuPanel, type MenuItem } from './overflow-menu';

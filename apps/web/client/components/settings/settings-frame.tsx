@@ -1,8 +1,9 @@
 // The frame of both settings areas: a title, the open page's name with its Learn more link and a way back, the
 // menu on the left, the page on the right.
+
 import type { ReactElement, ReactNode } from 'react';
 
-import type { GuideTarget } from '../../lib/settings-guide';
+import type { GuideTarget } from '../../lib/guide/settings-guide';
 import { GuideLink } from '../guide/guide-link';
 import { Button } from '../ui';
 

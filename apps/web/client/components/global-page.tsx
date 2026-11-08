@@ -1,7 +1,8 @@
 // The pages of the main area that belong to no project: the running previews and the user guide.
+
 import type { ReactElement } from 'react';
 
-import { useGuidePage } from '../lib/guide-url';
+import { useGuidePage } from '../lib/guide/guide-url';
 import { GuidePage } from './guide/guide-page';
 import { RunningPreviewsPage } from './previews/running-previews-page';
 

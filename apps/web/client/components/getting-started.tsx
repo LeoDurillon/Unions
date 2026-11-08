@@ -1,5 +1,6 @@
 // The getting-started checklist above a project's board: five steps from settings to a reviewed change,
 // each ticked from the project's state, until they are all done or the user hides it.
+
 import { useQuery } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 
@@ -10,7 +11,7 @@ import {
   GETTING_STARTED_STEPS,
   type GettingStartedStep,
 } from '../lib/getting-started';
-import type { GuideTarget } from '../lib/settings-guide';
+import type { GuideTarget } from '../lib/guide/settings-guide';
 import { openSettings } from '../lib/settings-sections';
 import { useGettingStartedShown } from '../lib/use-getting-started-shown';
 import { GuideLink } from './guide/guide-link';

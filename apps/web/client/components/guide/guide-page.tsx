@@ -1,11 +1,12 @@
 // The Guide page: the user guide (`documentation/`) as Union serves it, its pages on the left; links
 // between its pages and to its headings stay in the app, links out open a new tab.
+
 import { useQuery } from '@tanstack/react-query';
 import { useCallback, useEffect, type ReactElement } from 'react';
 
-import { guideApi } from '../../lib/guide-api';
-import { guideLinkOf, guideUrl } from '../../lib/guide-links';
-import { clearAnchorOnLeave, openGuide, scrollToAnchor } from '../../lib/guide-url';
+import { guideApi } from '../../lib/guide/guide-api';
+import { guideLinkOf, guideUrl } from '../../lib/guide/guide-links';
+import { clearAnchorOnLeave, openGuide, scrollToAnchor } from '../../lib/guide/guide-url';
 import { Markdown } from '../markdown';
 import { ErrorText } from '../ui';
 import { GuideNav } from './guide-nav';

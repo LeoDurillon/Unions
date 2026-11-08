@@ -1,6 +1,7 @@
 // The browser's client for the user guide's pages.
-import type { GuidePage, GuidePageText } from '../../src/guide-types';
-import { request } from './api';
+
+import type { GuidePage, GuidePageText } from '../../../src/guide-types';
+import { request } from '../api';
 
 export const guideApi = {
   pages: (): Promise<{ pages: GuidePage[] }> => request('GET', '/api/guide'),

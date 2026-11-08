@@ -1,9 +1,10 @@
 // The settings every project shares: a page per agent, the tools, the GitHub App (`?union=`).
+
 import { useQuery } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 
 import { api } from '../../lib/api';
-import { unionSettingsGuide } from '../../lib/settings-guide';
+import { unionSettingsGuide } from '../../lib/guide/settings-guide';
 import type { UnionSection } from '../../lib/union-settings-groups';
 import { SettingsFrame } from '../settings/settings-frame';
 import { UnionSectionBody } from './union-section-body';

@@ -1,7 +1,8 @@
 // Which page is shown (`?page=previews`, `?union=` for the Union settings, else the board) and which overlay is open.
+
 import { useState } from 'react';
 
-import { openGuide } from './guide-url';
+import { openGuide } from './guide/guide-url';
 import { confirmLeave } from './leave-guard';
 import { closeSettings } from './settings-sections';
 import { closeUnionSettings, openUnionSettings, useUnionSection } from './union-settings-sections';

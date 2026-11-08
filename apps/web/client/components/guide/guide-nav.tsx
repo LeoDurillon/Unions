@@ -1,10 +1,11 @@
 // The guide's pages down the left of the Guide page, the open one marked.
+
 import { useQuery } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 
-import { guideApi } from '../../lib/guide-api';
-import { guideHref } from '../../lib/guide-links';
-import { openGuide } from '../../lib/guide-url';
+import { guideApi } from '../../lib/guide/guide-api';
+import { guideHref } from '../../lib/guide/guide-links';
+import { openGuide } from '../../lib/guide/guide-url';
 
 const ACTIVE = 'bg-indigo-100 font-medium text-indigo-900 dark:bg-indigo-950 dark:text-indigo-200';
 const IDLE = 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800';

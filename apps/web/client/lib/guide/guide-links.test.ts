@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 
+import { headingSlug } from '../heading-slug';
 import { guideHref, guideLinkOf, guideUrl } from './guide-links';
-import { headingSlug } from './heading-slug';
 
 describe('guideUrl', () => {
   test('another page of the guide, with or without a heading', () => {
