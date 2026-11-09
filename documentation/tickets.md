@@ -209,7 +209,7 @@ Ctrl, ⌘ and Alt combinations stay the browser's.
 | Board       | **n**     | Open the first ticket that needs you, else go to the next project with one. |
 | Ticket      | **n / p** | Open the next or previous ticket that needs you.                            |
 | Ticket      | **r**     | Review the changes.                                                         |
-| Ticket      | **1 – 5** | Switch to Overview, Preview, Worker, PR, or Notion or Jira.                 |
+| Ticket      | **1 – 5** | Switch to Overview, Preview, Steps, PR, or Notion or Jira.                  |
 | Ticket      | **Esc**   | Close the panel.                                                            |
 | Review page | **j / k** | Open the next or previous file.                                             |
 | Repository  | **/**     | Jump to **Go to file**.                                                     |

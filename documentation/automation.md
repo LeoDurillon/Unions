@@ -4,18 +4,18 @@
 
 The sidebar's **Notifications** bell counts what happened while you were away, across projects:
 
-| Badge                     | When                                                                                     |
-| ------------------------- | ---------------------------------------------------------------------------------------- |
-| **Approval**              | A step waits for your approval.                                                          |
-| **Failed**                | A step or an investigation failed.                                                       |
-| **Commit refused**        | A git hook refused the agent's changes.                                                  |
-| **Usage limit**           | A run paused at your Claude usage limit. If Union knows when it resets, it retries then. |
-| **Blocked**               | A ticket moved to In progress before its parent was done.                                |
-| **Merged**, **Closed**    | A ticket's pull request was merged or closed.                                            |
-| **Checks failed**         | A ticket's pull request's CI checks turned red.                                          |
-| **Re-run failed**         | GitHub refused to re-run a CI job.                                                       |
-| **Answered**              | An investigation finished.                                                               |
-| **Rule**, **Rule failed** | An event rule notified you, or failed.                                                   |
+| Badge                     | When                                                                                       |
+| ------------------------- | ------------------------------------------------------------------------------------------ |
+| **Approval**              | A step waits for your approval.                                                            |
+| **Failed**                | A step or an investigation failed.                                                         |
+| **Commit refused**        | A git hook refused the agent's changes.                                                    |
+| **Usage limit**           | A run paused at your Claude usage limit. Union retries it by itself once the limit resets. |
+| **Blocked**               | A ticket moved to In progress before its parent was done.                                  |
+| **Merged**, **Closed**    | A ticket's pull request was merged or closed.                                              |
+| **Checks failed**         | A ticket's pull request's CI checks turned red.                                            |
+| **Re-run failed**         | GitHub refused to re-run a CI job.                                                         |
+| **Answered**              | An investigation finished.                                                                 |
+| **Rule**, **Rule failed** | An event rule notified you, or failed.                                                     |
 
 Notifications are grouped by ticket or investigation, newest first. Click one to open what it is about. **Mark all
 read** and **Delete all** clear the list. At the bottom of the panel, you can turn on **desktop notifications**, so
@@ -46,7 +46,7 @@ The actions on Notion and on Jira are offered only when the project is connected
 
 **Actions**
 
-- **Set properties of the ticket's Notion page**: a status, a URL, a date… for tickets imported from Notion or
+- **Set properties of the ticket's Notion page**: text, URL, number, select, multi-select, status, checkbox, date, email, phone or people properties, for tickets imported from Notion or
   [linked to a page](tickets.md#link-a-ticket-to-its-notion-page-or-jira-issue), and for pull requests under review linked to a
   Notion page.
 - **Comment on GitHub**, on the issue or the pull request. The issue is offered only when the project mirrors

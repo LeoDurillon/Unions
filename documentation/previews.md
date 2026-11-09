@@ -85,8 +85,8 @@ browser they need is installed on first use, at your repository's Playwright ver
 Commands there get `BASE_URL` and one `UNION_URL_<SERVICE>` variable per exposed service.
 
 A failure can be sent to the implementer as a revision (**Send the failure to the agent**). When the preview
-restarted or the agent worked on the ticket after the tests ran, the tab says the result may be out of date and
-offers only **Run again**: send a failure from tests run on the current code. A pull request's result can't be added to
+restarted or the agent worked on the ticket after the tests ran, the tab asks you to run them again and offers only
+**Run again**: send a failure from tests run on the current code. A pull request's result can't be added to
 the review in that case either. With **Start the preview for implementation steps**, the
 project's install command runs and the preview starts before each implementation run, and the agent is told to run the end-to-end tests its change
 touches.

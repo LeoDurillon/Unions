@@ -129,11 +129,11 @@ reopened.
 
 ## When a step stops
 
-| What you see                                  | What it means                                                         | What to do                                                                                                                                                                                          |
-| --------------------------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Run failed:** and an error                  | The run ended with an error (a crash, a timeout, a Docker problem).   | Read the **Log**, fix the cause if it is on your side, then **Retry**.                                                                                                                              |
-| **Claude usage limit reached**                | Your Claude subscription hit its usage limit.                         | Nothing: Union retries by itself after the reset, at the time shown. **Retry now** runs it at once. When no time is shown, Union could not read when the limit resets: click **Retry** once it has. |
-| **A git hook refused to commit some changes** | A pre-commit hook of the repository refused the agent's last changes. | See below.                                                                                                                                                                                          |
+| What you see                                  | What it means                                                         | What to do                                                                                                                                                                  |
+| --------------------------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Run failed:** and an error                  | The run ended with an error (a crash, a timeout, a Docker problem).   | Read the **Log**, fix the cause if it is on your side, then **Retry**.                                                                                                      |
+| **Claude usage limit reached**                | Your Claude subscription hit its usage limit.                         | Nothing: Union retries by itself at the time shown, a couple of minutes after the limit resets (or in about 30 minutes when it cannot tell). **Retry now** runs it at once. |
+| **A git hook refused to commit some changes** | A pre-commit hook of the repository refused the agent's last changes. | See below.                                                                                                                                                                  |
 
 When a hook refuses a commit, the panel shows the changes and what the hook said. You can:
 
@@ -144,7 +144,7 @@ When a hook refuses a commit, the panel shows the changes and what the hook said
 ## Watch an agent work
 
 The **Log** tab in the Steps tab shows what the agent does as it does it: the files it reads, the commands it runs,
-its messages. The Overview lists every run with its model, duration and tokens used.
+its messages. A long run shows its last 500 lines first; **Show the N earlier lines** above them loads the rest. The Overview lists every run with its model, duration and tokens used.
 
 The token usage shows what the same tokens would cost on the Anthropic API. A Claude Max subscription does not bill
 it; it helps compare models and steps.
