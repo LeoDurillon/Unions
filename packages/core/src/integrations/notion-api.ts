@@ -2,6 +2,7 @@
 import { commentOf, commentsOf, type NotionComment } from './notion-comment-parse';
 import { NotionError } from './notion-error';
 import type { NotionRichTextInput } from './notion-rich-text';
+import { resolveUnknownBlocks } from './notion-unknown-blocks';
 
 const API = 'https://api.notion.com/v1';
 /** Required by the markdown endpoint, and the only value it accepts. */
@@ -28,6 +29,7 @@ export type NotionApi = {
   dataSourceTitle(token: string, dataSourceId: string): Promise<string>;
   dataSource(token: string, dataSourceId: string): Promise<NotionDataSource>;
   page(token: string, pageId: string): Promise<NotionPage>;
+  /** The page as markdown, with the blocks Notion leaves unrendered read as their links. */
   pageMarkdown(token: string, pageId: string): Promise<{ markdown: string; truncated: boolean }>;
   /** The workspace members; needs the integration's "Read user information" capability. */
   users(token: string): Promise<NotionUser[]>;
@@ -262,8 +264,10 @@ export class FetchNotionApi implements NotionApi {
     pageId: string,
   ): Promise<{ markdown: string; truncated: boolean }> {
     const body = await this.get(token, `/pages/${pageId}/markdown`);
+    const markdown = typeof body.markdown === 'string' ? body.markdown : '';
     return {
-      markdown: typeof body.markdown === 'string' ? body.markdown : '',
+      // The markdown leaves some blocks (a connected Figma preview) as `<unknown>`: read their links.
+      markdown: await resolveUnknownBlocks(markdown, (id) => this.get(token, `/blocks/${id}`)),
       truncated: body.truncated === true,
     };
   }

@@ -4,6 +4,7 @@
 // this existed. Idempotent: clean markdown goes through unchanged.
 
 import { notionMediaLinks } from './notion-media';
+import { withBlockLinks } from './notion-unknown-blocks';
 
 /** `{toggle="true"}`, `{color="blue"}` at the end of a line: Notion block attributes. */
 const BLOCK_ATTRIBUTES = /\s*\{(?:[a-z_]+="[^"]*"\s*)+\}\s*$/u;
@@ -44,7 +45,7 @@ function isGroups(value: unknown): value is Record<string, string | undefined> {
 }
 
 function inline(line: string, titles: Record<string, string>): string {
-  let text = notionMediaLinks(line).replaceAll(MENTION, (...match: unknown[]) => {
+  let text = withBlockLinks(notionMediaLinks(line)).replaceAll(MENTION, (...match: unknown[]) => {
     const groups = match.at(-1);
     return isGroups(groups) ? mentionText(groups.kind ?? '', groups.attributes ?? '', titles) : '';
   });

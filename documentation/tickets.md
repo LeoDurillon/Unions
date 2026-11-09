@@ -59,7 +59,8 @@ Click **New ticket** in the project bar. The dialog has one tab per source:
     runs the final review, **Request revision** has the implementer change the pull request. Pull requests from
     forks, and closed or merged ones, cannot be imported.
 - **Import from Notion** (when the project is connected to Notion): a page of the connected data source. Union
-  copies its text, and keeps its images and attached files (PDFs and other uploads) as the ticket's files, which
+  copies its text (an embedded Figma file, video or bookmark becomes its link, which the agents can open),
+  and keeps its images and attached files (PDFs and other uploads) as the ticket's files, which
   the agents can read. Files above the size limits (25 MB each, 100 MB per ticket) stay as links to Notion,
   which stop working after about an hour. Click **Edit before creating** to change the text first.
 - **Import from Jira** (when the project is connected to Jira): the key (`ABC-123`) or link of an issue of the
