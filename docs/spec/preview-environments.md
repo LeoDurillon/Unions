@@ -56,7 +56,8 @@ Built (phases 1 to 4). Full design and what was built: [`docs/plans/archive/prev
   variables (`{ticket.id}`: `41`, `r5`); output in the ticket's log.
   Their state (phase 1b) is recorded by the worker from Docker (`shared_stacks`: status, each service running or
   not, the previews on their networks, the tickets whose agent is on their network, the last start's error) after
-  each join, release, restart and stop, and every 30 seconds while they run. Environments → Shared shows it, with
+  each join, release, restart and stop, and every 30 seconds for every project that shares services (a stack
+  that ran before the worker started included). Environments → Shared shows it, with
   Restart (`shared_restart`: `compose restart`, networks kept) and Stop (`shared_stop`: refused while a preview of
   the project starts, runs or stops; the tickets' and previews' networks are left, then `down`, volumes kept).
 - **Reset preview** (after a confirmation, a ticket's and a pull request's): `down -v --remove-orphans --rmi local`

@@ -63,7 +63,7 @@ export async function recordShared(
   }
 }
 
-/** Every 30 seconds, records the shared services that run: one that crashed shows as stopped. */
+/** Every 30 seconds, records the shared services of the projects that share some: one that crashed shows as stopped. */
 export class SharedWatcher {
   private lastLook = 0;
   private looking = false;
@@ -82,15 +82,31 @@ export class SharedWatcher {
     void this.lookOnce();
   }
 
+  /**
+   * The projects to look at: those that share services (their stack may run from before the worker
+   * started, unrecorded), and those recorded as running (a project that stopped sharing).
+   */
+  private watched(): number[] {
+    const { db } = this.deps;
+    const sharing = db
+      .select({ id: schema.projects.id, config: schema.projects.config })
+      .from(schema.projects)
+      .all()
+      .filter(({ config }) => (config.preview?.sharedServices ?? []).length > 0)
+      .map(({ id }) => id);
+    const running = db
+      .select({ projectId: schema.sharedStacks.projectId })
+      .from(schema.sharedStacks)
+      .where(eq(schema.sharedStacks.status, 'running'))
+      .all()
+      .map(({ projectId }) => projectId);
+    return [...new Set([...sharing, ...running])];
+  }
+
   private async lookOnce(): Promise<void> {
     this.looking = true;
     try {
-      const running = this.deps.db
-        .select({ projectId: schema.sharedStacks.projectId })
-        .from(schema.sharedStacks)
-        .where(eq(schema.sharedStacks.status, 'running'))
-        .all();
-      for (const { projectId } of running) {
+      for (const projectId of this.watched()) {
         await recordShared(this.deps, projectId);
       }
     } finally {

@@ -387,7 +387,7 @@
   effort. Their output goes to the ticket's log (`output-log.ts`). `preview/shared-state.ts` records the stack in `shared_stacks`
   (`recordShared`: `projectContainers`, the containers on the shared network, and the preview networks its
   containers are on), called by `joinShared` (with the error when it fails), `leaveShared` and the actions, and by
-  `SharedWatcher` every 30 seconds for the running ones. `preview/shared-actions.ts` runs `shared_restart` and
+  `SharedWatcher` every 30 seconds for the projects that share services and the ones recorded running. `preview/shared-actions.ts` runs `shared_restart` and
   `shared_stop` (`PreviewManager.shared`, one at a time per project, serialized with joins and releases).
 - `step-preview.ts`: with `config.preview.startForImplementation`, an implementation step runs the install command, then
   starts the preview (never failing the step; a failed install is the preview's reason and it does not start); every code step's commands get `previewEnv` (`preview-env.ts`: `BASE_URL`,

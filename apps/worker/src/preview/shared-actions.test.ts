@@ -16,7 +16,7 @@ import {
 } from '@union/core';
 
 import { previewSettings } from './compose';
-import { restartShared, stopShared } from './shared-actions';
+import { restartShared, SharedWatcher, stopShared } from './shared-actions';
 
 let db: Db;
 let projectId: number;
@@ -85,4 +85,21 @@ test("a stop waits for the project's previews: it is refused, and says why", asy
 test('a restart keeps their networks: one compose call', async () => {
   await restartShared(deps(), projectId);
   expect(done).toEqual(['-p union-p1-shared restart']);
+});
+
+test('the watcher records a stack that ran before the worker started', async () => {
+  db.update(schema.projects)
+    .set({
+      config: {
+        baseBranch: 'main',
+        preview: { composeFile: 'compose.yaml', env: {}, sharedServices: ['db'] },
+      },
+    })
+    .run();
+  let now = 0;
+  const watcher = new SharedWatcher(deps(), () => now);
+  now = 60_000;
+  watcher.tick();
+  await Bun.sleep(10);
+  expect(getSharedStack(db, projectId)).toMatchObject({ previews: ['t9'], agents: [4] });
 });
