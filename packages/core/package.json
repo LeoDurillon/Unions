@@ -43,7 +43,8 @@
     "./prompt-formats": "./src/prompt-formats.ts",
     "./review-report-markdown": "./src/review/review-report-markdown.ts",
     "./review-report-specs": "./src/review/review-report-specs.ts",
-    "./repository-blob": "./src/repository-blob.ts"
+    "./repository-blob": "./src/repository-blob.ts",
+    "./setup-apply": "./src/setup/setup-apply.ts"
   },
   "dependencies": {
     "@octokit/auth-app": "catalog:github",

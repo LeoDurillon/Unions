@@ -17,7 +17,7 @@ export function BoardPage({
 }): ReactElement {
   return (
     <div className="flex h-full flex-col">
-      <SetupStatus projectId={project.id} />
+      <SetupStatus project={project} />
       <GettingStarted project={project} onNewTicket={onNewTicket} />
       <div className="min-h-0 flex-1">
         <Board project={project} onOpen={onOpenTicket} />

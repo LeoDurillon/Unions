@@ -52,7 +52,11 @@ A one-off agent run on a custom prompt, outside the ticket pipeline (project bar
   container at `/workspace/union-guide` for it to read, and the worker's trailer asks for that block instead of the
   findings layout. `GET /api/projects/:projectId/setup` returns the latest run and its proposal
   (`parseSetupProposal`): every value checked as the settings would, secret values and file contents never kept,
-  refusals listed in `dropped`. Plan: [`docs/plans/setup-agent.md`](../plans/setup-agent.md).
+  refusals listed in `dropped`. **Review the setup** on the board's Project setup card opens a card per
+  section: Apply sends it through the endpoint its settings page uses (`setup-apply.ts` says what each writes and
+  whether the settings hold it already); secrets and project files are entered on their cards; tickets are created
+  in the Backlog; the questions go back as a follow-up asking for the whole proposal again. Dismissed cards and
+  created tickets are remembered per run in the browser. Plan: [`docs/plans/setup-agent.md`](../plans/setup-agent.md).
 - **No Claude login:** any run (an investigation, a ticket step) fails with "Claude is not logged in on this
   machine…" when the credentials file is missing or holds no subscription login.
 - **Not yet:** resuming the agent's own session on a follow-up, choosing another branch than the base or a

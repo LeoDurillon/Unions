@@ -1,6 +1,14 @@
 # Plan: a setup agent at the end of the wizard
 
-Status: step 1 built (2026-11-10, branch `setup-agent`); steps 2 to 4 planned. Decisions made (see the end).
+Status: steps 1 and 2 built (2026-11-10, branch `setup-agent`); steps 3 and 4 planned. Decisions made (see the end).
+
+Step 2 built differently from below: the review is a dialog opened by **Review the setup** on the board's Project
+setup card, not a `?setup=` page. Edit is not a separate mode: every card shows its values in fields. The preview
+card edits the compose file and additions only; the rest of the preview is shown read-only. `setup-apply.ts` (core,
+browser-safe) holds what each Apply writes and whether a section is already applied; it keeps values as the
+settings store them (agent switches only where they differ from the defaults, additions ending with one line
+break), so an applied section reads as applied. Checked in headless Chromium on a scratch database with the third
+Senova answer: every card applied through the real endpoints and then read Applied.
 
 Built differently from step 1 below: the board shows the run in a **Project setup** card above Getting started
 (not as a checklist item), and until step 2 its proposal opens as the investigation's answer. The "not logged in"

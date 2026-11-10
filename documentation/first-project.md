@@ -96,10 +96,32 @@ toolchain the default image lacks, an agent image. It also lists the secrets and
 any repository changes the setup needs. It only reads: it changes nothing in your repository or your settings.
 It runs on your Claude subscription.
 
-A **Project setup** card above the board follows the run. **Follow its log** shows what the agent is doing. Once it
-has answered, **Read its answer** opens its proposal on the Investigations tab. Fill in the settings it proposes in
-**Settings**; applying a proposal in one click is coming. If the run failed (for example, Claude is not logged in
-on this machine) or was cancelled, the card says why: pick a model and click **Run setup** to try again.
+A **Project setup** card above the board follows the run. **Follow its log** shows what the agent is doing. If the
+run failed (for example, Claude is not logged in on this machine) or was cancelled, the card says why: pick a model
+and click **Run setup** to try again.
+
+### Review the setup
+
+Once the agent has answered, the card says how many parts of its proposal are not in your settings yet. Click
+**Review the setup**:
+
+- **The agent's questions** come first: what it could not decide from your files. Answer the ones you can and click
+  **Ask the agent again**: it reads your answers and proposes everything again (on your Claude subscription).
+- **One card per part**: Checks, Saved scripts, Preview, End-to-end tests, Project instructions and Agent image.
+  Each says which files the agent based it on, and shows what the settings hold now where it differs. Edit a value
+  if you want, then click **Apply**: it is saved as if you had saved it on its settings page, with the same checks.
+  **Dismiss** hides a card you don't want; **Show** brings it back. A card already in your settings shows
+  **Applied**.
+  - **Preview** keeps the variables and settings the project has already and adds the agent's. Edit the Compose file
+    and the compose additions here; change the rest in **Environments** afterwards.
+  - **End-to-end tests** can be applied once the preview is.
+  - **Project instructions** replaces the project's instructions when it has some.
+  - **Agent image** saves the Dockerfile; Union builds it, and the agents use it once the build has passed.
+- **Secret variables** and **Project files** are for you to give: enter each secret's value (kept on the server,
+  never shown again) and upload each file.
+- **Changes the repository needs**: **Create ticket** puts each one you want in the Backlog.
+
+**Read its answer** opens the agent's full answer on the Investigations tab.
 
 ## Tell the agents how to build and check your code
 
