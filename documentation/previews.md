@@ -5,7 +5,7 @@ browser before you approve it, database and all.
 
 ## Set it up
 
-Open the project's **Environments** tab, in the bar above the board, and its **Services** page. The tab also lists
+Open the project's **Environments** tab, in the bar above the board, and its **Compose** page. The tab also lists
 the project's previews running now, with their addresses and **Stop**.
 
 1. **Compose file**: the path of the Compose file in the repository, for example `compose.yaml`.
@@ -88,7 +88,7 @@ Commands there get `BASE_URL` and one `UNION_URL_<SERVICE>` variable per exposed
 A failure can be sent to the implementer as a revision (**Send the failure to the agent**). When the preview
 restarted or the agent worked on the ticket after the tests ran, the tab asks you to run them again and offers only
 **Run again**: send a failure from tests run on the current code. A pull request's result can't be added to
-the review in that case either. With **Start the preview for implementation steps**, the
+the review in that case either. With **Start the preview for implementation steps** (**Environments → Agent**), the
 project's install command runs and the preview starts before each implementation run, and the agent is told to run the end-to-end tests its change
 touches.
 
@@ -112,7 +112,7 @@ Save the commands you run often in **Settings → Scripts**: each becomes a butt
 ## Services for the agent
 
 The agent can use your Compose services while it works, for example a database for its tests. Choose them in
-**Environments → Services** (**Start for the agent**). They start before the implementation or a rebase, and
+**Environments → Agent** (**Start for the agent**). They start before the implementation or a rebase, and
 stop after it.
 
 The ports they publish are forwarded to `localhost` in the ticket's container, so settings such as
@@ -125,7 +125,7 @@ agent.
 ## Services shared between previews
 
 Some services are only utilities, such as a virus scanner or a mail catcher, and every preview can use the same one.
-Choose them in **Environments → Services** (**Shared between previews**). Union then runs them once for the
+Choose them in **Environments → Shared**. Union then runs them once for the
 whole project instead of once per preview, which saves memory: a virus scanner alone can take more than a gigabyte.
 
 - Your previews still reach them by name (`clamav:3310`), so you don't change your Compose file or your variables.

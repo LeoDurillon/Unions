@@ -65,7 +65,7 @@ export function PreviewHeading({
             {
               label: 'Environment settings',
               onSelect: () => {
-                openEnvironments('services');
+                openEnvironments('compose');
               },
             },
           ]}
@@ -84,7 +84,7 @@ export function PreviewNotSetUp(): ReactElement {
         type="button"
         className="text-indigo-600 hover:underline dark:text-indigo-400"
         onClick={() => {
-          openEnvironments('services');
+          openEnvironments('compose');
         }}
       >
         Set up previews

@@ -1,5 +1,5 @@
-// The project's Environments tab: what runs for it now, and how its previews run (services,
-// variables, end-to-end tests, limits), a page at a time (`?env=`).
+// The project's Environments tab: what runs for it now, and how its previews run (compose, variables,
+// the agent's environment, shared services, end-to-end tests, limits), a page at a time (`?env=`).
 
 import type { ReactElement } from 'react';
 
@@ -10,31 +10,11 @@ import {
   environmentLabel,
   showEnvironmentSection,
   useEnvironmentSection,
-  type EnvironmentSection,
 } from '../../lib/environments-url';
 import { GuideLink } from '../guide/guide-link';
 import { TabButton } from '../tab-button';
-import { PreviewE2ePage } from './preview-e2e-page';
-import { PreviewLimitsPage } from './preview-limits-page';
-import { PreviewServicesPage } from './preview-services-page';
-import { PreviewVariablesPage } from './preview-variables-page';
+import { EnvironmentSectionBody } from './environment-section-body';
 import { ProjectPreviews } from './project-previews';
-
-function SectionBody({
-  section,
-  project,
-}: {
-  section: EnvironmentSection;
-  project: PublicProject;
-}): ReactElement {
-  const bodies: Record<EnvironmentSection, () => ReactElement> = {
-    services: () => <PreviewServicesPage project={project} />,
-    variables: () => <PreviewVariablesPage project={project} />,
-    e2e: () => <PreviewE2ePage project={project} />,
-    limits: () => <PreviewLimitsPage project={project} />,
-  };
-  return bodies[section]();
-}
 
 /** What runs for the project now, then how its previews run, a page at a time. */
 export function EnvironmentsPage({
@@ -69,7 +49,7 @@ export function EnvironmentsPage({
             </span>
           </div>
           <div key={`${project.id}:${section}`}>
-            <SectionBody section={section} project={project} />
+            <EnvironmentSectionBody section={section} project={project} />
           </div>
         </section>
       </div>

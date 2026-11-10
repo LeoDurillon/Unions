@@ -9,8 +9,10 @@ import { readParam, setParams, useUrlParam } from './url-state';
 
 /** The tab's pages, in order; the id is what `?env=` holds. */
 export const ENVIRONMENT_SECTIONS = [
-  { id: 'services', label: 'Services' },
+  { id: 'compose', label: 'Compose' },
   { id: 'variables', label: 'Variables' },
+  { id: 'agent', label: 'Agent' },
+  { id: 'shared', label: 'Shared' },
   { id: 'e2e', label: 'End-to-end tests' },
   { id: 'limits', label: 'Limits' },
 ] as const;
@@ -19,8 +21,10 @@ export type EnvironmentSection = (typeof ENVIRONMENT_SECTIONS)[number]['id'];
 
 /** Where each page's Learn more goes. */
 export const ENVIRONMENT_GUIDE: Record<EnvironmentSection, GuideTarget> = {
-  services: ['previews', 'set-it-up'],
+  compose: ['previews', 'set-it-up'],
   variables: ['previews', 'set-it-up'],
+  agent: ['previews', 'services-for-the-agent'],
+  shared: ['previews', 'services-shared-between-previews'],
   e2e: ['previews', 'end-to-end-tests'],
   limits: ['previews', 'run-a-preview'],
 };
@@ -41,10 +45,10 @@ export function useEnvironmentsOpen(): boolean {
   return useUrlParam('view') === 'environments';
 }
 
-/** The page of the tab the URL names; Services when it names none. */
+/** The page of the tab the URL names; Compose when it names none or an old one (`services`). */
 export function useEnvironmentSection(): EnvironmentSection {
   const value = useUrlParam('env');
-  return isSection(value) ? value : 'services';
+  return isSection(value) ? value : 'compose';
 }
 
 /** Shows the tab from the project bar, at the page it was left on. */
@@ -63,7 +67,7 @@ export function showEnvironmentSection(section: EnvironmentSection): void {
  * Opens the tab at one page from anywhere (a ticket's preview, a prompt to set previews up), closing
  * the settings and an open ticket. Asks first when the page shown has unsaved changes.
  */
-export function openEnvironments(section: EnvironmentSection = 'services'): void {
+export function openEnvironments(section: EnvironmentSection = 'compose'): void {
   const already = readParam('view') === 'environments' && readParam('env') === section;
   if (already || !confirmLeave()) {
     return;
@@ -81,7 +85,7 @@ export function openEnvironments(section: EnvironmentSection = 'services'): void
 }
 
 const OLD_SETTINGS: Record<string, EnvironmentSection> = {
-  'preview-services': 'services',
+  'preview-services': 'compose',
   'preview-variables': 'variables',
   'preview-e2e': 'e2e',
   'preview-limits': 'limits',

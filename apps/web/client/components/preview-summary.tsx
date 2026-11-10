@@ -50,7 +50,7 @@ export function PreviewSummary({
             type="button"
             className={LINK}
             onClick={() => {
-              openEnvironments('services');
+              openEnvironments('compose');
             }}
           >
             Not set up: set up previews

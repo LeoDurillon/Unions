@@ -24,9 +24,9 @@ Built (phases 1 to 4). Full design and what was built: [`docs/plans/archive/prev
   the e2e tests, the user's) get `UNION_URL_<SERVICE>`, each service's public address, besides `BASE_URL`. The
   project's e2e command runs when the user asks, from the ticket ("Run e2e tests", one run at a time: they take a lot
   of memory); a failure can be sent to the agent as a revision. With "Start the preview for implementation steps"
-  (Environments → End-to-end tests), the preview starts before each implementation or revision, and the agent is told
+  (Environments → Agent), the preview starts before each implementation or revision, and the agent is told
   the addresses and to run the e2e tests its work touches.
-- Compose additions (Environments tab → Services): YAML merged over the repository's file as a second
+- Compose additions (Environments tab → Compose): YAML merged over the repository's file as a second
   `-f`, for what Union adds without changing the repository (a database restore, migrations, a seed). Kept in the
   settings, written only in the compose helper.
 - Project files (project settings → Project → Files): files put at a path in every ticket's repository before each
@@ -37,11 +37,11 @@ Built (phases 1 to 4). Full design and what was built: [`docs/plans/archive/prev
   volumes and data stay). A preview whose served services crashed is taken down the same way. The ports they publish
   in the compose file are forwarded to the ticket container's `localhost` (IPv4 and IPv6), so the repository's
   laptop settings (`.env.test` with `localhost:5432`) work unchanged; the agent is told where each one answers. A
-  project whose settings already use the services' names turns it off (Environments → Services, "Reach them on
+  project whose settings already use the services' names turns it off (Environments → Agent, "Reach them on
   localhost"). Which
   plain variables the agent's commands get is a setting (all by default, none, or chosen): a variable already set
   wins over the repository's env files. Secrets never reach the agent.
-- Shared services (Environments tab → Services, `config.preview.sharedServices`; plan
+- Shared services (Environments tab → Shared, `config.preview.sharedServices`; plan
   [`docs/plans/shared-services.md`](../plans/shared-services.md), phase 1): chosen services run once per project as
   compose project `union-p<id>-shared` (its own volumes; memory caps as preview services; never the preview's
   variables), not in each preview. Their containers join each preview's networks under their service names, never
@@ -60,10 +60,10 @@ Built (phases 1 to 4). Full design and what was built: [`docs/plans/archive/prev
   folders the compose file mounts that git ignores whole and tracks nothing in, found at each start
   (`previews.data_folders`). Refused during a step, an e2e run or a command; Restart
   keeps updating in place, data kept. Design: [`docs/plans/archive/preview-reset.md`](../plans/archive/preview-reset.md).
-- **Environments** (a tab of the project bar, `?view=environments&env=services|variables|e2e|limits`): the
+- **Environments** (a tab of the project bar, `?view=environments&env=compose|variables|agent|shared|e2e|limits`): the
   project's previews running now (its rows of `/api/previews`, with Stop), then the preview settings a page at a
-  time: Services, Variables, End-to-end tests, Limits. They left the project settings; an old
-  `?settings=preview-*` link opens the matching page. The shared services' own state there is planned
+  time: Compose, Variables, Agent, Shared, End-to-end tests, Limits. They left the project settings; an old
+  `?settings=preview-*` link opens the matching page, and `env=services` (before the split) opens Compose. The shared services' own state there is planned
   (`docs/plans/shared-services.md`, phase 1b).
 - **Previews** (in the sidebar, with the number running): every project's previews that hold containers, tickets'
   and pull requests' under review, with their links and **Stop**; a ticket's opens its panel.
