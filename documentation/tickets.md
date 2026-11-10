@@ -172,7 +172,9 @@ Click a card to open its panel:
   **Open in Notion** opens a discussion there; **Refresh** reads the comments again. Resolved comments are not
   shown. **Reply** under a discussion answers in it; **New comment** at the bottom starts a discussion on the
   page. **Add to review** puts the whole discussion in the ticket's review, for the implementer with your next
-  **Send review** (see [Reviewing](reviewing.md)); it shows **In the review** after. You can write `**bold**`, `` `code` `` and `[links](https://…)`. The comment shows "Sending to Notion…"
+  **Send review** (see [Reviewing](reviewing.md)); it shows **In the review** after. On a comment on the whole
+  page, **Add to review** is next to each comment of the discussion and adds that comment alone, without the
+  replies. You can write `**bold**`, `` `code` `` and `[links](https://…)`. The comment shows "Sending to Notion…"
   until Notion has it, then the tab reads the comments again; if Notion refuses it, the box opens again with your
   text and the reason. Comments appear in Notion under your integration's name. Your Notion integration needs the
   **Read comments** and **Insert comments** capabilities (in Notion, the integration's settings, then

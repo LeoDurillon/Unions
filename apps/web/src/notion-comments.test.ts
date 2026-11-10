@@ -165,11 +165,11 @@ test('an empty comment is refused, and nothing is queued', async () => {
   expect(db.select().from(schema.commands).all()).toEqual([]);
 });
 
-function addToReview(discussionId: string): Promise<Response> | Response {
+function addToReview(discussionId: string, commentId?: string): Promise<Response> | Response {
   return app.request(`/api/tickets/${ticketId}/notion-comments/import`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ discussionId }),
+    body: JSON.stringify({ discussionId, commentId }),
   });
 }
 
@@ -200,4 +200,19 @@ test('a discussion goes into the review once, whole, with its Notion link', asyn
   const view = (await (await read()).json()) as NotionTabView;
   expect(view.review.importedIds).toEqual([ON_TEXT]);
   expect((await addToReview('gone')).status).toBe(404);
+});
+
+test('one comment of a discussion goes into the review alone, with its own link', async () => {
+  db.update(schema.tickets).set({ branch: '1-export' }).run();
+  expect(await (await addToReview('on-page', 'c1')).json()).toEqual({ imported: true });
+  expect(await (await addToReview('on-page', 'c1')).json()).toEqual({ imported: false });
+  expect((await addToReview('on-page', 'gone')).status).toBe(404);
+  const rows = db.select().from(schema.reviewComments).all();
+  expect(rows).toHaveLength(1);
+  expect(rows[0]).toMatchObject({
+    sourceUrl: `https://www.notion.so/${PAGE.replaceAll('-', '')}?d=onpage&c=c1`,
+    body: '**Grace** on the Notion page:\n\nIs it `CSV`',
+  });
+  const view = (await (await read()).json()) as NotionTabView;
+  expect(view.review.importedIds).toEqual(['c1']);
 });

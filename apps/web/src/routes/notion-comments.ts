@@ -25,7 +25,8 @@ function pageOf(ticket: Ticket): { id: string; url: string } {
 /**
  * `GET` reads the discussions from Notion on each call (the tab reads once per opening), with the
  * comments not posted yet and those in the review. `POST` (`{ discussionId?, text }`) queues a
- * reply or a page comment; `POST /import` (`{ discussionId }`) adds a discussion to the review.
+ * reply or a page comment; `POST /import` (`{ discussionId, commentId? }`) adds a discussion, or
+ * only one of its comments, to the review.
  */
 export function ticketNotionCommentRoutes(db: Db, notion: NotionApi): Hono {
   const routes = new Hono();
@@ -34,12 +35,11 @@ export function ticketNotionCommentRoutes(db: Db, notion: NotionApi): Hono {
     const page = pageOf(ticket);
     const token = notionTokenOf(db, ticket.projectId);
     const view = await readDiscussions(notion, token, page);
-    const ids = view.discussions.map((discussion) => discussion.id);
     return c.json({
       ...view,
       pending: pendingNotionComments(db, ticket.id),
       review: {
-        importedIds: importedDiscussions(db, ticket.id, page.id, ids),
+        importedIds: importedDiscussions(db, ticket.id, page.id, view.discussions),
         refusal: reviewImportRefusal(ticket),
       },
     });
@@ -51,14 +51,20 @@ export function ticketNotionCommentRoutes(db: Db, notion: NotionApi): Hono {
     if (refusal !== null) {
       throw fail(CONFLICT, refusal);
     }
-    const { discussionId } = await readObject(c.req.raw);
+    const { discussionId, commentId } = await readObject(c.req.raw);
     // Read again: the thread as it is now, replies included.
     const view = await readDiscussions(notion, notionTokenOf(db, ticket.projectId), page);
     const discussion = view.discussions.find((one) => one.id === discussionId);
     if (!discussion) {
       throw fail(NOT_FOUND, 'This discussion is not open on the page any more');
     }
-    return c.json({ imported: importNotionDiscussion(db, ticket, page.id, discussion) });
+    const one = typeof commentId === 'string' ? commentId : null;
+    if (one !== null && !discussion.comments.some((comment) => comment.id === one)) {
+      throw fail(NOT_FOUND, 'This comment is not on the page any more');
+    }
+    return c.json({
+      imported: importNotionDiscussion(db, ticket, page.id, { discussion, commentId: one }),
+    });
   });
   routes.post('/:id/notion-comments', async (c) => {
     const ticket = loadTicket(db, c);

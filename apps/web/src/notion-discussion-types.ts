@@ -29,7 +29,10 @@ export type PendingNotionComment = {
   createdAt: number;
 };
 
-/** The discussions already in the ticket's review, and why one cannot be added now (null when it can). */
+/**
+ * What is already in the ticket's review (the ids of discussions added whole and of page comments
+ * added alone), and why one cannot be added now (null when it can).
+ */
 type NotionReviewState = { importedIds: string[]; refusal: string | null };
 
 /** What the ticket's tab reads: the discussions, the comments being sent, and Add to review. */

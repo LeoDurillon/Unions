@@ -1,4 +1,4 @@
-// One open discussion of a Notion page: the text it is about, its comments oldest first, then Reply; Add to review sends it to the implementer.
+// One open discussion of a Notion page: the text it is about, its comments oldest first, then Reply; Add to review sends it (on the page: one comment) to the implementer.
 
 import type { ReactElement } from 'react';
 
@@ -22,26 +22,39 @@ const PLACES: Record<NotionDiscussionView['place'], string> = {
   block: 'On a block of the page',
 };
 
-function Comment({ comment }: { comment: NotionCommentView }): ReactElement {
+function Comment({
+  comment,
+  review,
+}: {
+  comment: NotionCommentView;
+  review?: ReviewImportState | undefined;
+}): ReactElement {
   return (
     <div className="space-y-1">
       <div className="flex items-baseline gap-2">
         <span className="font-medium">{comment.author}</span>
         <span className="text-xs text-zinc-500">{formatWhen(comment.createdAt)}</span>
+        {review ? <AddToReview review={review} /> : null}
       </div>
       <Markdown compact>{comment.markdown}</Markdown>
     </div>
   );
 }
 
-/** What a ticket's tab adds to a discussion: its replies being sent, Reply, and Add to review. */
+/**
+ * What a ticket's tab adds to a discussion: its replies being sent, Reply, and Add to review, for the
+ * whole thread (`commentId` null) or for one comment.
+ */
 export type DiscussionActions = {
   pending: PendingNotionComment[];
   sender: NotionCommentSend;
-  review: ReviewImportState;
+  review: (commentId: string | null) => ReviewImportState;
 };
 
-/** Without `actions` (a review's Notion tab), read only. */
+/**
+ * Without `actions` (a review's Notion tab), read only. A comment on the page is most often one
+ * request on its own: each of its comments is added alone, other threads whole.
+ */
 export function NotionDiscussion({
   discussion,
   actions,
@@ -49,11 +62,12 @@ export function NotionDiscussion({
   discussion: NotionDiscussionView;
   actions?: DiscussionActions;
 }): ReactElement {
+  const perComment = discussion.place === 'page';
   return (
     <article className={CARD} aria-label={PLACES[discussion.place]}>
       <div className="flex items-baseline gap-2 text-xs text-zinc-500">
         <span>{PLACES[discussion.place]}</span>
-        {actions ? <AddToReview review={actions.review} /> : null}
+        {actions && !perComment ? <AddToReview review={actions.review(null)} /> : null}
         <a
           href={discussion.url}
           target="_blank"
@@ -69,7 +83,11 @@ export function NotionDiscussion({
         </blockquote>
       )}
       {discussion.comments.map((comment) => (
-        <Comment key={comment.id} comment={comment} />
+        <Comment
+          key={comment.id}
+          comment={comment}
+          review={actions && perComment ? actions.review(comment.id) : undefined}
+        />
       ))}
       {actions ? (
         <NotionReply

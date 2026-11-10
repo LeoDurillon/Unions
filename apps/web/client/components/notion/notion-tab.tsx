@@ -45,13 +45,16 @@ function Discussions({
             actions={{
               pending: pendingIn(discussion.id),
               sender,
-              review: {
-                imported: view.review.importedIds.includes(discussion.id),
-                refusal: view.review.refusal,
-                adding: reviewImport.adding === discussion.id,
-                onAdd: () => {
-                  reviewImport.add(discussion.id);
-                },
+              review: (commentId) => {
+                const id = commentId ?? discussion.id;
+                return {
+                  imported: view.review.importedIds.includes(id),
+                  refusal: view.review.refusal,
+                  adding: reviewImport.adding === id,
+                  onAdd: () => {
+                    reviewImport.add({ discussionId: discussion.id, commentId });
+                  },
+                };
               },
             }}
           />
