@@ -194,7 +194,7 @@ post a review" act on them (see [Automation](automation.md)). Nothing is written
 
 **Send review** posts one review on GitHub, signed by your token or the GitHub App: **Comment**, **Approve** or
 **Request changes**. Your overall note becomes its body, and each draft a line comment. Drafts on lines that are no
-longer in the diff are quoted in the body instead. If GitHub refuses (for example, an approval of your own pull
+longer in the diff, or that reach past the changed lines, are quoted in the body instead, so the rest still goes. If GitHub refuses (for example, an approval of your own pull
 request), your drafts stay, with GitHub's reason.
 
 A pull request that is part of a stack opens with a tab per pull request of the stack, bottom first, each with its

@@ -29,8 +29,9 @@ review summaries, conversation comments and line threads, each to reply to: see 
 kept on the review (`current_reviews.files`, `head_sha`): comments are checked against those lines, and those
 written on an earlier head read as outdated. **Send review** offers **Comment**, **Approve** and **Request changes**;
 each queues a `submit_pr_review` command with that verdict, and the worker posts one review of that kind on the pull
-request: the overall note as its body, each draft on the reviewed head as a line comment, and the others quoted in the
-body with their code (GitHub refuses line comments outside the current diff). An approval may be sent with no draft
+request: the overall note as its body, each draft on the reviewed head and inside one hunk of its diff as a line comment,
+and the others quoted in the body with their code (GitHub refuses the whole review for one line comment outside the
+current diff). An approval may be sent with no draft
 and no note; a comment or a request for changes needs one of them. The posted drafts turn sent; a failure (GitHub
 refuses, for one, an approval or a request for changes on the user's own pull request) leaves them drafts and shows
 GitHub's reason (`submit_status`). A posted review logs `pr_review_posted` with its verdict, on the ticket whose

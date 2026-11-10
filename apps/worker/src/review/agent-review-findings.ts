@@ -1,5 +1,5 @@
 // The agent review's answer format, and its findings read back as draft comments.
-import { diffExcerpt, type AgentDraft } from '@union/core';
+import { diffExcerpt, rangeInDiff, type AgentDraft } from '@union/core';
 
 /** Drafts beyond this are dropped: a review that long is noise, whatever the prompt says. */
 const MAX_COMMENTS = 30;
@@ -103,7 +103,8 @@ function general(body: string): AgentDraft {
 
 /**
  * The findings as drafts: on the diff's lines when they are in it (with the code as the excerpt),
- * else on the whole change with the place they point at, so nothing the agent said is lost.
+ * trimmed to the hunk they start in, since GitHub refuses a line comment reaching past one; else on
+ * the whole change with the place they point at, so nothing the agent said is lost.
  */
 export function toDrafts(
   findings: Findings,
@@ -111,14 +112,16 @@ export function toDrafts(
 ): AgentDraft[] {
   const drafts = findings.comments.slice(0, MAX_COMMENTS).map((finding): AgentDraft => {
     const patch = patchOf(finding.path);
-    const excerpt =
+    const span =
       patch === undefined
         ? null
-        : diffExcerpt(patch, finding.side, finding.startLine, finding.endLine);
-    if (excerpt === null) {
+        : rangeInDiff(patch, finding.side, finding.startLine, finding.endLine);
+    if (patch === undefined || span === null) {
       return general(`**${finding.path}**, ${lines(finding)}:\n\n${finding.body}`);
     }
-    const { path, side, startLine, endLine, body } = finding;
+    const { path, side, body } = finding;
+    const excerpt = diffExcerpt(patch, side, span.startLine, span.endLine) ?? '';
+    const { startLine, endLine } = span;
     return { kind: 'line', path, side, startLine, endLine, excerpt, body };
   });
   return findings.summary === '' ? drafts : [general(findings.summary), ...drafts];

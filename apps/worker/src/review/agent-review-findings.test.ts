@@ -57,3 +57,20 @@ test('findings on the diff become line drafts; the others keep their place in th
     { kind: 'general', side: 'new', excerpt: '', body: '**other.ts**, line 1:\n\nNot changed.' },
   ]);
 });
+
+test('a finding reaching past its hunk is trimmed to it, as GitHub refuses the lines beyond', () => {
+  const patch = '@@ -5,2 +5,1 @@\n-old five\n-old six\n+new five\n@@ -20,1 +19,1 @@\n-x\n+y';
+  const [draft] = toDrafts(
+    {
+      summary: '',
+      comments: [{ pr: null, path: 'a.ts', side: 'old', startLine: 5, endLine: 21, body: 'Gone.' }],
+    },
+    () => patch,
+  );
+  expect(draft).toMatchObject({
+    kind: 'line',
+    startLine: 5,
+    endLine: 6,
+    excerpt: 'old five\nold six',
+  });
+});

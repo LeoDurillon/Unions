@@ -2,6 +2,7 @@
 // verdict.
 import {
   emitEvent,
+  rangeInDiff,
   schema,
   type Db,
   type Project,
@@ -34,30 +35,47 @@ function quoted(draft: ReviewComment): string {
 }
 
 /**
- * The review as GitHub gets it. Drafts written on the commit the review is anchored at become line
- * comments; the others (the pull request moved on since) are quoted in the body with their code,
- * since GitHub refuses line comments outside the current diff. Comments on the whole pull request
- * follow the summary in the body.
+ * Whether GitHub takes the draft as a line comment: all its lines in one hunk of the file's patch as
+ * last fetched. Without the files fetched, the draft is trusted, as it was checked when written.
+ */
+function inDiff(review: Pick<Review, 'files'>, draft: ReviewComment): boolean {
+  if (!review.files) {
+    return true;
+  }
+  const patch = review.files.find((file) => file.path === draft.path)?.patch;
+  const span =
+    patch === undefined ? null : rangeInDiff(patch, draft.side, draft.startLine, draft.endLine);
+  return span?.startLine === draft.startLine && span.endLine === draft.endLine;
+}
+
+function section(title: string, drafts: ReviewComment[]): string[] {
+  return drafts.length === 0 ? [] : [title, ...drafts.map((draft) => quoted(draft))];
+}
+
+/**
+ * The review as GitHub gets it. Drafts written on the commit the review is anchored at, on lines of
+ * its diff, become line comments; the others (the pull request moved on since, or lines outside the
+ * diff) are quoted in the body with their code, since GitHub refuses the whole review for one line
+ * comment outside the diff. Comments on the whole pull request follow the summary in the body.
  */
 function buildReview(
-  review: Pick<Review, 'headSha'>,
+  review: Pick<Review, 'headSha' | 'files'>,
   drafts: ReviewComment[],
   summary: string,
   verdict: ReviewVerdict,
 ): PullRequestReview {
-  const current = drafts.filter(
-    (draft) => draft.kind === 'line' && draft.headSha === review.headSha,
-  );
+  const lines = drafts.filter((draft) => draft.kind === 'line');
+  const onHead = lines.filter((draft) => draft.headSha === review.headSha);
+  const current = onHead.filter((draft) => inDiff(review, draft));
+  const outside = onHead.filter((draft) => !current.includes(draft));
+  const earlier = lines.filter((draft) => !onHead.includes(draft));
   const general = drafts.filter((draft) => draft.kind === 'general');
-  const earlier = drafts.filter((draft) => draft.kind === 'line' && !current.includes(draft));
   const parts = summary.trim() === '' ? [] : [summary.trim()];
-  parts.push(...general.map((draft) => draft.body.trim()));
-  if (earlier.length > 0) {
-    parts.push(
-      '### On an earlier version of the pull request',
-      ...earlier.map((draft) => quoted(draft)),
-    );
-  }
+  parts.push(
+    ...general.map((draft) => draft.body.trim()),
+    ...section('### Outside the diff', outside),
+    ...section('### On an earlier version of the pull request', earlier),
+  );
   return {
     commitId: review.headSha,
     body: parts.join('\n\n'),

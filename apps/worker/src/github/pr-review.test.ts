@@ -189,3 +189,24 @@ test('the posted review is logged with its verdict, on the ticket whose pull req
     payload: { number: 42, verdict: 'approve' },
   });
 });
+
+test('a draft reaching past the diff is quoted in the body, so GitHub takes the rest', async () => {
+  const patch = '@@ -1,2 +1,1 @@\n-one\n-two\n+uno';
+  const file = { id: 1, path: 'src/a.ts', oldPath: 'src/a.ts', status: 'modified' as const };
+  db.update(schema.currentReviews)
+    .set({ files: [{ ...file, binary: false, additions: 1, deletions: 2, patch }] })
+    .run();
+  draft({ startLine: 1, body: 'In the diff.' });
+  draft({ side: 'old', startLine: 1, endLine: 5, body: 'Past the hunk.' });
+
+  await postPullRequestReview(db, () => api, reviewId, { summary: '', verdict: 'comment' });
+
+  const [posted] = api.reviews;
+  expect(posted?.comments).toEqual([
+    { path: 'src/a.ts', body: 'In the diff.', side: 'RIGHT', line: 1 },
+  ]);
+  expect(posted?.body).toBe(
+    '### Outside the diff\n\n**src/a.ts**, lines 1-5 (removed code):\n\n```\ncode at 1\n```\n\nPast the hunk.',
+  );
+  expect(statuses()).toEqual(['sent', 'sent']);
+});

@@ -207,7 +207,7 @@
   in a throwaway `union-a<id>` container where the host cloned it at the reviewed commit (`pr-checkout.ts`, through
   `pull/<n>/head`, so forks work). The agent ends its answer with a JSON block (`agent-review-findings.ts`, format
   appended by the host); findings outside the diff's lines become `general` drafts naming the place, so nothing is
-  lost. Cancellation goes through the `cancel_agent_review` command hook.
+  lost, and a finding reaching past its hunk is trimmed to it (`rangeInDiff`). Cancellation goes through the `cancel_agent_review` command hook.
   Given specs go in the prompt (`specsSection`), in place of the ticket's text. A stack run (members in
   `agent_review_members`, `agent-review-stack.ts`) checks every PR out in one container at its reviewed commit as
   `refs/union/pr-<n>` (`clonePullRequests`), the top one at HEAD; the prompt gives each PR's own diff
