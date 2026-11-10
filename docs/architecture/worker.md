@@ -369,6 +369,18 @@
   (`agentServicesHint`). The same script (`preview/forwarder-script.ts`) is the preview router: a second process
   (`/tmp/union-hosts.*`) on the proxy's port, routing each connection by its first request's `Host` to the service
   (`preview/host-routes.ts`, from the preview row's `urls`), started by `startPreview` and `rejoinRunningPreview`.
+- `preview/shared-stack.ts`: the services a project's previews share (`config.preview.sharedServices`,
+  `docs/plans/shared-services.md`). `buildFile` and `ownFile` (`compose-file.ts`) move them out of the preview's
+  file into its `x-union-shared` extension (`splitShared` in core, with the refusals; a fork's pull request,
+  `Target.shared` empty, gets them back inline, `withSharedInline`). With one, `up` (`compose-up.ts`) runs
+  `up --no-start --build`, then `joinShared` (`compose -p union-p<id>-shared up -d --no-recreate --wait`, then
+  `connectNetwork` of each shared container to the preview's networks with its service name as alias), then
+  `up -d`. Agent services that are shared start the same way, and the ticket's container joins
+  `union-p<id>-shared_default` (forwards read their ports through `withSharedServices`). `leavePreview`
+  (`network.ts`) calls `leaveShared` before every `down`: the shared containers leave the project's networks, the
+  owner's container the shared one, and `releaseIfUnused` takes the stack down (volumes kept) when its containers
+  are on no other network and no other container is on its own. Joins and releases run one at a time per project
+  (`serialized`); Docker's state is the record, nothing is stored.
 - `step-preview.ts`: with `config.preview.startForImplementation`, an implementation step runs the install command, then
   starts the preview (never failing the step; a failed install is the preview's reason and it does not start); every code step's commands get `previewEnv` (`preview-env.ts`: `BASE_URL`,
   `UNION_URL_<SERVICE>`) while the preview runs, and `previewHint` lists the addresses.

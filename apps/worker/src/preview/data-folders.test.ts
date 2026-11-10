@@ -65,6 +65,7 @@ function target(): Target {
     urls: [],
     plain: {},
     secrets: {},
+    shared: [],
   };
 }
 

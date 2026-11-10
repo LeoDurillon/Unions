@@ -39,7 +39,7 @@ export async function serviceLogs(deps: PreviewDeps, owner: WorkspaceOwner): Pro
 
 /** `compose down` with `flags`, once the owner's container and the proxy left its networks. */
 async function down(deps: PreviewDeps, owner: WorkspaceOwner, flags: string[]): Promise<void> {
-  await leavePreview(deps.runtime, owner);
+  await leavePreview(deps, owner);
   const output = await compose(deps.runtime, deps.settings, {
     args: ['-p', previewProject(owner), 'down', ...flags],
   });

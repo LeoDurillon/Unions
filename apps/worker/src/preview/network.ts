@@ -13,6 +13,7 @@ import {
 
 import { routeToPreview } from './host-routes';
 import { leaveProxy } from './proxy-network';
+import { leaveShared, type SharedDeps } from './shared-stack';
 
 export { joinProxy } from './proxy-network';
 
@@ -49,17 +50,15 @@ export async function joinPreview(runtime: ContainerRuntime, owner: WorkspaceOwn
 }
 
 /**
- * Before the preview goes down, the owner's container and the proxy leave its networks: Docker will
- * not remove a network a container is still on.
+ * Before the preview goes down, the owner's container, the proxy and the shared services leave its
+ * networks: Docker will not remove a network a container is still on.
  */
-export async function leavePreview(
-  runtime: ContainerRuntime,
-  owner: WorkspaceOwner,
-): Promise<void> {
-  for (const network of await previewNetworks(runtime, owner)) {
-    await runtime.disconnectNetwork(network, ownerContainer(owner));
+export async function leavePreview(deps: SharedDeps, owner: WorkspaceOwner): Promise<void> {
+  for (const network of await previewNetworks(deps.runtime, owner)) {
+    await deps.runtime.disconnectNetwork(network, ownerContainer(owner));
   }
-  await leaveProxy(runtime, previewProject(owner));
+  await leaveProxy(deps.runtime, previewProject(owner));
+  await leaveShared(deps, previewProject(owner), ownerContainer(owner));
 }
 
 /** When the ticket's container is (re)provisioned while its preview runs: its networks and addresses. */

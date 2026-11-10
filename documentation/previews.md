@@ -121,6 +121,26 @@ instead, turn **Reach them on localhost** off.
 Choose which plain variables the agent's commands get (all, none, or a list). Secret variables never reach the
 agent.
 
+## Services shared between previews
+
+Some services are only utilities, such as a virus scanner or a mail catcher, and every preview can use the same one.
+Choose them in **Settings → Previews → Services** (**Shared between previews**). Union then runs them once for the
+whole project instead of once per preview, which saves memory: a virus scanner alone can take more than a gigabyte.
+
+- Your previews still reach them by name (`clamav:3310`), so you don't change your Compose file or your variables.
+  Previews still can't reach each other.
+- They start with the first preview that needs them and stop once no preview and no agent uses them. What they
+  store is kept for the next start.
+- Whichever preview starts them first decides how they run. Previews started later use them as they already are,
+  even if their branch changes those services.
+- They also serve the agent when you list them under **Start for the agent**, and their ports are forwarded to
+  `localhost` as usual.
+- A pull request from a fork runs its own copies.
+
+Choose only services that keep no data of their own for now: two previews sharing a database would also share its
+tables. A service the proxy opens, one that builds its image from the repository, or one that mounts files from it
+can't be shared. If you pick one, the preview won't start and says why.
+
 ## Project files
 
 **Settings → Files** holds files that every ticket's workspace gets at a path of your choice: a database dump for

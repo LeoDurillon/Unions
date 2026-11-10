@@ -12,11 +12,14 @@ import {
   composeServices,
   tidyCompose,
   previewServiceLimits,
+  splitShared,
+  withSharedInline,
   withResourceCaps,
   withoutProfiles,
   withProxyNetwork,
   withWorkspaceMounts,
   type ComposeJson,
+  type SharedContext,
   type WorkspaceOwner,
 } from '@union/core';
 
@@ -48,6 +51,8 @@ import {
 } from './variables';
 
 const TRAILING_SPACES = / +$/gmu;
+const SHARED_REFUSED =
+  'These services cannot be shared between previews (project settings → Previews → Services)';
 
 function toYaml(file: ComposeJson): string {
   return Bun.YAML.stringify(file, null, 2).replace(TRAILING_SPACES, '');
@@ -107,6 +112,13 @@ ${lastLines(output.tail)}`,
   );
 }
 
+function sharedContext(target: Target): SharedContext {
+  return {
+    exposed: target.exposed.map(({ service }) => service),
+    variables: Object.keys({ ...target.plain, ...target.secrets }),
+  };
+}
+
 function refuse(problems: string[], heading: string): void {
   if (problems.length > 0) {
     throw new PreviewError(`${heading}:\n- ${problems.join('\n- ')}`);
@@ -144,10 +156,12 @@ async function buildFile(
     [...composeProblems(resolved), ...exposedProblems(resolved, target, catalog)],
     'The compose file cannot run as a preview',
   );
+  const split = splitShared(resolved, target.shared, sharedContext(target));
+  refuse(split.problems, SHARED_REFUSED);
   const written = shown ? shownVariables(target) : runVariables(target);
   const { envFile } = target.config;
   const file = tidyCompose(
-    previewCompose(resolved, {
+    previewCompose(split.file, {
       project: target.project,
       workspaceVolume: target.workspaceVolume,
       exposed: target.exposed,
@@ -190,6 +204,19 @@ async function generatedFile(deps: PreviewDeps, target: Target): Promise<Compose
 }
 
 /**
+ * The user's own file with the shared services out of it, or back in it for an owner who may not
+ * share (a fork's pull request).
+ */
+function ownShared(resolved: ComposeJson, target: Target): ComposeJson {
+  if (target.shared.length === 0) {
+    return withSharedInline(resolved);
+  }
+  const split = splitShared(resolved, target.shared, sharedContext(target));
+  refuse(split.problems, SHARED_REFUSED);
+  return split.file;
+}
+
+/**
  * The user's own file for the ticket, resolved and checked like the generated one. Union keeps its
  * project name (isolation, Stop) and the workspace mounts; the rest is the user's, host ports included.
  */
@@ -198,7 +225,7 @@ async function ownFile(deps: PreviewDeps, target: Target, yaml: string): Promise
   const resolved = await resolve(deps, target, { yaml }, configEnvironment(target, false));
   const file = {
     ...withProxyNetwork(
-      withoutProfiles(withWorkspaceMounts(resolved, target.workspaceVolume)),
+      withoutProfiles(withWorkspaceMounts(ownShared(resolved, target), target.workspaceVolume)),
       target.project,
     ),
     name: target.project,

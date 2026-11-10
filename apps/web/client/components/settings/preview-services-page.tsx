@@ -11,7 +11,7 @@ import { AdditionsField, TextField } from './preview-fields';
 import { PreviewSave, usePreviewForm, type Form } from './preview-form';
 import { PreviewServicesField } from './preview-services-field';
 
-/** What the compose file offers: the profiles to enable, the services to open and to start for the agent. */
+/** What the compose file offers: the profiles to enable, the services to open, to start for the agent and to share. */
 function ComposeChoices({
   form,
   found,
@@ -56,6 +56,16 @@ function ComposeChoices({
         }}
       />
       {form.agentServices.length > 0 ? <AgentEnvironment form={form} onChange={setForm} /> : null}
+      <PreviewChoicesField
+        label="Shared between previews"
+        hint="Services without data of their own (a virus scanner, a mail catcher) that Union runs once for all the project's previews instead of in each one, to save memory. Each preview still reaches them by their name. A pull request from a fork runs its own copies."
+        example="clamav, mailhog"
+        selected={form.sharedServices}
+        known={found?.names ?? []}
+        onChange={(sharedServices) => {
+          setForm({ ...form, sharedServices });
+        }}
+      />
     </>
   );
 }

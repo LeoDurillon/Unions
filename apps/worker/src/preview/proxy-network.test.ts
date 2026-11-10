@@ -19,6 +19,8 @@ const runtime = {
     calls.push(`join ${network} ${container}`);
     return Promise.resolve();
   },
+  networkContainers: () => Promise.resolve([]),
+  containerNetworks: () => Promise.resolve([]),
   disconnectNetwork: (network: string, container: string) => {
     calls.push(`leave ${network} ${container}`);
     return Promise.resolve();

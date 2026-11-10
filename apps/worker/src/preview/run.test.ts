@@ -55,6 +55,8 @@ const runtime = {
     network.push(`join ${name} ${container}`);
     return Promise.resolve();
   },
+  networkContainers: () => Promise.resolve([]),
+  containerNetworks: () => Promise.resolve([]),
   disconnectNetwork: (name: string, container: string) => {
     network.push(`leave ${name} ${container}`);
     calls.push({ image: '', command: ['', '', '', '', 'leave', name] });

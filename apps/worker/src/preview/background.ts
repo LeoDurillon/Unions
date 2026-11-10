@@ -5,7 +5,9 @@ import {
   agentVariables,
   emitEvent,
   getPreview,
+  sharedPart,
   workspaceSubpaths,
+  type ComposeJson,
   type ContainerRuntime,
   type ExecOptions,
   type PortForward,
@@ -16,7 +18,8 @@ import { compose, createMountFolders } from './compose';
 import { fileToRun } from './compose-file';
 import { joinPreview } from './network';
 import { bringDown } from './run';
-import { lastLines, loadTarget, projectDirectory, type PreviewDeps } from './target';
+import { joinShared, withSharedServices } from './shared-stack';
+import { lastLines, loadTarget, projectDirectory, type PreviewDeps, type Target } from './target';
 import { unionEnvFile } from './variables';
 
 /** The services the agent works with, when the project has preview settings that name some. */
@@ -64,10 +67,47 @@ export type StartedServices = {
 
 const NONE: StartedServices = { env: {}, forwards: [], problems: [] };
 
+/** `up -d <services>` in the ticket's compose project; compose adds what they depend on. */
+async function upLocal(
+  deps: PreviewDeps,
+  target: Target,
+  file: ComposeJson,
+  services: string[],
+): Promise<void> {
+  if (services.length === 0) {
+    return;
+  }
+  await createMountFolders(
+    deps.runtime,
+    deps.settings,
+    target.workspaceVolume,
+    workspaceSubpaths(file),
+  );
+  const output = await compose(deps.runtime, deps.settings, {
+    args: [
+      '-p',
+      target.project,
+      '--project-directory',
+      projectDirectory(target),
+      '-f',
+      '-',
+      'up',
+      '-d',
+      ...services,
+    ],
+    workspaceVolume: target.workspaceVolume,
+    stdin: JSON.stringify(file),
+    files: unionEnvFile(target),
+  });
+  if (output.exitCode !== 0) {
+    throw new Error(lastLines(output.tail));
+  }
+}
+
 /**
- * Starts the agent's services in the ticket's compose project (`up -d <services>`; compose adds
- * what they depend on) and puts the ticket's container on their network. Never throws: a failure
- * is logged, and the step runs without.
+ * Starts the agent's services: the ticket's own in its compose project, the shared ones in the
+ * project's shared stack, and puts the ticket's container on their networks. Never throws: a
+ * failure is logged, and the step runs without.
  */
 export async function startAgentServices(
   deps: PreviewDeps,
@@ -80,30 +120,15 @@ export async function startAgentServices(
       return NONE;
     }
     const file = await fileToRun(deps, target);
-    await createMountFolders(
-      deps.runtime,
-      deps.settings,
-      target.workspaceVolume,
-      workspaceSubpaths(file),
+    const shared = Object.keys(sharedPart(file)?.services ?? {});
+    await upLocal(
+      deps,
+      target,
+      file,
+      services.filter((service) => !shared.includes(service)),
     );
-    const output = await compose(deps.runtime, deps.settings, {
-      args: [
-        '-p',
-        target.project,
-        '--project-directory',
-        projectDirectory(target),
-        '-f',
-        '-',
-        'up',
-        '-d',
-        ...services,
-      ],
-      workspaceVolume: target.workspaceVolume,
-      stdin: JSON.stringify(file),
-      files: unionEnvFile(target),
-    });
-    if (output.exitCode !== 0) {
-      throw new Error(lastLines(output.tail));
+    if (services.some((service) => shared.includes(service))) {
+      await joinShared(deps, target, file, `union-t${ticketId}`);
     }
     await joinPreview(deps.runtime, { ticketId });
     emitEvent(deps.db, { type: 'agent_services_started', ticketId, payload: { services } });
@@ -111,7 +136,7 @@ export async function startAgentServices(
       env: agentVariables(target.plain, target.config.agentVariables),
       ...(target.config.forwardPorts === false
         ? { forwards: [], problems: [] }
-        : agentForwards(file, services)),
+        : agentForwards(withSharedServices(file), services)),
     };
   } catch (error) {
     emitEvent(deps.db, {

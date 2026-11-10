@@ -67,6 +67,11 @@ export type Target = {
   urls: { service: string; url: string }[];
   plain: Record<string, string>;
   secrets: Record<string, string>;
+  /**
+   * The services it shares with the project's other previews: none when its code is not trusted
+   * with them (a fork's pull request), which runs its own copies.
+   */
+  shared: string[];
 };
 
 /**
@@ -145,6 +150,7 @@ export function loadTarget(deps: PreviewDeps, owner: WorkspaceOwner): Target {
       ]),
     ),
     secrets: source.secrets ? previewSecretValues(deps.db, source.projectId) : {},
+    shared: source.secrets ? (config.sharedServices ?? []) : [],
   };
 }
 

@@ -88,6 +88,11 @@ test('preview settings are checked, saved and cleared', async () => {
   ).json()) as PublicProject;
   expect(withAgent.config.preview?.agentServices).toEqual(['db', 'redis']);
   expect((await put({ ...SETTINGS, agentServices: ['not a service'] })).status).toBe(400);
+  const withShared = (await (
+    await put({ ...SETTINGS, sharedServices: ['clamav', ' mailhog '] })
+  ).json()) as PublicProject;
+  expect(withShared.config.preview?.sharedServices).toEqual(['clamav', 'mailhog']);
+  expect((await put({ ...SETTINGS, sharedServices: ['not a service'] })).status).toBe(400);
   const chosen = { mode: 'chosen', names: ['API_URL', 'API_URL'] };
   const withVariables = (await (
     await put({ ...SETTINGS, agentVariables: chosen })

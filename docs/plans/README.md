@@ -47,6 +47,10 @@ Open findings of the security reviews (2026-10-24 audit, 2026-11-08 review), to 
   picker, Markdown, images); left: folder READMEs, line selection and Copy link (step 3), the links in (step 4),
   search (step 5).
 
+- [Services shared between previews](shared-services.md): utility services (ClamAV, Mailhog, then S3 and
+  Postgres with a tenant per preview) run once per project and joined to each preview's network. Phase 1
+  (stateless services) in progress (2026-11-10, branch `shared-services`).
+
 ## Planned
 
 - [One adapter per tracker](tracker-adapters.md): what Notion and Jira do (comments, statuses, fields, links,

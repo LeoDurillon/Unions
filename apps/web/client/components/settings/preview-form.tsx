@@ -27,6 +27,7 @@ export type Form = {
   startForImplementation: boolean;
   profiles: string[];
   agentServices: string[];
+  sharedServices: string[];
   agentVariables: AgentVariables;
   forwardPorts: boolean;
   /** As typed: empty means the default. */
@@ -45,6 +46,7 @@ const EMPTY: Form = {
   startForImplementation: false,
   profiles: [],
   agentServices: [],
+  sharedServices: [],
   agentVariables: { mode: 'all' },
   forwardPorts: true,
   idleStopMinutes: '',
@@ -53,9 +55,10 @@ const EMPTY: Form = {
 
 function agentChoices(
   preview: PreviewConfig,
-): Pick<Form, 'agentServices' | 'agentVariables' | 'forwardPorts'> {
+): Pick<Form, 'agentServices' | 'sharedServices' | 'agentVariables' | 'forwardPorts'> {
   return {
     agentServices: preview.agentServices ?? [],
+    sharedServices: preview.sharedServices ?? [],
     agentVariables: preview.agentVariables ?? { mode: 'all' },
     forwardPorts: preview.forwardPorts !== false,
   };
@@ -99,6 +102,7 @@ function settingsOf(form: Form): PreviewConfig {
     ...(form.startForImplementation ? { startForImplementation: true } : {}),
     ...(form.profiles.length === 0 ? {} : { profiles: form.profiles }),
     ...(form.agentServices.length === 0 ? {} : { agentServices: form.agentServices }),
+    ...(form.sharedServices.length === 0 ? {} : { sharedServices: form.sharedServices }),
     ...(form.agentVariables.mode === 'all' ? {} : { agentVariables: form.agentVariables }),
     ...(form.forwardPorts ? {} : { forwardPorts: false }),
     ...(form.idleStopMinutes.trim() === ''

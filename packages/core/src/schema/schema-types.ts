@@ -32,6 +32,11 @@ export type PreviewConfig = {
    * the same compose project as the preview; stopped after each step.
    */
   agentServices?: string[];
+  /**
+   * Services run once for all the project's previews (`union-p<id>-shared`) instead of in each one:
+   * utilities such as a virus scanner or a mail catcher. Each preview's network gets them by name.
+   */
+  sharedServices?: string[];
   /** Which plain variables the agent's commands get (all when unset). Secrets never reach them. */
   agentVariables?: AgentVariables;
   /**

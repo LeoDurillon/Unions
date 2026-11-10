@@ -41,6 +41,14 @@ Built (phases 1 to 4). Full design and what was built: [`docs/plans/archive/prev
   localhost"). Which
   plain variables the agent's commands get is a setting (all by default, none, or chosen): a variable already set
   wins over the repository's env files. Secrets never reach the agent.
+- Shared services (project settings → Previews → Services, `config.preview.sharedServices`; plan
+  [`docs/plans/shared-services.md`](../plans/shared-services.md), phase 1): chosen services run once per project as
+  compose project `union-p<id>-shared` (its own volumes; memory caps as preview services; never the preview's
+  variables), not in each preview. Their containers join each preview's networks under their service names, never
+  the other way round, so previews still share no network. Brought up by the first preview or agent run that needs
+  them (running ones left as they are), taken down, data kept, once no other network and no ticket's container uses
+  them. Refused when exposed, built from the repository, mounting it, or depending on a service not shared. Only
+  tickets and pull requests whose commit is in the repository share; a fork's runs its own copies.
 - **Reset preview** (after a confirmation, a ticket's and a pull request's): `down -v --remove-orphans --rmi local`
   (every container of the compose project, the agent's services included, its volumes and the images it built), a
   `build --no-cache`, then a start. The workspace is kept, except the data folders the user ticks: the repository

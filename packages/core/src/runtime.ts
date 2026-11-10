@@ -83,8 +83,15 @@ export type ContainerRuntime = {
   projectContainers(project: string): Promise<ProjectContainer[]>;
   /** The containers of a compose service (`proxy`) on a network, by name. */
   serviceContainers(network: string, service: string): Promise<string[]>;
-  /** Joins or leaves a network; already joined or already left is not an error. */
-  connectNetwork(network: string, container: string): Promise<void>;
+  /** The containers on a network, by name (running or not). */
+  networkContainers(network: string): Promise<string[]>;
+  /** The networks a container is on; none when it does not exist. */
+  containerNetworks(container: string): Promise<string[]>;
+  /**
+   * Joins or leaves a network; already joined or already left is not an error. `aliases`: the names
+   * it answers to there besides its own.
+   */
+  connectNetwork(network: string, container: string, aliases?: string[]): Promise<void>;
   disconnectNetwork(network: string, container: string): Promise<void>;
 };
 

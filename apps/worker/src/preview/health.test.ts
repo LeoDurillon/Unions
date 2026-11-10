@@ -35,6 +35,8 @@ const runtime = {
   networkExists: () => Promise.resolve(true),
   serviceContainers: () => Promise.resolve(['union-next-proxy-1']),
   projectNetworks: (project: string) => Promise.resolve([`${project}_default`]),
+  networkContainers: () => Promise.resolve([]),
+  containerNetworks: () => Promise.resolve([]),
   disconnectNetwork: () => Promise.resolve(),
   async *runHelper(spec: HelperSpec): AsyncGenerator<string, ExecResult> {
     await Promise.resolve();

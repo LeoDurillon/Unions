@@ -115,6 +115,7 @@ export * from './preview/preview-config';
 export * from './preview/preview-proxy-network';
 export * from './preview/preview-screenshots';
 export * from './preview/preview-secrets';
+export * from './preview/preview-shared';
 export * from './project-files';
 export * from './prompt-writer';
 export * from './project-scripts';

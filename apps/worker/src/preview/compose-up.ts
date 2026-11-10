@@ -1,6 +1,7 @@
 // Brings a preview's services up (`compose up --build`), its output streamed to the ticket's log.
 import {
   emitEvent,
+  sharedPart,
   ticketOwnerId,
   workspaceSubpaths,
   type ComposeJson,
@@ -9,6 +10,7 @@ import {
 } from '@union/core';
 
 import { compose, createMountFolders } from './compose';
+import { joinShared } from './shared-stack';
 import { lastLines, PreviewError, projectDirectory, type PreviewDeps, type Target } from './target';
 import { unionEnvFile } from './variables';
 
@@ -42,14 +44,13 @@ export function outputLog(
   };
 }
 
-/** Brings the services up from the file to run; a start's signal stops the build. */
-export async function up(deps: PreviewDeps, target: Target, file: ComposeJson): Promise<void> {
-  await createMountFolders(
-    deps.runtime,
-    deps.settings,
-    target.workspaceVolume,
-    workspaceSubpaths(file),
-  );
+/** `compose up` of the file to run with `flags`, its output in the ticket's log. */
+async function composeUp(
+  deps: PreviewDeps,
+  target: Target,
+  file: ComposeJson,
+  flags: string[],
+): Promise<void> {
   const log = outputLog(deps.db, target.owner);
   const output = await compose(deps.runtime, deps.settings, {
     args: [
@@ -60,8 +61,7 @@ export async function up(deps: PreviewDeps, target: Target, file: ComposeJson): 
       '-f',
       '-',
       'up',
-      '-d',
-      '--build',
+      ...flags,
       '--remove-orphans',
     ],
     workspaceVolume: target.workspaceVolume,
@@ -74,4 +74,25 @@ export async function up(deps: PreviewDeps, target: Target, file: ComposeJson): 
   if (output.exitCode !== 0) {
     throw new PreviewError(`docker compose up failed:\n${lastLines(output.tail)}`);
   }
+}
+
+/**
+ * Brings the services up from the file to run; a start's signal stops the build. With shared
+ * services, its networks and containers are made first, the shared services join them, then it starts:
+ * a service finds them from its first line.
+ */
+export async function up(deps: PreviewDeps, target: Target, file: ComposeJson): Promise<void> {
+  await createMountFolders(
+    deps.runtime,
+    deps.settings,
+    target.workspaceVolume,
+    workspaceSubpaths(file),
+  );
+  if (sharedPart(file) === null) {
+    await composeUp(deps, target, file, ['-d', '--build']);
+    return;
+  }
+  await composeUp(deps, target, file, ['--no-start', '--build']);
+  await joinShared(deps, target, file);
+  await composeUp(deps, target, file, ['-d']);
 }

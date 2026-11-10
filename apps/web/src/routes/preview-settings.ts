@@ -201,6 +201,7 @@ function previewConfig(
   const e2eCommand = typeof input.e2eCommand === 'string' ? input.e2eCommand.trim() : '';
   const profiles = profileList(input.profiles);
   const agentServices = serviceList(input.agentServices);
+  const sharedServices = serviceList(input.sharedServices);
   const env = environment(input.env, exposed, secrets);
   const additions = composeAdditions(input.composeAdditions);
   const idleStopMinutes = optionalCount(
@@ -224,6 +225,7 @@ function previewConfig(
     ...(e2eCommand === '' ? {} : { e2eCommand }),
     ...(profiles.length === 0 ? {} : { profiles }),
     ...(agentServices.length === 0 ? {} : { agentServices }),
+    ...(sharedServices.length === 0 ? {} : { sharedServices }),
     ...agentEnvironment(input, Object.keys(env)),
     ...(idleStopMinutes === undefined ? {} : { idleStopMinutes }),
     ...(maxRunning === undefined ? {} : { maxRunning }),

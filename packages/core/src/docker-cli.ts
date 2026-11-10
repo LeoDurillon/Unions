@@ -39,6 +39,14 @@ export function run(args: string[], stdin?: string): Promise<Captured> {
   });
 }
 
+/** One name per line, blank lines dropped. */
+function namesOf(listed: string): string[] {
+  return listed
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line !== '');
+}
+
 async function ok(args: string[], stdin?: string): Promise<string> {
   const r = await run(args, stdin);
   if (r.code !== 0) {
@@ -223,8 +231,30 @@ export class DockerCli implements ContainerRuntime {
     return listed.split('\n').filter((line) => line.trim() !== '');
   }
 
-  async connectNetwork(network: string, container: string): Promise<void> {
-    const joined = await run(['network', 'connect', network, container]);
+  async networkContainers(network: string): Promise<string[]> {
+    const listed = await run([
+      'network',
+      'inspect',
+      network,
+      '--format',
+      '{{range .Containers}}{{.Name}}\n{{end}}',
+    ]);
+    return listed.code === 0 ? namesOf(listed.stdout) : [];
+  }
+
+  async containerNetworks(container: string): Promise<string[]> {
+    const listed = await run([
+      'inspect',
+      container,
+      '--format',
+      '{{range $name, $_ := .NetworkSettings.Networks}}{{$name}}\n{{end}}',
+    ]);
+    return listed.code === 0 ? namesOf(listed.stdout) : [];
+  }
+
+  async connectNetwork(network: string, container: string, aliases: string[] = []): Promise<void> {
+    const named = aliases.flatMap((alias) => ['--alias', alias]);
+    const joined = await run(['network', 'connect', ...named, network, container]);
     if (joined.code !== 0 && !/already exists|already attached/iu.test(joined.stderr)) {
       throw new Error(`docker network connect failed: ${joined.stderr.trim()}`);
     }
