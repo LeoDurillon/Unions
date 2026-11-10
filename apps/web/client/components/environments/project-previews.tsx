@@ -1,10 +1,13 @@
-// The project's previews that hold containers now, tickets' and pull requests', with Stop.
+// The project's previews that hold containers now, tickets' and pull requests', with Stop; and the
+// addresses of its shared services the proxy opens.
 
 import type { ReactElement } from 'react';
 
 import { useRunningPreviews, useStopPreview } from '../../lib/preview/use-running-previews';
+import { useSharedServices } from '../../lib/preview/use-shared-services';
 import { RunningPreviewRow } from '../previews/running-preview-row';
 import { ErrorText } from '../ui';
+import { SharedLinks } from './shared-links';
 
 /** What runs for the project now: its previews, each with its addresses and Stop. */
 export function ProjectPreviews({
@@ -15,6 +18,7 @@ export function ProjectPreviews({
   onOpenTicket: (ticketId: number) => void;
 }): ReactElement {
   const previews = useRunningPreviews();
+  const shared = useSharedServices(projectId).data?.stack;
   const stop = useStopPreview();
   const list = (previews.data ?? []).filter((preview) => preview.project.id === projectId);
   return (
@@ -23,6 +27,11 @@ export function ProjectPreviews({
         Running now
       </h3>
       <ErrorText error={previews.error ?? stop.error} />
+      {shared?.status === 'running' && (shared.urls ?? []).length > 0 ? (
+        <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-500">
+          Shared services: <SharedLinks urls={shared.urls} />
+        </div>
+      ) : null}
       {previews.data && list.length === 0 ? (
         <p className="text-sm text-zinc-500">
           No preview of this project is running. Start one from a ticket&apos;s Preview tab, or from

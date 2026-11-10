@@ -87,6 +87,7 @@ function view(db: Db, projectId: number): SharedServicesView {
       ? {
           status: stack.status,
           services: stack.services,
+          urls: stack.urls,
           error: stack.error,
           startedAt: stack.startedAt,
           updatedAt: stack.updatedAt,

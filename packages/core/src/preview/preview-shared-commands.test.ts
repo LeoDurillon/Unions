@@ -52,3 +52,12 @@ test("a preview's commands name its own data: a ticket's id, a pull request's r<
     { service: 'db', create: 'createdb -U postgres goreno_r5' },
   ]);
 });
+
+test('a port to open is kept alone, and must be one', () => {
+  expect(parseSharedCommands([{ service: 's3', port: '9001' }], ['s3'], EXPOSED)).toEqual([
+    { service: 's3', port: 9001 },
+  ]);
+  expect(() => parseSharedCommands([{ service: 's3', port: 70_000 }], ['s3'], EXPOSED)).toThrow(
+    's3: give the port its web page answers on',
+  );
+});

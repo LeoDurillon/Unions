@@ -7,11 +7,12 @@ import { sharedStacks, type SharedStackService } from './schema/schema-shared-st
 
 export type SharedStack = typeof sharedStacks.$inferSelect;
 
-/** What the worker saw: the services and who uses them; `error` when a start failed. */
+/** What the worker saw: the services, who uses them and where the opened ones answer; `error` when a start failed. */
 export type SharedStackSeen = {
   services: SharedStackService[];
   previews: string[];
   agents: number[];
+  urls: { service: string; url: string }[];
   error: string | null;
 };
 

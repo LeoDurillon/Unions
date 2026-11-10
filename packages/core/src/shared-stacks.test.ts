@@ -22,6 +22,7 @@ const RUNNING = {
   services: [{ service: 'clamav', running: true }],
   previews: ['t33', 'r5'],
   agents: [],
+  urls: [],
   error: null,
 };
 

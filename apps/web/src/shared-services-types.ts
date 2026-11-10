@@ -8,7 +8,10 @@ export type SharedServicesUser =
 
 export type SharedServicesView = {
   /** As the worker last saw them; null when they never ran. */
-  stack: Pick<SharedStack, 'status' | 'services' | 'error' | 'startedAt' | 'updatedAt'> | null;
+  stack: Pick<
+    SharedStack,
+    'status' | 'services' | 'urls' | 'error' | 'startedAt' | 'updatedAt'
+  > | null;
   previews: SharedServicesUser[];
   /** The tickets whose agent uses them now. */
   agents: { ticketId: number; title: string }[];

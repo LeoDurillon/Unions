@@ -8,6 +8,7 @@ import type { Tone } from '../../lib/labels';
 import { useSharedServices, useSharedServicesAction } from '../../lib/preview/use-shared-services';
 import { formatWhen } from '../../lib/relative-time';
 import { Badge, Button, ErrorText } from '../ui';
+import { SharedLinks } from './shared-links';
 
 type Stack = NonNullable<SharedServicesView['stack']>;
 
@@ -128,6 +129,7 @@ function Details({
           </li>
         ))}
       </ul>
+      <SharedLinks urls={stack.urls} />
       <Users view={view} onOpenTicket={onOpenTicket} />
       <p className="text-xs text-zinc-500">
         {stack.startedAt ? `Started ${formatWhen(stack.startedAt)} · ` : ''}

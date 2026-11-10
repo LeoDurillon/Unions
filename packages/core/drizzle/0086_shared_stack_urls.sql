@@ -1,0 +1,1 @@
+ALTER TABLE `shared_stacks` ADD `urls` text;

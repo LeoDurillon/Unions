@@ -7,8 +7,16 @@ import type { BoardStatus } from '../states';
 /** A service the proxy serves: at `t<id>.union.localhost` when `prefix` is empty, else `<prefix>-t<id>.union.localhost`. */
 export type PreviewService = { name: string; port: number; prefix: string };
 
-/** Commands run in a shared service's container for one preview; at least one is set. */
-export type SharedServiceCommands = { service: string; create?: string; drop?: string };
+/**
+ * A shared service's own settings, at least one set: the commands run in its container for one
+ * preview, and the port of its web page, which the proxy opens at `<service>-p<project>.union.localhost`.
+ */
+export type SharedServiceCommands = {
+  service: string;
+  create?: string;
+  drop?: string;
+  port?: number;
+};
 
 /** `all`: every plain variable; `none`: none (the repository's env files apply); `chosen`: `names`. */
 export type AgentVariables = { mode: 'all' | 'none' | 'chosen'; names?: string[] };

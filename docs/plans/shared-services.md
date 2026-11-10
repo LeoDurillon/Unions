@@ -5,7 +5,8 @@ previews. Phase 2 built (branch `shared-tenants`, 2026-11-10): `config.preview.s
 `drop` command per shared service. Checked with real Docker (two previews on one Postgres, a database each, made at
 each start and dropped with the preview's data). Not built from phase 2: Senova's template database (a settings
 change, below). Phase 1b built (branch `shared-state`, 2026-11-10): the shared services' state on Environments → Shared, with
-Restart and Stop (`shared_stacks`, migration 0085). Phase 3 planned.
+Restart and Stop (`shared_stacks`, migration 0085). The shared services' web pages through the proxy built (branch `shared-proxy`, migration 0086). Phase 3
+planned.
 
 ## Problem
 

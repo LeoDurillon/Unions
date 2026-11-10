@@ -6,12 +6,24 @@ import {
   SHARED_CONTAINER,
   sharedNetwork,
   sharedProject,
+  sharedUrls,
+  type SharedOpened,
   type ContainerRuntime,
   type Db,
 } from '@union/core';
 import { eq } from 'drizzle-orm';
 
 import type { PreviewSettings } from './compose';
+
+/** The shared services whose web page the project's settings open, with its port. */
+export function sharedOpened(db: Db, projectId: number): SharedOpened[] {
+  const project = db.select().from(schema.projects).where(eq(schema.projects.id, projectId)).get();
+  const preview = project?.config.preview;
+  const shared = preview?.sharedServices ?? [];
+  return (preview?.sharedCommands ?? []).flatMap(({ service, port }) =>
+    port !== undefined && shared.includes(service) ? [{ service, port }] : [],
+  );
+}
 
 /** What the shared stack needs of a preview's dependencies (`PreviewDeps` has them). */
 export type SharedDeps = { db: Db; runtime: ContainerRuntime; settings: PreviewSettings };
@@ -57,7 +69,10 @@ export async function recordShared(
       return id === undefined ? [] : [Number(id)];
     });
     const previews = await previewsOf(deps.runtime, shared);
-    saveSharedStack(deps.db, projectId, { services, previews, agents, error });
+    const running = services.filter((item) => item.running).map(({ service }) => service);
+    const opened = sharedOpened(deps.db, projectId);
+    const urls = sharedUrls(projectId, opened, running, deps.settings.publicPort);
+    saveSharedStack(deps.db, projectId, { services, previews, agents, urls, error });
   } catch {
     // Docker did not answer: the next look records them.
   }

@@ -139,6 +139,12 @@ whole project instead of once per preview, which saves memory: a virus scanner a
   `localhost` as usual.
 - A pull request from a fork runs its own copies.
 
+A shared service with a web page, such as a storage console or a mail catcher's inbox, can be opened in the
+browser: give its port under **port to open in the browser**. It answers at one address for the whole project,
+`http://<service>-p<project>.union.localhost:8080` (for example `http://mailhog-p1.union.localhost:8080`, one inbox
+for every preview's mail), on this machine only. The address shows on the Shared page and above the previews of
+the **Environments** tab while it runs. A port you add while they run takes effect the next time they start.
+
 Once they have run, the top of **Environments → Shared** shows them **Now**: whether each one runs, which previews
 and which tickets' agents use them, when they started, and why their last start failed. The state is checked every
 30 seconds, so a service that crashed shows as stopped.

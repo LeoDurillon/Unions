@@ -1,5 +1,5 @@
 // The services shared between previews and, per service, the commands that keep each preview's data
-// apart there (its database, its bucket): one at each start of a preview, one when its data goes.
+// apart there (its database, its bucket) and the port of its web page, which the proxy opens.
 
 import type { ReactElement } from 'react';
 
@@ -9,6 +9,9 @@ import type { Form, SharedCommands } from './preview-form';
 
 const CREATE_HINT =
   "Runs in the service's container before each start of a preview, and before the agent uses it. Make it safe to run again, for example create the database only if it is missing. {ticket.id} names the preview.";
+const PORT_HINT =
+  'Optional. The port of its web page (a console, an inbox), opened at <service>-p<project>.union.localhost on this machine, one address for all the previews. Takes effect the next time the shared services start.';
+const DIGITS = /^\d+$/u;
 const DROP_HINT =
   "Runs when the preview's data is removed: Stop, Reset, a start that failed, and once the ticket is done or removed.";
 
@@ -16,7 +19,7 @@ function commandsFor(all: SharedCommands[], service: string): SharedCommands {
   return all.find((commands) => commands.service === service) ?? { service };
 }
 
-/** The commands of each shared service, empty when its data needs no keeping apart (a mail catcher). */
+/** Each shared service's commands (empty when its data needs no keeping apart, a mail catcher) and port. */
 function SharedCommandsField({
   services,
   value,
@@ -57,6 +60,16 @@ function SharedCommandsField({
               placeholder="dropdb -U postgres --if-exists app_{ticket.id}"
               onChange={(drop) => {
                 change({ ...commands, drop });
+              }}
+            />
+            <TextField
+              label={`${service}: port to open in the browser`}
+              hint={PORT_HINT}
+              value={commands.port === undefined ? '' : String(commands.port)}
+              placeholder="9001"
+              onChange={(port) => {
+                const { port: _port, ...rest } = commands;
+                change(DIGITS.test(port.trim()) ? { ...rest, port: Number(port) } : rest);
               }}
             />
           </div>

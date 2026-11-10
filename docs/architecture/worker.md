@@ -388,7 +388,10 @@
   (`recordShared`: `projectContainers`, the containers on the shared network, and the preview networks its
   containers are on), called by `joinShared` (with the error when it fails), `leaveShared` and the actions, and by
   `SharedWatcher` every 30 seconds for the projects that share services and the ones recorded running. `preview/shared-actions.ts` runs `shared_restart` and
-  `shared_stop` (`PreviewManager.shared`, one at a time per project, serialized with joins and releases).
+  `shared_stop` (`PreviewManager.shared`, one at a time per project, serialized with joins and releases). The
+  services with a `port` are labelled for the proxy by `withSharedRoutes` (core) in `joinShared`, which then puts
+  the proxy on `union-p<id>-shared-proxy` (`joinProxy`); `releaseIfUnused` and `stopShared` take it off first
+  (`leaveProxy`). `recordShared` writes their addresses (`sharedUrls`).
 - `step-preview.ts`: with `config.preview.startForImplementation`, an implementation step runs the install command, then
   starts the preview (never failing the step; a failed install is the preview's reason and it does not start); every code step's commands get `previewEnv` (`preview-env.ts`: `BASE_URL`,
   `UNION_URL_<SERVICE>`) while the preview runs, and `previewHint` lists the addresses.

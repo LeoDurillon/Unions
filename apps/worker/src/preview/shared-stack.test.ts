@@ -259,3 +259,28 @@ test('Union records which previews use the shared services, for the Environments
   await stopPreview(deps(), { ticketId });
   expect(getSharedStack(db, 1)).toMatchObject({ status: 'stopped', previews: [], startedAt: null });
 });
+
+test('a shared service with a port is opened by the proxy at one address for the project', async () => {
+  db.update(schema.projects)
+    .set({
+      config: {
+        baseBranch: 'main',
+        preview: {
+          composeFile: 'compose.yaml',
+          services: [{ name: 'web', port: 80, prefix: '' }],
+          env: {},
+          sharedServices: ['clamav'],
+          sharedCommands: [{ service: 'clamav', port: 3310 }],
+        },
+      },
+    })
+    .run();
+  await startPreview(deps(), { ticketId });
+  const labels = sent('union-p1-shared').services.clamav?.labels as Record<string, string>;
+  expect(labels['traefik.http.routers.union-p1-shared-clamav.rule']).toBe(
+    'Host(`clamav-p1.union.localhost`)',
+  );
+  expect(getSharedStack(db, 1)?.urls).toEqual([
+    { service: 'clamav', url: 'http://clamav-p1.union.localhost:8080' },
+  ]);
+});

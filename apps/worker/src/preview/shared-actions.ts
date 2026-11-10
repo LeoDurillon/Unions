@@ -4,6 +4,7 @@ import { activePreviews, SHARED_CONTAINER, sharedNetwork, sharedProject } from '
 
 import type { SharedAction } from '../command-hooks';
 import { compose } from './compose';
+import { leaveProxy } from './proxy-network';
 import { serialized } from './shared-stack';
 import { recordShared, type SharedDeps } from './shared-state';
 
@@ -61,6 +62,7 @@ export async function stopShared(deps: SharedDeps, projectId: number): Promise<v
         }
       }
     }
+    await leaveProxy(deps.runtime, sharedProject(projectId));
     await composeIn(deps, projectId, ['down', '--remove-orphans']);
   });
 }

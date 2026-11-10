@@ -55,6 +55,7 @@ test('the state names the previews and the agents that use them', async () => {
     services: [{ service: 'clamav', running: true }],
     previews: [`t${ticketId}`],
     agents: [ticketId],
+    urls: [],
     error: null,
   });
   const shown = await read();
@@ -68,6 +69,7 @@ test('a stop waits for the previews to stop; a restart is queued once', async ()
     services: [{ service: 'clamav', running: true }],
     previews: [],
     agents: [],
+    urls: [],
     error: null,
   });
   updatePreview(db, { ticketId }, { status: 'running' });

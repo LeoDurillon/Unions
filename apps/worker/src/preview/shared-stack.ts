@@ -11,11 +11,13 @@ import {
   sharedProject,
   sharedStackFile,
   withResourceCaps,
+  withSharedRoutes,
   type ComposeJson,
 } from '@union/core';
 
 import { compose } from './compose';
-import { recordShared, type SharedDeps } from './shared-state';
+import { joinProxy, leaveProxy } from './proxy-network';
+import { recordShared, sharedOpened, type SharedDeps } from './shared-state';
 
 export type { SharedDeps } from './shared-state';
 
@@ -100,13 +102,15 @@ export async function joinShared(
   file: ComposeJson,
   agent?: string,
 ): Promise<void> {
-  const stack = sharedStackFile(file, target.projectId);
-  if (stack === null) {
+  const plain = sharedStackFile(file, target.projectId);
+  if (plain === null) {
     return;
   }
+  const stack = withSharedRoutes(plain, target.projectId, sharedOpened(deps.db, target.projectId));
   try {
     await serialized(target.projectId, async () => {
       const containers = await upShared(deps, target.projectId, stack);
+      await joinProxy(deps.runtime, sharedProject(target.projectId));
       for (const network of await serviceNetworks(deps, target.project)) {
         for (const { service, container } of containers) {
           await deps.runtime.connectNetwork(network, container, [service]);
@@ -147,6 +151,7 @@ async function releaseIfUnused(deps: SharedDeps, projectId: number): Promise<voi
       return;
     }
   }
+  await leaveProxy(deps.runtime, project);
   await compose(deps.runtime, deps.settings, { args: ['-p', project, 'down', '--remove-orphans'] });
 }
 

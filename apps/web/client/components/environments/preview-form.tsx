@@ -94,12 +94,12 @@ function initial(project: PublicProject): Form {
 /** A shared service's commands, as the settings keep them. */
 export type SharedCommands = NonNullable<PreviewConfig['sharedCommands']>[number];
 
-/** The commands of the services still shared, without the empty ones. */
+/** The settings of the services still shared, without the empty ones. */
 function sentCommands(form: Form): Pick<PreviewConfig, 'sharedCommands'> {
   const sharedCommands = form.sharedCommands.filter(
-    ({ service, create, drop }) =>
+    ({ service, create, drop, port }) =>
       form.sharedServices.includes(service) &&
-      ((create ?? '').trim() !== '' || (drop ?? '').trim() !== ''),
+      ((create ?? '').trim() !== '' || (drop ?? '').trim() !== '' || port !== undefined),
   );
   return sharedCommands.length === 0 ? {} : { sharedCommands };
 }

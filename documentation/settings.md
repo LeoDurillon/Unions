@@ -48,14 +48,14 @@ Deleting a project removes its tickets from Union, with their containers and vol
 The **Environments** tab, in the project bar, shows the project's previews running now, with their addresses and
 **Stop**, then how its previews run, a page at a time:
 
-| Page             | What it holds                                                                                                                           |
-| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| Compose          | Compose file, compose additions, profiles, and the services opened in the browser. Enough for a first preview.                          |
-| Variables        | Plain and secret environment variables for previews and the agent, and a file to write them to for apps that read one.                  |
-| Agent            | Services started for the agent, the variables its commands get, their ports on `localhost`, and the preview during implementation.      |
-| Shared           | [Services shared between previews](previews.md#services-shared-between-previews), and the commands that keep each preview's data apart. |
-| End-to-end tests | The e2e command.                                                                                                                        |
-| Limits           | Previews running at once, and the idle time after which a preview stops.                                                                |
+| Page             | What it holds                                                                                                                                                        |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Compose          | Compose file, compose additions, profiles, and the services opened in the browser. Enough for a first preview.                                                       |
+| Variables        | Plain and secret environment variables for previews and the agent, and a file to write them to for apps that read one.                                               |
+| Agent            | Services started for the agent, the variables its commands get, their ports on `localhost`, and the preview during implementation.                                   |
+| Shared           | [Services shared between previews](previews.md#services-shared-between-previews), the commands that keep each preview's data apart, and the ports the browser opens. |
+| End-to-end tests | The e2e command.                                                                                                                                                     |
+| Limits           | Previews running at once, and the idle time after which a preview stops.                                                                                             |
 
 The **Environment settings** entry of the **⋯** menu on a ticket's Preview tab opens it too.
 

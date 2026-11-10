@@ -60,6 +60,12 @@ Built (phases 1 to 4). Full design and what was built: [`docs/plans/archive/prev
   that ran before the worker started included). Environments → Shared shows it, with
   Restart (`shared_restart`: `compose restart`, networks kept) and Stop (`shared_stop`: refused while a preview of
   the project starts, runs or stops; the tickets' and previews' networks are left, then `down`, volumes kept).
+  A shared service's `port` (in `sharedCommands`) has the proxy open it at `<service>-p<project>.union.localhost`
+  (`withSharedRoutes`: Traefik labels, router `union-p<id>-shared-<service>`, on the stack's own proxy network
+  `union-p<id>-shared-proxy`, which the proxy joins after the stack's `up` and leaves before its `down`). Its
+  address is recorded with the stack (`shared_stacks.urls`) and shown on the Environments tab. Labels apply when the
+  containers are made, so a port added while they run takes effect at their next start. No idle stop, and no route
+  inside the tickets' containers.
 - **Reset preview** (after a confirmation, a ticket's and a pull request's): `down -v --remove-orphans --rmi local`
   (every container of the compose project, the agent's services included, its volumes and the images it built), a
   `build --no-cache`, then a start. The workspace is kept, except the data folders the user ticks: the repository

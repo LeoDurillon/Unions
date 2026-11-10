@@ -117,6 +117,7 @@ export * from './preview/preview-screenshots';
 export * from './preview/preview-secrets';
 export * from './preview/preview-shared';
 export * from './preview/preview-shared-commands';
+export * from './preview/preview-shared-proxy';
 export * from './shared-stacks';
 export * from './project-files';
 export * from './prompt-writer';

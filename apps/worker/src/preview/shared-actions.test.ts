@@ -31,6 +31,8 @@ const runtime = {
   containerNetworks: () => Promise.resolve(['union-p1-shared_default', 'union-t9_default']),
   projectNetworks: () => Promise.resolve(['union-p1-shared_default']),
   projectContainers: () => Promise.resolve([]),
+  // No shared service is opened by the proxy here.
+  networkExists: () => Promise.resolve(false),
   disconnectNetwork: (network: string, container: string) => {
     done.push(`leave ${network} ${container}`);
     return Promise.resolve();

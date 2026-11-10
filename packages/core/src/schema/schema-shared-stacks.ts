@@ -23,6 +23,8 @@ export const sharedStacks = sqliteTable('shared_stacks', {
   previews: text('previews', { mode: 'json' }).$type<string[]>().notNull(),
   /** The tickets whose agent services use them. */
   agents: text('agents', { mode: 'json' }).$type<number[]>().notNull(),
+  /** Where the services the proxy opens answer, while they run. */
+  urls: text('urls', { mode: 'json' }).$type<{ service: string; url: string }[]>(),
   error: text('error'),
   /** When they started, while they run. */
   startedAt: integer('started_at'),
