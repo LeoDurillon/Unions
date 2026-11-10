@@ -1,5 +1,5 @@
 // Runs work in a throwaway container from the agent image, with only the Claude login, removed after.
-import { emitEvent, type ContainerRuntime, type Db } from '@union/core';
+import { emitEvent, type ContainerRuntime, type Db, agentContainerLimits } from '@union/core';
 
 import {
   projectImage,
@@ -56,7 +56,7 @@ export async function inThrowaway<T>(
   try {
     const image =
       deps.projectId === undefined ? config.image : await projectImage(config, deps.projectId);
-    await runtime.create({ ...names, image });
+    await runtime.create({ ...names, image, limits: agentContainerLimits(deps.db, names.name) });
     await runtime.start(names.name);
     await seedCredentials(runtime, names.name, config.credentialsPath);
     return await work(names.name);

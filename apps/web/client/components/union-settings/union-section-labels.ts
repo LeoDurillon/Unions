@@ -7,6 +7,7 @@ import { AGENT_LABELS, isAgentId } from '../agents/agent-labels';
 
 const OTHER_LABELS: Record<Exclude<UnionSection, AgentId>, string> = {
   models: 'All agents',
+  resources: 'Resources',
   tools: 'Tools',
   connectors: 'Connectors',
   'github-app': 'GitHub App',

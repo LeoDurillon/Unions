@@ -50,7 +50,7 @@ Deleting a project removes its tickets from Union, with their containers and vol
 
 | Menu    | Pages                                                                                                  |
 | ------- | ------------------------------------------------------------------------------------------------------ |
-| General | Shared instructions                                                                                    |
+| General | Shared instructions, Resources                                                                         |
 | Agents  | **All agents**: every agent, yours included, with its model and effort; click one to open its own page |
 | Tools   | Tools, Connectors                                                                                      |
 | GitHub  | GitHub App                                                                                             |
@@ -59,6 +59,26 @@ Deleting a project removes its tickets from Union, with their containers and vol
 in the menu while open) holds its prompt, model, effort and tools.
 
 See [Agents, flows and memory](agents.md) for what each page does.
+
+### Resources
+
+**Union settings → Resources** sets how much memory and how many CPU cores the containers Union starts may use:
+
+- **Memory per agent container** (4 GB to start with): each ticket's container, and those of reviews,
+  investigations and checkouts.
+- **Memory per preview service** (2 GB to start with): each service of a preview, such as the app or its database.
+  A service whose compose file sets a lower limit keeps it.
+- **CPUs per container** (6 to start with): the cores each agent container and each preview may use. Tools that
+  start one worker per core (`nproc`, Vitest, recent Jest) then start fewer, and a busy run leaves the rest of your
+  computer responsive. A few tools, such as a Next.js build, still count every core of the computer: if one of them
+  is killed for its memory, give its container more memory, or set its own worker count in the project.
+
+When a container reaches its limit, its biggest process is stopped (for example a build), instead of your whole
+computer running out of memory and freezing. The step's log then says the process was killed with exit 137. Raise
+the limit there if your builds or tests need more; a change applies the next time a container starts.
+
+With two runs at once and a preview, the defaults use about 11 GB at most. On Windows, also give WSL a limit
+that leaves room for Windows (`memory=` in `C:\Users\<you>\.wslconfig`).
 
 ## Environment variables
 

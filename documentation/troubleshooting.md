@@ -52,6 +52,10 @@ The issue changed on GitHub after you opened the edit. Union does not overwrite 
 
 ## Runs
 
+**A build or test run was killed ("exit 137").**
+The container reached its memory limit and its biggest process was stopped. Raise **Memory per agent container**
+(or **per preview service**) in [Union settings → Resources](settings.md#resources), then **Retry**.
+
 **"Claude usage limit reached."**
 Your subscription's usage limit was reached. The step is paused, and Union runs it again by itself a couple of
 minutes after the limit resets: the notice says when. **Retry now** runs it at once (it stops again if the limit

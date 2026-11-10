@@ -1,7 +1,7 @@
 // Runs the project's check command in the repository; a timeout counts as red.
 import type { ContainerRuntime } from '@union/core';
 
-import { mustRunIn, runIn } from './container-exec';
+import { killedNote, mustRunIn, runIn } from './container-exec';
 import { REPO_DIR } from './provision';
 
 const GATE_TIMEOUT_MINUTES = 15;
@@ -28,7 +28,12 @@ export async function runGate(
     cwd: REPO_DIR,
     signal: signal ? AbortSignal.any([signal, timeout]) : timeout,
   });
-  return { green: result.exitCode === 0, exitCode: result.exitCode, tail: tail(result.stdout) };
+  const note = killedNote(result.exitCode);
+  return {
+    green: result.exitCode === 0,
+    exitCode: result.exitCode,
+    tail: note ? `${tail(result.stdout)}\n\n${note.trim()}` : tail(result.stdout),
+  };
 }
 
 /** Runs the project's install command; returns an error message, or null when it succeeded. */

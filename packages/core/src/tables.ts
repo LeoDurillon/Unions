@@ -28,3 +28,4 @@ export * from './schema/schema-review-specs';
 export * from './schema/schema-reviews';
 export * from './schema/schema-ticket-slices';
 export * from './schema/schema-union-update';
+export * from './schema/schema-union-settings';

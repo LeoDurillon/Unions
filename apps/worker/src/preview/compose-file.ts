@@ -11,6 +11,8 @@ import {
   saveGeneratedCompose,
   composeServices,
   tidyCompose,
+  previewServiceLimits,
+  withResourceCaps,
   withoutProfiles,
   withProxyNetwork,
   withWorkspaceMounts,
@@ -211,10 +213,11 @@ async function ownFile(deps: PreviewDeps, target: Target, yaml: string): Promise
   return file;
 }
 
-/** What Start runs: the user's file when the ticket has one, else a freshly generated one. */
-export function fileToRun(deps: PreviewDeps, target: Target): Promise<ComposeJson> {
+/** What Start runs: the user's file when the ticket has one, else a freshly generated one; each service's memory and cores capped. */
+export async function fileToRun(deps: PreviewDeps, target: Target): Promise<ComposeJson> {
   const override = getPreview(deps.db, target.owner)?.override;
-  return override ? ownFile(deps, target, override) : generatedFile(deps, target);
+  const file = override ? await ownFile(deps, target, override) : await generatedFile(deps, target);
+  return withResourceCaps(file, previewServiceLimits(deps.db, target.project));
 }
 
 /** The ticket's preview target; null when it has none (the reason is saved for the panel). */

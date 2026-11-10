@@ -1,6 +1,6 @@
 // A pull request's own container (`union-r<id>`): its checkout at the reviewed commit, for its preview, tests and commands.
 
-import { ownerContainerNames, schema, type Db } from '@union/core';
+import { ownerContainerNames, schema, type Db, agentContainerLimits } from '@union/core';
 import { eq } from 'drizzle-orm';
 
 import { projectGitToken } from './credentials';
@@ -85,7 +85,7 @@ async function whileRunning(
   work: () => Promise<void>,
 ): Promise<void> {
   const image = await projectImage(deps.config, review.projectId);
-  await deps.runtime.create({ ...names, image });
+  await deps.runtime.create({ ...names, image, limits: agentContainerLimits(deps.db, names.name) });
   if (!(await deps.runtime.isRunning(names.name))) {
     await deps.runtime.start(names.name);
   }

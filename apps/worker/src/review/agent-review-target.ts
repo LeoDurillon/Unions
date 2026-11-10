@@ -10,6 +10,7 @@ import {
   schema,
   stackReviewNote,
   ticketBase,
+  agentContainerLimits,
 } from '@union/core';
 import { desc, eq } from 'drizzle-orm';
 
@@ -119,7 +120,11 @@ export async function throwawayCheckout(
   const close = (): Promise<void> =>
     runtime.remove(names.name, { home: names.homeVolume, workspace: names.workspaceVolume });
   try {
-    await runtime.create({ ...names, image: await projectImage(config, project.id) });
+    await runtime.create({
+      ...names,
+      image: await projectImage(config, project.id),
+      limits: agentContainerLimits(db, names.name),
+    });
     await runtime.start(names.name);
     await seedCredentials(runtime, names.name, config.credentialsPath);
     const token = await projectGitToken(db, project);

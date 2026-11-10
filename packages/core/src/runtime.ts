@@ -1,5 +1,6 @@
 // Everything the worker needs from Docker. Swap the CLI implementation for the Engine API without
 // touching callers.
+import type { ContainerLimits } from './container-limits';
 
 export type TicketContainerSpec = {
   name: string;
@@ -7,6 +8,11 @@ export type TicketContainerSpec = {
   homeVolume: string;
   workspaceVolume: string;
   env?: Record<string, string>;
+  /**
+   * The memory (in MB, swap included: none beyond it) and the CPU cores the container may use: past its
+   * memory, the kernel kills the biggest process inside, not one elsewhere. Applied to a kept container too.
+   */
+  limits?: ContainerLimits;
 };
 
 export type ExecOptions = {

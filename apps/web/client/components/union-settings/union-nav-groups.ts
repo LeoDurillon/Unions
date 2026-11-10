@@ -28,7 +28,7 @@ export function navGroups(
   const isAgentPage = open !== null && open !== 'shared' && (isAgentId(open) || isCustomStep(open));
   const agentPage = open !== null && isAgentPage ? [entry(open, agents)] : [];
   return [
-    { label: 'General', sections: [entry('shared', agents)] },
+    { label: 'General', sections: [entry('shared', agents), entry('resources', agents)] },
     { label: 'Agents', sections: [entry('models', agents), ...agentPage] },
     ...UNION_SETTINGS_GROUPS.filter((group) => AFTER_AGENTS.has(group.label)).map((group) => ({
       label: group.label,

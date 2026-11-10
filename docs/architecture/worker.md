@@ -10,6 +10,14 @@
 - `commands.ts` maps UI commands to state-machine actions; `scheduler.ts` runs one step per ticket with a
   concurrency cap through an injected `StepExecutor`; `executor.ts` is the real one (planning, implement, review
   and rebase steps).
+- Memory limits: every container Union creates (tickets, throwaway checkouts, review agents, a PR's own container)
+  gets `--memory` = `--memory-swap`, `--cpuset-cpus` and `--pids-limit` from `agentContainerLimits(db, name)` (core
+  `union-settings.ts`, `container-limits.ts`: `cpusetFor` gives `cpus` consecutive cores, placed by the name's hash
+  so two runs tend to differ); a kept container gets them with `docker update`. A preview's services get `mem_limit`,
+  `memswap_limit` and `cpuset` from `previewServiceLimits(db, project)` in `fileToRun` (core `withResourceCaps`), a
+  service's own lower limit or own cores kept. `os.cpus()` (and so Next.js's build workers) still sees every core:
+  only `nproc` and `availableParallelism` follow the cpuset. A command killed with exit 137 says so (`killedNote`, `container-exec.ts`), in `mustRunIn` errors, the
+  check's output and an agent's no-result failure.
 - Each run has its own `AbortController` (`StepContext.signal`). `tick` aborts the run of a ticket that left
   `running` (Cancel) with the reason `cancelled`; `stop()` aborts all with `shutdown`. `run-end.ts` decides how
   the run ends: a ticket no longer `running` (or removed) takes nothing (run `failed`, "Cancelled", no dispatch);

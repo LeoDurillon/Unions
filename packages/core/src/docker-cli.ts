@@ -2,6 +2,7 @@
 import { spawn } from 'node:child_process';
 
 import { CONTAINER_FORMAT, parseProjectContainers } from './compose-containers';
+import { limitArgs } from './container-limits';
 import { checkCopiedFile } from './copied-file';
 import { helperArgs, removeOnAbort } from './docker-helper';
 import { mergedLines } from './merged-lines';
@@ -106,6 +107,11 @@ async function keepExisting(spec: TicketContainerSpec): Promise<boolean> {
 export class DockerCli implements ContainerRuntime {
   async create(spec: TicketContainerSpec): Promise<void> {
     if (await keepExisting(spec)) {
+      // A container from before the setting changed gets the current caps.
+      const limits = limitArgs(spec.limits);
+      if (limits.length > 0) {
+        await ok(['update', ...limits, spec.name]);
+      }
       return;
     }
     await ok(['volume', 'create', spec.homeVolume]);
@@ -122,6 +128,7 @@ export class DockerCli implements ContainerRuntime {
       `${spec.workspaceVolume}:${WORKSPACE}`,
       '-w',
       WORKSPACE,
+      ...limitArgs(spec.limits),
       ...env,
       spec.image,
       'sleep',

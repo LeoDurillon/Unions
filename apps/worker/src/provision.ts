@@ -4,7 +4,14 @@ import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { homedir, tmpdir } from 'node:os';
 import path from 'node:path';
 
-import { AGENT_REPO_DIR, schema, type ContainerRuntime, type Db, type Ticket } from '@union/core';
+import {
+  AGENT_REPO_DIR,
+  schema,
+  type ContainerRuntime,
+  type Db,
+  type Ticket,
+  agentContainerLimits,
+} from '@union/core';
 import { eq } from 'drizzle-orm';
 
 import { syncAttachments } from './attachments-sync';
@@ -166,7 +173,11 @@ export async function ensureTicketContainer(
   if (!project) {
     throw new Error(`Project ${ticket.projectId} not found`);
   }
-  await runtime.create({ ...names, image: await projectImage(config, project.id) });
+  await runtime.create({
+    ...names,
+    image: await projectImage(config, project.id),
+    limits: agentContainerLimits(db, names.name),
+  });
   if (!(await runtime.isRunning(names.name))) {
     await runtime.start(names.name);
   }

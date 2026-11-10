@@ -8,6 +8,7 @@ import {
   type ExecResult,
 } from '@union/core';
 
+import { killedNote } from '../container-exec';
 import { IDLE_GRACE_MS, RUN_MARKER, stopAborted, watchIdle } from './agent-idle';
 import { RATE_LIMIT, rejectedResetAt, resetFromMessage } from './rate-limit';
 
@@ -189,7 +190,10 @@ export async function runAgent(runtime: ContainerRuntime, run: AgentRun): Promis
     return toOutcome(result, rejectedReset);
   }
   const { exitCode, stderr } = exit;
-  return failure(`claude exited with ${exitCode} and no result: ${stderr.trim()}`, rejectedReset);
+  return failure(
+    `claude exited with ${exitCode} and no result: ${stderr.trim()}${killedNote(exitCode)}`,
+    rejectedReset,
+  );
 }
 
 export type AgentFn = (runtime: ContainerRuntime, run: AgentRun) => Promise<AgentOutcome>;

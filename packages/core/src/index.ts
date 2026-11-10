@@ -163,6 +163,8 @@ export * from './ticket-base';
 export * from './ticket-links';
 export * from './ticket-slices';
 export * from './tickets';
+export * from './union-settings';
+export * from './preview/preview-memory-caps';
 export * from './union-update';
 export * from './union-update-store';
 export * from './workspace-owner';

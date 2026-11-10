@@ -33,6 +33,7 @@ export const PROJECT_GUIDE: Record<SettingsSection, GuideTarget> = {
 
 /** The Union settings pages that are not an agent's. */
 const UNION_PAGE_GUIDE: Partial<Record<string, GuideTarget>> = {
+  resources: ['settings', 'resources'],
   tools: ['agents', 'tools-and-connectors'],
   connectors: ['agents', 'tools-and-connectors'],
   'github-app': ['first-project', 'use-a-github-app'],
