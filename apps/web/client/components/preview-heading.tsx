@@ -4,9 +4,9 @@ import type { Preview } from '@union/core';
 import type { ReactElement } from 'react';
 
 import type { PreviewView } from '../../src/api-types';
+import { openEnvironments } from '../lib/environments-url';
 import { PREVIEW_STATUS } from '../lib/preview/preview-status';
 import { clock } from '../lib/relative-time';
-import { openSettings } from '../lib/settings-sections';
 import { useNow } from '../lib/use-now';
 import { OverflowMenu } from './overflow-menu';
 import { canOfferReset } from './preview-reset';
@@ -63,9 +63,9 @@ export function PreviewHeading({
                 ]
               : []),
             {
-              label: 'Preview settings',
+              label: 'Environment settings',
               onSelect: () => {
-                openSettings('preview-services');
+                openEnvironments('services');
               },
             },
           ]}
@@ -84,7 +84,7 @@ export function PreviewNotSetUp(): ReactElement {
         type="button"
         className="text-indigo-600 hover:underline dark:text-indigo-400"
         onClick={() => {
-          openSettings('preview-services');
+          openEnvironments('services');
         }}
       >
         Set up previews

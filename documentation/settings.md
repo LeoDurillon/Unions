@@ -5,29 +5,28 @@
 Open a project's **Settings** in the project bar. Most pages have one **Save** at the bottom. **Learn more**, under
 the page's name, opens the part of this guide about it; Union settings pages have it too.
 
-| Group             | Page             | What it holds                                                                                                                                      |
-| ----------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Project**       | General          | GitHub access (token or GitHub App installation), the base branch, and whether tickets get GitHub issues.                                          |
-|                   | Files            | [Project files](previews.md#project-files) every workspace gets, kept out of git.                                                                  |
-| **Agents**        | Instructions     | [Notes every agent of the project reads](agents.md#project-instructions).                                                                          |
-|                   | Memory           | [Feedback and lessons](agents.md#memory).                                                                                                          |
-|                   | Checks           | Install command, check command, iteration limit. See [Your first project](first-project.md#tell-the-agents-how-to-build-and-check-your-code).      |
-|                   | Flows            | [Flow presets](tickets.md#flows) and the default one.                                                                                              |
-| **Pull requests** | Creation         | Open a draft pull request automatically; suggest replies to GitHub comments; split pull requests into stacks; check every slice.                   |
-|                   | Diff display     | Hide lock files and other paths from the review page.                                                                                              |
-| **Previews**      | Services         | Compose file, exposed services, compose additions, profiles, services for the agent.                                                               |
-|                   | Variables        | Plain and secret environment variables for previews and the agent, and a file to write them to for apps that read one.                             |
-|                   | End-to-end tests | The e2e command, and starting the preview for implementation steps.                                                                                |
-|                   | Limits           | Previews running at once, and the idle time after which a preview stops.                                                                           |
-| **Integrations**  | GitHub Project   | The GitHub Project the board mirrors to: connect one (pick or create), change it or disconnect it.                                                 |
-|                   | Notion           | The Notion integration secret and data source.                                                                                                     |
-|                   | Jira             | The Jira site, account email, API token, project key and the issue type of new issues ([Connect Jira](first-project.md#connect-jira)).             |
-| **Events**        | Rules            | [Event rules](automation.md#event-rules).                                                                                                          |
-| **Advanced**      | Scripts          | Commands you run by name from a ticket's Preview tab.                                                                                              |
-|                   | Change size      | The budget of a ticket without an estimate, and the paths that are not code. See [The size of a change](ticket-lifecycle.md#the-size-of-a-change). |
-|                   | Agent image      | [The image the project's agents run in](agents.md#the-agent-image): the default, your own Dockerfile, or an image you built.                       |
-|                   | Event activity   | What the [event rules](automation.md#event-rules) did.                                                                                             |
-|                   | Danger zone      | Delete the project. Type the repository's name to confirm.                                                                                         |
+How the previews run is not here but in the project's **Environments** tab, beside the board: see
+[Environments](#environments) below.
+
+| Group             | Page           | What it holds                                                                                                                                      |
+| ----------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Project**       | General        | GitHub access (token or GitHub App installation), the base branch, and whether tickets get GitHub issues.                                          |
+|                   | Files          | [Project files](previews.md#project-files) every workspace gets, kept out of git.                                                                  |
+| **Agents**        | Instructions   | [Notes every agent of the project reads](agents.md#project-instructions).                                                                          |
+|                   | Memory         | [Feedback and lessons](agents.md#memory).                                                                                                          |
+|                   | Checks         | Install command, check command, iteration limit. See [Your first project](first-project.md#tell-the-agents-how-to-build-and-check-your-code).      |
+|                   | Flows          | [Flow presets](tickets.md#flows) and the default one.                                                                                              |
+| **Pull requests** | Creation       | Open a draft pull request automatically; suggest replies to GitHub comments; split pull requests into stacks; check every slice.                   |
+|                   | Diff display   | Hide lock files and other paths from the review page.                                                                                              |
+| **Integrations**  | GitHub Project | The GitHub Project the board mirrors to: connect one (pick or create), change it or disconnect it.                                                 |
+|                   | Notion         | The Notion integration secret and data source.                                                                                                     |
+|                   | Jira           | The Jira site, account email, API token, project key and the issue type of new issues ([Connect Jira](first-project.md#connect-jira)).             |
+| **Events**        | Rules          | [Event rules](automation.md#event-rules).                                                                                                          |
+| **Advanced**      | Scripts        | Commands you run by name from a ticket's Preview tab.                                                                                              |
+|                   | Change size    | The budget of a ticket without an estimate, and the paths that are not code. See [The size of a change](ticket-lifecycle.md#the-size-of-a-change). |
+|                   | Agent image    | [The image the project's agents run in](agents.md#the-agent-image): the default, your own Dockerfile, or an image you built.                       |
+|                   | Event activity | What the [event rules](automation.md#event-rules) did.                                                                                             |
+|                   | Danger zone    | Delete the project. Type the repository's name to confirm.                                                                                         |
 
 Deleting a project removes its tickets from Union, with their containers and volumes. Nothing is deleted on GitHub.
 
@@ -43,6 +42,20 @@ Deleting a project removes its tickets from Union, with their containers and vol
   In Progress on GitHub starts the ticket. **Change** moves the tickets to another Project. **Disconnect** stops
   updating it; the Project and its cards stay on GitHub as they are. Without a Project, Union's board is the only
   board.
+
+## Environments
+
+The **Environments** tab, in the project bar, shows the project's previews running now, with their addresses and
+**Stop**, then how its previews run, a page at a time:
+
+| Page             | What it holds                                                                                                          |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Services         | Compose file, exposed services, compose additions, profiles, services for the agent, services shared between previews. |
+| Variables        | Plain and secret environment variables for previews and the agent, and a file to write them to for apps that read one. |
+| End-to-end tests | The e2e command, and starting the preview for implementation steps.                                                    |
+| Limits           | Previews running at once, and the idle time after which a preview stops.                                               |
+
+The **Environment settings** entry of the **⋯** menu on a ticket's Preview tab opens it too.
 
 ## Union settings
 

@@ -1,21 +1,20 @@
 // The command a ticket's Preview section runs on request against its preview, and whether the agent
 // gets the preview.
+
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
 import { Switch } from '../choice';
 import { TextField } from './preview-fields';
 import { PreviewSave, usePreviewForm } from './preview-form';
-import { SetUpFirst } from './set-up-first';
+import { SetUpServicesFirst } from './set-up-services-first';
 
 /** The command a ticket's Preview section runs on request against its preview, and whether the agent gets the preview. */
 export function PreviewE2ePage({ project }: { project: PublicProject }): ReactElement {
   const preview = usePreviewForm(project);
   const { value: form, set: setForm } = preview;
   if (!project.config.preview) {
-    return (
-      <SetUpFirst section="preview-services" what="Choose the compose file and its services" />
-    );
+    return <SetUpServicesFirst />;
   }
   return (
     <section className="space-y-4">

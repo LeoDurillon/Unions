@@ -117,7 +117,7 @@ function previewConfigOf(db: Db, projectId: number): PreviewConfig {
   const project = db.select().from(schema.projects).where(eq(schema.projects.id, projectId)).get();
   const config = project?.config.preview;
   if (!config) {
-    throw new PreviewError('The project has no preview settings (project settings → Preview)');
+    throw new PreviewError("The project has no preview settings (the project's Environments tab)");
   }
   return config;
 }
@@ -130,7 +130,9 @@ export function loadTarget(deps: PreviewDeps, owner: WorkspaceOwner): Target {
   }
   const services = exposedServices(config);
   if (services.length === 0) {
-    throw new PreviewError('The preview settings expose no service (project settings → Preview)');
+    throw new PreviewError(
+      "The preview settings expose no service (the project's Environments tab)",
+    );
   }
   const { publicPort } = deps.settings;
   const shared = source.secrets ? (config.sharedServices ?? []) : [];

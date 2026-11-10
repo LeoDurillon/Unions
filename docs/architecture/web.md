@@ -309,7 +309,7 @@
   `sync_agent_image` command; `DELETE …/agent-image/pending` drops the save (and stops its build); `GET …/agent-image/default` reads
   `docker/agent.Dockerfile` from Union's checkout, shown read-only under Default image. The web never
   builds: the worker does (`docs/architecture/agents.md`, The image).
-- Previews: project settings → Preview (`routes/preview-settings.ts`, `config.preview`: compose file, service,
+- Previews: the project's Environments tab (`components/environments/`, `?view=environments&env=`, `lib/environments-url.ts`; old `?settings=preview-*` links are redirected there; its Running now list is `/api/previews` filtered by project) (`routes/preview-settings.ts`, `config.preview`: compose file, service,
   port, plain variables) and the ticket Overview's Preview section (`preview-section.tsx`, `routes/preview.ts`,
   state in the `previews` table). Start, stop, reset and logs are commands; the worker owns Docker. What a ticket's and a
   pull request's preview routes share (the view, the refusals, a pending command, queueing one, the user's compose

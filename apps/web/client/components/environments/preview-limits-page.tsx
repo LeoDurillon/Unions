@@ -1,20 +1,19 @@
 // How long a preview nobody visits keeps running, and how many of the project's run at once.
+
 import { DEFAULT_IDLE_STOP_MINUTES } from '@union/core/preview';
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
 import { TextField } from './preview-fields';
 import { PreviewSave, usePreviewForm } from './preview-form';
-import { SetUpFirst } from './set-up-first';
+import { SetUpServicesFirst } from './set-up-services-first';
 
 /** How long a preview nobody visits keeps running, and how many of the project's run at once. */
 export function PreviewLimitsPage({ project }: { project: PublicProject }): ReactElement {
   const preview = usePreviewForm(project);
   const { value: form, set: setForm } = preview;
   if (!project.config.preview) {
-    return (
-      <SetUpFirst section="preview-services" what="Choose the compose file and its services" />
-    );
+    return <SetUpServicesFirst />;
   }
   return (
     <section className="space-y-4">

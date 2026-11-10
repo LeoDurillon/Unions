@@ -1,8 +1,10 @@
-// The open view of the project: the board, its investigations, its pull requests, its repository or its usage.
+// The open view of the project: the board, its investigations, its pull requests, its repository, its
+// environments or its usage.
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../src/api-types';
 import { Board, BoardView } from './board';
+import { EnvironmentsPage } from './environments/environments-page';
 import { GettingStarted } from './getting-started';
 import { InvestigationsPage } from './investigations/investigations-page';
 import { UsagePage } from './lazy-pages';
@@ -44,6 +46,9 @@ export function ProjectBody({
   }
   if (view === 'repository') {
     return <RepositoryPage key={project.id} project={project} />;
+  }
+  if (view === 'environments') {
+    return <EnvironmentsPage key={project.id} project={project} onOpenTicket={onOpenTicket} />;
   }
   if (view === 'usage') {
     return <UsagePage key={project.id} project={project} onOpenTicket={onOpenTicket} />;

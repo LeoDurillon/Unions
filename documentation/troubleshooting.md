@@ -101,7 +101,7 @@ volumes or networks named `union-…`. The message says which service or volume.
 additions**, rename it, or drop those settings for previews.
 
 **The preview stopped by itself.**
-Nobody opened it for the project's idle time (an hour by default). Change it in **Settings → Previews → Limits**.
+Nobody opened it for the project's idle time (an hour by default). Change it in **Environments → Limits**.
 
 **The preview fails with "all predefined address pools have been fully subnetted".**
 Docker has no room left for the preview's networks: each preview makes two, and Docker allows about 30 by default.

@@ -51,8 +51,7 @@ import {
 } from './variables';
 
 const TRAILING_SPACES = / +$/gmu;
-const SHARED_REFUSED =
-  'These services cannot be shared between previews (project settings → Previews → Services)';
+const SHARED_REFUSED = 'These services cannot be shared between previews (Environments → Services)';
 
 function toYaml(file: ComposeJson): string {
   return Bun.YAML.stringify(file, null, 2).replace(TRAILING_SPACES, '');

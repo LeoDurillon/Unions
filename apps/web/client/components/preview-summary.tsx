@@ -3,9 +3,9 @@
 import { useQuery } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 
+import { openEnvironments } from '../lib/environments-url';
 import { previewApi } from '../lib/preview/preview-api';
 import { PREVIEW_STATUS } from '../lib/preview/preview-status';
-import { openSettings } from '../lib/settings-sections';
 import { DetailRow } from './detail-row';
 import { Badge } from './ui';
 
@@ -50,7 +50,7 @@ export function PreviewSummary({
             type="button"
             className={LINK}
             onClick={() => {
-              openSettings('preview-services');
+              openEnvironments('services');
             }}
           >
             Not set up: set up previews

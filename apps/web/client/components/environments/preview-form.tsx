@@ -8,9 +8,9 @@ import type { PublicProject } from '../../../src/api-types';
 import { envLines, parseEnvLines } from '../../lib/env-lines';
 import { previewApi } from '../../lib/preview/preview-api';
 import { useSettingsForm, type SettingsForm } from '../../lib/use-settings-form';
+import { SaveBar } from '../settings/save-bar';
 import { Button, ErrorText } from '../ui';
 import { serviceRows, type ServiceRow } from './preview-services-field';
-import { SaveBar } from './save-bar';
 
 /**
  * The preview settings as the pages edit them. Each page starts from what is saved and saves the

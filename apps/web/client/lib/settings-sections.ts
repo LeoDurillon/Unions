@@ -30,15 +30,6 @@ export const SETTINGS_GROUPS = [
     ],
   },
   {
-    label: 'Previews',
-    sections: [
-      { id: 'preview-services', label: 'Services' },
-      { id: 'preview-variables', label: 'Variables' },
-      { id: 'preview-e2e', label: 'End-to-end tests' },
-      { id: 'preview-limits', label: 'Limits' },
-    ],
-  },
-  {
     label: 'Integrations',
     sections: [
       { id: 'github-project', label: 'GitHub Project' },
@@ -79,7 +70,7 @@ export function sectionLabel(id: SettingsSection): string {
   return SECTIONS.find((section) => section.id === id)?.label ?? id;
 }
 
-/** The project settings page open in the URL (`?settings=preview-services`), or null. */
+/** The project settings page open in the URL (`?settings=files`), or null. */
 export function useSettingsSection(): SettingsSection | null {
   const value = useUrlParam('settings');
   return isSection(value) ? value : null;

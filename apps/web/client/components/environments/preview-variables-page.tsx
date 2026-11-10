@@ -8,7 +8,7 @@ import { previewApi } from '../../lib/preview/preview-api';
 import { TextField, Variables } from './preview-fields';
 import { PreviewSave, usePreviewForm, type Form } from './preview-form';
 import { PreviewSecrets } from './preview-secrets';
-import { SetUpFirst } from './set-up-first';
+import { SetUpServicesFirst } from './set-up-services-first';
 
 function EnvFileFields({
   form,
@@ -50,9 +50,7 @@ export function PreviewVariablesPage({ project }: { project: PublicProject }): R
     queryFn: () => previewApi.settings(project.id),
   });
   if (!project.config.preview) {
-    return (
-      <SetUpFirst section="preview-services" what="Choose the compose file and its services" />
-    );
+    return <SetUpServicesFirst />;
   }
   return (
     <section className="space-y-4">

@@ -23,7 +23,7 @@ function ChosenNames({
   onChange: (value: AgentVariables) => void;
 }): ReactElement {
   if (names.length === 0) {
-    return <p className="text-xs text-zinc-500">No plain variable yet (Previews → Variables).</p>;
+    return <p className="text-xs text-zinc-500">No plain variable yet (Variables tab).</p>;
   }
   return (
     <ChipGroup>

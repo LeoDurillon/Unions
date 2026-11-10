@@ -92,7 +92,7 @@ async function startTarget(deps: PreviewDeps, target: Target): Promise<void> {
   const sameProject = others.filter((row) => row.projectId === target.projectId);
   if (projectCap !== undefined && sameProject.length >= projectCap) {
     throw new PreviewError(
-      `${sameProject.length} of the project's previews are running already (its limit, project settings → Previews → Limits): stop one first`,
+      `${sameProject.length} of the project's previews are running already (its limit, Environments → Limits): stop one first`,
       true,
     );
   }

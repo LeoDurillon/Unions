@@ -5,7 +5,8 @@ browser before you approve it, database and all.
 
 ## Set it up
 
-Open the project's **Settings → Previews → Services**:
+Open the project's **Environments** tab, in the bar above the board, and its **Services** page. The tab also lists
+the project's previews running now, with their addresses and **Stop**.
 
 1. **Compose file**: the path of the Compose file in the repository, for example `compose.yaml`.
 2. **Exposed services**: the services you want to open in the browser, with their port. The first one is the one
@@ -13,7 +14,7 @@ Open the project's **Settings → Previews → Services**:
 3. Optional: **Profiles** to enable, and **compose additions**: YAML merged over the repository's file, for what
    Union adds without changing the repository (a database restore, migrations, a seed).
 
-Then, in **Settings → Previews → Variables**, add the environment variables the services need. Values can use
+Then, in **Environments → Variables**, add the environment variables the services need. Values can use
 templates such as `{service.api.url}`, the address of another service. Secret values are kept on the server and
 never shown again in the browser. You can also have the variables written as a file inside one service.
 
@@ -29,7 +30,7 @@ working copy, and serves each exposed service at an address of its own:
 
 While it starts, the tab counts the time and shows the build's output as it comes; **Cancel start** stops it and
 removes what it had started. Once it runs, the tab shows its addresses, **Restart** and **Stop**, and the services'
-output. The **⋯** menu beside the status holds the Compose file, **Reset preview…** and the preview settings. The
+output. The **⋯** menu beside the status holds the Compose file, **Reset preview…** and **Environment settings**, which opens the project's **Environments** tab. The
 sidebar's **Previews** entry lists every preview running, across projects, with **Stop**.
 
 - Each ticket's preview is its own Compose project, with its own containers, network and volumes.
@@ -38,7 +39,7 @@ sidebar's **Previews** entry lists every preview running, across projects, with 
   within a minute, with which service stopped and the services' last output. Its other containers are removed (left
   running while the agent works on the ticket, which uses them); click **Start preview** to bring it back with its
   data, which stays in its volumes and the ticket's workspace. The ticket's Log says when it happened.
-- A preview nobody visited for an hour stops by itself (**Settings → Previews → Limits** changes the delay, or turns
+- A preview nobody visited for an hour stops by itself (**Environments → Limits** changes the delay, or turns
   it off), except while the agent works on the ticket or its end-to-end tests run.
 - Once the ticket's pull request is merged, or the ticket is cancelled, its preview is removed for good, with its
   data and the images it built.
@@ -76,7 +77,7 @@ names, or leave them unnamed.
 
 ## End-to-end tests
 
-Set the command in **Settings → Previews → End-to-end tests**, for example `npx playwright test`. It can take several
+Set the command in **Environments → End-to-end tests**, for example `npx playwright test`. It can take several
 lines, for example a setup line before the tests. Then click **Run
 e2e tests** in a ticket's Preview tab (**Run again** once there is a result).
 The result shows how long ago it ran; open **Output** for its last lines, or **Command** for what ran. The tests run in the ticket's container, against the running preview; the
@@ -111,7 +112,7 @@ Save the commands you run often in **Settings → Scripts**: each becomes a butt
 ## Services for the agent
 
 The agent can use your Compose services while it works, for example a database for its tests. Choose them in
-**Settings → Previews → Services** (**Start for the agent**). They start before the implementation or a rebase, and
+**Environments → Services** (**Start for the agent**). They start before the implementation or a rebase, and
 stop after it.
 
 The ports they publish are forwarded to `localhost` in the ticket's container, so settings such as
@@ -124,7 +125,7 @@ agent.
 ## Services shared between previews
 
 Some services are only utilities, such as a virus scanner or a mail catcher, and every preview can use the same one.
-Choose them in **Settings → Previews → Services** (**Shared between previews**). Union then runs them once for the
+Choose them in **Environments → Services** (**Shared between previews**). Union then runs them once for the
 whole project instead of once per preview, which saves memory: a virus scanner alone can take more than a gigabyte.
 
 - Your previews still reach them by name (`clamav:3310`), so you don't change your Compose file or your variables.
@@ -156,7 +157,7 @@ psql -U postgres -tAc "SELECT 1 FROM pg_database WHERE datname = 'app_{ticket.id
 dropdb -U postgres --if-exists app_{ticket.id}
 ```
 
-and `DATABASE_URL=postgres://postgres:postgres@db:5432/app_{ticket.id}` in **Settings → Previews → Variables**.
+and `DATABASE_URL=postgres://postgres:postgres@db:5432/app_{ticket.id}` in **Environments → Variables**.
 
 If the first command fails, the preview doesn't start and shows its output. If the service isn't running when a
 preview's data is removed, that data stays in the service.
