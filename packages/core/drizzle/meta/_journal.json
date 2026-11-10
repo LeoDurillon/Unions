@@ -610,6 +610,13 @@
       "when": 1794322886738,
       "tag": "0086_shared_stack_urls",
       "breakpoints": true
+    },
+    {
+      "idx": 87,
+      "version": "6",
+      "when": 1794326584321,
+      "tag": "0087_investigation_kind",
+      "breakpoints": true
     }
   ]
 }

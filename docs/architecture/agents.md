@@ -132,18 +132,19 @@ keep them, the agent page warns when an edit drops one (`missingFormats`, `promp
 
 The worker appends every other format after the user's prompt, so an edit cannot break it:
 
-| Agent                   | Format                                  | Defined and read in                                      |
-| ----------------------- | --------------------------------------- | -------------------------------------------------------- |
-| `pr_description`        | between `<pr-description>` marks        | `pr-description.ts` (`OUTPUT_RULES`, `descriptionOf`)    |
-| `review_comments`       | a final `json` block of findings        | `agent-review-findings.ts`                               |
-| `review_groups`         | a final `json` block of groups          | `review-grouping-format.ts`, `review-grouping-result.ts` |
-| `review_explain`        | a final `json` block                    | `review-explain-prompt.ts`, `review-explain-result.ts`   |
-| `pr_replies`            | a final `json` block of replies         | `pr-reply-format.ts`                                     |
-| `review_report`         | a final `json` block: the report        | `review-report-format.ts`, `review-report-result.ts`     |
-| review agents           | markdown citing `path:line`             | `review-agent-prompt.ts`; links: `diff-links.ts` (core)  |
-| `lesson_writer`         | a JSON array of lessons and `replaces`  | `lesson-writer.ts` (core)                                |
-| `lesson_tidier`         | the same, each replacing kept lessons   | `lesson-tidier.ts` (core)                                |
-| `implement`, `simplify` | a last line `Refused commit: <message>` | `leftovers.ts`                                           |
+| Agent                   | Format                                  | Defined and read in                                       |
+| ----------------------- | --------------------------------------- | --------------------------------------------------------- |
+| `pr_description`        | between `<pr-description>` marks        | `pr-description.ts` (`OUTPUT_RULES`, `descriptionOf`)     |
+| `review_comments`       | a final `json` block of findings        | `agent-review-findings.ts`                                |
+| `review_groups`         | a final `json` block of groups          | `review-grouping-format.ts`, `review-grouping-result.ts`  |
+| `review_explain`        | a final `json` block                    | `review-explain-prompt.ts`, `review-explain-result.ts`    |
+| `pr_replies`            | a final `json` block of replies         | `pr-reply-format.ts`                                      |
+| `review_report`         | a final `json` block: the report        | `review-report-format.ts`, `review-report-result.ts`      |
+| review agents           | markdown citing `path:line`             | `review-agent-prompt.ts`; links: `diff-links.ts` (core)   |
+| `lesson_writer`         | a JSON array of lessons and `replaces`  | `lesson-writer.ts` (core)                                 |
+| `lesson_tidier`         | the same, each replacing kept lessons   | `lesson-tidier.ts` (core)                                 |
+| setup (investigation)   | a final `json` block: the proposal      | `setup/setup-prompt.ts`, `setup/setup-proposal.ts` (core) |
+| `implement`, `simplify` | a last line `Refused commit: <message>` | `leftovers.ts`                                            |
 
 A new agent whose answer is parsed puts its format in the worker's part of the prompt, not in the editable one.
 

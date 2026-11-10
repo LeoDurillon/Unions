@@ -1,8 +1,6 @@
 // Reads the fields of the report agent's block: texts, lists, enums, paths and line ranges, never trusted.
 
-import type { ReportLines } from '@union/core';
-
-import { isRecord } from '../json-block';
+import { isRecord, type ReportLines } from '@union/core';
 
 const MAX_TEXT = 4000;
 const MAX_ITEMS = 40;

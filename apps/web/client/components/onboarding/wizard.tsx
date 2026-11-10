@@ -10,6 +10,7 @@ import {
 } from 'react';
 
 import { api } from '../../lib/api';
+import { setupApi } from '../../lib/setup-api';
 import { Button, CloseButton, ErrorText } from '../ui';
 import { ConnectStep } from './connect-step';
 import {
@@ -57,6 +58,10 @@ async function createFrom(draft: Draft): Promise<number> {
     ...(githubProjectNodeId === undefined ? {} : { githubProjectNodeId }),
     integrations: verifiedTrackers(draft),
   });
+  if (draft.setupAgent) {
+    // The project exists either way; a project just created has no other run to refuse it for.
+    await setupApi.start(created.id, draft.setupModel).catch(() => null);
+  }
   return created.id;
 }
 

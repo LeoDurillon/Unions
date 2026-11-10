@@ -1,6 +1,18 @@
 # Plan: a setup agent at the end of the wizard
 
-Status: planned (2026-11-10), decisions made (see the end).
+Status: step 1 built (2026-11-10, branch `setup-agent`); steps 2 to 4 planned. Decisions made (see the end).
+
+Built differently from step 1 below: the board shows the run in a **Project setup** card above Getting started
+(not as a checklist item), and until step 2 its proposal opens as the investigation's answer. The "not logged in"
+failure is in `seedCredentials`, so every run without a login gets it, not only setup.
+
+Added after two real runs on Senova (2026-11-10): the worker copies the user guide (`documentation/`) into the
+container at `/workspace/union-guide` (`setup-guide.ts`), and the prompt sends the agent there first. The prompt
+also says what to read in a monorepo and how to adapt a dev compose file, and that the agent has no shell. The
+format gained `composeAdditions` and `sharedCommands`. Without the guide, the agent proposed no preview and a
+ticket for a new compose file. With it, from blank settings, it proposed a preview close to the one set up by
+hand. Its questions showed gaps in the guide, now filled: host ports, `depends_on` on shared services, the e2e
+browser, `origin/<base>`.
 
 ## Problem
 

@@ -18,8 +18,9 @@ you visit Union. Later, open it again from **+** next to **Projects** in the sid
      needs the capabilities listed in [Installation](installation.md).
    - **Jira**: your Jira site, the email of your Atlassian account, an API token and the key of the project to
      import tickets from. See [Connect Jira](#connect-jira).
-4. **Review**: check the base branch (the branch tickets start from and pull requests target), then create the
-   project.
+4. **Review**: check the base branch (the branch tickets start from and pull requests target). To have an agent
+   set up the project for you, turn on **Let an agent set up this project** and pick its model (Sonnet by default).
+   See [Let an agent set up the project](#let-an-agent-set-up-the-project). Then create the project.
 
 The board opens, with a **Getting started** list above it: set the check command, write a ticket, start it,
 answer the planning, and review the change. Each step ticks itself once you have done it. **Open Checks** and
@@ -85,6 +86,21 @@ when your rules, comments or investigations ask it to.
 Your account must be able to see the project's issues. The token stays on this machine; to stop, click
 **Disconnect** in the settings.
 
+## Let an agent set up the project
+
+With **Let an agent set up this project** on in the wizard, an agent reads your repository once the project is
+created: its README, package scripts, compose files, CI workflows, env examples and test configs, along with this
+guide, to see how Union uses each setting. It proposes the install and
+check commands, the preview, the e2e command, saved scripts, project instructions and, when your code needs a
+toolchain the default image lacks, an agent image. It also lists the secrets and files you must add yourself, and
+any repository changes the setup needs. It only reads: it changes nothing in your repository or your settings.
+It runs on your Claude subscription.
+
+A **Project setup** card above the board follows the run. **Follow its log** shows what the agent is doing. Once it
+has answered, **Read its answer** opens its proposal on the Investigations tab. Fill in the settings it proposes in
+**Settings**; applying a proposal in one click is coming. If the run failed (for example, Claude is not logged in
+on this machine) or was cancelled, the card says why: pick a model and click **Run setup** to try again.
+
 ## Tell the agents how to build and check your code
 
 Open the project's **Settings → Checks** before you start a ticket:
@@ -93,6 +109,8 @@ Open the project's **Settings → Checks** before you start a ticket:
   `npm ci`.
 - **Check command**: what "done" means, for example `bun run check` or `npm test && npm run lint`. The
   implementation agent runs it, fixes what fails, and runs it again.
+- The ticket's checkout is a full clone of the repository: `origin/<base branch>` is the base branch as it was
+  when the ticket's container was created, so a command can compare against it (`git diff origin/main...`).
 - **Iteration limit**: how many times the agent may go back to fix failing checks before the step stops (3 by
   default).
 

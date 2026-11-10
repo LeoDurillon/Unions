@@ -184,6 +184,15 @@ test('the prompt says where the code is, or that there is none', () => {
   expect(repository).not.toContain('follows up');
 });
 
+test('a setup run ends with its json block, not the findings layout', () => {
+  const setup = { ...queue('repository'), kind: 'setup' as const };
+  const prompt = investigationPrompt(setup, project);
+  expect(prompt).toEndWith(
+    'End your answer with the `json` block described above, as its last block.',
+  );
+  expect(prompt).not.toContain('Output only your findings');
+});
+
 test('the prompt carries the project instructions when there are some', () => {
   const own = { ...project, config: { ...project.config, instructions: 'Answer in French.' } };
   expect(investigationPrompt(queue(), own)).toContain(

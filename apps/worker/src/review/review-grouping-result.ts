@@ -3,6 +3,8 @@
 // `missing`).
 
 import {
+  isRecord,
+  lastJsonBlock,
   hunkAt,
   hunksOf,
   type GroupingResult,
@@ -10,8 +12,6 @@ import {
   type SpecGroup,
   type UnrelatedChange,
 } from '@union/core';
-
-import { isRecord, lastJsonBlock } from '../json-block';
 
 const MAX_GROUPS = 40;
 const MAX_TEXT = 2000;

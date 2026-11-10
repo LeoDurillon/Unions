@@ -58,18 +58,34 @@ export function containerNames(ticketId: number): TicketContainer {
   };
 }
 
+/** What a run without a Claude login fails with: what to do, never the file's contents. */
+function notLoggedIn(credentialsPath: string): string {
+  return `Claude is not logged in on this machine (no subscription login in ${credentialsPath}): run \`claude\` and log in (see Installation), then try again.`;
+}
+
+/** The subscription login in the credentials file; throws `notLoggedIn` when there is none. */
+async function readOauth(credentialsPath: string): Promise<unknown> {
+  let raw: unknown = null;
+  try {
+    raw = JSON.parse(await readFile(credentialsPath, 'utf8'));
+  } catch {
+    // Missing or unreadable: the same as no login.
+  }
+  const oauth =
+    typeof raw === 'object' && raw !== null && 'claudeAiOauth' in raw ? raw.claudeAiOauth : null;
+  if (!oauth) {
+    throw new Error(notLoggedIn(credentialsPath));
+  }
+  return oauth;
+}
+
 /** Only the Claude subscription credential is seeded: no MCP tokens, no history. */
 export async function seedCredentials(
   runtime: ContainerRuntime,
   container: string,
   credentialsPath: string,
 ): Promise<void> {
-  const raw: unknown = JSON.parse(await readFile(credentialsPath, 'utf8'));
-  const oauth =
-    typeof raw === 'object' && raw !== null && 'claudeAiOauth' in raw ? raw.claudeAiOauth : null;
-  if (!oauth) {
-    throw new Error(`No claudeAiOauth entry in ${credentialsPath}`);
-  }
+  const oauth = await readOauth(credentialsPath);
   await runtime.writeFile(
     container,
     `${AGENT_HOME}/.claude/.credentials.json`,

@@ -1,10 +1,7 @@
-// Finds the answer block at the end of an agent's text: the last fenced `json` block of the expected shape.
+// Finds the answer block at the end of an agent's text: the last fenced `json` block of the expected shape; browser-safe.
+import { isRecord } from './agent-activity';
 
 const JSON_BLOCK = /```json[^\n]*\n(?<json>[\s\S]*?)\n\s*```/gu;
-
-export function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
-}
 
 /** The last fenced `json` block that parses to an object `accept` takes; null when there is none. */
 export function lastJsonBlock(

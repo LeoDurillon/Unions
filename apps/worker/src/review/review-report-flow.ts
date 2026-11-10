@@ -3,6 +3,7 @@
 // names (a spec, a commit message, a comment the diff adds), else marked inferred.
 
 import {
+  isRecord,
   quoteKey,
   WHY_SOURCES,
   type FlowEdge,
@@ -13,7 +14,6 @@ import {
   type WhySource,
 } from '@union/core';
 
-import { isRecord } from '../json-block';
 import { oneOf, pathOf, rangeOf, records, text, texts } from './review-report-fields';
 import { MAX_FLOW_EDGES, MAX_FLOW_NODES, MAX_FLOW_STEPS } from './review-report-format';
 

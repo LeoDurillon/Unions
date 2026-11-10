@@ -1,5 +1,5 @@
 // The routes under `/api/projects` that have their own module: event rules and what they pick from,
-// integrations, preview settings, the agent image, files, memory, the runs' live progress, the repository's files.
+// integrations, preview settings, the agent image, files, memory, the runs' live progress, the repository's files, the setup agent.
 import type { Db } from '@union/core';
 import { Hono } from 'hono';
 
@@ -9,9 +9,10 @@ import { projectIntegrationRoutes } from './integrations';
 import { memoryRoutes } from './memory';
 import { projectGitHubRoutes } from './project-github';
 import { runProgressRoutes } from './run-progress';
+import { setupRoutes } from './setup';
 import { workspaceSettingsRoutes } from './workspace-settings';
 
-/** The routes under `/api/projects` that have their own module: event rules and what they pick from, integrations, preview settings, the agent image, files, memory, the runs' live progress, the repository's files. */
+/** The routes under `/api/projects` that have their own module: event rules and what they pick from, integrations, preview settings, the agent image, files, memory, the runs' live progress, the repository's files, the setup agent. */
 export function projectSubroutes(db: Db, { github, notion, jira, repository }: ApiServices): Hono {
   const routes = new Hono();
   routes.route('/', eventRuleRoutes(db, notion));
@@ -20,5 +21,6 @@ export function projectSubroutes(db: Db, { github, notion, jira, repository }: A
   routes.route('/', workspaceSettingsRoutes(db));
   routes.route('/', memoryRoutes(db));
   routes.route('/', runProgressRoutes(db));
+  routes.route('/', setupRoutes(db));
   return routes;
 }

@@ -6,3 +6,6 @@ export const INVESTIGATION_DEFAULTS: { model: AgentModel; tools: readonly string
   model: 'opus',
   tools: ['Read', 'Grep', 'Glob', 'WebSearch', 'WebFetch'],
 };
+
+/** The setup agent's model until the user picks another one. */
+export const SETUP_DEFAULT_MODEL: AgentModel = 'sonnet';

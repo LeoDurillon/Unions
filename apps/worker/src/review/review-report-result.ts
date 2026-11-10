@@ -3,6 +3,7 @@
 // changed files it says nothing about listed; what it cannot back is dropped and counted.
 
 import {
+  lastJsonBlock,
   REPORT_VERDICTS,
   type ReportRequirement,
   type ReportSpec,
@@ -10,7 +11,6 @@ import {
   type ReviewReportResult,
 } from '@union/core';
 
-import { lastJsonBlock } from '../json-block';
 import { oneOf, text, texts } from './review-report-fields';
 import { flowOf } from './review-report-flow';
 import { docsOf, importantFilesOf, requirementsOf, risksOf } from './review-report-items';

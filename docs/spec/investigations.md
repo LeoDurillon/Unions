@@ -44,5 +44,16 @@ A one-off agent run on a custom prompt, outside the ticket pipeline (project bar
   the summary from the title (255 characters at most), the description converted from markdown to ADF (cut with a
   note past 30 000 characters), and link the ticket to it (`origin_kind` `jira`, `origin_id` the key). Jira's
   refusal becomes `ticket_error`, the ticket created all the same.
+- **Setup:** an investigation of kind `setup` (`investigations.kind`, `question` otherwise) is the setup agent's
+  run, queued by the wizard's "Let an agent set up this project" or **Run setup** on the board
+  (`POST /api/projects/:projectId/setup`, `queueSetup`, one at a time per project). A repository run with `Read`,
+  `Grep` and `Glob` only, on the model the user picked (Sonnet by default); its prompt (`setup-prompt.ts`) says what
+  each setting does and ends with the answer block; the worker copies the user guide (`documentation/`) into the
+  container at `/workspace/union-guide` for it to read, and the worker's trailer asks for that block instead of the
+  findings layout. `GET /api/projects/:projectId/setup` returns the latest run and its proposal
+  (`parseSetupProposal`): every value checked as the settings would, secret values and file contents never kept,
+  refusals listed in `dropped`. Plan: [`docs/plans/setup-agent.md`](../plans/setup-agent.md).
+- **No Claude login:** any run (an investigation, a ticket step) fails with "Claude is not logged in on this
+  machine…" when the credentials file is missing or holds no subscription login.
 - **Not yet:** resuming the agent's own session on a follow-up, choosing another branch than the base or a
   ticket's.

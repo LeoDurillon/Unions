@@ -267,6 +267,8 @@ export const agentTools = sqliteTable('agent_tools', {
 });
 
 export const INVESTIGATION_SCOPES = ['global', 'repository', 'ticket'] as const;
+/** `setup`: the setup agent's run, whose answer is a proposal of the project's settings. */
+export const INVESTIGATION_KINDS = ['question', 'setup'] as const;
 export const INVESTIGATION_STATUSES = [
   'queued',
   'running',
@@ -296,6 +298,7 @@ export const investigations = sqliteTable(
       .notNull()
       .default(sql`'[]'`),
     scope: text('scope', { enum: INVESTIGATION_SCOPES }).notNull(),
+    kind: text('kind', { enum: INVESTIGATION_KINDS }).notNull().default('question'),
     /** The ticket a `ticket` investigation runs on (null once that ticket is removed). */
     onTicketId: integer('on_ticket_id').references((): AnySQLiteColumn => tickets.id, {
       onDelete: 'set null',

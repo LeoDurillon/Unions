@@ -4,6 +4,7 @@
 import {
   appendAgentLine,
   claimInvestigation,
+  copySetupGuide,
   type ContainerRuntime,
   type Db,
   DIAGRAM_INSTRUCTION,
@@ -77,12 +78,15 @@ export function investigationPrompt(
     global: `No repository is checked out: this is a general question for the team working on ${project.owner}/${project.repo}. Answer from your knowledge and the tools you have.`,
   }[investigation.scope];
   const own = projectInstructions(project);
+  const answer =
+    investigation.kind === 'setup'
+      ? 'End your answer with the `json` block described above, as its last block.'
+      : `Output only your findings as markdown: the answer first, then the evidence (files, links) it rests on.\n${DIAGRAM_INSTRUCTION}`;
   return `${earlierExchanges(investigation)}${investigation.prompt}
 
 ---
 ${own === '' ? '' : `${own}\n\n`}${where}
-Output only your findings as markdown: the answer first, then the evidence (files, links) it rests on.
-${DIAGRAM_INSTRUCTION}`;
+${answer}`;
 }
 
 export type InvestigationDeps = {
@@ -141,6 +145,9 @@ function investigate(
         const token = await projectGitToken(db, project);
         const source = cloneSource(config.gitBaseUrl, project.owner, project.repo, token);
         await cloneInto(runtime, container, source, project.config.baseBranch);
+      }
+      if (investigation.kind === 'setup') {
+        await copySetupGuide(runtime, container);
       }
       if (signal.aborted) {
         return { status: 'cancelled' };

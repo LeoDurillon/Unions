@@ -14,6 +14,7 @@ function investigation(fields: Partial<Investigation> = {}): Investigation {
     prompt: 'Why is the cache stale?',
     history: [],
     scope: 'repository',
+    kind: 'question',
     onTicketId: null,
     model: 'opus',
     tools: ['Read', 'Grep'],

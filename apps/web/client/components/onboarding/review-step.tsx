@@ -3,6 +3,7 @@ import type { ReactElement, ReactNode } from 'react';
 
 import { Field, inputClass } from '../ui';
 import type { ProjectChoice, StepProps } from './draft';
+import { SetupAgentChoice } from './setup-agent-choice';
 
 function projectLabel(project: ProjectChoice): string {
   if (project === null) {
@@ -44,6 +45,7 @@ export function ReviewStep({ draft, patch }: StepProps): ReactElement {
           }}
         />
       </Field>
+      <SetupAgentChoice draft={draft} patch={patch} />
     </div>
   );
 }

@@ -1,5 +1,7 @@
 // The setup wizard's draft: what it collects, its steps, and when the user may move on.
 import { isIntegrationKindName, type IntegrationKindName } from '@union/core/integration-kinds';
+import { SETUP_DEFAULT_MODEL } from '@union/core/investigation-defaults';
+import type { AgentModel } from '@union/core/states';
 
 import type { ProjectOption, RepoOption, Viewer } from '../../../src/api-types';
 import type { GitHubCredential } from '../../lib/api';
@@ -28,6 +30,9 @@ export type Draft = {
   baseBranch: string;
   /** The trackers to import tickets from, each optional. */
   trackers: Record<IntegrationKindName, TrackerDraft>;
+  /** Run the setup agent once the project exists (uses the Claude subscription: off unless ticked). */
+  setupAgent: boolean;
+  setupModel: AgentModel;
 };
 
 export const EMPTY_DRAFT: Draft = {
@@ -42,6 +47,8 @@ export const EMPTY_DRAFT: Draft = {
     notion: { secret: '', config: { dataSourceId: '' }, title: null },
     jira: { secret: '', config: { site: '', email: '', projectKey: '' }, title: null },
   },
+  setupAgent: false,
+  setupModel: SETUP_DEFAULT_MODEL,
 };
 
 export const STEPS = [

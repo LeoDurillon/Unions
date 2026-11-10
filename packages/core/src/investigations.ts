@@ -14,6 +14,7 @@ export { INVESTIGATION_DEFAULTS } from './investigation-defaults';
 export type Investigation = typeof schema.investigations.$inferSelect;
 export type InvestigationScope = (typeof schema.INVESTIGATION_SCOPES)[number];
 export type InvestigationStatus = (typeof schema.INVESTIGATION_STATUSES)[number];
+type InvestigationKind = (typeof schema.INVESTIGATION_KINDS)[number];
 
 /** An investigation the request cannot create or change (bad input, or not in a state that allows it). */
 export class InvestigationError extends Error {}
@@ -31,6 +32,8 @@ export type NewInvestigation = {
   onTicketId?: number | null;
   model: string;
   tools: readonly string[];
+  /** `question` when unset. */
+  kind?: InvestigationKind;
 };
 
 /**
@@ -98,6 +101,7 @@ export function createInvestigation(db: Db, input: NewInvestigation): Investigat
     title: requireText(input.title, 'title'),
     prompt: requireText(input.prompt, 'prompt'),
     scope: input.scope,
+    kind: input.kind ?? 'question',
     onTicketId,
     model: input.model,
     tools: validateTools(db, input.tools),

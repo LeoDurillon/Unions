@@ -3,9 +3,9 @@
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../src/api-types';
-import { Board, BoardView } from './board';
+import { BoardView } from './board';
+import { BoardPage } from './board-page';
 import { EnvironmentsPage } from './environments/environments-page';
-import { GettingStarted } from './getting-started';
 import { InvestigationsPage } from './investigations/investigations-page';
 import { UsagePage } from './lazy-pages';
 import type { ProjectView } from './project-bar';
@@ -57,11 +57,11 @@ export function ProjectBody({
     return <PullRequestsPage key={project.id} project={project} onOpenTicket={onOpenTicket} />;
   }
   return (
-    <div className="flex h-full flex-col">
-      <GettingStarted key={project.id} project={project} onNewTicket={onNewTicket} />
-      <div className="min-h-0 flex-1">
-        <Board project={project} onOpen={onOpenTicket} />
-      </div>
-    </div>
+    <BoardPage
+      key={project.id}
+      project={project}
+      onOpenTicket={onOpenTicket}
+      onNewTicket={onNewTicket}
+    />
   );
 }

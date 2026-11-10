@@ -1,0 +1,1 @@
+ALTER TABLE `investigations` ADD `kind` text DEFAULT 'question' NOT NULL;

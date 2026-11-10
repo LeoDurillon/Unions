@@ -133,6 +133,7 @@ export * from './review/review-specs';
 export * from './integrations/notion-markdown';
 export * from './integrations/notion-media';
 export * from './notifications';
+export * from './json-block';
 export {
   composeProblems,
   isRecord,
@@ -173,3 +174,6 @@ export * from './preview/preview-memory-caps';
 export * from './union-update';
 export * from './union-update-store';
 export * from './workspace-owner';
+export * from './setup/setup-agent';
+export type * from './setup/setup-proposal-types';
+export * from './setup/setup-guide';

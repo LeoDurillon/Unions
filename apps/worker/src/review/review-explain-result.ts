@@ -1,8 +1,13 @@
 // Reads the explanation block at the end of the agent's answer, and drops the citations it cannot back.
 
-import type { AgentReviewSpec, ExplainedDoc, ExplainedSpec, ExplanationResult } from '@union/core';
-
-import { isRecord, lastJsonBlock } from '../json-block';
+import {
+  isRecord,
+  lastJsonBlock,
+  type AgentReviewSpec,
+  type ExplainedDoc,
+  type ExplainedSpec,
+  type ExplanationResult,
+} from '@union/core';
 
 const MAX_EXPLANATION = 12_000;
 const MAX_TEXT = 2000;

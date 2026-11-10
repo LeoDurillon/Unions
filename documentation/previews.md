@@ -14,9 +14,32 @@ the project's previews running now, with their addresses and **Stop**.
 3. Optional: **Profiles** to enable, and **compose additions**: YAML merged over the repository's file, for what
    Union adds without changing the repository (a database restore, migrations, a seed).
 
+Union never publishes a preview's ports on your computer: each preview is reached through its own addresses, so
+several previews never collide on a port, and you don't need to remove the `ports:` of your Compose file. Union
+also drops fixed `container_name`s.
+
 Then, in **Environments → Variables**, add the environment variables the services need. Values can use
 templates such as `{service.api.url}`, the address of another service. Secret values are kept on the server and
 never shown again in the browser. You can also have the variables written as a file inside one service.
+
+The templates, for ticket 12 with an exposed service `api` (prefix `api`):
+
+| Template                 | Gives                                                                 |
+| ------------------------ | --------------------------------------------------------------------- |
+| `{service.api.url}`      | its address from your browser: `http://api-t12.union.localhost:8080`  |
+| `{service.api.internal}` | its address from another service: `http://api:3000` (its port)        |
+| `{service.api.host}`     | its host name inside the preview: `api` (any service, exposed or not) |
+| `{ticket.id}`            | the ticket number: `12` (`r3` for a pull request under review)        |
+| `{pr.number}`            | the number of the pull request under review (empty for a ticket)      |
+| `{preview.host}`         | the preview's host: `t12.union.localhost`                             |
+| `{preview.url}`          | the address of the first exposed service                              |
+
+Addresses use the preview port, 8080 unless `UNION_PREVIEW_PORT` says otherwise; every preview's host name ends
+with `union.localhost`.
+
+The ticket's checkout, which the preview mounts wherever your Compose file mounts the repository, belongs to the
+agent user, uid and gid 1000. A service that writes into it (`node_modules`, a build folder) must run as that user,
+as the official `node` images do by default.
 
 ## Run a preview
 
@@ -80,10 +103,13 @@ names, or leave them unnamed.
 Set the command in **Environments → End-to-end tests**, for example `npx playwright test`. It can take several
 lines, for example a setup line before the tests. Then click **Run
 e2e tests** in a ticket's Preview tab (**Run again** once there is a result).
-The result shows how long ago it ran; open **Output** for its last lines, or **Command** for what ran. The tests run in the ticket's container, against the running preview; the
-browser they need is installed on first use, at your repository's Playwright version.
+The result shows how long ago it ran; open **Output** for its last lines, or **Command** for what ran. The tests run in the ticket's container, against the running preview.
+Chromium is installed on first use, at your repository's Playwright version. The system libraries of Firefox are
+in the image too, but not the browser: if your tests use Firefox, start the command with
+`npx playwright install firefox`.
 
-Commands there get `BASE_URL` and one `UNION_URL_<SERVICE>` variable per exposed service.
+Commands there get `BASE_URL` and one `UNION_URL_<SERVICE>` variable per exposed service. They also reach the
+preview's services by name, as the services reach each other (`db:5432`), for tests that write to the database.
 
 A failure can be sent to the implementer as a revision (**Send the failure to the agent**). When the preview
 restarted or the agent worked on the ticket after the tests ran, the tab asks you to run them again and offers only
@@ -130,6 +156,8 @@ whole project instead of once per preview, which saves memory: a virus scanner a
 
 - Your previews still reach them by name (`clamav:3310`), so you don't change your Compose file or your variables.
   Previews still can't reach each other.
+- They start before the preview's own services, so Union removes the `depends_on` that point at them (a
+  `condition: service_healthy` included): the preview's services don't wait for them again.
 - They start with the first preview that needs them and stop once no preview and no agent uses them. What they
   store is kept for the next start.
 - A service with data (a database) needs one more setting so that previews don't share its data: see below.
