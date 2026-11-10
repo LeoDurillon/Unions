@@ -4,20 +4,21 @@ import { useState, type ReactElement, type ReactNode } from 'react';
 
 import type { CommentView, DiffResponse } from '../../../src/api-types';
 import type { ReviewTarget } from '../../lib/review/review-target';
-import type { useCommentMutations } from '../../lib/review/use-review';
-import { ErrorText } from '../ui';
 import { useExplain, type ExplainFocus } from './explain-context';
 import type { DiffView } from './file-diff';
+import { useFilteredFiles } from './file-filter-bar';
 import { FileList } from './file-list';
-import { GeneralComments } from './general-comments';
-import { OpenFile } from './open-file';
+import { OpenFileArea, type Mutations } from './open-file-area';
 
-type Mutations = ReturnType<typeof useCommentMutations>;
+type Files = DiffResponse['files'];
 
-/** The picked file, else the first file that is not ignored, else the first file. */
-function openFileId(files: DiffResponse['files'], picked: number | null): number | null {
+/**
+ * The picked file (shown or not), else the first listed file that is not ignored, else the first
+ * listed, else the first file.
+ */
+function openFileId(files: Files, visible: Files, picked: number | null): number | null {
   const chosen = files.find((file) => file.id === picked);
-  return (chosen ?? files.find((file) => !file.ignored) ?? files[0])?.id ?? null;
+  return (chosen ?? visible.find((file) => !file.ignored) ?? visible[0] ?? files[0])?.id ?? null;
 }
 
 type Picked = { id: number; part: string | null; seq: number };
@@ -32,57 +33,16 @@ function freshFocus(picked: Picked | null, shown: ExplainFocus | null): ExplainF
  * picked one. `fresh` is that explanation's focus, for the file to select its lines.
  */
 function openFile(
-  files: DiffResponse['files'],
+  files: Files,
+  visible: Files,
   picked: Picked | null,
   shown: ExplainFocus | null,
 ): { fileId: number | null; part: string | null; fresh: ExplainFocus | null } {
   const fresh = freshFocus(picked, shown);
   const focused = fresh ? files.find((file) => file.path === fresh.path) : undefined;
-  const fileId = openFileId(files, focused?.id ?? picked?.id ?? null);
+  const fileId = openFileId(files, visible, focused?.id ?? picked?.id ?? null);
   const part = !focused && picked?.id === fileId ? picked.part : null;
   return { fileId, part, fresh };
-}
-
-/** The right side: the banner, errors, general comments and the open file. */
-function OpenFileArea({
-  target,
-  comments,
-  view,
-  mutations,
-  banner,
-  error,
-  emptyText,
-  open,
-}: {
-  target: ReviewTarget;
-  comments: CommentView[];
-  view: DiffView;
-  mutations: Mutations;
-  banner: ReactNode;
-  error: Error | null;
-  emptyText: string | null;
-  open: { fileId: number; part: string | null; focus: ExplainFocus | null } | null;
-}): ReactElement {
-  return (
-    <main className="min-w-0 flex-1 overflow-y-auto p-4">
-      {banner}
-      <ErrorText error={error} />
-      {emptyText ? <p className="text-sm text-zinc-500">{emptyText}</p> : null}
-      <GeneralComments comments={comments} mutations={mutations} />
-      {open === null ? null : (
-        <OpenFile
-          key={`${open.fileId}-${open.part ?? ''}`}
-          target={target}
-          fileId={open.fileId}
-          view={view}
-          comments={comments}
-          mutations={mutations}
-          part={open.part}
-          focus={open.focus}
-        />
-      )}
-    </main>
-  );
 }
 
 /** The touched files on the left, the picked one on the right. */
@@ -110,13 +70,16 @@ export function DiffBody({
 }): ReactElement {
   const [picked, setPicked] = useState<Picked | null>(null);
   const shown = useExplain()?.focus ?? null;
-  const { fileId, part, fresh } = openFile(files, picked, shown);
+  const { visible, bar } = useFilteredFiles(files);
+  const { fileId, part, fresh } = openFile(files, visible, picked, shown);
   return (
     <div className="flex min-h-0 flex-1">
       <aside className="w-80 shrink-0 space-y-2 overflow-y-auto border-r border-zinc-200 p-2 dark:border-zinc-800">
         {picker}
         <FileList
-          files={files}
+          files={visible}
+          total={files.length}
+          filterBar={bar}
           comments={comments}
           selected={fileId}
           onSelect={(id, under) => {

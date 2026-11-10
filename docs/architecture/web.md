@@ -81,7 +81,10 @@
   (`routes/review/review-comments.ts`, `routes/pull-requests/pr-review.ts`), and the client reviews a `ReviewTarget`
   (`lib/review/review-target.ts`), whose base URL serves the diff, the comments and the send. Files matching the project's
   review ignore rules (`isIgnoredPath` in `@union/core/diff`: built-in lock files plus `config.reviewIgnore`
-  gitignore-style patterns) are flagged `ignored` and listed apart, never dropped. `@union/core/diff` parses diffs and
+  gitignore-style patterns) are flagged `ignored` and listed apart, never dropped; files the change size counts as
+  code (`isCodeFile` in `@union/core/change-size`, with `sizeIgnoreOf(config)`) are flagged `code`, both set by
+  `routes/review/file-flags.ts` on every file list. The client narrows the list by a path query and Code only
+  (`lib/review/file-filter.ts`, `review/file-filter-bar.tsx`). `@union/core/diff` parses diffs and
   is browser-safe. A pull request's review can show one commit at a time (`commit-picker.tsx`, `commit-diff.tsx`,
   `routes/pull-requests/pr-commits.ts`: the PR's commits and a commit's files against its first parent, read from GitHub and kept
   by SHA in memory); that view is read only, comments are written on all the changes. A ticket's review has the same
@@ -215,7 +218,7 @@
   counts when typed in a field, with Ctrl, ⌘ or Alt, held down, already handled (`defaultPrevented`), or while a
   `<dialog>` without `data-shortcuts` is open (the ticket panel has it, since it answers its own keys). The board
   (`lib/use-board-keys.ts`, only while no ticket is open), the ticket panel (`components/ticket-panel-keys.ts`, not on
-  its review page), the review's file list (`review/use-file-keys.ts`) and `?` / `c` (`shortcuts-help.tsx`,
+  its review page), the review's file list (`review/use-file-keys.ts`, and `/` in `review/file-filter-bar.tsx`) and `?` / `c` (`shortcuts-help.tsx`,
   mounted by `main-area.tsx`) each own their keys; keep the list in `shortcuts-help.tsx` and the user guide in step.
   "Next needing you" walks the board's own `tickets` query in column order (`lib/next-needing.ts`, with `needsYou`
   from `board-filter.ts`).

@@ -85,9 +85,9 @@ test('the commits of the pull request are listed oldest first', async () => {
 
 test("a commit's files are read once, flagged like the whole diff, and served file by file", async () => {
   const diff = (await (await get(`/${FIRST}/diff`)).json()) as CommitDiffResponse;
-  expect(diff.files.map((file) => [file.path, file.ignored])).toEqual([
-    ['math.js', false],
-    ['bun.lock', true],
+  expect(diff.files.map((file) => [file.path, file.ignored, file.code])).toEqual([
+    ['math.js', false, true],
+    ['bun.lock', true, false],
   ]);
   expect(diff.files[0]).not.toHaveProperty('patch');
   const file = (await (await get(`/${FIRST}/files/1`)).json()) as { patch: string };

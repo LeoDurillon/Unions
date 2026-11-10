@@ -132,3 +132,6 @@ the spec (`docs/spec/`); open work is in the [plans README](../README.md).
   binary, the node user) and the default `union-agent` built on it with the JavaScript toolchains; a project's
   Dockerfile starts from either, with starters for JavaScript, Python, Rust, Go and PHP. Built (branch
   `agent-image-layers`, 2026-11-07); a real ticket step on the new default image left.
+- [Filter the review's files, and Code only](review-file-filter.md): a box that keeps the files whose path holds
+  every typed word (`/` goes to it), and Code only, which hides what the change size does not count as code. Built
+  (branch `review-file-filter`, 2026-11-09), checked in a browser on a copy of the live database.

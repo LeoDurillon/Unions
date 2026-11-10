@@ -192,6 +192,31 @@ test('lock files and the project patterns are flagged as ignored, other files ar
   ]);
 });
 
+test("files are flagged code by the change size's patterns, not the review's", async () => {
+  const [lock] = parseDiff(
+    'diff --git a/bun.lock b/bun.lock\n--- a/bun.lock\n+++ b/bun.lock\n@@ -1 +1 @@\n-a\n+b\n',
+  );
+  const snap = db.select().from(schema.diffSnapshots).get();
+  if (lock && snap) {
+    db.insert(schema.diffFiles)
+      .values({ snapshotId: snap.id, position: 1, ...lock })
+      .run();
+  }
+  let diff = (await (await call('GET', '/diff')).json()) as DiffResponse;
+  expect(diff.files.map((file) => [file.path, file.code])).toEqual([
+    ['math.js', true],
+    ['bun.lock', false],
+  ]);
+  db.update(schema.projects)
+    .set({ config: { baseBranch: 'main', reviewIgnore: ['*.js'], sizeIgnore: ['*.js'] } })
+    .run();
+  diff = (await (await call('GET', '/diff')).json()) as DiffResponse;
+  expect(diff.files.map((file) => [file.path, file.code])).toEqual([
+    ['math.js', false],
+    ['bun.lock', true],
+  ]);
+});
+
 test('a done ticket with its branch takes a review too', async () => {
   await call('POST', '/comments', {
     path: 'math.js',

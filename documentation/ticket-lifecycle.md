@@ -80,7 +80,8 @@ of code (+840 tests), for ~150 estimated". Hover it to see the files.
 
 The budget comes from the **Technical** step, which ends its plan with "Estimated size: 150 lines of code". To change
 the budget, **Edit** that line before you approve the plan. A flow without the Technical step uses the project's
-budget, if you set one (**Settings → Agents → Change size**); otherwise the size is only shown.
+budget, if you set one (**Settings → Agents → Change size**); otherwise the size is only shown. The paths you set
+there as not code are also what **Code only** hides in the [review](reviewing.md#review-a-tickets-branch).
 
 When a ticket's first implementation, with its checks green, adds more than one and a half times its budget, the
 implementer gets one more turn to cut what the task does not need: options nobody asked for, code that is used once,

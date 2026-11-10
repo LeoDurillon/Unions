@@ -1,14 +1,14 @@
 // `<review>/commits`: the pull request's commits, and one commit's files and patches, to read the
 // change one commit at a time.
 
-import { isIgnoredPath, type Db, type PullRequestFile } from '@union/core';
+import type { Db, PullRequestFile } from '@union/core';
 import { Hono, type Context } from 'hono';
 
 import type { CommitDiffResponse, CommitsResponse } from '../../api-types';
 import type { OnboardingGitHub } from '../../github-onboarding';
 import { BAD_REQUEST, fail, NOT_FOUND, requireId } from '../../http';
 import { guarded } from '../github-errors';
-import { authOf, load, type Project } from './pr-review-load';
+import { authOf, fileSummaries, load, type Project } from './pr-review-load';
 
 const SHA = /^[0-9a-f]{40}$/u;
 /** A commit's files never change: the last ones read are kept, this many commits. */
@@ -73,13 +73,9 @@ export function prCommitRoutes(db: Db, github: OnboardingGitHub): Hono {
   });
   routes.get('/:sha/diff', async (c) => {
     const { sha, project, files } = await commitFiles(db, github, c);
-    const patterns = project.config.reviewIgnore ?? [];
-    const hideLockFiles = project.config.hideLockFiles !== false;
     const body: CommitDiffResponse = {
       sha,
-      files: files.map(({ patch: _patch, ...file }) =>
-        Object.assign(file, { ignored: isIgnoredPath(file.path, patterns, hideLockFiles) }),
-      ),
+      files: fileSummaries(project, files),
     };
     return c.json(body);
   });

@@ -1,7 +1,7 @@
 // The touched files, as a list or a tree; ignored ones (lock files, project patterns) are listed
 // apart, collapsed.
 
-import { useState, type ReactElement } from 'react';
+import { useState, type ReactElement, type ReactNode } from 'react';
 
 import type { CommentView, DiffFileSummary } from '../../../src/api-types';
 import { reviewSlice, type ReviewTarget } from '../../lib/review/review-target';
@@ -67,23 +67,28 @@ function IgnoredFiles({
   );
 }
 
-/** How many files, the By spec switch and the List / Tree switch. */
+function countText(count: number, total: number): string {
+  const files = `file${total === 1 ? '' : 's'}`;
+  return count === total ? `${total} ${files}` : `${count} of ${total} ${files}`;
+}
+
+/** How many files (of how many, when filtered), the By spec switch and the List / Tree switch. */
 function ListHeader({
   count,
+  total,
   bySpec,
   layout,
   onLayout,
 }: {
   count: number;
+  total: number;
   bySpec: ReactElement | null;
   layout: Layout;
   onLayout: (layout: Layout) => void;
 }): ReactElement {
   return (
     <div className="flex items-center justify-between gap-2 px-2">
-      <span className="text-xs text-zinc-500">
-        {count} file{count === 1 ? '' : 's'}
-      </span>
+      <span className="text-xs text-zinc-500">{countText(count, total)}</span>
       <div className="flex items-center gap-1">
         {bySpec}
         <Segmented legend="File list layout" options={LAYOUTS} value={layout} onChange={onLayout} />
@@ -92,17 +97,13 @@ function ListHeader({
   );
 }
 
-/** The touched files, as a list or a tree; ignored ones (lock files, project patterns) are listed apart, collapsed. */
-export function FileList({
-  files,
-  comments,
-  selected,
-  onSelect,
-  part = null,
-  target,
-  allowBySpec = true,
-}: {
+type FileListProps = {
+  /** The files listed: all of them, or those the filter keeps. */
   files: DiffFileSummary[];
+  /** How many files the change has, filtered or not. */
+  total?: number;
+  /** The filter box and Code only, under the header. */
+  filterBar?: ReactNode;
   comments: CommentView[];
   selected: number | null;
   /** `part`: the part of the spec the file was picked under (By spec), else null. */
@@ -113,7 +114,20 @@ export function FileList({
   target: ReviewTarget;
   /** False on a single commit: the grouping is made for the whole change. */
   allowBySpec?: boolean;
-}): ReactElement {
+};
+
+/** The touched files, as a list or a tree; ignored ones (lock files, project patterns) are listed apart, collapsed. */
+export function FileList({
+  files,
+  total = files.length,
+  filterBar = null,
+  comments,
+  selected,
+  onSelect,
+  part = null,
+  target,
+  allowBySpec = true,
+}: FileListProps): ReactElement {
   const [layout, setLayout] = useLayout();
   // A slice's files are its own change: the grouping is the whole change's.
   const whole = allowBySpec && reviewSlice(target) === null;
@@ -135,10 +149,12 @@ export function FileList({
       <div className="space-y-3">
         <ListHeader
           count={files.length}
+          total={total}
           bySpec={bySpec.toggle}
           layout={layout}
           onLayout={setLayout}
         />
+        {filterBar}
         {bySpec.status}
         {bySpec.groups ? (
           <SpecGroups

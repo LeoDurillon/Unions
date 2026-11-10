@@ -166,6 +166,8 @@ export type DiffFileSummary = {
   deletions: number;
   /** Matched by the project's review ignore rules: listed apart, still viewable. */
   ignored: boolean;
+  /** Counted as code by the change size (not a test, doc, lock file or size pattern): what Code only keeps. */
+  code: boolean;
 };
 
 export type DiffResponse = {

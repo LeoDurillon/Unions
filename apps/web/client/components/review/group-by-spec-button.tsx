@@ -9,10 +9,12 @@ import { isGrouping, useReviewGrouping } from '../../lib/review/use-review-group
 import { Button, ErrorText } from '../ui';
 import { GroupBySpecDialog } from './group-by-spec-dialog';
 
-const ON = 'border-indigo-300 bg-indigo-100 font-medium dark:border-indigo-800 dark:bg-indigo-950';
+/** The file panel's on / off buttons (By spec, Code only), pressed or not. */
+export const ON =
+  'border-indigo-300 bg-indigo-100 font-medium dark:border-indigo-800 dark:bg-indigo-950';
 const SHOW_TITLE = 'Show the files under the parts of the specification they implement';
 const ASK_TITLE = "An agent groups the changed files by the parts of the review's specs";
-const OFF =
+export const OFF =
   'border-zinc-300 text-zinc-500 hover:text-zinc-900 dark:border-zinc-700 dark:hover:text-zinc-100';
 
 const BY_SPEC_KEY = 'union.review.bySpec';

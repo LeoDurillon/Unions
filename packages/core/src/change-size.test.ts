@@ -1,7 +1,13 @@
 import { describe, expect, test } from 'bun:test';
 
 import { changeBudget, describeSize, isOverBudget, parseSizeEstimate } from './change-budget';
-import { DEFAULT_SIZE_IGNORE, measureChange, parseNumstat, type ChangeSize } from './change-size';
+import {
+  DEFAULT_SIZE_IGNORE,
+  isCodeFile,
+  measureChange,
+  parseNumstat,
+  type ChangeSize,
+} from './change-size';
 
 describe('measureChange', () => {
   test('counts code apart from tests, generated files and docs; binary files count nowhere', () => {
@@ -77,5 +83,24 @@ describe('the budget', () => {
     expect(describeSize({ ...sized(312), tests: 840, removed: 41 }, budget)).toBe(
       '312 lines of code (+840 tests), 41 removed, for ~100 estimated',
     );
+  });
+});
+
+const code = (path: string, binary = false): boolean =>
+  isCodeFile({ path, binary }, DEFAULT_SIZE_IGNORE);
+
+describe('isCodeFile', () => {
+  test('source is code; tests, lock files, docs, migrations and binaries are not', () => {
+    expect(code('src/a.ts')).toBe(true);
+    expect(code('src/a.test.ts')).toBe(false);
+    expect(code('bun.lock')).toBe(false);
+    expect(code('docs/guide.md')).toBe(false);
+    expect(code('db/migrations/0001.sql')).toBe(false);
+    expect(code('logo.png', true)).toBe(false);
+  });
+
+  test("follows the project's own patterns instead of the defaults", () => {
+    expect(isCodeFile({ path: 'src/a.test.ts' }, ['generated/'])).toBe(true);
+    expect(isCodeFile({ path: 'generated/client.ts' }, ['generated/'])).toBe(false);
   });
 });

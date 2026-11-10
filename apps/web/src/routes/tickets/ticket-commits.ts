@@ -1,7 +1,7 @@
 // `/api/tickets/:id/commits`: the commits stored with the ticket's diff snapshot, the change since
 // the last review, a split ticket's slices, and their files.
 
-import { getTicket, isIgnoredPath, listSlices, schema, type Db, type Ticket } from '@union/core';
+import { getTicket, listSlices, schema, type Db, type Ticket } from '@union/core';
 import { and, asc, desc, eq } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
 
@@ -12,6 +12,7 @@ import {
   type CommitsResponse,
 } from '../../api-types';
 import { fail, NOT_FOUND, requireId } from '../../http';
+import { projectFileFlags } from '../review/file-flags';
 
 type CommitRow = typeof schema.diffCommits.$inferSelect;
 
@@ -90,17 +91,6 @@ function commitOf(db: Db, c: Context): { ticket: Ticket; row: CommitRow } {
   return { ticket, row };
 }
 
-function ignoreRule(db: Db, ticket: Ticket): (path: string) => boolean {
-  const project = db
-    .select({ config: schema.projects.config })
-    .from(schema.projects)
-    .where(eq(schema.projects.id, ticket.projectId))
-    .get();
-  const patterns = project?.config.reviewIgnore ?? [];
-  const hideLockFiles = project?.config.hideLockFiles !== false;
-  return (path) => isIgnoredPath(path, patterns, hideLockFiles);
-}
-
 /**
  * `/api/tickets/:id/commits`: the commits stored with the ticket's diff snapshot, the change since the
  * last review, a split ticket's slices, and their files. Read only: comments are written on the whole diff.
@@ -116,7 +106,7 @@ export function ticketCommitRoutes(db: Db): Hono {
   });
   routes.get('/:sha/diff', (c) => {
     const { ticket, row } = commitOf(db, c);
-    const ignored = ignoreRule(db, ticket);
+    const flags = projectFileFlags(db, ticket.projectId);
     const files = db
       .select()
       .from(schema.diffCommitFiles)
@@ -125,16 +115,10 @@ export function ticketCommitRoutes(db: Db): Hono {
       .all();
     const body: CommitDiffResponse = {
       sha: row.sha,
-      files: files.map(({ id, path, oldPath, status, binary, additions, deletions }) => ({
-        id,
-        path,
-        oldPath,
-        status,
-        binary,
-        additions,
-        deletions,
-        ignored: ignored(path),
-      })),
+      files: files.map(({ id, path, oldPath, status, binary, additions, deletions }) => {
+        const summary = { id, path, oldPath, status, binary, additions, deletions };
+        return Object.assign(summary, flags(summary));
+      }),
     };
     return c.json(body);
   });

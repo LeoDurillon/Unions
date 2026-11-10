@@ -43,11 +43,19 @@ export function sizeIgnoreOf(config: { sizeIgnore?: string[] }): readonly string
   return config.sizeIgnore ?? DEFAULT_SIZE_IGNORE;
 }
 
+/** Whether Union counts a file as code: not binary, and outside the size patterns `ignore`. */
+export function isCodeFile(
+  file: { path: string; binary?: boolean },
+  ignore: readonly string[],
+): boolean {
+  return file.binary !== true && !isIgnoredPath(file.path, ignore, false);
+}
+
 /** Splits a change into code, tests and the rest; binary files count nowhere. */
 export function measureChange(files: readonly SizedFile[], ignore: readonly string[]): ChangeSize {
   const size: ChangeSize = { code: 0, removed: 0, tests: 0, other: 0, codeFiles: [] };
   for (const file of files.filter((sized) => sized.binary !== true)) {
-    if (!isIgnoredPath(file.path, ignore, false)) {
+    if (isCodeFile(file, ignore)) {
       size.code += file.additions;
       size.removed += file.deletions;
       if (file.additions > 0) {

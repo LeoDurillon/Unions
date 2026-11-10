@@ -12,6 +12,11 @@ Click **Review changes** in a ticket's panel. The page opens on the **Diff** tab
 - On the left, the changed files, as a **List** or a **Tree**. **By spec** groups them by the part of the spec they
   implement (see [Specs](#specs)). Press **j** and **k** to open the next or previous file, in the order the list
   shows them.
+- Type a few letters of a path in **Filter files** (press **/** to get there) to list only the files whose path, or
+  old path for a renamed file, has those letters in order. **Esc** clears it. **Code only** hides what Union does not
+  count as code: tests, docs, lock files, migrations and binary files, or the patterns you set in
+  **Settings → Agents → Change size**. Union remembers Code only in this browser. A file you already opened stays
+  open even when the filter hides it, and the count above the list says how many files are shown, of how many.
 - On the right, one file at a time, with syntax highlighting, **Unified** or **Split** (side by side). Union
   remembers your choice in this browser.
 - The commit picker shows all the changes, the changes since your last review, or one commit at a time.

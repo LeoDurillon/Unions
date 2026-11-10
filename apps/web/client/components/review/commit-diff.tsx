@@ -8,16 +8,25 @@ import type { ReviewTarget } from '../../lib/review/review-target';
 import { useCommitDiff, useCommitFile } from '../../lib/use-commits';
 import { Button, ErrorText } from '../ui';
 import { FileDiff, type DiffView } from './file-diff';
+import { useFilteredFiles } from './file-filter-bar';
 import { FileList } from './file-list';
 
 const SHORT_SHA = 7;
 const NO_COMMENTS: never[] = [];
 
-/** The file open before, when the commit touches it; else its first file not ignored, else its first. */
-function openFile(files: DiffFileSummary[], picked: string | null): DiffFileSummary | null {
+/**
+ * The file open before, when the commit touches it; else its first listed file not ignored, else its
+ * first listed, else its first.
+ */
+function openFile(
+  files: DiffFileSummary[],
+  visible: DiffFileSummary[],
+  picked: string | null,
+): DiffFileSummary | null {
   return (
     files.find((file) => file.path === picked) ??
-    files.find((file) => !file.ignored) ??
+    visible.find((file) => !file.ignored) ??
+    visible[0] ??
     files[0] ??
     null
   );
@@ -105,13 +114,16 @@ export function CommitDiffBody({
   const diff = useCommitDiff(base, sha);
   const [picked, setPicked] = useState<string | null>(null);
   const files = diff.data?.files ?? [];
-  const file = openFile(files, picked);
+  const { visible, bar } = useFilteredFiles(files);
+  const file = openFile(files, visible, picked);
   return (
     <div className="flex min-h-0 flex-1">
       <aside className="w-80 shrink-0 space-y-2 overflow-y-auto border-r border-zinc-200 p-2 dark:border-zinc-800">
         {picker}
         <FileList
-          files={files}
+          files={visible}
+          total={files.length}
+          filterBar={bar}
           comments={NO_COMMENTS}
           selected={file?.id ?? null}
           onSelect={(id) => {

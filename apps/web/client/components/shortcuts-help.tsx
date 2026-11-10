@@ -40,6 +40,7 @@ const GROUPS: Group[] = [
     keys: [
       ['j', 'Next file'],
       ['k', 'Previous file'],
+      ['/', 'Filter files'],
     ],
   },
 ];

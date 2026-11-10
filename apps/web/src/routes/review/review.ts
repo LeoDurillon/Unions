@@ -1,11 +1,10 @@
 // A ticket's review routes: its diff, its comments, the agent review, the pull request import, and
 // sending the review.
 
-import { getTicket, isIgnoredPath, schema, type Db, type Ticket } from '@union/core';
-import { and, desc, eq } from 'drizzle-orm';
+import { getTicket, schema, type Db, type Ticket } from '@union/core';
+import { and, eq } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
 
-import type { DiffResponse } from '../../api-types';
 import type { OnboardingGitHub } from '../../github-onboarding';
 import { BAD_REQUEST, CONFLICT, fail, NOT_FOUND, readObject, requireId } from '../../http';
 import { formatTicketReview } from '../../review-feedback';
@@ -25,6 +24,7 @@ import {
   markSent,
   type CommentOwner,
 } from './review-comments';
+import { diffResponse, latestSnapshot, sendRefusal } from './review-diff';
 import {
   getDiscussion,
   importPullRequestComments,
@@ -41,81 +41,8 @@ function loadTicket(db: Db, c: Context): Ticket {
   }
 }
 
-function latestSnapshot(
-  db: Db,
-  ticketId: number,
-): typeof schema.diffSnapshots.$inferSelect | undefined {
-  return db
-    .select()
-    .from(schema.diffSnapshots)
-    .where(eq(schema.diffSnapshots.ticketId, ticketId))
-    .orderBy(desc(schema.diffSnapshots.id))
-    .get();
-}
-
-/**
- * Why a review cannot be sent now, or null when it can: the ticket waits on the user after code was
- * written, or it is done with its branch kept and its pull request not merged (the implementer then
- * works on it and the final review runs again).
- */
-function sendRefusal(ticket: Ticket): string | null {
-  const { phase } = ticket;
-  if (phase.kind === 'done') {
-    if (ticket.branch === null) {
-      return 'This ticket has no branch to review.';
-    }
-    return ticket.prState === 'merged'
-      ? 'The pull request is merged: open a new ticket for further changes.'
-      : null;
-  }
-  const waiting =
-    phase.kind === 'awaiting_approval' &&
-    (phase.step === 'implement' || phase.step === 'final_review');
-  return waiting
-    ? null
-    : 'Sending opens when the ticket waits on you at the implementation or the final review, or once it is done.';
-}
-
-function ignoreRule(db: Db, ticket: Ticket): (path: string) => boolean {
-  const project = db
-    .select()
-    .from(schema.projects)
-    .where(eq(schema.projects.id, ticket.projectId))
-    .get();
-  const patterns = project?.config.reviewIgnore ?? [];
-  const hideLockFiles = project?.config.hideLockFiles !== false;
-  return (path) => isIgnoredPath(path, patterns, hideLockFiles);
-}
-
 function getDiff(db: Db, c: Context): Response {
-  const ticket = loadTicket(db, c);
-  const snapshot = latestSnapshot(db, ticket.id);
-  const ignored = ignoreRule(db, ticket);
-  const files = snapshot
-    ? db
-        .select()
-        .from(schema.diffFiles)
-        .where(eq(schema.diffFiles.snapshotId, snapshot.id))
-        .orderBy(schema.diffFiles.position)
-        .all()
-        .map(({ patch: _patch, snapshotId: _snapshot, position: _position, ...summary }) =>
-          Object.assign(summary, { ignored: ignored(summary.path) }),
-        )
-    : [];
-  const body: DiffResponse = {
-    snapshot: snapshot
-      ? {
-          headSha: snapshot.headSha,
-          baseBranch: snapshot.baseBranch,
-          createdAt: snapshot.createdAt,
-        }
-      : null,
-    files,
-    canSend: sendRefusal(ticket) === null,
-    sendRefusal: sendRefusal(ticket),
-    pullRequest: ticket.prNumber,
-  };
-  return c.json(body);
+  return c.json(diffResponse(db, loadTicket(db, c)));
 }
 
 function getFile(db: Db, c: Context): Response {

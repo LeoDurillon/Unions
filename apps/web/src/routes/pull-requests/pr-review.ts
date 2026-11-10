@@ -2,7 +2,6 @@
 // diff, the comments, and posting them.
 
 import {
-  isIgnoredPath,
   isReviewVerdict,
   schema,
   verdictNeedsText,
@@ -35,7 +34,7 @@ import {
   type CommentOwner,
 } from '../review/review-comments';
 import { prAgentReviewRoutes } from './pr-agent-review';
-import { authOf, load, readReviewFiles } from './pr-review-load';
+import { authOf, fileSummaries, load, readReviewFiles } from './pr-review-load';
 
 type Review = typeof schema.currentReviews.$inferSelect;
 
@@ -77,13 +76,9 @@ async function getDiscussion(db: Db, github: OnboardingGitHub, c: Context): Prom
 async function getDiff(db: Db, github: OnboardingGitHub, c: Context): Promise<Response> {
   const { review, project } = load(db, c);
   const fetched = await readReviewFiles(db, github, project, review);
-  const patterns = project.config.reviewIgnore ?? [];
-  const hideLockFiles = project.config.hideLockFiles !== false;
   const body: DiffResponse = {
     snapshot: { headSha: fetched.headSha, baseBranch: fetched.baseBranch, createdAt: Date.now() },
-    files: fetched.files.map(({ patch: _patch, ...file }) =>
-      Object.assign(file, { ignored: isIgnoredPath(file.path, patterns, hideLockFiles) }),
-    ),
+    files: fileSummaries(project, fetched.files),
     canSend: review.submitStatus !== 'sending',
     sendRefusal: review.submitStatus === 'sending' ? 'The review is being posted on GitHub.' : null,
     pullRequest: null,
