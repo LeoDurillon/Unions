@@ -3,7 +3,6 @@
 import {
   deletePreviewSecret,
   isRecord,
-  parseAgentEnvironment,
   previewSecretNames,
   schema,
   setPreviewSecret,
@@ -19,6 +18,7 @@ import { Hono, type Context } from 'hono';
 import type { PreviewSettingsView } from '../api-types';
 import { BAD_REQUEST, fail, NOT_FOUND, readObject, requireId } from '../http';
 import { publicProjectOf } from '../public-project';
+import { agentEnvironment, sharedSettings } from './preview-settings-parts';
 
 const SERVICE_NAME = /^[a-zA-Z0-9][a-zA-Z0-9_.-]*$/u;
 const VARIABLE_NAME = /^[A-Za-z_][A-Za-z0-9_]*$/u;
@@ -175,18 +175,6 @@ function profileList(value: unknown): string[] {
   return [...new Set(list)];
 }
 
-/** The variables the agent gets and the forwarding, stored only when not the default. */
-function agentEnvironment(
-  input: Record<string, unknown>,
-  names: string[],
-): Pick<PreviewConfig, 'agentVariables' | 'forwardPorts' | 'startForImplementation'> {
-  try {
-    return parseAgentEnvironment(input, names);
-  } catch (error) {
-    throw fail(BAD_REQUEST, error instanceof Error ? error.message : String(error));
-  }
-}
-
 /** The settings as sent, checked; null clears them. */
 function previewConfig(
   body: Record<string, unknown>,
@@ -201,7 +189,6 @@ function previewConfig(
   const e2eCommand = typeof input.e2eCommand === 'string' ? input.e2eCommand.trim() : '';
   const profiles = profileList(input.profiles);
   const agentServices = serviceList(input.agentServices);
-  const sharedServices = serviceList(input.sharedServices);
   const env = environment(input.env, exposed, secrets);
   const additions = composeAdditions(input.composeAdditions);
   const idleStopMinutes = optionalCount(
@@ -225,7 +212,7 @@ function previewConfig(
     ...(e2eCommand === '' ? {} : { e2eCommand }),
     ...(profiles.length === 0 ? {} : { profiles }),
     ...(agentServices.length === 0 ? {} : { agentServices }),
-    ...(sharedServices.length === 0 ? {} : { sharedServices }),
+    ...sharedSettings(serviceList(input.sharedServices), input.sharedCommands, exposed),
     ...agentEnvironment(input, Object.keys(env)),
     ...(idleStopMinutes === undefined ? {} : { idleStopMinutes }),
     ...(maxRunning === undefined ? {} : { maxRunning }),

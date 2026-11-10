@@ -13,8 +13,8 @@ import {
 import { syncProjectFiles } from '../project-files-sync';
 import { compose } from './compose';
 import { fileToRun } from './compose-file';
-import { outputLog } from './compose-up';
 import { emptyDataFolders } from './data-folders';
+import { outputLog } from './output-log';
 import { startOwnerPreview } from './review-preview';
 import { takeDown } from './run';
 import {

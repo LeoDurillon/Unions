@@ -48,8 +48,8 @@ Open findings of the security reviews (2026-10-24 audit, 2026-11-08 review), to 
   search (step 5).
 
 - [Services shared between previews](shared-services.md): utility services (ClamAV, Mailhog, then S3 and
-  Postgres with a tenant per preview) run once per project and joined to each preview's network. Phase 1
-  (stateless services) in progress (2026-11-10, branch `shared-services`).
+  Postgres with a tenant per preview) run once per project and joined to each preview's network. Phases 1
+  and 2 built (2026-11-10); the Previews page row and drift warnings left.
 
 ## Planned
 

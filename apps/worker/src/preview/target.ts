@@ -11,11 +11,13 @@ import {
   previewSecretValues,
   previewServiceHost,
   renderPreviewTemplate,
+  renderSharedCommands,
   schema,
   type ContainerRuntime,
   type Db,
   type ExposedService,
   type PreviewConfig,
+  type SharedServiceCommands,
   type WorkspaceOwner,
 } from '@union/core';
 import { eq } from 'drizzle-orm';
@@ -72,6 +74,8 @@ export type Target = {
    * with them (a fork's pull request), which runs its own copies.
    */
   shared: string[];
+  /** What keeps this preview's data apart on the shared services, its templates filled in. */
+  sharedCommands: SharedServiceCommands[];
 };
 
 /**
@@ -129,6 +133,7 @@ export function loadTarget(deps: PreviewDeps, owner: WorkspaceOwner): Target {
     throw new PreviewError('The preview settings expose no service (project settings → Preview)');
   }
   const { publicPort } = deps.settings;
+  const shared = source.secrets ? (config.sharedServices ?? []) : [];
   const context = { owner, prNumber: source.prNumber, publicPort, exposed: services };
   const exposed = services.map((service) => ({
     service: service.name,
@@ -150,7 +155,8 @@ export function loadTarget(deps: PreviewDeps, owner: WorkspaceOwner): Target {
       ]),
     ),
     secrets: source.secrets ? previewSecretValues(deps.db, source.projectId) : {},
-    shared: source.secrets ? (config.sharedServices ?? []) : [],
+    shared,
+    sharedCommands: renderSharedCommands(config.sharedCommands ?? [], shared, context),
   };
 }
 

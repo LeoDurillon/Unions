@@ -42,6 +42,9 @@ let calls: HelperSpec[];
 let network: string[];
 /** The networks each container is on, as Docker would say. */
 let attached: Map<string, Set<string>>;
+/** `<container>: <command>` of each command run in a container, and the exit it gives. */
+let execs: string[];
+let execExit: number;
 
 function onNetwork(name: string): string[] {
   return [...attached].filter(([, networks]) => networks.has(name)).map(([container]) => container);
@@ -64,6 +67,12 @@ const runtime = {
     network.push(`leave ${name} ${container}`);
     attached.get(container)?.delete(name);
     return Promise.resolve();
+  },
+  async *exec(container: string, command: string[]): AsyncGenerator<string, ExecResult> {
+    execs.push(`${container}: ${command.join(' ')}`);
+    await Promise.resolve();
+    yield 'done';
+    return { exitCode: execExit, stderr: execExit === 0 ? '' : 'database exists' };
   },
   async *runHelper(spec: HelperSpec): AsyncGenerator<string, ExecResult> {
     if (spec.command[0] !== 'docker') {
@@ -134,7 +143,28 @@ beforeEach(() => {
   calls = [];
   network = [];
   attached = new Map();
+  execs = [];
+  execExit = 0;
 });
+
+function withCommands(): void {
+  db.update(schema.projects)
+    .set({
+      config: {
+        baseBranch: 'main',
+        preview: {
+          composeFile: 'compose.yaml',
+          services: [{ name: 'web', port: 80, prefix: '' }],
+          env: {},
+          sharedServices: ['clamav'],
+          sharedCommands: [
+            { service: 'clamav', create: 'make {ticket.id}', drop: 'drop {ticket.id}' },
+          ],
+        },
+      },
+    })
+    .run();
+}
 
 test('a preview runs without its shared services, which join its network under their names', async () => {
   await startPreview(deps(), { ticketId });
@@ -185,4 +215,25 @@ test('without the setting, the preview runs its own copies', async () => {
     .run();
   await startPreview(deps(), { ticketId });
   expect(composeCalls().some((command) => command.includes('union-p1-shared'))).toBe(false);
+});
+
+test('each preview gets its own data on a shared service before it starts, and loses it at Stop', async () => {
+  withCommands();
+  await startPreview(deps(), { ticketId });
+  expect(getPreview(db, { ticketId })?.status).toBe('running');
+  expect(execs).toEqual([`${SHARED}: sh -c make ${ticketId}`]);
+  await stopPreview(deps(), { ticketId });
+  expect(execs.at(-1)).toBe(`${SHARED}: sh -c drop ${ticketId}`);
+});
+
+test('a preview whose data could not be made does not start', async () => {
+  withCommands();
+  execExit = 1;
+  await startPreview(deps(), { ticketId });
+  expect(getPreview(db, { ticketId })?.error).toContain(
+    "The preview's data in clamav could not be made (exit 1",
+  );
+  expect(composeCalls()).not.toContain(
+    '-p union-t1 --project-directory /workspace/repo -f - up -d --remove-orphans',
+  );
 });

@@ -66,6 +66,7 @@ function target(): Target {
     plain: {},
     secrets: {},
     shared: [],
+    sharedCommands: [],
   };
 }
 

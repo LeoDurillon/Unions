@@ -49,6 +49,11 @@ Built (phases 1 to 4). Full design and what was built: [`docs/plans/archive/prev
   them (running ones left as they are), taken down, data kept, once no other network and no ticket's container uses
   them. Refused when exposed, built from the repository, mounting it, or depending on a service not shared. Only
   tickets and pull requests whose commit is in the repository share; a fork's runs its own copies.
+  Per shared service, `config.preview.sharedCommands` keeps each preview's data apart (phase 2): `create` runs in
+  its container (`sh -c`, 10 minutes at most) after the stack is joined and before the preview's own start, and
+  before the agent's services use it (a failure fails the start); `drop` runs before every `down -v` (Stop, Reset,
+  a failed start, the ticket's removal), best effort, skipped when the service does not run. Templates as in the
+  variables (`{ticket.id}`: `41`, `r5`); output in the ticket's log.
 - **Reset preview** (after a confirmation, a ticket's and a pull request's): `down -v --remove-orphans --rmi local`
   (every container of the compose project, the agent's services included, its volumes and the images it built), a
   `build --no-cache`, then a start. The workspace is kept, except the data folders the user ticks: the repository

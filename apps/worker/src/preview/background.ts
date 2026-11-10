@@ -18,6 +18,7 @@ import { compose, createMountFolders } from './compose';
 import { fileToRun } from './compose-file';
 import { joinPreview } from './network';
 import { bringDown } from './run';
+import { createSharedData } from './shared-data';
 import { joinShared, withSharedServices } from './shared-stack';
 import { lastLines, loadTarget, projectDirectory, type PreviewDeps, type Target } from './target';
 import { unionEnvFile } from './variables';
@@ -129,6 +130,7 @@ export async function startAgentServices(
     );
     if (services.some((service) => shared.includes(service))) {
       await joinShared(deps, target, file, `union-t${ticketId}`);
+      await createSharedData(deps, target, file);
     }
     await joinPreview(deps.runtime, { ticketId });
     emitEvent(deps.db, { type: 'agent_services_started', ticketId, payload: { services } });

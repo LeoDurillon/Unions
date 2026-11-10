@@ -1,48 +1,13 @@
 // Brings a preview's services up (`compose up --build`), its output streamed to the ticket's log.
-import {
-  emitEvent,
-  sharedPart,
-  ticketOwnerId,
-  workspaceSubpaths,
-  type ComposeJson,
-  type Db,
-  type WorkspaceOwner,
-} from '@union/core';
+import { sharedPart, workspaceSubpaths, type ComposeJson } from '@union/core';
 
 import { compose, createMountFolders } from './compose';
+import { findDataFolders } from './data-folders';
+import { outputLog } from './output-log';
+import { createSharedData } from './shared-data';
 import { joinShared } from './shared-stack';
 import { lastLines, PreviewError, projectDirectory, type PreviewDeps, type Target } from './target';
 import { unionEnvFile } from './variables';
-
-/** Output lines per `preview_output` event: a build prints thousands. */
-const OUTPUT_BATCH = 25;
-
-/** Sends the output to the ticket's log a batch at a time; a pull request's preview has no log. */
-export function outputLog(
-  db: Db,
-  owner: WorkspaceOwner,
-): { push: (line: string) => void; flush: () => void } {
-  const ticketId = ticketOwnerId(owner);
-  let lines: string[] = [];
-  const flush = (): void => {
-    if (ticketId !== null && lines.length > 0) {
-      emitEvent(db, { type: 'preview_output', ticketId, payload: { lines } });
-      lines = [];
-    }
-  };
-  return {
-    push: (line) => {
-      if (ticketId === null) {
-        return;
-      }
-      lines.push(line);
-      if (lines.length >= OUTPUT_BATCH) {
-        flush();
-      }
-    },
-    flush,
-  };
-}
 
 /** `compose up` of the file to run with `flags`, its output in the ticket's log. */
 async function composeUp(
@@ -90,9 +55,11 @@ export async function up(deps: PreviewDeps, target: Target, file: ComposeJson): 
   );
   if (sharedPart(file) === null) {
     await composeUp(deps, target, file, ['-d', '--build']);
-    return;
+  } else {
+    await composeUp(deps, target, file, ['--no-start', '--build']);
+    await joinShared(deps, target, file);
+    await createSharedData(deps, target, file);
+    await composeUp(deps, target, file, ['-d']);
   }
-  await composeUp(deps, target, file, ['--no-start', '--build']);
-  await joinShared(deps, target, file);
-  await composeUp(deps, target, file, ['-d']);
+  await findDataFolders(deps, target, file);
 }

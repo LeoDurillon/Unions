@@ -7,6 +7,9 @@ import type { BoardStatus } from '../states';
 /** A service the proxy serves: at `t<id>.union.localhost` when `prefix` is empty, else `<prefix>-t<id>.union.localhost`. */
 export type PreviewService = { name: string; port: number; prefix: string };
 
+/** Commands run in a shared service's container for one preview; at least one is set. */
+export type SharedServiceCommands = { service: string; create?: string; drop?: string };
+
 /** `all`: every plain variable; `none`: none (the repository's env files apply); `chosen`: `names`. */
 export type AgentVariables = { mode: 'all' | 'none' | 'chosen'; names?: string[] };
 
@@ -37,6 +40,12 @@ export type PreviewConfig = {
    * utilities such as a virus scanner or a mail catcher. Each preview's network gets them by name.
    */
   sharedServices?: string[];
+  /**
+   * Per shared service, what keeps each preview's data apart (a database, a bucket): `create` runs
+   * in its container at each start of a preview (and of the agent's services), `drop` when the
+   * preview's data is removed (Stop, Reset, the ticket's removal). Templates such as `{ticket.id}`.
+   */
+  sharedCommands?: SharedServiceCommands[];
   /** Which plain variables the agent's commands get (all when unset). Secrets never reach them. */
   agentVariables?: AgentVariables;
   /**

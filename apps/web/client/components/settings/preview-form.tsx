@@ -28,6 +28,7 @@ export type Form = {
   profiles: string[];
   agentServices: string[];
   sharedServices: string[];
+  sharedCommands: SharedCommands[];
   agentVariables: AgentVariables;
   forwardPorts: boolean;
   /** As typed: empty means the default. */
@@ -47,6 +48,7 @@ const EMPTY: Form = {
   profiles: [],
   agentServices: [],
   sharedServices: [],
+  sharedCommands: [],
   agentVariables: { mode: 'all' },
   forwardPorts: true,
   idleStopMinutes: '',
@@ -55,10 +57,14 @@ const EMPTY: Form = {
 
 function agentChoices(
   preview: PreviewConfig,
-): Pick<Form, 'agentServices' | 'sharedServices' | 'agentVariables' | 'forwardPorts'> {
+): Pick<
+  Form,
+  'agentServices' | 'sharedServices' | 'sharedCommands' | 'agentVariables' | 'forwardPorts'
+> {
   return {
     agentServices: preview.agentServices ?? [],
     sharedServices: preview.sharedServices ?? [],
+    sharedCommands: preview.sharedCommands ?? [],
     agentVariables: preview.agentVariables ?? { mode: 'all' },
     forwardPorts: preview.forwardPorts !== false,
   };
@@ -85,6 +91,19 @@ function initial(project: PublicProject): Form {
   };
 }
 
+/** A shared service's commands, as the settings keep them. */
+export type SharedCommands = NonNullable<PreviewConfig['sharedCommands']>[number];
+
+/** The commands of the services still shared, without the empty ones. */
+function sentCommands(form: Form): Pick<PreviewConfig, 'sharedCommands'> {
+  const sharedCommands = form.sharedCommands.filter(
+    ({ service, create, drop }) =>
+      form.sharedServices.includes(service) &&
+      ((create ?? '').trim() !== '' || (drop ?? '').trim() !== ''),
+  );
+  return sharedCommands.length === 0 ? {} : { sharedCommands };
+}
+
 function settingsOf(form: Form): PreviewConfig {
   return {
     composeFile: form.composeFile,
@@ -103,6 +122,7 @@ function settingsOf(form: Form): PreviewConfig {
     ...(form.profiles.length === 0 ? {} : { profiles: form.profiles }),
     ...(form.agentServices.length === 0 ? {} : { agentServices: form.agentServices }),
     ...(form.sharedServices.length === 0 ? {} : { sharedServices: form.sharedServices }),
+    ...sentCommands(form),
     ...(form.agentVariables.mode === 'all' ? {} : { agentVariables: form.agentVariables }),
     ...(form.forwardPorts ? {} : { forwardPorts: false }),
     ...(form.idleStopMinutes.trim() === ''

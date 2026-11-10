@@ -1,11 +1,10 @@
 # Plan: services shared between a project's previews
 
-Status: phase 1 built, not committed (branch `shared-services`, 2026-11-10): the setting, the split and its
-checks, the stack's start, join, leave and release, the agent services, the guide and the spec. Checked with real
-Docker (two compose projects sharing one service through `joinShared`/`leaveShared`: names resolve, the previews
-do not see each other, the stack goes down after the last one, its volume kept). Not yet checked: a whole preview
-start through the worker, and an agent run using a shared service on `localhost`. Phase 1b (the Previews page row),
-phases 2 and 3 planned.
+Status: phase 1 built (commit `ca49236`, 2026-11-10), checked on Senova with `clamav` and `mailhog` shared by two
+previews. Phase 2 built (branch `shared-tenants`, 2026-11-10): `config.preview.sharedCommands`, a `create` and a
+`drop` command per shared service. Checked with real Docker (two previews on one Postgres, a database each, made at
+each start and dropped with the preview's data). Not built from phase 2: Senova's template database (a settings
+change, below). Phase 1b (the Previews page row) and phase 3 planned.
 
 ## Problem
 
@@ -85,7 +84,8 @@ the agent services.
    join, leave and release, the agent services, the guide and the spec. Most of the memory saved. No migration:
    the stack's state is Docker's. Left for phase 1b: a row for each running stack on the Previews page (needs a
    record the web can read, since the web never asks Docker), with Restart and Stop.
-2. **A tenant per preview**: per shared service, a command run in its container at a preview's first start and one
+2. **A tenant per preview** (built as `sharedCommands`; `create` runs at each start, so it must be idempotent,
+   rather than at a first start Union would have to record): per shared service, a command run in its container at a preview's first start and one
    at its reset and removal (`createdb -T goreno_template goreno_{ticket.id}`, `mc mb local/uploads-{ticket.id}`,
    `dropdb …`), with `{ticket.id}` in the preview's variables (`…/goreno_{ticket.id}`). For Senova: the restore
    and the seed run once into `goreno_template`, each preview's database is a copy (seconds), only `migrate` runs

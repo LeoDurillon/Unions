@@ -93,6 +93,17 @@ test('preview settings are checked, saved and cleared', async () => {
   ).json()) as PublicProject;
   expect(withShared.config.preview?.sharedServices).toEqual(['clamav', 'mailhog']);
   expect((await put({ ...SETTINGS, sharedServices: ['not a service'] })).status).toBe(400);
+  const commands = [{ service: 'db', create: ' createdb app_{ticket.id} ', drop: '' }];
+  const withCommands = (await (
+    await put({ ...SETTINGS, sharedServices: ['db'], sharedCommands: commands })
+  ).json()) as PublicProject;
+  expect(withCommands.config.preview?.sharedCommands).toEqual([
+    { service: 'db', create: 'createdb app_{ticket.id}' },
+  ]);
+  const notShared = [{ service: 'cache', create: 'x' }];
+  expect(
+    (await put({ ...SETTINGS, sharedServices: ['db'], sharedCommands: notShared })).status,
+  ).toBe(400);
   const chosen = { mode: 'chosen', names: ['API_URL', 'API_URL'] };
   const withVariables = (await (
     await put({ ...SETTINGS, agentVariables: chosen })

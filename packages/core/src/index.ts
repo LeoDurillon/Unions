@@ -116,6 +116,7 @@ export * from './preview/preview-proxy-network';
 export * from './preview/preview-screenshots';
 export * from './preview/preview-secrets';
 export * from './preview/preview-shared';
+export * from './preview/preview-shared-commands';
 export * from './project-files';
 export * from './prompt-writer';
 export * from './project-scripts';
@@ -152,6 +153,7 @@ export type {
   PreviewService,
   ProjectScript,
   PullRequestFile,
+  SharedServiceCommands,
 } from './schema/schema-types';
 export * from './split-plan';
 export * from './stack-description';

@@ -380,7 +380,11 @@
   (`network.ts`) calls `leaveShared` before every `down`: the shared containers leave the project's networks, the
   owner's container the shared one, and `releaseIfUnused` takes the stack down (volumes kept) when its containers
   are on no other network and no other container is on its own. Joins and releases run one at a time per project
-  (`serialized`); Docker's state is the record, nothing is stored.
+  (`serialized`); Docker's state is the record, nothing is stored. `preview/shared-data.ts`: the shared services'
+  `create` commands (`config.preview.sharedCommands`, rendered per preview in `loadTarget` with
+  `renderSharedCommands`), run with `runIn` in the service's container by `up` after `joinShared` and by
+  `startAgentServices`, a failure throwing; and their `drop` commands, run by `takeDown` before `down -v`, best
+  effort. Their output goes to the ticket's log (`output-log.ts`).
 - `step-preview.ts`: with `config.preview.startForImplementation`, an implementation step runs the install command, then
   starts the preview (never failing the step; a failed install is the preview's reason and it does not start); every code step's commands get `previewEnv` (`preview-env.ts`: `BASE_URL`,
   `UNION_URL_<SERVICE>`) while the preview runs, and `previewHint` lists the addresses.

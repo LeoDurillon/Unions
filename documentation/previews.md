@@ -131,15 +131,42 @@ whole project instead of once per preview, which saves memory: a virus scanner a
   Previews still can't reach each other.
 - They start with the first preview that needs them and stop once no preview and no agent uses them. What they
   store is kept for the next start.
+- A service with data (a database) needs one more setting so that previews don't share its data: see below.
 - Whichever preview starts them first decides how they run. Previews started later use them as they already are,
   even if their branch changes those services.
 - They also serve the agent when you list them under **Start for the agent**, and their ports are forwarded to
   `localhost` as usual.
 - A pull request from a fork runs its own copies.
 
-Choose only services that keep no data of their own for now: two previews sharing a database would also share its
-tables. A service the proxy opens, one that builds its image from the repository, or one that mounts files from it
-can't be shared. If you pick one, the preview won't start and says why.
+### Services with data: one database per preview
+
+A database or a file store can be shared too, as long as each preview gets its own database or bucket in it. Under
+each shared service, two commands say how:
+
+- **When a preview starts** runs in the service's container before each start of a preview, and before the agent
+  uses it. It creates the preview's database if it is missing, so it must be safe to run again.
+- **When a preview's data is removed** runs when the preview's data goes: **Stop**, **Reset**, a start that failed,
+  and once the ticket is done or removed. Data the preview keeps over a **Restart** or a crash stays.
+
+`{ticket.id}` names the preview in both (`41` for ticket 41, `r5` for a pull request under review). Use it in your
+variables too, so the preview's services connect to their own database. For example, for Postgres:
+
+```
+psql -U postgres -tAc "SELECT 1 FROM pg_database WHERE datname = 'app_{ticket.id}'" | grep -q 1 || createdb -U postgres app_{ticket.id}
+dropdb -U postgres --if-exists app_{ticket.id}
+```
+
+and `DATABASE_URL=postgres://postgres:postgres@db:5432/app_{ticket.id}` in **Settings → Previews → Variables**.
+
+If the first command fails, the preview doesn't start and shows its output. If the service isn't running when a
+preview's data is removed, that data stays in the service.
+
+The agent's tests often name a fixed database in the repository's settings (`.env.test`). Two tickets working at the
+same time would then share it. List a shared database under **Start for the agent** only if its tests use the
+ticket's own database.
+
+A service the proxy opens, one that builds its image from the repository, or one that mounts files from it can't be
+shared. If you pick one, the preview won't start and says why.
 
 ## Project files
 

@@ -16,10 +16,10 @@ import { syncProjectFiles } from '../project-files-sync';
 import { compose } from './compose';
 import { fileToRun } from './compose-file';
 import { up } from './compose-up';
-import { findDataFolders } from './data-folders';
 import { routeToPreview } from './host-routes';
 import { joinPreview, joinProxy, leavePreview } from './network';
 import { proxyAnswers, waitReady } from './ready';
+import { dropSharedData } from './shared-data';
 import { lastLines, loadTarget, PreviewError, type PreviewDeps, type Target } from './target';
 
 export type { PreviewDeps } from './target';
@@ -54,6 +54,7 @@ export async function takeDown(
   owner: WorkspaceOwner,
   extra: string[] = [],
 ): Promise<void> {
+  await dropSharedData(deps, owner);
   await down(deps, owner, ['-v', '--remove-orphans', ...extra]);
 }
 
@@ -110,7 +111,6 @@ async function startTarget(deps: PreviewDeps, target: Target): Promise<void> {
   const file = await fileToRun(deps, target);
   await up(deps, target, file);
   await joinProxy(deps.runtime, target.project);
-  await findDataFolders(deps, target, file);
   // All at once: each service gets the whole wait, not what the previous one left.
   const answered = await Promise.all(
     target.exposed.map((exposed) =>
