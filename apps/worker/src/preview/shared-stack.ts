@@ -12,14 +12,12 @@ import {
   sharedStackFile,
   withResourceCaps,
   type ComposeJson,
-  type ContainerRuntime,
-  type Db,
 } from '@union/core';
 
-import { compose, type PreviewSettings } from './compose';
+import { compose } from './compose';
+import { recordShared, type SharedDeps } from './shared-state';
 
-/** What the shared stack needs of a preview's dependencies (`SharedDeps` has them). */
-export type SharedDeps = { db: Db; runtime: ContainerRuntime; settings: PreviewSettings };
+export type { SharedDeps } from './shared-state';
 
 /** How long the shared services get to be healthy. */
 const WAIT_SECONDS = 180;
@@ -31,7 +29,7 @@ const SHARED_PROJECT_ID = /^union-p(?<id>\d+)-shared[-_]/u;
 const queues = new Map<number, Promise<unknown>>();
 
 /** One start, join or release at a time per project: a release must not take down what a start joins. */
-function serialized<T>(projectId: number, work: () => Promise<T>): Promise<T> {
+export function serialized<T>(projectId: number, work: () => Promise<T>): Promise<T> {
   const before = queues.get(projectId);
   const next = (async (): Promise<T> => {
     try {
@@ -106,17 +104,27 @@ export async function joinShared(
   if (stack === null) {
     return;
   }
-  await serialized(target.projectId, async () => {
-    const containers = await upShared(deps, target.projectId, stack);
-    for (const network of await serviceNetworks(deps, target.project)) {
-      for (const { service, container } of containers) {
-        await deps.runtime.connectNetwork(network, container, [service]);
+  try {
+    await serialized(target.projectId, async () => {
+      const containers = await upShared(deps, target.projectId, stack);
+      for (const network of await serviceNetworks(deps, target.project)) {
+        for (const { service, container } of containers) {
+          await deps.runtime.connectNetwork(network, container, [service]);
+        }
       }
-    }
-    if (agent !== undefined) {
-      await deps.runtime.connectNetwork(sharedNetwork(target.projectId), agent);
-    }
-  });
+      if (agent !== undefined) {
+        await deps.runtime.connectNetwork(sharedNetwork(target.projectId), agent);
+      }
+    });
+  } catch (error) {
+    await recordShared(
+      deps,
+      target.projectId,
+      error instanceof Error ? error.message : String(error),
+    );
+    throw error;
+  }
+  await recordShared(deps, target.projectId);
 }
 
 /** The project a shared container or network belongs to. */
@@ -167,6 +175,7 @@ export async function leaveShared(deps: SharedDeps, project: string, owner: stri
   }
   for (const projectId of released) {
     await serialized(projectId, () => releaseIfUnused(deps, projectId));
+    await recordShared(deps, projectId);
   }
 }
 

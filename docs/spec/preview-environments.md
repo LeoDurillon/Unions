@@ -54,6 +54,11 @@ Built (phases 1 to 4). Full design and what was built: [`docs/plans/archive/prev
   before the agent's services use it (a failure fails the start); `drop` runs before every `down -v` (Stop, Reset,
   a failed start, the ticket's removal), best effort, skipped when the service does not run. Templates as in the
   variables (`{ticket.id}`: `41`, `r5`); output in the ticket's log.
+  Their state (phase 1b) is recorded by the worker from Docker (`shared_stacks`: status, each service running or
+  not, the previews on their networks, the tickets whose agent is on their network, the last start's error) after
+  each join, release, restart and stop, and every 30 seconds while they run. Environments → Shared shows it, with
+  Restart (`shared_restart`: `compose restart`, networks kept) and Stop (`shared_stop`: refused while a preview of
+  the project starts, runs or stops; the tickets' and previews' networks are left, then `down`, volumes kept).
 - **Reset preview** (after a confirmation, a ticket's and a pull request's): `down -v --remove-orphans --rmi local`
   (every container of the compose project, the agent's services included, its volumes and the images it built), a
   `build --no-cache`, then a start. The workspace is kept, except the data folders the user ticks: the repository
@@ -63,8 +68,7 @@ Built (phases 1 to 4). Full design and what was built: [`docs/plans/archive/prev
 - **Environments** (a tab of the project bar, `?view=environments&env=compose|variables|agent|shared|e2e|limits`): the
   project's previews running now (its rows of `/api/previews`, with Stop), then the preview settings a page at a
   time: Compose, Variables, Agent, Shared, End-to-end tests, Limits. They left the project settings; an old
-  `?settings=preview-*` link opens the matching page, and `env=services` (before the split) opens Compose. The shared services' own state there is planned
-  (`docs/plans/shared-services.md`, phase 1b).
+  `?settings=preview-*` link opens the matching page, and `env=services` (before the split) opens Compose. Its Shared page shows the shared services' state.
 - **Previews** (in the sidebar, with the number running): every project's previews that hold containers, tickets'
   and pull requests' under review, with their links and **Stop**; a ticket's opens its panel.
 - Served to this machine only (the proxy's port is published on `127.0.0.1`). A running preview nobody visited for

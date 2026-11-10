@@ -14,15 +14,17 @@ import { PreviewVariablesPage } from './preview-variables-page';
 export function EnvironmentSectionBody({
   section,
   project,
+  onOpenTicket,
 }: {
   section: EnvironmentSection;
   project: PublicProject;
+  onOpenTicket: (ticketId: number) => void;
 }): ReactElement {
   const bodies: Record<EnvironmentSection, () => ReactElement> = {
     compose: () => <PreviewComposePage project={project} />,
     variables: () => <PreviewVariablesPage project={project} />,
     agent: () => <PreviewAgentPage project={project} />,
-    shared: () => <PreviewSharedPage project={project} />,
+    shared: () => <PreviewSharedPage project={project} onOpenTicket={onOpenTicket} />,
     e2e: () => <PreviewE2ePage project={project} />,
     limits: () => <PreviewLimitsPage project={project} />,
   };

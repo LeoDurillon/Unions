@@ -20,6 +20,7 @@ export * from './schema/schema-pr-descriptions';
 export * from './schema/schema-previews';
 export * from './schema/schema-project-files';
 export * from './schema/schema-refused-commits';
+export * from './schema/schema-shared-stacks';
 export * from './schema/schema-review-agent-runs';
 export * from './schema/schema-review-explanations';
 export * from './schema/schema-review-groupings';

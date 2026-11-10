@@ -139,6 +139,14 @@ whole project instead of once per preview, which saves memory: a virus scanner a
   `localhost` as usual.
 - A pull request from a fork runs its own copies.
 
+Once they have run, the top of **Environments → Shared** shows them **Now**: whether each one runs, which previews
+and which tickets' agents use them, when they started, and why their last start failed. The state is checked every
+30 seconds, so a service that crashed shows as stopped.
+
+- **Restart** restarts them where they are: the previews keep reaching them, after a few seconds without.
+- **Stop** takes them down, keeping what they store. It waits until no preview of the project runs; stop those
+  first. You rarely need it: they stop on their own once nothing uses them.
+
 ### Services with data: one database per preview
 
 A database or a file store can be shared too, as long as each preview gets its own database or bucket in it. Under

@@ -278,6 +278,9 @@ test('the cancel command cancels a queued run itself and hands a running one to 
     updateUnion: () => {
       // Not under test.
     },
+    sharedServices: () => {
+      // No shared services here.
+    },
     syncAgentImage: () => {
       // Not under test.
     },

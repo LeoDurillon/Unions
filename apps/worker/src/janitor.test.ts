@@ -78,6 +78,9 @@ test('remove_containers hands every container to the hook', () => {
     updateUnion: () => {
       // Not under test.
     },
+    sharedServices: () => {
+      // No shared services here.
+    },
     syncAgentImage: () => {
       // Not under test.
     },

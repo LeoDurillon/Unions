@@ -49,7 +49,11 @@ export function EnvironmentsPage({
             </span>
           </div>
           <div key={`${project.id}:${section}`}>
-            <EnvironmentSectionBody section={section} project={project} />
+            <EnvironmentSectionBody
+              section={section}
+              project={project}
+              onOpenTicket={onOpenTicket}
+            />
           </div>
         </section>
       </div>

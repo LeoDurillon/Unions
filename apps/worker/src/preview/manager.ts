@@ -9,35 +9,15 @@ import {
   type WorkspaceOwner,
 } from '@union/core';
 
-import type { PreviewAction, PreviewOptions } from '../commands';
+import type { PreviewAction, PreviewOptions, SharedAction } from '../commands';
 import { previewSettings } from './compose';
-import { generatePreviewFile } from './compose-file';
 import { runRequestedE2e } from './e2e-request';
 import { failStoppedPreview, HealthWatcher } from './health';
 import { IdleWatcher, readProxyMetrics } from './idle';
-import { removeFinishedPreview, resetPreview } from './reset';
-import { startOwnerPreview, updateReviewPreview } from './review-preview';
-import { refreshPreviewLogs, stopPreview, takeDown, type PreviewDeps } from './run';
-
-type Action = (
-  deps: PreviewDeps,
-  owner: WorkspaceOwner,
-  options: PreviewOptions,
-) => Promise<unknown>;
-
-/**
- * A pull request's start checks it out first; only a pull request's checkout can be updated. A reset
- * drops everything the preview holds and starts it again.
- */
-const ACTIONS: Record<Exclude<PreviewAction, 'e2e'>, Action> = {
-  start: startOwnerPreview,
-  stop: stopPreview,
-  reset: (deps, owner, options) => resetPreview(deps, owner, options.folders),
-  logs: refreshPreviewLogs,
-  generate: generatePreviewFile,
-  update: (deps, owner) =>
-    'reviewId' in owner ? updateReviewPreview(deps, owner.reviewId) : Promise.resolve(),
-};
+import { ACTIONS } from './preview-actions';
+import { removeFinishedPreview } from './reset';
+import { stopPreview, takeDown, type PreviewDeps } from './run';
+import { sharedWork, SharedWatcher } from './shared-actions';
 
 /** Container names of previews' owners: a ticket's own is `union-t<id>`, a pull request's `union-r<id>`. */
 const OWNER_CONTAINER = /^union-(?<kind>[tr])(?<id>\d+)$/u;
@@ -144,9 +124,14 @@ export class PreviewManager {
     });
   }
 
-  /** What watches the running previews: stops those nobody visits, fails those whose services stopped. */
+  /** Restarts the project's shared services or takes them down, one action at a time per project. */
+  shared(projectId: number, action: SharedAction): void {
+    this.trackKey(`p${projectId}-shared`, () => sharedWork(action)(this.deps, projectId));
+  }
+
+  /** What watches the running previews: stops those nobody visits, fails those whose services stopped (and records the shared ones). */
   watchers(): { tick: () => void } {
-    const watchers = [this.idleWatcher(), this.healthWatcher()];
+    const watchers = [this.idleWatcher(), this.healthWatcher(), new SharedWatcher(this.deps)];
     return {
       tick: () => {
         for (const watcher of watchers) {
@@ -246,6 +231,14 @@ export class PreviewManager {
           payload: { message: 'The preview is busy: try again once it is done' },
         });
       }
+      return;
+    }
+    this.trackKey(key, work);
+  }
+
+  /** Runs `work` unless something runs under `key` already; `idle` waits for it. */
+  private trackKey(key: string, work: () => Promise<unknown>): void {
+    if (this.busy.has(key)) {
       return;
     }
     const done = (async (): Promise<void> => {

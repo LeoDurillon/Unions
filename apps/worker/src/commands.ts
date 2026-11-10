@@ -13,6 +13,8 @@ import {
   notionCommentOf,
   replyOf,
   schema,
+  SHARED_RESTART,
+  SHARED_STOP,
   SYNC_AGENT_IMAGE,
   type Db,
   type WorkspaceOwner,
@@ -29,7 +31,13 @@ import {
 import { ciJobOf } from './github/ci-rerun';
 import { ticketEditOf } from './github/ticket-edit';
 
-export type { CommandHooks, ContainerRef, PreviewAction, PreviewOptions } from './command-hooks';
+export type {
+  CommandHooks,
+  ContainerRef,
+  PreviewAction,
+  PreviewOptions,
+  SharedAction,
+} from './command-hooks';
 
 type Command = typeof schema.commands.$inferSelect;
 
@@ -256,6 +264,12 @@ const OTHER_COMMANDS: Record<string, (db: Db, command: Command, hooks: CommandHo
   },
   post_jira_comment: (_db, command, hooks) => {
     hooks.postJiraComment(command.id, jiraCommentOf(command.payload));
+  },
+  [SHARED_RESTART]: (_db, command, hooks) => {
+    hooks.sharedServices(numberField(command, 'projectId'), 'restart');
+  },
+  [SHARED_STOP]: (_db, command, hooks) => {
+    hooks.sharedServices(numberField(command, 'projectId'), 'stop');
   },
   [SYNC_AGENT_IMAGE]: (_db, command, hooks) => {
     hooks.syncAgentImage(numberField(command, 'projectId'));

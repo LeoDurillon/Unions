@@ -71,6 +71,9 @@ export function workerHooks(deps: HookDeps): CommandHooks {
     preview: (owner, action, options) => {
       previews.run(owner, action, options);
     },
+    sharedServices: (projectId, action) => {
+      previews.shared(projectId, action);
+    },
     syncAgentImage: (projectId) => {
       deps.agentImages.sync(projectId);
     },

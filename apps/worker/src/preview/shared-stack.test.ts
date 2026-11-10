@@ -5,6 +5,7 @@ import {
   createDb,
   createTicket,
   getPreview,
+  getSharedStack,
   migrateDb,
   schema,
   type ContainerRuntime,
@@ -56,6 +57,12 @@ const runtime = {
   serviceContainers: (name: string, service: string) =>
     Promise.resolve(name === 'union-p1-shared_default' ? [`union-p1-shared-${service}-1`] : []),
   networkContainers: (name: string) => Promise.resolve(onNetwork(name)),
+  projectContainers: (project: string) =>
+    Promise.resolve(
+      project === 'union-p1-shared' && attached.has(SHARED)
+        ? [{ service: 'clamav', running: true, exitCode: null }]
+        : [],
+    ),
   containerNetworks: (container: string) =>
     Promise.resolve([...(attached.get(container) ?? new Set<string>())]),
   connectNetwork: (name: string, container: string, aliases: string[] = []) => {
@@ -86,6 +93,9 @@ const runtime = {
     }
     if (command.includes('-p union-p1-shared') && command.includes(' up ')) {
       attached.set(SHARED, new Set(['union-p1-shared_default']));
+    }
+    if (command.includes('-p union-p1-shared down')) {
+      attached.delete(SHARED);
     }
     return { exitCode: 0, stderr: '' };
   },
@@ -236,4 +246,16 @@ test('a preview whose data could not be made does not start', async () => {
   expect(composeCalls()).not.toContain(
     '-p union-t1 --project-directory /workspace/repo -f - up -d --remove-orphans',
   );
+});
+
+test('Union records which previews use the shared services, for the Environments tab', async () => {
+  await startPreview(deps(), { ticketId });
+  expect(getSharedStack(db, 1)).toMatchObject({
+    status: 'running',
+    services: [{ service: 'clamav', running: true }],
+    previews: [`t${ticketId}`],
+    agents: [],
+  });
+  await stopPreview(deps(), { ticketId });
+  expect(getSharedStack(db, 1)).toMatchObject({ status: 'stopped', previews: [], startedAt: null });
 });
