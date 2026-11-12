@@ -56,7 +56,7 @@ working copy, and serves each exposed service at an address of its own:
 While it starts, the tab counts the time and shows the build's output as it comes; **Cancel start** stops it and
 removes what it had started. Once it runs, the tab shows its addresses, **Restart** and **Stop**, and the services'
 output. The **⋯** menu beside the status holds the Compose file, **Reset preview…** and **Environment settings**, which opens the project's **Environments** tab. The
-sidebar's **Previews** entry lists every preview running, across projects, with **Stop**.
+sidebar's **Previews** entry lists every preview running, grouped by project, with **Stop**.
 
 - Each ticket's preview is its own Compose project, with its own containers, network and volumes.
 - Previews answer on this machine only.
