@@ -138,12 +138,23 @@ export function PullRequestsToolbar({
           Read from GitHub {age(list.fetchedAt, receivedAt)}
         </span>
       ) : null}
+      {list || !fetching ? null : (
+        <span className="text-xs text-zinc-500">Reading the pull requests from GitHub…</span>
+      )}
       <Button
         disabled={fetching}
+        aria-busy={fetching}
+        className="flex items-center gap-2"
         title="Ask GitHub again now, instead of the list read a few minutes ago"
         onClick={onRefresh}
       >
-        {fetching ? 'Loading…' : 'Refresh'}
+        {fetching ? (
+          <span
+            aria-hidden
+            className="size-3 animate-spin rounded-full border-2 border-zinc-300 border-t-indigo-600 dark:border-zinc-700 dark:border-t-indigo-400"
+          />
+        ) : null}
+        Refresh
       </Button>
     </div>
   );
