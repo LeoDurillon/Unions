@@ -1,17 +1,14 @@
-// One investigation: its questions, the latest answer, the agent's live log and a follow-up form.
+// One investigation: its header, the ticket being written from it (or the form asking what it covers), then its
+// tabs: the conversation with the follow-up box, the agent's live log, and what its agent calls used.
 import type { Investigation } from '@union/core';
-import type { ReactElement } from 'react';
+import { useState, type ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
 import { creatingKinds } from '../../lib/integrations-api';
-import { MODEL_LABELS } from '../agents/agent-labels';
-import { Badge } from '../ui';
-import { Actions } from './investigation-actions';
-import { SCOPE_LABELS, STATUS_LABELS } from './investigation-labels';
+import { InvestigationHeader } from './investigation-header';
 import { InvestigationTabs } from './investigation-tabs';
-import { EarlierExchanges, LatestQuestion, NextSteps } from './investigation-thread';
+import { InvestigationTicket } from './investigation-ticket';
 
-/** One investigation: its questions, the latest answer, the agent's live log and a follow-up form. */
 export function InvestigationDetail({
   investigation,
   project,
@@ -24,30 +21,34 @@ export function InvestigationDetail({
   onDeleted: () => void;
   onOpenTicket: (id: number) => void;
 }): ReactElement {
-  const status = STATUS_LABELS[investigation.status];
+  const [asking, setAsking] = useState(false);
   return (
-    <article className="space-y-4">
-      <header className="space-y-2">
-        <div className="flex flex-wrap items-center gap-2">
-          <h3 className="text-base font-semibold">{investigation.title}</h3>
-          <Badge tone={status.tone}>{status.label}</Badge>
-        </div>
-        <p className="text-xs text-zinc-500">
-          {SCOPE_LABELS[investigation.scope].title} · {MODEL_LABELS[investigation.model]} ·{' '}
-          {investigation.tools.join(', ')}
-        </p>
-        <Actions investigation={investigation} onDeleted={onDeleted} />
-      </header>
-      <EarlierExchanges investigation={investigation} />
-      <LatestQuestion investigation={investigation} />
-      <InvestigationTabs investigation={investigation} />
-      {investigation.status === 'succeeded' ? (
-        <NextSteps
+    <article className="min-h-full bg-zinc-50/60 dark:bg-zinc-950">
+      <div className="bg-white dark:bg-zinc-950">
+        <InvestigationHeader
           investigation={investigation}
-          targets={creatingKinds(project)}
+          onDeleted={onDeleted}
+          onAskTicket={
+            asking
+              ? null
+              : () => {
+                  setAsking(true);
+                }
+          }
           onOpenTicket={onOpenTicket}
         />
-      ) : null}
+        <div className="px-8 empty:hidden [&:not(:empty)]:pb-4">
+          <InvestigationTicket
+            investigation={investigation}
+            targets={creatingKinds(project)}
+            asking={asking}
+            onClose={() => {
+              setAsking(false);
+            }}
+          />
+        </div>
+      </div>
+      <InvestigationTabs investigation={investigation} />
     </article>
   );
 }

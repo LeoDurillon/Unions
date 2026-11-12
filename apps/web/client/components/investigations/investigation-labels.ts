@@ -4,11 +4,11 @@ import type { InvestigationScope, InvestigationStatus } from '@union/core';
 import type { Tone } from '../../lib/labels';
 
 export const STATUS_LABELS: Record<InvestigationStatus, { label: string; tone: Tone }> = {
-  queued: { label: 'queued', tone: 'neutral' },
-  running: { label: 'running', tone: 'blue' },
-  succeeded: { label: 'done', tone: 'green' },
-  failed: { label: 'failed', tone: 'red' },
-  cancelled: { label: 'cancelled', tone: 'amber' },
+  queued: { label: 'Queued', tone: 'neutral' },
+  running: { label: 'Running', tone: 'blue' },
+  succeeded: { label: 'Answered', tone: 'green' },
+  failed: { label: 'Failed', tone: 'red' },
+  cancelled: { label: 'Cancelled', tone: 'neutral' },
 };
 
 export const SCOPE_LABELS: Record<InvestigationScope, { title: string; description: string }> = {

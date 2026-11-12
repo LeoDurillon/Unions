@@ -27,7 +27,7 @@ A one-off agent run on a custom prompt, outside the ticket pipeline (project bar
 - **Export:** **Export** downloads the investigation as Markdown (`investigation-<id>-<title>.md`): title, scope,
   model, tools, status and date, then each question and answer, oldest first (the latest answer replaced by its
   status or error while there is none). Built in the browser from the record the page already has; no API call.
-- **Ticket:** **Create ticket** on an answered investigation asks for optional context (what the ticket must cover).
+- **Ticket:** **Write a ticket from it** (header of an answered investigation) asks for optional context (what the ticket must cover).
   The worker (`TicketDrafter`, driven by the investigation runner, sharing the run slots) writes it in a throwaway
   container `union-i<id>-ticket` from every question and answer plus that context, in the language of the user's
   questions: a title, then the problem, what to change, acceptance criteria and the useful findings. It lands in the

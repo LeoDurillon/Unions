@@ -41,7 +41,7 @@ you want them to follow.
 
 Three kinds of runs have no page in Union settings:
 
-- **Investigations**, and the tickets written from them with **Create ticket**: you pick the model and tools in the
+- **Investigations**, and the tickets written from them with **Write a ticket from it**: you pick the model and tools in the
   investigation's form (Opus, reading the code and the web, to start with), and the ticket is written on the same
   model. See [Investigations](investigations.md).
   **Suggest improvements**, in a project's usage, starts one of them on Opus (see

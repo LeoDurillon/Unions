@@ -124,7 +124,13 @@ export function InvestigationForm({
 
   return (
     <form className="space-y-4" onSubmit={handleSubmit}>
-      <h3 className="text-base font-semibold">New investigation</h3>
+      <div className="space-y-1">
+        <h3 className="text-lg font-semibold">New investigation</h3>
+        <p className="text-[13px] text-zinc-500">
+          Run an agent on your own prompt, about the repository, a ticket&apos;s workspace or a
+          general subject. Nothing is posted to GitHub.
+        </p>
+      </div>
       <QuestionFields draft={draft} set={set} />
       <ScopeField
         value={scope}

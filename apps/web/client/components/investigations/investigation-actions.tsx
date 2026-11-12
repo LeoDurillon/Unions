@@ -56,7 +56,7 @@ export function Actions({
   const { cancel, rerun, remove } = useInvestigationActions(investigation, onDeleted);
   const busy = cancel.isPending || rerun.isPending || remove.isPending;
   return (
-    <div className="space-y-2">
+    <>
       <div className="flex flex-wrap gap-2">
         {isActive(status) ? (
           <Button
@@ -98,6 +98,6 @@ export function Actions({
         )}
       </div>
       <ErrorText error={cancel.error ?? rerun.error ?? remove.error} />
-    </div>
+    </>
   );
 }

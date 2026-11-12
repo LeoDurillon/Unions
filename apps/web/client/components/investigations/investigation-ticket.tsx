@@ -1,4 +1,5 @@
-// Turns the investigation into a backlog ticket written by an agent, and links to it once made.
+// Turns the investigation into a backlog ticket written by an agent: the header's buttons (Open ticket, Write a
+// ticket from it), then under it the form asking what the ticket covers, the ticket being written, or why it failed.
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { IntegrationKindName, Investigation } from '@union/core';
 import { integrationKind } from '@union/core/integration-kinds';
@@ -53,10 +54,13 @@ function Ask({
   const [target, setTarget] = useState<IntegrationKindName | null>(null);
   const ask = useMutation({
     mutationFn: () => api.requestInvestigationTicket(investigation, { context, target }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['investigations'] }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['investigations'] });
+      onCancel();
+    },
   });
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 rounded-xl border border-indigo-200 bg-indigo-50/50 p-4 dark:border-indigo-900 dark:bg-indigo-950/30">
       <label className="block space-y-1 text-sm">
         <span className="font-medium">What should the ticket cover?</span>
         <span className="block text-xs text-zinc-500">
@@ -113,54 +117,66 @@ function TicketError({
   );
 }
 
-/** Turns the investigation into a backlog ticket written by an agent, and links to it once made. */
+function writing(investigation: Investigation): boolean {
+  return investigation.ticketStatus === 'queued' || investigation.ticketStatus === 'running';
+}
+
+/** Under the header: the ticket being written, the form asking what it covers, or why the last one failed. */
 export function InvestigationTicket({
   investigation,
   targets,
-  onOpenTicket,
+  asking,
+  onClose,
 }: {
   investigation: Investigation;
   targets: IntegrationKindName[];
-  onOpenTicket: (id: number) => void;
-}): ReactElement {
-  const [asking, setAsking] = useState(false);
-  const { ticketStatus, ticketId, ticketError } = investigation;
-  if (ticketStatus === 'queued' || ticketStatus === 'running') {
-    return <p className="text-sm text-blue-700 dark:text-blue-300">Writing the ticket…</p>;
-  }
-  if (asking) {
+  /** Write a ticket from it was clicked: the form shows. */
+  asking: boolean;
+  onClose: () => void;
+}): ReactElement | null {
+  if (writing(investigation)) {
     return (
-      <Ask
-        investigation={investigation}
-        targets={targets}
-        onCancel={() => {
-          setAsking(false);
-        }}
-      />
+      <p className="flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800 dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-300">
+        <span className="size-2 animate-pulse rounded-full bg-blue-500" />
+        An agent is writing the ticket; it lands in the Backlog.
+      </p>
     );
   }
+  if (asking) {
+    return <Ask investigation={investigation} targets={targets} onCancel={onClose} />;
+  }
+  return <TicketError status={investigation.ticketStatus} error={investigation.ticketError} />;
+}
+
+/** The header's ticket buttons: Open ticket once one was written, and Write a ticket from it once answered. */
+export function TicketButtons({
+  investigation,
+  onAsk,
+  onOpenTicket,
+}: {
+  investigation: Investigation;
+  /** Null while the form it opens is open. */
+  onAsk: (() => void) | null;
+  onOpenTicket: (id: number) => void;
+}): ReactElement {
+  const { ticketId } = investigation;
+  const answered = investigation.status === 'succeeded';
   return (
-    <div className="space-y-2">
-      <TicketError status={ticketStatus} error={ticketError} />
-      <div className="flex flex-wrap items-center gap-2">
-        {ticketId === null ? null : (
-          <Button
-            variant="primary"
-            onClick={() => {
-              onOpenTicket(ticketId);
-            }}
-          >
-            Open ticket
-          </Button>
-        )}
+    <>
+      {ticketId === null ? null : (
         <Button
           onClick={() => {
-            setAsking(true);
+            onOpenTicket(ticketId);
           }}
         >
-          {ticketId === null ? 'Create ticket' : 'Create another ticket'}
+          Open ticket
         </Button>
-      </div>
-    </div>
+      )}
+      {answered && onAsk && !writing(investigation) ? (
+        <Button variant="primary" onClick={onAsk}>
+          {ticketId === null ? 'Write a ticket from it' : 'Write another ticket'}
+        </Button>
+      ) : null}
+    </>
   );
 }

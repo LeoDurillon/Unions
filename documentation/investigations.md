@@ -8,7 +8,10 @@ Union.
 
 ## Ask a question
 
-Open the project bar's **Investigations** tab and click **+ New investigation**:
+Open the project bar's **Investigations** tab. It opens on your latest investigation; the list on the left shows
+them all, newest first, by week, each with a dot for its state (green once answered, blue while it runs, red when
+it failed), its scope, **→ ticket** once a ticket was written from it, and its date. **Find an investigation**
+filters them by title. Click **+ New**:
 
 1. **Title** and **Prompt**: your question, sent to the agent as you write it.
 2. **Scope**: where the agent works.
@@ -24,7 +27,8 @@ Open the project bar's **Investigations** tab and click **+ New investigation**:
 
 The investigation waits for a free run slot, then runs once in a throwaway container (or, for **A ticket**, in
 that ticket's container). Its tabs show the
-**Answer**, the agent's **Log** as it works, and the **Usage** of its run. **Cancel** stops it. An answer can hold
+**Conversation** (each question in a bubble, each answer in a card under it), the agent's **Log** as it works (the
+tab it opens on while it runs), and the **Usage** of its run. **Cancel** stops it. An answer can hold
 diagrams, drawn in place, with **SVG**, **PNG** and **Copy source** above each (see
 [Diagrams](ticket-lifecycle.md#diagrams)). **Delete** removes the investigation and its answers, once you
 confirm; it is not offered while the agent runs.
@@ -37,7 +41,7 @@ answer ends with a warning: check it before the ticket's next step.
 
 ## Follow up
 
-Once answered, type a **follow-up** question under the answer and click **Ask**. The agent gets your earlier
+Once answered, type a **follow-up** question in the box under the conversation and click **Ask**. The agent gets your earlier
 questions and its answers, and works in a fresh container, with a fresh clone for a repository investigation.
 
 **Run again** asks the latest question again, for example after the code changed.
@@ -50,10 +54,11 @@ anywhere: the file is made in your browser.
 
 ## Turn it into a ticket
 
-**Create ticket** asks an agent to write a ticket from the whole investigation: a title, the problem, what to
+**Write a ticket from it**, at the top of an answered investigation, asks an agent to write a ticket from the whole
+investigation: a title, the problem, what to
 change, acceptance criteria and the useful findings, in the language of your questions. Add context to say what the
-ticket must cover. It runs on the investigation's model. Once a ticket is made, the button reads **Create another
-ticket**.
+ticket must cover. It runs on the investigation's model. Once a ticket is made, **Open ticket** opens it and the button reads
+**Write another ticket**.
 
 The ticket lands in Backlog, with its GitHub issue, and the investigation links to it. When the project is
 connected to Notion, **Also create it in Notion** adds a page for it in the Notion data source too. When it is

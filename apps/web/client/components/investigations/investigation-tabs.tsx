@@ -1,31 +1,17 @@
-// An investigation's tabs: its latest answer, the agent's live log, and what its agent calls used.
+// An investigation's tabs: the conversation (with the follow-up box once answered), the agent's live log, and what
+// its agent calls used.
 import type { Investigation } from '@union/core';
 import { useState, type ReactElement } from 'react';
 
 import { formatWhen } from '../../lib/relative-time';
 import { useInvestigationUsage } from '../../lib/use-usage';
 import { AgentLog } from '../log-tab';
-import { Markdown } from '../markdown';
 import { TabButton } from '../tab-button';
 import { UsageTable } from '../usage/usage-table';
 import { isActive } from './investigation-labels';
+import { Conversation, FollowUpForm } from './investigation-thread';
 
-type Tab = 'result' | 'log' | 'usage';
-
-function Answer({ investigation }: { investigation: Investigation }): ReactElement {
-  if (investigation.error !== null) {
-    return (
-      <p className="rounded-md bg-red-50 p-3 text-sm whitespace-pre-wrap text-red-800 dark:bg-red-950/40 dark:text-red-300">
-        {investigation.error}
-      </p>
-    );
-  }
-  if (investigation.result !== null) {
-    return <Markdown>{investigation.result}</Markdown>;
-  }
-  const waiting = isActive(investigation.status) ? 'The agent is still working: see the Log.' : '';
-  return <p className="text-sm text-zinc-500">No answer. {waiting}</p>;
-}
+type Tab = 'conversation' | 'log' | 'usage';
 
 /** One row per agent call: the first answer, then each follow-up. */
 function InvestigationUsage({ investigation }: { investigation: Investigation }): ReactElement {
@@ -48,17 +34,35 @@ export function InvestigationTabs({
   investigation: Investigation;
 }): ReactElement {
   // Remounted on every status change (see the key in the page): running shows the log, done the answer.
-  const [tab, setTab] = useState<Tab>(isActive(investigation.status) ? 'log' : 'result');
+  const [tab, setTab] = useState<Tab>(isActive(investigation.status) ? 'log' : 'conversation');
   return (
     <>
-      <div role="tablist" className="flex border-b border-zinc-200 dark:border-zinc-800">
-        <TabButton tab="result" current={tab} label="Answer" onSelect={setTab} />
+      <div
+        role="tablist"
+        aria-label="Investigation"
+        className="sticky top-0 z-10 flex border-b border-zinc-200 bg-white/90 px-8 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/90"
+      >
+        <TabButton tab="conversation" current={tab} label="Conversation" onSelect={setTab} />
         <TabButton tab="log" current={tab} label="Log" onSelect={setTab} />
         <TabButton tab="usage" current={tab} label="Usage" onSelect={setTab} />
       </div>
-      {tab === 'result' ? <Answer investigation={investigation} /> : null}
-      {tab === 'log' ? <AgentLog source={{ investigation: investigation.id }} /> : null}
-      {tab === 'usage' ? <InvestigationUsage investigation={investigation} /> : null}
+      <div className="mx-auto max-w-4xl space-y-6 px-8 py-6">
+        {tab === 'conversation' ? (
+          <>
+            <Conversation
+              investigation={investigation}
+              onLog={() => {
+                setTab('log');
+              }}
+            />
+            {investigation.status === 'succeeded' ? (
+              <FollowUpForm investigation={investigation} />
+            ) : null}
+          </>
+        ) : null}
+        {tab === 'log' ? <AgentLog source={{ investigation: investigation.id }} /> : null}
+        {tab === 'usage' ? <InvestigationUsage investigation={investigation} /> : null}
+      </div>
     </>
   );
 }

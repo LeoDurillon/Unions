@@ -15,7 +15,7 @@ function pendingAnswer(investigation: Investigation): string {
   if (investigation.error !== null) {
     return `_The run failed:_\n\n\`\`\`\n${investigation.error}\n\`\`\``;
   }
-  return `_No answer yet (${STATUS_LABELS[investigation.status].label})._`;
+  return `_No answer yet (${STATUS_LABELS[investigation.status].label.toLowerCase()})._`;
 }
 
 function exchanges(investigation: Investigation): Exchange[] {

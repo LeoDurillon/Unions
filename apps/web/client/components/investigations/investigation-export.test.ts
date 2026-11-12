@@ -38,7 +38,7 @@ test('one question: its settings, the question and the answer, unnumbered', () =
   expect(investigationMarkdown(investigation())).toBe(
     [
       '# Où vient le bug de cache ?',
-      '- Scope: Repository\n- Model: Opus (most capable)\n- Tools: Read, Grep\n- Status: done\n- Asked: 2026-11-03',
+      '- Scope: Repository\n- Model: Opus (most capable)\n- Tools: Read, Grep\n- Status: Answered\n- Asked: 2026-11-03',
       '## Question',
       'Why is the cache stale?',
       '## Answer',
