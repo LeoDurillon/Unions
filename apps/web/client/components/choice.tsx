@@ -121,7 +121,7 @@ export function Segmented<T extends string>({
 }): ReactElement {
   const name = useId();
   return (
-    <fieldset className="inline-flex flex-wrap rounded-md border border-zinc-300 p-0.5 dark:border-zinc-700">
+    <fieldset className="relative inline-flex flex-wrap rounded-md border border-zinc-300 p-0.5 dark:border-zinc-700">
       <legend className="sr-only">{legend}</legend>
       {options.map((option) => (
         <label
