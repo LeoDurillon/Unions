@@ -30,7 +30,8 @@ export function ProjectSectionBody({
 }): ReactElement {
   const bodies: Record<ProjectSection, () => ReactElement> = {
     general: () => (
-      <div className="space-y-6">
+      // Each part of General is a card: its Save bar shows inside it once it holds something to save.
+      <div className="space-y-4 [&>section]:rounded-xl [&>section]:border [&>section]:border-zinc-200 [&>section]:bg-white [&>section]:p-6 dark:[&>section]:border-zinc-800 dark:[&>section]:bg-zinc-900">
         <GitHubAccessSection project={project} />
         <BranchSection project={project} />
         <IssuesSection project={project} />

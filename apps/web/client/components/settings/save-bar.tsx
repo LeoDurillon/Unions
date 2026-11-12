@@ -1,4 +1,5 @@
-// The settings page's one Save, kept in view at the bottom, with whether something is unsaved.
+// A settings form's Save, kept in view at the bottom once something is unsaved, saved or refused. Until then it
+// stays out of the way.
 
 import type { ReactElement, ReactNode } from 'react';
 
@@ -20,6 +21,11 @@ function Status({ state }: { state: SaveState }): ReactElement | null {
   return null;
 }
 
+/** Nothing unsaved, nothing saving, nothing just saved or refused. */
+function isIdle(state: SaveState): boolean {
+  return !state.dirty && !state.saving && !state.saved && state.error === null;
+}
+
 /**
  * Save and Discard for the whole page. `invalid` says why it cannot be saved as it is; `children`
  * are actions beside them that apply at once (turning previews off).
@@ -34,7 +40,11 @@ export function SaveBar({
   label?: string;
   invalid?: string | null;
   children?: ReactNode;
-}): ReactElement {
+}): ReactElement | null {
+  // Nothing to save or tell: no bar, unless it holds actions of its own (turning previews off).
+  if (isIdle(state) && !children) {
+    return null;
+  }
   return (
     <div className="sticky bottom-0 -mx-6 -mb-6 mt-6 space-y-2 border-t border-zinc-200 bg-zinc-50/95 px-6 py-3 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/95">
       <ErrorText error={state.error} />

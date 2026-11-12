@@ -1,7 +1,10 @@
-// The settings pages by group; the danger zone last, set apart.
-import type { ReactElement } from 'react';
+// The settings pages by group, under a box that finds one by name; the danger zone last, set apart.
+import { useState, type ReactElement } from 'react';
 
-const ACTIVE = 'bg-indigo-50 font-medium text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300';
+import { filterNav } from '../../lib/settings/nav-filter';
+import { inputClass } from '../ui/ui';
+
+const ACTIVE = 'bg-indigo-50 font-semibold text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300';
 const IDLE = 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800';
 const DANGER = 'text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950';
 
@@ -30,9 +33,22 @@ export function SettingsNav<S extends string>({
   section: S;
   onOpen: (section: S) => void;
 }): ReactElement {
+  const [query, setQuery] = useState('');
+  const shown = filterNav(groups, query);
   return (
     <nav aria-label={label} className="space-y-4">
-      {groups.map((group) => (
+      <input
+        type="search"
+        aria-label="Find a setting"
+        placeholder="Find a setting"
+        className={`${inputClass} py-1 text-xs`}
+        value={query}
+        onChange={(event) => {
+          setQuery(event.target.value);
+        }}
+      />
+      {shown.length === 0 ? <p className="px-3 text-xs text-zinc-500">No page matches.</p> : null}
+      {shown.map((group) => (
         <div
           key={group.label ?? 'apart'}
           className={group.label ? '' : 'border-t border-zinc-200 pt-4 dark:border-zinc-800'}
