@@ -1,5 +1,5 @@
 # Shared by post-merge and post-rewrite: regenerates docs/map/ when it no longer matches the sources, and says so.
-if ! bun scripts/repo-map.ts --check >/dev/null 2>&1; then
-  bun scripts/repo-map.ts >/dev/null 2>&1
+bun scripts/repo-map.ts >/dev/null 2>&1
+if [ -n "$(git status --porcelain -- docs/map)" ]; then
   echo "$1: docs/map/ was out of date and has been regenerated; commit it (git add docs/map && git commit --amend)." >&2
 fi

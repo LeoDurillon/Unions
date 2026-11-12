@@ -1,9 +1,10 @@
 // Rewrites the relative imports of a source file after files moved: the move script's pure part.
 import path from 'node:path';
 
-/** `from './x'`, `import './x'` and `export … from './x'`: the relative specifiers. */
+/** `from './x'`, `import './x'`, `import('./x')` and `export … from './x'`: the relative specifiers. */
 // Named groups are numbered too: the replacer reads them as its positional arguments.
-const SPECIFIER = /(?<lead>\bfrom\s+|\bimport\s+)(?<quote>['"])(?<spec>\.{1,2}\/[^'"]+)\k<quote>/gu;
+const SPECIFIER =
+  /(?<lead>\bfrom\s+|\bimport\s*\(\s*|\bimport\s+)(?<quote>['"])(?<spec>\.{1,2}\/[^'"]+)\k<quote>/gu;
 const EXTENSIONS = ['.ts', '.tsx', '/index.ts', '/index.tsx'];
 
 /** The file a relative specifier names, among `files` (repository paths), or null. */

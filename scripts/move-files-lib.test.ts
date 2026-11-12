@@ -37,6 +37,13 @@ test("a moved file's own imports are written from its new folder", () => {
   );
 });
 
+test('a dynamic import is rewritten like a static one', () => {
+  const source = "const page = await import('./provision');\n";
+  expect(rewriteImports(source, 'apps/worker/src/preview-env.ts', moves, files)).toBe(
+    "const page = await import('../provision');\n",
+  );
+});
+
 test('the top comment is kept apart from the imports, once', () => {
   const source = "// What it is for.\nimport { a } from './a';\n";
   expect(detachHeader(source)).toBe("// What it is for.\n\nimport { a } from './a';\n");

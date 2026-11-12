@@ -11,6 +11,12 @@ test("a file's top comment is its summary, first sentence only", () => {
   );
 });
 
+test('a sentence does not end inside a `code` span', () => {
+  expect(summaryOf('// The `fixup! <sha>` targets, and `a?` too. Then more.')).toBe(
+    'The `fixup! <sha>` targets, and `a?` too.',
+  );
+});
+
 test('a long first sentence is kept whole, for the check to report rather than cut', () => {
   const long = `// ${'word '.repeat(40).trim()}.`;
   expect(summaryOf(long)?.length).toBe(long.length - '// '.length);

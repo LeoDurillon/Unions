@@ -37,9 +37,11 @@ function clean(lines: string[]): string {
     .trim();
 }
 
+/** Up to the first `.`, `!` or `?` ending a sentence, not counting those in a `code` span. */
+const FIRST_SENTENCE = /^(?:`[^`]*`|[^`.!?]|[.!?](?!\s|$)|`)*[.!?]?/u;
+
 function firstSentence(text: string): string {
-  const end = text.search(/[.!?](?:\s|$)/u);
-  return end === -1 ? text : text.slice(0, end + 1);
+  return FIRST_SENTENCE.exec(text)?.[0] ?? text;
 }
 
 /** The `//` lines at the top of the file, before any code; null when it starts otherwise. */
