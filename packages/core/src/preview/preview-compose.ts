@@ -6,7 +6,7 @@
 
 import path from 'node:path';
 
-import { PUBLISHED_PORTS_KEY } from '../agent-environment';
+import { PUBLISHED_PORTS_KEY } from '../agent/agent-environment';
 import {
   isRecord,
   PREVIEW_ENV_FILE,

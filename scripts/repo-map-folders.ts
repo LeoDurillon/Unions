@@ -2,15 +2,41 @@
 
 /** By `<area>` (its root) or `<area>/<folder>`; `bun run map:check` fails when a folder has none, or one names no folder. */
 export const FOLDER_SUMMARIES: Record<string, string> = {
-  core: 'Shared code, flat: the state machine and phases, agents, their prompts, tools, usage and lessons, Docker (runtime, docker-cli, limits), GitHub auth and clients, tickets, flows, stacks and slices, diffs, pull request descriptions, investigations, notifications, Union settings and update.',
+  core: 'The package entry and what every part shares: the public API, the database, the tables, the ticket state machine and its phases.',
+  'core/agent':
+    "The agents' defaults and how a run resolves them: prompts, models, tools, denied commands, environment, connectors, log, answer formats.",
+  'core/custom-agents':
+    'Custom agents: their records, defaults, what still uses them, and the prompt writer that writes their instructions.',
+  'core/diff':
+    'Diffs: parsing, hunks, excerpts, the links agents cite, and change size against the budget.',
+  'core/docker':
+    "Docker: the `ContainerRuntime` interface and the `docker` CLI behind it, helper containers, limits, compose containers, the projects' agent images.",
   'core/event':
     'Event rules: the events catalog and payloads, the rules and their actions (Jira, Notion, GitHub Project fields, pull requests), cursors and deliveries.',
   'core/integrations':
     'Jira and Notion: their API clients, configs and providers, comments and media, and the conversions between Markdown and Atlassian Document Format or Notion blocks.',
+  'core/flow':
+    "Ticket flows: the steps a ticket runs, the project's presets, editing them, step titles.",
+  'core/github':
+    'GitHub: auth and clients, the optional layers (Project, issues), Project fields, text, issue step comments, file blobs, half-sent recovery.',
+  'core/investigation':
+    'Investigations: their records, defaults, and the tickets written from them.',
+  'core/lessons':
+    "The project's memory: lessons and feedback, the lesson writer and tidier, their prompts and queue.",
+  'core/pull-request':
+    "A ticket's pull request: description rewrites, comment replies, review verdicts, branch moves on GitHub, the followed base, resumed-implementer prompts.",
+  'core/stack':
+    'Stacks of pull requests: GitHub stacks, the split plan, slices, trailers, restack todos, status, descriptions and state-machine moves.',
+  'core/ticket':
+    'Tickets: records and dispatch, links and base, Needs you, start over, attachments, project files and scripts, command and CI outputs, refused commits.',
+  'core/union':
+    'Union itself: machine settings, its update, the work a restart interrupts, notifications.',
+  'core/usage':
+    'Agent usage: tokens and tool calls recorded from the log, Claude limits, totals and summaries, findings, and the "Suggest improvements" prompt.',
   'core/preview':
-    "Previews: the compose file and its checks, config, memory caps, secrets, screenshots, and the shared services' stack and proxy.",
+    'Previews: records, the compose file and its checks, config, memory caps, secrets, e2e screenshots and staleness, workspace owner, shared services.',
   'core/review':
-    'Reviews: agent review runs, explanations, groupings by spec, review reports and their specs, the run lifecycle.',
+    'Reviews: agent reviews and their runs, specs and spec sources, explanations, groupings by spec, review reports, the run lifecycle.',
   'core/schema': 'The Drizzle schema, one file per group of tables, and their shared column types.',
   'core/setup':
     "The setup agent offered at the end of the wizard: its prompt, its proposal's parts and preview, and applying it.",

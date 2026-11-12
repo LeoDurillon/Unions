@@ -4,10 +4,10 @@
 
 import { and, asc, eq, max, type SQL } from 'drizzle-orm';
 
-import type { AgentReviewOwner } from '../agent-reviews';
 import type { Db } from '../db';
 import type { ReviewSpecRow } from '../schema/schema-review-specs';
 import * as schema from '../tables';
+import type { AgentReviewOwner } from './agent-reviews';
 import {
   missingStarts,
   sameSource,

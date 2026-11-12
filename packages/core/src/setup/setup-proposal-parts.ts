@@ -1,5 +1,6 @@
 // Readers for the setup agent's answer block: texts, lists and names, each refusal noted instead of thrown.
-import { isRecord } from '../agent-activity';
+
+import { isRecord } from '../agent/agent-activity';
 
 const MAX_TEXT = 4000;
 const MAX_ITEMS = 30;

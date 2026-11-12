@@ -5,7 +5,7 @@ import { and, asc, eq, getTableColumns, inArray } from 'drizzle-orm';
 import type { SQLiteColumn, SQLiteTable } from 'drizzle-orm/sqlite-core';
 
 import type { Db } from '../db';
-import type { emitEvent } from '../tickets';
+import type { emitEvent } from '../ticket/tickets';
 
 type Executor = Parameters<typeof emitEvent>[0];
 

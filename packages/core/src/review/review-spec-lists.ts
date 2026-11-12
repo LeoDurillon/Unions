@@ -1,8 +1,8 @@
 // What a review's spec list starts with, a stack's specs from its members', the specs as the text
 // Group by spec reads. Pure, browser-safe.
 
-import { MAX_SPEC_CHARS, MAX_SPECS, type AgentReviewSpec } from '../agent-review-specs';
-import { SPEC_SOURCES, type SpecSource } from '../spec-source-kinds';
+import { MAX_SPEC_CHARS, MAX_SPECS, type AgentReviewSpec } from './agent-review-specs';
+import { SPEC_SOURCES, type SpecSource } from './spec-source-kinds';
 
 /** A spec as the list keeps it: where it comes from (`ref`: a page id, an issue number). */
 export type SpecEntry = { kind: SpecSource; ref: string | null; label: string; url: string | null };

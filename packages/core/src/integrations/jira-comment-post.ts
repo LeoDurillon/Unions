@@ -1,6 +1,6 @@
 // A comment on a ticket's Jira issue, as the web queues it (`post_jira_comment`) and the worker posts it; browser-safe.
 
-import { isRecord } from '../agent-activity';
+import { isRecord } from '../agent/agent-activity';
 
 /** Jira refuses longer comments. */
 const MAX_JIRA_COMMENT = 32_767;

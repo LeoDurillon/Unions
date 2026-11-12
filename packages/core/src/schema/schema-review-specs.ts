@@ -3,7 +3,7 @@
 
 import { index, integer, sqliteTable, text, type AnySQLiteColumn } from 'drizzle-orm/sqlite-core';
 
-import { SPEC_SOURCES } from '../spec-source-kinds';
+import { SPEC_SOURCES } from '../review/spec-source-kinds';
 import { now, tickets } from './schema';
 import { currentReviews } from './schema-reviews';
 

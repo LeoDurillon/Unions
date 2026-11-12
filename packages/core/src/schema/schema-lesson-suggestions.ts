@@ -2,7 +2,7 @@
 
 import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
-import type { LessonProposal } from '../lesson-input';
+import type { LessonProposal } from '../lessons/lesson-input';
 import { now, projects } from './schema';
 
 export const LESSON_SUGGESTION_STATUSES = [

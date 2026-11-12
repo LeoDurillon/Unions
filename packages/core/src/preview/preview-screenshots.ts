@@ -5,10 +5,10 @@ import path from 'node:path';
 
 import { asc, eq } from 'drizzle-orm';
 
-import { attachmentsRoot, safeFileName, uniqueFileName } from '../attachments';
 import type { Db } from '../db';
-import { updatePreview } from '../previews';
 import * as schema from '../tables';
+import { attachmentsRoot, safeFileName, uniqueFileName } from '../ticket/attachments';
+import { updatePreview } from './previews';
 
 export type PreviewScreenshot = typeof schema.previewScreenshots.$inferSelect;
 

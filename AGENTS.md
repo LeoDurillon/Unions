@@ -9,7 +9,7 @@ behavior; this file covers how to work in the repo.
 Read the file for the area you change before changing it, and keep it current when behavior changes:
 
 - `packages/core`: shared code: schema and migrations, the pure state machine (`states.ts`), default agent prompts
-  and models (`agents.ts`: change a default there, not in the worker), the `ContainerRuntime` interface.
+  and models (`agent/default-prompts.ts`, `agent/agents.ts`: change a default there, not in the worker), the `ContainerRuntime` interface.
   → `docs/architecture/core.md`
 - `apps/web`: Hono API (`src/routes/`) and the React SPA (`client/`), one Bun process in production.
   → `docs/architecture/web.md`

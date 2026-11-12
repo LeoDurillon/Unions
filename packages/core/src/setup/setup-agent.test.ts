@@ -1,8 +1,9 @@
 // Tests queuing the setup agent and reading a project's latest setup run with its proposal.
+
 import { beforeEach, expect, test } from 'bun:test';
 
 import { createDb, migrateDb, type Db } from '../db';
-import { finishInvestigation, InvestigationError } from '../investigations';
+import { finishInvestigation, InvestigationError } from '../investigation/investigations';
 import * as schema from '../tables';
 import { latestSetup, queueSetup } from './setup-agent';
 

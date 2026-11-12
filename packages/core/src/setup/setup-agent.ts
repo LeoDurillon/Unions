@@ -1,9 +1,14 @@
 // Queues the setup agent (a repository investigation of kind `setup`) and reads a project's latest one with its proposal.
+
 import { and, desc, eq } from 'drizzle-orm';
 
 import type { Db } from '../db';
-import { SETUP_DEFAULT_MODEL } from '../investigation-defaults';
-import { createInvestigation, InvestigationError, type Investigation } from '../investigations';
+import { SETUP_DEFAULT_MODEL } from '../investigation/investigation-defaults';
+import {
+  createInvestigation,
+  InvestigationError,
+  type Investigation,
+} from '../investigation/investigations';
 import * as schema from '../schema/schema';
 import { setupPrompt } from './setup-prompt';
 import { parseSetupProposal } from './setup-proposal';

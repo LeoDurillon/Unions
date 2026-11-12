@@ -1,6 +1,7 @@
 // What each service of a preview may use: Union's memory cap and the preview's CPU cores. A
 // service's own lower memory limit is kept, and a service that sets its own CPU cores keeps them.
-import type { ContainerLimits } from '../container-limits';
+
+import type { ContainerLimits } from '../docker/container-limits';
 import { isRecord, type ComposeJson } from './preview-compose-check';
 
 const BYTES_PER_KB = 1024;

@@ -1,8 +1,8 @@
 import { expect, test } from 'bun:test';
 
-import { flowProblems } from './flows';
+import { flowProblems } from './flow/flows';
+import { stepTitle } from './flow/step-titles';
 import { nextStep, transition, type CustomStep, type Flow, type Phase } from './states';
-import { stepTitle } from './step-titles';
 
 const SECURITY: CustomStep = 'agent_1';
 const API_REVIEW: CustomStep = 'agent_2';

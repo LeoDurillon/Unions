@@ -2,7 +2,7 @@
 // reviewer. Also the files to read first and to skim, each requirement's status, and what the spec
 // did not ask for. Pure, browser-safe.
 
-import type { SpecSource } from '../spec-source-kinds';
+import type { SpecSource } from './spec-source-kinds';
 
 /**
  * A spec as the report's run sent it; `id` is the number the agent cites it by. `sameAs`: the spec

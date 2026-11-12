@@ -1,7 +1,7 @@
 // What each type of event in the log carries, keyed by its `type`: the one place to add an event.
 
-import type { PortForward } from '../agent-environment';
-import type { ReviewVerdict } from '../pr-review-verdicts';
+import type { PortForward } from '../agent/agent-environment';
+import type { ReviewVerdict } from '../pull-request/pr-review-verdicts';
 import type { BranchMove } from '../schema/schema-types';
 import type { Action, BoardStatus, Phase, Step } from '../states';
 import type * as tables from '../tables';

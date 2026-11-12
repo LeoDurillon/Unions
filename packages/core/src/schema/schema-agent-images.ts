@@ -3,7 +3,7 @@
 
 import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
-import type { AgentImageSource, AppliedAgentImage } from '../agent-image-source';
+import type { AgentImageSource, AppliedAgentImage } from '../docker/agent-image-source';
 import { now, projects } from './schema';
 
 export const AGENT_IMAGE_STATUSES = [

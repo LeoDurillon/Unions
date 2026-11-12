@@ -1,6 +1,6 @@
 // Notion's comment objects (`GET /v1/comments`) as `NotionComment`: who wrote what, where, when.
 
-import { isRecord } from '../agent-activity';
+import { isRecord } from '../agent/agent-activity';
 
 /** A run of a comment's text with its marks; a mention's text is its label (`@Name`). */
 export type NotionRichText = {

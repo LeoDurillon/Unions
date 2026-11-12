@@ -2,7 +2,7 @@
 
 import { index, integer, sqliteTable, text, type AnySQLiteColumn } from 'drizzle-orm/sqlite-core';
 
-import type { AgentReviewSpec } from '../agent-review-specs';
+import type { AgentReviewSpec } from '../review/agent-review-specs';
 import { now } from './schema';
 import { reviewOwnerColumns, runStatusColumn } from './schema-review-runs';
 

@@ -1,6 +1,7 @@
 // Reads the setup agent's answer into a proposal: its final `json` block, each value checked, refusals listed.
-import { lastJsonBlock } from '../json-block';
-import { parseScripts, ScriptsError } from '../project-scripts';
+
+import { lastJsonBlock } from '../agent/json-block';
+import { parseScripts, ScriptsError } from '../ticket/project-scripts';
 import { lines, records, section, text, type Dropped } from './setup-proposal-parts';
 import { previewOf, secretsOf } from './setup-proposal-preview';
 import type {

@@ -1,7 +1,8 @@
 // The setup agent's prompt: where Union's guide is, what to read, how each setting works, the
 // answer block to end with.
-import { MAX_RUN_TIMEOUT_SEC } from '../container-runs';
+
 import { PREVIEW_TEMPLATES } from '../preview/preview-config';
+import { MAX_RUN_TIMEOUT_SEC } from '../ticket/container-runs';
 import { SETUP_GUIDE_PATH } from './setup-guide';
 
 const READ = `## What to read

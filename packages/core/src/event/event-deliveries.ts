@@ -6,7 +6,7 @@ import { and, asc, desc, eq, inArray, isNotNull, isNull, like, lte } from 'drizz
 import type { Db } from '../db';
 import { parseNotionId } from '../integrations/notion-id';
 import * as schema from '../tables';
-import { emitEvent } from '../tickets';
+import { emitEvent } from '../ticket/tickets';
 import { isEvent, type StoredEvent } from './event-catalog';
 import { moveCursor, unreadEvents } from './event-cursors';
 import { triggerMatches } from './event-rules';

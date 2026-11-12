@@ -3,12 +3,12 @@
 
 import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
-import { SPEC_SOURCES } from '../spec-source-kinds';
+import { SPEC_SOURCES } from '../review/spec-source-kinds';
 import { now } from './schema';
 import { reviewOwnerColumns, runStatusColumn } from './schema-review-runs';
 
 // Where the specification came from: the text sent is kept in `spec`, whatever the source.
-export { SPEC_SOURCES, type SpecSource } from '../spec-source-kinds';
+export { SPEC_SOURCES, type SpecSource } from '../review/spec-source-kinds';
 
 /** A part of the specification and the changed files that implement it. */
 export type SpecGroup = {

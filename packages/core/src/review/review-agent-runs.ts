@@ -3,11 +3,11 @@
 
 import { and, desc, eq, inArray, type SQL } from 'drizzle-orm';
 
-import type { AgentReviewOwner } from '../agent-reviews';
-import { findCustomAgent } from '../custom-agents';
+import { findCustomAgent } from '../custom-agents/custom-agents';
 import type { Db } from '../db';
 import * as tables from '../tables';
-import { emitEvent } from '../tickets';
+import { emitEvent } from '../ticket/tickets';
+import type { AgentReviewOwner } from './agent-reviews';
 import type { ReportSpec } from './review-report-types';
 import {
   cancelQueuedReviewRun,

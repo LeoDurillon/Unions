@@ -5,7 +5,7 @@ import { eq } from 'drizzle-orm';
 import { createDb, migrateDb, type Db } from '../db';
 import { saveNotionConnection, storeNotionSchema } from '../integrations/notion-integration';
 import * as schema from '../tables';
-import { createTicket, emitEvent, getTicket } from '../tickets';
+import { createTicket, emitEvent, getTicket } from '../ticket/tickets';
 import {
   backfillNotionPages,
   finishDelivery,

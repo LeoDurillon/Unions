@@ -1,7 +1,7 @@
 import { beforeEach, expect, test } from 'bun:test';
 
-import { AgentToolError, REVIEW_AGENT_TOOLS } from '../agent-tools';
-import { resolveAgent, saveAgent, toolsFor } from '../agents';
+import { AgentToolError, REVIEW_AGENT_TOOLS } from '../agent/agent-tools';
+import { resolveAgent, saveAgent, toolsFor } from '../agent/agents';
 import {
   claimCustomAgentPrompt,
   createCustomAgent,
@@ -10,11 +10,11 @@ import {
   finishCustomAgentPrompt,
   flowReadySteps,
   readyReviewAgents,
-} from '../custom-agents';
+} from '../custom-agents/custom-agents';
 import { createDb, migrateDb, type Db } from '../db';
 import { customStep } from '../states';
 import * as tables from '../tables';
-import { createTicket } from '../tickets';
+import { createTicket } from '../ticket/tickets';
 import { queueReviewAgentRun } from './review-agent-runs';
 
 let db: Db;

@@ -2,7 +2,7 @@
 // checks as the worker.
 
 import type { PreviewConfig, PreviewService } from '../schema/schema-types';
-import { ownerHostId, ownerKey, type WorkspaceOwner } from '../workspace-owner';
+import { ownerHostId, ownerKey, type WorkspaceOwner } from './workspace-owner';
 
 /** Minutes without a visit before a running preview stops, when the settings do not say. */
 export const DEFAULT_IDLE_STOP_MINUTES = 60;

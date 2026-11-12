@@ -1,0 +1,157 @@
+// Ticket flows: the steps a ticket runs, the presets a project offers, and what agents are told of skipped steps.
+
+import type { ProjectConfig } from '../schema/schema-types';
+import {
+  FULL_FLOW,
+  isCustomStep,
+  PLANNING_STEPS,
+  pipelineIndex,
+  STEP_TITLES,
+  type CustomStep,
+  type Flow,
+  type PipelineStep,
+  type Step,
+} from '../states';
+import { stepTitle } from './step-titles';
+
+/**
+ * A named flow the user picks for a ticket; `id` is what `ProjectConfig.defaultFlow` names.
+ * `description`: what kind of ticket it is for, shown where the flow is picked.
+ */
+export type FlowPreset = { id: string; name: string; steps: PipelineStep[]; description?: string };
+
+export const BUILT_IN_PRESETS: readonly FlowPreset[] = [
+  {
+    id: 'full',
+    name: 'Full',
+    steps: [...FULL_FLOW],
+    description:
+      'A feature nobody has thought through yet, the most common case: every planning step.',
+  },
+  {
+    id: 'standard',
+    name: 'Standard',
+    steps: ['technical', 'implement', 'final_review'],
+    description:
+      'A feature already thought through, or a small one (a new button with one API call): the technical plan, then the code.',
+  },
+  {
+    id: 'quick',
+    name: 'Quick',
+    steps: ['implement', 'final_review'],
+    description:
+      'A really small fix that needs no thinking (a typo, a wording change): straight to the code.',
+  },
+];
+
+const DEFAULT_PRESET = 'full';
+
+/** Every flow ends with these: the final review's approval is what finishes a ticket. */
+const REQUIRED_STEPS: readonly PipelineStep[] = ['implement', 'final_review'];
+
+/** A built-in pipeline step or a custom agent's (`flowProblems` checks the agent exists). */
+export function isPipelineStep(value: unknown): value is PipelineStep {
+  return isCustomStep(value) || FULL_FLOW.some((step) => step === value);
+}
+
+function orderProblems(steps: readonly PipelineStep[]): string[] {
+  const order = steps.filter((step) => !isCustomStep(step)).map((step) => pipelineIndex(step));
+  const custom = steps.filter((step) => isCustomStep(step));
+  const problems: string[] = [];
+  if (order.some((at, index) => index > 0 && at <= (order[index - 1] ?? -1))) {
+    problems.push('Steps must appear once each, in pipeline order');
+  }
+  if (new Set(custom).size < custom.length) {
+    problems.push('A custom agent appears twice');
+  }
+  if (steps.includes('final_review') && steps.at(-1) !== 'final_review') {
+    problems.push(`${STEP_TITLES.final_review} must be the last step`);
+  }
+  return problems;
+}
+
+/**
+ * What makes `value` no flow: not a list, unknown or repeated steps, built-in steps out of order, a
+ * step after the final review, a required step missing. `customSteps` are the custom agents a flow
+ * may name (`flowReadySteps`); they go anywhere before the final review.
+ */
+export function flowProblems(value: unknown, customSteps: readonly CustomStep[] = []): string[] {
+  if (!Array.isArray(value)) {
+    return ['A flow is a list of steps'];
+  }
+  const steps: unknown[] = value;
+  const unknown = steps.filter(
+    (step) => !isPipelineStep(step) || (isCustomStep(step) && !customSteps.includes(step)),
+  );
+  if (unknown.length > 0) {
+    return [`Unknown steps: ${unknown.map((step) => JSON.stringify(step)).join(', ')}`];
+  }
+  const problems = orderProblems(steps.filter((step) => isPipelineStep(step)));
+  for (const step of REQUIRED_STEPS) {
+    if (!steps.includes(step)) {
+      problems.push(`Every flow runs ${stepTitle(step)}`);
+    }
+  }
+  return problems;
+}
+
+/** The project's presets: its own list when it has one, else the built-in ones. */
+/**
+ * The project's flows, or the built-in ones. A saved flow without a description takes the built-in's of
+ * the same id: flows saved before descriptions existed keep theirs.
+ */
+export function projectPresets(config: ProjectConfig): readonly FlowPreset[] {
+  if (!config.flows) {
+    return BUILT_IN_PRESETS;
+  }
+  return config.flows.map((preset) => {
+    const builtIn = BUILT_IN_PRESETS.find((each) => each.id === preset.id)?.description;
+    return preset.description === undefined && builtIn !== undefined
+      ? { ...preset, description: builtIn }
+      : preset;
+  });
+}
+
+export function sameFlow(a: Flow, b: Flow): boolean {
+  return a.length === b.length && a.every((step, index) => step === b[index]);
+}
+
+/** The name of the project's preset with these steps, else "Custom". */
+export function flowName(flow: Flow, config: ProjectConfig): string {
+  return projectPresets(config).find((preset) => sameFlow(preset.steps, flow))?.name ?? 'Custom';
+}
+
+/** The flow a ticket starts with: its own, else the project's default preset, else every step. */
+export function resolveFlow(ticket: { flow: Flow | null }, config: ProjectConfig): Flow {
+  if (ticket.flow !== null) {
+    return ticket.flow;
+  }
+  const id = config.defaultFlow ?? DEFAULT_PRESET;
+  return projectPresets(config).find((preset) => preset.id === id)?.steps ?? FULL_FLOW;
+}
+
+const OWN_NOTE: Partial<Record<Step, string>> = {
+  implement: 'Where your instructions refer to them, work from the ticket itself.',
+  final_review: 'Review the change against the ticket itself, and do not report them as missing.',
+};
+
+const NO_TEST_PLAN: Partial<Record<Step, string>> = {
+  implement:
+    'There is no test plan: add the tests this change needs, at the level the project already tests this behaviour.',
+  final_review: 'There is no test plan: judge whether the change has the tests it needs.',
+};
+
+/** The `# Flow` section the implementer and the final review get when planning steps were skipped. */
+export function flowNote(flow: Flow, step: Step): string {
+  const own = OWN_NOTE[step];
+  const skipped = PLANNING_STEPS.filter((planning) => !flow.includes(planning));
+  if (own === undefined || skipped.length === 0) {
+    return '';
+  }
+  const which =
+    skipped.length === PLANNING_STEPS.length
+      ? 'The user chose to skip planning for this ticket: no description, summary, technical plan or test plan was written.'
+      : `The user chose to skip these planning steps for this ticket, so they have no output: ${skipped.map((planning) => STEP_TITLES[planning]).join(', ')}.`;
+  const tests = skipped.includes('test_plan') ? NO_TEST_PLAN[step] : undefined;
+  return `# Flow\n\n${[which, own, tests].filter((part) => part !== undefined).join(' ')}`;
+}

@@ -5,7 +5,7 @@ import { and, eq } from 'drizzle-orm';
 import type { Db } from '../db';
 import { boardStatus } from '../states';
 import * as schema from '../tables';
-import type { Ticket } from '../tickets';
+import type { Ticket } from '../ticket/tickets';
 import {
   checkGitHubComment,
   checkGitHubProjectFields,

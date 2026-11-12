@@ -15,10 +15,10 @@ import {
   type PipelineStep,
   type Step,
 } from './phases';
-import { stackTransition } from './stack-states';
-import { startOverTransition } from './start-over';
+import { stackTransition } from './stack/stack-states';
+import { startOverTransition } from './ticket/start-over';
 
-export { canStartOver } from './start-over';
+export { canStartOver } from './ticket/start-over';
 
 export * from './phases';
 

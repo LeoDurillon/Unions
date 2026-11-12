@@ -6,9 +6,9 @@ custom agents' design is `docs/spec/custom-agents.md`.
 
 ## Settings
 
-An agent's prompt, model, effort and tools are resolved on every run (`packages/core/src/agents.ts`):
+An agent's prompt, model, effort and tools are resolved on every run (`packages/core/src/agent/agents.ts`):
 
-- Defaults: prompts in `DEFAULT_PROMPTS` (a few come from `pr-prompts.ts` and `lesson-writer.ts`), models in
+- Defaults: prompts in `DEFAULT_PROMPTS` (`agent/default-prompts.ts`; a few come from `pr-prompts.ts` and `lesson-writer.ts`), models in
   `MODEL_BY_AGENT` (`MODEL_BY_STEP` in `states.ts` for the steps), tools in `DEFAULT_TOOLS` (`agent-tools.ts`).
   Change a default there, never in the worker.
 - Overrides: one `agent_configs` row per edited agent; Reset deletes it. `resolveAgent` merges the two.

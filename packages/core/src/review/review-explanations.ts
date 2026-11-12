@@ -2,12 +2,12 @@
 
 import { and, asc, desc, eq, gt, inArray, type SQL } from 'drizzle-orm';
 
-import type { AgentReviewSpec } from '../agent-review-specs';
-import type { AgentReviewOwner } from '../agent-reviews';
 import type { Db } from '../db';
 import type { ExplanationResult } from '../schema/schema-review-explanations';
 import * as schema from '../tables';
-import { emitEvent } from '../tickets';
+import { emitEvent } from '../ticket/tickets';
+import type { AgentReviewSpec } from './agent-review-specs';
+import type { AgentReviewOwner } from './agent-reviews';
 import {
   cancelQueuedReviewRun,
   claimReviewRun,

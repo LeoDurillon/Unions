@@ -21,7 +21,7 @@ importing the repository's code by absolute path:
 
 ```ts
 import { runIn } from '<repo>/apps/worker/src/container-exec.ts';
-import { DockerCli } from '<repo>/packages/core/src/docker-cli.ts';
+import { DockerCli } from '<repo>/packages/core/src/docker/docker-cli.ts';
 import { createDb, migrateDb, schema } from '<repo>/packages/core/src/index.ts';
 
 const runtime = new DockerCli();

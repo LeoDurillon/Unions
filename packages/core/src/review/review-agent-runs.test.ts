@@ -1,16 +1,16 @@
 import { beforeEach, expect, test } from 'bun:test';
 
-import type { AgentReviewOwner } from '../agent-reviews';
 import {
   claimCustomAgentPrompt,
   createCustomAgent,
   deleteCustomAgent,
   finishCustomAgentPrompt,
-} from '../custom-agents';
+} from '../custom-agents/custom-agents';
 import { createDb, migrateDb, type Db } from '../db';
 import { isEvent } from '../event/event-catalog';
 import * as tables from '../tables';
-import { createTicket } from '../tickets';
+import { createTicket } from '../ticket/tickets';
+import type { AgentReviewOwner } from './agent-reviews';
 import {
   cancelQueuedReviewAgentRun,
   claimReviewAgentRun,

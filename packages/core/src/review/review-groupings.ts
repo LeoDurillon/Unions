@@ -3,11 +3,11 @@
 
 import { and, desc, eq, inArray, type SQL } from 'drizzle-orm';
 
-import type { AgentReviewOwner } from '../agent-reviews';
 import type { Db } from '../db';
 import type { GroupingResult, SpecSource } from '../schema/schema-review-groupings';
 import * as schema from '../tables';
-import { emitEvent } from '../tickets';
+import { emitEvent } from '../ticket/tickets';
+import type { AgentReviewOwner } from './agent-reviews';
 import {
   cancelQueuedReviewRun,
   claimReviewRun,

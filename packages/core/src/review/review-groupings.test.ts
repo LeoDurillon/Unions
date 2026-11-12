@@ -2,10 +2,10 @@
 
 import { beforeEach, expect, test } from 'bun:test';
 
-import type { AgentReviewOwner } from '../agent-reviews';
 import { createDb, migrateDb, type Db } from '../db';
 import * as schema from '../tables';
-import { createTicket } from '../tickets';
+import { createTicket } from '../ticket/tickets';
+import type { AgentReviewOwner } from './agent-reviews';
 import {
   cancelQueuedGrouping,
   claimGrouping,
