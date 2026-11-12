@@ -61,9 +61,7 @@ export function RunTable({
   return (
     <section className="space-y-2" aria-label="Runs">
       <div className="flex items-baseline justify-between">
-        <h3 className="text-xs font-semibold tracking-wider text-zinc-400 uppercase dark:text-zinc-500">
-          Runs
-        </h3>
+        <h3 className="text-xs font-semibold tracking-wider text-zinc-500 uppercase">Runs</h3>
         <span className="text-xs text-zinc-500">
           {runs.length} run{runs.length === 1 ? '' : 's'} · {formatDuration(runsDuration(runs))}
         </span>

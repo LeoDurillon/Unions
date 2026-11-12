@@ -8,10 +8,10 @@ import { useViewed } from './viewed-context';
 
 const STATUS_MARK = { added: 'A', deleted: 'D', modified: 'M', renamed: 'R' } as const;
 const STATUS_COLOR = {
-  added: 'text-green-600 dark:text-green-400',
-  deleted: 'text-red-600 dark:text-red-400',
-  modified: 'text-amber-600 dark:text-amber-400',
-  renamed: 'text-blue-600 dark:text-blue-400',
+  added: 'text-green-700 dark:text-green-400',
+  deleted: 'text-red-700 dark:text-red-400',
+  modified: 'text-amber-700 dark:text-amber-400',
+  renamed: 'text-blue-700 dark:text-blue-400',
 } as const;
 /** Indentation of one tree level, and the left padding of the top level, in pixels. */
 export const INDENT = 12;
@@ -71,7 +71,7 @@ export function FileRow({
   return (
     <div
       style={{ paddingLeft: PADDING + depth * INDENT }}
-      className={`flex items-center gap-2 rounded-md pr-2 text-xs transition ${active ? 'bg-indigo-100 dark:bg-indigo-950' : 'hover:bg-zinc-200/70 dark:hover:bg-zinc-800'}`}
+      className={`flex items-center gap-2 rounded-md pr-2 text-xs transition ${active ? 'bg-white shadow-xs ring-1 ring-indigo-300 ring-inset dark:bg-indigo-950 dark:shadow-none dark:ring-indigo-900' : 'hover:bg-zinc-200/70 dark:hover:bg-zinc-800'}`}
     >
       <input
         type="checkbox"
@@ -101,8 +101,8 @@ export function FileRow({
         {drafts > 0 ? (
           <span className="rounded-full bg-indigo-600 px-1.5 text-xs text-white">{drafts}</span>
         ) : null}
-        <span className="text-green-600 dark:text-green-400">+{file.additions}</span>
-        <span className="text-red-600 dark:text-red-400">−{file.deletions}</span>
+        <span className="text-green-700 dark:text-green-400">+{file.additions}</span>
+        <span className="text-red-700 dark:text-red-400">−{file.deletions}</span>
       </button>
     </div>
   );

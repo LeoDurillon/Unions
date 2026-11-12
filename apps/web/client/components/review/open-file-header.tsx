@@ -23,8 +23,8 @@ export function FileHeader({
         {file.path}
       </h3>
       <span className="shrink-0 font-mono text-xs">
-        <span className="text-green-600 dark:text-green-400">+{file.additions}</span>{' '}
-        <span className="text-red-600 dark:text-red-400">−{file.deletions}</span>
+        <span className="text-green-700 dark:text-green-400">+{file.additions}</span>{' '}
+        <span className="text-red-700 dark:text-red-400">−{file.deletions}</span>
       </span>
       {whole ? (
         <button

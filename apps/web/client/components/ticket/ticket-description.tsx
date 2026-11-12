@@ -45,7 +45,7 @@ export function TicketDescription({ ticket }: { ticket: TicketDetail['ticket'] }
   return (
     <section className="ticket-prose min-w-0 space-y-2" aria-label="Description">
       <div className="flex items-center justify-between">
-        <h3 className="text-xs font-semibold tracking-wider text-zinc-400 uppercase dark:text-zinc-500">
+        <h3 className="text-xs font-semibold tracking-wider text-zinc-500 uppercase">
           Description
         </h3>
         <Button

@@ -55,7 +55,7 @@ function Header({
             </Badge>
           ))}
           {explanation.partsOutdated ? (
-            <span className="text-amber-600 dark:text-amber-400">(older grouping)</span>
+            <span className="text-amber-700 dark:text-amber-400">(older grouping)</span>
           ) : null}
         </p>
       ) : null}

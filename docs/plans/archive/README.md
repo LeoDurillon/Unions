@@ -135,3 +135,6 @@ the spec (`docs/spec/`); open work is in the [plans README](../README.md).
 - [Filter the review's files, and Code only](review-file-filter.md): a box that keeps the files whose path holds
   every typed word (`/` goes to it), and Code only, which hides what the change size does not count as code. Built
   (branch `review-file-filter`, 2026-11-09), checked in a browser on a copy of the live database.
+- [UI overhaul](ui-overhaul.md): every page redesigned from the Claude Design canvases (cards, ticket tabs, loading
+  placeholders, New ticket, the dialogs), then a dark and a light contrast pass over all of them. Built
+  (2026-11-12).

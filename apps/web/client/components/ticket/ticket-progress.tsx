@@ -30,7 +30,7 @@ const NOTE: Record<StopState, string> = {
   running: 'text-blue-700 dark:text-blue-300',
   waiting: 'text-amber-700 dark:text-amber-300',
   stalled: 'text-red-700 dark:text-red-300',
-  todo: 'text-zinc-400 dark:text-zinc-500',
+  todo: 'text-zinc-500',
 };
 
 function StopDot({ state }: { state: StopState }): ReactElement {

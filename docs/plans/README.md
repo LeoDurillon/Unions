@@ -19,8 +19,6 @@ Open findings of the security reviews (2026-10-24 audit, 2026-11-08 review), to 
 
 ## In progress
 
-- [UI overhaul: what is left](ui-overhaul.md): most pages and the ticket tabs redesigned, loading placeholders and a
-  card per settings group built (2026-11-12); the New ticket dialog, a few pages not done, and a dark mode pass left.
 - [What the agents' logs say to improve](usage-insights.md): findings on the Usage tab from each call's tokens
   and tool uses (part 1 built), then a Claude run that proposes the changes (part 2 built, branch
   `usage-suggestions`); part 3 (comparing the figures before and after a change) planned.
@@ -94,3 +92,7 @@ Loose ends found while building, not planned yet (2026-10-15):
 - [Events v2](events-v2.md): more actions (GitHub comment, pull request labels and GitHub Project fields built;
   Notion comment planned; webhook deferred), replay, filters, group triggers
 - [Names in the event rule preview](rule-preview-people.md) (small)
+- From the [UI overhaul](archive/ui-overhaul.md)'s canvases, new features to ask about first (they use Claude or
+  start work): "Draft with the agent" on a Notion comment, "Start it now" in New ticket, "Bring the page's changes
+  in" on the Notion tab, Stop on a running step in the Log (a state machine change). Also open: naming the Notion
+  status column in Settings → Notion, and per-service preview state (a migration).

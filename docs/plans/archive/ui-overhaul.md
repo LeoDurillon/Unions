@@ -1,4 +1,4 @@
-# UI overhaul: what is left
+# UI overhaul
 
 The client got a visual redesign, page by page, from mockups on Claude Design canvases (private to the owner;
 ask them for access if you need them):
@@ -106,14 +106,19 @@ large), colours read through a canvas so `oklch()` counts.
 - Red, green, amber, blue and indigo text without a dark variant (the review file list's +/− and kinds, errors in
   Memory and in an explanation) got their `dark:` -400.
 
+Then the light mode contrast (2026-11-12), client only: the same scan in light over every page, the ones redesigned
+today too. In light mode `--color-zinc-500` is `oklch(0.5 0.016 286)` (`index.css`), so the muted text reads over
+4.5:1 on the page's zinc-50 and on zinc-100 fills (it was 4.4:1). The labels in `text-zinc-400` (the Overview's
+DESCRIPTION and RUNS, a step not reached yet: "PR ready", "On GitHub") are `text-zinc-500`; the zinc-400 left is
+decoration (the "/" separators, icons, placeholders). The review file list's +/− counts and change kinds are the
+-700 shades in light, and its open file is a white row with an indigo ring (the indigo-100 fill took the green and
+amber under 4.5:1). Checked in dark again where a class moved.
+
 ## Left to do
 
 Take them in this order; each is one worktree, one commit, checked with screenshots before it is deployed.
 
-1. **Light mode contrast**, found during the dark pass, not changed yet: the muted text (`text-zinc-500`) reads
-   about 4.4:1 on the page background, just under 4.5:1, and the faint labels (`text-zinc-400`: "PR ready" under the
-   ticket's steps, the Overview's DESCRIPTION and RUNS titles) about 2.6:1. Ask the user before changing light
-   mode.
+Nothing: the redesign is built. The ideas the canvases hold that are new features, not design, are below.
 
 Two ideas on the inner canvas are new features, not design: "Draft with the agent" on a Notion comment and "Start
 it now" in New ticket. Ask the user before building either: both spend Claude usage or start work.
