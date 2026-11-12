@@ -1,97 +1,44 @@
-// A ticket card for the board: its title, its state, the ticket it builds on, its pull request, its CI checks and a
-// branch moved on GitHub, what its agent is doing while it runs, and Start while it waits in the backlog.
-import { flowName, resolveFlow } from '@union/core/flows';
-import { FULL_FLOW } from '@union/core/states';
+// A ticket card for the board: its issue and pull request, its title, the ticket it builds on, its state and its
+// way through the flow, its CI checks, stack and a branch moved on GitHub, what its agent is doing while it runs,
+// and Start while it waits in the backlog.
 import type { ReactElement } from 'react';
 
 import type { PublicProject, TicketSummary } from '../../src/api-types';
-import { describePhase, isBlocked, isStartable, refLabel, type Tone } from '../lib/labels';
+import { needsYou } from '../lib/board-filter';
+import { describePhase, isBlocked, isStartable, refLabel } from '../lib/labels';
 import { useCustomAgentNames } from '../lib/use-custom-agents';
+import { CardMeta } from './card-meta';
 import { CardProgress } from './card-progress';
-import { Badge } from './ui';
+import { CardSignals } from './card-signals';
+import { CardSteps } from './card-steps';
+import { StatusPill } from './status-pill';
 
-const SHORT_SHA = 7;
-
-const CHECKS: Record<NonNullable<TicketSummary['prChecksState']>, { label: string; tone: Tone }> = {
-  pending: { label: 'Checks running', tone: 'amber' },
-  success: { label: 'Checks passed', tone: 'green' },
-  failure: { label: 'Checks failed', tone: 'red' },
-};
-
-/** The CI checks of the open pull request's head commit; nothing when they are not known. */
-function ChecksBadge({ ticket }: { ticket: TicketSummary }): ReactElement | null {
-  if (ticket.prState !== 'open' || ticket.prChecksState === null) {
-    return null;
-  }
-  const { label, tone } = CHECKS[ticket.prChecksState];
-  const sha = ticket.prChecksSha?.slice(0, SHORT_SHA);
-  return (
-    <Badge tone={tone} title={sha ? `CI checks on ${sha}` : undefined}>
-      {label}
-    </Badge>
-  );
-}
-
-/** How the ticket's pull request ended, for the Merged / Closed column; null while it has not. */
-/** The branch moved on GitHub since Union pushed it: the Pull request tab offers a resync. */
-function MovedBadge({ ticket }: { ticket: TicketSummary }): ReactElement | null {
-  if (ticket.prState !== 'open' || ticket.remoteMoved === null) {
-    return null;
-  }
-  return (
-    <Badge tone="amber" title="Resync it from the Pull request tab">
-      Branch moved
-    </Badge>
-  );
-}
-
-function PrEnd({ prState }: { prState: TicketSummary['prState'] }): ReactElement {
-  return prState === 'merged' ? (
-    <Badge tone="blue">Merged</Badge>
-  ) : (
-    <Badge tone="red">Closed</Badge>
-  );
-}
-
-/** The card's state, one pill: how the pull request ended, else whether it waits, else its phase and step. */
-function CardStatus({ ticket }: { ticket: TicketSummary }): ReactElement {
+/**
+ * The card's state, one pill, when the column does not say it already: how the pull request ended, waiting for
+ * the parent, or the phase and step of a ticket that runs, waits or stopped. Not "Not started" in Backlog, nor
+ * "Done" in Done.
+ */
+function CardStatus({ ticket }: { ticket: TicketSummary }): ReactElement | null {
   const names = useCustomAgentNames();
   if (ticket.board === 'merged') {
-    return <PrEnd prState={ticket.prState} />;
+    const merged = ticket.prState === 'merged';
+    return (
+      <StatusPill
+        size="sm"
+        tone={merged ? 'green' : 'neutral'}
+        label={merged ? 'Merged' : 'Closed'}
+      />
+    );
   }
   if (isBlocked(ticket)) {
-    return <Badge tone="amber">Waiting for parent</Badge>;
+    return <StatusPill size="sm" tone="neutral" label="Waiting for parent" />;
   }
-  const phase = describePhase(ticket.phase, names);
-  return <Badge tone={phase.tone}>{phase.label}</Badge>;
-}
-
-/** A split ticket: its stack's size, what merged, and its pull requests. */
-function StackBadge({ stack }: { stack: NonNullable<TicketSummary['stack']> }): ReactElement {
-  const prs = stack.slices.flatMap((slice) =>
-    slice.prNumber === null ? [] : [`#${slice.prNumber}`],
-  );
-  const wrong = stack.outOfOrder.length > 0 || stack.closed.length > 0;
-  return (
-    <Badge tone={wrong ? 'red' : 'neutral'} title={prs.join(' → ')}>
-      {stack.label}
-    </Badge>
-  );
-}
-
-/** The flow's name when it is not the full pipeline: a short flow is worth seeing on the board. */
-function FlowBadge({
-  ticket,
-  config,
-}: {
-  ticket: TicketSummary;
-  config: PublicProject['config'];
-}): ReactElement | null {
-  const flow = resolveFlow(ticket, config);
-  if (flow.length === FULL_FLOW.length) {
+  const { kind } = ticket.phase;
+  if (kind === 'backlog' || kind === 'done') {
     return null;
   }
-  return <Badge tone="neutral">{flowName(flow, config)}</Badge>;
+  const phase = describePhase(ticket.phase, names);
+  return <StatusPill size="sm" tone={phase.tone} label={phase.label} title={phase.label} />;
 }
 
 /** The ticket it builds on, as a small chip: its whole title on hover. */
@@ -99,23 +46,10 @@ function ParentChip({ parent }: { parent: NonNullable<TicketSummary['parent']> }
   return (
     <span
       title={`Starts after ${refLabel(parent)} ${parent.title}`}
-      className="inline-block max-w-full truncate rounded border border-zinc-200 px-1.5 text-xs text-zinc-500 dark:border-zinc-700"
+      className="inline-block max-w-full truncate text-[11px] text-zinc-500 dark:text-zinc-400"
     >
       ↳ after {refLabel(parent)}
     </span>
-  );
-}
-
-/** Starts the agent on a backlog ticket, above the card's own click. */
-function StartButton({ onStart }: { onStart: () => void }): ReactElement {
-  return (
-    <button
-      type="button"
-      onClick={onStart}
-      className="relative z-[1] rounded-md border border-indigo-300 px-2 py-0.5 text-xs font-medium text-indigo-700 hover:bg-indigo-50 dark:border-indigo-800 dark:text-indigo-300 dark:hover:bg-indigo-950/40"
-    >
-      Start
-    </button>
   );
 }
 
@@ -130,15 +64,33 @@ function StartAction({
   onStart?: (id: number) => void;
 }): ReactElement | null {
   if (starting) {
-    return <Badge tone="blue">Starting…</Badge>;
+    return <StatusPill size="sm" tone="blue" label="Starting…" />;
   }
-  return isStartable(ticket) && onStart ? (
-    <StartButton
-      onStart={() => {
+  if (!isStartable(ticket) || !onStart) {
+    return null;
+  }
+  return (
+    <button
+      type="button"
+      onClick={() => {
         onStart(ticket.id);
       }}
-    />
-  ) : null;
+      className="relative z-[1] inline-flex h-6 items-center gap-1 rounded-md bg-indigo-600 px-2 text-[11px] font-semibold text-white hover:bg-indigo-500"
+    >
+      <span aria-hidden>▶</span> Start
+    </button>
+  );
+}
+
+/** A card waiting for the user stands out in amber; a running one in blue. */
+function cardTone(ticket: TicketSummary): string {
+  if (needsYou(ticket)) {
+    return 'border-amber-300 ring-1 ring-amber-200/70 dark:border-amber-800 dark:ring-amber-900/40';
+  }
+  if (ticket.phase.kind === 'running') {
+    return 'border-blue-200 dark:border-blue-900';
+  }
+  return 'border-zinc-200 dark:border-zinc-800';
 }
 
 export function TicketCard({
@@ -159,35 +111,38 @@ export function TicketCard({
   startError?: string | null;
 }): ReactElement {
   return (
-    <div className="relative space-y-2 rounded-lg border border-zinc-200 bg-white p-3 shadow-sm transition hover:border-indigo-400 dark:border-zinc-800 dark:bg-zinc-900">
-      <button
-        type="button"
-        onClick={() => {
-          onOpen(ticket.id);
-        }}
-        title={ticket.title}
-        className="line-clamp-3 text-left text-sm font-medium after:absolute after:inset-0 after:content-['']"
-      >
-        {ticket.title}
-      </button>
-      {ticket.parent ? <ParentChip parent={ticket.parent} /> : null}
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-        <CardStatus ticket={ticket} />
-        <ChecksBadge ticket={ticket} />
-        <MovedBadge ticket={ticket} />
-        {ticket.stack ? <StackBadge stack={ticket.stack} /> : null}
-        {config ? <FlowBadge ticket={ticket} config={config} /> : null}
-        <StartAction ticket={ticket} starting={starting} onStart={onStart} />
-        <span className="ml-auto text-xs whitespace-nowrap text-zinc-500">
-          {ticket.issueNumber === null ? 'not on GitHub yet' : `#${ticket.issueNumber}`}
-        </span>
+    <div
+      className={`relative space-y-2.5 rounded-xl border bg-white p-3.5 shadow-sm transition hover:-translate-y-px hover:shadow-md dark:bg-zinc-900 ${cardTone(ticket)}`}
+    >
+      <CardMeta ticket={ticket} config={config} />
+      <div className="space-y-1">
+        <button
+          type="button"
+          onClick={() => {
+            onOpen(ticket.id);
+          }}
+          title={ticket.title}
+          className="line-clamp-3 text-left text-[13.5px] leading-snug font-semibold after:absolute after:inset-0 after:rounded-xl after:content-['']"
+        >
+          {ticket.title}
+        </button>
+        {ticket.parent ? <ParentChip parent={ticket.parent} /> : null}
       </div>
+      <div className="flex flex-wrap items-center gap-2 empty:hidden">
+        <CardStatus ticket={ticket} />
+        <StartAction ticket={ticket} starting={starting} onStart={onStart} />
+      </div>
+      {/* Once done, every step is behind it: the column says so. */}
+      {config && ticket.phase.kind !== 'done' ? (
+        <CardSteps ticket={ticket} config={config} />
+      ) : null}
       {startError ? (
         <p role="alert" className="text-xs text-red-600 dark:text-red-400">
           Not started: {startError}
         </p>
       ) : null}
       <CardProgress ticket={ticket} />
+      <CardSignals ticket={ticket} />
     </div>
   );
 }

@@ -12,11 +12,19 @@ moving a card to In Progress on GitHub starts the ticket. Without one, Union's b
 | **Done**            | Tickets whose final review you approved. Their pull request is ready for review. |
 | **Merged / Closed** | Tickets whose pull request was merged or closed in the last three weeks.         |
 
-Each card shows the ticket's state ("Waiting for you · Technical", "Running · Implementation"), its issue number (when it has an issue), the
-ticket it depends on, and the CI checks of its pull request. It also shows the flow's name when it is not Full, a split
-ticket's stack ("Stack of 3 · 1 merged"), **Branch moved** when someone pushed to its branch on GitHub, and, in Merged / Closed,
-**Merged** or **Closed**. "Rate limited" means the step waits for your Claude usage limit to reset; "Commit refused"
-means a git hook of the repository refused the agent's changes (see
+Each card shows its issue and pull request numbers on top (and the flow's name when it is not Full), then its title
+and the ticket it depends on. Below them come:
+
+- its state ("Waiting for you · Technical", "Running · Implementation"), except in Backlog and Done, where the
+  column already says it;
+- a thin bar with one segment per step of its flow: green for the steps done, amber for the one waiting for you,
+  blue while it runs, red when it stopped. Hover it to see the steps' names;
+- the CI checks of its pull request, a split ticket's stack ("Stack of 3 · 1 merged"), and **Branch moved** when
+  someone pushed to its branch on GitHub.
+
+In Merged / Closed, the card says **Merged** or **Closed**. A card that needs you has an amber border, and a running
+one a blue border. "Rate limited" means the step waits for your Claude usage limit to reset; "Commit refused" means
+a git hook of the repository refused the agent's changes (see
 [When a step stops](ticket-lifecycle.md#when-a-step-stops)). Fold a column you do not need with its arrow; Merged /
 Closed starts folded.
 

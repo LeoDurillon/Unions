@@ -54,7 +54,7 @@ function Placeholders(): ReactElement {
       {[0, 1].map((key) => (
         <div
           key={key}
-          className="h-20 animate-pulse rounded-lg bg-zinc-200/80 dark:bg-zinc-800/80"
+          className="h-24 animate-pulse rounded-xl bg-zinc-200/80 dark:bg-zinc-800/80"
         />
       ))}
     </div>
@@ -98,10 +98,13 @@ function Column({
 }): ReactElement {
   const { started } = view;
   return (
-    <section className="flex h-full min-w-52 flex-1 flex-col gap-2 rounded-xl bg-zinc-100 p-3 dark:bg-zinc-900/60">
-      <h2 className="flex items-center gap-2 text-sm font-semibold">
-        <span className="min-w-0 flex-1 truncate">{title}</span>
-        <span className="text-xs font-normal text-zinc-500">{tickets.length}</span>
+    <section className="flex h-full min-w-56 flex-1 flex-col gap-2.5 rounded-2xl bg-zinc-100/80 p-3 dark:bg-zinc-900/60">
+      <h2 className="flex items-center gap-2 px-0.5 text-[13px] font-semibold">
+        <span className="truncate">{title}</span>
+        <span className="rounded-full bg-white px-1.5 text-[11px] font-medium text-zinc-600 tabular-nums shadow-sm dark:bg-zinc-800 dark:text-zinc-300">
+          {tickets.length}
+        </span>
+        <span className="flex-1" />
         <button
           type="button"
           title={`Fold ${title}`}
@@ -112,7 +115,7 @@ function Column({
           ‹
         </button>
       </h2>
-      <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto">
+      <div className="-mx-1 flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto px-1 pt-0.5 pb-1">
         {tickets.length === 0 ? <EmptyColumn status={status} view={view} /> : null}
         {tickets.map((ticket) => (
           <TicketCard
