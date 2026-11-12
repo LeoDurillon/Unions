@@ -5,8 +5,10 @@ browser before you approve it, database and all.
 
 ## Set it up
 
-Open the project's **Environments** tab, in the bar above the board, and its **Compose** page. The tab also lists
-the project's previews running now, with their addresses and **Stop**.
+Open the project's **Environments** tab, in the bar above the board, and its **Compose** page (the pages are listed
+on the left). At the top, four cards say whether previews are on, how many run now, the Compose file and the
+profiles turned on. Under them, while some run, the tab lists the project's previews running now, with their
+addresses and **Stop**.
 
 1. **Compose file**: the path of the Compose file in the repository, for example `compose.yaml`.
 2. **Exposed services**: the services you want to open in the browser, with their port. The first one is the one

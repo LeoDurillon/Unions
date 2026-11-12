@@ -1,5 +1,5 @@
 // The project's previews that hold containers now, tickets' and pull requests', with Stop. Also the
-// addresses of its shared services the proxy opens.
+// addresses of its shared services the proxy opens; nothing while none runs (the summary says 0).
 
 import type { ReactElement } from 'react';
 
@@ -16,29 +16,29 @@ export function ProjectPreviews({
 }: {
   projectId: number;
   onOpenTicket: (ticketId: number) => void;
-}): ReactElement {
+}): ReactElement | null {
   const previews = useRunningPreviews();
   const shared = useSharedServices(projectId).data?.stack;
   const stop = useStopPreview();
   const list = (previews.data ?? []).filter((preview) => preview.project.id === projectId);
+  const sharedUp = shared?.status === 'running' && (shared.urls ?? []).length > 0;
+  const failed = previews.error ?? stop.error;
+  if (list.length === 0 && !sharedUp && failed === null) {
+    return null;
+  }
   return (
     <section aria-labelledby="running-now" className="space-y-2">
       <h3 id="running-now" className="text-sm font-semibold">
         Running now
       </h3>
-      <ErrorText error={previews.error ?? stop.error} />
-      {shared?.status === 'running' && (shared.urls ?? []).length > 0 ? (
+      <ErrorText error={failed} />
+      {sharedUp ? (
         <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-500">
           Shared services: <SharedLinks urls={shared.urls} />
         </div>
       ) : null}
-      {previews.data && list.length === 0 ? (
-        <p className="text-sm text-zinc-500">
-          No preview of this project is running. Start one from a ticket&apos;s Preview tab, or from
-          a pull request&apos;s review.
-        </p>
-      ) : (
-        <ul className="rounded-md border border-zinc-200 dark:border-zinc-800 [&>li:last-child]:border-b-0">
+      {list.length === 0 ? null : (
+        <ul className="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900 [&>li:last-child]:border-b-0">
           {list.map((preview) => (
             <RunningPreviewRow
               key={preview.id}
