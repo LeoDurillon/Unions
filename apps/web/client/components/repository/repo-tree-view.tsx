@@ -5,21 +5,16 @@ import type { ReactElement } from 'react';
 import type { RepositoryEntry } from '../../../src/repository-api-types';
 import { nameOf } from '../../lib/repository/repo-tree';
 import { INDENT, PADDING } from '../review/file-row';
+import { EntryIcon } from './entry-icon';
 import type { RepoTreeState } from './use-repo-tree';
 
 const ROW =
-  'flex w-full items-center gap-2 rounded-md py-1 pr-2 text-left font-mono text-xs transition';
+  'flex w-full items-center gap-1.5 rounded-md py-1 pr-2 text-left font-mono text-xs transition';
 
-const MARKS: Record<RepositoryEntry['type'], string> = {
-  dir: '',
-  file: '',
-  link: '↪',
-  submodule: '⧉',
-};
-
-function markOf(entry: RepositoryEntry, open: boolean): string {
+/** A folder's caret: open or not; nothing for the rest. */
+function caretOf(entry: RepositoryEntry, open: boolean): string {
   if (entry.type !== 'dir') {
-    return MARKS[entry.type];
+    return '';
   }
   return open ? '▾' : '▸';
 }
@@ -56,14 +51,10 @@ function EntryRow({
       className={`${ROW} ${active ? 'bg-indigo-100 text-zinc-900 dark:bg-indigo-950 dark:text-zinc-100' : 'text-zinc-700 hover:bg-zinc-200/70 dark:text-zinc-300 dark:hover:bg-zinc-800'}`}
     >
       <span aria-hidden className="w-3 shrink-0 text-center text-[10px] text-zinc-500">
-        {markOf(entry, open)}
+        {caretOf(entry, open)}
       </span>
-      <span
-        className={`min-w-0 flex-1 truncate ${isDir ? 'text-zinc-600 dark:text-zinc-400' : ''}`}
-      >
-        {nameOf(entry.path)}
-        {isDir ? '/' : ''}
-      </span>
+      <EntryIcon type={entry.type} open={open} />
+      <span className="min-w-0 flex-1 truncate">{nameOf(entry.path)}</span>
       {state.loading.has(entry.path) ? <span className="text-[10px] text-zinc-500">…</span> : null}
     </button>
   );

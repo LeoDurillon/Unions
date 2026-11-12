@@ -17,7 +17,10 @@ function Crumbs({
   const parts = path === '' ? [] : path.split('/');
   const crumbs = parts.map((name, index) => ({ name, at: parts.slice(0, index + 1).join('/') }));
   return (
-    <nav aria-label="Path" className="flex min-w-0 flex-wrap items-center gap-1 font-mono text-xs">
+    <nav
+      aria-label="Path"
+      className="flex min-w-0 flex-wrap items-center gap-1 font-mono text-[13px]"
+    >
       <button
         type="button"
         onClick={() => {
@@ -62,7 +65,7 @@ export function FileHeader({
   onPick: (path: string) => void;
 }): ReactElement {
   return (
-    <header className="sticky top-0 z-10 flex items-center gap-3 border-b border-zinc-200 bg-white px-4 py-2 dark:border-zinc-800 dark:bg-zinc-900">
+    <header className="sticky top-0 z-10 flex items-center gap-3 border-b border-zinc-200 bg-white/95 px-5 py-2.5 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/95">
       <Crumbs root={place.repo} path={path} onPick={onPick} />
       <span className="flex-1" />
       {entry?.size === null || entry?.size === undefined ? null : (
@@ -74,7 +77,7 @@ export function FileHeader({
         rel="noreferrer"
         className="text-xs text-indigo-600 hover:underline dark:text-indigo-400"
       >
-        Open on GitHub
+        Open on GitHub ↗
       </a>
     </header>
   );

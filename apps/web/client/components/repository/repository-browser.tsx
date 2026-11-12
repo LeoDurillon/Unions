@@ -35,7 +35,7 @@ function Loaded({ tree, ...props }: Props & { tree: RepositoryTree }): ReactElem
   const current = path ?? '';
   return (
     <div className="flex min-h-0 flex-1">
-      <aside className="flex w-72 shrink-0 flex-col gap-2 overflow-y-auto border-r border-zinc-200 bg-zinc-50 p-2 dark:border-zinc-800 dark:bg-zinc-950">
+      <aside className="flex w-72 shrink-0 flex-col gap-2 overflow-y-auto border-r border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-950">
         <RepoFilterBox value={query} onChange={setQuery} />
         <ErrorText error={state.error} />
         {query.trim() === '' ? (
@@ -49,7 +49,7 @@ function Loaded({ tree, ...props }: Props & { tree: RepositoryTree }): ReactElem
           />
         )}
       </aside>
-      <div className="min-w-0 flex-1 overflow-auto bg-white dark:bg-zinc-900">
+      <div className="min-w-0 flex-1 overflow-auto bg-zinc-50 dark:bg-zinc-950">
         <FileViewer
           base={{
             projectId,

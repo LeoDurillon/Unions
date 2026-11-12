@@ -5,11 +5,12 @@ ticket changed. Use it to read a file before you write a ticket, or to look at c
 
 ## What you see
 
-- **At the top**: the branch shown, its latest commit, who made it and when. The short commit id opens the commit on
-  GitHub. **Refresh** reads the branch again after someone pushed to it.
+- **At the top**: the branch shown, then its latest commit: who made it, its message, its short id and when. The
+  short commit id opens the commit on GitHub. **Refresh** reads the branch again after someone pushed to it.
 - **On the left**: the folders and files. Click a folder to open it; click a file to show it.
 - **On the right**: the file, with line numbers and colours for its language. Images show as images. A binary file, or one larger than 1 MB, shows only its size: **Open on GitHub** opens it
-  there. A folder shows its contents with their sizes.
+  there. A folder shows its contents in three columns, folders first, with their sizes, then its README rendered
+  under them when it has one (as on GitHub).
 - **The path above the file**: click a folder in it to go back up.
 
 ## Another branch

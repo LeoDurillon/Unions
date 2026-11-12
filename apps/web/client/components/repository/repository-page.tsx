@@ -21,7 +21,7 @@ export function RepositoryPage({ project }: { project: PublicProject }): ReactEl
   };
   return (
     <div className="flex h-full flex-col">
-      <div className="flex items-center gap-2 border-b border-zinc-200 px-4 py-2 dark:border-zinc-800">
+      <div className="flex items-center gap-3 border-b border-zinc-200 bg-white px-5 py-2.5 dark:border-zinc-800 dark:bg-zinc-950">
         <RefPicker
           projectId={project.id}
           current={ref ?? project.config.baseBranch}
