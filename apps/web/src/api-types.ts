@@ -322,6 +322,8 @@ export type PullRequestNote = {
 };
 
 export type PullRequestDiscussion = {
+  /** The pull request's title on GitHub. */
+  title: string;
   /** The pull request's own description (markdown). */
   description: string;
   threads: PullRequestThread[];

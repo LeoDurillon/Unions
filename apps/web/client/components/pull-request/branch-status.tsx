@@ -1,42 +1,92 @@
-// How far the PR's branch is behind its base (polled from GitHub by the worker) and the Rebase
-// button.
+// The pull request's branch card: how far it is behind its base, Rebase, and the other branch operations.
+// The worker polls GitHub for how far behind; the other operations open from the card's menu button.
 
-import type { ReactElement } from 'react';
+import { useState, type ReactElement } from 'react';
 
 import type { TicketDetail } from '../../../src/api-types';
+import { canRewrite, rewriteBlock } from '../../lib/pull-request/rewrite-block';
 import { useTicketCommands } from '../../lib/ticket/use-ticket-commands';
 import { HelpText } from '../ui/help-text';
-import { Button, ErrorText } from '../ui/ui';
+import { Button, CARD_CLASS, ErrorText } from '../ui/ui';
+import { hasMoreActions, MoreActions, moreActionsLabel } from './more-actions';
 
 const HELP =
   'Git rebases the branch and the checks run, then it is force-pushed. The implementation agent is called only for conflicts or failing checks, and then the final review runs again. On failure the branch is left as it was.';
 
-/**
- * Why the branch cannot be rewritten now (a rebase, a simpler history, a split, a new target); null
- * when it can: the ticket waits on its final review, or is done with the PR open, and the branch on
- * GitHub is the one Union pushed.
- */
-export function rewriteBlock(detail: TicketDetail): string | null {
-  const { phase, remoteMoved } = detail.ticket;
-  if (remoteMoved !== null) {
-    return 'The branch moved on GitHub: resync it first';
+/** The card's first line: how far behind, up to date, or the branch while the worker has not checked. */
+function Headline({ detail }: { detail: TicketDetail }): ReactElement {
+  const { ticket, project } = detail;
+  const base = <code>{ticket.baseBranch ?? project.config.baseBranch}</code>;
+  if (ticket.behindBy === null) {
+    return (
+      <>
+        Branch <code>{ticket.branch}</code>
+      </>
+    );
   }
-  const ready =
-    phase.kind === 'done' || (phase.kind === 'awaiting_approval' && phase.step === 'final_review');
-  return ready ? null : 'Available at the final review, or once done';
+  if (ticket.behindBy === 0) {
+    return <>Up to date with {base}</>;
+  }
+  return (
+    <>
+      {ticket.behindBy === 1 ? '1 commit' : `${ticket.behindBy} commits`} behind {base}
+    </>
+  );
 }
 
-export function canRewrite(detail: TicketDetail): boolean {
-  return rewriteBlock(detail) === null;
+const BEHIND_CLASS =
+  'space-y-3 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm dark:border-amber-900 dark:bg-amber-950/30';
+
+/** The branch's card itself: its state, the menu button, Rebase when behind, and the actions once opened. */
+function BranchCard({ detail, more }: { detail: TicketDetail; more: boolean }): ReactElement {
+  const { ticket } = detail;
+  const { command } = useTicketCommands(ticket.id);
+  const [open, setOpen] = useState(false);
+  const behind = ticket.behindBy !== null && ticket.behindBy > 0;
+  return (
+    <section className={behind ? BEHIND_CLASS : `${CARD_CLASS} text-sm`}>
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="min-w-0 flex-1 space-y-0.5">
+          <p className="font-semibold">
+            <Headline detail={detail} />
+          </p>
+          {behind ? <HelpText>{HELP}</HelpText> : null}
+        </div>
+        {more ? (
+          <Button
+            aria-expanded={open}
+            onClick={() => {
+              setOpen(!open);
+            }}
+          >
+            {moreActionsLabel(detail)} {open ? '▴' : '▾'}
+          </Button>
+        ) : null}
+        {behind ? (
+          <Button
+            variant="primary"
+            disabled={!canRewrite(detail) || command.isPending}
+            title={rewriteBlock(detail) ?? undefined}
+            onClick={() => {
+              command.mutate({ type: 'rebase' });
+            }}
+          >
+            Rebase
+          </Button>
+        ) : null}
+      </div>
+      <ErrorText error={command.error} />
+      {open && more ? <MoreActions detail={detail} /> : null}
+    </section>
+  );
 }
 
 /**
- * How far the PR's branch is behind its base (polled from GitHub by the worker) and the Rebase
- * button. Nothing shows until the worker has checked, or once the PR is closed or merged.
+ * The branch's card: how far it is behind its base (polled from GitHub by the worker), Rebase then, and the
+ * menu button opening the other branch operations. A split ticket's stack panel has its own.
  */
 export function BranchStatus({ detail }: { detail: TicketDetail }): ReactElement | null {
-  const { ticket, project } = detail;
-  const { command } = useTicketCommands(ticket.id);
+  const { ticket } = detail;
   if (ticket.prState === 'merged') {
     return (
       <p className="text-sm text-zinc-500">
@@ -44,37 +94,9 @@ export function BranchStatus({ detail }: { detail: TicketDetail }): ReactElement
       </p>
     );
   }
-  // A split ticket's stack panel shows how far the stack is behind, and its Rebase.
-  if (ticket.behindBy === null || ticket.branch === null || ticket.stack) {
+  const more = hasMoreActions(detail);
+  if (ticket.branch === null || ticket.stack || (ticket.behindBy === null && !more)) {
     return null;
   }
-  const base = ticket.baseBranch ?? project.config.baseBranch;
-  if (ticket.behindBy === 0) {
-    return (
-      <p className="text-sm text-zinc-500">
-        Up to date with <code>{base}</code>.
-      </p>
-    );
-  }
-  const commits = ticket.behindBy === 1 ? '1 commit' : `${ticket.behindBy} commits`;
-  return (
-    <div className="space-y-2 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm dark:border-amber-900 dark:bg-amber-950/30">
-      <div className="flex flex-wrap items-center gap-3">
-        <span>
-          <code>{ticket.branch}</code> is {commits} behind <code>{base}</code>.
-        </span>
-        <Button
-          disabled={!canRewrite(detail) || command.isPending}
-          title={rewriteBlock(detail) ?? undefined}
-          onClick={() => {
-            command.mutate({ type: 'rebase' });
-          }}
-        >
-          Rebase
-        </Button>
-      </div>
-      <HelpText>{HELP}</HelpText>
-      <ErrorText error={command.error} />
-    </div>
-  );
+  return <BranchCard detail={detail} more={more} />;
 }

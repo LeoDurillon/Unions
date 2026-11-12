@@ -5,10 +5,10 @@ import { useState, type ReactElement } from 'react';
 
 import type { TicketDetail } from '../../../src/api-types';
 import { api } from '../../lib/app/api';
+import { canRewrite, rewriteBlock } from '../../lib/pull-request/rewrite-block';
 import { BranchPicker } from '../ticket/branch-picker';
 import { HelpText } from '../ui/help-text';
 import { Button, ErrorText } from '../ui/ui';
-import { canRewrite, rewriteBlock } from './branch-status';
 
 const HELP =
   "Only this ticket's commits move onto the new branch, then it is force-pushed and the pull request targets it. Git rebases them and the checks run; the implementation agent is called only for conflicts or failing checks, and then the final review runs again. On failure the branch is left as it was.";

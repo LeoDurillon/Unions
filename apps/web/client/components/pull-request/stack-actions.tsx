@@ -4,9 +4,9 @@
 import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../../src/api-types';
+import { canRewrite } from '../../lib/pull-request/rewrite-block';
 import { useTicketCommands } from '../../lib/ticket/use-ticket-commands';
 import { Button, ErrorText } from '../ui/ui';
-import { canRewrite } from './branch-status';
 import { RewriteDescriptions } from './rewrite-descriptions';
 import { SimplifyStackButton } from './simplify-history';
 

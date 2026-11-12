@@ -9,15 +9,20 @@ Union opens a draft pull request after the implementation, unless you turned tha
 requests**. Its description follows the repository's pull request template (in `.github/`, the root or `docs/`),
 in the template's language, and ends with `Closes #<issue>`.
 
-- The tab opens on a card for the pull request: its state, its branch and base, **Open on GitHub**, and **Unlink**.
-  Without one, **Link** a pull request by number or URL when you opened one yourself.
+- The tab opens on a card for the pull request: its state, its number and title on GitHub, its branch and base,
+  **Open on GitHub**, and **⋯ → Unlink the pull request**. Without one, **Link** a pull request by number or URL
+  when you opened one yourself.
+- Under it, a card for the branch: how far it is behind its base, with **Rebase** when it is, and the button that
+  opens the other branch operations (see [More actions](#more-actions)).
 - **CI checks** shows a bar of the checks on the last commit (failed, running, passed, skipped) with their counts,
   then the failed and running ones; past the first few running checks, and the passed and skipped ones, fold
   away behind a line you click.
 - **Rewrite description** writes the description again from the current code; you review the draft before it is
   sent to GitHub. The draft opens as it will read on GitHub (**Preview**); **Edit** changes its text, and
   **Changes from GitHub's** shows what it changes line by line.
-- The **discussion** shows the pull request's comments and reviews from GitHub. Import its line comments into a
+- **Discussion on GitHub** shows the pull request's comments and reviews, one row each with its author, and
+  **All**, **People** and **Bots** to show only some, with how many each shows. A bot's comment shows its first line
+  until you click its author. **Add to review** on a row adds it to the next review you send. Import its line comments into a
   review with **Import** (see [Reviewing changes](reviewing.md#comment-and-send)), or answer them where you read
   them (see [Reply to comments](#reply-to-comments)). Click a line thread's file and lines to open them in the
   review's diff.
@@ -100,14 +105,14 @@ the next **Rebase** moves only the ticket's own commits onto the new base, even 
 
 ## More actions
 
-While the pull request is open, **More actions** above the CI checks folds the operations you need less often:
-**Change target**, **Simplify history** and, when stacks are turned on, **Split into a stack**. Click it to unfold
-them. A ticket split into a stack has none of them there: its [stack panel](#the-stack-panel) holds its own.
+While the pull request is open, the branch card has a button for the operations you need less often:
+**Change target**, **Simplify history** and, when stacks are turned on, **Split into a stack** (it reads **Change
+target, simplify, split ▾**). Click it to open them in the card, and again to close them. A ticket split into a stack has none of them there: its [stack panel](#the-stack-panel) holds its own.
 
 ## Change target
 
 To move a finished ticket onto another base, for example a fix built on `develop` that must ship as a hotfix on
-`main`, open **More actions** in the PR tab and click **Change target**. Pick the branch (the button reads **Pick a
+`main`, open the branch card's **Change target, simplify ▾** in the PR tab and click **Change target**. Pick the branch (the button reads **Pick a
 branch** until you do), then click **Retarget onto `<branch>`**.
 
 Union moves only the ticket's own commits onto the new branch (the old base's commits stay behind), pushes, and

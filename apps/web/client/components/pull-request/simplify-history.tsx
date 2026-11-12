@@ -4,10 +4,10 @@
 import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../../src/api-types';
+import { canRewrite, rewriteBlock } from '../../lib/pull-request/rewrite-block';
 import { useTicketCommands } from '../../lib/ticket/use-ticket-commands';
 import { HelpText } from '../ui/help-text';
 import { Button, ErrorText } from '../ui/ui';
-import { canRewrite, rewriteBlock } from './branch-status';
 
 const HELP =
   "The implementation agent rewrites the branch's commits into fewer, clearer ones. The code must stay exactly the same, so the final review stands; the branch is then force-pushed. On failure it is left as it was.";

@@ -3,10 +3,10 @@
 import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../../src/api-types';
+import { canRewrite, rewriteBlock } from '../../lib/pull-request/rewrite-block';
 import { useTicketCommands } from '../../lib/ticket/use-ticket-commands';
 import { HelpText } from '../ui/help-text';
 import { Button, ErrorText } from '../ui/ui';
-import { canRewrite, rewriteBlock } from './branch-status';
 
 const HELP =
   'An agent proposes slices of the spec, each one a pull request on the one below. You edit and approve the plan in its Worker tab; the implementation agent then rewrites the commits into the slices, the code unchanged, and the stack is pushed and opened on GitHub.';

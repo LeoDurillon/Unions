@@ -1,4 +1,4 @@
-// A review summary or a conversation comment, with its Add to review action when there is one. A
+// A review summary or a conversation comment as a row with its author's avatar and Add to review. A
 // line thread, its place a link to the diff; each with its replies below. And the discussion's
 // shape while GitHub answers.
 
@@ -11,6 +11,7 @@ import { formatWhen } from '../../lib/ui/relative-time';
 import { Loading, SkeletonList } from '../ui/skeleton';
 import { Badge, Button, CARD_CLASS } from '../ui/ui';
 import { CommentBody } from './comment-body';
+import { NoteAvatar } from './note-avatar';
 
 const CARD =
   'space-y-2 rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm dark:border-zinc-800 dark:bg-zinc-900';
@@ -28,9 +29,9 @@ function When({ at, url }: { at: string; url: string }): ReactElement {
       href={url}
       target="_blank"
       rel="noreferrer"
-      className="ml-auto shrink-0 text-zinc-500 hover:underline"
+      className="shrink-0 text-zinc-500 hover:underline"
     >
-      {formatWhen(at)}
+      · {formatWhen(at)}
     </a>
   );
 }
@@ -48,13 +49,13 @@ function NoteAction({
     return <Badge tone="blue">in the review</Badge>;
   }
   return onImport ? (
-    <Button disabled={pending} onClick={onImport}>
+    <Button size="sm" disabled={pending} onClick={onImport}>
       Add to review
     </Button>
   ) : null;
 }
 
-/** Who wrote the note and what it is; folded, also its first line. Clicking it folds or unfolds. */
+/** Who wrote the note and what it is; clicking it folds or unfolds the note. */
 function NoteSummary({
   note,
   open,
@@ -70,24 +71,23 @@ function NoteSummary({
       type="button"
       aria-expanded={open}
       onClick={onToggle}
-      className="flex min-w-0 flex-1 items-center gap-2 text-left"
+      className="flex min-w-0 items-center gap-2 text-left"
     >
-      <span aria-hidden className="w-2 text-zinc-500">
-        {open ? '▾' : '▸'}
-      </span>
-      <span className="shrink-0 font-medium">@{note.author}</span>
+      <span className="truncate font-semibold">{note.author}</span>
       {note.bot ? <Badge tone="neutral">bot</Badge> : null}
       {note.kind === 'review' ? (
         <Badge tone={state?.tone ?? 'neutral'}>{state?.label ?? 'review'}</Badge>
       ) : null}
-      {open ? null : <span className="truncate text-zinc-500">{githubTitle(note.body)}</span>}
+      <span aria-hidden className="text-zinc-400">
+        {open ? '▾' : '▸'}
+      </span>
     </button>
   );
 }
 
 /**
- * A review summary or a conversation comment, with its Add to review action when there is one.
- * A bot's starts folded to one line.
+ * A review summary or a conversation comment as a row: its author's avatar, who and when, its first line
+ * folded (a bot's starts folded) or all of it, and Add to review beside it.
  */
 export function NoteCard({
   note,
@@ -106,25 +106,31 @@ export function NoteCard({
 }): ReactElement {
   const [open, setOpen] = useState(!note.bot);
   return (
-    <article className={CARD}>
-      <header className="flex items-center gap-2 text-xs">
-        <NoteSummary
-          note={note}
-          open={open}
-          onToggle={() => {
-            setOpen(!open);
-          }}
-        />
-        {imported && !open ? <Badge tone="blue">in the review</Badge> : null}
-        <When at={note.createdAt} url={note.url} />
-      </header>
-      {open ? (
-        <>
-          <CommentBody text={note.body} />
-          <NoteAction imported={imported} pending={pending} onImport={onImport} />
-          {reply}
-        </>
-      ) : null}
+    <article className="flex gap-2.5 border-t border-zinc-200 pt-2.5 text-sm dark:border-zinc-800">
+      <NoteAvatar login={note.author} />
+      <div className="min-w-0 flex-1 space-y-1.5">
+        <header className="flex items-center gap-2 text-xs">
+          <NoteSummary
+            note={note}
+            open={open}
+            onToggle={() => {
+              setOpen(!open);
+            }}
+          />
+          <When at={note.createdAt} url={note.url} />
+          <span className="ml-auto shrink-0">
+            <NoteAction imported={imported} pending={pending} onImport={onImport} />
+          </span>
+        </header>
+        {open ? (
+          <>
+            <CommentBody text={note.body} />
+            {reply}
+          </>
+        ) : (
+          <p className="truncate text-zinc-500">{githubTitle(note.body)}</p>
+        )}
+      </div>
     </article>
   );
 }

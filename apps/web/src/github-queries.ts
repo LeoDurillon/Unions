@@ -76,6 +76,7 @@ export const PULL_REQUEST_NOTES = /* GraphQL */ `
   query PullRequestNotes($owner: String!, $repo: String!, $number: Int!) {
     repository(owner: $owner, name: $repo) {
       pullRequest(number: $number) {
+        title
         body
         reviews(last: 100) {
           nodes {

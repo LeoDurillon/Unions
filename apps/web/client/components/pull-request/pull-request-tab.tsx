@@ -6,7 +6,6 @@ import { useState, type ReactElement } from 'react';
 import type { TicketDetail } from '../../../src/api-types';
 import { useSlicePick } from '../review/slice-pick';
 import { BranchActions } from './branch-actions';
-import { MoreActions } from './more-actions';
 import { PullRequestRow } from './pull-request-row';
 import { PullRequestSections } from './pull-request-sections';
 import { StackPanel } from './stack-panel';
@@ -53,7 +52,6 @@ export function PullRequestTab({ detail }: { detail: TicketDetail }): ReactEleme
       <PullRequestRow ticket={ticket} project={project} />
       <StackPanel detail={detail} shown={pr} />
       <BranchActions detail={detail} />
-      <MoreActions detail={detail} />
       {pr === null ? (
         <p className="text-sm text-zinc-500">
           Link the pull request to read its discussion here and import review comments.

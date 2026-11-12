@@ -73,7 +73,7 @@ function Notes({
   return (
     <section className={CARD_CLASS}>
       <div className="flex items-center justify-between gap-2">
-        <h3 className="text-sm font-semibold">Reviews and comments</h3>
+        <h3 className="text-sm font-semibold">Discussion on GitHub</h3>
         <NoteFilterControl notes={discussion.notes} value={filter} onChange={setFilter} />
       </div>
       <ErrorText error={importNote.error} />

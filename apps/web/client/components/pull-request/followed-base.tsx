@@ -3,9 +3,9 @@
 import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../../src/api-types';
+import { canRewrite, rewriteBlock } from '../../lib/pull-request/rewrite-block';
 import { useTicketCommands } from '../../lib/ticket/use-ticket-commands';
 import { Button, ErrorText } from '../ui/ui';
-import { canRewrite, rewriteBlock } from './branch-status';
 
 /** Rebase from the notice, for a branch up to date with its new base: the behind count offers none. */
 function RebaseButton({ detail }: { detail: TicketDetail }): ReactElement {

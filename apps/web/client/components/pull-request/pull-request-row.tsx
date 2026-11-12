@@ -1,10 +1,12 @@
-// The ticket's pull request: shown with an Unlink button, or a field to link one by number or URL.
+// The ticket's pull request: its number and title, Unlink in its menu, or a field to link one by number or URL.
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 
 import type { PublicProject, TicketSummary } from '../../../src/api-types';
 import { api } from '../../lib/app/api';
+import { useDiscussion } from '../../lib/review/use-review';
+import { OverflowMenu } from '../ui/overflow-menu';
 import { Badge, Button, CARD_CLASS, ErrorText, inputClass } from '../ui/ui';
 
 function useLinkMutations(ticketId: number): {
@@ -25,6 +27,16 @@ function useLinkMutations(ticketId: number): {
     onSuccess: refresh,
   });
   return { link, unlink };
+}
+
+/** `#12 · its title on GitHub`; the number alone until GitHub answers or when it cannot. */
+function PullRequestTitle({ ticketId, pr }: { ticketId: number; pr: number }): ReactElement {
+  const title = useDiscussion(ticketId, pr, true).data?.title;
+  return (
+    <p className="truncate text-sm font-semibold" title={title}>
+      {title ? `#${pr} · ${title}` : `Pull request #${pr}`}
+    </p>
+  );
 }
 
 const STATE_TONE = { open: 'green', merged: 'blue', closed: 'neutral' } as const;
@@ -51,7 +63,7 @@ function LinkedPullRequest({
       <div className="flex items-center gap-3">
         {ticket.prState ? <Badge tone={STATE_TONE[ticket.prState]}>{ticket.prState}</Badge> : null}
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold">Pull request #{ticket.prNumber}</p>
+          <PullRequestTitle ticketId={ticket.id} pr={ticket.prNumber} />
           {ticket.branch ? (
             <p className="truncate font-mono text-xs text-zinc-500">
               {ticket.branch} → {base}
@@ -66,9 +78,16 @@ function LinkedPullRequest({
         >
           Open on GitHub ↗
         </a>
-        <Button variant="ghost" disabled={pending} onClick={onUnlink}>
-          Unlink
-        </Button>
+        <OverflowMenu
+          label="More: unlink the pull request"
+          items={[
+            {
+              label: 'Unlink the pull request',
+              onSelect: onUnlink,
+              refusal: pending ? 'Unlinking…' : null,
+            },
+          ]}
+        />
       </div>
       {warning ? <p className="text-xs text-amber-700 dark:text-amber-400">{warning}</p> : null}
       <ErrorText error={error} />
@@ -76,7 +95,7 @@ function LinkedPullRequest({
   );
 }
 
-/** The ticket's pull request: shown with an Unlink button, or a field to link one by number or URL. */
+/** The ticket's pull request: its number and title, Unlink in its menu, or a field to link one by number or URL. */
 export function PullRequestRow({
   ticket,
   project,

@@ -1,4 +1,4 @@
-// Reads a pull request's discussion from GitHub: its description, line threads, review summaries
+// Reads a pull request's discussion from GitHub: its title and description, line threads, review summaries
 // and comments.
 import type { Octokit } from 'octokit';
 
@@ -40,6 +40,7 @@ type ThreadPage = PullRequestData<{
 }>;
 
 type NotesData = PullRequestData<{
+  title: string;
   body: string;
   reviews: { nodes: (RawNote | null)[] };
   comments: { nodes: (RawNote | null)[] };
@@ -143,6 +144,7 @@ export async function fetchDiscussion(
     return null;
   }
   return {
+    title: pull.title,
     description: pull.body,
     threads,
     notes: toNotes(pull.reviews.nodes, pull.comments.nodes),
