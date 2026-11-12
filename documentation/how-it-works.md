@@ -74,9 +74,11 @@ an agent runs. What you use elsewhere (Claude Code, claude.ai) shows at the next
 old its figures are when no agent has run for a while. Folded, the sidebar shows the higher of the two shares.
 
 A project's **Usage** tab (beside **Repository**) has two tabs, both over the last 7, 30 or 90 days, or since
-the start. **Cost** adds up what its agents used: the API-equivalent cost, the agent calls and the tokens, a bar per week (hover one for its
-figures), then the cost per step, per model and for the most expensive tickets (click one to open it), with the
-investigations on their own line.
+the start. **Cost** opens with a banner when the agents' logs show something to improve ("9 ways to spend less", and
+the first of them): click it for **What to improve**. Then it adds up what the agents used: the API-equivalent cost,
+the agent calls (and the model most of them ran on), and the tokens; a bar per week (hover one for its figures); then
+the cost per step, per model and for the most expensive tickets (click one to open it), with the investigations on
+their own line. A bar beside each row shows its cost against the costliest row.
 
 **What to improve** (with the number of findings) lists what the agents' logs show over the same range, each with the tickets
 that show it most (click one to open it). Each card is marked **Repository** when the fix belongs in your project's

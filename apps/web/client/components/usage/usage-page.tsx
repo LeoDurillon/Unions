@@ -9,6 +9,7 @@ import { useProjectFindings, useProjectUsage, type UsageRange } from '../../lib/
 import { Segmented, type SegmentOption } from '../ui/choice';
 import { TabButton } from '../ui/tab-button';
 import { ErrorText } from '../ui/ui';
+import { ImproveBanner } from './improve-banner';
 import { SuggestImprovements } from './suggest-improvements';
 import { UsageCost } from './usage-cost';
 import { UsageFindings } from './usage-findings';
@@ -32,7 +33,7 @@ function Header({
   return (
     <header className="flex flex-wrap items-center justify-between gap-2">
       <div>
-        <h2 className="text-base font-semibold">Usage</h2>
+        <h2 className="text-lg font-semibold tracking-tight">Usage</h2>
         <p className="text-xs text-zinc-500">
           What this project&apos;s agents used: its tickets and investigations. The cost is what
           these tokens would cost on the API; a Max subscription is not billed per call.
@@ -57,7 +58,7 @@ export function UsagePage({
   const found = findings.data?.findings.length ?? 0;
   return (
     <div className="h-full overflow-y-auto">
-      <div className="mx-auto max-w-5xl space-y-4 p-4">
+      <div className="mx-auto max-w-6xl space-y-5 p-6">
         <Header range={range} onRange={setRange} />
         <div role="tablist" className="flex border-b border-zinc-200 dark:border-zinc-800">
           <TabButton tab="cost" current={tab} label="Cost" onSelect={setTab} />
@@ -71,7 +72,18 @@ export function UsagePage({
         <div role="tabpanel" className="space-y-6">
           <ErrorText error={tab === 'cost' ? usage.error : findings.error} />
           {tab === 'cost' && usage.data ? (
-            <UsageCost usage={usage.data} onOpenTicket={onOpenTicket} />
+            <UsageCost
+              usage={usage.data}
+              improve={
+                <ImproveBanner
+                  findings={findings.data}
+                  onOpen={() => {
+                    setTab('improve');
+                  }}
+                />
+              }
+              onOpenTicket={onOpenTicket}
+            />
           ) : null}
           {tab === 'improve' && findings.data ? (
             <UsageFindings

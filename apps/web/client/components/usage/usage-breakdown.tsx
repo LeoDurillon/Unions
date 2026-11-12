@@ -1,5 +1,5 @@
-// A project's usage split per step, per model and per ticket: calls, tokens and API-equivalent cost,
-// most expensive first.
+// A project's usage split per step, per model and per ticket: calls, tokens and API-equivalent cost, most
+// expensive first. A bar shows each row's cost against the costliest.
 
 import type { ProjectUsage, UsageSlice } from '@union/core';
 import type { ReactElement, ReactNode } from 'react';
@@ -8,6 +8,7 @@ import { stepTitle } from '../../lib/board/labels';
 import { count } from '../../lib/log/token-counts';
 import { useCustomAgentNames } from '../../lib/union-settings/use-custom-agents';
 import { costText } from '../../lib/usage/usage-format';
+import { shareOf } from '../../lib/usage/usage-shares';
 
 type Row = UsageSlice & { key: string; label: ReactNode };
 
@@ -16,13 +17,16 @@ function CostTable({ title, rows }: { title: string; rows: Row[] }): ReactElemen
     return null;
   }
   return (
-    <section className="space-y-1">
-      <h3 className="text-sm font-semibold">{title}</h3>
+    <section className="h-fit space-y-2 rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+      <h3 className="text-[13px] font-semibold">{title}</h3>
       <table className="w-full text-xs">
         <thead className="text-left text-zinc-500">
           <tr>
             <th className="py-1 font-normal">
               <span className="sr-only">{title}</span>
+            </th>
+            <th className="w-24 py-1 font-normal">
+              <span className="sr-only">Share of the cost</span>
             </th>
             <th className="py-1 text-right font-normal">Calls</th>
             <th className="py-1 text-right font-normal">In</th>
@@ -33,7 +37,15 @@ function CostTable({ title, rows }: { title: string; rows: Row[] }): ReactElemen
         <tbody className="tabular-nums">
           {rows.map((row) => (
             <tr key={row.key} className="border-t border-zinc-200 dark:border-zinc-800">
-              <td className="max-w-0 truncate py-1 pr-2">{row.label}</td>
+              <td className="max-w-0 truncate py-1.5 pr-2">{row.label}</td>
+              <td aria-hidden className="pr-3">
+                <span className="block h-1.5 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
+                  <span
+                    className="block h-full rounded-full bg-indigo-500"
+                    style={{ width: `${shareOf(row, rows)}%` }}
+                  />
+                </span>
+              </td>
               <td className="w-12 text-right">{row.calls}</td>
               <td className="w-14 text-right">{count(row.input)}</td>
               <td className="w-14 text-right">{count(row.output)}</td>
