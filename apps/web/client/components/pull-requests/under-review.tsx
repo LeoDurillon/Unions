@@ -1,5 +1,5 @@
-// The Pull requests tab's "Under review" part: pull requests put under review without a ticket,
-// stacks first. Open review opens the review page (a stack's with a tab per pull request).
+// The Pull requests tab's Under review part: the pull requests under review without a ticket, as cards. Stacks
+// come first; Open review opens the review page (a stack's with a tab per pull request).
 
 import type { ReactElement } from 'react';
 
@@ -11,7 +11,6 @@ import {
 } from '../../lib/pull-request/use-current-reviews';
 import { useReviewedPullRequest } from '../../lib/review/review-url';
 import { ErrorText } from '../ui/ui';
-import { Part } from './list-part';
 import { ReviewItem } from './review-item';
 import { ReviewStackItem } from './review-stack-item';
 import { StackReview } from './stack-review';
@@ -29,39 +28,44 @@ function ReviewRows({
   const { remove, removeStack } = mutations;
   const all = reviewStacks(list);
   return (
-    <Part title="Under review" count={all.length}>
-      {all
-        .filter((stack) => stack.length > 1)
-        .map((stack) => (
-          <ReviewStackItem
-            key={stack[0]?.id}
-            stack={stack}
-            removing={removeStack.isPending}
-            onOpen={() => {
-              onOpen(stack[0]?.prNumber ?? 0);
-            }}
-            onRemove={() => {
-              removeStack.mutate(stack.map((review) => review.prNumber));
-            }}
-          />
-        ))}
-      {all
-        .filter((stack) => stack.length === 1)
-        .flat()
-        .map((review) => (
-          <ReviewItem
-            key={review.id}
-            review={review}
-            removing={remove.isPending}
-            onOpen={() => {
-              onOpen(review.prNumber);
-            }}
-            onRemove={() => {
-              remove.mutate(review.prNumber);
-            }}
-          />
-        ))}
-    </Part>
+    <section aria-label="Under review" className="px-6 pt-5">
+      <h3 className="mb-2.5 text-[13px] font-semibold">
+        Under review <span className="font-normal text-zinc-500">{all.length}</span>
+      </h3>
+      <ul className="grid grid-cols-[repeat(auto-fill,minmax(20rem,1fr))] gap-3">
+        {all
+          .filter((stack) => stack.length > 1)
+          .map((stack) => (
+            <ReviewStackItem
+              key={stack[0]?.id}
+              stack={stack}
+              removing={removeStack.isPending}
+              onOpen={() => {
+                onOpen(stack[0]?.prNumber ?? 0);
+              }}
+              onRemove={() => {
+                removeStack.mutate(stack.map((review) => review.prNumber));
+              }}
+            />
+          ))}
+        {all
+          .filter((stack) => stack.length === 1)
+          .flat()
+          .map((review) => (
+            <ReviewItem
+              key={review.id}
+              review={review}
+              removing={remove.isPending}
+              onOpen={() => {
+                onOpen(review.prNumber);
+              }}
+              onRemove={() => {
+                remove.mutate(review.prNumber);
+              }}
+            />
+          ))}
+      </ul>
+    </section>
   );
 }
 
@@ -97,8 +101,8 @@ export function UnderReview({ project }: { project: PublicProject }): ReactEleme
     return null;
   }
   return (
-    <div className="mb-6">
-      <div className="px-4">
+    <div>
+      <div className="px-6">
         <ErrorText error={error} />
       </div>
       {list.length > 0 ? <ReviewRows list={list} onOpen={setOpened} mutations={mutations} /> : null}

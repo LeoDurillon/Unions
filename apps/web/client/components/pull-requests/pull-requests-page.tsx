@@ -1,119 +1,32 @@
-// The pull requests under review without a ticket, then every pull request of the project's
-// repository. They are read from GitHub, open stacks as one row; linked ones open their ticket.
-
+// The Pull requests tab: the pull requests under review, then every pull request of the repository. They are
+// read from GitHub, open stacks as one row, narrowed by a search and filters; linked ones open their ticket.
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 
-import {
-  PULL_REQUEST_FILTERS,
-  type PublicProject,
-  type PullRequestFilter,
-  type PullRequestList,
-} from '../../../src/api-types';
+import type { PublicProject, PullRequestFilter, PullRequestList } from '../../../src/api-types';
 import { api } from '../../lib/app/api';
-import { formatWhen } from '../../lib/ui/relative-time';
-import { Button, ErrorText } from '../ui/ui';
+import { filterPulls, NO_PULL_FILTER } from '../../lib/pull-request/pull-request-filter';
+import { ErrorText } from '../ui/ui';
 import { PullRequestRows } from './pull-request-rows';
+import { PullRequestsToolbar } from './pull-requests-toolbar';
 import { UnderReview } from './under-review';
 
-const FILTER_LABELS: Record<PullRequestFilter, string> = {
-  open: 'Open',
-  closed: 'Closed',
-  all: 'All',
-};
 /** The page asks the server again after this long; the server itself keeps GitHub's list a few minutes. */
 const STALE_MS = 300_000;
 /** Lists of the other filters and projects are kept this long after leaving them. */
 const KEEP_MS = 1_800_000;
-const MS_PER_MINUTE = 60_000;
-
-/** `just now`, `3 min ago`: how old the list GitHub gave is. */
-function age(fetchedAt: number, now: number): string {
-  const minutes = Math.floor((now - fetchedAt) / MS_PER_MINUTE);
-  return minutes < 1 ? 'just now' : `${minutes} min ago`;
-}
-
-function FilterToggle({
-  filter,
-  onChange,
-}: {
-  filter: PullRequestFilter;
-  onChange: (filter: PullRequestFilter) => void;
-}): ReactElement {
-  return (
-    <fieldset className="flex rounded-md border border-zinc-300 p-0.5 dark:border-zinc-700">
-      <legend className="sr-only">Pull requests to show</legend>
-      {PULL_REQUEST_FILTERS.map((entry) => (
-        <button
-          key={entry}
-          type="button"
-          aria-pressed={entry === filter}
-          onClick={() => {
-            onChange(entry);
-          }}
-          className={`rounded px-2.5 py-1 text-xs transition ${entry === filter ? 'bg-indigo-100 font-medium dark:bg-indigo-950' : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100'}`}
-        >
-          {FILTER_LABELS[entry]}
-        </button>
-      ))}
-    </fieldset>
-  );
-}
-
-/** The filter, how many there are, and Refresh. */
-function Toolbar({
-  filter,
-  onFilter,
-  list,
-  receivedAt,
-  fetching,
-  onRefresh,
-}: {
-  filter: PullRequestFilter;
-  onFilter: (filter: PullRequestFilter) => void;
-  list: PullRequestList | undefined;
-  /** When the page got the list: its age is told as of then (the server may have kept it a while). */
-  receivedAt: number;
-  fetching: boolean;
-  onRefresh: () => void;
-}): ReactElement {
-  const shown = list?.pullRequests.length ?? 0;
-  return (
-    <div className="flex items-center gap-3 border-b border-zinc-200 px-4 py-2 dark:border-zinc-800">
-      <FilterToggle filter={filter} onChange={onFilter} />
-      <span className="text-xs text-zinc-500">
-        {list
-          ? `${list.total} ${filter === 'all' ? 'in all' : filter}${list.total > shown ? `, newest ${shown} shown` : ''}`
-          : ''}
-      </span>
-      <div className="flex-1" />
-      {list ? (
-        <span className="text-xs text-zinc-500" title={formatWhen(list.fetchedAt)}>
-          Read from GitHub {age(list.fetchedAt, receivedAt)}
-        </span>
-      ) : null}
-      <Button
-        disabled={fetching}
-        title="Ask GitHub again now, instead of the list read a few minutes ago"
-        onClick={onRefresh}
-      >
-        {fetching ? 'Loading…' : 'Refresh'}
-      </Button>
-    </div>
-  );
-}
 
 const LOADING_ROWS = 6;
 
 /** Grey rows while GitHub is read the first time. */
 function LoadingRows(): ReactElement {
   return (
-    <ul aria-label="Loading pull requests" className="mt-3 animate-pulse">
+    <ul
+      aria-label="Loading pull requests"
+      className="mx-6 mt-5 animate-pulse divide-y divide-zinc-100 overflow-hidden rounded-xl border border-zinc-200 bg-white dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900"
+    >
       {Array.from({ length: LOADING_ROWS }, (_, index) => (
-        <li
-          key={index}
-          className="flex items-center gap-3 border-b border-zinc-200 px-4 py-4 dark:border-zinc-800"
-        >
+        <li key={index} className="flex items-center gap-3 px-4 py-4">
           <span className="h-4 w-12 rounded-full bg-zinc-200 dark:bg-zinc-800" />
           <span className="h-4 flex-1 rounded bg-zinc-200 dark:bg-zinc-800" />
           <span className="h-4 w-28 rounded bg-zinc-200 dark:bg-zinc-800" />
@@ -166,16 +79,20 @@ export function PullRequestsPage({
   project: PublicProject;
   onOpenTicket: (id: number) => void;
 }): ReactElement {
-  const [filter, setFilter] = useState<PullRequestFilter>('open');
-  const { query, refresh } = usePullRequestList(project.id, filter);
+  const [state, setState] = useState<PullRequestFilter>('open');
+  const [filter, setFilter] = useState(NO_PULL_FILTER);
+  const { query, refresh } = usePullRequestList(project.id, state);
   const list = query.data;
-  const shown = list?.pullRequests.length ?? 0;
+  const kept = list ? filterPulls(list.pullRequests, filter) : [];
   return (
     <div className="flex h-full flex-col">
-      <Toolbar
+      <PullRequestsToolbar
+        state={state}
+        onState={setState}
         filter={filter}
         onFilter={setFilter}
         list={list}
+        kept={kept.length}
         receivedAt={query.dataUpdatedAt}
         fetching={query.isFetching || refresh.isPending}
         onRefresh={() => {
@@ -183,20 +100,22 @@ export function PullRequestsPage({
         }}
       />
       <div className="min-h-0 flex-1 overflow-y-auto">
-        <div className="px-4 pt-3">
+        <div className="px-6 pt-3">
           <ErrorText error={query.error ?? refresh.error} />
         </div>
         <UnderReview project={project} />
         {!list && query.isFetching ? <LoadingRows /> : null}
-        {list && shown === 0 ? (
-          <p className="px-4 text-sm text-zinc-500">No pull requests.</p>
+        {list && kept.length === 0 ? (
+          <p className="px-6 pt-5 text-sm text-zinc-500">
+            {list.pullRequests.length === 0 ? 'No pull requests.' : 'None matches.'}
+          </p>
         ) : null}
         {list ? (
           <PullRequestRows
             projectId={project.id}
-            pulls={list.pullRequests}
+            pulls={kept}
             stacks={list.stacks}
-            open={filter === 'open'}
+            open={state === 'open'}
             onOpenTicket={onOpenTicket}
           />
         ) : null}

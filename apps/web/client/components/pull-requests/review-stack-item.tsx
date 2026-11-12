@@ -1,11 +1,10 @@
-// A stack of pull requests under review as one row: its bottom's title, its pull requests, opening and removing it whole.
-
+// A stack of pull requests under review as one card: its bottom's title, its pull requests, opening and removing it
+// whole.
 import type { ReactElement } from 'react';
 
 import type { CurrentReview } from '../../../src/api-types';
-import { ConfirmButton } from '../ui/confirm-button';
-import { TrashIcon } from '../ui/icon-button';
-import { Badge, Button } from '../ui/ui';
+import { Badge } from '../ui/ui';
+import { ReviewCardActions } from './review-item';
 
 /** `stack` is bottom first; Open review opens its bottom pull request. */
 export function ReviewStackItem({
@@ -25,13 +24,14 @@ export function ReviewStackItem({
   const previewing = stack.some((review) => review.previewStatus === 'running');
   const linked = stack.filter((review) => review.notionPages.length > 0);
   return (
-    <li className="flex items-start gap-3 border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
-      <Badge tone="neutral">stack of {stack.length}</Badge>
-      <div className="min-w-0 flex-1 space-y-1">
-        <p className="truncate text-sm font-medium">{bottom?.title}</p>
-        <p className="flex flex-wrap items-center gap-x-2 text-xs text-zinc-500">
-          <span>{stack.map((review) => `#${review.prNumber}`).join(' → ')}</span>
-          <span className="truncate font-mono">→ {bottom?.baseBranch}</span>
+    <li className="flex flex-col gap-2 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <p className="truncate font-mono text-[11px] text-zinc-500">
+        {stack.map((review) => `#${review.prNumber}`).join(' → ')} → {bottom?.baseBranch}
+      </p>
+      <p className="line-clamp-2 text-[13px] font-semibold">{bottom?.title}</p>
+      <div className="space-y-1">
+        <p className="flex flex-wrap items-center gap-1.5">
+          <Badge tone="neutral">stack of {stack.length}</Badge>
           {posting ? <Badge tone="blue">posting…</Badge> : null}
           {failed ? <Badge tone="red">posting failed</Badge> : null}
           {previewing ? <Badge tone="green">preview running</Badge> : null}
@@ -52,14 +52,12 @@ export function ReviewStackItem({
           ) : null}
         </p>
       </div>
-      <Button onClick={onOpen}>Open review</Button>
-      <ConfirmButton
+      <ReviewCardActions
         label="Stop reviewing the stack"
-        icon={<TrashIcon />}
         question="Stop reviewing the whole stack? Its drafts and previews are removed."
-        confirmLabel="Remove"
-        disabled={removing}
-        onConfirm={onRemove}
+        removing={removing}
+        onRemove={onRemove}
+        onOpen={onOpen}
       />
     </li>
   );

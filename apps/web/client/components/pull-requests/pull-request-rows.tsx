@@ -15,7 +15,7 @@ import {
 } from '../../lib/pull-request/use-current-reviews';
 import { ErrorText } from '../ui/ui';
 import { Part } from './list-part';
-import { PullRequestItem } from './pull-request-item';
+import { PullRequestColumns, PullRequestItem } from './pull-request-item';
 import { StackItem } from './stack-item';
 
 /** What the rows need from the current reviews: who is in, which stack one would join, adding. */
@@ -56,7 +56,7 @@ function StackPart({
 }): ReactElement {
   const { inReview, joinsOf, addOne, addStack } = actions;
   return (
-    <div className="mb-6">
+    <div>
       <Part title="Stacks" count={stacks.length}>
         {stacks.map((row) => (
           <StackItem
@@ -111,14 +111,14 @@ export function PullRequestRows({
   ));
   return (
     <>
-      <div className="px-4">
+      <div className="px-6">
         <ErrorText error={error} />
       </div>
       {stacks.length > 0 ? (
         <StackPart stacks={stacks} actions={actions} onOpenTicket={onOpenTicket} />
       ) : null}
       {singles.length > 0 ? (
-        <Part title="Pull requests" count={singles.length}>
+        <Part title="Pull requests" count={singles.length} header={<PullRequestColumns />}>
           {rows}
         </Part>
       ) : null}

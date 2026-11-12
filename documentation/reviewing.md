@@ -167,10 +167,16 @@ spec and the spec report all read it.
 ## Review other people's pull requests
 
 The project bar's **Pull requests** tab lists the repository's pull requests: **Open**, **Closed** or **All**,
-newest first, with their author, branches, review state and size. Stacks of pull requests show as one row.
+newest first, as a table: their state, title and branches (and review state), author, when they were last updated,
+and their size, with a small bar of lines added and removed. Stacks of pull requests show as one row.
+
+**Find by title, #number or branch** narrows the list as you type. **With a ticket** keeps only the pull requests
+Union opened for a ticket, and **Drafts hidden** leaves out the drafts; the count beside them says how many are
+left ("5 of 15 open").
 
 - A pull request opened by Union for a ticket has **Open ticket**.
-- Any other has **Add to reviews**, which puts it under **Under review** at the top of the tab, for this project.
+- Any other has **Add to reviews**, which puts it under **Under review** at the top of the tab, for this project:
+  one card per pull request (or stack), with **Open review**.
   **Add stack to reviews** adds every pull request of a stack.
 
 **Open review** opens the same review page, with these tabs:
@@ -204,7 +210,7 @@ only**.
 The browser's Back and Forward buttons move between the pull requests and tabs you opened, Back again closes the
 review page, and reloading the page keeps the pull request and tab you are on.
 
-**Stop reviewing #\<PR\>** on its row removes a pull request from Under review, after you confirm: its drafts are
+**Stop reviewing #\<PR\>** (the bin on its card) removes a pull request from Under review, after you confirm: its drafts are
 deleted and its preview stopped.
 A pull request that is merged or closed on GitHub leaves Under review on its own, the same way, the next time the
 list is read.

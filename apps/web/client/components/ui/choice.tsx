@@ -121,13 +121,13 @@ export function Segmented<T extends string>({
 }): ReactElement {
   const name = useId();
   return (
-    <fieldset className="relative inline-flex flex-wrap rounded-md border border-zinc-300 p-0.5 dark:border-zinc-700">
+    <fieldset className="relative inline-flex flex-wrap rounded-lg bg-zinc-100 p-0.5 dark:bg-zinc-900">
       <legend className="sr-only">{legend}</legend>
       {options.map((option) => (
         <label
           key={option.value}
           title={option.title}
-          className={`relative cursor-pointer rounded transition ${FOCUS_RING} ${SEGMENT_SIZES[size]} ${option.value === value ? 'bg-indigo-100 font-medium dark:bg-indigo-950' : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100'}`}
+          className={`relative cursor-pointer rounded transition ${FOCUS_RING} ${SEGMENT_SIZES[size]} ${option.value === value ? 'bg-white font-medium text-zinc-900 shadow-sm dark:bg-zinc-800 dark:text-zinc-100' : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100'}`}
         >
           <input
             type="radio"

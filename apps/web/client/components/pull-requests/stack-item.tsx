@@ -163,7 +163,7 @@ export function StackItem({
   const [open, setOpen] = useState(false);
   const { pulls } = row;
   return (
-    <li className="border-b border-zinc-200 dark:border-zinc-800">
+    <li>
       <div className="flex items-center gap-3 px-4 py-3">
         <Toggle open={open} onToggle={setOpen} />
         <SizeBadges row={row} />
