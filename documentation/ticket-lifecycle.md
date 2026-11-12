@@ -145,7 +145,8 @@ When a hook refuses a commit, the panel shows the changes and what the hook said
 ## Watch an agent work
 
 The **Log** tab in the Steps tab shows what the agent does as it does it: the files it reads, the commands it runs,
-its messages. A long run shows its last 500 lines first; **Show the N earlier lines** above them loads the rest. The Overview lists every run with its model, duration and tokens used.
+its messages, one row each; click a tool's row for its whole input and result, or **Raw output** for every line as
+the CLI printed it. A long run shows its last 500 lines first; **Show the N earlier lines** above them loads the rest. The Overview lists every run with its model, duration and tokens used.
 
 The token usage shows what the same tokens would cost on the Anthropic API. A Claude Max subscription does not bill
 it; it helps compare models and steps.

@@ -48,21 +48,25 @@ line says why they cannot run (`e2eRefusal`); scripts are ▸ chips. Union recor
 service's: per-service state (db Ready, simulator No answer) would need the worker to store each container's state
 (a migration); the user chose not to for now.
 
+Then the Log's board (2026-11-12), client only: a tool call keeps its id and whole input, its result its id and
+text (`lib/log/agent-events.ts`), and `lib/log/log-calls.ts` folds each result into its call; each call is a row
+(`steps/log-tool-row.tsx`) with its result's first line and its time, opening to the input and result; the agent's
+words are rows; a run's card (`steps/log-run.tsx`) says when, its tool calls, model and use, and pulses until its
+`run_finished`; Steps / Raw output switches to every CLI line (`steps/log-raw.tsx`). Not built: Stop (no action
+stops one step without cancelling the ticket: a state machine and worker change) and "turn N of M".
+
 ## Left to do
 
 Take them in this order; each is one worktree, one commit, checked with screenshots before it is deployed.
 
-1. **Log** (board "Steps › Log"): a header with the step, turn, time, tool-call count, model and Stop; each row's
-   time; a row that opens to the call's full input and result (`lib/log/agent-events.ts` keeps only a summary
-   today); a Steps / Raw output switch.
-2. **Notion tab**: the page's title, status and last edit in its card (needs the worker or `NotionApi` to read
+1. **Notion tab**: the page's title, status and last edit in its card (needs the worker or `NotionApi` to read
    the page's properties).
-3. **New ticket dialog** (board "New ticket dialog"): Write / Preview on the description, attached files as chips
+2. **New ticket dialog** (board "New ticket dialog"): Write / Preview on the description, attached files as chips
    under it, the flow's steps under the switch, Cancel beside Create ticket, Ctrl/⌘ Enter to create.
-4. **Pages not redesigned yet**: a step's output tab (`components/steps/step-tab.tsx` and its notices), the
+3. **Pages not redesigned yet**: a step's output tab (`components/steps/step-tab.tsx` and its notices), the
    review's Ticket and Report tabs beyond their cards, Union Tools and Connectors lists, the GitHub App page (its
    header sits outside its card), the onboarding wizard, the setup agent's proposal cards, the guide.
-5. **Dark mode pass** over every page above: each was checked in light; only the PR tab was checked in dark.
+4. **Dark mode pass** over every page above: each was checked in light; only the PR tab was checked in dark.
 
 Two ideas on the inner canvas are new features, not design: "Draft with the agent" on a Notion comment and "Start
 it now" in New ticket. Ask the user before building either: both spend Claude usage or start work.

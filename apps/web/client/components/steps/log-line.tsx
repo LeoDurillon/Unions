@@ -1,52 +1,53 @@
-// One line of an agent log: a tool call as its name and argument, the agent's words as prose, a run's end or error.
+// One line of an agent log: a tool call's row, the agent's words as prose, a run's end or error.
 // Also a run's total use, for its header, and what a Log with no line shows.
 
 import type { ReactElement } from 'react';
 
-import type { LogLine } from '../../lib/log/agent-events';
+import type { LogLine, ToolCallPart } from '../../lib/log/agent-events';
 import type { LogRun } from '../../lib/log/log-runs';
 import { sumTokens, tokensText, type CallTokens } from '../../lib/log/token-counts';
 import { Loading, SkeletonLog } from '../ui/skeleton';
+import { LineTime, ToolRow } from './log-tool-row';
 
 export type Entry = {
   key: string;
   kind: LogLine['kind'] | 'run';
   text: string;
   tokens?: CallTokens;
+  /** When it was logged. */
+  at?: number;
+  call?: ToolCallPart;
+  model?: string;
+  /** On a ticket run's header: the run, to tell whether it still runs. */
+  runId?: number;
 };
 
-/** A tool call: its name as a chip, then its argument on one line (the whole of it on hover). */
-function ToolCall({ text }: { text: string }): ReactElement {
-  const space = text.indexOf(' ');
-  const name = space === -1 ? text : text.slice(0, space);
-  const argument = space === -1 ? '' : text.slice(space + 1);
+/** The agent's own words: a row of prose with its time. */
+function AgentWords({ entry }: { entry: Entry }): ReactElement {
   return (
-    <p className="flex min-w-0 items-baseline gap-2 py-0.5" title={text}>
-      <span className="shrink-0 rounded-md border border-zinc-200 bg-zinc-50 px-1.5 text-[11px] font-semibold text-zinc-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
-        {name}
+    <div className="flex items-start gap-3 border-b border-zinc-100 bg-zinc-50/70 py-2 last:border-b-0 dark:border-zinc-800/60 dark:bg-zinc-950/40">
+      <span className="w-16 shrink-0 rounded-md bg-indigo-50 text-center text-[11px] leading-5 font-semibold text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300">
+        Agent
       </span>
-      <span className="truncate font-mono text-xs text-zinc-700 dark:text-zinc-300">
-        {argument}
-      </span>
-    </p>
+      <p className="min-w-0 flex-1 text-[13px] leading-relaxed whitespace-pre-wrap text-zinc-800 dark:text-zinc-200">
+        {entry.text}
+      </p>
+      <LineTime at={entry.at} />
+    </div>
   );
 }
 
-const LINES: Record<Entry['kind'], (text: string) => ReactElement | null> = {
-  run: (text) => <p className="text-sm font-semibold">{text}</p>,
-  tool: (text) => <ToolCall text={text} />,
-  // "tool result" says nothing the next line does not.
+const LINES: Record<Entry['kind'], (entry: Entry) => ReactElement | null> = {
+  run: ({ text }) => <p className="text-sm font-semibold">{text}</p>,
+  tool: ({ text, call, at }) => <ToolRow text={text} call={call} at={at} />,
+  // A result shows on its call's row; one without its call says nothing the next line does not.
   tool_result: () => null,
-  text: (text) => (
-    <p className="my-1 rounded-lg border-l-2 border-indigo-300 bg-indigo-50/60 px-3 py-1.5 text-[13px] leading-relaxed whitespace-pre-wrap text-zinc-800 dark:border-indigo-700 dark:bg-indigo-950/30 dark:text-zinc-200">
-      {text}
-    </p>
+  text: (entry) => <AgentWords entry={entry} />,
+  init: ({ text }) => <p className="py-1 text-xs text-zinc-500">{text}</p>,
+  result: ({ text }) => (
+    <p className="py-1 text-xs font-medium text-green-700 dark:text-green-400">✓ {text}</p>
   ),
-  init: (text) => <p className="py-0.5 text-xs text-zinc-500">{text}</p>,
-  result: (text) => (
-    <p className="py-0.5 text-xs font-medium text-green-700 dark:text-green-400">✓ {text}</p>
-  ),
-  error: (text) => (
+  error: ({ text }) => (
     <p className="my-1 rounded-lg bg-red-50 px-3 py-1.5 font-mono text-xs whitespace-pre-wrap text-red-700 dark:bg-red-950/40 dark:text-red-400">
       {text}
     </p>
@@ -55,7 +56,7 @@ const LINES: Record<Entry['kind'], (text: string) => ReactElement | null> = {
 
 /** One line of the log, shaped by its kind; a tool's plain result is not shown. */
 export function Line({ entry }: { entry: Entry }): ReactElement | null {
-  return LINES[entry.kind](entry.text);
+  return LINES[entry.kind](entry);
 }
 
 /** What the run's agent calls used, summed: `2 calls · 12 turns · 4.1M in…`. */

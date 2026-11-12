@@ -4,7 +4,7 @@ import { summarizeAgentEvent } from './agent-events';
 
 test('init, text, tool use and results become short lines', () => {
   expect(summarizeAgentEvent({ type: 'system', subtype: 'init', model: 'haiku' })).toEqual([
-    { kind: 'init', text: 'session started · haiku' },
+    { kind: 'init', text: 'session started · haiku', model: 'haiku' },
   ]);
   expect(
     summarizeAgentEvent({
@@ -76,4 +76,42 @@ test("the worker's own notes show as one line", () => {
     { kind: 'init', text: 'rebased with no conflict' },
   ]);
   expect(summarizeAgentEvent({ type: 'union_note' })).toEqual([]);
+});
+
+test('a tool call keeps its id and input, its result its id and text', () => {
+  expect(
+    summarizeAgentEvent({
+      type: 'assistant',
+      message: {
+        content: [{ type: 'tool_use', id: 'tu1', name: 'Bash', input: { command: 'ls' } }],
+      },
+    }),
+  ).toEqual([
+    {
+      kind: 'tool',
+      text: 'Bash ls',
+      call: { id: 'tu1', input: '{\n  "command": "ls"\n}' },
+    },
+  ]);
+  expect(
+    summarizeAgentEvent({
+      type: 'user',
+      message: {
+        content: [
+          {
+            type: 'tool_result',
+            tool_use_id: 'tu1',
+            is_error: true,
+            content: [{ type: 'text', text: 'No such file' }, { type: 'image' }],
+          },
+        ],
+      },
+    }),
+  ).toEqual([
+    {
+      kind: 'error',
+      text: 'tool failed',
+      call: { id: 'tu1', output: 'No such file\n[image]', failed: true },
+    },
+  ]);
 });

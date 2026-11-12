@@ -192,8 +192,10 @@ Then come the tabs:
   model, duration and token usage.
 - **Preview**: the ticket's [preview environment](previews.md), its end-to-end tests and commands.
 - **Steps**: one tab per step with the agent's output, then the **Log**, which shows what the agent does live: a
-  card per run, the last one open, with each tool the agent calls (its name, then what it ran or read) and the
-  agent's own words between them.
+  card per run, the last one open. A run's card says when it ran, how many tools it called, its model and what it
+  used, with a pulsing dot while it runs. Each tool call is a row: its name, what it ran or read, the first line of
+  what it gave (or **running…**), and its time; click it for the call's whole input and result. The agent's own
+  words are rows of their own. **Raw output**, above the runs, shows every line the agent's CLI printed, as is.
 - **PR**: the ticket's pull request, its CI checks and branch operations. See
   [Branches and pull requests](branches.md).
 - **Notion**: the open comments of the ticket's Notion page, for a ticket imported from Notion or linked to a page.
