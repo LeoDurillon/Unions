@@ -14,7 +14,7 @@ export type WorkerTab = 'log' | Step;
 export type WorkerTabEntry = { id: WorkerTab; label: string; enabled: boolean };
 
 /** The ticket's steps in its flow's order, with the built-in ones it skips but ran before in their place. */
-function stepsOf(detail: TicketDetail): Step[] {
+export function flowStepsOf(detail: TicketDetail): Step[] {
   const flow = resolveFlow(detail.ticket, detail.project.config);
   const ran = (step: Step): boolean => detail.outputs.some((output) => output.step === step);
   // A step the flow skips has no tab, unless it has output from before.
@@ -26,7 +26,7 @@ function stepsOf(detail: TicketDetail): Step[] {
 
 /** Where the Worker tab opens when no step runs: the furthest step with output, else the log. */
 export function latestWorkerTab(detail: TicketDetail): WorkerTab {
-  const done = stepsOf(detail).filter((step) =>
+  const done = flowStepsOf(detail).filter((step) =>
     detail.outputs.some((output) => output.step === step),
   );
   return done.at(-1) ?? 'log';
@@ -35,7 +35,7 @@ export function latestWorkerTab(detail: TicketDetail): WorkerTab {
 export function workerTabsFor(detail: TicketDetail, names: CustomAgentNames): WorkerTabEntry[] {
   const active = currentStep(detail.ticket.phase);
   const ran = (step: Step): boolean => detail.outputs.some((output) => output.step === step);
-  const steps = stepsOf(detail).map((step) => ({
+  const steps = flowStepsOf(detail).map((step) => ({
     id: step,
     label: stepTitle(step, names),
     enabled: step === active || ran(step),

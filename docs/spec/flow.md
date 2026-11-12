@@ -77,7 +77,10 @@
    or to an issue of the project's Jira project (`routes/ticket-*-link.ts`): it becomes the ticket's origin, as if
    imported, its text unchanged; a ticket has one origin, so linking the other tracker's item or unlinking it is
    refused (409).
-   The ticket panel's tabs: **Overview** (description, links, actions, runs), **Preview**, **Steps** (one tab per
+   Above the ticket panel's tabs: its state, its progress through the flow (a stop per step, then Done and Merged)
+   and a card saying what it needs from the user, with its action (open the step, Review changes, Start); Cancel
+   and Remove are in the header's ⋯ menu and ask first.
+   The ticket panel's tabs: **Overview** (description, details beside it, runs), **Preview**, **Steps** (one tab per
    step, then the Log; it follows the running step), **PR** (link the pull request, then its GitHub discussion, with
    Reply, Quote reply and the implementer's suggested replies: see
    [Replies to comments](pull-requests.md#replies-to-comments)), then **Notion** (the open discussions of the

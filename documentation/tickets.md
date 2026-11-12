@@ -112,7 +112,7 @@ round. Unlink it first to link it to the other tracker.
 
 ## Start a ticket
 
-Click **Start** on the card or in the ticket's Overview: the card moves to **In progress** at once and says
+Click **Start** on the card or at the top of the ticket's panel: the card moves to **In progress** at once and says
 **Starting…** until the agent begins. If the start is refused, the card goes back to Backlog with the reason on it. With a GitHub
 Project connected, moving the ticket's card to In Progress there works too.
 
@@ -158,11 +158,21 @@ ticket starts.
 
 ## The ticket panel
 
-Click a card to open its panel:
+Click a card to open its panel. Its top line shows the repository, the issue and the pull request, each linked to
+GitHub. Under the title:
 
-- **Overview**: the description, where the ticket comes from, its parent and the tickets that build on it, its
-  files, the base branch and flow, the **Start** and **Cancel ticket** buttons, and every run with its model,
-  duration and token usage.
+- the ticket's state, its flow and its branch;
+- its progress: one stop per step of its flow, then **Done** and **Merged**. Each stop says what happened there
+  ("v2 · 1h 22m", "Waiting for you", "Changes requested", "Failed"); click a step that ran to open it;
+- a card saying what the ticket needs from you, when it needs something: a step to read or questions to answer
+  (with how many are left), the final review's verdict with **Review changes**, a failed run, or **Start** for a
+  ticket in Backlog. Its button opens the step, where you approve or ask for a revision.
+
+Then come the tabs:
+
+- **Overview**: the description, with the details beside it (where the ticket comes from, its parent and the
+  tickets that build on it, the base branch and flow, its size, files and preview), then every run with its
+  model, duration and token usage.
 - **Preview**: the ticket's [preview environment](previews.md), its end-to-end tests and commands.
 - **Steps**: one tab per step with the agent's output, then the **Log**, which shows what the agent does live.
 - **PR**: the ticket's pull request, its CI checks and branch operations. See
@@ -218,11 +228,12 @@ Ctrl, ⌘ and Alt combinations stay the browser's.
 
 ## Cancel and remove
 
-**Cancel ticket**, in the Overview of a ticket that is not Done, stops the ticket: a running step is stopped (the
+**Cancel ticket**, in the **⋯** menu at the top of the panel of a ticket that is not Done, asks you to confirm,
+then stops the ticket: a running step is stopped (the
 agent too, within a few seconds), nothing it does after is kept or pushed, and the card goes back to Backlog marked
 **Cancelled**; its run shows **Cancelled** in the Log. Its open pull requests are closed on GitHub (so a ticket that
 had one moves on to **Merged / Closed**, marked **Closed**), and its issue is closed as not planned; a merged pull
 request stays as it is, the branch is kept, and you can reopen either on GitHub, which Union leaves alone. Once the
 agent stopped, Union removes the ticket's preview, container and workspace (the branch on GitHub stays). A cancelled
-ticket can then leave Union with **Remove for good**, in its Overview: its runs, outputs and files are deleted.
+ticket can then leave Union with **Remove ticket** in the same **⋯** menu, then **Remove for good**: its runs, outputs and files are deleted.
 Nothing brings it back.

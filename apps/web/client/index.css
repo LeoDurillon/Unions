@@ -1,4 +1,11 @@
 @import 'tailwindcss';
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/jetbrains-mono';
+
+@theme {
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
 
 :root {
   color-scheme: light dark;
@@ -12,7 +19,8 @@ body,
 
 body {
   @apply bg-zinc-50 text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100;
-  font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-family: var(--font-sans);
+  font-feature-settings: 'cv11', 'ss01';
 }
 
 dialog::backdrop {
@@ -21,6 +29,11 @@ dialog::backdrop {
 
 .markdown {
   @apply text-sm leading-relaxed;
+}
+/* A ticket's description reads as a page: a size up, more air between lines. */
+.ticket-prose .markdown {
+  font-size: 0.9375rem;
+  line-height: 1.7;
 }
 .markdown h1,
 .markdown h2,

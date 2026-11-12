@@ -2,13 +2,13 @@
 import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../src/api-types';
+import { formatDuration, runsDuration } from '../lib/duration';
 import { stepTitle } from '../lib/labels';
 import { useCustomAgentNames } from '../lib/use-custom-agents';
 import { useTicketUsage } from '../lib/use-usage';
 import { Badge } from './ui';
 import { UsageTable, type UsageRow } from './usage/usage-table';
 
-const MS_PER_SECOND = 1000;
 const RUN_TONE = {
   running: 'blue',
   succeeded: 'green',
@@ -19,10 +19,8 @@ const COLUMNS = ['Run', 'Step', 'Model', 'Status', 'Time'];
 
 type Run = TicketDetail['runs'][number];
 
-function seconds(run: Run): string {
-  return run.finishedAt === null
-    ? '…'
-    : `${Math.round((run.finishedAt - run.startedAt) / MS_PER_SECOND)}s`;
+function took(run: Run): string {
+  return run.finishedAt === null ? '…' : formatDuration(run.finishedAt - run.startedAt);
 }
 
 export function RunTable({
@@ -44,7 +42,7 @@ export function RunTable({
       <Badge key="status" tone={RUN_TONE[run.status]}>
         {run.status}
       </Badge>,
-      seconds(run),
+      took(run),
     ],
     group: groups.find((group) => group.runId === run.id),
   }));
@@ -59,5 +57,17 @@ export function RunTable({
   if (rows.length === 0) {
     return null;
   }
-  return <UsageTable columns={COLUMNS} rows={rows} total={usage.data?.total} />;
+  return (
+    <section className="space-y-2" aria-label="Runs">
+      <div className="flex items-baseline justify-between">
+        <h3 className="text-xs font-semibold tracking-wider text-zinc-400 uppercase dark:text-zinc-500">
+          Runs
+        </h3>
+        <span className="text-xs text-zinc-500">
+          {runs.length} run{runs.length === 1 ? '' : 's'} · {formatDuration(runsDuration(runs))}
+        </span>
+      </div>
+      <UsageTable columns={COLUMNS} rows={rows} total={usage.data?.total} />
+    </section>
+  );
 }

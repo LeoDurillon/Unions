@@ -48,7 +48,10 @@ export function TicketDetails({
 }): ReactElement {
   const { ticket } = detail;
   return (
-    <div className="space-y-3 rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
+    <aside
+      aria-label="Details"
+      className="h-fit divide-y divide-zinc-200 rounded-xl border border-zinc-200 px-4 py-3 dark:divide-zinc-800 dark:border-zinc-800"
+    >
       <SourceRow detail={detail} />
       <TicketTrackerRows detail={detail} onOpenTab={onOpenTab} />
       <TicketLinks detail={detail} onOpen={onOpenTicket} />
@@ -62,6 +65,6 @@ export function TicketDetails({
           onOpenTab('preview');
         }}
       />
-    </div>
+    </aside>
   );
 }

@@ -21,6 +21,8 @@
     "apps/web": {
       "name": "@union/web",
       "dependencies": {
+        "@fontsource-variable/inter": "catalog:ui",
+        "@fontsource-variable/jetbrains-mono": "catalog:ui",
         "@hono/bun": "catalog:server",
         "@tailwindcss/vite": "catalog:ui",
         "@tanstack/react-query": "catalog:ui",
@@ -105,6 +107,8 @@
       "hono": "4.13.13",
     },
     "ui": {
+      "@fontsource-variable/inter": "5.3.0",
+      "@fontsource-variable/jetbrains-mono": "5.3.0",
       "@tailwindcss/vite": "4.3.3",
       "@tanstack/react-query": "5.104.1",
       "@types/react": "19.3.0",
@@ -217,6 +221,10 @@
     "@esbuild/win32-ia32": ["@esbuild/win32-ia32@0.25.12", "", { "os": "win32", "cpu": "ia32" }, "sha512-HkqnmmBoCbCwxUKKNPBixiWDGCpQGVsrQfJoVGYLPT41XWF8lHuE5N6WhVia2n4o5QK5M4tYr21827fNhi4byQ=="],
 
     "@esbuild/win32-x64": ["@esbuild/win32-x64@0.25.12", "", { "os": "win32", "cpu": "x64" }, "sha512-alJC0uCZpTFrSL0CCDjcgleBXPnCrEAhTBILpeAp7M/OFgoqtAetfBzX0xM00MUsVVPpVjlPuMbREqnZCXaTnA=="],
+
+    "@fontsource-variable/inter": ["@fontsource-variable/inter@5.3.0", "", {}, "sha512-OupL48va4JNofb97w6NYeF9S7W/kHNKM0Er8Dem5nqi4jeOLrVJDoE8tZEpnMJmtkvNbB1EIPPwHcdkF6b1oUA=="],
+
+    "@fontsource-variable/jetbrains-mono": ["@fontsource-variable/jetbrains-mono@5.3.0", "", {}, "sha512-F32xpS2NsGYoQi2ADSkKTgpJj7ozajsGgDJ8woTnqjmIB+dxDIqImjl4pXZVEExu8UFZ2ndhmX18EBS/hdz3Lw=="],
 
     "@hono/bun": ["@hono/bun@1.0.1", "", { "peerDependencies": { "hono": ">=4.13.9 || ^5.0.0-0" } }, "sha512-74m9j/JY6sPhjOnZZSSPFDRWWRVqO8jI7cDTrcjXP+qnlCMOu0BCLnjq31LrKsWGWW7SsRWDzqrf9vDfnwtStA=="],
 

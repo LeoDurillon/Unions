@@ -42,11 +42,14 @@ export function TicketDescription({ ticket }: { ticket: TicketDetail['ticket'] }
   }
   const body = shownBody(ticket);
   return (
-    <section className="space-y-2" aria-label="Description">
+    <section className="ticket-prose min-w-0 space-y-2" aria-label="Description">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-medium">Description</h3>
+        <h3 className="text-xs font-semibold tracking-wider text-zinc-400 uppercase dark:text-zinc-500">
+          Description
+        </h3>
         <Button
-          className="px-2 py-1 text-xs"
+          variant="ghost"
+          size="sm"
           onClick={() => {
             setEditing({ title: ticket.title, body: ticket.body });
           }}

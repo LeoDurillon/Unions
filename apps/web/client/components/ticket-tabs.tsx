@@ -1,10 +1,10 @@
 // The panel's top tabs: the ticket, its preview, the agents' work, its pull request and the comments of the
 // tracker item it came from (its Notion page's, or its Jira issue's).
-import type { ReactElement } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 
 import type { TicketDetail } from '../../src/api-types';
 import { useCustomAgentNames } from '../lib/use-custom-agents';
-import { workerTabsFor, type WorkerTab } from '../lib/worker-tabs';
+import { flowStepsOf, workerTabsFor, type WorkerTab } from '../lib/worker-tabs';
 import { LogTab } from './log-tab';
 import { OverviewTab } from './overview-tab';
 import { PreviewTab } from './preview-tab';
@@ -15,32 +15,47 @@ import { TRACKER_LABELS, TrackerTab, trackerSection } from './tracker-tab';
 /** The panel's top tabs: the ticket, its preview, the agents' work, its pull request, its tracker item. */
 export type Section = 'overview' | 'preview' | 'worker' | 'pull-request' | 'notion' | 'jira';
 export { latestWorkerTab, type WorkerTab } from '../lib/worker-tabs';
-type TabEntry<T> = { id: T; label: string; enabled: boolean };
+type TabEntry<T> = { id: T; label: string; enabled: boolean; badge?: ReactNode };
+
+const COUNT =
+  'rounded-full bg-zinc-100 px-1.5 text-[11px] font-medium text-zinc-600 tabular-nums dark:bg-zinc-800 dark:text-zinc-300';
 
 function sectionsFor(detail: TicketDetail): TabEntry<Section>[] {
   const { prNumber } = detail.ticket;
   const tracker = trackerSection(detail.ticket);
-  return [
+  const ran = flowStepsOf(detail).filter((step) =>
+    detail.outputs.some((output) => output.step === step),
+  ).length;
+  const sections: TabEntry<Section>[] = [
     { id: 'overview', label: 'Overview', enabled: true },
     { id: 'preview', label: 'Preview', enabled: true },
-    { id: 'worker', label: 'Steps', enabled: true },
+    {
+      id: 'worker',
+      label: 'Steps',
+      enabled: true,
+      badge: ran > 0 ? <span className={COUNT}>{ran}</span> : null,
+    },
     { id: 'pull-request', label: prNumber === null ? 'PR' : `PR #${prNumber}`, enabled: true },
-    { ...tracker, label: TRACKER_LABELS[tracker.id] },
   ];
+  // A tracker tab the ticket has nothing for stays out of the way.
+  return tracker.enabled
+    ? [...sections, { ...tracker, label: TRACKER_LABELS[tracker.id] }]
+    : sections;
 }
 
 const LOOKS = {
   top: {
-    bar: 'flex gap-1 overflow-x-auto border-b border-zinc-200 px-4 dark:border-zinc-800',
-    tab: 'border-b-2 px-3 py-2',
-    on: 'border-indigo-600 font-medium',
+    // Sticks under the panel's top bar while the page scrolls.
+    bar: 'sticky top-0 z-10 flex gap-1 overflow-x-auto border-b border-zinc-200 bg-white/90 px-4 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/90',
+    tab: 'flex items-center gap-1.5 border-b-2 px-2.5 py-2.5 font-medium',
+    on: 'border-zinc-900 text-zinc-900 dark:border-zinc-100 dark:text-zinc-100',
     off: 'border-transparent text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100',
   },
   sub: {
-    bar: 'flex gap-1 overflow-x-auto pb-3',
+    bar: 'mb-5 flex w-fit max-w-full gap-1 overflow-x-auto rounded-lg bg-zinc-100 p-1 dark:bg-zinc-900',
     tab: 'rounded-md px-2.5 py-1',
-    on: 'bg-indigo-100 font-medium dark:bg-indigo-950',
-    off: 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800/60 dark:hover:text-zinc-100',
+    on: 'bg-white font-medium text-zinc-900 shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-800 dark:text-zinc-100 dark:ring-zinc-700',
+    off: 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100',
   },
 } as const;
 
@@ -60,7 +75,7 @@ function TabBar<T extends string>({
   const style = LOOKS[look];
   return (
     <div role="tablist" aria-label={label} className={style.bar}>
-      {tabs.map(({ id, label: text, enabled }) => (
+      {tabs.map(({ id, label: text, enabled, badge }) => (
         <button
           key={id}
           type="button"
@@ -73,6 +88,7 @@ function TabBar<T extends string>({
           className={`whitespace-nowrap text-sm transition disabled:cursor-not-allowed disabled:opacity-40 ${style.tab} ${current === id ? style.on : style.off}`}
         >
           {text}
+          {badge}
         </button>
       ))}
     </div>
@@ -133,7 +149,6 @@ export function PanelBody({
   workerTab,
   onWorkerTab,
   onOpenTicket,
-  onRemoved,
   onSection,
 }: {
   detail: TicketDetail;
@@ -141,18 +156,10 @@ export function PanelBody({
   workerTab: WorkerTab;
   onWorkerTab: (tab: WorkerTab) => void;
   onOpenTicket: (id: number) => void;
-  onRemoved: () => void;
   onSection: (section: Section) => void;
 }): ReactElement {
   if (section === 'overview') {
-    return (
-      <OverviewTab
-        detail={detail}
-        onOpenTicket={onOpenTicket}
-        onRemoved={onRemoved}
-        onOpenTab={onSection}
-      />
-    );
+    return <OverviewTab detail={detail} onOpenTicket={onOpenTicket} onOpenTab={onSection} />;
   }
   if (section === 'preview') {
     return <PreviewTab detail={detail} />;

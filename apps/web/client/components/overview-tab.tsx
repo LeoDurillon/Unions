@@ -1,65 +1,29 @@
-// The ticket panel's overview tab: run status, details, and the buttons that act on the ticket.
+// The ticket panel's overview tab: the description beside the details the ticket is attached to, then its runs.
 import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../src/api-types';
-import { isBlocked } from '../lib/labels';
-import { useTicketCommands } from '../lib/use-ticket-commands';
-import { RemoveTicket } from './remove-ticket';
 import { RunTable } from './run-table';
 import { TicketDescription } from './ticket-description';
 import { TicketDetails } from './ticket-details';
-import { Button, ErrorText } from './ui';
 
+/** Start sits in the attention card above the tabs, Cancel and Remove in the header's ⋯ menu. */
 export function OverviewTab({
   detail,
   onOpenTicket,
-  onRemoved,
   onOpenTab,
 }: {
   detail: TicketDetail;
   onOpenTicket: (id: number) => void;
-  /** After a cancelled ticket is removed: the panel closes. */
-  onRemoved: () => void;
   /** The Preview and Notion tabs, from their summaries here. */
   onOpenTab: (tab: 'preview' | 'notion' | 'jira') => void;
 }): ReactElement {
   const { ticket, runs } = detail;
-  const blocked = isBlocked(ticket);
-  const { command } = useTicketCommands(ticket.id);
-  const { kind } = ticket.phase;
-  const finished = kind === 'done' || kind === 'cancelled';
-
   return (
-    <div className="space-y-4">
-      <TicketDetails detail={detail} onOpenTicket={onOpenTicket} onOpenTab={onOpenTab} />
-      <TicketDescription ticket={ticket} />
-      <ErrorText error={command.error} />
-      <div className="flex gap-2">
-        {kind === 'backlog' ? (
-          <Button
-            variant="primary"
-            disabled={command.isPending || blocked}
-            title={blocked ? 'Waits for the parent ticket to be done' : undefined}
-            onClick={() => {
-              command.mutate({ type: 'start' });
-            }}
-          >
-            Start
-          </Button>
-        ) : null}
-        {kind === 'cancelled' ? <RemoveTicket ticketId={ticket.id} onRemoved={onRemoved} /> : null}
-        {finished ? null : (
-          <Button
-            variant="danger"
-            disabled={command.isPending}
-            title="Stops the ticket, and closes its issue and open pull requests on GitHub"
-            onClick={() => {
-              command.mutate({ type: 'cancel' });
-            }}
-          >
-            Cancel ticket
-          </Button>
-        )}
+    // Side by side once the panel is wide enough; the details go under the description when it is not.
+    <div className="@container space-y-8">
+      <div className="grid gap-8 @3xl:grid-cols-[minmax(0,1fr)_18rem]">
+        <TicketDescription ticket={ticket} />
+        <TicketDetails detail={detail} onOpenTicket={onOpenTicket} onOpenTab={onOpenTab} />
       </div>
       <RunTable ticketId={ticket.id} runs={runs} />
     </div>

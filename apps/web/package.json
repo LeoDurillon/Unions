@@ -10,6 +10,8 @@
     "start": "NODE_ENV=production bun src/server.ts"
   },
   "dependencies": {
+    "@fontsource-variable/inter": "catalog:ui",
+    "@fontsource-variable/jetbrains-mono": "catalog:ui",
     "@hono/bun": "catalog:server",
     "@tailwindcss/vite": "catalog:ui",
     "@tanstack/react-query": "catalog:ui",
