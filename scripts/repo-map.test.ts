@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test';
 
-import { renderMap, summaryOf } from './repo-map-lib';
+import { renderMaps, summaryOf } from './repo-map-lib';
 
 test("a file's top comment is its summary, first sentence only", () => {
   expect(
@@ -19,11 +19,36 @@ test('a file without a top `//` comment has no summary, whatever its doc comment
   expect(summaryOf("import x from 'y';\n// Not at the top.\nexport const a = 1;")).toBeNull();
 });
 
-test('the map lists each folder with its files and their summaries', () => {
-  const map = renderMap({ name: 'w', root: 'apps/w' }, [
-    { file: 'apps/w/b.ts', source: '// B does b.' },
-    { file: 'apps/w/sub/a.ts', source: 'export const a = 1;' },
-  ]);
-  expect(map).toContain('## ./\n\n- `b.ts`: B does b.\n');
-  expect(map).toContain('## sub/\n\n- `a.ts`: (no summary)\n');
+test('the index links each folder to its map, and each map lists its files', () => {
+  const area = { name: 'w', root: 'apps/w' };
+  const maps = renderMaps(
+    [
+      {
+        area,
+        files: [
+          { file: 'apps/w/sub/a.ts', source: 'export const a = 1;' },
+          { file: 'apps/w/b.ts', source: '// B does b.' },
+        ],
+      },
+    ],
+    { w: 'The root.', 'w/sub': 'The sub folder.', 'w/gone': 'Nothing.' },
+  );
+  expect([...maps.files.keys()]).toEqual(['README.md', 'w/root.md', 'w/sub.md']);
+  const index = maps.files.get('README.md') ?? '';
+  expect(index).toContain(
+    '- [`./`](w/root.md), 1 file: The root.\n- [`sub/`](w/sub.md), 1 file: The sub folder.',
+  );
+  expect(maps.files.get('w/root.md')).toContain('# Map: `apps/w/`\n\nThe root.');
+  expect(maps.files.get('w/root.md')).toContain('- `b.ts`: B does b.\n');
+  expect(maps.files.get('w/sub.md')).toContain('- `a.ts`: (no summary)\n');
+  expect(maps.undescribed).toEqual([]);
+  expect(maps.unused).toEqual(['w/gone']);
+});
+
+test('a folder without a summary is reported', () => {
+  const maps = renderMaps(
+    [{ area: { name: 'w', root: 'apps/w' }, files: [{ file: 'apps/w/x/a.ts', source: '// A.' }] }],
+    {},
+  );
+  expect(maps.undescribed).toEqual(['w/x']);
 });

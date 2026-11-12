@@ -29,12 +29,15 @@ Read the file for the area you change before changing it, and keep it current wh
   button, a setting, a step, a default), update the guide's page that covers it in the same change. Write it for
   users: what to click and what happens, not tables, events or file names.
 
-To find a file, read the map of its area in `docs/map/` (`core`, `web-server`, `web-client`, `worker`, `scripts`):
-one line per file, from the file's own top comment. Then search (`grep -rn`) and read only the lines you need.
-Every source file starts with a one-line `//` comment saying what it is for; write it for new files and keep it true
-when a file's purpose changes. `bun run map` regenerates the maps; `bun run check` fails when one is out of date or a
-file has no summary. Never edit a file under `docs/map/` by hand: change the source file's top comment (or add or
-remove the file), then run `bun run map` to update the maps.
+To find a file, read the index `docs/map/README.md`: one line per folder of `core`, `web-server`, `web-client`,
+`worker` and `scripts`, saying what it holds. Then read the map of the folders you need (one line per file, from the
+file's own top comment), or search every map at once (`grep -rn <word> docs/map`) when a topic spans several
+folders. Then search the code (`grep -rn`) and read only the lines you need. Every source file starts with a one-line
+`//` comment saying what it is for; write it for new files and keep it true when a file's purpose changes. Every
+folder has a sentence in `scripts/repo-map-folders.ts`; write it for a new folder and keep it true when what the
+folder holds changes. `bun run map` regenerates the maps; `bun run check` fails when one is out of date, or a file
+or folder has no summary. Never edit a file under `docs/map/` by hand: change the source file's top comment or the
+folder's sentence (or add or remove the file), then run `bun run map` to update the maps.
 
 ## Commands
 
@@ -53,8 +56,8 @@ remove the file), then run `bun run map` to update the maps.
 - `bun run secrets`: gitleaks over the git history and the uncommitted changes, redacted. Needs `gitleaks` on the
   PATH (`brew install gitleaks`). `.gitleaks.toml` adds Claude OAuth tokens and legacy Notion secrets to the default
   rules: add a rule there for any new kind of secret Union handles. Never run it without `--redact`.
-- `bun run map`: regenerates `docs/map/` after adding, removing or re-describing files; `bun run map:check` (part of
-  `check`) fails when a map is out of date or a source file has no top comment.
+- `bun run map`: regenerates `docs/map/` after adding, removing or re-describing files or folders; `bun run map:check`
+  (part of `check`) fails when a map is out of date, a source file has no top comment or a folder no sentence.
 - `bun run docs:check`: fails when a link in `docs/`, `documentation/`, `AGENTS.md` or `README.md` points at a
   file that does not exist (part of `check` and the pre-commit hook). Built plans live in `docs/plans/archive/`;
   move a plan there once built and run it.
