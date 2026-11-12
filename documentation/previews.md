@@ -54,16 +54,17 @@ working copy, and serves each exposed service at an address of its own:
 | One with a prefix | `http://api-t<ticket>.union.localhost:8080` |
 
 While it starts, the tab counts the time and shows the build's output as it comes; **Cancel start** stops it and
-removes what it had started. Once it runs, the tab shows its addresses, **Restart** and **Stop**, and the services'
-output. The **⋯** menu beside the status holds the Compose file, **Reset preview…** and **Environment settings**, which opens the project's **Environments** tab. The
+removes what it had started. The preview's card lists its exposed services, one row each with the preview's state
+and the service's port; once it runs, each row has the service's address, and the card has **Restart** and **Stop**
+and the services' output. The **⋯** menu beside the status holds the Compose file, **Reset preview…** and **Environment settings**, which opens the project's **Environments** tab. The
 sidebar's **Previews** entry lists every preview running, grouped by project, with **Stop**.
 
 - Each ticket's preview is its own Compose project, with its own containers, network and volumes.
 - Previews answer on this machine only.
 - When a service the preview serves stops on its own (it crashed, or was killed), the preview shows **Failed**
-  within a minute, with which service stopped and the services' last output. Its other containers are removed (left
-  running while the agent works on the ticket, which uses them); click **Start preview** to bring it back with its
-  data, which stays in its volumes and the ticket's workspace. The ticket's Log says when it happened.
+  within a minute: a red card above it says which service stopped, and the services' last output opens under the
+  rows. Its other containers are removed (left running while the agent works on the ticket, which uses them); click
+  **Start again** on the red card to bring it back with its data, which stays in its volumes and the ticket's workspace. The ticket's Log says when it happened.
 - A preview nobody visited for an hour stops by itself (**Environments → Limits** changes the delay, or turns
   it off), except while the agent works on the ticket or its end-to-end tests run.
 - Once the ticket's pull request is merged, or the ticket is cancelled, its preview is removed for good, with its
@@ -104,7 +105,8 @@ names, or leave them unnamed.
 
 Set the command in **Environments → End-to-end tests**, for example `npx playwright test`. It can take several
 lines, for example a setup line before the tests. Then click **Run
-e2e tests** in a ticket's Preview tab (**Run again** once there is a result).
+e2e tests** on the **End-to-end tests** card of a ticket's Preview tab (**Run again** once there is a result).
+When they cannot run now, the card says why under its title and the button is off.
 The result shows how long ago it ran; open **Output** for its last lines, or **Command** for what ran. The tests run in the ticket's container, against the running preview.
 Chromium is installed on first use, at your repository's Playwright version. The system libraries of Firefox are
 in the image too, but not the browser: if your tests use Firefox, start the command with
@@ -124,7 +126,7 @@ E2e tests take a lot of memory, so they only run when you ask, one ticket at a t
 
 ## Commands and scripts
 
-The Preview tab's **Commands** runs a command in the ticket's workspace, as the agent would: in its checkout, with
+The Preview tab's **Run a command** runs a command in the ticket's workspace, as the agent would: in its checkout, with
 its services and variables. Use it to run a migration, a seed or one test. You see its output live. A command:
 
 - cannot run while a step runs, and one runs at a time per ticket;
@@ -135,7 +137,8 @@ Each command you ran is one line: its exit code, the command and how long it too
 and the buttons that keep it or send it to the agent; **↻ Again** runs it again. The newest is open, and the list shows
 the last five, with **Show older** for the rest.
 
-Save the commands you run often in **Settings → Scripts**: each becomes a button in the Preview tab.
+Save the commands you run often in **Settings → Scripts**: each becomes a **▸** chip above the command box; click it
+to run it.
 
 ## Services for the agent
 

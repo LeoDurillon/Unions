@@ -41,24 +41,28 @@ Rebase as its primary button and the other branch operations behind a menu butto
 `more-actions.tsx`; `lib/pull-request/rewrite-block.ts` says when the branch can be rewritten); the discussion's
 notes are rows with an initials avatar (`note-avatar.tsx`) and Add to review beside them.
 
+Then the Preview tab's board (2026-11-12), client only: a red failure card with Start again above the preview's card
+(`preview-failure.tsx`); the card (`preview-card.tsx`) lists the settings' exposed services, one row each with the
+preview's state, the port and, while it runs, the address (`preview-services.tsx`); the e2e tests are a card whose
+line says why they cannot run (`e2eRefusal`); scripts are ▸ chips. Union records the preview's state, not each
+service's: per-service state (db Ready, simulator No answer) would need the worker to store each container's state
+(a migration); the user chose not to for now.
+
 ## Left to do
 
 Take them in this order; each is one worktree, one commit, checked with screenshots before it is deployed.
 
-1. **Preview tab** (board "Ticket panel · Preview tab"): one row per service with its state and port (check what
-   the preview's view holds before adding an API field), scripts as chips with ▸, the e2e tests greyed out until a
-   preview runs, the failure card with Start again beside the reason.
-2. **Log** (board "Steps › Log"): a header with the step, turn, time, tool-call count, model and Stop; each row's
+1. **Log** (board "Steps › Log"): a header with the step, turn, time, tool-call count, model and Stop; each row's
    time; a row that opens to the call's full input and result (`lib/log/agent-events.ts` keeps only a summary
    today); a Steps / Raw output switch.
-3. **Notion tab**: the page's title, status and last edit in its card (needs the worker or `NotionApi` to read
+2. **Notion tab**: the page's title, status and last edit in its card (needs the worker or `NotionApi` to read
    the page's properties).
-4. **New ticket dialog** (board "New ticket dialog"): Write / Preview on the description, attached files as chips
+3. **New ticket dialog** (board "New ticket dialog"): Write / Preview on the description, attached files as chips
    under it, the flow's steps under the switch, Cancel beside Create ticket, Ctrl/⌘ Enter to create.
-5. **Pages not redesigned yet**: a step's output tab (`components/steps/step-tab.tsx` and its notices), the
+4. **Pages not redesigned yet**: a step's output tab (`components/steps/step-tab.tsx` and its notices), the
    review's Ticket and Report tabs beyond their cards, Union Tools and Connectors lists, the GitHub App page (its
    header sits outside its card), the onboarding wizard, the setup agent's proposal cards, the guide.
-6. **Dark mode pass** over every page above: each was checked in light; only the PR tab was checked in dark.
+5. **Dark mode pass** over every page above: each was checked in light; only the PR tab was checked in dark.
 
 Two ideas on the inner canvas are new features, not design: "Draft with the agent" on a Notion comment and "Start
 it now" in New ticket. Ask the user before building either: both spend Claude usage or start work.

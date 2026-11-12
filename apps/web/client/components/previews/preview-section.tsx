@@ -1,17 +1,17 @@
-// A ticket's or a pull request's preview: its compose environment run from the workspace, opened
-// through the proxy.
+// A ticket's or a pull request's preview: why a start failed, its card with its services, and its e2e tests.
+// Its compose environment runs from the workspace, opened through the proxy.
 
-import { useState, type ReactElement, type ReactNode } from 'react';
+import type { PreviewService } from '@union/core/preview';
+import type { ReactElement, ReactNode } from 'react';
 
 import type { PreviewTarget } from '../../lib/preview/preview-target';
 import { usePreview } from '../../lib/preview/use-preview';
-import { CARD_CLASS, ErrorText } from '../ui/ui';
-import { PreviewComposeDialog } from './preview-compose-dialog';
-import { Controls } from './preview-controls';
+import { PreviewCard } from './preview-card';
 import { PreviewE2e } from './preview-e2e';
-import { PreviewHeading, PreviewNotSetUp } from './preview-heading';
-import { PreviewOutput } from './preview-output';
-import { ResetPanel } from './preview-reset';
+import { PreviewFailure } from './preview-failure';
+import { PreviewNotSetUp } from './preview-heading';
+
+const NO_SERVICES: readonly PreviewService[] = [];
 
 /**
  * A ticket's or a pull request's preview: its compose environment run from the workspace, opened
@@ -23,14 +23,15 @@ export function PreviewSection({
   target,
   notice,
   canRevise = false,
+  services = NO_SERVICES,
 }: {
   target: PreviewTarget;
   notice?: ReactNode;
   canRevise?: boolean;
+  /** The settings' exposed services, for their rows before the preview ever ran; else its addresses. */
+  services?: readonly PreviewService[];
 }): ReactElement | null {
   const { query, calls, act, busy, error } = usePreview(target);
-  const [composeOpen, setComposeOpen] = useState(false);
-  const [resetting, setResetting] = useState(false);
   const view = query.data;
   if (!view) {
     return null;
@@ -38,44 +39,20 @@ export function PreviewSection({
   if (!view.configured) {
     return <PreviewNotSetUp />;
   }
-  const { preview } = view;
   return (
-    <section className={CARD_CLASS}>
-      <PreviewHeading
-        view={view}
-        onCompose={() => {
-          setComposeOpen(true);
-        }}
-        onReset={() => {
-          setResetting(true);
-        }}
-      />
-      {notice}
-      <Controls view={view} calls={calls} act={act} busy={busy} />
-      {resetting ? (
-        <ResetPanel
-          view={view}
-          calls={calls}
-          act={act}
-          busy={busy}
-          onClose={() => {
-            setResetting(false);
-          }}
-        />
-      ) : null}
-      <PreviewComposeDialog
+    <>
+      <PreviewFailure view={view} calls={calls} act={act} busy={busy} />
+      <PreviewCard
         target={target}
         view={view}
-        open={composeOpen}
-        onClose={() => {
-          setComposeOpen(false);
-        }}
+        calls={calls}
+        act={act}
+        busy={busy}
+        error={error}
+        notice={notice}
+        services={services}
       />
-      <ErrorText error={error} />
-      {preview ? (
-        <PreviewOutput target={target} preview={preview} calls={calls} act={act} busy={busy} />
-      ) : null}
       <PreviewE2e target={target} view={view} canRevise={canRevise} />
-    </section>
+    </>
   );
 }

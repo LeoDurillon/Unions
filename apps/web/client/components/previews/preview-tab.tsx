@@ -1,5 +1,6 @@
 // The ticket's Preview tab: the environment, its output, its end-to-end tests, and commands.
 
+import { exposedServices } from '@union/core/preview';
 import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../../src/api-types';
@@ -19,7 +20,11 @@ export function PreviewTab({ detail }: { detail: TicketDetail }): ReactElement {
   const target = { kind: 'ticket', ticketId: ticket.id } as const;
   return (
     <div className="space-y-3">
-      <PreviewSection target={target} canRevise={canRevise(ticket.phase)} />
+      <PreviewSection
+        target={target}
+        canRevise={canRevise(ticket.phase)}
+        services={project.config.preview ? exposedServices(project.config.preview) : []}
+      />
       <ContainerCommands
         target={target}
         scripts={project.config.scripts ?? []}

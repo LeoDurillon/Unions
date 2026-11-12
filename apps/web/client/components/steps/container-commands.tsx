@@ -198,7 +198,7 @@ export function ContainerCommands({
   const view = runs.data;
   return (
     <section className={CARD_CLASS}>
-      <h3 className="text-sm font-semibold">Commands</h3>
+      <h3 className="text-sm font-semibold">Run a command</h3>
       <Intro intro={intro} folded={(view?.runs.length ?? 0) > 0} />
       <ScriptButtons scripts={scripts} blocked={blocked} pending={run.isPending} onRun={submit} />
       <CommandForm blocked={blocked} pending={run.isPending} onRun={submit} />

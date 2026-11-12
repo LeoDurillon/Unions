@@ -89,7 +89,7 @@ function LogTail({
   );
 }
 
-/** What the preview printed: its start while it starts; otherwise why it failed and its services' last lines. */
+/** What the preview printed: its start while it starts; otherwise its services' last lines. */
 export function PreviewOutput({
   target,
   preview,
@@ -106,19 +106,5 @@ export function PreviewOutput({
   if (preview.status === 'starting') {
     return <StartOutput target={target} preview={preview} />;
   }
-  return (
-    <>
-      {preview.status === 'failed' && preview.error ? (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 dark:border-red-900 dark:bg-red-950/40">
-          <p className="text-sm font-semibold text-red-800 dark:text-red-300">
-            The preview failed to start
-          </p>
-          <pre className="font-mono text-xs whitespace-pre-wrap text-red-700 dark:text-red-400">
-            {preview.error}
-          </pre>
-        </div>
-      ) : null}
-      <LogTail preview={preview} calls={calls} act={act} busy={busy} />
-    </>
-  );
+  return <LogTail preview={preview} calls={calls} act={act} busy={busy} />;
 }

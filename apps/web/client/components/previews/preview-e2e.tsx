@@ -7,9 +7,19 @@ import type { ReactElement } from 'react';
 import type { PreviewView } from '../../../src/api-types';
 import { previewCalls, previewKey, type PreviewTarget } from '../../lib/preview/preview-target';
 import { ReviewE2eActions } from '../pull-requests/review-e2e-actions';
-import { Button, ErrorText } from '../ui/ui';
+import { Button, CARD_CLASS, ErrorText } from '../ui/ui';
 import { Details, LastResult } from './preview-e2e-result';
 import { TicketE2eActions } from './ticket-e2e-actions';
+
+/** The card's title, and why the tests cannot run now under it. */
+function E2eTitle({ refusal }: { refusal: string | null }): ReactElement {
+  return (
+    <div className="min-w-0 flex-1 space-y-0.5">
+      <h3 className="text-sm font-semibold">End-to-end tests</h3>
+      {refusal ? <p className="text-xs text-zinc-500">{refusal}</p> : null}
+    </div>
+  );
+}
 
 /**
  * The project's end-to-end tests against the preview, run when the user asks (a browser and a
@@ -38,16 +48,16 @@ export function PreviewE2e({
   }
   const stale = view.e2eStale;
   return (
-    <div className="space-y-2 border-t border-zinc-200 pt-2 dark:border-zinc-800">
+    <section className={CARD_CLASS}>
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-sm font-medium">End-to-end tests</span>
+        <E2eTitle refusal={view.e2eRefusal} />
         {preview ? (
           <LastResult
             preview={preview}
             shotsWhere={target.kind === 'ticket' ? "in the ticket's files" : 'linked beside'}
           />
         ) : null}
-        <span className="ml-auto flex flex-wrap items-center gap-2">
+        <span className="flex flex-wrap items-center gap-2">
           <Button
             disabled={run.isPending || view.e2eRefusal !== null}
             title={view.e2eRefusal ?? undefined}
@@ -71,6 +81,6 @@ export function PreviewE2e({
       </div>
       <Details command={e2eCommand} preview={preview} stale={stale} />
       <ErrorText error={run.error} />
-    </div>
+    </section>
   );
 }

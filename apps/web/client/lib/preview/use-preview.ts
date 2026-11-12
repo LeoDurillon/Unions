@@ -7,6 +7,16 @@ import { previewCalls, previewKey, previewPoll, type PreviewTarget } from './pre
 
 export type PreviewCalls = ReturnType<typeof previewCalls>;
 
+/** A preview's view and how its parts act on it, as the Preview tab's cards take them. */
+export type PreviewState = {
+  target: PreviewTarget;
+  view: PreviewView;
+  calls: PreviewCalls;
+  /** Sends one of `calls` and shows the view it answers. */
+  act: (call: () => Promise<PreviewView>) => void;
+  busy: boolean;
+};
+
 /** The preview (polled for a pull request while something is on its way), and `act` to run a call. */
 export function usePreview(target: PreviewTarget): {
   query: UseQueryResult<PreviewView>;
