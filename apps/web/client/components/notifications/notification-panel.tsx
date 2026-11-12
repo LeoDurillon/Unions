@@ -1,15 +1,15 @@
-// The bell's panel: the notifications newest first, grouped by ticket, "Mark all read", "Delete all", older ones on request, and the desktop opt-in (folded).
+// The bell's panel: first what still asks something of the user, then the rest as history, newest first and
+// grouped by ticket; "Mark all read", "Delete all", older ones on request, and the desktop opt-in (folded).
 import { useEffect, type ReactElement, type RefObject } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
 import { useDesktopSetting } from '../../lib/desktop-notifications';
-import { groupNotifications } from '../../lib/notification-groups';
 import type { NotificationTarget } from '../../lib/open-notification';
 import type { Notifications } from '../../lib/use-notifications';
 import { Switch } from '../choice';
 import { ConfirmButton } from '../confirm-button';
 import { Button, ErrorText } from '../ui';
-import { NotificationGroupItem } from './notification-group';
+import { NotificationSections } from './notification-section';
 
 /** Closes the panel on Escape or a click outside `box` (the bell and the panel). */
 function useDismiss(box: RefObject<HTMLDivElement | null>, close: () => void): void {
@@ -127,16 +127,7 @@ export function NotificationPanel({
     >
       <PanelHeader notifications={notifications} />
       <ErrorText error={notifications.error} />
-      <ul className="min-h-0 flex-1 space-y-0.5 overflow-y-auto">
-        {groupNotifications(items).map((group) => (
-          <NotificationGroupItem
-            key={group.key}
-            group={group}
-            project={names.get(group.latest.projectId) ?? null}
-            onOpen={onOpen}
-          />
-        ))}
-      </ul>
+      <NotificationSections items={items} names={names} onOpen={onOpen} />
       {items.length === 0 ? (
         <p className="px-2 text-sm text-zinc-500">
           Nothing yet. Approvals, failures, the usage limit, merged pull requests and finished

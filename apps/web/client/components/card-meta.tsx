@@ -16,11 +16,11 @@ export function CardMeta({
   const flow = config ? resolveFlow(ticket, config) : null;
   const short = config && flow && flow.length !== FULL_FLOW.length ? flowName(flow, config) : null;
   return (
-    <div className="flex items-center gap-1.5 font-mono text-[11px] text-zinc-500 dark:text-zinc-400">
+    <div className="flex items-center gap-1.5 overflow-hidden font-mono text-[11px] whitespace-nowrap text-zinc-500 dark:text-zinc-400">
       <span>{ticket.issueNumber === null ? 'not on GitHub yet' : `#${ticket.issueNumber}`}</span>
       {ticket.prNumber === null ? null : <span>· PR #{ticket.prNumber}</span>}
       {short ? (
-        <span className="ml-auto rounded-full border border-zinc-200 px-1.5 font-sans text-[10.5px] dark:border-zinc-700">
+        <span className="ml-auto shrink-0 rounded-full border border-zinc-200 px-1.5 font-sans text-[10.5px] dark:border-zinc-700">
           {short}
         </span>
       ) : null}

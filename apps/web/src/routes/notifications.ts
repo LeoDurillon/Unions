@@ -1,5 +1,6 @@
 // `/api/notifications`: what needs the user across every project (the worker writes them), marking them read and clearing them.
 import { schema, type Db, type Notification } from '@union/core';
+import { toAct } from '@union/core/needs-you';
 import { and, count, desc, eq, isNull, lt } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
 
@@ -8,8 +9,61 @@ import { fail, NOT_FOUND, requireId } from '../http';
 const PAGE = 30;
 const MAX_PAGE = 100;
 
-/** A page of notifications, newest first, and how many are unread in all. */
-export type NotificationPage = { items: Notification[]; unread: number };
+/** A notification, and whether it still asks something of the user (`toAct` in core). */
+export type NotificationView = Notification & { toAct: boolean };
+
+/**
+ * A page of notifications, newest first; how many are unread in all, and `toAct`: how many tickets and
+ * investigations still ask something (two approvals of one ticket count once).
+ */
+export type NotificationPage = { items: NotificationView[]; unread: number; toAct: number };
+
+type Asking = { ids: Set<number>; subjects: number };
+
+/** What a notification is about: its ticket, else its investigation, else itself. */
+function subjectOf(row: {
+  id: number;
+  ticketId: number | null;
+  investigationId: number | null;
+}): string {
+  if (row.ticketId !== null) {
+    return `ticket:${row.ticketId}`;
+  }
+  return row.investigationId === null
+    ? `notification:${row.id}`
+    : `investigation:${row.investigationId}`;
+}
+
+/** The unread notifications that still ask something (those about a ticket read its state now), and what about. */
+function askingNow(db: Db): Asking {
+  const rows = db
+    .select({
+      id: schema.notifications.id,
+      ticketId: schema.notifications.ticketId,
+      investigationId: schema.notifications.investigationId,
+      kind: schema.notifications.kind,
+      readAt: schema.notifications.readAt,
+      phase: schema.tickets.phase,
+      prState: schema.tickets.prState,
+      prChecksState: schema.tickets.prChecksState,
+    })
+    .from(schema.notifications)
+    .leftJoin(schema.tickets, eq(schema.tickets.id, schema.notifications.ticketId))
+    .where(isNull(schema.notifications.readAt))
+    .all();
+  const open = rows.filter((row) =>
+    toAct(
+      row,
+      row.phase === null
+        ? null
+        : { phase: row.phase, prState: row.prState, prChecksState: row.prChecksState },
+    ),
+  );
+  return {
+    ids: new Set(open.map((row) => row.id)),
+    subjects: new Set(open.map((row) => subjectOf(row))).size,
+  };
+}
 
 function pageSize(value: string | undefined): number {
   const size = Number(value);
@@ -36,7 +90,9 @@ function list(db: Db, c: Context): Response {
       .from(schema.notifications)
       .where(isNull(schema.notifications.readAt))
       .get()?.value ?? 0;
-  return c.json({ items, unread } satisfies NotificationPage);
+  const open = askingNow(db);
+  const views = items.map((item) => Object.assign(item, { toAct: open.ids.has(item.id) }));
+  return c.json({ items: views, unread, toAct: open.subjects } satisfies NotificationPage);
 }
 
 function markRead(db: Db, c: Context): Response {

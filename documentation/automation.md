@@ -2,7 +2,7 @@
 
 ## Notifications
 
-The sidebar's **Notifications** bell counts what happened while you were away, across projects:
+The sidebar's **Notifications** bell lists what happened while you were away, across projects:
 
 | Badge                     | When                                                                                       |
 | ------------------------- | ------------------------------------------------------------------------------------------ |
@@ -16,6 +16,13 @@ The sidebar's **Notifications** bell counts what happened while you were away, a
 | **Re-run failed**         | GitHub refused to re-run a CI job.                                                         |
 | **Answered**              | An investigation finished.                                                                 |
 | **Rule**, **Rule failed** | An event rule notified you, or failed.                                                     |
+
+The panel shows first **To act on**: the unread notifications that still ask something of you. That means an
+approval, a failure or failed checks whose ticket still waits for you, or an investigation's answer you have not
+opened. The bell's orange number counts them, one per ticket or investigation (two approvals of one ticket count
+once), and so does the tab's title. Everything else is under **Earlier**, as history: merged and closed pull
+requests, usage limits (Union retries those by itself), and the approvals and failures of tickets that have moved
+on since.
 
 Notifications are grouped by ticket or investigation, newest first. Click one to open what it is about. **Mark all
 read** and **Delete all** clear the list. At the bottom of the panel, you can turn on **desktop notifications**, so

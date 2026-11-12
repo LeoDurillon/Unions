@@ -1,13 +1,16 @@
 // The next ticket that waits on the user, in the board's order: column by column, each as it lists them.
 import type { TicketSummary } from '../../src/api-types';
 import { needsYou } from './board-filter';
+import { orderColumn } from './board-order';
 import { COLUMNS } from './labels';
 
 type Orderable = Pick<TicketSummary, 'id' | 'board'> & Parameters<typeof needsYou>[0];
 
-/** The tickets as the board shows them: column by column, left to right. */
-function boardOrder<T extends Pick<TicketSummary, 'board'>>(tickets: T[]): T[] {
-  return COLUMNS.flatMap(({ status }) => tickets.filter((ticket) => ticket.board === status));
+/** The tickets as the board shows them: column by column, left to right, each sorted as it lists them. */
+function boardOrder<T extends Orderable>(tickets: T[]): T[] {
+  return COLUMNS.flatMap(({ status }) =>
+    orderColumn(tickets.filter((ticket) => ticket.board === status)),
+  );
 }
 
 /** Just outside the list, on the side a walk in `step`'s direction starts from. */

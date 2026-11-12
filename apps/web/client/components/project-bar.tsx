@@ -30,7 +30,11 @@ function ViewTabs({
   onView: (view: ProjectView) => void;
 }): ReactElement {
   return (
-    <div role="tablist" aria-label="Project" className="flex gap-1">
+    <div
+      role="tablist"
+      aria-label="Project"
+      className="-mb-3 flex gap-1 self-end overflow-x-auto max-sm:order-last max-sm:w-full"
+    >
       {VIEWS.map((entry) => {
         const on = entry.view === view;
         return (
@@ -42,7 +46,7 @@ function ViewTabs({
             onClick={() => {
               onView(entry.view);
             }}
-            className={`rounded-md px-3 py-1 text-sm transition ${on ? 'bg-indigo-100 font-medium dark:bg-indigo-950' : 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800/60 dark:hover:text-zinc-100'}`}
+            className={`border-b-2 px-2.5 pt-1 pb-3 text-sm font-medium whitespace-nowrap transition ${on ? 'border-zinc-900 text-zinc-900 dark:border-zinc-100 dark:text-zinc-100' : 'border-transparent text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100'}`}
           >
             {entry.label}
           </button>
@@ -84,17 +88,34 @@ export function ProjectBar({
 }): ReactElement {
   return (
     <>
-      <header className="flex items-center gap-3 border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
-        <h2 className="text-base font-semibold">
-          {project ? `${project.owner}/${project.repo}` : 'No project selected'}
+      <header className="flex items-center gap-5 border-b max-sm:flex-wrap max-sm:gap-y-2 border-zinc-200 bg-white px-5 py-3 dark:border-zinc-800 dark:bg-zinc-950">
+        <h2 className="text-[15px] font-semibold whitespace-nowrap">
+          {project ? (
+            <>
+              {project.owner}
+              <span className="text-zinc-400">/</span>
+              {project.repo}
+            </>
+          ) : (
+            'No project selected'
+          )}
         </h2>
         {project ? <ViewTabs view={view} onView={onView} /> : null}
         <div className="flex-1" />
         <Button onClick={onSettings} disabled={project === null}>
           Settings
         </Button>
-        <Button variant="primary" onClick={onNewTicket} disabled={project === null}>
+        <Button
+          variant="primary"
+          className="flex items-center gap-2 whitespace-nowrap"
+          title="New ticket (c)"
+          onClick={onNewTicket}
+          disabled={project === null}
+        >
           New ticket
+          <kbd className="rounded border border-current px-1 font-mono text-[10px] leading-4 opacity-70 max-sm:hidden">
+            C
+          </kbd>
         </Button>
       </header>
       {project?.githubAccess === 'none' ? <NoAccessBanner onSettings={onSettings} /> : null}

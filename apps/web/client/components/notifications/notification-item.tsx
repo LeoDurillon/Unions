@@ -1,4 +1,5 @@
-// One notification in the panel: what it is about, what happened, where and when; unread ones stand out.
+// One notification in the panel: what it is about, what happened, where and when; those that still ask something
+// stand out.
 import type { Notification } from '@union/core';
 import type { ReactElement } from 'react';
 
@@ -12,12 +13,13 @@ export function NotificationItem({
   project,
   onOpen,
 }: {
-  notification: Notification;
+  /** `toAct`: it still asks something; without it, an unread one stands out. */
+  notification: Notification & { toAct?: boolean };
   /** `owner/repo`, when the project is still there. */
   project: string | null;
   onOpen: (notification: Notification) => void;
 }): ReactElement {
-  const unread = notification.readAt === null;
+  const unread = notification.toAct ?? notification.readAt === null;
   const kind = KIND_LABELS[notification.kind];
   return (
     <li>

@@ -37,16 +37,25 @@ has the whole story.
 Above the board:
 
 - **Search** finds tickets by title, issue number (`#36`) or pull request number.
-- **Needs you** shows only the tickets waiting for you, with their count: a step to approve, a question to answer,
-  a failed run, a refused commit, or failed CI checks on an open pull request.
+- On the right, the project at a glance: **N need you** (click it to show only the tickets waiting for you: a step to
+  approve, a question to answer, a failed run, a refused commit, or failed CI checks on an open pull request), how
+  many tickets run and wait in review, and how much of Claude's five-hour window is used.
 - Once some tickets came from Notion or Jira, **All**, **From Notion**, **From Jira** and **From GitHub** show only
   the tickets of one origin. **From GitHub** keeps the tickets written in Union or imported from a GitHub issue.
+
+Under the toolbar, **Needs you** shows up to four tickets that wait for you, each with what to do ("Intake waits
+for you", "Checks failed"); click one to open it. With more, **+N more** shows them all on the board. In each
+column, the tickets that need you come first, then the newest. In Done and Merged / Closed, the tickets that need
+nothing more take one line each, under the cards.
+
+On a phone, the board shows one column at a time: pick it in the row of buttons above it.
 
 Press **/** to jump to the search, **c** to write a new ticket, and **n** to open the first ticket that needs you;
 when none of this project's does, **n** goes to the next project that has some.
 
 In the sidebar, each project shows how many of its tickets wait for you (an orange number), and a blue dot while one
-of its steps runs, so you can see another project needs you without opening it.
+of its steps runs, so you can see another project needs you without opening it. With a single project, the sidebar
+starts folded to its icons; unfold it with **»** at its top (Union remembers your choice).
 Press **?** anywhere for the list of [keyboard shortcuts](#keyboard-shortcuts).
 
 ## Create a ticket

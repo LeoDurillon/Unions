@@ -77,7 +77,21 @@ test('clearing deletes every notification', async () => {
   notify(2);
   const response = await app.request('/api/notifications', { method: 'DELETE' });
   expect(await response.json()).toEqual({ cleared: 2 });
-  expect(await page()).toEqual({ items: [], unread: 0 });
+  expect(await page()).toEqual({ items: [], unread: 0, toAct: 0 });
+});
+
+test('an approval asks something only while its ticket still waits for it', async () => {
+  const id = notify(1);
+  const waiting = { kind: 'awaiting_approval', step: 'intake' } as const;
+  db.update(schema.tickets).set({ phase: waiting }).run();
+  expect((await page()).toAct).toBe(1);
+  expect((await page()).items.find((item) => item.id === id)?.toAct).toBe(true);
+  db.update(schema.tickets)
+    .set({ phase: { kind: 'running', step: 'summary' } })
+    .run();
+  const moved = await page();
+  expect(moved.toAct).toBe(0);
+  expect(moved.unread).toBe(1);
 });
 
 test('unknown or malformed ids are refused', async () => {

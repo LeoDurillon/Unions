@@ -164,8 +164,11 @@
   `routes/jira-picks.ts`; details in `integrations.md`). Triggers, variables and Notion value shapes are in
   the browser-safe `@union/core/event-rules`; matching and the delivery queue in `event-rules.ts` and
   `event-deliveries.ts`. Rules apply only to events logged after their creation (no replay).
-- Notifications: the bell above the projects in the sidebar (`components/notifications/`) shows the unread count
-  (also in the tab title) and opens a panel of every project's notifications, newest first
+- Notifications: the bell above the projects in the sidebar (`components/notifications/`) shows how many
+  tickets and investigations still ask something (`toAct` in `@union/core/needs-you`: unread, and about a ticket
+  that still `needsYou`, or of a kind that asks until read; the page's `toAct` counts subjects, each item carries
+  its own flag), also in the tab title, and opens a panel of every project's notifications, To act on first, then
+  the rest, newest first
   (`routes/notifications.ts`: `GET /api/notifications?before=`, `POST /:id/read`, `POST /read-all`, `DELETE /` to
   clear them all after a confirm; marking read and clearing are plain record writes (the worker's cursor is past
   the cleared events, so they do not come back); mounted with the event stream in `routes/live.ts`). The worker writes them; the list

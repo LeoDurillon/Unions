@@ -1,27 +1,16 @@
-// The board's columns: each its title, count and fold button over its cards (or, folded, a narrow strip
-// that unfolds on a click); empty ones say so, and placeholder cards stand in while the board loads.
+// The board's columns side by side, each unfolded (`board-column-body.tsx`) or folded to a narrow strip that
+// unfolds on a click; on a phone, one column at a time, picked above them.
 import type { BoardColumn } from '@union/core';
-import type { ReactElement } from 'react';
+import { Fragment, useState, type ReactElement } from 'react';
 
 import type { PublicProject, TicketSummary } from '../../src/api-types';
 import { COLUMNS } from '../lib/labels';
 import { useFoldedColumns } from '../lib/use-folded-columns';
 import type { StartState } from '../lib/use-start-tickets';
-import { TicketCard } from './ticket-card';
+import { Column, type ColumnView } from './board-column-body';
+import { ColumnSwitcher } from './column-switcher';
 
 type Config = PublicProject['config'];
-
-/** What an empty column says. */
-const EMPTY: Record<BoardColumn, string> = {
-  backlog: 'No ticket waiting',
-  in_progress: 'Nothing running',
-  in_review: 'Nothing to review',
-  done: 'Nothing done yet',
-  merged: 'Nothing merged lately',
-};
-
-const FOLD_BUTTON =
-  'rounded px-1 text-zinc-500 hover:bg-zinc-200 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-zinc-100';
 
 /** A folded column: a narrow strip with its title and count, that unfolds on a click. */
 function FoldedColumn({
@@ -39,97 +28,11 @@ function FoldedColumn({
       title={`Show ${title}`}
       aria-label={`Show ${title}, ${count} tickets`}
       onClick={onUnfold}
-      className="flex h-full w-10 shrink-0 flex-col items-center gap-2 rounded-xl bg-zinc-100 py-3 text-sm font-semibold hover:bg-zinc-200 dark:bg-zinc-900/60 dark:hover:bg-zinc-800"
+      className="flex h-full w-10 shrink-0 flex-col items-center gap-2 rounded-2xl bg-zinc-100/80 py-3 max-sm:hidden text-sm font-semibold hover:bg-zinc-200 dark:bg-zinc-900/60 dark:hover:bg-zinc-800"
     >
       <span className="text-xs font-normal text-zinc-500">{count}</span>
       <span className="[writing-mode:vertical-rl]">{title}</span>
     </button>
-  );
-}
-
-/** Two grey cards that pulse while the board's tickets are read. */
-function Placeholders(): ReactElement {
-  return (
-    <div aria-hidden className="flex flex-col gap-2">
-      {[0, 1].map((key) => (
-        <div
-          key={key}
-          className="h-24 animate-pulse rounded-xl bg-zinc-200/80 dark:bg-zinc-800/80"
-        />
-      ))}
-    </div>
-  );
-}
-
-/** What a column with no card shows: placeholders while loading, else why it is empty. */
-function EmptyColumn({ status, view }: { status: BoardColumn; view: ColumnView }): ReactElement {
-  if (view.loading) {
-    return <Placeholders />;
-  }
-  return (
-    <p className="py-6 text-center text-xs text-zinc-500 dark:text-zinc-500">
-      {view.filtering ? 'None matches the filter' : EMPTY[status]}
-    </p>
-  );
-}
-
-/** How the board is shown: filtered, still loading, and what the Start buttons started. */
-type ColumnView = {
-  filtering: boolean;
-  loading: boolean;
-  config?: Config;
-  started?: StartState;
-};
-
-function Column({
-  status,
-  title,
-  tickets,
-  view,
-  onOpen,
-  onFold,
-}: {
-  status: BoardColumn;
-  title: string;
-  tickets: TicketSummary[];
-  view: ColumnView;
-  onOpen: (id: number) => void;
-  onFold: () => void;
-}): ReactElement {
-  const { started } = view;
-  return (
-    <section className="flex h-full min-w-56 flex-1 flex-col gap-2.5 rounded-2xl bg-zinc-100/80 p-3 dark:bg-zinc-900/60">
-      <h2 className="flex items-center gap-2 px-0.5 text-[13px] font-semibold">
-        <span className="truncate">{title}</span>
-        <span className="rounded-full bg-white px-1.5 text-[11px] font-medium text-zinc-600 tabular-nums shadow-sm dark:bg-zinc-800 dark:text-zinc-300">
-          {tickets.length}
-        </span>
-        <span className="flex-1" />
-        <button
-          type="button"
-          title={`Fold ${title}`}
-          aria-label={`Fold ${title}`}
-          onClick={onFold}
-          className={FOLD_BUTTON}
-        >
-          ‹
-        </button>
-      </h2>
-      <div className="-mx-1 flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto px-1 pt-0.5 pb-1">
-        {tickets.length === 0 ? <EmptyColumn status={status} view={view} /> : null}
-        {tickets.map((ticket) => (
-          <TicketCard
-            key={ticket.id}
-            ticket={ticket}
-            config={view.config}
-            onOpen={onOpen}
-            onStart={started?.start}
-            starting={started?.starting.has(ticket.id) === true}
-            startError={started?.failures.get(ticket.id) ?? null}
-          />
-        ))}
-      </div>
-    </section>
   );
 }
 
@@ -151,27 +54,39 @@ export function BoardColumns({
 }): ReactElement {
   const view: ColumnView = { filtering, loading, config, started };
   const columns = useFoldedColumns();
+  const [phone, setPhone] = useState<BoardColumn>('in_progress');
   return (
-    <div className="flex min-h-0 flex-1 gap-4 overflow-x-auto">
-      {COLUMNS.map(({ status, title }) => {
-        const inColumn = tickets.filter((ticket) => ticket.board === status);
-        const toggle = (): void => {
-          columns.toggle(status);
-        };
-        return columns.folded(status) ? (
-          <FoldedColumn key={status} title={title} count={inColumn.length} onUnfold={toggle} />
-        ) : (
-          <Column
-            key={status}
-            status={status}
-            title={title}
-            tickets={inColumn}
-            view={view}
-            onOpen={onOpen}
-            onFold={toggle}
-          />
-        );
-      })}
-    </div>
+    <>
+      <ColumnSwitcher tickets={tickets} current={phone} onPick={setPhone} />
+      <div className="flex min-h-0 flex-1 gap-4 overflow-x-auto">
+        {COLUMNS.map(({ status, title }) => {
+          const inColumn = tickets.filter((ticket) => ticket.board === status);
+          const toggle = (): void => {
+            columns.toggle(status);
+          };
+          const folded = columns.folded(status);
+          // On a phone only the picked column shows, unfolded; the strips are for wide screens.
+          const shownOnPhone = status === phone;
+          return (
+            <Fragment key={status}>
+              {folded ? (
+                <FoldedColumn title={title} count={inColumn.length} onUnfold={toggle} />
+              ) : null}
+              {!folded || shownOnPhone ? (
+                <Column
+                  status={status}
+                  title={title}
+                  tickets={inColumn}
+                  view={view}
+                  onOpen={onOpen}
+                  onFold={toggle}
+                  className={`${shownOnPhone ? 'max-sm:w-full' : 'max-sm:hidden'} ${folded ? 'sm:hidden' : ''}`}
+                />
+              ) : null}
+            </Fragment>
+          );
+        })}
+      </div>
+    </>
   );
 }

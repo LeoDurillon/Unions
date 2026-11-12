@@ -1,48 +1,13 @@
-// Above the board: the search, "Needs you" with its count, where the tickets came from (when some
-// came from a tracker), how many the filter shows, and how to start one while the backlog has any.
+// Above the board: the search, where the tickets came from (when some came from a tracker), how many the filter
+// shows, and on the right the project at a glance (the Needs you toggle, what runs, Claude's window).
 import { useRef, type ReactElement } from 'react';
 
 import type { TicketSummary } from '../../src/api-types';
-import {
-  isFiltering,
-  needsYou,
-  NO_FILTER,
-  originOptions,
-  type BoardFilter,
-} from '../lib/board-filter';
-import { isStartable } from '../lib/labels';
+import { isFiltering, NO_FILTER, originOptions, type BoardFilter } from '../lib/board-filter';
 import { useBoardKeys } from '../lib/use-board-keys';
+import { BoardSummary } from './board-summary';
 import { Segmented } from './choice';
 import { inputClass } from './ui';
-
-function NeedsYouToggle({
-  on,
-  count,
-  onChange,
-}: {
-  on: boolean;
-  count: number;
-  onChange: (on: boolean) => void;
-}): ReactElement {
-  return (
-    <button
-      type="button"
-      aria-pressed={on}
-      title="Steps waiting for your approval, failures, refused commits and red CI checks (n opens the first)"
-      onClick={() => {
-        onChange(!on);
-      }}
-      className={`flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs transition ${on ? 'border-amber-400 bg-amber-50 font-medium text-amber-900 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-200' : 'border-zinc-300 text-zinc-600 hover:text-zinc-900 dark:border-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-100'}`}
-    >
-      Needs you
-      <span
-        className={`rounded-full px-1.5 font-semibold ${count > 0 ? 'bg-amber-500 text-white' : 'bg-zinc-200 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400'}`}
-      >
-        {count}
-      </span>
-    </button>
-  );
-}
 
 /** Where the tickets came from: shown only when some came from Notion. */
 function OriginPicker({
@@ -101,7 +66,6 @@ export function BoardToolbar({
   shown,
   filter,
   onFilter,
-  canStart,
   onOpen,
 }: {
   /** Every ticket on the board, before the filter. */
@@ -110,18 +74,15 @@ export function BoardToolbar({
   shown: number;
   filter: BoardFilter;
   onFilter: (filter: BoardFilter) => void;
-  /** The cards have Start buttons: while the backlog has a ticket that can start, say how. */
-  canStart: boolean;
   /** Opens a ticket: `n` opens the first that needs the user. */
   onOpen: (id: number) => void;
 }): ReactElement {
   const search = useRef<HTMLInputElement>(null);
   useBoardKeys(tickets, search, onOpen);
   const filtering = isFiltering(filter);
-  const startable = canStart && tickets.some((ticket) => isStartable(ticket));
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <div className="w-72">
+      <div className="w-72 max-sm:w-full">
         <input
           ref={search}
           type="search"
@@ -134,13 +95,6 @@ export function BoardToolbar({
           }}
         />
       </div>
-      <NeedsYouToggle
-        on={filter.needsYou}
-        count={tickets.filter((ticket) => needsYou(ticket)).length}
-        onChange={(on) => {
-          onFilter({ ...filter, needsYou: on });
-        }}
-      />
       <OriginPicker tickets={tickets} filter={filter} onFilter={onFilter} />
       {filtering ? (
         <FilterCount
@@ -151,11 +105,13 @@ export function BoardToolbar({
           }}
         />
       ) : null}
-      {startable && !filtering ? (
-        <span className="ml-auto text-xs text-zinc-500">
-          Start a backlog ticket with its Start button.
-        </span>
-      ) : null}
+      <BoardSummary
+        tickets={tickets}
+        needsYouOn={filter.needsYou}
+        onNeedsYou={(on) => {
+          onFilter({ ...filter, needsYou: on });
+        }}
+      />
     </div>
   );
 }

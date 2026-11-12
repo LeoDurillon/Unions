@@ -54,7 +54,7 @@ export function Sidebar({
   onPage: (page: Page) => void;
   onOpenNotification: (target: NotificationTarget) => void;
 }): ReactElement {
-  const [compact, toggle] = useCompactSidebar();
+  const [compact, toggle] = useCompactSidebar(projects.length <= 1);
   return (
     <aside
       data-compact={compact ? '' : undefined}

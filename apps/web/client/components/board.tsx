@@ -1,4 +1,5 @@
-// The board: its search and filters, then the columns down to the bottom edge; any can fold to a strip. Start moves a card at once.
+// The board: its search and filters, what needs the user, then the columns down to the bottom edge; any can fold
+// to a strip. Start moves a card at once.
 import { useQuery } from '@tanstack/react-query';
 import { leftBoard } from '@union/core/states';
 import { useState, type ReactElement } from 'react';
@@ -8,7 +9,7 @@ import { api } from '../lib/api';
 import { filterTickets, isFiltering, NO_FILTER } from '../lib/board-filter';
 import { asStarted, useStartTickets, type StartState } from '../lib/use-start-tickets';
 import { BoardColumns } from './board-column';
-import { BoardToolbar } from './board-toolbar';
+import { BoardTop } from './board-top';
 import { ErrorText } from './ui';
 
 type Config = PublicProject['config'];
@@ -45,13 +46,12 @@ export function BoardView({
   const [filter, setFilter] = useState(NO_FILTER);
   const shown = filterTickets(onBoard, filter);
   return (
-    <div className="flex h-full flex-col gap-3 px-4 pt-3 pb-4">
-      <BoardToolbar
+    <div className="flex h-full flex-col gap-4 px-5 pt-4 pb-4">
+      <BoardTop
         tickets={onBoard}
         shown={shown.length}
         filter={filter}
         onFilter={setFilter}
-        canStart={started !== undefined}
         onOpen={onOpen}
       />
       <ErrorText error={error} />

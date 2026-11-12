@@ -1,4 +1,4 @@
-// The sidebar's bell: the unread count, and the panel of notifications it opens.
+// The sidebar's bell: how many notifications still ask something of the user, and the panel it opens.
 import { useCallback, useRef, useState, type ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
@@ -31,13 +31,15 @@ export function NotificationBell({
   const close = useCallback((): void => {
     setOpen(false);
   }, []);
-  const { unread } = notifications;
+  const { unread, toAct } = notifications;
   return (
     <div ref={box} className="relative">
       <button
         type="button"
         aria-expanded={open}
-        aria-label={unread > 0 ? `Notifications, ${unread} unread` : 'Notifications'}
+        aria-label={
+          toAct > 0 ? `Notifications, ${toAct} to act on, ${unread} unread` : 'Notifications'
+        }
         onClick={() => {
           setOpen(!open);
         }}
@@ -46,9 +48,9 @@ export function NotificationBell({
       >
         <BellIcon />
         <span className={SIDE_LABEL}>Notifications</span>
-        {unread > 0 ? (
-          <span className={`${SIDE_BADGE} bg-indigo-600`}>
-            {unread > MAX_COUNT ? `${MAX_COUNT}+` : unread}
+        {toAct > 0 ? (
+          <span className={`${SIDE_BADGE} bg-amber-500`}>
+            {toAct > MAX_COUNT ? `${MAX_COUNT}+` : toAct}
           </span>
         ) : null}
       </button>
