@@ -1,4 +1,4 @@
-// `/api/tickets/:id/notion-comments`: the open discussions of the ticket's Notion page, read now.
+// `/api/tickets/:id/notion-comments`: the ticket's Notion page and its open discussions, read now.
 // Also the comments the user sends to it.
 
 import type { Db, NotionApi, Ticket } from '@union/core';
@@ -6,6 +6,7 @@ import { Hono } from 'hono';
 
 import { ACCEPTED, CONFLICT, fail, NOT_FOUND, readObject } from '../http';
 import { pendingNotionComments, queueNotionComment } from '../notion-comment-commands';
+import type { NotionPageFacts } from '../notion-discussion-types';
 import { readDiscussions } from '../notion-discussions';
 import { importedDiscussions, importNotionDiscussion } from '../notion-review-import';
 import { reviewImportRefusal } from '../review-import-refusal';
@@ -23,8 +24,22 @@ function pageOf(ticket: Ticket): { id: string; url: string } {
   return { id: ticket.originId, url };
 }
 
+/** The page's title, status and last edit; null when Notion does not give the page (the tab shows the rest). */
+async function pageFacts(
+  notion: NotionApi,
+  token: string,
+  pageId: string,
+): Promise<NotionPageFacts | null> {
+  try {
+    const page = await notion.page(token, pageId);
+    return { title: page.title, status: page.status ?? null, editedAt: page.editedAt ?? null };
+  } catch {
+    return null;
+  }
+}
+
 /**
- * `GET` reads the discussions from Notion on each call (the tab reads once per opening), with the
+ * `GET` reads the page and the discussions from Notion on each call (the tab reads once per opening), with the
  * comments not posted yet and those in the review. `POST` (`{ discussionId?, text }`) queues a
  * reply or a page comment; `POST /import` (`{ discussionId, commentId? }`) adds a discussion, or
  * only one of its comments, to the review.
@@ -35,9 +50,13 @@ export function ticketNotionCommentRoutes(db: Db, notion: NotionApi): Hono {
     const ticket = loadTicket(db, c);
     const page = pageOf(ticket);
     const token = notionTokenOf(db, ticket.projectId);
-    const view = await readDiscussions(notion, token, page);
+    const [view, facts] = await Promise.all([
+      readDiscussions(notion, token, page),
+      pageFacts(notion, token, page.id),
+    ]);
     return c.json({
       ...view,
+      page: facts,
       pending: pendingNotionComments(db, ticket.id),
       review: {
         importedIds: importedDiscussions(db, ticket.id, page.id, view.discussions),

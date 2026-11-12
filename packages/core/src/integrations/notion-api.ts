@@ -1,8 +1,10 @@
 // The Notion calls Union makes (`NotionApi`), and the client that makes them over fetch.
 import { commentOf, commentsOf, type NotionComment } from './notion-comment-parse';
 import { NotionError } from './notion-error';
+import { pageOf, type NotionPage } from './notion-page-parse';
 import type { NotionRichTextInput } from './notion-rich-text';
 import { resolveUnknownBlocks } from './notion-unknown-blocks';
+import { isRecord, plain } from './notion-values';
 
 const API = 'https://api.notion.com/v1';
 /** Required by the markdown endpoint, and the only value it accepts. */
@@ -14,7 +16,7 @@ const MAX_USER_PAGES = 10;
 /** 100 comments a page: a block with more open comments than this is not a discussion one reads. */
 const MAX_COMMENT_PAGES = 10;
 
-export type NotionPage = { id: string; title: string; url: string; dataSourceId: string | null };
+export type { NotionPage } from './notion-page-parse';
 
 /** A column of a data source: its id (stable across renames), name, type, and choices if any. */
 export type NotionProperty = { id: string; name: string; type: string; options: string[] };
@@ -57,32 +59,6 @@ export type NotionApi = {
   ): Promise<NotionPage>;
 };
 
-/** Rich text arrays to plain text; anything unexpected reads as empty. */
-function plain(texts: unknown): string {
-  if (!Array.isArray(texts)) {
-    return '';
-  }
-  return texts
-    .map((text: unknown) =>
-      isRecord(text) && typeof text.plain_text === 'string' ? text.plain_text : '',
-    )
-    .join('');
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
-}
-
-function titleOf(properties: unknown): string {
-  if (!isRecord(properties)) {
-    return '';
-  }
-  const title = Object.values(properties).find(
-    (property) => isRecord(property) && property.type === 'title',
-  );
-  return isRecord(title) ? plain(title.title) : '';
-}
-
 /** The choices of a select, multi-select or status column; empty for the other types. */
 function optionsOf(property: Record<string, unknown>): string[] {
   const config = property[String(property.type)];
@@ -114,22 +90,6 @@ function propertiesOf(properties: unknown): NotionProperty[] {
       ? [{ id: property.id, name, type: property.type, options: optionsOf(property) }]
       : [],
   );
-}
-
-function pageOf(body: Record<string, unknown>): NotionPage {
-  const { parent } = body;
-  const dataSourceId =
-    isRecord(parent) &&
-    parent.type === 'data_source_id' &&
-    typeof parent.data_source_id === 'string'
-      ? parent.data_source_id
-      : null;
-  return {
-    id: String(body.id),
-    title: titleOf(body.properties),
-    url: typeof body.url === 'string' ? body.url : '',
-    dataSourceId,
-  };
 }
 
 export class FetchNotionApi implements NotionApi {

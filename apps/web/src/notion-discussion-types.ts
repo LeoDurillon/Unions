@@ -35,8 +35,17 @@ export type PendingNotionComment = {
  */
 type NotionReviewState = { importedIds: string[]; refusal: string | null };
 
-/** What the ticket's tab reads: the discussions, the comments being sent, and Add to review. */
+/** The page itself as Notion has it now: its title, its status column's value, when it changed. */
+export type NotionPageFacts = {
+  title: string;
+  status: { name: string; value: string } | null;
+  editedAt: string | null;
+};
+
+/** What the ticket's tab reads: the page, the discussions, the comments being sent, and Add to review. */
 export type NotionTabView = NotionDiscussionsView & {
+  /** Null when the page could not be read; the discussions still show. */
+  page: NotionPageFacts | null;
   pending: PendingNotionComment[];
   review: NotionReviewState;
 };

@@ -55,18 +55,22 @@ words are rows; a run's card (`steps/log-run.tsx`) says when, its tool calls, mo
 `run_finished`; Steps / Raw output switches to every CLI line (`steps/log-raw.tsx`). Not built: Stop (no action
 stops one step without cancelling the ticket: a state machine and worker change) and "turn N of M".
 
+Then the Notion tab's page card (2026-11-12): core's page read keeps `editedAt` (`last_edited_time`) and `status`
+(the page's property of Notion's `status` type, its name and value; `integrations/notion-page-parse.ts`); the web's
+`GET /api/tickets/:id/notion-comments` reads the page beside the discussions (`page`, null when Notion refuses it);
+`components/notion/notion-page-card.tsx` shows them. Not built: "Bring the page's changes in" and "Draft with the
+agent" (new features).
+
 ## Left to do
 
 Take them in this order; each is one worktree, one commit, checked with screenshots before it is deployed.
 
-1. **Notion tab**: the page's title, status and last edit in its card (needs the worker or `NotionApi` to read
-   the page's properties).
-2. **New ticket dialog** (board "New ticket dialog"): Write / Preview on the description, attached files as chips
+1. **New ticket dialog** (board "New ticket dialog"): Write / Preview on the description, attached files as chips
    under it, the flow's steps under the switch, Cancel beside Create ticket, Ctrl/⌘ Enter to create.
-3. **Pages not redesigned yet**: a step's output tab (`components/steps/step-tab.tsx` and its notices), the
+2. **Pages not redesigned yet**: a step's output tab (`components/steps/step-tab.tsx` and its notices), the
    review's Ticket and Report tabs beyond their cards, Union Tools and Connectors lists, the GitHub App page (its
    header sits outside its card), the onboarding wizard, the setup agent's proposal cards, the guide.
-4. **Dark mode pass** over every page above: each was checked in light; only the PR tab was checked in dark.
+3. **Dark mode pass** over every page above: each was checked in light; only the PR tab was checked in dark.
 
 Two ideas on the inner canvas are new features, not design: "Draft with the agent" on a Notion comment and "Start
 it now" in New ticket. Ask the user before building either: both spend Claude usage or start work.

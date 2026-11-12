@@ -198,7 +198,8 @@ Then come the tabs:
   words are rows of their own. **Raw output**, above the runs, shows every line the agent's CLI printed, as is.
 - **PR**: the ticket's pull request, its CI checks and branch operations. See
   [Branches and pull requests](branches.md).
-- **Notion**: the open comments of the ticket's Notion page, for a ticket imported from Notion or linked to a page.
+- **Notion**: for a ticket imported from Notion or linked to a page, a card for the page (its title, the value of its
+  status column, when it was last edited, **Open in Notion**), then the page's open comments.
   Comments on the whole page come first, then those on a passage of the text, under the passage they are about.
   The tab opens on a card for the page, with **Open in Notion** and **Refresh**, which reads the comments again;
   **Open in Notion** on a discussion opens it there. Resolved comments are not

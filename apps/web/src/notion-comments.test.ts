@@ -46,7 +46,18 @@ let markdown = '';
 let reads: string[] = [];
 let refuse = false;
 
+const PAGE_OBJECT = {
+  id: PAGE,
+  title: 'Export CSV',
+  url: PAGE_URL,
+  dataSourceId: null,
+  editedAt: '2026-11-12T10:00:00.000Z',
+  status: { name: 'Avancement', value: 'En cours' },
+};
+let pageRead: () => Promise<unknown> = () => Promise.resolve(PAGE_OBJECT);
+
 const notion = {
+  page: () => pageRead(),
   pageMarkdown: () => Promise.resolve({ markdown, truncated: false }),
   comments: (_token: string, id: string) => {
     reads.push(id);
@@ -65,6 +76,7 @@ let app: Hono;
 let ticketId: number;
 
 beforeEach(() => {
+  pageRead = () => Promise.resolve(PAGE_OBJECT);
   markdown = `# Spec\n\nThe ${span(BLOCK, ON_TEXT, 'export format')} is open.`;
   reads = [];
   refuse = false;
@@ -101,6 +113,19 @@ test('the discussions: the page one, then the one on the text with its quote', a
     ['c2', 'Grace', 'Is it `CSV`'],
     ['c3', 'Notion user', 'Is it `CSV`'],
   ]);
+});
+
+test('the page comes with its title, status and last edit; a failed read leaves them out', async () => {
+  const view = (await (await read()).json()) as NotionTabView;
+  expect(view.page).toEqual({
+    title: 'Export CSV',
+    status: { name: 'Avancement', value: 'En cours' },
+    editedAt: '2026-11-12T10:00:00.000Z',
+  });
+  pageRead = () => Promise.reject(new NotionError('Not found', 404));
+  const without = (await (await read()).json()) as NotionTabView;
+  expect(without.page).toBeNull();
+  expect(without.discussions).toHaveLength(2);
 });
 
 test('a page with many commented blocks is read in part, and says so', async () => {

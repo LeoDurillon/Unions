@@ -1,4 +1,4 @@
-// A ticket's Notion tab: the open discussions of its page, read once per opening, with Refresh, replies and New comment.
+// A ticket's Notion tab: its page's card, then the page's open discussions, read once per opening, with replies.
 
 import type { ReactElement } from 'react';
 
@@ -12,8 +12,10 @@ import {
   useNotionReviewImport,
   type NotionReviewImport,
 } from '../../lib/integrations/use-notion-review-import';
-import { Button, CARD_CLASS, ErrorText } from '../ui/ui';
+import { Loading, SkeletonList } from '../ui/skeleton';
+import { CARD_CLASS, ErrorText } from '../ui/ui';
 import { NotionDiscussion } from './notion-discussion';
+import { NotionPageCard } from './notion-page-card';
 import { NotionReply } from './notion-reply';
 
 /** The page has no open discussion: what would show here. */
@@ -99,40 +101,22 @@ export function NotionTab({ ticketId }: { ticketId: number }): ReactElement {
   const { data } = comments;
   return (
     <div className="space-y-4">
-      <div className={`${CARD_CLASS} flex items-center gap-3 space-y-0`}>
-        <span
-          aria-hidden
-          className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50 font-semibold dark:border-zinc-700 dark:bg-zinc-800"
-        >
-          N
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold">Notion page</p>
-          <p className="text-xs text-zinc-500">Its open discussions, read when the tab opens.</p>
-        </div>
-        {data ? (
-          <a
-            href={data.pageUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="shrink-0 text-sm text-indigo-600 hover:underline dark:text-indigo-400"
-          >
-            Open in Notion ↗
-          </a>
-        ) : null}
-        <Button
-          className="shrink-0"
-          disabled={comments.isFetching}
-          onClick={() => {
-            void comments.refetch();
-          }}
-        >
-          {comments.isFetching ? 'Reading…' : 'Refresh'}
-        </Button>
-      </div>
+      <NotionPageCard
+        facts={data?.page ?? null}
+        loaded={data !== undefined || comments.error !== null}
+        pageUrl={data?.pageUrl ?? null}
+        reading={comments.isFetching}
+        onRefresh={() => {
+          void comments.refetch();
+        }}
+      />
       <ErrorText error={comments.error ?? reviewImport.error} />
       {!data && comments.isFetching ? (
-        <p className="text-sm text-zinc-500">Reading the comments on Notion…</p>
+        <section className={CARD_CLASS}>
+          <Loading label="Reading the comments" reason="Reading the page from Notion">
+            <SkeletonList count={2} lines={2} />
+          </Loading>
+        </section>
       ) : null}
       {data ? <Discussions view={data} sender={sender} reviewImport={reviewImport} /> : null}
     </div>
