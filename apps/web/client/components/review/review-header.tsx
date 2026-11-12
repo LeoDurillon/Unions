@@ -1,5 +1,5 @@
 // Back, what is reviewed and at which commit, the GitHub import (tickets), Explain and the layout
-// switch, then the agent review and Send.
+// switch. Then the agent review and Send.
 
 import type { ReactElement } from 'react';
 

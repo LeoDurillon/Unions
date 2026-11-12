@@ -1,4 +1,5 @@
-// What an agent's tool call is about, for counting: the command family and its shape, the file read, the skill or subagent.
+// What an agent's tool call is about, for counting: the command family and shape, the file read,
+// the skill or subagent.
 
 /** The tool and what it was used on; `variant` is the command's shape, for Bash only. */
 export type ToolKey = { tool: string; target: string; variant: string };

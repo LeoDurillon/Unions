@@ -1,5 +1,5 @@
 // The services a project's previews share (`union-p<id>-shared`), as the worker last saw them in
-// Docker: for the Environments tab, since the web never asks Docker.
+// Docker. For the Environments tab, since the web never asks Docker.
 import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
 import { now, projects } from './schema';

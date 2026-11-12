@@ -1,4 +1,5 @@
-// One review agent's newest run on the change: its state (Cancel while it works), why it failed, or its answer with links to the diff, Copy and Run again.
+// One review agent's newest run on the change: its state (Cancel while it works), why it failed, or
+// its answer. The answer has links to the diff, Copy and Run again.
 
 import type { ReactElement, ReactNode } from 'react';
 

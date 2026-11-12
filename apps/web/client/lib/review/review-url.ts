@@ -1,6 +1,7 @@
-// The review page's slice and section tab in the URL (`?slice=2&tab=pull-request`), the lines its
-// diff opens on (`?lines=new:12-30:src/a.ts`), and the pull request reviewed without a ticket
-// (`?review-pr=42`), so Back and Forward move between them and a reload keeps them.
+// The review page's slice, section tab, diff lines and ticketless pull request in the URL, for
+// Back, Forward and reload. The slice and tab (`?slice=2&tab=pull-request`), the lines its diff
+// opens on (`?lines=new:12-30:src/a.ts`), and the pull request reviewed without a ticket
+// (`?review-pr=42`) are kept there, so Back and Forward move between them and a reload keeps them.
 
 import { useCallback } from 'react';
 

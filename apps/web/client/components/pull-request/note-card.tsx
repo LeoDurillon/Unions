@@ -1,4 +1,5 @@
-// A review summary or a conversation comment, with its Add to review action when there is one; a line thread, its place a link to the diff; each with its replies below.
+// A review summary or a conversation comment, with its Add to review action when there is one. A
+// line thread, its place a link to the diff; each with its replies below.
 
 import { githubTitle } from '@union/core/github-text';
 import { useState, type ReactElement, type ReactNode } from 'react';

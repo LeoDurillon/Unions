@@ -1,4 +1,5 @@
-// Prepares a review agent's checkout before it runs: the project's files and its install command, never for a fork's pull request.
+// Prepares a review agent's checkout before it runs: the project's files and its install command.
+// Never for a fork's pull request.
 
 import { schema, type ReviewAgentRun } from '@union/core';
 import { eq } from 'drizzle-orm';

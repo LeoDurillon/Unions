@@ -1,5 +1,5 @@
-// A preview's reset as the routes queue it: refused when it cannot happen now, with the data folders
-// the user chose among the ones its last start found.
+// A preview's reset as the routes queue it: refused when it cannot happen now. It carries the data
+// folders the user chose among the ones its last start found.
 import { getPreview, type Db } from '@union/core';
 import type { Context } from 'hono';
 

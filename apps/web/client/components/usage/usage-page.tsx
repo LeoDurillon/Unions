@@ -1,5 +1,6 @@
-// A project's Usage tab: what its agents used over a range of days, with its API-equivalent cost (the
-// Cost tab), and what their logs show to improve (the What to improve tab).
+// A project's Usage tab: what its agents used over a range of days, and what their logs show to
+// improve. The Cost tab shows the use with its API-equivalent cost; the What to improve tab shows
+// the findings.
 import { useState, type ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';

@@ -1,5 +1,5 @@
-// Where the links and images of a Markdown file of the repository go: a file of it opens in the Repository tab,
-// an image of it loads from the repository, the rest is left as written.
+// Where a repository Markdown file's links and images go. A file of the repository opens in the
+// Repository tab, an image of it loads from the repository, the rest is left as written.
 import { repositoryImageType } from '@union/core/repository-blob';
 
 import type { RepositoryEntry } from '../../src/repository-api-types';

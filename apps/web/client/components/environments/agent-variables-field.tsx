@@ -1,5 +1,5 @@
-// Which of the preview's plain variables the agent's commands get (and the commands the user runs):
-// a preview's database address would otherwise win over the one the tests' env file names.
+// Which of the preview's plain variables the agent's commands get (and the commands the user runs).
+// Otherwise a preview's database address would win over the one the tests' env file names.
 import type { AgentVariables } from '@union/core/preview';
 import type { ReactElement } from 'react';
 

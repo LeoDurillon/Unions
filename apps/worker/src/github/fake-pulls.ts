@@ -1,4 +1,5 @@
-// The pull requests of the in-memory GitHub for tests, their lookups by branch and commit comparisons: the base of `FakeGitHubApi`.
+// The pull requests of the in-memory GitHub for tests, their lookups by branch and commit
+// comparisons. It is the base of `FakeGitHubApi`.
 import type { Comparison } from '@union/core';
 
 import type { PullRequestRef, PullRequestState, RepoRef } from './api';

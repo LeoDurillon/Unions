@@ -1,4 +1,5 @@
-// Simplifies a split ticket's history slice by slice with the implementer's session, each slice's content unchanged, and force-pushes the stack.
+// Simplifies a split ticket's history slice by slice with the implementer's session, and
+// force-pushes the stack. Each slice's content stays unchanged.
 
 import { openSlices } from '@union/core';
 

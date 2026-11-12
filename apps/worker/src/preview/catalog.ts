@@ -1,5 +1,5 @@
-// The whole compose file, every profile enabled (`--profile '*'`): what the settings offer, and how
-// to explain a service that is missing because its profile is not enabled.
+// The whole compose file, every profile enabled (`--profile '*'`): what the settings offer. It also
+// says how to explain a service that is missing because its profile is not enabled.
 import { isRecord, PREVIEW_ADDITIONS_FILE } from '@union/core';
 
 import { compose, printedJson } from './compose';

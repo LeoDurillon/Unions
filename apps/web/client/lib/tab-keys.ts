@@ -1,4 +1,5 @@
-// Arrow keys in a tab bar (`role="tablist"`): Left and Right move to the previous or next tab, Home and End to the ends, and select it.
+// Arrow keys in a tab bar (`role="tablist"`): Left and Right move to the previous or next tab, Home
+// and End to the ends. Each move also selects the tab.
 import { useEffect } from 'react';
 
 const MOVES: Record<string, (at: number, count: number) => number> = {

@@ -1,4 +1,6 @@
-// `/api/tickets/:id/pr-checks`: the pull request's CI checks read from GitHub, the failed ones (with related jobs and bot comments) given to the implementer, a failed Actions job run again, each open slice's checks counted.
+// `/api/tickets/:id/pr-checks`: the pull request's CI checks from GitHub, and the failed ones given
+// to the implementer. Failed ones come with related jobs and bot comments; a failed Actions job can
+// be run again, and each open slice's checks are counted.
 
 import {
   CiOutputError,

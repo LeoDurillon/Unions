@@ -1,4 +1,5 @@
-// A monospace textarea that colours its text for a language (Dockerfile, YAML): the highlighted copy sits behind a transparent textarea.
+// A monospace textarea that colours its text for a language (Dockerfile, YAML). The highlighted
+// copy sits behind a transparent textarea.
 import {
   useMemo,
   useRef,

@@ -1,5 +1,5 @@
-// The Repository tab in the URL (`?view=repository&repo-ref=main&repo-path=src/a.ts`), so a reload and
-// Back keep the branch and file looked at.
+// The Repository tab in the URL (`?view=repository&repo-ref=main&repo-path=src/a.ts`). A reload and
+// Back then keep the branch and file looked at.
 import { useCallback } from 'react';
 
 import { setParams, useUrlParam } from './url-state';

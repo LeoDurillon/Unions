@@ -1,5 +1,5 @@
-// Review with agent: the review's specs (a stack's from each of its pull requests), the scope (this
-// pull request or the whole stack), and the start.
+// Review with agent: the review's specs, the scope (this pull request or the whole stack), and the
+// start. A stack's specs come from each of its pull requests.
 
 import type { AgentReviewSpec } from '@union/core';
 import { useState, type ReactElement } from 'react';

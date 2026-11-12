@@ -1,5 +1,5 @@
-// The Notion pages of a pull request under review: their text, the description's suggestions,
-// checking, linking one more and unlinking one.
+// The Notion pages of a pull request under review: their text and the description's suggestions.
+// Also checking, linking one more and unlinking one.
 
 import {
   useMutation,

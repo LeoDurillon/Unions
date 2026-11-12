@@ -1,4 +1,5 @@
-// A project's own agent image: the one its agents run on, the one saved and not applied yet, and its build's state and log.
+// A project's own agent image: the one its agents run on, the one saved and not applied yet, its
+// build's state and log.
 
 import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 

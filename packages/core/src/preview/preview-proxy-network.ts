@@ -1,4 +1,4 @@
-// The network one preview's exposed services share with the proxy, and with no other preview: on a
+// The network one preview's exposed services share with the proxy, and with no other preview. On a
 // network every preview joins, a service name (`s3`) answers from every preview that has one.
 import {
   isRecord,

@@ -1,4 +1,5 @@
-// Measures an implementation against its size budget and, when a first one went too far over, sends the implementer's session back once to cut it.
+// Measures an implementation against its size budget. When a first one went too far over, it sends
+// the implementer's session back once to cut it.
 
 import {
   changeBudget,

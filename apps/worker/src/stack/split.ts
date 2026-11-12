@@ -1,4 +1,5 @@
-// Rewrites the ticket's commits into the approved slices with the implementer's session, checks them, pushes the stack and opens it on GitHub.
+// Rewrites the ticket's commits into the approved slices with the implementer's session, and pushes
+// the stack. It checks the slices before the push, and opens the stack on GitHub.
 
 import {
   latestOutput,

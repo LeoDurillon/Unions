@@ -1,4 +1,4 @@
-// A file's diff with what the review's current spec report says about it: a note above (read first,
+// A file's diff with what the review's current spec report says about it. A note above (read first,
 // skim, what needs the reviewer here) and marks on the lines an item points at.
 
 import type { ReviewReportResult } from '@union/core';

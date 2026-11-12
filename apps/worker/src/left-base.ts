@@ -1,4 +1,5 @@
-// Where the base a ticket left is read from: its merged pull request's ref, else its branch, else the workspace's last copy.
+// Where the base a ticket left is read from: its merged PR's ref, else its branch, else the
+// workspace's last copy.
 
 import { emitEvent, schema, type LeftBase } from '@union/core';
 import { eq } from 'drizzle-orm';

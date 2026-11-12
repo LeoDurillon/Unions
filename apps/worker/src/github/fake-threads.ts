@@ -1,4 +1,5 @@
-// The line threads of the in-memory GitHub for tests, with the replies and comments posted on pull requests: the base of `FakeGitHubApi`.
+// The line threads of the in-memory GitHub for tests, with the replies and comments posted on pull
+// requests. It is the base of `FakeGitHubApi`.
 import type { RepoRef, ThreadPullRequest } from './api';
 import { FakePulls } from './fake-pulls';
 

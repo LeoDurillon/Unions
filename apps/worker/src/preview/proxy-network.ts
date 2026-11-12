@@ -1,5 +1,5 @@
-// Puts Union's proxy on a preview's own proxy network after `up`, and takes it off before `down`:
-// the exposed services share that network with the proxy only, never with another preview.
+// Puts Union's proxy on a preview's own proxy network after `up`, and takes it off before `down`.
+// The exposed services share that network with the proxy only, never with another preview.
 import { PREVIEW_NETWORK, previewProxyNetwork, type ContainerRuntime } from '@union/core';
 
 /** A preview's container (`union-t12-proxy-1`): until Union's own previews moved off the shared network, one could be named `proxy`. */

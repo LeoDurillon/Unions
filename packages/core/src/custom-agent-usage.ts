@@ -1,5 +1,5 @@
-// What still runs a custom agent: project flow presets that name it, tickets not yet done whose flow has
-// it, and its review runs waiting or running.
+// What still runs a custom agent: flow presets that name it, tickets not yet done whose flow has
+// it, its review runs. The presets are the project's; review runs count while waiting or running.
 
 import { and, eq, inArray } from 'drizzle-orm';
 

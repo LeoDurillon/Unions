@@ -1,5 +1,5 @@
-// The record of a project's shared services: written by the worker from Docker's state, read by
-// the Environments tab; and the commands the tab sends about them.
+// The record of a project's shared services: written by the worker from Docker's state, read by the
+// Environments tab. Also the commands the tab sends about them.
 import { eq } from 'drizzle-orm';
 
 import type { Db } from './db';

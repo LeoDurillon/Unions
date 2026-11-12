@@ -1,4 +1,4 @@
-// What keeps each preview's data apart on the shared services (its database, its bucket): commands
+// What keeps each preview's data apart on the shared services (its database, its bucket). Commands
 // run in their containers at each start of the preview, and when its data is removed.
 import { sharedNetwork, sharedPart, type ComposeJson, type WorkspaceOwner } from '@union/core';
 

@@ -1,4 +1,5 @@
-// The New ticket dialog's GitHub tab: an issue (with the flow picker) or a pull request (on its own branch, its flow decided by the import).
+// The New ticket dialog's GitHub tab: an issue (with the flow picker) or a pull request. A pull
+// request comes on its own branch, its flow decided by the import.
 import type { PipelineStep } from '@union/core/states';
 import { useState, type ReactElement, type ReactNode } from 'react';
 

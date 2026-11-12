@@ -1,4 +1,5 @@
-// What a command needs besides a valid move of the state machine: no command already waiting, a startable ticket, an open pull request, stacks turned on, a branch not moved on GitHub.
+// What a command needs besides a valid move of the state machine. No command already waiting, a
+// startable ticket, an open pull request, stacks turned on, a branch not moved on GitHub.
 
 import { movedBranchRefusal, schema, type Db } from '@union/core';
 import { and, eq, isNull } from 'drizzle-orm';

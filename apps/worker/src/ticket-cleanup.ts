@@ -1,5 +1,6 @@
 // Removes what a finished ticket holds in Docker (its preview with its built images, its container
-// and volumes) once nothing comes back to it: its pull request merged, or the ticket cancelled.
+// and volumes). It does so once nothing comes back to it: its pull request merged, or the ticket
+// cancelled.
 import { emitEvent, schema, type ContainerRuntime, type Db, type Ticket } from '@union/core';
 import { eq, isNotNull, sql } from 'drizzle-orm';
 

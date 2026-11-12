@@ -1,4 +1,5 @@
-// Fails when a link in the docs, the user guide, AGENTS.md or README.md points at a file that does not exist, or a living doc names a source path that is gone.
+// Fails when a link in the docs, the user guide, AGENTS.md or README.md points at a file that does
+// not exist. It also fails when a living doc names a source path that is gone.
 import { access, readFile } from 'node:fs/promises';
 import path from 'node:path';
 

@@ -1,5 +1,5 @@
-// Starts the work outside the ticket pipeline (investigations, review agents, PR descriptions),
-// after failing what a stopped worker left running.
+// Starts the work outside the ticket pipeline: investigations, review agents, PR descriptions. It
+// first fails what a stopped worker left running.
 
 import { backfillNotionPages, FetchNotionApi, type Project } from '@union/core';
 

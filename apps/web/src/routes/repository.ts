@@ -1,5 +1,6 @@
-// `/api/projects/:projectId/repository`: the Repository tab's reads from GitHub: the commit a branch or sha
-// names, the tree at it, one file, an image's own bytes for a rendered Markdown file, and the branches to pick.
+// `/api/projects/:projectId/repository`: the Repository tab's reads from GitHub (commit, tree,
+// file, branches). They are the commit a branch or sha names, the tree at it, one file, an image's
+// own bytes for a rendered Markdown file, and the branches to pick.
 
 import { schema, type Db, type GitHubAuth } from '@union/core';
 import {

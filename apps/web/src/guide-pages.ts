@@ -1,5 +1,5 @@
-// The user guide's pages from the files of `documentation/`: which names are pages, their titles, and the
-// order the index lists them in.
+// The user guide's pages from the files of `documentation/`: which names are pages and their
+// titles. Also the order the index lists them in.
 import type { GuidePage } from './guide-types';
 
 const PAGE_FILE = /^(?<name>[a-z0-9-]+|README)\.md$/u;

@@ -1,4 +1,5 @@
-// Queues a "Suggest improvements" investigation: the project's usage findings over a range, asked of an agent reading the repository.
+// Queues a "Suggest improvements" investigation of the project's usage findings over a range. They
+// are asked of an agent reading the repository.
 import type { Db } from './db';
 import { INVESTIGATION_DEFAULTS } from './investigation-defaults';
 import { createInvestigation, InvestigationError, type Investigation } from './investigations';

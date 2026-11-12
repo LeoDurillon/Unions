@@ -1,5 +1,5 @@
-// The newest spec report of the review, with starting and cancelling one, adding its gaps to the
-// review, and marking what needs the reviewer not useful.
+// The newest spec report of the review, with starting and cancelling one and adding its gaps to the
+// review. Also marking what needs the reviewer not useful.
 
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 

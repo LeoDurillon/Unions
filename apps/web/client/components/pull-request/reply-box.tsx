@@ -1,4 +1,5 @@
-// The box a reply to a pull request comment is written in: its text, Resolve for a thread, who posts, the error with the text kept.
+// The box a reply to a pull request comment is written in: its text, Resolve for a thread, who
+// posts. Also the error, with the text kept.
 import { useState, type ReactElement } from 'react';
 
 import { Button, inputClass } from '../ui';

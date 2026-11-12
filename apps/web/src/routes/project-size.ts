@@ -1,4 +1,5 @@
-// The project's size settings: the paths left out of a change's lines of code, and the budget of a ticket whose plan gives no estimate.
+// The project's size settings: the paths left out of a change's lines of code. Also the budget of a
+// ticket whose plan gives no estimate.
 import type { ProjectConfig } from '@union/core';
 
 import { BAD_REQUEST, fail } from '../http';

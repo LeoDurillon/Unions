@@ -1,5 +1,6 @@
 // `/api/projects/:projectId/shared-services`: the project's shared services as the worker last saw
-// them, who uses them, and restarting or stopping them (the worker does: the web never touches Docker).
+// them, who uses them. Also restarting or stopping them (the worker does: the web never touches
+// Docker).
 import {
   activePreviews,
   getSharedStack,

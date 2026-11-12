@@ -1,4 +1,5 @@
-// Checks that a project's agent image still has what Union's agents need: the claude CLI, git, the node user and its HOME, /workspace.
+// Checks that a project's agent image still has what Union's agents need. That is the claude CLI,
+// git, the node user and its HOME, /workspace.
 import type { ContainerRuntime } from '@union/core';
 
 /** Each line it prints is a problem; it exits 1 when there is one. */

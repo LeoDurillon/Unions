@@ -1,4 +1,4 @@
-// What an agent says or does in one `claude -p` stream-json event, in a short line: shared by the
+// What an agent says or does in one `claude -p` stream-json event, in a short line. Shared by the
 // Log (in the browser) and the board's live progress (read on the server). Browser-safe.
 
 /** A short line for one block of an assistant message: what it wrote, or the tool it called. */

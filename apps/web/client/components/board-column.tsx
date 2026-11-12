@@ -1,5 +1,6 @@
-// The board's columns side by side, each unfolded (`board-column-body.tsx`) or folded to a narrow strip that
-// unfolds on a click; on a phone, one column at a time, picked above them.
+// The board's columns side by side, each unfolded (`board-column-body.tsx`) or folded to a narrow
+// strip. A folded one unfolds on a click; on a phone, one column shows at a time, picked above
+// them.
 import type { BoardColumn } from '@union/core';
 import { Fragment, useState, type ReactElement } from 'react';
 

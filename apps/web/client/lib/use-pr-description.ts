@@ -1,4 +1,5 @@
-// A pull request's description rewrite (the ticket's or a slice's): its latest draft, and rewriting, sending, discarding or cancelling it.
+// A pull request's description rewrite: its latest draft, and rewriting, sending, discarding or
+// cancelling it. The pull request is the ticket's or a slice's.
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import type { PrDescriptionView } from '../../src/api-types';

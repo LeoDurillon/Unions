@@ -1,4 +1,5 @@
-// A rule's GitHub Project fields: on the ticket's issue item or its pull request's, their checks and the values sent; browser-safe.
+// A rule's GitHub Project fields: on the ticket's issue item or its pull request's, their checks
+// and the values sent. Browser-safe.
 import { unknownVariables } from './event-rule-types';
 
 /** The Project item a rule sets fields on: the ticket's issue's, or its pull request's. */

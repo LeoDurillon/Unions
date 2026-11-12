@@ -1,4 +1,5 @@
-// The throwaway container of a review side run on a pull request: one letter per kind, as their ids come from different tables.
+// The throwaway container of a review side run on a pull request: one letter per kind. Their ids
+// come from different tables.
 import type { TicketContainer } from '../provision';
 
 /** `a` agent review, `g` grouping, `s` spec report, `e` explanation, `v` review agent. */

@@ -1,5 +1,5 @@
-// The report's triage read from the agent's block: what needs the reviewer (with every gap and every
-// unasked behaviour it left out added), and the files they can skim.
+// The report's triage read from the agent's block: what needs the reviewer, and the files they can
+// skim. Every gap and every unasked behaviour it left out of what needs the reviewer is added.
 import {
   ATTENTION_KINDS,
   type AttentionItem,

@@ -1,5 +1,6 @@
-// The project's runs in progress, polled while the board shows a running ticket: when each started
-// and what its agent did last. Agent output is not on the shared stream, so this is read on a timer.
+// The project's runs in progress: when each started and what its agent did last. They are polled
+// while the board shows a running ticket. Agent output is not on the shared stream, so this is read
+// on a timer.
 import { useQuery } from '@tanstack/react-query';
 import type { RunProgress } from '@union/core';
 

@@ -1,4 +1,5 @@
-// The CI checks of the worker's GitHub client: a pull request's head commit and the overall state of its checks, re-running an Actions job, and comparing two commits.
+// The CI checks of the worker's GitHub client: a pull request's head commit and the overall state
+// of its checks. It also re-runs an Actions job and compares two commits.
 import type { Comparison } from '@union/core';
 
 import type { ChecksState, PullRequestChecks, RepoRef } from './api';

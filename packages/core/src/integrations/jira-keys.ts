@@ -1,5 +1,6 @@
-// The Jira issues a pull request names, by habit: keys (ABC-123) in its title, branch or description, and links of
-// the project's site; only the project's own keys, so `UTF-8` or `SHA-256` are not taken for issues. Pure.
+// The Jira issues a pull request names: keys (ABC-123) in its title, branch or description, and the
+// site's links. These are named by habit; links are of the project's site, and only the project's
+// own keys count, so `UTF-8` or `SHA-256` are not taken for issues. Pure.
 
 import { parseJiraKey } from './jira-config';
 

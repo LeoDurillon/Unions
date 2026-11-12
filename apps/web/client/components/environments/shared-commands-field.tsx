@@ -1,5 +1,6 @@
 // The services shared between previews and, per service, the commands that keep each preview's data
-// apart there (its database, its bucket) and the port of its web page, which the proxy opens.
+// apart there. That data is its database, its bucket; per service also the port of its web page,
+// which the proxy opens.
 
 import type { ReactElement } from 'react';
 

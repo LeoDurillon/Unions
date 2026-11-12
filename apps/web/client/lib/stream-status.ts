@@ -1,4 +1,5 @@
-// Whether the live event stream is connected, for the sidebar's "Reconnecting…" pill, and how long to wait before reopening it.
+// Whether the live event stream is connected, for the sidebar's "Reconnecting…" pill. Also how long
+// to wait before reopening it.
 import { useSyncExternalStore } from 'react';
 
 export type StreamStatus = 'live' | 'reconnecting';

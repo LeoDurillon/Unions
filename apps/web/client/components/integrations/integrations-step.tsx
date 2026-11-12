@@ -1,4 +1,5 @@
-// The setup wizard's Integrations step: a selector between the GitHub Project and the trackers (Notion, Jira), and the chosen one's form.
+// The setup wizard's Integrations step: a selector between the GitHub Project and the trackers
+// (Notion, Jira). Below it, the chosen one's form.
 import { integrationKind, type IntegrationKindName } from '@union/core/integration-kinds';
 import { useState, type ReactElement } from 'react';
 

@@ -1,4 +1,5 @@
-// The projects' own agent images in the worker: builds what the settings saved, and gives each run the image its project's agents use.
+// The projects' own agent images in the worker. It builds what the settings saved, and gives each
+// run the image its project's agents use.
 import {
   agentImageRepository,
   finishAgentImage,

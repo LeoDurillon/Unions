@@ -1,5 +1,5 @@
-// `GET /api/projects/:projectId/jira/picks/:type`: what a Jira field rule can pick (people, versions, components,
-// sprints), read from Jira when the editor asks, never stored.
+// `GET /api/projects/:projectId/jira/picks/:type`: what a Jira field rule can pick, read from Jira
+// when the editor asks. The picks are people, versions, components or sprints, never stored.
 import {
   integrationOf,
   isJiraFieldType,

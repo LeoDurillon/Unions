@@ -1,4 +1,5 @@
-// Runs the review agents the user asked for on a review's change: each in its own throwaway checkout (`union-v<id>`), installed first.
+// Runs the review agents the user asked for on a review's change. Each runs in its own throwaway
+// checkout (`union-v<id>`), installed first.
 
 import {
   claimReviewAgentRun,

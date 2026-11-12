@@ -1,5 +1,5 @@
-// The pull requests under review of a project as the Pull requests tab lists them: without their
-// files, with their preview's state and their linked Notion pages and Jira issues.
+// The pull requests under review of a project as the Pull requests tab lists them, without their
+// files. Each comes with its preview's state and its linked Notion pages and Jira issues.
 
 import { linkedJiraIssues, linkedNotionPages, schema, type Db } from '@union/core';
 import { desc, eq, getTableColumns } from 'drizzle-orm';

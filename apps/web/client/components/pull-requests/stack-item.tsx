@@ -1,4 +1,5 @@
-// A stack of pull requests as one row: its bottom's title, its size, adding it to the reviews (or its ticket); its members below when opened.
+// A stack of pull requests as one row: its bottom's title, its size, adding it to the reviews (or
+// its ticket). Its members show below when opened.
 import { useState, type ReactElement } from 'react';
 
 import type { PullRequestListItem } from '../../../src/api-types';

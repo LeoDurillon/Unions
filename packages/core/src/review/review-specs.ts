@@ -1,5 +1,6 @@
-// A review's specs in the database: the list (started with its sources the first time), saving the
-// user's list, and the Notion pages and Jira issues linked to it (its `notion` and `jira` specs).
+// A review's specs in the database: the list, saving the user's list, and the Notion pages and Jira
+// issues linked to it. The list is started with its sources the first time; the linked ones are its
+// `notion` and `jira` specs.
 
 import { and, asc, eq, max, type SQL } from 'drizzle-orm';
 

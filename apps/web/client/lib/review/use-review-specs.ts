@@ -1,5 +1,5 @@
 // A review's specs (its Specs bar): the list as saved and read now, saving it, the specs the agents
-// get, and a whole stack's for its agent review.
+// get. Also a whole stack's, for its agent review.
 
 import {
   useMutation,

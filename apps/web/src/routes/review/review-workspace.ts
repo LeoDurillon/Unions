@@ -1,5 +1,5 @@
-// The routes under a pull request under review about its own checkout, commits and links: preview,
-// commands, commits, replies to its comments, Notion pages, Jira issues.
+// The routes of a pull request under review about its own checkout, commits and links. They are:
+// preview, commands, commits, replies to its comments, Notion pages, Jira issues.
 
 import type { Db, JiraApi, NotionApi } from '@union/core';
 import { Hono } from 'hono';

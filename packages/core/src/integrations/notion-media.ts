@@ -1,5 +1,5 @@
-// Notion's file, PDF, video and audio blocks (`<file src="…">caption</file>`) as markdown links,
-// named by their caption, else the file's name; browser-safe.
+// Notion's file, PDF, video and audio blocks (`<file src="…">caption</file>`) as markdown links.
+// Named by their caption, else the file's name; browser-safe.
 
 /** `src` in Notion's enhanced markdown (v1), `source` in Notion-flavored markdown (v2). */
 const MEDIA =

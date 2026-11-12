@@ -1,4 +1,5 @@
-// The heavy pages, loaded only when first opened (the review page, both settings, usage, the guide), each with the same name and props as the page itself.
+// The heavy pages, loaded only when first opened (the review page, both settings, usage, the
+// guide). Each has the same name and props as the page itself.
 import { lazy, Suspense, type ComponentProps, type ReactElement } from 'react';
 
 import type { GuidePage as GuidePageEager } from './guide/guide-page';

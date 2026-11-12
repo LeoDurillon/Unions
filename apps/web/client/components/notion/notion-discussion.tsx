@@ -1,4 +1,5 @@
-// One open discussion of a Notion page: the text it is about, its comments oldest first, then Reply; Add to review sends it (on the page: one comment) to the implementer.
+// One open discussion of a Notion page: the text it is about, its comments oldest first, then
+// Reply. Add to review sends it (on the page: one comment) to the implementer.
 
 import type { ReactElement } from 'react';
 

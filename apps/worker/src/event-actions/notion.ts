@@ -1,4 +1,5 @@
-// The Notion action of a rule: sets properties of the ticket's Notion page (or the reviewed pull request's linked pages), one request per page.
+// The Notion action of a rule: sets properties of the ticket's Notion page, or the reviewed pull
+// request's linked pages. One request per page.
 import {
   getTicket,
   integrationOf,

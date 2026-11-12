@@ -1,4 +1,5 @@
-// Inline code naming a file of the change (`path`, `path:12`, `path:12-30`) as a link that opens it in the diff, at those lines.
+// Inline code naming a file of the change (`path`, `path:12`, `path:12-30`) as a link that opens it
+// in the diff. It opens at those lines.
 
 import { diffLinkOf } from '@union/core/diff-links';
 import { useCallback, useMemo, type ReactNode } from 'react';

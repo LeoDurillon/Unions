@@ -1,5 +1,6 @@
-// A Jira issue's description as markdown with its attachments as links: images and files in the text matched to
-// the issue's attachments by file name, the others listed at the end. The web downloads those links as ticket files.
+// A Jira issue's description as markdown with its attachments as links. Images and files in the
+// text are matched to the issue's attachments by file name, the others listed at the end. The web
+// downloads those links as ticket files.
 import { adfMarkdown } from './adf-markdown';
 import type { AdfMedia } from './adf-node';
 import type { JiraIssue } from './jira-parse';

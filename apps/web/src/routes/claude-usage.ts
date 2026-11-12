@@ -1,5 +1,6 @@
 // The API routes for Claude usage: how much of the subscription's windows is used, what a project's
-// agents used, with its API-equivalent cost, what that shows to improve, and asking an agent about it.
+// agents used. A project's use comes with its API-equivalent cost, what it shows to improve, and
+// asking an agent about it.
 import {
   InvestigationError,
   latestClaudeLimits,

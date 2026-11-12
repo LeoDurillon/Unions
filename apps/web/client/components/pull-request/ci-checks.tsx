@@ -1,4 +1,5 @@
-// The pull request's CI checks on its last commit, and its bot comments: the failed ones and what explains them can be given to the implementer.
+// The pull request's CI checks on its last commit, and its bot comments. The failed ones and what
+// explains them can be given to the implementer.
 import { useState, type ReactElement } from 'react';
 
 import type { CiPick, PrChecksView, PullRequestCheck } from '../../../src/ci-api-types';

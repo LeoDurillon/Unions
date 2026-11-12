@@ -1,5 +1,6 @@
-// The getting-started checklist above a project's board: five steps from settings to a reviewed change,
-// each ticked from the project's state, until they are all done or the user hides it.
+// The getting-started checklist above a project's board: five steps from settings to a reviewed
+// change. Each is ticked from the project's state; it shows until they are all done or the user
+// hides it.
 
 import { useQuery } from '@tanstack/react-query';
 import type { ReactElement } from 'react';

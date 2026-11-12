@@ -1,4 +1,5 @@
-// The routes no project owns: the event stream, the notifications it announces, the running previews, Union's update and machine settings, Claude usage, and the user guide.
+// The routes no project owns: the event stream, the notifications it announces, the running
+// previews, Union's update. Also machine settings, Claude usage, and the user guide.
 import type { Db } from '@union/core';
 import { Hono } from 'hono';
 

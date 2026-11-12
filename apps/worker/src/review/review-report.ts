@@ -1,4 +1,5 @@
-// Writes the spec reports the user asked for: a ticket's in its own container, a pull request's in a throwaway one (`union-s<id>`).
+// Writes the spec reports the user asked for. A ticket's report runs in its own container, a pull
+// request's in a throwaway one (`union-s<id>`).
 
 import {
   claimReport,

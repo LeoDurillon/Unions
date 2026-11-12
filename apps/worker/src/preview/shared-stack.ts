@@ -1,5 +1,6 @@
-// The services a project's previews share (`union-p<id>-shared`): brought up for a preview or the
-// agent, joined to its networks under their service names, and taken down once nothing uses them.
+// The services a project's previews share (`union-p<id>-shared`): brought up, joined to networks,
+// taken down when unused. They are brought up for a preview or the agent, joined to its networks
+// under their service names, and taken down once nothing uses them.
 import {
   isRecord,
   PREVIEW_NETWORK,

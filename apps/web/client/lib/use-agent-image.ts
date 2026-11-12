@@ -1,4 +1,5 @@
-// A project's agent image on its settings page: what runs, what was saved, its build (polled while the worker builds), and saving or dropping a choice.
+// A project's agent image on its settings page: what runs, what was saved, its build, and saving or
+// dropping a choice. The build is polled while the worker builds.
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 
 import type { AgentImageView, DefaultDockerfileView } from '../../src/routes/agent-image';

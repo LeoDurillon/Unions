@@ -1,5 +1,5 @@
-// What a Jira field rule can pick (people, versions, components, sprints), read from Jira when a field of that type is
-// in the editor.
+// What a Jira field rule can pick (people, versions, components, sprints). It is read from Jira
+// when a field of that type is in the editor.
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import type { JiraPick, JiraPickedType } from '@union/core/jira-field-types';

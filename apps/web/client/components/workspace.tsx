@@ -1,5 +1,5 @@
-// Project bar plus the board, investigations, pull requests, repository or usage (or the empty board
-// behind the first-run wizard).
+// Project bar plus the board, investigations, pull requests, repository or usage. Or the empty
+// board behind the first-run wizard.
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../src/api-types';

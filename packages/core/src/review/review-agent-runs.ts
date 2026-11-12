@@ -1,4 +1,5 @@
-// Review agents' runs on a review's change: queued by the web, one at a time per change, claimed and finished by the worker.
+// Review agents' runs on a review's change: queued by the web, one at a time per change. The worker
+// claims and finishes them.
 
 import { and, desc, eq, inArray, type SQL } from 'drizzle-orm';
 

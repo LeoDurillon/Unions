@@ -1,4 +1,5 @@
-// The pull request action of a rule: changes the ticket's pull request (labels, reviewers, assignees, title, a description section).
+// The pull request action of a rule: changes the ticket's pull request. It sets labels, reviewers,
+// assignees, title, a description section.
 import {
   describeChange,
   getTicket,

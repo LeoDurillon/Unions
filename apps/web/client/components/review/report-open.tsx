@@ -1,5 +1,5 @@
-// Links from the spec report to the diff: a file (its name, then its folder, shortened), its key lines as
-// chips, opened in the Diff tab, or a draft comment started on them.
+// Links from the spec report to the diff: a file, its key lines as chips, opened in the Diff tab.
+// Or a draft comment started on them; the file shows its name, then its folder, shortened.
 import type { ReportCite, ReportLines } from '@union/core';
 import type { ReactElement } from 'react';
 

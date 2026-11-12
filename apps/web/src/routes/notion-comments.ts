@@ -1,4 +1,5 @@
-// `/api/tickets/:id/notion-comments`: the open discussions of the ticket's Notion page, read now, and the comments the user sends to it.
+// `/api/tickets/:id/notion-comments`: the open discussions of the ticket's Notion page, read now.
+// Also the comments the user sends to it.
 
 import type { Db, NotionApi, Ticket } from '@union/core';
 import { Hono } from 'hono';

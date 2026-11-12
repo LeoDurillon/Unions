@@ -1,5 +1,6 @@
-// A ticket's review page: the diff, with the ticket's description, preview, pull request, spec
-// report and review agents as tabs beside it, as a pull request review has; it opens on the diff. The tab is kept in the URL.
+// A ticket's review page: its diff beside tabs for its description, preview, pull request, spec
+// report and review agents. The tabs sit beside the diff as a pull request review has them; it
+// opens on the diff. The tab is kept in the URL.
 
 import type { ReactElement } from 'react';
 

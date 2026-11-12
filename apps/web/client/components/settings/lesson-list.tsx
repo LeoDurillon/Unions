@@ -1,5 +1,5 @@
-// The project's lessons by agent step (and the spec report's), as cards: edited one at a time, reordered
-// and removed in the page's form.
+// The project's lessons by agent step (and the spec report's), as cards. Edited one at a time,
+// reordered and removed in the page's form.
 import { REPORT_LESSONS, type LessonInput, type LessonSection } from '@union/core/lesson-input';
 import { FULL_FLOW } from '@union/core/states';
 import type { ReactElement } from 'react';

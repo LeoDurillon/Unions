@@ -1,6 +1,7 @@
-// Resets a preview: its containers, volumes (the agent's services' included) and built images go,
-// the data folders chosen are emptied, its images are built again without the cache, then it starts
-// from nothing. A finished ticket's preview is taken down the same way, for good.
+// Resets a preview: its containers, volumes and built images go, then it is rebuilt without the
+// cache and started anew. The volumes include the agent's services'; the data folders chosen are
+// emptied, its images are built again without the cache, then it starts from nothing. A finished
+// ticket's preview is taken down the same way, for good.
 import {
   emitEvent,
   getPreview,

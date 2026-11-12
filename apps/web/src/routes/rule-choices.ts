@@ -1,4 +1,6 @@
-// What a rule picks from on GitHub, read live: the repo's labels and users (`github/rule-choices`), the Project's fields (`github/project-fields`).
+// What a rule picks from on GitHub, read live: the repo's labels and users, the Project's fields.
+// The routes are `github/rule-choices` (labels and users) and `github/project-fields` (the
+// Project's fields).
 import { projectGitHubAuth, schema, type Db, type GitHubAuth, type Project } from '@union/core';
 import { eq } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';

@@ -1,5 +1,5 @@
-// `/api/projects/:projectId/pull-requests/reviews/:number`: the description and discussion, the
-// diff, the comments, and posting them.
+// `/api/projects/:projectId/pull-requests/reviews/:number`: a review's description, discussion,
+// diff and comments. It also posts them.
 
 import {
   isReviewVerdict,

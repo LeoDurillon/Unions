@@ -1,4 +1,5 @@
-// Groups a review's files by spec, as the user asked: a ticket's in its own container, a pull request's in a throwaway one (`union-g<id>`).
+// Groups a review's files by spec, as the user asked. A ticket's grouping runs in its own
+// container, a pull request's in a throwaway one (`union-g<id>`).
 
 import {
   claimGrouping,

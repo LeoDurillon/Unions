@@ -1,5 +1,6 @@
-// The web pages of a project's shared services, opened by the proxy at one address per project
-// (`s3-p1.union.localhost`), on a network only the proxy and those services share.
+// The web pages of a project's shared services, opened by the proxy at one address per project. The
+// address reads `s3-p1.union.localhost`; the network is one only the proxy and those services
+// share.
 import { isRecord, PREVIEW_NETWORK_KEY, type ComposeJson } from './preview-compose-check';
 import { PREVIEW_DOMAIN, previewAddress } from './preview-config';
 import { previewProxyNetwork } from './preview-proxy-network';

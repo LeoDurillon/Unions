@@ -1,5 +1,6 @@
-// How much of the Claude subscription's usage windows (five hours, seven days) is used, as the last
-// `rate_limit_event` an agent call printed reported it. Union learns it only while its agents run.
+// How much of the Claude subscription's usage windows (five hours, seven days) is used. It is read
+// from the last `rate_limit_event` an agent call printed. Union learns it only while its agents
+// run.
 import { and, desc, gt, max, sql } from 'drizzle-orm';
 
 import type { Db } from './db';

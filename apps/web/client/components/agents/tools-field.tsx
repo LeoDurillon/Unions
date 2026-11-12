@@ -1,5 +1,5 @@
-// Multi-select over the tool list: the selected tools as toggles, the others behind "Add a tool";
-// the selection keeps the list's order.
+// Multi-select over the tool list: the selected tools as toggles, the others behind "Add a tool".
+// The selection keeps the list's order.
 import type { ToolOption } from '@union/core';
 import { useState, type ReactElement } from 'react';
 

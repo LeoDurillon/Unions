@@ -1,5 +1,5 @@
-// The review's Report tab: the newest spec report, the agent writing one (with Cancel), why the last
-// one failed, or what a report is and Start.
+// The review's Report tab: the newest spec report, the agent writing one (with Cancel), or why the
+// last one failed. Otherwise, what a report is and Start.
 
 import { useState, type ReactElement } from 'react';
 

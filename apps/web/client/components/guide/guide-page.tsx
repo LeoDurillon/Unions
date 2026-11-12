@@ -1,5 +1,5 @@
-// The Guide page: the user guide (`documentation/`) as Union serves it, its pages on the left; links
-// between its pages and to its headings stay in the app, links out open a new tab.
+// The Guide page: the user guide (`documentation/`) as Union serves it, its pages on the left.
+// Links between its pages and to its headings stay in the app, links out open a new tab.
 
 import { useQuery } from '@tanstack/react-query';
 import { useCallback, useEffect, type ReactElement } from 'react';

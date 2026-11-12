@@ -1,5 +1,6 @@
-// The preview work beside the pipeline: the manager running preview commands, its watchers (idle
-// and stopped previews), and the cleanup of finished tickets' previews, containers and volumes.
+// The preview work beside the pipeline: the manager running preview commands, its watchers, and the
+// cleanup. The watchers handle idle and stopped previews; the cleanup removes finished tickets'
+// previews, containers and volumes.
 
 import { TicketCleanup } from '../ticket-cleanup';
 import { createPreviewManager, type PreviewManager } from './manager';

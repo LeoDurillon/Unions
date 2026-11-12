@@ -1,4 +1,5 @@
-// The Dockerfiles the agent image page offers to start from: JavaScript extras, Python, Rust, Go and PHP, each on the base it needs.
+// The Dockerfiles the agent image page offers to start from: JavaScript extras, Python, Rust, Go
+// and PHP. Each is on the base it needs.
 
 export type Starter = { id: string; label: string; dockerfile: string };
 

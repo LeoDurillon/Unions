@@ -1,4 +1,5 @@
-// Moves source files into a folder and rewrites every relative import to and from them; `bun scripts/move-files.ts <folder> <file>...`.
+// Moves source files into a folder and rewrites every relative import to and from them. Usage: `bun
+// scripts/move-files.ts <folder> <file>...`.
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 

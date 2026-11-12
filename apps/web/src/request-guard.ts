@@ -1,4 +1,5 @@
-// Refuses API requests from anywhere but Union's own page: other hosts (DNS rebinding, containers), other origins (CSRF), form bodies.
+// Refuses API requests from anywhere but Union's own page: other hosts, other origins, form bodies.
+// Other hosts covers DNS rebinding and containers; other origins covers CSRF.
 import type { MiddlewareHandler } from 'hono';
 
 const FORBIDDEN = 403;

@@ -1,4 +1,5 @@
-// What a stopped worker left half-sent: a pull request review and replies marked `sending` whose command it had already taken.
+// What a stopped worker left half-sent: a pull request review and replies marked `sending`. Only
+// those whose command it had already taken.
 import { and, eq, inArray, isNull } from 'drizzle-orm';
 
 import type { Db } from './db';

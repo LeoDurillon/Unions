@@ -1,4 +1,5 @@
-// The side runs that need no repository, each in a throwaway container: reading the account's connectors, the lesson writer and the prompt writer.
+// The side runs that need no repository: reading the account's connectors, the lesson writer and
+// the prompt writer. Each runs in a throwaway container.
 import { LessonWriterRunner, type LessonWriterDeps } from './lesson-writer-run';
 import { ConnectorChecker } from './mcp-check';
 import { PromptWriterRunner } from './prompt-writer-run';

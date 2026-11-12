@@ -1,5 +1,5 @@
-// The project's end-to-end tests against the preview, run when the user asks (a browser and a whole
-// environment take a lot of memory): never on their own.
+// The project's end-to-end tests against the preview, run only when the user asks, never on their
+// own. A browser and a whole environment take a lot of memory.
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { ReactElement } from 'react';

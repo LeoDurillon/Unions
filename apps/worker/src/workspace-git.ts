@@ -1,5 +1,6 @@
-// Puts the repository on `branch`: the local branch if it exists, else the pushed one (a recreated
-// container only has `origin/<branch>`), else a new branch from `base`.
+// Puts the repository on `branch`: the local branch if it exists, else the pushed one, else a new
+// branch from `base`. The pushed one is for a recreated container, which only has
+// `origin/<branch>`.
 import type { ContainerRuntime } from '@union/core';
 
 import { mustRunIn, runIn } from './container-exec';

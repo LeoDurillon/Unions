@@ -1,4 +1,5 @@
-// A split ticket's slices as a segmented control under the review header: All, then each slice with its pull request and drafts.
+// A split ticket's slices as a segmented control under the review header. All, then each slice with
+// its pull request and drafts.
 import type { ReactElement } from 'react';
 
 import type { CommentView } from '../../../src/api-types';

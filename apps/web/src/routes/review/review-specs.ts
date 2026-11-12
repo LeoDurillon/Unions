@@ -1,6 +1,7 @@
-// Under a review's base (`/api/tickets/:id`, `/api/projects/:projectId/pull-requests/reviews/:number`):
-// `/specs`, the review's specs, started the first time, each read from its source unless edited;
-// `PUT /specs` saves the list as the Specs bar edits it.
+// `/specs` under a review's base: the review's specs, started the first time, each read from its
+// source unless edited. The base is `/api/tickets/:id` or
+// `/api/projects/:projectId/pull-requests/reviews/:number`; `PUT /specs` saves the list as the
+// Specs bar edits it.
 
 import {
   parseNotionId,

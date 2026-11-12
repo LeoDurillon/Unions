@@ -1,5 +1,5 @@
-// Files the user attached to a ticket, stored on the host under the attachments folder and copied
-// into the ticket's container for the agents.
+// Files the user attached to a ticket, stored on the host under the attachments folder. They are
+// copied into the ticket's container for the agents.
 import { integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
 import { now, tickets } from './schema';

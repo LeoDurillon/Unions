@@ -1,4 +1,5 @@
-// The commands' hooks that write to GitHub: a review posted, a description sent, an issue edited, a job run again, a comment replied to.
+// The commands' hooks that write to GitHub. They cover a review posted, a description sent, an
+// issue edited, a job run again, a comment replied to.
 import type { Db, Project } from '@union/core';
 
 import type { CommandHooks } from '../command-hooks';

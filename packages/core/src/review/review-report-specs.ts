@@ -1,5 +1,5 @@
-// The specs a report sends, cleaned (images out of the text, a spec another one holds sent once), and
-// the key its quotes are matched by. Pure, browser-safe.
+// The specs a report sends, cleaned (images out of the text, a spec another one holds sent once).
+// Also the key its quotes are matched by. Pure, browser-safe.
 import type { ReportSpec } from './review-report-types';
 
 const IMAGE = /!\[[^\]]*\]\([^)\s]*\)/gu;

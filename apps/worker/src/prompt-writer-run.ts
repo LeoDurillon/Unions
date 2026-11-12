@@ -1,4 +1,5 @@
-// Writes the prompts of the custom agents the user created or regenerated, in a throwaway container with only the Claude login.
+// Writes the prompts of the custom agents the user created or regenerated. It runs in a throwaway
+// container with only the Claude login.
 
 import {
   claimCustomAgentPrompt,

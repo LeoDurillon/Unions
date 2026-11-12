@@ -1,4 +1,5 @@
-// Replies to a pull request's comments: a ticket's (`/api/tickets/:id/pr-replies`, with its suggestions) and a current review's (`<review>/replies`).
+// Replies to a pull request's comments, for a ticket and for a current review (`<review>/replies`).
+// A ticket's are at `/api/tickets/:id/pr-replies`, with its suggestions.
 
 import { schema, type Db, type PrCommentReply, type Ticket } from '@union/core';
 import { eq } from 'drizzle-orm';

@@ -1,5 +1,6 @@
-// What the worker records of a project's shared services, from Docker's state: which run, which
-// previews are on their networks, which tickets' agents use them; and a look every 30 seconds.
+// What the worker records of a project's shared services from Docker's state, with a look every 30
+// seconds. It records which run, which previews are on their networks, which tickets' agents use
+// them.
 import {
   saveSharedStack,
   schema,

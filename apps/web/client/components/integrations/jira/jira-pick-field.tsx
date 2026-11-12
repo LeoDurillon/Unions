@@ -1,5 +1,6 @@
-// The value of a picked Jira field in the rule editor: a person or a sprint from a list, versions or components as
-// boxes; what was picked before and is no longer listed stays, so it can be removed.
+// The value of a picked Jira field in the rule editor: a person, a sprint, versions or components.
+// A person or a sprint is picked from a list, versions or components as boxes; what was picked
+// before and is no longer listed stays, so it can be removed.
 
 import { isSinglePick, type JiraPick, type JiraPickedType } from '@union/core/jira-field-types';
 import type { ReactElement } from 'react';

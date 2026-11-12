@@ -1,4 +1,5 @@
-// Explains a review's lines as users ask, one per review at a time: a ticket's in its own container, a pull request's in a throwaway one (`union-e<id>`).
+// Explains a review's lines as users ask, one per review at a time. A ticket's explanation runs in
+// its own container, a pull request's in a throwaway one (`union-e<id>`).
 
 import {
   appendAgentLine,

@@ -1,5 +1,6 @@
-// `<review>/jira`: the Jira issues a pull request under review is linked to (its `jira` specs): their description and
-// comments, read only; checking one, linking it, unlinking it; and the issues the pull request names, suggested.
+// `<review>/jira`: the Jira issues a pull request under review is linked to (its `jira` specs), and
+// those it names. It serves their description and comments, read only; checking one, linking it,
+// unlinking it; and the issues the pull request names, suggested.
 
 import {
   integrationKind,

@@ -1,4 +1,4 @@
-// Brings the base branch and the pushed branch, as they are on GitHub now, into the container: the
+// Brings the base branch and the pushed branch, as they are on GitHub now, into the container. The
 // host fetches them with the project's credentials and hands over a git bundle, since the container
 // has none.
 

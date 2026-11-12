@@ -1,5 +1,5 @@
-// A ticket's links to what lives outside Union: its pull request on GitHub, its Notion page and the
-// page's discussions, its Jira issue's comments.
+// A ticket's links outside Union: its GitHub pull request, its Notion page and its discussions, its
+// Jira issue's comments.
 
 import type { Db } from '@union/core';
 import { Hono } from 'hono';

@@ -1,6 +1,6 @@
-// What a spec report holds: the specs it read, its verdict, how the change works, what needs the
-// reviewer, the files to read first and to skim, each requirement's status, and what the spec did not
-// ask for. Pure, browser-safe.
+// What a spec report holds: the specs it read, its verdict, how the change works and what needs the
+// reviewer. Also the files to read first and to skim, each requirement's status, and what the spec
+// did not ask for. Pure, browser-safe.
 
 import type { SpecSource } from '../spec-source-kinds';
 

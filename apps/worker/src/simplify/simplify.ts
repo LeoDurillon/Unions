@@ -1,4 +1,5 @@
-// Rewrites the ticket's commits into a simpler history with the implementer's own session, checks the code did not change and force-pushes it with a lease.
+// Rewrites the ticket's commits into a simpler history with the implementer's own session, and
+// force-pushes it. Before the push (with a lease) it checks the code did not change.
 
 import { remoteOf } from '../branch-push';
 import type { ImplementDeps } from '../implement/implement-checks';

@@ -1,5 +1,5 @@
-// The lines of the open file that what needs the reviewer points at, for the diff's gutter to mark:
-// provided by the file's diff, read by each line number.
+// The lines of the open file that what needs the reviewer points at, for the diff's gutter to mark.
+// Provided by the file's diff, read by each line number.
 import type { ReportLines } from '@union/core';
 import { createContext, useContext, useMemo, type ReactElement, type ReactNode } from 'react';
 

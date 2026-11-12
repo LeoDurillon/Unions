@@ -1,5 +1,5 @@
-// The Jira actions of a rule (move the ticket's issue, set its fields, comment on it) and their checks against the
-// stored Jira project; what they send is built when they run.
+// The Jira actions of a rule (move the ticket's issue, set its fields, comment on it) and their
+// checks. They are checked against the stored Jira project; what they send is built when they run.
 
 import type { Db } from '../db';
 import {

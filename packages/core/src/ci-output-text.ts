@@ -1,4 +1,5 @@
-// The text the implementer gets from CI: a failed check (its failed step's log, annotations, summary), another job's log, a bot's comment; browser-safe.
+// The text the implementer gets from CI: a failed check, another job's log, a bot's comment. A
+// failed check gives its failed step's log, annotations and summary; browser-safe.
 import { stripAnsi } from './ansi';
 
 /** A log keeps its last lines, at most this many. */

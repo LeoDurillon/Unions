@@ -1,5 +1,6 @@
-// The picked values of a Jira fields rule (a person, versions, components, a sprint) as Jira takes them; "the active
-// sprint" and "the next sprint" read from the project's board when the rule runs.
+// The picked values of a Jira fields rule (a person, versions, components, a sprint) as Jira takes
+// them. "The active sprint" and "the next sprint" are read from the project's board when the rule
+// runs.
 import {
   jiraPickedValue,
   resolveSprint,

@@ -1,4 +1,5 @@
-// The GitHub Project fields action of a rule: sets fields of the ticket's issue item, or of its pull request's (added to the Project).
+// The GitHub Project fields action of a rule: sets fields of the ticket's issue item, or of its
+// pull request's. The pull request is added to the Project.
 import {
   getTicket,
   hasGitHubProject,

@@ -1,5 +1,5 @@
-// One requirement of the spec report: its status, the spec's words, the note, the code and tests that do
-// it, and a comment to start on its code.
+// One requirement of the spec report: its status, the spec's words, the note, the code and tests
+// that do it. Also a comment to start on its code.
 import type { ReportRequirement, ReportSpec, RequirementStatus } from '@union/core';
 import { STATUS_LABELS } from '@union/core/review-report-markdown';
 import { plainQuote } from '@union/core/review-report-specs';

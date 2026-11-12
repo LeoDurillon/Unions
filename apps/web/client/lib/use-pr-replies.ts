@@ -1,4 +1,5 @@
-// The replies of one pull request (pending, suggested, who posts) and their mutations; the discussion is read again once GitHub has a reply.
+// The replies of one pull request (pending, suggested, who posts) and their mutations. The
+// discussion is read again once GitHub has a reply.
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 import { useState } from 'react';
 

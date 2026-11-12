@@ -1,4 +1,5 @@
-// `PUT /api/tickets/:id/text`: the user's new title and description, queued for the worker, which writes them to the issue.
+// `PUT /api/tickets/:id/text`: the user's new title and description, queued for the worker to write
+// to the issue.
 
 import { isRecord, schema, type Db } from '@union/core';
 import { and, eq, isNull } from 'drizzle-orm';

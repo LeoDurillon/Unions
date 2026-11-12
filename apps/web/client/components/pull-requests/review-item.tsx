@@ -1,4 +1,5 @@
-// One pull request under review without a ticket, on its row: its link, branches and status, Open review and Stop reviewing.
+// One pull request under review without a ticket, on its row: its link, branches and status. Also
+// Open review and Stop reviewing.
 import type { ReactElement } from 'react';
 
 import type { CurrentReview } from '../../../src/api-types';

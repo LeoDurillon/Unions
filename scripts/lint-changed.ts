@@ -1,5 +1,5 @@
-// Lints only the TypeScript files changed since the last commit, and new ones: seconds instead of the
-// whole repository while working. `bun run check` still runs everything before finishing.
+// Lints only the TypeScript files changed since the last commit, and new ones. Seconds instead of
+// the whole repository while working. `bun run check` still runs everything before finishing.
 
 async function git(args: string[]): Promise<string[]> {
   const child = Bun.spawn(['git', ...args], { stdout: 'pipe' });

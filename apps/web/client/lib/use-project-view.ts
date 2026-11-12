@@ -1,5 +1,6 @@
-// Which view of the project shows (board, investigations, pull requests, repository, environments, usage), from the URL
-// and the user's choice, and changing it; the Help menu's Getting started goes back to the board.
+// Which view of the project shows: board, investigations, pull requests, repository, environments
+// or usage. It comes from the URL and the user's choice, and can be changed; the Help menu's
+// Getting started goes back to the board.
 
 import { useState } from 'react';
 

@@ -1,4 +1,4 @@
-// Removes a cancelled ticket from Union: its runs, outputs, reviews and files go with it, and the
+// Removes a cancelled ticket from Union: its runs, outputs, reviews and files go with it. The
 // worker is asked to remove its container (the web never calls Docker).
 
 import { emitEvent, schema, type Db } from '@union/core';

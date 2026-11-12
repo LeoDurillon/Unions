@@ -1,4 +1,5 @@
-// The open Union settings page: an agent's, or one of the others (all agents, resources, tools, connectors, the GitHub App).
+// The open Union settings page: an agent's, or another (all agents, resources, tools, connectors,
+// the GitHub App).
 import { isCustomStep } from '@union/core/states';
 import type { ReactElement } from 'react';
 

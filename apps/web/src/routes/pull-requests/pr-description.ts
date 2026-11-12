@@ -1,6 +1,6 @@
-// `/api/tickets/:id/pr-description`: the agent rewrites the PR's description (each open slice's,
-// for a split ticket) into drafts the user edits; sending one is a command (the worker writes to
-// GitHub).
+// `/api/tickets/:id/pr-description`: the agent rewrites the PR's description into drafts the user
+// edits. For a split ticket it rewrites each open slice's; sending one is a command (the worker
+// writes to GitHub).
 
 import {
   discardPrDescription,

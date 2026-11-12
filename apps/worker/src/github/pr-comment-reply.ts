@@ -1,4 +1,5 @@
-// Posts a reply to a pull request comment on GitHub (a line thread's reply, or a conversation comment) and logs how it went.
+// Posts a reply to a pull request comment on GitHub and logs how it went. The reply is a line
+// thread's reply, or a conversation comment.
 import {
   emitEvent,
   schema,

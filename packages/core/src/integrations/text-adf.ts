@@ -1,5 +1,6 @@
-// A rule's plain text (a comment, a multi-line field) as Atlassian Document Format, which Jira's REST v3 requires:
-// paragraphs from blank lines, line breaks, and https links. No markdown: rule texts are written for Jira's readers.
+// A rule's plain text (a comment, a multi-line field) as Atlassian Document Format, which Jira's
+// REST v3 requires. Paragraphs from blank lines, line breaks, and https links. No markdown: rule
+// texts are written for Jira's readers.
 
 type AdfText = { type: 'text'; text: string; marks?: { type: 'link'; attrs: { href: string } }[] };
 type AdfInline = AdfText | { type: 'hardBreak' };

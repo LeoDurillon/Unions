@@ -11,6 +11,11 @@ test("a file's top comment is its summary, first sentence only", () => {
   );
 });
 
+test('a long first sentence is kept whole, for the check to report rather than cut', () => {
+  const long = `// ${'word '.repeat(40).trim()}.`;
+  expect(summaryOf(long)?.length).toBe(long.length - '// '.length);
+});
+
 test('a file without a top `//` comment has no summary, whatever its doc comments', () => {
   expect(summaryOf('/**\n * The map of a part.\n */\nimport x from "y";')).toBeNull();
   expect(

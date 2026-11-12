@@ -1,4 +1,4 @@
-// Puts the ticket's current files in the container, before every step: files added since the last
+// Puts the ticket's current files in the container, before every step. Files added since the last
 // step appear, removed ones disappear, and whatever the agent changed in them is reset.
 import {
   CONTAINER_ATTACHMENTS_DIR,

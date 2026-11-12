@@ -1,4 +1,5 @@
-// `/api/union-update`: how far Union's checkout is behind `origin/main`, and the commands that check again and update (the worker does both).
+// `/api/union-update`: how far Union's checkout is behind `origin/main`, and commands to check
+// again and update. The worker does both.
 import { activeWork, readUnionUpdate, schema, type Db } from '@union/core';
 import { Hono } from 'hono';
 

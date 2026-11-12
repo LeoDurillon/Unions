@@ -1,4 +1,5 @@
-// After a revision is pushed, asks the implementer for a reply to each comment imported from GitHub it worked on, kept as drafts the user sends.
+// After a revision is pushed, asks the implementer for a reply to each comment imported from GitHub
+// it worked on. The replies are kept as drafts the user sends.
 
 import {
   IMPLEMENT_DENIED,

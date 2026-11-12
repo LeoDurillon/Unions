@@ -1,4 +1,5 @@
-// The Memory page's data: lessons and feedback, saving them with the on/off switch, curating feedback, and the lesson writer's and tidier's runs.
+// The Memory page's data: lessons and feedback, saving them with the on/off switch, curating
+// feedback. Also the lesson writer's and tidier's runs.
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 import type { FeedbackItem, Lesson, LessonSuggestion } from '@union/core';
 import type { LessonsSave } from '@union/core/lesson-input';

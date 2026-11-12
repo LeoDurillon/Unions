@@ -1,6 +1,6 @@
-// Reads what the report is checked against in the container: the files it names must exist (a deleted
-// file of the change aside), its line ranges are cut to the file's length; and the change's commit
-// messages.
+// Reads in the container what the report is checked against: the files it names and the change's
+// commit messages. The files must exist (a deleted file of the change aside); its line ranges are
+// cut to the file's length.
 
 import type { ContainerRuntime, ReportFlow, ReportLines, ReviewReportResult } from '@union/core';
 

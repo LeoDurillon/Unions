@@ -1,4 +1,5 @@
-// The sidebar's "Reconnecting…" pill, shown while the live event stream is down for more than a moment; its live region takes no space.
+// The sidebar's "Reconnecting…" pill, shown while the live event stream is down for more than a
+// moment. Its live region takes no space.
 import type { ReactElement } from 'react';
 
 import { useStreamStatus } from '../lib/stream-status';

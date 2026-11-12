@@ -1,4 +1,5 @@
-// The replies of a pull request as the UI reads them: those the worker has not posted yet, the implementer's suggestions, and who posts.
+// A pull request's replies as the UI reads them: those the worker has not posted yet, the
+// implementer's suggestions. Also who posts.
 import {
   getGitHubApp,
   isEvent,

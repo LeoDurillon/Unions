@@ -1,4 +1,5 @@
-// Checks a stack's simplified history before it is pushed: every commit in its slice, every slice's tip with the same content.
+// Checks a stack's simplified history before pushing: every commit in its slice, each slice's tip
+// with the same content.
 
 import { shortSha, sliceTrailer, sliceTips, type StackCommit, type TicketSlice } from '@union/core';
 

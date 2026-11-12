@@ -1,5 +1,5 @@
-// Creates a ticket drafted from an investigation as an item of the tracker the user picked too (a Notion page, a
-// Jira issue).
+// Creates a ticket drafted from an investigation as an item of the tracker the user picked too. The
+// item is a Notion page or a Jira issue.
 import {
   integrationKind,
   integrationOf,

@@ -1,4 +1,5 @@
-// Where a reply to a pull request comment goes on GitHub: a line thread checked to be on that pull request, or its conversation.
+// Where a reply to a pull request comment goes on GitHub. Either a line thread checked to be on
+// that pull request, or its conversation.
 import { schema, type Db, type PrCommentReply, type ReviewComment } from '@union/core';
 import { eq } from 'drizzle-orm';
 

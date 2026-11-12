@@ -1,4 +1,4 @@
-// The project's previews that hold containers now, tickets' and pull requests', with Stop; and the
+// The project's previews that hold containers now, tickets' and pull requests', with Stop. Also the
 // addresses of its shared services the proxy opens.
 
 import type { ReactElement } from 'react';

@@ -1,4 +1,5 @@
-// The review's Agents tab: Run agent (the user's review agents, one run at a time on the change), then each agent's newest run with its answer.
+// The review's Agents tab: Run agent (the user's review agents, one run at a time on the change).
+// Then each agent's newest run with its answer.
 
 import { useState, type ReactElement } from 'react';
 

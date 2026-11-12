@@ -1,5 +1,5 @@
 // The agent's grouping, checked against the change: only changed files and their real hunks, every
-// hunk at least once (the ones it left out are unrelated), no empty group (its part goes to
+// hunk at least once. The hunks it left out count as unrelated; no group is empty (its part goes to
 // `missing`).
 
 import {

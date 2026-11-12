@@ -1,5 +1,6 @@
-// The lessons a Memory page save sends, checked (a known step or the spec report, a one-line rule, the id
-// of a kept lesson), and the lesson writer's proposals applied to them (browser-safe).
+// The lessons a Memory page save sends, checked, and the lesson writer's proposals applied to them
+// (browser-safe). Checked: a known step or the spec report, a one-line rule, the id of a kept
+// lesson.
 import { FULL_FLOW, isCustomStep, type PipelineStep } from './states';
 
 /** The spec report's lessons: it is no pipeline step, but learns from the reviewer as the steps do. */

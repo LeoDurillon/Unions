@@ -1,4 +1,5 @@
-// The Usage tab's "Suggest improvements": asks first (it runs an agent on the Claude subscription), then queues the investigation and opens it.
+// The Usage tab's "Suggest improvements": asks first, then queues the investigation and opens it.
+// It asks because it runs an agent on the Claude subscription.
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { INVESTIGATION_DEFAULTS } from '@union/core/investigation-defaults';
 import { useState, type ReactElement } from 'react';

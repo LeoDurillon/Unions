@@ -1,4 +1,5 @@
-// When a ticket's branch moved on GitHub away from what Union last pushed, and what that holds back until a resync; browser-safe.
+// When a ticket's branch moved on GitHub away from what Union last pushed, and what that holds back
+// until a resync. Browser-safe.
 
 import type { Phase } from './phases';
 import type { BranchMove } from './schema/schema-types';

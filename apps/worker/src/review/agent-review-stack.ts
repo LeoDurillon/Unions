@@ -1,4 +1,5 @@
-// A stack's agent review: its pull requests checked out together, the prompt that lists them, and the findings split per pull request.
+// A stack's agent review: its pull requests checked out together, and the prompt that lists them.
+// The findings are split per pull request.
 
 import {
   resolveAgent,

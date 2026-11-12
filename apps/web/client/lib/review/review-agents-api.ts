@@ -1,4 +1,5 @@
-// API calls for a review's review agents, under the review's API root (`reviewBase`): the agents it can run, each one's newest run, run one, cancel.
+// API calls for a review's review agents: the agents it can run, each one's newest run, run one,
+// cancel. They go under the review's API root (`reviewBase`).
 
 import type { ReviewAgentsView } from '../../../src/routes/review/review-agent-runs';
 import { request } from '../api';

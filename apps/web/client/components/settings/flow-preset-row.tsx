@@ -1,4 +1,5 @@
-// One flow preset in the settings: its name, what it is for, its planning steps and custom agents, whether new tickets get it, and Remove.
+// One flow preset in the settings: its name, what it is for, its planning steps and custom agents.
+// Also whether new tickets get it, and Remove.
 import type { FlowPreset } from '@union/core/flows';
 import type { ReactElement } from 'react';
 

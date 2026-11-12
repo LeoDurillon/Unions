@@ -1,5 +1,6 @@
-// "Not useful" on an item of what needs the reviewer: hides it from the report and, with a rule, keeps
-// the rule as a lesson of the project's spec reports, so the next ones stop raising that kind of item.
+// "Not useful" on an item of what needs the reviewer: hides it from the report and can keep a rule
+// as a lesson. With a rule, it keeps the rule as a lesson of the project's spec reports, so the
+// next ones stop raising that kind of item.
 
 import type { AttentionItem } from '@union/core';
 import { useState, type ReactElement } from 'react';

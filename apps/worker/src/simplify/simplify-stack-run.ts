@@ -1,4 +1,5 @@
-// One simplification of a stack: the fetch and its safety checks, the agent's turns until the host accepts the result, the push.
+// One simplification of a stack: the fetch and its safety checks, the agent's turns, the push. The
+// agent's turns go on until the host accepts the result.
 
 import type { TicketSlice } from '@union/core';
 

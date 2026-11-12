@@ -1,5 +1,5 @@
-// Which attachment a description's file card shows, when the card names it only by its Media Services id: the
-// ids are read from Jira, for the issues whose text has such a card.
+// Which attachment a description's file card shows, when the card names it only by its Media
+// Services id. The ids are read from Jira, for the issues whose text has such a card.
 import { adfNodeOf, type AdfNode } from './adf-node';
 import type { JiraApi, JiraAuth } from './jira-api';
 import type { JiraIssue } from './jira-parse';

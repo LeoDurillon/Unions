@@ -1,4 +1,5 @@
-// Reads a pull request to import as a ticket, in one GraphQL query: its branches and head, and the issues it closes with their comments.
+// Reads a pull request to import as a ticket, in one GraphQL query: its branches and head, and the
+// issues it closes. Those issues come with their comments.
 import type { Octokit } from 'octokit';
 
 import type { PullRequestSource } from './api-pr-import-types';

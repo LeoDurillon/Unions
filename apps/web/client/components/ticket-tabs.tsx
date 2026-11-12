@@ -1,5 +1,6 @@
-// The panel's top tabs: the ticket, its preview, the agents' work, its pull request and the comments of the
-// tracker item it came from (its Notion page's, or its Jira issue's).
+// The panel's top tabs: the ticket, its preview, the agents' work, its pull request and the tracker
+// item's comments. The comments are those of the tracker item it came from: its Notion page's, or
+// its Jira issue's.
 import type { ReactElement, ReactNode } from 'react';
 
 import type { TicketDetail } from '../../src/api-types';

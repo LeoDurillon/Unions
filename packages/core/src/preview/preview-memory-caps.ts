@@ -1,4 +1,5 @@
-// What each service of a preview may use: Union's memory cap (a service's own lower limit kept) and the preview's CPU cores (unless a service sets its own).
+// What each service of a preview may use: Union's memory cap and the preview's CPU cores. A
+// service's own lower memory limit is kept, and a service that sets its own CPU cores keeps them.
 import type { ContainerLimits } from '../container-limits';
 import { isRecord, type ComposeJson } from './preview-compose-check';
 

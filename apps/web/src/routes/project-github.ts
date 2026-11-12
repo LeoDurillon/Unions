@@ -1,4 +1,5 @@
-// The project's GitHub routes that have their own module: what an event rule picks from, the Repository tab, its GitHub Project.
+// Project GitHub routes with their own module: what an event rule picks from, the Repository tab,
+// its GitHub Project.
 import type { Db } from '@union/core';
 import { Hono } from 'hono';
 

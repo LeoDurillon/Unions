@@ -1,5 +1,6 @@
-// What the agent gets from the preview's environment: services started for its runs, the variables
-// its commands get, their ports on its `localhost`, and the preview itself during implementation.
+// What the agent gets from the preview's environment: services, variables, ports, and the preview
+// itself. That is the services started for its runs, the variables its commands get, their ports on
+// its `localhost`, and the preview itself during implementation.
 
 import type { ReactElement } from 'react';
 

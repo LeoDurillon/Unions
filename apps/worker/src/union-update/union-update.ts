@@ -1,4 +1,5 @@
-// Union's own update: checks the checkout against `origin/main` every few minutes, and starts the update the user asked for.
+// Union's own update: checks the checkout against `origin/main` every few minutes. It starts the
+// update the user asked for.
 
 import path from 'node:path';
 

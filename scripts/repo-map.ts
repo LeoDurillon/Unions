@@ -4,7 +4,14 @@ import { rm } from 'node:fs/promises';
 import { Glob } from 'bun';
 
 import { FOLDER_SUMMARIES } from './repo-map-folders';
-import { MAP_AREAS, renderMaps, summaryOf, type MapArea, type SourceFile } from './repo-map-lib';
+import {
+  MAP_AREAS,
+  MAX_SUMMARY,
+  renderMaps,
+  summaryOf,
+  type MapArea,
+  type SourceFile,
+} from './repo-map-lib';
 
 const MAP_DIR = 'docs/map';
 const SOURCE = /\.tsx?$/u;
@@ -53,6 +60,11 @@ const areas = await Promise.all(
 const missing = areas.flatMap(({ files }) =>
   files.filter(({ source }) => summaryOf(source) === null).map(({ file }) => file),
 );
+const tooLong = areas.flatMap(({ files }) =>
+  files
+    .filter(({ source }) => (summaryOf(source)?.length ?? 0) > MAX_SUMMARY)
+    .map(({ file }) => file),
+);
 const maps = renderMaps(areas, FOLDER_SUMMARIES);
 const changed = await changedMaps(maps.files);
 const onDisk = await Array.fromAsync(new Glob('**/*.md').scan({ cwd: MAP_DIR })).catch(
@@ -61,6 +73,7 @@ const onDisk = await Array.fromAsync(new Glob('**/*.md').scan({ cwd: MAP_DIR }))
 const extra = onDisk.filter((file) => !maps.files.has(file));
 const problems: [string, string[]][] = [
   ['No summary (start the file with a one-line // comment)', missing],
+  [`Summary over ${MAX_SUMMARY} characters (shorten the top comment's first sentence)`, tooLong],
   ['No folder summary (add one to scripts/repo-map-folders.ts)', maps.undescribed],
   ['Summary of no folder (remove it from scripts/repo-map-folders.ts)', maps.unused],
 ];

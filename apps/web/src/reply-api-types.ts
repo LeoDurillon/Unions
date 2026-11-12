@@ -1,4 +1,5 @@
-// What the API answers about replies to a pull request's comments: those being posted, the implementer's suggestions, who posts.
+// What the API answers about replies to a pull request's comments: those being posted, the
+// implementer's suggestions. Also who posts.
 
 /** A reply the user sent that the worker has not posted yet (or that failed, until its event is read). */
 export type PendingReply = {

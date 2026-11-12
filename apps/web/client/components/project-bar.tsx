@@ -1,4 +1,4 @@
-// Slim bar above the project: which project is open, its tabs, and the actions; a banner under it
+// Slim bar above the project: which project is open, its tabs, and the actions. A banner under it
 // when the project has no GitHub access.
 import type { ReactElement } from 'react';
 

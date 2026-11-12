@@ -1,4 +1,5 @@
-// A split ticket's pull requests polled together: each slice's state, and the ticket merged only once every slice is in the base.
+// A split ticket's pull requests polled together: each slice's state. The ticket is merged only
+// once every slice is in the base.
 import {
   dispatch,
   emitEvent,

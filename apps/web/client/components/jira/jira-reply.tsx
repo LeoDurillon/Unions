@@ -1,5 +1,6 @@
-// A new comment on a ticket's Jira issue, or a reply to one (it mentions the author): what is being sent, then a
-// button that opens the box. A refused comment opens the box again with its text.
+// A new comment on a ticket's Jira issue, or a reply to one (it mentions the author). It shows what
+// is being sent, then a button that opens the box. A refused comment opens the box again with its
+// text.
 
 import type { JiraReplyTo } from '@union/core/jira-comment-post';
 import { useState, type ReactElement } from 'react';

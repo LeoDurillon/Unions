@@ -1,4 +1,5 @@
-// `/api/notifications`: what needs the user across every project (the worker writes them), marking them read and clearing them.
+// `/api/notifications`: what needs the user across every project, marking them read and clearing
+// them. The worker writes them.
 import { schema, type Db, type Notification } from '@union/core';
 import { toAct } from '@union/core/needs-you';
 import { and, count, desc, eq, isNull, lt } from 'drizzle-orm';

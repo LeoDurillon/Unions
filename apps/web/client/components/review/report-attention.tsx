@@ -1,5 +1,6 @@
-// What needs the reviewer, at the top of the spec report: the items in the report's order, each with its
-// lines and a draft comment to start on them; or a word that nothing does.
+// What needs the reviewer, at the top of the spec report: its items in order, or a word that
+// nothing does. The items keep the report's order, each with its lines and a draft comment to start
+// on them.
 
 import type { AttentionItem, AttentionKind, ReviewReportResult } from '@union/core';
 import { ATTENTION_LABELS } from '@union/core/review-report-markdown';

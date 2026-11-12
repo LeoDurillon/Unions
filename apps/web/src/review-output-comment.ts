@@ -1,5 +1,5 @@
-// A command's or the e2e tests' output as a review comment: what ran, how it ended, the last lines in a
-// code block; and adding a draft on a whole change, of a ticket or a pull request.
+// A command's or the e2e tests' output as a review comment: what ran, how it ended, the last lines
+// in a code block. Also adding a draft on a whole change, of a ticket or a pull request.
 import { schema, type AgentReviewOwner, type Db } from '@union/core';
 
 /** Lines of output a comment quotes: enough to read the failure, not a log dump. */

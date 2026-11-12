@@ -1,5 +1,6 @@
-// The file panel's "By spec" switch: shows the files under the parts of a specification, and the
-// first time (or Regroup) asks an agent to group them; where the grouping stands, under the switch.
+// The file panel's "By spec" switch: shows the files under the parts of a specification. The first
+// time (or Regroup) it asks an agent to group them; where the grouping stands shows under the
+// switch.
 
 import { useState, type ReactElement } from 'react';
 

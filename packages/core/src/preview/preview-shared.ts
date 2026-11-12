@@ -1,5 +1,6 @@
-// Services shared between a project's previews: taken out of a preview's resolved file into its
-// `x-union-shared` extension, checked, and written as the shared compose project Union runs once.
+// Services shared between a project's previews, written as the shared compose project Union runs
+// once. They are taken out of a preview's resolved file into its `x-union-shared` extension and
+// checked.
 import { PUBLISHED_PORTS_KEY } from '../agent-environment';
 import {
   isRecord,

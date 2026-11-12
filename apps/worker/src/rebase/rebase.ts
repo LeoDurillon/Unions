@@ -1,5 +1,5 @@
-// Rebases the ticket's branch onto its base (git alone when there is no conflict, else the
-// implementer's own session), checks it and force-pushes it with a lease.
+// Rebases the ticket's branch onto its base, checks it and force-pushes it with a lease. Git alone
+// rebases when there is no conflict, else the implementer's own session does.
 
 import type { ImplementDeps } from '../implement/implement-checks';
 import { afterFollowed, followedMove } from '../left-base';

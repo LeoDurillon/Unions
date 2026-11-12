@@ -1,5 +1,5 @@
 // The review's specs under its header: one chip each (edited ones marked, unreadable ones in red),
-// and Edit, which opens the dialog that changes them for every agent action.
+// and Edit. Edit opens the dialog that changes them for every agent action.
 
 import type { ReactElement } from 'react';
 

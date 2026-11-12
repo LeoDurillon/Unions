@@ -1,5 +1,6 @@
-// A Notion page's open discussions: its comments grouped by thread, each inline one with the text it
-// is about (from the `discussion-urls` spans of the page markdown). Pure and browser-safe.
+// A Notion page's open discussions: its comments grouped by thread, each inline one with the text
+// it is about. That text comes from the `discussion-urls` spans of the page markdown. Pure and
+// browser-safe.
 import type { NotionComment, NotionRichText } from './notion-comment-parse';
 
 /** A discussion span; its inner text stops at the first `</span>`, which nested spans may cut short. */

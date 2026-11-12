@@ -1,4 +1,5 @@
-// The box above the review's files that narrows them by words of their path (`/` goes to it), the Code only switch, and the files they keep.
+// The box above the review's files that narrows them by words of their path (`/` goes to it). Also
+// the Code only switch, and the files they keep.
 import { useRef, type ReactElement, type ReactNode } from 'react';
 
 import { filterFiles } from '../../lib/review/file-filter';

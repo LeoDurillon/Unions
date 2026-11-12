@@ -1,7 +1,7 @@
-// Notion's page markdown (`GET /v1/pages/{id}/markdown`) as plain GitHub-flavored markdown: its own
-// tags (mentions, link previews, files, callouts, colored or commented spans, toggles) become what any
-// renderer, GitHub and the agents read. Browser-safe: the panel also cleans tickets imported before
-// this existed. Idempotent: clean markdown goes through unchanged.
+// Notion's page markdown (`GET /v1/pages/{id}/markdown`) as plain GitHub-flavored markdown. Its own
+// tags (mentions, link previews, files, callouts, colored or commented spans, toggles) become what
+// any renderer, GitHub and the agents read. Browser-safe: the panel also cleans tickets imported
+// before this existed. Idempotent: clean markdown goes through unchanged.
 
 import { notionMediaLinks } from './notion-media';
 import { withBlockLinks } from './notion-unknown-blocks';

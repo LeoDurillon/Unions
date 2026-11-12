@@ -1,4 +1,5 @@
-// Reading a GitHub Project's fields (the ones a rule can set) and setting one on an item: queries and parsing, for the web and the worker.
+// Reading a GitHub Project's fields (the ones a rule can set) and setting one on an item. Queries
+// and parsing, for the web and the worker.
 
 import type { ProjectField, ProjectFieldType } from './event/event-project-fields-action';
 

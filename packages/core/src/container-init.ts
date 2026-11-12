@@ -1,4 +1,5 @@
-// Identifies this container's run: its init's (PID 1) start in clock ticks, which a container restart changes and a `bun --watch` reload does not.
+// Identifies this container's run: its init's (PID 1) start in clock ticks. A container restart
+// changes it, a `bun --watch` reload does not.
 import { readFile } from 'node:fs/promises';
 
 /** `starttime` is field 22 of the stat line; fields after the command's `)` start at field 3. */

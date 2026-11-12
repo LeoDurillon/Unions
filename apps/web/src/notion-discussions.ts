@@ -1,5 +1,5 @@
 // Reads a Notion page's open discussions for the panel: the page's comments and those of each
-// commented block, grouped, with the text they are about.
+// commented block, grouped. Each discussion comes with the text it is about.
 import {
   commentedSpans,
   discussionsOf,

@@ -1,5 +1,5 @@
-// The prompts of a spec report: the first one with the specs and the change, and the one more turn
-// asking for the block when the answer has none.
+// The prompts of a spec report: the first one with the specs and the change, and one more turn
+// asking for the block. That turn is sent when the answer has none.
 import {
   reportLessonsPrompt,
   resolveAgent,

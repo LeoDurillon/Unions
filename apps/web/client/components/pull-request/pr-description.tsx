@@ -1,4 +1,5 @@
-// A pull request's description, the same for the ticket's and each slice's: GitHub's text, and the agent's rewrite of it to edit and send.
+// A pull request's description: GitHub's text, and the agent's rewrite of it to edit and send. The
+// same for the ticket's and each slice's.
 import type { ReactElement } from 'react';
 
 import type { PrDescriptionDraft, PrDescriptionView } from '../../../src/api-types';

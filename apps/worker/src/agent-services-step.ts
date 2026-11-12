@@ -1,5 +1,5 @@
-// A step that runs code (implementation, rebase), with the project's agent services beside it and,
-// while the preview runs, its addresses in the environment.
+// A step that runs code (implementation, rebase), with the project's agent services beside it.
+// While the preview runs, its addresses are in the environment.
 
 import { hasActiveContainerRun } from '@union/core';
 

@@ -1,5 +1,5 @@
-// The report's lists read from the agent's block: requirements with their quotes checked against the
-// specs sent, the important files, the risks and the docs.
+// The report's lists read from the agent's block: requirements, the important files, the risks and
+// the docs. The requirements' quotes are checked against the specs sent.
 import {
   IMPORTANT_FILE_KINDS,
   quoteKey,

@@ -1,5 +1,5 @@
-// What a review's spec list starts with, a stack's specs from its members', and the specs as the one
-// text Group by spec reads. Pure, browser-safe.
+// What a review's spec list starts with, a stack's specs from its members', the specs as the text
+// Group by spec reads. Pure, browser-safe.
 
 import { MAX_SPEC_CHARS, MAX_SPECS, type AgentReviewSpec } from '../agent-review-specs';
 import { SPEC_SOURCES, type SpecSource } from '../spec-source-kinds';

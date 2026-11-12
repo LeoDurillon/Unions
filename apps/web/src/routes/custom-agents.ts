@@ -1,4 +1,5 @@
-// The API routes for custom agents: create one of a kind (a ticket step or a review agent; the worker writes its prompt), rename it, rewrite its role, regenerate, delete.
+// The API routes for custom agents: create one of a kind, rename it, rewrite its role, regenerate,
+// delete. A kind is a ticket step or a review agent; the worker writes its prompt.
 import {
   createCustomAgent,
   CustomAgentError,

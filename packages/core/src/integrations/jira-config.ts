@@ -1,4 +1,5 @@
-// A Jira integration's config (site, account email, project key) and issue keys, parsed from what users paste; browser-safe.
+// A Jira integration's config (site, account email, project key) and issue keys, parsed from what
+// users paste. Browser-safe.
 
 /** The config of a Jira Cloud integration; the API token is its secret, not config. */
 export type JiraConfig = {

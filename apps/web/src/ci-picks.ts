@@ -1,4 +1,5 @@
-// The user's picks among the pull request's CI, checked against its current checks, then read from GitHub into the text the implementer gets.
+// The user's picks among the pull request's CI, checked against its current checks. They are then
+// read from GitHub into the text the implementer gets.
 import {
   botCommentText,
   failedCheckText,

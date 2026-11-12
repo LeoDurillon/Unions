@@ -1,4 +1,5 @@
-// The lifecycle the review side runs share (agent reviews, groupings, reports, explanations, review agents): claim, cancel, fail the interrupted.
+// The lifecycle the review side runs share: claim, cancel, fail the interrupted. The side runs are
+// agent reviews, groupings, reports, explanations and review agents.
 
 import { and, asc, eq, getTableColumns, inArray } from 'drizzle-orm';
 import type { SQLiteColumn, SQLiteTable } from 'drizzle-orm/sqlite-core';

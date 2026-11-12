@@ -1,4 +1,5 @@
-// A pull request's own container (`union-r<id>`): its checkout at the reviewed commit, for its preview, tests and commands.
+// A pull request's own container (`union-r<id>`): its checkout at the reviewed commit, for preview,
+// tests and commands.
 
 import { ownerContainerNames, schema, type Db, agentContainerLimits } from '@union/core';
 import { eq } from 'drizzle-orm';

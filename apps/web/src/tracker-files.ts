@@ -1,5 +1,6 @@
-// Downloads the images and files a tracker item links (a Notion page, a Jira issue) so they are kept as the
-// ticket's files: each kept one is referenced as `attachment:<name>` in the markdown. Each tracker gives its source.
+// Downloads the images and files a tracker item links (a Notion page, a Jira issue), kept as the
+// ticket's files. Each kept one is referenced as `attachment:<name>` in the markdown. Each tracker
+// gives its source.
 import {
   fileNameOfUrl,
   MAX_ATTACHMENT_BYTES,

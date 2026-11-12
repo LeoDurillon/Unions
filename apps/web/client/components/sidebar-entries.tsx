@@ -1,4 +1,4 @@
-// The sidebar's projects (with Add project) and its Union settings entry; on the rail, a project
+// The sidebar's projects (with Add project) and its Union settings entry. On the rail, a project
 // shows the first two letters of its name.
 import type { ReactElement } from 'react';
 

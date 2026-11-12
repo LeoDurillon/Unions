@@ -1,4 +1,6 @@
-// The default prompts of the turns that resume the implementer's session on its branch: the trim pass over a change too large, the replies to the pull request's comments, and its split into a stack.
+// The default prompts of the turns that resume the implementer on its branch: trim, pull request
+// replies, stack split. The trim pass is over a change too large, the replies answer the pull
+// request's comments, and the split turns it into a stack; each resumes the implementer's session.
 
 import { SPLIT_PLAN_FORMAT } from './split-plan';
 

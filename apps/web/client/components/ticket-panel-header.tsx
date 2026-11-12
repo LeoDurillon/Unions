@@ -1,5 +1,6 @@
-// The ticket panel's top bar: where the ticket lives (repository, issue, pull request), the way to the next
-// ticket that needs the user, Investigate, Review changes, the ⋯ menu and Close.
+// The ticket panel's top bar: where the ticket lives (repository, issue, pull request) and its
+// actions. The actions are the way to the next ticket that needs the user, Investigate, Review
+// changes, the ⋯ menu and Close.
 import type { ReactElement } from 'react';
 
 import type { TicketDetail, TicketSummary } from '../../src/api-types';

@@ -1,4 +1,6 @@
-// Union's update, started by the worker in its own process: backs the database up when migrations come, fast-forwards to `<to>`, reinstalls if needed, then ends the worker's container so compose starts it again.
+// Union's update, started by the worker in its own process: backup, fast-forward to `<to>`,
+// reinstall, worker restart. It backs the database up only when migrations come and reinstalls only
+// if needed; it ends the worker's container so compose starts it again.
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 

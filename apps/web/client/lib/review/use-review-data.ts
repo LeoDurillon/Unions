@@ -1,5 +1,5 @@
-// What a review page reads and writes: the diff, the comments and their writes, the picked slice of a
-// split ticket, and the wording for the target.
+// What a review page reads and writes: the diff, the comments and their writes, the wording for the
+// target. Also the picked slice of a split ticket.
 
 import type { CommentView } from '../../../src/api-types';
 import { useSliceView, type SliceView } from '../use-slice-view';

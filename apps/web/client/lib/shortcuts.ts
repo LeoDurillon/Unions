@@ -1,4 +1,5 @@
-// Single-key shortcuts: which key a keydown means (none while typing, with a modifier, or under a dialog), and the hook that listens.
+// Single-key shortcuts: which key a keydown means, and the hook that listens. A keydown means none
+// while typing, with a modifier, or under a dialog.
 import { useEffect, useRef } from 'react';
 
 /** The keys a part of the app answers, each with its action; an undefined action leaves the key alone. */

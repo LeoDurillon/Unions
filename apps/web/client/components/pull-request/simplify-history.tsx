@@ -1,4 +1,5 @@
-// The Simplify history button: the implementation agent rewrites the branch's commits (a stack's slice by slice), the code unchanged.
+// The Simplify history button: the implementation agent rewrites the branch's commits, the code
+// unchanged. A stack's are rewritten slice by slice.
 import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../../src/api-types';

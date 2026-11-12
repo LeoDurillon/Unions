@@ -1,5 +1,5 @@
-// The sidebar's Claude usage: how much of the subscription's five-hour and weekly windows is used and
-// when each starts over, as the agents' last call reported it.
+// The sidebar's Claude usage: how much of the five-hour and weekly windows is used and when each
+// starts over. The windows are the subscription's, as the agents' last call reported them.
 import type { ClaudeLimits, LimitWindow } from '@union/core';
 import type { ReactElement } from 'react';
 

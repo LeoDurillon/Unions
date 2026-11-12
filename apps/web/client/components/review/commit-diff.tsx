@@ -1,5 +1,5 @@
-// One commit of the change against its first parent (or the change since the last review): its
-// files on the left, the picked one on the right, read only.
+// One commit of the change against its first parent (or the change since the last review), read
+// only. Its files on the left, the picked one on the right.
 
 import { useState, type ReactElement, type ReactNode } from 'react';
 

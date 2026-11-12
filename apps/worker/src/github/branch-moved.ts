@@ -1,4 +1,5 @@
-// Notices when the ticket's branch on GitHub is no longer the commit Union pushed: commits added on top, or the branch rewritten.
+// Notices when the ticket's branch on GitHub is no longer the commit Union pushed. Either commits
+// were added on top, or the branch was rewritten.
 import { moveKind, recordMove, stepHoldsBranch, type Db, type Ticket } from '@union/core';
 
 import type { GitHubApi, RepoRef } from './api';

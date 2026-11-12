@@ -1,4 +1,5 @@
-// A step's name as the UI, the notifications and the issue comments show it: built-in, or the custom agent's; browser-safe.
+// A step's name as the UI, the notifications and the issue comments show it: built-in, or the
+// custom agent's. Browser-safe.
 import { isCustomStep, STEP_TITLES, type CustomStep, type Step } from './states';
 
 /** The custom agents' names by step, deleted ones included (their tickets keep their tabs). */

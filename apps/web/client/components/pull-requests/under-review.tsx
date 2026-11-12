@@ -1,5 +1,5 @@
-// The Pull requests tab's "Under review" part: pull requests put under review without a ticket, stacks
-// first; Open review opens the review page (a stack's with a tab per pull request).
+// The Pull requests tab's "Under review" part: pull requests put under review without a ticket,
+// stacks first. Open review opens the review page (a stack's with a tab per pull request).
 
 import type { ReactElement } from 'react';
 

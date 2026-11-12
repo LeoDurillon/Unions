@@ -1,6 +1,6 @@
-// Places the nodes of a spec report's map in layers, top to bottom: each node one layer below the
-// deepest node pointing at it (the links closing a cycle aside; a node nothing points at just above
-// what it points at), ordered in its layer near the nodes it comes from.
+// Lays out a spec report's map in layers, top to bottom, each node ordered in its layer near the
+// nodes it comes from. Each node sits one layer below the deepest node pointing at it (the links
+// closing a cycle aside; a node nothing points at just above what it points at).
 
 export const NODE_WIDTH = 184;
 export const NODE_HEIGHT = 48;

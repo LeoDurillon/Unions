@@ -1,4 +1,5 @@
-// A review agent's prompt: the instructions and its lessons, its own prompt, the review's specs, the change, how its checkout was prepared, and how to cite code.
+// A review agent's prompt: the instructions and its lessons, its own prompt, the review's specs,
+// the change. Also how its checkout was prepared, and how to cite code.
 import {
   customStep,
   lessonsPrompt,

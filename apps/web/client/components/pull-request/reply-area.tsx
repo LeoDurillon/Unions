@@ -1,4 +1,5 @@
-// Under a thread or a note: the replies being posted, the implementer's suggested reply, and Reply (or Quote reply) to write one; Send all above them.
+// Under a thread or a note: the replies being posted, the implementer's suggested reply, and Reply
+// or Quote reply. Reply (or Quote reply) writes one; Send all sits above them.
 import { githubText } from '@union/core/github-text';
 import { quoteReply } from '@union/core/pr-comment-reply';
 import { useState, type ReactElement } from 'react';

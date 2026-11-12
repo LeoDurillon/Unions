@@ -1,4 +1,5 @@
-// The agent image page's state: what the agents run on, the save being built or why it was not applied, and the build's log.
+// The agent image page's state: what the agents run on, the save being built or why it was not
+// applied. Also the build's log.
 import { formatBytes } from '@union/core/attachment-limits';
 import type { ReactElement } from 'react';
 

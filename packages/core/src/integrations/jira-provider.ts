@@ -1,5 +1,6 @@
-// Jira Cloud as an `IntegrationProvider`: verify, read the project's types and statuses, import an issue of it, and
-// create one (a ticket written from an investigation).
+// Jira Cloud as an `IntegrationProvider`: verify, read the project's types and statuses, import an
+// issue, create one. The issue imported is the project's; the one created is a ticket written from
+// an investigation.
 import type { JiraApi, JiraAuth } from './jira-api';
 import { issueMarkdown } from './jira-attachments';
 import { jiraConfigOf } from './jira-config';

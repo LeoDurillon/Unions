@@ -1,5 +1,5 @@
-// The files of the review's current spec report the file list marks (to read first, or to skim):
-// provided once by the list, read by each row.
+// The files of the review's current spec report the file list marks (to read first, or to skim).
+// Provided once by the list, read by each row.
 
 import { createContext, useContext, useMemo, type ReactElement, type ReactNode } from 'react';
 

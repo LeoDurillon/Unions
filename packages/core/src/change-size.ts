@@ -1,4 +1,5 @@
-// How much code a change adds: its lines added outside tests and generated files, counted from a diff or `git diff --numstat` (browser-safe).
+// How much code a change adds: its lines added outside tests and generated files. Counted from a
+// diff or `git diff --numstat` (browser-safe).
 import { isIgnoredPath, LOCK_FILES } from './diff';
 
 /** Paths that count as tests: left out of the code, counted apart. */

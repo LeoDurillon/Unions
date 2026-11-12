@@ -1,4 +1,4 @@
-// Groups the change by the review's specs: they are read together, each a titled section, so the
+// Groups the change by the review's specs: they are read together, each a titled section. So the
 // parts can come from any of them; then the agent starts.
 
 import { groupingLabel, groupingText } from '@union/core/review-spec-lists';

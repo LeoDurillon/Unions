@@ -1,4 +1,4 @@
-// The agent's report comparing a review's change with its specs, run when the user asks: for a
+// The agent's report comparing a review's change with its specs, run when the user asks. For a
 // ticket's branch or a pull request under review (`review_comments` owners).
 
 import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';

@@ -1,5 +1,5 @@
-// The runners of the review page's agents: agent reviews, groupings by spec, explanations of lines, spec
-// reports and the user's review agents.
+// Runners of the review page's agents: agent reviews, spec groupings, line explanations, spec
+// reports, review agents. The review agents are the user's own.
 import { AgentReviewRunner, type AgentReviewDeps } from './agent-review';
 import { ReviewAgentRunner } from './review-agent-run';
 import { ReviewExplainRunner } from './review-explain';

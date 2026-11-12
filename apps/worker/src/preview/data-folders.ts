@@ -1,5 +1,5 @@
-// The folders a preview's services keep data in inside the checkout: the repository folders they mount
-// that git ignores whole. Found at each start; a reset empties the ones the user chose.
+// The data folders of a preview's services in the checkout: the repository folders they mount that
+// git ignores whole. Found at each start; a reset empties the ones the user chose.
 import {
   getPreview,
   recordDataFolders,

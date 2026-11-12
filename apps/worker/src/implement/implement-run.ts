@@ -1,4 +1,4 @@
-// The implementation before it is published: the agent's turns and the checks, or the end of a run
+// The implementation before it is published: the agent's turns and the checks. It also ends a run
 // paused on a refused commit.
 
 import { getTicket, schema, ticketBase, type Db, type Project } from '@union/core';

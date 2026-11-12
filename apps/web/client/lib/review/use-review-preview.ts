@@ -1,4 +1,5 @@
-// A pull request's preview as its Preview tab reads it (its checkout, its screenshots), and adding an output to the review.
+// A pull request's preview as its Preview tab reads it (checkout, screenshots), and adding an
+// output to the review.
 
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 

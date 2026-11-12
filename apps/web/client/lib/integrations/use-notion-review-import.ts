@@ -1,4 +1,5 @@
-// Add to review on a Notion discussion, or on one comment of the page's: the server reads it again and adds it to the ticket's review as a draft.
+// Add to review on a Notion discussion, or on one comment of the page's. The server reads it again
+// and adds it to the ticket's review as a draft.
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 

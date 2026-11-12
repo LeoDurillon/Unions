@@ -1,4 +1,5 @@
-// The Pull requests tab's read from GitHub: the pull requests and the repository's stacks together, the current reviews' stacks kept up with it and the closed ones removed.
+// The Pull requests tab's read from GitHub: the pull requests and the repository's stacks together.
+// The current reviews' stacks are kept up with it and the closed ones removed.
 
 import { schema, type Db, type GitHubAuth } from '@union/core';
 import type { GitHubStack } from '@union/core/github-stacks';

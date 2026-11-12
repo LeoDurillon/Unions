@@ -1,5 +1,5 @@
-// The implementer's prompts past the first: check and preview hints, feedback, failed checks, given
-// outputs, and its report.
+// The implementer's later prompts: check and preview hints, feedback, failed checks, given outputs,
+// and its report.
 
 import {
   previewUrlVariable,

@@ -1,4 +1,5 @@
-// Replies to a pull request's comments, as the web hands them to the worker: a reply queued, a suggestion edited, sent or discarded.
+// Replies to a pull request's comments, as the web hands them to the worker. A reply is queued, a
+// suggestion edited, sent or discarded.
 import {
   replyBodyProblem,
   schema,

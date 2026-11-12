@@ -1,4 +1,5 @@
-// A pull request review's Description tab: the rows linking its Notion pages and Jira issues, then the description from GitHub.
+// A pull request review's Description tab: the rows linking its Notion pages and Jira issues. Then
+// the description from GitHub.
 
 import { githubText } from '@union/core/github-text';
 import type { ReactElement } from 'react';

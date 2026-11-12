@@ -1,4 +1,5 @@
-// Union's own update: the worker's last check (read again every few seconds), checking again, updating, and reloading the page on the new commit.
+// Union's own update: the worker's last check, checking again, updating, and reloading the page on
+// the new commit. The last check is read again every few seconds.
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 

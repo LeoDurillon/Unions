@@ -1,5 +1,5 @@
-// The parts of the preview settings that core checks (the agent's environment, the shared services'
-// commands), their refusals answered as 400s.
+// The parts of the preview settings that core checks: the agent's environment, the shared services'
+// commands. Their refusals are answered as 400s.
 import {
   parseAgentEnvironment,
   parseSharedCommands,

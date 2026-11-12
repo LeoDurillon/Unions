@@ -1,4 +1,5 @@
-// A ticket's newest diff for the review page: its snapshot, its files with their flags, and whether a review can be sent now.
+// A ticket's newest diff for the review page: its snapshot, its files with flags, and whether a
+// review can be sent now.
 import { schema, type Db, type Ticket } from '@union/core';
 import { desc, eq } from 'drizzle-orm';
 

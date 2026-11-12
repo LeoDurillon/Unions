@@ -1,4 +1,6 @@
-// The issue and pull request changes of the worker's GitHub client (issue text, PR title and base, labels, reviewers, assignees) and its pull requests by branch: the base of `OctokitGitHubApi`.
+// The issue and pull request changes of the worker's GitHub client, and its pull requests by
+// branch. The changes are issue text, PR title and base, labels, reviewers, assignees; it is the
+// base of `OctokitGitHubApi`.
 import { RequestError, type Octokit } from 'octokit';
 
 import type { IssueCloseReason, IssueText, PullRequestRef, RepoRef } from './api';

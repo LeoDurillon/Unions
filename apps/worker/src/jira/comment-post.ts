@@ -1,5 +1,5 @@
-// Posts a comment on a ticket's Jira issue, its markdown as Jira's rich text (a reply mentions the comment's author
-// first), and logs how it went.
+// Posts a comment on a ticket's Jira issue, its markdown as Jira's rich text, and logs how it went.
+// A reply mentions the comment's author first.
 import {
   emitEvent,
   FetchJiraApi,

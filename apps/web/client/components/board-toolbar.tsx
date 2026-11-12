@@ -1,5 +1,6 @@
-// Above the board: the search, where the tickets came from (when some came from a tracker), how many the filter
-// shows, and on the right the project at a glance (the Needs you toggle, what runs, Claude's window).
+// Above the board: the search, where the tickets came from, how many the filter shows, and the
+// project at a glance. Where they came from shows when some came from a tracker; the project at a
+// glance, on the right, is the Needs you toggle, what runs and Claude's window.
 import { useRef, type ReactElement } from 'react';
 
 import type { TicketSummary } from '../../src/api-types';

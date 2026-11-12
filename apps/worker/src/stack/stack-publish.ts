@@ -1,4 +1,5 @@
-// Opens the stack on GitHub: a pull request per lower slice, the ticket's own retargeted, their texts, the issue's comment.
+// Opens the stack on GitHub: a pull request per lower slice, the ticket's own retargeted, their
+// texts. Also the issue's comment.
 
 import {
   replaceSlices,

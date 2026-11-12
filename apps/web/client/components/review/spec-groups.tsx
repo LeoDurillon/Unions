@@ -1,5 +1,5 @@
-// The files under the parts of the specification they implement (a file can be under several, with
-// only some of its hunks), then the changes no part covers, then the parts nothing implements.
+// The files under the parts of the specification they implement, then the changes no part covers. A
+// file can be under several, with only some of its hunks; the parts nothing implements come last.
 
 import type { ReactElement } from 'react';
 

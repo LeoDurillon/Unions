@@ -1,4 +1,5 @@
-// Makes a project's agent image from what the user saved: the Dockerfile built on the base images, or the image pulled, then checked.
+// Makes a project's agent image from what the user saved: the Dockerfile built on the base images,
+// or the image pulled. Then it is checked.
 import {
   agentImageTag,
   buildableDockerfile,

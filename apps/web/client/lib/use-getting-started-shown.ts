@@ -1,5 +1,6 @@
-// Whether a project's getting-started checklist shows: hidden by the user (remembered in this browser), shown
-// by itself while a step is left, or asked for again from the Help menu (shown even when complete).
+// Whether a project's getting-started checklist shows. It is hidden by the user (remembered in this
+// browser), shown by itself while a step is left, or asked for again from the Help menu (shown even
+// when complete).
 import { useCallback, useState } from 'react';
 
 import { requestHelp, useHelpRequest } from './help-requests';

@@ -1,5 +1,6 @@
-// What a rule's Jira action would do for one ticket's issue, its templates filled in; nothing is sent and Jira is not
-// called, so the workflow and a select's options are checked only when the rule runs.
+// What a rule's Jira action would do for one ticket's issue, its templates filled in. Nothing is
+// sent and Jira is not called, so the workflow and a select's options are checked only when the
+// rule runs.
 import {
   isPickedType,
   jiraFieldValue,

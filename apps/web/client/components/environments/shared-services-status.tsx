@@ -1,5 +1,5 @@
-// The project's shared services now: whether they run, which previews and agents use them, why
-// their last start failed, and Restart and Stop.
+// The project's shared services now: whether they run, which previews and agents use them, and
+// Restart and Stop. Also why their last start failed.
 
 import type { ReactElement } from 'react';
 

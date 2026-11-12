@@ -1,5 +1,6 @@
-// The Repository tab's reads: the commit a branch names, the tree at it (a folder at a time when GitHub
-// truncated it), one file. Trees and files are named by their sha, so they are never read twice.
+// The Repository tab's reads: the commit a branch names, the tree at it, one file. The tree is read
+// a folder at a time when GitHub truncated it. Trees and files are named by their sha, so they are
+// never read twice.
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import { REPOSITORY_FILE_LIMIT } from '@union/core/repository-blob';
 

@@ -1,5 +1,6 @@
-// Downloads the images and files a Notion page holds (their links expire within the hour) so they can be
-// kept as the ticket's files: each kept one is referenced as `attachment:<name>` in the markdown.
+// Downloads the images and files a Notion page holds so they can be kept as the ticket's files.
+// Their links expire within the hour; each kept one is referenced as `attachment:<name>` in the
+// markdown.
 import { fetchTrackerFiles, type FileSource, type TrackerFile } from './tracker-files';
 
 /** Notion serves a page's files from its own S3 bucket, behind links signed for an hour. */

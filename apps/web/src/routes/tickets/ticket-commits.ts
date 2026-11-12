@@ -1,5 +1,5 @@
-// `/api/tickets/:id/commits`: the commits stored with the ticket's diff snapshot, the change since
-// the last review, a split ticket's slices, and their files.
+// `/api/tickets/:id/commits`: the commits stored with the ticket's diff snapshot, and their files.
+// It also gives the change since the last review, a split ticket's slices, and their files.
 
 import { getTicket, listSlices, schema, type Db, type Ticket } from '@union/core';
 import { and, asc, desc, eq } from 'drizzle-orm';

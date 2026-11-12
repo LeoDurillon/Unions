@@ -1,5 +1,6 @@
-// The routes under `/api/projects` that have their own module: event rules and what they pick from,
-// integrations, preview settings, the agent image, files, memory, the runs' live progress, the repository's files, the setup agent.
+// The routes under `/api/projects` that have their own module. They are event rules and what they
+// pick from, integrations, preview settings, the agent image, files, memory, the runs' live
+// progress, the repository's files, the setup agent.
 import type { Db } from '@union/core';
 import { Hono } from 'hono';
 

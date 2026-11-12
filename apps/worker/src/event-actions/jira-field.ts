@@ -1,5 +1,6 @@
-// The "Set fields of the ticket's Jira issue" action of a rule: its values filled in, checked against the issue's edit
-// screen, then sent in one request (labels added, the other fields set; picked ones resolved first).
+// The "Set fields of the ticket's Jira issue" action of a rule: values filled in, checked, then
+// sent in one request. They are checked against the issue's edit screen; labels are added, the
+// other fields set, picked ones resolved first.
 import {
   isPickedType,
   jiraFieldValue,

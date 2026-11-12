@@ -1,5 +1,6 @@
-// The preview's Reset: drops its containers, volumes and built images, and the data folders the user
-// ticks (the mounted folders git ignores), then starts it fresh, after a confirmation.
+// The preview's Reset: drops its containers, volumes and built images, and the data folders the
+// user ticks. The data folders are the mounted folders git ignores; then it starts the preview
+// fresh, after a confirmation.
 
 import { useState, type ReactElement } from 'react';
 

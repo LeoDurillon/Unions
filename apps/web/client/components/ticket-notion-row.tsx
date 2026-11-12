@@ -1,5 +1,5 @@
-// The ticket's Notion page: a link with Change and Unlink and, once read, its open discussions' count;
-// or Link a Notion page when it has none.
+// The ticket's Notion page: a link with Change and Unlink and, once read, its open discussions'
+// count. Or Link a Notion page when it has none.
 
 import { useState, type ReactElement } from 'react';
 

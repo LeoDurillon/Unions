@@ -1,4 +1,5 @@
-// Git in Union's own checkout: fetching `origin/main` (over SSH with the host's keys, never prompting) and reading where it stands.
+// Git in Union's own checkout: fetching `origin/main` and reading where it stands. The fetch goes
+// over SSH with the host's keys, never prompting.
 import path from 'node:path';
 
 import {

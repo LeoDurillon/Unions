@@ -1,5 +1,5 @@
-// The review's specs to edit, saved on the review for Review with agent, Explain and Group by spec:
-// each one's text (edited, or its source's), removing one, adding one from any source.
+// The review's specs to edit, saved on the review for Review with agent, Explain and Group by spec.
+// Each one's text (edited, or its source's), removing one, adding one from any source.
 
 import type { SavedSpecEntry, SpecSource } from '@union/core';
 import { useState, type ReactElement } from 'react';

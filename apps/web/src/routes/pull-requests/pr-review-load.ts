@@ -1,4 +1,5 @@
-// Loads the review and project a pull request route refers to, the GitHub auth to act on them, and the review's files and stack from GitHub.
+// Loads what a pull request route needs: the review and its project, and the GitHub auth to act on
+// them. It also reads the review's files and stack from GitHub.
 
 import { projectGitHubAuth, schema, type Db, type PullRequestFile } from '@union/core';
 import type { GitHubStack } from '@union/core/github-stacks';

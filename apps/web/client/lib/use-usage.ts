@@ -1,5 +1,5 @@
-// What agent calls used: a ticket's or an investigation's (refetched with them), a project's over a
-// range of days, and how much of the Claude subscription's windows is used.
+// What agent calls used: a ticket's or an investigation's (refetched with them) and a project's
+// over a range of days. Also how much of the Claude subscription's windows is used.
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import type {
   ClaudeLimits,

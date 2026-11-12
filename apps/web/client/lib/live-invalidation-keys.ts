@@ -1,4 +1,5 @@
-// Which cached queries an event makes stale: the board, a ticket, investigations, notifications, the review page's side runs.
+// Which cached queries an event makes stale: board, ticket, investigations, notifications, the
+// review page's side runs.
 
 import type { InvalidateQueryFilters, QueryKey } from '@tanstack/react-query';
 

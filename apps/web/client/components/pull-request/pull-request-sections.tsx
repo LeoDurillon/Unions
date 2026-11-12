@@ -1,4 +1,5 @@
-// The PR tab's sections about one pull request, the same for the ticket's and a slice's picked above them: CI checks, description, discussion.
+// The PR tab's sections about one pull request: CI checks, description, discussion. The same for
+// the ticket's and a slice's picked above them.
 import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../../src/api-types';

@@ -1,5 +1,5 @@
-// The part of a review agent's prompt that says where the change is and how to read it: its diff, its
-// files and the index of its hunks.
+// The part of a review agent's prompt that says where the change is and how to read it. That is its
+// diff, its files and the index of its hunks.
 import type { ReviewTarget } from './agent-review-target';
 import { HUNK_INDEX } from './review-grouping-format';
 

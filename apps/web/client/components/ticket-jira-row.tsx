@@ -1,5 +1,6 @@
-// The ticket's Jira issue in its Overview: the key linking to the issue, its comments' count once read, Change and
-// Unlink; or Link a Jira issue for a ticket from no tracker, in a project connected to Jira.
+// The ticket's Jira issue in its Overview: the key linking to the issue, its comments' count once
+// read, Change and Unlink. Or Link a Jira issue, for a ticket from no tracker in a project
+// connected to Jira.
 
 import { useQuery } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';

@@ -1,4 +1,5 @@
-// What each agent call did with its tools: calls, errors, refusals and output size per tool key, written from its `result` line.
+// What each agent call did with its tools: calls, errors, refusals and output size per tool key.
+// Written from its `result` line.
 import { index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
 import { now } from './schema';

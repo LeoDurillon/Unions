@@ -1,4 +1,6 @@
-// The agent image page's Dockerfile fields: the project's, highlighted, with "Start from" (the JavaScript, Python, Rust, Go or PHP example), and the default image's, read-only.
+// The agent image page's Dockerfile fields: the project's (highlighted, with "Start from") and the
+// default image's. The default image's is read-only; "Start from" offers the JavaScript, Python,
+// Rust, Go or PHP example.
 import { useState, type ReactElement } from 'react';
 
 import { STARTERS } from '../../lib/agent-image-starters';

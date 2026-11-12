@@ -1,5 +1,6 @@
-// Right-hand side of the app: the running previews, the user guide (`?guide=`), the Union settings
-// (`?union=`), the project's settings (`?settings=`), or the project; and the keyboard shortcuts' list.
+// Right-hand side of the app: running previews, the guide, Union or project settings, or the
+// project. The user guide is `?guide=`, the Union settings `?union=`, the project's settings
+// `?settings=`; also the keyboard shortcuts' list.
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../src/api-types';

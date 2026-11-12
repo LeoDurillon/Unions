@@ -1,4 +1,5 @@
-// `/api/projects/:projectId/github-project`: the GitHub Projects the board can mirror to, connecting one (picked or created) and disconnecting it.
+// `/api/projects/:projectId/github-project`: the GitHub Projects the board can mirror to, and
+// connecting one. One is picked or created to connect; it can also be disconnected.
 import { parseProjectUrl, type Db } from '@union/core';
 import { Hono, type Context } from 'hono';
 

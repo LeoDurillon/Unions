@@ -1,5 +1,5 @@
-// Whether the review's specs dialog is open, shared by the Specs bar and the agent actions' dialogs
-// (their "Edit the specs" opens it).
+// Whether the review's specs dialog is open, shared by the Specs bar and the agent actions'
+// dialogs. Their "Edit the specs" opens it.
 import {
   createContext,
   useContext,

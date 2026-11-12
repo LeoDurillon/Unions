@@ -1,5 +1,5 @@
-// Whether the worker opens a draft PR after the implementation, or the user links one by hand;
-// suggested replies to GitHub comments; stacks.
+// Whether the worker opens a draft PR after the implementation, or the user links one by hand. Also
+// suggested replies to GitHub comments, and stacks.
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';

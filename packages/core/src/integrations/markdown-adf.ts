@@ -1,5 +1,6 @@
-// Markdown (a ticket's description, as an agent writes it) as Atlassian Document Format, for a Jira issue: parsed
-// with mdast and GitHub's extensions (tables, task lists, strikethrough), as Union renders it, then mapped node by node.
+// Markdown (a ticket's description, as an agent writes it) as Atlassian Document Format, for a Jira
+// issue. Parsed with mdast and GitHub's extensions (tables, task lists, strikethrough), as Union
+// renders it, then mapped node by node.
 import type { BlockContent, DefinitionContent, Nodes, Root, RootContent } from 'mdast';
 import { fromMarkdown } from 'mdast-util-from-markdown';
 import { gfmFromMarkdown } from 'mdast-util-gfm';

@@ -1,5 +1,6 @@
-// The project's Environments tab: what runs for it now, and how its previews run (compose, variables,
-// the agent's environment, shared services, end-to-end tests, limits), a page at a time (`?env=`).
+// The project's Environments tab: what runs for it now, and how its previews run, a page at a time
+// (`?env=`). The pages: compose, variables, the agent's environment, shared services, end-to-end
+// tests, limits.
 
 import type { ReactElement } from 'react';
 

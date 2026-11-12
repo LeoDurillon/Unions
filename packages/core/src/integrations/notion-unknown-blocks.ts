@@ -1,5 +1,5 @@
-// The blocks Notion's page markdown cannot render (`<unknown url="…#block" alt="…"/>`, as a connected
-// Figma preview reads), resolved to the link the block API gives them.
+// The blocks Notion's page markdown cannot render, resolved to the link the block API gives them.
+// In the markdown they read `<unknown url="…#block" alt="…"/>`, as a connected Figma preview reads.
 
 /** `<unknown url="https://app.notion.com/p/…#<block id>" alt="external_object_instance"/>` */
 const UNKNOWN =

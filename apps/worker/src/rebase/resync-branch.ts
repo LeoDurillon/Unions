@@ -1,4 +1,5 @@
-// Puts the ticket's workspace on its branch as GitHub has it, after someone else pushed to it or rewrote it: no push, no agent.
+// Puts the ticket's workspace on its branch as GitHub has it, after someone else pushed to it or
+// rewrote it. No push, no agent.
 
 import {
   emitEvent,

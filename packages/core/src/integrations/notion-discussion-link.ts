@@ -1,4 +1,5 @@
-// The link that names a discussion of a Notion page (or one comment of it), kept on a review comment imported from it; browser-safe.
+// The link that names a discussion of a Notion page (or one comment of it), kept on a review
+// comment imported from it. Browser-safe.
 
 /** Every discussion link starts so; GitHub's never do. */
 export const NOTION_DISCUSSION_PREFIX = 'https://www.notion.so/';

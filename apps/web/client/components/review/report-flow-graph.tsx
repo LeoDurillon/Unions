@@ -1,6 +1,6 @@
-// The spec report's map of how the change works, drawn: nodes in layers (the changed ones highlighted,
-// the others grey and dashed), the links between them with how, and the numbers of what needs the
-// reviewer on the nodes it points at; a changed node opens its lines in the diff.
+// The spec report's map of how the change works, drawn: nodes in layers and the links between them
+// with how. The changed nodes are highlighted, the others grey and dashed; the numbers of what
+// needs the reviewer sit on the nodes it points at; a changed node opens its lines in the diff.
 import type { FlowEdge, FlowNode, ReportFlow } from '@union/core';
 import type { ReactElement } from 'react';
 

@@ -1,4 +1,5 @@
-// One row of the All agents table: the agent's name (opening its page, a dot when you changed its settings), its model and effort.
+// One row of the All agents table: the agent's name (opening its page), its model and effort. A dot
+// by the name shows you changed its settings.
 import type { AgentConfig } from '@union/core';
 import type { ReactElement } from 'react';
 

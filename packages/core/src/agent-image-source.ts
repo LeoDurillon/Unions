@@ -1,4 +1,5 @@
-// A project's own agent image: the Dockerfile or image the user gives, checked, rewritten onto the base images, and tagged by content.
+// A project's own agent image: the Dockerfile or image the user gives, checked and rewritten onto
+// the base images. It is tagged by content.
 
 /**
  * The names a project's Dockerfile starts from: `union-agent` (the default image, with the JavaScript

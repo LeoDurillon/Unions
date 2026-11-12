@@ -1,4 +1,5 @@
-// What a project's agent usage says to improve, from its calls' tokens: large sessions, costly tickets, many review rounds (browser-safe types).
+// What a project's agent usage says to improve: large sessions, costly tickets, many review rounds.
+// Read from its calls' tokens (browser-safe types).
 
 /** Who can act on a finding: the project's repository (its docs, scripts, skills) or Union's own runs. */
 export type FindingActor = 'repository' | 'union';

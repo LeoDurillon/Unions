@@ -1,4 +1,5 @@
-// The cards of a setup proposal's sections, in the order a project is set up: checks, scripts, preview, e2e, then the rest.
+// The cards of a setup proposal's sections, in the order a project is set up: checks, scripts,
+// preview, e2e, the rest.
 import type { SetupProposal } from '@union/core';
 import type { ReactElement } from 'react';
 

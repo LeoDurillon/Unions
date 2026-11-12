@@ -1,4 +1,5 @@
-// A pull request's CI checks (the ticket's or a slice's; read again every 30 s while some still run), and giving picks of them to the implementer.
+// A pull request's CI checks (the ticket's or a slice's), and giving picks of them to the
+// implementer. They are read again every 30 s while some still run.
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 
 import type { CiGivenView, CiPick, CiPreview, PrChecksView } from '../../src/ci-api-types';

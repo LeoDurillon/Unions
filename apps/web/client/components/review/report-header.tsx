@@ -1,5 +1,6 @@
-// The top of a finished spec report: the verdict, the counts, its actions (add the gaps to the review,
-// copy it, run it again), the summary, the specs it read, and whether the change moved since.
+// The top of a finished spec report: the verdict, the counts, its actions, the summary, and the
+// specs it read. The actions add the gaps to the review, copy it, run it again; it also says
+// whether the change moved since.
 
 import {
   reportCounts,

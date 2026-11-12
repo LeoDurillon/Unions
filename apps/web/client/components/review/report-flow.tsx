@@ -1,5 +1,6 @@
-// How the change works, near the top of the spec report: the map of its main path, numbered with what
-// needs the reviewer, and the walkthrough, each step's why with where it comes from.
+// How the change works, near the top of the spec report: the map of its main path, and the
+// walkthrough. The map is numbered with what needs the reviewer; the walkthrough gives each step's
+// why with where it comes from.
 import type { FlowStep, ReportFlow, ReviewReportResult } from '@union/core';
 import { plainQuote } from '@union/core/review-report-specs';
 import type { ReactElement } from 'react';

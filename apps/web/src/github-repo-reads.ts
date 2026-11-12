@@ -1,4 +1,6 @@
-// The web's repository and Project reads from GitHub: branches, an issue, what a rule picks from (labels, users, Project fields); null for what does not exist.
+// The web's repository and Project reads from GitHub: branches, an issue, and what a rule picks
+// from. A rule picks from labels, users and Project fields; the reads give null for what does not
+// exist.
 import {
   parseProjectFields,
   PROJECT_FIELDS,

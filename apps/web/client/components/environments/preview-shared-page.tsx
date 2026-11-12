@@ -1,4 +1,4 @@
-// The services the project's previews share, run once instead of in each preview: their state now,
+// The services the project's previews share, run once instead of in each preview. Their state now,
 // which ones, and what keeps each preview's data apart there.
 
 import type { ReactElement } from 'react';

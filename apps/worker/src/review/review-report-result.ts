@@ -1,6 +1,6 @@
-// Reads the report block at the end of the agent's answer: quotes checked against the specs sent,
-// paths against the change, the gaps and unasked behaviours always among what needs the reviewer, the
-// changed files it says nothing about listed; what it cannot back is dropped and counted.
+// Reads the report block ending the agent's answer: quotes checked against the specs sent, paths
+// against the change. The gaps and unasked behaviours are always among what needs the reviewer, and
+// the changed files it says nothing about are listed; what it cannot back is dropped and counted.
 
 import {
   lastJsonBlock,

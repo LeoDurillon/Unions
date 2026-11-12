@@ -1,5 +1,5 @@
-// A shell script run as root in a helper holding only the owner's workspace volume (at `/workspace`):
-// what the services wrote there may be root's.
+// A shell script run as root in a helper holding only the owner's workspace volume (at
+// `/workspace`). Root, since what the services wrote there may be root's.
 import type { ContainerRuntime } from '@union/core';
 
 /** `args` are the script's `$1`…; `output` every line it printed, stderr included. */

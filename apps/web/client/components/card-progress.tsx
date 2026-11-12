@@ -1,5 +1,5 @@
-// A running ticket's card line: how long its run has gone, and what its agent did last (and how
-// long ago, once it has been quiet a while: a stuck run shows).
+// A running ticket's card line: how long its run has gone, and what its agent did last. Once it has
+// been quiet a while it also says how long ago, so a stuck run shows.
 import type { ReactElement } from 'react';
 
 import type { TicketSummary } from '../../src/api-types';

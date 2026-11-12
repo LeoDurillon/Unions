@@ -1,6 +1,6 @@
-// A command the user ran in a workspace: a ticket's (its container, in the checkout, as the agent)
-// or a pull request's under review (exactly one of `ticket_id` and `review_id`), with the end of
-// its output.
+// A command the user ran in a workspace: a ticket's or a pull request's under review, with the end
+// of its output. A ticket's runs in its container, in the checkout, as the agent; exactly one of
+// `ticket_id` and `review_id` is set.
 import { sql } from 'drizzle-orm';
 import {
   check,

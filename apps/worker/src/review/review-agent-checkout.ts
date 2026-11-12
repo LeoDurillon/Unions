@@ -1,4 +1,5 @@
-// A review agent's change in its own throwaway container (`union-v<id>`): a pull request cloned from GitHub, a ticket's branch from a bundle of its container's.
+// A review agent's change in its own throwaway container (`union-v<id>`). A pull request is cloned
+// from GitHub, a ticket's branch from a bundle of its container's.
 
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';

@@ -1,5 +1,5 @@
-// Runs a review agent's work on the change's files with their hunk index written in the checkout, then
-// removes it and closes the target.
+// Runs a review agent's work on the change's files with their hunk index written in the checkout.
+// Then it removes the index and closes the target.
 
 import type { ContainerRuntime } from '@union/core';
 

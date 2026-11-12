@@ -1,5 +1,5 @@
-// `<review>/notion`: the Notion pages a pull request under review is linked to (its `notion` specs):
-// their text and open discussions, linking one more, unlinking one.
+// `<review>/notion`: the Notion pages a pull request under review is linked to (its `notion`
+// specs). It serves their text and open discussions, linking one more, unlinking one.
 
 import {
   linkedNotionPages,

@@ -1,4 +1,5 @@
-// `/api/projects/:projectId/lessons`, `/feedback`, `/lesson-suggestion` and `/lesson-tidy`: the project's memory (the worker runs the lesson writer and tidier).
+// `/api/projects/:projectId/lessons`, `/feedback`, `/lesson-suggestion` and `/lesson-tidy`: the
+// project's memory. The worker runs the lesson writer and tidier.
 import {
   dismissLessonSuggestion,
   latestLessonSuggestion,

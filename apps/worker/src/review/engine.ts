@@ -1,4 +1,5 @@
-// One runner for the review side runs: claims within the run slots, checks the change out, runs the kind's work with the hunk index, finishes, recovers.
+// One runner for the review side runs: claims within the run slots, checks the change out, runs the
+// kind's work. It runs the work with the hunk index, finishes, and recovers.
 
 import { reviewRunExists, type ReviewRunKind } from '@union/core';
 

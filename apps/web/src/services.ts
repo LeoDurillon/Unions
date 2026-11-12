@@ -1,5 +1,5 @@
-// The outside services the API routes may call: GitHub (the wizard's and the PR tab's reads, its CI, the
-// Repository tab's reads), Notion.
+// The outside services the API routes may call: GitHub and Notion. GitHub serves the wizard's and
+// the PR tab's reads, its CI, the Repository tab's reads.
 import type { JiraApi, NotionApi } from '@union/core';
 
 import type { CiGitHub } from './github-checks';

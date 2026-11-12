@@ -1,5 +1,5 @@
 // The pull requests under review without a ticket, then every pull request of the project's
-// repository, read from GitHub, open stacks as one row; linked ones open their ticket.
+// repository. They are read from GitHub, open stacks as one row; linked ones open their ticket.
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 

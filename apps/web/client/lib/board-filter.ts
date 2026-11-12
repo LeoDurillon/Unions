@@ -1,5 +1,5 @@
-// Which tickets the board shows: a text search (title, issue or PR number), only those that need the
-// user, and where they came from.
+// Which tickets the board shows: a text search (title, issue or PR number) and where they came
+// from. A filter also shows only those that need the user.
 import { integrationKind, type IntegrationKindName } from '@union/core/integration-kinds';
 import { needsYou as waitsOnUser } from '@union/core/needs-you';
 

@@ -1,4 +1,5 @@
-// A review's Notion tab: each linked page's text as Notion has it now, folded when long, then its open discussions (read only), with Refresh.
+// A review's Notion tab: each linked page's text as Notion has it now, folded when long, then its
+// open discussions. The discussions are read only; the tab has Refresh.
 
 import type { ReactElement } from 'react';
 

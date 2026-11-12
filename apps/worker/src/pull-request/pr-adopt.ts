@@ -1,4 +1,5 @@
-// A ticket imported from a pull request: its branch checked out in the ticket's container and its diff captured, so the Changes tab shows the pull request; no agent, no push.
+// A ticket imported from a pull request: its branch checked out in the ticket's container and its
+// diff captured. The Changes tab then shows the pull request; no agent, no push.
 
 import { emitEvent, getTicket, stepHoldsBranch, ticketBase } from '@union/core';
 

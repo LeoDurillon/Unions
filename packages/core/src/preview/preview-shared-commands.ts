@@ -1,5 +1,6 @@
-// A shared service's own settings as they are sent, checked (the commands that keep each preview's
-// data apart there, the port the proxy opens), and the commands a preview runs, its templates filled in.
+// A shared service's own settings as they are sent, checked, and the commands a preview runs, its
+// templates filled in. The settings hold the commands that keep each preview's data apart there and
+// the port the proxy opens.
 import type { PreviewService, SharedServiceCommands } from '../schema/schema-types';
 import { isRecord } from './preview-compose-check';
 import { renderPreviewTemplate, templateProblems, type TemplateContext } from './preview-config';

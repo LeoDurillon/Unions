@@ -1,6 +1,6 @@
-// The spec report's sections: the frame they share (a title with a count, rows in one box), then the last
-// ones: what the specs did not ask for, the risks, the questions, the docs to update, and the changed
-// files the agent said nothing about.
+// The spec report's sections: the frame they share (a title with a count, rows in one box), then
+// the last ones. The last ones: what the specs did not ask for, the risks, the questions, the docs
+// to update, and the changed files the agent said nothing about.
 import type { ReviewReportResult } from '@union/core';
 import type { ReactElement, ReactNode } from 'react';
 

@@ -1,5 +1,6 @@
-// What a Jira field rule picks from (the project's assignable people, versions, components, sprints), read from Jira
-// when the editor asks, and "the active sprint" or "the next sprint" resolved when a rule runs.
+// What a Jira field rule picks from: the project's assignable people, versions, components,
+// sprints. Read from Jira when the editor asks; "the active sprint" or "the next sprint" is
+// resolved when a rule runs.
 import type { JiraApi, JiraAuth } from './jira-api';
 import { JiraError } from './jira-error';
 import { ACTIVE_SPRINT, NEXT_SPRINT, type JiraPick, type JiraPickedType } from './jira-field-types';

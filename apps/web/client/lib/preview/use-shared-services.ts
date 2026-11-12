@@ -1,5 +1,5 @@
-// The project's shared services as the worker last saw them (read again every few seconds: they send
-// no events), and asking it to restart or stop them.
+// The project's shared services as the worker last saw them, and asking it to restart or stop them.
+// They are read again every few seconds: they send no events.
 
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 

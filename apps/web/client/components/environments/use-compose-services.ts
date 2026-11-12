@@ -1,4 +1,4 @@
-// What the compose file of the project's latest preview offers (its services and profiles), for the
+// What the compose file of the project's latest preview offers (its services and profiles). For the
 // pages that pick among them.
 import { useQuery } from '@tanstack/react-query';
 

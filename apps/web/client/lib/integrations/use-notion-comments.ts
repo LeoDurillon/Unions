@@ -1,4 +1,5 @@
-// The open discussions of a ticket's Notion page, read from Notion once per opening of its tab, and the comments sent to it.
+// The open discussions of a ticket's Notion page and the comments sent to it. The discussions are
+// read from Notion once per opening of its tab.
 
 import { useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 import { useState } from 'react';

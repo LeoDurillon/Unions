@@ -1,4 +1,5 @@
-// The text of a specification, from where the user points: the PR, the ticket, a GitHub issue, a Notion page, a Jira issue.
+// A specification's text from where the user points: the PR, the ticket, a GitHub issue, a Notion
+// page, a Jira issue.
 
 import {
   integrationKind,

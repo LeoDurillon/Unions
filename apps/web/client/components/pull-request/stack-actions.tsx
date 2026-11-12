@@ -1,4 +1,5 @@
-// What can be done to a split ticket's whole stack: how far it is behind its base, Rebase stack, Restack, Simplify history, Split again, Rewrite all descriptions.
+// What can be done to a split ticket's whole stack: Rebase stack, Restack, Simplify history, Split
+// again. Also how far it is behind its base, and Rewrite all descriptions.
 import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../../src/api-types';

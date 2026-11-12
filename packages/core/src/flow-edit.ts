@@ -1,4 +1,5 @@
-// Editing a flow in the settings or a ticket's Custom flow: planning steps on or off, custom agents added and moved; browser-safe.
+// Editing a flow in the settings or a ticket's Custom flow: planning steps on or off, custom agents
+// added and moved. Browser-safe.
 import {
   isCustomStep,
   pipelineIndex,

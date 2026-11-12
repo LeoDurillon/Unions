@@ -1,5 +1,5 @@
-// What each running agent of a project is doing now: when its run started, and the last thing it
-// wrote or the last tool it called. Read by the board, which polls it while a ticket runs.
+// What each running agent of a project is doing now: the last thing it wrote or the last tool it
+// called. Also when its run started. Read by the board, which polls it while a ticket runs.
 import { and, desc, eq, sql } from 'drizzle-orm';
 
 import { latestActivity, type ActivityLine } from './agent-activity';

@@ -1,5 +1,5 @@
-// The open ticket, and whether its review is open, live in the URL (`?ticket=3&review=1`), so they
-// survive reloads and back/forward.
+// The open ticket, and whether its review is open, live in the URL (`?ticket=3&review=1`). They
+// survive reloads and back/forward that way.
 
 import { useCallback } from 'react';
 

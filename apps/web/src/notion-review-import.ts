@@ -1,4 +1,5 @@
-// Adds a discussion of a ticket's Notion page, or one comment of it, to its review, as a general draft for the implementer, and says which already are.
+// Adds a Notion page discussion, or one comment of it, to the ticket's review as a general draft
+// for the implementer. It also says which already are.
 import {
   isNotionUrl,
   notionCommentUrl,

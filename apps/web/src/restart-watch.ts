@@ -1,4 +1,5 @@
-// Ends the web's container when an update asks Union to restart (`union_restart`); compose starts it again on the new commit.
+// Ends the web's container when an update asks Union to restart (`union_restart`). Compose starts
+// it again on the new commit.
 import { schema, type Db } from '@union/core';
 import { and, desc, eq, gt } from 'drizzle-orm';
 

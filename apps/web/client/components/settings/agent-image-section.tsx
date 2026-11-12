@@ -1,4 +1,5 @@
-// Project settings → Agent image: the default image, a Dockerfile built on it, or an image built elsewhere; Save and build applies it once it passes.
+// Project settings → Agent image: the default image, a Dockerfile built on it, or an image built
+// elsewhere. Save and build applies it once it passes.
 import { useState, type ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';

@@ -1,4 +1,5 @@
-// What a rule does, in a sentence for its row: the Notion properties it sets, what it changes on the pull request or its Project item, where it comments, or what it notifies.
+// What a rule does, in a sentence for its row: the Notion properties it sets, where it comments,
+// what it notifies. It can also say what it changes on the pull request or its Project item.
 import type { NotionSchema } from '@union/core';
 import {
   COMMENT_TARGET_LABELS,

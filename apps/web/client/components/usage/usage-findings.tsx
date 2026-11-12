@@ -1,4 +1,5 @@
-// A project's findings on its Usage tab: what its agents' calls and tool uses show to improve, each with the tickets that show it.
+// A project's findings on its Usage tab: what its agents' calls and tool uses show to improve. Each
+// comes with the tickets that show it.
 import type { Finding, FindingItem, ProjectFindings } from '@union/core';
 import { stepTextTitle } from '@union/core/step-titles';
 import type { ReactElement, ReactNode } from 'react';

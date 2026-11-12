@@ -1,4 +1,6 @@
-// The project settings of what a ticket's workspace runs with: its preview (and its shared services), the files it gets, and the image its agents run in.
+// The project settings of what a ticket's workspace runs with: its preview, its files and its
+// agents' image. In full: its preview (and its shared services), the files it gets, and the image
+// its agents run in.
 import type { Db } from '@union/core';
 import { Hono } from 'hono';
 

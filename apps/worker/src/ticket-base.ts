@@ -1,7 +1,7 @@
-// Chooses the branch a ticket is cloned from, before its first clone: the branch the user chose
-// (over the parent's), else the parent's branch while its pull request is open and the branch
-// exists on GitHub, else the project's base branch (a merged parent is already in it, a closed one
-// is dropped).
+// Chooses the branch a ticket is cloned from: the user's choice, else the parent's, else the
+// project's base branch. It chooses before the first clone. The user's choice wins over the
+// parent's; the parent's branch is used while its pull request is open and the branch exists on
+// GitHub; a merged parent is already in the project's base branch, a closed one is dropped.
 import { emitEvent, parentOf, schema, ticketLabel, type Db, type Ticket } from '@union/core';
 import { eq } from 'drizzle-orm';
 

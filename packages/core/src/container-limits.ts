@@ -1,4 +1,5 @@
-// The caps of a container on the docker command line: its memory (no swap beyond it), the CPU cores it may use, and how many processes it runs.
+// The caps of a container on the docker command line: its memory, the CPU cores it may use, how
+// many processes it runs. No swap beyond the memory.
 
 /** Processes a container may run at once: room for builds and test runners, not for a runaway fork. */
 const PIDS_LIMIT = 4096;

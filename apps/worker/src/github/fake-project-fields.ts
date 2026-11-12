@@ -1,4 +1,5 @@
-// The GitHub Project fields of the in-memory GitHub for tests: the fields, and what each item holds; the base of `FakeGitHubApi`.
+// The GitHub Project fields of the in-memory GitHub for tests: the fields and what each item holds.
+// It is the base of `FakeGitHubApi`.
 import type { ProjectFieldInput, RemoteProjectField } from '@union/core';
 
 import type { ProjectFieldChange, RepoRef } from './api';

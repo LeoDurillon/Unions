@@ -1,4 +1,5 @@
-// A ticket's size budget: the estimate in its approved technical plan, else the project's default, and whether a change goes over it (browser-safe).
+// A ticket's size budget and whether a change goes over it. The budget is the estimate in its
+// approved technical plan, else the project's default (browser-safe).
 import type { ChangeSize } from './change-size';
 
 /** How far over its budget a change may go before the implementer is asked to cut: estimates are rough. */

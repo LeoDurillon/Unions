@@ -1,4 +1,6 @@
-// `/api/projects/:projectId/agent-image`: the image the project's agents run on, a new one saved (and built by the worker), or the save dropped; and the default image's Dockerfile, to read.
+// `/api/projects/:projectId/agent-image`: the image the project's agents run on, a new one saved,
+// or the save dropped. The worker builds a saved image; the default image's Dockerfile can also be
+// read.
 import path from 'node:path';
 
 import {

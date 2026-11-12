@@ -1,4 +1,5 @@
-// Installs and starts the ticket's preview before an implementation step when the project asks for it, and gives a step's commands its addresses.
+// Installs and starts the ticket's preview before an implementation step when the project asks for
+// it. It also gives a step's commands its addresses.
 
 import {
   getPreview,

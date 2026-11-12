@@ -1,4 +1,5 @@
-// Loading a ticket's PR checks: the ticket, the pull request picked (its own or a slice's), the credentials, and GitHub's listing.
+// Loading a ticket's PR checks: the ticket, the pull request picked, the credentials, and GitHub's
+// listing. The pull request is its own or a slice's.
 import { getTicket, projectGitHubAuth, schema, type Db, type Ticket } from '@union/core';
 import { eq } from 'drizzle-orm';
 import type { Context } from 'hono';

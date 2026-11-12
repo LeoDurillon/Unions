@@ -1,5 +1,5 @@
 // A project's agent usage summed several ways for its Usage page: in all, per week, per step, per
-// model, per ticket, and its investigations. Pure: the rows come from `project-usage.ts`.
+// model, per ticket. Also its investigations. Pure: the rows come from `project-usage.ts`.
 import type { Step } from './states';
 
 /** One `agent_usage` row with what it belongs to. */

@@ -1,4 +1,5 @@
-// The stack a pull request under review is in, for the review page's agent: its pull requests bottom first, null when alone.
+// The stack a pull request under review is in, for the review page's agent. Its pull requests come
+// bottom first; null when alone.
 import { createContext, useContext } from 'react';
 
 /** `linked`: it has a Notion page (Link the whole stack offers the page to those without one). */

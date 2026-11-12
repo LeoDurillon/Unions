@@ -1,6 +1,6 @@
-// Starts the project's agent services for a run in the ticket's container (provisioned first:
-// compose reads the file from its workspace), forwards their ports to its `localhost`, and gives
-// its commands the variables the setting allows.
+// Starts the project's agent services for a run in the ticket's container and forwards their ports
+// to its `localhost`. The container is provisioned first (compose reads the file from its
+// workspace); its commands get the variables the setting allows.
 import {
   emitEvent,
   type AgentSetup,

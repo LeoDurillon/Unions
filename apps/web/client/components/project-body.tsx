@@ -1,5 +1,5 @@
-// The open view of the project: the board, its investigations, its pull requests, its repository, its
-// environments or its usage.
+// The open view of the project: board, investigations, pull requests, repository, environments or
+// usage.
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../src/api-types';

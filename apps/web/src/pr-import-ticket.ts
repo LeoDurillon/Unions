@@ -1,4 +1,6 @@
-// Creates the ticket a pull request is imported as: on its branch and base, its planning steps prefilled, its description as the implementation's output, and the worker asked to adopt it.
+// Creates the ticket a pull request is imported as: on its branch and base, its planning steps
+// prefilled. Its description becomes the implementation's output, and the worker is asked to adopt
+// it.
 import { createTicket, emitEvent, schema, type Db, type Project, type Ticket } from '@union/core';
 import { and, eq, or } from 'drizzle-orm';
 

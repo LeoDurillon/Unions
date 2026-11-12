@@ -1,4 +1,5 @@
-// A revision on a split ticket: the implementer is told the slices, then its new commits are moved into them and the stack pushed.
+// A revision on a split ticket: the implementer is told the slices, then its new commits are moved
+// into them. The stack is then pushed.
 
 import {
   emitEvent,

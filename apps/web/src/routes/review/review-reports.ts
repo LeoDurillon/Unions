@@ -1,7 +1,9 @@
-// Under a review's base (`/api/tickets/:id`, `/api/projects/:projectId/pull-requests/reviews/:number`):
-// `/reports` (the newest spec report), `POST /reports` (queue one on the review's specs), `/reports/cancel`,
-// `/reports/gaps` (a draft asking for the requirements it found not met), `/reports/attention/:index/not-useful`
-// (an item hidden, its rule kept as a lesson).
+// Spec report routes under a review's base: `/reports` and its `cancel`, `gaps` and `attention`
+// subroutes. The base is `/api/tickets/:id` or
+// `/api/projects/:projectId/pull-requests/reviews/:number`: `/reports` (the newest spec report),
+// `POST /reports` (queue one on the review's specs), `/reports/cancel`, `/reports/gaps` (a draft
+// asking for the requirements it found not met), `/reports/attention/:index/not-useful` (an item
+// hidden, its rule kept as a lesson).
 
 import {
   addLesson,

@@ -1,6 +1,6 @@
-// A ticket card for the board: its issue and pull request, its title, the ticket it builds on, its state and its
-// way through the flow, its CI checks, stack and a branch moved on GitHub, what its agent is doing while it runs,
-// and Start while it waits in the backlog.
+// A ticket card for the board: its issue and pull request, title, the ticket it builds on, state
+// and way through the flow. It also shows its CI checks, stack and a branch moved on GitHub, what
+// its agent is doing while it runs, and Start while it waits in the backlog.
 import type { ReactElement } from 'react';
 
 import type { PublicProject, TicketSummary } from '../../src/api-types';

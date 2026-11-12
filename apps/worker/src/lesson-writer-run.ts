@@ -1,4 +1,5 @@
-// Runs the lesson writer and the lesson tidier the Memory page asks for, in a throwaway container with only the Claude login.
+// Runs the lesson writer and the lesson tidier the Memory page asks for. They run in a throwaway
+// container with only the Claude login.
 
 import {
   claimLessonSuggestion,

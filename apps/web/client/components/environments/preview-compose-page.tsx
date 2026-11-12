@@ -1,5 +1,5 @@
-// What runs as a ticket's preview: the compose file, what Union adds to it, its profiles, and the
-// services opened in the browser.
+// What runs as a ticket's preview: the compose file, what Union adds to it, and its profiles. Also
+// the services opened in the browser.
 
 import type { ReactElement } from 'react';
 

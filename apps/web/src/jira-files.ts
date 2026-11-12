@@ -1,5 +1,6 @@
-// Downloads a Jira issue's attachments its text links (`/rest/api/3/attachment/content/<id>` of the site) as the
-// ticket's files, with the integration's token; the token is never sent off the site.
+// Downloads a Jira issue's attachments its text links as the ticket's files, with the integration's
+// token. The links are `/rest/api/3/attachment/content/<id>` of the site; the token is never sent
+// off the site.
 import type { JiraConfig } from '@union/core';
 
 import { fetchTrackerFiles, type FileSource, type TrackerFile } from './tracker-files';

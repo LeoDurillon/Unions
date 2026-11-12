@@ -1,4 +1,5 @@
-// Follows the event log: writes the notifications, queues a delivery for each event a rule waits for, then does the due ones, a few per tick and one at a time.
+// Follows the event log: writes the notifications and queues a delivery for each event a rule waits
+// for. Then it does the due ones, a few per tick and one at a time.
 import {
   FetchJiraApi,
   finishDelivery,

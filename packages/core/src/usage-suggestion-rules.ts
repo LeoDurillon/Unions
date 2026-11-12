@@ -1,4 +1,5 @@
-// The "Suggest improvements" prompt's account of how Union runs the agents: the rules it imposes, and each step's tools and denied commands.
+// The "Suggest improvements" prompt's account of how Union runs the agents. The rules it imposes,
+// and each step's tools and denied commands.
 import { BASE_DENIED, deniedFor } from './agent-denied';
 import { toolsFor } from './agents';
 import type { Db } from './db';

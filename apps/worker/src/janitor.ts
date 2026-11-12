@@ -1,5 +1,5 @@
-// Removes containers and volumes: deleted tickets', and the runs a stopped worker left; a failure is
-// logged as an event, not thrown.
+// Removes containers and volumes: deleted tickets', and the runs a stopped worker left. A failure
+// is logged as an event, not thrown.
 import { emitEvent, type ContainerRuntime, type Db } from '@union/core';
 
 import type { ContainerRef } from './commands';

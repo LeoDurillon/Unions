@@ -1,4 +1,5 @@
-// Starting backlog tickets from the board: shown In progress at once ("Starting…"), back in Backlog with the error when refused.
+// Starting backlog tickets from the board: shown In progress at once ("Starting…"). A refused one
+// goes back to Backlog with the error.
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 

@@ -1,5 +1,6 @@
-// Notifications, running previews, project switcher and creation entry point, settings and Help, Claude
-// usage and Union's Update, always visible on the left; folds to an icon rail.
+// The left sidebar: notifications, running previews, the project switcher and creation entry point,
+// settings, Help. It also shows Claude usage and Union's Update, is always visible on the left, and
+// folds to an icon rail.
 import type { ReactElement } from 'react';
 
 import type { ListedProject } from '../../src/api-types';

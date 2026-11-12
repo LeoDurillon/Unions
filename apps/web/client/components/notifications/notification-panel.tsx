@@ -1,5 +1,6 @@
-// The bell's panel: first what still asks something of the user, then the rest as history, newest first and
-// grouped by ticket; "Mark all read", "Delete all", older ones on request, and the desktop opt-in (folded).
+// The bell's panel: first what still asks something of the user, then the rest as history. The
+// history is newest first and grouped by ticket; "Mark all read", "Delete all", older ones on
+// request, and the desktop opt-in (folded).
 import { useEffect, type ReactElement, type RefObject } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';

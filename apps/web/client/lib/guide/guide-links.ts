@@ -1,5 +1,5 @@
-// Where the guide's links and images go in the app: another page of the guide opens on the Guide page, a
-// screenshot loads from the API, the code's own docs open on GitHub.
+// Where the guide's links and images go in the app. Another page of the guide opens on the Guide
+// page, a screenshot loads from the API, the code's own docs open on GitHub.
 
 /** Union's repository, for the guide's links to the docs about its code. */
 const REPO_URL = 'https://github.com/LeoDurillon/Unions/blob/main/';

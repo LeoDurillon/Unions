@@ -1,4 +1,6 @@
-// Under a review's base: `/review-agents` (the review agents it can run, and each one's newest run on the change), `POST /review-agents` (run one on the review's specs), `/review-agents/:runId/cancel`.
+// Review agent routes under a review's base: `/review-agents`, `POST /review-agents`,
+// `/review-agents/:runId/cancel`. `/review-agents` gives the review agents it can run, and each
+// one's newest run on the change; `POST /review-agents` runs one on the review's specs.
 
 import {
   latestReviewAgentRuns,

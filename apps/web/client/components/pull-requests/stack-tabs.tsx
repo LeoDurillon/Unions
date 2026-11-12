@@ -1,4 +1,5 @@
-// The pull requests of a stack under review as a segmented control, bottom first: the picked one is reviewed below, each shows its drafts.
+// The pull requests of a stack under review as a segmented control, bottom first. The picked one is
+// reviewed below, each shows its drafts.
 
 import type { ReactElement } from 'react';
 

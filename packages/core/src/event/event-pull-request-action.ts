@@ -1,4 +1,5 @@
-// A rule's changes to the ticket's pull request (labels, reviewers, assignees, title, a description section); browser-safe.
+// A rule's changes to the ticket's pull request (labels, reviewers, assignees, title, a description
+// section). Browser-safe.
 import { unknownVariables } from './event-rule-types';
 
 export type PullRequestChange =

@@ -1,5 +1,6 @@
-// What the Jira actions of rules share: the issues they act on (a posted review's linked ones, else the ticket's), the
-// credentials to reach them, and Jira's failures as outcomes.
+// What the Jira actions of rules share: the issues they act on, the credentials to reach them,
+// failures as outcomes. The issues are a posted review's linked ones, else the ticket's; Jira's
+// failures become outcomes.
 import {
   getTicket,
   integrationOf,

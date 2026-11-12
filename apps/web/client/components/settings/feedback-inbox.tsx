@@ -1,4 +1,5 @@
-// The feedback given on Revise and final reviews: made a lesson, given to the lesson writer, or dismissed; the curated ones on request.
+// The feedback given on Revise and final reviews: made a lesson, given to the lesson writer, or
+// dismissed. The curated ones show on request.
 import type { FeedbackItem } from '@union/core';
 import type { LessonInput } from '@union/core/lesson-input';
 import { useState, type ReactElement } from 'react';

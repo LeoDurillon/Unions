@@ -1,5 +1,5 @@
-// Where a specification comes from (the PR description, the ticket, an issue, a Notion page, a Jira issue):
-// picking it and reading it.
+// Where a specification comes from: the PR description, the ticket, an issue, a Notion page, a Jira
+// issue. Picking it and reading it.
 
 import { useMutation } from '@tanstack/react-query';
 import type { SpecSource } from '@union/core';

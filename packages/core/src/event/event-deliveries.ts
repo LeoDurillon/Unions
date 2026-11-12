@@ -1,5 +1,5 @@
-// Reads the events logged since the last call and queues one delivery per matching enabled rule of
-// the project it is about (`eventProjects`).
+// Reads the events logged since the last call and queues one delivery per matching enabled rule.
+// The rule is of the project the event is about (`eventProjects`).
 
 import { and, asc, desc, eq, inArray, isNotNull, isNull, like, lte } from 'drizzle-orm';
 

@@ -1,4 +1,5 @@
-// What a project's agents' tool uses say to improve: large outputs, many forms of the checks, files read again, refusals, skills loaded again.
+// What a project's agents' tool uses say to improve: large outputs, many forms of the checks, files
+// read again, refusals. Also skills loaded again.
 import { finding, topTickets, type Finding, type FindingItem } from './usage-findings';
 
 /** A ticket's uses of one tool key, summed over its calls. */

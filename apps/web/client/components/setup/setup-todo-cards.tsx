@@ -1,4 +1,5 @@
-// The setup proposal's to-dos: secret values and files only the user can give, written through the settings' own endpoints.
+// The setup proposal's to-dos: secret values and files only the user can give. They are written
+// through the settings' own endpoints.
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { SetupProjectFile, SetupSecret } from '@union/core';
 import { useState, type ReactElement } from 'react';

@@ -1,4 +1,5 @@
-// The setup agent's proposal to review: its summary and questions, a card per section to apply, and the tickets it asks for.
+// The setup agent's proposal to review: summary and questions, a card per section to apply, the
+// tickets it asks for.
 import type { Investigation, SetupProposal } from '@union/core';
 import type { ReactElement } from 'react';
 

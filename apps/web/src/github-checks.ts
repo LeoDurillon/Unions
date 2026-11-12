@@ -1,4 +1,5 @@
-// The web's reads of a pull request's CI: its checks and bot comments, and what a pick gives the agent (a check's annotations, a job's log, a comment).
+// The web's reads of a pull request's CI: its checks and bot comments, and what a pick gives the
+// agent. A pick gives a check's annotations, a job's log, or a comment.
 import type { CheckAnnotation, GitHubAuth } from '@union/core';
 import { githubClient, type ClientOptions } from '@union/core/github-client';
 import type { Octokit } from 'octokit';

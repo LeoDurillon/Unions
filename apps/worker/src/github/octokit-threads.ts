@@ -1,4 +1,5 @@
-// Replies to a pull request's comments in the worker's GitHub client: a line thread found, replied to and resolved, a conversation comment posted.
+// Replies to a pull request's comments in the worker's GitHub client. A line thread is found,
+// replied to and resolved, or a conversation comment posted.
 import type { RepoRef, ThreadPullRequest } from './api';
 import { OctokitProjectFields } from './octokit-project-fields';
 

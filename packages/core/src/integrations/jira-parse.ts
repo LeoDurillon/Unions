@@ -1,4 +1,5 @@
-// Jira Cloud's REST v3 responses (project, statuses, fields, issue) read into Union's shapes; anything unexpected reads as empty.
+// Jira Cloud's REST v3 responses (project, statuses, fields, issue) read into Union's shapes.
+// Anything unexpected reads as empty.
 import { fieldTypeOf, type JiraFieldInfo } from './jira-field-types';
 
 /** A Jira project: its key, name and issue types (`subtask`: a sub-task type, which needs a parent issue). */

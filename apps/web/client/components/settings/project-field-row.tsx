@@ -1,4 +1,5 @@
-// One field a Project fields rule sets: which field of the GitHub Project, its value (an option or a template), and removing it.
+// One field a Project fields rule sets: which field of the GitHub Project, its value, and removing
+// it. The value is an option or a template.
 import type { ProjectField, ProjectFieldValue } from '@union/core/event-project-fields';
 import type { ReactElement } from 'react';
 

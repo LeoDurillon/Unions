@@ -1,5 +1,5 @@
-// The frame of both settings areas: a title, the open page's name with its Learn more link and a way back, the
-// menu on the left, the page on the right.
+// The frame of both settings areas: a title, the open page's name with its Learn more link and a
+// way back. The menu is on the left, the page on the right.
 
 import type { ReactElement, ReactNode } from 'react';
 

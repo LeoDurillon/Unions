@@ -1,4 +1,5 @@
-// The `usage:backfill` script: records the token usage and tool uses of the agent calls already in the log (`DB_PATH`, else the default database).
+// The `usage:backfill` script: records the token usage and tool uses of the agent calls already in
+// the log. On `DB_PATH`, else the default database.
 import {
   backfillToolUsage,
   backfillUsage,

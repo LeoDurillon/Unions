@@ -1,5 +1,5 @@
-// A ticket's Jira tab: the comments of the issue it was imported from, read once per opening, with Refresh, Reply
-// on each and New comment, which the worker posts.
+// A ticket's Jira tab: the comments of the issue it was imported from, read once per opening. With
+// Refresh, Reply on each and New comment, which the worker posts.
 
 import type { ReactElement } from 'react';
 

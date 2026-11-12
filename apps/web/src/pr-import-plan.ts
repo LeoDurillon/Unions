@@ -1,4 +1,5 @@
-// What a pull request becomes on import: its issue, the planning steps read from Union's comments there, the flow, or why it cannot be imported.
+// What a pull request becomes on import: its issue, the planning steps read from Union's comments
+// there, the flow. Or why it cannot be imported.
 import {
   issueStepComments,
   stepCommentId,

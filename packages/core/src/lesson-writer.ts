@@ -1,4 +1,5 @@
-// The lesson writer: the prompt it gets for some feedback, what it shares with the tidier, and its answer read back as lessons.
+// The lesson writer: the prompt it gets for some feedback, what it shares with the tidier, its
+// answer read as lessons.
 import { MAX_LESSON_LENGTH, type LessonProposal } from './lesson-input';
 import { FULL_FLOW, STEP_TITLES, type PipelineStep } from './states';
 

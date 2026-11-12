@@ -1,6 +1,7 @@
-// The report's map of how the change works, read from the agent's block: nodes on paths of the
-// checkout, edges between them, and a walkthrough whose every why is checked against the source it
-// names (a spec, a commit message, a comment the diff adds), else marked inferred.
+// The report's map of how the change works, read from the agent's block: nodes, edges and a
+// walkthrough. Nodes are on paths of the checkout, edges between them; every why of the walkthrough
+// is checked against the source it names (a spec, a commit message, a comment the diff adds), else
+// marked inferred.
 
 import {
   isRecord,

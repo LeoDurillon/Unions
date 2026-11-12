@@ -1,4 +1,5 @@
-// A change of target on GitHub: the base the pull request has now, the branches that exist, and the pull request moved onto the new base.
+// A change of target on GitHub: the base the pull request has now and the branches that exist. Then
+// the pull request is moved onto the new base.
 
 import { BUILDS_ON_LINK, type Project } from '@union/core';
 

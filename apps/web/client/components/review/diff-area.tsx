@@ -1,5 +1,5 @@
 // The whole change, or one of its commits or the change since the last review (read only), with the
-// Explain panel on the right.
+// Explain panel. The panel sits on the right.
 
 import { useState, type ReactElement } from 'react';
 

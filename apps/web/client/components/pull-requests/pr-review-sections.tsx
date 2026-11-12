@@ -1,5 +1,5 @@
 // The tabs a pull request review shows before its diff: Notion and Jira once it is linked, then the
-// spec report and the review agents last.
+// spec report. The review agents come last.
 
 import type { ReactElement } from 'react';
 

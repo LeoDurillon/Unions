@@ -1,4 +1,5 @@
-// What to do with the picked checks, jobs and comments: read the text the agent would get, keep it for its next run, or send it now.
+// The picked checks, jobs and comments: read the text the agent would get, keep it for its next
+// run, or send it now.
 import { useState, type ReactElement } from 'react';
 
 import type { CiPick } from '../../../src/ci-api-types';

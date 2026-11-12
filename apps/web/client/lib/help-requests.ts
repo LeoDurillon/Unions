@@ -1,5 +1,5 @@
-// Help asked for from the sidebar's Help menu, heard by the part that shows it: the keyboard shortcuts, a
-// project's getting-started checklist.
+// Help asked for from the sidebar's Help menu (the keyboard shortcuts, a project's getting-started
+// checklist). It is heard by the part that shows it.
 import { useEffect, useRef } from 'react';
 
 type HelpRequest = 'shortcuts' | 'getting-started';

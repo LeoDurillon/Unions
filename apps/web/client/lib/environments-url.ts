@@ -1,5 +1,6 @@
-// The project's Environments tab in the URL (`?view=environments&env=variables`): its pages, opening
-// it from elsewhere, and the old preview settings addresses (`?settings=preview-services`) it replaces.
+// The project's Environments tab in the URL (`?view=environments&env=variables`): its pages,
+// opening it from elsewhere. It replaces the old preview settings addresses
+// (`?settings=preview-services`).
 import { useEffect } from 'react';
 
 import type { GuideTarget } from './guide/settings-guide';

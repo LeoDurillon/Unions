@@ -1,5 +1,5 @@
-// `/api/tickets/:id/jira-comments`: the comments of the Jira issue a ticket was imported from, read now, and those
-// the user sends to it (posted by the worker).
+// `/api/tickets/:id/jira-comments`: the comments of the Jira issue a ticket was imported from, read
+// now. Also those the user sends to it, posted by the worker.
 
 import { jiraAuthOf, type Db, type JiraApi, type Ticket } from '@union/core';
 import { Hono } from 'hono';

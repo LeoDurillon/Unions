@@ -1,4 +1,5 @@
-// What applying each section of a setup proposal makes of the project's settings, and whether it already matches; browser-safe.
+// What applying each section of a setup proposal makes of the project's settings, and whether it
+// already matches. Browser-safe.
 import type { PreviewConfig, ProjectConfig, ProjectScript } from '../schema/schema-types';
 import type { SetupChecks, SetupPreview, SetupProposal } from './setup-proposal-types';
 

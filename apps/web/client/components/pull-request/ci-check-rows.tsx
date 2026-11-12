@@ -1,4 +1,5 @@
-// One line per CI check or bot comment of the pull request, with a box to pick it for the implementer and, on a failed Actions job, Re-run.
+// One line per CI check or bot comment of the pull request, with a box to pick it for the
+// implementer. On a failed Actions job, Re-run.
 import type { ReactElement } from 'react';
 
 import type { BotComment, CiPick, PullRequestCheck } from '../../../src/ci-api-types';

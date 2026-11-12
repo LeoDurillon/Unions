@@ -1,5 +1,5 @@
-// One comment of a ticket's Jira issue: who wrote it and when, who may see it, its text, where it is in Jira, and
-// what can be done with it (Reply).
+// One comment of a ticket's Jira issue: who wrote it and when, who may see it, and its text. Also
+// where it is in Jira, and what can be done with it (Reply).
 import type { JiraComment } from '@union/core';
 import type { ReactElement, ReactNode } from 'react';
 

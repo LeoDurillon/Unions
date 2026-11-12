@@ -1,5 +1,5 @@
 // Giving a finished run's output to the implementer: kept for its next run, or sent now as a
-// revision (when the ticket can go back to it) with a note.
+// revision with a note. Sending now needs a ticket that can go back to it.
 import type { ContainerRun } from '@union/core';
 import { useState, type ReactElement } from 'react';
 

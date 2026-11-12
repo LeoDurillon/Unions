@@ -1,4 +1,5 @@
-// CI output the user gave the implementer from the pull request's checks: a failed check, another job's log, a bot's comment.
+// CI output the user gave the implementer from the pull request's checks. A failed check, another
+// job's log, a bot's comment.
 import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
 import { now, tickets } from './schema';

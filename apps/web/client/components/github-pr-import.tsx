@@ -1,4 +1,5 @@
-// Fetches an open pull request of the project's repository, previews the ticket it becomes (its issue, the steps Union wrote there, the flow), and creates it.
+// Fetches an open pull request of the project's repository, previews the ticket it becomes, and
+// creates it. The preview shows its issue, the steps Union wrote there, the flow.
 import { useMutation } from '@tanstack/react-query';
 import { stepTitle } from '@union/core/step-titles';
 import { useState, type ReactElement } from 'react';

@@ -1,5 +1,7 @@
-// The routes about a ticket's workspace: the branch it starts from (a change of target, a resync later),
-// the steps it runs, its title and description, the commands run in it, and what its agents used.
+// The routes about a ticket's workspace: its base branch, the steps it runs, its title and
+// description, its commands. In full: the branch it starts from (a change of target, a resync
+// later), the steps it runs, its title and description, the commands run in it, and what its agents
+// used.
 
 import type { Db } from '@union/core';
 import { Hono } from 'hono';
