@@ -55,7 +55,7 @@ export function GuidePage({ name }: { name: string }): ReactElement {
       <div data-guide-top className="min-w-0 flex-1 overflow-y-auto">
         <article
           ref={article}
-          className="max-w-3xl px-8 pt-6 pb-16 [&_h1]:scroll-mt-4 [&_h2]:scroll-mt-4 [&_h3]:scroll-mt-4"
+          className="guide-prose mx-auto my-6 max-w-3xl rounded-xl border border-zinc-200 bg-white px-10 pt-8 pb-12 shadow-xs dark:border-zinc-800 dark:bg-zinc-900 [&_h1]:scroll-mt-4 [&_h2]:scroll-mt-4 [&_h3]:scroll-mt-4"
         >
           <ErrorText error={page.error} />
           {text === undefined ? null : (

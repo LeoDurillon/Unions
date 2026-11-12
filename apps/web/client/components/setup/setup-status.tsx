@@ -76,9 +76,9 @@ export function SetupStatus({ project }: { project: PublicProject }): ReactEleme
   return (
     <section
       aria-label="Project setup"
-      className="mx-4 mt-3 space-y-2 rounded-lg border border-zinc-200 p-3 text-sm dark:border-zinc-800"
+      className="mx-4 mt-3 space-y-2 rounded-xl border border-zinc-200 bg-white p-4 text-sm shadow-xs dark:border-zinc-800 dark:bg-zinc-900"
     >
-      <h2 className="font-semibold">Project setup</h2>
+      <h2 className="text-[15px] font-semibold">Project setup</h2>
       {body(setup.data, project)}
     </section>
   );

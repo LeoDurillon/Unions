@@ -17,7 +17,7 @@ const LEVEL_TONES: Record<ReviewReportResult['risks'][number]['severity'], Tone>
 
 /** The rows of a section: one box, a line between rows. */
 export const ROWS_CLASS =
-  'divide-y divide-zinc-200 rounded-lg border border-zinc-200 bg-white text-sm dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900';
+  'divide-y divide-zinc-200 rounded-xl border border-zinc-200 bg-white text-sm shadow-xs dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900';
 
 /**
  * A titled part of the report, left out when it has nothing (`count` 0); `collapsed`: closed until
@@ -50,7 +50,7 @@ export function ReportSection({
   if (collapsed) {
     return (
       <details id={id} className="space-y-2">
-        <summary className="cursor-pointer font-semibold select-none">
+        <summary className="cursor-pointer text-[15px] font-semibold select-none">
           <h3 className="inline-flex items-baseline gap-2">{heading}</h3>
         </summary>
         {children}
@@ -59,7 +59,7 @@ export function ReportSection({
   }
   return (
     <section id={id} className="space-y-2">
-      <h3 className="flex items-baseline gap-2 font-semibold">{heading}</h3>
+      <h3 className="flex items-baseline gap-2 text-[15px] font-semibold">{heading}</h3>
       {children}
     </section>
   );

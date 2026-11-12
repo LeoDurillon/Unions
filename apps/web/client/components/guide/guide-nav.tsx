@@ -16,8 +16,11 @@ export function GuideNav({ current }: { current: string }): ReactElement {
   return (
     <nav
       aria-label="Guide pages"
-      className="w-56 shrink-0 overflow-y-auto border-r border-zinc-200 p-3 dark:border-zinc-800"
+      className="w-56 shrink-0 overflow-y-auto border-r border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900"
     >
+      <h2 className="px-2.5 pt-1 pb-2 text-xs font-semibold tracking-wider text-zinc-500 uppercase">
+        User guide
+      </h2>
       <ul className="space-y-0.5">
         {(pages.data?.pages ?? []).map((page) => (
           <li key={page.name}>

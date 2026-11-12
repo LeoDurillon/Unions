@@ -44,6 +44,10 @@ dialog::backdrop {
 .markdown h2 {
   @apply text-base;
 }
+/* The text starts at its box's top edge: a card's padding is the only space above it. */
+.markdown > :first-child {
+  @apply mt-0;
+}
 .markdown h3 {
   @apply text-sm;
 }
@@ -84,6 +88,17 @@ dialog::backdrop {
 }
 .markdown h1 {
   @apply text-lg;
+}
+/* The user guide reads as a page: a title a size up, its sections set apart. */
+.guide-prose .markdown {
+  font-size: 0.9375rem;
+  line-height: 1.7;
+}
+.guide-prose .markdown h1 {
+  @apply mb-4 text-2xl tracking-tight;
+}
+.guide-prose .markdown h2 {
+  @apply mt-8 border-t border-zinc-200 pt-6 text-lg dark:border-zinc-800;
 }
 .markdown a {
   @apply break-words text-indigo-600 underline dark:text-indigo-400;

@@ -11,55 +11,47 @@ import { ConfirmButton } from '../ui/confirm-button';
 import { Badge, Button, ErrorText } from '../ui/ui';
 import { AppSetupForm } from './app-setup-form';
 
-const CARD =
-  'space-y-3 rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900';
-
 function InstallationList(): ReactElement {
   const query = useQuery({
     queryKey: ['github-app', 'installations'],
     queryFn: api.githubApp.installations,
   });
   return (
-    <div className="space-y-1">
+    <div className="space-y-1.5">
       <h4 className="text-sm font-medium">Installed on</h4>
       <ErrorText error={query.error} />
-      <ul className="space-y-1 text-sm">
-        {(query.data ?? []).map((installation) => (
-          <li key={installation.id} className="flex items-center gap-2">
-            {installation.account}
-            <Badge tone="neutral">
-              {installation.allRepositories ? 'all repositories' : 'selected repositories'}
-            </Badge>
-          </li>
-        ))}
-      </ul>
       {query.data?.length === 0 ? (
         <p className="text-sm text-zinc-500">Not installed yet.</p>
-      ) : null}
+      ) : (
+        <ul className="divide-y divide-zinc-200 rounded-lg border border-zinc-200 text-sm dark:divide-zinc-800 dark:border-zinc-800">
+          {(query.data ?? []).map((installation) => (
+            <li key={installation.id} className="flex items-center gap-2 px-3 py-2">
+              <span className="flex-1 font-medium">{installation.account}</span>
+              <Badge tone="neutral">
+                {installation.allRepositories ? 'all repositories' : 'selected repositories'}
+              </Badge>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
 
+const LINK_CLASS =
+  'rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800';
+
+/** The app's page on GitHub and its install page, opened in a new tab. */
 function AppLinks({ url }: { url: string }): ReactElement {
   return (
-    <p className="flex gap-3 text-sm">
-      <a
-        className="text-indigo-600 underline dark:text-indigo-400"
-        href={url}
-        target="_blank"
-        rel="noreferrer"
-      >
-        App page
+    <span className="flex flex-wrap gap-2">
+      <a className={LINK_CLASS} href={url} target="_blank" rel="noreferrer">
+        App page ↗
       </a>
-      <a
-        className="text-indigo-600 underline dark:text-indigo-400"
-        href={`${url}/installations/new`}
-        target="_blank"
-        rel="noreferrer"
-      >
-        Install on an account
+      <a className={LINK_CLASS} href={`${url}/installations/new`} target="_blank" rel="noreferrer">
+        Install on an account ↗
       </a>
-    </p>
+    </span>
   );
 }
 
@@ -75,13 +67,14 @@ function ConfiguredApp({
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['github-app'] }),
   });
   return (
-    <section className={CARD}>
-      <header className="flex flex-wrap items-center gap-2">
+    // A card of the settings page itself (`.settings-cards`), not one nested in another.
+    <section className="space-y-4">
+      <header className="flex flex-wrap items-center gap-x-3 gap-y-2">
         <h3 className="font-semibold">{app.name}</h3>
         <Badge tone="green">connected</Badge>
-        <span className="text-xs text-zinc-500">App ID {app.appId}</span>
+        <span className="flex-1 text-xs text-zinc-500">App ID {app.appId}</span>
+        <AppLinks url={app.url} />
       </header>
-      <AppLinks url={app.url} />
       <InstallationList />
       {replacing ? (
         <AppSetupForm
@@ -91,7 +84,7 @@ function ConfiguredApp({
         />
       ) : null}
       <ErrorText error={remove.error} />
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2 border-t border-zinc-200 pt-4 dark:border-zinc-800">
         <Button
           className="whitespace-nowrap"
           onClick={() => {
@@ -123,15 +116,13 @@ export function GitHubAppSection(): ReactElement {
         An alternative to personal tokens: projects pick one of the app’s installations in their
         settings. Issues, comments and pull requests are then authored by the app.
       </SettingsIntro>
-      <section className="space-y-4">
-        <ErrorText error={status.error} />
-        {status.data?.configured ? <ConfiguredApp app={status.data} /> : null}
-        {status.data?.configured === false ? (
-          <section className={CARD}>
-            <AppSetupForm />
-          </section>
-        ) : null}
-      </section>
+      <ErrorText error={status.error} />
+      {status.data?.configured ? <ConfiguredApp app={status.data} /> : null}
+      {status.data?.configured === false ? (
+        <section>
+          <AppSetupForm />
+        </section>
+      ) : null}
     </>
   );
 }

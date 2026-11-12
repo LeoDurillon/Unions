@@ -88,7 +88,8 @@ description, review comments, groups, explanations, replies, lessons, and a comm
 ## Tools and connectors
 
 **Union settings → Tools** lists the tools agents and investigations pick from: Claude Code tools (`Read`, `Edit`,
-`WebFetch`…) and permission rules such as `Bash(pnpm *)`. Add your own there, then select them on an agent's page.
+`WebFetch`…) and permission rules such as `Bash(pnpm *)`. Add your own under **Your tools** (a name and, if you
+like, what it is for), then select them on an agent's page. **Built in** lists the ones Union always offers.
 
 Some things stay refused whatever you allow: agents never push, and they never hold GitHub credentials.
 

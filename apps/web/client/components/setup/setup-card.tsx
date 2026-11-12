@@ -40,14 +40,13 @@ function Actions({
     );
   }
   return (
-    <div className="flex gap-2">
+    <div className="flex shrink-0 gap-2">
       {onApply ? (
-        <Button size="sm" variant="primary" disabled={state.pending} onClick={onApply}>
+        <Button variant="primary" disabled={state.pending} onClick={onApply}>
           {state.pending ? 'Applying…' : applyLabel}
         </Button>
       ) : null}
       <Button
-        size="sm"
         variant="ghost"
         onClick={() => {
           onDismiss(true);
@@ -80,18 +79,22 @@ export function SetupCard({
   return (
     <section
       aria-label={title}
-      className="space-y-2 rounded-lg border border-zinc-200 p-3 text-sm dark:border-zinc-800"
+      className="space-y-3 rounded-xl border border-zinc-200 bg-white p-4 text-sm shadow-xs dark:border-zinc-800 dark:bg-zinc-900"
     >
       <header className="flex items-start justify-between gap-3">
-        <h3 className="font-semibold">
-          {title} {state.applied ? <Badge tone="green">Applied</Badge> : null}
-          {state.dismissed && !state.applied ? <Badge tone="neutral">Dismissed</Badge> : null}
-        </h3>
+        <div className="min-w-0 space-y-0.5">
+          <h3 className="flex flex-wrap items-center gap-2 text-[15px] font-semibold">
+            {title} {state.applied ? <Badge tone="green">Applied</Badge> : null}
+            {state.dismissed && !state.applied ? <Badge tone="neutral">Dismissed</Badge> : null}
+          </h3>
+          {why === '' || (state.dismissed && !state.applied) ? null : (
+            <p className="text-sm text-zinc-500">{why}</p>
+          )}
+        </div>
         <Actions state={state} onApply={onApply} onDismiss={onDismiss} applyLabel={applyLabel} />
       </header>
       {state.dismissed && !state.applied ? null : (
         <>
-          {why === '' ? null : <p className="text-xs text-zinc-500">{why}</p>}
           {children}
           <ErrorText error={state.error} />
         </>

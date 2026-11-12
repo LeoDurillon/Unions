@@ -14,7 +14,7 @@ import type { ReportView } from '../../../src/routes/review/review-reports';
 import type { Tone } from '../../lib/board/labels';
 import type { ReviewTarget } from '../../lib/review/review-target';
 import { useReviewReport } from '../../lib/review/use-review-report';
-import { Badge, Button, ErrorText } from '../ui/ui';
+import { Badge, Button, CARD_CLASS, ErrorText } from '../ui/ui';
 import { CopyMarkdownButton } from './copy-markdown-button';
 
 const VERDICT_TONES: Record<NonNullable<ReportView['result']>['verdict'], Tone> = {
@@ -73,7 +73,7 @@ function AddGaps({
 
 function Outdated({ onAgain }: { onAgain: () => void }): ReactElement {
   return (
-    <p className="flex items-center gap-2 rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
+    <p className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-300">
       <span className="flex-1">Outdated: the change moved since this report was written.</span>
       <Button onClick={onAgain}>Run again</Button>
     </p>
@@ -96,7 +96,7 @@ export function ReportHeader({
   return (
     <>
       {report.outdated ? <Outdated onAgain={onAgain} /> : null}
-      <header className="space-y-2">
+      <header className={CARD_CLASS}>
         <div className="flex flex-wrap items-center gap-2">
           <Badge tone={VERDICT_TONES[result.verdict]}>{VERDICT_LABELS[result.verdict]}</Badge>
           <span className="text-sm text-zinc-500">{reportCounts(result)}</span>
@@ -107,11 +107,9 @@ export function ReportHeader({
           </span>
         </div>
         {result.summary === '' ? null : (
-          <p className="rounded-lg bg-zinc-100 px-3 py-2 text-sm leading-relaxed dark:bg-zinc-900">
-            {result.summary}
-          </p>
+          <p className="text-[15px] leading-relaxed">{result.summary}</p>
         )}
-        <p className="text-xs text-zinc-500">
+        <p className="border-t border-zinc-200 pt-2 text-xs text-zinc-500 dark:border-zinc-800">
           Specs read: {specsRead(report.specs)}
           {droppedNote(result.dropped)}
         </p>

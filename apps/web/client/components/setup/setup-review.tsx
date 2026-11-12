@@ -56,10 +56,12 @@ export function SetupReview({
     .map((key) => Number(key.slice(CREATED.length)));
   return (
     <Dialog open wide title="Review the setup" onClose={onClose}>
-      <p className="text-sm">{proposal.summary}</p>
-      <p className="text-xs text-zinc-500">
-        Nothing is applied until you click Apply on a card. Edit a value first if you want.
-      </p>
+      <div className="space-y-1">
+        <p className="text-[15px] leading-relaxed">{proposal.summary}</p>
+        <p className="text-sm text-zinc-500">
+          Nothing is applied until you click Apply on a card. Edit a value first if you want.
+        </p>
+      </div>
       <Dropped dropped={proposal.dropped} />
       {proposal.questions.length > 0 ? (
         <QuestionsCard

@@ -70,17 +70,36 @@ Depends on as rows with their label in a column (`form-row.tsx`), the flow's des
 the switch (`FlowPicker`, also in the Overview's Flow row); Cancel beside Create ticket, which shows Ctrl ↵ (⌘ ↵ on
 a Mac): Ctrl/⌘+Enter in the title or the description submits (`form-footer.tsx`). Not built: "Start it now".
 
+Then the pages not redesigned yet (2026-11-12), client only:
+
+- A step's output tab: the output in a card (`steps/step-output-card.tsx`) with its version picker, when it was
+  written and its approval in the header, the revision's feedback under it; no output is a dashed card; a failed
+  run or a usage limit is a red card like the Preview tab's (`step-notices.tsx`). `.markdown > :first-child` has
+  no top margin anywhere, so a card's padding is the only space above its text.
+- The review's Ticket tab: one card with the whole title and the issue number (`ticket/review-ticket-tab.tsx`).
+  Report tab: the header (verdict, counts, actions, summary, specs read) is a card; outdated, writing and failed
+  are callouts; sections, requirements and the map are `rounded-xl` with the shared shadow.
+- Union Tools: a Your tools card (rows, Add tool under them) and a Built in card of chips. Connectors: bordered
+  rows, the status a badge, the last check under the title.
+- GitHub App: the app is the page's card (no card nested in one), its links as buttons in its header, the
+  installations as rows, Replace credentials and Remove under a line.
+- The onboarding wizard: one card, the stepper as its top bar, Back / Next (Prev is now Back) in a footer bar.
+- The setup proposal: cards `rounded-xl` with the why under the title, Apply and Dismiss full size, the questions
+  card filled amber, the tickets as rows; the board's Project setup card and buttons match.
+- The guide: "User guide" over its pages, each page a card centred in the space, a size-up title and sections
+  set apart by a line.
+
+Checked in light and dark with screenshots (the setup proposal and the wizard on stubbed data, a failed run on a
+stubbed phase).
+
 ## Left to do
 
 Take them in this order; each is one worktree, one commit, checked with screenshots before it is deployed.
 
-1. **Pages not redesigned yet**: a step's output tab (`components/steps/step-tab.tsx` and its notices), the
-   review's Ticket and Report tabs beyond their cards, Union Tools and Connectors lists, the GitHub App page (its
-   header sits outside its card), the onboarding wizard, the setup agent's proposal cards, the guide.
-2. **Dark mode pass** over every page above. Checked in dark so far: the loading PR tab, Settings › Checks, the PR
+1. **Dark mode pass** over every page above. Checked in dark so far: the loading PR tab, Settings › Checks, the PR
    tab, the Preview tab (failed), the Log and the Notion tab. Not yet: the other settings, Union settings and
    Environments pages, Overview, Investigations, Usage, Pull requests, Repository, the review page, dialogs
-   (New ticket is checked).
+   (New ticket, and every page of the step above, are checked).
 
 Two ideas on the inner canvas are new features, not design: "Draft with the agent" on a Notion comment and "Start
 it now" in New ticket. Ask the user before building either: both spend Claude usage or start work.

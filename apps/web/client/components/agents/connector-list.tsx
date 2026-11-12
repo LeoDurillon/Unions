@@ -7,7 +7,7 @@ import type { ConnectorsResponse } from '../../../src/api-types';
 import { formatWhen } from '../../lib/ui/relative-time';
 import { useConnectors } from '../../lib/union-settings/use-connectors';
 import { SettingsIntro } from '../settings/settings-intro';
-import { Button, ErrorText } from '../ui/ui';
+import { Badge, Button, ErrorText } from '../ui/ui';
 
 function CheckStatus({
   check,
@@ -22,7 +22,9 @@ function CheckStatus({
     );
   }
   if (check?.status === 'failed') {
-    return <p className="text-xs text-red-600">The last check failed: {check.error}</p>;
+    return (
+      <p className="text-xs text-red-600 dark:text-red-400">The last check failed: {check.error}</p>
+    );
   }
   if (check?.finishedAt) {
     return <p className="text-xs text-zinc-500">Checked {formatWhen(check.finishedAt)}.</p>;
@@ -46,8 +48,11 @@ export function ConnectorList(): ReactElement {
         do not load any.
       </SettingsIntro>
       <section className="space-y-3">
-        <header className="flex items-center justify-between gap-3">
-          <h3 className="text-sm font-semibold">Your connectors</h3>
+        <header className="flex items-start justify-between gap-3">
+          <div className="space-y-0.5">
+            <h3 className="font-semibold">Your connectors</h3>
+            <CheckStatus check={connectors.data?.check ?? null} checking={checking} />
+          </div>
           <Button
             disabled={checking}
             onClick={() => {
@@ -58,23 +63,19 @@ export function ConnectorList(): ReactElement {
           </Button>
         </header>
         <ErrorText error={connectors.error ?? check.error} />
-        <CheckStatus check={connectors.data?.check ?? null} checking={checking} />
         {list.length === 0 ? (
           <p className="text-sm text-zinc-500">No connector read yet.</p>
         ) : (
-          <ul className="divide-y divide-zinc-200 text-sm dark:divide-zinc-800">
+          <ul className="divide-y divide-zinc-200 rounded-lg border border-zinc-200 text-sm dark:divide-zinc-800 dark:border-zinc-800">
             {list.map((connector) => (
-              <li key={connector.name} className="flex items-center gap-3 py-2">
+              <li key={connector.name} className="flex items-center gap-3 px-3 py-2">
                 <span className="font-medium">{connector.name}</span>
                 <code className="min-w-0 flex-1 truncate text-xs text-zinc-500">
                   {connector.tool}
                 </code>
-                <span
-                  className={`text-xs ${connector.connected ? 'text-green-700 dark:text-green-400' : 'text-amber-700 dark:text-amber-400'}`}
-                  title={connector.url}
-                >
-                  {connector.status}
-                </span>
+                <Badge tone={connector.connected ? 'green' : 'amber'} title={connector.url}>
+                  {connector.status.replace(/^✔\s*/u, '')}
+                </Badge>
               </li>
             ))}
           </ul>

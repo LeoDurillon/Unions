@@ -29,9 +29,9 @@ function TicketRow({
     },
   });
   return (
-    <li className="space-y-1">
+    <li className="space-y-1 px-3 py-2">
       <div className="flex items-start justify-between gap-3">
-        <details className="min-w-0 text-xs">
+        <details className="min-w-0 text-sm">
           <summary className="cursor-pointer font-medium">{ticket.title}</summary>
           <p className="mt-1 whitespace-pre-wrap text-zinc-600 dark:text-zinc-400">
             {ticket.description}
@@ -72,13 +72,13 @@ export function TicketsCard({
   return (
     <section
       aria-label="Tickets"
-      className="space-y-2 rounded-lg border border-zinc-200 p-3 text-sm dark:border-zinc-800"
+      className="space-y-3 rounded-xl border border-zinc-200 bg-white p-4 text-sm shadow-xs dark:border-zinc-800 dark:bg-zinc-900"
     >
-      <h3 className="font-semibold">Changes the repository needs</h3>
+      <h3 className="text-[15px] font-semibold">Changes the repository needs</h3>
       <p className="text-xs text-zinc-500">
         Create a ticket for each one you want: it lands in the Backlog.
       </p>
-      <ul className="space-y-2">
+      <ul className="divide-y divide-zinc-200 rounded-lg border border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
         {tickets.map((ticket, index) => (
           <TicketRow
             key={ticket.title}
@@ -117,14 +117,14 @@ export function QuestionsCard({
   return (
     <section
       aria-label="Questions"
-      className="space-y-2 rounded-lg border border-amber-200 p-3 text-sm dark:border-amber-900"
+      className="space-y-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm dark:border-amber-900 dark:bg-amber-950/30"
     >
-      <h3 className="font-semibold">The agent&apos;s questions</h3>
+      <h3 className="text-[15px] font-semibold">The agent&apos;s questions</h3>
       {questions.map((question, index) => (
         <label key={question} className="block space-y-1">
-          <span className="text-xs">{question}</span>
+          <span className="text-sm font-medium">{question}</span>
           <textarea
-            className={`${inputClass} h-14 text-xs`}
+            className={`${inputClass} h-16 bg-white text-sm dark:bg-zinc-900`}
             value={answers[index] ?? ''}
             onChange={(event) => {
               setAnswers(answers.map((answer, at) => (at === index ? event.target.value : answer)));
@@ -132,9 +132,8 @@ export function QuestionsCard({
           />
         </label>
       ))}
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-3">
         <Button
-          size="sm"
           disabled={ask.isPending}
           onClick={() => {
             ask.mutate();

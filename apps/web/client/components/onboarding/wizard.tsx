@@ -98,8 +98,9 @@ function Footer({
   const last = step === LAST;
   const label = last ? 'Create project' : 'Next';
   return (
-    <footer className="flex items-center justify-between">
-      {step > 0 ? <Button onClick={onPrev}>Prev</Button> : <span />}
+    // A bar along the card's bottom edge, as the other dialogs have it.
+    <footer className="flex items-center justify-between rounded-b-2xl border-t border-zinc-200 bg-zinc-50 px-6 py-3 dark:border-zinc-800 dark:bg-zinc-950">
+      {step > 0 ? <Button onClick={onPrev}>Back</Button> : <span />}
       <Button variant="primary" disabled={!canNext || pending} onClick={onNext}>
         {pending ? 'Creating…' : label}
       </Button>
@@ -140,9 +141,9 @@ function WizardDialog({
         event.preventDefault();
         onClose?.();
       }}
-      className="m-0 h-full max-h-none w-full max-w-none bg-transparent p-0 text-zinc-900 backdrop:bg-black/10 backdrop:backdrop-blur-sm dark:text-zinc-100"
+      className="m-0 h-full max-h-none w-full max-w-none bg-transparent p-0 text-zinc-900 dark:text-zinc-100"
     >
-      <div className="flex min-h-full flex-col items-center gap-5 px-4 pt-16 pb-8">{children}</div>
+      <div className="flex min-h-full flex-col items-center px-4 pt-16 pb-8">{children}</div>
     </dialog>
   );
 }
@@ -168,21 +169,21 @@ export function Wizard({
 
   return (
     <WizardDialog onClose={onClose}>
-      <div className="w-full max-w-2xl rounded-xl bg-white p-4 shadow dark:bg-zinc-900">
-        <Stepper current={step} />
-      </div>
-      <div className="flex w-full max-w-2xl flex-col gap-5 rounded-xl bg-white p-6 shadow dark:bg-zinc-900">
-        <header className="flex items-start justify-between gap-4">
-          <div>
-            <h2 id="wizard-title" className="text-xl font-semibold">
+      <div className="w-full max-w-2xl rounded-2xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="flex items-center gap-2 rounded-t-2xl border-b border-zinc-200 bg-zinc-50 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-950">
+          <Stepper current={step} />
+          {onClose ? <CloseButton onClick={onClose} /> : null}
+        </div>
+        <div className="flex flex-col gap-5 p-6">
+          <header>
+            <h2 id="wizard-title" className="text-xl font-semibold tracking-tight">
               {header.title}
             </h2>
             <p className="text-sm text-zinc-500">{header.description}</p>
-          </div>
-          {onClose ? <CloseButton onClick={onClose} /> : null}
-        </header>
-        <View {...props} />
-        <ErrorText error={error} />
+          </header>
+          <View {...props} />
+          <ErrorText error={error} />
+        </div>
         <Footer
           step={step}
           canNext={canContinue(step, draft)}

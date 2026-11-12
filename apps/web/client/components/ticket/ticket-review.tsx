@@ -11,12 +11,12 @@ import { PreviewTab } from '../previews/preview-tab';
 import { PullRequestTab } from '../pull-request/pull-request-tab';
 import { ReportTab } from '../review/report-tab';
 import { ReviewAgentsTab } from '../review/review-agents-tab';
-import { TicketDescription } from './ticket-description';
+import { ReviewTicketTab } from './review-ticket-tab';
 
 function sectionsOf(detail: TicketDetail): ReviewSection[] {
   const { prNumber } = detail.ticket;
   return [
-    { id: 'ticket', label: 'Ticket', content: <TicketDescription ticket={detail.ticket} /> },
+    { id: 'ticket', label: 'Ticket', content: <ReviewTicketTab ticket={detail.ticket} /> },
     { id: 'preview', label: 'Preview', content: <PreviewTab detail={detail} /> },
     {
       id: 'pull-request',

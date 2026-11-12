@@ -84,7 +84,7 @@ export function ReportRequirementCard({
   const [first] = requirement.evidence;
   const note = requirement.note || requirement.title;
   return (
-    <article className="space-y-2 rounded-lg border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900">
+    <article className="space-y-2 rounded-xl border border-zinc-200 bg-white p-3 shadow-xs dark:border-zinc-800 dark:bg-zinc-900">
       <header className="flex items-center gap-2">
         <Badge tone={STATUS_TONES[requirement.status]}>{STATUS_LABELS[requirement.status]}</Badge>
         <h4 className="min-w-0 flex-1 text-sm font-medium">{requirement.title}</h4>

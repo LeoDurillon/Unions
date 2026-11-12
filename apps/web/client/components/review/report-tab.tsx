@@ -14,8 +14,9 @@ import { ReportStart } from './report-start';
 function Writing({ target, report }: { target: ReviewTarget; report: ReportView }): ReactElement {
   const { cancel } = useReviewReport(target);
   return (
-    <div className="flex items-center gap-3 rounded-lg border border-zinc-200 bg-white p-4 text-sm dark:border-zinc-800 dark:bg-zinc-900">
-      <span className="flex-1 animate-pulse text-indigo-600 dark:text-indigo-400">
+    <div className="flex items-center gap-3 rounded-xl border border-zinc-200 bg-white p-4 text-sm shadow-xs dark:border-zinc-800 dark:bg-zinc-900">
+      <span aria-hidden className="size-2 animate-pulse rounded-full bg-indigo-500" />
+      <span className="flex-1 text-indigo-600 dark:text-indigo-400">
         {report.status === 'queued' ? 'Waiting for a run slot…' : 'Writing the report…'}
       </span>
       <ErrorText error={cancel.error} />
@@ -36,10 +37,11 @@ function Failed({ report }: { report: ReportView }): ReactElement | null {
     return null;
   }
   return (
-    <div className="space-y-2 text-sm">
-      <p className="text-red-600 dark:text-red-400">The last report failed: {report.error}</p>
+    <div className="space-y-2 rounded-xl border border-red-200 bg-red-50 p-4 text-sm dark:border-red-900 dark:bg-red-950/40">
+      <h3 className="text-[15px] font-semibold">The last report failed</h3>
+      <p className="whitespace-pre-wrap text-red-800 dark:text-red-300">{report.error}</p>
       {report.raw === null ? null : (
-        <details className="rounded-md border border-zinc-200 p-2 dark:border-zinc-800">
+        <details className="rounded-md border border-red-200 bg-white p-2 dark:border-red-900 dark:bg-zinc-900">
           <summary className="cursor-pointer text-zinc-500">The agent&rsquo;s answer</summary>
           <p className="mt-2 whitespace-pre-wrap">{report.raw}</p>
         </details>

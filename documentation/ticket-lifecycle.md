@@ -15,7 +15,9 @@ flowchart LR
 ```
 
 Each step's output is a tab in the ticket's **Steps** tab and, when the project mirrors tickets as GitHub issues,
-a comment on the issue. When you ask for a revision, Union edits that comment instead of adding another one.
+a comment on the issue. The tab shows the output in a card: its top says which version it is (pick an earlier one
+from the list when there are several), when it was written, and whether you approved it or asked for a revision,
+with the feedback you gave. When you ask for a revision, Union edits that comment instead of adding another one.
 
 ### Diagrams
 
@@ -132,7 +134,7 @@ reopened.
 
 | What you see                                  | What it means                                                         | What to do                                                                                                                                                                  |
 | --------------------------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Run failed:** and an error                  | The run ended with an error (a crash, a timeout, a Docker problem).   | Read the **Log**, fix the cause if it is on your side, then **Retry**.                                                                                                      |
+| **The run failed** and the error              | The run ended with an error (a crash, a timeout, a Docker problem).   | Read the **Log**, fix the cause if it is on your side, then **Retry**.                                                                                                      |
 | **Claude usage limit reached**                | Your Claude subscription hit its usage limit.                         | Nothing: Union retries by itself at the time shown, a couple of minutes after the limit resets (or in about 30 minutes when it cannot tell). **Retry now** runs it at once. |
 | **A git hook refused to commit some changes** | A pre-commit hook of the repository refused the agent's last changes. | See below.                                                                                                                                                                  |
 

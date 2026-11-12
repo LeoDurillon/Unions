@@ -34,9 +34,8 @@ export function SetupAnswered({
       <p>
         The setup agent has a proposal: {proposal.summary} {leftText(left)}
       </p>
-      <div className="flex gap-2">
+      <div className="flex gap-2 pt-1">
         <Button
-          size="sm"
           variant="primary"
           onClick={() => {
             setOpen(true);
@@ -45,7 +44,6 @@ export function SetupAnswered({
           Review the setup
         </Button>
         <Button
-          size="sm"
           variant="ghost"
           onClick={() => {
             openInvestigation(investigation.id);

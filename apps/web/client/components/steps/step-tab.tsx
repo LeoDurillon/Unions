@@ -1,68 +1,25 @@
 // The ticket panel tab for one step: its output, verdict, answer form and review bar.
 
 import type { Step, StepOutput } from '@union/core';
-import { useState, type ReactElement, type ReactNode } from 'react';
+import { useState, type ReactElement } from 'react';
 
 import type { TicketDetail } from '../../../src/api-types';
 import { findingsOf, parseVerdict } from '../../lib/ticket/verdict';
 import { Markdown } from '../markdown/markdown';
-import { Badge } from '../ui/ui';
 import { AnswerForm, useAnswers, type Answers } from './answer-form';
 import { ReviewBar } from './review-bar';
 import { StepNotices } from './step-notices';
+import { NoOutput, StepOutputCard } from './step-output-card';
 import { VerdictBadge } from './verdict-badge';
 
-const VALIDATION_TONE = { approved: 'green', revise: 'neutral' } as const;
-const VALIDATION_LABEL = {
-  approved: 'approved',
-  revise: 'revision requested',
-} as const;
-
-function VersionBar({
-  versions,
-  shown,
-  onPick,
-}: {
-  versions: StepOutput[];
-  shown: StepOutput;
-  onPick: (version: number) => void;
-}): ReactElement {
+/** A new version being written while an older one shows. */
+function WorkingNote(): ReactElement {
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      {/* A version still to approve says nothing here: the ticket's badge already says "Waiting for you". */}
-      {shown.validation === 'pending' ? null : (
-        <Badge tone={VALIDATION_TONE[shown.validation]}>{VALIDATION_LABEL[shown.validation]}</Badge>
-      )}
-      {versions.length > 1 ? (
-        <select
-          className="rounded-md border border-zinc-300 bg-white px-2 py-0.5 text-xs dark:border-zinc-700 dark:bg-zinc-900"
-          value={shown.version}
-          onChange={(event) => {
-            onPick(Number(event.target.value));
-          }}
-        >
-          {versions.map((output) => (
-            <option key={output.version} value={output.version}>
-              v{output.version}
-            </option>
-          ))}
-        </select>
-      ) : null}
-    </div>
-  );
-}
-
-function FeedbackNote({ feedback }: { feedback: string | null }): ReactElement | null {
-  return feedback ? (
-    <p className="rounded-md bg-zinc-100 p-2 text-sm dark:bg-zinc-900">
-      <strong>Feedback on this version:</strong> {feedback}
+    <p className="flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2.5 text-sm text-blue-800 dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-300">
+      <span aria-hidden className="size-2 animate-pulse rounded-full bg-blue-500" />
+      The agent is writing a new version. The Log tab shows what it does.
     </p>
-  ) : null;
-}
-
-function Notice({ tone, children }: { tone: 'blue' | 'zinc'; children: ReactNode }): ReactElement {
-  const color = tone === 'blue' ? 'text-blue-600 dark:text-blue-400' : 'text-zinc-500';
-  return <p className={`text-sm ${color}`}>{children}</p>;
+  );
 }
 
 function Footer({
@@ -79,24 +36,19 @@ function Footer({
   latest: StepOutput | undefined;
   pending: string | undefined;
   onEditing: (draft: string | null) => void;
-}): ReactElement {
+}): ReactElement | null {
   const { phase } = detail.ticket;
   const awaiting = phase.kind === 'awaiting_approval' && phase.step === step;
-  return (
-    <>
-      <FeedbackNote feedback={shown?.feedback ?? null} />
-      {awaiting && latest && shown === latest ? (
-        <ReviewBar
-          ticketId={detail.ticket.id}
-          step={step}
-          next={detail.afterApproval}
-          content={latest.content}
-          pending={pending}
-          onEditing={onEditing}
-        />
-      ) : null}
-    </>
-  );
+  return awaiting && latest && shown === latest ? (
+    <ReviewBar
+      ticketId={detail.ticket.id}
+      step={step}
+      next={detail.afterApproval}
+      content={latest.content}
+      pending={pending}
+      onEditing={onEditing}
+    />
+  ) : null;
 }
 
 /** Rendered output: inputs for the `Answer:` lines while the latest version awaits review. */
@@ -166,19 +118,20 @@ function StepView({ detail, step }: { detail: TicketDetail; step: Step }): React
   const { shown, working, answers } = state;
   return (
     <div className="space-y-4">
-      {shown ? (
-        <VersionBar versions={state.versions} shown={shown} onPick={state.handlePick} />
-      ) : null}
-      {working ? <Notice tone="blue">The agent is working… see the Log tab.</Notice> : null}
+      {working && shown ? <WorkingNote /> : null}
       <StepNotices detail={detail} step={step} />
       {shown ? (
-        <OutputBody
-          step={step}
-          content={state.draft ?? shown.content}
-          answerable={state.answerable}
-          answers={answers}
-        />
-      ) : null}
+        <StepOutputCard versions={state.versions} shown={shown} onPick={state.handlePick}>
+          <OutputBody
+            step={step}
+            content={state.draft ?? shown.content}
+            answerable={state.answerable}
+            answers={answers}
+          />
+        </StepOutputCard>
+      ) : (
+        <NoOutput working={working} />
+      )}
       <Footer
         detail={detail}
         step={step}
@@ -187,7 +140,6 @@ function StepView({ detail, step }: { detail: TicketDetail; step: Step }): React
         pending={answers.answers.length > 0 ? answers.pending : undefined}
         onEditing={state.handleEditing}
       />
-      {!shown && !working ? <Notice tone="zinc">No output yet.</Notice> : null}
     </div>
   );
 }

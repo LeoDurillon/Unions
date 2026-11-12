@@ -179,7 +179,7 @@ export function FlowGraph({
     flow.edges,
   );
   return (
-    <div className="overflow-x-auto rounded-lg border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="overflow-x-auto rounded-xl border border-zinc-200 bg-white p-3 shadow-xs dark:border-zinc-800 dark:bg-zinc-900">
       <svg
         width={layout.width + 2 * PAD}
         height={layout.height + 2 * PAD}

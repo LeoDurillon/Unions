@@ -1,4 +1,4 @@
-// The tools the user added to the list, the built-in ones folded, and the form to add more.
+// The tools the user added to the list with the form to add more, then the built-in ones, each in a card.
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { ToolOption } from '@union/core';
@@ -30,7 +30,10 @@ function AddToolForm(): ReactElement {
     add.mutate();
   };
   return (
-    <form onSubmit={submit} className="space-y-2">
+    <form
+      onSubmit={submit}
+      className="space-y-2 border-t border-zinc-200 pt-4 dark:border-zinc-800"
+    >
       <div className="flex flex-wrap gap-2">
         <input
           className={`${inputClass} max-w-64 font-mono`}
@@ -67,15 +70,27 @@ function BuiltIn({ tools }: { tools: ToolOption[] }): ReactElement | null {
     return null;
   }
   return (
-    <details className="text-xs text-zinc-500">
-      <summary className="cursor-pointer select-none">
-        Built in ({builtIn.length}): Claude Code&apos;s tools and the git rules the agents use by
-        default
-      </summary>
-      <p className="mt-1 font-mono leading-relaxed">
-        {builtIn.map((tool) => tool.name).join(' · ')}
-      </p>
-    </details>
+    <section className="space-y-3">
+      <div className="space-y-0.5">
+        <h3 className="flex items-baseline gap-2 font-semibold">
+          Built in <span className="text-sm font-normal text-zinc-500">{builtIn.length}</span>
+        </h3>
+        <p className="text-sm text-zinc-500">
+          Claude Code&apos;s tools and the git rules the agents use by default: always listed.
+        </p>
+      </div>
+      <ul className="flex flex-wrap gap-1.5">
+        {builtIn.map((tool) => (
+          <li
+            key={tool.name}
+            title={tool.description ?? undefined}
+            className="rounded-md border border-zinc-200 bg-zinc-50 px-1.5 py-0.5 font-mono text-xs text-zinc-600 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-400"
+          >
+            {tool.name}
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 
@@ -100,12 +115,14 @@ function CustomTools({
     return <p className="text-sm text-zinc-500">No tools added yet.</p>;
   }
   return (
-    <ul className="divide-y divide-zinc-200 text-sm dark:divide-zinc-800">
+    <ul className="divide-y divide-zinc-200 rounded-lg border border-zinc-200 text-sm dark:divide-zinc-800 dark:border-zinc-800">
       {tools.map((tool) => (
-        <li key={tool.name} className="flex items-center gap-3 py-1.5">
-          <code className="text-xs">{tool.name}</code>
+        <li key={tool.name} className="flex items-center gap-3 px-3 py-2">
+          <code className="shrink-0 text-xs font-medium">{tool.name}</code>
           <span className="flex-1 text-xs text-zinc-500">{tool.description}</span>
           <Button
+            variant="quietDanger"
+            size="sm"
             disabled={removing}
             onClick={() => {
               onRemove(tool.name);
@@ -135,8 +152,8 @@ export function ToolList(): ReactElement {
         or a permission rule (<code>Bash(pnpm lint*)</code>), then select it on the agents that need
         it. Pushing, remotes and branch changes stay blocked whatever is selected.
       </SettingsIntro>
-      <section className="space-y-3">
-        <BuiltIn tools={tools.data ?? []} />
+      <section className="space-y-4">
+        <h3 className="font-semibold">Your tools</h3>
         <ErrorText error={tools.error ?? remove.error} />
         <CustomTools
           tools={tools.isPending ? null : custom}
@@ -147,6 +164,7 @@ export function ToolList(): ReactElement {
         />
         <AddToolForm />
       </section>
+      <BuiltIn tools={tools.data ?? []} />
     </>
   );
 }
