@@ -55,7 +55,7 @@ function Header({
             </Badge>
           ))}
           {explanation.partsOutdated ? (
-            <span className="text-amber-600">(older grouping)</span>
+            <span className="text-amber-600 dark:text-amber-400">(older grouping)</span>
           ) : null}
         </p>
       ) : null}
@@ -103,7 +103,7 @@ function Turn({
         />
       ) : null}
       {turn.status === 'failed' ? (
-        <p className="text-sm whitespace-pre-wrap text-red-600">{turn.error}</p>
+        <p className="text-sm whitespace-pre-wrap text-red-600 dark:text-red-400">{turn.error}</p>
       ) : null}
       {turn.status === 'cancelled' ? <p className="text-sm text-zinc-500">Cancelled.</p> : null}
       {turn.result ? (

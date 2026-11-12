@@ -10,6 +10,13 @@
 :root {
   color-scheme: light dark;
 }
+/* The muted text (`text-zinc-500`, the app's secondary text) a step lighter in dark mode: on the dark cards
+   zinc-500 reads under 4.5:1. Nearly every use of zinc-500 is text, so the token is the one place to change. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-zinc-500: oklch(0.66 0.014 286);
+  }
+}
 
 html,
 body,

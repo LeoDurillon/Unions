@@ -82,7 +82,7 @@ function NextNeeding({
       }}
     >
       Next needing you
-      <span className="ml-1.5 rounded-full bg-amber-500 px-1.5 text-xs font-semibold text-white">
+      <span className="ml-1.5 rounded-full bg-amber-400 px-1.5 text-xs font-semibold text-amber-950">
         {others}
       </span>
     </Button>

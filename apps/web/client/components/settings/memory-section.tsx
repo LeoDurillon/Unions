@@ -158,7 +158,11 @@ function MemoryBody({
   feedback: Loaded<readonly FeedbackItem[]>;
 }): ReactElement {
   if (lessons.error ?? feedback.error) {
-    return <p className="text-sm text-red-600">Could not load the project&apos;s memory.</p>;
+    return (
+      <p className="text-sm text-red-600 dark:text-red-400">
+        Could not load the project&apos;s memory.
+      </p>
+    );
   }
   if (!lessons.data || !feedback.data) {
     return <LessonsLoading />;

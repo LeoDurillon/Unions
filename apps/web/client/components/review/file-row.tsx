@@ -8,10 +8,10 @@ import { useViewed } from './viewed-context';
 
 const STATUS_MARK = { added: 'A', deleted: 'D', modified: 'M', renamed: 'R' } as const;
 const STATUS_COLOR = {
-  added: 'text-green-600',
-  deleted: 'text-red-600',
-  modified: 'text-amber-600',
-  renamed: 'text-blue-600',
+  added: 'text-green-600 dark:text-green-400',
+  deleted: 'text-red-600 dark:text-red-400',
+  modified: 'text-amber-600 dark:text-amber-400',
+  renamed: 'text-blue-600 dark:text-blue-400',
 } as const;
 /** Indentation of one tree level, and the left padding of the top level, in pixels. */
 export const INDENT = 12;
@@ -101,8 +101,8 @@ export function FileRow({
         {drafts > 0 ? (
           <span className="rounded-full bg-indigo-600 px-1.5 text-xs text-white">{drafts}</span>
         ) : null}
-        <span className="text-green-600">+{file.additions}</span>
-        <span className="text-red-600">−{file.deletions}</span>
+        <span className="text-green-600 dark:text-green-400">+{file.additions}</span>
+        <span className="text-red-600 dark:text-red-400">−{file.deletions}</span>
       </button>
     </div>
   );

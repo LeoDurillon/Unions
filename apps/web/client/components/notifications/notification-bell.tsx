@@ -50,7 +50,7 @@ export function NotificationBell({
         <BellIcon />
         <span className={SIDE_LABEL}>Notifications</span>
         {toAct > 0 ? (
-          <span className={`${SIDE_BADGE} bg-amber-500`}>
+          <span className={`${SIDE_BADGE} bg-amber-400 text-amber-950`}>
             {toAct > MAX_COUNT ? `${MAX_COUNT}+` : toAct}
           </span>
         ) : null}

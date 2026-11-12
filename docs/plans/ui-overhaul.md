@@ -92,14 +92,28 @@ Then the pages not redesigned yet (2026-11-12), client only:
 Checked in light and dark with screenshots (the setup proposal and the wizard on stubbed data, a failed run on a
 stubbed phase).
 
+Then the dark mode pass (2026-11-12), client only, over every page not checked yet: every project settings, Union
+settings and Environments page, the board, Overview, Investigations, Pull requests, Usage, Repository, the review
+page (Diff, Preview, Agents) and the dialogs (shortcuts, New agent, Review with agent, Specs, New investigation).
+A throwaway Playwright script took each page in dark and listed light backgrounds and text under 4.5:1 (3:1 when
+large), colours read through a canvas so `oklch()` counts.
+
+- The muted text failed almost everywhere (zinc-500 on zinc-900 is about 3.6:1): in dark mode `--color-zinc-500` is
+  `oklch(0.66 0.014 286)` (`index.css`), about 5:1 on the cards. Every zinc-500 but one hover border is text.
+- The sidebar's counts and the panel's Next needing you count were white on amber, orange and green (2–3.6:1, in
+  both modes): now dark text on a bright fill (`bg-amber-400 text-amber-950`…); `SIDE_BADGE` no longer sets the text
+  colour.
+- Red, green, amber, blue and indigo text without a dark variant (the review file list's +/− and kinds, errors in
+  Memory and in an explanation) got their `dark:` -400.
+
 ## Left to do
 
 Take them in this order; each is one worktree, one commit, checked with screenshots before it is deployed.
 
-1. **Dark mode pass** over every page above. Checked in dark so far: the loading PR tab, Settings › Checks, the PR
-   tab, the Preview tab (failed), the Log and the Notion tab. Not yet: the other settings, Union settings and
-   Environments pages, Overview, Investigations, Usage, Pull requests, Repository, the review page, dialogs
-   (New ticket, and every page of the step above, are checked).
+1. **Light mode contrast**, found during the dark pass, not changed yet: the muted text (`text-zinc-500`) reads
+   about 4.4:1 on the page background, just under 4.5:1, and the faint labels (`text-zinc-400`: "PR ready" under the
+   ticket's steps, the Overview's DESCRIPTION and RUNS titles) about 2.6:1. Ask the user before changing light
+   mode.
 
 Two ideas on the inner canvas are new features, not design: "Draft with the agent" on a Notion comment and "Start
 it now" in New ticket. Ask the user before building either: both spend Claude usage or start work.

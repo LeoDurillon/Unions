@@ -154,7 +154,7 @@ export function FileDiff({
       {lines.length > shown.length ? (
         <button
           type="button"
-          className="m-2 text-indigo-600 underline"
+          className="m-2 text-indigo-600 underline dark:text-indigo-400"
           onClick={() => {
             setShowAll(true);
           }}

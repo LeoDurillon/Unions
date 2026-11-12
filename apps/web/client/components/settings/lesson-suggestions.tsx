@@ -211,7 +211,7 @@ export function LessonSuggestions({
       ) : null}
       {row.status === 'failed' ? (
         <div className="flex items-center justify-between gap-2">
-          <p className="text-xs text-red-600">
+          <p className="text-xs text-red-600 dark:text-red-400">
             The lesson {row.kind === 'tidy' ? 'tidier' : 'writer'} failed: {row.error}
           </p>
           <Button className="px-2 py-1 text-xs" onClick={close}>

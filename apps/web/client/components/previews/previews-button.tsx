@@ -36,7 +36,9 @@ export function PreviewsButton({
     >
       <PlayIcon />
       <span className={SIDE_LABEL}>Previews</span>
-      {count > 0 ? <span className={`${SIDE_BADGE} bg-emerald-600`}>{count}</span> : null}
+      {count > 0 ? (
+        <span className={`${SIDE_BADGE} bg-emerald-400 text-emerald-950`}>{count}</span>
+      ) : null}
     </button>
   );
 }

@@ -25,7 +25,10 @@ function ProjectSignal({ counts }: Pick<ListedProject, 'counts'>): ReactElement 
         </span>
       ) : null}
       {counts.needsYou > 0 ? (
-        <span title={`${counts.needsYou} waiting for you`} className={`${SIDE_BADGE} bg-amber-600`}>
+        <span
+          title={`${counts.needsYou} waiting for you`}
+          className={`${SIDE_BADGE} bg-orange-400 text-orange-950`}
+        >
           {counts.needsYou}
           <span className="sr-only"> waiting for you</span>
         </span>
