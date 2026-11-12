@@ -172,3 +172,7 @@ Commit messages are short and imperative. Do not commit `*.sqlite*`, `.env` or `
 The pre-commit hook (`.husky/pre-commit`, a few seconds) runs gitleaks on the staged changes, then format, map,
 changed-file lint, `sg`, `knip`, `dup` and typecheck; the tests stay in `bun run check`. Fix what it reports; do not
 skip it with `--no-verify`. Format and lint read the working tree, not only what is staged.
+
+`docs/map/` never stops a rebase or a merge: the `repo-map` merge driver (`.gitattributes`, set up by `bun install`)
+keeps one side, then the `post-rewrite` and `post-merge` hooks regenerate the maps when they are stale and say so.
+Commit what they wrote (`git add docs/map && git commit --amend` after a rebase).

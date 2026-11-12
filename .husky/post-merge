@@ -1,0 +1,2 @@
+# After a merge or pull: docs/map/ kept one side through the `repo-map` merge driver, so regenerate it if stale.
+sh .husky/maps-after-rewrite post-merge
