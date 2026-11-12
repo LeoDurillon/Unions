@@ -1,11 +1,12 @@
 // One line of an agent log: a tool call as its name and argument, the agent's words as prose, a run's end or error.
-// Also a run's total use, for its header.
+// Also a run's total use, for its header, and what a Log with no line shows.
 
 import type { ReactElement } from 'react';
 
 import type { LogLine } from '../../lib/log/agent-events';
 import type { LogRun } from '../../lib/log/log-runs';
 import { sumTokens, tokensText, type CallTokens } from '../../lib/log/token-counts';
+import { Loading, SkeletonLog } from '../ui/skeleton';
 
 export type Entry = {
   key: string;
@@ -65,4 +66,19 @@ export function runTotal(run: LogRun<Entry>): string {
     return used;
   }
   return `${calls.length} calls${used ? ` · ${used}` : ''}`;
+}
+
+/** Before the first read, the shape of a log; after it, that there is none yet. */
+export function NoEntries({ loaded }: { loaded: boolean }): ReactElement {
+  if (loaded) {
+    return <p className="text-zinc-500">No agent activity yet.</p>;
+  }
+  return (
+    <Loading
+      label="Reading the Log"
+      className="space-y-2.5 rounded-xl border border-zinc-200 px-4 py-3.5 dark:border-zinc-800"
+    >
+      <SkeletonLog count={8} />
+    </Loading>
+  );
 }

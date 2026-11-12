@@ -6,6 +6,7 @@ import { useState, type ReactElement } from 'react';
 import type { CiPick, PrChecksView, PullRequestCheck } from '../../../src/ci-api-types';
 import { useCiRerun, type CiRerun } from '../../lib/pull-request/use-ci-rerun';
 import { usePrChecks } from '../../lib/pull-request/use-pr-checks';
+import { Bone, Loading } from '../ui/skeleton';
 import { Button, CARD_CLASS, ErrorText } from '../ui/ui';
 import { CiBar } from './ci-bar';
 import { BotCommentRow, CheckRow, pickKey, RelatedJobs, type Picking } from './ci-check-rows';
@@ -102,6 +103,23 @@ function CheckLists({
   );
 }
 
+const CHECK_WIDTHS = ['38%', '30%', '44%'] as const;
+
+/** The check rows' shape while GitHub answers: a state dot, a name, a duration. */
+function ChecksLoading(): ReactElement {
+  return (
+    <Loading label="Reading the CI checks">
+      {CHECK_WIDTHS.map((width) => (
+        <div key={width} className="flex items-center gap-2.5">
+          <Bone className="size-3.5 rounded-full" />
+          <Bone width={width} />
+          <Bone className="ml-auto h-3 w-12" />
+        </div>
+      ))}
+    </Loading>
+  );
+}
+
 /** Read from GitHub when the tab opens, every 30 s while a check runs, and on Refresh. */
 export function CiChecks({ ticketId, pr }: { ticketId: number; pr: number }): ReactElement {
   const { checks, preview, keep, send, drop } = usePrChecks(ticketId, pr);
@@ -145,6 +163,7 @@ export function CiChecks({ ticketId, pr }: { ticketId: number; pr: number }): Re
           <CiGiven given={view.given} headSha={view.headSha} drop={drop} />
         </>
       ) : null}
+      {!view && !checks.error ? <ChecksLoading /> : null}
     </section>
   );
 }

@@ -18,7 +18,7 @@ import {
 import { CommentCard } from '../review/comment-card';
 import { ImportComments } from '../review/import-comments';
 import { CARD_CLASS, ErrorText } from '../ui/ui';
-import { NoteCard, ThreadCard } from './note-card';
+import { DiscussionLoading, NoteCard, ThreadCard } from './note-card';
 import { filterNotes, NoteFilterControl, useNoteFilter } from './note-filter';
 import { ReplyArea, SendAllReplies } from './reply-area';
 
@@ -148,11 +148,7 @@ export function Discussion({ ticketId, pr }: { ticketId: number; pr: number }): 
   const { importNote } = useImportMutations(ticketId, pr);
   const replies = usePrReplies(ticketRepliesBase(ticketId), pr, discussion.refetch, `?pr=${pr}`);
   if (!discussion.data) {
-    return discussion.error ? (
-      <ErrorText error={discussion.error} />
-    ) : (
-      <p className="text-sm text-zinc-500">Reading the discussion on GitHub…</p>
-    );
+    return discussion.error ? <ErrorText error={discussion.error} /> : <DiscussionLoading />;
   }
   return (
     <div className="space-y-4">

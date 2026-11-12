@@ -10,7 +10,7 @@ import { groupRuns, type LogRun } from '../../lib/log/log-runs';
 import { useLog } from '../../lib/log/use-log';
 import { formatWhen } from '../../lib/ui/relative-time';
 import { useCustomAgentNames } from '../../lib/union-settings/use-custom-agents';
-import { Line, runTotal, type Entry } from './log-line';
+import { Line, NoEntries, runTotal, type Entry } from './log-line';
 
 type AgentReviewChange = EventPayloads['agent_review_changed'];
 
@@ -177,9 +177,7 @@ export function AgentLog({ source }: { source: LogSource }): ReactElement {
   return (
     <div className="space-y-3 text-xs">
       {error ? <p className="text-red-600 dark:text-red-400">{error.message}</p> : null}
-      {entries.length === 0 && !error ? (
-        <p className="text-zinc-500">No agent activity yet.</p>
-      ) : null}
+      {entries.length === 0 && !error ? <NoEntries loaded={log.loaded} /> : null}
       {runs.map((run) => {
         const open = toggled.get(run.key) ?? run.key === lastKey;
         return (

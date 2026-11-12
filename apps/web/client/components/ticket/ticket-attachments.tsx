@@ -11,6 +11,7 @@ import { useState, type ReactElement } from 'react';
 
 import { attachmentsApi, attachmentUrl } from '../../lib/ticket/attachments-api';
 import { DetailRow } from '../ui/detail-row';
+import { Bone } from '../ui/skeleton';
 import { ErrorText } from '../ui/ui';
 import { ATTACHMENTS_HINT, FilePicker, FileRow } from './attachments';
 
@@ -102,7 +103,11 @@ export function TicketAttachments({ ticketId }: { ticketId: number }): ReactElem
       hint={`${ATTACHMENTS_HINT} Files added or changed here reach the agents at the next step.`}
     >
       <div className="space-y-2" aria-label="Files">
-        <FileList attachments={attachments} disabled={busy} update={update} remove={remove} />
+        {query.isPending ? (
+          <Bone width="30%" />
+        ) : (
+          <FileList attachments={attachments} disabled={busy} update={update} remove={remove} />
+        )}
         <FilePicker
           label={upload.isPending ? 'Uploading…' : 'Add files'}
           disabled={upload.isPending}

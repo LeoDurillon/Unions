@@ -1,5 +1,6 @@
 // A review summary or a conversation comment, with its Add to review action when there is one. A
-// line thread, its place a link to the diff; each with its replies below.
+// line thread, its place a link to the diff; each with its replies below. And the discussion's
+// shape while GitHub answers.
 
 import { githubTitle } from '@union/core/github-text';
 import { useState, type ReactElement, type ReactNode } from 'react';
@@ -7,7 +8,8 @@ import { useState, type ReactElement, type ReactNode } from 'react';
 import type { PullRequestNote, PullRequestThread } from '../../../src/api-types';
 import { openDiffLines, type DiffLines, type ReviewPageKind } from '../../lib/review/review-url';
 import { formatWhen } from '../../lib/ui/relative-time';
-import { Badge, Button } from '../ui/ui';
+import { Loading, SkeletonList } from '../ui/skeleton';
+import { Badge, Button, CARD_CLASS } from '../ui/ui';
 import { CommentBody } from './comment-body';
 
 const CARD =
@@ -198,5 +200,21 @@ export function ThreadCard({
       ))}
       {reply}
     </article>
+  );
+}
+
+/** The discussion while GitHub answers: a card of comments taking shape, and why it waits. */
+export function DiscussionLoading(): ReactElement {
+  return (
+    <section className={CARD_CLASS}>
+      <h3 className="text-sm font-semibold">Discussion</h3>
+      <Loading
+        label="Reading the discussion"
+        reason="Reading the pull request from GitHub"
+        className="space-y-3.5"
+      >
+        <SkeletonList count={2} lines={2} />
+      </Loading>
+    </section>
   );
 }

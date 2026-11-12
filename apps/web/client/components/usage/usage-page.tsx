@@ -6,43 +6,11 @@ import { useState, type ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
 import { useProjectFindings, useProjectUsage, type UsageRange } from '../../lib/usage/use-usage';
-import { Segmented, type SegmentOption } from '../ui/choice';
 import { TabButton } from '../ui/tab-button';
-import { ErrorText } from '../ui/ui';
-import { ImproveBanner } from './improve-banner';
-import { SuggestImprovements } from './suggest-improvements';
-import { UsageCost } from './usage-cost';
-import { UsageFindings } from './usage-findings';
-
-const RANGES: SegmentOption<UsageRange>[] = [
-  { value: '7', label: '7 days' },
-  { value: '30', label: '30 days' },
-  { value: '90', label: '90 days' },
-  { value: 'all', label: 'All' },
-];
+import { UsageHeader } from './usage-header';
+import { CostPanel, ImprovePanel } from './usage-panels';
 
 type Tab = 'cost' | 'improve';
-
-function Header({
-  range,
-  onRange,
-}: {
-  range: UsageRange;
-  onRange: (range: UsageRange) => void;
-}): ReactElement {
-  return (
-    <header className="flex flex-wrap items-center justify-between gap-2">
-      <div>
-        <h2 className="text-lg font-semibold tracking-tight">Usage</h2>
-        <p className="text-xs text-zinc-500">
-          What this project&apos;s agents used: its tickets and investigations. The cost is what
-          these tokens would cost on the API; a Max subscription is not billed per call.
-        </p>
-      </div>
-      <Segmented legend="Range" options={RANGES} value={range} onChange={onRange} />
-    </header>
-  );
-}
 
 export function UsagePage({
   project,
@@ -59,7 +27,7 @@ export function UsagePage({
   return (
     <div className="h-full overflow-y-auto">
       <div className="mx-auto max-w-6xl space-y-5 p-6">
-        <Header range={range} onRange={setRange} />
+        <UsageHeader range={range} onRange={setRange} />
         <div role="tablist" className="flex border-b border-zinc-200 dark:border-zinc-800">
           <TabButton tab="cost" current={tab} label="Cost" onSelect={setTab} />
           <TabButton
@@ -70,28 +38,23 @@ export function UsagePage({
           />
         </div>
         <div role="tabpanel" className="space-y-6">
-          <ErrorText error={tab === 'cost' ? usage.error : findings.error} />
-          {tab === 'cost' && usage.data ? (
-            <UsageCost
-              usage={usage.data}
-              improve={
-                <ImproveBanner
-                  findings={findings.data}
-                  onOpen={() => {
-                    setTab('improve');
-                  }}
-                />
-              }
-              onOpenTicket={onOpenTicket}
-            />
-          ) : null}
-          {tab === 'improve' && findings.data ? (
-            <UsageFindings
+          {tab === 'cost' ? (
+            <CostPanel
+              usage={usage}
               findings={findings.data}
-              action={<SuggestImprovements projectId={project.id} range={range} />}
+              onImprove={() => {
+                setTab('improve');
+              }}
               onOpenTicket={onOpenTicket}
             />
-          ) : null}
+          ) : (
+            <ImprovePanel
+              findings={findings}
+              projectId={project.id}
+              range={range}
+              onOpenTicket={onOpenTicket}
+            />
+          )}
         </div>
       </div>
     </div>

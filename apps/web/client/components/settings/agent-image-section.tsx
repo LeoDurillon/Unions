@@ -15,7 +15,7 @@ import {
 import { Segmented } from '../ui/choice';
 import { Button, ErrorText, Field, inputClass } from '../ui/ui';
 import { DefaultDockerfile, DockerfileEditor } from './agent-image-starters';
-import { AgentImageStatus } from './agent-image-status';
+import { AgentImageLoading, AgentImageStatus } from './agent-image-status';
 
 type Kind = AgentImageChoice['kind'];
 type Draft = { kind: Kind; dockerfile: string; ref: string };
@@ -151,6 +151,7 @@ export function AgentImageSection({ project }: { project: PublicProject }): Reac
       ) : (
         <ErrorText error={image.error} />
       )}
+      {image.isPending ? <AgentImageLoading /> : null}
     </section>
   );
 }

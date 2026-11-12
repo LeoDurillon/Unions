@@ -7,6 +7,7 @@ import { previewApi } from '../../lib/preview/preview-api';
 import { PREVIEW_STATUS } from '../../lib/preview/preview-status';
 import { openEnvironments } from '../../lib/settings/environments-url';
 import { DetailRow } from '../ui/detail-row';
+import { Bone } from '../ui/skeleton';
 import { Badge } from '../ui/ui';
 
 const LINK = 'text-indigo-600 hover:underline dark:text-indigo-400';
@@ -25,7 +26,11 @@ export function PreviewSummary({
   });
   const view = query.data;
   if (!view) {
-    return null;
+    return query.isPending ? (
+      <DetailRow label="Preview">
+        <Bone width="45%" />
+      </DetailRow>
+    ) : null;
   }
   const { preview } = view;
   return (

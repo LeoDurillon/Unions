@@ -4,6 +4,7 @@ import type { ReactElement } from 'react';
 
 import { useDiscussion } from '../../lib/review/use-review';
 import { FoldedMarkdown } from '../markdown/folded-markdown';
+import { Loading, SkeletonLines } from '../ui/skeleton';
 import { ErrorText } from '../ui/ui';
 
 export function GitHubDescription({
@@ -15,7 +16,13 @@ export function GitHubDescription({
 }): ReactElement {
   const discussion = useDiscussion(ticketId, pr, true);
   if (!discussion.data) {
-    return <ErrorText error={discussion.error} />;
+    return discussion.error ? (
+      <ErrorText error={discussion.error} />
+    ) : (
+      <Loading label="Reading the description">
+        <SkeletonLines />
+      </Loading>
+    );
   }
   const text = discussion.data.description.trim();
   return text === '' ? (

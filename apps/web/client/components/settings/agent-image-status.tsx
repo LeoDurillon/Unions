@@ -1,5 +1,5 @@
 // The agent image page's state: what the agents run on, the save being built or why it was not
-// applied. Also the build's log.
+// applied. Also the build's log, and the page's shape while it is read.
 
 import { formatBytes } from '@union/core/attachment-limits';
 import type { ReactElement } from 'react';
@@ -8,6 +8,7 @@ import type { AgentImageView } from '../../../src/routes/agent-image';
 import { isBuilding } from '../../lib/settings/use-agent-image';
 import { timeAgo } from '../../lib/ui/relative-time';
 import { useNow } from '../../lib/ui/use-now';
+import { Bone, Loading } from '../ui/skeleton';
 import { Badge } from '../ui/ui';
 
 function appliedName(view: AgentImageView): string {
@@ -70,5 +71,19 @@ export function AgentImageStatus({ view }: { view: AgentImageView }): ReactEleme
         </details>
       )}
     </div>
+  );
+}
+
+/** While the image's state is read: its badge and what runs, the choice, the Dockerfile. */
+export function AgentImageLoading(): ReactElement {
+  return (
+    <Loading label="Reading the agent image" className="space-y-3">
+      <div className="flex items-center gap-2">
+        <Bone className="h-5 w-24 rounded-full" />
+        <Bone width="40%" />
+      </div>
+      <Bone className="h-8 w-72 rounded-lg" />
+      <Bone className="h-48 rounded-lg" />
+    </Loading>
   );
 }

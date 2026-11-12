@@ -8,12 +8,13 @@ import { api } from '../app/api';
 /** Agent output is not on the shared stream: an open Log asks for its new lines this often. */
 const POLL_MS = 1000;
 
-type Log = { entries: LogEntry[]; error: Error | null };
+/** `loaded`: the first read came back, so no entry means none yet. */
+type Log = { entries: LogEntry[]; error: Error | null; loaded: boolean };
 
 /** What was read, for the query it was read for: another query's reads are not shown. */
 type State = Log & { query: string };
 
-const EMPTY: Log = { entries: [], error: null };
+const EMPTY: Log = { entries: [], error: null, loaded: false };
 
 /**
  * The Log's entries, in order, kept up to date while mounted. A hidden tab skips its polls; a failed
@@ -38,6 +39,7 @@ export function useLog(query: string): Log {
             entries:
               previous.query === query ? [...previous.entries, ...page.entries] : page.entries,
             error: null,
+            loaded: true,
           }));
         }
       } catch (error) {

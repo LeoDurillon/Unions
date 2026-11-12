@@ -6,7 +6,11 @@ import { useState, type ReactElement, type SubmitEvent } from 'react';
 
 import { api } from '../../lib/app/api';
 import { useAgentTools } from '../../lib/union-settings/use-agent-tools';
+import { Loading, SkeletonRows } from '../ui/skeleton';
 import { Button, ErrorText, inputClass } from '../ui/ui';
+
+/** Rows shown while the list is read. */
+const LOADING_ROWS = 3;
 
 function AddToolForm(): ReactElement {
   const queryClient = useQueryClient();
@@ -74,6 +78,46 @@ function BuiltIn({ tools }: { tools: ToolOption[] }): ReactElement | null {
   );
 }
 
+/** The tools the user added, each with Remove; their shape while the list is read (`tools` null). */
+function CustomTools({
+  tools,
+  removing,
+  onRemove,
+}: {
+  tools: ToolOption[] | null;
+  removing: boolean;
+  onRemove: (name: string) => void;
+}): ReactElement {
+  if (tools === null) {
+    return (
+      <Loading label="Reading the tools" className="divide-y divide-zinc-200 dark:divide-zinc-800">
+        <SkeletonRows count={LOADING_ROWS} columns="grid-cols-[12rem_1fr_4.5rem]" cells={2} />
+      </Loading>
+    );
+  }
+  if (tools.length === 0) {
+    return <p className="text-sm text-zinc-500">No tools added yet.</p>;
+  }
+  return (
+    <ul className="divide-y divide-zinc-200 text-sm dark:divide-zinc-800">
+      {tools.map((tool) => (
+        <li key={tool.name} className="flex items-center gap-3 py-1.5">
+          <code className="text-xs">{tool.name}</code>
+          <span className="flex-1 text-xs text-zinc-500">{tool.description}</span>
+          <Button
+            disabled={removing}
+            onClick={() => {
+              onRemove(tool.name);
+            }}
+          >
+            Remove
+          </Button>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 /** The tools the user added to the list, and the form to add more. */
 export function ToolList(): ReactElement {
   const queryClient = useQueryClient();
@@ -96,26 +140,13 @@ export function ToolList(): ReactElement {
       </header>
       <BuiltIn tools={tools.data ?? []} />
       <ErrorText error={tools.error ?? remove.error} />
-      {custom.length === 0 ? (
-        <p className="text-sm text-zinc-500">No tools added yet.</p>
-      ) : (
-        <ul className="divide-y divide-zinc-200 text-sm dark:divide-zinc-800">
-          {custom.map((tool) => (
-            <li key={tool.name} className="flex items-center gap-3 py-1.5">
-              <code className="text-xs">{tool.name}</code>
-              <span className="flex-1 text-xs text-zinc-500">{tool.description}</span>
-              <Button
-                disabled={remove.isPending}
-                onClick={() => {
-                  remove.mutate(tool.name);
-                }}
-              >
-                Remove
-              </Button>
-            </li>
-          ))}
-        </ul>
-      )}
+      <CustomTools
+        tools={tools.isPending ? null : custom}
+        removing={remove.isPending}
+        onRemove={(name) => {
+          remove.mutate(name);
+        }}
+      />
       <AddToolForm />
     </section>
   );

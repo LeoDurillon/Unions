@@ -13,6 +13,7 @@ import {
 import { useNow } from '../../lib/ui/use-now';
 import { Button, ErrorText, inputClass } from '../ui/ui';
 import { isActive, SCOPE_LABELS, STATUS_LABELS } from './investigation-labels';
+import { InvestigationListLoading } from './investigation-loading';
 
 const DOT: Record<Tone, string> = {
   neutral: 'bg-zinc-400',
@@ -75,7 +76,8 @@ function ListHeader({
   onText,
   onNew,
 }: {
-  count: number;
+  /** None until the list is read: never a wrong "0". */
+  count: number | null;
   text: string;
   error: Error | null;
   onText: (text: string) => void;
@@ -85,7 +87,8 @@ function ListHeader({
     <div className="space-y-2.5 p-4 pb-2">
       <div className="flex items-center gap-2">
         <h2 className="flex-1 text-[15px] font-semibold">
-          Investigations <span className="font-normal text-zinc-500">{count}</span>
+          Investigations{' '}
+          {count === null ? null : <span className="font-normal text-zinc-500">{count}</span>}
         </h2>
         <Button variant="primary" size="sm" className="py-1" onClick={onNew}>
           + New
@@ -132,7 +135,7 @@ export function InvestigationList({
       className="flex w-80 shrink-0 flex-col border-r border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950"
     >
       <ListHeader
-        count={investigations.length}
+        count={loaded ? investigations.length : null}
         text={text}
         error={error}
         onText={setText}
@@ -157,6 +160,7 @@ export function InvestigationList({
             </ul>
           </section>
         ))}
+        {!loaded && error === null ? <InvestigationListLoading /> : null}
         {loaded && shown.length === 0 ? (
           <p className="px-2.5 pt-3 text-sm text-zinc-500">
             {investigations.length === 0 ? 'No investigation yet.' : 'None matches.'}

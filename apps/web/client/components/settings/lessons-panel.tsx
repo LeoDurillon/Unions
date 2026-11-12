@@ -1,9 +1,11 @@
 // The Memory page's lessons part: whether they are sent to the agents, Tidy lessons, then the lessons by step.
+// Also the page's shape while the lessons are read.
 
 import type { LessonInput } from '@union/core/lesson-input';
 import type { ReactElement } from 'react';
 
 import { Switch } from '../ui/choice';
+import { Loading, SkeletonLines } from '../ui/skeleton';
 import { LessonList, type Editing } from './lesson-list';
 import type { AcceptLessons } from './lesson-suggestions';
 import { TidyLessons } from './lesson-tidy';
@@ -56,5 +58,16 @@ export function LessonsPanel({
         />
       </div>
     </div>
+  );
+}
+
+/** The Memory page while its lessons and feedback are read. */
+export function LessonsLoading(): ReactElement {
+  return (
+    <section>
+      <Loading label="Reading the memory" className="space-y-3">
+        <SkeletonLines count={4} title />
+      </Loading>
+    </section>
   );
 }

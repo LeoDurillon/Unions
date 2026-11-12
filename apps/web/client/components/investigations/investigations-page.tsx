@@ -10,6 +10,7 @@ import { clearInvestigateTicket } from '../../lib/investigations/investigate-tic
 import { InvestigationDetail } from './investigation-detail';
 import { InvestigationForm } from './investigation-form';
 import { InvestigationList } from './investigation-list';
+import { InvestigationDetailLoading } from './investigation-loading';
 
 /** An investigation's id, the form (`new`), or null: the latest one (the form while there is none). */
 type Selection = number | 'new' | null;
@@ -48,6 +49,22 @@ function NewInvestigation({
       />
     </div>
   );
+}
+
+/** No investigation open: its shape while the list is read, else the form when it shows. */
+function NoneShown({
+  loading,
+  form,
+  children,
+}: {
+  loading: boolean;
+  form: boolean;
+  children: ReactElement;
+}): ReactElement | null {
+  if (loading) {
+    return <InvestigationDetailLoading />;
+  }
+  return form ? children : null;
 }
 
 /** Ad-hoc agent runs on a custom prompt for the project; no GitHub issue is created. */
@@ -97,13 +114,18 @@ export function InvestigationsPage({
             onOpenTicket={onOpenTicket}
           />
         ) : null}
-        {!shown && (query.isSuccess || selection === 'new') ? (
-          <NewInvestigation
-            project={project}
-            initialTicket={initialTicket}
-            onCreated={setSelection}
-          />
-        ) : null}
+        {shown ? null : (
+          <NoneShown
+            loading={query.isPending && selection !== 'new'}
+            form={query.isSuccess || selection === 'new'}
+          >
+            <NewInvestigation
+              project={project}
+              initialTicket={initialTicket}
+              onCreated={setSelection}
+            />
+          </NoneShown>
+        )}
       </div>
     </div>
   );

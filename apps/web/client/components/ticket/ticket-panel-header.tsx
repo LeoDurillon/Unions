@@ -6,6 +6,7 @@ import type { ReactElement } from 'react';
 
 import type { TicketDetail, TicketSummary } from '../../../src/api-types';
 import { investigateTicket } from '../../lib/investigations/investigate-ticket';
+import { Bone } from '../ui/skeleton';
 import { Button, CloseButton } from '../ui/ui';
 import { TicketMenu } from './ticket-menu';
 import type { NeedingYou } from './ticket-panel-keys';
@@ -32,7 +33,11 @@ function Crumb({ href, children }: { href: string; children: string }): ReactEle
 /** `owner/repo / #12 / PR #34`, the issue and the pull request linked to GitHub. */
 function Breadcrumb({ detail }: { detail: TicketDetail | undefined }): ReactElement {
   if (!detail) {
-    return <span className="flex-1 text-xs text-zinc-500">Loading…</span>;
+    return (
+      <span className="flex-1">
+        <Bone width="40%" />
+      </span>
+    );
   }
   const { project, ticket } = detail;
   const repo = `https://github.com/${project.owner}/${project.repo}`;

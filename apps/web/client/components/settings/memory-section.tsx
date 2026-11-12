@@ -23,7 +23,7 @@ import {
 } from '../../lib/settings/use-memory';
 import { useSettingsForm, type SettingsForm } from '../../lib/settings/use-settings-form';
 import { FeedbackInbox, type FeedbackActions } from './feedback-inbox';
-import { LessonsPanel } from './lessons-panel';
+import { LessonsLoading, LessonsPanel } from './lessons-panel';
 import { SaveBar } from './save-bar';
 
 function stepOf(section: string): PipelineStep {
@@ -138,7 +138,7 @@ export function MemorySection({ project }: { project: PublicProject }): ReactEle
     return <p className="text-sm text-red-600">Could not load the project&apos;s memory.</p>;
   }
   if (!lessons.data || !feedback.data) {
-    return <p className="text-sm text-zinc-500">Loading…</p>;
+    return <LessonsLoading />;
   }
   return <MemoryForm project={project} lessons={lessons.data} feedback={feedback.data} />;
 }

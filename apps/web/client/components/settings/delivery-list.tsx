@@ -9,9 +9,11 @@ import type { DeliveryView } from '../../../src/event-api-types';
 import { useNotionUsers } from '../../lib/integrations/use-notion-users';
 import { eventRulesApi } from '../../lib/settings/event-rules-api';
 import { formatWhen } from '../../lib/ui/relative-time';
+import { Loading, SkeletonRows } from '../ui/skeleton';
 import { Badge } from '../ui/ui';
 
 const DELIVERIES_POLL_MS = 10_000;
+const LOADING_ROWS = 9;
 const STATUS_TONES = {
   pending: 'blue',
   succeeded: 'green',
@@ -76,6 +78,16 @@ function DeliveryList({ projectId }: { projectId: number }): ReactElement {
       projectId,
       rows.some((row) => row.detail !== null),
     ).data ?? [];
+  if (deliveries.isPending) {
+    return (
+      <Loading
+        label="Reading the event activity"
+        className="divide-y divide-zinc-200 dark:divide-zinc-800"
+      >
+        <SkeletonRows count={LOADING_ROWS} columns={COLUMNS} cells={3} rowClassName="py-2.5" />
+      </Loading>
+    );
+  }
   if (rows.length === 0) {
     return (
       <p className="text-sm text-zinc-500">Nothing yet: rules apply to what happens from now on.</p>
