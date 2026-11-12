@@ -1,10 +1,9 @@
-// A ticket's files in the browser: one file's row, the file picker, and the New ticket form's
-// pending files.
+// A ticket's files in the browser: one file's row, its note and switch, and the file picker.
 
 import { formatBytes } from '@union/core/attachment-limits';
 import { useState, type ReactElement, type ReactNode } from 'react';
 
-import { fileProblem, type PendingFile } from '../../lib/ticket/attachments-api';
+import { fileProblem } from '../../lib/ticket/attachments-api';
 import { Switch } from '../ui/choice';
 import { Dropzone } from '../ui/dropzone';
 import { Button, inputClass } from '../ui/ui';
@@ -81,7 +80,7 @@ function FileSummary({
 }
 
 /** The note and the switch of an opened file row. */
-function FileDetails({
+export function FileDetails({
   name,
   note,
   allowInRepo,
@@ -200,61 +199,5 @@ export function FilePicker({
         );
       }}
     />
-  );
-}
-
-/** The New ticket form's files: kept in the browser, uploaded once the ticket exists. */
-export function PendingFilesField({
-  files,
-  onChange,
-}: {
-  files: PendingFile[];
-  onChange: (files: PendingFile[]) => void;
-}): ReactElement {
-  const [problems, setProblems] = useState<string[]>([]);
-  const change = (index: number, update: Partial<PendingFile>): void => {
-    onChange(files.map((pending, at) => (at === index ? { ...pending, ...update } : pending)));
-  };
-  return (
-    <div className="space-y-2">
-      <span className="text-sm font-medium">Files</span>
-      <ul className="space-y-2">
-        {files.map((pending, index) => (
-          <FileRow
-            // The list only changes through this form; position and name identify a row.
-            // oxlint-disable-next-line react/no-array-index-key
-            key={`${index}-${pending.file.name}`}
-            name={pending.file.name}
-            size={pending.file.size}
-            note={pending.note}
-            allowInRepo={pending.allowInRepo}
-            disabled={false}
-            startOpen
-            onNote={(note) => {
-              change(index, { note });
-            }}
-            onAllow={(allowInRepo) => {
-              change(index, { allowInRepo });
-            }}
-            onRemove={() => {
-              onChange(files.filter((_, at) => at !== index));
-            }}
-          />
-        ))}
-      </ul>
-      <FilePicker
-        label="Add files"
-        onFiles={(picked, refused) => {
-          setProblems(refused);
-          onChange([...files, ...picked.map((file) => ({ file, note: '', allowInRepo: false }))]);
-        }}
-      />
-      {problems.map((problem) => (
-        <p key={problem} className="text-sm text-red-600 dark:text-red-400">
-          {problem}
-        </p>
-      ))}
-      <span className="block text-xs text-zinc-500">Optional. {ATTACHMENTS_HINT}</span>
-    </div>
   );
 }

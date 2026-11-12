@@ -1,73 +1,16 @@
 // The form that creates a ticket, with its parent and attached files.
 
-import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 import type { TicketOrigin } from '@union/core';
 import { integrationKind } from '@union/core/integration-kinds';
 import type { PipelineStep } from '@union/core/states';
 import { useState, type ReactElement, type ReactNode, type SubmitEvent } from 'react';
 
-import { api } from '../../lib/app/api';
-import { attachmentsApi, type PendingFile } from '../../lib/ticket/attachments-api';
-import { PendingFilesField } from '../ticket/attachments';
-import { ParentPicker } from '../ticket/parent-picker';
-import { Button, ErrorText, Field, inputClass } from '../ui/ui';
-
-function ParentField({
-  projectId,
-  value,
-  onChange,
-}: {
-  projectId: number;
-  value: number | null;
-  onChange: (parentId: number | null) => void;
-}): ReactElement {
-  return (
-    <Field
-      label="Depends on"
-      hint="Optional. The ticket starts only once its parent is done, from the parent's branch."
-    >
-      <ParentPicker projectId={projectId} ticketId={null} value={value} onChange={onChange} />
-    </Field>
-  );
-}
-
-/** One by one; on a failure the files not sent yet are kept (`keep`), so a retry sends only them. */
-async function uploadPending(
-  ticketId: number,
-  files: PendingFile[],
-  keep: (files: PendingFile[]) => void,
-): Promise<void> {
-  let remaining = files;
-  try {
-    for (const pending of files) {
-      // oxlint-disable-next-line no-await-in-loop -- one by one, see above
-      await attachmentsApi.upload(ticketId, pending);
-      remaining = remaining.slice(1);
-    }
-  } catch (error) {
-    keep(remaining);
-    throw new Error(
-      `The ticket was created, but a file could not be uploaded: ${error instanceof Error ? error.message : String(error)}. Remove it and submit again, or add the files later from the ticket's Overview tab.`,
-      { cause: error },
-    );
-  }
-}
-
-function submitLabel(pending: boolean, created: boolean): string {
-  if (pending) {
-    return 'Creating…';
-  }
-  return created ? 'Upload the files and open the ticket' : 'Create ticket';
-}
-
-type NewTicket = {
-  projectId: number;
-  title: string;
-  body: string;
-  parentId: number | null;
-  flow: PipelineStep[] | null;
-  origin?: TicketOrigin;
-};
+import type { PendingFile } from '../../lib/ticket/attachments-api';
+import { useCreateTicket } from '../../lib/ticket/use-create-ticket';
+import { ErrorText, inputClass } from '../ui/ui';
+import { DescriptionField } from './description-field';
+import { FormFooter, submitOnModEnter } from './form-footer';
+import { ParentField } from './parent-field';
 
 /** A tracker item (a Notion page) whose import is edited before the ticket is created. */
 export type SourceRef = TicketOrigin & { title: string };
@@ -87,67 +30,25 @@ function SourceLink({ item, onUnlink }: { item: SourceRef; onUnlink: () => void 
   );
 }
 
-/** Creates the ticket, then uploads its files; a retry after a failed upload reuses the ticket. */
-function useCreateTicket(
-  ticket: NewTicket,
-  { files, setFiles }: { files: PendingFile[]; setFiles: (files: PendingFile[]) => void },
-  onCreated: (ticketId: number) => void,
-): { create: UseMutationResult<number, Error, void>; created: boolean } {
-  const queryClient = useQueryClient();
-  const [createdId, setCreatedId] = useState<number | null>(null);
-  const create = useMutation({
-    mutationFn: async () => {
-      let id = createdId;
-      if (id === null) {
-        ({ id } = await api.createTicket(ticket));
-      }
-      setCreatedId(id);
-      await uploadPending(id, files, setFiles);
-      return id;
-    },
-    onSuccess: async (id) => {
-      await queryClient.invalidateQueries({ queryKey: ['tickets'] });
-      onCreated(id);
-    },
-  });
-  return { create, created: createdId !== null };
-}
-
-function TextFields({
+function TitleInput({
   title,
-  body,
   onTitle,
-  onBody,
 }: {
   title: string;
-  body: string;
   onTitle: (title: string) => void;
-  onBody: (body: string) => void;
 }): ReactElement {
   return (
-    <>
-      <Field label="Title">
-        <input
-          className={`${inputClass} py-2 text-[15px] font-semibold`}
-          placeholder="What should change, in a line"
-          value={title}
-          onChange={(event) => {
-            onTitle(event.target.value);
-          }}
-          required
-        />
-      </Field>
-      <Field label="Description" hint="Markdown. This becomes the GitHub issue body.">
-        <textarea
-          className={`${inputClass} min-h-44 font-mono leading-relaxed`}
-          placeholder="The problem, what done looks like, anything the agents should know."
-          value={body}
-          onChange={(event) => {
-            onBody(event.target.value);
-          }}
-        />
-      </Field>
-    </>
+    <input
+      aria-label="Title"
+      className={`${inputClass} py-2 text-[15px] font-semibold`}
+      placeholder="What should change, in a line"
+      value={title}
+      onKeyDown={submitOnModEnter}
+      onChange={(event) => {
+        onTitle(event.target.value);
+      }}
+      required
+    />
   );
 }
 
@@ -155,6 +56,7 @@ export function TicketForm({
   projectId,
   flow,
   onCreated,
+  onCancel,
   initialTitle = '',
   initialBody = '',
   source = null,
@@ -163,9 +65,10 @@ export function TicketForm({
   projectId: number;
   /** Chosen in `flowField`, shared with the other ways of creating the ticket. */
   flow: PipelineStep[] | null;
-  /** The flow picker, shown after the files. */
+  /** The flow picker, shown after the description. */
   flowField?: ReactNode;
   onCreated: (ticketId: number) => void;
+  onCancel: () => void;
   initialTitle?: string;
   initialBody?: string;
   source?: SourceRef | null;
@@ -197,17 +100,12 @@ export function TicketForm({
           }}
         />
       ) : null}
-      <TextFields title={title} body={body} onTitle={setTitle} onBody={setBody} />
-      <ParentField projectId={projectId} value={parentId} onChange={setParentId} />
-      <PendingFilesField files={files} onChange={setFiles} />
+      <TitleInput title={title} onTitle={setTitle} />
+      <DescriptionField body={body} onBody={setBody} files={files} onFiles={setFiles} />
       {flowField}
+      <ParentField projectId={projectId} value={parentId} onChange={setParentId} />
       <ErrorText error={create.error} />
-      {/* The dialog's footer: a bar along its bottom edge, the action on the right. */}
-      <div className="-mx-6 -mb-6 flex justify-end rounded-b-2xl border-t border-zinc-200 bg-zinc-50 px-6 py-3 dark:border-zinc-800 dark:bg-zinc-950">
-        <Button type="submit" variant="primary" disabled={create.isPending}>
-          {submitLabel(create.isPending, created)}
-        </Button>
-      </div>
+      <FormFooter pending={create.isPending} created={created} onCancel={onCancel} />
     </form>
   );
 }

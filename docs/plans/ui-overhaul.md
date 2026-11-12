@@ -63,18 +63,24 @@ agent" (new features).
 On the user's database the status reads null: its status column (`Avancement`) is not of Notion's `status` type
 (a select, most likely). Naming the status column in Settings → Notion would fix it; the user has not decided yet.
 
+Then the New ticket dialog (2026-11-12), client only: the title without a label; the description in one box
+(`new-ticket/description-field.tsx`) with Write / Preview, "Markdown · drop files here", Attach files, and the files
+dropped or attached as chips under the text (`pending-file-chips.tsx`), a chip opening its note and switch; Flow and
+Depends on as rows with their label in a column (`form-row.tsx`), the flow's description and steps in one line under
+the switch (`FlowPicker`, also in the Overview's Flow row); Cancel beside Create ticket, which shows Ctrl ↵ (⌘ ↵ on
+a Mac): Ctrl/⌘+Enter in the title or the description submits (`form-footer.tsx`). Not built: "Start it now".
+
 ## Left to do
 
 Take them in this order; each is one worktree, one commit, checked with screenshots before it is deployed.
 
-1. **New ticket dialog** (board "New ticket dialog"): Write / Preview on the description, attached files as chips
-   under it, the flow's steps under the switch, Cancel beside Create ticket, Ctrl/⌘ Enter to create.
-2. **Pages not redesigned yet**: a step's output tab (`components/steps/step-tab.tsx` and its notices), the
+1. **Pages not redesigned yet**: a step's output tab (`components/steps/step-tab.tsx` and its notices), the
    review's Ticket and Report tabs beyond their cards, Union Tools and Connectors lists, the GitHub App page (its
    header sits outside its card), the onboarding wizard, the setup agent's proposal cards, the guide.
-3. **Dark mode pass** over every page above. Checked in dark so far: the loading PR tab, Settings › Checks, the PR
+2. **Dark mode pass** over every page above. Checked in dark so far: the loading PR tab, Settings › Checks, the PR
    tab, the Preview tab (failed), the Log and the Notion tab. Not yet: the other settings, Union settings and
-   Environments pages, Overview, Investigations, Usage, Pull requests, Repository, the review page, dialogs.
+   Environments pages, Overview, Investigations, Usage, Pull requests, Repository, the review page, dialogs
+   (New ticket is checked).
 
 Two ideas on the inner canvas are new features, not design: "Draft with the agent" on a Notion comment and "Start
 it now" in New ticket. Ask the user before building either: both spend Claude usage or start work.

@@ -23,6 +23,10 @@ const GROUPS: Group[] = [
     ],
   },
   {
+    title: 'New ticket',
+    keys: [['Ctrl / ⌘ Enter', 'Create the ticket']],
+  },
+  {
     title: 'Ticket',
     keys: [
       ['n', 'Next ticket that needs you'],

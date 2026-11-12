@@ -6,8 +6,8 @@ import { useState, type ReactElement } from 'react';
 
 import type { PublicProject, SourceImport } from '../../../src/api-types';
 import type { Overlay } from '../../lib/app/use-navigation';
-import { FlowPicker } from '../flow/flow-picker';
 import { SourceImportPanel } from '../integrations/source-import';
+import { FlowField } from '../new-ticket/flow-field';
 import { GitHubImportPanel } from '../new-ticket/github-import';
 import { TicketForm, type SourceRef } from '../new-ticket/ticket-form';
 import { Dialog } from '../ui/ui';
@@ -58,24 +58,6 @@ function TicketTabs({
   );
 }
 
-function FlowField({
-  project,
-  value,
-  onChange,
-}: {
-  project: PublicProject;
-  value: PipelineStep[] | null;
-  onChange: (flow: PipelineStep[] | null) => void;
-}): ReactElement {
-  return (
-    // Not a `Field`: its label would wrap the picker's own labels.
-    <div className="space-y-1">
-      <span className="text-sm font-medium">Flow</span>
-      <FlowPicker config={project.config} value={value} onChange={onChange} />
-    </div>
-  );
-}
-
 /** A tracker's item opened in the form, still linked to it. */
 function editedDraft(kind: IntegrationKindName, item: SourceImport, previous: Draft): Draft {
   const source = { kind, id: item.id, url: item.url, title: item.title };
@@ -86,9 +68,11 @@ function editedDraft(kind: IntegrationKindName, item: SourceImport, previous: Dr
 function TicketBody({
   project,
   onCreated,
+  onCancel,
 }: {
   project: PublicProject;
   onCreated: (id: number) => void;
+  onCancel: () => void;
 }): ReactElement {
   const [tab, setTab] = useState<Source>('write');
   const tabs = sourcesFor(project);
@@ -105,6 +89,7 @@ function TicketBody({
       source={draft.source}
       flowField={picker}
       onCreated={onCreated}
+      onCancel={onCancel}
     />
   );
   if (tabs.length === 1) {
@@ -153,7 +138,7 @@ function TicketDialog({
 }): ReactElement {
   return (
     <Dialog open={open && project !== null} onClose={onClose} title="New ticket">
-      {project ? <TicketBody project={project} onCreated={onCreated} /> : null}
+      {project ? <TicketBody project={project} onCreated={onCreated} onCancel={onClose} /> : null}
     </Dialog>
   );
 }

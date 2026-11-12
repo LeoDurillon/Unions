@@ -29,7 +29,7 @@ function boxClass(over: boolean, disabled: boolean): string {
 }
 
 /** Whether files are dragged over `ref`'s element; hands over the ones dropped on it. */
-function useFileDrop(
+export function useFileDrop(
   ref: RefObject<HTMLElement | null>,
   disabled: boolean,
   onDrop: (files: File[]) => void,

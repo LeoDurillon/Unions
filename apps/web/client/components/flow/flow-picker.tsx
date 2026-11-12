@@ -115,11 +115,16 @@ export function FlowPicker({
           }
         }}
       />
-      {preset?.description ? <p className="text-sm">{preset.description}</p> : null}
       {preset === null ? <PlanningChips flow={flow} onChange={choose} /> : null}
-      <p className="text-xs text-zinc-500">
-        {flowSteps(flow, names)}
-        {sameFlow(flow, defaultSteps) ? ` (the project's default, ${flowName(flow, config)})` : ''}
+      {/* What the flow is for, then its steps, in one line under the switch. */}
+      <p className="text-xs text-zinc-600 dark:text-zinc-400">
+        {preset?.description ? `${preset.description} ` : null}
+        <span className="text-zinc-500">
+          {flowSteps(flow, names)}
+          {sameFlow(flow, defaultSteps)
+            ? ` (the project's default, ${flowName(flow, config)})`
+            : ''}
+        </span>
       </p>
     </div>
   );
