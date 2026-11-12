@@ -54,7 +54,9 @@ Three kinds of runs have no page in Union settings:
 On an agent's page:
 
 - **Prompt**: what the agent is told to do. A few prompts ask for an answer Union reads: keep that part when you
-  edit them (see [What Union reads from an answer](#what-union-reads-from-an-answer)).
+  edit them (see [What Union reads from an answer](#what-union-reads-from-an-answer)). **Preview** above it shows
+  the prompt rendered as Markdown (**Edit** goes back), and the count beside it says how many lines and words it
+  has. The shared instructions have the same editor.
 - **Model**: Haiku (fastest, uses the least), Sonnet, or Opus (most capable).
 - **Effort**: how hard the agent thinks (`low` to `max`). **Default** leaves it to Claude Code.
 - **Tools**: what the agent may do. The planning and review agents read; the implementer also edits and runs
