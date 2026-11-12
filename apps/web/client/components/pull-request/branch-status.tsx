@@ -58,7 +58,7 @@ export function BranchStatus({ detail }: { detail: TicketDetail }): ReactElement
   }
   const commits = ticket.behindBy === 1 ? '1 commit' : `${ticket.behindBy} commits`;
   return (
-    <div className="space-y-2 rounded-md border border-amber-300 p-3 text-sm dark:border-amber-900">
+    <div className="space-y-2 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm dark:border-amber-900 dark:bg-amber-950/30">
       <div className="flex flex-wrap items-center gap-3">
         <span>
           <code>{ticket.branch}</code> is {commits} behind <code>{base}</code>.

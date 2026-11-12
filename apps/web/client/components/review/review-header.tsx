@@ -33,7 +33,7 @@ function ReviewTitle({
   const snapshot = diff?.snapshot;
   const ignoredCount = diff?.files.filter((file) => file.ignored).length ?? 0;
   return (
-    <div className="min-w-0 flex-1">
+    <div className="min-w-48 flex-1">
       {snapshot ? (
         <p className="truncate font-mono text-[11.5px] text-zinc-500">
           {diff.files.length} files against {snapshot.baseBranch}

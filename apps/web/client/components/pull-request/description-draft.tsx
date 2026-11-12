@@ -4,7 +4,17 @@ import { useState, type ReactElement } from 'react';
 
 import type { PrDescriptionDraft } from '../../../src/api-types';
 import { lineDiff } from '../../lib/review/line-diff';
+import { Markdown } from '../markdown/markdown';
+import { Segmented } from '../ui/choice';
 import { Button } from '../ui/ui';
+
+type Mode = 'preview' | 'edit' | 'changes';
+
+const MODES: { value: Mode; label: string }[] = [
+  { value: 'preview', label: 'Preview' },
+  { value: 'edit', label: 'Edit' },
+  { value: 'changes', label: 'Changes from GitHub’s' },
+];
 
 const LINE_TONES = {
   same: 'text-zinc-500',
@@ -87,32 +97,33 @@ export function DescriptionDraft({
   rewriteLabel: string | null;
 }): ReactElement {
   const [text, setText] = useState(draft.text ?? '');
-  const [showChanges, setShowChanges] = useState(false);
+  const [mode, setMode] = useState<Mode>('preview');
   const sending = draft.status === 'sending';
   return (
     <div className="space-y-2">
-      <button
-        type="button"
-        className="text-xs text-indigo-600 hover:underline dark:text-indigo-400"
-        onClick={() => {
-          setShowChanges(!showChanges);
-        }}
-      >
-        {showChanges ? 'Edit the new description' : 'Show the changes from the current one'}
-      </button>
-      {showChanges ? (
-        <Changes before={draft.original ?? ''} after={text} />
-      ) : (
+      <Segmented
+        legend="Show the new description"
+        options={MODES}
+        value={mode}
+        onChange={setMode}
+      />
+      {mode === 'changes' ? <Changes before={draft.original ?? ''} after={text} /> : null}
+      {mode === 'preview' ? (
+        <div className="max-h-96 overflow-auto rounded-lg border border-zinc-200 px-4 py-2 dark:border-zinc-800">
+          <Markdown github>{text}</Markdown>
+        </div>
+      ) : null}
+      {mode === 'edit' ? (
         <textarea
           aria-label="New description"
-          className="h-72 w-full rounded-md border border-zinc-300 bg-white p-2 font-mono text-xs dark:border-zinc-700 dark:bg-zinc-900"
+          className="h-72 w-full rounded-lg border border-zinc-300 bg-white p-3 font-mono text-xs dark:border-zinc-700 dark:bg-zinc-950"
           value={text}
           readOnly={sending}
           onChange={(event) => {
             setText(event.target.value);
           }}
         />
-      )}
+      ) : null}
       <DraftButtons
         text={text}
         busy={busy}

@@ -9,9 +9,14 @@ Union opens a draft pull request after the implementation, unless you turned tha
 requests**. Its description follows the repository's pull request template (in `.github/`, the root or `docs/`),
 in the template's language, and ends with `Closes #<issue>`.
 
-- **Link** a pull request by number or URL when you opened one yourself, or **Unlink** it.
+- The tab opens on a card for the pull request: its state, its branch and base, **Open on GitHub**, and **Unlink**.
+  Without one, **Link** a pull request by number or URL when you opened one yourself.
+- **CI checks** shows a bar of the checks on the last commit (failed, running, passed, skipped) with their counts,
+  then the failed and running ones; past the first few running checks, and the passed and skipped ones, fold
+  away behind a line you click.
 - **Rewrite description** writes the description again from the current code; you review the draft before it is
-  sent to GitHub.
+  sent to GitHub. The draft opens as it will read on GitHub (**Preview**); **Edit** changes its text, and
+  **Changes from GitHub's** shows what it changes line by line.
 - The **discussion** shows the pull request's comments and reviews from GitHub. Import its line comments into a
   review with **Import** (see [Reviewing changes](reviewing.md#comment-and-send)), or answer them where you read
   them (see [Reply to comments](#reply-to-comments)). Click a line thread's file and lines to open them in the

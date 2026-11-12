@@ -6,7 +6,7 @@ import { useState, type ReactElement } from 'react';
 import type { ReviewAgentsView } from '../../../src/routes/review/review-agent-runs';
 import type { ReviewTarget } from '../../lib/review/review-target';
 import { isActive, useReviewAgents } from '../../lib/review/use-review-agents';
-import { Button, ErrorText, inputClass } from '../ui/ui';
+import { Button, CARD_CLASS, ErrorText, inputClass } from '../ui/ui';
 import { NewAgentButton } from '../union-settings/new-agent-dialog';
 import { useDiffLinks } from './diff-link-code';
 import { ReviewAgentRunCard } from './review-agent-run-card';
@@ -23,7 +23,7 @@ function blocked(view: ReviewAgentsView): string | null {
 
 function NoAgents(): ReactElement {
   return (
-    <div className="space-y-2 rounded-lg border border-dashed border-zinc-300 p-4 text-sm dark:border-zinc-700">
+    <div className="space-y-3 rounded-xl border border-dashed border-zinc-300 bg-white p-5 text-sm dark:border-zinc-700 dark:bg-zinc-900">
       <p>
         Review agents are your own: describe what one should check (whether a pull request can be
         merged, a security pass, an API contract), and Union writes its prompt. It runs in a copy of
@@ -47,34 +47,46 @@ function RunAgent({
   const agentId = picked ?? view.agents[0]?.id ?? null;
   const reason = blocked(view);
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <select
-        aria-label="Review agent"
-        className={`${inputClass} w-auto`}
-        value={agentId ?? ''}
-        onChange={(event) => {
-          setPicked(Number(event.target.value));
-        }}
-      >
-        {view.agents.map((agent) => (
-          <option key={agent.id} value={agent.id}>
-            {agent.name}
-          </option>
-        ))}
-      </select>
-      <Button
-        variant="primary"
-        disabled={agentId === null || reason !== null || pending}
-        onClick={() => {
-          if (agentId !== null) {
-            onRun(agentId);
-          }
-        }}
-      >
-        Run agent
-      </Button>
-      {reason === null ? null : <span className="text-sm text-zinc-500">{reason}</span>}
-    </div>
+    <section className={CARD_CLASS}>
+      <div>
+        <h3 className="text-sm font-semibold">Run a review agent</h3>
+        <p className="text-xs text-zinc-500">
+          It reads the change in a copy it may build and test, then answers below. One runs at a
+          time, on your Claude usage.
+        </p>
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <select
+          aria-label="Review agent"
+          className={`${inputClass} max-w-xs`}
+          value={agentId ?? ''}
+          onChange={(event) => {
+            setPicked(Number(event.target.value));
+          }}
+        >
+          {view.agents.map((agent) => (
+            <option key={agent.id} value={agent.id}>
+              {agent.name}
+            </option>
+          ))}
+        </select>
+        <Button
+          variant="primary"
+          disabled={agentId === null || reason !== null || pending}
+          onClick={() => {
+            if (agentId !== null) {
+              onRun(agentId);
+            }
+          }}
+        >
+          Run agent
+        </Button>
+        {reason === null ? null : <span className="text-sm text-zinc-500">{reason}</span>}
+        <span className="ml-auto">
+          <NewAgentButton kind="review" label="New review agent" />
+        </span>
+      </div>
+    </section>
   );
 }
 

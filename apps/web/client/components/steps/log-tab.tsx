@@ -5,24 +5,12 @@ import { isEvent, type EventPayloads } from '@union/core/event-catalog';
 import { useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
 
 import { stepTitle } from '../../lib/board/labels';
-import { summarizeAgentEvent, type LogLine } from '../../lib/log/agent-events';
+import { summarizeAgentEvent } from '../../lib/log/agent-events';
 import { groupRuns, type LogRun } from '../../lib/log/log-runs';
-import { sumTokens, tokensText, type CallTokens } from '../../lib/log/token-counts';
 import { useLog } from '../../lib/log/use-log';
 import { formatWhen } from '../../lib/ui/relative-time';
 import { useCustomAgentNames } from '../../lib/union-settings/use-custom-agents';
-
-type Entry = { key: string; kind: LogLine['kind'] | 'run'; text: string; tokens?: CallTokens };
-
-const KIND_CLASS: Record<Entry['kind'], string> = {
-  run: 'font-semibold',
-  init: 'text-zinc-500',
-  text: '',
-  tool: 'text-indigo-600 dark:text-indigo-400',
-  tool_result: 'text-zinc-500',
-  result: 'text-green-600 dark:text-green-400',
-  error: 'text-red-600 dark:text-red-400',
-};
+import { Line, runTotal, type Entry } from './log-line';
 
 type AgentReviewChange = EventPayloads['agent_review_changed'];
 
@@ -92,20 +80,6 @@ function queryOf(source: LogSource): string {
   return 'ticket' in source ? `ticket=${source.ticket}` : `investigation=${source.investigation}`;
 }
 
-function Line({ entry }: { entry: Entry }): ReactElement {
-  return <p className={`whitespace-pre-wrap ${KIND_CLASS[entry.kind]}`}>{entry.text}</p>;
-}
-
-/** What the run's agent calls used, summed: `2 calls · 12 turns · 4.1M in…`. */
-function runTotal(run: LogRun<Entry>): string {
-  const calls = run.lines.flatMap((entry) => (entry.tokens ? [entry.tokens] : []));
-  const used = tokensText(sumTokens(calls));
-  if (calls.length < 2) {
-    return used;
-  }
-  return `${calls.length} calls${used ? ` · ${used}` : ''}`;
-}
-
 /** The lines a long run shows at first: its end, where it stands now; the rest on a click. */
 const SHOWN_LINES = 500;
 
@@ -114,7 +88,7 @@ function RunLines({ lines }: { lines: LogRun<Entry>['lines'] }): ReactElement {
   const [all, setAll] = useState(false);
   const hidden = all ? 0 : Math.max(0, lines.length - SHOWN_LINES);
   return (
-    <div className="mt-1 space-y-1">
+    <div className="space-y-0.5">
       {hidden > 0 ? (
         <button
           type="button"
@@ -150,9 +124,9 @@ function RunSection({
       onToggle={(event) => {
         onToggle(event.currentTarget.open);
       }}
-      className="border-t border-zinc-300 pt-2 first:border-t-0 first:pt-0 dark:border-zinc-700"
+      className="rounded-xl border border-zinc-200 bg-white shadow-xs dark:border-zinc-800 dark:bg-zinc-900"
     >
-      <summary className="flex cursor-pointer list-none items-baseline gap-2">
+      <summary className="flex cursor-pointer list-none items-baseline gap-2 px-4 py-3">
         <span aria-hidden className="w-3 shrink-0 text-center text-zinc-500">
           {open ? '▾' : '▸'}
         </span>
@@ -163,13 +137,17 @@ function RunSection({
             <p className="font-semibold">Before the runs</p>
           )}
           {/* The run's size and usage on a line of their own, so a long header does not wrap them. */}
-          <span className="block text-zinc-500">
+          <span className="block text-xs text-zinc-500">
             {run.lines.length} line{run.lines.length === 1 ? '' : 's'}
             {total ? ` · ${total}` : ''}
           </span>
         </span>
       </summary>
-      {open ? <RunLines lines={run.lines} /> : null}
+      {open ? (
+        <div className="border-t border-zinc-200 px-4 py-2 dark:border-zinc-800">
+          <RunLines lines={run.lines} />
+        </div>
+      ) : null}
     </details>
   );
 }
@@ -197,7 +175,7 @@ export function AgentLog({ source }: { source: LogSource }): ReactElement {
   }, [count]);
 
   return (
-    <div className="space-y-3 font-mono text-xs">
+    <div className="space-y-3 text-xs">
       {error ? <p className="text-red-600 dark:text-red-400">{error.message}</p> : null}
       {entries.length === 0 && !error ? (
         <p className="text-zinc-500">No agent activity yet.</p>

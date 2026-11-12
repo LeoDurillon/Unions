@@ -17,7 +17,7 @@ import {
 } from '../../lib/review/use-review';
 import { CommentCard } from '../review/comment-card';
 import { ImportComments } from '../review/import-comments';
-import { ErrorText } from '../ui/ui';
+import { CARD_CLASS, ErrorText } from '../ui/ui';
 import { NoteCard, ThreadCard } from './note-card';
 import { filterNotes, NoteFilterControl, useNoteFilter } from './note-filter';
 import { ReplyArea, SendAllReplies } from './reply-area';
@@ -38,7 +38,7 @@ function ImportedDrafts({
     return null;
   }
   return (
-    <section className="space-y-2">
+    <section className={CARD_CLASS}>
       <h3 className="text-sm font-semibold">In the review</h3>
       <p className="text-xs text-zinc-500">
         Sent to the implementer with the line comments, from Review changes → Send review.
@@ -71,7 +71,7 @@ function Notes({
   const [filter, setFilter] = useNoteFilter();
   const notes = filterNotes(discussion.notes, filter);
   return (
-    <section className="space-y-2">
+    <section className={CARD_CLASS}>
       <div className="flex items-center justify-between gap-2">
         <h3 className="text-sm font-semibold">Reviews and comments</h3>
         <NoteFilterControl notes={discussion.notes} value={filter} onChange={setFilter} />
@@ -112,7 +112,7 @@ function Threads({
 }): ReactElement {
   const { threads } = discussion;
   return (
-    <section className="space-y-2">
+    <section className={CARD_CLASS}>
       <div className="flex items-start justify-between gap-2">
         <h3 className="text-sm font-semibold">Line comments ({threads.length})</h3>
         {threads.length > 0 ? (
@@ -155,7 +155,7 @@ export function Discussion({ ticketId, pr }: { ticketId: number; pr: number }): 
     );
   }
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <SendAllReplies replies={replies} />
       <ImportedDrafts comments={comments.data ?? []} mutations={mutations} />
       <Notes discussion={discussion.data} importNote={importNote} replies={replies} />

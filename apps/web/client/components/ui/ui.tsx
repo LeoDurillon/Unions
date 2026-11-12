@@ -74,7 +74,7 @@ export function Badge({
 }
 
 const INPUT_CLASS =
-  'w-full rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm outline-none focus:border-indigo-500 dark:border-zinc-700 dark:bg-zinc-900';
+  'w-full rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-sm outline-none focus:border-indigo-500 focus:ring-3 focus:ring-indigo-500/15 dark:border-zinc-700 dark:bg-zinc-950';
 
 export function Field({
   label,
@@ -86,7 +86,7 @@ export function Field({
   children: ReactNode;
 }): ReactElement {
   return (
-    <label className="block space-y-1">
+    <label data-field className="block space-y-1">
       <span className="text-sm font-medium">{label}</span>
       {children}
       {hint ? <span className="block text-xs text-zinc-500">{hint}</span> : null}
@@ -95,6 +95,10 @@ export function Field({
 }
 
 export const inputClass = INPUT_CLASS;
+
+/** The card a ticket tab's sections sit in (PR, Preview, Steps, a tracker's), like the settings pages' cards. */
+export const CARD_CLASS =
+  'space-y-3 rounded-xl border border-zinc-200 bg-white p-4 shadow-xs dark:border-zinc-800 dark:bg-zinc-900';
 
 export function TextInput({
   value,
@@ -165,11 +169,11 @@ export function Dialog({
     <dialog
       ref={ref}
       onClose={onClose}
-      className={`m-auto w-full ${wide ? 'max-w-4xl' : 'max-w-lg'} rounded-xl bg-white p-0 text-zinc-900 shadow-xl dark:bg-zinc-900 dark:text-zinc-100`}
+      className={`m-auto w-full ${wide ? 'max-w-4xl' : 'max-w-xl'} rounded-2xl border border-zinc-200 bg-white p-0 text-zinc-900 shadow-2xl dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100`}
     >
       <div className="space-y-4 p-6">
         <header className="flex items-start justify-between gap-4">
-          <h2 className="text-lg font-semibold">{title}</h2>
+          <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
           <CloseButton onClick={onClose} />
         </header>
         {open ? children : null}

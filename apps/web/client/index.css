@@ -24,7 +24,8 @@ body {
 }
 
 dialog::backdrop {
-  background: rgb(0 0 0 / 0.5);
+  background: rgb(15 15 20 / 0.45);
+  backdrop-filter: blur(3px);
 }
 
 .markdown {
@@ -228,4 +229,37 @@ dialog::backdrop {
 }
 .markdown .mermaid-diagram {
   @apply my-2 overflow-x-auto;
+}
+
+/* Settings, Union settings and Environments pages: each part of a page is a card, in the components layer so a
+   section's own classes (the danger zone's red border) still win. */
+@layer components {
+  .settings-cards > section,
+  .settings-cards > div > section {
+    @apply rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900;
+  }
+}
+/* A card's title a size up, and a one-line field's label in a column beside it (fields set side by side keep
+   theirs above). Outside the layers, as they
+   override the components' own utilities. */
+.settings-cards > section > h3:first-child,
+.settings-cards > section > header:first-child h3,
+.settings-cards > section > div:first-child > h3:first-child,
+.settings-cards > div > section > h3:first-child {
+  font-size: 15px;
+  letter-spacing: -0.01em;
+}
+:is(.settings-cards > section, .settings-cards > div > section)
+  > [data-field]:has(> input:not([type='checkbox'], [type='radio']), > select) {
+  @apply grid grid-cols-[10rem_minmax(0,1fr)] items-start gap-x-5 gap-y-1;
+}
+:is(.settings-cards > section, .settings-cards > div > section)
+  > [data-field]:has(> input:not([type='checkbox'], [type='radio']), > select)
+  > * {
+  @apply col-start-2 mt-0;
+}
+:is(.settings-cards > section, .settings-cards > div > section)
+  > [data-field]:has(> input:not([type='checkbox'], [type='radio']), > select)
+  > span:first-child {
+  @apply col-start-1 row-span-2 pt-1.5;
 }

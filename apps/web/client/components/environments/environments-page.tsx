@@ -56,7 +56,7 @@ export function EnvironmentsPage({
               <GuideLink target={ENVIRONMENT_GUIDE[section]} />
             </span>
           </nav>
-          <div key={`${project.id}:${section}`} className="min-w-0 space-y-4">
+          <div key={`${project.id}:${section}`} className="settings-cards min-w-0 space-y-4">
             <h2 className="text-[15px] font-semibold">{environmentLabel(section)}</h2>
             <EnvironmentSectionBody
               section={section}

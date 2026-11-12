@@ -14,15 +14,15 @@ export function MoreActions({ detail }: { detail: TicketDetail }): ReactElement 
     return null;
   }
   return (
-    <details className="group rounded-md border border-zinc-200 text-sm dark:border-zinc-800">
-      <summary className="cursor-pointer px-3 py-2 text-zinc-600 select-none hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100">
+    <details className="group rounded-xl border border-zinc-200 bg-white text-sm shadow-xs dark:border-zinc-800 dark:bg-zinc-900">
+      <summary className="cursor-pointer px-4 py-2.5 text-zinc-600 select-none hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100">
         More actions{' '}
         <span className="text-xs text-zinc-500">
           change target, simplify history
           {detail.project.config.stacks === true ? ', split into a stack' : ''}
         </span>
       </summary>
-      <div className="space-y-3 border-t border-zinc-200 p-3 dark:border-zinc-800">
+      <div className="space-y-3 border-t border-zinc-200 p-4 dark:border-zinc-800">
         <ChangeTarget detail={detail} />
         <SimplifyHistory detail={detail} />
         <SplitStack detail={detail} />

@@ -6,12 +6,15 @@ import { useState, type ReactElement } from 'react';
 import type { CiPick, PrChecksView, PullRequestCheck } from '../../../src/ci-api-types';
 import { useCiRerun, type CiRerun } from '../../lib/pull-request/use-ci-rerun';
 import { usePrChecks } from '../../lib/pull-request/use-pr-checks';
-import { Button, ErrorText } from '../ui/ui';
+import { Button, CARD_CLASS, ErrorText } from '../ui/ui';
+import { CiBar } from './ci-bar';
 import { BotCommentRow, CheckRow, pickKey, RelatedJobs, type Picking } from './ci-check-rows';
 import { CiGiven } from './ci-given';
 import { CiPickActions } from './ci-pick-actions';
 
 const SHA_SHOWN = 7;
+/** Running checks listed before the rest fold away. */
+const RUNNING_SHOWN = 4;
 
 function usePicking(): Picking & { picks: CiPick[]; clear: () => void } {
   const [picks, setPicks] = useState<CiPick[]>([]);
@@ -32,16 +35,27 @@ function usePicking(): Picking & { picks: CiPick[]; clear: () => void } {
   };
 }
 
-function counts(checks: readonly PullRequestCheck[]): string {
-  const of = (state: PullRequestCheck['state']): number =>
-    checks.filter((check) => check.state === state).length;
-  const parts = [
-    `${of('failed')} failed`,
-    `${of('pending')} running`,
-    `${of('passed')} passed`,
-    `${of('skipped')} skipped`,
-  ];
-  return parts.filter((part) => !part.startsWith('0 ')).join(', ') || 'no checks';
+/** Checks behind a summary line, opened on a click; nothing when there are none. */
+function FoldedChecks({
+  checks,
+  label,
+}: {
+  checks: readonly PullRequestCheck[];
+  label: (count: number) => string;
+}): ReactElement | null {
+  if (checks.length === 0) {
+    return null;
+  }
+  return (
+    <details>
+      <summary className="cursor-pointer text-xs text-zinc-500">{label(checks.length)}</summary>
+      <ul className="mt-1 space-y-1">
+        {checks.map((check) => (
+          <CheckRow key={check.id} check={check} />
+        ))}
+      </ul>
+    </details>
+  );
 }
 
 function CheckLists({
@@ -65,22 +79,12 @@ function CheckLists({
             <RelatedJobs check={check} checks={view.checks} picking={picking} />
           </div>
         ))}
-        {pending.map((check) => (
+        {pending.slice(0, RUNNING_SHOWN).map((check) => (
           <CheckRow key={check.id} check={check} />
         ))}
       </ul>
-      {rest.length > 0 ? (
-        <details>
-          <summary className="cursor-pointer text-xs text-zinc-500">
-            Passed and skipped ({rest.length})
-          </summary>
-          <ul className="mt-1 space-y-1">
-            {rest.map((check) => (
-              <CheckRow key={check.id} check={check} />
-            ))}
-          </ul>
-        </details>
-      ) : null}
+      <FoldedChecks checks={pending.slice(RUNNING_SHOWN)} label={(n) => `${n} more running`} />
+      <FoldedChecks checks={rest} label={(n) => `Passed and skipped (${n})`} />
       {view.botComments.length > 0 ? (
         <details open={failed.length > 0}>
           <summary className="cursor-pointer text-xs text-zinc-500">
@@ -108,12 +112,12 @@ export function CiChecks({ ticketId, pr }: { ticketId: number; pr: number }): Re
     picking.clear();
   };
   return (
-    <section className="space-y-2 rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
+    <section className={CARD_CLASS}>
       <div className="flex flex-wrap items-center gap-2">
-        <h3 className="text-sm font-medium">CI checks</h3>
+        <h3 className="text-sm font-semibold">CI checks</h3>
         {view ? (
           <span className="text-xs text-zinc-500">
-            {counts(view.checks)} on <code>{view.headSha.slice(0, SHA_SHOWN)}</code>
+            on <code>{view.headSha.slice(0, SHA_SHOWN)}</code>
           </span>
         ) : null}
         <Button
@@ -130,6 +134,7 @@ export function CiChecks({ ticketId, pr }: { ticketId: number; pr: number }): Re
       <ErrorText error={rerun.error} />
       {view ? (
         <>
+          <CiBar checks={view.checks} />
           <CheckLists view={view} picking={picking} rerun={rerun} />
           <CiPickActions
             picks={picking.picks}

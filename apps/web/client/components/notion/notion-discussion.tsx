@@ -12,10 +12,10 @@ import type { NotionCommentSend } from '../../lib/integrations/use-notion-commen
 import { formatWhen } from '../../lib/ui/relative-time';
 import { Markdown } from '../markdown/markdown';
 import { AddToReview, type ReviewImportState } from '../review/add-to-review';
+import { CARD_CLASS } from '../ui/ui';
 import { NotionReply } from './notion-reply';
 
-const CARD =
-  'space-y-3 rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm dark:border-zinc-800 dark:bg-zinc-900';
+const CARD = `${CARD_CLASS} text-sm`;
 
 const PLACES: Record<NotionDiscussionView['place'], string> = {
   page: 'On the page',

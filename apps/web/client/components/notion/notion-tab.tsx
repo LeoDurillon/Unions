@@ -12,9 +12,28 @@ import {
   useNotionReviewImport,
   type NotionReviewImport,
 } from '../../lib/integrations/use-notion-review-import';
-import { Button, ErrorText } from '../ui/ui';
+import { Button, CARD_CLASS, ErrorText } from '../ui/ui';
 import { NotionDiscussion } from './notion-discussion';
 import { NotionReply } from './notion-reply';
+
+/** The page has no open discussion: what would show here. */
+function NoDiscussions(): ReactElement {
+  return (
+    <div className="flex flex-col items-center gap-1 rounded-xl border border-dashed border-zinc-300 bg-white px-6 py-8 text-center dark:border-zinc-700 dark:bg-zinc-900">
+      <span
+        aria-hidden
+        className="flex size-8 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-300"
+      >
+        ✓
+      </span>
+      <p className="mt-1 text-sm font-semibold">No open comments</p>
+      <p className="max-w-sm text-xs text-zinc-500">
+        When someone comments on the Notion page, the discussion shows here: reply to it, or add it
+        to the review.
+      </p>
+    </div>
+  );
+}
 
 function Discussions({
   view,
@@ -36,7 +55,7 @@ function Discussions({
         </p>
       ) : null}
       {view.discussions.length === 0 ? (
-        <p className="text-sm text-zinc-500">No open comments on the page.</p>
+        <NoDiscussions />
       ) : (
         view.discussions.map((discussion) => (
           <NotionDiscussion
@@ -60,12 +79,15 @@ function Discussions({
           />
         ))
       )}
-      <NotionReply
-        discussionId={null}
-        label="New comment"
-        pending={pendingIn(null)}
-        sender={sender}
-      />
+      <section className={CARD_CLASS}>
+        <h3 className="text-sm font-semibold">Comment on the page</h3>
+        <NotionReply
+          discussionId={null}
+          label="New comment"
+          pending={pendingIn(null)}
+          sender={sender}
+        />
+      </section>
     </>
   );
 }
@@ -77,19 +99,29 @@ export function NotionTab({ ticketId }: { ticketId: number }): ReactElement {
   const { data } = comments;
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2">
+      <div className={`${CARD_CLASS} flex items-center gap-3 space-y-0`}>
+        <span
+          aria-hidden
+          className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50 font-semibold dark:border-zinc-700 dark:bg-zinc-800"
+        >
+          N
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold">Notion page</p>
+          <p className="text-xs text-zinc-500">Its open discussions, read when the tab opens.</p>
+        </div>
         {data ? (
           <a
             href={data.pageUrl}
             target="_blank"
             rel="noreferrer"
-            className="text-sm text-zinc-500 hover:underline"
+            className="shrink-0 text-sm text-indigo-600 hover:underline dark:text-indigo-400"
           >
-            Open the page in Notion
+            Open in Notion ↗
           </a>
         ) : null}
         <Button
-          className="ml-auto"
+          className="shrink-0"
           disabled={comments.isFetching}
           onClick={() => {
             void comments.refetch();

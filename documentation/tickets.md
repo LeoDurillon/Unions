@@ -191,14 +191,17 @@ Then come the tabs:
   tickets that build on it, the base branch and flow, its size, files and preview), then every run with its
   model, duration and token usage.
 - **Preview**: the ticket's [preview environment](previews.md), its end-to-end tests and commands.
-- **Steps**: one tab per step with the agent's output, then the **Log**, which shows what the agent does live.
+- **Steps**: one tab per step with the agent's output, then the **Log**, which shows what the agent does live: a
+  card per run, the last one open, with each tool the agent calls (its name, then what it ran or read) and the
+  agent's own words between them.
 - **PR**: the ticket's pull request, its CI checks and branch operations. See
   [Branches and pull requests](branches.md).
 - **Notion**: the open comments of the ticket's Notion page, for a ticket imported from Notion or linked to a page.
   Comments on the whole page come first, then those on a passage of the text, under the passage they are about.
-  **Open in Notion** opens a discussion there; **Refresh** reads the comments again. Resolved comments are not
-  shown. **Reply** under a discussion answers in it; **New comment** at the bottom starts a discussion on the
-  page. **Add to review** puts the whole discussion in the ticket's review, for the implementer with your next
+  The tab opens on a card for the page, with **Open in Notion** and **Refresh**, which reads the comments again;
+  **Open in Notion** on a discussion opens it there. Resolved comments are not
+  shown. **Reply** under a discussion answers in it; **New comment** in the **Comment on the page** card at the
+  bottom starts a discussion on the page. **Add to review** puts the whole discussion in the ticket's review, for the implementer with your next
   **Send review** (see [Reviewing](reviewing.md)); it shows **In the review** after. On a comment on the whole
   page, **Add to review** is next to each comment of the discussion and adds that comment alone, without the
   replies. You can write `**bold**`, `` `code` `` and `[links](https://…)`. The comment shows "Sending to Notion…"

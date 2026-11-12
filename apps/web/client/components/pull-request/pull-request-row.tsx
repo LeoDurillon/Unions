@@ -5,7 +5,7 @@ import { useState, type ReactElement } from 'react';
 
 import type { PublicProject, TicketSummary } from '../../../src/api-types';
 import { api } from '../../lib/app/api';
-import { Button, ErrorText, inputClass } from '../ui/ui';
+import { Badge, Button, CARD_CLASS, ErrorText, inputClass } from '../ui/ui';
 
 function useLinkMutations(ticketId: number): {
   link: ReturnType<
@@ -27,15 +27,19 @@ function useLinkMutations(ticketId: number): {
   return { link, unlink };
 }
 
+const STATE_TONE = { open: 'green', merged: 'blue', closed: 'neutral' } as const;
+
 function LinkedPullRequest({
-  number,
+  ticket,
+  base,
   url,
   warning,
   onUnlink,
   pending,
   error,
 }: {
-  number: number;
+  ticket: TicketSummary & { prNumber: number };
+  base: string;
   url: string;
   warning: string | null;
   onUnlink: () => void;
@@ -43,18 +47,26 @@ function LinkedPullRequest({
   error: Error | null;
 }): ReactElement {
   return (
-    <div className="space-y-1">
-      <div className="flex items-center gap-3 text-sm">
-        <span className="text-zinc-500">Pull request</span>
+    <div className={CARD_CLASS}>
+      <div className="flex items-center gap-3">
+        {ticket.prState ? <Badge tone={STATE_TONE[ticket.prState]}>{ticket.prState}</Badge> : null}
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold">Pull request #{ticket.prNumber}</p>
+          {ticket.branch ? (
+            <p className="truncate font-mono text-xs text-zinc-500">
+              {ticket.branch} → {base}
+            </p>
+          ) : null}
+        </div>
         <a
-          className="text-indigo-600 underline dark:text-indigo-400"
+          className="shrink-0 text-sm text-indigo-600 hover:underline dark:text-indigo-400"
           href={url}
           target="_blank"
           rel="noreferrer"
         >
-          #{number}
+          Open on GitHub ↗
         </a>
-        <Button disabled={pending} onClick={onUnlink}>
+        <Button variant="ghost" disabled={pending} onClick={onUnlink}>
           Unlink
         </Button>
       </div>
@@ -77,7 +89,8 @@ export function PullRequestRow({
   if (ticket.prNumber !== null) {
     return (
       <LinkedPullRequest
-        number={ticket.prNumber}
+        ticket={{ ...ticket, prNumber: ticket.prNumber }}
+        base={ticket.baseBranch ?? project.config.baseBranch}
         url={`https://github.com/${project.owner}/${project.repo}/pull/${ticket.prNumber}`}
         warning={link.data?.warning ?? null}
         onUnlink={() => {

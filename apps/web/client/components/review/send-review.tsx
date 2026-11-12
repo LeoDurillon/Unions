@@ -158,17 +158,21 @@ export function SendReview({ canSend, ...props }: SendProps): ReactElement {
   };
   return (
     <div ref={anchor} className="relative flex items-center gap-3">
-      {canSend ? null : <span className="text-xs text-zinc-500">{props.copy.blocked}</span>}
-      <Button
-        variant={props.drafts > 0 ? 'primary' : 'secondary'}
-        disabled={!canSend}
-        aria-expanded={open}
-        onClick={() => {
-          setOpen(!open);
-        }}
-      >
-        Send review ({props.drafts})
-      </Button>
+      {/* Why it cannot be sent, on hover over the button and for screen readers: written out, it took
+          the room of the title. */}
+      {canSend ? null : <span className="sr-only">{props.copy.blocked}</span>}
+      <span title={canSend ? undefined : props.copy.blocked}>
+        <Button
+          variant={props.drafts > 0 ? 'primary' : 'secondary'}
+          disabled={!canSend}
+          aria-expanded={open}
+          onClick={() => {
+            setOpen(!open);
+          }}
+        >
+          Send review ({props.drafts})
+        </Button>
+      </span>
       {open ? <SendPanel {...props} anchor={anchor} onCancel={close} /> : null}
     </div>
   );

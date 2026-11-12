@@ -6,7 +6,7 @@ import type { ReactElement } from 'react';
 import type { StackView, TicketDetail } from '../../../src/api-types';
 import type { CheckCounts } from '../../../src/ci-api-types';
 import { useStackChecks } from '../../lib/pull-request/use-stack-checks';
-import { ErrorText } from '../ui/ui';
+import { CARD_CLASS, ErrorText } from '../ui/ui';
 import { StackActions } from './stack-actions';
 import { StackSliceRow } from './stack-slice-row';
 
@@ -78,7 +78,7 @@ export function StackPanel({
   const ciOf = (position: number): CheckCounts | null | undefined =>
     checks.data?.slices.find((slice) => slice.position === position)?.counts;
   return (
-    <div className="space-y-2 rounded-md border border-zinc-200 p-3 text-sm dark:border-zinc-800">
+    <div className={`${CARD_CLASS} text-sm`}>
       <div className="flex flex-wrap items-baseline gap-2">
         <span className="font-medium">{stack.label}</span>
         <span className="text-xs text-zinc-500">1 is the bottom: merge it first</span>

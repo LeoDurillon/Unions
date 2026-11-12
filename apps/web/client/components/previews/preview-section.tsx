@@ -5,7 +5,7 @@ import { useState, type ReactElement, type ReactNode } from 'react';
 
 import type { PreviewTarget } from '../../lib/preview/preview-target';
 import { usePreview } from '../../lib/preview/use-preview';
-import { ErrorText } from '../ui/ui';
+import { CARD_CLASS, ErrorText } from '../ui/ui';
 import { PreviewComposeDialog } from './preview-compose-dialog';
 import { Controls } from './preview-controls';
 import { PreviewE2e } from './preview-e2e';
@@ -40,7 +40,7 @@ export function PreviewSection({
   }
   const { preview } = view;
   return (
-    <section className="space-y-2 rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
+    <section className={CARD_CLASS}>
       <PreviewHeading
         view={view}
         onCompose={() => {

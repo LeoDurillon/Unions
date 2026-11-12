@@ -44,7 +44,8 @@ branch is pushed.
 
 1. Click a line number to comment on that line. Shift-click another line number to extend it to a block.
 2. Your comments stay drafts in Union until you send them.
-3. **Send review** sends them all to the implementer, as a revision.
+3. **Send review** sends them all to the implementer, as a revision. While it cannot be sent (the ticket is not
+   waiting on you, the pull request is merged), hover the button to read why.
 
 You can send a review while the ticket waits for you at the implementation or the final review, or once it is Done
 (its pull request open and not merged). Sent at the implementation, the revised code waits for you there again. Sent

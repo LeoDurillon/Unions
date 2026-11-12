@@ -49,7 +49,7 @@ export function SettingsFrame({
           {nav}
         </aside>
         <div className="min-h-0 flex-1 overflow-y-auto bg-zinc-50 dark:bg-zinc-950">
-          <div key={pageKey} className="mx-auto max-w-3xl p-6">
+          <div key={pageKey} className="settings-cards mx-auto max-w-3xl space-y-4 p-6">
             {children}
           </div>
         </div>

@@ -46,7 +46,7 @@ export function SaveBar({
     return null;
   }
   return (
-    <div className="sticky bottom-0 -mx-6 -mb-6 mt-6 space-y-2 border-t border-zinc-200 bg-zinc-50/95 px-6 py-3 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/95">
+    <div className="sticky bottom-0 -mx-6 -mb-6 mt-6 space-y-2 rounded-b-xl border-t border-zinc-200 bg-zinc-50/95 px-6 py-3 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/95">
       <ErrorText error={state.error} />
       <div className="flex flex-wrap items-center gap-2">
         <Status state={state} />

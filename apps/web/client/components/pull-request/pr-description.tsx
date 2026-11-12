@@ -9,7 +9,7 @@ import {
   type DescriptionActions,
 } from '../../lib/pull-request/use-pr-description';
 import { formatWhen } from '../../lib/ui/relative-time';
-import { Button, ErrorText } from '../ui/ui';
+import { Button, CARD_CLASS, ErrorText } from '../ui/ui';
 import { DescriptionDraft } from './description-draft';
 import { GitHubDescription } from './github-description';
 
@@ -165,7 +165,7 @@ export function PrDescription({
   const { view, error, actions } = usePrDescription(ticketId, pr);
   const notice = notices(view);
   return (
-    <section className="space-y-2 rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
+    <section className={CARD_CLASS}>
       <h3 className="text-sm font-semibold">Description of #{pr}</h3>
       {notice.outdated && from !== null ? (
         <p className="text-sm text-amber-700 dark:text-amber-400">

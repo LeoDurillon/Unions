@@ -128,7 +128,8 @@ function TextFields({
     <>
       <Field label="Title">
         <input
-          className={inputClass}
+          className={`${inputClass} py-2 text-[15px] font-semibold`}
+          placeholder="What should change, in a line"
           value={title}
           onChange={(event) => {
             onTitle(event.target.value);
@@ -138,7 +139,8 @@ function TextFields({
       </Field>
       <Field label="Description" hint="Markdown. This becomes the GitHub issue body.">
         <textarea
-          className={`${inputClass} min-h-40 font-mono`}
+          className={`${inputClass} min-h-44 font-mono leading-relaxed`}
+          placeholder="The problem, what done looks like, anything the agents should know."
           value={body}
           onChange={(event) => {
             onBody(event.target.value);
@@ -200,9 +202,12 @@ export function TicketForm({
       <PendingFilesField files={files} onChange={setFiles} />
       {flowField}
       <ErrorText error={create.error} />
-      <Button type="submit" variant="primary" disabled={create.isPending}>
-        {submitLabel(create.isPending, created)}
-      </Button>
+      {/* The dialog's footer: a bar along its bottom edge, the action on the right. */}
+      <div className="-mx-6 -mb-6 flex justify-end rounded-b-2xl border-t border-zinc-200 bg-zinc-50 px-6 py-3 dark:border-zinc-800 dark:bg-zinc-950">
+        <Button type="submit" variant="primary" disabled={create.isPending}>
+          {submitLabel(create.isPending, created)}
+        </Button>
+      </div>
     </form>
   );
 }

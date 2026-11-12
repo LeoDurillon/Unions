@@ -13,7 +13,7 @@ import {
 } from '../../lib/ticket/use-container-runs';
 import { AddRunToReview } from '../pull-requests/review-run-actions';
 import { ScriptButtons } from '../ticket/script-buttons';
-import { Button, ErrorText, inputClass } from '../ui/ui';
+import { Button, CARD_CLASS, ErrorText, inputClass } from '../ui/ui';
 import { RunItem } from './container-run-item';
 import { TicketRunActions } from './ticket-run-actions';
 
@@ -197,7 +197,7 @@ export function ContainerCommands({
   };
   const view = runs.data;
   return (
-    <section className="space-y-2 rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
+    <section className={CARD_CLASS}>
       <h3 className="text-sm font-semibold">Commands</h3>
       <Intro intro={intro} folded={(view?.runs.length ?? 0) > 0} />
       <ScriptButtons scripts={scripts} blocked={blocked} pending={run.isPending} onRun={submit} />
