@@ -10,6 +10,7 @@ import type { ExplainFocus } from './explain-context';
 import type { DiffView } from './file-diff';
 import { GeneralComments } from './general-comments';
 import { OpenFile } from './open-file';
+import type { FileSize } from './open-file-header';
 
 export type Mutations = ReturnType<typeof useCommentMutations>;
 
@@ -31,7 +32,13 @@ export function OpenFileArea({
   banner: ReactNode;
   error: Error | null;
   emptyText: string | null;
-  open: { fileId: number; part: string | null; focus: ExplainFocus | null } | null;
+  /** `size`: its lines added and removed, for its header. */
+  open: {
+    fileId: number;
+    part: string | null;
+    focus: ExplainFocus | null;
+    size: FileSize;
+  } | null;
 }): ReactElement {
   return (
     <main className="min-w-0 flex-1 overflow-y-auto p-4">
@@ -49,6 +56,7 @@ export function OpenFileArea({
           mutations={mutations}
           part={open.part}
           focus={open.focus}
+          size={open.size}
         />
       )}
     </main>

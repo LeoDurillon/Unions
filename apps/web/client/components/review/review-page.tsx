@@ -1,15 +1,15 @@
-// The review page, with its Explain panel's state.
+// The review page, with what its parts share (the Explain panel, the specs dialog, the files marked viewed).
 
 import { useState, type ReactElement, type ReactNode } from 'react';
 
 import type { ReviewTarget } from '../../lib/review/review-target';
 import { useReviewData } from '../../lib/review/use-review-data';
 import { DiffArea } from './diff-area';
-import { ExplainOff, ExplainProvider } from './explain-context';
+import { ExplainOff } from './explain-context';
+import { ReviewProviders } from './review-providers';
 import { ReviewTop } from './review-top';
 import { SlicePickProvider } from './slice-pick';
 import { SliceTabs } from './slice-tabs';
-import { SpecsEditingProvider } from './specs-editing';
 import { useDiffView } from './view-toggle';
 
 /** What a tab's content can do on the page: switch to the Diff tab (where its links open files). */
@@ -35,7 +35,7 @@ function SectionTabs({
     <div
       role="tablist"
       aria-label="Review"
-      className="flex gap-1 border-b border-zinc-200 px-4 dark:border-zinc-800"
+      className="flex gap-1 overflow-x-auto border-b border-zinc-200 bg-white px-4 dark:border-zinc-800 dark:bg-zinc-950"
     >
       {sections.map(({ id, label }) => (
         <button
@@ -46,7 +46,7 @@ function SectionTabs({
           onClick={() => {
             onChange(id);
           }}
-          className={`border-b-2 px-3 py-2 text-sm whitespace-nowrap transition ${current === id ? 'border-indigo-600 font-medium' : 'border-transparent text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100'}`}
+          className={`border-b-2 px-3 py-2.5 text-sm font-medium whitespace-nowrap transition ${current === id ? 'border-zinc-900 text-zinc-900 dark:border-zinc-100 dark:text-zinc-100' : 'border-transparent text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100'}`}
         >
           {label}
         </button>
@@ -181,13 +181,11 @@ function ReviewPageBody({
   );
 }
 
-/** The review page, with its Explain panel's state. */
+/** The review page, with what its parts share. */
 export function ReviewPage(props: ReviewPageProps): ReactElement {
   return (
-    <ExplainProvider target={props.target}>
-      <SpecsEditingProvider>
-        <ReviewPageBody {...props} />
-      </SpecsEditingProvider>
-    </ExplainProvider>
+    <ReviewProviders target={props.target}>
+      <ReviewPageBody {...props} />
+    </ReviewProviders>
   );
 }

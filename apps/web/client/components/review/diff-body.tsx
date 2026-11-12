@@ -21,6 +21,12 @@ function openFileId(files: Files, visible: Files, picked: number | null): number
   return (chosen ?? visible.find((file) => !file.ignored) ?? visible[0] ?? files[0])?.id ?? null;
 }
 
+/** The file's lines added and removed, as the list has them. */
+function sizeOf(files: Files, id: number): { additions: number; deletions: number } {
+  const file = files.find((candidate) => candidate.id === id);
+  return { additions: file?.additions ?? 0, deletions: file?.deletions ?? 0 };
+}
+
 type Picked = { id: number; part: string | null; seq: number };
 
 /** An explanation's focus the user has not moved away from yet. */
@@ -97,7 +103,7 @@ export function DiffBody({
         banner={banner}
         error={error}
         emptyText={emptyText}
-        open={fileId === null ? null : { fileId, part, focus: fresh }}
+        open={fileId === null ? null : { fileId, part, focus: fresh, size: sizeOf(files, fileId) }}
       />
     </div>
   );

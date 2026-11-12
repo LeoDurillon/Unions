@@ -84,7 +84,9 @@
   gitignore-style patterns) are flagged `ignored` and listed apart, never dropped; files the change size counts as
   code (`isCodeFile` in `@union/core/change-size`, with `sizeIgnoreOf(config)`) are flagged `code`, both set by
   `routes/review/file-flags.ts` on every file list. The client narrows the list by a path query and Code only
-  (`lib/review/file-filter.ts`, `review/file-filter-bar.tsx`). `@union/core/diff` parses diffs and
+  (`lib/review/file-filter.ts`, `review/file-filter-bar.tsx`), and Not viewed: the files marked viewed are kept in
+  the browser's localStorage per review, keyed by path and line counts (`lib/review/viewed-files.ts`,
+  `review/viewed-context.tsx`), never sent to the server. `@union/core/diff` parses diffs and
   is browser-safe. A pull request's review can show one commit at a time (`commit-picker.tsx`, `commit-diff.tsx`,
   `routes/pull-requests/pr-commits.ts`: the PR's commits and a commit's files against its first parent, read from GitHub and kept
   by SHA in memory); that view is read only, comments are written on all the changes. A ticket's review has the same

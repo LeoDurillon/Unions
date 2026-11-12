@@ -17,6 +17,10 @@ Click **Review changes** in a ticket's panel. The page opens on the **Diff** tab
   count as code: tests, docs, lock files, migrations and binary files, or the patterns you set in
   **Settings → Agents → Change size**. Union remembers Code only in this browser. A file you already opened stays
   open even when the filter hides it, and the count above the list says how many files are shown, of how many.
+- Tick a file's box in the list, or **Viewed** at the top of the open file, once you have read it; **v** marks the
+  open file viewed and opens the next one. The header counts them ("12 of 300 files viewed"), and **Not viewed**,
+  beside Code only, lists only the files left to read. The marks are kept in this browser, for this review; a file
+  whose lines added or removed change after you marked it counts as not viewed again.
 - On the right, one file at a time, with syntax highlighting, **Unified** or **Split** (side by side). Union
   remembers your choice in this browser.
 - The commit picker shows all the changes, the changes since your last review, or one commit at a time.
@@ -47,8 +51,9 @@ You can send a review while the ticket waits for you at the implementation or th
 at the final review or from Done, the final review runs again once the implementer is done; from Done, the ticket
 goes back to In progress.
 
-To bring in what people wrote on GitHub, click **Import from #\<PR\>** in the header (or **Import** in the PR tab).
-On a split ticket, the header's **Import from the stack** imports the comments of every open slice's pull request,
+To bring in what people wrote on GitHub, click **Import from #\<PR\>** in the header's **⋯** menu (or **Import** in
+the PR tab).
+On a split ticket, the header's **⋯** menu has **Import from the stack**, which imports the comments of every open slice's pull request,
 each onto its own slice.
 Unresolved line comments become drafts on their lines, with the replies folded in. Review summaries and
 conversation comments are offered one by one with **Add to review**, since bots post many of them. Comments whose

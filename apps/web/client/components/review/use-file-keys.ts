@@ -1,9 +1,11 @@
-// The review's file keys: j opens the next file, k the previous one, in the order the list shows them.
+// The review's file keys: j opens the next file, k the previous one, in the order the list shows them. v marks the
+// open file viewed and opens the next (or unmarks it).
 
 import type { DiffFileSummary } from '../../../src/api-types';
 import { treeOrder } from '../../lib/review/file-tree';
 import { useShortcuts } from '../../lib/ui/shortcuts';
 import type { Layout } from './file-rows';
+import { useViewed } from './viewed-context';
 
 /** The files as the list shows them: the shown ones (as a list or a tree), then the ignored ones. */
 function shownOrder(files: DiffFileSummary[], layout: Layout): DiffFileSummary[] {
@@ -29,5 +31,17 @@ export function useFileKeys(
         onSelect(target.id);
       }
     };
-  useShortcuts({ j: go(1), k: go(-1) });
+  const viewed = useViewed();
+  const markViewed = (): void => {
+    const file = order[at];
+    if (!file) {
+      return;
+    }
+    const was = viewed.isViewed(file);
+    viewed.toggle(file);
+    if (!was) {
+      go(1)();
+    }
+  };
+  useShortcuts({ j: go(1), k: go(-1), v: markViewed });
 }

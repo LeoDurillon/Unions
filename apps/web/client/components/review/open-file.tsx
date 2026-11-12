@@ -1,66 +1,18 @@
-// One file of the review: its diff, the threads under their lines, and the outdated comments.
+// One file of the review: its header, its diff, the threads under their lines, and the outdated comments.
 
-import { useState, type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 import type { CommentView } from '../../../src/api-types';
-import type { Selection } from '../../lib/review/diff-selection';
 import type { ReviewTarget } from '../../lib/review/review-target';
-import { useDiffFile, type useCommentMutations } from '../../lib/review/use-review';
+import type { useCommentMutations } from '../../lib/review/use-review';
 import { ErrorText } from '../ui/ui';
 import { hasThread, OutdatedComments, Thread } from './comment-thread';
-import { useWholeExplain, type ExplainFocus, type WholeExplain } from './explain-context';
-import { useHunkFocus } from './hunk-focus';
+import type { ExplainFocus } from './explain-context';
+import { FileHeader, type FileSize } from './open-file-header';
 import { ReportFileDiff, type DiffView } from './report-file-diff';
+import { useOpenFile } from './use-open-file';
 
 type Mutations = ReturnType<typeof useCommentMutations>;
-
-/** The selected lines: the user's, or the ones an explanation opened in the panel shows, until the user selects others. */
-function useSelection(
-  focus: ExplainFocus | null,
-  path: string | undefined,
-): [Selection | null, (selection: Selection | null) => void] {
-  const [own, setOwn] = useState<{ selection: Selection | null; seq: number }>({
-    selection: null,
-    seq: 0,
-  });
-  const shows = focus !== null && focus.path === path && focus.seq > own.seq;
-  const selection = shows
-    ? { side: focus.side, start: focus.start, end: focus.end }
-    : own.selection;
-  return [
-    selection,
-    (next) => {
-      setOwn({ selection: next, seq: Math.max(own.seq, focus?.seq ?? 0) });
-    },
-  ];
-}
-
-function FileHeader({
-  path,
-  patch,
-  whole,
-}: {
-  path: string;
-  patch: string;
-  whole: WholeExplain | undefined;
-}): ReactElement {
-  return (
-    <div className="flex items-center gap-2">
-      <h3 className="font-mono text-sm font-semibold">{path}</h3>
-      {whole ? (
-        <button
-          type="button"
-          className="text-xs text-indigo-700 hover:underline dark:text-indigo-300"
-          onClick={() => {
-            whole.file(patch);
-          }}
-        >
-          Explain file
-        </button>
-      ) : null}
-    </div>
-  );
-}
 
 /** One file of the review: its diff, the threads under their lines, and the outdated comments. */
 export function OpenFile({
@@ -71,9 +23,11 @@ export function OpenFile({
   mutations,
   part,
   focus: shown,
+  size,
 }: {
   target: ReviewTarget;
   fileId: number;
+  size: FileSize;
   view: DiffView;
   comments: CommentView[];
   mutations: Mutations;
@@ -82,18 +36,15 @@ export function OpenFile({
   /** Lines an explanation in the panel shows: selected while the user selects none. */
   focus: ExplainFocus | null;
 }): ReactElement {
-  const file = useDiffFile(target, fileId);
-  const [selection, setSelection] = useSelection(shown, file.data?.path);
-  const forFile = comments.filter((comment) => comment.path === file.data?.path);
-  const focus = useHunkFocus(target, part, file.data, forFile);
-  const whole = useWholeExplain(file.data?.path);
+  const open = useOpenFile({ target, fileId, comments, part, shown });
+  const { file, selection, setSelection, forFile, focus, whole } = open;
   if (!file.data) {
     return <ErrorText error={file.error} />;
   }
   const { path } = file.data;
   return (
     <div className="space-y-3">
-      <FileHeader path={path} patch={file.data.patch} whole={whole} />
+      <FileHeader file={{ ...file.data, ...size }} whole={whole} />
       {focus.bar}
       <OutdatedComments comments={forFile.filter((c) => c.outdated)} mutations={mutations} />
       <ReportFileDiff

@@ -241,6 +241,7 @@ Ctrl, ⌘ and Alt combinations stay the browser's.
 | Ticket      | **1 – 5** | Switch to Overview, Preview, Steps, PR, or Notion or Jira.                  |
 | Ticket      | **Esc**   | Close the panel.                                                            |
 | Review page | **j / k** | Open the next or previous file.                                             |
+| Review page | **v**     | Mark the open file viewed and open the next one.                            |
 | Repository  | **/**     | Jump to **Go to file**.                                                     |
 
 ## Cancel and remove
