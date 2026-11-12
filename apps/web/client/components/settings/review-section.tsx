@@ -1,12 +1,13 @@
 // Files the review page lists apart (collapsed), so the sidebar shows what needs reading.
+
 import { LOCK_FILES } from '@union/core/diff';
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
-import { api } from '../../lib/api';
-import { useSettingsForm } from '../../lib/use-settings-form';
-import { Switch } from '../choice';
-import { Field, inputClass } from '../ui';
+import { api } from '../../lib/app/api';
+import { useSettingsForm } from '../../lib/settings/use-settings-form';
+import { Switch } from '../ui/choice';
+import { Field, inputClass } from '../ui/ui';
 import { SaveBar } from './save-bar';
 
 function LockFilesToggle({

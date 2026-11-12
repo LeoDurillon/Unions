@@ -1,13 +1,14 @@
 // Above the event rules: each connected tracker's columns or fields as Union last read them, and reading them again.
+
 import { useMutation } from '@tanstack/react-query';
 import type { NotionSchema } from '@union/core';
 import type { ReactElement } from 'react';
 
 import type { EventRulesResponse } from '../../../src/event-api-types';
-import { integrationsApi } from '../../lib/integrations-api';
-import { formatWhen } from '../../lib/relative-time';
+import { integrationsApi } from '../../lib/integrations/integrations-api';
+import { formatWhen } from '../../lib/ui/relative-time';
 import { JiraFieldsBar } from '../integrations/jira/jira-fields-bar';
-import { Button, ErrorText } from '../ui';
+import { Button, ErrorText } from '../ui/ui';
 
 function NotionColumns({
   projectId,

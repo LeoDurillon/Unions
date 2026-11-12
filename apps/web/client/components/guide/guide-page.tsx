@@ -7,8 +7,8 @@ import { useCallback, useEffect, type ReactElement } from 'react';
 import { guideApi } from '../../lib/guide/guide-api';
 import { guideLinkOf, guideUrl } from '../../lib/guide/guide-links';
 import { clearAnchorOnLeave, openGuide, scrollToAnchor } from '../../lib/guide/guide-url';
-import { Markdown } from '../markdown';
-import { ErrorText } from '../ui';
+import { Markdown } from '../markdown/markdown';
+import { ErrorText } from '../ui/ui';
 import { GuideNav } from './guide-nav';
 
 /** A click on a guide link opens it here; a link out opens a new tab. */

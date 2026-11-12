@@ -1,12 +1,13 @@
 // What both diff layouts share: line tones, the gutter, highlighted code, a hunk's spec tags and
 // the comments on a line.
+
 import type { DiffLine } from '@union/core/diff';
 import type { ReactElement, ReactNode } from 'react';
 
 import type { CommentView } from '../../../src/api-types';
-import type { Selection, Side } from '../../lib/diff-selection';
-import type { Token } from '../../lib/highlight';
-import { headerKey } from '../../lib/spec-hunks';
+import type { Token } from '../../lib/markdown/highlight';
+import type { Selection, Side } from '../../lib/review/diff-selection';
+import { headerKey } from '../../lib/review/spec-hunks';
 import { useLineMark, type LineMark } from './report-line-marks';
 
 export const ROW_TONE = {

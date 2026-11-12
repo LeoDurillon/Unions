@@ -3,7 +3,7 @@
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 
 import type { JiraIssueLink } from '../../../src/routes/tickets/ticket-jira-link';
-import { request } from '../api';
+import { request } from '../app/api';
 
 export type TicketJiraActions = {
   check: UseMutationResult<JiraIssueLink, Error, string>;

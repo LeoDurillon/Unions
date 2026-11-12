@@ -1,10 +1,11 @@
 // The onboarding step that picks the repository from a paged list.
+
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 
 import type { RepoOption } from '../../../src/api-types';
-import { api } from '../../lib/api';
-import { Badge, Button, ErrorText, inputClass } from '../ui';
+import { api } from '../../lib/app/api';
+import { Badge, Button, ErrorText, inputClass } from '../ui/ui';
 import { credentialOf, type StepProps } from './draft';
 
 function RepoCard({

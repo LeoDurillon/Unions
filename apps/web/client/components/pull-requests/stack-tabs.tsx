@@ -5,8 +5,8 @@ import type { ReactElement } from 'react';
 
 import type { CurrentReview } from '../../../src/api-types';
 import { useDraftCounts } from '../../lib/review/use-review';
-import { Segmented } from '../choice';
-import { Badge } from '../ui';
+import { Segmented } from '../ui/choice';
+import { Badge } from '../ui/ui';
 
 function Status({ review }: { review: CurrentReview }): ReactElement | null {
   if (review.submitStatus === 'sending') {

@@ -5,8 +5,8 @@ import { useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-q
 import { useState } from 'react';
 
 import type { NotionTabView } from '../../../src/notion-discussion-types';
-import { request } from '../api';
-import { useEvents } from '../use-event-stream';
+import { request } from '../app/api';
+import { useEvents } from '../app/use-event-stream';
 
 /** A comment Notion refused: why, and its text for the box. */
 type NotionCommentFailure = { error: string; text: string };

@@ -1,10 +1,15 @@
 // A stack of pull requests as one row: its bottom's title, its size, adding it to the reviews (or
 // its ticket). Its members show below when opened.
+
 import { useState, type ReactElement } from 'react';
 
 import type { PullRequestListItem } from '../../../src/api-types';
-import { addableMembers, unlistedMembers, type StackRow } from '../../lib/pull-request-stacks';
-import { Badge, Button } from '../ui';
+import {
+  addableMembers,
+  unlistedMembers,
+  type StackRow,
+} from '../../lib/pull-request/pull-request-stacks';
+import { Badge, Button } from '../ui/ui';
 import { ACTION, PullRequestItem } from './pull-request-item';
 
 /** The ticket every listed member belongs to (a split ticket's stack), if they share one. */

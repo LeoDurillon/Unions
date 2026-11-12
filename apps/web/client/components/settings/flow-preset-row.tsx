@@ -1,11 +1,12 @@
 // One flow preset in the settings: its name, what it is for, its planning steps and custom agents.
 // Also whether new tickets get it, and Remove.
+
 import type { FlowPreset } from '@union/core/flows';
 import type { ReactElement } from 'react';
 
-import { useCustomAgentNames } from '../../lib/use-custom-agents';
-import { flowSteps, PlanningChips } from '../flow-picker';
-import { Button, inputClass } from '../ui';
+import { useCustomAgentNames } from '../../lib/union-settings/use-custom-agents';
+import { flowSteps, PlanningChips } from '../flow/flow-picker';
+import { Button, inputClass } from '../ui/ui';
 
 export function FlowPresetRow({
   preset,

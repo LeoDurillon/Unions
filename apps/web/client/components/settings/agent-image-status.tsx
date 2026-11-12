@@ -1,13 +1,14 @@
 // The agent image page's state: what the agents run on, the save being built or why it was not
 // applied. Also the build's log.
+
 import { formatBytes } from '@union/core/attachment-limits';
 import type { ReactElement } from 'react';
 
 import type { AgentImageView } from '../../../src/routes/agent-image';
-import { timeAgo } from '../../lib/relative-time';
-import { isBuilding } from '../../lib/use-agent-image';
-import { useNow } from '../../lib/use-now';
-import { Badge } from '../ui';
+import { isBuilding } from '../../lib/settings/use-agent-image';
+import { timeAgo } from '../../lib/ui/relative-time';
+import { useNow } from '../../lib/ui/use-now';
+import { Badge } from '../ui/ui';
 
 function appliedName(view: AgentImageView): string {
   if (!view.applied) {

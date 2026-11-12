@@ -1,9 +1,10 @@
-// One notification in the panel: what it is about, what happened, where and when; those that still ask something
-// stand out.
+// One notification in the panel: what it is about, what happened, where and when. Those that still
+// ask something stand out.
+
 import type { Notification } from '@union/core';
 import type { ReactElement } from 'react';
 
-import { Badge } from '../ui';
+import { Badge } from '../ui/ui';
 import { KIND_LABELS } from './notification-labels';
 
 const TIME = { dateStyle: 'short', timeStyle: 'short' } as const;

@@ -1,10 +1,11 @@
 // App ID and private key, checked against GitHub before they are stored on the server.
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 
-import { api } from '../../lib/api';
-import { Dropzone } from '../dropzone';
-import { Button, ErrorText, Field, inputClass } from '../ui';
+import { api } from '../../lib/app/api';
+import { Dropzone } from '../ui/dropzone';
+import { Button, ErrorText, Field, inputClass } from '../ui/ui';
 
 /** GitHub pre-fills the app form from these: no webhook, only what Union needs (CI reads for the PR tab). */
 const APP_PARAMS = new URLSearchParams({

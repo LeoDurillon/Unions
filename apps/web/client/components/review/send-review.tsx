@@ -4,7 +4,7 @@ import type { ReviewVerdict } from '@union/core';
 import { useEffect, useRef, useState, type ReactElement, type RefObject } from 'react';
 
 import type { ReviewCopy } from '../../lib/review/review-target';
-import { Button, ErrorText, inputClass } from '../ui';
+import { Button, ErrorText, inputClass } from '../ui/ui';
 
 type SendProps = {
   copy: ReviewCopy;

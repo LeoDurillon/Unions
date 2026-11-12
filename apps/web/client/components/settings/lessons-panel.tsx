@@ -1,8 +1,9 @@
 // The Memory page's lessons part: whether they are sent to the agents, Tidy lessons, then the lessons by step.
+
 import type { LessonInput } from '@union/core/lesson-input';
 import type { ReactElement } from 'react';
 
-import { Switch } from '../choice';
+import { Switch } from '../ui/choice';
 import { LessonList, type Editing } from './lesson-list';
 import type { AcceptLessons } from './lesson-suggestions';
 import { TidyLessons } from './lesson-tidy';

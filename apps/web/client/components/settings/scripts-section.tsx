@@ -1,12 +1,13 @@
 // Commands saved by name, run from a ticket's Preview tab in its workspace; one edited at a time.
+
 import type { ProjectScript } from '@union/core';
 import { useState, type ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
-import { api } from '../../lib/api';
-import { useLeaveGuard } from '../../lib/leave-guard';
-import { useSettingsForm, type SettingsForm } from '../../lib/use-settings-form';
-import { Button } from '../ui';
+import { api } from '../../lib/app/api';
+import { useLeaveGuard } from '../../lib/app/leave-guard';
+import { useSettingsForm, type SettingsForm } from '../../lib/settings/use-settings-form';
+import { Button } from '../ui/ui';
 import { SaveBar } from './save-bar';
 import { draftOf, ScriptCard, ScriptForm, scriptOf, type ScriptDraft } from './script-row';
 

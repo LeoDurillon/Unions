@@ -6,8 +6,8 @@ import { useState, type ReactElement, type ReactNode } from 'react';
 
 import type { CommentView } from '../../../src/api-types';
 import type { ReviewTarget } from '../../lib/review/review-target';
+import { focusOf, hunkTags, inHunks, type Focus } from '../../lib/review/spec-hunks';
 import { useReviewGrouping } from '../../lib/review/use-review-grouping';
-import { focusOf, hunkTags, inHunks, type Focus } from '../../lib/spec-hunks';
 
 function FocusBar({
   focus,

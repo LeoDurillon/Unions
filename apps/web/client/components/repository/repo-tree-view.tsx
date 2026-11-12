@@ -1,8 +1,9 @@
 // The repository's folders and files; a folder unfolds on click, its entries drawn only once open.
+
 import type { ReactElement } from 'react';
 
 import type { RepositoryEntry } from '../../../src/repository-api-types';
-import { nameOf } from '../../lib/repo-tree';
+import { nameOf } from '../../lib/repository/repo-tree';
 import { INDENT, PADDING } from '../review/file-row';
 import type { RepoTreeState } from './use-repo-tree';
 

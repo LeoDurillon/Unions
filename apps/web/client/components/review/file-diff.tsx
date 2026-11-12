@@ -1,10 +1,11 @@
 // One file's diff, unified or side by side; comments and the editor appear under the last line they
 // cover.
+
 import { parsePatch, type DiffLine } from '@union/core/diff';
 import { useMemo, useState, type ReactElement, type ReactNode } from 'react';
 
-import { anchorOf, isSelected, select } from '../../lib/diff-selection';
-import { highlightDiff, languageFor, type Token } from '../../lib/highlight';
+import { highlightDiff, languageFor, type Token } from '../../lib/markdown/highlight';
+import { anchorOf, isSelected, select } from '../../lib/review/diff-selection';
 import {
   Code,
   commentsAt,

@@ -1,10 +1,11 @@
 // The services the proxy serves: name in the compose file, port, and host prefix.
+
 import type { PreviewService } from '@union/core';
 import type { ReactElement } from 'react';
 
 import type { PreviewSettingsView } from '../../../src/api-types';
-import { formatWhen } from '../../lib/relative-time';
-import { Button, inputClass } from '../ui';
+import { formatWhen } from '../../lib/ui/relative-time';
+import { Button, inputClass } from '../ui/ui';
 
 export type ServiceRow = { name: string; port: string; prefix: string };
 

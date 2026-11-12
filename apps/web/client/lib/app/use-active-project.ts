@@ -1,0 +1,21 @@
+// The project list plus the remembered selection, falling back to the first project.
+
+import { useQuery } from '@tanstack/react-query';
+
+import type { ListedProject, PublicProject } from '../../../src/api-types';
+import { useStoredNumber } from '../ui/use-stored-number';
+import { api } from './api';
+
+/** The project list plus the remembered selection, falling back to the first project. */
+export function useActiveProject(): {
+  projects: ListedProject[];
+  project: PublicProject | null;
+  select: (id: number) => void;
+  loading: boolean;
+} {
+  const query = useQuery({ queryKey: ['projects'], queryFn: api.projects });
+  const [stored, select] = useStoredNumber('union.project');
+  const projects = query.data ?? [];
+  const project = projects.find((candidate) => candidate.id === stored) ?? projects[0] ?? null;
+  return { projects, project, select, loading: query.isPending };
+}

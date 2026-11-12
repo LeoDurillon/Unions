@@ -1,10 +1,11 @@
 // The value a rule sets, shaped by the property's type.
+
 import type { NotionProperty } from '@union/core';
 import { useState, type ReactElement } from 'react';
 
-import { joinChoices, partitionChoices } from '../../lib/choice-values';
-import { CheckChip, ChipGroup, toggled } from '../choice';
-import { Field, inputClass } from '../ui';
+import { joinChoices, partitionChoices } from '../../lib/settings/choice-values';
+import { CheckChip, ChipGroup, toggled } from '../ui/choice';
+import { Field, inputClass } from '../ui/ui';
 import { PeopleField } from './people-field';
 import { VariableChips } from './variable-chips';
 

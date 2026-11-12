@@ -1,12 +1,13 @@
 // The Repository tab's "go to file": a box that finds files by a few letters of their path, and the files found.
+
 import { useMemo, useRef, type ReactElement } from 'react';
 
 import type { RepositoryEntry } from '../../../src/repository-api-types';
-import { FILTER_LIMIT, filterPaths } from '../../lib/path-filter';
-import { nameOf, parentOf } from '../../lib/repo-tree';
-import { useShortcuts } from '../../lib/shortcuts';
-import { useUrlParam } from '../../lib/url-state';
-import { inputClass } from '../ui';
+import { useUrlParam } from '../../lib/app/url-state';
+import { nameOf, parentOf } from '../../lib/repository/repo-tree';
+import { FILTER_LIMIT, filterPaths } from '../../lib/review/path-filter';
+import { useShortcuts } from '../../lib/ui/shortcuts';
+import { inputClass } from '../ui/ui';
 
 /** The filter box; `/` focuses it while no ticket is open over the tab. */
 export function RepoFilterBox({

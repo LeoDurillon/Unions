@@ -4,7 +4,7 @@
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 
 import type { ReviewPreviewView } from '../../../src/review-preview-types';
-import { request } from '../api';
+import { request } from '../app/api';
 import {
   previewKey,
   previewPath,

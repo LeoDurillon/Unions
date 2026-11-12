@@ -1,12 +1,13 @@
 // A project's usage split per step, per model and per ticket: calls, tokens and API-equivalent cost,
 // most expensive first.
+
 import type { ProjectUsage, UsageSlice } from '@union/core';
 import type { ReactElement, ReactNode } from 'react';
 
-import { stepTitle } from '../../lib/labels';
-import { count } from '../../lib/token-counts';
-import { costText } from '../../lib/usage-format';
-import { useCustomAgentNames } from '../../lib/use-custom-agents';
+import { stepTitle } from '../../lib/board/labels';
+import { count } from '../../lib/log/token-counts';
+import { useCustomAgentNames } from '../../lib/union-settings/use-custom-agents';
+import { costText } from '../../lib/usage/usage-format';
 
 type Row = UsageSlice & { key: string; label: ReactNode };
 

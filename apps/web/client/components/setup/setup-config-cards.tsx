@@ -1,12 +1,13 @@
 // The setup proposal's saved scripts and agent image cards.
+
 import type { ProjectScript, SetupScripts, SetupText } from '@union/core';
 import { sectionApplied, scriptsAfter } from '@union/core/setup-apply';
 import { useState, type ReactElement } from 'react';
 
-import { useAgentImage } from '../../lib/use-agent-image';
-import { setupWrites, useSetupApply } from '../../lib/use-setup-apply';
-import { CodeTextarea } from '../code-textarea';
-import { inputClass } from '../ui';
+import { useAgentImage } from '../../lib/settings/use-agent-image';
+import { setupWrites, useSetupApply } from '../../lib/setup/use-setup-apply';
+import { CodeTextarea } from '../ui/code-textarea';
+import { inputClass } from '../ui/ui';
 import { SetupCard } from './setup-card';
 import type { SetupCardProps } from './setup-card-props';
 

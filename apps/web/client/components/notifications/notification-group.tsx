@@ -1,8 +1,9 @@
 // One ticket's or investigation's notifications: the latest, and the earlier ones folded under it.
+
 import { useState, type ReactElement } from 'react';
 
-import type { NotificationGroup } from '../../lib/notification-groups';
-import type { NotificationTarget } from '../../lib/open-notification';
+import type { NotificationGroup } from '../../lib/notifications/notification-groups';
+import type { NotificationTarget } from '../../lib/notifications/open-notification';
 import { NotificationItem } from './notification-item';
 
 /** Opening any of them opens their ticket or investigation and marks the whole group read. */

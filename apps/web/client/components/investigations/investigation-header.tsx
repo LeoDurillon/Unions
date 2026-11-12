@@ -1,10 +1,12 @@
-// The top of an open investigation: its title and state, where it ran (scope, model, questions, tools), and its
-// actions: Run again or Cancel, Export, Delete, Open ticket and Write a ticket from it.
+// The top of an open investigation: its title and state, where it ran (scope, model, questions,
+// tools), its actions. The actions are Run again or Cancel, Export, Delete, Open ticket and Write a
+// ticket from it.
+
 import type { Investigation } from '@union/core';
 import type { ReactElement } from 'react';
 
 import { MODEL_LABELS } from '../agents/agent-labels';
-import { StatusPill } from '../status-pill';
+import { StatusPill } from '../ticket/status-pill';
 import { Actions } from './investigation-actions';
 import { SCOPE_LABELS, STATUS_LABELS } from './investigation-labels';
 import { TicketButtons } from './investigation-ticket';

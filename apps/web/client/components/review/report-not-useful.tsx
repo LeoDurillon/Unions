@@ -7,7 +7,7 @@ import { useState, type ReactElement } from 'react';
 
 import type { ReviewTarget } from '../../lib/review/review-target';
 import { useReviewReport } from '../../lib/review/use-review-report';
-import { Button, ErrorText, inputClass } from '../ui';
+import { Button, ErrorText, inputClass } from '../ui/ui';
 
 /** A first draft of the rule, for the reviewer to widen to the kind of item. */
 function draftRule(item: AttentionItem): string {

@@ -1,9 +1,10 @@
 // The Update dialog: the commits it pulls, and the work a restart would interrupt, with Wait and Update anyway.
+
 import type { ReactElement } from 'react';
 
 import type { UnionUpdateView } from '../../../src/union-update-types';
-import { useStartUpdate } from '../../lib/use-union-update';
-import { Button, Dialog, ErrorText } from '../ui';
+import { useStartUpdate } from '../../lib/union-settings/use-union-update';
+import { Button, Dialog, ErrorText } from '../ui/ui';
 
 type Active = UnionUpdateView['active'];
 

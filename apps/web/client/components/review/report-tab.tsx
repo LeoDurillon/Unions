@@ -6,7 +6,7 @@ import { useState, type ReactElement } from 'react';
 import type { ReportView } from '../../../src/routes/review/review-reports';
 import type { ReviewTarget } from '../../lib/review/review-target';
 import { isReporting, useReviewReport } from '../../lib/review/use-review-report';
-import { Button, ErrorText } from '../ui';
+import { Button, ErrorText } from '../ui/ui';
 import { ReportBody } from './report-body';
 import { useOpenLines } from './report-open';
 import { ReportStart } from './report-start';

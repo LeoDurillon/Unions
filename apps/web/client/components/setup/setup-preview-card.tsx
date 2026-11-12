@@ -1,11 +1,12 @@
 // The setup proposal's preview card: its compose file and additions to edit, the rest of its settings to read, then Apply.
+
 import type { SetupPreview } from '@union/core';
 import { previewAfter, sectionApplied } from '@union/core/setup-apply';
 import { useState, type ReactElement } from 'react';
 
-import { setupWrites, useSetupApply } from '../../lib/use-setup-apply';
-import { CodeTextarea } from '../code-textarea';
-import { inputClass } from '../ui';
+import { setupWrites, useSetupApply } from '../../lib/setup/use-setup-apply';
+import { CodeTextarea } from '../ui/code-textarea';
+import { inputClass } from '../ui/ui';
 import { SetupCard } from './setup-card';
 import type { SetupCardProps } from './setup-card-props';
 import { SetupField, SetupList } from './setup-values';

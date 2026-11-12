@@ -4,7 +4,7 @@ import type { ContainerRun } from '@union/core';
 import type { ReactElement } from 'react';
 
 import { useAddToReview, type PullRequestTarget } from '../../lib/review/use-review-preview';
-import { Button, ErrorText } from '../ui';
+import { Button, ErrorText } from '../ui/ui';
 
 export function AddRunToReview({
   target,

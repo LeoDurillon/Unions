@@ -9,8 +9,8 @@ import type {
   PendingNotionComment,
 } from '../../../src/notion-discussion-types';
 import type { NotionCommentSend } from '../../lib/integrations/use-notion-comments';
-import { formatWhen } from '../../lib/relative-time';
-import { Markdown } from '../markdown';
+import { formatWhen } from '../../lib/ui/relative-time';
+import { Markdown } from '../markdown/markdown';
 import { AddToReview, type ReviewImportState } from '../review/add-to-review';
 import { NotionReply } from './notion-reply';
 

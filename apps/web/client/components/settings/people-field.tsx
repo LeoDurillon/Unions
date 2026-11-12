@@ -2,10 +2,10 @@
 
 import type { ReactElement } from 'react';
 
-import { joinChoices, splitChoices } from '../../lib/choice-values';
 import { useNotionUsers } from '../../lib/integrations/use-notion-users';
-import { CheckChip, ChipGroup, toggled } from '../choice';
-import { ErrorText } from '../ui';
+import { joinChoices, splitChoices } from '../../lib/settings/choice-values';
+import { CheckChip, ChipGroup, toggled } from '../ui/choice';
+import { ErrorText } from '../ui/ui';
 
 const CAPABILITY_HINT =
   'Union lists the members only if the Notion integration has the "Read user information" capability (notion.so/profile/integrations → the integration → Capabilities).';

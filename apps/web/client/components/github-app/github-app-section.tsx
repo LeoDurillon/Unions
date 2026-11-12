@@ -1,12 +1,13 @@
 // The GitHub App every project may use instead of a personal token.
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 
 import type { GitHubAppStatus } from '../../../src/api-types';
-import { api } from '../../lib/api';
-import { useGitHubApp } from '../../lib/use-github-app';
-import { ConfirmButton } from '../confirm-button';
-import { Badge, Button, ErrorText } from '../ui';
+import { api } from '../../lib/app/api';
+import { useGitHubApp } from '../../lib/settings/use-github-app';
+import { ConfirmButton } from '../ui/confirm-button';
+import { Badge, Button, ErrorText } from '../ui/ui';
 import { AppSetupForm } from './app-setup-form';
 
 const CARD =

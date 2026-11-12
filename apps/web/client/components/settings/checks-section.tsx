@@ -1,10 +1,11 @@
 // How the implementation agent's work is installed and checked inside the ticket's container.
+
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
-import { api } from '../../lib/api';
-import { useSettingsForm } from '../../lib/use-settings-form';
-import { Field, inputClass } from '../ui';
+import { api } from '../../lib/app/api';
+import { useSettingsForm } from '../../lib/settings/use-settings-form';
+import { Field, inputClass } from '../ui/ui';
 import { SaveBar } from './save-bar';
 
 const DEFAULT_ITERATIONS = 3;

@@ -1,9 +1,10 @@
 // One change a pull request rule makes: labels, reviewers or assignees to pick, or a title or description template.
+
 import type { PullRequestChange } from '@union/core/event-pull-request';
 import type { ReactElement } from 'react';
 
 import type { RuleChoices } from '../../../src/event-api-types';
-import { Field, inputClass } from '../ui';
+import { Field, inputClass } from '../ui/ui';
 import { NamePicker } from './name-picker';
 import { VariableChips } from './variable-chips';
 

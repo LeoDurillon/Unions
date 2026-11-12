@@ -1,4 +1,5 @@
 // Step-by-step project setup, shown over the board (the first thing a new user sees).
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   useEffect,
@@ -9,9 +10,9 @@ import {
   type RefObject,
 } from 'react';
 
-import { api } from '../../lib/api';
-import { setupApi } from '../../lib/setup-api';
-import { Button, CloseButton, ErrorText } from '../ui';
+import { api } from '../../lib/app/api';
+import { setupApi } from '../../lib/setup/setup-api';
+import { Button, CloseButton, ErrorText } from '../ui/ui';
 import { ConnectStep } from './connect-step';
 import {
   canContinue,

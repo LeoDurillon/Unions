@@ -1,11 +1,12 @@
 // A split ticket's stack in its PR tab: one line per slice with its CI, what went wrong, and what
 // can be done to it. Each line also says how it merges.
+
 import type { ReactElement } from 'react';
 
 import type { StackView, TicketDetail } from '../../../src/api-types';
 import type { CheckCounts } from '../../../src/ci-api-types';
-import { useStackChecks } from '../../lib/use-stack-checks';
-import { ErrorText } from '../ui';
+import { useStackChecks } from '../../lib/pull-request/use-stack-checks';
+import { ErrorText } from '../ui/ui';
 import { StackActions } from './stack-actions';
 import { StackSliceRow } from './stack-slice-row';
 

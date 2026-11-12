@@ -1,4 +1,5 @@
 // One rule: its on/off switch, when, then, and edit and delete.
+
 import type { EventRule, NotionSchema } from '@union/core';
 import {
   BOARD_LABELS,
@@ -8,10 +9,10 @@ import {
 } from '@union/core/event-rules';
 import type { ReactElement } from 'react';
 
-import { stepTitle } from '../../lib/labels';
-import { Switch } from '../choice';
-import { ConfirmButton } from '../confirm-button';
-import { IconButton, PencilIcon, TrashIcon } from '../icon-button';
+import { stepTitle } from '../../lib/board/labels';
+import { Switch } from '../ui/choice';
+import { ConfirmButton } from '../ui/confirm-button';
+import { IconButton, PencilIcon, TrashIcon } from '../ui/icon-button';
 import { ActionText } from './rule-action-text';
 
 function triggerText(trigger: EventTrigger): string {

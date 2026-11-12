@@ -1,11 +1,12 @@
 // The setup agent's proposal to review: summary and questions, a card per section to apply, the
 // tickets it asks for.
+
 import type { Investigation, SetupProposal } from '@union/core';
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
-import { useSetupDismissed } from '../../lib/use-setup-dismissed';
-import { Dialog } from '../ui';
+import { useSetupDismissed } from '../../lib/setup/use-setup-dismissed';
+import { Dialog } from '../ui/ui';
 import { QuestionsCard, TicketsCard } from './setup-agent-cards';
 import type { SetupCardProps } from './setup-card-props';
 import { SetupCards } from './setup-cards';

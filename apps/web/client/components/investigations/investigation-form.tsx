@@ -1,14 +1,15 @@
 // A new investigation: what to look into, where, and with which model and tools.
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { AgentModel, InvestigationScope } from '@union/core';
 import { INVESTIGATION_DEFAULTS } from '@union/core/investigation-defaults';
 import { useState, type ReactElement, type SubmitEvent } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
-import { api } from '../../lib/api';
+import { api } from '../../lib/app/api';
 import { ModelField } from '../agents/model-field';
 import { ToolsField } from '../agents/tools-field';
-import { Button, ErrorText, Field, inputClass, TextInput } from '../ui';
+import { Button, ErrorText, Field, inputClass, TextInput } from '../ui/ui';
 import { ScopeField } from './scope-field';
 
 const DEFAULT_TOOLS = [...INVESTIGATION_DEFAULTS.tools];

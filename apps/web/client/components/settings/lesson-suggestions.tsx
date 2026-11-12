@@ -1,12 +1,13 @@
 // The lesson writer's or tidier's latest run on the Memory page: working, failed, or its proposals.
 // The proposals (new lessons, ones replacing kept lessons, removals) are accepted one by one or
 // all.
+
 import type { LessonSuggestion } from '@union/core';
 import type { LessonInput, LessonProposal } from '@union/core/lesson-input';
 import { useState, type ReactElement } from 'react';
 
-import { useLessonSuggestion, useLessonWriter } from '../../lib/use-memory';
-import { Badge, Button, ErrorText } from '../ui';
+import { useLessonSuggestion, useLessonWriter } from '../../lib/settings/use-memory';
+import { Badge, Button, ErrorText } from '../ui/ui';
 import { lessonTitle } from './lesson-list';
 
 /**

@@ -1,11 +1,12 @@
 // The sidebar's Claude usage: how much of the five-hour and weekly windows is used and when each
 // starts over. The windows are the subscription's, as the agents' last call reported them.
+
 import type { ClaudeLimits, LimitWindow } from '@union/core';
 import type { ReactElement } from 'react';
 
-import { timeAgo } from '../../lib/relative-time';
-import { useNow } from '../../lib/use-now';
-import { useClaudeLimits } from '../../lib/use-usage';
+import { timeAgo } from '../../lib/ui/relative-time';
+import { useNow } from '../../lib/ui/use-now';
+import { useClaudeLimits } from '../../lib/usage/use-usage';
 
 const PERCENT = 100;
 /** From here a window is close to its limit. */

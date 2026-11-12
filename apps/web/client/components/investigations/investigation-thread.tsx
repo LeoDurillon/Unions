@@ -1,12 +1,13 @@
-// An investigation as a conversation, oldest first: each question in a bubble, each answer in a card (the latest
-// one whole, or why there is none yet), then the box that asks a follow-up.
+// An investigation as a conversation, oldest first: questions in bubbles, answers in cards, then
+// the follow-up box. The latest answer shows whole, or why there is none yet.
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { Investigation } from '@union/core';
 import { useState, type ReactElement, type ReactNode, type SubmitEvent } from 'react';
 
-import { api } from '../../lib/api';
-import { Markdown } from '../markdown';
-import { Button, ErrorText } from '../ui';
+import { api } from '../../lib/app/api';
+import { Markdown } from '../markdown/markdown';
+import { Button, ErrorText } from '../ui/ui';
 import { isActive } from './investigation-labels';
 
 /** Longer answers before the latest start folded, so the conversation stays easy to scan. */

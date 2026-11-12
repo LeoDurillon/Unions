@@ -1,11 +1,12 @@
 // Ad-hoc agent runs on a custom prompt for the project; no GitHub issue is created. Opens on the latest one.
+
 import { useQuery } from '@tanstack/react-query';
 import type { Investigation } from '@union/core';
 import { useState, type ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
-import { api } from '../../lib/api';
-import { clearInvestigateTicket } from '../../lib/investigate-ticket';
+import { api } from '../../lib/app/api';
+import { clearInvestigateTicket } from '../../lib/investigations/investigate-ticket';
 import { InvestigationDetail } from './investigation-detail';
 import { InvestigationForm } from './investigation-form';
 import { InvestigationList } from './investigation-list';

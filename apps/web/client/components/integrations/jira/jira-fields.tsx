@@ -1,8 +1,9 @@
 // The fields of a Jira connection (site, email, API token, project key) and how to get them; settings and onboarding.
+
 import type { ReactElement } from 'react';
 
 import { TokenInput } from '../../onboarding/connect-step';
-import { Field, inputClass } from '../../ui';
+import { Field, inputClass } from '../../ui/ui';
 
 /** What the user types to connect Jira; the token is the secret, the rest its config. */
 export type JiraForm = {

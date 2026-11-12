@@ -1,10 +1,11 @@
 // Edits a rule: its name, what triggers it, and what it does.
+
 import type { NotionSchema } from '@union/core';
 import { useState, type ReactElement } from 'react';
 
-import type { RuleDraft } from '../../lib/event-rules-api';
-import { useLeaveGuard } from '../../lib/leave-guard';
-import { Button, ErrorText, Field, inputClass } from '../ui';
+import { useLeaveGuard } from '../../lib/app/leave-guard';
+import type { RuleDraft } from '../../lib/settings/event-rules-api';
+import { Button, ErrorText, Field, inputClass } from '../ui/ui';
 import { ActionFields } from './action-fields';
 import { RulePreviewBox } from './rule-preview';
 import { TriggerFields } from './trigger-fields';

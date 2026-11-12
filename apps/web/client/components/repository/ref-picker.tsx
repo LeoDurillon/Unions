@@ -1,10 +1,11 @@
 // The branch the Repository tab shows, as a button opening the repository's branches; a tag or commit can be
 // typed too.
+
 import { useCallback, useEffect, useRef, useState, type ReactElement, type RefObject } from 'react';
 
-import { useRepositoryBranches } from '../../lib/repository-api';
-import { useDismiss } from '../../lib/use-dismiss';
-import { BranchList } from '../branch-picker';
+import { useRepositoryBranches } from '../../lib/repository/repository-api';
+import { useDismiss } from '../../lib/ui/use-dismiss';
+import { BranchList } from '../ticket/branch-picker';
 
 /** The base branch first, as GitHub lists the default one, then the others as listed. */
 function baseFirst(branches: string[] | undefined, base: string): string[] | undefined {

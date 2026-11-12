@@ -1,14 +1,15 @@
 // What the rule as edited would do for one of the project's tickets; nothing is sent.
+
 import { useMutation, useQuery } from '@tanstack/react-query';
 import type { EventAction } from '@union/core/event-actions';
 import { useState, type ReactElement } from 'react';
 
 import type { TicketSummary } from '../../../src/api-types';
 import type { RulePreview } from '../../../src/event-api-types';
-import { api } from '../../lib/api';
-import { eventRulesApi, type RuleDraft } from '../../lib/event-rules-api';
+import { api } from '../../lib/app/api';
+import { eventRulesApi, type RuleDraft } from '../../lib/settings/event-rules-api';
 import { JiraPreview } from '../integrations/jira/jira-preview';
-import { Button, ErrorText, inputClass } from '../ui';
+import { Button, ErrorText, inputClass } from '../ui/ui';
 
 type Shown<K extends string> = Extract<RulePreview, { ok: true; kind: K }>;
 

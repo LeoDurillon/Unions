@@ -1,12 +1,13 @@
 // The project settings section for the Notion connection, verified when saved.
+
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../../src/api-types';
-import { integrationsApi, projectIntegration } from '../../../lib/integrations-api';
-import { useSettingsForm } from '../../../lib/use-settings-form';
+import { integrationsApi, projectIntegration } from '../../../lib/integrations/integrations-api';
+import { useSettingsForm } from '../../../lib/settings/use-settings-form';
 import { TokenInput } from '../../onboarding/connect-step';
 import { SaveBar } from '../../settings/save-bar';
-import { Badge, Field, inputClass } from '../../ui';
+import { Badge, Field, inputClass } from '../../ui/ui';
 import { Disconnect } from '../disconnect';
 import { NotionHelp } from './notion-step';
 

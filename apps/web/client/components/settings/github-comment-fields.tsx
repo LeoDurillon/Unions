@@ -1,9 +1,10 @@
 // A GitHub comment action's fields: the issue or the pull request, and the comment as a template.
+
 import { COMMENT_TARGET_LABELS, type GitHubCommentAction } from '@union/core/event-actions';
 import { useEffect, type ReactElement } from 'react';
 
-import { useOfferedCommentTargets } from '../../lib/offered-action-kinds';
-import { Field, inputClass } from '../ui';
+import { useOfferedCommentTargets } from '../../lib/settings/offered-action-kinds';
+import { Field, inputClass } from '../ui/ui';
 import { VariableChips } from './variable-chips';
 
 /** Rows of the comment box: a few lines show without scrolling. */

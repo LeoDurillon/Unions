@@ -5,15 +5,19 @@ import type { ReactElement } from 'react';
 
 import type { CommentView, DiscussionResponse } from '../../../src/api-types';
 import {
+  ticketRepliesBase,
+  usePrReplies,
+  type PrReplies,
+} from '../../lib/pull-request/use-pr-replies';
+import {
   useCommentMutations,
   useComments,
   useDiscussion,
   useImportMutations,
 } from '../../lib/review/use-review';
-import { ticketRepliesBase, usePrReplies, type PrReplies } from '../../lib/use-pr-replies';
 import { CommentCard } from '../review/comment-card';
 import { ImportComments } from '../review/import-comments';
-import { ErrorText } from '../ui';
+import { ErrorText } from '../ui/ui';
 import { NoteCard, ThreadCard } from './note-card';
 import { filterNotes, NoteFilterControl, useNoteFilter } from './note-filter';
 import { ReplyArea, SendAllReplies } from './reply-area';

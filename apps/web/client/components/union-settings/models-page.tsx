@@ -1,12 +1,13 @@
 // All agents in one table: each one's model and effort with one Save, whether it was customized, and a link to its page.
+
 import { useQuery } from '@tanstack/react-query';
 import type { AgentConfig } from '@union/core';
 import type { ReactElement } from 'react';
 
-import { api } from '../../lib/api';
-import { modelRows, useModelsForm } from '../../lib/use-models-form';
+import { api } from '../../lib/app/api';
+import { modelRows, useModelsForm } from '../../lib/union-settings/use-models-form';
 import { SaveBar } from '../settings/save-bar';
-import { ErrorText } from '../ui';
+import { ErrorText } from '../ui/ui';
 import { CELL, ModelRow } from './agent-row';
 
 function ModelsForm({ configs }: { configs: AgentConfig[] }): ReactElement {

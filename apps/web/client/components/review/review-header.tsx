@@ -6,7 +6,7 @@ import type { ReactElement } from 'react';
 import type { DiffResponse } from '../../../src/api-types';
 import type { ReviewCopy, ReviewTarget } from '../../lib/review/review-target';
 import type { useCommentMutations } from '../../lib/review/use-review';
-import { Button } from '../ui';
+import { Button } from '../ui/ui';
 import { AgentReviewButton } from './agent-review-button';
 import type { DiffView } from './file-diff';
 import { ImportComments } from './import-comments';

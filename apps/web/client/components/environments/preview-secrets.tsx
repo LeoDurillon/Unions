@@ -4,9 +4,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 
 import type { PreviewSettingsView } from '../../../src/api-types';
-import { useLeaveGuard } from '../../lib/leave-guard';
+import { useLeaveGuard } from '../../lib/app/leave-guard';
 import { previewApi } from '../../lib/preview/preview-api';
-import { Button, ErrorText, inputClass } from '../ui';
+import { Button, ErrorText, inputClass } from '../ui/ui';
 
 type Save = (run: () => Promise<PreviewSettingsView>) => void;
 

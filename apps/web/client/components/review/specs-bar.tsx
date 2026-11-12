@@ -4,10 +4,10 @@
 import type { ReactElement } from 'react';
 
 import type { ReviewSpecView } from '../../../src/review-spec-types';
-import { projectIntegration } from '../../lib/integrations-api';
+import { useActiveProject } from '../../lib/app/use-active-project';
+import { projectIntegration } from '../../lib/integrations/integrations-api';
 import type { ReviewTarget } from '../../lib/review/review-target';
 import { useReviewSpecs } from '../../lib/review/use-review-specs';
-import { useActiveProject } from '../../lib/use-active-project';
 import { specSources } from './spec-picker';
 import { SpecsDialog } from './specs-dialog';
 import { useSpecsEditing } from './specs-editing';

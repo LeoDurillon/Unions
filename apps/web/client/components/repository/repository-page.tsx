@@ -1,11 +1,12 @@
 // A project's Repository tab: the whole repository at its base branch (or the branch in the URL), read from GitHub.
+
 import { useQueryClient } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
-import { useRepositoryCommit } from '../../lib/repository-api';
-import { useRepositoryLocation } from '../../lib/repository-url';
-import { ErrorText } from '../ui';
+import { useRepositoryCommit } from '../../lib/repository/repository-api';
+import { useRepositoryLocation } from '../../lib/repository/repository-url';
+import { ErrorText } from '../ui/ui';
 import { CommitLine } from './commit-line';
 import { RefPicker } from './ref-picker';
 import { RepositoryBrowser } from './repository-browser';

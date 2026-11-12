@@ -7,8 +7,8 @@ import { useState, type ReactElement } from 'react';
 
 import type { CommentView } from '../../../src/api-types';
 import type { useCommentMutations } from '../../lib/review/use-review';
-import { Markdown } from '../markdown';
-import { Badge, Button, inputClass } from '../ui';
+import { Markdown } from '../markdown/markdown';
+import { Badge, Button, inputClass } from '../ui/ui';
 
 /** Where an imported comment comes from, as its link reads. */
 function sourceLabel(url: string): string {

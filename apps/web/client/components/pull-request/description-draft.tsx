@@ -1,9 +1,10 @@
 // The rewritten description, editable, with what it changes on GitHub a click away.
+
 import { useState, type ReactElement } from 'react';
 
 import type { PrDescriptionDraft } from '../../../src/api-types';
-import { lineDiff } from '../../lib/line-diff';
-import { Button } from '../ui';
+import { lineDiff } from '../../lib/review/line-diff';
+import { Button } from '../ui/ui';
 
 const LINE_TONES = {
   same: 'text-zinc-500',

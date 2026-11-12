@@ -5,8 +5,8 @@ import type { JiraReplyTo } from '@union/core/jira-comment-post';
 import { useState } from 'react';
 
 import type { JiraTabView } from '../../../src/jira-comment-types';
-import { request } from '../api';
-import { useEvents } from '../use-event-stream';
+import { request } from '../app/api';
+import { useEvents } from '../app/use-event-stream';
 
 /** A comment Jira refused: why, and its text for the box. */
 type JiraCommentFailure = { error: string; text: string };

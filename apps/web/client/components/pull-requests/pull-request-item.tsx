@@ -1,10 +1,11 @@
 // One pull request: state, title, who and when, branches, review, size, and what can be done with
 // it.
+
 import type { ReactElement } from 'react';
 
 import type { PullRequestListItem } from '../../../src/api-types';
-import { formatWhen } from '../../lib/relative-time';
-import { Badge, Button } from '../ui';
+import { formatWhen } from '../../lib/ui/relative-time';
+import { Badge, Button } from '../ui/ui';
 
 type Tone = 'green' | 'red' | 'amber' | 'blue' | 'neutral';
 

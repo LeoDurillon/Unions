@@ -1,7 +1,8 @@
 // One part of a setup proposal: why the agent proposes it, its values, and Apply or Dismiss until it is in the settings.
+
 import type { ReactElement, ReactNode } from 'react';
 
-import { Badge, Button, ErrorText } from '../ui';
+import { Badge, Button, ErrorText } from '../ui/ui';
 
 export type CardState = {
   /** The settings already hold it. */

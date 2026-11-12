@@ -4,11 +4,11 @@
 import { useState, type ReactElement } from 'react';
 
 import type { CurrentReview } from '../../../src/api-types';
-import { projectIntegration } from '../../lib/integrations-api';
+import { useActiveProject } from '../../lib/app/use-active-project';
+import { projectIntegration } from '../../lib/integrations/integrations-api';
 import { useReviewNotionLink } from '../../lib/review/use-review-notion';
-import { useActiveProject } from '../../lib/use-active-project';
-import { NotionLinkForm, NotionPageLink } from '../notion-link-form';
-import { Button, ErrorText } from '../ui';
+import { NotionLinkForm, NotionPageLink } from '../tracker/notion-link-form';
+import { Button, ErrorText } from '../ui/ui';
 import { LinkStackButton, NotionSuggestions } from './review-notion-offers';
 
 type LinkActions = ReturnType<typeof useReviewNotionLink>;

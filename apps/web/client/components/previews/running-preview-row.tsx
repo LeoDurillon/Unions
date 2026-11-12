@@ -4,8 +4,8 @@ import type { ReactElement } from 'react';
 
 import type { RunningPreview } from '../../../src/running-previews-types';
 import { PREVIEW_STATUS } from '../../lib/preview/preview-status';
-import { formatWhen } from '../../lib/relative-time';
-import { Badge, Button } from '../ui';
+import { formatWhen } from '../../lib/ui/relative-time';
+import { Badge, Button } from '../ui/ui';
 
 const LINK = 'text-indigo-600 hover:underline dark:text-indigo-400';
 

@@ -1,11 +1,12 @@
 // The pull request's CI checks on its last commit, and its bot comments. The failed ones and what
 // explains them can be given to the implementer.
+
 import { useState, type ReactElement } from 'react';
 
 import type { CiPick, PrChecksView, PullRequestCheck } from '../../../src/ci-api-types';
-import { useCiRerun, type CiRerun } from '../../lib/use-ci-rerun';
-import { usePrChecks } from '../../lib/use-pr-checks';
-import { Button, ErrorText } from '../ui';
+import { useCiRerun, type CiRerun } from '../../lib/pull-request/use-ci-rerun';
+import { usePrChecks } from '../../lib/pull-request/use-pr-checks';
+import { Button, ErrorText } from '../ui/ui';
 import { BotCommentRow, CheckRow, pickKey, RelatedJobs, type Picking } from './ci-check-rows';
 import { CiGiven } from './ci-given';
 import { CiPickActions } from './ci-pick-actions';

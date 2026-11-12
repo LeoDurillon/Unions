@@ -6,9 +6,9 @@ import type { ReactElement } from 'react';
 import type { CurrentReview } from '../../../src/api-types';
 import type { ReviewNotionPage } from '../../../src/review-notion-types';
 import { useReviewNotionPages } from '../../lib/review/use-review-notion';
-import { FoldedMarkdown } from '../folded-markdown';
+import { FoldedMarkdown } from '../markdown/folded-markdown';
 import { NotionDiscussion } from '../notion/notion-discussion';
-import { Button, ErrorText } from '../ui';
+import { Button, ErrorText } from '../ui/ui';
 
 /** The page's open discussions, read only: replying and Add to review are a ticket's. */
 function PageDiscussions({ page }: { page: ReviewNotionPage }): ReactElement | null {

@@ -1,9 +1,10 @@
 // A split ticket's Rewrite all descriptions: the agent rewrites each open slice's, one after the other.
+
 import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../../src/api-types';
-import { usePrDescription } from '../../lib/use-pr-description';
-import { Button, ErrorText } from '../ui';
+import { usePrDescription } from '../../lib/pull-request/use-pr-description';
+import { Button, ErrorText } from '../ui/ui';
 
 const HINT =
   "The agent rewrites each open slice's description about its own change, one after the other. Review and send each one from its pull request below; unsent drafts are replaced.";

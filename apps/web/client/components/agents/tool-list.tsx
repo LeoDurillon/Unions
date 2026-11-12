@@ -1,11 +1,12 @@
 // The tools the user added to the list, the built-in ones folded, and the form to add more.
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { ToolOption } from '@union/core';
 import { useState, type ReactElement, type SubmitEvent } from 'react';
 
-import { api } from '../../lib/api';
-import { useAgentTools } from '../../lib/use-agent-tools';
-import { Button, ErrorText, inputClass } from '../ui';
+import { api } from '../../lib/app/api';
+import { useAgentTools } from '../../lib/union-settings/use-agent-tools';
+import { Button, ErrorText, inputClass } from '../ui/ui';
 
 function AddToolForm(): ReactElement {
   const queryClient = useQueryClient();

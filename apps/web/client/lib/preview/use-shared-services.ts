@@ -4,7 +4,7 @@
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 
 import type { SharedServicesView } from '../../../src/shared-services-types';
-import { request } from '../api';
+import { request } from '../app/api';
 
 const POLL_MS = 5000;
 

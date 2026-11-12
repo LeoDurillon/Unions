@@ -1,4 +1,5 @@
 // The "When" of an event rule: what triggers it, and the column, step or verdict some triggers need.
+
 import {
   BOARD_LABELS,
   TRIGGER_KINDS,
@@ -10,8 +11,8 @@ import { reviewVerdicts, type ReviewVerdict } from '@union/core/pr-review-verdic
 import { BOARD_STATUSES, PLANNING_STEPS } from '@union/core/states';
 import type { ReactElement } from 'react';
 
-import { STEP_TITLES } from '../../lib/labels';
-import { Field, inputClass } from '../ui';
+import { STEP_TITLES } from '../../lib/board/labels';
+import { Field, inputClass } from '../ui/ui';
 
 const APPROVAL_STEPS = [...PLANNING_STEPS, 'implement', 'final_review'] as const;
 

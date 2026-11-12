@@ -1,12 +1,13 @@
 // One pull request under review without a ticket, on its row: its link, branches and status. Also
 // Open review and Stop reviewing.
+
 import type { ReactElement } from 'react';
 
 import type { CurrentReview } from '../../../src/api-types';
-import { formatWhen } from '../../lib/relative-time';
-import { ConfirmButton } from '../confirm-button';
-import { TrashIcon } from '../icon-button';
-import { Badge, Button } from '../ui';
+import { formatWhen } from '../../lib/ui/relative-time';
+import { ConfirmButton } from '../ui/confirm-button';
+import { TrashIcon } from '../ui/icon-button';
+import { Badge, Button } from '../ui/ui';
 
 export function ReviewItem({
   review,

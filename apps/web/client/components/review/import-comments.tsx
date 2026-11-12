@@ -4,10 +4,10 @@
 import type { ReactElement } from 'react';
 
 import type { ReviewImportResult, StackImportResult } from '../../../src/api-types';
+import { useCommits } from '../../lib/pull-request/use-commits';
 import { ticketReviewBase } from '../../lib/review/review-target';
 import { useImportMutations, useStackImport } from '../../lib/review/use-review';
-import { useCommits } from '../../lib/use-commits';
-import { Button, ErrorText } from '../ui';
+import { Button, ErrorText } from '../ui/ui';
 
 function counts(result: ReviewImportResult): string | null {
   const { imported, alreadyImported, resolved } = result;

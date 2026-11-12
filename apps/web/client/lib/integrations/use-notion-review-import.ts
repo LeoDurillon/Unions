@@ -4,7 +4,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import type { NotionTabView } from '../../../src/notion-discussion-types';
-import { request } from '../api';
+import { request } from '../app/api';
 import { ticketReviewBase } from '../review/review-target';
 
 /** A whole discussion, or only one of its comments. */

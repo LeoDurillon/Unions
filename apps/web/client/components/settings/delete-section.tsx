@@ -1,10 +1,11 @@
 // Typing the repository name to confirm keeps a stray click from deleting a project.
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
-import { api } from '../../lib/api';
-import { Button, ErrorText, inputClass } from '../ui';
+import { api } from '../../lib/app/api';
+import { Button, ErrorText, inputClass } from '../ui/ui';
 
 /** Typing the repository name to confirm keeps a stray click from deleting a project. */
 export function DeleteSection({

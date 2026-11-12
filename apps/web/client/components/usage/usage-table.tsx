@@ -1,8 +1,9 @@
 // A table of runs with what their agent calls used (input, output, API-equivalent cost); a row opens to its calls.
+
 import type { UsageGroup, UsageTotals } from '@union/core';
 import { useState, type ReactElement, type ReactNode } from 'react';
 
-import { costText, inputText, outputText } from '../../lib/usage-format';
+import { costText, inputText, outputText } from '../../lib/usage/usage-format';
 import { CallDetails } from './call-details';
 
 /** The row's own cells (run, step…), and the calls it groups, if any. */

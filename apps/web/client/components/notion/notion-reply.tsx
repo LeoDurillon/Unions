@@ -4,9 +4,9 @@ import { useState, type ReactElement } from 'react';
 
 import type { PendingNotionComment } from '../../../src/notion-discussion-types';
 import { replyKey, type NotionCommentSend } from '../../lib/integrations/use-notion-comments';
-import { Markdown } from '../markdown';
+import { Markdown } from '../markdown/markdown';
 import { ReplyBox } from '../pull-request/reply-box';
-import { Button } from '../ui';
+import { Button } from '../ui/ui';
 
 const POSTS_AS = 'Posts under the Notion integration’s name';
 

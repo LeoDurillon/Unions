@@ -1,11 +1,12 @@
 // Under a thread or a note: the replies being posted, the implementer's suggested reply, and Reply
 // or Quote reply. Reply (or Quote reply) writes one; Send all sits above them.
+
 import { githubText } from '@union/core/github-text';
 import { quoteReply } from '@union/core/pr-comment-reply';
 import { useState, type ReactElement } from 'react';
 
-import { targetKey, type PrReplies, type ReplyTarget } from '../../lib/use-pr-replies';
-import { Button } from '../ui';
+import { targetKey, type PrReplies, type ReplyTarget } from '../../lib/pull-request/use-pr-replies';
+import { Button } from '../ui/ui';
 import { ReplyBox } from './reply-box';
 import { Sending, Suggestion } from './suggested-reply';
 

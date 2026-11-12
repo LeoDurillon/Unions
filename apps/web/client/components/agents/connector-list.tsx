@@ -1,11 +1,12 @@
 // The claude.ai connectors the agents can use (Figma…), read from the Claude account the worker
 // runs agents with.
+
 import type { ReactElement } from 'react';
 
 import type { ConnectorsResponse } from '../../../src/api-types';
-import { formatWhen } from '../../lib/relative-time';
-import { useConnectors } from '../../lib/use-connectors';
-import { Button, ErrorText } from '../ui';
+import { formatWhen } from '../../lib/ui/relative-time';
+import { useConnectors } from '../../lib/union-settings/use-connectors';
+import { Button, ErrorText } from '../ui/ui';
 
 function CheckStatus({
   check,

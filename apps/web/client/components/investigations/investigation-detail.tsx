@@ -1,10 +1,12 @@
-// One investigation: its header, the ticket being written from it (or the form asking what it covers), then its
-// tabs: the conversation with the follow-up box, the agent's live log, and what its agent calls used.
+// One investigation: its header, the ticket being written from it (or the form asking what it
+// covers), then its tabs. The tabs are the conversation with the follow-up box, the agent's live
+// log, and what its agent calls used.
+
 import type { Investigation } from '@union/core';
 import { useState, type ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
-import { creatingKinds } from '../../lib/integrations-api';
+import { creatingKinds } from '../../lib/integrations/integrations-api';
 import { InvestigationHeader } from './investigation-header';
 import { InvestigationTabs } from './investigation-tabs';
 import { InvestigationTicket } from './investigation-ticket';

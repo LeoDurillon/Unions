@@ -1,5 +1,6 @@
 // The pull requests under review without a ticket, then every pull request of the project's
 // repository. They are read from GitHub, open stacks as one row; linked ones open their ticket.
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 
@@ -9,9 +10,9 @@ import {
   type PullRequestFilter,
   type PullRequestList,
 } from '../../../src/api-types';
-import { api } from '../../lib/api';
-import { formatWhen } from '../../lib/relative-time';
-import { Button, ErrorText } from '../ui';
+import { api } from '../../lib/app/api';
+import { formatWhen } from '../../lib/ui/relative-time';
+import { Button, ErrorText } from '../ui/ui';
 import { PullRequestRows } from './pull-request-rows';
 import { UnderReview } from './under-review';
 

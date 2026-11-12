@@ -1,11 +1,12 @@
 // A split ticket's slices as a segmented control under the review header. All, then each slice with
 // its pull request and drafts.
+
 import type { ReactElement } from 'react';
 
 import type { CommentView } from '../../../src/api-types';
-import { draftsByTab } from '../../lib/slice-view';
-import type { SliceView } from '../../lib/use-slice-view';
-import { Segmented } from '../choice';
+import { draftsByTab } from '../../lib/review/slice-view';
+import type { SliceView } from '../../lib/review/use-slice-view';
+import { Segmented } from '../ui/choice';
 
 const ALL = 'all';
 

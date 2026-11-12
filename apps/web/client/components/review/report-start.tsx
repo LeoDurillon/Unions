@@ -5,7 +5,7 @@ import type { ReactElement } from 'react';
 import type { ReviewTarget } from '../../lib/review/review-target';
 import { useReviewReport } from '../../lib/review/use-review-report';
 import { useReviewSpecs } from '../../lib/review/use-review-specs';
-import { Button, ErrorText } from '../ui';
+import { Button, ErrorText } from '../ui/ui';
 import { SpecSummary } from './spec-summary';
 
 export function ReportStart({

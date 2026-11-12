@@ -1,11 +1,12 @@
 // The sidebar's Update entry: prominent when the checkout is behind `origin/main`, else a quiet line;
 // Check now beside it.
+
 import { useState, type ReactElement } from 'react';
 
 import type { UnionUpdateView } from '../../../src/union-update-types';
-import { formatWhen } from '../../lib/relative-time';
-import { useCheckNow, useUnionUpdate } from '../../lib/use-union-update';
-import { SIDE_LABEL } from '../sidebar-classes';
+import { formatWhen } from '../../lib/ui/relative-time';
+import { useCheckNow, useUnionUpdate } from '../../lib/union-settings/use-union-update';
+import { SIDE_LABEL } from '../layout/sidebar-classes';
 import { UpdateDialog } from './update-dialog';
 
 type Update = NonNullable<UnionUpdateView['update']>;

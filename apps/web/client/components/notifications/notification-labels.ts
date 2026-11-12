@@ -1,7 +1,8 @@
 // The badge each kind of notification shows: a word for the moment and its tone.
+
 import type { NotificationKind } from '@union/core';
 
-import type { Tone } from '../../lib/labels';
+import type { Tone } from '../../lib/board/labels';
 
 export const KIND_LABELS: Record<NotificationKind, { label: string; tone: Tone }> = {
   awaiting_approval: { label: 'Approval', tone: 'amber' },

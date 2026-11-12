@@ -5,7 +5,7 @@ import { useState, type ReactElement } from 'react';
 import type { AgentReviewView } from '../../../src/api-types';
 import type { ReviewTarget } from '../../lib/review/review-target';
 import { isActive, useAgentReview } from '../../lib/review/use-agent-review';
-import { Button, ErrorText } from '../ui';
+import { Button, ErrorText } from '../ui/ui';
 import { AgentReviewDialog } from './agent-review-dialog';
 
 /** What the last run left: its error, or how many suggestions it added. */

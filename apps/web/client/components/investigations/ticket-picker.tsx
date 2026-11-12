@@ -1,10 +1,11 @@
 // The project's tickets that have a workspace to read (not cancelled), newest first.
+
 import { useQuery } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 
-import { api } from '../../lib/api';
-import { refLabel } from '../../lib/labels';
-import { inputClass } from '../ui';
+import { api } from '../../lib/app/api';
+import { refLabel } from '../../lib/board/labels';
+import { inputClass } from '../ui/ui';
 
 const ROW_ON = 'bg-indigo-50 text-indigo-900 dark:bg-indigo-950/40 dark:text-indigo-100';
 const ROW_OFF = 'hover:bg-zinc-100 dark:hover:bg-zinc-800';

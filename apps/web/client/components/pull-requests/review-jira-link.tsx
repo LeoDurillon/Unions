@@ -5,15 +5,15 @@
 import { useState, type ReactElement } from 'react';
 
 import type { CurrentReview } from '../../../src/api-types';
-import { projectIntegration } from '../../lib/integrations-api';
+import { useActiveProject } from '../../lib/app/use-active-project';
+import { projectIntegration } from '../../lib/integrations/integrations-api';
 import {
   useReviewJiraLink,
   useReviewJiraSuggestions,
   type ReviewJiraActions,
 } from '../../lib/review/use-review-jira';
-import { useActiveProject } from '../../lib/use-active-project';
-import { ItemLink, TrackerLinkForm } from '../tracker-link-form';
-import { Button, ErrorText } from '../ui';
+import { ItemLink, TrackerLinkForm } from '../tracker/tracker-link-form';
+import { Button, ErrorText } from '../ui/ui';
 
 /** The issues the pull request names (its title, branch, description), each linked in one click. */
 function Suggestions({

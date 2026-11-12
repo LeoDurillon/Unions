@@ -1,10 +1,11 @@
 // A stack of pull requests under review as one row: its bottom's title, its pull requests, opening and removing it whole.
+
 import type { ReactElement } from 'react';
 
 import type { CurrentReview } from '../../../src/api-types';
-import { ConfirmButton } from '../confirm-button';
-import { TrashIcon } from '../icon-button';
-import { Badge, Button } from '../ui';
+import { ConfirmButton } from '../ui/confirm-button';
+import { TrashIcon } from '../ui/icon-button';
+import { Badge, Button } from '../ui/ui';
 
 /** `stack` is bottom first; Open review opens its bottom pull request. */
 export function ReviewStackItem({

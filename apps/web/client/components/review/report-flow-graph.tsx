@@ -1,10 +1,11 @@
 // The spec report's map of how the change works, drawn: nodes in layers and the links between them
 // with how. The changed nodes are highlighted, the others grey and dashed; the numbers of what
 // needs the reviewer sit on the nodes it points at; a changed node opens its lines in the diff.
+
 import type { FlowEdge, FlowNode, ReportFlow } from '@union/core';
 import type { ReactElement } from 'react';
 
-import { layoutFlow, NODE_HEIGHT, NODE_WIDTH, type FlowLayout } from '../../lib/flow-layout';
+import { layoutFlow, NODE_HEIGHT, NODE_WIDTH, type FlowLayout } from '../../lib/review/flow-layout';
 import type { OpenLines } from './report-open';
 
 /** Room around the map, so the outer nodes' borders are not cut. */

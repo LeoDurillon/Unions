@@ -10,7 +10,7 @@ import {
   SETTINGS_GROUPS,
   sectionLabel,
   type SettingsSection,
-} from '../../lib/settings-sections';
+} from '../../lib/settings/settings-sections';
 import { AGENT_SECTIONS, AgentSectionBody, type AgentSection } from './agent-section-body';
 import { IntegrationSectionBody } from './integration-section-body';
 import { PROJECT_SECTIONS, ProjectSectionBody, type ProjectSection } from './project-section-body';

@@ -1,10 +1,11 @@
 // The report's files to read first, in order, each with why and its key lines; and the ones to skim,
 // closed until clicked.
+
 import type { ImportantFile, ReviewReportResult } from '@union/core';
 import type { ReactElement } from 'react';
 
-import type { Tone } from '../../lib/labels';
-import { Badge } from '../ui';
+import type { Tone } from '../../lib/board/labels';
+import { Badge } from '../ui/ui';
 import { FileLink, FileName, FileRef, type OpenLines } from './report-open';
 import { ReportSection, ROWS_CLASS } from './report-sections';
 

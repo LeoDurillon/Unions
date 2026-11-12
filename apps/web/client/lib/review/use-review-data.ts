@@ -2,9 +2,9 @@
 // target. Also the picked slice of a split ticket.
 
 import type { CommentView } from '../../../src/api-types';
-import { useSliceView, type SliceView } from '../use-slice-view';
 import { reviewCopy, type ReviewTarget } from './review-target';
 import { useCommentMutations, useComments, useDiff } from './use-review';
+import { useSliceView, type SliceView } from './use-slice-view';
 
 type Mutations = ReturnType<typeof useCommentMutations>;
 

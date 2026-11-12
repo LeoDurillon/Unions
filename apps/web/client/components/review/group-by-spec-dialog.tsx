@@ -7,7 +7,7 @@ import type { ReactElement } from 'react';
 import type { ReviewTarget } from '../../lib/review/review-target';
 import { useReviewGrouping } from '../../lib/review/use-review-grouping';
 import { useReviewSpecs } from '../../lib/review/use-review-specs';
-import { Button, Dialog, ErrorText } from '../ui';
+import { Button, Dialog, ErrorText } from '../ui/ui';
 import { SpecSummary } from './spec-summary';
 
 /** Groups the change by the review's specs, read together; then the agent starts. */

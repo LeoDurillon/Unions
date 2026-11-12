@@ -1,10 +1,11 @@
 // A custom agent's own part of its page: its role, the prompt writer's progress, Regenerate, and Delete.
+
 import type { AgentConfig, CustomAgentInfo } from '@union/core';
 import { useState, type ReactElement } from 'react';
 
-import { useCustomAgent, type CustomAgentActions } from '../../lib/use-custom-agent';
-import { ConfirmButton } from '../confirm-button';
-import { Badge, Button, ErrorText, Field, inputClass } from '../ui';
+import { useCustomAgent, type CustomAgentActions } from '../../lib/union-settings/use-custom-agent';
+import { ConfirmButton } from '../ui/confirm-button';
+import { Badge, Button, ErrorText, Field, inputClass } from '../ui/ui';
 
 const ROLE_ROWS = 3;
 

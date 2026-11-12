@@ -1,7 +1,8 @@
 // A text file of the repository with its line numbers, highlighted for its language up to a few thousand lines.
+
 import { useMemo, type ReactElement, type ReactNode } from 'react';
 
-import { languageFor, tokenize, type Token } from '../../lib/highlight';
+import { languageFor, tokenize, type Token } from '../../lib/markdown/highlight';
 
 /** Past this many lines the rest shows plain: highlighting a generated file would freeze the page. */
 const HIGHLIGHT_LINES = 5000;

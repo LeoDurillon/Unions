@@ -1,8 +1,9 @@
 // The Jira settings' issue type for the issues Union creates (tickets written from investigations), from the project's.
+
 import type { JiraRuleSource } from '@union/core';
 import type { ReactElement } from 'react';
 
-import { Field, inputClass } from '../../ui';
+import { Field, inputClass } from '../../ui/ui';
 
 const HINT =
   'For the tickets an investigation writes with Also create it in Jira. Default: Task, else the project’s first type.';

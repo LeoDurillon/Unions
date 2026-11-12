@@ -13,7 +13,7 @@ import type { AgentReviewSpec, SavedSpecEntry } from '@union/core';
 import { stackSpecs } from '@union/core/review-spec-lists';
 
 import type { ReviewSpecView } from '../../../src/review-spec-types';
-import { request } from '../api';
+import { request } from '../app/api';
 import { reviewBase, type ReviewTarget } from './review-target';
 
 /** The query key of a review's specs, by its API root: linking a Notion page changes them too. */

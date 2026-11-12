@@ -3,8 +3,8 @@
 import type { ReactElement } from 'react';
 
 import { useDiscussion } from '../../lib/review/use-review';
-import { FoldedMarkdown } from '../folded-markdown';
-import { ErrorText } from '../ui';
+import { FoldedMarkdown } from '../markdown/folded-markdown';
+import { ErrorText } from '../ui/ui';
 
 export function GitHubDescription({
   ticketId,

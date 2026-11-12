@@ -1,8 +1,9 @@
 // The open file's or folder's path, each folder of it a link up, with its size and the way to it on GitHub.
+
 import type { ReactElement } from 'react';
 
 import type { RepositoryEntry } from '../../../src/repository-api-types';
-import { githubUrl, sizeText, type GitHubPlace } from '../../lib/repo-links';
+import { githubUrl, sizeText, type GitHubPlace } from '../../lib/repository/repo-links';
 
 function Crumbs({
   root,

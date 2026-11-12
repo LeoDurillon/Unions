@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import type { JiraRuleSource } from '@union/core';
 
-import { eventRulesApi } from '../event-rules-api';
+import { eventRulesApi } from '../settings/event-rules-api';
 
 /** Null while it loads, and for a project not connected to Jira or not read yet. */
 export function useJiraRuleSource(projectId: number): JiraRuleSource | null {

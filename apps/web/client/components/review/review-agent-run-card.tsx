@@ -4,10 +4,10 @@
 import type { ReactElement, ReactNode } from 'react';
 
 import type { ReviewAgentRunView } from '../../../src/routes/review/review-agent-runs';
-import type { Tone } from '../../lib/labels';
+import type { Tone } from '../../lib/board/labels';
 import { isActive } from '../../lib/review/use-review-agents';
-import { Markdown } from '../markdown';
-import { Badge, Button } from '../ui';
+import { Markdown } from '../markdown/markdown';
+import { Badge, Button } from '../ui/ui';
 import { CopyMarkdownButton } from './copy-markdown-button';
 
 const STATUS: Record<ReviewAgentRunView['status'], { label: string; tone: Tone }> = {

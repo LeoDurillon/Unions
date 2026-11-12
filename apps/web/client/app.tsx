@@ -1,12 +1,13 @@
 // The root layout of the web app: sidebar, main area, ticket panel, dialogs and the project wizard.
+
 import type { ReactElement } from 'react';
 
-import { AppDialogs } from './components/app-dialogs';
-import { MainArea } from './components/main-area';
-import { Sidebar } from './components/sidebar';
-import { TicketPanel } from './components/ticket-panel';
-import { WizardHost } from './components/wizard-host';
-import { useAppState } from './lib/use-app-state';
+import { AppDialogs } from './components/layout/app-dialogs';
+import { MainArea } from './components/layout/main-area';
+import { Sidebar } from './components/layout/sidebar';
+import { WizardHost } from './components/layout/wizard-host';
+import { TicketPanel } from './components/ticket/ticket-panel';
+import { useAppState } from './lib/app/use-app-state';
 
 export function App(): ReactElement {
   const state = useAppState();

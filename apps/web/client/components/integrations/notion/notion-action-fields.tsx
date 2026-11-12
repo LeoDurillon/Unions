@@ -1,10 +1,11 @@
 // A Notion action's fields: the properties of the ticket's Notion page to set, a row each.
+
 import type { NotionSchema } from '@union/core';
 import type { NotionPropertyAction, NotionValue } from '@union/core/event-actions';
 import { WRITABLE_NOTION_TYPES } from '@union/core/event-rules';
 import type { ReactElement } from 'react';
 
-import { Button } from '../../ui';
+import { Button } from '../../ui/ui';
 import { NotionValueRow } from './notion-value-row';
 
 function NoNotion(): ReactElement {

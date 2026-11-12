@@ -1,9 +1,10 @@
 // The notice that GitHub moved the pull request off its base: the next rebase leaves that base's commits behind.
+
 import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../../src/api-types';
-import { useTicketCommands } from '../../lib/use-ticket-commands';
-import { Button, ErrorText } from '../ui';
+import { useTicketCommands } from '../../lib/ticket/use-ticket-commands';
+import { Button, ErrorText } from '../ui/ui';
 import { canRewrite, rewriteBlock } from './branch-status';
 
 /** Rebase from the notice, for a branch up to date with its new base: the behind count offers none. */

@@ -3,7 +3,7 @@
 import type { ReactElement } from 'react';
 
 import type { CommentView } from '../../../src/api-types';
-import type { Selection } from '../../lib/diff-selection';
+import type { Selection } from '../../lib/review/diff-selection';
 import type { useCommentMutations } from '../../lib/review/use-review';
 import { ReviewCommentCard } from './comment-card';
 import { CommentEditor } from './comment-editor';

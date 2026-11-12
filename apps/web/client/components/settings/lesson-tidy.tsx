@@ -1,9 +1,10 @@
 // "Tidy lessons" on the Memory page: asks the lesson tidier to fix the lessons kept, then shows its proposals.
+
 import type { LessonInput } from '@union/core/lesson-input';
 import type { ReactElement } from 'react';
 
-import { useLessonSuggestion, useLessonWriter } from '../../lib/use-memory';
-import { Button, ErrorText } from '../ui';
+import { useLessonSuggestion, useLessonWriter } from '../../lib/settings/use-memory';
+import { Button, ErrorText } from '../ui/ui';
 import { LessonSuggestions, type AcceptLessons } from './lesson-suggestions';
 
 const TIDY_HINT =

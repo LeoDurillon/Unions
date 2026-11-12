@@ -5,7 +5,7 @@ import type { ReactElement, ReactNode } from 'react';
 
 import type { GuideTarget } from '../../lib/guide/settings-guide';
 import { GuideLink } from '../guide/guide-link';
-import { Button } from '../ui';
+import { Button } from '../ui/ui';
 
 export function SettingsFrame({
   title,

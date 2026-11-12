@@ -1,8 +1,9 @@
 // The trackers (Notion, Jira), events and the danger zone.
+
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
-import { closeSettings } from '../../lib/settings-sections';
+import { closeSettings } from '../../lib/settings/settings-sections';
 import { TrackerSection } from '../integrations/tracker-section';
 import { DeleteSection } from './delete-section';
 import { EventActivitySection, EventRulesSection } from './events-section';

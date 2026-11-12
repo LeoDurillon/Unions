@@ -5,7 +5,7 @@
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
-import { Switch } from '../choice';
+import { Switch } from '../ui/choice';
 import { AgentEnvironment } from './agent-variables-field';
 import { PreviewChoicesField } from './preview-choices-field';
 import { PreviewSave, usePreviewForm } from './preview-form';

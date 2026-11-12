@@ -1,11 +1,12 @@
 // Project settings → Change size: the budget of a ticket whose plan gives no estimate, and the paths that are not code.
+
 import { DEFAULT_SIZE_IGNORE } from '@union/core/change-size';
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
-import { api } from '../../lib/api';
-import { useSettingsForm } from '../../lib/use-settings-form';
-import { Field, inputClass } from '../ui';
+import { api } from '../../lib/app/api';
+import { useSettingsForm } from '../../lib/settings/use-settings-form';
+import { Field, inputClass } from '../ui/ui';
 import { SaveBar } from './save-bar';
 
 type Size = { budget: string; patterns: string };

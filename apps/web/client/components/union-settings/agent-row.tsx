@@ -1,10 +1,11 @@
 // One row of the All agents table: the agent's name (opening its page), its model and effort. A dot
 // by the name shows you changed its settings.
+
 import type { AgentConfig } from '@union/core';
 import type { ReactElement } from 'react';
 
-import { openUnionSettings } from '../../lib/union-settings-sections';
-import type { ModelChoice } from '../../lib/use-models-form';
+import { openUnionSettings } from '../../lib/union-settings/union-settings-sections';
+import type { ModelChoice } from '../../lib/union-settings/use-models-form';
 import { agentLabel, EFFORT_LABELS, MODEL_LABELS } from '../agents/agent-labels';
 import { EffortField } from '../agents/effort-field';
 import { ModelField } from '../agents/model-field';

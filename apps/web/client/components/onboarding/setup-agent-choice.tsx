@@ -1,8 +1,9 @@
 // The wizard's last question: whether an agent sets up the new project, and the model it runs with.
+
 import type { ReactElement } from 'react';
 
 import { ModelField } from '../agents/model-field';
-import { Switch } from '../choice';
+import { Switch } from '../ui/choice';
 import type { StepProps } from './draft';
 
 export function SetupAgentChoice({ draft, patch }: StepProps): ReactElement {

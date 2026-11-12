@@ -11,9 +11,9 @@ import {
   environmentLabel,
   showEnvironmentSection,
   useEnvironmentSection,
-} from '../../lib/environments-url';
+} from '../../lib/settings/environments-url';
 import { GuideLink } from '../guide/guide-link';
-import { TabButton } from '../tab-button';
+import { TabButton } from '../ui/tab-button';
 import { EnvironmentSectionBody } from './environment-section-body';
 import { ProjectPreviews } from './project-previews';
 

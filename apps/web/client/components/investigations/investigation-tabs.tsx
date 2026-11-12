@@ -1,12 +1,13 @@
-// An investigation's tabs: the conversation (with the follow-up box once answered), the agent's live log, and what
-// its agent calls used.
+// An investigation's tabs: the conversation, the agent's live log, and what its agent calls used.
+// The conversation has the follow-up box once answered.
+
 import type { Investigation } from '@union/core';
 import { useState, type ReactElement } from 'react';
 
-import { formatWhen } from '../../lib/relative-time';
-import { useInvestigationUsage } from '../../lib/use-usage';
-import { AgentLog } from '../log-tab';
-import { TabButton } from '../tab-button';
+import { formatWhen } from '../../lib/ui/relative-time';
+import { useInvestigationUsage } from '../../lib/usage/use-usage';
+import { AgentLog } from '../steps/log-tab';
+import { TabButton } from '../ui/tab-button';
 import { UsageTable } from '../usage/usage-table';
 import { isActive } from './investigation-labels';
 import { Conversation, FollowUpForm } from './investigation-thread';

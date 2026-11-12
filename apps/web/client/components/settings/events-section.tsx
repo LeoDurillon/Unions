@@ -1,13 +1,14 @@
 // Event rules: when something happens to a ticket, set a property of its Notion page or comment on
 // GitHub. The comment goes on its GitHub issue or pull request.
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { EventRule, NotionSchema } from '@union/core';
 import { useState, type ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
 import type { EventRulesResponse } from '../../../src/event-api-types';
-import { eventRulesApi, newRule, type RuleDraft } from '../../lib/event-rules-api';
-import { Button, ErrorText } from '../ui';
+import { eventRulesApi, newRule, type RuleDraft } from '../../lib/settings/event-rules-api';
+import { Button, ErrorText } from '../ui/ui';
 import { RuleEditor } from './rule-editor';
 import { RuleRow } from './rule-list';
 import { TrackerBars } from './tracker-bars';

@@ -1,10 +1,11 @@
 // The setup proposal's cards made of commands and text: the checks, the e2e command and the project instructions.
+
 import type { SetupChecks, SetupText } from '@union/core';
 import { sectionApplied, checksChange } from '@union/core/setup-apply';
 import { useState, type ReactElement } from 'react';
 
-import { setupWrites, useSetupApply } from '../../lib/use-setup-apply';
-import { inputClass } from '../ui';
+import { setupWrites, useSetupApply } from '../../lib/setup/use-setup-apply';
+import { inputClass } from '../ui/ui';
 import { SetupCard } from './setup-card';
 import type { SetupCardProps } from './setup-card-props';
 import { SetupField } from './setup-values';

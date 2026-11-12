@@ -1,9 +1,10 @@
 // The implementer's suggested reply under a thread or note (edit, send, discard), and a reply being sent.
+
 import { useState, type ReactElement } from 'react';
 
 import type { SuggestedReply } from '../../../src/reply-api-types';
-import type { PrReplies } from '../../lib/use-pr-replies';
-import { Badge, Button } from '../ui';
+import type { PrReplies } from '../../lib/pull-request/use-pr-replies';
+import { Badge, Button } from '../ui/ui';
 import { CommentBody } from './comment-body';
 import { ReplyBox } from './reply-box';
 

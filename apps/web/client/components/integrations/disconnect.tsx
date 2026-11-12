@@ -1,11 +1,12 @@
 // The Disconnect button of a tracker's settings section: drops the integration and its secret at once.
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { IntegrationKindName } from '@union/core/integration-kinds';
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
-import { integrationsApi, projectIntegration } from '../../lib/integrations-api';
-import { Button, ErrorText } from '../ui';
+import { integrationsApi, projectIntegration } from '../../lib/integrations/integrations-api';
+import { Button, ErrorText } from '../ui/ui';
 
 /** Applies at once: the integration secret is dropped and imports stop. Nothing when not connected. */
 export function Disconnect({

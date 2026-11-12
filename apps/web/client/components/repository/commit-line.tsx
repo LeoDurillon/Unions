@@ -1,11 +1,12 @@
 // The commit the Repository tab shows: its short sha (a link to GitHub), message, author and age, and Refresh.
+
 import type { ReactElement } from 'react';
 
 import type { RepositoryCommit } from '../../../src/repository-api-types';
-import { timeAgo } from '../../lib/relative-time';
-import { SHORT_SHA } from '../../lib/repo-links';
-import { useNow } from '../../lib/use-now';
-import { Button } from '../ui';
+import { SHORT_SHA } from '../../lib/repository/repo-links';
+import { timeAgo } from '../../lib/ui/relative-time';
+import { useNow } from '../../lib/ui/use-now';
+import { Button } from '../ui/ui';
 
 /** The commit shown, and Refresh to read again where its branch is now. */
 export function CommitLine({

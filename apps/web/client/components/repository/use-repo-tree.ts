@@ -1,9 +1,10 @@
 // The Repository tab's tree state: the folders open, and those read one at a time when GitHub truncated the tree.
+
 import { useMemo, useState } from 'react';
 
 import type { RepositoryEntry, RepositoryTree } from '../../../src/repository-api-types';
-import { foldersTo, indexEntries, type RepoIndex } from '../../lib/repo-tree';
-import { readFolder } from '../../lib/repository-api';
+import { foldersTo, indexEntries, type RepoIndex } from '../../lib/repository/repo-tree';
+import { readFolder } from '../../lib/repository/repository-api';
 
 export type RepoTreeState = {
   index: RepoIndex;

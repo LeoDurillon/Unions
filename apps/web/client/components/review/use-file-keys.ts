@@ -1,7 +1,8 @@
 // The review's file keys: j opens the next file, k the previous one, in the order the list shows them.
+
 import type { DiffFileSummary } from '../../../src/api-types';
-import { treeOrder } from '../../lib/file-tree';
-import { useShortcuts } from '../../lib/shortcuts';
+import { treeOrder } from '../../lib/review/file-tree';
+import { useShortcuts } from '../../lib/ui/shortcuts';
 import type { Layout } from './file-rows';
 
 /** The files as the list shows them: the shown ones (as a list or a tree), then the ignored ones. */

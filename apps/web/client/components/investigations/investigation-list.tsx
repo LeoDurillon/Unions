@@ -1,12 +1,17 @@
-// The investigations beside the open one: New, a search, then the investigations by week, each with its state
-// (a dot), its scope, the ticket written from it and its date.
+// The investigations beside the open one: New, a search, then the investigations by week. Each
+// shows its state (a dot), its scope, the ticket written from it and its date.
+
 import type { Investigation } from '@union/core';
 import { useState, type ReactElement } from 'react';
 
-import { groupByWeek, searchInvestigations, shortDate } from '../../lib/investigation-groups';
-import type { Tone } from '../../lib/labels';
-import { useNow } from '../../lib/use-now';
-import { Button, ErrorText, inputClass } from '../ui';
+import type { Tone } from '../../lib/board/labels';
+import {
+  groupByWeek,
+  searchInvestigations,
+  shortDate,
+} from '../../lib/investigations/investigation-groups';
+import { useNow } from '../../lib/ui/use-now';
+import { Button, ErrorText, inputClass } from '../ui/ui';
 import { isActive, SCOPE_LABELS, STATUS_LABELS } from './investigation-labels';
 
 const DOT: Record<Tone, string> = {

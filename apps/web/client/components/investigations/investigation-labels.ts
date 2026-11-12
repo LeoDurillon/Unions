@@ -1,7 +1,8 @@
 // The labels and badge tones the investigations pages show for each status and scope.
+
 import type { InvestigationScope, InvestigationStatus } from '@union/core';
 
-import type { Tone } from '../../lib/labels';
+import type { Tone } from '../../lib/board/labels';
 
 export const STATUS_LABELS: Record<InvestigationStatus, { label: string; tone: Tone }> = {
   queued: { label: 'Queued', tone: 'neutral' },

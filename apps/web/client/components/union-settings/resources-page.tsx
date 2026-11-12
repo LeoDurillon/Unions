@@ -1,10 +1,11 @@
 // Union settings → Resources: the memory each agent container and each preview service may use, and the CPU cores of each.
+
 import type { ReactElement } from 'react';
 
 import type { UnionSettingsView } from '../../../src/routes/union-settings';
-import { useResourcesForm, useUnionSettings } from '../../lib/use-resources-form';
+import { useResourcesForm, useUnionSettings } from '../../lib/union-settings/use-resources-form';
 import { SaveBar } from '../settings/save-bar';
-import { ErrorText, Field, inputClass } from '../ui';
+import { ErrorText, Field, inputClass } from '../ui/ui';
 
 const MIN_GB = 1;
 const MAX_GB = 64;

@@ -1,12 +1,13 @@
 // The setup agent's run above a project's board: reading the repository, its proposal, or why it failed.
+
 import { useQuery } from '@tanstack/react-query';
 import type { Investigation, SetupView } from '@union/core';
 import type { ReactElement, ReactNode } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
-import { openInvestigation } from '../../lib/opened-investigation';
-import { setupApi } from '../../lib/setup-api';
-import { Button } from '../ui';
+import { openInvestigation } from '../../lib/investigations/opened-investigation';
+import { setupApi } from '../../lib/setup/setup-api';
+import { Button } from '../ui/ui';
 import { SetupAnswered } from './setup-answered';
 import { SetupStart } from './setup-start';
 

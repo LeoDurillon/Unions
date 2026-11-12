@@ -1,11 +1,12 @@
 // All the changes, the change since the last review (tickets), or one commit: a button that opens
 // the list. Previous and next step through the commits in order.
+
 import { useState, type ReactElement } from 'react';
 
 import { SINCE_REVIEW, type CommitsResponse, type ReviewCommit } from '../../../src/api-types';
-import { formatWhen } from '../../lib/relative-time';
-import { useCommits } from '../../lib/use-commits';
-import { ErrorText } from '../ui';
+import { useCommits } from '../../lib/pull-request/use-commits';
+import { formatWhen } from '../../lib/ui/relative-time';
+import { ErrorText } from '../ui/ui';
 
 const SHORT_SHA = 7;
 const ROW = 'block w-full rounded px-2 py-1 text-left text-xs';

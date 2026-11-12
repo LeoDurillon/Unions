@@ -1,7 +1,8 @@
 // The slice a split ticket's review page shows, shared with its tabs so the PR tab follows the stack's tabs above.
+
 import { createContext, useContext, useMemo, type ReactElement, type ReactNode } from 'react';
 
-import type { SliceView } from '../../lib/use-slice-view';
+import type { SliceView } from '../../lib/review/use-slice-view';
 
 type SlicePick = Pick<SliceView, 'slices' | 'slice' | 'setSlice'>;
 

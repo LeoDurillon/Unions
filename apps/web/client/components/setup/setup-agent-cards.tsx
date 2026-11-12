@@ -1,11 +1,12 @@
 // The setup proposal's tickets to create, and its questions, answered in a follow-up that asks for the proposal again.
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { Investigation, SetupTicket } from '@union/core';
 import { useState, type ReactElement } from 'react';
 
-import { api } from '../../lib/api';
-import { setupFollowUp } from '../../lib/setup-follow-up';
-import { Badge, Button, ErrorText, inputClass } from '../ui';
+import { api } from '../../lib/app/api';
+import { setupFollowUp } from '../../lib/setup/setup-follow-up';
+import { Badge, Button, ErrorText, inputClass } from '../ui/ui';
 
 function TicketRow({
   projectId,

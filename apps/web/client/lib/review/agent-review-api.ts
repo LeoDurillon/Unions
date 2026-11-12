@@ -3,7 +3,7 @@
 import type { AgentReviewSpec } from '@union/core';
 
 import type { AgentReviewView } from '../../../src/api-types';
-import { request } from '../api';
+import { request } from '../app/api';
 
 export type AgentReviewStart = { specs: AgentReviewSpec[]; stack?: number[] };
 

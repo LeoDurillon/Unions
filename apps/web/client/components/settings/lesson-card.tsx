@@ -1,9 +1,10 @@
 // One lesson as a card: its whole rule, wrapped; the pencil opens a multiline field to edit it.
+
 import { MAX_LESSON_LENGTH } from '@union/core/lesson-input';
 import { useEffect, useRef, type ReactElement } from 'react';
 
-import { CheckIcon, IconButton, PencilIcon } from '../icon-button';
-import { inputClass } from '../ui';
+import { CheckIcon, IconButton, PencilIcon } from '../ui/icon-button';
+import { inputClass } from '../ui/ui';
 
 export type LessonCardProps = {
   place: number;

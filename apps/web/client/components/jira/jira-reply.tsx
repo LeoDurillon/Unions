@@ -7,9 +7,9 @@ import { useState, type ReactElement } from 'react';
 
 import type { PendingJiraComment } from '../../../src/jira-comment-types';
 import { jiraReplyKey, type JiraCommentSend } from '../../lib/integrations/use-jira-comments';
-import { Markdown } from '../markdown';
+import { Markdown } from '../markdown/markdown';
 import { ReplyBox } from '../pull-request/reply-box';
-import { Button } from '../ui';
+import { Button } from '../ui/ui';
 
 const POSTS_AS =
   'Markdown: **bold**, `code`, [links](https://…), lists. Posts as the Atlassian account of the Jira connection, visible to everyone who can see the issue';

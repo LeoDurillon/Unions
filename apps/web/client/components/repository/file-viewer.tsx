@@ -1,12 +1,13 @@
 // The right side of the Repository tab: the picked file (text highlighted, or its size), or a folder's entries.
+
 import type { ReactElement, ReactNode } from 'react';
 
 import type { RepositoryBlob, RepositoryEntry } from '../../../src/repository-api-types';
-import type { MarkdownBase } from '../../lib/markdown-links';
-import { SHORT_SHA, sizeText } from '../../lib/repo-links';
-import { nameOf, type RepoIndex } from '../../lib/repo-tree';
-import { readable, useRepositoryBlob } from '../../lib/repository-api';
-import { ErrorText } from '../ui';
+import type { MarkdownBase } from '../../lib/markdown/markdown-links';
+import { SHORT_SHA, sizeText } from '../../lib/repository/repo-links';
+import { nameOf, type RepoIndex } from '../../lib/repository/repo-tree';
+import { readable, useRepositoryBlob } from '../../lib/repository/repository-api';
+import { ErrorText } from '../ui/ui';
 import { FileHeader } from './file-header';
 import { isMarkdown, MarkdownView } from './markdown-view';
 import { TextView } from './text-view';

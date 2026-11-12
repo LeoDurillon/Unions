@@ -10,7 +10,7 @@ import {
 
 import type { CurrentReview } from '../../../src/api-types';
 import type { ReviewJiraIssue, ReviewJiraLink } from '../../../src/review-jira-types';
-import { request } from '../api';
+import { request } from '../app/api';
 import { reviewBase } from './review-target';
 import { specsKey } from './use-review-specs';
 

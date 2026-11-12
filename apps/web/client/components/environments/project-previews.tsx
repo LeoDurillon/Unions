@@ -6,7 +6,7 @@ import type { ReactElement } from 'react';
 import { useRunningPreviews, useStopPreview } from '../../lib/preview/use-running-previews';
 import { useSharedServices } from '../../lib/preview/use-shared-services';
 import { RunningPreviewRow } from '../previews/running-preview-row';
-import { ErrorText } from '../ui';
+import { ErrorText } from '../ui/ui';
 import { SharedLinks } from './shared-links';
 
 /** What runs for the project now: its previews, each with its addresses and Stop. */

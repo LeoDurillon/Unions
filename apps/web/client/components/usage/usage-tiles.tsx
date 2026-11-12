@@ -1,9 +1,10 @@
 // The Usage tab's totals over its range: API-equivalent cost, agent calls, tokens in and out.
+
 import type { UsageSlice } from '@union/core';
 import type { ReactElement } from 'react';
 
-import { count } from '../../lib/token-counts';
-import { costText } from '../../lib/usage-format';
+import { count } from '../../lib/log/token-counts';
+import { costText } from '../../lib/usage/usage-format';
 
 function Tile({
   label,

@@ -2,7 +2,7 @@
 
 import type { Preview } from '@union/core';
 
-import type { Tone } from '../labels';
+import type { Tone } from '../board/labels';
 
 export const PREVIEW_STATUS: Record<Preview['status'], { label: string; tone: Tone }> = {
   starting: { label: 'Starting…', tone: 'blue' },

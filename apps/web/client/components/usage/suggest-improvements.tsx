@@ -1,13 +1,14 @@
 // The Usage tab's "Suggest improvements": asks first, then queues the investigation and opens it.
 // It asks because it runs an agent on the Claude subscription.
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { INVESTIGATION_DEFAULTS } from '@union/core/investigation-defaults';
 import { useState, type ReactElement } from 'react';
 
-import { request } from '../../lib/api';
-import { openInvestigation } from '../../lib/opened-investigation';
-import type { UsageRange } from '../../lib/use-usage';
-import { Button, ErrorText } from '../ui';
+import { request } from '../../lib/app/api';
+import { openInvestigation } from '../../lib/investigations/opened-investigation';
+import type { UsageRange } from '../../lib/usage/use-usage';
+import { Button, ErrorText } from '../ui/ui';
 
 export function SuggestImprovements({
   projectId,

@@ -3,11 +3,11 @@
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../../src/api-types';
-import { integrationsApi, projectIntegration } from '../../../lib/integrations-api';
+import { integrationsApi, projectIntegration } from '../../../lib/integrations/integrations-api';
 import { useJiraRuleSource } from '../../../lib/integrations/jira-rule-source';
-import { useSettingsForm } from '../../../lib/use-settings-form';
+import { useSettingsForm } from '../../../lib/settings/use-settings-form';
 import { SaveBar } from '../../settings/save-bar';
-import { Badge } from '../../ui';
+import { Badge } from '../../ui/ui';
 import { Disconnect } from '../disconnect';
 import { JiraFields, JiraHelp, jiraConfigOf, jiraFormOf, type JiraForm } from './jira-fields';
 import { JiraIssueTypeField } from './jira-issue-type-field';

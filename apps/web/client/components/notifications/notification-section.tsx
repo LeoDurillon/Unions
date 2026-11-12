@@ -1,10 +1,11 @@
-// One part of the bell's panel under its title (what still asks something, or the history): its notifications
-// grouped by what they are about.
+// One part of the bell's panel under its title: its notifications grouped by what they are about.
+// The parts are what still asks something, and the history.
+
 import type { ReactElement } from 'react';
 
 import type { NotificationView } from '../../../src/routes/notifications';
-import { groupNotifications } from '../../lib/notification-groups';
-import type { NotificationTarget } from '../../lib/open-notification';
+import { groupNotifications } from '../../lib/notifications/notification-groups';
+import type { NotificationTarget } from '../../lib/notifications/open-notification';
 import { NotificationGroupItem } from './notification-group';
 
 /** One part of the panel, under its title; nothing when it has no notification. */

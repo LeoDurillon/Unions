@@ -1,8 +1,9 @@
 // The names the Union settings menu shows: each agent's title, then the other pages'.
+
 import type { AgentConfig, AgentId } from '@union/core';
 import { isCustomStep } from '@union/core/states';
 
-import type { UnionSection } from '../../lib/union-settings-groups';
+import type { UnionSection } from '../../lib/union-settings/union-settings-groups';
 import { AGENT_LABELS, isAgentId } from '../agents/agent-labels';
 
 const OTHER_LABELS: Record<Exclude<UnionSection, AgentId>, string> = {

@@ -1,12 +1,13 @@
 // How the change works, near the top of the spec report: the map of its main path, and the
 // walkthrough. The map is numbered with what needs the reviewer; the walkthrough gives each step's
 // why with where it comes from.
+
 import type { FlowStep, ReportFlow, ReviewReportResult } from '@union/core';
 import { plainQuote } from '@union/core/review-report-specs';
 import type { ReactElement } from 'react';
 
-import type { Tone } from '../../lib/labels';
-import { Badge } from '../ui';
+import type { Tone } from '../../lib/board/labels';
+import { Badge } from '../ui/ui';
 import { FlowGraph } from './report-flow-graph';
 import type { OpenLines } from './report-open';
 import { ReportSection, ROWS_CLASS } from './report-sections';

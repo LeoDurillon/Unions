@@ -1,8 +1,9 @@
 // An agent's prompt editor, warning when the edit drops a format Union reads from the agent's answer.
+
 import { missingFormats } from '@union/core/prompt-formats';
 import type { ReactElement } from 'react';
 
-import { inputClass } from '../ui';
+import { inputClass } from '../ui/ui';
 
 export function PromptField({
   agent,

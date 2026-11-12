@@ -5,9 +5,9 @@ import { githubTitle } from '@union/core/github-text';
 import { useState, type ReactElement, type ReactNode } from 'react';
 
 import type { PullRequestNote, PullRequestThread } from '../../../src/api-types';
-import { formatWhen } from '../../lib/relative-time';
 import { openDiffLines, type DiffLines, type ReviewPageKind } from '../../lib/review/review-url';
-import { Badge, Button } from '../ui';
+import { formatWhen } from '../../lib/ui/relative-time';
+import { Badge, Button } from '../ui/ui';
 import { CommentBody } from './comment-body';
 
 const CARD =

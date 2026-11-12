@@ -134,7 +134,7 @@ files and uses `union.sqlite` here, which holds the user's real projects.
   read rows with `isEvent`.
 - Memory (feedback and lessons) lives in the database, per project. Do not reintroduce markdown inbox files.
 - In the client, ask before a destructive action with `ConfirmButton` (or an inline question), never the browser's
-  `confirm`; only the leave guard (`lib/leave-guard.ts`) uses it, as it runs on navigation.
+  `confirm`; only the leave guard (`lib/app/leave-guard.ts`) uses it, as it runs on navigation.
 - Lint and format are strict and enforced by `bun run check`: oxlint (type-aware, `--deny-warnings`) and oxfmt
   (single quotes, 100 columns, sorted imports). Config is in `.oxlintrc.json` and `.oxfmtrc.json`. Fix the code, not
   the rule. Do not add `oxlint-disable` comments or loosen the config without a stated reason.

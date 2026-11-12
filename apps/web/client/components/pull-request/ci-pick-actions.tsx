@@ -1,11 +1,12 @@
 // The picked checks, jobs and comments: read the text the agent would get, keep it for its next
 // run, or send it now.
+
 import { useState, type ReactElement } from 'react';
 
 import type { CiPick } from '../../../src/ci-api-types';
-import type { usePrChecks } from '../../lib/use-pr-checks';
-import { SendForm } from '../run-agent-actions';
-import { Button, ErrorText } from '../ui';
+import type { usePrChecks } from '../../lib/pull-request/use-pr-checks';
+import { SendForm } from '../steps/run-agent-actions';
+import { Button, ErrorText } from '../ui/ui';
 
 type Hooks = Pick<ReturnType<typeof usePrChecks>, 'preview' | 'keep' | 'send'>;
 

@@ -1,11 +1,12 @@
 // How far the PR's branch is behind its base (polled from GitHub by the worker) and the Rebase
 // button.
+
 import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../../src/api-types';
-import { useTicketCommands } from '../../lib/use-ticket-commands';
-import { HelpText } from '../help-text';
-import { Button, ErrorText } from '../ui';
+import { useTicketCommands } from '../../lib/ticket/use-ticket-commands';
+import { HelpText } from '../ui/help-text';
+import { Button, ErrorText } from '../ui/ui';
 
 const HELP =
   'Git rebases the branch and the checks run, then it is force-pushed. The implementation agent is called only for conflicts or failing checks, and then the final review runs again. On failure the branch is left as it was.';

@@ -3,7 +3,7 @@
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 
 import type { RunningPreview } from '../../../src/running-previews-types';
-import { request } from '../api';
+import { request } from '../app/api';
 
 const RUNNING_PREVIEWS_KEY = ['previews', 'running'];
 const POLL_MS = 5000;

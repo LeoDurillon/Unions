@@ -1,10 +1,11 @@
 // What can be done to a split ticket's whole stack: Rebase stack, Restack, Simplify history, Split
 // again. Also how far it is behind its base, and Rewrite all descriptions.
+
 import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../../src/api-types';
-import { useTicketCommands } from '../../lib/use-ticket-commands';
-import { Button, ErrorText } from '../ui';
+import { useTicketCommands } from '../../lib/ticket/use-ticket-commands';
+import { Button, ErrorText } from '../ui/ui';
 import { canRewrite } from './branch-status';
 import { RewriteDescriptions } from './rewrite-descriptions';
 import { SimplifyStackButton } from './simplify-history';

@@ -3,7 +3,7 @@
 import type { ReactElement } from 'react';
 
 import { useRunningPreviews, useStopPreview } from '../../lib/preview/use-running-previews';
-import { ErrorText } from '../ui';
+import { ErrorText } from '../ui/ui';
 import { RunningPreviewRow } from './running-preview-row';
 
 /**

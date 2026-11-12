@@ -1,11 +1,12 @@
 // Creates a custom agent from its kind, a name and a role; the worker then writes its prompt, and its page opens.
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { CustomAgentKind } from '@union/core';
 import { useState, type ReactElement } from 'react';
 
-import { customAgentsApi } from '../../lib/custom-agents-api';
-import { openUnionSettings } from '../../lib/union-settings-sections';
-import { Button, Dialog, ErrorText, Field, inputClass, TextInput } from '../ui';
+import { customAgentsApi } from '../../lib/union-settings/custom-agents-api';
+import { openUnionSettings } from '../../lib/union-settings/union-settings-sections';
+import { Button, Dialog, ErrorText, Field, inputClass, TextInput } from '../ui/ui';
 import { AgentKindField, KIND_TEXTS } from './agent-kind-field';
 
 const ROLE_ROWS = 5;

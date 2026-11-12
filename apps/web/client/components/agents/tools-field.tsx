@@ -1,11 +1,12 @@
 // Multi-select over the tool list: the selected tools as toggles, the others behind "Add a tool".
 // The selection keeps the list's order.
+
 import type { ToolOption } from '@union/core';
 import { useState, type ReactElement } from 'react';
 
-import { useAgentTools } from '../../lib/use-agent-tools';
-import { CheckChip, ChipGroup } from '../choice';
-import { ErrorText } from '../ui';
+import { useAgentTools } from '../../lib/union-settings/use-agent-tools';
+import { CheckChip, ChipGroup } from '../ui/choice';
+import { ErrorText } from '../ui/ui';
 
 function ToolChip({
   tool,

@@ -1,11 +1,12 @@
 // The Simplify history button: the implementation agent rewrites the branch's commits, the code
 // unchanged. A stack's are rewritten slice by slice.
+
 import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../../src/api-types';
-import { useTicketCommands } from '../../lib/use-ticket-commands';
-import { HelpText } from '../help-text';
-import { Button, ErrorText } from '../ui';
+import { useTicketCommands } from '../../lib/ticket/use-ticket-commands';
+import { HelpText } from '../ui/help-text';
+import { Button, ErrorText } from '../ui/ui';
 import { canRewrite, rewriteBlock } from './branch-status';
 
 const HELP =

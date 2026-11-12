@@ -7,8 +7,8 @@ import type { ReactElement } from 'react';
 import type { CurrentReview } from '../../../src/api-types';
 import type { ReviewTarget } from '../../lib/review/review-target';
 import { useReviewDiscussion } from '../../lib/review/use-review';
-import { Markdown } from '../markdown';
-import { ErrorText } from '../ui';
+import { Markdown } from '../markdown/markdown';
+import { ErrorText } from '../ui/ui';
 import { ReviewJiraLinkRow } from './review-jira-link';
 import { ReviewNotionLinkRow } from './review-notion-link';
 

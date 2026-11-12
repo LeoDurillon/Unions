@@ -1,11 +1,12 @@
 // The spec report's sections: the frame they share (a title with a count, rows in one box), then
 // the last ones. The last ones: what the specs did not ask for, the risks, the questions, the docs
 // to update, and the changed files the agent said nothing about.
+
 import type { ReviewReportResult } from '@union/core';
 import type { ReactElement, ReactNode } from 'react';
 
-import type { Tone } from '../../lib/labels';
-import { Badge } from '../ui';
+import type { Tone } from '../../lib/board/labels';
+import { Badge } from '../ui/ui';
 import { FileLink, FileName, type OpenLines } from './report-open';
 
 const LEVEL_TONES: Record<ReviewReportResult['risks'][number]['severity'], Tone> = {

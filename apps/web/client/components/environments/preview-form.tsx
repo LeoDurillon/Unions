@@ -5,11 +5,11 @@ import { exposedServices, type AgentVariables, type PreviewConfig } from '@union
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
-import { envLines, parseEnvLines } from '../../lib/env-lines';
 import { previewApi } from '../../lib/preview/preview-api';
-import { useSettingsForm, type SettingsForm } from '../../lib/use-settings-form';
+import { envLines, parseEnvLines } from '../../lib/settings/env-lines';
+import { useSettingsForm, type SettingsForm } from '../../lib/settings/use-settings-form';
 import { SaveBar } from '../settings/save-bar';
-import { Button, ErrorText } from '../ui';
+import { Button, ErrorText } from '../ui/ui';
 import { serviceRows, type ServiceRow } from './preview-services-field';
 
 /**

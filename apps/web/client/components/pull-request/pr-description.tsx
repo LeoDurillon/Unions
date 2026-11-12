@@ -1,11 +1,15 @@
 // A pull request's description: GitHub's text, and the agent's rewrite of it to edit and send. The
 // same for the ticket's and each slice's.
+
 import type { ReactElement } from 'react';
 
 import type { PrDescriptionDraft, PrDescriptionView } from '../../../src/api-types';
-import { formatWhen } from '../../lib/relative-time';
-import { usePrDescription, type DescriptionActions } from '../../lib/use-pr-description';
-import { Button, ErrorText } from '../ui';
+import {
+  usePrDescription,
+  type DescriptionActions,
+} from '../../lib/pull-request/use-pr-description';
+import { formatWhen } from '../../lib/ui/relative-time';
+import { Button, ErrorText } from '../ui/ui';
 import { DescriptionDraft } from './description-draft';
 import { GitHubDescription } from './github-description';
 

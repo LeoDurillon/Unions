@@ -1,4 +1,5 @@
 // The rule editor's "Then": the kinds of action the project can use (a tracker's only once it is connected).
+
 import {
   ACTION_LABELS,
   emptyAction,
@@ -7,8 +8,8 @@ import {
 } from '@union/core/event-actions';
 import type { ReactElement } from 'react';
 
-import { useOfferedActionKinds } from '../../lib/offered-action-kinds';
-import { Field, inputClass } from '../ui';
+import { useOfferedActionKinds } from '../../lib/settings/offered-action-kinds';
+import { Field, inputClass } from '../ui/ui';
 
 export function ActionKindSelect({
   projectId,

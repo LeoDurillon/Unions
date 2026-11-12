@@ -1,9 +1,10 @@
 // The Repository tab at one commit: the go-to-file box and the folders on the left, the picked file on the right.
+
 import { useState, type ReactElement } from 'react';
 
 import type { RepositoryCommit, RepositoryTree } from '../../../src/repository-api-types';
-import { useRepositoryTree } from '../../lib/repository-api';
-import { ErrorText } from '../ui';
+import { useRepositoryTree } from '../../lib/repository/repository-api';
+import { ErrorText } from '../ui/ui';
 import { FileViewer } from './file-viewer';
 import { RepoFilterBox, RepoFilterResults } from './repo-filter';
 import { RepoTreeView } from './repo-tree-view';

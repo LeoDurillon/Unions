@@ -4,10 +4,10 @@
 import type { ReactElement } from 'react';
 
 import type { SharedServicesView } from '../../../src/shared-services-types';
-import type { Tone } from '../../lib/labels';
+import type { Tone } from '../../lib/board/labels';
 import { useSharedServices, useSharedServicesAction } from '../../lib/preview/use-shared-services';
-import { formatWhen } from '../../lib/relative-time';
-import { Badge, Button, ErrorText } from '../ui';
+import { formatWhen } from '../../lib/ui/relative-time';
+import { Badge, Button, ErrorText } from '../ui/ui';
 import { SharedLinks } from './shared-links';
 
 type Stack = NonNullable<SharedServicesView['stack']>;

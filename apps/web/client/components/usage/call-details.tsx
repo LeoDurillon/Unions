@@ -1,8 +1,9 @@
 // The agent calls of one row of a Usage table: each call's turns, time and peak context, then its models.
+
 import type { UsageCall, UsageGroup, UsageModel } from '@union/core';
 import type { ReactElement } from 'react';
 
-import { costText, inputText, outputText, peakText } from '../../lib/usage-format';
+import { costText, inputText, outputText, peakText } from '../../lib/usage/usage-format';
 
 const MS_PER_SECOND = 1000;
 

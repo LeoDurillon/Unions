@@ -1,12 +1,13 @@
 // One line per CI check or bot comment of the pull request, with a box to pick it for the
 // implementer. On a failed Actions job, Re-run.
+
 import type { ReactElement } from 'react';
 
 import type { BotComment, CiPick, PullRequestCheck } from '../../../src/ci-api-types';
-import type { Tone } from '../../lib/labels';
-import { formatWhen } from '../../lib/relative-time';
-import type { CiRerun } from '../../lib/use-ci-rerun';
-import { Badge, Button } from '../ui';
+import type { Tone } from '../../lib/board/labels';
+import type { CiRerun } from '../../lib/pull-request/use-ci-rerun';
+import { formatWhen } from '../../lib/ui/relative-time';
+import { Badge, Button } from '../ui/ui';
 
 const STATE_TONES: Record<PullRequestCheck['state'], Tone> = {
   failed: 'red',

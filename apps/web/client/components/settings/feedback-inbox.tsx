@@ -1,14 +1,15 @@
 // The feedback given on Revise and final reviews: made a lesson, given to the lesson writer, or
 // dismissed. The curated ones show on request.
+
 import type { FeedbackItem } from '@union/core';
 import type { LessonInput } from '@union/core/lesson-input';
 import { useState, type ReactElement } from 'react';
 
-import { STEP_TITLES } from '../../lib/labels';
-import { formatWhen } from '../../lib/relative-time';
-import { closeSettings } from '../../lib/settings-sections';
-import { setParams } from '../../lib/url-state';
-import { Badge, Button, ErrorText } from '../ui';
+import { setParams } from '../../lib/app/url-state';
+import { STEP_TITLES } from '../../lib/board/labels';
+import { closeSettings } from '../../lib/settings/settings-sections';
+import { formatWhen } from '../../lib/ui/relative-time';
+import { Badge, Button, ErrorText } from '../ui/ui';
 import { LessonSuggestions, type AcceptLessons } from './lesson-suggestions';
 
 /** What the page does with feedback: start a lesson from it, ask the lesson writer, or curate it at once. */

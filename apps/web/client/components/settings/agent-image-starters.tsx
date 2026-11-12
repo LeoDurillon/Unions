@@ -1,12 +1,13 @@
 // The agent image page's Dockerfile fields: the project's (highlighted, with "Start from") and the
 // default image's. The default image's is read-only; "Start from" offers the JavaScript, Python,
 // Rust, Go or PHP example.
+
 import { useState, type ReactElement } from 'react';
 
-import { STARTERS } from '../../lib/agent-image-starters';
-import { useDefaultDockerfile } from '../../lib/use-agent-image';
-import { CodeTextarea } from '../code-textarea';
-import { Button, ErrorText, Field } from '../ui';
+import { STARTERS } from '../../lib/settings/agent-image-starters';
+import { useDefaultDockerfile } from '../../lib/settings/use-agent-image';
+import { CodeTextarea } from '../ui/code-textarea';
+import { Button, ErrorText, Field } from '../ui/ui';
 
 /** Replaces the text with a starter; asks first when the text is the user's own (not empty, not a starter). */
 function StarterPicker({

@@ -5,7 +5,7 @@ import type { ReactElement, ReactNode } from 'react';
 import type { CommentView } from '../../../src/api-types';
 import type { ReviewTarget } from '../../lib/review/review-target';
 import type { useCommentMutations } from '../../lib/review/use-review';
-import { ErrorText } from '../ui';
+import { ErrorText } from '../ui/ui';
 import type { ExplainFocus } from './explain-context';
 import type { DiffView } from './file-diff';
 import { GeneralComments } from './general-comments';

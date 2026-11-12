@@ -4,9 +4,9 @@
 import { useState, type ReactElement, type ReactNode } from 'react';
 
 import { SINCE_REVIEW, type DiffFileSummary } from '../../../src/api-types';
+import { useCommitDiff, useCommitFile } from '../../lib/pull-request/use-commits';
 import type { ReviewTarget } from '../../lib/review/review-target';
-import { useCommitDiff, useCommitFile } from '../../lib/use-commits';
-import { Button, ErrorText } from '../ui';
+import { Button, ErrorText } from '../ui/ui';
 import { FileDiff, type DiffView } from './file-diff';
 import { useFilteredFiles } from './file-filter-bar';
 import { FileList } from './file-list';

@@ -1,11 +1,19 @@
 // The Pull requests tab's list: stacks first, then the other pull requests, and adding them to the current reviews.
+
 import type { GitHubStack } from '@union/core/github-stacks';
 import type { ReactElement } from 'react';
 
 import type { PullRequestListItem } from '../../../src/api-types';
-import { reviewStackBottoms, splitStacks, type StackRow } from '../../lib/pull-request-stacks';
-import { useCurrentReviewMutations, useCurrentReviews } from '../../lib/use-current-reviews';
-import { ErrorText } from '../ui';
+import {
+  reviewStackBottoms,
+  splitStacks,
+  type StackRow,
+} from '../../lib/pull-request/pull-request-stacks';
+import {
+  useCurrentReviewMutations,
+  useCurrentReviews,
+} from '../../lib/pull-request/use-current-reviews';
+import { ErrorText } from '../ui/ui';
 import { Part } from './list-part';
 import { PullRequestItem } from './pull-request-item';
 import { StackItem } from './stack-item';

@@ -3,10 +3,10 @@
 import { useState, type ReactElement } from 'react';
 
 import type { CommentView } from '../../../src/api-types';
-import type { Selection } from '../../lib/diff-selection';
+import type { Selection } from '../../lib/review/diff-selection';
 import type { ReviewTarget } from '../../lib/review/review-target';
 import { useDiffFile, type useCommentMutations } from '../../lib/review/use-review';
-import { ErrorText } from '../ui';
+import { ErrorText } from '../ui/ui';
 import { hasThread, OutdatedComments, Thread } from './comment-thread';
 import { useWholeExplain, type ExplainFocus, type WholeExplain } from './explain-context';
 import { useHunkFocus } from './hunk-focus';

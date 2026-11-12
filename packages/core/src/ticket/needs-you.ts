@@ -1,5 +1,6 @@
-// Whether a ticket waits on the user (the rule the board's Needs you filter, `n` and the sidebar's counts share),
-// and whether a notification still asks something of them (the bell's count).
+// Whether a ticket waits on the user, and whether a notification still asks something of them. The
+// first is the rule the board's Needs you filter, `n` and the sidebar's counts share; the second,
+// the bell's count.
 
 /** What the rule reads of a ticket. */
 export type NeedsYouFields = {

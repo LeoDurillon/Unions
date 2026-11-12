@@ -4,7 +4,7 @@ import { useState, type ReactElement } from 'react';
 
 import type { ExplanationView } from '../../../src/routes/review/review-explanations';
 import type { useExplanations } from '../../lib/review/use-explanations';
-import { Badge, Button, ErrorText, inputClass } from '../ui';
+import { Badge, Button, ErrorText, inputClass } from '../ui/ui';
 import type { ExplainState } from './explain-context';
 import { ExplanationAnswer } from './explanation-answer';
 import { ExplanationProgress } from './explanation-progress';

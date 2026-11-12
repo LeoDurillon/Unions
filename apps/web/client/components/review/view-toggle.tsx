@@ -3,7 +3,7 @@
 import { useState, type ReactElement } from 'react';
 
 import { isExplaining, useExplanations } from '../../lib/review/use-explanations';
-import { Segmented, type SegmentOption } from '../choice';
+import { Segmented, type SegmentOption } from '../ui/choice';
 import { useExplain, type ExplainState } from './explain-context';
 import type { DiffView } from './file-diff';
 

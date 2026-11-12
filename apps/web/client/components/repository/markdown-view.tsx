@@ -1,10 +1,11 @@
 // A Markdown file of the repository rendered as GitHub shows it, or its source. Its links open the
 // repository's files in the tab, its images load from the repository.
+
 import { useCallback, useState, type ReactElement } from 'react';
 
-import { markdownUrl, tabPathOf, type MarkdownBase } from '../../lib/markdown-links';
-import { Segmented, type SegmentOption } from '../choice';
-import { Markdown } from '../markdown';
+import { markdownUrl, tabPathOf, type MarkdownBase } from '../../lib/markdown/markdown-links';
+import { Markdown } from '../markdown/markdown';
+import { Segmented, type SegmentOption } from '../ui/choice';
 import { TextView } from './text-view';
 
 type Mode = 'rendered' | 'source';

@@ -1,11 +1,12 @@
 // The project's flow presets: the steps a ticket can run, and the one new tickets get.
+
 import { BUILT_IN_PRESETS, projectPresets, type FlowPreset } from '@union/core/flows';
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
-import { api } from '../../lib/api';
-import { useSettingsForm } from '../../lib/use-settings-form';
-import { Button } from '../ui';
+import { api } from '../../lib/app/api';
+import { useSettingsForm } from '../../lib/settings/use-settings-form';
+import { Button } from '../ui/ui';
 import { FlowPresetRow } from './flow-preset-row';
 import { SaveBar } from './save-bar';
 

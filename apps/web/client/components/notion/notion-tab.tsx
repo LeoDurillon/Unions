@@ -12,7 +12,7 @@ import {
   useNotionReviewImport,
   type NotionReviewImport,
 } from '../../lib/integrations/use-notion-review-import';
-import { Button, ErrorText } from '../ui';
+import { Button, ErrorText } from '../ui/ui';
 import { NotionDiscussion } from './notion-discussion';
 import { NotionReply } from './notion-reply';
 

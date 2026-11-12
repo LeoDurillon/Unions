@@ -1,10 +1,11 @@
 // One property a Notion action sets: which property of the ticket's page, its value, and removing it.
+
 import type { NotionProperty } from '@union/core';
 import type { NotionValue } from '@union/core/event-actions';
 import type { ReactElement } from 'react';
 
 import { ValueField } from '../../settings/value-field';
-import { Button, Field, inputClass } from '../../ui';
+import { Button, Field, inputClass } from '../../ui/ui';
 
 export function NotionValueRow({
   projectId,

@@ -1,7 +1,8 @@
 // The last onboarding step: a summary of the choices made, before the project is created.
+
 import type { ReactElement, ReactNode } from 'react';
 
-import { Field, inputClass } from '../ui';
+import { Field, inputClass } from '../ui/ui';
 import type { ProjectChoice, StepProps } from './draft';
 import { SetupAgentChoice } from './setup-agent-choice';
 

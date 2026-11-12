@@ -4,7 +4,7 @@ import type { SpecSource } from '@union/core';
 
 import type { GroupingView } from '../../../src/routes/review/review-groupings';
 import type { SpecText } from '../../../src/routes/spec-sources';
-import { request } from '../api';
+import { request } from '../app/api';
 
 /** `base` is the review's API root (`reviewBase`). */
 export const reviewGroupingApi = {

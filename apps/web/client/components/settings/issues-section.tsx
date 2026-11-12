@@ -1,11 +1,12 @@
 // Project settings → General: whether new tickets get a GitHub issue, always on while a GitHub Project is connected.
+
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
-import { api } from '../../lib/api';
-import { hasBoard } from '../../lib/github-project-api';
-import { useSettingsForm } from '../../lib/use-settings-form';
-import { Switch } from '../choice';
+import { api } from '../../lib/app/api';
+import { hasBoard } from '../../lib/settings/github-project-api';
+import { useSettingsForm } from '../../lib/settings/use-settings-form';
+import { Switch } from '../ui/choice';
 import { SaveBar } from './save-bar';
 
 const HINT =

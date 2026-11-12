@@ -14,7 +14,7 @@ import {
   type JiraReviewImport,
 } from '../../lib/integrations/use-jira-review-import';
 import { AddToReview } from '../review/add-to-review';
-import { Button, ErrorText } from '../ui';
+import { Button, ErrorText } from '../ui/ui';
 import { JiraCommentCard } from './jira-comment';
 import { JiraReply } from './jira-reply';
 

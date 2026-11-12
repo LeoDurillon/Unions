@@ -5,7 +5,7 @@ import { useState, type ReactElement, type ReactNode } from 'react';
 
 import type { CommentView, DiffFileSummary } from '../../../src/api-types';
 import { reviewSlice, type ReviewTarget } from '../../lib/review/review-target';
-import { Segmented, type SegmentOption } from '../choice';
+import { Segmented, type SegmentOption } from '../ui/choice';
 import { draftCounts } from './file-row';
 import { FileRows, type RowOptions, type Layout } from './file-rows';
 import { useBySpecControl } from './group-by-spec-button';

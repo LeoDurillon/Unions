@@ -1,11 +1,12 @@
 // The onboarding steps' Verify for a tracker: checks its secret and config, and keeps the normalized config and title.
+
 import { useMutation } from '@tanstack/react-query';
 import { integrationKind, type IntegrationKindName } from '@union/core/integration-kinds';
 import type { ReactElement } from 'react';
 
-import { integrationsApi } from '../../lib/integrations-api';
+import { integrationsApi } from '../../lib/integrations/integrations-api';
 import { trackerSkipped, type StepProps, type TrackerDraft } from '../onboarding/draft';
-import { Button, ErrorText } from '../ui';
+import { Button, ErrorText } from '../ui/ui';
 
 function trimmed(config: Record<string, string>): Record<string, string> {
   return Object.fromEntries(Object.entries(config).map(([name, value]) => [name, value.trim()]));

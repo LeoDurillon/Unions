@@ -1,11 +1,12 @@
 // Above the event rules: the Jira project's statuses and fields as Union last read them, and reading them again.
+
 import { useMutation } from '@tanstack/react-query';
 import type { JiraRuleSource } from '@union/core';
 import type { ReactElement } from 'react';
 
-import { integrationsApi } from '../../../lib/integrations-api';
-import { formatWhen } from '../../../lib/relative-time';
-import { Button, ErrorText } from '../../ui';
+import { integrationsApi } from '../../../lib/integrations/integrations-api';
+import { formatWhen } from '../../../lib/ui/relative-time';
+import { Button, ErrorText } from '../../ui/ui';
 
 export function JiraFieldsBar({
   projectId,

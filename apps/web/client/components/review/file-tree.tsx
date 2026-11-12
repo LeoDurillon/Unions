@@ -1,8 +1,9 @@
 // The files by directory; every directory starts open and folds on click.
+
 import { useMemo, useState, type ReactElement } from 'react';
 
 import type { DiffFileSummary } from '../../../src/api-types';
-import { buildFileTree, type TreeNode } from '../../lib/file-tree';
+import { buildFileTree, type TreeNode } from '../../lib/review/file-tree';
 import { FileRow, INDENT, PADDING } from './file-row';
 
 type Props = {

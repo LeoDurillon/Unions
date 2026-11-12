@@ -1,16 +1,17 @@
 // Files every ticket's workspace gets at a path in the repository, kept out of git. For example a
 // database dump for the preview's seed, a local config.
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { formatBytes } from '@union/core/attachment-limits';
 import { useState, type ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
 import type { ProjectFileView } from '../../../src/routes/project-files';
-import { useLeaveGuard } from '../../lib/leave-guard';
-import { projectFilesApi } from '../../lib/project-files-api';
-import { formatWhen } from '../../lib/relative-time';
-import { Dropzone } from '../dropzone';
-import { Button, ErrorText, inputClass } from '../ui';
+import { useLeaveGuard } from '../../lib/app/leave-guard';
+import { projectFilesApi } from '../../lib/settings/project-files-api';
+import { formatWhen } from '../../lib/ui/relative-time';
+import { Dropzone } from '../ui/dropzone';
+import { Button, ErrorText, inputClass } from '../ui/ui';
 
 function FileList({
   projectId,

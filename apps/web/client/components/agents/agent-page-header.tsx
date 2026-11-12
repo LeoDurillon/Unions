@@ -1,9 +1,10 @@
 // An agent page's title, whether it is customized, its model and effort, and what it does.
+
 import type { AgentConfig } from '@union/core';
 import type { ReactElement } from 'react';
 
-import type { AgentEdits } from '../../lib/use-agent-form';
-import { Badge } from '../ui';
+import type { AgentEdits } from '../../lib/union-settings/use-agent-form';
+import { Badge } from '../ui/ui';
 import { agentLabel } from './agent-labels';
 import { CustomAgentRole } from './custom-agent-card';
 import { EffortField } from './effort-field';

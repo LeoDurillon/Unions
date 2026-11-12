@@ -1,8 +1,9 @@
 // Which pull request of a split ticket's stack the PR tab's checks, description and discussion are about, bottom first.
+
 import type { ReactElement } from 'react';
 
 import type { StackView } from '../../../src/api-types';
-import { Segmented } from '../choice';
+import { Segmented } from '../ui/choice';
 
 /** The slices' pull requests, bottom first; none when the ticket is not split. */
 export function stackPullRequests(stack: StackView | null | undefined): number[] {

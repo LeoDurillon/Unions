@@ -3,9 +3,13 @@
 import type { ReactElement } from 'react';
 
 import type { PullRequestNote } from '../../../src/api-types';
+import {
+  reviewRepliesBase,
+  usePrReplies,
+  type PrReplies,
+} from '../../lib/pull-request/use-pr-replies';
 import { reviewBase, type ReviewTarget } from '../../lib/review/review-target';
 import { useReviewDiscussion } from '../../lib/review/use-review';
-import { reviewRepliesBase, usePrReplies, type PrReplies } from '../../lib/use-pr-replies';
 import { NoteCard, ThreadCard } from '../pull-request/note-card';
 import { filterNotes, NoteFilterControl, useNoteFilter } from '../pull-request/note-filter';
 import { ReplyArea } from '../pull-request/reply-area';

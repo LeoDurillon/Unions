@@ -1,11 +1,12 @@
 // Choose where the GitHub App is installed; sets the app up first when it is not configured.
+
 import { useQuery } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 
 import type { InstallationOption } from '../../../src/api-types';
-import { api } from '../../lib/api';
-import { useGitHubApp } from '../../lib/use-github-app';
-import { Badge, Button, ErrorText } from '../ui';
+import { api } from '../../lib/app/api';
+import { useGitHubApp } from '../../lib/settings/use-github-app';
+import { Badge, Button, ErrorText } from '../ui/ui';
 import { AppSetupForm } from './app-setup-form';
 
 const CHOICE_ON = 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40';

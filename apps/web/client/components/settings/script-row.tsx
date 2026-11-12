@@ -1,8 +1,9 @@
 // A saved script in the settings: its closed card, its edit form, and the draft between them.
+
 import type { ProjectScript } from '@union/core';
 import type { ReactElement } from 'react';
 
-import { Button, inputClass } from '../ui';
+import { Button, inputClass } from '../ui/ui';
 
 const SEC_PER_MIN = 60;
 /** The command box grows with its lines, up to this. */

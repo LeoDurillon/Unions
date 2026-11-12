@@ -1,4 +1,5 @@
 // One field a Jira fields rule sets: which field of the Jira site, its value as its type takes it, and removing it.
+
 import {
   isPickedType,
   type JiraFieldInfo,
@@ -9,7 +10,7 @@ import {
 import type { ReactElement } from 'react';
 
 import { VariableChips } from '../../settings/variable-chips';
-import { Button, Field, inputClass } from '../../ui';
+import { Button, Field, inputClass } from '../../ui/ui';
 import { JiraPickField } from './jira-pick-field';
 
 /** What to type for each type, as a placeholder. */

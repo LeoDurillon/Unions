@@ -1,15 +1,16 @@
 // The bell's panel: first what still asks something of the user, then the rest as history. The
 // history is newest first and grouped by ticket; "Mark all read", "Delete all", older ones on
 // request, and the desktop opt-in (folded).
+
 import { useEffect, type ReactElement, type RefObject } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
-import { useDesktopSetting } from '../../lib/desktop-notifications';
-import type { NotificationTarget } from '../../lib/open-notification';
-import type { Notifications } from '../../lib/use-notifications';
-import { Switch } from '../choice';
-import { ConfirmButton } from '../confirm-button';
-import { Button, ErrorText } from '../ui';
+import { useDesktopSetting } from '../../lib/notifications/desktop-notifications';
+import type { NotificationTarget } from '../../lib/notifications/open-notification';
+import type { Notifications } from '../../lib/notifications/use-notifications';
+import { Switch } from '../ui/choice';
+import { ConfirmButton } from '../ui/confirm-button';
+import { Button, ErrorText } from '../ui/ui';
 import { NotificationSections } from './notification-section';
 
 /** Closes the panel on Escape or a click outside `box` (the bell and the panel). */

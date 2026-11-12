@@ -1,9 +1,10 @@
 // One slice of a split ticket's stack on one line: its pull request (linked), state, CI and title; its branch on hover.
+
 import type { ReactElement } from 'react';
 
 import type { PublicProject, StackView } from '../../../src/api-types';
 import type { CheckCounts } from '../../../src/ci-api-types';
-import { Badge } from '../ui';
+import { Badge } from '../ui/ui';
 import { SliceCi } from './slice-ci';
 
 type Slice = StackView['slices'][number];

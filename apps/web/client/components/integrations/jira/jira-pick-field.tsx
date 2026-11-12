@@ -6,8 +6,8 @@ import { isSinglePick, type JiraPick, type JiraPickedType } from '@union/core/ji
 import type { ReactElement } from 'react';
 
 import { useJiraPicks } from '../../../lib/integrations/use-jira-picks';
-import { CheckChip, ChipGroup } from '../../choice';
-import { ErrorText, inputClass } from '../../ui';
+import { CheckChip, ChipGroup } from '../../ui/choice';
+import { ErrorText, inputClass } from '../../ui/ui';
 
 const NONE: Record<'user' | 'sprint', string> = {
   user: 'Nobody (clears the field)',

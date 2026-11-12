@@ -1,14 +1,15 @@
 // Fetches an item of a tracker the project is connected to (a Notion page), previews it, and creates the ticket.
+
 import { useMutation, type UseMutationResult } from '@tanstack/react-query';
 import { integrationKind, type IntegrationKindName } from '@union/core/integration-kinds';
 import type { PipelineStep } from '@union/core/states';
 import { useState, type ReactElement } from 'react';
 
 import type { SourceImport, TicketSummary } from '../../../src/api-types';
-import { api } from '../../lib/api';
-import { integrationsApi } from '../../lib/integrations-api';
-import { Markdown } from '../markdown';
-import { Button, ErrorText, Field, inputClass } from '../ui';
+import { api } from '../../lib/app/api';
+import { integrationsApi } from '../../lib/integrations/integrations-api';
+import { Markdown } from '../markdown/markdown';
+import { Button, ErrorText, Field, inputClass } from '../ui/ui';
 
 function Preview({
   kind,

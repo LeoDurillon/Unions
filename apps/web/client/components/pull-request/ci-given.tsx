@@ -1,9 +1,10 @@
 // The CI output given to the implementer: waiting for its next run (it can be taken back) or read.
+
 import type { CiOutput } from '@union/core';
 import type { ReactElement } from 'react';
 
-import type { usePrChecks } from '../../lib/use-pr-checks';
-import { Badge, Button, ErrorText } from '../ui';
+import type { usePrChecks } from '../../lib/pull-request/use-pr-checks';
+import { Badge, Button, ErrorText } from '../ui/ui';
 
 const SHA_SHOWN = 7;
 const KIND_LABELS: Record<CiOutput['kind'], string> = {

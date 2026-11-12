@@ -6,7 +6,7 @@ import type {
   ExplanationLogView,
   ExplanationView,
 } from '../../../src/routes/review/review-explanations';
-import { request } from '../api';
+import { request } from '../app/api';
 
 /** New lines to explain, or a follow-up (`parentId` and `question`) on an explanation. */
 export type ExplanationAsk =

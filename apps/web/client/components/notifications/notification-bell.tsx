@@ -1,10 +1,11 @@
 // The sidebar's bell: how many notifications still ask something of the user, and the panel it opens.
+
 import { useCallback, useRef, useState, type ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
-import type { NotificationTarget } from '../../lib/open-notification';
-import { useNotifications } from '../../lib/use-notifications';
-import { SIDE_BADGE, SIDE_ITEM, SIDE_LABEL } from '../sidebar-classes';
+import type { NotificationTarget } from '../../lib/notifications/open-notification';
+import { useNotifications } from '../../lib/notifications/use-notifications';
+import { SIDE_BADGE, SIDE_ITEM, SIDE_LABEL } from '../layout/sidebar-classes';
 import { NotificationPanel } from './notification-panel';
 
 /** More than this shows as `99+`. */

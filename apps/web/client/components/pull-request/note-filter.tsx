@@ -1,8 +1,9 @@
 // Whose reviews and comments the discussion shows: everyone's, people's only, or bots' only.
+
 import { useState, type ReactElement } from 'react';
 
 import type { PullRequestNote } from '../../../src/api-types';
-import { Segmented } from '../choice';
+import { Segmented } from '../ui/choice';
 
 export type NoteFilter = 'all' | 'people' | 'bots';
 

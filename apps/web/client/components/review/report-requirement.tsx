@@ -1,12 +1,13 @@
 // One requirement of the spec report: its status, the spec's words, the note, the code and tests
 // that do it. Also a comment to start on its code.
+
 import type { ReportRequirement, ReportSpec, RequirementStatus } from '@union/core';
 import { STATUS_LABELS } from '@union/core/review-report-markdown';
 import { plainQuote } from '@union/core/review-report-specs';
 import type { ReactElement } from 'react';
 
-import type { Tone } from '../../lib/labels';
-import { Badge } from '../ui';
+import type { Tone } from '../../lib/board/labels';
+import { Badge } from '../ui/ui';
 import { byFile, DraftButton, FileLink, FileRef, type OpenLines } from './report-open';
 
 const STATUS_TONES: Record<RequirementStatus, Tone> = {

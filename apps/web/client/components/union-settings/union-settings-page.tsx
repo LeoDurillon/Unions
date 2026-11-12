@@ -3,9 +3,9 @@
 import { useQuery } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 
-import { api } from '../../lib/api';
+import { api } from '../../lib/app/api';
 import { unionSettingsGuide } from '../../lib/guide/settings-guide';
-import type { UnionSection } from '../../lib/union-settings-groups';
+import type { UnionSection } from '../../lib/union-settings/union-settings-groups';
 import { SettingsFrame } from '../settings/settings-frame';
 import { UnionSectionBody } from './union-section-body';
 import { unionSectionLabel } from './union-section-labels';

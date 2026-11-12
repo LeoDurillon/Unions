@@ -1,12 +1,13 @@
 // Change target: the finished ticket's own commits moved onto another branch, and its pull request retargeted there.
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 
 import type { TicketDetail } from '../../../src/api-types';
-import { api } from '../../lib/api';
-import { BranchPicker } from '../branch-picker';
-import { HelpText } from '../help-text';
-import { Button, ErrorText } from '../ui';
+import { api } from '../../lib/app/api';
+import { BranchPicker } from '../ticket/branch-picker';
+import { HelpText } from '../ui/help-text';
+import { Button, ErrorText } from '../ui/ui';
 import { canRewrite, rewriteBlock } from './branch-status';
 
 const HELP =

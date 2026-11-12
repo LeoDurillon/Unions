@@ -1,8 +1,12 @@
 // The Union settings menu: the shared instructions, All agents (and the agent page open), Tools and the GitHub App.
+
 import type { AgentConfig } from '@union/core';
 import { isCustomStep } from '@union/core/states';
 
-import { UNION_SETTINGS_GROUPS, type UnionSection } from '../../lib/union-settings-groups';
+import {
+  UNION_SETTINGS_GROUPS,
+  type UnionSection,
+} from '../../lib/union-settings/union-settings-groups';
 import { isAgentId } from '../agents/agent-labels';
 import type { NavGroup } from '../settings/settings-nav';
 import { unionSectionLabel } from './union-section-labels';

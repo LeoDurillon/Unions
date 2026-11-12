@@ -8,7 +8,7 @@ import {
   useReviewNotionSuggestions,
   type useReviewNotionLink,
 } from '../../lib/review/use-review-notion';
-import { Button } from '../ui';
+import { Button } from '../ui/ui';
 
 type LinkActions = ReturnType<typeof useReviewNotionLink>;
 

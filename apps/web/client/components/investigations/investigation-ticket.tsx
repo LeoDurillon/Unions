@@ -1,13 +1,15 @@
-// Turns the investigation into a backlog ticket written by an agent: the header's buttons (Open ticket, Write a
-// ticket from it), then under it the form asking what the ticket covers, the ticket being written, or why it failed.
+// Turns the investigation into a backlog ticket written by an agent: the header's buttons and the
+// form under it. The buttons are Open ticket and Write a ticket from it; under them, the form
+// asking what the ticket covers, the ticket being written, or why it failed.
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { IntegrationKindName, Investigation } from '@union/core';
 import { integrationKind } from '@union/core/integration-kinds';
 import { useState, type ReactElement } from 'react';
 
-import { api } from '../../lib/api';
-import { Switch } from '../choice';
-import { Button, ErrorText, inputClass } from '../ui';
+import { api } from '../../lib/app/api';
+import { Switch } from '../ui/choice';
+import { Button, ErrorText, inputClass } from '../ui/ui';
 
 /** One switch per tracker; one at most is on (a ticket has one origin). */
 function TargetOptions({

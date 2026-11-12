@@ -1,7 +1,8 @@
 // A GitHub comment's text in compact markdown, folded behind a fade when it renders tall.
+
 import { useEffect, useRef, useState, type ReactElement, type RefObject } from 'react';
 
-import { Markdown } from '../markdown';
+import { Markdown } from '../markdown/markdown';
 
 /** Taller than this (in pixels, as rendered) starts folded: reports, tables, walkthroughs. */
 const FOLD_HEIGHT = 200;

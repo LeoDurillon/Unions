@@ -1,10 +1,11 @@
 // One agent's prompt, model, effort and tools, with one Save; the next run of that step uses them.
+
 import { useQuery } from '@tanstack/react-query';
 import type { AgentId } from '@union/core';
 import { useState, type ReactElement } from 'react';
 
-import { api } from '../../lib/api';
-import { ErrorText } from '../ui';
+import { api } from '../../lib/app/api';
+import { ErrorText } from '../ui/ui';
 import { AgentForm } from './agent-form';
 import { CustomAgentDanger } from './custom-agent-card';
 

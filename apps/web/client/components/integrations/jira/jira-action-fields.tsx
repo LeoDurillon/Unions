@@ -7,7 +7,7 @@ import type { ReactElement } from 'react';
 
 import { useJiraRuleSource } from '../../../lib/integrations/jira-rule-source';
 import { VariableChips } from '../../settings/variable-chips';
-import { Button, Field, inputClass } from '../../ui';
+import { Button, Field, inputClass } from '../../ui/ui';
 import { JiraFieldRow } from './jira-field-row';
 
 type Action<K extends ActionKind> = Extract<EventAction, { kind: K }>;

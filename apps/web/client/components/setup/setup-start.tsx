@@ -1,11 +1,12 @@
 // Starts the setup agent again: the model to run with, and a Start that says it uses the Claude subscription.
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { AgentModel } from '@union/core';
 import { useState, type ReactElement } from 'react';
 
-import { setupApi } from '../../lib/setup-api';
+import { setupApi } from '../../lib/setup/setup-api';
 import { ModelField } from '../agents/model-field';
-import { Button, ErrorText } from '../ui';
+import { Button, ErrorText } from '../ui/ui';
 
 export function SetupStart({
   projectId,

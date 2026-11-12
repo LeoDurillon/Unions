@@ -1,10 +1,11 @@
 // The wizard's GitHub Project form (under Integrations): none, one of the owner's Projects, or a new one.
+
 import { useQuery } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 
 import type { ProjectOption } from '../../../src/api-types';
-import { api } from '../../lib/api';
-import { ErrorText, inputClass } from '../ui';
+import { api } from '../../lib/app/api';
+import { ErrorText, inputClass } from '../ui/ui';
 import { credentialOf, projectScopeMissing, type ProjectChoice, type StepProps } from './draft';
 
 const CHOICE_ON = 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40';

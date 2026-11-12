@@ -11,7 +11,7 @@ import {
 
 import type { CurrentReview } from '../../../src/api-types';
 import type { ReviewNotionLink, ReviewNotionPage } from '../../../src/review-notion-types';
-import { request } from '../api';
+import { request } from '../app/api';
 import { reviewBase } from './review-target';
 import { specsKey } from './use-review-specs';
 

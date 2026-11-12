@@ -1,8 +1,9 @@
 // An explanation's answer: how the lines work with their cited code, the specs and docs they relate to.
+
 import type { ExplanationResult } from '@union/core';
 import type { ReactElement, ReactNode } from 'react';
 
-import { Markdown } from '../markdown';
+import { Markdown } from '../markdown/markdown';
 
 /** `path:line` as the agent cites code, in backticks or not. */
 const CITATION = /(?<path>[\w.@-]+(?:\/[\w.@-]+)+|[\w-]+\.\w+):(?<line>\d+)/gu;

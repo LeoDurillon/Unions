@@ -1,7 +1,7 @@
 // API calls for a review's spec report, under the review's API root (`reviewBase`).
 
 import type { ReportView } from '../../../src/routes/review/review-reports';
-import { request } from '../api';
+import { request } from '../app/api';
 
 /** `base` is the review's API root (`reviewBase`). */
 export const reviewReportApi = {

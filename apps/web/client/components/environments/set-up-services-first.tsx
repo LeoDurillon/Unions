@@ -1,8 +1,9 @@
 // What a page of the Environments tab shows before the project's previews are set up: the way to Compose.
+
 import type { ReactElement } from 'react';
 
-import { openEnvironments } from '../../lib/environments-url';
-import { Button } from '../ui';
+import { openEnvironments } from '../../lib/settings/environments-url';
+import { Button } from '../ui/ui';
 
 /** The other pages need the compose file and its services first. */
 export function SetUpServicesFirst(): ReactElement {

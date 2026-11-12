@@ -1,8 +1,9 @@
 // Picks names (labels, GitHub logins): the picked ones as chips, and a box that suggests the others and takes new ones.
+
 import { useId, useState, type ReactElement } from 'react';
 
-import { CheckChip, ChipGroup } from '../choice';
-import { Button, inputClass } from '../ui';
+import { CheckChip, ChipGroup } from '../ui/choice';
+import { Button, inputClass } from '../ui/ui';
 
 /** The names picked, as chips that remove themselves when clicked. */
 function PickedNames({

@@ -8,8 +8,8 @@ import { useReviewStack, type StackPull } from '../../lib/review/review-stack';
 import type { ReviewTarget } from '../../lib/review/review-target';
 import { useAgentReview } from '../../lib/review/use-agent-review';
 import { useReviewSpecs, useStackSpecs } from '../../lib/review/use-review-specs';
-import { Segmented } from '../choice';
-import { Button, Dialog, ErrorText } from '../ui';
+import { Segmented } from '../ui/choice';
+import { Button, Dialog, ErrorText } from '../ui/ui';
 import { SpecSummary } from './spec-summary';
 
 type Scope = 'stack' | 'one';

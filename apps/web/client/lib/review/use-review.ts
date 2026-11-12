@@ -17,7 +17,7 @@ import {
   type ReviewImportResult,
   type StackImportResult,
 } from '../../../src/api-types';
-import { api, request } from '../api';
+import { api, request } from '../app/api';
 import { agentReviewApi } from './agent-review-api';
 import { reviewBase, reviewSlice, ticketReviewBase, type ReviewTarget } from './review-target';
 

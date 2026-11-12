@@ -5,8 +5,8 @@
 
 import { useCallback } from 'react';
 
-import type { Selection } from '../diff-selection';
-import { readParam, setParams, useUrlParam } from '../url-state';
+import { readParam, setParams, useUrlParam } from '../app/url-state';
+import type { Selection } from './diff-selection';
 
 /** Spread into `setParams` wherever the review closes, so its slice, tab and lines do not outlive it. */
 export const CLOSE_REVIEW = {

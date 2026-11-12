@@ -9,10 +9,10 @@ import {
   useReviewPreview,
   type PullRequestTarget,
 } from '../../lib/review/use-review-preview';
-import { ContainerCommands } from '../container-commands';
-import { PreviewSection } from '../preview-section';
+import { PreviewSection } from '../previews/preview-section';
 import type { ReviewSection } from '../review/review-page';
-import { Button, ErrorText } from '../ui';
+import { ContainerCommands } from '../steps/container-commands';
+import { Button, ErrorText } from '../ui/ui';
 
 const SHORT_SHA = 7;
 

@@ -1,11 +1,12 @@
 // The project's own instructions, sent to every agent run on it after the shared instructions.
+
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
-import { api } from '../../lib/api';
-import { openUnionSettings } from '../../lib/union-settings-sections';
-import { useSettingsForm } from '../../lib/use-settings-form';
-import { inputClass } from '../ui';
+import { api } from '../../lib/app/api';
+import { useSettingsForm } from '../../lib/settings/use-settings-form';
+import { openUnionSettings } from '../../lib/union-settings/union-settings-sections';
+import { inputClass } from '../ui/ui';
 import { SaveBar } from './save-bar';
 
 const PLACEHOLDER = `## Stack

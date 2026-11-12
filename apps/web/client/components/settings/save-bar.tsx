@@ -1,8 +1,9 @@
 // The settings page's one Save, kept in view at the bottom, with whether something is unsaved.
+
 import type { ReactElement, ReactNode } from 'react';
 
-import type { SaveState } from '../../lib/use-settings-form';
-import { Button, ErrorText } from '../ui';
+import type { SaveState } from '../../lib/settings/use-settings-form';
+import { Button, ErrorText } from '../ui/ui';
 
 function Status({ state }: { state: SaveState }): ReactElement | null {
   if (state.dirty) {

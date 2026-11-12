@@ -1,11 +1,12 @@
 // The project's API-equivalent cost per week, as bars over a round scale; a bar's figures on hover
 // or focus.
+
 import type { ProjectUsage } from '@union/core';
 import { useState, type ReactElement } from 'react';
 
-import { niceTicks } from '../../lib/nice-scale';
-import { count } from '../../lib/token-counts';
-import { costText } from '../../lib/usage-format';
+import { count } from '../../lib/log/token-counts';
+import { niceTicks } from '../../lib/usage/nice-scale';
+import { costText } from '../../lib/usage/usage-format';
 
 type Week = ProjectUsage['weeks'][number];
 

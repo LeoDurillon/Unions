@@ -1,8 +1,9 @@
 // A "Notify me in Union" action's field: the message, as a template, shown under the ticket's title.
+
 import { MAX_NOTIFICATION, type UnionNotificationAction } from '@union/core/event-actions';
 import type { ReactElement } from 'react';
 
-import { Field, inputClass } from '../ui';
+import { Field, inputClass } from '../ui/ui';
 import { VariableChips } from './variable-chips';
 
 const MESSAGE_ROWS = 2;

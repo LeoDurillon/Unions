@@ -1,12 +1,13 @@
 // The onboarding step that connects GitHub, by access token or by app installation.
+
 import { useMutation } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 
-import { api } from '../../lib/api';
-import { blockingScopes } from '../../lib/github-project-api';
+import { api } from '../../lib/app/api';
+import { blockingScopes } from '../../lib/settings/github-project-api';
 import { AccessMethodTabs } from '../github-app/access-method';
 import { InstallationPicker } from '../github-app/installation-picker';
-import { Button, ErrorText, Field, inputClass } from '../ui';
+import { Button, ErrorText, Field, inputClass } from '../ui/ui';
 import { EMPTY_DRAFT, type StepProps } from './draft';
 
 const TOKEN_URL = 'https://github.com/settings/tokens/new?description=union&scopes=repo,project';

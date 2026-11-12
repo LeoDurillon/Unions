@@ -1,10 +1,11 @@
 // Picks the GitHub Project a project's board mirrors to: one of the repository owner's, or a new one by title.
+
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 
 import type { ProjectOption, PublicProject } from '../../../src/api-types';
-import { githubProjectApi, type GitHubProjectChoice } from '../../lib/github-project-api';
-import { Button, ErrorText, inputClass } from '../ui';
+import { githubProjectApi, type GitHubProjectChoice } from '../../lib/settings/github-project-api';
+import { Button, ErrorText, inputClass } from '../ui/ui';
 
 const NEW = 'new';
 

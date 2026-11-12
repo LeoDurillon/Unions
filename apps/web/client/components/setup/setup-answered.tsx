@@ -1,11 +1,12 @@
 // The Project setup card once the agent answered: what is left to apply, Review the setup, and its raw answer.
+
 import type { Investigation, SetupProposal } from '@union/core';
 import { pendingSections } from '@union/core/setup-apply';
 import { useState, type ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
-import { openInvestigation } from '../../lib/opened-investigation';
-import { Button } from '../ui';
+import { openInvestigation } from '../../lib/investigations/opened-investigation';
+import { Button } from '../ui/ui';
 import { SetupReview } from './setup-review';
 
 function leftText(left: number): string {

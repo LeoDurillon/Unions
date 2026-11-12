@@ -1,12 +1,13 @@
 // An investigation's buttons: Cancel or Run again, Export as Markdown, and Delete.
+
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 import type { Investigation } from '@union/core';
 import type { ReactElement } from 'react';
 
-import { api } from '../../lib/api';
-import { download } from '../../lib/download';
-import { ConfirmButton } from '../confirm-button';
-import { Button, ErrorText } from '../ui';
+import { api } from '../../lib/app/api';
+import { download } from '../../lib/ui/download';
+import { ConfirmButton } from '../ui/confirm-button';
+import { Button, ErrorText } from '../ui/ui';
 import { investigationFileName, investigationMarkdown } from './investigation-export';
 import { isActive } from './investigation-labels';
 

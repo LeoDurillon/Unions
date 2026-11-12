@@ -3,10 +3,10 @@
 import type { ReactElement } from 'react';
 
 import type { ExplanationView } from '../../../src/routes/review/review-explanations';
-import { summarizeAgentEvent } from '../../lib/agent-events';
+import { summarizeAgentEvent } from '../../lib/log/agent-events';
 import type { ReviewTarget } from '../../lib/review/review-target';
 import { useExplanationLog } from '../../lib/review/use-explanations';
-import { Button } from '../ui';
+import { Button } from '../ui/ui';
 
 const SHOWN_STEPS = 5;
 

@@ -2,7 +2,7 @@
 // cancel. They go under the review's API root (`reviewBase`).
 
 import type { ReviewAgentsView } from '../../../src/routes/review/review-agent-runs';
-import { request } from '../api';
+import { request } from '../app/api';
 
 /** `base` is the review's API root (`reviewBase`). */
 export const reviewAgentsApi = {

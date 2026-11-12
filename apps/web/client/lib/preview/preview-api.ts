@@ -3,7 +3,7 @@
 import type { PreviewConfig } from '@union/core';
 
 import type { PreviewSettingsView, PreviewView, PublicProject } from '../../../src/api-types';
-import { request } from '../api';
+import { request } from '../app/api';
 
 function base(ticketId: number): string {
   return `/api/tickets/${ticketId}/preview`;

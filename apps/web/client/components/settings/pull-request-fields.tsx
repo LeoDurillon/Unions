@@ -1,4 +1,5 @@
 // A pull request action's fields: the changes it makes, one box each, and adding the kinds not used yet.
+
 import { useQuery } from '@tanstack/react-query';
 import type { GitHubPullRequestAction } from '@union/core/event-actions';
 import {
@@ -12,8 +13,8 @@ import {
 import type { ReactElement } from 'react';
 
 import type { RuleChoices } from '../../../src/event-api-types';
-import { eventRulesApi } from '../../lib/event-rules-api';
-import { Button, inputClass } from '../ui';
+import { eventRulesApi } from '../../lib/settings/event-rules-api';
+import { Button, inputClass } from '../ui/ui';
 import { PullRequestChangeFields } from './pull-request-change';
 
 const NO_CHOICES: RuleChoices = { labels: [], users: [] };

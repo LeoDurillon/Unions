@@ -1,14 +1,19 @@
 // Project settings → Agent image: the default image, a Dockerfile built on it, or an image built
 // elsewhere. Save and build applies it once it passes.
+
 import { useState, type ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
 import type { AgentImageView } from '../../../src/routes/agent-image';
-import { FIRST_STARTER } from '../../lib/agent-image-starters';
-import { useLeaveGuard } from '../../lib/leave-guard';
-import { isBuilding, useAgentImage, type AgentImageChoice } from '../../lib/use-agent-image';
-import { Segmented } from '../choice';
-import { Button, ErrorText, Field, inputClass } from '../ui';
+import { useLeaveGuard } from '../../lib/app/leave-guard';
+import { FIRST_STARTER } from '../../lib/settings/agent-image-starters';
+import {
+  isBuilding,
+  useAgentImage,
+  type AgentImageChoice,
+} from '../../lib/settings/use-agent-image';
+import { Segmented } from '../ui/choice';
+import { Button, ErrorText, Field, inputClass } from '../ui/ui';
 import { DefaultDockerfile, DockerfileEditor } from './agent-image-starters';
 import { AgentImageStatus } from './agent-image-status';
 

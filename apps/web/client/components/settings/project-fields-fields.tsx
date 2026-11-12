@@ -1,4 +1,5 @@
 // A Project fields action's fields: the item (the issue's or the pull request's), then the fields to set, a row each.
+
 import { useQuery } from '@tanstack/react-query';
 import type { GitHubProjectFieldsAction } from '@union/core/event-actions';
 import {
@@ -10,8 +11,8 @@ import {
 } from '@union/core/event-project-fields';
 import type { ReactElement } from 'react';
 
-import { eventRulesApi } from '../../lib/event-rules-api';
-import { Button, ErrorText, Field, inputClass } from '../ui';
+import { eventRulesApi } from '../../lib/settings/event-rules-api';
+import { Button, ErrorText, Field, inputClass } from '../ui/ui';
 import { ProjectFieldRow } from './project-field-row';
 
 const EMPTY_VALUE: ProjectFieldValue = { fieldId: '', fieldName: '', fieldType: 'text', value: '' };

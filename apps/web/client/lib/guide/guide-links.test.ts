@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 
-import { headingSlug } from '../heading-slug';
+import { headingSlug } from '../markdown/heading-slug';
 import { guideHref, guideLinkOf, guideUrl } from './guide-links';
 
 describe('guideUrl', () => {

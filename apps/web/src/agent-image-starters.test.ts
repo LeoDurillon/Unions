@@ -2,7 +2,7 @@ import { expect, test } from 'bun:test';
 
 import { dockerfileBases, parseAgentImageSource } from '@union/core';
 
-import { STARTERS } from '../client/lib/agent-image-starters';
+import { STARTERS } from '../client/lib/settings/agent-image-starters';
 
 test('every starter passes the check, and only JavaScript carries the JavaScript toolchains', () => {
   for (const starter of STARTERS) {

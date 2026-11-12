@@ -1,11 +1,12 @@
 // One spec in the specs dialog: its label and source, its text to read or edit, Use the source once
 // edited, Remove.
+
 import { useState, type ReactElement } from 'react';
 
 import type { ReviewSpecView } from '../../../src/review-spec-types';
-import { ConfirmButton } from '../confirm-button';
-import { TrashIcon } from '../icon-button';
-import { Badge, Button, inputClass } from '../ui';
+import { ConfirmButton } from '../ui/confirm-button';
+import { TrashIcon } from '../ui/icon-button';
+import { Badge, Button, inputClass } from '../ui/ui';
 import { LABELS } from './spec-picker';
 
 /** Characters of a closed card's text shown as its preview. */

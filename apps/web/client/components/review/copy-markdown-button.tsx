@@ -1,7 +1,8 @@
 // "Copy as markdown": puts a text on the clipboard, and says "Copied" for a moment.
+
 import { useState, type ReactElement } from 'react';
 
-import { Button } from '../ui';
+import { Button } from '../ui/ui';
 
 const COPIED_MS = 2000;
 

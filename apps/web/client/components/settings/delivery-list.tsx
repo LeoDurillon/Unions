@@ -6,10 +6,10 @@ import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
 import type { DeliveryView } from '../../../src/event-api-types';
-import { eventRulesApi } from '../../lib/event-rules-api';
 import { useNotionUsers } from '../../lib/integrations/use-notion-users';
-import { formatWhen } from '../../lib/relative-time';
-import { Badge } from '../ui';
+import { eventRulesApi } from '../../lib/settings/event-rules-api';
+import { formatWhen } from '../../lib/ui/relative-time';
+import { Badge } from '../ui/ui';
 
 const DELIVERIES_POLL_MS = 10_000;
 const STATUS_TONES = {

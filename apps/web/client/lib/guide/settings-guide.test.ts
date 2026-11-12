@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'bun:test';
 import path from 'node:path';
 
-import { headingSlug } from '../heading-slug';
-import { UNION_SETTINGS_GROUPS } from '../union-settings-groups';
+import { headingSlug } from '../markdown/heading-slug';
+import { UNION_SETTINGS_GROUPS } from '../union-settings/union-settings-groups';
 import { PROJECT_GUIDE, unionSettingsGuide, type GuideTarget } from './settings-guide';
 
 const GUIDE = path.join(import.meta.dir, '../../../../../documentation');

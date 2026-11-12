@@ -1,9 +1,10 @@
 // The Union settings menu: the shared instructions, All agents, Tools, the GitHub App, and New agent.
+
 import type { AgentConfig } from '@union/core';
 import type { ReactElement } from 'react';
 
-import type { UnionSection } from '../../lib/union-settings-groups';
-import { openUnionSettings } from '../../lib/union-settings-sections';
+import type { UnionSection } from '../../lib/union-settings/union-settings-groups';
+import { openUnionSettings } from '../../lib/union-settings/union-settings-sections';
 import { SettingsNav } from '../settings/settings-nav';
 import { NewAgentButton } from './new-agent-dialog';
 import { navGroups } from './union-nav-groups';

@@ -4,7 +4,7 @@
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import type { JiraPick, JiraPickedType } from '@union/core/jira-field-types';
 
-import { request } from '../api';
+import { request } from '../app/api';
 
 /** These change rarely during one edit: one read per settings visit is enough. */
 const STALE_MS = 300_000;

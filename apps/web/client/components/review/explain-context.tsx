@@ -11,12 +11,12 @@ import {
   type ReactNode,
 } from 'react';
 
-import { fileSelection, hunkSelection, type Selection } from '../../lib/diff-selection';
+import { useUrlParam } from '../../lib/app/url-state';
+import { fileSelection, hunkSelection, type Selection } from '../../lib/review/diff-selection';
 import type { ReviewTarget } from '../../lib/review/review-target';
 import { diffLinesOf } from '../../lib/review/review-url';
 import { useExplanations } from '../../lib/review/use-explanations';
 import { useReviewSpecs } from '../../lib/review/use-review-specs';
-import { useUrlParam } from '../../lib/url-state';
 
 const STORAGE_KEY = 'union.review.explain';
 

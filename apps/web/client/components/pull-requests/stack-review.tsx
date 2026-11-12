@@ -6,7 +6,7 @@ import type { ReactElement } from 'react';
 import type { CurrentReview } from '../../../src/api-types';
 import { ReviewStackContext } from '../../lib/review/review-stack';
 import { useReviewTab } from '../../lib/review/review-url';
-import { ReviewPage } from '../lazy-pages';
+import { ReviewPage } from '../layout/lazy-pages';
 import { prReviewSections } from './pr-review-sections';
 import { reviewPreviewSection } from './review-preview-tab';
 import { StackTabs } from './stack-tabs';

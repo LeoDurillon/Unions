@@ -1,9 +1,10 @@
 // A choice among names the compose file has (profiles, services). A box per name known once a
 // ticket's file was generated, and a field for others.
+
 import { useState, type ReactElement, type ReactNode } from 'react';
 
-import { CheckChip, ChipGroup, toggled } from '../choice';
-import { inputClass } from '../ui';
+import { CheckChip, ChipGroup, toggled } from '../ui/choice';
+import { inputClass } from '../ui/ui';
 
 /**
  * A choice among names the compose file has (profiles, services): a box per name known once a

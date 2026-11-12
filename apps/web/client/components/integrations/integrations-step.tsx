@@ -1,11 +1,12 @@
 // The setup wizard's Integrations step: a selector between the GitHub Project and the trackers
 // (Notion, Jira). Below it, the chosen one's form.
+
 import { integrationKind, type IntegrationKindName } from '@union/core/integration-kinds';
 import { useState, type ReactElement } from 'react';
 
-import { Segmented } from '../choice';
 import { projectSettled, trackerKinds, trackerSettled, type StepProps } from '../onboarding/draft';
 import { ProjectStep } from '../onboarding/project-step';
+import { Segmented } from '../ui/choice';
 import { JiraStep } from './jira/jira-step';
 import { NotionStep } from './notion/notion-step';
 

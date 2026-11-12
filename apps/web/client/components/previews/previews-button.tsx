@@ -3,7 +3,7 @@
 import type { ReactElement } from 'react';
 
 import { useRunningPreviews } from '../../lib/preview/use-running-previews';
-import { SIDE_BADGE, SIDE_ITEM, SIDE_LABEL } from '../sidebar-classes';
+import { SIDE_BADGE, SIDE_ITEM, SIDE_LABEL } from '../layout/sidebar-classes';
 
 function PlayIcon(): ReactElement {
   return (

@@ -5,9 +5,9 @@ import type { ReactElement } from 'react';
 import type { CurrentReview } from '../../../src/api-types';
 import type { ReviewJiraIssue } from '../../../src/review-jira-types';
 import { useReviewJiraIssues } from '../../lib/review/use-review-jira';
-import { FoldedMarkdown } from '../folded-markdown';
 import { JiraCommentCard } from '../jira/jira-comment';
-import { Button, ErrorText } from '../ui';
+import { FoldedMarkdown } from '../markdown/folded-markdown';
+import { Button, ErrorText } from '../ui/ui';
 
 /** The issue's comments, read only: replying and Add to review are a ticket's. */
 function IssueComments({ issue }: { issue: ReviewJiraIssue }): ReactElement | null {

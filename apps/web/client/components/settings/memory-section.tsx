@@ -1,4 +1,5 @@
 // Project settings → Memory: the lessons each agent step gets, and the feedback they are made from.
+
 import type { FeedbackItem, Lesson } from '@union/core';
 import {
   isLessonSection,
@@ -19,8 +20,8 @@ import {
   useLessons,
   useSaveMemory,
   type MemorySave,
-} from '../../lib/use-memory';
-import { useSettingsForm, type SettingsForm } from '../../lib/use-settings-form';
+} from '../../lib/settings/use-memory';
+import { useSettingsForm, type SettingsForm } from '../../lib/settings/use-settings-form';
 import { FeedbackInbox, type FeedbackActions } from './feedback-inbox';
 import { LessonsPanel } from './lessons-panel';
 import { SaveBar } from './save-bar';

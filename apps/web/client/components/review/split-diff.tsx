@@ -1,9 +1,10 @@
 // Old file on the left, new on the right; removed and added runs face each other.
+
 import type { DiffLine } from '@union/core/diff';
 import type { ReactElement, ReactNode } from 'react';
 
-import { isSelected, select, type Side } from '../../lib/diff-selection';
-import { splitRows, type SplitRow } from '../../lib/split-rows';
+import { isSelected, select, type Side } from '../../lib/review/diff-selection';
+import { splitRows, type SplitRow } from '../../lib/review/split-rows';
 import {
   Code,
   commentsAt,

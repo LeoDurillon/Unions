@@ -1,12 +1,13 @@
 // A project's findings on its Usage tab: what its agents' calls and tool uses show to improve. Each
 // comes with the tickets that show it.
+
 import type { Finding, FindingItem, ProjectFindings } from '@union/core';
 import { stepTextTitle } from '@union/core/step-titles';
 import type { ReactElement, ReactNode } from 'react';
 
-import { FINDING_TEXTS } from '../../lib/finding-text';
-import { useCustomAgentNames } from '../../lib/use-custom-agents';
-import { Badge } from '../ui';
+import { useCustomAgentNames } from '../../lib/union-settings/use-custom-agents';
+import { FINDING_TEXTS } from '../../lib/usage/finding-text';
+import { Badge } from '../ui/ui';
 
 type Open = (id: number) => void;
 

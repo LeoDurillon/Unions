@@ -6,9 +6,9 @@ import type { AttentionItem, AttentionKind, ReviewReportResult } from '@union/co
 import { ATTENTION_LABELS } from '@union/core/review-report-markdown';
 import type { ReactElement } from 'react';
 
-import type { Tone } from '../../lib/labels';
+import type { Tone } from '../../lib/board/labels';
 import type { ReviewTarget } from '../../lib/review/review-target';
-import { Badge } from '../ui';
+import { Badge } from '../ui/ui';
 import { NotUseful } from './report-not-useful';
 import { byFile, DraftButton, FileRef, type OpenLines } from './report-open';
 import { ReportSection, ROWS_CLASS } from './report-sections';

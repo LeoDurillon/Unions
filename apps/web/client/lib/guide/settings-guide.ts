@@ -1,7 +1,7 @@
 // The part of the user guide each settings page links to with Learn more: a guide page and a heading of it.
 
-import type { SettingsSection } from '../settings-sections';
-import type { UnionSection } from '../union-settings-groups';
+import type { SettingsSection } from '../settings/settings-sections';
+import type { UnionSection } from '../union-settings/union-settings-groups';
 
 /** A page of `documentation/` (without `.md`) and the id of one of its headings. */
 export type GuideTarget = readonly [page: string, anchor: string];

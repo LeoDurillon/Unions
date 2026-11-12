@@ -1,10 +1,11 @@
 // The box above the review's files that narrows them by words of their path (`/` goes to it). Also
 // the Code only switch, and the files they keep.
+
 import { useRef, type ReactElement, type ReactNode } from 'react';
 
 import { filterFiles } from '../../lib/review/file-filter';
-import { useShortcuts } from '../../lib/shortcuts';
-import { inputClass } from '../ui';
+import { useShortcuts } from '../../lib/ui/shortcuts';
+import { inputClass } from '../ui/ui';
 import { OFF, ON } from './group-by-spec-button';
 import { useFileFilter, type FileFilterState } from './use-file-filter';
 

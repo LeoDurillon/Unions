@@ -1,13 +1,14 @@
 // A project's Usage tab: what its agents used over a range of days, and what their logs show to
 // improve. The Cost tab shows the use with its API-equivalent cost; the What to improve tab shows
 // the findings.
+
 import { useState, type ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
-import { useProjectFindings, useProjectUsage, type UsageRange } from '../../lib/use-usage';
-import { Segmented, type SegmentOption } from '../choice';
-import { TabButton } from '../tab-button';
-import { ErrorText } from '../ui';
+import { useProjectFindings, useProjectUsage, type UsageRange } from '../../lib/usage/use-usage';
+import { Segmented, type SegmentOption } from '../ui/choice';
+import { TabButton } from '../ui/tab-button';
+import { ErrorText } from '../ui/ui';
 import { SuggestImprovements } from './suggest-improvements';
 import { UsageCost } from './usage-cost';
 import { UsageFindings } from './usage-findings';

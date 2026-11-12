@@ -2,7 +2,11 @@ import { expect, test } from 'bun:test';
 
 import type { AgentConfig } from '@union/core';
 
-import { isUnionSection, menuIndex, UNION_SETTINGS_GROUPS } from '../../lib/union-settings-groups';
+import {
+  isUnionSection,
+  menuIndex,
+  UNION_SETTINGS_GROUPS,
+} from '../../lib/union-settings/union-settings-groups';
 import { AGENT_LABELS } from '../agents/agent-labels';
 import { navGroups } from './union-nav-groups';
 import { unionSectionLabel } from './union-section-labels';

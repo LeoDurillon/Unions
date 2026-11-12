@@ -5,8 +5,8 @@ import type { ReactElement } from 'react';
 
 import type { DiffFileSummary } from '../../../src/api-types';
 import type { GroupingView } from '../../../src/routes/review/review-groupings';
-import { formatWhen } from '../../lib/relative-time';
-import { partialCount, UNRELATED_PART } from '../../lib/spec-hunks';
+import { partialCount, UNRELATED_PART } from '../../lib/review/spec-hunks';
+import { formatWhen } from '../../lib/ui/relative-time';
 import { FileRows, type RowOptions } from './file-rows';
 
 function Group({

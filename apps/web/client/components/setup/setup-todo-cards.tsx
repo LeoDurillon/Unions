@@ -1,12 +1,13 @@
 // The setup proposal's to-dos: secret values and files only the user can give. They are written
 // through the settings' own endpoints.
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { SetupProjectFile, SetupSecret } from '@union/core';
 import { useState, type ReactElement } from 'react';
 
 import { previewApi } from '../../lib/preview/preview-api';
-import { projectFilesApi } from '../../lib/project-files-api';
-import { Badge, Button, ErrorText, inputClass } from '../ui';
+import { projectFilesApi } from '../../lib/settings/project-files-api';
+import { Badge, Button, ErrorText, inputClass } from '../ui/ui';
 import { SetupCard } from './setup-card';
 import type { SetupCardProps } from './setup-card-props';
 

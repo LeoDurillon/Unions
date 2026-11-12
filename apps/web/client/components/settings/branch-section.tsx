@@ -1,10 +1,11 @@
 // The project settings section for the base branch, saved with the General page's Save.
+
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
-import { api } from '../../lib/api';
-import { useSettingsForm } from '../../lib/use-settings-form';
-import { inputClass } from '../ui';
+import { api } from '../../lib/app/api';
+import { useSettingsForm } from '../../lib/settings/use-settings-form';
+import { inputClass } from '../ui/ui';
 import { SaveBar } from './save-bar';
 
 export function BranchSection({ project }: { project: PublicProject }): ReactElement {

@@ -1,8 +1,9 @@
 // The page of the Environments tab the URL names, one per part of how the previews run.
+
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
-import type { EnvironmentSection } from '../../lib/environments-url';
+import type { EnvironmentSection } from '../../lib/settings/environments-url';
 import { PreviewAgentPage } from './preview-agent-page';
 import { PreviewComposePage } from './preview-compose-page';
 import { PreviewE2ePage } from './preview-e2e-page';

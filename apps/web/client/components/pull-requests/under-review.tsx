@@ -4,10 +4,13 @@
 import type { ReactElement } from 'react';
 
 import type { CurrentReview, PublicProject } from '../../../src/api-types';
-import { reviewStacks } from '../../lib/pull-request-stacks';
+import { reviewStacks } from '../../lib/pull-request/pull-request-stacks';
+import {
+  useCurrentReviewMutations,
+  useCurrentReviews,
+} from '../../lib/pull-request/use-current-reviews';
 import { useReviewedPullRequest } from '../../lib/review/review-url';
-import { useCurrentReviewMutations, useCurrentReviews } from '../../lib/use-current-reviews';
-import { ErrorText } from '../ui';
+import { ErrorText } from '../ui/ui';
 import { Part } from './list-part';
 import { ReviewItem } from './review-item';
 import { ReviewStackItem } from './review-stack-item';

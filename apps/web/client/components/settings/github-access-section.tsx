@@ -1,15 +1,16 @@
 // The project settings section that shows and changes how the project reaches GitHub.
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 
 import type { GitHubAccess, InstallationOption, PublicProject } from '../../../src/api-types';
-import { saveInstallation, saveToken } from '../../lib/github-access-save';
-import type { Tone } from '../../lib/labels';
-import { useLeaveGuard } from '../../lib/leave-guard';
+import { useLeaveGuard } from '../../lib/app/leave-guard';
+import type { Tone } from '../../lib/board/labels';
+import { saveInstallation, saveToken } from '../../lib/settings/github-access-save';
 import { AccessMethodTabs, type AccessMethod } from '../github-app/access-method';
 import { InstallationPicker } from '../github-app/installation-picker';
 import { Scopes, TokenInput } from '../onboarding/connect-step';
-import { Badge, Button, ErrorText } from '../ui';
+import { Badge, Button, ErrorText } from '../ui/ui';
 
 const ACCESS_BADGE: Record<GitHubAccess, { tone: Tone; label: string }> = {
   token: { tone: 'green', label: 'personal token' },

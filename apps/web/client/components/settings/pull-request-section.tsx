@@ -1,11 +1,12 @@
 // Whether the worker opens a draft PR after the implementation, or the user links one by hand. Also
 // suggested replies to GitHub comments, and stacks.
+
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
-import { api } from '../../lib/api';
-import { useSettingsForm } from '../../lib/use-settings-form';
-import { Switch } from '../choice';
+import { api } from '../../lib/app/api';
+import { useSettingsForm } from '../../lib/settings/use-settings-form';
+import { Switch } from '../ui/choice';
 import { SaveBar } from './save-bar';
 
 type PullRequestSettings = {

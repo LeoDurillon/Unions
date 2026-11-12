@@ -1,12 +1,13 @@
 // The setup wizard's draft: what it collects, its steps, and when the user may move on.
+
 import { isIntegrationKindName, type IntegrationKindName } from '@union/core/integration-kinds';
 import { SETUP_DEFAULT_MODEL } from '@union/core/investigation-defaults';
 import type { AgentModel } from '@union/core/states';
 
 import type { ProjectOption, RepoOption, Viewer } from '../../../src/api-types';
-import type { GitHubCredential } from '../../lib/api';
-import { blockingScopes as blocking } from '../../lib/github-project-api';
-import type { NewIntegration } from '../../lib/integrations-api';
+import type { GitHubCredential } from '../../lib/app/api';
+import type { NewIntegration } from '../../lib/integrations/integrations-api';
+import { blockingScopes as blocking } from '../../lib/settings/github-project-api';
 import type { AccessMethod } from '../github-app/access-method';
 
 /** A tracker in the wizard: optional; all empty skips it, otherwise `title` is set once verified. */

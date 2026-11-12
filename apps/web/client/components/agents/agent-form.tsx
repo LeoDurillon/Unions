@@ -1,4 +1,5 @@
 // One agent's form on its page: the prompt, model, effort and tools, saved together, and Reset to default.
+
 import type { AgentConfig } from '@union/core';
 import type { ReactElement } from 'react';
 
@@ -7,9 +8,9 @@ import {
   useAgentForm,
   useResetAgent,
   type AgentEdits,
-} from '../../lib/use-agent-form';
+} from '../../lib/union-settings/use-agent-form';
 import { SaveBar } from '../settings/save-bar';
-import { Button, ErrorText } from '../ui';
+import { Button, ErrorText } from '../ui/ui';
 import { agentLabel } from './agent-labels';
 import { AgentPageHeader } from './agent-page-header';
 import { PromptField } from './prompt-field';

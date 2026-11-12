@@ -1,8 +1,9 @@
 // The editor under selected lines of the diff: a comment to add, or the lines to Explain with an optional question.
+
 import { useEffect, useState, type ReactElement } from 'react';
 
-import type { Selection } from '../../lib/diff-selection';
-import { Button, ErrorText, inputClass } from '../ui';
+import type { Selection } from '../../lib/review/diff-selection';
+import { Button, ErrorText, inputClass } from '../ui/ui';
 import { useExplain, type ExplainState } from './explain-context';
 
 /** Explain, and the question folded under it; nothing outside a review page. */

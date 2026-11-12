@@ -1,10 +1,11 @@
 // The notice that the branch moved on GitHub since Union pushed it, and the button that resyncs Union's copy onto it.
+
 import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../../src/api-types';
-import { useBranchResync } from '../../lib/use-branch-resync';
-import { HelpText } from '../help-text';
-import { Button, ErrorText } from '../ui';
+import { useBranchResync } from '../../lib/ticket/use-branch-resync';
+import { HelpText } from '../ui/help-text';
+import { Button, ErrorText } from '../ui/ui';
 
 const SHORT_SHA = 7;
 

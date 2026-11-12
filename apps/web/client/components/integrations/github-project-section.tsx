@@ -1,10 +1,11 @@
 // Project settings → Integrations → GitHub Project: the board the tickets mirror to, connected, changed or disconnected.
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
-import { githubProjectApi, hasBoard } from '../../lib/github-project-api';
-import { Badge, Button, ErrorText } from '../ui';
+import { githubProjectApi, hasBoard } from '../../lib/settings/github-project-api';
+import { Badge, Button, ErrorText } from '../ui/ui';
 import { GitHubProjectPicker } from './github-project-picker';
 
 const ABOUT =

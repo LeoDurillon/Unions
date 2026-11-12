@@ -8,7 +8,7 @@ import {
   useReviewPreview,
   type PullRequestTarget,
 } from '../../lib/review/use-review-preview';
-import { Button, ErrorText } from '../ui';
+import { Button, ErrorText } from '../ui/ui';
 
 export function ReviewE2eActions({ target }: { target: PullRequestTarget }): ReactElement | null {
   const view = useReviewPreview(target).data;
