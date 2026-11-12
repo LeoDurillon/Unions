@@ -133,8 +133,8 @@ Open the project's **Settings → Checks** before you start a ticket:
   implementation agent runs it, fixes what fails, and runs it again.
 - The ticket's checkout is a full clone of the repository: `origin/<base branch>` is the base branch as it was
   when the ticket's container was created, so a command can compare against it (`git diff origin/main...`).
-- **Iteration limit**: how many times the agent may go back to fix failing checks before the step stops (3 by
-  default).
+- **Iteration limit** (its own card, with its own **Save**): **Agent turns**, how many times the agent may go back
+  to fix failing checks before the step stops (3 by default).
 
 The agents run inside a Linux container with Node, Bun, pnpm, yarn, git and the Claude Code CLI. If your project needs
 other tools (another language's toolchain, a database for its tests), see

@@ -9,6 +9,7 @@ import { GitHubAccessSection } from './github-access-section';
 import { IssuesSection } from './issues-section';
 import { PullRequestSection } from './pull-request-section';
 import { ReviewSection } from './review-section';
+import { SettingsIntro } from './settings-intro';
 
 /** Shown in their menu groups (`settings-sections.ts`); the GitHub Project is listed under Integrations. */
 export const PROJECT_SECTIONS = [
@@ -31,11 +32,15 @@ export function ProjectSectionBody({
   const bodies: Record<ProjectSection, () => ReactElement> = {
     general: () => (
       // Each part of General is a card (`.settings-cards`): its Save bar shows inside it once it holds something to save.
-      <div className="space-y-4">
+      <>
+        <SettingsIntro>
+          How Union reaches the repository, the branch new tickets start from, and its GitHub
+          issues.
+        </SettingsIntro>
         <GitHubAccessSection project={project} />
         <BranchSection project={project} />
         <IssuesSection project={project} />
-      </div>
+      </>
     ),
     files: () => <FilesSection project={project} />,
     'github-project': () => <GitHubProjectSection project={project} />,

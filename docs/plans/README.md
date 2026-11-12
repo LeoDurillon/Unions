@@ -19,8 +19,8 @@ Open findings of the security reviews (2026-10-24 audit, 2026-11-08 review), to 
 
 ## In progress
 
-- [UI overhaul: what is left](ui-overhaul.md): most pages redesigned and loading placeholders built (2026-11-12); a card
-  per settings group, the rest of the ticket tabs' mockups, a few pages not done, and a dark mode pass left.
+- [UI overhaul: what is left](ui-overhaul.md): most pages redesigned, loading placeholders and a card per settings
+  group built (2026-11-12); the rest of the ticket tabs' mockups, a few pages not done, and a dark mode pass left.
 - [What the agents' logs say to improve](usage-insights.md): findings on the Usage tab from each call's tokens
   and tool uses (part 1 built), then a Claude run that proposes the changes (part 2 built, branch
   `usage-suggestions`); part 3 (comparing the figures before and after a change) planned.

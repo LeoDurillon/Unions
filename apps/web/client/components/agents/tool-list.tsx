@@ -6,6 +6,7 @@ import { useState, type ReactElement, type SubmitEvent } from 'react';
 
 import { api } from '../../lib/app/api';
 import { useAgentTools } from '../../lib/union-settings/use-agent-tools';
+import { SettingsIntro } from '../settings/settings-intro';
 import { Loading, SkeletonRows } from '../ui/skeleton';
 import { Button, ErrorText, inputClass } from '../ui/ui';
 
@@ -128,26 +129,24 @@ export function ToolList(): ReactElement {
   });
   const custom = (tools.data ?? []).filter((tool) => tool.source === 'custom');
   return (
-    <section className="space-y-3">
-      <header>
-        <h3 className="text-sm font-semibold">Tools</h3>
-        <p className="text-xs text-zinc-500">
-          Claude Code&apos;s tools are always listed. Add a tool name (
-          <code>mcp__server__tool</code>) or a permission rule (<code>Bash(pnpm lint*)</code>), then
-          select it on the agents that need it. Pushing, remotes and branch changes stay blocked
-          whatever is selected.
-        </p>
-      </header>
-      <BuiltIn tools={tools.data ?? []} />
-      <ErrorText error={tools.error ?? remove.error} />
-      <CustomTools
-        tools={tools.isPending ? null : custom}
-        removing={remove.isPending}
-        onRemove={(name) => {
-          remove.mutate(name);
-        }}
-      />
-      <AddToolForm />
-    </section>
+    <>
+      <SettingsIntro>
+        Claude Code&apos;s tools are always listed. Add a tool name (<code>mcp__server__tool</code>)
+        or a permission rule (<code>Bash(pnpm lint*)</code>), then select it on the agents that need
+        it. Pushing, remotes and branch changes stay blocked whatever is selected.
+      </SettingsIntro>
+      <section className="space-y-3">
+        <BuiltIn tools={tools.data ?? []} />
+        <ErrorText error={tools.error ?? remove.error} />
+        <CustomTools
+          tools={tools.isPending ? null : custom}
+          removing={remove.isPending}
+          onRemove={(name) => {
+            remove.mutate(name);
+          }}
+        />
+        <AddToolForm />
+      </section>
+    </>
   );
 }

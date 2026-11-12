@@ -5,6 +5,7 @@ import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
 import { previewApi } from '../../lib/preview/preview-api';
+import { SettingsIntro } from '../settings/settings-intro';
 import { TextField, Variables } from './preview-fields';
 import { PreviewSave, usePreviewForm, type Form } from './preview-form';
 import { PreviewSecrets } from './preview-secrets';
@@ -53,16 +54,23 @@ export function PreviewVariablesPage({ project }: { project: PublicProject }): R
     return <SetUpServicesFirst />;
   }
   return (
-    <section className="space-y-4">
-      <Variables
-        value={form.env}
-        onChange={(env) => {
-          setForm({ ...form, env });
-        }}
-      />
-      <EnvFileFields form={form} onChange={setForm} />
-      <PreviewSecrets projectId={project.id} names={settings.data?.secretNames ?? []} />
-      <PreviewSave project={project} form={preview} />
-    </section>
+    <>
+      <SettingsIntro>
+        The environment variables the preview&apos;s services start with. Values can use templates
+        such as <code>{'{service.api.url}'}</code>; secret values are kept on the server and never
+        shown again.
+      </SettingsIntro>
+      <section className="space-y-4">
+        <Variables
+          value={form.env}
+          onChange={(env) => {
+            setForm({ ...form, env });
+          }}
+        />
+        <EnvFileFields form={form} onChange={setForm} />
+        <PreviewSecrets projectId={project.id} names={settings.data?.secretNames ?? []} />
+        <PreviewSave project={project} form={preview} />
+      </section>
+    </>
   );
 }

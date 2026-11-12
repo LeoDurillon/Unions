@@ -8,6 +8,7 @@ import { api } from '../../lib/app/api';
 import { useSettingsForm } from '../../lib/settings/use-settings-form';
 import { Switch } from '../ui/choice';
 import { SaveBar } from './save-bar';
+import { SettingsIntro } from './settings-intro';
 
 type PullRequestSettings = {
   createPullRequest: boolean;
@@ -69,37 +70,42 @@ export function PullRequestSection({ project }: { project: PublicProject }): Rea
   const automatic = form.value.createPullRequest;
 
   return (
-    <section className="space-y-3">
-      <Switch
-        checked={automatic}
-        onChange={(on) => {
-          form.set({ ...form.value, createPullRequest: on });
-        }}
-        hint="After the implementation, the branch is pushed and a draft pull request (Closes #issue) is opened. Approving the final review marks it ready for review."
-      >
-        <span className="font-medium">Open a draft pull request automatically</span>
-      </Switch>
-      <p className="rounded-md bg-zinc-100 p-3 text-xs text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400">
-        {automatic
-          ? 'A pull request you link by hand on a ticket is always kept: no second one is opened.'
-          : 'The branch is still pushed, but no pull request is opened. Link one from the ticket’s Overview tab, by number or URL.'}
-      </p>
-      <Switch
-        checked={form.value.suggestReplies}
-        onChange={(suggestReplies) => {
-          form.set({ ...form.value, suggestReplies });
-        }}
-        hint="When you send a review with comments added from GitHub, the implementer drafts a reply to each once its changes are pushed: what it changed and in which commit, or why not. You edit, send or discard each one in the PR tab; nothing is posted until you send it."
-      >
-        <span className="font-medium">Suggest replies to GitHub comments</span>
-      </Switch>
-      <StackSwitches
-        value={form.value}
-        onChange={(value) => {
-          form.set(value);
-        }}
-      />
-      <SaveBar state={form} />
-    </section>
+    <>
+      <SettingsIntro>
+        How the tickets&apos; pull requests are opened, and what the agents add to them.
+      </SettingsIntro>
+      <section className="space-y-3">
+        <Switch
+          checked={automatic}
+          onChange={(on) => {
+            form.set({ ...form.value, createPullRequest: on });
+          }}
+          hint="After the implementation, the branch is pushed and a draft pull request (Closes #issue) is opened. Approving the final review marks it ready for review."
+        >
+          <span className="font-medium">Open a draft pull request automatically</span>
+        </Switch>
+        <p className="rounded-md bg-zinc-100 p-3 text-xs text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400">
+          {automatic
+            ? 'A pull request you link by hand on a ticket is always kept: no second one is opened.'
+            : 'The branch is still pushed, but no pull request is opened. Link one from the ticket’s Overview tab, by number or URL.'}
+        </p>
+        <Switch
+          checked={form.value.suggestReplies}
+          onChange={(suggestReplies) => {
+            form.set({ ...form.value, suggestReplies });
+          }}
+          hint="When you send a review with comments added from GitHub, the implementer drafts a reply to each once its changes are pushed: what it changed and in which commit, or why not. You edit, send or discard each one in the PR tab; nothing is posted until you send it."
+        >
+          <span className="font-medium">Suggest replies to GitHub comments</span>
+        </Switch>
+        <StackSwitches
+          value={form.value}
+          onChange={(value) => {
+            form.set(value);
+          }}
+        />
+        <SaveBar state={form} />
+      </section>
+    </>
   );
 }

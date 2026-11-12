@@ -5,6 +5,7 @@ import { useState, type ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
 import { githubProjectApi, hasBoard } from '../../lib/settings/github-project-api';
+import { SettingsIntro } from '../settings/settings-intro';
 import { Badge, Button, ErrorText } from '../ui/ui';
 import { GitHubProjectPicker } from './github-project-picker';
 
@@ -60,29 +61,31 @@ export function GitHubProjectSection({ project }: { project: PublicProject }): R
   const connected = hasBoard(project);
   const [picking, setPicking] = useState(false);
   return (
-    <section className="space-y-4">
-      <p className="flex items-center gap-2 text-sm">
-        GitHub Project
-        <Badge tone={connected ? 'green' : 'neutral'}>
-          {connected ? 'connected' : 'not connected'}
-        </Badge>
-      </p>
-      <p className="text-xs text-zinc-500">{ABOUT}</p>
-      {connected && !picking ? (
-        <Connected
-          project={project}
-          onChange={() => {
-            setPicking(true);
-          }}
-        />
-      ) : (
-        <GitHubProjectPicker
-          project={project}
-          onDone={() => {
-            setPicking(false);
-          }}
-        />
-      )}
-    </section>
+    <>
+      <SettingsIntro>{ABOUT}</SettingsIntro>
+      <section className="space-y-4">
+        <h3 className="flex items-center gap-2 text-sm font-semibold">
+          Board
+          <Badge tone={connected ? 'green' : 'neutral'}>
+            {connected ? 'connected' : 'not connected'}
+          </Badge>
+        </h3>
+        {connected && !picking ? (
+          <Connected
+            project={project}
+            onChange={() => {
+              setPicking(true);
+            }}
+          />
+        ) : (
+          <GitHubProjectPicker
+            project={project}
+            onDone={() => {
+              setPicking(false);
+            }}
+          />
+        )}
+      </section>
+    </>
   );
 }

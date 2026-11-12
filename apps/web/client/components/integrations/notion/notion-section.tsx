@@ -43,12 +43,12 @@ export function NotionSection({ project }: { project: PublicProject }): ReactEle
 
   return (
     <section className="space-y-4">
-      <p className="flex items-center gap-2 text-sm">
-        Notion import
+      <h3 className="flex items-center gap-2 text-sm font-semibold">
+        Connection
         <Badge tone={connected ? 'green' : 'neutral'}>
           {connected ? 'connected' : 'not connected'}
         </Badge>
-      </p>
+      </h3>
       <NotionHelp />
       <Field
         label="Integration secret"

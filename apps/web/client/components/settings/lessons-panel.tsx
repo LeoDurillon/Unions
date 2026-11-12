@@ -1,14 +1,16 @@
 // The Memory page's lessons part: whether they are sent to the agents, Tidy lessons, then the lessons by step.
-// Also the page's shape while the lessons are read.
+// Its card holds the page's Save bar. Also the page's shape while the lessons are read.
 
 import type { LessonInput } from '@union/core/lesson-input';
 import type { ReactElement } from 'react';
 
+import type { SaveState } from '../../lib/settings/use-settings-form';
 import { Switch } from '../ui/choice';
 import { Loading, SkeletonLines } from '../ui/skeleton';
 import { LessonList, type Editing } from './lesson-list';
 import type { AcceptLessons } from './lesson-suggestions';
 import { TidyLessons } from './lesson-tidy';
+import { SaveBar } from './save-bar';
 
 type Value = { enabled: boolean; lessons: LessonInput[] };
 
@@ -19,6 +21,7 @@ export function LessonsPanel({
   onChange,
   onAccept,
   editing,
+  save,
 }: {
   projectId: number;
   value: Value;
@@ -26,9 +29,11 @@ export function LessonsPanel({
   /** Applies the tidier's accepted proposals to the form. */
   onAccept: AcceptLessons;
   editing: Editing;
+  /** The Save bar of the page's form, in this card. */
+  save: { state: SaveState; invalid: string | null };
 }): ReactElement {
   return (
-    <div className="space-y-3">
+    <section className="space-y-3">
       <h3 className="text-sm font-semibold">Lessons</h3>
       <p className="text-xs text-zinc-500">
         Rules learned from your feedback, sent to every run of their step on this project, after the
@@ -57,7 +62,8 @@ export function LessonsPanel({
           editing={editing}
         />
       </div>
-    </div>
+      <SaveBar state={save.state} invalid={save.invalid} />
+    </section>
   );
 }
 

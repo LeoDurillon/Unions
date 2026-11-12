@@ -6,6 +6,7 @@ import { useState, type ReactElement } from 'react';
 import type { GitHubAppStatus } from '../../../src/api-types';
 import { api } from '../../lib/app/api';
 import { useGitHubApp } from '../../lib/settings/use-github-app';
+import { SettingsIntro } from '../settings/settings-intro';
 import { ConfirmButton } from '../ui/confirm-button';
 import { Badge, Button, ErrorText } from '../ui/ui';
 import { AppSetupForm } from './app-setup-form';
@@ -117,21 +118,20 @@ function ConfiguredApp({
 export function GitHubAppSection(): ReactElement {
   const status = useGitHubApp();
   return (
-    <div className="space-y-4">
-      <header>
-        <h3 className="text-sm font-semibold">GitHub App</h3>
-        <p className="text-xs text-zinc-500">
-          An alternative to personal tokens: projects pick one of the app’s installations in their
-          settings. Issues, comments and pull requests are then authored by the app.
-        </p>
-      </header>
-      <ErrorText error={status.error} />
-      {status.data?.configured ? <ConfiguredApp app={status.data} /> : null}
-      {status.data?.configured === false ? (
-        <section className={CARD}>
-          <AppSetupForm />
-        </section>
-      ) : null}
-    </div>
+    <>
+      <SettingsIntro>
+        An alternative to personal tokens: projects pick one of the app’s installations in their
+        settings. Issues, comments and pull requests are then authored by the app.
+      </SettingsIntro>
+      <section className="space-y-4">
+        <ErrorText error={status.error} />
+        {status.data?.configured ? <ConfiguredApp app={status.data} /> : null}
+        {status.data?.configured === false ? (
+          <section className={CARD}>
+            <AppSetupForm />
+          </section>
+        ) : null}
+      </section>
+    </>
   );
 }

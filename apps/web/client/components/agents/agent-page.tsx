@@ -5,8 +5,10 @@ import type { AgentId } from '@union/core';
 import { useState, type ReactElement } from 'react';
 
 import { api } from '../../lib/app/api';
+import { SettingsIntro } from '../settings/settings-intro';
 import { ErrorText } from '../ui/ui';
 import { AgentForm } from './agent-form';
+import { agentLabel } from './agent-labels';
 import { CustomAgentDanger } from './custom-agent-card';
 
 /** One agent's prompt, model, effort and tools, with one Save; the next run of that step uses them. */
@@ -23,7 +25,8 @@ export function AgentPage({ agent }: { agent: AgentId }): ReactElement {
     );
   }
   return (
-    <div className="space-y-6">
+    <>
+      <SettingsIntro>{agentLabel(config).description}</SettingsIntro>
       <AgentForm
         // A new prompt from the writer starts the form again from it.
         key={`${resets}-${config.defaultPrompt}`}
@@ -33,6 +36,6 @@ export function AgentPage({ agent }: { agent: AgentId }): ReactElement {
         }}
       />
       <CustomAgentDanger config={config} />
-    </div>
+    </>
   );
 }

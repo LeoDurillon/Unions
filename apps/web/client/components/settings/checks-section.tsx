@@ -7,18 +7,9 @@ import { api } from '../../lib/app/api';
 import { useSettingsForm } from '../../lib/settings/use-settings-form';
 import { Field, inputClass } from '../ui/ui';
 import { SaveBar } from './save-bar';
+import { SettingsIntro } from './settings-intro';
 
 const DEFAULT_ITERATIONS = 3;
-
-type Checks = { installCommand: string; gateCommand: string; maxIterations: string };
-
-function initial(project: PublicProject): Checks {
-  return {
-    installCommand: project.config.installCommand ?? '',
-    gateCommand: project.config.gateCommand ?? '',
-    maxIterations: String(project.config.maxIterations ?? DEFAULT_ITERATIONS),
-  };
-}
 
 function CommandField({
   label,
@@ -57,7 +48,7 @@ function IterationField({
   onChange: (value: string) => void;
 }): ReactElement {
   return (
-    <Field label="Iteration limit" hint="Agent turns before the step ends, even if checks are red.">
+    <Field label="Agent turns" hint="Turns before the step ends, even if checks are still red.">
       <input
         className={`${inputClass} max-w-24`}
         type="number"
@@ -72,43 +63,75 @@ function IterationField({
   );
 }
 
-/** How the implementation agent's work is installed and checked inside the ticket's container. */
-export function ChecksSection({ project }: { project: PublicProject }): ReactElement {
+/** The commands the container runs: install once, then check after each turn. */
+function CommandsCard({ project }: { project: PublicProject }): ReactElement {
   const form = useSettingsForm(
-    () => initial(project),
-    (checks) =>
-      api.updateProject(project.id, { ...checks, maxIterations: Number(checks.maxIterations) }),
+    () => ({
+      installCommand: project.config.installCommand ?? '',
+      gateCommand: project.config.gateCommand ?? '',
+    }),
+    (commands) => api.updateProject(project.id, commands),
   );
-  const checks = form.value;
-  const change =
-    (key: keyof Checks) =>
-    (value: string): void => {
-      form.set({ ...checks, [key]: value });
-    };
-
+  const commands = form.value;
   return (
     <section className="space-y-3">
-      <h3 className="text-sm font-semibold">Checks</h3>
+      <h3 className="text-sm font-semibold">Commands</h3>
       <p className="text-xs text-zinc-500">
-        Run in the ticket&apos;s container after each implementation turn. Red checks go back to the
-        agent, up to the iteration limit.
+        What the container runs, from the repository&apos;s root.
       </p>
       <CommandField
         label="Install command"
         hint="Runs once before the agent starts. Leave empty to skip."
-        value={checks.installCommand}
+        value={commands.installCommand}
         placeholder="bun install"
-        onChange={change('installCommand')}
+        onChange={(installCommand) => {
+          form.set({ ...commands, installCommand });
+        }}
       />
       <CommandField
         label="Check command"
         hint="Exit code 0 means green. Leave empty to skip the checks."
-        value={checks.gateCommand}
+        value={commands.gateCommand}
         placeholder="bun run check"
-        onChange={change('gateCommand')}
+        onChange={(gateCommand) => {
+          form.set({ ...commands, gateCommand });
+        }}
       />
-      <IterationField value={checks.maxIterations} onChange={change('maxIterations')} />
       <SaveBar state={form} />
     </section>
+  );
+}
+
+/** How many turns the agent gets before the step ends. */
+function IterationCard({ project }: { project: PublicProject }): ReactElement {
+  const form = useSettingsForm(
+    () => String(project.config.maxIterations ?? DEFAULT_ITERATIONS),
+    (value) => api.updateProject(project.id, { maxIterations: Number(value) }),
+  );
+  return (
+    <section className="space-y-3">
+      <h3 className="text-sm font-semibold">Iteration limit</h3>
+      <IterationField
+        value={form.value}
+        onChange={(value) => {
+          form.set(value);
+        }}
+      />
+      <SaveBar state={form} />
+    </section>
+  );
+}
+
+/** How the implementation agent's work is installed and checked inside the ticket's container. */
+export function ChecksSection({ project }: { project: PublicProject }): ReactElement {
+  return (
+    <>
+      <SettingsIntro>
+        Run in the ticket&apos;s container after each implementation turn. Red checks go back to the
+        agent, up to the iteration limit.
+      </SettingsIntro>
+      <CommandsCard project={project} />
+      <IterationCard project={project} />
+    </>
   );
 }

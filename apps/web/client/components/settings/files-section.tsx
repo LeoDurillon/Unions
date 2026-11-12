@@ -6,53 +6,12 @@ import { formatBytes } from '@union/core/attachment-limits';
 import { useState, type ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
-import type { ProjectFileView } from '../../../src/routes/project-files';
 import { useLeaveGuard } from '../../lib/app/leave-guard';
 import { projectFilesApi } from '../../lib/settings/project-files-api';
-import { formatWhen } from '../../lib/ui/relative-time';
 import { Dropzone } from '../ui/dropzone';
 import { Button, ErrorText, inputClass } from '../ui/ui';
-
-function FileList({
-  projectId,
-  files,
-}: {
-  projectId: number;
-  files: ProjectFileView[];
-}): ReactElement {
-  const queryClient = useQueryClient();
-  const remove = useMutation({
-    mutationFn: (fileId: number) => projectFilesApi.remove(projectId, fileId),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['project-files', projectId] }),
-  });
-  if (files.length === 0) {
-    return <p className="text-xs text-zinc-500">No files yet.</p>;
-  }
-  return (
-    <>
-      <ul className="divide-y divide-zinc-200 rounded border border-zinc-200 text-sm dark:divide-zinc-800 dark:border-zinc-800">
-        {files.map((file) => (
-          <li key={file.id} className="flex items-center gap-3 px-3 py-1.5">
-            <span className="min-w-0 flex-1 truncate font-mono text-xs">{file.path}</span>
-            <span className="text-xs text-zinc-500">{formatBytes(file.size)}</span>
-            <span className="text-xs text-zinc-500">{formatWhen(file.updatedAt)}</span>
-            <button
-              type="button"
-              className="text-xs text-red-600 hover:underline disabled:opacity-50 dark:text-red-400"
-              disabled={remove.isPending}
-              onClick={() => {
-                remove.mutate(file.id);
-              }}
-            >
-              remove
-            </button>
-          </li>
-        ))}
-      </ul>
-      <ErrorText error={remove.error} />
-    </>
-  );
-}
+import { FileList } from './project-file-list';
+import { SettingsIntro } from './settings-intro';
 
 function UploadForm({ projectId }: { projectId: number }): ReactElement {
   const queryClient = useQueryClient();
@@ -117,17 +76,18 @@ export function FilesSection({ project }: { project: PublicProject }): ReactElem
     queryFn: () => projectFilesApi.list(project.id),
   });
   return (
-    <section className="space-y-3">
-      <h3 className="text-sm font-semibold">Project files</h3>
-      <p className="text-xs text-zinc-500">
+    <>
+      <SettingsIntro>
         Put in every ticket&apos;s workspace at their path in the repository, before each agent step
         and each preview start, and kept out of git: a push that contains one is refused. Agents and
         previews can read them; nobody can download them from here. Uploading to a path already used
         replaces that file.
-      </p>
-      <ErrorText error={files.error} />
-      <FileList projectId={project.id} files={files.data ?? []} />
-      <UploadForm projectId={project.id} />
-    </section>
+      </SettingsIntro>
+      <section className="space-y-3">
+        <ErrorText error={files.error} />
+        <FileList projectId={project.id} files={files.data ?? []} />
+        <UploadForm projectId={project.id} />
+      </section>
+    </>
   );
 }

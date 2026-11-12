@@ -1,4 +1,5 @@
-// Above the event rules: each connected tracker's columns or fields as Union last read them, and reading them again.
+// Above the event rules: each connected tracker's columns or fields as Union last read them, and reading them
+// again.
 
 import { useMutation } from '@tanstack/react-query';
 import type { NotionSchema } from '@union/core';
@@ -43,7 +44,7 @@ function NotionColumns({
   );
 }
 
-/** Notion's columns and Jira's fields, for the trackers the project is connected to. */
+/** Notion's columns and Jira's fields, in a card, for the trackers the project is connected to; none: nothing. */
 export function TrackerBars({
   projectId,
   data,
@@ -52,15 +53,22 @@ export function TrackerBars({
   projectId: number;
   data: EventRulesResponse | undefined;
   onRefreshed: () => Promise<void>;
-}): ReactElement {
+}): ReactElement | null {
+  if (!data?.hasNotion && !data?.jira) {
+    return null;
+  }
   return (
-    <>
-      {data?.hasNotion ? (
+    <section className="space-y-3">
+      <h3 className="text-sm font-semibold">Trackers&apos; columns</h3>
+      <p className="text-xs text-zinc-500">
+        What the rules can set, as Union last read it. Read it again after changing the columns.
+      </p>
+      {data.hasNotion ? (
         <NotionColumns projectId={projectId} notion={data.notion} onRefreshed={onRefreshed} />
       ) : null}
-      {data?.jira ? (
+      {data.jira ? (
         <JiraFieldsBar projectId={projectId} source={data.jira} onRefreshed={onRefreshed} />
       ) : null}
-    </>
+    </section>
   );
 }

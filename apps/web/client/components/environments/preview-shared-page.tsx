@@ -4,6 +4,7 @@
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
+import { SettingsIntro } from '../settings/settings-intro';
 import { PreviewSave, usePreviewForm } from './preview-form';
 import { SetUpServicesFirst } from './set-up-services-first';
 import { SharedServicesFields } from './shared-commands-field';
@@ -25,12 +26,18 @@ export function PreviewSharedPage({
     return <SetUpServicesFirst />;
   }
   return (
-    <section className="space-y-4">
-      {form.sharedServices.length > 0 ? (
-        <SharedServicesStatus projectId={project.id} onOpenTicket={onOpenTicket} />
-      ) : null}
-      <SharedServicesFields form={form} known={found?.names ?? []} onChange={setForm} />
-      <PreviewSave project={project} form={preview} />
-    </section>
+    <>
+      <SettingsIntro>
+        Utility services every preview can use, run once for the whole project instead of once per
+        preview, which saves memory.
+      </SettingsIntro>
+      <section className="space-y-4">
+        {form.sharedServices.length > 0 ? (
+          <SharedServicesStatus projectId={project.id} onOpenTicket={onOpenTicket} />
+        ) : null}
+        <SharedServicesFields form={form} known={found?.names ?? []} onChange={setForm} />
+        <PreviewSave project={project} form={preview} />
+      </section>
+    </>
   );
 }

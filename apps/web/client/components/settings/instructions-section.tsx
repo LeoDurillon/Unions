@@ -8,6 +8,7 @@ import { useSettingsForm } from '../../lib/settings/use-settings-form';
 import { openUnionSettings } from '../../lib/union-settings/union-settings-sections';
 import { inputClass } from '../ui/ui';
 import { SaveBar } from './save-bar';
+import { SettingsIntro } from './settings-intro';
 
 const PLACEHOLDER = `## Stack
 Bun workspace, Hono API in apps/web, React client in apps/web/client.
@@ -24,9 +25,8 @@ export function InstructionsSection({ project }: { project: PublicProject }): Re
   );
 
   return (
-    <section className="space-y-3">
-      <h3 className="text-sm font-semibold">Project instructions</h3>
-      <p className="text-xs text-zinc-500">
+    <>
+      <SettingsIntro>
         Sent to every agent working on this project (ticket steps and investigations), after the{' '}
         <button
           type="button"
@@ -38,17 +38,19 @@ export function InstructionsSection({ project }: { project: PublicProject }): Re
           shared instructions
         </button>
         : stack, conventions, commands, things to avoid. Applies from the next agent run.
-      </p>
-      <textarea
-        aria-label="Project instructions"
-        className={`${inputClass} min-h-72 font-mono text-xs`}
-        value={form.value}
-        placeholder={PLACEHOLDER}
-        onChange={(event) => {
-          form.set(event.target.value);
-        }}
-      />
-      <SaveBar state={form} />
-    </section>
+      </SettingsIntro>
+      <section className="space-y-3">
+        <textarea
+          aria-label="Project instructions"
+          className={`${inputClass} min-h-72 font-mono text-xs`}
+          value={form.value}
+          placeholder={PLACEHOLDER}
+          onChange={(event) => {
+            form.set(event.target.value);
+          }}
+        />
+        <SaveBar state={form} />
+      </section>
+    </>
   );
 }

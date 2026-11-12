@@ -30,34 +30,35 @@ description, discussion), the Overview's Files and Preview rows, the Log (`useLo
 back), Investigations (no count until read), Usage (tiles keep their labels), Event activity, Agent image, Memory,
 Union Resources and Tools. Pages with their own words show them at once; only the data waits.
 
+Then a card per settings group (2026-11-12): the settings frame and Environments show the page's name as its
+title, and each page puts its one line under it with `SettingsIntro` (`components/settings/settings-intro.tsx`),
+outside its cards. Checks (commands, iteration limit: two forms, two Save bars), Memory (lessons with the Save bar,
+feedback), Agent image (status, image) and Rules (trackers' columns, rules) are split into cards.
+
 ## Left to do
 
 Take them in this order; each is one worktree, one commit, checked with screenshots before it is deployed.
 
-1. **Settings: a card per group** (inner canvas, board "Settings · Checks"): the page title and one line above
-   the cards, not inside the first one; pages with several groups split into several cards (Memory: lessons and
-   feedback; Agent image: status and Dockerfile; Checks: commands and iteration limit; Rules: trackers' columns and
-   the rules). Today each page is one card with its title inside. The Save bar stays in the card that changed.
-2. **Ticket PR tab, the rest of the board "Ticket panel · PR tab"**:
+1. **Ticket PR tab, the rest of the board "Ticket panel · PR tab"**:
    - the pull request's own title in its card (the ticket summary has no PR title: the web has to read it, or
      the worker store it);
    - the behind-the-base card with Rebase as its primary button and More actions as a menu beside it, instead of
      a separate fold;
    - the discussion's All / People / Bots filter with counts, and its comments as rows with an avatar.
-3. **Preview tab** (board "Ticket panel · Preview tab"): one row per service with its state and port (check what
+2. **Preview tab** (board "Ticket panel · Preview tab"): one row per service with its state and port (check what
    the preview's view holds before adding an API field), scripts as chips with ▸, the e2e tests greyed out until a
    preview runs, the failure card with Start again beside the reason.
-4. **Log** (board "Steps › Log"): a header with the step, turn, time, tool-call count, model and Stop; each row's
+3. **Log** (board "Steps › Log"): a header with the step, turn, time, tool-call count, model and Stop; each row's
    time; a row that opens to the call's full input and result (`lib/log/agent-events.ts` keeps only a summary
    today); a Steps / Raw output switch.
-5. **Notion tab**: the page's title, status and last edit in its card (needs the worker or `NotionApi` to read
+4. **Notion tab**: the page's title, status and last edit in its card (needs the worker or `NotionApi` to read
    the page's properties).
-6. **New ticket dialog** (board "New ticket dialog"): Write / Preview on the description, attached files as chips
+5. **New ticket dialog** (board "New ticket dialog"): Write / Preview on the description, attached files as chips
    under it, the flow's steps under the switch, Cancel beside Create ticket, Ctrl/⌘ Enter to create.
-7. **Pages not redesigned yet**: a step's output tab (`components/steps/step-tab.tsx` and its notices), the
+6. **Pages not redesigned yet**: a step's output tab (`components/steps/step-tab.tsx` and its notices), the
    review's Ticket and Report tabs beyond their cards, Union Tools and Connectors lists, the GitHub App page (its
    header sits outside its card), the onboarding wizard, the setup agent's proposal cards, the guide.
-8. **Dark mode pass** over every page above: each was checked in light; only the PR tab was checked in dark.
+7. **Dark mode pass** over every page above: each was checked in light; only the PR tab was checked in dark.
 
 Two ideas on the inner canvas are new features, not design: "Draft with the agent" on a Notion comment and "Start
 it now" in New ticket. Ask the user before building either: both spend Claude usage or start work.

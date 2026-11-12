@@ -9,6 +9,7 @@ import { useSettingsForm } from '../../lib/settings/use-settings-form';
 import { Switch } from '../ui/choice';
 import { Field, inputClass } from '../ui/ui';
 import { SaveBar } from './save-bar';
+import { SettingsIntro } from './settings-intro';
 
 function LockFilesToggle({
   checked,
@@ -39,30 +40,32 @@ export function ReviewSection({ project }: { project: PublicProject }): ReactEle
   );
 
   return (
-    <section className="space-y-4">
-      <p className="text-xs text-zinc-500">
+    <>
+      <SettingsIntro>
         Ignored files are listed apart and collapsed on the review page; you can still open them.
-      </p>
-      <LockFilesToggle
-        checked={form.value.hideLockFiles}
-        onChange={(hideLockFiles) => {
-          form.set({ ...form.value, hideLockFiles });
-        }}
-      />
-      <Field
-        label="Ignored paths"
-        hint="One gitignore-style pattern per line: dist/, *.snap, /generated/**. Lines starting with # are comments."
-      >
-        <textarea
-          className={`${inputClass} min-h-28 font-mono`}
-          value={form.value.patterns}
-          placeholder={'dist/\n*.snap'}
-          onChange={(event) => {
-            form.set({ ...form.value, patterns: event.target.value });
+      </SettingsIntro>
+      <section className="space-y-4">
+        <LockFilesToggle
+          checked={form.value.hideLockFiles}
+          onChange={(hideLockFiles) => {
+            form.set({ ...form.value, hideLockFiles });
           }}
         />
-      </Field>
-      <SaveBar state={form} />
-    </section>
+        <Field
+          label="Ignored paths"
+          hint="One gitignore-style pattern per line: dist/, *.snap, /generated/**. Lines starting with # are comments."
+        >
+          <textarea
+            className={`${inputClass} min-h-28 font-mono`}
+            value={form.value.patterns}
+            placeholder={'dist/\n*.snap'}
+            onChange={(event) => {
+              form.set({ ...form.value, patterns: event.target.value });
+            }}
+          />
+        </Field>
+        <SaveBar state={form} />
+      </section>
+    </>
   );
 }

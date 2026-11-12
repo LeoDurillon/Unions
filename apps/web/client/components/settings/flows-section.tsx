@@ -9,6 +9,7 @@ import { useSettingsForm } from '../../lib/settings/use-settings-form';
 import { Button } from '../ui/ui';
 import { FlowPresetRow } from './flow-preset-row';
 import { SaveBar } from './save-bar';
+import { SettingsIntro } from './settings-intro';
 
 type Flows = { flows: FlowPreset[]; defaultFlow: string };
 
@@ -65,50 +66,51 @@ export function FlowsSection({ project }: { project: PublicProject }): ReactElem
     form.set(replaced(form.value, at, preset));
   };
   return (
-    <section className="space-y-3">
-      <h3 className="text-sm font-semibold">Flows</h3>
-      <p className="text-xs text-zinc-500">
+    <>
+      <SettingsIntro>
         The steps a ticket runs, picked when it is created and changeable until it starts. Every
         flow ends with the implementation and the final review; a small fix can skip planning. Your
         custom agents (Union settings) go anywhere before the final review.
-      </p>
-      <ul className="space-y-2">
-        {flows.map((preset, at) => (
-          <FlowPresetRow
-            key={preset.id}
-            preset={preset}
-            isDefault={preset.id === defaultFlow}
-            canRemove={flows.length > 1 && preset.id !== defaultFlow}
-            onChange={(next) => {
-              replace(at, next);
+      </SettingsIntro>
+      <section className="space-y-3">
+        <ul className="space-y-2">
+          {flows.map((preset, at) => (
+            <FlowPresetRow
+              key={preset.id}
+              preset={preset}
+              isDefault={preset.id === defaultFlow}
+              canRemove={flows.length > 1 && preset.id !== defaultFlow}
+              onChange={(next) => {
+                replace(at, next);
+              }}
+              onMakeDefault={() => {
+                form.set({ flows, defaultFlow: preset.id });
+              }}
+              onRemove={() => {
+                replace(at, null);
+              }}
+            />
+          ))}
+        </ul>
+        <div className="flex gap-2">
+          <Button
+            onClick={() => {
+              const steps: FlowPreset['steps'] = ['implement', 'final_review'];
+              form.set({ flows: [...flows, { id: newId(flows), name: '', steps }], defaultFlow });
             }}
-            onMakeDefault={() => {
-              form.set({ flows, defaultFlow: preset.id });
+          >
+            Add a flow
+          </Button>
+          <Button
+            onClick={() => {
+              form.set(BUILT_IN);
             }}
-            onRemove={() => {
-              replace(at, null);
-            }}
-          />
-        ))}
-      </ul>
-      <div className="flex gap-2">
-        <Button
-          onClick={() => {
-            const steps: FlowPreset['steps'] = ['implement', 'final_review'];
-            form.set({ flows: [...flows, { id: newId(flows), name: '', steps }], defaultFlow });
-          }}
-        >
-          Add a flow
-        </Button>
-        <Button
-          onClick={() => {
-            form.set(BUILT_IN);
-          }}
-        >
-          Use the built-in flows
-        </Button>
-      </div>
-      <SaveBar state={form} invalid={problem(form.value)} />
-    </section>
+          >
+            Use the built-in flows
+          </Button>
+        </div>
+        <SaveBar state={form} invalid={problem(form.value)} />
+      </section>
+    </>
   );
 }

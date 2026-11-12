@@ -7,6 +7,7 @@ import type { ReactElement } from 'react';
 import { api } from '../../lib/app/api';
 import { modelRows, useModelsForm } from '../../lib/union-settings/use-models-form';
 import { SaveBar } from '../settings/save-bar';
+import { SettingsIntro } from '../settings/settings-intro';
 import { ErrorText } from '../ui/ui';
 import { CELL, ModelRow } from './agent-row';
 
@@ -15,13 +16,6 @@ function ModelsForm({ configs }: { configs: AgentConfig[] }): ReactElement {
   const rows = modelRows(configs);
   return (
     <section className="space-y-3">
-      <header>
-        <h3 className="text-sm font-semibold">All agents</h3>
-        <p className="text-xs text-zinc-500">
-          Every agent’s model and effort in one place, changes applying to the next run of that
-          step. Click an agent for its prompt and tools; a dot marks one you customized.
-        </p>
-      </header>
       <table className="w-full text-left text-sm">
         <thead className="text-xs text-zinc-500">
           <tr>
@@ -52,8 +46,17 @@ function ModelsForm({ configs }: { configs: AgentConfig[] }): ReactElement {
 /** All agents in one table, with one Save for their models and efforts. */
 export function ModelsPage(): ReactElement {
   const agents = useQuery({ queryKey: ['agents'], queryFn: api.agents });
-  if (agents.data === undefined) {
-    return <ErrorText error={agents.error} />;
-  }
-  return <ModelsForm configs={agents.data} />;
+  return (
+    <>
+      <SettingsIntro>
+        Every agent’s model and effort in one place, changes applying to the next run of that step.
+        Click an agent for its prompt and tools; a dot marks one you customized.
+      </SettingsIntro>
+      {agents.data === undefined ? (
+        <ErrorText error={agents.error} />
+      ) : (
+        <ModelsForm configs={agents.data} />
+      )}
+    </>
+  );
 }

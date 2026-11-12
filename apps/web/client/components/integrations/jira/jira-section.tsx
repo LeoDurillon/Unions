@@ -44,15 +44,15 @@ export function JiraSection({ project }: { project: PublicProject }): ReactEleme
 
   return (
     <section className="space-y-4">
-      <p className="flex items-center gap-2 text-sm">
-        Jira import
+      <h3 className="flex items-center gap-2 text-sm font-semibold">
+        Connection
         <Badge tone={connected ? 'green' : 'neutral'}>
           {connected ? 'connected' : 'not connected'}
         </Badge>
         {integration?.title ? (
           <span className="text-zinc-500">project “{integration.title}”</span>
         ) : null}
-      </p>
+      </h3>
       <JiraHelp />
       <JiraFields
         value={form.value}

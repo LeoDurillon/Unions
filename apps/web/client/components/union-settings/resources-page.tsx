@@ -5,6 +5,7 @@ import type { ReactElement } from 'react';
 import type { UnionSettingsView } from '../../../src/routes/union-settings';
 import { useResourcesForm, useUnionSettings } from '../../lib/union-settings/use-resources-form';
 import { SaveBar } from '../settings/save-bar';
+import { SettingsIntro } from '../settings/settings-intro';
 import { Loading, SkeletonRows } from '../ui/skeleton';
 import { ErrorText, Field, inputClass } from '../ui/ui';
 
@@ -48,14 +49,11 @@ function NumberField({
 
 function ResourcesIntro(): ReactElement {
   return (
-    <header>
-      <h3 className="text-sm font-semibold">Resources</h3>
-      <p className="text-xs text-zinc-500">
-        How much memory and how many CPU cores each container Union starts may use. Past it, the
-        biggest process in that container is stopped, instead of your whole computer running out of
-        memory. A change applies the next time a container starts.
-      </p>
-    </header>
+    <SettingsIntro>
+      How much memory and how many CPU cores each container Union starts may use. Past it, the
+      biggest process in that container is stopped, instead of your whole computer running out of
+      memory. A change applies the next time a container starts.
+    </SettingsIntro>
   );
 }
 
@@ -63,7 +61,6 @@ function ResourcesForm({ saved }: { saved: UnionSettingsView }): ReactElement {
   const form = useResourcesForm(saved);
   return (
     <section className="space-y-4">
-      <ResourcesIntro />
       <NumberField
         unit="GB"
         label="Memory per agent container"
@@ -101,22 +98,29 @@ export function ResourcesPage(): ReactElement {
   const settings = useUnionSettings();
   if (settings.data === undefined) {
     return (
-      <section className="space-y-4">
+      <>
         <ResourcesIntro />
-        {settings.error ? (
-          <ErrorText error={settings.error} />
-        ) : (
-          <Loading label="Reading the resources" className="space-y-4">
-            <SkeletonRows
-              count={FIELDS}
-              columns="grid-cols-[10rem_6rem]"
-              cells={1}
-              rowClassName="h-8"
-            />
-          </Loading>
-        )}
-      </section>
+        <section className="space-y-4">
+          {settings.error ? (
+            <ErrorText error={settings.error} />
+          ) : (
+            <Loading label="Reading the resources" className="space-y-4">
+              <SkeletonRows
+                count={FIELDS}
+                columns="grid-cols-[10rem_6rem]"
+                cells={1}
+                rowClassName="h-8"
+              />
+            </Loading>
+          )}
+        </section>
+      </>
     );
   }
-  return <ResourcesForm saved={settings.data} />;
+  return (
+    <>
+      <ResourcesIntro />
+      <ResourcesForm saved={settings.data} />
+    </>
+  );
 }

@@ -1,5 +1,5 @@
 // The frame of both settings areas: a way back, a title, the open page's name with its Learn more link. The menu
-// is on the left, the page on the right.
+// is on the left, the page on the right, under its title.
 
 import type { ReactElement, ReactNode } from 'react';
 
@@ -50,6 +50,7 @@ export function SettingsFrame({
         </aside>
         <div className="min-h-0 flex-1 overflow-y-auto bg-zinc-50 dark:bg-zinc-950">
           <div key={pageKey} className="settings-cards mx-auto max-w-3xl space-y-4 p-6">
+            <h2 className="text-xl font-semibold tracking-tight">{subtitle}</h2>
             {children}
           </div>
         </div>

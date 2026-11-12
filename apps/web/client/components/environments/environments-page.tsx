@@ -57,7 +57,7 @@ export function EnvironmentsPage({
             </span>
           </nav>
           <div key={`${project.id}:${section}`} className="settings-cards min-w-0 space-y-4">
-            <h2 className="text-[15px] font-semibold">{environmentLabel(section)}</h2>
+            <h2 className="text-xl font-semibold tracking-tight">{environmentLabel(section)}</h2>
             <EnvironmentSectionBody
               section={section}
               project={project}

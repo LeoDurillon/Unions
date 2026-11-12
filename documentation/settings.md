@@ -3,10 +3,11 @@
 ## Project settings
 
 Open a project's **Settings** in the project bar; **←** at the top left goes back to the board. **Find a setting**,
-above the menu, lists only the pages whose name holds what you type (Union settings has it too). Once you change
-something, a bar at the bottom says **Unsaved changes**, with **Discard** and **Save**; on **General**, each part
-(base branch, GitHub issues) is a card with its own bar. **Learn more**, under the page's name, opens the part of
-this guide about it; Union settings pages have it too.
+above the menu, lists only the pages whose name holds what you type (Union settings has it too). Each page starts
+with its name and one line on what it is for, then a card per part: on **Checks**, the commands and the iteration
+limit; on **Memory**, the lessons and the feedback. Once you change something in a card, a bar at its bottom says
+**Unsaved changes**, with **Discard** and **Save** for that card. **Learn more**, under the page's name in the top
+bar, opens the part of this guide about it; Union settings pages have it too.
 
 How the previews run is not here but in the project's **Environments** tab, beside the board: see
 [Environments](#environments) below.

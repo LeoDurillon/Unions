@@ -8,6 +8,7 @@ import { api } from '../../lib/app/api';
 import { useSettingsForm } from '../../lib/settings/use-settings-form';
 import { Field, inputClass } from '../ui/ui';
 import { SaveBar } from './save-bar';
+import { SettingsIntro } from './settings-intro';
 
 type Size = { budget: string; patterns: string };
 
@@ -34,41 +35,43 @@ export function SizeSection({ project }: { project: PublicProject }): ReactEleme
   );
   const { value } = form;
   return (
-    <section className="space-y-3">
-      <p className="text-xs text-zinc-500">
+    <>
+      <SettingsIntro>
         Union counts the lines of code each implementation adds. The technical plan estimates them;
         when a first implementation goes over half again its estimate, the agent is asked once to
         cut what the task does not need and to say why the rest is needed.
-      </p>
-      <Field
-        label="Budget without an estimate"
-        hint="Lines of code for a ticket whose flow skips the technical step, or whose plan gives no estimate. Empty: none, the size is only shown."
-      >
-        <input
-          className={`${inputClass} max-w-32`}
-          type="number"
-          min={1}
-          value={value.budget}
-          placeholder="none"
-          onChange={(event) => {
-            form.set({ ...value, budget: event.target.value });
-          }}
-        />
-      </Field>
-      <Field
-        label="Not code"
-        hint="Gitignore-style patterns, one per line: their lines are counted apart (tests, other). Empty: the defaults shown."
-      >
-        <textarea
-          className={`${inputClass} min-h-40 font-mono`}
-          value={value.patterns}
-          placeholder={DEFAULT_SIZE_IGNORE.join('\n')}
-          onChange={(event) => {
-            form.set({ ...value, patterns: event.target.value });
-          }}
-        />
-      </Field>
-      <SaveBar state={form} />
-    </section>
+      </SettingsIntro>
+      <section className="space-y-3">
+        <Field
+          label="Budget without an estimate"
+          hint="Lines of code for a ticket whose flow skips the technical step, or whose plan gives no estimate. Empty: none, the size is only shown."
+        >
+          <input
+            className={`${inputClass} max-w-32`}
+            type="number"
+            min={1}
+            value={value.budget}
+            placeholder="none"
+            onChange={(event) => {
+              form.set({ ...value, budget: event.target.value });
+            }}
+          />
+        </Field>
+        <Field
+          label="Not code"
+          hint="Gitignore-style patterns, one per line: their lines are counted apart (tests, other). Empty: the defaults shown."
+        >
+          <textarea
+            className={`${inputClass} min-h-40 font-mono`}
+            value={value.patterns}
+            placeholder={DEFAULT_SIZE_IGNORE.join('\n')}
+            onChange={(event) => {
+              form.set({ ...value, patterns: event.target.value });
+            }}
+          />
+        </Field>
+        <SaveBar state={form} />
+      </section>
+    </>
   );
 }

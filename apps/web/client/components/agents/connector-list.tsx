@@ -6,6 +6,7 @@ import type { ReactElement } from 'react';
 import type { ConnectorsResponse } from '../../../src/api-types';
 import { formatWhen } from '../../lib/ui/relative-time';
 import { useConnectors } from '../../lib/union-settings/use-connectors';
+import { SettingsIntro } from '../settings/settings-intro';
 import { Button, ErrorText } from '../ui/ui';
 
 function CheckStatus({
@@ -38,17 +39,15 @@ export function ConnectorList(): ReactElement {
   const { connectors, check, checking } = useConnectors();
   const list = connectors.data?.connectors ?? [];
   return (
-    <section className="space-y-3">
-      <header className="flex items-start justify-between gap-3">
-        <div>
-          <h3 className="text-sm font-semibold">Connectors</h3>
-          <p className="text-xs text-zinc-500">
-            The MCP connectors of your Claude account (claude.ai → Settings → Connectors). Select
-            one on an agent like a tool to give it all the connector&apos;s tools; agents without
-            one selected do not load any.
-          </p>
-        </div>
-        <div className="shrink-0">
+    <>
+      <SettingsIntro>
+        The MCP connectors of your Claude account (claude.ai → Settings → Connectors). Select one on
+        an agent like a tool to give it all the connector&apos;s tools; agents without one selected
+        do not load any.
+      </SettingsIntro>
+      <section className="space-y-3">
+        <header className="flex items-center justify-between gap-3">
+          <h3 className="text-sm font-semibold">Your connectors</h3>
           <Button
             disabled={checking}
             onClick={() => {
@@ -57,30 +56,30 @@ export function ConnectorList(): ReactElement {
           >
             {list.length === 0 ? 'Read connectors' : 'Check again'}
           </Button>
-        </div>
-      </header>
-      <ErrorText error={connectors.error ?? check.error} />
-      <CheckStatus check={connectors.data?.check ?? null} checking={checking} />
-      {list.length === 0 ? (
-        <p className="text-sm text-zinc-500">No connector read yet.</p>
-      ) : (
-        <ul className="divide-y divide-zinc-200 text-sm dark:divide-zinc-800">
-          {list.map((connector) => (
-            <li key={connector.name} className="flex items-center gap-3 py-2">
-              <span className="font-medium">{connector.name}</span>
-              <code className="min-w-0 flex-1 truncate text-xs text-zinc-500">
-                {connector.tool}
-              </code>
-              <span
-                className={`text-xs ${connector.connected ? 'text-green-700 dark:text-green-400' : 'text-amber-700 dark:text-amber-400'}`}
-                title={connector.url}
-              >
-                {connector.status}
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
+        </header>
+        <ErrorText error={connectors.error ?? check.error} />
+        <CheckStatus check={connectors.data?.check ?? null} checking={checking} />
+        {list.length === 0 ? (
+          <p className="text-sm text-zinc-500">No connector read yet.</p>
+        ) : (
+          <ul className="divide-y divide-zinc-200 text-sm dark:divide-zinc-800">
+            {list.map((connector) => (
+              <li key={connector.name} className="flex items-center gap-3 py-2">
+                <span className="font-medium">{connector.name}</span>
+                <code className="min-w-0 flex-1 truncate text-xs text-zinc-500">
+                  {connector.tool}
+                </code>
+                <span
+                  className={`text-xs ${connector.connected ? 'text-green-700 dark:text-green-400' : 'text-amber-700 dark:text-amber-400'}`}
+                  title={connector.url}
+                >
+                  {connector.status}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    </>
   );
 }

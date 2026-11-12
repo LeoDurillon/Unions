@@ -24,7 +24,7 @@ import {
 import { useSettingsForm, type SettingsForm } from '../../lib/settings/use-settings-form';
 import { FeedbackInbox, type FeedbackActions } from './feedback-inbox';
 import { LessonsLoading, LessonsPanel } from './lessons-panel';
-import { SaveBar } from './save-bar';
+import { SettingsIntro } from './settings-intro';
 
 function stepOf(section: string): PipelineStep {
   return FULL_FLOW.find((step) => step === section) ?? 'implement';
@@ -81,6 +81,9 @@ function useFeedbackActions(
   };
 }
 
+/** What a query gives the page: its data once read, or why it failed. */
+type Loaded<T> = { data: T | undefined; error: Error | null };
+
 function MemoryForm({
   project,
   lessons,
@@ -107,7 +110,7 @@ function MemoryForm({
   const { onAccept } = actions;
   const empty = form.value.lessons.some((lesson) => lesson.rule.trim() === '');
   return (
-    <section className="space-y-6">
+    <>
       <LessonsPanel
         projectId={project.id}
         value={form.value}
@@ -116,17 +119,17 @@ function MemoryForm({
         }}
         onAccept={onAccept}
         editing={{ at: editingAt, open: setEditingAt }}
+        save={{ state: form, invalid: empty ? 'Write each lesson or remove it.' : null }}
       />
-      <div className="space-y-3">
+      <section className="space-y-3">
         <h3 className="text-sm font-semibold">Feedback</h3>
         <p className="text-xs text-zinc-500">
           What you wrote on Revise and final reviews. Make a lesson from what should hold for every
           ticket, dismiss the rest.
         </p>
         <FeedbackInbox feedback={feedback} actions={actions} />
-      </div>
-      <SaveBar state={form} invalid={empty ? 'Write each lesson or remove it.' : null} />
-    </section>
+      </section>
+    </>
   );
 }
 
@@ -134,6 +137,26 @@ function MemoryForm({
 export function MemorySection({ project }: { project: PublicProject }): ReactElement {
   const lessons = useLessons(project.id);
   const feedback = useFeedback(project.id);
+  return (
+    <>
+      <SettingsIntro>
+        What the agents learn on this project: lessons made from your feedback, sent to every run of
+        their step.
+      </SettingsIntro>
+      <MemoryBody project={project} lessons={lessons} feedback={feedback} />
+    </>
+  );
+}
+
+function MemoryBody({
+  project,
+  lessons,
+  feedback,
+}: {
+  project: PublicProject;
+  lessons: Loaded<readonly Lesson[]>;
+  feedback: Loaded<readonly FeedbackItem[]>;
+}): ReactElement {
   if (lessons.error ?? feedback.error) {
     return <p className="text-sm text-red-600">Could not load the project&apos;s memory.</p>;
   }

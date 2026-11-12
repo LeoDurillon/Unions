@@ -6,7 +6,9 @@ import type { PublicProject } from '../../../src/api-types';
 import { closeSettings } from '../../lib/settings/settings-sections';
 import { TrackerSection } from '../integrations/tracker-section';
 import { DeleteSection } from './delete-section';
-import { EventActivitySection, EventRulesSection } from './events-section';
+import { EventActivitySection } from './delivery-list';
+import { EventRulesSection } from './events-section';
+import { SettingsIntro } from './settings-intro';
 
 export type IntegrationSection = 'notion' | 'jira' | 'event-rules' | 'event-activity' | 'danger';
 
@@ -24,12 +26,15 @@ export function IntegrationSectionBody({
     'event-rules': () => <EventRulesSection project={project} />,
     'event-activity': () => <EventActivitySection project={project} />,
     danger: () => (
-      <DeleteSection
-        project={project}
-        onDeleted={() => {
-          closeSettings();
-        }}
-      />
+      <>
+        <SettingsIntro>What cannot be undone.</SettingsIntro>
+        <DeleteSection
+          project={project}
+          onDeleted={() => {
+            closeSettings();
+          }}
+        />
+      </>
     ),
   };
   return bodies[section]();

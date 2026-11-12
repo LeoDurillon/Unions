@@ -10,6 +10,7 @@ import { useSettingsForm, type SettingsForm } from '../../lib/settings/use-setti
 import { Button } from '../ui/ui';
 import { SaveBar } from './save-bar';
 import { draftOf, ScriptCard, ScriptForm, scriptOf, type ScriptDraft } from './script-row';
+import { SettingsIntro } from './settings-intro';
 
 const EMPTY: ScriptDraft = { name: '', command: '', minutes: '' };
 
@@ -88,43 +89,44 @@ export function ScriptsSection({ project }: { project: PublicProject }): ReactEl
   );
   const { editing, open, editor } = useScriptEditing(form);
   return (
-    <section className="space-y-3">
-      <h3 className="text-sm font-semibold">Scripts</h3>
-      <p className="text-xs text-zinc-500">
+    <>
+      <SettingsIntro>
         Commands you run by name from a ticket&apos;s Preview tab, in its workspace: the repository,
         as the agent (no GitHub credentials), with <code>PREVIEW_URL</code> while the preview runs.
         Their output can go to the agent. The timeout is 10 minutes unless set (30 at most).
-      </p>
-      <ul className="space-y-2">
-        {form.value.map((script, index) =>
-          editing?.index === index ? (
-            editor(editing)
-          ) : (
-            <ScriptCard
-              key={script.name}
-              script={script}
-              disabled={editing !== null}
-              onEdit={() => {
-                open({ index, draft: draftOf(script) });
-              }}
-            />
-          ),
-        )}
-        {editing?.index === null ? editor(editing) : null}
-      </ul>
-      {editing === null ? (
-        <Button
-          onClick={() => {
-            open({ index: null, draft: EMPTY });
-          }}
-        >
-          Add a script
-        </Button>
-      ) : null}
-      <SaveBar
-        state={form}
-        invalid={editing === null ? null : 'Finish or cancel the script you are editing.'}
-      />
-    </section>
+      </SettingsIntro>
+      <section className="space-y-3">
+        <ul className="space-y-2">
+          {form.value.map((script, index) =>
+            editing?.index === index ? (
+              editor(editing)
+            ) : (
+              <ScriptCard
+                key={script.name}
+                script={script}
+                disabled={editing !== null}
+                onEdit={() => {
+                  open({ index, draft: draftOf(script) });
+                }}
+              />
+            ),
+          )}
+          {editing?.index === null ? editor(editing) : null}
+        </ul>
+        {editing === null ? (
+          <Button
+            onClick={() => {
+              open({ index: null, draft: EMPTY });
+            }}
+          >
+            Add a script
+          </Button>
+        ) : null}
+        <SaveBar
+          state={form}
+          invalid={editing === null ? null : 'Finish or cancel the script you are editing.'}
+        />
+      </section>
+    </>
   );
 }

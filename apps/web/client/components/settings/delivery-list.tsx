@@ -1,71 +1,17 @@
 // What the event rules did lately, as a table: when, status, rule and ticket, then what it set or why it failed.
 
 import { useQuery } from '@tanstack/react-query';
-import type { NotionUser } from '@union/core';
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
-import type { DeliveryView } from '../../../src/event-api-types';
 import { useNotionUsers } from '../../lib/integrations/use-notion-users';
 import { eventRulesApi } from '../../lib/settings/event-rules-api';
-import { formatWhen } from '../../lib/ui/relative-time';
 import { Loading, SkeletonRows } from '../ui/skeleton';
-import { Badge } from '../ui/ui';
+import { COLUMNS, DeliveryRow } from './delivery-row';
+import { SettingsIntro } from './settings-intro';
 
 const DELIVERIES_POLL_MS = 10_000;
 const LOADING_ROWS = 9;
-const STATUS_TONES = {
-  pending: 'blue',
-  succeeded: 'green',
-  failed: 'red',
-  skipped: 'neutral',
-} as const;
-const COLUMNS = 'grid grid-cols-[10rem_6rem_minmax(0,14rem)_minmax(0,1fr)] gap-x-3';
-
-/** The detail with each Notion member's id replaced by their name (a person property stores ids). */
-function withNames(detail: string, users: NotionUser[]): string {
-  return users.reduce((text, user) => text.replaceAll(user.id, user.name), detail);
-}
-
-function DeliveryRow({
-  delivery,
-  users,
-}: {
-  delivery: DeliveryView;
-  users: NotionUser[];
-}): ReactElement {
-  const ticket = delivery.ticketTitle ?? 'no ticket';
-  return (
-    <li className="border-b border-zinc-200 py-2 text-sm last:border-b-0 dark:border-zinc-800">
-      <div className={`${COLUMNS} items-center`}>
-        <span className="text-xs whitespace-nowrap text-zinc-500">
-          {formatWhen(delivery.createdAt)}
-        </span>
-        <span>
-          <Badge tone={STATUS_TONES[delivery.status]}>{delivery.status}</Badge>
-        </span>
-        <span className="truncate font-medium" title={delivery.ruleName}>
-          {delivery.ruleName}
-        </span>
-        <span className="truncate text-zinc-500" title={ticket}>
-          {ticket}
-        </span>
-      </div>
-      {delivery.detail ? (
-        <p className="mt-0.5 text-zinc-600 dark:text-zinc-400">
-          {withNames(delivery.detail, users)}
-        </p>
-      ) : null}
-      {delivery.error ? (
-        <p className="mt-0.5 text-red-600 dark:text-red-400">
-          {delivery.error}
-          {delivery.status === 'pending' ? ` (attempt ${delivery.attempts}, trying again)` : ''}
-        </p>
-      ) : null}
-    </li>
-  );
-}
-
 function DeliveryList({ projectId }: { projectId: number }): ReactElement {
   const deliveries = useQuery({
     queryKey: ['event-deliveries', projectId],
@@ -115,11 +61,13 @@ function DeliveryList({ projectId }: { projectId: number }): ReactElement {
 /** What the rules did lately: each update or comment, and why one failed. */
 export function EventActivitySection({ project }: { project: PublicProject }): ReactElement {
   return (
-    <section className="space-y-4">
-      <p className="text-sm text-zinc-500">
+    <>
+      <SettingsIntro>
         The latest Notion updates and GitHub comments the event rules made, newest first.
-      </p>
-      <DeliveryList projectId={project.id} />
-    </section>
+      </SettingsIntro>
+      <section>
+        <DeliveryList projectId={project.id} />
+      </section>
+    </>
   );
 }
