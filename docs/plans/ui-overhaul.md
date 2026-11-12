@@ -60,6 +60,8 @@ Then the Notion tab's page card (2026-11-12): core's page read keeps `editedAt` 
 `GET /api/tickets/:id/notion-comments` reads the page beside the discussions (`page`, null when Notion refuses it);
 `components/notion/notion-page-card.tsx` shows them. Not built: "Bring the page's changes in" and "Draft with the
 agent" (new features).
+On the user's database the status reads null: its status column (`Avancement`) is not of Notion's `status` type
+(a select, most likely). Naming the status column in Settings → Notion would fix it; the user has not decided yet.
 
 ## Left to do
 
@@ -70,7 +72,9 @@ Take them in this order; each is one worktree, one commit, checked with screensh
 2. **Pages not redesigned yet**: a step's output tab (`components/steps/step-tab.tsx` and its notices), the
    review's Ticket and Report tabs beyond their cards, Union Tools and Connectors lists, the GitHub App page (its
    header sits outside its card), the onboarding wizard, the setup agent's proposal cards, the guide.
-3. **Dark mode pass** over every page above: each was checked in light; only the PR tab was checked in dark.
+3. **Dark mode pass** over every page above. Checked in dark so far: the loading PR tab, Settings › Checks, the PR
+   tab, the Preview tab (failed), the Log and the Notion tab. Not yet: the other settings, Union settings and
+   Environments pages, Overview, Investigations, Usage, Pull requests, Repository, the review page, dialogs.
 
 Two ideas on the inner canvas are new features, not design: "Draft with the agent" on a Notion comment and "Start
 it now" in New ticket. Ask the user before building either: both spend Claude usage or start work.
