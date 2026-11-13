@@ -10,6 +10,7 @@ import { useAgentReview } from '../../lib/review/use-agent-review';
 import { useReviewSpecs, useStackSpecs } from '../../lib/review/use-review-specs';
 import { Segmented } from '../ui/choice';
 import { Button, Dialog, ErrorText } from '../ui/ui';
+import { ModePicker, useSliceOffer, type ReviewMode } from './agent-review-mode';
 import { SpecSummary } from './spec-summary';
 
 type Scope = 'stack' | 'one';
@@ -51,6 +52,13 @@ function useScopeSpecs(
   return scope === 'stack' ? whole : one;
 }
 
+function startLabel(scope: Scope, pulls: number, mode: ReviewMode): string {
+  if (scope === 'stack') {
+    return `Review the ${pulls} pull requests`;
+  }
+  return mode === 'sliced' ? 'Start the review in slices' : 'Start the review';
+}
+
 export function AgentReviewDialog({
   target,
   onClose,
@@ -63,6 +71,10 @@ export function AgentReviewDialog({
   const specs = useScopeSpecs(target, stack, scope);
   const { start } = useAgentReview(target);
   const numbers = (stack ?? []).map((pull) => pull.number);
+  const offer = useSliceOffer(target);
+  const [picked, setPicked] = useState<ReviewMode>('sliced');
+  const sliceable = scope === 'one' && offer.offered;
+  const mode: ReviewMode = sliceable ? picked : 'single';
   return (
     <Dialog open onClose={onClose} title="Review with agent" wide>
       <div className="space-y-4">
@@ -71,6 +83,7 @@ export function AgentReviewDialog({
           arrive as drafts on each pull request: nothing is sent until you send the review.
         </p>
         {stack ? <ScopePicker stack={stack} scope={scope} onChange={setScope} /> : null}
+        {sliceable ? <ModePicker lines={offer.lines} mode={picked} onChange={setPicked} /> : null}
         <SpecSummary specs={specs} onEdit={onClose} />
         <ErrorText error={start.error} />
         <div className="flex justify-end gap-2">
@@ -80,11 +93,13 @@ export function AgentReviewDialog({
             disabled={specs === null || start.isPending}
             onClick={() => {
               const body =
-                scope === 'stack' ? { specs: specs ?? [], stack: numbers } : { specs: specs ?? [] };
+                scope === 'stack'
+                  ? { specs: specs ?? [], stack: numbers }
+                  : { specs: specs ?? [], mode };
               start.mutate(body, { onSuccess: onClose });
             }}
           >
-            {scope === 'stack' ? `Review the ${numbers.length} pull requests` : 'Start the review'}
+            {startLabel(scope, numbers.length, mode)}
           </Button>
         </div>
       </div>

@@ -10,6 +10,7 @@ import {
 } from 'drizzle-orm/sqlite-core';
 
 import type { AgentReviewCoverage } from '../review/agent-review-coverage';
+import type { SliceProgress } from '../review/agent-review-slices';
 import type { AgentReviewSpec } from '../review/agent-review-specs';
 import { now, projects, tickets } from './schema';
 import type { PullRequestFile } from './schema-types';
@@ -145,6 +146,12 @@ export const agentReviews = sqliteTable(
     comments: integer('comments'),
     /** What of the change the agent opened, read from its log; null: not measured (a stack, an older run). */
     coverage: text('coverage', { mode: 'json' }).$type<AgentReviewCoverage>(),
+    /** One agent on the whole change, or one per slice and one on the seams (`agent-review-slices.ts`). */
+    mode: text('mode', { enum: ['single', 'sliced'] })
+      .notNull()
+      .default('single'),
+    /** A sliced run's agents and where each stands; null before the slices are cut, and for a single run. */
+    slices: text('slices', { mode: 'json' }).$type<SliceProgress[]>(),
     createdAt: integer('created_at').notNull().default(now),
     startedAt: integer('started_at'),
     finishedAt: integer('finished_at'),

@@ -160,7 +160,7 @@ test("a stack's pull requests are checked out together and each gets the comment
   const specs = [
     { kind: 'issue' as const, label: 'Issue #4', text: 'An API on a schema.', prs: [12, 13] },
   ];
-  queueAgentReview(db, { kind: 'review', id: bottom }, specs, [bottom, top]);
+  queueAgentReview(db, { kind: 'review', id: bottom }, specs, { members: [bottom, top] });
   reply = `Done.\n\n\`\`\`json\n${JSON.stringify({
     summary: 'The split is sound.',
     comments: [

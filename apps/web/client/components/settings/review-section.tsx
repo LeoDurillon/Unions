@@ -1,5 +1,6 @@
-// Files the review page lists apart (collapsed), so the sidebar shows what needs reading.
+// Project settings → Review: the files the review page lists apart, and when Review with agent works in slices.
 
+import { DEFAULT_SLICE_REVIEW_ABOVE } from '@union/core/agent-review-slices';
 import { LOCK_FILES } from '@union/core/diff';
 import type { ReactElement } from 'react';
 
@@ -25,17 +26,46 @@ function LockFilesToggle({
   );
 }
 
-/** Files the review page lists apart (collapsed), so the sidebar shows what needs reading. */
+function SliceField({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+}): ReactElement {
+  return (
+    <Field
+      label="Review with agent in slices above"
+      hint="Changed lines, ignored files left out. Above it, Review with agent offers to cut the change into parts, one agent each, then one more on how they fit. Empty: the default; 0: never."
+    >
+      <input
+        className={`${inputClass} max-w-32`}
+        type="number"
+        min={0}
+        value={value}
+        placeholder={String(DEFAULT_SLICE_REVIEW_ABOVE)}
+        onChange={(event) => {
+          onChange(event.target.value);
+        }}
+      />
+    </Field>
+  );
+}
+
+/** Files the review page lists apart (collapsed), and when Review with agent works in slices. */
 export function ReviewSection({ project }: { project: PublicProject }): ReactElement {
+  const { sliceReviewAbove } = project.config;
   const form = useSettingsForm(
     () => ({
       hideLockFiles: project.config.hideLockFiles !== false,
       patterns: (project.config.reviewIgnore ?? []).join('\n'),
+      sliceAbove: sliceReviewAbove === undefined ? '' : String(sliceReviewAbove),
     }),
-    ({ hideLockFiles, patterns }) =>
+    ({ hideLockFiles, patterns, sliceAbove }) =>
       api.updateProject(project.id, {
         hideLockFiles,
         reviewIgnore: patterns.split('\n').filter((line) => line.trim() !== ''),
+        sliceReviewAbove: sliceAbove.trim() === '' ? null : Number(sliceAbove),
       }),
   );
 
@@ -64,6 +94,12 @@ export function ReviewSection({ project }: { project: PublicProject }): ReactEle
             }}
           />
         </Field>
+        <SliceField
+          value={form.value.sliceAbove}
+          onChange={(sliceAbove) => {
+            form.set({ ...form.value, sliceAbove });
+          }}
+        />
         <SaveBar state={form} />
       </section>
     </>

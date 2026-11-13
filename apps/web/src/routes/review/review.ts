@@ -124,11 +124,12 @@ function agentReviewRoutes(routes: Hono, db: Db): void {
   routes.get('/:id/agent-review', (c) => getAgentReview(c, db, owner(loadTicket(db, c))));
   routes.post('/:id/agent-review', async (c) => {
     const ticket = loadTicket(db, c);
-    const { specs } = await readAgentReviewBody(c.req.raw);
+    const { specs, mode } = await readAgentReviewBody(c.req.raw);
     return startAgentReview(c, db, {
       owner: owner(ticket),
       refusal: agentRefusal(db, ticket),
       specs,
+      mode,
     });
   });
   routes.post('/:id/agent-review/cancel', (c) =>

@@ -131,6 +131,8 @@ export type ProjectConfig = {
   sizeIgnore?: string[];
   /** Lines of code a change may add when its plan gives no estimate; absent: no budget. */
   sizeBudget?: number;
+  /** Changed lines above which Review with agent offers to review in slices; absent: 1200, 0: never. */
+  sliceReviewAbove?: number;
   /** New tickets get a GitHub issue (default true); always on while a GitHub Project is connected. */
   mirrorIssues?: boolean;
 };

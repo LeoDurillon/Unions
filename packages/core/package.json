@@ -42,6 +42,7 @@
     "./investigation-defaults": "./src/investigation/investigation-defaults.ts",
     "./union-update": "./src/union/union-update.ts",
     "./review-spec-lists": "./src/review/review-spec-lists.ts",
+    "./agent-review-slices": "./src/review/agent-review-slices.ts",
     "./prompt-formats": "./src/agent/prompt-formats.ts",
     "./review-report-markdown": "./src/review/review-report-markdown.ts",
     "./review-report-specs": "./src/review/review-report-specs.ts",

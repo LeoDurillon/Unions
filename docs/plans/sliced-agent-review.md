@@ -1,6 +1,6 @@
 # Plan: agent reviews of large changes, slice by slice
 
-Status: planned (2026-11-13); step 0 done (recording built, commit `25105a4`; #1756 rerun and read), step 1 built and measured (commit `c75b8c7`, run 25): it fixes the line numbers, not the coverage; step 2 next.
+Status: planned (2026-11-13); step 0 done (recording built, commit `25105a4`; #1756 rerun and read), step 1 built and measured (commit `c75b8c7`, run 25): it fixes the line numbers, not the coverage; step 2 built (branch `sliced-agent-review`), its run on #1756 left.
 
 ## Problem
 
@@ -157,6 +157,13 @@ Conclusion: a prompt does not change how much one agent reads; step 2 is needed 
 - Then rerun step 0's pull requests and compare. If this is enough up to some size, raise the threshold of step 2.
 
 ## Step 2: a sliced review above a threshold
+
+Built (2026-11-13), with these differences from the list below: a grouping run for the cut is not saved as the
+page's grouping (it would need the grouping's source label, and would replace the user's); a comment on another
+slice's lines is kept, after the owner's, rather than dropped (a bug found is worth keeping, the duplicate check
+removes the repeats); the seams agent gets no `git grep` of the changed symbols, it reads what it needs; drafts carry
+no label of the slice that wrote them yet; the progress is on the button (the part being read, every part's status
+on hover), not on a card.
 
 **Deciding to slice**
 

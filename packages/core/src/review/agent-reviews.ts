@@ -7,6 +7,7 @@ import type { Db } from '../db';
 import * as schema from '../tables';
 import { emitEvent } from '../ticket/tickets';
 import type { AgentReviewCoverage } from './agent-review-coverage';
+import type { SliceProgress } from './agent-review-slices';
 import type { AgentReviewSpec } from './agent-review-specs';
 import {
   cancelQueuedReviewRun,
@@ -104,7 +105,7 @@ export function queueAgentReview(
   db: Db,
   owner: AgentReviewOwner,
   specs: AgentReviewSpec[] | null = null,
-  members: number[] = [],
+  { members = [], mode = 'single' }: { members?: number[]; mode?: AgentReview['mode'] } = {},
 ): AgentReview {
   return db.transaction((tx) => {
     const owners: AgentReviewOwner[] =
@@ -124,6 +125,8 @@ export function queueAgentReview(
       .values({
         ...(owner.kind === 'ticket' ? { ticketId: owner.id } : { reviewId: owner.id }),
         specs,
+        // A stack is reviewed in one pass.
+        mode: members.length > 1 ? 'single' : mode,
       })
       .returning()
       .get();
@@ -219,6 +222,17 @@ export function finishAgentReview(db: Db, id: number, outcome: AgentReviewOutcom
     }
     changed(tx, review);
   });
+}
+
+/** A sliced run's agents and where each stands, saved as they go; the review page refreshes on it. */
+export function setAgentReviewSlices(db: Db, id: number, slices: SliceProgress[]): void {
+  const review = db
+    .update(schema.agentReviews)
+    .set({ slices })
+    .where(eq(schema.agentReviews.id, id))
+    .returning()
+    .get();
+  changed(db, review);
 }
 
 /** Cancels a review still waiting for a slot; false when it already started (the runner stops it). */

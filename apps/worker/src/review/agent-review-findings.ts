@@ -109,8 +109,9 @@ function general(body: string): AgentDraft {
 export function toDrafts(
   findings: Findings,
   patchOf: (path: string) => string | undefined,
+  max = MAX_COMMENTS,
 ): AgentDraft[] {
-  const drafts = findings.comments.slice(0, MAX_COMMENTS).map((finding): AgentDraft => {
+  const drafts = findings.comments.slice(0, max).map((finding): AgentDraft => {
     const patch = patchOf(finding.path);
     const span =
       patch === undefined

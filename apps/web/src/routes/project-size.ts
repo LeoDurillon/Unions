@@ -1,10 +1,10 @@
 // The project's size settings: the paths left out of a change's lines of code. Also the budget of a
-// ticket whose plan gives no estimate.
+// ticket whose plan gives no estimate, and the size above which an agent review is offered in slices.
 import type { ProjectConfig } from '@union/core';
 
 import { BAD_REQUEST, fail } from '../http';
 
-export const SIZE_FIELDS = ['sizeIgnore', 'sizeBudget'] as const;
+export const SIZE_FIELDS = ['sizeIgnore', 'sizeBudget', 'sliceReviewAbove'] as const;
 
 const MAX_PATTERNS = 100;
 const MAX_BUDGET = 100_000;
@@ -35,6 +35,20 @@ function budgetChange(value: unknown): number | undefined {
   return value;
 }
 
+/** A whole number of changed lines, 0 to never slice; null brings back the default. */
+function sliceChange(value: unknown): number | undefined {
+  if (value === null) {
+    return undefined;
+  }
+  if (typeof value !== 'number' || !Number.isInteger(value) || value < 0 || value > MAX_BUDGET) {
+    throw fail(
+      BAD_REQUEST,
+      `"sliceReviewAbove" must be a whole number from 0 to ${MAX_BUDGET}, or null`,
+    );
+  }
+  return value;
+}
+
 /** The size settings a request changes; an absent key keeps the current value. */
 export function sizeChange(
   body: Record<string, unknown>,
@@ -43,5 +57,7 @@ export function sizeChange(
   return {
     sizeIgnore: 'sizeIgnore' in body ? ignoreChange(body.sizeIgnore) : config.sizeIgnore,
     sizeBudget: 'sizeBudget' in body ? budgetChange(body.sizeBudget) : config.sizeBudget,
+    sliceReviewAbove:
+      'sliceReviewAbove' in body ? sliceChange(body.sliceReviewAbove) : config.sliceReviewAbove,
   };
 }

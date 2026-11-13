@@ -90,6 +90,21 @@ They arrive as drafts, like yours: keep, edit or delete each one before you send
 leave a remark on the whole change, and findings about code outside the diff, shown above the files. Once it has
 run, the button reads **Review again with agent**. On a split ticket, it reviews slice by slice.
 
+On a large change (more than 1200 changed lines by default, ignored files left out), **Review with agent** asks how
+the agent should read it:
+
+- **In slices** (the default): the change is cut into parts, by the parts of your specs (the Group by spec result if
+  you ran it on this commit, otherwise a new grouping), or by folder when there are no specs. Each part gets its own
+  agent, which reviews that part's files and reads the rest only to follow a call. Then one more agent checks how
+  the parts fit together. While it runs, the button says which part it reads ("Agent reviewing part 3 of 6: …").
+  The comments of every part arrive together as drafts, a comment two agents made on the same lines kept once, and
+  the remark on the whole change lists what each part found. Up to 10 agent runs, one after another: slower, and it
+  uses more of your Claude usage, but one agent alone leaves about half of a change this size unread.
+- **In one pass**: one agent reads the whole change, as on a small one.
+
+Change the size in Project settings → Review → **Review with agent in slices above** (0 never offers it). A stack is
+always reviewed in one pass.
+
 Next to the button, Union says how much of the change the agent actually opened: "opened every file", or "did not
 open 12 of 77 files (2092 of 4628 lines)". Hover it to see which files. A file it never opened got no review, so
 check those yourself or run the review again. Files the review hides (lock files and your project's ignored

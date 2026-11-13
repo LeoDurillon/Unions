@@ -34,6 +34,25 @@ function Coverage({ coverage }: { coverage: AgentReviewCoverage | null }): React
   );
 }
 
+/** Where a queued or running review stands; a sliced one names the part its agent reads. */
+function activeLabel(review: AgentReviewView | null | undefined): string {
+  if (review?.status === 'queued') {
+    return 'Agent review queued…';
+  }
+  if (review?.stack) {
+    return `Agent reviewing… (the stack of ${review.stack.length})`;
+  }
+  if (review?.mode !== 'sliced') {
+    return 'Agent reviewing…';
+  }
+  const slices = review.slices ?? [];
+  const index = slices.findIndex((slice) => slice.status === 'running');
+  const slice = slices[index];
+  return slice
+    ? `Agent reviewing part ${index + 1} of ${slices.length}: ${slice.title}…`
+    : 'Agent cutting the change into parts…';
+}
+
 /** What the last run left: its error, or how many suggestions it added. */
 function LastRun({ review }: { review: AgentReviewView | null | undefined }): ReactElement | null {
   if (review?.status === 'failed') {
@@ -68,9 +87,11 @@ export function AgentReviewButton({ target }: { target: ReviewTarget }): ReactEl
   if (isActive(latest)) {
     return (
       <div className="flex items-center gap-2">
-        <span className="animate-pulse text-xs text-indigo-600 dark:text-indigo-400">
-          {latest?.status === 'queued' ? 'Agent review queued…' : 'Agent reviewing…'}
-          {latest?.stack ? ` (the stack of ${latest.stack.length})` : ''}
+        <span
+          title={latest?.slices?.map((slice) => `${slice.title}: ${slice.status}`).join('\n')}
+          className="max-w-96 animate-pulse truncate text-xs text-indigo-600 dark:text-indigo-400"
+        >
+          {activeLabel(latest)}
         </span>
         <Button
           disabled={cancel.isPending}

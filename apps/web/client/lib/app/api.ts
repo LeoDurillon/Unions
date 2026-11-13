@@ -167,6 +167,8 @@ export const api = {
       sizeIgnore?: string[] | null;
       /** Null: no budget for a ticket whose plan gives no estimate. */
       sizeBudget?: number | null;
+      /** Null: back to the default; 0: never review in slices. */
+      sliceReviewAbove?: number | null;
     },
   ): Promise<PublicProject> => request('PATCH', `/api/projects/${id}`, change),
   deleteProject: (id: number): Promise<unknown> => request('DELETE', `/api/projects/${id}`),

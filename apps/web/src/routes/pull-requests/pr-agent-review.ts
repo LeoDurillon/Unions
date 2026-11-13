@@ -119,14 +119,14 @@ export function prAgentReviewRoutes(routes: Hono, db: Db, github: OnboardingGitH
   routes.get('/agent-review', (c) => getAgentReview(c, db, owner(load(db, c).review)));
   routes.post('/agent-review', async (c) => {
     const opened = load(db, c);
-    const { specs, stack } = await readAgentReviewBody(c.req.raw);
+    const { specs, stack, mode } = await readAgentReviewBody(c.req.raw);
     if (stack && stack.length > 1) {
       return startStack(c, { db, github }, opened, { specs, stack });
     }
     const { review } = opened;
     const refusal =
       review.files && review.headSha ? null : 'Open the diff first: its files are not read yet.';
-    return startAgentReview(c, db, { owner: owner(review), refusal, specs });
+    return startAgentReview(c, db, { owner: owner(review), refusal, specs, mode });
   });
   routes.post('/agent-review/cancel', (c) => cancelAgentReview(c, db, owner(load(db, c).review)));
 }

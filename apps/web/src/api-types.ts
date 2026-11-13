@@ -2,8 +2,6 @@
 // server.
 import type {
   AfterApproval,
-  AgentReviewCoverage,
-  AgentReviewSpec,
   BoardColumn,
   ContainerRun,
   IntegrationKindName,
@@ -31,6 +29,7 @@ export type { PullRequestImport, PullRequestSource } from './api-pr-import-types
 
 export type { PublicIntegration, SourceImport } from './api-integration-types';
 export type { StackView } from './api-stack-types';
+export type { AgentReviewView } from './api-agent-review-types';
 
 /** How a project reaches GitHub, as the browser sees it. */
 export type GitHubAccess = 'token' | 'app' | 'none';
@@ -225,22 +224,6 @@ export type CommitDiffResponse = { sha: string; files: DiffFileSummary[] };
 export type CommentView = ReviewComment & { outdated: boolean };
 
 /** The latest run of the review agent on a ticket's diff or a pull request. */
-export type AgentReviewView = {
-  id: number;
-  status: 'queued' | 'running' | 'succeeded' | 'failed' | 'cancelled';
-  error: string | null;
-  /** Drafts it added, once it succeeded. */
-  comments: number | null;
-  /** The files it had to review and those it never opened, read from its log; null when not measured. */
-  coverage: AgentReviewCoverage | null;
-  /** What it checked the change against; null when it was given none. */
-  specs: AgentReviewSpec[] | null;
-  /** A stack run's pull requests, bottom first; null for a run on one change. */
-  stack: number[] | null;
-  createdAt: number;
-  startedAt: number | null;
-  finishedAt: number | null;
-};
 
 /** One line-comment thread of a pull request, as GitHub returns it. */
 export type PullRequestThread = {

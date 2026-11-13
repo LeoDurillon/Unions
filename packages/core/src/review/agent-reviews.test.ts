@@ -142,7 +142,9 @@ function reviewDrafts(reviewId: number): string[] {
 
 test("a stack's run covers each of its reviews: busy, latest and drafts for every one", () => {
   const [bottom = 0, middle = 0, top = 0] = stackReviews();
-  const run = queueAgentReview(db, { kind: 'review', id: bottom }, [], [bottom, middle, top]);
+  const run = queueAgentReview(db, { kind: 'review', id: bottom }, [], {
+    members: [bottom, middle, top],
+  });
   expect(agentReviewStack(db, run.id).map((member) => member.prNumber)).toEqual([12, 13, 14]);
   expect(latestAgentReview(db, { kind: 'review', id: top })?.id).toBe(run.id);
   expect(() => queueAgentReview(db, { kind: 'review', id: middle })).toThrow(AgentReviewBusyError);
@@ -163,7 +165,7 @@ test("a stack's run covers each of its reviews: busy, latest and drafts for ever
 
   const single = queueAgentReview(db, { kind: 'review', id: top });
   expect(agentReviewStack(db, single.id)).toEqual([]);
-  expect(() => queueAgentReview(db, { kind: 'review', id: bottom }, [], [bottom, top])).toThrow(
-    AgentReviewBusyError,
-  );
+  expect(() =>
+    queueAgentReview(db, { kind: 'review', id: bottom }, [], { members: [bottom, top] }),
+  ).toThrow(AgentReviewBusyError);
 });

@@ -112,6 +112,21 @@ is read) and saves them on the run (`agent_reviews.coverage`). Next to **Review 
 shows "opened every file" or "did not open N of M files (L of T lines)", the files listed on hover. A stack's run is
 not measured.
 
+### Review with agent: in slices
+
+Above the project's `sliceReviewAbove` (changed lines of the files the review does not ignore; default 1200, 0 never),
+the dialog offers **In slices** (default) or **In one pass**; a stack is reviewed in one pass. The request carries
+`mode: 'sliced'`, saved on `agent_reviews.mode`. The worker cuts the change (`agent-review-cut.ts`): the newest
+succeeded grouping of the same head, else with specs a grouping run now (not saved as the page's), else by folder
+(`slicesByFolder`). Each hunk is owned by one slice; slices over 1200 lines are split by folder, those under 50
+merged into a neighbour, at most 8 (`agent-review-slices.ts`). One agent per slice, then one on the seams (given
+every slice's findings and the spec parts no change implements), each in a fresh session in the same checkout;
+their progress is saved in `agent_reviews.slices` and shown on the button. The findings are merged
+(`agent-review-merge.ts`): comments on lines their slice owns first, then the others, then the seams', one on lines
+an earlier one covers dropped, at most 60. The general draft starts with the seams agent's summary and lists each
+part's. A failed part is named there; the review fails only when every part did. Coverage is read from all of the
+run's agents.
+
 ### Explain
 
 On either review page (a ticket's branch or a pull request under review), **Explain** asks an agent about lines of
