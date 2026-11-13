@@ -1,8 +1,9 @@
 // The browser's client for the event rules endpoints.
 
-import type { EventRule, NotionSchema, NotionUser, ProjectField } from '@union/core';
+import type { EventRule, NotionUser, ProjectField } from '@union/core';
 import { emptyAction, type EventAction } from '@union/core/event-actions';
 import type { EventTrigger } from '@union/core/event-rules';
+import type { IntegrationKindName } from '@union/core/integration-kinds';
 
 import type {
   DeliveryView,
@@ -19,16 +20,16 @@ export type RuleDraft = {
   action: EventAction;
 };
 
-/** A new rule: it sets a Notion property when the Notion columns are read, else it comments. */
-export function newRule(notion: NotionSchema | null): RuleDraft {
+/** A new rule: it sets fields of the first tracker whose columns are read, else it comments on GitHub. */
+export function newRule(tracker: IntegrationKindName | null): RuleDraft {
   return {
     name: '',
     enabled: true,
     trigger: { kind: 'pull_request_linked' },
     action: emptyAction(
-      notion
-        ? { kind: 'tracker_fields', tracker: 'notion' }
-        : { kind: 'github_comment', tracker: null },
+      tracker === null
+        ? { kind: 'github_comment', tracker: null }
+        : { kind: 'tracker_fields', tracker },
     ),
   };
 }

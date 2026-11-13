@@ -1,0 +1,13 @@
+id: no-tracker-names
+valid:
+  - |
+    const { label } = integrationKind(ticket.originKind);
+  - |
+    const shown = integrationKinds().map(({ kind }) => kind);
+  - |
+    const note = 'Imported from a tracker';
+invalid:
+  - |
+    if (ticket.originKind === 'jira') { readIssue(); }
+  - |
+    const integration = integrationOf(db, projectId, 'notion');

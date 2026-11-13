@@ -1,8 +1,13 @@
-// Where a specification comes from: the PR description, the ticket, an issue, a Notion page, a Jira
-// issue. Picking it and reading it.
+// Where a specification comes from: the PR description, the ticket, an issue, a tracker's item.
+// Picking it and reading it.
 
 import { useMutation } from '@tanstack/react-query';
 import type { SpecSource } from '@union/core';
+import {
+  integrationKind,
+  isIntegrationKindName,
+  type IntegrationKindName,
+} from '@union/core/integration-kinds';
 import { useState, type ReactElement } from 'react';
 
 import type { SpecText } from '../../../src/routes/spec-sources';
@@ -11,35 +16,43 @@ import { reviewBase, type ReviewTarget } from '../../lib/review/review-target';
 import { Segmented } from '../ui/choice';
 import { Button, ErrorText, inputClass } from '../ui/ui';
 
-export const LABELS: Record<SpecSource, string> = {
+const OWN_LABELS: Record<Exclude<SpecSource, IntegrationKindName>, string> = {
   pr: 'PR description',
   ticket: 'Ticket description',
   issue: 'GitHub issue',
-  notion: 'Notion page',
-  jira: 'Jira issue',
 };
 
-const REF_HINTS: Partial<Record<SpecSource, string>> = {
-  issue: 'Issue number or URL, e.g. 42',
-  notion: 'Notion page URL',
-  jira: 'Issue key or link, e.g. ABC-12',
-};
+/** "PR description", "Notion page", "Jira issue". */
+export function sourceLabel(source: SpecSource): string {
+  if (isIntegrationKindName(source)) {
+    const { label, itemLabel } = integrationKind(source);
+    return `${label} ${itemLabel}`;
+  }
+  return OWN_LABELS[source];
+}
+
+/** What to type for a source read from a reference: an issue's number, a tracker item's link. */
+function refHint(source: SpecSource): string | undefined {
+  if (isIntegrationKindName(source)) {
+    return integrationKind(source).linkPrompt.label;
+  }
+  return source === 'issue' ? 'Issue number or URL, e.g. 42' : undefined;
+}
 
 /**
- * The sources this review can read: a PR description needs a PR, a ticket's text a ticket, a Jira issue
- * a project connected to Jira.
+ * The sources this review can read: a PR description needs a PR, a ticket's text a ticket, a tracker's
+ * item a project connected to the tracker.
  */
 export function specSources(
   target: ReviewTarget,
   hasPullRequest: boolean,
-  jiraConnected: boolean,
+  trackers: readonly IntegrationKindName[],
 ): SpecSource[] {
   return [
     ...(hasPullRequest ? (['pr'] as const) : []),
     ...(target.kind === 'ticket' ? (['ticket'] as const) : []),
     'issue',
-    'notion',
-    ...(jiraConnected ? (['jira'] as const) : []),
+    ...trackers,
   ];
 }
 
@@ -59,7 +72,7 @@ export function SourcePicker({
       </p>
       <Segmented
         legend="Specification"
-        options={sources.map((source) => ({ value: source, label: LABELS[source] }))}
+        options={sources.map((source) => ({ value: source, label: sourceLabel(source) }))}
         value={kind}
         onChange={onPick}
       />
@@ -153,9 +166,9 @@ function Reader({
   loaded: boolean;
   load: Load;
 }): ReactElement {
-  const hint = REF_HINTS[kind];
+  const hint = refHint(kind);
   if (!hint) {
-    const what = `the ${LABELS[kind].toLowerCase()}`;
+    const what = `the ${sourceLabel(kind).toLowerCase()}`;
     return <ReadAtOnce kind={kind} what={what} loaded={loaded} load={load} />;
   }
   return <RefField kind={kind} hint={hint} load={load} />;

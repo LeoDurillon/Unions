@@ -4,7 +4,7 @@ import { beforeEach, expect, test } from 'bun:test';
 import {
   createDb,
   emitEvent,
-  linkNotionPage,
+  linkTrackerItem,
   migrateDb,
   saveNotionConnection,
   schema,
@@ -63,7 +63,11 @@ beforeEach(() => {
     })
     .returning()
     .get().id;
-  linkNotionPage(db, { kind: 'review', id: reviewId }, { id: PAGE, title: 'Spec', url: null });
+  linkTrackerItem(db, { kind: 'review', id: reviewId }, 'notion', {
+    id: PAGE,
+    title: 'Spec',
+    url: null,
+  });
   const path = `/api/projects/${projectId}/pull-requests/reviews/7/tracker-fields`;
   set = (body) =>
     app.request(path, {

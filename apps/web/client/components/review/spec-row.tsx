@@ -7,7 +7,7 @@ import type { ReviewSpecView } from '../../../src/review-spec-types';
 import { ConfirmButton } from '../ui/confirm-button';
 import { TrashIcon } from '../ui/icon-button';
 import { Badge, Button, inputClass } from '../ui/ui';
-import { LABELS } from './spec-picker';
+import { sourceLabel } from './spec-picker';
 
 /** Characters of a closed card's text shown as its preview. */
 const PREVIEW_CHARS = 240;
@@ -98,7 +98,7 @@ export function SpecRow({
           )}
         </span>
         {item.text === null ? null : <Badge tone="amber">edited</Badge>}
-        <span className="text-xs text-zinc-500">{LABELS[item.kind]}</span>
+        <span className="text-xs text-zinc-500">{sourceLabel(item.kind)}</span>
         <SpecActions item={item} editing={editing} onEditing={setEditing} onChange={onChange} />
       </div>
       {editing ? (

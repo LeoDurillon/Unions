@@ -96,6 +96,7 @@ export function Rules({
     setEditing(null);
   });
   const notion = data?.notion ?? null;
+  const firstRead = data?.trackers.find((tracker) => tracker.read)?.kind ?? null;
   return (
     <>
       <TrackerBars projectId={projectId} data={data} onRefreshed={() => writes.refresh()} />
@@ -106,7 +107,7 @@ export function Rules({
           <RuleEditor
             projectId={projectId}
             notion={notion}
-            initial={editing === 'new' ? newRule(notion) : draftOf(editing)}
+            initial={editing === 'new' ? newRule(firstRead) : draftOf(editing)}
             saving={writes.save.isPending}
             error={writes.save.error}
             onSave={(rule) => {

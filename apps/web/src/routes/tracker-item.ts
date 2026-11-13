@@ -8,7 +8,7 @@ import { NOT_FOUND, fail } from '../http';
 import { loadTicketTrackerItem } from '../ticket-tracker-item';
 import { pendingTrackerFields } from '../tracker-field-commands';
 import type { TrackerItemView } from '../tracker-item-types';
-import { guarded } from './notion';
+import { guarded } from './tracker-errors';
 
 async function itemView(db: Db, apis: IntegrationApis, c: Context): Promise<TrackerItemView> {
   const { ticket, kind, item, integration } = loadTicketTrackerItem(db, c);

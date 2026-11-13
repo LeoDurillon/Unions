@@ -9,7 +9,10 @@ import type { TrackerActionKind } from './tracker-action-kinds';
 import type { TrackerCapability } from './tracker-adapter';
 import type { TrackerFieldShape } from './tracker-field-types';
 
-export type IntegrationKindName = 'notion' | 'jira';
+/** Every kind of tracker, in the order the UI lists them. */
+export const INTEGRATION_KIND_NAMES = ['notion', 'jira'] as const;
+
+export type IntegrationKindName = (typeof INTEGRATION_KIND_NAMES)[number];
 
 /** What the UI and the routes need to know about a kind; no secret, no network. */
 export type IntegrationKind = {

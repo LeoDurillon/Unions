@@ -1,5 +1,6 @@
-// The trackers (Notion, Jira), events and the danger zone.
+// The trackers' settings pages, events and the danger zone.
 
+import { isIntegrationKindName, type IntegrationKindName } from '@union/core/integration-kinds';
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
@@ -10,7 +11,7 @@ import { EventActivitySection } from './delivery-list';
 import { EventRulesSection } from './events-section';
 import { SettingsIntro } from './settings-intro';
 
-export type IntegrationSection = 'notion' | 'jira' | 'event-rules' | 'event-activity' | 'danger';
+export type IntegrationSection = IntegrationKindName | 'event-rules' | 'event-activity' | 'danger';
 
 /** The trackers, events and the danger zone. */
 export function IntegrationSectionBody({
@@ -20,22 +21,24 @@ export function IntegrationSectionBody({
   section: IntegrationSection;
   project: PublicProject;
 }): ReactElement {
-  const bodies: Record<IntegrationSection, () => ReactElement> = {
-    notion: () => <TrackerSection kind="notion" project={project} />,
-    jira: () => <TrackerSection kind="jira" project={project} />,
-    'event-rules': () => <EventRulesSection project={project} />,
-    'event-activity': () => <EventActivitySection project={project} />,
-    danger: () => (
-      <>
-        <SettingsIntro>What cannot be undone.</SettingsIntro>
-        <DeleteSection
-          project={project}
-          onDeleted={() => {
-            closeSettings();
-          }}
-        />
-      </>
-    ),
-  };
-  return bodies[section]();
+  if (isIntegrationKindName(section)) {
+    return <TrackerSection kind={section} project={project} />;
+  }
+  if (section === 'event-rules') {
+    return <EventRulesSection project={project} />;
+  }
+  if (section === 'event-activity') {
+    return <EventActivitySection project={project} />;
+  }
+  return (
+    <>
+      <SettingsIntro>What cannot be undone.</SettingsIntro>
+      <DeleteSection
+        project={project}
+        onDeleted={() => {
+          closeSettings();
+        }}
+      />
+    </>
+  );
 }

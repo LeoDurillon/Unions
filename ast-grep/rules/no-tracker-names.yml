@@ -1,0 +1,22 @@
+id: no-tracker-names
+language: TypeScript
+severity: error
+message: Features ask a tracker's adapter or kind for what they need, never for a tracker by name ('notion', 'jira').
+note: |
+  AGENTS.md, Rules (trackers behind adapters). Name a tracker only in its own code: core's
+  integrations/, the client's components/integrations/, and files named after it (jira-picks.ts).
+  Widen `ignores` only for code that must name one, such as reading kinds saved before the
+  adapters; say why beside the entry.
+rule:
+  kind: string
+  regex: '^[''"](notion|jira)[''"]$'
+ignores:
+  - '**/*.test.ts'
+  - '**/*.test.tsx'
+  - 'packages/core/src/integrations/**'
+  - 'apps/web/client/components/integrations/**'
+  # A tracker's own files, named after it.
+  - '**/*notion*'
+  - '**/*jira*'
+  # Reads the rule actions saved before tracker actions as the tracker action each became; dropped after a release.
+  - 'packages/core/src/event/event-legacy-actions.ts'

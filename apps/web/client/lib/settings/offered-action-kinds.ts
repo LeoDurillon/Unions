@@ -49,11 +49,8 @@ export function offeredCommentTargets(
 
 function connectionsOf(data: EventRulesResponse | undefined): Set<Connection> {
   const connected = new Set<Connection>();
-  if (data?.hasNotion) {
-    connected.add('notion');
-  }
-  if (data?.jira) {
-    connected.add('jira');
+  for (const { kind } of data?.trackers ?? []) {
+    connected.add(kind);
   }
   if (data?.github.project) {
     connected.add('github-project');

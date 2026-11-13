@@ -5,7 +5,7 @@ import type { ReactElement } from 'react';
 import type { TicketDetail } from '../../../src/api-types';
 import { FlowRow } from '../flow/flow-row';
 import { PreviewSummary } from '../previews/preview-summary';
-import { TicketTrackerRows } from '../tracker/ticket-tracker-rows';
+import { TicketTrackerRows, type TrackerRowsTab } from '../tracker/ticket-tracker-rows';
 import { DetailRow } from '../ui/detail-row';
 import { BaseBranchRow } from './base-branch-row';
 import { SizeRow } from './size-row';
@@ -45,7 +45,7 @@ export function TicketDetails({
 }: {
   detail: TicketDetail;
   onOpenTicket: (id: number) => void;
-  onOpenTab: (tab: 'preview' | 'notion' | 'jira') => void;
+  onOpenTab: (tab: 'preview' | TrackerRowsTab) => void;
 }): ReactElement {
   const { ticket } = detail;
   return (

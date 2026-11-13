@@ -15,7 +15,7 @@ import { Hono, type Context } from 'hono';
 import { BAD_REQUEST, CONFLICT, fail, readObject, requireText } from '../../http';
 import { requireFreeOrigin, requireOrigin } from '../../ticket-origin-guard';
 import { kindParam } from '../../ticket-tracker-item';
-import { guarded } from '../notion';
+import { guarded } from '../tracker-errors';
 import { loadTicket } from './ticket-load';
 
 /** The item `{ item }` names, read with the project's credentials. */

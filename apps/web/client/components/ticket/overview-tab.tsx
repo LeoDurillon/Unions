@@ -1,5 +1,6 @@
 // The ticket panel's overview tab: the description beside the details the ticket is attached to, then its runs.
 
+import type { IntegrationKindName } from '@union/core/integration-kinds';
 import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../../src/api-types';
@@ -16,7 +17,7 @@ export function OverviewTab({
   detail: TicketDetail;
   onOpenTicket: (id: number) => void;
   /** The Preview and Notion tabs, from their summaries here. */
-  onOpenTab: (tab: 'preview' | 'notion' | 'jira') => void;
+  onOpenTab: (tab: 'preview' | IntegrationKindName) => void;
 }): ReactElement {
   const { ticket, runs } = detail;
   return (

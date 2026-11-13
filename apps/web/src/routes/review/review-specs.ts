@@ -4,7 +4,8 @@
 // Specs bar edits it.
 
 import {
-  parseNotionId,
+  integrationKind,
+  isIntegrationKindName,
   parseSavedSpecs,
   reviewSpecRows,
   saveReviewSpecs,
@@ -69,14 +70,15 @@ export function readReviewSpecs(
   return views(readers, target, startReviewSpecs(readers.db, target.owner, target.starts));
 }
 
-/** A Notion spec names its page by id, as a link does (the dialog may send the page's URL). */
+/** A tracker's spec names its item by id, as a link does (the dialog may send the item's URL). */
 function withPageId(spec: SavedSpecEntry): SavedSpecEntry {
-  if (spec.kind !== 'notion') {
+  if (!isIntegrationKindName(spec.kind)) {
     return spec;
   }
-  const id = parseNotionId(spec.ref ?? '');
+  const kind = integrationKind(spec.kind);
+  const id = kind.parseRef(spec.ref ?? '');
   if (!id) {
-    throw fail(BAD_REQUEST, `${spec.label}: give a Notion page URL or ID`);
+    throw fail(BAD_REQUEST, `${spec.label}: give a ${kind.label} ${kind.itemLabel} link or ID`);
   }
   return { ...spec, ref: id };
 }

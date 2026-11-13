@@ -1,7 +1,7 @@
 # One adapter per tracker
 
 Status: planned (2026-11-07), brought up to date 2026-11-13 after [tracker properties](archive/tracker-properties.md).
-Steps 1 to 4 built and deployed, step 5 built (2026-11-13, branch `tracker-adapters`); step 3 checked on real Jira, Notion's check waits.
+Steps 1 to 6 built (2026-11-13, branch `tracker-adapters`; 1 to 4 deployed); step 3 checked on real Jira, Notion's check waits. Step 7 optional.
 Follows [Jira](archive/jira.md) and its gap plans, built and deployed; prepares a later
 tracker (Linear, GitHub Issues as a source, Asana…).
 
@@ -196,6 +196,17 @@ Each step moves Notion and Jira together, keeps the screens as they are, and is 
 
 6. **The guard and the guide.** The ast-grep rule (D6) with its cases, set to fail; the Trackers page (D8);
    `docs/architecture/integrations.md` describes adapters; this plan's status.
+   Built: `no-tracker-names` and `no-tracker-names-tsx` (ast-grep, one per parser), failing, with their cases;
+   AGENTS.md says the rule. Moved behind the kinds and adapters to pass it: review specs (one reader over `refs` and
+   `text`, `SPEC_SOURCES` from `INTEGRATION_KIND_NAMES`, labels from the kind), the ticket's tracker tab and
+   section types, the settings menu and pages, the spec picker (only connected trackers are offered: Notion was
+   offered unconnected), the rules page (the response lists connected trackers; a new rule starts on the first
+   whose columns are read, Jira too; each tracker's bar is its own part), the Notion import backfill (now
+   `integrations/notion-backfill.ts`), the review link helpers (`linkTrackerItem`, `linkedTrackerItems`). Ignored,
+   with the reason: tests, each tracker's own folders and files, and `event-legacy-actions.ts` until it is dropped.
+   The guide's [Trackers](../../documentation/trackers.md) page says what Union does with a tracker and what
+   differs; the detail stays on the pages that had it (tickets, reviewing, automation, first project).
+
 7. **GitHub Project fields (optional).** D7.
 
 After step 6, a new tracker is: its API client and fake, its adapter (mappings and formats), its settings section,

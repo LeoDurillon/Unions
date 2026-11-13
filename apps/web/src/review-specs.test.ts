@@ -3,7 +3,7 @@ import { beforeEach, expect, test } from 'bun:test';
 import {
   createDb,
   createTicket,
-  linkNotionPage,
+  linkTrackerItem,
   migrateDb,
   saveNotionConnection,
   schema,
@@ -92,8 +92,16 @@ test("a ticket's specs start from its text and the Notion page it came from, rea
 test("a pull request's specs are its description and every linked page; one unreadable says why", async () => {
   const base = `/api/projects/${projectId}/pull-requests/reviews/9/specs`;
   const reviewId = db.select().from(schema.currentReviews).get()?.id ?? 0;
-  linkNotionPage(db, { kind: 'review', id: reviewId }, { id: PAGE, title: 'Spec', url: null });
-  linkNotionPage(db, { kind: 'review', id: reviewId }, { id: GONE, title: 'Old', url: null });
+  linkTrackerItem(db, { kind: 'review', id: reviewId }, 'notion', {
+    id: PAGE,
+    title: 'Spec',
+    url: null,
+  });
+  linkTrackerItem(db, { kind: 'review', id: reviewId }, 'notion', {
+    id: GONE,
+    title: 'Old',
+    url: null,
+  });
   const list = await specs(base);
   expect(list.map((spec) => [spec.kind, spec.ref])).toEqual([
     ['pr', null],

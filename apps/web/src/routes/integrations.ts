@@ -30,7 +30,7 @@ import {
 } from '../http';
 import { toPublicIntegration } from '../public-project';
 import { jiraPickRoutes } from './jira-picks';
-import { guarded } from './notion';
+import { guarded } from './tracker-errors';
 
 function kindOf(c: Context): IntegrationKindName {
   const kind = c.req.param('kind') ?? '';

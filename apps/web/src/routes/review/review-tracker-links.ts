@@ -17,8 +17,8 @@ import { Hono, type Context } from 'hono';
 
 import type { OnboardingGitHub } from '../../github-onboarding';
 import { BAD_REQUEST, fail, readObject, requireText } from '../../http';
-import { guarded } from '../notion';
 import { authOf, load, type Review } from '../pull-requests/pr-review-load';
+import { guarded } from '../tracker-errors';
 import { requireAccess, reviewTracker, type ReviewTracker } from './review-tracker-access';
 
 /** A description rarely names more; each is a read of the tracker. */

@@ -8,7 +8,6 @@ import { notionSets } from '../integrations/notion-rule-check';
 import * as schema from '../tables';
 import { createTicket, emitEvent, getTicket } from '../ticket/tickets';
 import {
-  backfillNotionPages,
   finishDelivery,
   nextDelivery,
   queueDeliveries,
@@ -230,21 +229,6 @@ test('temporary failures are tried again later, then given up', () => {
   expect(recentDeliveries(db, projectId)).toMatchObject([
     { status: 'failed', attempts: 5, error: 'Notion: rate limited' },
   ]);
-});
-
-test('tickets imported before the link was stored are linked from their description', () => {
-  const imported = createTicket(db, {
-    projectId,
-    title: 'Old import',
-    body: 'Text.\n\n---\nImported from Notion: https://www.notion.so/acme/Add-search-0123456789abcdef0123456789abcdef',
-  });
-  createTicket(db, { projectId, title: 'Local', body: 'Nothing here.' });
-  expect(backfillNotionPages(db)).toBe(1);
-  expect(getTicket(db, imported.id)).toMatchObject({
-    originKind: 'notion',
-    originId: '01234567-89ab-cdef-0123-456789abcdef',
-  });
-  expect(backfillNotionPages(db)).toBe(0);
 });
 
 test('a review posted on a pull request without a ticket queues the rules of its project', () => {

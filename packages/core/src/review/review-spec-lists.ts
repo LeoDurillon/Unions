@@ -1,6 +1,7 @@
 // What a review's spec list starts with, a stack's specs from its members', the specs as the text
 // Group by spec reads. Pure, browser-safe.
 
+import type { IntegrationKindName } from '../integrations/kinds';
 import { MAX_SPEC_CHARS, MAX_SPECS, type AgentReviewSpec } from './agent-review-specs';
 import { SPEC_SOURCES, type SpecSource } from './spec-source-kinds';
 
@@ -12,7 +13,7 @@ export type SpecOwnerFacts =
   | {
       kind: 'ticket';
       /** The tracker item the ticket comes from (a Notion page, a Jira issue), read as a spec too. */
-      trackerOrigin: { kind: 'notion' | 'jira'; id: string; url: string | null } | null;
+      trackerOrigin: { kind: IntegrationKindName; id: string; url: string | null } | null;
     }
   | { kind: 'review'; prNumber: number };
 

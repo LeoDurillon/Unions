@@ -4,7 +4,7 @@ import { beforeEach, expect, test } from 'bun:test';
 import {
   createDb,
   JiraError,
-  linkedJiraIssues,
+  linkedTrackerItems,
   migrateDb,
   saveIntegration,
   schema,
@@ -96,7 +96,7 @@ test('an issue is linked as a spec of the review, read with its text, and unlink
     url: `${SITE}/browse/XYZ-3`,
   });
   expect((await send('PUT', base, { item: `${SITE}/browse/abc-12` })).status).toBe(200);
-  expect(linkedJiraIssues(db, { kind: 'review', id: reviewId })).toEqual([
+  expect(linkedTrackerItems(db, { kind: 'review', id: reviewId }, 'jira')).toEqual([
     { id: 'ABC-12', title: 'ABC-12 Summary of ABC-12', url: `${SITE}/browse/ABC-12` },
   ]);
   const suggested = (await (await send('GET', `${base}/suggestions`)).json()) as {
@@ -116,7 +116,7 @@ test('an issue is linked as a spec of the review, read with its text, and unlink
     },
   ]);
   expect((await send('DELETE', `${base}/ABC-12`)).status).toBe(200);
-  expect(linkedJiraIssues(db, { kind: 'review', id: reviewId })).toEqual([]);
+  expect(linkedTrackerItems(db, { kind: 'review', id: reviewId }, 'jira')).toEqual([]);
 });
 
 test('a link of another site, a missing issue, or a project not connected is refused', async () => {

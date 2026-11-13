@@ -1,12 +1,10 @@
-// What the routes reading the trackers share: their errors as HTTP answers; Notion's secret for a project.
+// The trackers' failures as HTTP answers: a refusal, a value or item refused, the tracker's own status.
 import {
-  integrationOf,
   ItemOutsideSourceError,
   JiraError,
   NotionError,
   TrackerRefusedError,
   TrackerValueError,
-  type Db,
 } from '@union/core';
 import { HTTPException } from 'hono/http-exception';
 
@@ -45,15 +43,4 @@ export async function guarded<T>(work: () => Promise<T>): Promise<T> {
     const message = error instanceof Error ? error.message : 'The tracker request failed';
     throw fail(trackerStatus(error), message);
   }
-}
-
-const NOT_CONNECTED = 'This project is not connected to Notion: set it up in the project settings';
-
-/** The project's Notion secret, for reading any page shared with the integration. */
-export function notionTokenOf(db: Db, projectId: number): string {
-  const integration = integrationOf(db, projectId, 'notion');
-  if (!integration) {
-    throw fail(CONFLICT, NOT_CONNECTED);
-  }
-  return integration.secret;
 }

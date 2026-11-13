@@ -1,6 +1,8 @@
 // `/api/projects/:projectId/event-rules` and its deliveries, and the stored Notion columns and Jira fields.
 import {
   hasGitHubProject,
+  integrationKinds,
+  integrationOf,
   mirrorsIssues,
   checkRule,
   deleteRule,
@@ -24,7 +26,7 @@ import { Hono, type Context } from 'hono';
 import type { DeliveryView, EventRulesResponse } from '../event-api-types';
 import { BAD_REQUEST, CONFLICT, CREATED, fail, NOT_FOUND, readObject, requireId } from '../http';
 import { previewOf } from '../rule-previews';
-import { guarded } from './notion';
+import { guarded } from './tracker-errors';
 
 function loadProject(db: Db, c: Context): Project {
   const id = requireId(c.req.param('projectId'), 'project id');
@@ -61,8 +63,11 @@ function list(db: Db, c: Context): Response {
   const body: EventRulesResponse = {
     rules: listRules(db, project.id),
     notion: notionSchemaOf(db, project.id),
-    hasNotion: notionAccessOf(db, project.id) !== null,
     jira: jiraRuleSourceOf(db, project.id),
+    trackers: integrationKinds().flatMap(({ kind }) => {
+      const integration = integrationOf(db, project.id, kind);
+      return integration ? [{ kind, read: integration.fieldsReadAt !== null }] : [];
+    }),
     github: { project: hasGitHubProject(project), issues: mirrorsIssues(project) },
   };
   return c.json(body);

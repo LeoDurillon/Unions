@@ -1,17 +1,13 @@
-// A specification's text from where the user points: the PR, the ticket, a GitHub issue, a Notion
-// page, a Jira issue.
+// A specification's text from where the user points: the PR, the ticket, a GitHub issue, a tracker's item.
 
 import {
   integrationKind,
   integrationOf,
-  issueMarkdown,
-  jiraAuthOf,
-  mentionTitles,
-  notionMarkdown,
-  parseNotionId,
   projectGitHubAuth,
+  trackerAdapter,
   withoutUnionLinks,
   type Db,
+  type IntegrationKindName,
   type JiraApi,
   type NotionApi,
   type SpecSource,
@@ -21,8 +17,8 @@ import type { OnboardingGitHub } from '../github-onboarding';
 import { BAD_REQUEST, CONFLICT, fail, NOT_FOUND } from '../http';
 import { parseIssueRef } from '../pull-request-ref';
 import { guarded } from './github-errors';
-import { guarded as notionGuarded, notionTokenOf } from './notion';
 import type { GroupingTarget } from './review/review-groupings';
+import { guarded as trackerGuarded } from './tracker-errors';
 
 /** What the services the specification can come from are read with: all read only. */
 export type SpecReaders = { db: Db; github: OnboardingGitHub; notion: NotionApi; jira: JiraApi };
@@ -93,57 +89,48 @@ async function issueSpec(
   };
 }
 
-/** Any page the project's integration can read (it only sees the pages shared with it). */
-async function notionSpec(
-  readers: SpecReaders,
-  target: GroupingTarget,
-  ref: string,
-): Promise<SpecText> {
-  const token = notionTokenOf(readers.db, target.project.id);
-  const id = parseNotionId(ref);
-  if (!id) {
-    throw fail(BAD_REQUEST, 'Give a Notion page URL or ID');
-  }
-  const page = await notionGuarded(() => readers.notion.page(token, id));
-  const { markdown } = await notionGuarded(() => readers.notion.pageMarkdown(token, id));
-  const titles = await mentionTitles(readers.notion, token, markdown);
-  return {
-    kind: 'notion',
-    label: `Notion: ${page.title || 'Untitled page'}`,
-    text: notionMarkdown(markdown, titles).trim(),
-    url: page.url,
-  };
-}
-
 /**
- * Any issue of the project's Jira site the account can see, not only its project's (a review may implement
- * another project's issue); its description as the import converts it, attachments listed but not read.
+ * Any item of the project's tracker the account can read: a Notion page shared with the integration, an
+ * issue of the Jira site of any project (a review may implement another project's). Its text as the import
+ * converts it, attachments listed but not read.
  */
-async function jiraSpec(
+async function trackerSpec(
   readers: SpecReaders,
   target: GroupingTarget,
-  ref: string,
+  spec: { kind: IntegrationKindName; ref: string },
 ): Promise<SpecText> {
-  const kind = integrationKind('jira');
-  const integration = integrationOf(readers.db, target.project.id, 'jira');
-  const auth = jiraAuthOf(readers.db, target.project.id);
-  if (!integration || !auth) {
-    throw fail(CONFLICT, 'Connect the project to Jira first (Settings → Integrations → Jira)');
+  const { label, itemLabel, namedByKey } = integrationKind(spec.kind);
+  const integration = integrationOf(readers.db, target.project.id, spec.kind);
+  const { refs, text } = trackerAdapter(spec.kind, readers);
+  if (!integration || !refs || !text) {
+    throw fail(
+      CONFLICT,
+      `Connect the project to ${label} first (Settings → Integrations → ${label})`,
+    );
   }
-  const key = kind.parseRef(ref);
-  if (!key) {
-    throw fail(BAD_REQUEST, 'Give a Jira issue key or link, e.g. ABC-12');
+  const itemId = refs.parse(spec.ref);
+  if (!itemId) {
+    throw fail(BAD_REQUEST, `Give a ${label} ${itemLabel} link or ID`);
   }
-  const elsewhere = kind.refError?.(ref, integration.config) ?? null;
+  const elsewhere = refs.error(spec.ref, integration.config);
   if (elsewhere !== null) {
     throw fail(BAD_REQUEST, elsewhere);
   }
-  const issue = await notionGuarded(() => readers.jira.issue(auth, key));
+  const { secret, config } = integration;
+  const read = await trackerGuarded(() => text.read(secret, config, itemId));
+  // A tracker giving the title with the text (Jira) is read once; else the item is read for it.
+  const found =
+    read.title === undefined
+      ? await trackerGuarded(() => refs.check(secret, config, itemId, true))
+      : { itemId, title: read.title, url: refs.url(itemId, config) };
+  const title = namedByKey
+    ? `${found.itemId} ${found.title}`
+    : found.title || `Untitled ${itemLabel}`;
   return {
-    kind: 'jira',
-    label: `Jira: ${issue.key} ${issue.summary}`.trim(),
-    text: issueMarkdown(issue, auth.site).trim(),
-    url: `${auth.site}/browse/${issue.key}`,
+    kind: spec.kind,
+    label: `${label}: ${title}`.trim(),
+    text: read.markdown.trim(),
+    url: found.url,
   };
 }
 
@@ -163,8 +150,8 @@ export function readSpec(
   if (kind === 'pr') {
     return pullRequestSpec(readers, target);
   }
-  if (kind === 'jira') {
-    return jiraSpec(readers, target, ref);
+  if (kind === 'issue') {
+    return issueSpec(readers, target, ref);
   }
-  return kind === 'issue' ? issueSpec(readers, target, ref) : notionSpec(readers, target, ref);
+  return trackerSpec(readers, target, { kind, ref });
 }

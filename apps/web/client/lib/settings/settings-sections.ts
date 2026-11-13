@@ -1,8 +1,16 @@
 // The project settings pages by group, and opening or closing them through `?settings=`.
 
+import { INTEGRATION_KIND_NAMES, integrationKind } from '@union/core/integration-kinds';
+
 import { confirmLeave } from '../app/leave-guard';
 import { readParam, setParams, useUrlParam } from '../app/url-state';
 import { CLOSE_REVIEW } from '../review/review-url';
+
+/** Each tracker's settings page, named after it. */
+const TRACKER_SECTIONS = INTEGRATION_KIND_NAMES.map((kind) => ({
+  id: kind,
+  label: integrationKind(kind).label,
+}));
 
 /** The project settings pages, in menu order, by group; the id is what `?settings=` holds. */
 export const SETTINGS_GROUPS = [
@@ -31,11 +39,7 @@ export const SETTINGS_GROUPS = [
   },
   {
     label: 'Integrations',
-    sections: [
-      { id: 'github-project', label: 'GitHub Project' },
-      { id: 'notion', label: 'Notion' },
-      { id: 'jira', label: 'Jira' },
-    ],
+    sections: [{ id: 'github-project', label: 'GitHub Project' }, ...TRACKER_SECTIONS],
   },
   {
     label: 'Events',

@@ -10,7 +10,7 @@ import { loadTicketTrackerItem, type TicketTrackerItem } from '../ticket-tracker
 import { pendingTrackerComments, queueTrackerComment } from '../tracker-comment-commands';
 import type { TrackerCommentsView } from '../tracker-comment-types';
 import { importedThreads, importThread } from '../tracker-review-import';
-import { guarded } from './notion';
+import { guarded } from './tracker-errors';
 
 type Loaded = TicketTrackerItem & { read: () => Promise<TrackerThreads> };
 

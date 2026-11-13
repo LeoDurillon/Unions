@@ -13,7 +13,7 @@ import {
 import { Hono } from 'hono';
 
 import { BAD_REQUEST, CONFLICT, fail, requireId } from '../http';
-import { guarded } from './notion';
+import { guarded } from './tracker-errors';
 
 export function jiraPickRoutes(db: Db, jira: JiraApi): Hono {
   const routes = new Hono();

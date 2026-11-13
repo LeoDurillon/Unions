@@ -1,0 +1,11 @@
+id: no-tracker-names-tsx
+valid:
+  - |
+    <TrackerTab ticket={ticket} section={tracker.id} />
+  - |
+    const { Bar } = TRACKER_RULE_EDITORS[kind];
+invalid:
+  - |
+    <TrackerSection kind="notion" project={project} />
+  - |
+    const tab = section === 'jira' ? <JiraTab /> : null;

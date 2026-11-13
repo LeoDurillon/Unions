@@ -206,7 +206,7 @@ test('event rules use the stored Notion columns; a ticket from an import preview
   expect(saved.status).toBe(201);
   expect(await (await call('GET', `${base}/event-rules`)).json()).toMatchObject({
     rules: [{ name: 'PR link', enabled: true }],
-    hasNotion: true,
+    trackers: [{ kind: 'notion', read: true }],
   });
 
   // The import's page is linked to the ticket made from it.

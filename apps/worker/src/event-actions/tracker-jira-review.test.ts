@@ -3,7 +3,7 @@ import { beforeEach, expect, test } from 'bun:test';
 import {
   createDb,
   emitEvent,
-  linkJiraIssue,
+  linkTrackerItem,
   migrateDb,
   queueDeliveries,
   recentDeliveries,
@@ -70,11 +70,11 @@ function postReview(keys: string[]): void {
     .returning()
     .get().id;
   for (const key of keys) {
-    linkJiraIssue(
-      db,
-      { kind: 'review', id: reviewId },
-      { id: key, title: `${key} summary`, url: null },
-    );
+    linkTrackerItem(db, { kind: 'review', id: reviewId }, 'jira', {
+      id: key,
+      title: `${key} summary`,
+      url: null,
+    });
   }
   emitEvent(db, {
     type: 'pr_review_posted',

@@ -1,6 +1,7 @@
 // The review's specs under its header: one chip each (edited ones marked, unreadable ones in red),
 // and Edit. Edit opens the dialog that changes them for every agent action.
 
+import { INTEGRATION_KIND_NAMES } from '@union/core/integration-kinds';
 import type { ReactElement } from 'react';
 
 import type { ReviewSpecView } from '../../../src/review-spec-types';
@@ -40,7 +41,9 @@ export function SpecsBar({
   const editing = useSpecsEditing();
   const shown = (list.data ?? []).filter((spec) => !spec.removed);
   const { project } = useActiveProject();
-  const jiraConnected = project !== null && projectIntegration(project, 'jira') !== null;
+  const trackers = INTEGRATION_KIND_NAMES.filter(
+    (kind) => project !== null && projectIntegration(project, kind) !== null,
+  );
   return (
     <div className="flex items-center gap-2 border-b border-zinc-200 px-4 py-1.5 dark:border-zinc-800">
       <span className="text-xs font-medium text-zinc-500">Specs</span>
@@ -69,7 +72,7 @@ export function SpecsBar({
       {editing?.editing ? (
         <SpecsDialog
           target={target}
-          sources={specSources(target, hasPullRequest, jiraConnected)}
+          sources={specSources(target, hasPullRequest, trackers)}
           onClose={() => {
             editing.setEditing(false);
           }}

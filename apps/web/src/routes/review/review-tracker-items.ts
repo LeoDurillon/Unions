@@ -13,8 +13,8 @@ import { Hono, type Context } from 'hono';
 import { NOT_FOUND, fail } from '../../http';
 import type { ReviewTrackerItem } from '../../review-tracker-types';
 import { pendingReviewFields } from '../../tracker-field-commands';
-import { guarded } from '../notion';
 import { load } from '../pull-requests/pr-review-load';
+import { guarded } from '../tracker-errors';
 import {
   requireAccess,
   requireLinked,

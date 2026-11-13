@@ -6,6 +6,9 @@ import type { ReactElement } from 'react';
 import type { TicketDetail } from '../../../src/api-types';
 import { TicketTrackerRow } from './ticket-tracker-row';
 
+/** The tab a row's comment count opens: its tracker's. */
+export type TrackerRowsTab = IntegrationKindName;
+
 export function TicketTrackerRows({
   detail,
   onOpenTab,

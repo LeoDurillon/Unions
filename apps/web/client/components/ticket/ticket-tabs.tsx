@@ -11,11 +11,11 @@ import { PreviewTab } from '../previews/preview-tab';
 import { PullRequestTab } from '../pull-request/pull-request-tab';
 import { LogTab } from '../steps/log-tab';
 import { StepTab } from '../steps/step-tab';
-import { TRACKER_LABELS, TrackerTab, trackerSection } from '../tracker/tracker-tab';
+import { TrackerTab, trackerSection, type TrackerTabId } from '../tracker/tracker-tab';
 import { OverviewTab } from './overview-tab';
 
 /** The panel's top tabs: the ticket, its preview, the agents' work, its pull request, its tracker item. */
-export type Section = 'overview' | 'preview' | 'worker' | 'pull-request' | 'notion' | 'jira';
+export type Section = 'overview' | 'preview' | 'worker' | 'pull-request' | TrackerTabId;
 export { latestWorkerTab, type WorkerTab } from '../../lib/ticket/worker-tabs';
 type TabEntry<T> = { id: T; label: string; enabled: boolean; badge?: ReactNode };
 
@@ -40,9 +40,7 @@ function sectionsFor(detail: TicketDetail): TabEntry<Section>[] {
     { id: 'pull-request', label: prNumber === null ? 'PR' : `PR #${prNumber}`, enabled: true },
   ];
   // A tracker tab the ticket has nothing for stays out of the way.
-  return tracker.enabled
-    ? [...sections, { ...tracker, label: TRACKER_LABELS[tracker.id] }]
-    : sections;
+  return tracker.enabled ? [...sections, tracker] : sections;
 }
 
 const LOOKS = {

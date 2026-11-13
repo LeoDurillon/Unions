@@ -13,8 +13,9 @@ import type {
 export type EventRulesResponse = {
   rules: EventRule[];
   notion: NotionSchema | null;
-  hasNotion: boolean;
   jira: JiraRuleSource | null;
+  /** The trackers the project is connected to, in the kinds' order; `read`: their columns are read. */
+  trackers: { kind: IntegrationKindName; read: boolean }[];
   /** The optional GitHub layers: a GitHub Project connected, new tickets mirrored as issues. */
   github: { project: boolean; issues: boolean };
 };

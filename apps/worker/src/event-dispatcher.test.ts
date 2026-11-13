@@ -4,7 +4,7 @@ import {
   createDb,
   createTicket,
   emitEvent,
-  linkNotionPage,
+  linkTrackerItem,
   migrateDb,
   NotionError,
   queueDeliveries,
@@ -198,7 +198,7 @@ function postReview(
     .returning()
     .get().id;
   for (const id of pages === null ? [] : [pages].flat()) {
-    linkNotionPage(db, { kind: 'review', id: reviewId }, { id, title: id, url: null });
+    linkTrackerItem(db, { kind: 'review', id: reviewId }, 'notion', { id, title: id, url: null });
   }
   emitEvent(db, {
     type: 'pr_review_posted',

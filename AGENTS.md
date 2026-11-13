@@ -114,6 +114,11 @@ files and uses `union.sqlite` here, which holds the user's real projects.
   approve, revise, retry, cancel) is a row in `commands`, handled by the worker. The web may write plain records
   directly: creating projects and tickets, and saving an edited step output. It reads state from SQLite and
   streams `events` over SSE.
+- Trackers (Notion, Jira) sit behind one adapter each (`TrackerAdapter`, `packages/core/src/integrations/`): a
+  feature asks a capability (`adapter.comments`) or its kind (`integrationKind(kind).label`), never a tracker by
+  name. A `'notion'` or `'jira'` literal belongs in core's `integrations/`, the client's `components/integrations/`
+  or a file named after its tracker (ast-grep `no-tracker-names`). A new tracker is an adapter, its kind, its
+  settings section and its guide section, with the contract suite (`adapter-contract.ts`) passing.
 - GitHub, Notion, Jira: the web server only reads, for what the UI needs answered right away (`OnboardingGitHub`,
   `NotionApi`, `JiraApi`); every write happens in the worker. Secrets (tokens, the GitHub App key, integration
   secrets) never reach the browser (`toPublicProject`, `toPublicIntegration`), and containers never hold GitHub

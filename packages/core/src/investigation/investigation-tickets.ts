@@ -163,8 +163,10 @@ function originErrorOf(
   if (!('originError' in outcome) || outcome.originError === undefined) {
     return null;
   }
-  const { label } = integrationKind(investigation.ticketTarget ?? 'notion');
-  return `The ticket was created, but not in ${label}: ${outcome.originError}`;
+  const where = investigation.ticketTarget
+    ? integrationKind(investigation.ticketTarget).label
+    : 'its tracker';
+  return `The ticket was created, but not in ${where}: ${outcome.originError}`;
 }
 
 /** Ticket drafts left `running` by a worker that stopped mid-way fail; returns their investigations. */

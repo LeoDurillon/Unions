@@ -1,10 +1,10 @@
-// A review's specs in the database: the list, saving the user's list, and the Notion pages and Jira
-// issues linked to it. The list is started with its sources the first time; the linked ones are its
-// `notion` and `jira` specs.
+// A review's specs in the database: the list, saving the user's list, and the tracker items linked to it.
+// The list is started with its sources the first time; the linked ones are its specs of a tracker's kind.
 
 import { and, asc, eq, max, type SQL } from 'drizzle-orm';
 
 import type { Db } from '../db';
+import { integrationKind, type IntegrationKindName } from '../integrations/kinds';
 import type { ReviewSpecRow } from '../schema/schema-review-specs';
 import * as schema from '../tables';
 import type { AgentReviewOwner } from './agent-reviews';
@@ -21,11 +21,12 @@ export type { ReviewSpecRow } from '../schema/schema-review-specs';
 export type LinkedPage = { id: string; title: string; url: string | null };
 
 /** The spec kinds that are a tracker's item, linked to a review. */
-type TrackerSpec = 'notion' | 'jira';
+type TrackerSpec = IntegrationKindName;
 
-const NOTION_PREFIX = 'Notion: ';
-/** A Jira spec's label, as `spec-sources.ts` reads it too: `Jira: KEY summary`. */
-const JIRA_PREFIX = 'Jira: ';
+/** A tracker spec's label starts with its tracker's name: `Notion: Title`, `Jira: KEY summary`. */
+function prefixOf(kind: TrackerSpec): string {
+  return `${integrationKind(kind).label}: `;
+}
 
 function owns(owner: AgentReviewOwner): SQL {
   return owner.kind === 'ticket'
@@ -165,8 +166,6 @@ function unlinkItem(db: Db, owner: AgentReviewOwner, kind: TrackerSpec, ref: str
     .run();
 }
 
-const PREFIXES: Record<TrackerSpec, string> = { notion: NOTION_PREFIX, jira: JIRA_PREFIX };
-
 /** Links an item of a tracker (`title` as its list shows it: "KEY summary" for Jira), as a page is. */
 export function linkTrackerItem(
   db: Db,
@@ -174,7 +173,7 @@ export function linkTrackerItem(
   kind: TrackerSpec,
   item: LinkedPage,
 ): void {
-  linkItem(db, owner, { kind, item, label: `${PREFIXES[kind]}${item.title}` });
+  linkItem(db, owner, { kind, item, label: `${prefixOf(kind)}${item.title}` });
 }
 
 /** Unlinks an item: its spec is removed (kept removed, so a ticket's origin item is not added back). */
@@ -193,25 +192,5 @@ export function linkedTrackerItems(
   owner: AgentReviewOwner,
   kind: TrackerSpec,
 ): LinkedPage[] {
-  return linkedItems(db, owner, kind, PREFIXES[kind]);
-}
-
-/** The Notion pages linked to the review: its `notion` specs not removed. */
-export function linkedNotionPages(db: Db, owner: AgentReviewOwner): LinkedPage[] {
-  return linkedItems(db, owner, 'notion', NOTION_PREFIX);
-}
-
-/** Links a page: its spec added at the end, or back if it was removed, with the title as read now. */
-export function linkNotionPage(db: Db, owner: AgentReviewOwner, page: LinkedPage): void {
-  linkItem(db, owner, { kind: 'notion', item: page, label: `${NOTION_PREFIX}${page.title}` });
-}
-
-/** The Jira issues linked to the review: its `jira` specs not removed (`id` the key, `title` "KEY summary"). */
-export function linkedJiraIssues(db: Db, owner: AgentReviewOwner): LinkedPage[] {
-  return linkedItems(db, owner, 'jira', JIRA_PREFIX);
-}
-
-/** Links an issue (`title` "KEY summary"), as a page is. */
-export function linkJiraIssue(db: Db, owner: AgentReviewOwner, issue: LinkedPage): void {
-  linkItem(db, owner, { kind: 'jira', item: issue, label: `${JIRA_PREFIX}${issue.title}` });
+  return linkedItems(db, owner, kind, prefixOf(kind));
 }

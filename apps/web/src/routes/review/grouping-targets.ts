@@ -1,7 +1,7 @@
 // The grouping, explanation, spec, report and review agent routes, under a ticket and under a pull
 // request under review.
 
-import { getTicket, notionMarkdown, schema, startingSpecs, type Db } from '@union/core';
+import { getTicket, integrationKind, schema, startingSpecs, type Db } from '@union/core';
 import { and, desc, eq } from 'drizzle-orm';
 import type { Context, Hono } from 'hono';
 
@@ -50,7 +50,9 @@ function ticketTarget(db: Db, c: Context): GroupingTarget {
     owner: { kind: 'ticket', id },
     project: projectOf(db, ticket.projectId),
     prNumber: ticket.prNumber,
-    ticketText: ticket.originKind === 'notion' ? notionMarkdown(ticket.body) : ticket.body,
+    ticketText: ticket.originKind
+      ? integrationKind(ticket.originKind).cleanMarkdown(ticket.body)
+      : ticket.body,
     starts: startingSpecs({
       kind: 'ticket',
       trackerOrigin:

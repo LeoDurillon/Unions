@@ -64,7 +64,7 @@ Containers never hold GitHub credentials. Tokens, the App's key and integration 
   a link, why another site's link is refused, the items a text names), `text` (the tracker's markdown as plain
   markdown), `comments`, `fields` (a property set by hand) and `rules` (the rule actions its kind's `ruleActions`
   names, `tracker-rules.ts`: checked and previewed from the stored columns by `trackerRuleChecks`, which needs no
-  API client, and sent by `deliver`, at `perTick`); features are moving onto them ([plan](../plans/tracker-adapters.md)). Every adapter passes the same
+  API client, and sent by `deliver`, at `perTick`); and `files` (an item's images and attachments, `tracker-files.ts`). Features ask for a capability or the kind, never for a tracker by name: the ast-grep rule `no-tracker-names` (and `no-tracker-names-tsx`) refuses a `'notion'` or `'jira'` literal outside core's `integrations/`, the client's `components/integrations/` (each tracker's own parts: `tracker-rule-editors.tsx`, `tracker-value-parts.tsx`) and files named after a tracker ([plan](../plans/tracker-adapters.md)). Every adapter passes the same
   cases (`adapter-contract.ts`) against its fake API (`fake-notion-api.ts`, `fake-jira-api.ts`). The web
   routes are generic (`routes/integrations.ts`): `POST /api/integrations/:kind/verify` (no project: onboarding),
   and under `/api/projects/:id/integrations/:kind`, `PUT` (reads the columns with the new secret and config, then

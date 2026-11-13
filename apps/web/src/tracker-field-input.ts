@@ -12,7 +12,7 @@ import {
 } from '@union/core';
 
 import { BAD_REQUEST, CONFLICT, fail, NOT_FOUND } from './http';
-import { guarded } from './routes/notion';
+import { guarded } from './routes/tracker-errors';
 import { queueTrackerField } from './tracker-field-commands';
 
 /** The item whose property is set, its tracker and project, and the tab it is set from: a ticket's or a review's. */

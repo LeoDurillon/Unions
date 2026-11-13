@@ -2,7 +2,7 @@ import { beforeEach, expect, test } from 'bun:test';
 
 import {
   createDb,
-  linkedNotionPages,
+  linkedTrackerItems,
   migrateDb,
   NotionError,
   saveNotionConnection,
@@ -125,7 +125,7 @@ function linked(number = 7): string[] {
     .all()
     .find((row) => row.prNumber === number);
   return review
-    ? linkedNotionPages(db, { kind: 'review', id: review.id }).map((page) => page.id)
+    ? linkedTrackerItems(db, { kind: 'review', id: review.id }, 'notion').map((page) => page.id)
     : [];
 }
 
