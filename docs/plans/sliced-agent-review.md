@@ -237,6 +237,58 @@ on hover), not on a card.
   commented, the bugs found only at seams, and the usage.
 - Set the threshold's default from that, or drop slicing if step 1 is enough.
 
+### Measured: run 26 on #1756, in slices (2026-11-13, same head)
+
+|                                      | Run 24 (one pass) | Run 25 (step 1) | Run 26 (in slices)               |
+| ------------------------------------ | ----------------- | --------------- | -------------------------------- |
+| Agent runs                           | 1                 | 1               | 10 (grouping, 8 parts, seams)    |
+| Turns, time                          | 28, 3 min         | 45, 3 min 40 s  | 244, 24 min                      |
+| Peak context                         | 160k              | 171k            | 89k to 140k per part, 158k seams |
+| API-equivalent cost                  | $1.85             | $2.63           | $13.15                           |
+| Line comments                        | 8                 | 4               | 38 (40 written, 2 duplicates)    |
+| Files not opened (of 77, 4628 lines) | 41 (2092 lines)   | 50 (2104 lines) | 0                                |
+
+- **The cut.** No grouping on this head, so a new one ran first ($0.03 of usage, 3 min). It gave 8 parts of 164 to
+  1162 lines; every part succeeded. The grouping's 30 spec parts were merged into 8 slices.
+- **Coverage is solved.** Every changed file was opened by some agent, and no agent came near its budget: the
+  largest part (1162 lines, 16 files) peaked at 140k.
+- **The seams pass found what no part could:** the "served" publication mode is followed only by the modules the
+  change touched; the individual-order campaign still reads `project.computeIndividualQuantityMode`.
+- **The comments are specific:** the publisher's name leaking through `metadata.json`, a republication left half
+  written when an upload fails, the simulator showing a 0 € share under its "not available" alert, an option
+  locked as incompatible but still checked, no test on `loadComputedInputs`. Within an hour the user had kept or
+  edited 10 of the 38.
+- **The price:** 5× the usage of one pass and 8× the time, since the parts run one after another.
+
+What to fix, seen on this run:
+
+1. **Part titles.** A slice merged from several groups joins their titles with " + ": the last part's title is six
+   spec headings long. Name the first group and "and N more", and keep the full list for the prompt.
+2. **The seams summary is shown twice:** as the review's remark, then again on the "How the parts fit together"
+   line. That line should give only its comment count.
+3. **The same finding in two files is kept twice.** Duplicates are only dropped on overlapping lines: the name leak
+   is at `publishedScenarioSnapshot.ts:66` and `financial-computation-saving.service.ts:233`, the half-written
+   republication at lines 494 and 566. Ask the seams agent to name the comments that say the same thing, and drop
+   all but the owner's.
+4. **Part summaries open with "Fichiers lus : …"** (files read): tell the part agents not to list what they read;
+   coverage is measured.
+5. **Time.** Running the parts in parallel (2 or 3 at a time, within the run slots) would bring 24 min near 10.
+
+Conclusion so far: keep slices as the default above 1200 lines, with **In one pass** for when usage matters more.
+Recheck on a second large pull request before closing step 3.
+
+## Send review: keep all the agent's suggestions
+
+A sliced review leaves many drafts (38 here). **Send review** already posts every draft, the agent's included; the
+panel only warns "28 of them are agent suggestions you have not kept or edited". To keep them one by one, the user
+clicks **Keep** on each, and any not kept are replaced by the next **Review with agent**.
+
+- In the send panel, under that warning, a **Keep all (28)** button: it marks every agent draft of the review as the
+  user's (the same as **Keep** on each, in one request: `POST …/comments/keep-all`, scoped like `keepComment`), and
+  the warning goes. Sending afterwards posts them as before.
+- On a stack, it keeps the drafts of the pull request whose panel it is, not the whole stack's.
+- Docs: `documentation/reviewing.md` (Send review, Review with agent), `docs/spec/pull-requests.md`.
+
 ## Tests
 
 - Core, pure: the generated-file rule, the size count, folder grouping, slices from a grouping (ownership, merging
