@@ -209,12 +209,10 @@ test("each page comes with its open discussions; a refused read keeps the page's
   await send('PUT', '', { page: PAGE });
   await send('PUT', '', { page: MENTIONED });
   const [spec, model] = (await (await send('GET', '')).json()) as ReviewNotionPage[];
-  expect(spec?.discussions).toMatchObject({
+  expect(spec?.threads).toMatchObject({
     truncated: false,
-    discussions: [
-      { id: 'd1', place: 'page', comments: [{ author: 'Grace', markdown: 'CSV only?' }] },
-    ],
+    threads: [{ id: 'd1', place: 'item', comments: [{ author: 'Grace', markdown: 'CSV only?' }] }],
   });
   expect(model?.markdown).toContain('## Goal');
-  expect(JSON.stringify(model?.discussions)).toContain('Read comments');
+  expect(JSON.stringify(model?.threads)).toContain('Read comments');
 });

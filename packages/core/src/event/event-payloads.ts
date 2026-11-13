@@ -151,7 +151,22 @@ type GitHubPayloads = {
   pr_comment_replied: ReplyOrigin & { url: string; resolveError: string | null };
   /** `body` is the text that was not posted, so the reply box gets it back. */
   pr_comment_reply_failed: ReplyOrigin & { error: string; body: string };
-  /** A comment posted on the ticket's Notion page, in `discussionId` (a new one for a page comment). */
+  /** A comment posted on the ticket's tracker item (`commentId`, the tracker's), in reply to `threadId` when set. */
+  tracker_comment_posted: {
+    commandId: number;
+    kind: IntegrationKindName;
+    threadId: string | null;
+    commentId: string;
+  };
+  /** `text` is the comment that was not posted, so its box (`threadId`, null: a new comment) gets it back. */
+  tracker_comment_failed: {
+    commandId: number;
+    kind: IntegrationKindName;
+    threadId: string | null;
+    text: string;
+    error: string;
+  };
+  /** Logged before `tracker_comment_posted`: a comment posted on the ticket's Notion page, in `discussionId`. */
   notion_comment_posted: { commandId: number; discussionId: string; commentId: string };
   /** `text` is the comment that was not posted, so its box gets it back. */
   notion_comment_failed: {
@@ -160,7 +175,7 @@ type GitHubPayloads = {
     text: string;
     error: string;
   };
-  /** A comment posted on the ticket's Jira issue (`commentId`, Jira's). */
+  /** Logged before `tracker_comment_posted`: a comment posted on the ticket's Jira issue (`commentId`, Jira's). */
   jira_comment_posted: { commandId: number; commentId: string };
   /** `text` is the comment that was not posted, so its box gets it back; `replyTo` the comment it answered. */
   jira_comment_failed: { commandId: number; replyTo: string | null; text: string; error: string };

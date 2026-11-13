@@ -1,9 +1,8 @@
 // What the commands hand off to the running worker (all asynchronous), and the no-op set for tests and tools.
 import type {
-  JiraCommentPost,
-  NotionCommentPost,
   PrCommentReply,
   ReviewVerdict,
+  TrackerCommentPost,
   TrackerFieldSet,
   WorkspaceOwner,
 } from '@union/core';
@@ -48,9 +47,8 @@ export type CommandHooks = {
   rerunCiJob: (ticketId: number, job: CiJob) => void;
   /** Posts a reply to a pull request comment; `commandId` ties its event to the command. */
   replyToPrComment: (commandId: number, reply: PrCommentReply) => void;
-  /** Posts a comment on a ticket's Notion page; `commandId` ties its event to the command. */
-  postNotionComment: (commandId: number, post: NotionCommentPost) => void;
-  postJiraComment: (commandId: number, post: JiraCommentPost) => void;
+  /** Posts a comment on a ticket's tracker item; `commandId` ties its event to the command. */
+  postTrackerComment: (commandId: number, post: TrackerCommentPost) => void;
   /** Sets one property of a tracker's item, typed by hand in a tab; `commandId` ties its event to the command. */
   setTrackerField: (commandId: number, change: TrackerFieldSet) => void;
   /**
@@ -96,8 +94,7 @@ export const NO_HOOKS: CommandHooks = {
   showAdoptedPullRequest: ignore,
   rerunCiJob: ignore,
   replyToPrComment: ignore,
-  postNotionComment: ignore,
-  postJiraComment: ignore,
+  postTrackerComment: ignore,
   setTrackerField: ignore,
   preview: ignore,
   syncAgentImage: ignore,

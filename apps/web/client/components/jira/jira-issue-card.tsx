@@ -4,10 +4,10 @@
 import type { JiraIssueFacts } from '@union/core';
 import type { ReactElement, ReactNode } from 'react';
 
-import type { PendingTrackerField } from '../../../src/tracker-field-types';
+import type { JiraItemView } from '../../../src/tracker-item-types';
 import type { Tone } from '../../lib/board/labels';
-import { jiraCommentsKey } from '../../lib/integrations/use-jira-comments';
 import { ticketFieldTarget, useTrackerFieldSend } from '../../lib/integrations/use-tracker-fields';
+import { trackerItemKey } from '../../lib/integrations/use-tracker-item';
 import { timeAgo } from '../../lib/ui/relative-time';
 import { useNow } from '../../lib/ui/use-now';
 import { TrackerItemCard } from '../tracker/tracker-item-card';
@@ -77,18 +77,15 @@ function Heading({
 
 export function JiraIssueCard({
   ticket,
-  issue,
-  pendingFields,
+  view,
   loaded,
   reading,
   onRefresh,
   children,
 }: {
   ticket: { id: number; projectId: number };
-  /** The issue's key and address, and its facts (null when Jira did not give them). */
-  issue: { key: string; url: string; facts: JiraIssueFacts | null } | null;
-  /** The fields being set, not sent to Jira yet. */
-  pendingFields: PendingTrackerField[];
+  /** The issue once read: its key and address, its facts (null when Jira did not give them), the fields being set. */
+  view: JiraItemView | null;
   /** Jira answered (the issue read or not). */
   loaded: boolean;
   reading: boolean;
@@ -96,7 +93,11 @@ export function JiraIssueCard({
   /** The tab's content under the card. */
   children: ReactNode;
 }): ReactElement {
-  const sender = useTrackerFieldSend(ticketFieldTarget(ticket.id, jiraCommentsKey(ticket.id)));
+  const sender = useTrackerFieldSend(
+    ticketFieldTarget(ticket.id, trackerItemKey(ticket.id, 'jira')),
+  );
+  const issue = view ? { key: view.key, url: view.issueUrl, facts: view.issue } : null;
+  const pendingFields = view?.pendingFields ?? [];
   return (
     <TrackerItemCard
       mark="J"

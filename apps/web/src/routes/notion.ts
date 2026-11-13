@@ -5,6 +5,7 @@ import {
   ItemOutsideSourceError,
   JiraError,
   NotionError,
+  TrackerRefusedError,
   type Db,
 } from '@union/core';
 import { HTTPException } from 'hono/http-exception';
@@ -23,7 +24,7 @@ import {
 function trackerStatus(
   error: unknown,
 ): typeof CONFLICT | typeof UNAUTHORIZED | typeof NOT_FOUND | typeof BAD_GATEWAY {
-  if (error instanceof ItemOutsideSourceError) {
+  if (error instanceof ItemOutsideSourceError || error instanceof TrackerRefusedError) {
     return CONFLICT;
   }
   const status = error instanceof NotionError || error instanceof JiraError ? error.status : null;

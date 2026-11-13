@@ -17,7 +17,8 @@ import type { Hono } from 'hono';
 
 import { createApp } from './app';
 import type { OnboardingGitHub } from './github-onboarding';
-import type { NotionTabView } from './notion-discussion-types';
+import type { TrackerCommentsView } from './tracker-comment-types';
+import type { NotionItemView } from './tracker-item-types';
 
 const PAGE = 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee';
 const PAGE_URL = 'https://www.notion.so/Export-aaaaaaaabbbb4ccc8dddeeeeeeeeeeee';
@@ -105,29 +106,38 @@ beforeEach(() => {
 });
 
 function read(): Promise<Response> | Response {
-  return app.request(`/api/tickets/${ticketId}/notion-comments`);
+  return app.request(`/api/tickets/${ticketId}/trackers/notion/comments`);
 }
 
 test('the discussions: the page one, then the one on the text with its quote', async () => {
   const response = await read();
   expect(response.status).toBe(200);
-  const view = (await response.json()) as NotionTabView;
+  const view = (await response.json()) as TrackerCommentsView;
   expect(reads).toEqual([PAGE, BLOCK]);
   expect(view.truncated).toBe(false);
-  expect(view.discussions.map(({ id, place, quote }) => ({ id, place, quote }))).toEqual([
-    { id: 'on-page', place: 'page', quote: null },
+  expect(view.threads.map(({ id, place, quote }) => ({ id, place, quote }))).toEqual([
+    { id: 'on-page', place: 'item', quote: null },
     { id: ON_TEXT, place: 'text', quote: 'export format' },
   ]);
-  const [, onText] = view.discussions;
-  expect(onText?.url).toBe(`${PAGE_URL}?d=${ON_TEXT.replaceAll('-', '')}`);
+  const [, onText] = view.threads;
+  expect(onText?.url).toBe(
+    `https://www.notion.so/${PAGE.replaceAll('-', '')}?d=${ON_TEXT.replaceAll('-', '')}`,
+  );
   expect(onText?.comments.map((item) => [item.id, item.author, item.markdown])).toEqual([
     ['c2', 'Grace', 'Is it `CSV`'],
     ['c3', 'Notion user', 'Is it `CSV`'],
   ]);
 });
 
-test('the page comes with its title, status, last edit and properties; a failed read leaves them out', async () => {
-  const view = (await (await read()).json()) as NotionTabView;
+function readItem(): Promise<NotionItemView> {
+  return Promise.resolve(app.request(`/api/tickets/${ticketId}/trackers/notion/item`)).then(
+    async (response) => (await response.json()) as NotionItemView,
+  );
+}
+
+test('the item: the page with its title, status, last edit and properties; a failed read leaves them out', async () => {
+  const view = await readItem();
+  expect(view.pageUrl).toBe(PAGE_URL);
   expect(view.page).toEqual({
     title: 'Export CSV',
     status: { name: 'Avancement', value: 'En cours' },
@@ -135,9 +145,9 @@ test('the page comes with its title, status, last edit and properties; a failed 
     properties: PAGE_OBJECT.properties,
   });
   pageRead = () => Promise.reject(new NotionError('Not found', 404));
-  const without = (await (await read()).json()) as NotionTabView;
-  expect(without.page).toBeNull();
-  expect(without.discussions).toHaveLength(2);
+  expect((await readItem()).page).toBeNull();
+  const comments = (await (await read()).json()) as TrackerCommentsView;
+  expect(comments.threads).toHaveLength(2);
 });
 
 test('a page with many commented blocks is read in part, and says so', async () => {
@@ -145,7 +155,7 @@ test('a page with many commented blocks is read in part, and says so', async () 
     const id = String(index).padStart(8, '0');
     return span(`${id}-bbbb-4ccc-8ddd-eeeeeeeeeeee`, `${id}-dddd-4ccc-8ddd-eeeeeeeeeeee`, 'x');
   }).join('\n');
-  const view = (await (await read()).json()) as NotionTabView;
+  const view = (await (await read()).json()) as TrackerCommentsView;
   expect(reads.length).toBe(31);
   expect(view.truncated).toBe(true);
 });
@@ -165,7 +175,7 @@ test('a ticket without a Notion page is refused', async () => {
 });
 
 function send(body: unknown): Promise<Response> | Response {
-  return app.request(`/api/tickets/${ticketId}/notion-comments`, {
+  return app.request(`/api/tickets/${ticketId}/trackers/notion/comments`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify(body),
@@ -173,26 +183,32 @@ function send(body: unknown): Promise<Response> | Response {
 }
 
 test('a reply is queued for the worker and shows pending until its event', async () => {
-  const response = await send({ discussionId: ON_TEXT, text: ' Done in #42 ' });
+  const response = await send({ threadId: ON_TEXT, text: ' Done in #42 ' });
   expect(response.status).toBe(202);
   const { id } = (await response.json()) as { id: number };
   const command = db.select().from(schema.commands).all().at(-1);
   expect(command).toMatchObject({
     id,
-    type: 'post_notion_comment',
+    type: 'post_tracker_comment',
     ticketId,
-    payload: { pageId: PAGE, discussionId: ON_TEXT, text: 'Done in #42' },
+    payload: {
+      kind: 'notion',
+      itemId: PAGE,
+      threadId: ON_TEXT,
+      mention: null,
+      text: 'Done in #42',
+    },
   });
-  let view = (await (await read()).json()) as NotionTabView;
-  expect(view.pending.map((item) => [item.discussionId, item.text])).toEqual([
+  let view = (await (await read()).json()) as TrackerCommentsView;
+  expect(view.pending.map((item) => [item.threadId, item.text])).toEqual([
     [ON_TEXT, 'Done in #42'],
   ]);
   emitEvent(db, {
-    type: 'notion_comment_posted',
+    type: 'tracker_comment_posted',
     ticketId,
-    payload: { commandId: id, discussionId: ON_TEXT, commentId: 'c9' },
+    payload: { commandId: id, kind: 'notion', threadId: ON_TEXT, commentId: 'c9' },
   });
-  view = (await (await read()).json()) as NotionTabView;
+  view = (await (await read()).json()) as TrackerCommentsView;
   expect(view.pending).toEqual([]);
 });
 
@@ -202,23 +218,23 @@ test('an empty comment is refused, and nothing is queued', async () => {
   expect(db.select().from(schema.commands).all()).toEqual([]);
 });
 
-function addToReview(discussionId: string, commentId?: string): Promise<Response> | Response {
-  return app.request(`/api/tickets/${ticketId}/notion-comments/import`, {
+function addToReview(threadId: string, commentId?: string): Promise<Response> | Response {
+  return app.request(`/api/tickets/${ticketId}/trackers/notion/comments/import`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ discussionId, commentId }),
+    body: JSON.stringify({ threadId, commentId }),
   });
 }
 
 test('Add to review waits for a branch', async () => {
-  let view = (await (await read()).json()) as NotionTabView;
+  let view = (await (await read()).json()) as TrackerCommentsView;
   expect(view.review).toEqual({
     importedIds: [],
     refusal: 'Available once the ticket is implemented',
   });
   expect((await addToReview(ON_TEXT)).status).toBe(409);
   db.update(schema.tickets).set({ branch: '1-export' }).run();
-  view = (await (await read()).json()) as NotionTabView;
+  view = (await (await read()).json()) as TrackerCommentsView;
   expect(view.review.refusal).toBeNull();
 });
 
@@ -232,9 +248,9 @@ test('a discussion goes into the review once, whole, with its Notion link', asyn
     kind: 'general',
     status: 'draft',
     sourceUrl: `https://www.notion.so/${PAGE.replaceAll('-', '')}?d=${ON_TEXT.replaceAll('-', '')}`,
-    body: '**Grace** on the Notion page, about "export format":\n\nIs it `CSV`\n\n**Notion user** replied:\n\nIs it `CSV`',
+    body: '**Grace** commented on the Notion page, about "export format":\n\nIs it `CSV`\n\n**Notion user** replied:\n\nIs it `CSV`',
   });
-  const view = (await (await read()).json()) as NotionTabView;
+  const view = (await (await read()).json()) as TrackerCommentsView;
   expect(view.review.importedIds).toEqual([ON_TEXT]);
   expect((await addToReview('gone')).status).toBe(404);
 });
@@ -248,8 +264,8 @@ test('one comment of a discussion goes into the review alone, with its own link'
   expect(rows).toHaveLength(1);
   expect(rows[0]).toMatchObject({
     sourceUrl: `https://www.notion.so/${PAGE.replaceAll('-', '')}?d=onpage&c=c1`,
-    body: '**Grace** on the Notion page:\n\nIs it `CSV`',
+    body: '**Grace** commented on the Notion page:\n\nIs it `CSV`',
   });
-  const view = (await (await read()).json()) as NotionTabView;
+  const view = (await (await read()).json()) as TrackerCommentsView;
   expect(view.review.importedIds).toEqual(['c1']);
 });

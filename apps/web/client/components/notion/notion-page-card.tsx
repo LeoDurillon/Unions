@@ -3,9 +3,9 @@
 
 import type { ReactElement, ReactNode } from 'react';
 
-import type { NotionPageFacts, NotionTabView } from '../../../src/notion-discussion-types';
-import { notionCommentsKey } from '../../lib/integrations/use-notion-comments';
+import type { NotionItemView, NotionPageFacts } from '../../../src/tracker-item-types';
 import { ticketFieldTarget, useTrackerFieldSend } from '../../lib/integrations/use-tracker-fields';
+import { trackerItemKey } from '../../lib/integrations/use-tracker-item';
 import { timeAgo } from '../../lib/ui/relative-time';
 import { useNow } from '../../lib/ui/use-now';
 import { TrackerItemCard } from '../tracker/tracker-item-card';
@@ -59,8 +59,8 @@ export function NotionPageCard({
   children,
 }: {
   ticket: { id: number; projectId: number };
-  /** The tab's view, once read. */
-  view: NotionTabView | null;
+  /** The page, once read. */
+  view: NotionItemView | null;
   /** Notion answered (the page read or not). */
   loaded: boolean;
   reading: boolean;
@@ -68,7 +68,9 @@ export function NotionPageCard({
   /** The tab's content under the card. */
   children: ReactNode;
 }): ReactElement {
-  const sender = useTrackerFieldSend(ticketFieldTarget(ticket.id, notionCommentsKey(ticket.id)));
+  const sender = useTrackerFieldSend(
+    ticketFieldTarget(ticket.id, trackerItemKey(ticket.id, 'notion')),
+  );
   const facts = view?.page ?? null;
   return (
     <TrackerItemCard

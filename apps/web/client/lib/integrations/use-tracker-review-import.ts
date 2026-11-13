@@ -1,38 +1,43 @@
-// Add to review on a Notion discussion, or on one comment of the page's. The server reads it again
-// and adds it to the ticket's review as a draft.
+// Add to review on a tracker's thread, or on one comment of it. The server reads it again and adds it to the
+// ticket's review as a draft.
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type { IntegrationKindName } from '@union/core/integration-kinds';
 
-import type { NotionTabView } from '../../../src/notion-discussion-types';
+import type { TrackerCommentsView } from '../../../src/tracker-comment-types';
 import { request } from '../app/api';
 import { ticketReviewBase } from '../review/review-target';
+import { trackerCommentsKey } from './use-tracker-comments';
 
-/** A whole discussion, or only one of its comments. */
-type ImportTarget = { discussionId: string; commentId: string | null };
+/** A whole thread, or only one of its comments. */
+type ImportTarget = { threadId: string; commentId: string | null };
 
-export type NotionReviewImport = {
+export type TrackerReviewImport = {
   add: (target: ImportTarget) => void;
-  /** The id of the discussion (or comment) being added, if one is. */
+  /** The id of the thread (or comment) being added, if one is. */
   adding: string | null;
   error: Error | null;
 };
 
 function idOf(target: ImportTarget): string {
-  return target.commentId ?? target.discussionId;
+  return target.commentId ?? target.threadId;
 }
 
-/** Marks the discussion (or comment) "In the review" and reads the ticket's review comments again. */
-export function useNotionReviewImport(ticketId: number): NotionReviewImport {
+/** Marks the thread (or comment) "In the review" and reads the ticket's review comments again. */
+export function useTrackerReviewImport(
+  ticketId: number,
+  kind: IntegrationKindName,
+): TrackerReviewImport {
   const client = useQueryClient();
   const mutation = useMutation({
     mutationFn: (target: ImportTarget) =>
       request<{ imported: boolean }>(
         'POST',
-        `/api/tickets/${ticketId}/notion-comments/import`,
+        `/api/tickets/${ticketId}/trackers/${kind}/comments/import`,
         target,
       ),
     onSuccess: async (_result, target) => {
-      client.setQueryData<NotionTabView>(['notion-comments', ticketId], (old) =>
+      client.setQueryData<TrackerCommentsView>(trackerCommentsKey(ticketId, kind), (old) =>
         old
           ? {
               ...old,

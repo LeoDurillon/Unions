@@ -39,11 +39,13 @@ Containers never hold GitHub credentials. Tokens, the App's key and integration 
   says who posts from the stored credentials (`pr-replies.ts`), without a GitHub call.
 - Notion writes happen in the worker only: event rules set properties of a ticket's page, or for a review posted from the review panel, the page that review is linked to (`updatePage`; `event-actions/notion.ts`), and a
   ticket written from an investigation can be created as a page of the project's data source (`createPage`, with
-  `markdown` content). A comment typed in a ticket's Notion tab is the `post_notion_comment` command
-  (`{ projectId, ticketId, pageId, discussionId | null, text }`, core's `notion-comment-post.ts`); the worker's
-  `notion/comment-post.ts` converts the text (core's `notion-rich-text.ts`: links, `**bold**`, `` `code` ``) and
-  posts it with `addComment` (`POST /v1/comments`, in the discussion or on the page), under the integration's name,
-  and logs `notion_comment_posted` or `notion_comment_failed` (403 names the "Insert comments" capability).
+  `markdown` content). A comment typed in a ticket's tracker tab is the `post_tracker_comment` command
+  (`{ projectId, ticketId, kind, itemId, threadId | null, mention | null, text }`, core's
+  `tracker-comment-post.ts`, whose length checks are each tracker's: `notion-comment-post.ts`,
+  `jira-comment-post.ts`); the worker posts it through the adapter's `comments.post`. For Notion
+  (`notion-threads.ts`), the text becomes rich text (`notion-rich-text.ts`: links, `**bold**`, `` `code` ``) posted
+  with `addComment` (`POST /v1/comments`, in the discussion or on the page) under the integration's name; a 403 names
+  the "Insert comments" capability.
   A property edited in the Notion tab's Properties card is the `set_tracker_fields` command (core's
   `tracker-field-set.ts`: `{ projectId, kind, itemId, ticketId | reviewId, field, value, text, picks }`, one property
   each). `POST /api/tickets/:id/tracker-fields` (`routes/tracker-fields.ts`) reads the page first, so the property's
@@ -76,10 +78,10 @@ Containers never hold GitHub credentials. Tokens, the App's key and integration 
   `IntegrationProvider`), the pages a pull
   request under review is linked to and the review's Notion specs (any page shared with the integration;
   `routes/review/review-notion.ts`, `routes/review/review-specs.ts`, their text (and in the review's Notion tab, their open discussions) read fresh each time, mention titles from core's `integrations/notion-mentions.ts`), and the open
-  discussions of a ticket's page (`routes/notion-comments.ts`, `GET /api/tickets/:id/notion-comments`; `src/notion-discussions.ts`
-  reads the page's comments, then those of each block its markdown marks as commented, one block at a time and at
-  most 30; core's `notion-comments.ts` groups them and quotes the commented text; needs the integration's "Read
-  comments" capability, a 403 answers which). Uses API version
+  discussions of a ticket's page (the comments route below; core's `notion-threads.ts` reads the page's comments,
+  then those of each block its markdown marks as commented, one block at a time and at most 30;
+  `notion-comments.ts` groups them and quotes the commented text; needs the integration's "Read comments"
+  capability: a 403 becomes `TrackerRefusedError`, answered 409 with which one to turn on). Uses API version
   `2026-03-11` and `GET /v1/pages/{id}/markdown`. The secret, data source and columns as read are a row of
   `integrations` (kind `notion`; `integrations/notion-integration.ts` reads and saves it), never sent to the browser.
   (Before `0070_source_integrations` they were `projects.notion_token`, `config.notionDataSourceId` and the table
@@ -125,16 +127,20 @@ Containers never hold GitHub credentials. Tokens, the App's key and integration 
   specs), links and unlinks; `/suggestions` reads the keys the title, head branch and description name (core's
   `jira-keys.ts`: the project's key prefix only, bare or as a `/browse/` link of the site), reads each (at most 10)
   and drops the linked and unreadable ones. Nothing is written to Jira.
-- A Jira ticket's comments: the web reads them for its Jira tab (`routes/jira-comments.ts`, `GET
-  /api/tickets/:id/jira-comments`; `JiraApi.comments`, newest first, 100 a page, 5 pages at most, shown oldest
-  first; core's `jira-comments.ts` converts each with `adfMarkdown`, media by name, and names a role, group or
-  internal restriction), with the comments not posted yet (`pending-comments.ts`, shared with Notion's) and those in
-  the review. Posting is the `post_jira_comment` command (`{ projectId, ticketId, key, text, replyTo }`, core's
-  `jira-comment-post.ts`); the worker's `jira/comment-post.ts` sends the text as ADF, a reply starting with a
-  mention of the author (`textAdf(text, mention)`), and logs `jira_comment_posted` or `jira_comment_failed` (403
-  names "Add comments"). Add to review (`POST …/jira-comments/import`, `jira-review-import.ts`) reads the comment
-  again and adds a `general` draft whose `source_url` is the comment's link (`jira-comment-link.ts`); sending the
-  review never asks such a draft a GitHub reply (`markSent` leaves out Notion's and Jira's links).
+- A ticket's tracker comments, for every tracker: `routes/tracker-comments.ts` (`/api/tickets/:id/trackers/:kind/comments`)
+  reads them through the adapter's `comments.read` as threads (core's `tracker-comments.ts`: a Notion discussion is a
+  thread; a Jira comment a thread of one), with the comments not posted yet (`tracker-comment-commands.ts` over
+  `pending-comments.ts`) and those in the review; `POST` queues `post_tracker_comment`; `POST /import` reads the
+  thread again and adds it whole, or one comment of a thread on the item, as a `general` draft whose `source_url` is
+  the thread's or comment's link (`tracker-review-import.ts`); sending the review never asks such a draft a GitHub
+  reply (`markSent` leaves out Notion's and Jira's links). How a reply answers is the kind's `commentReplies`: in the
+  thread (Notion), or a new comment starting with a mention of the author (Jira). The tab's card reads the item
+  separately (`routes/tracker-item.ts`, `GET …/trackers/:kind/item`: one shape per tracker until step 4 of the
+  [adapters plan](../plans/tracker-adapters.md)).
+- A Jira ticket's comments: core's `jira-threads.ts` reads them (`JiraApi.comments`, newest first, 100 a page, 5
+  pages at most, shown oldest first; `jira-comments.ts` converts each with `adfMarkdown`, media by name, and names a
+  role, group or internal restriction) and posts one as ADF (`markdownAdf`), a reply starting with a mention of the
+  author (`withLeadingMention`); a 403 names "Add comments". A comment's link is `jira-comment-link.ts`'s.
   The tab's Properties card lists the status and the issue's edit screen (`?expand=editmeta`, read with the facts;
   `jira-issue-values.ts`, edit start and picks from `jira-hand-value.ts`). A field edited there is the
   `set_tracker_fields` command (kind `jira`, as for Notion): `routes/tracker-fields.ts` (`tracker-field-jira.ts`)

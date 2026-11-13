@@ -5,11 +5,11 @@ import { useState, type ReactElement } from 'react';
 
 import type { TicketDetail } from '../../../src/api-types';
 import { projectIntegration } from '../../lib/integrations/integrations-api';
-import { useNotionDiscussionCount } from '../../lib/integrations/use-notion-comments';
 import {
   useTicketNotion,
   type TicketNotionActions,
 } from '../../lib/integrations/use-ticket-notion';
+import { useTrackerCommentsRead } from '../../lib/integrations/use-tracker-comments';
 import { DetailRow } from '../ui/detail-row';
 import { Button, ErrorText } from '../ui/ui';
 import { NotionLinkForm, NotionPageLink } from './notion-link-form';
@@ -22,7 +22,7 @@ function DiscussionCount({
   ticketId: number;
   onOpen: () => void;
 }): ReactElement | null {
-  const count = useNotionDiscussionCount(ticketId);
+  const count = useTrackerCommentsRead(ticketId, 'notion')?.threads.length ?? null;
   if (count === null) {
     return null;
   }

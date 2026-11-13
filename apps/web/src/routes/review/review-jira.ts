@@ -8,6 +8,7 @@ import {
   issueMarkdown,
   jiraAuthOf,
   jiraKeysIn,
+  jiraThreads,
   linkedJiraIssues,
   readJiraConfig,
   readJiraIssueFacts,
@@ -72,11 +73,10 @@ async function issueText(
   key: string,
 ): Promise<ReviewJiraIssue> {
   const issue = await guarded(() => jira.issue(auth, key));
-  const [comments, facts] = await Promise.all([
-    jira.comments(auth, key).then(
-      (read) => read.comments,
-      (error: unknown) => ({ error: error instanceof Error ? error.message : String(error) }),
-    ),
+  const [threads, facts] = await Promise.all([
+    jiraThreads(jira, auth, key).catch((error: unknown) => ({
+      error: error instanceof Error ? error.message : String(error),
+    })),
     readJiraIssueFacts(jira, auth, key),
   ]);
   return {
@@ -84,7 +84,7 @@ async function issueText(
     summary: issue.summary,
     url: `${auth.site}/browse/${issue.key}`,
     markdown: issueMarkdown(issue, auth.site).trim(),
-    comments,
+    threads,
     properties: facts?.properties ?? [],
     pendingFields: pendingReviewFields(db, reviewId, issue.key),
   };

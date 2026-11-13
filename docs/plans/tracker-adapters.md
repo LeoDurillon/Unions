@@ -1,7 +1,7 @@
 # One adapter per tracker
 
 Status: planned (2026-11-07), brought up to date 2026-11-13 after [tracker properties](archive/tracker-properties.md).
-Step 1 built (2026-11-13, branch `tracker-adapters`).
+Steps 1 and 2 built (2026-11-13, branch `tracker-adapters`).
 Follows [Jira](archive/jira.md) and its gap plans, built and deployed; prepares a later
 tracker (Linear, GitHub Issues as a source, Asana…).
 
@@ -116,6 +116,14 @@ Each step moves Notion and Jira together, keeps the screens as they are, and is 
 2. **Comments.** The `comments` capability; one comments route and one ticket tab (D4) for both; the post commands
    (`post_notion_comment`, `post_jira_comment`) become `post_tracker_comment` (the worker reads the old names for one
    release, so commands queued before the deploy still run). Add to review over the adapter.
+   Built: comments are threads for every tracker (`tracker-comments.ts`: a Notion discussion is a thread, a Jira
+   comment a thread of one) and the kind says how a reply answers (`commentReplies`: in the thread, or a new
+   comment with a mention). The events are `tracker_comment_posted` and `tracker_comment_failed`; the old ones stay
+   declared for the rows already logged. The tab's card reads the item on its own route (`…/trackers/:kind/item`),
+   one shape per tracker, for step 4 to merge with the cards. Seen on screen: a lone comment on the item shows
+   without its "On the page" line, its Open link beside the author (Jira comments look as before); Add to review
+   drafts start "**Name** commented on the Notion page" (it said "**Name** on the Notion page"). The pending
+   comments of an old command queued in the 10 minutes before the deploy do not show "Sending…", though they post.
 3. **Shared field types, rule actions and properties.** D2 and D3: the types, Notion's and Jira's mappings, the
    three tracker actions, the editor, previews, the worker's delivery; the migration of stored rules; tests that
    every saved rule reads the same before and after. The `fields` and `status` capabilities also take over tracker

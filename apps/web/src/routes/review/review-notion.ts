@@ -6,6 +6,7 @@ import {
   linkNotionPage,
   mentionTitles,
   notionMarkdown,
+  notionThreadsOfPage,
   schema,
   unlinkNotionPage,
   type Db,
@@ -15,7 +16,6 @@ import { and, eq, ne } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
 
 import { readObject } from '../../http';
-import { discussionsOfPage } from '../../notion-discussions';
 import type { ReviewNotionLink, ReviewNotionPage } from '../../review-notion-types';
 import { pendingReviewFields, withNotionOptions } from '../../tracker-field-commands';
 import { guarded, notionTokenOf, requireNotionId } from '../notion';
@@ -46,20 +46,20 @@ async function pageText(
     url: page.url,
     markdown: notionMarkdown(markdown, titles).trim(),
     truncated,
-    discussions: await discussionsOr(notion, token, { id: pageId, url: page.url, markdown }),
+    threads: await threadsOr(notion, token, { id: pageId, markdown }),
     properties: withNotionOptions(db, review.projectId, page.properties ?? []),
     pendingFields: pendingReviewFields(db, review.id, pageId),
   };
 }
 
 /** The discussions, or the reason they are missing: a refusal (no "Read comments") keeps the text. */
-async function discussionsOr(
+async function threadsOr(
   notion: NotionApi,
   token: string,
-  page: { id: string; url: string; markdown: string },
-): Promise<ReviewNotionPage['discussions']> {
+  page: { id: string; markdown: string },
+): Promise<ReviewNotionPage['threads']> {
   try {
-    return await discussionsOfPage(notion, token, page);
+    return await notionThreadsOfPage(notion, token, page);
   } catch (error) {
     return { error: error instanceof Error ? error.message : String(error) };
   }

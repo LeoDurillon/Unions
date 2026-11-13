@@ -2,13 +2,12 @@
 // read, Change and Unlink. Or Link a Jira issue, for a ticket from no tracker in a project
 // connected to Jira.
 
-import { useQuery } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 
 import type { TicketDetail } from '../../../src/api-types';
-import type { JiraTabView } from '../../../src/jira-comment-types';
 import { projectIntegration } from '../../lib/integrations/integrations-api';
 import { useTicketJira, type TicketJiraActions } from '../../lib/integrations/use-ticket-jira';
+import { useTrackerCommentsRead } from '../../lib/integrations/use-tracker-comments';
 import { DetailRow } from '../ui/detail-row';
 import { Button, ErrorText } from '../ui/ui';
 import { ItemLink, TrackerLinkForm } from './tracker-link-form';
@@ -21,11 +20,7 @@ function CommentCount({
   ticketId: number;
   onOpen: () => void;
 }): ReactElement | null {
-  const { data } = useQuery<JiraTabView>({
-    queryKey: ['jira-comments', ticketId],
-    enabled: false,
-    staleTime: Infinity,
-  });
+  const data = useTrackerCommentsRead(ticketId, 'jira');
   if (!data) {
     return null;
   }

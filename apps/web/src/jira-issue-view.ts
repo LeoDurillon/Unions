@@ -10,8 +10,8 @@ import {
 } from '@union/core';
 
 import { CONFLICT, fail } from './http';
-import type { JiraTabView } from './jira-comment-types';
 import { pendingTrackerFields } from './tracker-field-commands';
+import type { JiraItemView } from './tracker-item-types';
 
 /** The issue the ticket was imported from. */
 export function jiraIssueKeyOf(ticket: Ticket): string {
@@ -36,7 +36,7 @@ export async function jiraIssueView(
   jira: JiraApi,
   auth: JiraAuth,
   ticket: Ticket,
-): Promise<Pick<JiraTabView, 'issue' | 'pendingFields'>> {
+): Promise<Pick<JiraItemView, 'issue' | 'pendingFields'>> {
   return {
     issue: await readJiraIssueFacts(jira, auth, jiraIssueKeyOf(ticket)),
     pendingFields: pendingTrackerFields(db, ticket.id),

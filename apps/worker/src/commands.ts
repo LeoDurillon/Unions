@@ -9,8 +9,6 @@ import {
   transition,
   emitEvent,
   recordValidation,
-  jiraCommentOf,
-  notionCommentOf,
   replyOf,
   schema,
   SHARED_RESTART,
@@ -32,6 +30,7 @@ import {
 } from './command-hooks';
 import { ciJobOf } from './github/ci-rerun';
 import { ticketEditOf } from './github/ticket-edit';
+import { TRACKER_COMMENT_COMMANDS } from './tracker-comment-commands';
 
 export type {
   CommandHooks,
@@ -261,12 +260,7 @@ const OTHER_COMMANDS: Record<string, (db: Db, command: Command, hooks: CommandHo
   reply_pr_comment: (_db, command, hooks) => {
     hooks.replyToPrComment(command.id, replyOf(command.payload));
   },
-  post_notion_comment: (_db, command, hooks) => {
-    hooks.postNotionComment(command.id, notionCommentOf(command.payload));
-  },
-  post_jira_comment: (_db, command, hooks) => {
-    hooks.postJiraComment(command.id, jiraCommentOf(command.payload));
-  },
+  ...TRACKER_COMMENT_COMMANDS,
   [SET_TRACKER_FIELDS]: (_db, command, hooks) => {
     hooks.setTrackerField(command.id, trackerFieldSetOf(command.payload));
   },

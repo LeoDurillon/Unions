@@ -8,7 +8,7 @@ import { capabilitiesOf } from './tracker-adapter';
 
 const apis = {
   notion: fakeNotionApi({ id: 'source', title: 'Roadmap' }, []),
-  jira: fakeJiraApi({ key: 'ABC', name: 'Apollo' }, []),
+  jira: fakeJiraApi({ key: 'ABC', name: 'Apollo', site: 'https://acme.atlassian.net' }, []),
 };
 
 test('each kind has its own adapter, with the capabilities the kind names', () => {

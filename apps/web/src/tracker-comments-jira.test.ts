@@ -87,12 +87,49 @@ function jiraTicket(): number {
 }
 
 function read(ticketId: number): Response | Promise<Response> {
-  return app.request(`/api/tickets/${ticketId}/jira-comments`);
+  return app.request(`/api/tickets/${ticketId}/trackers/jira/comments`);
 }
 
-test("the tab reads the issue's comments with the project's token", async () => {
-  const response = await read(jiraTicket());
-  expect(await response.json()).toEqual({
+function readItem(ticketId: number): Response | Promise<Response> {
+  return app.request(`/api/tickets/${ticketId}/trackers/jira/item`);
+}
+
+/** The thread the tab shows for `COMMENT`: Jira has no threads, so one per comment. */
+const THREAD = {
+  id: '10010',
+  place: 'item',
+  quote: null,
+  url: COMMENT.url,
+  comments: [
+    {
+      id: '10010',
+      author: 'Ada Lovelace',
+      createdAt: COMMENT.created,
+      edited: false,
+      restriction: null,
+      markdown: 'Is it CSV or XLSX?',
+      url: COMMENT.url,
+      mention: { accountId: '557058:ada', name: 'Ada Lovelace' },
+    },
+  ],
+};
+
+test("the tab reads the issue's comments with the project's token, as threads of one", async () => {
+  const ticketId = jiraTicket();
+  expect(await (await read(ticketId)).json()).toEqual({
+    kind: 'jira',
+    threads: [THREAD],
+    total: 1,
+    truncated: false,
+    pending: [],
+    review: { importedIds: [], refusal: 'Available once the ticket is implemented' },
+  });
+  expect(asked).toEqual([{ token: 'tok', key: 'ABC-1' }]);
+});
+
+test("the item: the issue's facts and fields", async () => {
+  expect(await (await readItem(jiraTicket())).json()).toEqual({
+    kind: 'jira',
     key: 'ABC-1',
     issueUrl: `${SITE}/browse/ABC-1`,
     issue: {
@@ -122,27 +159,24 @@ test("the tab reads the issue's comments with the project's token", async () => 
         },
       ],
     },
-    comments: [COMMENT],
-    total: 1,
-    pending: [],
     pendingFields: [],
-    review: { importedIds: [], refusal: 'Available once the ticket is implemented' },
   });
-  expect(asked).toEqual([{ token: 'tok', key: 'ABC-1' }]);
 });
 
 test('an issue Jira does not give leaves its card empty; the comments still show', async () => {
   issueRefused = true;
-  const view = (await (await read(jiraTicket())).json()) as { issue: unknown; comments: unknown[] };
-  expect(view.issue).toBeNull();
-  expect(view.comments).toEqual([COMMENT]);
+  const ticketId = jiraTicket();
+  const item = (await (await readItem(ticketId)).json()) as { issue: unknown };
+  expect(item.issue).toBeNull();
+  const view = (await (await read(ticketId)).json()) as { threads: unknown[] };
+  expect(view.threads).toEqual([THREAD]);
 });
 
 test('a ticket not from Jira, or a project no longer connected, is refused without calling Jira', async () => {
   const written = createTicket(db, { projectId, title: 'Written in Union' }).id;
   const notFromJira = await read(written);
   expect(notFromJira.status).toBe(409);
-  expect(await notFromJira.json()).toEqual({ error: 'This ticket was not imported from Jira' });
+  expect(await notFromJira.json()).toEqual({ error: 'This ticket is not linked to a Jira issue' });
   const ticketId = jiraTicket();
   removeIntegration(db, projectId, 'jira');
   const disconnected = await read(ticketId);
@@ -162,7 +196,7 @@ test("Jira's refusals reach the tab as their status and message", async () => {
 });
 
 function post(ticketId: number, body: unknown): Response | Promise<Response> {
-  return app.request(`/api/tickets/${ticketId}/jira-comments`, {
+  return app.request(`/api/tickets/${ticketId}/trackers/jira/comments`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify(body),
@@ -171,24 +205,32 @@ function post(ticketId: number, body: unknown): Response | Promise<Response> {
 
 test('a comment is queued for the worker and shown pending until it is posted', async () => {
   const ticketId = jiraTicket();
-  const replyTo = { commentId: '10010', accountId: '557058:ada', name: 'Ada Lovelace' };
-  const queued = await post(ticketId, { text: ' Done, see the PR ', replyTo });
+  const mention = { accountId: '557058:ada', name: 'Ada Lovelace' };
+  const queued = await post(ticketId, { text: ' Done, see the PR ', threadId: '10010', mention });
   expect(queued.status).toBe(202);
   const { id } = (await queued.json()) as { id: number };
   const command = db.select().from(schema.commands).get();
   expect(command).toMatchObject({
-    type: 'post_jira_comment',
+    type: 'post_tracker_comment',
     ticketId,
-    payload: { projectId, ticketId, key: 'ABC-1', text: 'Done, see the PR', replyTo },
+    payload: {
+      projectId,
+      ticketId,
+      kind: 'jira',
+      itemId: 'ABC-1',
+      threadId: '10010',
+      mention,
+      text: 'Done, see the PR',
+    },
   });
   const pending = (await (await read(ticketId)).json()) as { pending: unknown[] };
   expect(pending.pending).toMatchObject([
-    { commandId: id, replyTo: '10010', text: 'Done, see the PR' },
+    { commandId: id, threadId: '10010', text: 'Done, see the PR' },
   ]);
   emitEvent(db, {
-    type: 'jira_comment_posted',
+    type: 'tracker_comment_posted',
     ticketId,
-    payload: { commandId: id, commentId: '10200' },
+    payload: { commandId: id, kind: 'jira', threadId: '10010', commentId: '10200' },
   });
   const posted = (await (await read(ticketId)).json()) as { pending: unknown[] };
   expect(posted.pending).toEqual([]);
@@ -204,10 +246,10 @@ test('an empty comment, or one on a ticket not from Jira, is refused', async () 
 });
 
 function importComment(ticketId: number, commentId: string): Response | Promise<Response> {
-  return app.request(`/api/tickets/${ticketId}/jira-comments/import`, {
+  return app.request(`/api/tickets/${ticketId}/trackers/jira/comments/import`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ commentId }),
+    body: JSON.stringify({ threadId: commentId, commentId }),
   });
 }
 

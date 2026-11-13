@@ -105,7 +105,7 @@ test('an issue is linked as a spec of the review, read with its text, and unlink
       summary: 'Summary of ABC-12',
       url: `${SITE}/browse/ABC-12`,
       markdown: 'Do it.',
-      comments: { error: 'Jira refused it.' },
+      threads: { error: 'Jira refused it.' },
       properties: [],
       pendingFields: [],
     },

@@ -9,7 +9,8 @@ import type { JiraFields } from './jira-integration';
 import { attachmentsByMediaId, hasUnnamedMedia } from './jira-media-ids';
 import { ItemOutsideSourceError, type IntegrationProvider, type SourceItem } from './provider';
 
-function authOf(token: string, config: unknown): { auth: JiraAuth; projectKey: string } {
+/** The account's auth on the integration's site, and its project's key. */
+export function jiraAccess(token: string, config: unknown): { auth: JiraAuth; projectKey: string } {
   const { site, email, projectKey } = jiraConfigOf(config);
   return { auth: { site, email, token }, projectKey };
 }
@@ -20,7 +21,7 @@ async function item(
   config: unknown,
   key: string,
 ): Promise<SourceItem> {
-  const { auth, projectKey } = authOf(token, config);
+  const { auth, projectKey } = jiraAccess(token, config);
   const issue = await jira.issue(auth, key);
   if (issue.projectKey !== projectKey) {
     throw new ItemOutsideSourceError(
@@ -42,14 +43,14 @@ async function item(
 export function jiraProvider(jira: JiraApi): IntegrationProvider {
   return {
     verify: async (token, config) => {
-      const { auth, projectKey } = authOf(token, config);
+      const { auth, projectKey } = jiraAccess(token, config);
       // Checks the email and token first: a bad pair would otherwise read as a missing project.
       await jira.myself(auth);
       const project = await jira.project(auth, projectKey);
       return { title: project.name };
     },
     readFields: async (token, config): Promise<{ title: string; fields: JiraFields }> => {
-      const { auth, projectKey } = authOf(token, config);
+      const { auth, projectKey } = jiraAccess(token, config);
       const [project, statuses, fields] = await Promise.all([
         jira.project(auth, projectKey),
         jira.statuses(auth, projectKey),

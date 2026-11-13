@@ -24,6 +24,10 @@ export type IntegrationKind = {
   createsItems: boolean;
   /** What the kind's adapter can do, so the browser shows only what it supports. */
   capabilities: readonly TrackerCapability[];
+  /** How a reply answers a comment: in its thread, or as a new comment that mentions its author. */
+  commentReplies: 'thread' | 'mention';
+  /** Under the comment box: what the text may hold and whose name it is posted under. */
+  commentsPostAs: string;
   /** The tracker's markdown as plain GitHub-flavored markdown. */
   cleanMarkdown(markdown: string): string;
   /** A config as sent by the browser, checked and normalized; or what is wrong with it. */
@@ -52,7 +56,9 @@ const KINDS: Record<IntegrationKindName, IntegrationKind> = {
     cleanMarkdown: (markdown) => notionMarkdown(markdown),
     readConfig: readNotionConfig,
     createsItems: true,
-    capabilities: ['refs', 'text'],
+    capabilities: ['refs', 'text', 'comments'],
+    commentReplies: 'thread',
+    commentsPostAs: 'Posts under the Notion integration’s name',
   },
   jira: {
     kind: 'jira',
@@ -65,7 +71,10 @@ const KINDS: Record<IntegrationKindName, IntegrationKind> = {
     readConfig: readJiraConfig,
     refError: jiraRefSiteError,
     createsItems: true,
-    capabilities: ['refs', 'text'],
+    capabilities: ['refs', 'text', 'comments'],
+    commentReplies: 'mention',
+    commentsPostAs:
+      'Markdown: **bold**, `code`, [links](https://…), lists. Posts as the Atlassian account of the Jira connection, visible to everyone who can see the issue',
   },
 };
 

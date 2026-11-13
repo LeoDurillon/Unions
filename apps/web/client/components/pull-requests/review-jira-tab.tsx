@@ -5,27 +5,27 @@ import type { ReactElement } from 'react';
 import type { CurrentReview } from '../../../src/api-types';
 import type { ReviewJiraIssue } from '../../../src/review-jira-types';
 import { reviewJiraKey, useReviewJiraIssues } from '../../lib/review/use-review-jira';
-import { JiraCommentCard } from '../jira/jira-comment';
 import { FoldedMarkdown } from '../markdown/folded-markdown';
+import { TrackerThreadCard } from '../tracker/tracker-thread';
 import { Button, ErrorText } from '../ui/ui';
 import { ReviewTrackerItem } from './review-tracker-item';
 
 /** The issue's comments, read only: replying and Add to review are a ticket's. */
 function IssueComments({ issue }: { issue: ReviewJiraIssue }): ReactElement | null {
-  const { comments } = issue;
-  if ('error' in comments) {
-    return <p className="text-xs text-amber-700 dark:text-amber-400">{comments.error}</p>;
+  const { threads } = issue;
+  if ('error' in threads) {
+    return <p className="text-xs text-amber-700 dark:text-amber-400">{threads.error}</p>;
   }
-  if (comments.length === 0) {
+  if (threads.threads.length === 0) {
     return null;
   }
   return (
     <div className="space-y-3">
       <h4 className="text-xs font-semibold tracking-wide text-zinc-500 uppercase">
-        Comments ({comments.length})
+        Comments ({threads.threads.length})
       </h4>
-      {comments.map((comment) => (
-        <JiraCommentCard key={comment.id} comment={comment} />
+      {threads.threads.map((thread) => (
+        <TrackerThreadCard key={thread.id} kind="jira" thread={thread} />
       ))}
     </div>
   );

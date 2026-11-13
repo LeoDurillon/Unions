@@ -63,13 +63,10 @@ test('remove_containers hands every container to the hook', () => {
     replyToPrComment: () => {
       // Not under test.
     },
-    postNotionComment: () => {
+    postTrackerComment: () => {
       // Not under test.
     },
     setTrackerField: () => {
-      // Not under test.
-    },
-    postJiraComment: () => {
       // Not under test.
     },
     preview: () => {

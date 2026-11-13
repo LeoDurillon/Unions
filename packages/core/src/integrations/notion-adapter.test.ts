@@ -9,7 +9,31 @@ const FOREIGN = 'ffffffff-bbbb-4ccc-8ddd-eeeeeeeeeeee';
 const hex = (id: string): string => id.replaceAll('-', '');
 
 const notion = fakeNotionApi({ id: SOURCE, title: 'Roadmap' }, [
-  { id: PAGE, title: 'Add dark mode', dataSourceId: SOURCE, markdown: '## Goal\n' },
+  {
+    id: PAGE,
+    title: 'Add dark mode',
+    dataSourceId: SOURCE,
+    markdown: '## Goal\n',
+    comments: [
+      {
+        id: 'c-1',
+        discussionId: 'd-1',
+        blockId: null,
+        author: 'Ada',
+        createdAt: '2026-01-01T00:00:00.000Z',
+        richText: [
+          {
+            text: 'Which shade?',
+            href: null,
+            bold: false,
+            italic: false,
+            strikethrough: false,
+            code: false,
+          },
+        ],
+      },
+    ],
+  },
   { id: OTHER, title: 'Theme tokens', dataSourceId: SOURCE, markdown: '' },
   {
     id: FOREIGN,
@@ -43,4 +67,5 @@ adapterContract({
     raw: `See <mention-page url="https://www.notion.so/${hex(OTHER)}"/>`,
     clean: `See [Notion page](https://www.notion.so/${hex(OTHER)})`,
   },
+  commented: PAGE,
 });

@@ -4,9 +4,10 @@
 
 import type { IntegrationKindName } from './kinds';
 import type { IntegrationProvider } from './provider';
+import type { TrackerCommentInput, TrackerThreads } from './tracker-comments';
 
 /** Every capability an adapter may have, in the order `capabilitiesOf` lists them. */
-const TRACKER_CAPABILITIES = ['refs', 'text'] as const;
+const TRACKER_CAPABILITIES = ['refs', 'text', 'comments'] as const;
 
 export type TrackerCapability = (typeof TRACKER_CAPABILITIES)[number];
 
@@ -26,11 +27,21 @@ type TrackerText = {
   markdown(raw: string): string;
 };
 
+/** An item's comments: read as threads, and one posted (a reply as the kind's `commentReplies` says). */
+type TrackerComments = {
+  /** The item's threads; throws `TrackerRefusedError` (`tracker-refused.ts`) when the integration may not read comments. */
+  read(secret: string, config: unknown, itemId: string): Promise<TrackerThreads>;
+  post(secret: string, config: unknown, post: TrackerCommentInput): Promise<{ commentId: string }>;
+  /** Why the tracker refused a post, the permission named when it lacks one; `inThread`: it was a reply. */
+  postFailure(error: unknown, inThread: boolean): string;
+};
+
 /** One tracker: the provider's calls, its kind, and each capability it has. */
 export type TrackerAdapter = IntegrationProvider & {
   kind: IntegrationKindName;
   refs?: TrackerRefs;
   text?: TrackerText;
+  comments?: TrackerComments;
 };
 
 /** The capabilities the adapter has, in `TRACKER_CAPABILITIES`'s order. */

@@ -277,11 +277,12 @@
   pull request, or finds an imported line comment's thread by its first comment's URL; it posts the reply (in the
   thread, resolved if asked, else as a conversation comment), turns a suggestion `sent` or back to a draft with
   `reply_error`, and logs `pr_comment_replied` or `pr_comment_reply_failed` with the command's id. The GitHub calls
-  are in `github/octokit-threads.ts` (and `fake-threads.ts` for tests). `notion/comment-post.ts` handles
-  `post_notion_comment` (through its `notionHooks`): it posts the comment with the project's Notion secret and logs
-  `notion_comment_posted` or `notion_comment_failed` (with the text, which the tab puts back in its box).
-  `jira/comment-post.ts` handles `post_jira_comment` the same way for a Jira ticket's issue: the text as Jira's
-  rich text, a reply starting with a mention of its author, logged as `jira_comment_posted` or `jira_comment_failed`.
+  are in `github/octokit-threads.ts` (and `fake-threads.ts` for tests). `tracker-comment-post.ts` handles
+  `post_tracker_comment` (`tracker-comment-commands.ts`, through `trackerHooks`): it posts the comment through the
+  tracker's adapter (`comments.post`) with the project's secret for that tracker, and logs `tracker_comment_posted`
+  or `tracker_comment_failed` (with the adapter's reason and the text, which the tab puts back in its box). The
+  commands queued before it, `post_notion_comment` and `post_jira_comment`, are read as tracker comments for one
+  release (core's `legacyNotionComment`, `legacyJiraComment`).
   `github/ci-rerun.ts` handles `rerun_ci_job`: GitHub runs the failed Actions job again; it logs `ci_job_rerun` or
   `ci_job_rerun_failed` (which notifies). `github/ticket-edit.ts` handles `edit_ticket` (the title and description
   edited on the Overview): it writes them to the issue only if GitHub still has the text the edit started from

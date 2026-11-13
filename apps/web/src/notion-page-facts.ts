@@ -3,8 +3,8 @@
 import type { Db, NotionApi, Ticket } from '@union/core';
 
 import { CONFLICT, fail } from './http';
-import type { NotionTabView } from './notion-discussion-types';
 import { pendingTrackerFields, withNotionOptions } from './tracker-field-commands';
+import type { NotionItemView } from './tracker-item-types';
 
 const NOT_LINKED = 'This ticket is not linked to a Notion page';
 
@@ -26,7 +26,7 @@ export async function notionPageView(
   notion: NotionApi,
   token: string,
   ticket: Ticket,
-): Promise<Pick<NotionTabView, 'page' | 'pendingFields'>> {
+): Promise<Pick<NotionItemView, 'page' | 'pendingFields'>> {
   const pendingFields = pendingTrackerFields(db, ticket.id);
   try {
     const page = await notion.page(token, notionPageOf(ticket).id);

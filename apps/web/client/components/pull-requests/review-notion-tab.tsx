@@ -7,31 +7,31 @@ import type { CurrentReview } from '../../../src/api-types';
 import type { ReviewNotionPage } from '../../../src/review-notion-types';
 import { reviewNotionKey, useReviewNotionPages } from '../../lib/review/use-review-notion';
 import { FoldedMarkdown } from '../markdown/folded-markdown';
-import { NotionDiscussion } from '../notion/notion-discussion';
+import { TrackerThreadCard } from '../tracker/tracker-thread';
 import { Button, ErrorText } from '../ui/ui';
 import { ReviewTrackerItem } from './review-tracker-item';
 
 /** The page's open discussions, read only: replying and Add to review are a ticket's. */
 function PageDiscussions({ page }: { page: ReviewNotionPage }): ReactElement | null {
-  const { discussions } = page;
-  if ('error' in discussions) {
-    return <p className="text-xs text-amber-700 dark:text-amber-400">{discussions.error}</p>;
+  const { threads } = page;
+  if ('error' in threads) {
+    return <p className="text-xs text-amber-700 dark:text-amber-400">{threads.error}</p>;
   }
-  if (discussions.discussions.length === 0) {
+  if (threads.threads.length === 0) {
     return null;
   }
   return (
     <div className="space-y-3">
       <h4 className="text-xs font-semibold tracking-wide text-zinc-500 uppercase">
-        Open discussions ({discussions.discussions.length})
+        Open discussions ({threads.threads.length})
       </h4>
-      {discussions.truncated ? (
+      {threads.truncated ? (
         <p className="text-xs text-amber-700 dark:text-amber-400">
           The page has many commented passages: only the first ones were read.
         </p>
       ) : null}
-      {discussions.discussions.map((discussion) => (
-        <NotionDiscussion key={discussion.id} discussion={discussion} />
+      {threads.threads.map((thread) => (
+        <TrackerThreadCard key={thread.id} kind="notion" thread={thread} />
       ))}
     </div>
   );

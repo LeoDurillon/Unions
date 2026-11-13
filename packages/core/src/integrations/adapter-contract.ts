@@ -3,6 +3,7 @@
 
 import { describe, expect, test } from 'bun:test';
 
+import { commentsCases } from './adapter-contract-comments';
 import { integrationKind } from './kinds';
 import { ItemOutsideSourceError } from './provider';
 import { capabilitiesOf, type TrackerAdapter } from './tracker-adapter';
@@ -22,6 +23,8 @@ export type ContractFixture = {
   named: { texts: string[]; ids: string[] };
   /** The tracker's markdown as stored on an imported ticket, and as plain markdown. */
   markdown: { raw: string; clean: string };
+  /** An item with at least one thread of comments (one whose author can be mentioned, for mention replies). */
+  commented: string;
 };
 
 function required<T>(capability: T | undefined, name: string): T {
@@ -71,6 +74,7 @@ export function adapterContract(fixture: ContractFixture): void {
       expect(refused).toBeInstanceOf(ItemOutsideSourceError);
     });
     refsCases(fixture);
+    commentsCases({ adapter, secret, config, itemId: fixture.commented });
     test("reads the tracker's markdown as plain markdown", () => {
       expect(required(adapter.text, 'text').markdown(fixture.markdown.raw)).toBe(
         fixture.markdown.clean,

@@ -68,13 +68,16 @@
   `reply_status = 'requested'` (`markSent`'s `askReplies`, unless `config.suggestReplies` is false). In the client,
   `lib/use-pr-replies.ts` reads them and follows the reply events, and `pull-request/reply-area.tsx` (with
   `reply-box.tsx`, `suggested-reply.tsx`) sits in each `ThreadCard` and `NoteCard` of the PR tab (`discussion.tsx`)
-  and the review's Comments tab (`pull-requests/review-comments-tab.tsx`). A ticket's Notion comments
-  (`routes/notion-comments.ts`): `GET` reads the page's discussions (`notion-discussions.ts`) with the
-  `post_notion_comment` commands not answered yet (`notion-comment-commands.ts`), `POST` queues one, `POST /import` adds a discussion to the review (`notion-review-import.ts`:
-  one `general` draft, deduped by its Notion link in `source_url`; `review-feedback.ts` puts these under "On the
-  spec (Notion comments)", and `markSent` asks no reply for them); in the client,
-  `lib/integrations/use-notion-comments.ts` and `notion/notion-tab.tsx`, `notion-discussion.tsx`, `notion-reply.tsx` (which
-  reuses the PR tab's `reply-box.tsx`). `PUT /api/tickets/:id/text`
+  and the review's Comments tab (`pull-requests/review-comments-tab.tsx`). A ticket's tracker comments
+  (`routes/tracker-comments.ts`, `/api/tickets/:id/trackers/:kind/comments`, for Notion and Jira alike): `GET` reads
+  the item's threads through its adapter with the `post_tracker_comment` commands not answered yet
+  (`tracker-comment-commands.ts`), `POST` queues one, `POST /import` adds a thread or one comment to the review
+  (`tracker-review-import.ts`: one `general` draft, deduped by its link in `source_url`; `review-feedback.ts` puts
+  these under "On the spec (Notion comments)" or "(Jira comments)", and `markSent` asks no reply for them). `routes/tracker-item.ts` (`…/item`) reads the
+  item for the tab's card. In the client, `tracker/tracker-tab.tsx` reads both (`lib/integrations/use-tracker-item.ts`,
+  `use-tracker-comments.ts`) and shows the tracker's card (`notion/notion-page-card.tsx`, `jira/jira-issue-card.tsx`),
+  then `tracker-comments.tsx`, `tracker-thread-list.tsx`, `tracker-thread.tsx` and `tracker-reply.tsx` (which
+  reuses the PR tab's `reply-box.tsx`); Add to review is `use-tracker-review-import.ts`. `PUT /api/tickets/:id/text`
   (`routes/tickets/ticket-edit.ts`) queues `edit_ticket` with the new title and description and the `base` the user started
   from; it refuses a base the ticket no longer has, and a second edit while one waits. A pull request under review (Pull requests tab, Under review) uses the same
   page and comment code: `review_comments` rows belong to a ticket or to a `current_reviews` row
@@ -247,9 +250,9 @@
   `specs-bar.tsx` under the header (`review-top.tsx`), the dialog `specs-dialog.tsx` and `spec-row.tsx`, its open
   state in `specs-editing.tsx` (the agent dialogs' "Edit the specs"), `lib/review/use-review-specs.ts`.
 - A review's Notion pages: its `notion` specs. `routes/review/review-notion.ts` (mounted from `review-workspace.ts`) reads
-  each linked page's text and its open discussions (`GET`, one page at a time; `discussionsOfPage` in
-  `notion-discussions.ts` reuses the markdown already read, and a refused comment read becomes the page's
-  `discussions.error`, so the text still shows), checks a page before linking (`POST /check`), links one more (`PUT`) and unlinks
+  each linked page's text and its open discussions (`GET`, one page at a time; core's `notionThreadsOfPage`
+  reuses the markdown already read, and a refused comment read becomes the page's `threads.error`, so the text
+  still shows), checks a page before linking (`POST /check`), links one more (`PUT`) and unlinks
   one (`DELETE /:pageId`); `{ page, stack: true }` also links the reviews of its GitHub stack without a page
   (`github_stack_number`). The reviews list carries `notionPages` (`current-review-list.ts`). `GET
   /notion/suggestions` (`review-notion-suggestions.ts`) reads the description's Notion links (`notionUrlsIn`,

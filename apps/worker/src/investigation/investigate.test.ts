@@ -272,13 +272,10 @@ test('the cancel command cancels a queued run itself and hands a running one to 
     replyToPrComment: () => {
       // Not under test.
     },
-    postNotionComment: () => {
+    postTrackerComment: () => {
       // Not under test.
     },
     setTrackerField: () => {
-      // Not under test.
-    },
-    postJiraComment: () => {
       // Not under test.
     },
     preview: () => {

@@ -1,13 +1,12 @@
-// The command hooks that write to the trackers: comments on Notion pages and Jira issues, a property set by hand.
+// The command hooks that write to the trackers: a comment on a ticket's item, a property set by hand.
 import { FetchJiraApi, FetchNotionApi, type Db, type JiraApi, type NotionApi } from '@union/core';
 
 import type { CommandHooks } from './command-hooks';
-import { jiraHooks } from './jira/comment-post';
 import { setJiraField } from './jira/field-set';
-import { notionHooks } from './notion/comment-post';
 import { setNotionField } from './notion/field-set';
+import { postTrackerComment } from './tracker-comment-post';
 
-type TrackerHooks = Pick<CommandHooks, 'postNotionComment' | 'postJiraComment' | 'setTrackerField'>;
+type TrackerHooks = Pick<CommandHooks, 'postTrackerComment' | 'setTrackerField'>;
 
 export function trackerHooks(
   db: Db,
@@ -15,8 +14,9 @@ export function trackerHooks(
   jira: JiraApi = new FetchJiraApi(),
 ): TrackerHooks {
   return {
-    ...notionHooks(db, notion),
-    ...jiraHooks(db, jira),
+    postTrackerComment: (commandId, post) => {
+      void postTrackerComment(db, { notion, jira }, commandId, post);
+    },
     setTrackerField: (commandId, change) => {
       void (change.kind === 'jira'
         ? setJiraField(db, jira, commandId, change)
