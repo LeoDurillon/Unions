@@ -21,6 +21,6 @@ export function ticketOutsideLinkRoutes(db: Db, { github, notion, jira }: ApiSer
   routes.route('/', ticketNotionCommentRoutes(db, notion));
   routes.route('/', ticketJiraCommentRoutes(db, jira));
   routes.route('/', ticketJiraLinkRoutes(db, jira));
-  routes.route('/', ticketTrackerFieldRoutes(db, notion));
+  routes.route('/', ticketTrackerFieldRoutes(db, notion, jira));
   return routes;
 }

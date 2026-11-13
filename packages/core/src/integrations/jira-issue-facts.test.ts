@@ -33,7 +33,7 @@ test('the summary, type, status with its category, assignee and last update', ()
         text: 'In Review',
         value: 'In Review',
         options: [],
-        settable: false,
+        settable: true,
       },
     ],
   });
@@ -61,7 +61,7 @@ test('an unassigned issue, an unknown category and missing fields read as null',
         text: 'Odd',
         value: 'Odd',
         options: [],
-        settable: false,
+        settable: true,
       },
     ],
   });

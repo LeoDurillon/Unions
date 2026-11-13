@@ -231,8 +231,13 @@ Then come the tabs:
   the issue (its summary, key, type, status, assignee and when it was last updated, **Open in Jira** and
   **Refresh**, which reads the issue and its comments again), its **Properties** (its status, then the fields of
   the issue's edit screen in Jira, its summary, description and files left out, the empty ones folded under
-  "N empty"), then the issue's comments, oldest first, each with
-  its author, time ("edited" when changed), **Open in Jira**, and a badge when not everyone can see it (a role or
+  "N empty"), then the issue's comments, oldest first. A field Union can set (text, numbers, dates, selects,
+  checkboxes, labels, people, versions, components, the sprint) has **Edit**: change it with the input its type
+  takes, then **Save**. Labels you type replace the issue's. **Edit** on the status lists the moves the issue's
+  workflow offers from where it is, as Jira's own status button does; a move that needs a screen in Jira (a
+  resolution, a comment) is refused with Jira's reason. The new value shows "Saving…" until Jira has it; the account
+  of the project's Jira connection needs the **Edit issues** and **Transition issues** permissions. Each comment
+  comes with its author, time ("edited" when changed), **Open in Jira**, and a badge when not everyone can see it (a role or
   group, or an internal note). An issue with more than 500 comments shows the latest 500. **Reply** under a comment posts a new comment that starts with a mention of its author, so Jira notifies
   them (Jira comments have no threads); **New comment** in the **Comment on the issue** card at the bottom posts a plain one. You can write
   markdown: `**bold**`, `` `code` ``, `[links](https://…)`, lists, code blocks and quotes keep their shape in Jira

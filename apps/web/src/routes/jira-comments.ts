@@ -1,33 +1,17 @@
 // `/api/tickets/:id/jira-comments`: the Jira issue a ticket was imported from and its comments, read
 // now. Also those the user sends to it, posted by the worker.
 
-import { jiraAuthOf, readJiraIssueFacts, type Db, type JiraApi, type Ticket } from '@union/core';
+import type { Db, JiraApi } from '@union/core';
 import { Hono } from 'hono';
 
 import { ACCEPTED, CONFLICT, fail, NOT_FOUND, readObject } from '../http';
 import { pendingJiraComments, queueJiraComment } from '../jira-comment-commands';
 import type { JiraTabView } from '../jira-comment-types';
+import { jiraAuthFor, jiraIssueKeyOf, jiraIssueView } from '../jira-issue-view';
 import { importedJiraComments, importJiraComment } from '../jira-review-import';
 import { reviewImportRefusal } from '../review-import-refusal';
 import { guarded } from './notion';
 import { loadTicket } from './tickets/ticket-notion-link';
-
-/** The issue the ticket was imported from. */
-function issueKeyOf(ticket: Ticket): string {
-  if (ticket.originKind !== 'jira' || !ticket.originId) {
-    throw fail(CONFLICT, 'This ticket was not imported from Jira');
-  }
-  return ticket.originId;
-}
-
-/** Who calls Jira for the ticket's project; refused when it is not connected any more. */
-function authFor(db: Db, ticket: Ticket): NonNullable<ReturnType<typeof jiraAuthOf>> {
-  const auth = jiraAuthOf(db, ticket.projectId);
-  if (!auth) {
-    throw fail(CONFLICT, 'The project is not connected to Jira');
-  }
-  return auth;
-}
 
 /**
  * `GET` reads the issue and its comments from Jira on each call (the tab reads them once per opening, and on
@@ -38,16 +22,16 @@ export function ticketJiraCommentRoutes(db: Db, jira: JiraApi): Hono {
   const routes = new Hono();
   routes.get('/:id/jira-comments', async (c) => {
     const ticket = loadTicket(db, c);
-    const key = issueKeyOf(ticket);
-    const auth = authFor(db, ticket);
+    const key = jiraIssueKeyOf(ticket);
+    const auth = jiraAuthFor(db, ticket);
     const [read, issue] = await Promise.all([
       guarded(() => jira.comments(auth, key)),
-      readJiraIssueFacts(jira, auth, key),
+      jiraIssueView(db, jira, auth, ticket),
     ]);
     const view: JiraTabView = {
       key,
       issueUrl: ticket.originUrl ?? `${auth.site}/browse/${key}`,
-      issue,
+      ...issue,
       comments: read.comments,
       total: read.total,
       pending: pendingJiraComments(db, ticket.id),
@@ -65,12 +49,12 @@ export function ticketJiraCommentRoutes(db: Db, jira: JiraApi): Hono {
   });
   routes.post('/:id/jira-comments/import', async (c) => {
     const ticket = loadTicket(db, c);
-    const key = issueKeyOf(ticket);
+    const key = jiraIssueKeyOf(ticket);
     const refusal = reviewImportRefusal(ticket);
     if (refusal !== null) {
       throw fail(CONFLICT, refusal);
     }
-    const auth = authFor(db, ticket);
+    const auth = jiraAuthFor(db, ticket);
     const { commentId } = await readObject(c.req.raw);
     // Read again: the comment as it is now.
     const read = await guarded(() => jira.comments(auth, key));
@@ -82,8 +66,8 @@ export function ticketJiraCommentRoutes(db: Db, jira: JiraApi): Hono {
   });
   routes.post('/:id/jira-comments', async (c) => {
     const ticket = loadTicket(db, c);
-    const key = issueKeyOf(ticket);
-    authFor(db, ticket);
+    const key = jiraIssueKeyOf(ticket);
+    jiraAuthFor(db, ticket);
     const input = await readObject(c.req.raw);
     return c.json({ id: queueJiraComment(db, ticket, key, input) }, ACCEPTED);
   });

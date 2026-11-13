@@ -1,9 +1,13 @@
 // The Jira tab's issue card: its summary, key, type, status, assignee and last update, Open in Jira, Refresh.
+// Then its fields, each one Union can set with Edit.
 
 import type { JiraIssueFacts } from '@union/core';
 import type { ReactElement } from 'react';
 
+import type { PendingTrackerField } from '../../../src/tracker-field-types';
 import type { Tone } from '../../lib/board/labels';
+import { jiraCommentsKey } from '../../lib/integrations/use-jira-comments';
+import { useTrackerFieldSend } from '../../lib/integrations/use-tracker-fields';
 import { timeAgo } from '../../lib/ui/relative-time';
 import { useNow } from '../../lib/ui/use-now';
 import { TrackerItemCard } from '../tracker/tracker-item-card';
@@ -72,18 +76,24 @@ function Heading({
 }
 
 export function JiraIssueCard({
+  ticket,
   issue,
+  pendingFields,
   loaded,
   reading,
   onRefresh,
 }: {
+  ticket: { id: number; projectId: number };
   /** The issue's key and address, and its facts (null when Jira did not give them). */
   issue: { key: string; url: string; facts: JiraIssueFacts | null } | null;
+  /** The fields being set, not sent to Jira yet. */
+  pendingFields: PendingTrackerField[];
   /** Jira answered (the issue read or not). */
   loaded: boolean;
   reading: boolean;
   onRefresh: () => void;
 }): ReactElement {
+  const sender = useTrackerFieldSend(ticket.id, jiraCommentsKey(ticket.id));
   return (
     <TrackerItemCard
       mark="J"
@@ -92,6 +102,13 @@ export function JiraIssueCard({
       reading={reading}
       onRefresh={onRefresh}
       properties={issue?.facts?.properties ?? []}
+      editing={{
+        kind: 'jira',
+        ticketId: ticket.id,
+        projectId: ticket.projectId,
+        pending: pendingFields,
+        sender,
+      }}
     >
       <Heading issueKey={issue?.key ?? null} facts={issue?.facts ?? null} />
     </TrackerItemCard>

@@ -10,7 +10,8 @@ import { CARD_CLASS, ErrorText } from '../ui/ui';
 import { JiraComments } from './jira-comment-list';
 import { JiraIssueCard } from './jira-issue-card';
 
-export function JiraTab({ ticketId }: { ticketId: number }): ReactElement {
+export function JiraTab({ ticket }: { ticket: { id: number; projectId: number } }): ReactElement {
+  const ticketId = ticket.id;
   const comments = useJiraComments(ticketId);
   const sender = useJiraCommentSend(ticketId);
   const reviewImport = useJiraReviewImport(ticketId);
@@ -18,6 +19,8 @@ export function JiraTab({ ticketId }: { ticketId: number }): ReactElement {
   return (
     <div className="space-y-4">
       <JiraIssueCard
+        ticket={ticket}
+        pendingFields={data?.pendingFields ?? []}
         issue={data ? { key: data.key, url: data.issueUrl, facts: data.issue } : null}
         loaded={data !== undefined || comments.error !== null}
         reading={comments.isFetching}

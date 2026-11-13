@@ -109,7 +109,7 @@ test("the tab reads the issue's comments with the project's token", async () => 
           text: 'In Review',
           value: 'In Review',
           options: [],
-          settable: false,
+          settable: true,
         },
         {
           id: 'duedate',
@@ -125,6 +125,7 @@ test("the tab reads the issue's comments with the project's token", async () => 
     comments: [COMMENT],
     total: 1,
     pending: [],
+    pendingFields: [],
     review: { importedIds: [], refusal: 'Available once the ticket is implemented' },
   });
   expect(asked).toEqual([{ token: 'tok', key: 'ABC-1' }]);

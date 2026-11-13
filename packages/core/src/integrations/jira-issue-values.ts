@@ -3,6 +3,7 @@
 
 import { adfMarkdown } from './adf-markdown';
 import { fieldTypeOf } from './jira-field-types';
+import { jiraEditStart } from './jira-hand-value';
 import { isRecord, text } from './jira-parse';
 import { joined, shortDateTime, type TrackerProperty } from './tracker-property';
 
@@ -62,7 +63,7 @@ function optionsOf(field: Record<string, unknown>): string[] {
   );
 }
 
-/** The status, first: it is not on the edit screen, Jira moves it through the workflow. */
+/** The status, first: it is not on the edit screen, it is moved through the workflow's transitions. */
 function statusRow(fields: Record<string, unknown>): TrackerProperty[] {
   const status = valueText(fields.status);
   return status === ''
@@ -75,7 +76,7 @@ function statusRow(fields: Record<string, unknown>): TrackerProperty[] {
           text: status,
           value: status,
           options: [],
-          settable: false,
+          settable: true,
         },
       ];
 }
@@ -99,9 +100,9 @@ export function issuePropertiesOf(body: unknown): TrackerProperty[] {
         name: text(field, 'name') || id,
         type: type ?? schema.type,
         text: shown,
-        value: shown,
         options: optionsOf(field),
         settable: type !== null,
+        ...(type === null ? { value: shown } : jiraEditStart(type, fields[id])),
       },
     ];
   });

@@ -75,7 +75,13 @@ export function NotionPageCard({
       reading={reading}
       onRefresh={onRefresh}
       properties={facts?.properties ?? []}
-      editing={{ projectId: ticket.projectId, pending: view?.pendingFields ?? [], sender }}
+      editing={{
+        kind: 'notion',
+        ticketId: ticket.id,
+        projectId: ticket.projectId,
+        pending: view?.pendingFields ?? [],
+        sender,
+      }}
     >
       <Heading facts={facts} />
     </TrackerItemCard>

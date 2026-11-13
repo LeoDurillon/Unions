@@ -6,11 +6,10 @@ import { useState, type ReactElement } from 'react';
 import type { PendingTrackerField } from '../../../src/tracker-field-types';
 import type { TrackerFieldSend } from '../../lib/integrations/use-tracker-fields';
 import { Button } from '../ui/ui';
-import { TrackerPropertyEditor } from './tracker-property-editor';
+import { TrackerPropertyEditor, type TrackerEditContext } from './tracker-property-editor';
 
-/** What a card needs to let its properties be edited: the project (for its lists), the changes being sent. */
-export type TrackerPropertyEditing = {
-  projectId: number;
+/** What a card needs to let its properties be edited: the tracker, ticket and project, the changes being sent. */
+export type TrackerPropertyEditing = TrackerEditContext & {
   pending: PendingTrackerField[];
   sender: TrackerFieldSend;
 };
@@ -77,10 +76,10 @@ export function TrackerPropertyRow({
       {open && editing ? (
         <dd className="col-span-2">
           <TrackerPropertyEditor
-            projectId={editing.projectId}
+            context={editing}
             property={property}
-            onSave={async (value, text) => {
-              await editing.sender.send(property.id, value, text);
+            onSave={async (draft) => {
+              await editing.sender.send(property.id, draft);
               setOpen(false);
             }}
             onCancel={() => {

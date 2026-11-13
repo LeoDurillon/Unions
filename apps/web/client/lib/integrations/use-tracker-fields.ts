@@ -7,13 +7,14 @@ import { useState } from 'react';
 import type { PendingTrackerField } from '../../../src/tracker-field-types';
 import { request } from '../app/api';
 import { useEvents } from '../app/use-event-stream';
+import type { TrackerDraft } from './tracker-draft';
 
 /** A tab's view that lists the properties being set. */
 type WithPendingFields = { pendingFields: PendingTrackerField[] };
 
 export type TrackerFieldSend = {
   /** Queues the change; resolves once queued (the editor closes), rejects with the server's reason. */
-  send: (fieldId: string, value: string, text: string) => Promise<void>;
+  send: (fieldId: string, draft: TrackerDraft) => Promise<void>;
   /** The tracker's reason for each property it refused, by id. */
   failures: ReadonlyMap<string, string>;
   dismiss: (fieldId: string) => void;
@@ -45,15 +46,11 @@ export function useTrackerFieldSend(ticketId: number, queryKey: unknown[]): Trac
     void client.invalidateQueries({ queryKey });
   });
   return {
-    send: async (fieldId, value, text) => {
+    send: async (fieldId, { value, text, picks }) => {
       const { id } = await request<{ id: number }>(
         'POST',
         `/api/tickets/${ticketId}/tracker-fields`,
-        {
-          fieldId,
-          value,
-          text,
-        },
+        { fieldId, value, text, picks },
       );
       dismiss(fieldId);
       client.setQueryData<WithPendingFields>(queryKey, (old) =>

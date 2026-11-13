@@ -130,6 +130,13 @@ Containers never hold GitHub credentials. Tokens, the App's key and integration 
   names "Add comments"). Add to review (`POST …/jira-comments/import`, `jira-review-import.ts`) reads the comment
   again and adds a `general` draft whose `source_url` is the comment's link (`jira-comment-link.ts`); sending the
   review never asks such a draft a GitHub reply (`markSent` leaves out Notion's and Jira's links).
+  The tab's Properties card lists the status and the issue's edit screen (`?expand=editmeta`, read with the facts;
+  `jira-issue-values.ts`, edit start and picks from `jira-hand-value.ts`). A field edited there is the
+  `set_tracker_fields` command (kind `jira`, as for Notion): `routes/tracker-fields.ts` (`tracker-field-jira.ts`)
+  reads the issue again and checks the value with `jiraHandChange` (the rules' shaping, labels set as a whole), or,
+  for the status, that the picked transition is one `GET /issue/{key}/transitions` offers now (also served at
+  `GET /api/tickets/:id/jira-transitions` for the editor). The worker's `jira/field-set.ts` resolves "the active
+  sprint", then `updateIssue` or `transitionIssue`; 403 names "Edit issues" or "Transition issues".
 - A project reaches GitHub with a token (`projects.github_token`) or an installation of the GitHub App
   (`projects.github_installation_id`; the app's ID and private key are one row of `github_app`). Both are stored in
   plain text (local single-user app, like the original Union) and never reach the browser: responses use

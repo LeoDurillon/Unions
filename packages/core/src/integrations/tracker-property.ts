@@ -13,6 +13,8 @@ export type TrackerProperty = {
   value: string;
   options: string[];
   settable: boolean;
+  /** What a picked field holds (a Jira user, versions, a sprint): ids with names. */
+  picks?: { id: string; name: string }[];
 };
 
 /** Names in a list read as `A, B`. */

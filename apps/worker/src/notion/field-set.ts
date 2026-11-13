@@ -1,6 +1,5 @@
 // Sets one property of a Notion page, typed by hand in a tracker tab, and logs how it went.
 import {
-  emitEvent,
   integrationOf,
   NotionError,
   notionHandValue,
@@ -8,6 +7,8 @@ import {
   type NotionApi,
   type TrackerFieldSet,
 } from '@union/core';
+
+import { logFieldOutcome } from '../tracker-field-outcome';
 
 const FORBIDDEN = 403;
 
@@ -47,22 +48,5 @@ export async function setNotionField(
   commandId: number,
   change: TrackerFieldSet,
 ): Promise<void> {
-  const error = await attempt(db, notion, change);
-  const outcome = {
-    commandId,
-    kind: change.kind,
-    itemId: change.itemId,
-    reviewId: change.reviewId,
-    fieldId: change.field.id,
-    fieldName: change.field.name,
-    text: change.text,
-  };
-  // A review's change has no ticket: the event is the project's then, the review in its payload.
-  const ticket = change.ticketId === null ? {} : { ticketId: change.ticketId };
-  emitEvent(
-    db,
-    error === null
-      ? { type: 'tracker_field_set', ...ticket, payload: outcome }
-      : { type: 'tracker_field_failed', ...ticket, payload: { ...outcome, error } },
-  );
+  logFieldOutcome(db, commandId, change, await attempt(db, notion, change));
 }

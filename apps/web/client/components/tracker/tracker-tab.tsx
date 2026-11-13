@@ -37,7 +37,7 @@ export function TrackerTab({
   section: 'notion' | 'jira';
 }): ReactElement {
   return section === 'jira' ? (
-    <JiraTab key={ticket.id} ticketId={ticket.id} />
+    <JiraTab key={ticket.id} ticket={ticket} />
   ) : (
     <NotionTab key={ticket.id} ticket={ticket} />
   );

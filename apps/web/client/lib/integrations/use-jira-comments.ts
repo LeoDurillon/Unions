@@ -16,7 +16,8 @@ export function jiraReplyKey(replyTo: string | null): string {
   return replyTo ?? 'issue';
 }
 
-function key(ticketId: number): unknown[] {
+/** The tab's view in the query cache: changes to its issue update it. */
+export function jiraCommentsKey(ticketId: number): unknown[] {
   return ['jira-comments', ticketId];
 }
 
@@ -27,7 +28,7 @@ function url(ticketId: number): string {
 /** `refetch` is the tab's Refresh. */
 export function useJiraComments(ticketId: number): UseQueryResult<JiraTabView> {
   return useQuery({
-    queryKey: key(ticketId),
+    queryKey: jiraCommentsKey(ticketId),
     queryFn: () => request<JiraTabView>('GET', url(ticketId)),
     staleTime: Infinity,
     retry: false,
@@ -72,14 +73,14 @@ export function useJiraCommentSend(ticketId: number): JiraCommentSend {
     if (failure) {
       setFailures((old) => new Map(old).set(failure.key, failure));
     }
-    void client.invalidateQueries({ queryKey: key(ticketId) });
+    void client.invalidateQueries({ queryKey: jiraCommentsKey(ticketId) });
   });
   return {
     send: async (replyTo, text) => {
       const { id } = await request<{ id: number }>('POST', url(ticketId), { replyTo, text });
       const replyKey = replyTo?.commentId ?? null;
       dismiss(jiraReplyKey(replyKey));
-      client.setQueryData<JiraTabView>(key(ticketId), (old) =>
+      client.setQueryData<JiraTabView>(jiraCommentsKey(ticketId), (old) =>
         old
           ? {
               ...old,

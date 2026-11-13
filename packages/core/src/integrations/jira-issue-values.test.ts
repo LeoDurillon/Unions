@@ -12,10 +12,16 @@ const BODY = {
     assignee: { displayName: 'Ada Lovelace', accountId: 'a1' },
     priority: { name: 'High' },
     labels: ['ui', 'theme'],
-    fixVersions: [{ name: '2.4' }, { name: '2.5' }],
+    fixVersions: [
+      { id: '10', name: '2.4' },
+      { id: '11', name: '2.5' },
+    ],
     duedate: null,
     customfield_1: { value: 'Web' },
-    customfield_2: [{ name: 'Sprint 12', state: 'active' }],
+    customfield_2: [
+      { id: 4, name: 'Sprint 11', state: 'closed' },
+      { id: 5, name: 'Sprint 12', state: 'active' },
+    ],
     customfield_3: 5,
     customfield_4: '2026-11-12T10:00:00.000+0100',
     environment: {
@@ -32,7 +38,11 @@ const BODY = {
       labels: { name: 'Labels', schema: { type: 'array', items: 'string', system: 'labels' } },
       fixVersions: { name: 'Fix versions', schema: { type: 'array', items: 'version' } },
       duedate: { name: 'Due date', schema: { type: 'date', system: 'duedate' } },
-      customfield_1: { name: 'Platform', schema: { type: 'option', custom: 'x:select' } },
+      customfield_1: {
+        name: 'Platform',
+        schema: { type: 'option', custom: 'x:select' },
+        allowedValues: [{ value: 'Web' }, { value: 'iOS' }],
+      },
       customfield_2: { name: 'Sprint', schema: { type: 'array', items: 'json', custom: SPRINT } },
       customfield_3: { name: 'Points', schema: { type: 'number', custom: 'x:float' } },
       customfield_4: { name: 'Started', schema: { type: 'datetime', custom: 'x:datetime' } },
@@ -41,7 +51,7 @@ const BODY = {
   },
 };
 
-test('the status, then each field of the edit screen with its value and whether it can be set', () => {
+test('the status, then each field of the edit screen with its value, where an edit starts, and what it holds', () => {
   expect(issuePropertiesOf(BODY)).toEqual([
     {
       id: 'status',
@@ -50,7 +60,7 @@ test('the status, then each field of the edit screen with its value and whether 
       text: 'In Progress',
       value: 'In Progress',
       options: [],
-      settable: false,
+      settable: true,
     },
     {
       id: 'assignee',
@@ -60,6 +70,7 @@ test('the status, then each field of the edit screen with its value and whether 
       value: 'Ada Lovelace',
       options: [],
       settable: true,
+      picks: [{ id: 'a1', name: 'Ada Lovelace' }],
     },
     {
       id: 'priority',
@@ -87,6 +98,10 @@ test('the status, then each field of the edit screen with its value and whether 
       value: '2.4, 2.5',
       options: [],
       settable: true,
+      picks: [
+        { id: '10', name: '2.4' },
+        { id: '11', name: '2.5' },
+      ],
     },
     {
       id: 'duedate',
@@ -103,17 +118,18 @@ test('the status, then each field of the edit screen with its value and whether 
       type: 'option',
       text: 'Web',
       value: 'Web',
-      options: [],
+      options: ['Web', 'iOS'],
       settable: true,
     },
     {
       id: 'customfield_2',
       name: 'Sprint',
       type: 'sprint',
-      text: 'Sprint 12',
+      text: 'Sprint 11, Sprint 12',
       value: 'Sprint 12',
       options: [],
       settable: true,
+      picks: [{ id: '5', name: 'Sprint 12' }],
     },
     {
       id: 'customfield_3',
@@ -129,7 +145,7 @@ test('the status, then each field of the edit screen with its value and whether 
       name: 'Started',
       type: 'datetime',
       text: '2026-11-12 10:00',
-      value: '2026-11-12 10:00',
+      value: '2026-11-12T10:00',
       options: [],
       settable: true,
     },
@@ -138,7 +154,7 @@ test('the status, then each field of the edit screen with its value and whether 
       name: 'Environment',
       type: 'textarea',
       text: 'Chrome on macOS',
-      value: 'Chrome on macOS',
+      value: 'Chrome  on macOS',
       options: [],
       settable: true,
     },
