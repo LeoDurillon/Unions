@@ -4,7 +4,7 @@ import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 import { now } from './schema';
 
 /**
- * One `claude -p` stream-json event (or a `union_*` note) of a ticket's, an investigation's or an explanation's agent.
+ * One `claude -p` stream-json event (or a `union_*` note) of a ticket's, an investigation's, an explanation's or an agent review's agent.
  * `after_seq` is the last `events.seq` when it was written: the Log shows each line after that
  * event and before the next, so run headers and their lines keep their order across both tables.
  */
@@ -17,6 +17,8 @@ export const agentLog = sqliteTable(
     runId: integer('run_id'),
     investigationId: integer('investigation_id'),
     explanationId: integer('explanation_id'),
+    /** An agent review's lines, a pull request's included (it has no ticket). */
+    agentReviewId: integer('agent_review_id'),
     payload: text('payload', { mode: 'json' }).$type<unknown>().notNull(),
     at: integer('at').notNull().default(now),
   },
@@ -24,5 +26,6 @@ export const agentLog = sqliteTable(
     index('agent_log_ticket_idx').on(t.ticketId, t.id),
     index('agent_log_investigation_idx').on(t.investigationId, t.id),
     index('agent_log_explanation_idx').on(t.explanationId, t.id),
+    index('agent_log_agent_review_idx').on(t.agentReviewId, t.id),
   ],
 );

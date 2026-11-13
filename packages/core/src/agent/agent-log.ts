@@ -31,6 +31,7 @@ export function appendAgentLine(
     runId?: number;
     investigationId?: number;
     explanationId?: number;
+    agentReviewId?: number;
     payload: unknown;
   },
 ): void {
@@ -43,6 +44,7 @@ export function appendAgentLine(
         runId: line.runId ?? null,
         investigationId: line.investigationId ?? null,
         explanationId: line.explanationId ?? null,
+        agentReviewId: line.agentReviewId ?? null,
         payload: line.payload,
       })
       .returning()

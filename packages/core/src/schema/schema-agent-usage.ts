@@ -16,6 +16,7 @@ export const agentUsage = sqliteTable(
     ticketId: integer('ticket_id'),
     runId: integer('run_id'),
     investigationId: integer('investigation_id'),
+    agentReviewId: integer('agent_review_id'),
     sessionId: text('session_id').notNull(),
     model: text('model').notNull(),
     /** The model of the call's own turns; the others are its subagents'. */
@@ -43,5 +44,6 @@ export const agentUsage = sqliteTable(
     index('agent_usage_ticket_idx').on(t.ticketId),
     index('agent_usage_run_idx').on(t.runId),
     index('agent_usage_investigation_idx').on(t.investigationId),
+    index('agent_usage_agent_review_idx').on(t.agentReviewId),
   ],
 );

@@ -53,6 +53,7 @@ export function recordToolUsage(db: Executor, line: AgentLine): number {
         ticketId: line.ticketId,
         runId: line.runId,
         investigationId: line.investigationId,
+        agentReviewId: line.agentReviewId,
         sessionId: result.sessionId,
         ...count,
         at: line.at,

@@ -81,6 +81,16 @@ test('an investigation’s calls are recorded under it', () => {
   expect(rows()[0]).toMatchObject({ investigationId: 3, ticketId: null, output: 40 });
 });
 
+test('a pull request’s agent review records its calls under it, without a ticket', () => {
+  appendAgentLine(db, { agentReviewId: 4, payload: turn('m1', 700) });
+  appendAgentLine(db, { agentReviewId: 5, payload: result(10, 0.1) });
+  appendAgentLine(db, { agentReviewId: 4, payload: result(40, 0.2) });
+  expect(rows().map((row) => [row.agentReviewId, row.ticketId, row.peakContext])).toEqual([
+    [5, null, null],
+    [4, null, 700],
+  ]);
+});
+
 test('the backfill records the calls not recorded yet, once', () => {
   appendAgentLine(db, { ticketId: 1, payload: result(50, 1) });
   db.delete(schema.agentUsage).run();

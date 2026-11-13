@@ -17,6 +17,7 @@ export const agentToolUsage = sqliteTable(
     ticketId: integer('ticket_id'),
     runId: integer('run_id'),
     investigationId: integer('investigation_id'),
+    agentReviewId: integer('agent_review_id'),
     sessionId: text('session_id').notNull(),
     tool: text('tool').notNull(),
     /** The command family, the file read, the skill or the subagent type; empty for the others. */
@@ -42,5 +43,6 @@ export const agentToolUsage = sqliteTable(
     ),
     index('agent_tool_usage_ticket_idx').on(t.ticketId),
     index('agent_tool_usage_investigation_idx').on(t.investigationId),
+    index('agent_tool_usage_agent_review_idx').on(t.agentReviewId),
   ],
 );

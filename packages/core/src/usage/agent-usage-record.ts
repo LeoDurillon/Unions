@@ -19,7 +19,7 @@ type AgentLine = typeof schema.agentLog.$inferSelect;
 
 const MICRO = 1_000_000;
 
-/** The lines of the same Log (a ticket's or an investigation's) and Claude session. */
+/** The lines of the same owner (a ticket, an investigation or an agent review) and Claude session. */
 export function sameSession(line: AgentLine, sessionId: string): SQL | undefined {
   const owner = ownerOf(line);
   return owner
@@ -31,9 +31,10 @@ function ownerOf(line: AgentLine): SQL | null {
   if (line.ticketId !== null) {
     return eq(schema.agentLog.ticketId, line.ticketId);
   }
-  return line.investigationId === null
-    ? null
-    : eq(schema.agentLog.investigationId, line.investigationId);
+  if (line.investigationId !== null) {
+    return eq(schema.agentLog.investigationId, line.investigationId);
+  }
+  return line.agentReviewId === null ? null : eq(schema.agentLog.agentReviewId, line.agentReviewId);
 }
 
 export function ofType(type: string): SQL {
@@ -111,6 +112,7 @@ export function recordUsage(db: Executor, line: AgentLine): boolean {
         ticketId: line.ticketId,
         runId: line.runId,
         investigationId: line.investigationId,
+        agentReviewId: line.agentReviewId,
         sessionId: result.sessionId,
         model: usage.model,
         main: usage.main,

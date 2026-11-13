@@ -59,7 +59,8 @@ The agents' raw output is not an event: `appendAgentLine` writes it to `agent_lo
 with the last `events.seq` at the time, and `readLog` merges both tables into one Log in that order.
 When the line is a call's `result`, it also records what the call consumed in `agent_usage`, a row per model
 (`agent-usage-record.ts`). The result's `modelUsage` and cost add up over a resumed session, so a call's share is
-its result minus the session's previous one in the same Log (`agent-usage.ts`, pure); its peak context comes from
+its result minus the session's previous one of the same owner, a ticket, an investigation or an agent review
+(`agent-usage.ts`, pure); its peak context comes from
 its own `assistant` lines since then. Its tool uses since then go to `agent_tool_usage` (`agent-tool-record.ts`),
 a row per key: `agent-tool-key.ts` names the Bash command's family (`git diff`, `git diff --stat`, `jest`…) and its
 form (family and flags), the file a `Read` read, the skill, the subagent type; `agent-tool-calls.ts` adds up the

@@ -84,6 +84,7 @@ const runtime = {
 
 const agent: AgentFn = (_runtime, run) => {
   runs.push(run);
+  run.onEvent({ type: 'system', session_id: 's' });
   return Promise.resolve({ kind: 'ok', text: reply, sessionId: 's' });
 };
 
@@ -262,5 +263,10 @@ test('a pull request is checked out at its reviewed commit in a container remove
   expect(removed).toEqual(['union-a1']);
   expect(savedDrafts()).toEqual([
     { kind: 'line', excerpt: 'const b = 3;', body: 'Why 3?', headSha: head },
+  ]);
+  // Its log is kept by the review's id, though no ticket owns it.
+  const lines = db.select().from(schema.agentLog).all();
+  expect(lines.map(({ agentReviewId, ticketId }) => ({ agentReviewId, ticketId }))).toEqual([
+    { agentReviewId: 1, ticketId: null },
   ]);
 });

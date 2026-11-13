@@ -67,3 +67,11 @@ test('the backfill records past calls once', () => {
   expect(backfillToolUsage(db)).toEqual({ read: 0, recorded: 0 });
   expect(rows()).toHaveLength(1);
 });
+
+test('a pull request’s agent review records its tool uses under it', () => {
+  appendAgentLine(db, { agentReviewId: 4, payload: use('a', 'git diff main...HEAD') });
+  appendAgentLine(db, { agentReviewId: 4, payload: output('a', 'diff') });
+  appendAgentLine(db, { agentReviewId: 4, payload: result() });
+  const [row] = db.select().from(schema.agentToolUsage).all();
+  expect(row).toMatchObject({ agentReviewId: 4, ticketId: null, target: 'git diff', calls: 1 });
+});

@@ -3,6 +3,7 @@
 
 import {
   agentReviewStack,
+  appendAgentLine,
   claimAgentReview,
   effortFor,
   failInterruptedAgentReviews,
@@ -51,7 +52,6 @@ ${FINDINGS_FORMAT}`;
 type Checkout = {
   container: string;
   prompt: string;
-  log: (event: unknown) => void;
   close: () => Promise<void>;
   outcome: (findings: Findings) => AgentReviewOutcome;
 };
@@ -72,9 +72,6 @@ async function openCheckout(
     return {
       container: target.container,
       prompt: stackReviewPrompt(deps.db, target, review.specs),
-      log: () => {
-        // A pull request review has no log view.
-      },
       close: target.close,
       outcome: (findings) => stackOutcome(findings, target.members),
     };
@@ -83,7 +80,6 @@ async function openCheckout(
   return {
     container: target.container,
     prompt: agentReviewPrompt(deps.db, target, review.specs),
-    log: target.log,
     close: target.close,
     outcome: (findings) => ({
       status: 'succeeded',
@@ -105,7 +101,7 @@ const agentReview: SideReviewKind<AgentReview, AgentReviewOutcome, Checkout> = {
   open: openCheckout,
   ...STANDARD_ENDS,
   hunkIndex: false,
-  work: async (deps, { target: checkout, signal }) => {
+  work: async (deps, { row, target: checkout, signal }) => {
     const { db, runtime } = deps;
     const outcome = await (deps.agent ?? runAgent)(runtime, {
       container: checkout.container,
@@ -115,7 +111,14 @@ const agentReview: SideReviewKind<AgentReview, AgentReviewOutcome, Checkout> = {
       prompt: checkout.prompt,
       tools: toolsFor(db, 'review_comments'),
       signal,
-      onEvent: checkout.log,
+      // Kept by the review's id, a pull request's too; a ticket's lines are also its Log's.
+      onEvent: (event) => {
+        appendAgentLine(db, {
+          agentReviewId: row.id,
+          ticketId: row.ticketId ?? undefined,
+          payload: event,
+        });
+      },
     });
     if (outcome.kind !== 'ok') {
       return { status: 'failed', error: agentFailure(outcome) };
