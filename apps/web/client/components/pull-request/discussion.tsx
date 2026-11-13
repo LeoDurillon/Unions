@@ -16,9 +16,9 @@ import {
   useImportMutations,
 } from '../../lib/review/use-review';
 import { CommentCard } from '../review/comment-card';
-import { ImportComments } from '../review/import-comments';
 import { CARD_CLASS, ErrorText } from '../ui/ui';
-import { DiscussionLoading, NoteCard, ThreadCard } from './note-card';
+import { LineThreads } from './line-threads';
+import { DiscussionLoading, NoteCard } from './note-card';
 import { filterNotes, NoteFilterControl, useNoteFilter } from './note-filter';
 import { ReplyArea, SendAllReplies } from './reply-area';
 
@@ -33,7 +33,9 @@ function ImportedDrafts({
   comments: CommentView[];
   mutations: Mutations;
 }): ReactElement | null {
-  const general = comments.filter((comment) => comment.kind === 'general');
+  const general = comments.filter(
+    (comment) => comment.kind === 'general' && comment.status === 'draft',
+  );
   if (general.length === 0) {
     return null;
   }
@@ -101,44 +103,6 @@ function Notes({
   );
 }
 
-function Threads({
-  ticketId,
-  discussion,
-  replies,
-}: {
-  ticketId: number;
-  discussion: DiscussionResponse;
-  replies: PrReplies;
-}): ReactElement {
-  const { threads } = discussion;
-  return (
-    <section className={CARD_CLASS}>
-      <div className="flex items-start justify-between gap-2">
-        <h3 className="text-sm font-semibold">Line comments ({threads.length})</h3>
-        {threads.length > 0 ? (
-          <ImportComments ticketId={ticketId} pullRequest={discussion.number} />
-        ) : null}
-      </div>
-      {threads.length === 0 ? <p className="text-sm text-zinc-500">None.</p> : null}
-      {threads.map((thread) => (
-        <ThreadCard
-          key={thread.comments[0]?.url ?? thread.path}
-          thread={thread}
-          imported={discussion.imported.includes(thread.comments[0]?.url ?? '')}
-          diffIn="ticket"
-          reply={
-            <ReplyArea
-              replies={replies}
-              target={{ kind: 'thread', threadId: thread.id }}
-              githubUrl={thread.comments[0]?.url}
-            />
-          }
-        />
-      ))}
-    </section>
-  );
-}
-
 /** The pull request's GitHub discussion (`pr`: the ticket's or a slice's), and what of it goes to the implementer. */
 export function Discussion({ ticketId, pr }: { ticketId: number; pr: number }): ReactElement {
   const discussion = useDiscussion(ticketId, pr, true);
@@ -154,8 +118,8 @@ export function Discussion({ ticketId, pr }: { ticketId: number; pr: number }): 
     <div className="space-y-4">
       <SendAllReplies replies={replies} />
       <ImportedDrafts comments={comments.data ?? []} mutations={mutations} />
+      <LineThreads ticketId={ticketId} discussion={discussion.data} replies={replies} />
       <Notes discussion={discussion.data} importNote={importNote} replies={replies} />
-      <Threads ticketId={ticketId} discussion={discussion.data} replies={replies} />
     </div>
   );
 }

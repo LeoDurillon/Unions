@@ -20,6 +20,8 @@ in the template's language, and ends with `Closes #<issue>`.
 - **Rewrite description** writes the description again from the current code; you review the draft before it is
   sent to GitHub. The draft opens as it will read on GitHub (**Preview**); **Edit** changes its text, and
   **Changes from GitHub's** shows what it changes line by line.
+- **Line comments** come first: the open threads, then the resolved ones folded behind a line you click.
+- **In the review** lists the comments you added to the next review; they leave the list once you send it.
 - **Discussion on GitHub** shows the pull request's comments and reviews, one row each with its author, and
   **All**, **People** and **Bots** to show only some, with how many each shows. A bot's comment shows its first line
   until you click its author. **Add to review** on a row adds it to the next review you send. Import its line comments into a
