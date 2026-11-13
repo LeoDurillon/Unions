@@ -5,6 +5,8 @@ you visit Union. Later, open it again from **+** next to **Projects** in the sid
 
 ## The setup wizard
 
+![The setup wizard's first step: connect GitHub with a token or a GitHub App](../docs/screenshots/setup-wizard.png)
+
 1. **Connect**: paste a GitHub token and click **Verify**, or switch to **GitHub App** (see below).
 2. **Repository**: pick the repository the agents work on.
 3. **Integrations** (optional): pick **GitHub Project**, **Notion** or **Jira** at the top to set it up; you can

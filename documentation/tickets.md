@@ -62,6 +62,8 @@ Press **?** anywhere for the list of [keyboard shortcuts](#keyboard-shortcuts).
 
 Click **New ticket** in the project bar. The dialog has one tab per source:
 
+![The New ticket dialog: a title, a Markdown description, the flow and what the ticket depends on](../docs/screenshots/new-ticket.png)
+
 - **Write**: a title and a description in Markdown. The description becomes the GitHub issue's body (when the
   project mirrors tickets as issues), so write it for the agents and for your colleagues: the problem, what you
   expect, and anything they must not change. **Preview**, above the description, shows it as it will read;
@@ -183,6 +185,8 @@ ticket starts.
 
 Click a card to open its panel. Its top line shows the repository, the issue and the pull request, each linked to
 GitHub. Under the title:
+
+![A ticket's panel: its state, flow and branch, its progress, a card saying what it needs from you, then its tabs](../docs/screenshots/ticket-panel.png)
 
 - the ticket's state, its flow and its branch;
 - its progress: one stop per step of its flow, then **Done** and **Merged**. Each stop says what happened there

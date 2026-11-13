@@ -57,6 +57,8 @@ Under each output:
 When the Intake step asks questions, the tab shows a text box under each one. Type your answers, then **Approve**:
 Union writes them into the output, and the next steps read the questions with your answers.
 
+![The Intake step's questions, each with a box for your answer](../docs/screenshots/intake.png)
+
 ## Implementation
 
 After the last planning step is approved, the implementation agent (Opus by default) writes the code on the
