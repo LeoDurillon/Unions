@@ -1,6 +1,6 @@
 # Plan: agent reviews of large changes, slice by slice
 
-Status: planned (2026-11-13); step 0 done (recording built, commit `25105a4`; #1756 rerun and read), step 1 built (branch `review-agent-coverage`), its rerun on #1756 left.
+Status: planned (2026-11-13); step 0 done (recording built, commit `25105a4`; #1756 rerun and read), step 1 built and measured (commit `c75b8c7`, run 25): it fixes the line numbers, not the coverage; step 2 next.
 
 ## Problem
 
@@ -110,7 +110,36 @@ What this says for the plan:
 Built (2026-11-13) for a single change (`agent-review-change.ts`, `agent-review-coverage.ts`), with two changes to the
 list below: the generated files are the ones the review page already hides (lock files and the project's
 `reviewIgnore`), not a new list; and the coverage is shown next to the button, its files on hover. A stack's prompt
-is unchanged and its run not measured. Left: rerun #1756 and compare with run 24 (41 files, 2092 lines not opened).
+is unchanged and its run not measured.
+
+### Measured: run 25 on #1756, same head
+
+|                                  | Run 24 (before) | Run 25 (step 1) |
+| -------------------------------- | --------------- | --------------- |
+| Turns, time                      | 28, 3 min 5 s   | 45, 3 min 40 s  |
+| Peak context                     | 160k            | 171k            |
+| API-equivalent cost              | $1.85           | $2.63           |
+| Drafts                           | 9               | 5               |
+| Files not opened                 | 41 (2092 lines) | 50 (2104 lines) |
+| Code not opened (of 3334 lines)  | 25 files, 1116  | 33 files, 984   |
+| Tests and docs not opened (1294) | 16 files, 976   | 17 files, 1120  |
+| Comments placed on wrong lines   | 1               | 0               |
+
+- **What step 1 fixed.** The agent read the hunk index first, then diffed file by file: no output went through the
+  CLI's saved file, and every line comment sits on its lines. It reached more of the simulator and the Conception
+  (`publishedScenarios.helpers.ts`, `actionsTotals.ts`, `publishedScenarioSnapshot.ts`, the e2e test).
+- **What it did not fix.** Coverage is the same: 45% of the changed lines never opened. The tests are still left
+  almost whole, and `useActionsDetailsData.ts` (487 lines, the largest file) again.
+- **The agent's own account is wrong.** Its summary says "every file read through its diff, except
+  `useActionsDetailsData.ts`, `PublishedActionsTable` and the Conception's views, skimmed": 50 files were never
+  opened, the tests among them. The measured coverage on the page is the only reliable signal.
+- **Both runs stop near 160-170k of context**, in a 1M window: about 130k of reading after a 35k prompt, whatever
+  the instructions. That is the budget one agent spends here, about 2500 changed lines with the files around them.
+  It sets the size of a slice: at most about 1000 to 1200 changed lines, its tests included, so each agent ends its
+  reading with room left.
+
+Conclusion: a prompt does not change how much one agent reads; step 2 is needed above about 1200 lines. Keep step 1
+(it is what each slice agent will get) and the coverage (it measures step 2).
 
 - Use `checkedOutChange` in `agentReviewPrompt` (and in the stack's prompt) instead of its own paragraph: the list
   of changed files, "read the diff one file at a time when it is large", and the hunk index. Set `hunkIndex` to
