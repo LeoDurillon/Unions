@@ -116,6 +116,8 @@ The **Report** tab tells you, before you read the diff, what needs your attentio
 against the change's specs. Click **Write the report**: an agent reads the specs listed there (the [Specs](#specs)
 bar's; with no spec, the button stays off) and the whole change, and writes:
 
+![A spec report: the verdict and summary, how the change works, what needs you, the files to read first and the requirements to check](../docs/screenshots/spec-report.png)
+
 - **How it works**: a small map of the change's main path (click a part to open it in the diff; the grey ones are
   not changed; the red numbers are the **Needs you** items about that part), and a walkthrough in a few steps:
   what happens, and why. Each why says where it comes from: **From the spec**, **From a commit** or **From a

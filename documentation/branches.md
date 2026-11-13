@@ -161,6 +161,8 @@ Once the ticket is split, its PR tab shows the stack as one panel, bottom slice 
 line is a slice: its pull request, its state, its title and its CI in one word (failed, running or passed; hover it
 for the counts). The CI is read again every 30 seconds while a check runs.
 
+![A stack of three slices, the bottom one merged, with Restack, Rebase stack and Rewrite all descriptions](../docs/screenshots/stack-panel.png)
+
 Under the slices, the panel says how far the stack is behind its base, and offers:
 
 - **Rebase stack** (when the stack is behind): moves every slice onto the base at once, runs the checks and pushes them together. As with a

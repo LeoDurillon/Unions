@@ -59,6 +59,8 @@ and the service's port; once it runs, each row has the service's address, and th
 and the services' output. The **⋯** menu beside the status holds the Compose file, **Reset preview…** and **Environment settings**, which opens the project's **Environments** tab. The
 sidebar's **Previews** entry lists every preview running, grouped by project, with **Stop**.
 
+![A running preview: its service and address, Restart and Stop, the services' output, the end-to-end tests and Run a command](../docs/screenshots/preview.png)
+
 - Each ticket's preview is its own Compose project, with its own containers, network and volumes.
 - Previews answer on this machine only.
 - When a service the preview serves stops on its own (it crashed, or was killed), the preview shows **Failed**
