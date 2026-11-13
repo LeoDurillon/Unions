@@ -1,16 +1,16 @@
-// Editing one property of a tracker's item: the input its tracker and type take, from its current value, Save or Cancel.
+// Editing one property of a tracker's item: the input its shared type takes, from its current value, Save or Cancel.
 
 import type { TrackerProperty } from '@union/core';
+import type { IntegrationKindName } from '@union/core/integration-kinds';
 import { useState, type ReactElement } from 'react';
 
 import { draftOf, type TrackerDraft } from '../../lib/integrations/tracker-draft';
-import { JiraPropertyInput } from '../jira/jira-property-input';
-import { NotionPropertyInput } from '../notion/notion-property-input';
 import { Button, ErrorText } from '../ui/ui';
+import { TrackerValueInput } from './tracker-value-input';
 
 /** Which tracker the item is in, the project whose lists the inputs read, where a Jira issue's moves are read. */
 export type TrackerEditContext = {
-  kind: 'notion' | 'jira';
+  kind: IntegrationKindName;
   projectId: number;
   transitionsUrl: string | null;
 };
@@ -40,18 +40,17 @@ export function TrackerPropertyEditor({
       setSaving(false);
     }
   };
-  const input = { property, draft, onChange: setDraft };
   return (
     <div className="space-y-2 rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
-      {context.kind === 'jira' ? (
-        <JiraPropertyInput
-          transitionsUrl={context.transitionsUrl}
-          projectId={context.projectId}
-          {...input}
-        />
-      ) : (
-        <NotionPropertyInput projectId={context.projectId} {...input} />
-      )}
+      <TrackerValueInput
+        projectId={context.projectId}
+        tracker={context.kind}
+        field={property}
+        draft={draft}
+        variables={false}
+        movesUrl={context.transitionsUrl}
+        onChange={setDraft}
+      />
       <ErrorText error={error} />
       <div className="flex gap-2">
         <Button

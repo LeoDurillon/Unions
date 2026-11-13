@@ -158,6 +158,11 @@ Containers never hold GitHub credentials. Tokens, the App's key and integration 
   for an item the review is not linked to; the issue's moves at `<review>/jira/:key/transitions`). Such a command has
   no ticket: its payload's `reviewId` names the review, its events have no ticket, and `pendingReviewFields` finds
   those not answered by item.
+  A value is typed in one input, in those tabs and in the rule editor's rows alike (the client's
+  `tracker/tracker-value-input.tsx`): each kind maps its own types to shared field types (`fieldShape`, core's
+  `tracker-field-types.ts`; `notion-field-shapes.ts`, `jira-field-shapes.ts`), and the input picks by shared type.
+  Choices, typed values and templates are shared; people, picks and a status move are the tracker's own parts
+  (`components/integrations/tracker-value-parts.tsx`).
   The properties the user hides in those tabs are `integrations.hidden_fields` (ids, per project and tracker; migration
   `0088_hidden_fields`), sent with the project (`PublicIntegration.hiddenFields`) and saved whole by
   `PUT /api/projects/:id/integrations/:kind/hidden-fields` (a plain record the web writes, `saveHiddenFields`).

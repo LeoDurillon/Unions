@@ -1,10 +1,13 @@
 // The kinds of ticket source Union connects to (Notion, Jira), and what the UI needs to know about each; browser-safe.
 
 import { jiraRefSiteError, parseJiraKey, readJiraConfig } from './jira-config';
+import { jiraFieldShape } from './jira-field-shapes';
+import { notionFieldShape } from './notion-field-shapes';
 import { parseNotionId } from './notion-id';
 import { notionMarkdown } from './notion-markdown';
 import type { TrackerActionKind } from './tracker-action-kinds';
 import type { TrackerCapability } from './tracker-adapter';
+import type { TrackerFieldShape } from './tracker-field-types';
 
 export type IntegrationKindName = 'notion' | 'jira';
 
@@ -27,6 +30,8 @@ export type IntegrationKind = {
   createsItems: boolean;
   /** What the kind's adapter can do, so the browser shows only what it supports. */
   capabilities: readonly TrackerCapability[];
+  /** How a field of the tracker's `type` takes its value, as a shared type; null when Union cannot set it. */
+  fieldShape(type: string): TrackerFieldShape | null;
   /** The rule actions it takes, in the order the rule editor offers them. */
   ruleActions: readonly TrackerActionKind[];
   /** How a reply answers a comment: in its thread, or as a new comment that mentions its author. */
@@ -63,6 +68,7 @@ const KINDS: Record<IntegrationKindName, IntegrationKind> = {
     readConfig: readNotionConfig,
     createsItems: true,
     capabilities: ['refs', 'text', 'comments', 'fields', 'rules'],
+    fieldShape: notionFieldShape,
     ruleActions: ['tracker_fields'],
     commentReplies: 'thread',
     commentsPostAs: 'Posts under the Notion integration’s name',
@@ -80,6 +86,7 @@ const KINDS: Record<IntegrationKindName, IntegrationKind> = {
     refError: jiraRefSiteError,
     createsItems: true,
     capabilities: ['refs', 'text', 'comments', 'fields', 'rules'],
+    fieldShape: jiraFieldShape,
     ruleActions: ['tracker_status', 'tracker_fields', 'tracker_comment'],
     commentReplies: 'mention',
     commentsPostAs:

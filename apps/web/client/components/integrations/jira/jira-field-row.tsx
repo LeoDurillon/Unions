@@ -1,10 +1,14 @@
 // One field a Jira fields rule sets: which field of the Jira site, its value as its type takes it, and removing it.
 
-import type { JiraFieldInfo, JiraFieldValue } from '@union/core/jira-field-types';
+import {
+  isPickedType,
+  type JiraFieldInfo,
+  type JiraFieldValue,
+} from '@union/core/jira-field-types';
 import type { ReactElement } from 'react';
 
+import { TrackerValueInput } from '../../tracker/tracker-value-input';
 import { Button, Field, inputClass } from '../../ui/ui';
-import { JiraValueField } from './jira-value-field';
 
 export function JiraFieldRow({
   projectId,
@@ -46,7 +50,17 @@ export function JiraFieldRow({
         </select>
       </Field>
       {entry.fieldId === '' ? null : (
-        <JiraValueField projectId={projectId} entry={entry} onChange={onChange} />
+        <TrackerValueInput
+          projectId={projectId}
+          tracker="jira"
+          field={{ id: entry.fieldId, name: entry.fieldName, type: entry.fieldType, options: [] }}
+          draft={{ value: entry.value, picks: entry.picks ?? [], text: '' }}
+          variables
+          onChange={({ value, picks }) => {
+            // A picked field keeps what is picked, none included; a typed one has no picks.
+            onChange({ ...entry, value, ...(isPickedType(entry.fieldType) ? { picks } : {}) });
+          }}
+        />
       )}
       <Button onClick={onRemove}>Remove this field</Button>
     </div>

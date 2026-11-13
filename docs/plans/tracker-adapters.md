@@ -1,7 +1,7 @@
 # One adapter per tracker
 
 Status: planned (2026-11-07), brought up to date 2026-11-13 after [tracker properties](archive/tracker-properties.md).
-Steps 1, 2, 3a and 3b built (2026-11-13, branch `tracker-adapters`); 3c (D2) next.
+Steps 1, 2 and 3 (3a, 3b, 3c) built (2026-11-13, branch `tracker-adapters`); the real check of step 3 waits.
 Follows [Jira](archive/jira.md) and its gap plans, built and deployed; prepares a later
 tracker (Linear, GitHub Issues as a source, Asana…).
 
@@ -152,9 +152,16 @@ Each step moves Notion and Jira together, keeps the screens as they are, and is 
    labels and checks the edit screen, a value set by hand replaces them, so sharing would change what saved rules
    do. Seen on screen: the tracker actions come after GitHub's and Union's in the "Then" list; the Notion preview's
    lines are plain text like Jira's.
-   3c, next: D2, the shared field types, and one value input by type in the rule editor and the tabs (in place of
-   `notion-property-input.tsx`, `jira-property-input.tsx` and the rule rows' inputs); then the real check of one
-   rule and one property set per tracker.
+   3c built: D2's shared field types (`tracker-field-types.ts`: those listed above, and `checkbox`, `url`, `email`,
+   `phone`, and `move` for a status reached through the item's moves). Each kind maps its own types
+   (`IntegrationKind.fieldShape`, with what the inputs say about each: whether it takes variables or new options,
+   its placeholder and hints), and one client input picks by shared type (`tracker-value-input.tsx`) in the rule
+   rows and the tabs, in place of `value-field.tsx`, `jira-value-field.tsx`, `notion-property-input.tsx` and
+   `jira-property-input.tsx`. `TrackerProperty.type` stays the tracker's: the client maps it, so the routes and
+   the stored rules did not change. Seen on screen: a Notion text property is a box of several lines in a rule (as
+   in its tab); a Jira select set by hand lists the issue's options; a Notion status no longer an option says
+   "no longer an option in Notion". Still to do for step 3: the real check of one rule and one property set per
+   tracker (it writes to the user's Notion and Jira).
 4. **Linking, specs and reviews.** The Overview row, review specs, a review's links, suggestions and tab over `refs`
    and `text` (D4), and one item card in the ticket's and the review's tabs (`notion-page-card.tsx`,
    `jira-issue-card.tsx` into `tracker-item-card.tsx`). Removes `review-notion*.ts`, `review-jira*.ts`,

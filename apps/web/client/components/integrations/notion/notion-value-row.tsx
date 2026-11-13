@@ -4,8 +4,44 @@ import type { NotionProperty } from '@union/core';
 import type { TrackerRuleValue } from '@union/core/event-tracker-actions';
 import type { ReactElement } from 'react';
 
-import { ValueField } from '../../settings/value-field';
+import { TrackerValueInput } from '../../tracker/tracker-value-input';
 import { Button, Field, inputClass } from '../../ui/ui';
+
+/** Which property of the page the row sets; another property starts the value over. */
+function PropertySelect({
+  choices,
+  entry,
+  onChange,
+}: {
+  choices: NotionProperty[];
+  entry: TrackerRuleValue;
+  onChange: (entry: TrackerRuleValue) => void;
+}): ReactElement {
+  return (
+    <Field label="Property">
+      <select
+        className={inputClass}
+        value={entry.fieldId}
+        onChange={(event) => {
+          const picked = choices.find((candidate) => candidate.id === event.target.value);
+          onChange({
+            fieldId: picked?.id ?? '',
+            fieldName: picked?.name ?? '',
+            fieldType: picked?.type ?? '',
+            value: '',
+          });
+        }}
+      >
+        <option value="">Pick a property…</option>
+        {choices.map((candidate) => (
+          <option key={candidate.id} value={candidate.id}>
+            {candidate.name} ({candidate.type.replace('_', ' ')})
+          </option>
+        ))}
+      </select>
+    </Field>
+  );
+}
 
 export function NotionValueRow({
   projectId,
@@ -28,29 +64,7 @@ export function NotionValueRow({
     <div className="space-y-2 rounded-md border border-zinc-200 p-2 dark:border-zinc-800">
       <div className="flex items-end gap-2">
         <div className="flex-1">
-          <Field label="Property">
-            <select
-              className={inputClass}
-              value={entry.fieldId}
-              onChange={(event) => {
-                // Another property, another type: the value starts over.
-                const picked = choices.find((candidate) => candidate.id === event.target.value);
-                onChange({
-                  fieldId: picked?.id ?? '',
-                  fieldName: picked?.name ?? '',
-                  fieldType: picked?.type ?? '',
-                  value: '',
-                });
-              }}
-            >
-              <option value="">Pick a property…</option>
-              {choices.map((candidate) => (
-                <option key={candidate.id} value={candidate.id}>
-                  {candidate.name} ({candidate.type.replace('_', ' ')})
-                </option>
-              ))}
-            </select>
-          </Field>
+          <PropertySelect choices={choices} entry={entry} onChange={onChange} />
         </div>
         {onRemove ? (
           <Button aria-label={`Remove ${property?.name ?? 'this property'}`} onClick={onRemove}>
@@ -58,14 +72,18 @@ export function NotionValueRow({
           </Button>
         ) : null}
       </div>
-      <ValueField
-        projectId={projectId}
-        property={property}
-        value={entry.value}
-        onChange={(value) => {
-          onChange({ ...entry, value });
-        }}
-      />
+      {property ? (
+        <TrackerValueInput
+          projectId={projectId}
+          tracker="notion"
+          field={property}
+          draft={{ value: entry.value, picks: [], text: '' }}
+          variables
+          onChange={({ value }) => {
+            onChange({ ...entry, value });
+          }}
+        />
+      ) : null}
     </div>
   );
 }

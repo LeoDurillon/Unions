@@ -25,6 +25,7 @@
     "./notion-discussion-link": "./src/integrations/notion-discussion-link.ts",
     "./integration-kinds": "./src/integrations/kinds.ts",
     "./jira-field-types": "./src/integrations/jira-field-types.ts",
+    "./tracker-field-types": "./src/integrations/tracker-field-types.ts",
     "./jira-comment-post": "./src/integrations/jira-comment-post.ts",
     "./jira-comment-link": "./src/integrations/jira-comment-link.ts",
     "./event-actions": "./src/event/event-actions.ts",
