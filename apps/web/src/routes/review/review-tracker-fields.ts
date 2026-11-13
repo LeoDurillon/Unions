@@ -13,9 +13,7 @@ import {
 import { Hono } from 'hono';
 
 import { ACCEPTED, BAD_REQUEST, CONFLICT, fail, NOT_FOUND, readObject } from '../../http';
-import { trackerFieldInputOf } from '../../tracker-field-input';
-import { queueJiraField } from '../../tracker-field-jira';
-import { queueNotionField } from '../../tracker-field-notion';
+import { queueFieldChange, trackerFieldInputOf } from '../../tracker-field-input';
 import { guarded } from '../notion';
 import { load } from '../pull-requests/pr-review-load';
 
@@ -60,16 +58,10 @@ export function reviewTrackerFieldRoutes(db: Db, { notion, jira }: Clients): Hon
     const { review, project } = load(db, c);
     const body = await readObject(c.req.raw);
     const itemId = linkedItem(db, review.id, body.kind, body.itemId);
-    const input = trackerFieldInputOf(body);
-    const target = {
-      projectId: project.id,
-      itemId,
-      place: { ticketId: null, reviewId: review.id },
-    };
-    const id =
-      body.kind === 'jira'
-        ? await queueJiraField(db, jira, { auth: jiraAuth(db, project.id), target }, input)
-        : await queueNotionField(db, notion, target, input);
+    const kind = body.kind === 'jira' ? 'jira' : 'notion';
+    const place = { ticketId: null, reviewId: review.id };
+    const target = { kind, projectId: project.id, itemId, place } as const;
+    const id = await queueFieldChange(db, { notion, jira }, target, trackerFieldInputOf(body));
     return c.json({ id }, ACCEPTED);
   });
   routes.get('/jira/:key/transitions', async (c) => {

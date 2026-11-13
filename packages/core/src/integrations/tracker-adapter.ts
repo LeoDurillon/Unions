@@ -5,9 +5,10 @@
 import type { IntegrationKindName } from './kinds';
 import type { IntegrationProvider } from './provider';
 import type { TrackerCommentInput, TrackerThreads } from './tracker-comments';
+import type { CheckedField, FieldChange, TrackerAccess, TrackerFieldInput } from './tracker-fields';
 
 /** Every capability an adapter may have, in the order `capabilitiesOf` lists them. */
-const TRACKER_CAPABILITIES = ['refs', 'text', 'comments'] as const;
+const TRACKER_CAPABILITIES = ['refs', 'text', 'comments', 'fields'] as const;
 
 export type TrackerCapability = (typeof TRACKER_CAPABILITIES)[number];
 
@@ -36,12 +37,22 @@ type TrackerComments = {
   postFailure(error: unknown, inThread: boolean): string;
 };
 
+/** An item's properties set by hand: checked against the item read now, then sent by the worker. */
+type TrackerFields = {
+  /** The change as the command keeps it; throws `TrackerValueError` (`tracker-value-error.ts`) when refused. */
+  check(access: TrackerAccess, itemId: string, input: TrackerFieldInput): Promise<CheckedField>;
+  set(access: TrackerAccess, change: FieldChange): Promise<void>;
+  /** Why the tracker refused the change, the permission named when it lacks one. */
+  setFailure(error: unknown, fieldId: string): string;
+};
+
 /** One tracker: the provider's calls, its kind, and each capability it has. */
 export type TrackerAdapter = IntegrationProvider & {
   kind: IntegrationKindName;
   refs?: TrackerRefs;
   text?: TrackerText;
   comments?: TrackerComments;
+  fields?: TrackerFields;
 };
 
 /** The capabilities the adapter has, in `TRACKER_CAPABILITIES`'s order. */

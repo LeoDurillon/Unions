@@ -104,6 +104,8 @@ export * from './integrations/tracker-field-set';
 export * from './integrations/tracker-comment-post';
 export type * from './integrations/tracker-comments';
 export * from './integrations/tracker-refused';
+export * from './integrations/tracker-value-error';
+export * from './integrations/tracker-fields';
 export * from './integrations/notion-threads';
 export * from './integrations/jira-threads';
 export * from './integrations/jira-hand-value';

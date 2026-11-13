@@ -1,7 +1,7 @@
 # One adapter per tracker
 
 Status: planned (2026-11-07), brought up to date 2026-11-13 after [tracker properties](archive/tracker-properties.md).
-Steps 1 and 2 built (2026-11-13, branch `tracker-adapters`).
+Steps 1, 2 and 3a built (2026-11-13, branch `tracker-adapters`).
 Follows [Jira](archive/jira.md) and its gap plans, built and deployed; prepares a later
 tracker (Linear, GitHub Issues as a source, Asana…).
 
@@ -134,6 +134,12 @@ Each step moves Notion and Jira together, keeps the screens as they are, and is 
    `status`). The command and its events keep their names. Real check of one rule and one property set per tracker
    after asking (it writes to the user's Notion and Jira). The largest step: if it does not fit one deploy, split
    it into 3a (types, mappings and properties) and 3b (rule actions and their migration).
+   Split so. 3a built: the `fields` capability checks a value set by hand against the item read now (`check`,
+   throwing `TrackerValueError`) and sends it (`set`, `setFailure`); the web's two checkers and the worker's two
+   senders became `queueFieldChange` and `tracker-field-set.ts`, and the contract checks both adapters do it.
+   Moved out of 3a: reading an item's properties goes with the cards in step 4 (they are read with the item's
+   title and status, in one request); the shared field types and one value input by type go with the rule editor
+   in 3b, which rebuilds those inputs.
 4. **Linking, specs and reviews.** The Overview row, review specs, a review's links, suggestions and tab over `refs`
    and `text` (D4), and one item card in the ticket's and the review's tabs (`notion-page-card.tsx`,
    `jira-issue-card.tsx` into `tracker-item-card.tsx`). Removes `review-notion*.ts`, `review-jira*.ts`,

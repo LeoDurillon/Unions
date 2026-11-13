@@ -2,9 +2,8 @@
 import { FetchJiraApi, FetchNotionApi, type Db, type JiraApi, type NotionApi } from '@union/core';
 
 import type { CommandHooks } from './command-hooks';
-import { setJiraField } from './jira/field-set';
-import { setNotionField } from './notion/field-set';
 import { postTrackerComment } from './tracker-comment-post';
+import { setTrackerField } from './tracker-field-set';
 
 type TrackerHooks = Pick<CommandHooks, 'postTrackerComment' | 'setTrackerField'>;
 
@@ -18,9 +17,7 @@ export function trackerHooks(
       void postTrackerComment(db, { notion, jira }, commandId, post);
     },
     setTrackerField: (commandId, change) => {
-      void (change.kind === 'jira'
-        ? setJiraField(db, jira, commandId, change)
-        : setNotionField(db, notion, commandId, change));
+      void setTrackerField(db, { notion, jira }, commandId, change);
     },
   };
 }

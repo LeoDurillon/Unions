@@ -155,8 +155,6 @@ export const FOLDER_SUMMARIES: Record<string, string> = {
     'GitHub sync: issues and pull requests, the board and Project fields, CI, comment replies, stacks, inbound changes, and the fake API the tests use.',
   'worker/implement': 'The implementation step: its loop, checks, prompts and size trimming.',
   'worker/investigation': 'Investigations: running one, and turning it into tickets.',
-  'worker/jira': "Posting Jira comments and setting an issue's fields or status.",
-  'worker/notion': "Posting Notion comments and setting a page's properties.",
   'worker/preview':
     'Previews: compose up, the proxy and forwarder, health and readiness, idle stop, e2e runs and screenshots, variables, shared services.',
   'worker/pull-request':

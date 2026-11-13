@@ -48,10 +48,13 @@ Containers never hold GitHub credentials. Tokens, the App's key and integration 
   the "Insert comments" capability.
   A property edited in the Notion tab's Properties card is the `set_tracker_fields` command (core's
   `tracker-field-set.ts`: `{ projectId, kind, itemId, ticketId | reviewId, field, value, text, picks }`, one property
-  each). `POST /api/tickets/:id/tracker-fields` (`routes/tracker-fields.ts`) reads the page first, so the property's
-  type is Notion's now, and refuses a value `notionHandValue` (the rules' `notionPropertyValue`, without variables)
-  cannot shape; the worker's `notion/field-set.ts` shapes it again, sends it with `updatePage`, and logs
-  `tracker_field_set` or `tracker_field_failed` (403 names the "Update content" capability). The tab shows a
+  each). `POST /api/tickets/:id/tracker-fields` (`routes/tracker-fields.ts`, `queueFieldChange` in
+  `tracker-field-input.ts`) checks the change through the adapter's `fields.check`: Notion's (core's
+  `notion-fields.ts`) reads the page first, so the property's type is Notion's now, takes a choice's options from the
+  stored columns, and refuses a value `notionHandValue` (the rules' `notionPropertyValue`, without variables) cannot
+  shape (`TrackerValueError`, answered 400, or 404 for a property gone). The worker's `tracker-field-set.ts` sends it
+  through `fields.set` (`updatePage` for Notion) and logs `tracker_field_set` or `tracker_field_failed` (403 names
+  the "Update content" capability). The tab shows a
   change "Saving…" until one answers (`pendingTrackerFields`, over `pending-comments.ts`).
 - Trackers a project is connected to (Notion, Jira) are rows of `integrations`, one per kind: secret, config, the
   tracker's columns as read. Each kind has a browser-safe entry (`@union/core/integration-kinds`: label, ID parsing,
@@ -143,11 +146,11 @@ Containers never hold GitHub credentials. Tokens, the App's key and integration 
   author (`withLeadingMention`); a 403 names "Add comments". A comment's link is `jira-comment-link.ts`'s.
   The tab's Properties card lists the status and the issue's edit screen (`?expand=editmeta`, read with the facts;
   `jira-issue-values.ts`, edit start and picks from `jira-hand-value.ts`). A field edited there is the
-  `set_tracker_fields` command (kind `jira`, as for Notion): `routes/tracker-fields.ts` (`tracker-field-jira.ts`)
-  reads the issue again and checks the value with `jiraHandChange` (the rules' shaping, labels set as a whole), or,
+  `set_tracker_fields` command (kind `jira`, as for Notion): the Jira adapter's `fields.check` (core's
+  `jira-fields.ts`) reads the issue again and checks the value with `jiraHandChange` (the rules' shaping, labels set as a whole), or,
   for the status, that the picked transition is one `GET /issue/{key}/transitions` offers now (also served at
-  `GET /api/tickets/:id/jira-transitions` for the editor). The worker's `jira/field-set.ts` resolves "the active
-  sprint", then `updateIssue` or `transitionIssue`; 403 names "Edit issues" or "Transition issues".
+  `GET /api/tickets/:id/jira-transitions` for the editor). Its `fields.set` resolves "the active sprint",
+  then `updateIssue` or `transitionIssue`; 403 names "Edit issues" or "Transition issues".
   A review's Notion and Jira tabs list the same properties for each linked page or issue (`review-notion.ts`,
   `review-jira.ts`), editable through `<review>/tracker-fields` (`routes/review/review-tracker-fields.ts`, refused
   for an item the review is not linked to; the issue's moves at `<review>/jira/:key/transitions`). Such a command has

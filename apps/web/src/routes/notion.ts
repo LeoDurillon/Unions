@@ -6,6 +6,7 @@ import {
   JiraError,
   NotionError,
   TrackerRefusedError,
+  TrackerValueError,
   type Db,
 } from '@union/core';
 import { HTTPException } from 'hono/http-exception';
@@ -23,9 +24,17 @@ import {
 /** A tracker's own answer (bad secret, not found) kept as the status; anything else is the tracker failing. */
 function trackerStatus(
   error: unknown,
-): typeof CONFLICT | typeof UNAUTHORIZED | typeof NOT_FOUND | typeof BAD_GATEWAY {
+):
+  | typeof BAD_REQUEST
+  | typeof CONFLICT
+  | typeof UNAUTHORIZED
+  | typeof NOT_FOUND
+  | typeof BAD_GATEWAY {
   if (error instanceof ItemOutsideSourceError || error instanceof TrackerRefusedError) {
     return CONFLICT;
+  }
+  if (error instanceof TrackerValueError) {
+    return error.gone ? NOT_FOUND : BAD_REQUEST;
   }
   const status = error instanceof NotionError || error instanceof JiraError ? error.status : null;
   if (status === UNAUTHORIZED || status === NOT_FOUND) {

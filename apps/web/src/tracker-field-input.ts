@@ -1,19 +1,23 @@
-// What a tracker tab sends to set one property, read from the request, and the checks both trackers share.
+// What a tracker tab sends to set one property: read from the request, checked by the tracker's adapter, queued.
 
-import type { TrackerFieldSet, TrackerProperty } from '@union/core';
+import {
+  integrationKind,
+  integrationOf,
+  trackerAdapter,
+  type Db,
+  type IntegrationApis,
+  type IntegrationKindName,
+  type TrackerFieldInput,
+  type TrackerFieldSet,
+} from '@union/core';
 
-import { BAD_REQUEST, fail, NOT_FOUND } from './http';
+import { BAD_REQUEST, CONFLICT, fail, NOT_FOUND } from './http';
+import { guarded } from './routes/notion';
+import { queueTrackerField } from './tracker-field-commands';
 
-/** `value` as a rule's value is written, `text` as the user reads it, `picks` what a picked field holds. */
-export type TrackerFieldInput = {
-  fieldId: string;
-  value: string;
-  text: string;
-  picks: TrackerFieldSet['picks'];
-};
-
-/** The item whose property is set, its project, and the tab it is set from: a ticket's or a review's. */
+/** The item whose property is set, its tracker and project, and the tab it is set from: a ticket's or a review's. */
 export type TrackerFieldTarget = {
+  kind: IntegrationKindName;
   projectId: number;
   itemId: string;
   place: Pick<TrackerFieldSet, 'ticketId' | 'reviewId'>;
@@ -44,18 +48,34 @@ export function trackerFieldInputOf(body: Record<string, unknown>): TrackerField
   };
 }
 
-/** The property the input names among the item's, read now; refused when gone or not settable. */
-export function settableProperty(
-  properties: TrackerProperty[],
+/** Reads the item now (the property's type is the tracker's), checks the value as the worker will send it, queues it. */
+export async function queueFieldChange(
+  db: Db,
+  apis: IntegrationApis,
+  target: TrackerFieldTarget,
   input: TrackerFieldInput,
-  tracker: 'Notion' | 'Jira',
-): TrackerProperty {
-  const property = properties.find((one) => one.id === input.fieldId);
-  if (!property) {
-    throw fail(NOT_FOUND, `This property is not on the ${tracker} item any more: refresh the tab`);
+): Promise<number> {
+  const { kind, projectId, itemId } = target;
+  const integration = integrationOf(db, projectId, kind);
+  if (!integration) {
+    throw fail(CONFLICT, `The project is not connected to ${integrationKind(kind).label}`);
   }
-  if (!property.settable) {
-    throw fail(BAD_REQUEST, `Union cannot set a ${tracker} ${property.type} field`);
+  const { fields } = trackerAdapter(kind, apis);
+  if (!fields) {
+    throw fail(NOT_FOUND, `Union does not set the fields of ${integrationKind(kind).label}`);
   }
-  return property;
+  const access = {
+    secret: integration.secret,
+    config: integration.config,
+    fields: integration.fields,
+  };
+  const checked = await guarded(() => fields.check(access, itemId, input));
+  return queueTrackerField(db, {
+    projectId,
+    kind,
+    itemId,
+    ...target.place,
+    ...checked,
+    text: input.text,
+  });
 }

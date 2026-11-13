@@ -1,7 +1,8 @@
-// Jira Cloud as a `TrackerAdapter`: its provider, issues named by key or by a link of the site, their comments.
+// Jira Cloud as a `TrackerAdapter`: its provider, issues named by key or by a link of the site, their comments and fields.
 
 import type { JiraApi } from './jira-api';
 import { jiraConfigOf } from './jira-config';
+import { checkJiraField, jiraFieldFailure, setJiraField } from './jira-fields';
 import { jiraKeysIn } from './jira-keys';
 import { jiraAccess, jiraProvider } from './jira-provider';
 import { jiraPostFailure, jiraThreads, postJiraThreadComment } from './jira-threads';
@@ -28,6 +29,13 @@ export function jiraAdapter(jira: JiraApi): TrackerAdapter {
       post: (token, config, post) =>
         postJiraThreadComment(jira, jiraAccess(token, config).auth, post),
       postFailure: (error) => jiraPostFailure(error),
+    },
+    fields: {
+      check: (access, key, input) =>
+        checkJiraField(jira, jiraAccess(access.secret, access.config).auth, key, input),
+      set: (access, change) =>
+        setJiraField(jira, jiraAccess(access.secret, access.config).auth, change),
+      setFailure: jiraFieldFailure,
     },
   };
 }

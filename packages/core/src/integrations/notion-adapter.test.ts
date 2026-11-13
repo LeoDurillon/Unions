@@ -8,40 +8,56 @@ const OTHER = 'bbbbbbbb-bbbb-4ccc-8ddd-eeeeeeeeeeee';
 const FOREIGN = 'ffffffff-bbbb-4ccc-8ddd-eeeeeeeeeeee';
 const hex = (id: string): string => id.replaceAll('-', '');
 
-const notion = fakeNotionApi({ id: SOURCE, title: 'Roadmap' }, [
-  {
-    id: PAGE,
-    title: 'Add dark mode',
-    dataSourceId: SOURCE,
-    markdown: '## Goal\n',
-    comments: [
-      {
-        id: 'c-1',
-        discussionId: 'd-1',
-        blockId: null,
-        author: 'Ada',
-        createdAt: '2026-01-01T00:00:00.000Z',
-        richText: [
-          {
-            text: 'Which shade?',
-            href: null,
-            bold: false,
-            italic: false,
-            strikethrough: false,
-            code: false,
-          },
-        ],
-      },
-    ],
-  },
-  { id: OTHER, title: 'Theme tokens', dataSourceId: SOURCE, markdown: '' },
-  {
-    id: FOREIGN,
-    title: 'Elsewhere',
-    dataSourceId: '99999999-2222-4333-8444-555555555555',
-    markdown: '',
-  },
-]);
+const updates: { pageId: string; properties: Record<string, unknown> }[] = [];
+const NOTES = {
+  id: 'n%3A1',
+  name: 'Notes',
+  type: 'rich_text',
+  text: '',
+  value: '',
+  options: [],
+  settable: true,
+};
+
+const notion = fakeNotionApi(
+  { id: SOURCE, title: 'Roadmap' },
+  [
+    {
+      id: PAGE,
+      title: 'Add dark mode',
+      dataSourceId: SOURCE,
+      markdown: '## Goal\n',
+      properties: [NOTES],
+      comments: [
+        {
+          id: 'c-1',
+          discussionId: 'd-1',
+          blockId: null,
+          author: 'Ada',
+          createdAt: '2026-01-01T00:00:00.000Z',
+          richText: [
+            {
+              text: 'Which shade?',
+              href: null,
+              bold: false,
+              italic: false,
+              strikethrough: false,
+              code: false,
+            },
+          ],
+        },
+      ],
+    },
+    { id: OTHER, title: 'Theme tokens', dataSourceId: SOURCE, markdown: '' },
+    {
+      id: FOREIGN,
+      title: 'Elsewhere',
+      dataSourceId: '99999999-2222-4333-8444-555555555555',
+      markdown: '',
+    },
+  ],
+  updates,
+);
 
 adapterContract({
   adapter: notionAdapter(notion),
@@ -68,4 +84,5 @@ adapterContract({
     clean: `See [Notion page](https://www.notion.so/${hex(OTHER)})`,
   },
   commented: PAGE,
+  fields: { itemId: PAGE, field: { id: NOTES.id, value: 'Shipped' }, sent: () => updates.length },
 });

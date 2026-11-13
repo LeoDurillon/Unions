@@ -4,6 +4,7 @@ import type { NotionApi, NotionPage } from './notion-api';
 import type { NotionComment } from './notion-comment-parse';
 import { NotionError } from './notion-error';
 import type { NotionRichTextInput } from './notion-rich-text';
+import type { TrackerProperty } from './tracker-property';
 
 const NOT_FOUND = 404;
 /** Posted comments are a minute apart from this time on. */
@@ -17,6 +18,7 @@ export type FakeNotionPage = {
   dataSourceId: string;
   markdown: string;
   comments?: NotionComment[];
+  properties?: TrackerProperty[];
 };
 
 function missing(): Promise<never> {
@@ -33,6 +35,7 @@ function pageOf(page: FakeNotionPage): NotionPage {
     title: page.title,
     url: `https://www.notion.so/${page.id.replaceAll('-', '')}`,
     dataSourceId: page.dataSourceId,
+    ...(page.properties ? { properties: page.properties } : {}),
   };
 }
 
@@ -51,10 +54,11 @@ function runsOf(richText: NotionRichTextInput[]): NotionComment['richText'] {
   }));
 }
 
-/** Comments are kept on the pages given, so a test reads back what it posted. */
+/** Comments are kept on the pages given, so a test reads back what it posted; property updates go to `updates`. */
 export function fakeNotionApi(
   source: { id: string; title: string },
   pages: readonly FakeNotionPage[],
+  updates: { pageId: string; properties: Record<string, unknown> }[] = [],
 ): NotionApi {
   let next = 0;
   const find = (id: string): FakeNotionPage | undefined =>
@@ -98,7 +102,10 @@ export function fakeNotionApi(
       return found.comments ?? [];
     },
     addComment,
-    updatePage: unsupported,
+    updatePage: async (_token, pageId, properties) => {
+      await page(pageId);
+      updates.push({ pageId, properties });
+    },
     createPage: unsupported,
   };
 }

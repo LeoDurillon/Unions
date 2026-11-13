@@ -10,13 +10,21 @@ import {
   schema,
   SET_TRACKER_FIELDS,
   type Db,
+  type JiraApi,
   type NotionApi,
   type TrackerFieldSet,
 } from '@union/core';
 
-import { NO_HOOKS } from '../command-hooks';
-import { drainCommands } from '../commands';
-import { setNotionField } from './field-set';
+import { NO_HOOKS } from './command-hooks';
+import { drainCommands } from './commands';
+import { setTrackerField } from './tracker-field-set';
+
+const setNotionField = (
+  db: Db,
+  notion: NotionApi,
+  commandId: number,
+  set: TrackerFieldSet,
+): Promise<void> => setTrackerField(db, { notion, jira: {} as JiraApi }, commandId, set);
 
 let db: Db;
 let projectId: number;

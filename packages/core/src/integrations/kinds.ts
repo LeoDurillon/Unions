@@ -56,7 +56,7 @@ const KINDS: Record<IntegrationKindName, IntegrationKind> = {
     cleanMarkdown: (markdown) => notionMarkdown(markdown),
     readConfig: readNotionConfig,
     createsItems: true,
-    capabilities: ['refs', 'text', 'comments'],
+    capabilities: ['refs', 'text', 'comments', 'fields'],
     commentReplies: 'thread',
     commentsPostAs: 'Posts under the Notion integration’s name',
   },
@@ -71,7 +71,7 @@ const KINDS: Record<IntegrationKindName, IntegrationKind> = {
     readConfig: readJiraConfig,
     refError: jiraRefSiteError,
     createsItems: true,
-    capabilities: ['refs', 'text', 'comments'],
+    capabilities: ['refs', 'text', 'comments', 'fields'],
     commentReplies: 'mention',
     commentsPostAs:
       'Markdown: **bold**, `code`, [links](https://…), lists. Posts as the Atlassian account of the Jira connection, visible to everyone who can see the issue',

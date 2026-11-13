@@ -4,6 +4,7 @@
 import { describe, expect, test } from 'bun:test';
 
 import { commentsCases } from './adapter-contract-comments';
+import { fieldsCases, type FieldsFixture } from './adapter-contract-fields';
 import { integrationKind } from './kinds';
 import { ItemOutsideSourceError } from './provider';
 import { capabilitiesOf, type TrackerAdapter } from './tracker-adapter';
@@ -25,6 +26,8 @@ export type ContractFixture = {
   markdown: { raw: string; clean: string };
   /** An item with at least one thread of comments (one whose author can be mentioned, for mention replies). */
   commented: string;
+  /** A settable field of an item and a value it takes, and what the fake was sent. */
+  fields: Omit<FieldsFixture, 'adapter' | 'access'>;
 };
 
 function required<T>(capability: T | undefined, name: string): T {
@@ -75,6 +78,7 @@ export function adapterContract(fixture: ContractFixture): void {
     });
     refsCases(fixture);
     commentsCases({ adapter, secret, config, itemId: fixture.commented });
+    fieldsCases({ adapter, access: { secret, config, fields: null }, ...fixture.fields });
     test("reads the tracker's markdown as plain markdown", () => {
       expect(required(adapter.text, 'text').markdown(fixture.markdown.raw)).toBe(
         fixture.markdown.clean,

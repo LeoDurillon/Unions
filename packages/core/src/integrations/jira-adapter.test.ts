@@ -4,6 +4,13 @@ import { jiraAdapter } from './jira-adapter';
 
 const SITE = 'https://acme.atlassian.net';
 
+const updates: { key: string; change: unknown }[] = [];
+/** `GET /issue/ABC-1` with its edit screen: the due date can be set. */
+const ISSUE_BODY = {
+  fields: { summary: 'Add dark mode', status: { name: 'To Do' }, duedate: null },
+  editmeta: { fields: { duedate: { name: 'Due date', schema: { type: 'date' } } } },
+};
+
 const PARAGRAPH = { type: 'paragraph', content: [{ type: 'text', text: 'Which shade?' }] };
 
 const jira = fakeJiraApi(
@@ -19,14 +26,18 @@ const jira = fakeJiraApi(
     { key: 'XYZ-2', summary: 'Elsewhere', projectKey: 'XYZ', description: null, attachments: [] },
   ],
   {
-    'ABC-1': [
-      {
-        id: '10001',
-        author: { displayName: 'Ada', accountId: '557058:ada' },
-        created: '2026-01-01T00:00:00.000+0000',
-        body: { type: 'doc', version: 1, content: [PARAGRAPH] },
-      },
-    ],
+    bodies: { 'ABC-1': ISSUE_BODY },
+    updates,
+    comments: {
+      'ABC-1': [
+        {
+          id: '10001',
+          author: { displayName: 'Ada', accountId: '557058:ada' },
+          created: '2026-01-01T00:00:00.000+0000',
+          body: { type: 'doc', version: 1, content: [PARAGRAPH] },
+        },
+      ],
+    },
   },
 );
 
@@ -47,4 +58,9 @@ adapterContract({
   },
   markdown: { raw: '## Goal\n\nMake it **fast**', clean: '## Goal\n\nMake it **fast**' },
   commented: 'ABC-1',
+  fields: {
+    itemId: 'ABC-1',
+    field: { id: 'duedate', value: '2026-12-01' },
+    sent: () => updates.length,
+  },
 });

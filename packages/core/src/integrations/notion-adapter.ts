@@ -1,7 +1,8 @@
-// Notion as a `TrackerAdapter`: its provider, pages named by id or link, its markdown cleaned, its discussions.
+// Notion as a `TrackerAdapter`: its provider, pages by id or link, its markdown, discussions and properties.
 
 import { integrationKind } from './kinds';
 import type { NotionApi } from './notion-api';
+import { checkNotionField, notionFieldFailure, setNotionField } from './notion-fields';
 import { notionUrlsIn } from './notion-links';
 import { notionProvider } from './notion-provider';
 import { notionPostFailure, notionThreads, postNotionThreadComment } from './notion-threads';
@@ -28,6 +29,11 @@ export function notionAdapter(notion: NotionApi): TrackerAdapter {
       read: (token, _config, pageId) => notionThreads(notion, token, pageId),
       post: (token, _config, post) => postNotionThreadComment(notion, token, post),
       postFailure: notionPostFailure,
+    },
+    fields: {
+      check: (access, pageId, input) => checkNotionField(notion, access, pageId, input),
+      set: (access, change) => setNotionField(notion, access, change),
+      setFailure: (error) => notionFieldFailure(error),
     },
   };
 }

@@ -44,7 +44,7 @@ function isProperty(value: unknown): value is NotionProperty {
   );
 }
 
-function isDataSource(fields: unknown): fields is NotionDataSource {
+export function isDataSource(fields: unknown): fields is NotionDataSource {
   return (
     isRecord(fields) &&
     typeof fields.title === 'string' &&
