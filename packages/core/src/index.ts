@@ -2,6 +2,7 @@
 
 export * from './union/active-work';
 export * from './ticket/agent-inputs';
+export * from './review/agent-review-coverage';
 export * from './review/agent-review-specs';
 export * from './review/agent-reviews';
 export * from './agent/agent-tools';

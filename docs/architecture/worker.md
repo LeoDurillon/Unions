@@ -211,6 +211,11 @@
   Its lines go to `agent_log` with `agent_review_id` (and the ticket's id for a ticket's), so a pull request's
   review, stack or not, keeps its log and records its `agent_usage` and `agent_tool_usage` under that id. No page
   shows them yet, and the project's Usage page leaves them out (it sums its tickets' and investigations').
+  A single change's prompt and coverage are in `agent-review-change.ts`: the files to review with their changed
+  lines, the hidden ones apart (`isIgnoredPath` with the project's `reviewIgnore` and `hideLockFiles`), one file
+  per `git diff`, and the hunk index (the checkout is the whole `ReviewTarget`, so the engine writes it). On
+  success, `reviewCoverage` (core, `agent-review-coverage.ts`) reads the run's log for the files it never opened,
+  saved in `agent_reviews.coverage`. A stack's run has no coverage.
   Given specs go in the prompt (`specsSection`), in place of the ticket's text. A stack run (members in
   `agent_review_members`, `agent-review-stack.ts`) checks every PR out in one container at its reviewed commit as
   `refs/union/pr-<n>` (`clonePullRequests`), the top one at HEAD; the prompt gives each PR's own diff

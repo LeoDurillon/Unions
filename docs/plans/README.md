@@ -61,7 +61,8 @@ Open findings of the security reviews (2026-10-24 audit, 2026-11-08 review), to 
 
 - [Agent reviews of large changes, slice by slice](sliced-agent-review.md): the agent review given the change's
   file list and hunk index, then, above a size threshold, one agent per slice of a grouping by spec (or by folder
-  without specs), a pass on the seams between slices, and the drafts merged. Planned (2026-11-13), measure first.
+  without specs), a pass on the seams between slices, and the drafts merged. Step 0 done; step 1 (the file list,
+  one file per diff, and what the agent never opened shown on the page) built 2026-11-13, its rerun left.
 - [One adapter per tracker](tracker-adapters.md): what Notion and Jira do (comments, statuses, fields, links,
   specs, reviews, files) behind one `TrackerAdapter` with capabilities, shared field types and rule actions, one
   contract test suite and an ast-grep guard, so a new tracker is an adapter and its settings. Planned (2026-11-07),

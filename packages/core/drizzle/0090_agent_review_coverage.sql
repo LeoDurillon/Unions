@@ -1,0 +1,1 @@
+ALTER TABLE `agent_reviews` ADD `coverage` text;

@@ -2,6 +2,7 @@
 // server.
 import type {
   AfterApproval,
+  AgentReviewCoverage,
   AgentReviewSpec,
   BoardColumn,
   ContainerRun,
@@ -229,6 +230,8 @@ export type AgentReviewView = {
   error: string | null;
   /** Drafts it added, once it succeeded. */
   comments: number | null;
+  /** The files it had to review and those it never opened, read from its log; null when not measured. */
+  coverage: AgentReviewCoverage | null;
   /** What it checked the change against; null when it was given none. */
   specs: AgentReviewSpec[] | null;
   /** A stack run's pull requests, bottom first; null for a run on one change. */

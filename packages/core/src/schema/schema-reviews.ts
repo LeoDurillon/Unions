@@ -9,6 +9,7 @@ import {
   type AnySQLiteColumn,
 } from 'drizzle-orm/sqlite-core';
 
+import type { AgentReviewCoverage } from '../review/agent-review-coverage';
 import type { AgentReviewSpec } from '../review/agent-review-specs';
 import { now, projects, tickets } from './schema';
 import type { PullRequestFile } from './schema-types';
@@ -142,6 +143,8 @@ export const agentReviews = sqliteTable(
     specs: text('specs', { mode: 'json' }).$type<AgentReviewSpec[]>(),
     /** Drafts the run added (a run replaces the agent's drafts the user did not keep). */
     comments: integer('comments'),
+    /** What of the change the agent opened, read from its log; null: not measured (a stack, an older run). */
+    coverage: text('coverage', { mode: 'json' }).$type<AgentReviewCoverage>(),
     createdAt: integer('created_at').notNull().default(now),
     startedAt: integer('started_at'),
     finishedAt: integer('finished_at'),

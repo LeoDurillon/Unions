@@ -115,3 +115,14 @@ export function readLog(
     };
   });
 }
+
+/** An agent review's logged lines, oldest first: what its coverage is read from. */
+export function agentReviewLog(db: Db, agentReviewId: number): unknown[] {
+  return db
+    .select({ payload: schema.agentLog.payload })
+    .from(schema.agentLog)
+    .where(eq(schema.agentLog.agentReviewId, agentReviewId))
+    .orderBy(asc(schema.agentLog.id))
+    .all()
+    .map((line) => line.payload);
+}

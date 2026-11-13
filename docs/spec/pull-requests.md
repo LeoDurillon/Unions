@@ -101,6 +101,17 @@ removed starting spec stays removed. **Review with agent** and **Group by spec**
 linked to several members once, linked to all of them. Group by spec reads them as one text, each a titled section,
 so its parts can come from any of them.
 
+### Review with agent: what it opened
+
+An agent review of one change (a ticket's or a pull request's, not a stack) is told the files to review with their
+changed lines, the files the review page hides set apart (lock files, the project's `reviewIgnore`), the hunk index,
+and to diff one file per call: a large `git diff` output is cut to a preview by the CLI, and its line numbers are no
+longer the file's. Its log is kept by `agent_review_id`. When it succeeds, Union reads from that log the files to
+review it never opened (diffed alone or in a folder, read, or printed; a diff saved to a file counts once that file
+is read) and saves them on the run (`agent_reviews.coverage`). Next to **Review again with agent**, the review page
+shows "opened every file" or "did not open N of M files (L of T lines)", the files listed on hover. A stack's run is
+not measured.
+
 ### Explain
 
 On either review page (a ticket's branch or a pull request under review), **Explain** asks an agent about lines of

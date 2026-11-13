@@ -260,6 +260,9 @@ test('a pull request is checked out at its reviewed commit in a container remove
   expect(await git(copied, 'rev-parse', 'origin/main')).not.toBe(head);
   expect(runs[0]?.prompt).toContain('git diff origin/main...HEAD');
   expect(runs[0]?.prompt).toContain('Pull request #7 by someone');
+  expect(runs[0]?.prompt).toContain(
+    'Its files to review, 1 with 2 changed lines:\n\n- `a.ts` (2 lines)',
+  );
   expect(removed).toEqual(['union-a1']);
   expect(savedDrafts()).toEqual([
     { kind: 'line', excerpt: 'const b = 3;', body: 'Why 3?', headSha: head },
@@ -269,4 +272,10 @@ test('a pull request is checked out at its reviewed commit in a container remove
   expect(lines.map(({ agentReviewId, ticketId }) => ({ agentReviewId, ticketId }))).toEqual([
     { agentReviewId: 1, ticketId: null },
   ]);
+  // The fake agent opened nothing: its review says so.
+  expect(db.select().from(schema.agentReviews).get()?.coverage).toEqual({
+    files: 1,
+    lines: 2,
+    unopened: [{ path: 'a.ts', lines: 2 }],
+  });
 });

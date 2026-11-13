@@ -6,6 +6,7 @@ import { and, asc, desc, eq, inArray, sql, type SQL } from 'drizzle-orm';
 import type { Db } from '../db';
 import * as schema from '../tables';
 import { emitEvent } from '../ticket/tickets';
+import type { AgentReviewCoverage } from './agent-review-coverage';
 import type { AgentReviewSpec } from './agent-review-specs';
 import {
   cancelQueuedReviewRun,
@@ -29,7 +30,13 @@ export type AgentDraft = Pick<
 type MemberDrafts = { reviewId: number; headSha: string; drafts: AgentDraft[] };
 
 export type AgentReviewOutcome =
-  | { status: 'succeeded'; headSha: string; drafts: AgentDraft[]; others?: MemberDrafts[] }
+  | {
+      status: 'succeeded';
+      headSha: string;
+      drafts: AgentDraft[];
+      others?: MemberDrafts[];
+      coverage?: AgentReviewCoverage | null;
+    }
   | { status: 'failed'; error: string }
   | { status: 'cancelled' };
 
@@ -198,6 +205,7 @@ export function finishAgentReview(db: Db, id: number, outcome: AgentReviewOutcom
           outcome.status === 'succeeded'
             ? others.reduce((sum, other) => sum + other.drafts.length, outcome.drafts.length)
             : null,
+        coverage: outcome.status === 'succeeded' ? (outcome.coverage ?? null) : null,
         finishedAt: Date.now(),
       })
       .where(eq(schema.agentReviews.id, id))

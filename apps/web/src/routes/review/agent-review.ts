@@ -21,10 +21,10 @@ function view(db: Db, owner: AgentReviewOwner): AgentReviewView | null {
   if (!review) {
     return null;
   }
-  const { id, status, error, comments, specs, createdAt, startedAt, finishedAt } = review;
+  const { id, status, error, comments, coverage, specs, createdAt, startedAt, finishedAt } = review;
   const members = agentReviewStack(db, id);
   const stack = members.length > 0 ? members.map((member) => member.prNumber) : null;
-  return { id, status, error, comments, specs, stack, createdAt, startedAt, finishedAt };
+  return { id, status, error, comments, coverage, specs, stack, createdAt, startedAt, finishedAt };
 }
 
 /** The owner's latest agent review, null when none was asked. */

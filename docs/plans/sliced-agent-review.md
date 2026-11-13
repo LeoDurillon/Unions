@@ -1,6 +1,6 @@
 # Plan: agent reviews of large changes, slice by slice
 
-Status: planned (2026-11-13); step 0 done (recording built, commit `25105a4`; #1756 rerun and read), step 1 next.
+Status: planned (2026-11-13); step 0 done (recording built, commit `25105a4`; #1756 rerun and read), step 1 built (branch `review-agent-coverage`), its rerun on #1756 left.
 
 ## Problem
 
@@ -106,6 +106,11 @@ What this says for the plan:
   show the coverage from the log (`agent_tool_usage`: the files read and the paths diffed).
 
 ## Step 1: give the agent review a map of the change (cheap, every size)
+
+Built (2026-11-13) for a single change (`agent-review-change.ts`, `agent-review-coverage.ts`), with two changes to the
+list below: the generated files are the ones the review page already hides (lock files and the project's
+`reviewIgnore`), not a new list; and the coverage is shown next to the button, its files on hover. A stack's prompt
+is unchanged and its run not measured. Left: rerun #1756 and compare with run 24 (41 files, 2092 lines not opened).
 
 - Use `checkedOutChange` in `agentReviewPrompt` (and in the stack's prompt) instead of its own paragraph: the list
   of changed files, "read the diff one file at a time when it is large", and the hunk index. Set `hunkIndex` to

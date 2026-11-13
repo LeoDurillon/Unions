@@ -90,6 +90,11 @@ They arrive as drafts, like yours: keep, edit or delete each one before you send
 leave a remark on the whole change, and findings about code outside the diff, shown above the files. Once it has
 run, the button reads **Review again with agent**. On a split ticket, it reviews slice by slice.
 
+Next to the button, Union says how much of the change the agent actually opened: "opened every file", or "did not
+open 12 of 77 files (2092 of 4628 lines)". Hover it to see which files. A file it never opened got no review, so
+check those yourself or run the review again. Files the review hides (lock files and your project's ignored
+patterns) are not counted.
+
 ## Spec report
 
 The **Report** tab tells you, before you read the diff, what needs your attention and what you can skim, judged

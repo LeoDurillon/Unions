@@ -9,44 +9,22 @@ import {
   failInterruptedAgentReviews,
   finishAgentReview,
   modelFor,
-  resolveAgent,
-  sharedPrompt,
-  specsSection,
   toolsFor,
   type AgentReview,
-  type AgentReviewSpec,
   type AgentReviewOutcome,
-  type Db,
 } from '@union/core';
 
 import { agentFailure, runAgent, type AgentFn } from '../agent/agent';
 import { REPO_DIR, type TicketContainer } from '../provision';
 import type { RunSlots } from '../slots';
-import { FINDINGS_FORMAT, parseFindings, toDrafts, type Findings } from './agent-review-findings';
+import { changeCoverage, changeReviewPrompt } from './agent-review-change';
+import { parseFindings, toDrafts, type Findings } from './agent-review-findings';
 import { openStackTarget, stackOutcome, stackReviewPrompt } from './agent-review-stack';
-import { openTarget, type ReviewTarget, type TargetDeps } from './agent-review-target';
+import { openTarget, type TargetDeps } from './agent-review-target';
 import { SideReviewRunner, STANDARD_ENDS, type SideReviewKind } from './engine';
 import { missingBlock } from './outcome-text';
 
 export type AgentReviewDeps = TargetDeps & { slots: RunSlots; agent?: AgentFn };
-
-/** `specs` null: the review asked for none, the ticket's own text stands in for them. */
-function agentReviewPrompt(db: Db, target: ReviewTarget, specs: AgentReviewSpec[] | null): string {
-  const specText = specs === null ? '' : specsSection(specs);
-  return `${sharedPrompt(db, target.projectId)}
-
-${resolveAgent(db, 'review_comments').prompt}
-
-## What you review
-
-${specs === null ? target.about : target.brief}
-${specText === '' ? '' : `\n${specText}\n`}
-The change is checked out in the repository root, at HEAD. Compare it with its base with \`git diff ${target.base}...HEAD\` and \`git log ${target.base}..HEAD\`, and read any file you need. Run one git command per call: no \`&&\`, no \`cd\`. Do not change any file.
-
-## Your answer
-
-${FINDINGS_FORMAT}`;
-}
 
 /** A change checked out for the agent: where it runs, what it is asked, what its findings become. */
 type Checkout = {
@@ -77,14 +55,15 @@ async function openCheckout(
     };
   }
   const target = await openTarget(deps, review, names);
+  // The whole target, so the run gets the change's hunk index.
   return {
-    container: target.container,
-    prompt: agentReviewPrompt(deps.db, target, review.specs),
-    close: target.close,
+    ...target,
+    prompt: changeReviewPrompt(deps.db, target, review.specs),
     outcome: (findings) => ({
       status: 'succeeded',
       headSha: target.headSha,
       drafts: toDrafts(findings, target.patchOf),
+      coverage: changeCoverage(deps.db, target, review.id),
     }),
   };
 }
@@ -100,7 +79,6 @@ const agentReview: SideReviewKind<AgentReview, AgentReviewOutcome, Checkout> = {
   failInterrupted: ({ db }) => failInterruptedAgentReviews(db),
   open: openCheckout,
   ...STANDARD_ENDS,
-  hunkIndex: false,
   work: async (deps, { row, target: checkout, signal }) => {
     const { db, runtime } = deps;
     const outcome = await (deps.agent ?? runAgent)(runtime, {
