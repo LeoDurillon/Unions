@@ -8,8 +8,12 @@ import { JiraPropertyInput } from '../jira/jira-property-input';
 import { NotionPropertyInput } from '../notion/notion-property-input';
 import { Button, ErrorText } from '../ui/ui';
 
-/** Which tracker the item is in, and the ticket and project whose lists the inputs read. */
-export type TrackerEditContext = { kind: 'notion' | 'jira'; ticketId: number; projectId: number };
+/** Which tracker the item is in, the project whose lists the inputs read, where a Jira issue's moves are read. */
+export type TrackerEditContext = {
+  kind: 'notion' | 'jira';
+  projectId: number;
+  transitionsUrl: string | null;
+};
 
 export function TrackerPropertyEditor({
   context,
@@ -40,7 +44,11 @@ export function TrackerPropertyEditor({
   return (
     <div className="space-y-2 rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
       {context.kind === 'jira' ? (
-        <JiraPropertyInput ticketId={context.ticketId} projectId={context.projectId} {...input} />
+        <JiraPropertyInput
+          transitionsUrl={context.transitionsUrl}
+          projectId={context.projectId}
+          {...input}
+        />
       ) : (
         <NotionPropertyInput projectId={context.projectId} {...input} />
       )}

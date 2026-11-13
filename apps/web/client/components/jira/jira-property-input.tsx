@@ -9,13 +9,14 @@ import { JiraValueField } from '../integrations/jira/jira-value-field';
 import { JiraStatusInput } from './jira-status-input';
 
 export function JiraPropertyInput({
-  ticketId,
+  transitionsUrl,
   projectId,
   property,
   draft,
   onChange,
 }: {
-  ticketId: number;
+  /** Where the issue's moves are read; null: the status is not edited here. */
+  transitionsUrl: string | null;
   projectId: number;
   property: TrackerProperty;
   draft: TrackerDraft;
@@ -23,7 +24,9 @@ export function JiraPropertyInput({
 }): ReactElement | null {
   if (property.id === 'status') {
     // A move starts unpicked: the issue's status is where it moves from.
-    return <JiraStatusInput ticketId={ticketId} draft={draft} onChange={onChange} />;
+    return transitionsUrl === null ? null : (
+      <JiraStatusInput url={transitionsUrl} draft={draft} onChange={onChange} />
+    );
   }
   if (!isJiraFieldType(property.type)) {
     return null;

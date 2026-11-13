@@ -11,17 +11,18 @@ import { ErrorText, Field, inputClass } from '../ui/ui';
 type Move = { id: string; name: string; toName: string };
 
 export function JiraStatusInput({
-  ticketId,
+  url,
   draft,
   onChange,
 }: {
-  ticketId: number;
+  /** The route answering the issue's transitions now. */
+  url: string;
   draft: TrackerDraft;
   onChange: (draft: TrackerDraft) => void;
 }): ReactElement {
   const transitions = useQuery({
-    queryKey: ['jira-transitions', ticketId],
-    queryFn: () => request<Move[]>('GET', `/api/tickets/${ticketId}/jira-transitions`),
+    queryKey: ['jira-transitions', url],
+    queryFn: () => request<Move[]>('GET', url),
     staleTime: 0,
     retry: false,
   });

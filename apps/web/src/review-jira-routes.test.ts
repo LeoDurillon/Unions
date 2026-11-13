@@ -106,6 +106,8 @@ test('an issue is linked as a spec of the review, read with its text, and unlink
       url: `${SITE}/browse/ABC-12`,
       markdown: 'Do it.',
       comments: { error: 'Jira refused it.' },
+      properties: [],
+      pendingFields: [],
     },
   ]);
   expect((await send('DELETE', `${base}/ABC-12`)).status).toBe(200);

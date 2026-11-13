@@ -7,7 +7,7 @@ import type { ReactElement } from 'react';
 import type { PendingTrackerField } from '../../../src/tracker-field-types';
 import type { Tone } from '../../lib/board/labels';
 import { jiraCommentsKey } from '../../lib/integrations/use-jira-comments';
-import { useTrackerFieldSend } from '../../lib/integrations/use-tracker-fields';
+import { ticketFieldTarget, useTrackerFieldSend } from '../../lib/integrations/use-tracker-fields';
 import { timeAgo } from '../../lib/ui/relative-time';
 import { useNow } from '../../lib/ui/use-now';
 import { TrackerItemCard } from '../tracker/tracker-item-card';
@@ -93,7 +93,7 @@ export function JiraIssueCard({
   reading: boolean;
   onRefresh: () => void;
 }): ReactElement {
-  const sender = useTrackerFieldSend(ticket.id, jiraCommentsKey(ticket.id));
+  const sender = useTrackerFieldSend(ticketFieldTarget(ticket.id, jiraCommentsKey(ticket.id)));
   return (
     <TrackerItemCard
       mark="J"
@@ -104,7 +104,7 @@ export function JiraIssueCard({
       properties={issue?.facts?.properties ?? []}
       editing={{
         kind: 'jira',
-        ticketId: ticket.id,
+        transitionsUrl: `/api/tickets/${ticket.id}/jira-transitions`,
         projectId: ticket.projectId,
         pending: pendingFields,
         sender,

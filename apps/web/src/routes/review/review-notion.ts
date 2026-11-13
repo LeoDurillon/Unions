@@ -17,6 +17,7 @@ import { Hono, type Context } from 'hono';
 import { readObject } from '../../http';
 import { discussionsOfPage } from '../../notion-discussions';
 import type { ReviewNotionLink, ReviewNotionPage } from '../../review-notion-types';
+import { pendingReviewFields, withNotionOptions } from '../../tracker-field-commands';
 import { guarded, notionTokenOf, requireNotionId } from '../notion';
 import { load, type Review } from '../pull-requests/pr-review-load';
 
@@ -32,8 +33,8 @@ async function readLink(
 }
 
 async function pageText(
-  notion: NotionApi,
-  token: string,
+  { db, notion, token }: { db: Db; notion: NotionApi; token: string },
+  review: { id: number; projectId: number },
   pageId: string,
 ): Promise<ReviewNotionPage> {
   const page = await guarded(() => notion.page(token, pageId));
@@ -46,6 +47,8 @@ async function pageText(
     markdown: notionMarkdown(markdown, titles).trim(),
     truncated,
     discussions: await discussionsOr(notion, token, { id: pageId, url: page.url, markdown }),
+    properties: withNotionOptions(db, review.projectId, page.properties ?? []),
+    pendingFields: pendingReviewFields(db, review.id, pageId),
   };
 }
 
@@ -74,7 +77,7 @@ async function pagesText(db: Db, notion: NotionApi, c: Context): Promise<Respons
   for (const page of pages) {
     // One page at a time: each reads its commented blocks too, and Notion answers 429 to bursts.
     // oxlint-disable-next-line no-await-in-loop
-    read.push(await pageText(notion, token, page.id));
+    read.push(await pageText({ db, notion, token }, review, page.id));
   }
   return c.json(read);
 }

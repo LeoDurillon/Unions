@@ -25,10 +25,15 @@ function issuesKey(review: CurrentReview): string {
   return review.jiraIssues.map((issue) => issue.id).join(',');
 }
 
+/** The tab's view in the query cache: a change to one of its issues updates it. */
+export function reviewJiraKey(review: CurrentReview): unknown[] {
+  return ['review-jira', review.projectId, review.prNumber, issuesKey(review)];
+}
+
 /** Read from Jira once per opening of the tab; `refetch` is its Refresh. */
 export function useReviewJiraIssues(review: CurrentReview): UseQueryResult<ReviewJiraIssue[]> {
   return useQuery({
-    queryKey: ['review-jira', review.projectId, review.prNumber, issuesKey(review)],
+    queryKey: reviewJiraKey(review),
     queryFn: () => request<ReviewJiraIssue[]>('GET', jiraPath(review)),
     staleTime: Infinity,
     retry: false,

@@ -1,5 +1,5 @@
 // `<review>/jira`: the Jira issues a pull request under review is linked to (its `jira` specs), and
-// those it names. It serves their description and comments, read only; checking one, linking it,
+// those it names. It serves their description, comments and fields; checking one, linking it,
 // unlinking it; and the issues the pull request names, suggested.
 
 import {
@@ -10,6 +10,7 @@ import {
   jiraKeysIn,
   linkedJiraIssues,
   readJiraConfig,
+  readJiraIssueFacts,
   linkJiraIssue,
   unlinkJiraIssue,
   type Db,
@@ -21,6 +22,7 @@ import { Hono, type Context } from 'hono';
 import type { OnboardingGitHub } from '../../github-onboarding';
 import { BAD_REQUEST, CONFLICT, fail, readObject, requireText } from '../../http';
 import type { ReviewJiraIssue, ReviewJiraLink } from '../../review-jira-types';
+import { pendingReviewFields } from '../../tracker-field-commands';
 import { guarded } from '../notion';
 import { authOf, load, type Project } from '../pull-requests/pr-review-load';
 
@@ -64,18 +66,27 @@ async function readLink(jira: JiraApi, access: Access, ref: string): Promise<Rev
   return { key: issue.key, summary: issue.summary, url: `${access.auth.site}/browse/${issue.key}` };
 }
 
-async function issueText(jira: JiraApi, auth: JiraAuth, key: string): Promise<ReviewJiraIssue> {
+async function issueText(
+  { db, jira, auth }: { db: Db; jira: JiraApi; auth: JiraAuth },
+  reviewId: number,
+  key: string,
+): Promise<ReviewJiraIssue> {
   const issue = await guarded(() => jira.issue(auth, key));
-  const comments = await jira.comments(auth, key).then(
-    (read) => read.comments,
-    (error: unknown) => ({ error: error instanceof Error ? error.message : String(error) }),
-  );
+  const [comments, facts] = await Promise.all([
+    jira.comments(auth, key).then(
+      (read) => read.comments,
+      (error: unknown) => ({ error: error instanceof Error ? error.message : String(error) }),
+    ),
+    readJiraIssueFacts(jira, auth, key),
+  ]);
   return {
     key: issue.key,
     summary: issue.summary,
     url: `${auth.site}/browse/${issue.key}`,
     markdown: issueMarkdown(issue, auth.site).trim(),
     comments,
+    properties: facts?.properties ?? [],
+    pendingFields: pendingReviewFields(db, reviewId, issue.key),
   };
 }
 
@@ -87,7 +98,9 @@ async function issuesText(db: Db, jira: JiraApi, c: Context): Promise<Response> 
     return c.json([]);
   }
   const { auth } = requireAccess(db, project);
-  return c.json(await Promise.all(linked.map((issue) => issueText(jira, auth, issue.id))));
+  return c.json(
+    await Promise.all(linked.map((issue) => issueText({ db, jira, auth }, review.id, issue.id))),
+  );
 }
 
 async function link(db: Db, jira: JiraApi, c: Context): Promise<Response> {

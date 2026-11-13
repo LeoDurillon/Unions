@@ -1,13 +1,14 @@
-// A review's Jira tab: each linked issue's description as Jira has it now, then its comments (read only), with Refresh.
+// A review's Jira tab: each linked issue's fields (editable), description, then its comments (read only), Refresh.
 
 import type { ReactElement } from 'react';
 
 import type { CurrentReview } from '../../../src/api-types';
 import type { ReviewJiraIssue } from '../../../src/review-jira-types';
-import { useReviewJiraIssues } from '../../lib/review/use-review-jira';
+import { reviewJiraKey, useReviewJiraIssues } from '../../lib/review/use-review-jira';
 import { JiraCommentCard } from '../jira/jira-comment';
 import { FoldedMarkdown } from '../markdown/folded-markdown';
 import { Button, ErrorText } from '../ui/ui';
+import { ReviewItemProperties } from './review-item-properties';
 
 /** The issue's comments, read only: replying and Add to review are a ticket's. */
 function IssueComments({ issue }: { issue: ReviewJiraIssue }): ReactElement | null {
@@ -30,7 +31,13 @@ function IssueComments({ issue }: { issue: ReviewJiraIssue }): ReactElement | nu
   );
 }
 
-function IssueText({ issue }: { issue: ReviewJiraIssue }): ReactElement {
+function IssueText({
+  review,
+  issue,
+}: {
+  review: CurrentReview;
+  issue: ReviewJiraIssue;
+}): ReactElement {
   return (
     <section className="space-y-2" aria-label={issue.key}>
       <h3 className="text-sm font-semibold">
@@ -44,6 +51,11 @@ function IssueText({ issue }: { issue: ReviewJiraIssue }): ReactElement {
           {issue.key} {issue.summary}
         </a>
       </h3>
+      <ReviewItemProperties
+        review={review}
+        item={{ kind: 'jira', itemId: issue.key, ...issue }}
+        queryKey={reviewJiraKey(review)}
+      />
       {issue.markdown === '' ? (
         <p className="text-sm text-zinc-500">No description.</p>
       ) : (
@@ -73,7 +85,7 @@ export function ReviewJiraTab({ review }: { review: CurrentReview }): ReactEleme
         <p className="text-sm text-zinc-500">Reading the issues on Jira…</p>
       ) : null}
       {issues.data?.map((issue) => (
-        <IssueText key={issue.key} issue={issue} />
+        <IssueText key={issue.key} review={review} issue={issue} />
       ))}
     </div>
   );

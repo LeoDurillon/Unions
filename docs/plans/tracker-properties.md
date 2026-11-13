@@ -1,8 +1,8 @@
 # Edit the tracker item's properties from the ticket
 
-Status: steps 1 to 4 built (2026-11-13, branch `tracker-properties`): both tabs list the values, the value inputs
-are shared, and a Notion page's properties and a Jira issue's fields and status can be edited from the ticket's tab
-(no real edit checked yet); steps 5 and 6 planned. Builds on the Notion and Jira tabs (comments, built) and the rules' field
+Status: steps 1 to 5 built (2026-11-13, branch `tracker-properties`): a ticket's and a review's Notion and Jira
+tabs list the item's properties and edit them (Jira's status through its transitions); no real edit checked yet.
+Step 6 (docs) done with each step; archive once a real edit is checked. Builds on the Notion and Jira tabs (comments, built) and the rules' field
 machinery ([Jira rule actions](archive/jira-rule-actions.md), [More Jira fields](archive/jira-more-fields.md)).
 Overlaps [One adapter per tracker](tracker-adapters.md): see D8.
 

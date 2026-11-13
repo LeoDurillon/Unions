@@ -5,7 +5,7 @@ import type { ReactElement } from 'react';
 
 import type { NotionPageFacts, NotionTabView } from '../../../src/notion-discussion-types';
 import { notionCommentsKey } from '../../lib/integrations/use-notion-comments';
-import { useTrackerFieldSend } from '../../lib/integrations/use-tracker-fields';
+import { ticketFieldTarget, useTrackerFieldSend } from '../../lib/integrations/use-tracker-fields';
 import { timeAgo } from '../../lib/ui/relative-time';
 import { useNow } from '../../lib/ui/use-now';
 import { TrackerItemCard } from '../tracker/tracker-item-card';
@@ -65,7 +65,7 @@ export function NotionPageCard({
   reading: boolean;
   onRefresh: () => void;
 }): ReactElement {
-  const sender = useTrackerFieldSend(ticket.id, notionCommentsKey(ticket.id));
+  const sender = useTrackerFieldSend(ticketFieldTarget(ticket.id, notionCommentsKey(ticket.id)));
   const facts = view?.page ?? null;
   return (
     <TrackerItemCard
@@ -77,7 +77,7 @@ export function NotionPageCard({
       properties={facts?.properties ?? []}
       editing={{
         kind: 'notion',
-        ticketId: ticket.id,
+        transitionsUrl: null,
         projectId: ticket.projectId,
         pending: view?.pendingFields ?? [],
         sender,

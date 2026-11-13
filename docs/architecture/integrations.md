@@ -137,6 +137,11 @@ Containers never hold GitHub credentials. Tokens, the App's key and integration 
   for the status, that the picked transition is one `GET /issue/{key}/transitions` offers now (also served at
   `GET /api/tickets/:id/jira-transitions` for the editor). The worker's `jira/field-set.ts` resolves "the active
   sprint", then `updateIssue` or `transitionIssue`; 403 names "Edit issues" or "Transition issues".
+  A review's Notion and Jira tabs list the same properties for each linked page or issue (`review-notion.ts`,
+  `review-jira.ts`), editable through `<review>/tracker-fields` (`routes/review/review-tracker-fields.ts`, refused
+  for an item the review is not linked to; the issue's moves at `<review>/jira/:key/transitions`). Such a command has
+  no ticket: its payload's `reviewId` names the review, its events have no ticket, and `pendingReviewFields` finds
+  those not answered by item.
 - A project reaches GitHub with a token (`projects.github_token`) or an installation of the GitHub App
   (`projects.github_installation_id`; the app's ID and private key are one row of `github_app`). Both are stored in
   plain text (local single-user app, like the original Union) and never reach the browser: responses use

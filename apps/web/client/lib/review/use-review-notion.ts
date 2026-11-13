@@ -30,10 +30,15 @@ function pagesKey(review: CurrentReview): string {
   return review.notionPages.map((page) => page.id).join(',');
 }
 
+/** The tab's view in the query cache: a change to one of its pages updates it. */
+export function reviewNotionKey(review: CurrentReview): unknown[] {
+  return ['review-notion', review.projectId, review.prNumber, pagesKey(review)];
+}
+
 /** Read from Notion once per opening of the tab; `refetch` is its Refresh. */
 export function useReviewNotionPages(review: CurrentReview): UseQueryResult<ReviewNotionPage[]> {
   return useQuery({
-    queryKey: ['review-notion', review.projectId, review.prNumber, pagesKey(review)],
+    queryKey: reviewNotionKey(review),
     queryFn: () => request<ReviewNotionPage[]>('GET', notionPath(review)),
     staleTime: Infinity,
     retry: false,

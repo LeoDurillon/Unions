@@ -1,6 +1,6 @@
 // The comments a ticket's tracker tab is still sending: queued commands the worker has not answered with an event yet.
 import { schema, type Db } from '@union/core';
-import { and, eq, gte, inArray, isNull } from 'drizzle-orm';
+import { and, eq, gte, inArray, isNull, type SQL } from 'drizzle-orm';
 
 /** A comment still unanswered after this is no longer shown pending: the worker stopped while posting it. */
 const STALE_COMMENT_MS = 600_000;
@@ -20,14 +20,22 @@ function commandIdOf(payload: unknown): number | null {
   return typeof value === 'number' ? value : null;
 }
 
+/** The events or commands of the ticket, or of none (`null`: a review's, or the project's). */
+function onTicket(
+  column: typeof schema.events.ticketId | typeof schema.commands.ticketId,
+  ticketId: number | null,
+): SQL {
+  return ticketId === null ? isNull(column) : eq(column, ticketId);
+}
+
 /** The commands answered on the ticket since `since`. */
-function answered(db: Db, ticketId: number, answers: string[], since: number): Set<number> {
+function answered(db: Db, ticketId: number | null, answers: string[], since: number): Set<number> {
   const events = db
     .select()
     .from(schema.events)
     .where(
       and(
-        eq(schema.events.ticketId, ticketId),
+        onTicket(schema.events.ticketId, ticketId),
         inArray(schema.events.type, answers),
         gte(schema.events.at, since),
       ),
@@ -36,10 +44,13 @@ function answered(db: Db, ticketId: number, answers: string[], since: number): S
   return new Set(events.flatMap((event) => commandIdOf(event.payload) ?? []));
 }
 
-/** The ticket's comments of this kind the worker has not posted yet ("Sending…", across reloads). */
+/**
+ * The ticket's comments of this kind the worker has not posted yet ("Sending…", across reloads);
+ * `ticketId` null: the commands of no ticket (a review's).
+ */
 export function pendingComments<T>(
   db: Db,
-  ticketId: number,
+  ticketId: number | null,
   command: CommentCommand<T>,
   now = Date.now(),
 ): { commandId: number; createdAt: number; post: T }[] {
@@ -50,7 +61,7 @@ export function pendingComments<T>(
     .where(
       and(
         eq(schema.commands.type, command.type),
-        eq(schema.commands.ticketId, ticketId),
+        onTicket(schema.commands.ticketId, ticketId),
         gte(schema.commands.createdAt, since),
         isNull(schema.commands.error),
       ),
