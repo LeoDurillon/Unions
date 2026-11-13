@@ -1,6 +1,6 @@
 # Plan: agent reviews of large changes, slice by slice
 
-Status: planned (2026-11-13); step 0's recording built (branch `review-agent-logs`), the rerun of #1756 left.
+Status: planned (2026-11-13); step 0 done (recording built, commit `25105a4`; #1756 rerun and read), step 1 next.
 
 ## Problem
 
@@ -9,9 +9,9 @@ first files, skims the rest, and misses what lies between them.
 
 The agent review (`apps/worker/src/review/agent-review.ts`) is one agent with one prompt: "compare the change with
 `git diff <base>...HEAD`". It runs with `hunkIndex: false`, so unlike the other review agents it gets neither the
-list of changed files nor the hunk index (`checkedOutChange` in `review-change-prompt.ts`). On a large change it
-probably reads the whole diff in one call, the output fills its context, and it reads the end less closely. This is
-inferred from the prompt; step 0 checks it against real logs.
+list of changed files nor the hunk index (`checkedOutChange` in `review-change-prompt.ts`). Step 0's log shows
+the cause is not a full context (peak 160k of 1M): the agent picks one area, goes deep, and ends its answer with
+about half the change unread, without saying so.
 
 What already exists to build on:
 
@@ -47,20 +47,63 @@ The agent went deep on the API's publication path and found real bugs there. It 
 `publishedProgramme.ts` (369 lines) of the shared package. That is the pattern this plan is for: depth on one part,
 silence on the rest. With one pass, silence does not tell "read and fine" from "never read".
 
-How it read the diff cannot be checked. A pull request's agent review keeps **no log** (`agent-review.ts`: "A pull
-request review has no log view") and writes **no `agent_usage` or `agent_tool_usage` rows** (none exist with
-neither a ticket nor an investigation). Its throwaway container is gone after the run.
+That run's log could not be read: a pull request's agent review kept none, and recorded no usage. Built since
+(commit `25105a4`): its log in `agent_log`, and its `agent_usage` and `agent_tool_usage` rows, by `agent_review_id`
+(migration 0089; a ticket's review gets both ids). Nothing shows them yet; the project's Usage page still leaves them
+out.
 
-### To do
+### The rerun, with its log (agent review 24, same head)
 
-- Built: a pull request's agent review records its log in `agent_log`, and its `agent_usage` and
-  `agent_tool_usage` rows, by `agent_review_id` (migration 0089; a ticket's review gets both ids). Nothing shows
-  them yet; the project's Usage page still leaves them out. Without this, neither step 1 nor step 2 can be
-  measured on pull requests, which is where large changes come from.
-- Ask the agent, in its `summary`, which files it read closely and which it skimmed (step 1 does this). A cheap
-  signal while the log is missing, and still useful after.
-- Rerun PR #1756 once the log is recorded (with the user's consent: it uses Claude usage), to get the before figures:
-  tool calls, how the diff was read, peak context, files commented by area.
+Opus, 3 min 5 s, 28 turns, 9 drafts. Peak context 160k (of a 1M window), starting at 32k (the prompt and the specs);
+2.6M tokens read from the cache, 15k written out, $1.85 API-equivalent.
+
+How it read the change, in order:
+
+1. `git diff --stat`, then `git diff <base>...HEAD -- goreno/api/src`. That output (58 KB) was too large for the CLI,
+   which saved it to a file in the session and showed a 2 KB preview; the agent then read the file (1546 lines).
+2. Nine `Grep`s and a few reads around the API: the file authorization rules, the Prisma schema (its `Decimal` and
+   `DateTime` fields). About 30k of context spent there.
+3. The shared package: `publishedProgramme.ts` and `publicationSummary.ts`, read whole.
+4. The simulator: the diffs of three hooks and helpers, of `src/app`, `types.ts` and the API client; two new files
+   read whole.
+5. The Conception: one `git diff` whose paths did not exist (`src/components/...` for `src/parts/...`), then
+   `--name-only`, then the diffs of three folders.
+6. Then it answered.
+
+What it never opened, 45% of the changed lines (2092 of 4628):
+
+| File                                                     | Changed lines |
+| -------------------------------------------------------- | ------------- |
+| `goreno/simulator/src/hooks/useActionsDetailsData.ts`    | 487           |
+| `goreno/e2e/.../financial-engineering.e2e-spec.ts`       | 174           |
+| every test of the change (`*.spec.ts(x)`), together      | about 500     |
+| `conception/.../publishedScenarios.helpers.ts`           | 116           |
+| `conception/.../PublishedActionsTable.tsx` (and 4 views) | about 250     |
+| `docs/adr/0013-a-publication-freezes-...md` and the docs | 172           |
+| `simulator/src/helpers/actionsTotals.ts`                 | 70            |
+| `packages/.../publishedScenarioSnapshot.ts`              | 66            |
+
+Its 9 drafts: 7 on the API (one of them general), 1 on the shared package, none on the simulator or the
+Conception, though it read part of both. Its summary does not say what it left out.
+
+Compared with run 23 on the same head: 3 findings in both (the author's name readable by clients, the mode served
+against the project's mode, the silent fallback in `publication.helpers.ts`), 6 only in run 24, 2 only in run 23
+(the cache missed by every simulator at once, `isPublished` reading the current mode). Two runs of one pass find
+different bugs: neither run covers the change.
+
+What this says for the plan:
+
+- **Coverage, not context, is the problem.** The context never filled. The agent chose to stop. Slicing helps by
+  giving each part its own agent, and so does a plain list of files the answer must account for.
+- **Order decides what gets reviewed.** It started with the API (the backend) and spent a third of its turns there;
+  the largest file, in the simulator, was never opened. A slice per area removes that choice.
+- **A large `git diff` is read through the CLI's saved file**, whose line numbers are the file's, not the source's.
+  One finding cited `stored-inputs.reviver.ts` lines 504-518 (the file has 40) and became a general draft. Step 1's
+  "one file at a time" and the hunk index avoid it.
+- **The tests, the e2e test and the ADR were skipped.** The ADR is close to a spec of the change; the slices should
+  give the docs to the slice they describe, and the tests to the slice of the code they test, not to `unrelated`.
+- **Silence is not visible.** The answer must list the files it did not read (step 1), and the review's card can
+  show the coverage from the log (`agent_tool_usage`: the files read and the paths diffed).
 
 ## Step 1: give the agent review a map of the change (cheap, every size)
 
@@ -72,6 +115,11 @@ neither a ticket nor an investigation). Its throwaway container is gone after th
   threshold below too), with tests.
 - Ask the agent to read the files in an order that follows the change (entry points first), and to note in its
   `summary` the files it did not get to, if any.
+- Tell it never to diff a whole folder: one file, or a few small ones, per `git diff`, so no output goes through the
+  CLI's saved file (about 30 KB and more), and line numbers stay the source's.
+- From the log, after the run: the changed files the agent neither diffed nor read, saved with the review and shown
+  on its card ("Not read: 31 files, 2092 lines"). Pure code in core over `agent_tool_usage` and the Bash commands'
+  paths, with tests.
 - Then rerun step 0's pull requests and compare. If this is enough up to some size, raise the threshold of step 2.
 
 ## Step 2: a sliced review above a threshold
