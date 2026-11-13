@@ -53,6 +53,7 @@ const PAGE_OBJECT = {
   dataSourceId: null,
   editedAt: '2026-11-12T10:00:00.000Z',
   status: { name: 'Avancement', value: 'En cours' },
+  properties: [{ id: 'st', name: 'Avancement', type: 'status', text: 'En cours', settable: true }],
 };
 let pageRead: () => Promise<unknown> = () => Promise.resolve(PAGE_OBJECT);
 
@@ -115,12 +116,13 @@ test('the discussions: the page one, then the one on the text with its quote', a
   ]);
 });
 
-test('the page comes with its title, status and last edit; a failed read leaves them out', async () => {
+test('the page comes with its title, status, last edit and properties; a failed read leaves them out', async () => {
   const view = (await (await read()).json()) as NotionTabView;
   expect(view.page).toEqual({
     title: 'Export CSV',
     status: { name: 'Avancement', value: 'En cours' },
     editedAt: '2026-11-12T10:00:00.000Z',
+    properties: PAGE_OBJECT.properties,
   });
   pageRead = () => Promise.reject(new NotionError('Not found', 404));
   const without = (await (await read()).json()) as NotionTabView;

@@ -68,6 +68,7 @@ export function NotionPageCard({
       open={pageUrl ? { url: pageUrl, label: 'Open in Notion' } : null}
       reading={reading}
       onRefresh={onRefresh}
+      properties={facts?.properties ?? []}
     >
       <Heading facts={facts} />
     </TrackerItemCard>

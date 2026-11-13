@@ -48,7 +48,9 @@ const ISSUE_BODY = {
     status: { name: 'In Review', statusCategory: { key: 'indeterminate' } },
     assignee: null,
     updated: '2026-11-12T10:00:00.000+0100',
+    duedate: '2026-12-01',
   },
+  editmeta: { fields: { duedate: { name: 'Due date', schema: { type: 'date' } } } },
 };
 
 const jira = {
@@ -99,6 +101,10 @@ test("the tab reads the issue's comments with the project's token", async () => 
       status: { name: 'In Review', category: 'indeterminate' },
       assignee: null,
       updatedAt: '2026-11-12T10:00:00.000+0100',
+      properties: [
+        { id: 'status', name: 'Status', type: 'status', text: 'In Review', settable: false },
+        { id: 'duedate', name: 'Due date', type: 'date', text: '2026-12-01', settable: true },
+      ],
     },
     comments: [COMMENT],
     total: 1,

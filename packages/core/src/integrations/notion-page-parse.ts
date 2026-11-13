@@ -1,6 +1,8 @@
 // Reads a Notion page object: its title, its URL, its data source, when it changed and its status column.
 
+import { pagePropertiesOf } from './notion-page-values';
 import { isRecord, plain } from './notion-values';
+import type { TrackerProperty } from './tracker-property';
 
 export type NotionPage = {
   id: string;
@@ -11,6 +13,8 @@ export type NotionPage = {
   editedAt?: string;
   /** Its status column (Notion's `status` type) and the value it holds, when it has one. */
   status?: { name: string; value: string };
+  /** Its properties but the title, when it has any. */
+  properties?: TrackerProperty[];
 };
 
 function titleOf(properties: unknown): string {
@@ -46,6 +50,7 @@ export function pageOf(body: Record<string, unknown>): NotionPage {
     typeof parent.data_source_id === 'string'
       ? parent.data_source_id
       : null;
+  const properties = pagePropertiesOf(body.properties);
   return {
     id: String(body.id),
     title: titleOf(body.properties),
@@ -53,5 +58,6 @@ export function pageOf(body: Record<string, unknown>): NotionPage {
     dataSourceId,
     ...(typeof body.last_edited_time === 'string' ? { editedAt: body.last_edited_time } : {}),
     ...(statusOf(body.properties) ? { status: statusOf(body.properties) } : {}),
+    ...(properties.length > 0 ? { properties } : {}),
   };
 }

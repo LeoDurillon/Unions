@@ -1,5 +1,7 @@
 // What a ticket's Notion tab reads: the open discussions of its page, as read now.
 
+import type { TrackerProperty } from '@union/core';
+
 /** One comment: who wrote it, when, and its text as markdown. */
 export type NotionCommentView = { id: string; author: string; createdAt: string; markdown: string };
 
@@ -35,11 +37,12 @@ export type PendingNotionComment = {
  */
 type NotionReviewState = { importedIds: string[]; refusal: string | null };
 
-/** The page itself as Notion has it now: its title, its status column's value, when it changed. */
+/** The page itself as Notion has it now: its title, its status column's value, when it changed, its properties. */
 export type NotionPageFacts = {
   title: string;
   status: { name: string; value: string } | null;
   editedAt: string | null;
+  properties: TrackerProperty[];
 };
 
 /** What the ticket's tab reads: the page, the discussions, the comments being sent, and Add to review. */

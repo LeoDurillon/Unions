@@ -24,7 +24,7 @@ function pageOf(ticket: Ticket): { id: string; url: string } {
   return { id: ticket.originId, url };
 }
 
-/** The page's title, status and last edit; null when Notion does not give the page (the tab shows the rest). */
+/** The page's title, status, last edit and properties; null when Notion does not give the page (the tab shows the rest). */
 async function pageFacts(
   notion: NotionApi,
   token: string,
@@ -32,7 +32,12 @@ async function pageFacts(
 ): Promise<NotionPageFacts | null> {
   try {
     const page = await notion.page(token, pageId);
-    return { title: page.title, status: page.status ?? null, editedAt: page.editedAt ?? null };
+    return {
+      title: page.title,
+      status: page.status ?? null,
+      editedAt: page.editedAt ?? null,
+      properties: page.properties ?? [],
+    };
   } catch {
     return null;
   }

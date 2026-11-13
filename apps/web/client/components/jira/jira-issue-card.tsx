@@ -91,6 +91,7 @@ export function JiraIssueCard({
       open={issue ? { url: issue.url, label: 'Open in Jira' } : null}
       reading={reading}
       onRefresh={onRefresh}
+      properties={issue?.facts?.properties ?? []}
     >
       <Heading issueKey={issue?.key ?? null} facts={issue?.facts ?? null} />
     </TrackerItemCard>

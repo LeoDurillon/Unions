@@ -98,6 +98,7 @@ export * from './integrations/jira-field-types';
 export * from './integrations/jira-picks';
 export * from './integrations/jira-integration';
 export * from './integrations/jira-issue-facts';
+export type { TrackerProperty } from './integrations/tracker-property';
 export * from './integrations/jira-provider';
 export * from './integrations/jira-values';
 export * from './integrations/markdown-adf';

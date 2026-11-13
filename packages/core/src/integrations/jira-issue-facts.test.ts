@@ -25,6 +25,9 @@ test('the summary, type, status with its category, assignee and last update', ()
     status: { name: 'In Review', category: 'indeterminate' },
     assignee: 'Ada Lovelace',
     updatedAt: '2026-11-12T10:00:00.000+0100',
+    properties: [
+      { id: 'status', name: 'Status', type: 'status', text: 'In Review', settable: false },
+    ],
   });
 });
 
@@ -42,11 +45,12 @@ test('an unassigned issue, an unknown category and missing fields read as null',
     status: { name: 'Odd', category: null },
     assignee: null,
     updatedAt: null,
+    properties: [{ id: 'status', name: 'Status', type: 'status', text: 'Odd', settable: false }],
   });
   expect(issueFactsOf(null).status).toBeNull();
 });
 
-test('reads only the fields it shows, and gives null when Jira refuses', async () => {
+test('reads the fields with the edit screen, and gives null when Jira refuses', async () => {
   const paths: string[] = [];
   let refuse = false;
   const jira = {
@@ -56,7 +60,7 @@ test('reads only the fields it shows, and gives null when Jira refuses', async (
     },
   } satisfies Partial<JiraApi> as unknown as JiraApi;
   expect((await readJiraIssueFacts(jira, AUTH, 'ABC-1'))?.summary).toBe('Dark mode');
-  expect(paths).toEqual(['/issue/ABC-1?fields=summary,issuetype,status,assignee,updated']);
+  expect(paths).toEqual(['/issue/ABC-1?expand=editmeta']);
   refuse = true;
   expect(await readJiraIssueFacts(jira, AUTH, 'ABC-1')).toBeNull();
 });

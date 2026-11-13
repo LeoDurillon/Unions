@@ -1,8 +1,10 @@
-// What the ticket's Jira tab says about its issue: summary, type, status, assignee and last update.
+// What the ticket's Jira tab says about its issue: summary, type, status, assignee, last update and its fields.
 // Read through `JiraApi.read`; null when Jira does not give the issue, so the tab still shows the comments.
 
 import type { JiraApi, JiraAuth } from './jira-api';
+import { issuePropertiesOf } from './jira-issue-values';
 import { isRecord, text } from './jira-parse';
+import type { TrackerProperty } from './tracker-property';
 
 /** Jira's status categories: to do, in progress, done. */
 type JiraStatusCategory = 'new' | 'indeterminate' | 'done';
@@ -14,9 +16,12 @@ export type JiraIssueFacts = {
   status: { name: string; category: JiraStatusCategory | null } | null;
   assignee: string | null;
   updatedAt: string | null;
+  /** The status and the fields of the issue's edit screen, with their values. */
+  properties: TrackerProperty[];
 };
 
-const FIELDS = 'summary,issuetype,status,assignee,updated';
+/** Every field's value, and the edit screen: which fields the issue has and of what type. */
+const QUERY = 'expand=editmeta';
 const CATEGORIES: ReadonlySet<string> = new Set(['new', 'indeterminate', 'done']);
 
 function isCategory(value: string): value is JiraStatusCategory {
@@ -37,7 +42,7 @@ function statusOf(value: unknown): JiraIssueFacts['status'] {
   return { name, category: isCategory(category) ? category : null };
 }
 
-/** `GET /issue/{key}?fields=…`: the facts, what Jira leaves out as null. */
+/** `GET /issue/{key}?expand=editmeta`: the facts, what Jira leaves out as null, and the fields. */
 export function issueFactsOf(body: unknown): JiraIssueFacts {
   const fields = isRecord(body) && isRecord(body.fields) ? body.fields : {};
   return {
@@ -46,6 +51,7 @@ export function issueFactsOf(body: unknown): JiraIssueFacts {
     status: statusOf(fields.status),
     assignee: nameOf(fields.assignee, 'displayName'),
     updatedAt: text(fields, 'updated') || null,
+    properties: issuePropertiesOf(body),
   };
 }
 
@@ -56,9 +62,7 @@ export async function readJiraIssueFacts(
   key: string,
 ): Promise<JiraIssueFacts | null> {
   try {
-    return issueFactsOf(
-      await jira.read(auth, `/issue/${encodeURIComponent(key)}?fields=${FIELDS}`),
-    );
+    return issueFactsOf(await jira.read(auth, `/issue/${encodeURIComponent(key)}?${QUERY}`));
   } catch {
     return null;
   }

@@ -62,7 +62,7 @@ Open findings of the security reviews (2026-10-24 audit, 2026-11-08 review), to 
 - [Edit the tracker item's properties from the ticket](tracker-properties.md): the Notion and Jira tabs list the
   page's properties or the issue's fields with their values, each editable with an input fitting its type (Jira's
   status through its transitions), on the ticket and on a review's tabs; the worker sends the change. Reuses the
-  rules' value code. Planned (2026-11-13).
+  rules' value code. Step 1 (the values, read only) built (2026-11-13, branch `tracker-properties`).
 - [One adapter per tracker](tracker-adapters.md): what Notion and Jira do (comments, statuses, fields, links,
   specs, reviews, files) behind one `TrackerAdapter` with capabilities, shared field types and rule actions, one
   contract test suite and an ast-grep guard, so a new tracker is an adapter and its settings. Planned (2026-11-07).

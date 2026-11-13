@@ -21,6 +21,9 @@ test('a page gives its title, when it changed and its status column', () => {
     dataSourceId: 'ds1',
     editedAt: '2026-11-12T10:00:00.000Z',
     status: { name: 'Avancement', value: 'En cours' },
+    properties: [
+      { id: 'Avancement', name: 'Avancement', type: 'status', text: 'En cours', settable: true },
+    ],
   });
 });
 
@@ -32,5 +35,6 @@ test('a page without a status column or an edit time has neither', () => {
     title: '',
     url: '',
     dataSourceId: null,
+    properties: [{ id: 'Etat', name: 'Etat', type: 'select', text: 'A', settable: true }],
   });
 });

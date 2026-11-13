@@ -205,7 +205,9 @@ Then come the tabs:
 - **PR**: the ticket's pull request, its CI checks and branch operations. See
   [Branches and pull requests](branches.md).
 - **Notion**: for a ticket imported from Notion or linked to a page, a card for the page (its title, the value of its
-  status column, when it was last edited, **Open in Notion**), then the page's open comments.
+  status column, when it was last edited, **Open in Notion**), its **Properties**, then the page's open comments.
+  **Properties** lists every property of the page but its title, with its value as Notion has it now; the empty ones
+  are folded under "N empty", click it to see them.
   Comments on the whole page come first, then those on a passage of the text, under the passage they are about.
   The tab opens on a card for the page, with **Open in Notion** and **Refresh**, which reads the comments again;
   **Open in Notion** on a discussion opens it there. Resolved comments are not
@@ -222,7 +224,9 @@ Then come the tabs:
   and once the tab has read them says how many comments it has; see
   [Link a ticket to its Notion page or Jira issue](#link-a-ticket-to-its-notion-page-or-jira-issue)): a card for
   the issue (its summary, key, type, status, assignee and when it was last updated, **Open in Jira** and
-  **Refresh**, which reads the issue and its comments again), then the issue's comments, oldest first, each with
+  **Refresh**, which reads the issue and its comments again), its **Properties** (its status, then the fields of
+  the issue's edit screen in Jira, its summary, description and files left out, the empty ones folded under
+  "N empty"), then the issue's comments, oldest first, each with
   its author, time ("edited" when changed), **Open in Jira**, and a badge when not everyone can see it (a role or
   group, or an internal note). An issue with more than 500 comments shows the latest 500. **Reply** under a comment posts a new comment that starts with a mention of its author, so Jira notifies
   them (Jira comments have no threads); **New comment** in the **Comment on the issue** card at the bottom posts a plain one. You can write

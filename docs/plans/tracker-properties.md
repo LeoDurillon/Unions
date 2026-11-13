@@ -1,6 +1,7 @@
 # Edit the tracker item's properties from the ticket
 
-Status: planned (2026-11-13). Builds on the Notion and Jira tabs (comments, built) and the rules' field
+Status: step 1 built (2026-11-13, branch `tracker-properties`): both tabs list the values, read only; steps 2 to 6
+planned. Builds on the Notion and Jira tabs (comments, built) and the rules' field
 machinery ([Jira rule actions](archive/jira-rule-actions.md), [More Jira fields](archive/jira-more-fields.md)).
 Overlaps [One adapter per tracker](tracker-adapters.md): see D8.
 
