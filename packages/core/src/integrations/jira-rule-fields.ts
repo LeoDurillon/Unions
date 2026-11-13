@@ -1,32 +1,68 @@
-// The "Set fields of the ticket's Jira issue" action of a rule: values filled in, checked, then
-// sent in one request. They are checked against the issue's edit screen; labels are added, the
-// other fields set, picked ones resolved first.
+// The "Set fields of the ticket's Jira issue" rule action as it runs: values filled in, checked, sent in one request.
+// They are checked against the issue's edit screen; labels are added, the other fields set, picked ones resolved
+// first ("the active sprint" read from the project's board when the rule runs).
+
+import type { DeliveryOutcome } from '../event/delivery-outcome';
+import { renderTemplate } from '../event/event-rule-types';
+import type { TrackerActionOf, TrackerRuleValue } from '../event/event-tracker-actions';
+import type { JiraApi } from './jira-api';
 import {
+  isJiraFieldType,
   isPickedType,
-  jiraFieldValue,
-  renderTemplate,
-  type DeliveryOutcome,
-  type JiraApi,
-  type JiraFieldAction,
-} from '@union/core';
+  type JiraFieldType,
+  type JiraPickedType,
+} from './jira-field-types';
+import { resolveSprint } from './jira-picks';
+import { jiraRuleFailure } from './jira-rule-failure';
+import type { JiraIssueTarget } from './jira-rule-send';
+import { jiraFieldValue, jiraPickedValue } from './jira-values';
 
-import { pickedValue } from './jira-field-picks';
-import { jiraFailure, type JiraIssueTarget } from './jira-target';
-
-type Entry = JiraFieldAction['values'][number];
+type Entry = TrackerRuleValue & { fieldType: JiraFieldType };
 /** One field as it is sent, and as the delivery says it. */
 type Prepared = { entry: Entry; text: string; value: { set: unknown } | { add: string[] } };
 type Change = { fields: Record<string, unknown>; update: Record<string, unknown> };
+
+/** `ABC-12` → `ABC`: the project whose board has the sprints. */
+function projectKeyOf(issueKey: string): string {
+  return issueKey.slice(0, issueKey.lastIndexOf('-'));
+}
+
+/** What the rule picked, sprints resolved, as Jira takes it and as the delivery says it. */
+async function pickedValue(
+  jira: JiraApi,
+  target: JiraIssueTarget,
+  entry: Entry,
+  type: JiraPickedType,
+): Promise<{ text: string; value: { set: unknown } }> {
+  const stored = entry.picks ?? [];
+  const picks =
+    type === 'sprint'
+      ? await Promise.all(
+          stored.map((pick) => resolveSprint(jira, target.auth, projectKeyOf(target.key), pick)),
+        )
+      : stored;
+  return {
+    text: picks.map((pick) => pick.name || pick.id).join(', '),
+    value: jiraPickedValue(
+      type,
+      picks.map((pick) => pick.id),
+    ),
+  };
+}
 
 /** One value filled in (or its picks resolved) and shaped for its type, or why it cannot be. */
 async function prepareOne(
   jira: JiraApi,
   target: JiraIssueTarget,
-  entry: Entry,
+  stored: TrackerRuleValue,
 ): Promise<Prepared | { error: string }> {
-  const type = entry.fieldType;
+  const type = stored.fieldType;
+  if (!isJiraFieldType(type)) {
+    return { error: `${stored.fieldName}: Union cannot set this field any more` };
+  }
+  const entry: Entry = { ...stored, fieldType: type };
   if (isPickedType(type)) {
-    return { entry, ...(await pickedValue(jira, target, { ...entry, fieldType: type })) };
+    return { entry, ...(await pickedValue(jira, target, entry, type)) };
   }
   const text = renderTemplate(entry.value, target.values);
   const value = jiraFieldValue(type, text);
@@ -38,7 +74,7 @@ async function prepareOne(
 /** Each value shaped for its type; the first one that cannot be fails the delivery. */
 async function prepare(
   jira: JiraApi,
-  action: JiraFieldAction,
+  action: TrackerActionOf<'tracker_fields'>,
   target: JiraIssueTarget,
 ): Promise<Prepared[] | { error: string }> {
   const all = await Promise.all(action.values.map((entry) => prepareOne(jira, target, entry)));
@@ -103,15 +139,16 @@ function describe(prepared: Prepared[]): string {
 
 export async function deliverJiraFields(
   jira: JiraApi,
-  target: JiraIssueTarget | DeliveryOutcome,
-  action: JiraFieldAction,
+  target: JiraIssueTarget,
+  action: TrackerActionOf<'tracker_fields'>,
 ): Promise<DeliveryOutcome> {
-  if ('status' in target) {
-    return target;
-  }
   const prepared = await prepare(jira, action, target).catch((error: unknown) =>
     // Reading the board's sprints failed: no board, no active sprint, or Jira refused.
-    jiraFailure(error, 'Browse projects', action.values.map((entry) => entry.fieldName).join(', ')),
+    jiraRuleFailure(
+      error,
+      'Browse projects',
+      action.values.map((entry) => entry.fieldName).join(', '),
+    ),
   );
   if ('status' in prepared) {
     return prepared;
@@ -128,6 +165,6 @@ export async function deliverJiraFields(
     await jira.updateIssue(target.auth, target.key, changeOf(prepared));
     return { status: 'succeeded', detail: `${target.key}: ${detail}` };
   } catch (error) {
-    return jiraFailure(error, 'Edit issues', detail);
+    return jiraRuleFailure(error, 'Edit issues', detail);
   }
 }

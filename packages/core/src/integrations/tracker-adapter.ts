@@ -6,9 +6,10 @@ import type { IntegrationKindName } from './kinds';
 import type { IntegrationProvider } from './provider';
 import type { TrackerCommentInput, TrackerThreads } from './tracker-comments';
 import type { CheckedField, FieldChange, TrackerAccess, TrackerFieldInput } from './tracker-fields';
+import type { TrackerRules } from './tracker-rules';
 
 /** Every capability an adapter may have, in the order `capabilitiesOf` lists them. */
-const TRACKER_CAPABILITIES = ['refs', 'text', 'comments', 'fields'] as const;
+const TRACKER_CAPABILITIES = ['refs', 'text', 'comments', 'fields', 'rules'] as const;
 
 export type TrackerCapability = (typeof TRACKER_CAPABILITIES)[number];
 
@@ -53,6 +54,8 @@ export type TrackerAdapter = IntegrationProvider & {
   text?: TrackerText;
   comments?: TrackerComments;
   fields?: TrackerFields;
+  /** The rule actions its kind's `ruleActions` names: checked, previewed and sent (`tracker-rules.ts`). */
+  rules?: TrackerRules;
 };
 
 /** The capabilities the adapter has, in `TRACKER_CAPABILITIES`'s order. */

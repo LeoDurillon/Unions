@@ -111,7 +111,12 @@ function lastDelivery(): unknown {
   return recentDeliveries(db, projectId)[0];
 }
 
-const MOVE: EventAction = { kind: 'jira_transition', statusId: '3', statusName: 'In Review' };
+const MOVE: EventAction = {
+  kind: 'tracker_status',
+  tracker: 'jira',
+  statusId: '3',
+  statusName: 'In Review',
+};
 
 test("the ticket's issue moves through the transition that leads to the status", async () => {
   rule(MOVE);
@@ -186,8 +191,9 @@ test("rate limits and outages are tried again; a refusal fails with Jira's reaso
   });
 });
 
-const FIELDS: Extract<EventAction, { kind: 'jira_field' }> = {
-  kind: 'jira_field',
+const FIELDS: Extract<EventAction, { kind: 'tracker_fields' }> = {
+  kind: 'tracker_fields',
+  tracker: 'jira',
   values: [
     { fieldId: 'customfield_1', fieldName: 'PR link', fieldType: 'text', value: '{pr.url}' },
     { fieldId: 'customfield_2', fieldName: 'Points', fieldType: 'number', value: '3' },
@@ -221,7 +227,11 @@ test("a value the issue's edit screen refuses fails before anything is sent", as
   if (!link || !priority) {
     throw new Error('Fields');
   }
-  rule({ kind: 'jira_field', values: [link, { ...priority, value: 'Urgent' }] });
+  rule({
+    kind: 'tracker_fields',
+    tracker: 'jira',
+    values: [link, { ...priority, value: 'Urgent' }],
+  });
   openPullRequest();
   await dispatch();
   expect(calls).toEqual([]);
@@ -232,7 +242,11 @@ test("a value the issue's edit screen refuses fails before anything is sent", as
 
   db.delete(schema.eventDeliveries).run();
   db.delete(schema.eventRules).run();
-  rule({ kind: 'jira_field', values: [{ ...link, fieldId: 'customfield_9', fieldName: 'Gone' }] });
+  rule({
+    kind: 'tracker_fields',
+    tracker: 'jira',
+    values: [{ ...link, fieldId: 'customfield_9', fieldName: 'Gone' }],
+  });
   openPullRequest('ABC-2');
   await dispatch();
   expect(lastDelivery()).toMatchObject({
@@ -242,7 +256,7 @@ test("a value the issue's edit screen refuses fails before anything is sent", as
 });
 
 test('a comment is sent as rich text with its link, with the stored token', async () => {
-  rule({ kind: 'jira_comment', body: 'Ready for QA: {pr.url}' });
+  rule({ kind: 'tracker_comment', tracker: 'jira', body: 'Ready for QA: {pr.url}' });
   openPullRequest();
   await dispatch();
   expect(calls).toEqual([

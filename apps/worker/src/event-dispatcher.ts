@@ -5,7 +5,6 @@ import {
   finishDelivery,
   nextDelivery,
   queueDeliveries,
-  type ActionKind,
   type Db,
   type DeliveryOutcome,
   type JiraApi,
@@ -15,9 +14,8 @@ import {
 import { gitHubCommentTarget, type GitHubApiFor } from './event-actions/github-comment';
 import { gitHubProjectFieldsTarget } from './event-actions/github-project-fields';
 import { gitHubPullRequestTarget } from './event-actions/github-pull-request';
-import { jiraTargets } from './event-actions/jira';
-import { notionTarget } from './event-actions/notion';
-import { deliverAction, type ActionTargets } from './event-actions/target';
+import { deliverAction, paceOf, type ActionTargets } from './event-actions/target';
+import { trackerTargets } from './event-actions/tracker';
 import { unionNotificationTarget } from './event-actions/union-notification';
 import { writeNotifications } from './notifier';
 
@@ -38,12 +36,11 @@ export class EventDispatcher {
     jira: JiraApi = new FetchJiraApi(),
   ) {
     this.targets = {
-      notion_property: notionTarget(db, notion),
       github_comment: gitHubCommentTarget(db, apiFor),
       github_pull_request: gitHubPullRequestTarget(db, apiFor),
       github_project_fields: gitHubProjectFieldsTarget(db, apiFor),
       union_notification: unionNotificationTarget(db),
-      ...jiraTargets(db, jira),
+      ...trackerTargets(db, { notion, jira }),
     };
   }
 
@@ -66,18 +63,19 @@ export class EventDispatcher {
   private async work(): Promise<void> {
     writeNotifications(this.db);
     queueDeliveries(this.db);
-    const done = new Map<ActionKind, number>();
+    const done = new Map<string, number>();
     for (;;) {
       const due = nextDelivery(this.db);
       if (!due) {
         return;
       }
       const { action } = due.rule;
-      const count = done.get(action.kind) ?? 0;
-      if (count >= this.targets[action.kind].perTick) {
+      const pace = paceOf(this.targets, action);
+      const count = done.get(pace.key) ?? 0;
+      if (count >= pace.perTick) {
         return;
       }
-      done.set(action.kind, count + 1);
+      done.set(pace.key, count + 1);
       const outcome = await deliverAction(this.targets, due, action).catch(
         (error: unknown): DeliveryOutcome => ({
           status: 'failed',

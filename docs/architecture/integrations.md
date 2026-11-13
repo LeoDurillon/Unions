@@ -37,7 +37,7 @@ Containers never hold GitHub credentials. Tokens, the App's key and integration 
   command, posted by `github/pr-comment-reply.ts` (GraphQL `addPullRequestReviewThreadReply` and
   `resolveReviewThread` for a line thread, `POST /issues/{n}/comments` for a conversation comment); the web only
   says who posts from the stored credentials (`pr-replies.ts`), without a GitHub call.
-- Notion writes happen in the worker only: event rules set properties of a ticket's page, or for a review posted from the review panel, the page that review is linked to (`updatePage`; `event-actions/notion.ts`), and a
+- Notion writes happen in the worker only: event rules set properties of a ticket's page, or for a review posted from the review panel, the page that review is linked to (`updatePage`; `notion-rule-send.ts` through the adapter's `rules`), and a
   ticket written from an investigation can be created as a page of the project's data source (`createPage`, with
   `markdown` content). A comment typed in a ticket's tracker tab is the `post_tracker_comment` command
   (`{ projectId, ticketId, kind, itemId, threadId | null, mention | null, text }`, core's
@@ -61,8 +61,10 @@ Containers never hold GitHub credentials. Tokens, the App's key and integration 
   config check, the capabilities its adapter has) and an adapter over its API client (`trackerAdapter`, whose
   `IntegrationProvider` part `integrationProvider` returns, `integrations/providers.ts`). A `TrackerAdapter`
   (`integrations/tracker-adapter.ts`) is the provider plus optional capabilities: `refs` (an item's id from a key or
-  a link, why another site's link is refused, the items a text names) and `text` (the tracker's markdown as plain
-  markdown); features are moving onto them ([plan](../plans/tracker-adapters.md)). Every adapter passes the same
+  a link, why another site's link is refused, the items a text names), `text` (the tracker's markdown as plain
+  markdown), `comments`, `fields` (a property set by hand) and `rules` (the rule actions its kind's `ruleActions`
+  names, `tracker-rules.ts`: checked and previewed from the stored columns by `trackerRuleChecks`, which needs no
+  API client, and sent by `deliver`, at `perTick`); features are moving onto them ([plan](../plans/tracker-adapters.md)). Every adapter passes the same
   cases (`adapter-contract.ts`) against its fake API (`fake-notion-api.ts`, `fake-jira-api.ts`). The web
   routes are generic (`routes/integrations.ts`): `POST /api/integrations/:kind/verify` (no project: onboarding),
   and under `/api/projects/:id/integrations/:kind`, `PUT` (reads the columns with the new secret and config, then
@@ -107,15 +109,15 @@ Containers never hold GitHub credentials. Tokens, the App's key and integration 
   that path of the configured site, with the token; Jira's redirect to its media host is followed by hand without
   it, and only to https) into private ticket files, within the attachment limits. Jira writes happen in the worker
   only, from event rules on tickets imported from Jira, or for `pr_review_posted` the Jira issues the review is
-  linked to (`event-actions/jira-*.ts`, `jiraTargets`; `jira-target.ts`'s `jiraIssueOf` gives the keys, `eachIssue`
-  runs the action on each in turn and joins their details): a move reads the
+  linked to (the worker's `event-actions/tracker.ts` gives the keys; core's `jira-rule-send.ts` runs the action on
+  each in turn and joins their details): a move reads the
   issue's status and transitions and posts the one that leads to the rule's status; fields are checked against the
   issue's `editmeta`, then sent in one `PUT` (labels as `update` operations); comments go as ADF (core's
   `text-adf.ts`). Picked fields (`user`, `versions`, `components`, `sprint`; `jira-field-types.ts`) store their
   picks' ids with their names; the editor reads the lists from `GET /api/projects/:id/jira/picks/:type`
   (`routes/jira-picks.ts`, core's `jira-picks.ts` over `JiraApi.read`: assignable users, the project's versions and
   components, the first board with sprints' active and future sprints (scrum, else a team-managed project's "simple" board) through Jira Software's `/rest/agile/1.0`), never
-  stored. "The active sprint" and "the next sprint" are resolved at delivery (`worker/event-actions/jira-field-picks.ts`).
+  stored. "The active sprint" and "the next sprint" are resolved at delivery (`jira-rule-fields.ts`).
   Multi-selects are typed as option names and checked against `editmeta` as single selects are. The rules editor reads the stored statuses and settable fields (`GET /field`, kept in
   `integrations.fields` by Refresh; `jira-field-types.ts`) from the rules list (`jiraRuleSourceOf`). The web calls
   none of the writes (ast-grep `web-reads-trackers-only`). Jira's `createItem` (`jira-create.ts`, called by the

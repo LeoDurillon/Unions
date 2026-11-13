@@ -1,12 +1,17 @@
-// Notion as a `TrackerAdapter`: its provider, pages by id or link, its markdown, discussions and properties.
+// Notion as a `TrackerAdapter`: its provider, pages by id or link, its markdown, discussions, properties and rules.
 
 import { integrationKind } from './kinds';
 import type { NotionApi } from './notion-api';
 import { checkNotionField, notionFieldFailure, setNotionField } from './notion-fields';
 import { notionUrlsIn } from './notion-links';
 import { notionProvider } from './notion-provider';
+import { deliverNotionRule } from './notion-rule-send';
 import { notionPostFailure, notionThreads, postNotionThreadComment } from './notion-threads';
 import type { TrackerAdapter } from './tracker-adapter';
+import { trackerRuleChecks } from './tracker-rules';
+
+/** Notion allows about three requests a second. */
+const NOTION_PER_TICK = 3;
 
 /** The pages the texts link to, once each, in order. */
 function pagesIn(texts: readonly string[]): string[] {
@@ -34,6 +39,11 @@ export function notionAdapter(notion: NotionApi): TrackerAdapter {
       check: (access, pageId, input) => checkNotionField(notion, access, pageId, input),
       set: (access, change) => setNotionField(notion, access, change),
       setFailure: (error) => notionFieldFailure(error),
+    },
+    rules: {
+      ...trackerRuleChecks('notion'),
+      perTick: NOTION_PER_TICK,
+      deliver: (access, run) => deliverNotionRule(notion, access, run),
     },
   };
 }

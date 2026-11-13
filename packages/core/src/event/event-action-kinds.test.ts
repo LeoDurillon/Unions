@@ -5,7 +5,7 @@ import { beforeEach, expect, test } from 'bun:test';
 import { createDb, migrateDb, type Db } from '../db';
 import { saveNotionConnection, storeNotionSchema } from '../integrations/notion-integration';
 import * as schema from '../tables';
-import { EventRuleError } from './event-notion-action';
+import { EventRuleError } from './event-rule-error';
 import { checkRule } from './event-rules';
 
 let db: Db;
@@ -37,8 +37,9 @@ test('an action of an unknown kind is refused', () => {
 
 test('an action without a kind is a Notion action, as rules were before other kinds', () => {
   expect(check({ propertyId: 'p%3Ar', value: '{pr.url}' })).toEqual({
-    kind: 'notion_property',
-    values: [{ propertyId: 'p%3Ar', value: '{pr.url}' }],
+    kind: 'tracker_fields',
+    tracker: 'notion',
+    values: [{ fieldId: 'p%3Ar', fieldName: 'PR', fieldType: 'url', value: '{pr.url}' }],
   });
 });
 

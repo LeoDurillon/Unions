@@ -155,18 +155,23 @@
   single select, text, number, date; Status on the issue's item is refused, Union's sync sets it; the editor reads
   the fields live from `github/project-fields`, and the rule keeps each field's id, name and type), notify
   the user in Union (a message template, shown under the
-  ticket's title in the bell, kind `rule`), or set one or more properties of the Notion page it was
-  imported from (`values: [{ propertyId, value }]`, each property once; `event-notion-action.ts`)
+  ticket's title in the bell, kind `rule`), or act on the tracker item it was imported from: the tracker actions
+  `tracker_status`, `tracker_fields` and `tracker_comment`, each naming its `tracker` (`event-tracker-actions.ts`;
+  what each tracker takes is its kind's `ruleActions`: Notion sets properties, Jira also moves and comments). The
+  editor's tracker parts come from `components/integrations/tracker-rule-editors.tsx`, the preview is one shape
+  (`kind: 'tracker'`, from the tracker's `trackerRuleChecks(...).preview`)
   (`tickets.origin_kind` `notion` and `origin_id`, set by the import or later from the ticket's **Notion** row:
   `routes/tickets/ticket-notion-link.ts`, `POST /:id/notion/check`, `PUT` and `DELETE /:id/notion`, mounted with the
   pull request link by `ticket-outside-links.ts`; the client's `ticket-notion-row.tsx`; older imports are
   linked from their "Imported from Notion:" line by `backfillNotionPages` at worker start). Notion rules point at
   properties by id in the stored copy of the data source's columns (`integrations.fields`, read again on connect
-  or "Refresh from Notion") and are checked against it on save. On a ticket linked to a Jira issue (the import, or
-  later its **Jira** row: `routes/tickets/ticket-jira-link.ts`, `POST /:id/jira/check`, `PUT` and `DELETE /:id/jira`), a
-  rule can also move the issue to a status, set its fields or comment on it (`jira_transition`, `jira_field`,
-  `jira_comment`; `event-jira-action.ts`, checked against the stored statuses and fields; the field pickers read
-  `routes/jira-picks.ts`; details in `integrations.md`). Triggers, variables and Notion value shapes are in
+  or "Refresh from Notion") and are checked against it on save (`notion-rule-check.ts`; each value keeps
+  `fieldId`, `fieldName`, `fieldType`). On a ticket linked to a Jira issue (the import, or later its **Jira** row:
+  `routes/tickets/ticket-jira-link.ts`, `POST /:id/jira/check`, `PUT` and `DELETE /:id/jira`), the Jira actions are
+  checked against the stored statuses and fields (`jira-rule-check.ts`; the field pickers read
+  `routes/jira-picks.ts`; details in `integrations.md`). Saving a rule calls no tracker
+  (`event-action-checks.ts`); the old kinds (`notion_property`, `jira_*`) are read as tracker actions for one
+  release (`event-legacy-actions.ts`), and migration 0091 rewrote the saved ones. Triggers, variables and Notion value shapes are in
   the browser-safe `@union/core/event-rules`; matching and the delivery queue in `event-rules.ts` and
   `event-deliveries.ts`. Rules apply only to events logged after their creation (no replay).
 - Notifications: the bell above the projects in the sidebar (`components/notifications/`) shows how many

@@ -165,6 +165,17 @@ function unlinkItem(db: Db, owner: AgentReviewOwner, kind: TrackerSpec, ref: str
     .run();
 }
 
+const PREFIXES: Record<TrackerSpec, string> = { notion: NOTION_PREFIX, jira: JIRA_PREFIX };
+
+/** The items of a tracker linked to the review: its specs of that kind not removed. */
+export function linkedTrackerItems(
+  db: Db,
+  owner: AgentReviewOwner,
+  kind: TrackerSpec,
+): LinkedPage[] {
+  return linkedItems(db, owner, kind, PREFIXES[kind]);
+}
+
 /** The Notion pages linked to the review: its `notion` specs not removed. */
 export function linkedNotionPages(db: Db, owner: AgentReviewOwner): LinkedPage[] {
   return linkedItems(db, owner, 'notion', NOTION_PREFIX);

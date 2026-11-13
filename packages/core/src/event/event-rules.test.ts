@@ -4,6 +4,7 @@ import { eq } from 'drizzle-orm';
 
 import { createDb, migrateDb, type Db } from '../db';
 import { saveNotionConnection, storeNotionSchema } from '../integrations/notion-integration';
+import { notionSets } from '../integrations/notion-rule-check';
 import * as schema from '../tables';
 import { createTicket, emitEvent, getTicket } from '../ticket/tickets';
 import {
@@ -13,7 +14,6 @@ import {
   queueDeliveries,
   recentDeliveries,
 } from './event-deliveries';
-import { EventRuleError, notionSets } from './event-notion-action';
 import { isTrigger, notionPropertyValue, renderTemplate } from './event-rule-types';
 import { type EventRule, saveRule, templateValues, triggerMatches } from './event-rules';
 
@@ -45,14 +45,14 @@ beforeEach(() => {
 function prRule(
   value = '{pr.url}',
   propertyId = 'p%3Ar',
-): EventRule & { action: Extract<EventRule['action'], { kind: 'notion_property' }> } {
+): EventRule & { action: Extract<EventRule['action'], { kind: 'tracker_fields' }> } {
   const rule = saveRule(db, projectId, {
     name: 'PR link',
     enabled: true,
     trigger: { kind: 'pull_request_linked' },
-    action: { kind: 'notion_property', values: [{ propertyId, value }] },
+    action: { kind: 'tracker_fields', tracker: 'notion', values: [{ fieldId: propertyId, value }] },
   });
-  if (rule.action.kind !== 'notion_property') {
+  if (rule.action.kind !== 'tracker_fields') {
     throw new Error('A Notion rule was saved as another kind');
   }
   return { ...rule, action: rule.action };
@@ -60,14 +60,15 @@ function prRule(
 
 test('a rule is checked against the stored Notion schema before it is saved', () => {
   expect(prRule().action).toEqual({
-    kind: 'notion_property',
-    values: [{ propertyId: 'p%3Ar', value: '{pr.url}' }],
+    kind: 'tracker_fields',
+    tracker: 'notion',
+    values: [{ fieldId: 'p%3Ar', fieldName: 'PR', fieldType: 'url', value: '{pr.url}' }],
   });
   expect(() => prRule('{pr.link}')).toThrow('Unknown variable: {pr.link}');
   expect(() => prRule('x', 'gone')).toThrow('Pick a property');
   expect(() => prRule('x', 'f%3Ao')).toThrow('cannot be set by a rule');
   expect(() => prRule('Shipped', 's%3At')).toThrow('not a status of this property');
-  expect(() => prRule('soon', 'n%3Ab')).toThrow(EventRuleError);
+  expect(() => prRule('soon', 'n%3Ab')).toThrow('is not a number');
   expect(prRule(ADA, 'd%3Ev').action.values[0]?.value).toBe(ADA);
   expect(() => prRule('{pr.url}', 'd%3Ev')).toThrow('not variables');
   expect(() => prRule('Ada', 'd%3Ev')).toThrow('is not a Notion user');
@@ -76,7 +77,11 @@ test('a rule is checked against the stored Notion schema before it is saved', ()
       name: 'Done',
       enabled: true,
       trigger: { kind: 'board_status', status: 'done' },
-      action: { kind: 'notion_property', values: [{ propertyId: 's%3At', value: 'Done' }] },
+      action: {
+        kind: 'tracker_fields',
+        tracker: 'notion',
+        values: [{ fieldId: 's%3At', value: 'Done' }],
+      },
     }).trigger,
   ).toEqual({ kind: 'board_status', status: 'done' });
 });
@@ -189,7 +194,7 @@ test('events after a rule is made queue one delivery each; earlier ones never do
   const sets = due
     ? notionSets(
         PROPERTIES,
-        rule.action,
+        rule.action.values,
         templateValues({ owner: 'acme', repo: 'shop' }, getTicket(db, ticket.id), due.event),
       )
     : null;

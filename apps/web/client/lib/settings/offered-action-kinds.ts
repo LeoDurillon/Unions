@@ -1,11 +1,11 @@
-// The kinds of action the rule editor offers: those of the trackers and GitHub layers the project has, and Union's.
+// The actions the rule editor offers: those of the trackers and GitHub layers the project has, and Union's.
 
 import { useQuery } from '@tanstack/react-query';
 import {
-  ACTION_KINDS,
-  ACTION_TRACKERS,
+  actionChoices,
+  choiceKey,
   COMMENT_TARGETS,
-  type ActionKind,
+  type ActionChoice,
   type CommentTarget,
 } from '@union/core/event-actions';
 import type { IntegrationKindName } from '@union/core/integration-kinds';
@@ -16,22 +16,22 @@ import { eventRulesApi } from './event-rules-api';
 /** What an action can need: a tracker, or the GitHub Project (not a row of `integrations`). */
 export type Connection = IntegrationKindName | 'github-project';
 
-function neededBy(kind: ActionKind): Connection | null {
-  return kind === 'github_project_fields' ? 'github-project' : ACTION_TRACKERS[kind];
+function neededBy(choice: ActionChoice): Connection | null {
+  return choice.kind === 'github_project_fields' ? 'github-project' : choice.tracker;
 }
 
 /**
- * The kinds to offer: a tracker's only when the project is connected to it, the Project fields' only
- * with a GitHub Project. The rule's own kind stays, so editing a rule of something since
+ * The choices to offer: a tracker's only when the project is connected to it, the Project fields'
+ * only with a GitHub Project. The rule's own choice stays, so editing a rule of something since
  * disconnected does not change what it does.
  */
-export function offeredActionKinds(
+export function offeredActionChoices(
   connected: ReadonlySet<Connection>,
-  current: ActionKind,
-): ActionKind[] {
-  return ACTION_KINDS.filter((kind) => {
-    const needed = neededBy(kind);
-    return needed === null || connected.has(needed) || kind === current;
+  current: ActionChoice,
+): ActionChoice[] {
+  return actionChoices().filter((choice) => {
+    const needed = neededBy(choice);
+    return needed === null || connected.has(needed) || choiceKey(choice) === choiceKey(current);
   });
 }
 
@@ -69,9 +69,9 @@ function useRulesSource(projectId: number): EventRulesResponse | undefined {
   }).data;
 }
 
-/** The kinds to offer for the project (only those needing nothing until the rules list loads). */
-export function useOfferedActionKinds(projectId: number, current: ActionKind): ActionKind[] {
-  return offeredActionKinds(connectionsOf(useRulesSource(projectId)), current);
+/** The choices to offer for the project (only those needing nothing until the rules list loads). */
+export function useOfferedActionChoices(projectId: number, current: ActionChoice): ActionChoice[] {
+  return offeredActionChoices(connectionsOf(useRulesSource(projectId)), current);
 }
 
 /** Where a GitHub comment can go for the project (both until the rules list loads). */

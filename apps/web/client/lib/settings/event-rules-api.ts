@@ -25,7 +25,11 @@ export function newRule(notion: NotionSchema | null): RuleDraft {
     name: '',
     enabled: true,
     trigger: { kind: 'pull_request_linked' },
-    action: emptyAction(notion ? 'notion_property' : 'github_comment'),
+    action: emptyAction(
+      notion
+        ? { kind: 'tracker_fields', tracker: 'notion' }
+        : { kind: 'github_comment', tracker: null },
+    ),
   };
 }
 

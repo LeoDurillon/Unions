@@ -58,7 +58,11 @@ beforeEach(() => {
     name: 'PR link',
     enabled: true,
     trigger: { kind: 'pull_request_linked' },
-    action: { kind: 'notion_property', propertyId: 'p%3Ar', value: '{pr.url}' },
+    action: {
+      kind: 'tracker_fields',
+      tracker: 'notion',
+      values: [{ fieldId: 'p%3Ar', value: '{pr.url}' }],
+    },
   });
   updates = [];
   failure = null;
@@ -125,21 +129,21 @@ test('a rate limit is tried again later; a refusal fails at once', async () => {
 });
 
 /** The only rule: on a pull request, set these properties. */
-function onlyRule(values: { propertyId: string; value: string }[]): void {
+function onlyRule(values: { fieldId: string; value: string }[]): void {
   db.delete(schema.eventRules).run();
   saveRule(db, projectId, {
     name: 'PR in Notion',
     enabled: true,
     trigger: { kind: 'pull_request_linked' },
-    action: { kind: 'notion_property', values },
+    action: { kind: 'tracker_fields', tracker: 'notion', values },
   });
 }
 
 test('a rule sets several properties of the page in one request', async () => {
   onlyRule([
-    { propertyId: 'p%3Ar', value: '{pr.url}' },
-    { propertyId: 's%3At', value: 'In review' },
-    { propertyId: 'n%3Ab', value: '{pr.number}' },
+    { fieldId: 'p%3Ar', value: '{pr.url}' },
+    { fieldId: 's%3At', value: 'In review' },
+    { fieldId: 'n%3Ab', value: '{pr.number}' },
   ]);
   openPullRequest('page-1');
   await dispatch();
@@ -164,8 +168,8 @@ test('a rule sets several properties of the page in one request', async () => {
 
 test('one value that cannot be set fails the whole delivery, naming its property', async () => {
   onlyRule([
-    { propertyId: 'p%3Ar', value: '{pr.url}' },
-    { propertyId: 'n%3Ab', value: '{pr.url}' },
+    { fieldId: 'p%3Ar', value: '{pr.url}' },
+    { fieldId: 'n%3Ab', value: '{pr.url}' },
   ]);
   openPullRequest('page-1');
   await dispatch();
@@ -207,7 +211,11 @@ test("a posted review sets the review's own Notion page; other verdicts do nothi
     name: 'Changes requested',
     enabled: true,
     trigger: { kind: 'pull_request_reviewed', verdict: 'request_changes' },
-    action: { kind: 'notion_property', propertyId: 's%3At', value: 'Todo' },
+    action: {
+      kind: 'tracker_fields',
+      tracker: 'notion',
+      values: [{ fieldId: 's%3At', value: 'Todo' }],
+    },
   });
   postReview(12, 'page-r', 'request_changes');
   await dispatch();
@@ -229,7 +237,11 @@ test('a posted review sets every Notion page linked to the pull request', async 
     name: 'Approved',
     enabled: true,
     trigger: { kind: 'pull_request_reviewed', verdict: 'approve' },
-    action: { kind: 'notion_property', propertyId: 's%3At', value: 'Todo' },
+    action: {
+      kind: 'tracker_fields',
+      tracker: 'notion',
+      values: [{ fieldId: 's%3At', value: 'Todo' }],
+    },
   });
   postReview(15, ['page-a', 'page-b'], 'approve');
   await dispatch();

@@ -7,6 +7,7 @@ import type { Db } from '../db';
 import { parseNotionId } from '../integrations/notion-id';
 import * as schema from '../tables';
 import { emitEvent } from '../ticket/tickets';
+import type { DeliveryOutcome } from './delivery-outcome';
 import { isEvent, type StoredEvent } from './event-catalog';
 import { moveCursor, unreadEvents } from './event-cursors';
 import { triggerMatches } from './event-rules';
@@ -126,12 +127,6 @@ export function nextDelivery(
   }
   return { delivery, rule, event };
 }
-
-export type DeliveryOutcome =
-  | { status: 'succeeded' | 'skipped'; detail: string }
-  | { status: 'failed'; error: string; detail?: string }
-  /** A temporary failure: tried again later, until `MAX_ATTEMPTS`. */
-  | { status: 'retry'; error: string };
 
 /** Records what a delivery did; the ticket's log shows it. */
 export function finishDelivery(db: Db, delivery: EventDelivery, outcome: DeliveryOutcome): void {

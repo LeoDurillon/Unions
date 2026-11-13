@@ -2,9 +2,11 @@
 import type {
   CommentTarget,
   EventRule,
+  IntegrationKindName,
   JiraRuleSource,
   NotionSchema,
   ProjectItemTarget,
+  RulePreviewText,
 } from '@union/core';
 
 /** The Events settings: the rules, and the Notion columns and Jira fields they can set (null until read). */
@@ -35,13 +37,6 @@ export type DeliveryView = {
 
 /** What a rule would send for a ticket, without sending it. */
 export type RulePreview =
-  | {
-      ok: true;
-      kind: 'notion_property';
-      pageId: string;
-      /** Each property the rule sets, with its value as the user reads it and as Notion takes it. */
-      properties: { name: string; text: string; value: unknown }[];
-    }
   | { ok: true; kind: 'github_comment'; on: CommentTarget; number: number; text: string }
   | { ok: true; kind: 'union_notification'; title: string; text: string }
   /** `changes`: what each change would do, its templates filled in. */
@@ -54,17 +49,8 @@ export type RulePreview =
       number: number;
       fields: { name: string; text: string }[];
     }
-  /** A Jira action: what it would do on the issue (`title`), its fields (`lines`) or comment (`text`). */
-  | {
-      ok: true;
-      kind: 'jira';
-      key: string;
-      title: string;
-      lines: string[];
-      text: string | null;
-      /** What only the run can check (the workflow, the options): said under the preview. */
-      note: string | null;
-    }
+  /** A tracker action: what it would do on the item (`title`), its fields (`lines`) or comment (`text`). */
+  | ({ ok: true; kind: 'tracker'; tracker: IntegrationKindName; itemId: string } & RulePreviewText)
   | { ok: false; error: string };
 
 /** What a pull request rule can pick: the repository's label names and assignable logins. */

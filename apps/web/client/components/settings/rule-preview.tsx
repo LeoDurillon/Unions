@@ -2,14 +2,15 @@
 
 import { useMutation, useQuery } from '@tanstack/react-query';
 import type { EventAction } from '@union/core/event-actions';
+import { integrationKind } from '@union/core/integration-kinds';
 import { useState, type ReactElement } from 'react';
 
 import type { TicketSummary } from '../../../src/api-types';
 import type { RulePreview } from '../../../src/event-api-types';
 import { api } from '../../lib/app/api';
 import { eventRulesApi, type RuleDraft } from '../../lib/settings/event-rules-api';
-import { JiraPreview } from '../integrations/jira/jira-preview';
 import { Button, ErrorText, inputClass } from '../ui/ui';
+import { TrackerPreview } from './tracker-preview';
 
 type Shown<K extends string> = Extract<RulePreview, { ok: true; kind: K }>;
 
@@ -74,37 +75,20 @@ function PreviewResult({ result }: { result: RulePreview | undefined }): ReactEl
   if (result.kind === 'github_pull_request') {
     return <PullRequestPreview result={result} />;
   }
-  if (result.kind === 'jira') {
-    return <JiraPreview result={result} />;
+  if (result.kind === 'tracker') {
+    return <TrackerPreview result={result} />;
   }
   if (result.kind === 'github_project_fields') {
     return <ProjectFieldsPreview result={result} />;
   }
-  if (result.kind === 'github_comment') {
-    return (
-      <div className="space-y-1 text-sm">
-        <p>
-          Would comment on {result.on === 'issue' ? 'issue' : 'pull request'} #{result.number}:
-        </p>
-        <pre className="rounded bg-zinc-100 p-2 whitespace-pre-wrap dark:bg-zinc-800">
-          {result.text === '' ? '(empty: nothing would be sent)' : result.text}
-        </pre>
-      </div>
-    );
-  }
   return (
     <div className="space-y-1 text-sm">
-      <p>Would set on the ticket&apos;s Notion page:</p>
-      <ul className="list-inside list-disc">
-        {result.properties.map((property) => (
-          <li key={property.name}>
-            <span className="font-medium">{property.name}</span> to{' '}
-            <code className="rounded bg-zinc-100 px-1 dark:bg-zinc-800">
-              {property.text === '' ? '(empty)' : property.text}
-            </code>
-          </li>
-        ))}
-      </ul>
+      <p>
+        Would comment on {result.on === 'issue' ? 'issue' : 'pull request'} #{result.number}:
+      </p>
+      <pre className="rounded bg-zinc-100 p-2 whitespace-pre-wrap dark:bg-zinc-800">
+        {result.text === '' ? '(empty: nothing would be sent)' : result.text}
+      </pre>
     </div>
   );
 }
@@ -114,16 +98,14 @@ function applicable(
   tickets: TicketSummary[],
   action: EventAction,
 ): { tickets: TicketSummary[]; none: string } {
-  if (action.kind === 'notion_property') {
-    const linked = tickets.filter((ticket) => ticket.originKind === 'notion');
-    return { tickets: linked, none: 'No ticket imported from Notion to try it on yet.' };
+  if ('tracker' in action) {
+    const { tracker } = action;
+    const imported = tickets.filter((ticket) => ticket.originKind === tracker);
+    const { label } = integrationKind(tracker);
+    return { tickets: imported, none: `No ticket imported from ${label} to try it on yet.` };
   }
   if (action.kind === 'union_notification') {
     return { tickets, none: 'No ticket to try it on yet.' };
-  }
-  if (action.kind.startsWith('jira_')) {
-    const imported = tickets.filter((ticket) => ticket.originKind === 'jira');
-    return { tickets: imported, none: 'No ticket imported from Jira to try it on yet.' };
   }
   if (
     (action.kind === 'github_comment' && action.on === 'issue') ||

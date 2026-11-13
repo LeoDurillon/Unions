@@ -1,13 +1,18 @@
-// Jira Cloud as a `TrackerAdapter`: its provider, issues named by key or by a link of the site, their comments and fields.
+// Jira Cloud as a `TrackerAdapter`: its provider, issues by key or by link, their comments, fields and rules.
 
 import type { JiraApi } from './jira-api';
 import { jiraConfigOf } from './jira-config';
 import { checkJiraField, jiraFieldFailure, setJiraField } from './jira-fields';
 import { jiraKeysIn } from './jira-keys';
 import { jiraAccess, jiraProvider } from './jira-provider';
+import { deliverJiraRule } from './jira-rule-send';
 import { jiraPostFailure, jiraThreads, postJiraThreadComment } from './jira-threads';
 import { integrationKind } from './kinds';
 import type { TrackerAdapter } from './tracker-adapter';
+import { trackerRuleChecks } from './tracker-rules';
+
+/** Jira Cloud limits requests per user, and a move is two or three of them. */
+const JIRA_PER_TICK = 2;
 
 export function jiraAdapter(jira: JiraApi): TrackerAdapter {
   const kind = integrationKind('jira');
@@ -36,6 +41,11 @@ export function jiraAdapter(jira: JiraApi): TrackerAdapter {
       set: (access, change) =>
         setJiraField(jira, jiraAccess(access.secret, access.config).auth, change),
       setFailure: jiraFieldFailure,
+    },
+    rules: {
+      ...trackerRuleChecks('jira'),
+      perTick: JIRA_PER_TICK,
+      deliver: (access, run) => deliverJiraRule(jira, access, run),
     },
   };
 }

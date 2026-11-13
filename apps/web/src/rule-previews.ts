@@ -2,49 +2,47 @@
 import {
   clipDetail,
   describeChange,
-  notionSchemaOf,
-  notionSets,
+  integrationKind,
+  integrationOf,
   renderTemplate,
   templateValues,
+  trackerRuleChecks,
   type ActionKind,
   type ActionOf,
   type Db,
   type GitHubCommentAction,
   type GitHubProjectFieldsAction,
   type GitHubPullRequestAction,
-  type NotionPropertyAction,
   type Project,
   type Ticket,
+  type TrackerAction,
   type UnionNotificationAction,
 } from '@union/core';
 
 import type { RulePreview } from './event-api-types';
-import { jiraCommentPreview, jiraFieldPreview, jiraTransitionPreview } from './jira-rule-previews';
 
-function notionPreview(
+/** What a tracker action would do on the item the ticket came from; the tracker is not called. */
+function trackerPreview(
   db: Db,
   project: Project,
   ticket: Ticket,
-  action: NotionPropertyAction,
+  action: TrackerAction,
 ): RulePreview {
-  const pageId = ticket.originKind === 'notion' ? ticket.originId : null;
-  if (!pageId) {
-    return { ok: false, error: 'This ticket was not imported from Notion' };
+  const { label } = integrationKind(action.tracker);
+  const itemId = ticket.originKind === action.tracker ? ticket.originId : null;
+  if (!itemId) {
+    return { ok: false, error: `This ticket was not imported from ${label}` };
   }
-  const properties = notionSchemaOf(db, project.id)?.properties ?? [];
-  const sets = notionSets(properties, action, templateValues(project, ticket, null));
-  return 'error' in sets
-    ? { ok: false, error: sets.error }
-    : {
-        ok: true,
-        kind: 'notion_property',
-        pageId,
-        properties: sets.sets.map(({ property, text, value }) => ({
-          name: property.name,
-          text,
-          value,
-        })),
-      };
+  const integration = integrationOf(db, project.id, action.tracker);
+  const preview = trackerRuleChecks(action.tracker).preview(
+    integration?.fields ?? null,
+    action,
+    itemId,
+    templateValues(project, ticket, null),
+  );
+  return 'error' in preview
+    ? { ok: false, error: preview.error }
+    : { ok: true, kind: 'tracker', tracker: action.tracker, itemId, ...preview };
 }
 
 type Previews = {
@@ -125,14 +123,13 @@ function gitHubProjectFieldsPreview(
 }
 
 const PREVIEWS: Previews = {
-  notion_property: notionPreview,
+  tracker_status: trackerPreview,
+  tracker_fields: trackerPreview,
+  tracker_comment: trackerPreview,
   github_comment: gitHubCommentPreview,
   github_pull_request: gitHubPullRequestPreview,
   github_project_fields: gitHubProjectFieldsPreview,
   union_notification: unionNotificationPreview,
-  jira_transition: jiraTransitionPreview,
-  jira_field: jiraFieldPreview,
-  jira_comment: jiraCommentPreview,
 };
 
 /** What the rule's action would do for the ticket; nothing is sent. */

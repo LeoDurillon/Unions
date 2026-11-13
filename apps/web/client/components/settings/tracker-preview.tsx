@@ -1,12 +1,12 @@
-// A Jira action's preview on one ticket: what it would do on the issue, with what only the run can check.
+// A tracker action's preview on one ticket: what it would do on the item, with what only the run can check.
 import type { ReactElement } from 'react';
 
-import type { RulePreview } from '../../../../src/event-api-types';
+import type { RulePreview } from '../../../src/event-api-types';
 
-export function JiraPreview({
+export function TrackerPreview({
   result,
 }: {
-  result: Extract<RulePreview, { kind: 'jira' }>;
+  result: Extract<RulePreview, { kind: 'tracker' }>;
 }): ReactElement {
   return (
     <div className="space-y-1 text-sm">

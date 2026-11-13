@@ -3,12 +3,11 @@ import type { NotionSchema } from '@union/core';
 import type { EventAction } from '@union/core/event-actions';
 import type { ReactElement } from 'react';
 
-import { JiraActionFields } from '../integrations/jira/jira-action-fields';
-import { NotionActionFields } from '../integrations/notion/notion-action-fields';
 import { ActionKindSelect } from './action-kind-select';
 import { GitHubCommentFields } from './github-comment-fields';
 import { ProjectFieldsFields } from './project-fields-fields';
 import { PullRequestFields } from './pull-request-fields';
+import { TrackerActionFields } from './tracker-action-fields';
 import { UnionNotificationFields } from './union-notification-fields';
 
 /** The fields of the action's own kind. */
@@ -23,9 +22,9 @@ function KindFields({
   action: EventAction;
   onChange: (action: EventAction) => void;
 }): ReactElement {
-  if (action.kind === 'notion_property') {
+  if ('tracker' in action) {
     return (
-      <NotionActionFields
+      <TrackerActionFields
         projectId={projectId}
         notion={notion}
         action={action}
@@ -42,10 +41,7 @@ function KindFields({
   if (action.kind === 'github_project_fields') {
     return <ProjectFieldsFields projectId={projectId} action={action} onChange={onChange} />;
   }
-  if (action.kind === 'github_comment') {
-    return <GitHubCommentFields projectId={projectId} action={action} onChange={onChange} />;
-  }
-  return <JiraActionFields projectId={projectId} action={action} onChange={onChange} />;
+  return <GitHubCommentFields projectId={projectId} action={action} onChange={onChange} />;
 }
 
 export function ActionFields({

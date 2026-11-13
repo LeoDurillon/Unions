@@ -1,14 +1,15 @@
 // The rule editor's "Then": the kinds of action the project can use (a tracker's only once it is connected).
 
 import {
-  ACTION_LABELS,
+  choiceKey,
+  choiceLabel,
+  choiceOf,
   emptyAction,
-  isActionKind,
   type EventAction,
 } from '@union/core/event-actions';
 import type { ReactElement } from 'react';
 
-import { useOfferedActionKinds } from '../../lib/settings/offered-action-kinds';
+import { useOfferedActionChoices } from '../../lib/settings/offered-action-kinds';
 import { Field, inputClass } from '../ui/ui';
 
 export function ActionKindSelect({
@@ -20,22 +21,23 @@ export function ActionKindSelect({
   action: EventAction;
   onChange: (action: EventAction) => void;
 }): ReactElement {
-  const kinds = useOfferedActionKinds(projectId, action.kind);
+  const choices = useOfferedActionChoices(projectId, choiceOf(action));
   return (
     <Field label="Then">
       <select
         className={inputClass}
-        value={action.kind}
+        value={choiceKey(choiceOf(action))}
         onChange={(event) => {
-          // Another kind holds other fields: it starts empty.
-          if (isActionKind(event.target.value)) {
-            onChange(emptyAction(event.target.value));
+          // Another choice holds other fields: it starts empty.
+          const picked = choices.find((choice) => choiceKey(choice) === event.target.value);
+          if (picked) {
+            onChange(emptyAction(picked));
           }
         }}
       >
-        {kinds.map((kind) => (
-          <option key={kind} value={kind}>
-            {ACTION_LABELS[kind]}
+        {choices.map((choice) => (
+          <option key={choiceKey(choice)} value={choiceKey(choice)}>
+            {choiceLabel(choice)}
           </option>
         ))}
       </select>

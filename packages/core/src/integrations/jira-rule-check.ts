@@ -1,24 +1,17 @@
-// The Jira actions of a rule (move the ticket's issue, set its fields, comment on it) and their
-// checks. They are checked against the stored Jira project; what they send is built when they run.
+// Jira's rule actions (move the ticket's issue, set its fields, comment on it), checked against the stored project.
+// What they send is built when they run (`jira-rule-send.ts`); the preview is here, as it calls nothing.
 
-import type { Db } from '../db';
-import {
-  isPickedType,
-  isSinglePick,
-  type JiraFieldInfo,
-  type JiraFieldValue,
-  type JiraPick,
-} from '../integrations/jira-field-types';
-import { jiraFieldsFor, type JiraFields } from '../integrations/jira-integration';
-import { jiraValueError } from '../integrations/jira-values';
-import { integrationOf } from '../integrations/store';
-import type { ActionOf } from './event-actions';
-import { EventRuleError } from './event-notion-action';
-import { unknownVariables } from './event-rule-types';
-
-export type JiraTransitionAction = ActionOf<'jira_transition'>;
-export type JiraFieldAction = ActionOf<'jira_field'>;
-export type JiraCommentAction = ActionOf<'jira_comment'>;
+import { EventRuleError } from '../event/event-rule-error';
+import { unknownVariables } from '../event/event-rule-types';
+import type {
+  TrackerAction,
+  TrackerActionOf,
+  TrackerRuleValue,
+} from '../event/event-tracker-actions';
+import { isPickedType, isSinglePick, type JiraFieldInfo, type JiraPick } from './jira-field-types';
+import { jiraFieldsOf, type JiraFields } from './jira-integration';
+import { jiraValueError } from './jira-values';
+import type { TrackerActionKind } from './tracker-action-kinds';
 
 /** Jira refuses longer comments. */
 const MAX_COMMENT = 32_767;
@@ -29,29 +22,21 @@ function text(record: object, key: string): string {
 }
 
 /** The stored Jira project, or why a Jira action cannot be saved without it. */
-function storedFields(db: Db, projectId: number): JiraFields {
-  if (!integrationOf(db, projectId, 'jira')) {
-    throw new EventRuleError('Connect the project to Jira first (Settings → Integrations → Jira)');
-  }
-  const fields = jiraFieldsFor(db, projectId);
+function storedFields(stored: unknown): JiraFields {
+  const fields = jiraFieldsOf(stored);
   if (!fields) {
     throw new EventRuleError('Read the Jira project first (Refresh from Jira, above the rules)');
   }
   return fields;
 }
 
-/** A "Move the ticket's Jira issue" action as sent by the settings page, checked against the stored statuses. */
-export function checkedJiraTransition(
-  db: Db,
-  projectId: number,
-  record: object,
-): JiraTransitionAction {
+function checkedStatus(fields: JiraFields, record: object): TrackerActionOf<'tracker_status'> {
   const statusId = text(record, 'statusId');
-  const status = storedFields(db, projectId).statuses.find((each) => each.id === statusId);
+  const status = fields.statuses.find((each) => each.id === statusId);
   if (!status) {
     throw new EventRuleError('Pick a status of the Jira project');
   }
-  return { kind: 'jira_transition', statusId: status.id, statusName: status.name };
+  return { kind: 'tracker_status', tracker: 'jira', statusId: status.id, statusName: status.name };
 }
 
 type Entry = { fieldId: string; value: string; picks: JiraPick[] };
@@ -74,7 +59,7 @@ function valuesOf(record: object): Entry[] {
 }
 
 /** One field's value as the rule stores it: typed, or picked (its names as the value, for the sentence). */
-function checkedValue(field: JiraFieldInfo, { value, picks }: Entry): JiraFieldValue {
+function checkedValue(field: JiraFieldInfo, { value, picks }: Entry): TrackerRuleValue {
   const base = { fieldId: field.id, fieldName: field.name, fieldType: field.type };
   if (isPickedType(field.type)) {
     if (isSinglePick(field.type) && picks.length > 1) {
@@ -89,9 +74,8 @@ function checkedValue(field: JiraFieldInfo, { value, picks }: Entry): JiraFieldV
   return { ...base, value };
 }
 
-/** A "Set fields of the ticket's Jira issue" action as sent by the settings page, checked against the stored fields. */
-export function checkedJiraFields(db: Db, projectId: number, record: object): JiraFieldAction {
-  const { fields } = storedFields(db, projectId);
+function checkedFields(stored: JiraFields, record: object): TrackerActionOf<'tracker_fields'> {
+  const { fields } = stored;
   if (fields.length === 0) {
     throw new EventRuleError('Read the Jira fields first (Refresh from Jira)');
   }
@@ -100,7 +84,7 @@ export function checkedJiraFields(db: Db, projectId: number, record: object): Ji
     throw new EventRuleError('Pick a field of the Jira issue');
   }
   const seen = new Set<string>();
-  const values = entries.map((entry): JiraFieldValue => {
+  const values = entries.map((entry) => {
     const field = fields.find((candidate) => candidate.id === entry.fieldId);
     if (!field) {
       throw new EventRuleError('Pick a field of the Jira issue');
@@ -111,12 +95,10 @@ export function checkedJiraFields(db: Db, projectId: number, record: object): Ji
     seen.add(field.id);
     return checkedValue(field, entry);
   });
-  return { kind: 'jira_field', values };
+  return { kind: 'tracker_fields', tracker: 'jira', values };
 }
 
-/** A "Comment on the ticket's Jira issue" action as sent by the settings page. */
-export function checkedJiraComment(db: Db, projectId: number, record: object): JiraCommentAction {
-  storedFields(db, projectId);
+function checkedComment(record: object): TrackerActionOf<'tracker_comment'> {
   const body = text(record, 'body').trim();
   if (body === '') {
     throw new EventRuleError('Write the comment');
@@ -128,5 +110,21 @@ export function checkedJiraComment(db: Db, projectId: number, record: object): J
   if (unknown.length > 0) {
     throw new EventRuleError(`Unknown variable: {${unknown.join('}, {')}}`);
   }
-  return { kind: 'jira_comment', body };
+  return { kind: 'tracker_comment', tracker: 'jira', body };
+}
+
+/** A Jira action as sent by the settings page, checked against the stored project. */
+export function checkJiraRule(
+  stored: unknown,
+  kind: TrackerActionKind,
+  record: object,
+): TrackerAction {
+  const fields = storedFields(stored);
+  if (kind === 'tracker_status') {
+    return checkedStatus(fields, record);
+  }
+  if (kind === 'tracker_fields') {
+    return checkedFields(fields, record);
+  }
+  return checkedComment(record);
 }

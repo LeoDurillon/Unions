@@ -1,9 +1,11 @@
 import { beforeEach, expect, test } from 'bun:test';
 
-import type { JiraApi, JiraFieldAction } from '@union/core';
+import type { TrackerActionOf } from '../event/event-tracker-actions';
+import type { JiraApi } from './jira-api';
+import { deliverJiraFields } from './jira-rule-fields';
+import type { JiraIssueTarget } from './jira-rule-send';
 
-import { deliverJiraFields } from './jira-field';
-import type { JiraIssueTarget } from './jira-target';
+type JiraFieldAction = TrackerActionOf<'tracker_fields'>;
 
 const BOARD = '/rest/agile/1.0/board?projectKeyOrId=ABC';
 const SPRINTS = '/rest/agile/1.0/board/7/sprint?state=active,future';
@@ -40,7 +42,7 @@ const target: JiraIssueTarget = {
 };
 
 function action(values: JiraFieldAction['values']): JiraFieldAction {
-  return { kind: 'jira_field', values };
+  return { kind: 'tracker_fields', tracker: 'jira', values };
 }
 
 beforeEach(() => {

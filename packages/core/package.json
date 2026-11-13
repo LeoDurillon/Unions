@@ -28,6 +28,7 @@
     "./jira-comment-post": "./src/integrations/jira-comment-post.ts",
     "./jira-comment-link": "./src/integrations/jira-comment-link.ts",
     "./event-actions": "./src/event/event-actions.ts",
+    "./event-tracker-actions": "./src/event/event-tracker-actions.ts",
     "./event-catalog": "./src/event/event-catalog.ts",
     "./event-rules": "./src/event/event-rule-types.ts",
     "./event-pull-request": "./src/event/event-pull-request-action.ts",

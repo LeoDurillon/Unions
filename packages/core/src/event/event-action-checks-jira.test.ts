@@ -3,8 +3,9 @@ import { beforeEach, expect, test } from 'bun:test';
 import { createDb, migrateDb, type Db } from '../db';
 import { saveIntegration, storeFields } from '../integrations/store';
 import * as schema from '../tables';
-import { checkedJiraComment, checkedJiraFields, checkedJiraTransition } from './event-jira-action';
-import { EventRuleError } from './event-notion-action';
+import { checkedAction } from './event-action-checks';
+import type { EventAction } from './event-actions';
+import { EventRuleError } from './event-rule-error';
 
 let db: Db;
 let projectId: number;
@@ -31,6 +32,11 @@ function connect(fields: unknown): void {
   storeFields(db, saved.id, { title: 'Apollo', fields });
 }
 
+/** A Jira action of `kind` as the settings page sends it, checked. */
+function checked(kind: string, record: object): EventAction {
+  return checkedAction(db, projectId, { kind, tracker: 'jira', ...record });
+}
+
 /** The message a check refuses with. */
 function refusal(check: () => unknown): string {
   try {
@@ -54,18 +60,49 @@ beforeEach(() => {
 
 test('Jira actions need the project connected to Jira', () => {
   const message = 'Connect the project to Jira first (Settings → Integrations → Jira)';
-  expect(refusal(() => checkedJiraTransition(db, projectId, { statusId: '3' }))).toBe(message);
-  expect(refusal(() => checkedJiraComment(db, projectId, { body: 'Hi' }))).toBe(message);
+  expect(refusal(() => checked('tracker_status', { statusId: '3' }))).toBe(message);
+  expect(refusal(() => checked('tracker_comment', { body: 'Hi' }))).toBe(message);
+});
+
+test('Notion takes no move: a tracker takes only the actions its kind lists', () => {
+  expect(
+    refusal(() => checkedAction(db, projectId, { kind: 'tracker_status', tracker: 'notion' })),
+  ).toBe('Pick what the rule does');
+  expect(
+    refusal(() => checkedAction(db, projectId, { kind: 'tracker_fields', tracker: 'x' })),
+  ).toBe('Pick what the rule does');
+});
+
+test('the kinds before tracker actions are read as the tracker action each became', () => {
+  connect(FIELDS);
+  expect(checkedAction(db, projectId, { kind: 'jira_transition', statusId: '3' })).toEqual({
+    kind: 'tracker_status',
+    tracker: 'jira',
+    statusId: '3',
+    statusName: 'In Review',
+  });
+  expect(checkedAction(db, projectId, { kind: 'jira_comment', body: 'Hi' })).toEqual({
+    kind: 'tracker_comment',
+    tracker: 'jira',
+    body: 'Hi',
+  });
+  expect(
+    checkedAction(db, projectId, {
+      kind: 'jira_field',
+      values: [{ fieldId: 'customfield_10051', value: '3' }],
+    }),
+  ).toMatchObject({ kind: 'tracker_fields', tracker: 'jira' });
 });
 
 test('a move targets a status of the Jira project, its name as stored', () => {
   connect(FIELDS);
-  expect(checkedJiraTransition(db, projectId, { statusId: '3', statusName: 'Renamed' })).toEqual({
-    kind: 'jira_transition',
+  expect(checked('tracker_status', { statusId: '3', statusName: 'Renamed' })).toEqual({
+    kind: 'tracker_status',
+    tracker: 'jira',
     statusId: '3',
     statusName: 'In Review',
   });
-  expect(refusal(() => checkedJiraTransition(db, projectId, { statusId: '99' }))).toBe(
+  expect(refusal(() => checked('tracker_status', { statusId: '99' }))).toBe(
     'Pick a status of the Jira project',
   );
 });
@@ -73,14 +110,15 @@ test('a move targets a status of the Jira project, its name as stored', () => {
 test('fields are checked against the stored ones, keeping their name and type', () => {
   connect(FIELDS);
   expect(
-    checkedJiraFields(db, projectId, {
+    checked('tracker_fields', {
       values: [
         { fieldId: 'customfield_10050', value: '{pr.url}' },
         { fieldId: 'customfield_10052', value: 'High' },
       ],
     }),
   ).toEqual({
-    kind: 'jira_field',
+    kind: 'tracker_fields',
+    tracker: 'jira',
     values: [
       { fieldId: 'customfield_10050', fieldName: 'PR link', fieldType: 'text', value: '{pr.url}' },
       {
@@ -92,7 +130,7 @@ test('fields are checked against the stored ones, keeping their name and type', 
     ],
   });
   const fields = (values: unknown[]): string =>
-    refusal(() => checkedJiraFields(db, projectId, { values }));
+    refusal(() => checked('tracker_fields', { values }));
   expect(fields([])).toBe('Pick a field of the Jira issue');
   expect(fields([{ fieldId: 'customfield_1', value: 'x' }])).toBe('Pick a field of the Jira issue');
   expect(fields([{ fieldId: 'customfield_10051', value: 'many' }])).toBe(
@@ -104,24 +142,25 @@ test('fields are checked against the stored ones, keeping their name and type', 
 
 test('fields read before rules could set them ask for a Refresh', () => {
   connect({ ...FIELDS, fields: undefined });
-  expect(
-    refusal(() => checkedJiraFields(db, projectId, { values: [{ fieldId: 'x', value: 'y' }] })),
-  ).toBe('Read the Jira fields first (Refresh from Jira)');
+  expect(refusal(() => checked('tracker_fields', { values: [{ fieldId: 'x', value: 'y' }] }))).toBe(
+    'Read the Jira fields first (Refresh from Jira)',
+  );
   // A move needs only the statuses, which were read already.
-  expect(checkedJiraTransition(db, projectId, { statusId: '1' }).statusName).toBe('To Do');
+  expect(checked('tracker_status', { statusId: '1' })).toMatchObject({ statusName: 'To Do' });
 });
 
 test('a comment is written, within the limit, with known variables', () => {
   connect(FIELDS);
-  expect(checkedJiraComment(db, projectId, { body: ' Ready for QA: {pr.url} ' })).toEqual({
-    kind: 'jira_comment',
+  expect(checked('tracker_comment', { body: ' Ready for QA: {pr.url} ' })).toEqual({
+    kind: 'tracker_comment',
+    tracker: 'jira',
     body: 'Ready for QA: {pr.url}',
   });
-  expect(refusal(() => checkedJiraComment(db, projectId, { body: ' ' }))).toBe('Write the comment');
-  expect(refusal(() => checkedJiraComment(db, projectId, { body: '{pr.link}' }))).toBe(
+  expect(refusal(() => checked('tracker_comment', { body: ' ' }))).toBe('Write the comment');
+  expect(refusal(() => checked('tracker_comment', { body: '{pr.link}' }))).toBe(
     'Unknown variable: {pr.link}',
   );
-  expect(refusal(() => checkedJiraComment(db, projectId, { body: 'x'.repeat(32_768) }))).toContain(
+  expect(refusal(() => checked('tracker_comment', { body: 'x'.repeat(32_768) }))).toContain(
     'at most',
   );
 });
@@ -130,8 +169,8 @@ test('a project connected without reading Jira (the setup wizard) is asked to re
   const config = { site: 'https://acme.atlassian.net', email: 'a@b.c', projectKey: 'ABC' };
   saveIntegration(db, projectId, 'jira', { secret: 'tok', config });
   const message = 'Read the Jira project first (Refresh from Jira, above the rules)';
-  expect(refusal(() => checkedJiraTransition(db, projectId, { statusId: '3' }))).toBe(message);
-  expect(refusal(() => checkedJiraComment(db, projectId, { body: 'Hi' }))).toBe(message);
+  expect(refusal(() => checked('tracker_status', { statusId: '3' }))).toBe(message);
+  expect(refusal(() => checked('tracker_comment', { body: 'Hi' }))).toBe(message);
 });
 
 test('fields stored before rules knew which can be set are narrowed when read back', () => {
@@ -140,7 +179,7 @@ test('fields stored before rules knew which can be set are narrowed when read ba
     fields: [...FIELDS.fields, { id: 'created', name: 'Created', type: 'datetime' }],
   });
   const refused = refusal(() =>
-    checkedJiraFields(db, projectId, { values: [{ fieldId: 'created', value: '{date.now}' }] }),
+    checked('tracker_fields', { values: [{ fieldId: 'created', value: '{date.now}' }] }),
   );
   expect(refused).toBe('Pick a field of the Jira issue');
 });
@@ -149,7 +188,7 @@ test('picked fields keep their picks, their names as the value; a person is one'
   connect(FIELDS);
   const ada = { id: 'u1', name: 'Ada' };
   expect(
-    checkedJiraFields(db, projectId, {
+    checked('tracker_fields', {
       values: [
         { fieldId: 'assignee', value: 'ignored', picks: [ada] },
         {
@@ -157,23 +196,25 @@ test('picked fields keep their picks, their names as the value; a person is one'
           picks: [{ id: '10', name: '2.4' }, { id: '11', name: '2.5' }, { id: '' }],
         },
       ],
-    }).values,
-  ).toEqual([
-    { fieldId: 'assignee', fieldName: 'Assignee', fieldType: 'user', value: 'Ada', picks: [ada] },
-    {
-      fieldId: 'fixVersions',
-      fieldName: 'Fix versions',
-      fieldType: 'versions',
-      value: '2.4, 2.5',
-      picks: [
-        { id: '10', name: '2.4' },
-        { id: '11', name: '2.5' },
-      ],
-    },
-  ]);
+    }),
+  ).toMatchObject({
+    values: [
+      { fieldId: 'assignee', fieldName: 'Assignee', fieldType: 'user', value: 'Ada', picks: [ada] },
+      {
+        fieldId: 'fixVersions',
+        fieldName: 'Fix versions',
+        fieldType: 'versions',
+        value: '2.4, 2.5',
+        picks: [
+          { id: '10', name: '2.4' },
+          { id: '11', name: '2.5' },
+        ],
+      },
+    ],
+  });
   expect(
     refusal(() =>
-      checkedJiraFields(db, projectId, {
+      checked('tracker_fields', {
         values: [{ fieldId: 'assignee', picks: [ada, { id: 'u2', name: 'Bo' }] }],
       }),
     ),

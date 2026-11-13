@@ -6,19 +6,9 @@ import type { Db } from '../db';
 import { boardStatus } from '../states';
 import * as schema from '../tables';
 import type { Ticket } from '../ticket/tickets';
-import {
-  checkGitHubComment,
-  checkGitHubProjectFields,
-  checkGitHubPullRequest,
-  checkUnionNotification,
-  isActionKind,
-  type ActionKind,
-  type ActionOf,
-  type EventAction,
-} from './event-actions';
+import { checkedAction } from './event-action-checks';
 import { isEvent, type EventPayloads, type StoredEvent } from './event-catalog';
-import { checkedJiraComment, checkedJiraFields, checkedJiraTransition } from './event-jira-action';
-import { checkedNotionAction, EventRuleError } from './event-notion-action';
+import { EventRuleError } from './event-rule-error';
 import {
   BOARD_LABELS,
   isTrigger,
@@ -35,40 +25,6 @@ export type RuleInput = {
   trigger: unknown;
   action: unknown;
 };
-
-type ActionChecks = {
-  [K in ActionKind]: (db: Db, projectId: number, record: object) => ActionOf<K>;
-};
-
-/** A check's result as the save sees it: the action, or the reason thrown. */
-function thrown<A>(checked: { action: A } | { error: string }): A {
-  if ('error' in checked) {
-    throw new EventRuleError(checked.error);
-  }
-  return checked.action;
-}
-
-/** Each kind's checks; a Notion action is checked against the stored Notion columns. */
-const ACTION_CHECKS: ActionChecks = {
-  notion_property: checkedNotionAction,
-  github_comment: (_db, _projectId, record) => thrown(checkGitHubComment(record)),
-  github_pull_request: (_db, _projectId, record) => thrown(checkGitHubPullRequest(record)),
-  github_project_fields: (_db, _projectId, record) => thrown(checkGitHubProjectFields(record)),
-  union_notification: (_db, _projectId, record) => thrown(checkUnionNotification(record)),
-  jira_transition: checkedJiraTransition,
-  jira_field: checkedJiraFields,
-  jira_comment: checkedJiraComment,
-};
-
-/** An action without a `kind` is a Notion one: rules saved before there were other kinds. */
-function checkedAction(db: Db, projectId: number, action: unknown): EventAction {
-  const record = typeof action === 'object' && action !== null ? action : {};
-  const kind = 'kind' in record ? record.kind : 'notion_property';
-  if (!isActionKind(kind)) {
-    throw new EventRuleError('Pick what the rule does');
-  }
-  return ACTION_CHECKS[kind](db, projectId, record);
-}
 
 /** The rule as it would be saved, after the checks against the stored Notion schema. */
 export function checkRule(

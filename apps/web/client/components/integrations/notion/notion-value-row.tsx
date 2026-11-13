@@ -1,7 +1,7 @@
 // One property a Notion action sets: which property of the ticket's page, its value, and removing it.
 
 import type { NotionProperty } from '@union/core';
-import type { NotionValue } from '@union/core/event-actions';
+import type { TrackerRuleValue } from '@union/core/event-tracker-actions';
 import type { ReactElement } from 'react';
 
 import { ValueField } from '../../settings/value-field';
@@ -19,8 +19,8 @@ export function NotionValueRow({
   /** The properties this row can pick: the writable ones no other row sets. */
   choices: NotionProperty[];
   property: NotionProperty | undefined;
-  entry: NotionValue;
-  onChange: (entry: NotionValue) => void;
+  entry: TrackerRuleValue;
+  onChange: (entry: TrackerRuleValue) => void;
   /** Null for the last row: the action sets one property at least. */
   onRemove: (() => void) | null;
 }): ReactElement {
@@ -31,10 +31,16 @@ export function NotionValueRow({
           <Field label="Property">
             <select
               className={inputClass}
-              value={entry.propertyId}
+              value={entry.fieldId}
               onChange={(event) => {
                 // Another property, another type: the value starts over.
-                onChange({ propertyId: event.target.value, value: '' });
+                const picked = choices.find((candidate) => candidate.id === event.target.value);
+                onChange({
+                  fieldId: picked?.id ?? '',
+                  fieldName: picked?.name ?? '',
+                  fieldType: picked?.type ?? '',
+                  value: '',
+                });
               }}
             >
               <option value="">Pick a property…</option>

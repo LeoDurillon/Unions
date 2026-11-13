@@ -74,15 +74,25 @@ async function preview(action: unknown, ticketId: number): Promise<unknown> {
   return response.json();
 }
 
-const MOVE = { kind: 'jira_transition', statusId: '3', statusName: 'In Review' } as const;
+const MOVE = {
+  kind: 'tracker_status',
+  tracker: 'jira',
+  statusId: '3',
+  statusName: 'In Review',
+} as const;
 const FIELDS = {
-  kind: 'jira_field',
+  kind: 'tracker_fields',
+  tracker: 'jira',
   values: [
     { fieldId: 'customfield_1', value: '{pr.url}' },
     { fieldId: 'labels', value: 'qa' },
   ],
 };
-const COMMENT = { kind: 'jira_comment', body: 'Ready for QA: {pr.url}' } as const;
+const COMMENT = {
+  kind: 'tracker_comment',
+  tracker: 'jira',
+  body: 'Ready for QA: {pr.url}',
+} as const;
 
 test('Jira rules need the project connected to Jira, then save against its statuses and fields', async () => {
   const refused = await send('POST', base, rule(MOVE));
@@ -103,7 +113,8 @@ test('Jira rules need the project connected to Jira, then save against its statu
   expect(listed.rules.map((saved) => saved.action)).toEqual([
     MOVE,
     {
-      kind: 'jira_field',
+      kind: 'tracker_fields',
+      tracker: 'jira',
       values: [
         { fieldId: 'customfield_1', fieldName: 'PR link', fieldType: 'text', value: '{pr.url}' },
         { fieldId: 'labels', fieldName: 'Labels', fieldType: 'labels', value: 'qa' },
@@ -114,7 +125,11 @@ test('Jira rules need the project connected to Jira, then save against its statu
   const badOption = await send(
     'POST',
     base,
-    rule({ kind: 'jira_field', values: [{ fieldId: 'customfield_3', value: '{board.status}' }] }),
+    rule({
+      kind: 'tracker_fields',
+      tracker: 'jira',
+      values: [{ fieldId: 'customfield_3', value: '{board.status}' }],
+    }),
   );
   expect(await badOption.json()).toEqual({
     error: 'Priority: An option is picked by its name, not with variables',
@@ -133,8 +148,9 @@ test('a preview says what the action would do on the ticket’s issue, without c
 
   expect(await preview(MOVE, imported.id)).toEqual({
     ok: true,
-    kind: 'jira',
-    key: 'ABC-1',
+    kind: 'tracker',
+    tracker: 'jira',
+    itemId: 'ABC-1',
     title: 'Would move ABC-1 to In Review',
     lines: [],
     text: null,

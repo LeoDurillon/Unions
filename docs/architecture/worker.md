@@ -181,17 +181,19 @@
   `createPage`), the ticket's origin set to the new item.
 - `event-dispatcher.ts`: follows the `events` log (cursor in `event_cursors`), queues one `event_deliveries` row
   per matching rule and event (unique), and hands each due one to the target of its action's kind
-  (`event-actions/`: `notion.ts` sets the rule's Notion properties in one `updatePage` per page (a posted review's linked pages, else the ticket's), all or none, `github-comment.ts` comments on the issue or the PR with
+  (`event-actions/`: `tracker.ts` does the tracker actions (`tracker_status`, `tracker_fields`, `tracker_comment`)
+  on a posted review's linked items of the tracker, else the item the ticket came from, through the adapter's
+  `rules.deliver` (core: `notion-rule-send.ts` sets the Notion properties in one `updatePage` per page, all or
+  none; `jira-rule-send.ts` moves the issue, `jira-rule-fields.ts` sets its fields, picks resolved at delivery,
+  `jira-rule-comment.ts` comments), `github-comment.ts` comments on the issue or the PR with
   the project's GitHub client, `github-pull-request.ts` makes a rule's changes to the PR in order (each can be
   done again harmlessly: the description section sits between `<!-- union-rule:<id> -->` marks and is replaced, so
   a retry redoes the whole delivery; a refusal fails it and says what was done before), `github-project-fields.ts` sets fields of the issue's
   Project item (`tickets.project_item_id`) or of the PR's (added with `addToProject`, which returns the item it
   has): it reads the Project's fields and checks every value first, so a field or option gone fails it before
   anything is set, `union-notification.ts` writes a notification through the notifier's
-  `recordNotification`, `jira.ts` the Jira actions on the ticket's issue or a posted review's linked ones
-  (`jira-target.ts`): `jira-transition.ts` moves it, `jira-field.ts` sets its fields (picks resolved by
-  `jira-field-picks.ts`), `jira-comment.ts` comments), one at a time and at most the target's `perTick` per tick
-  (Notion 3, Jira 2, GitHub 1, notifications 50).
+  `recordNotification`), one at a time and at most the target's `perTick` per tick, a tracker's counted apart
+  (`paceOf`; the adapter's `rules.perTick`: Notion 3, Jira 2; GitHub 1, notifications 50).
   A target says when to retry (rate limits, 5xx and network errors); retries back off, up to 5 attempts; each outcome is logged as `event_rule_applied` (the
   ticket's Log tab). `github/pull-request.ts` logs `pull_request_merged`/`pull_request_closed`,
   `github/pull-request-checks.ts` logs `pull_request_checks_failed` when the open PR's checks turn red, and linking

@@ -40,7 +40,7 @@ function isFieldInfo(value: unknown): value is JiraFieldInfo {
 }
 
 /** The stored fields of a Jira integration; null when they are not Jira's or not read yet. */
-function jiraFieldsOf(fields: unknown): JiraFields | null {
+export function jiraFieldsOf(fields: unknown): JiraFields | null {
   if (!isRecord(fields) || typeof fields.projectName !== 'string') {
     return null;
   }
@@ -68,12 +68,6 @@ export function jiraAuthOf(db: Db, projectId: number): JiraAuth | null {
     return null;
   }
   return { site: read.config.site, email: read.config.email, token: integration.secret };
-}
-
-/** The project's Jira fields as last read; null when it is not connected to Jira or nothing was read. */
-export function jiraFieldsFor(db: Db, projectId: number): JiraFields | null {
-  const integration = integrationOf(db, projectId, 'jira');
-  return integration ? jiraFieldsOf(integration.fields) : null;
 }
 
 /**

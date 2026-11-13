@@ -3,6 +3,7 @@
 import { jiraRefSiteError, parseJiraKey, readJiraConfig } from './jira-config';
 import { parseNotionId } from './notion-id';
 import { notionMarkdown } from './notion-markdown';
+import type { TrackerActionKind } from './tracker-action-kinds';
 import type { TrackerCapability } from './tracker-adapter';
 
 export type IntegrationKindName = 'notion' | 'jira';
@@ -16,6 +17,8 @@ export type IntegrationKind = {
   itemLabel: string;
   /** What its items come from: "data source". */
   sourceLabel: string;
+  /** What its items' fields are called, in the plural: "properties". */
+  fieldsLabel: string;
   /** An item's id from a URL or a bare id; null when the input holds none. */
   parseRef(input: string): string | null;
   /** Why a pasted link cannot be an item of this integration (another site); null when it can. */
@@ -24,6 +27,8 @@ export type IntegrationKind = {
   createsItems: boolean;
   /** What the kind's adapter can do, so the browser shows only what it supports. */
   capabilities: readonly TrackerCapability[];
+  /** The rule actions it takes, in the order the rule editor offers them. */
+  ruleActions: readonly TrackerActionKind[];
   /** How a reply answers a comment: in its thread, or as a new comment that mentions its author. */
   commentReplies: 'thread' | 'mention';
   /** Under the comment box: what the text may hold and whose name it is posted under. */
@@ -52,11 +57,13 @@ const KINDS: Record<IntegrationKindName, IntegrationKind> = {
     label: 'Notion',
     itemLabel: 'page',
     sourceLabel: 'data source',
+    fieldsLabel: 'properties',
     parseRef: parseNotionId,
     cleanMarkdown: (markdown) => notionMarkdown(markdown),
     readConfig: readNotionConfig,
     createsItems: true,
-    capabilities: ['refs', 'text', 'comments', 'fields'],
+    capabilities: ['refs', 'text', 'comments', 'fields', 'rules'],
+    ruleActions: ['tracker_fields'],
     commentReplies: 'thread',
     commentsPostAs: 'Posts under the Notion integration’s name',
   },
@@ -65,13 +72,15 @@ const KINDS: Record<IntegrationKindName, IntegrationKind> = {
     label: 'Jira',
     itemLabel: 'issue',
     sourceLabel: 'project',
+    fieldsLabel: 'fields',
     parseRef: parseJiraKey,
     // The provider converts an issue's ADF to markdown already.
     cleanMarkdown: (markdown) => markdown,
     readConfig: readJiraConfig,
     refError: jiraRefSiteError,
     createsItems: true,
-    capabilities: ['refs', 'text', 'comments', 'fields'],
+    capabilities: ['refs', 'text', 'comments', 'fields', 'rules'],
+    ruleActions: ['tracker_status', 'tracker_fields', 'tracker_comment'],
     commentReplies: 'mention',
     commentsPostAs:
       'Markdown: **bold**, `code`, [links](https://…), lists. Posts as the Atlassian account of the Jira connection, visible to everyone who can see the issue',
@@ -80,6 +89,11 @@ const KINDS: Record<IntegrationKindName, IntegrationKind> = {
 
 export function isIntegrationKindName(value: string): value is IntegrationKindName {
   return Object.hasOwn(KINDS, value);
+}
+
+/** Every kind, in the order the UI lists them. */
+export function integrationKinds(): IntegrationKind[] {
+  return Object.values(KINDS);
 }
 
 export function integrationKind(kind: IntegrationKindName): IntegrationKind {

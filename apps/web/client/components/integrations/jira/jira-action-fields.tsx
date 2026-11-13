@@ -1,20 +1,24 @@
-// A Jira action's fields in the rule editor: the status to move to, the fields to set, or the comment.
+// The Jira editors of tracker rule actions: the status to move the ticket's issue to, the fields to set on it.
 
 import type { JiraRuleSource } from '@union/core';
-import type { ActionKind, EventAction } from '@union/core/event-actions';
-import type { JiraFieldValue } from '@union/core/jira-field-types';
+import type { EventAction } from '@union/core/event-actions';
+import type { TrackerActionOf, TrackerRuleValue } from '@union/core/event-tracker-actions';
+import { isJiraFieldType, type JiraFieldValue } from '@union/core/jira-field-types';
 import type { ReactElement } from 'react';
 
 import { useJiraRuleSource } from '../../../lib/integrations/jira-rule-source';
-import { VariableChips } from '../../settings/variable-chips';
 import { Button, Field, inputClass } from '../../ui/ui';
 import { JiraFieldRow } from './jira-field-row';
 
-type Action<K extends ActionKind> = Extract<EventAction, { kind: K }>;
-type JiraAction = Action<'jira_transition' | 'jira_field' | 'jira_comment'>;
+type StatusAction = TrackerActionOf<'tracker_status'>;
+type FieldsAction = TrackerActionOf<'tracker_fields'>;
 
 const EMPTY_FIELD: JiraFieldValue = { fieldId: '', fieldName: '', fieldType: 'text', value: '' };
-const COMMENT_ROWS = 4;
+
+/** A stored value as the Jira rows edit it; a type Jira no longer offers reads as text. */
+function jiraValue(entry: TrackerRuleValue): JiraFieldValue {
+  return { ...entry, fieldType: isJiraFieldType(entry.fieldType) ? entry.fieldType : 'text' };
+}
 
 function StatusField({
   source,
@@ -22,7 +26,7 @@ function StatusField({
   onChange,
 }: {
   source: JiraRuleSource;
-  action: Action<'jira_transition'>;
+  action: StatusAction;
   onChange: (action: EventAction) => void;
 }): ReactElement {
   if (source.statuses.length === 0) {
@@ -66,7 +70,7 @@ function FieldRows({
 }: {
   projectId: number;
   source: JiraRuleSource;
-  action: Action<'jira_field'>;
+  action: FieldsAction;
   onChange: (action: EventAction) => void;
 }): ReactElement {
   if (source.fields.length === 0) {
@@ -76,7 +80,7 @@ function FieldRows({
       </p>
     );
   }
-  const set = (values: JiraFieldValue[]): void => {
+  const set = (values: TrackerRuleValue[]): void => {
     onChange({ ...action, values });
   };
   return (
@@ -86,7 +90,7 @@ function FieldRows({
           key={entry.fieldId}
           projectId={projectId}
           fields={source.fields}
-          entry={entry}
+          entry={jiraValue(entry)}
           onChange={(changed) => {
             set(action.values.map((each, at) => (at === index ? changed : each)));
           }}
@@ -108,41 +112,13 @@ function FieldRows({
   );
 }
 
-function CommentField({
-  action,
-  onChange,
-}: {
-  action: Action<'jira_comment'>;
-  onChange: (action: EventAction) => void;
-}): ReactElement {
-  return (
-    <Field label="Comment (plain text; links become links, variables are filled in when it is sent)">
-      <textarea
-        className={inputClass}
-        rows={COMMENT_ROWS}
-        value={action.body}
-        placeholder="Ready for QA: {pr.url}"
-        onChange={(event) => {
-          onChange({ ...action, body: event.target.value });
-        }}
-      />
-      <VariableChips
-        onPick={(variable) => {
-          onChange({ ...action, body: `${action.body}${variable}` });
-        }}
-      />
-    </Field>
-  );
-}
-
-export function JiraActionFields({
+/** The project's Jira statuses and fields as last read, or why there are none. */
+function WithSource({
   projectId,
-  action,
-  onChange,
+  children,
 }: {
   projectId: number;
-  action: JiraAction;
-  onChange: (action: EventAction) => void;
+  children: (source: JiraRuleSource) => ReactElement;
 }): ReactElement {
   const source = useJiraRuleSource(projectId);
   if (!source) {
@@ -152,11 +128,41 @@ export function JiraActionFields({
       </p>
     );
   }
-  if (action.kind === 'jira_transition') {
-    return <StatusField source={source} action={action} onChange={onChange} />;
-  }
-  if (action.kind === 'jira_field') {
-    return <FieldRows projectId={projectId} source={source} action={action} onChange={onChange} />;
-  }
-  return <CommentField action={action} onChange={onChange} />;
+  return children(source);
+}
+
+/** "Move the ticket's Jira issue": the status to move it to. */
+export function JiraStatusEditor({
+  projectId,
+  action,
+  onChange,
+}: {
+  projectId: number;
+  action: StatusAction;
+  onChange: (action: EventAction) => void;
+}): ReactElement {
+  return (
+    <WithSource projectId={projectId}>
+      {(source) => <StatusField source={source} action={action} onChange={onChange} />}
+    </WithSource>
+  );
+}
+
+/** "Set fields of the ticket's Jira issue": a row per field. */
+export function JiraFieldsEditor({
+  projectId,
+  action,
+  onChange,
+}: {
+  projectId: number;
+  action: FieldsAction;
+  onChange: (action: EventAction) => void;
+}): ReactElement {
+  return (
+    <WithSource projectId={projectId}>
+      {(source) => (
+        <FieldRows projectId={projectId} source={source} action={action} onChange={onChange} />
+      )}
+    </WithSource>
+  );
 }

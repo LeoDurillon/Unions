@@ -48,7 +48,7 @@ beforeEach(() => {
       name: 'Reviewed → In Review',
       enabled: true,
       trigger: { kind: 'pull_request_reviewed', verdict: null },
-      action: { kind: 'jira_transition', statusId: '3', statusName: 'In Review' },
+      action: { kind: 'tracker_status', tracker: 'jira', statusId: '3', statusName: 'In Review' },
     })
     .run();
   moved = [];

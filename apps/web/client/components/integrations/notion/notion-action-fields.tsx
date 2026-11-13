@@ -1,8 +1,9 @@
 // A Notion action's fields: the properties of the ticket's Notion page to set, a row each.
 
 import type { NotionSchema } from '@union/core';
-import type { NotionPropertyAction, NotionValue } from '@union/core/event-actions';
+import type { EventAction } from '@union/core/event-actions';
 import { WRITABLE_NOTION_TYPES } from '@union/core/event-rules';
+import type { TrackerActionOf, TrackerRuleValue } from '@union/core/event-tracker-actions';
 import type { ReactElement } from 'react';
 
 import { Button } from '../../ui/ui';
@@ -24,8 +25,8 @@ export function NotionActionFields({
 }: {
   projectId: number;
   notion: NotionSchema | null;
-  action: NotionPropertyAction;
-  onChange: (action: NotionPropertyAction) => void;
+  action: TrackerActionOf<'tracker_fields'>;
+  onChange: (action: EventAction) => void;
 }): ReactElement {
   if (!notion) {
     return <NoNotion />;
@@ -33,8 +34,8 @@ export function NotionActionFields({
   const writable = notion.properties.filter((property) =>
     WRITABLE_NOTION_TYPES.some((type) => type === property.type),
   );
-  const used = new Set(action.values.map((entry) => entry.propertyId));
-  const update = (values: NotionValue[]): void => {
+  const used = new Set(action.values.map((entry) => entry.fieldId));
+  const update = (values: TrackerRuleValue[]): void => {
     onChange({ ...action, values });
   };
   return (
@@ -45,10 +46,10 @@ export function NotionActionFields({
       {action.values.map((entry, index) => (
         <NotionValueRow
           // Each property is set once and one row at most has none yet: a row is its property.
-          key={entry.propertyId}
+          key={entry.fieldId}
           projectId={projectId}
-          choices={writable.filter((p) => p.id === entry.propertyId || !used.has(p.id))}
-          property={notion.properties.find((candidate) => candidate.id === entry.propertyId)}
+          choices={writable.filter((p) => p.id === entry.fieldId || !used.has(p.id))}
+          property={notion.properties.find((candidate) => candidate.id === entry.fieldId)}
           entry={entry}
           onChange={(next) => {
             update(action.values.map((other, at) => (at === index ? next : other)));
@@ -65,7 +66,7 @@ export function NotionActionFields({
       <Button
         disabled={used.has('') || writable.every((property) => used.has(property.id))}
         onClick={() => {
-          update([...action.values, { propertyId: '', value: '' }]);
+          update([...action.values, { fieldId: '', fieldName: '', fieldType: '', value: '' }]);
         }}
       >
         Add a property

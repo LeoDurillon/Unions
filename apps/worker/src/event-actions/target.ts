@@ -5,8 +5,8 @@ import type { ActionKind, ActionOf, DeliveryOutcome, nextDelivery } from '@union
 export type Due = NonNullable<ReturnType<typeof nextDelivery>>;
 
 export type ActionTarget<K extends ActionKind> = {
-  /** Deliveries done per tick at most: the pace the service it calls allows. */
-  perTick: number;
+  /** Deliveries done per tick at most: the pace the service it calls allows (a tracker's, its own). */
+  perTick: number | ((action: ActionOf<K>) => number);
   /** Does the action for the delivery; says why when it cannot, and whether to try again. */
   deliver: (due: Due, action: ActionOf<K>) => Promise<DeliveryOutcome>;
 };
@@ -20,6 +20,18 @@ export function deliverAction<K extends ActionKind>(
   action: ActionOf<K>,
 ): Promise<DeliveryOutcome> {
   return targets[action.kind].deliver(due, action);
+}
+
+/** The pace of the action's deliveries: counted by kind, and by tracker for a tracker action. */
+export function paceOf<K extends ActionKind>(
+  targets: ActionTargets,
+  action: ActionOf<K>,
+): { key: string; perTick: number } {
+  const { perTick } = targets[action.kind];
+  return {
+    key: 'tracker' in action ? `${action.kind}:${action.tracker}` : action.kind,
+    perTick: typeof perTick === 'number' ? perTick : perTick(action),
+  };
 }
 
 /** Why an action on a ticket is skipped: its event has none (a review of a pull request without a ticket), or it was removed. */
