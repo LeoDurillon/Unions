@@ -130,14 +130,15 @@ test("the tab reads the issue's comments with the project's token, as threads of
 test("the item: the issue's facts and fields", async () => {
   expect(await (await readItem(jiraTicket())).json()).toEqual({
     kind: 'jira',
-    key: 'ABC-1',
-    issueUrl: `${SITE}/browse/ABC-1`,
-    issue: {
-      summary: 'Dark mode',
+    itemId: 'ABC-1',
+    url: `${SITE}/browse/ABC-1`,
+    item: {
+      title: 'Dark mode',
+      key: 'ABC-1',
       type: 'Story',
-      status: { name: 'In Review', category: 'indeterminate' },
+      status: { field: null, name: 'In Review', stage: 'indeterminate' },
       assignee: null,
-      updatedAt: '2026-11-12T10:00:00.000+0100',
+      changedAt: '2026-11-12T10:00:00.000+0100',
       properties: [
         {
           id: 'status',
@@ -166,8 +167,8 @@ test("the item: the issue's facts and fields", async () => {
 test('an issue Jira does not give leaves its card empty; the comments still show', async () => {
   issueRefused = true;
   const ticketId = jiraTicket();
-  const item = (await (await readItem(ticketId)).json()) as { issue: unknown };
-  expect(item.issue).toBeNull();
+  const card = (await (await readItem(ticketId)).json()) as { item: unknown };
+  expect(card.item).toBeNull();
   const view = (await (await read(ticketId)).json()) as { threads: unknown[] };
   expect(view.threads).toEqual([THREAD]);
 });

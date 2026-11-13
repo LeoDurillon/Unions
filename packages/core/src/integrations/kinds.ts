@@ -20,6 +20,14 @@ export type IntegrationKind = {
   itemLabel: string;
   /** What its items come from: "data source". */
   sourceLabel: string;
+  /** Its items are named by a key (`ABC-12`) rather than a title alone. */
+  namedByKey: boolean;
+  /** The field linking an item to a ticket: its name for screen readers, and what to paste. */
+  linkPrompt: { label: string; placeholder: string };
+  /** How the Overview counts the item's comments: its threads or all its comments, and their name. */
+  commentCount: { counts: 'threads' | 'total'; one: string; many: string };
+  /** How an item's card says it last changed: "edited 2 h ago". */
+  changedLabel: string;
   /** What its items' fields are called, in the plural: "properties". */
   fieldsLabel: string;
   /** An item's id from a URL or a bare id; null when the input holds none. */
@@ -63,6 +71,10 @@ const KINDS: Record<IntegrationKindName, IntegrationKind> = {
     itemLabel: 'page',
     sourceLabel: 'data source',
     fieldsLabel: 'properties',
+    changedLabel: 'edited',
+    namedByKey: false,
+    linkPrompt: { label: 'Notion page URL', placeholder: 'Link a Notion page: its URL or ID' },
+    commentCount: { counts: 'threads', one: 'open discussion', many: 'open discussions' },
     parseRef: parseNotionId,
     cleanMarkdown: (markdown) => notionMarkdown(markdown),
     readConfig: readNotionConfig,
@@ -79,6 +91,13 @@ const KINDS: Record<IntegrationKindName, IntegrationKind> = {
     itemLabel: 'issue',
     sourceLabel: 'project',
     fieldsLabel: 'fields',
+    changedLabel: 'updated',
+    namedByKey: true,
+    linkPrompt: {
+      label: 'Jira issue key or link',
+      placeholder: 'Link a Jira issue: its key (ABC-12) or link',
+    },
+    commentCount: { counts: 'total', one: 'comment', many: 'comments' },
     parseRef: parseJiraKey,
     // The provider converts an issue's ADF to markdown already.
     cleanMarkdown: (markdown) => markdown,

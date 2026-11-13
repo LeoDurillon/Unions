@@ -3,6 +3,7 @@
 import { integrationKind } from './kinds';
 import type { NotionApi } from './notion-api';
 import { checkNotionField, notionFieldFailure, setNotionField } from './notion-fields';
+import { readNotionItem } from './notion-item-read';
 import { notionUrlsIn } from './notion-links';
 import { notionProvider } from './notion-provider';
 import { deliverNotionRule } from './notion-rule-send';
@@ -28,6 +29,11 @@ export function notionAdapter(notion: NotionApi): TrackerAdapter {
       // A Notion link names no site: a page of another data source is refused when it is read.
       error: () => null,
       namedIn: (texts) => pagesIn(texts),
+      check: async (secret, _config, pageId) => {
+        const page = await notion.page(secret, pageId);
+        return { itemId: page.id, title: page.title || 'Untitled Notion page', url: page.url };
+      },
+      url: (pageId) => `https://www.notion.so/${pageId.replaceAll('-', '')}`,
     },
     text: { markdown: (raw) => kind.cleanMarkdown(raw) },
     comments: {
@@ -36,6 +42,7 @@ export function notionAdapter(notion: NotionApi): TrackerAdapter {
       postFailure: notionPostFailure,
     },
     fields: {
+      read: (access, pageId) => readNotionItem(notion, access, pageId),
       check: (access, pageId, input) => checkNotionField(notion, access, pageId, input),
       set: (access, change) => setNotionField(notion, access, change),
       setFailure: (error) => notionFieldFailure(error),

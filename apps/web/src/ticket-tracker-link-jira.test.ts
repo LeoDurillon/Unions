@@ -66,29 +66,31 @@ function written(): number {
 
 test('a ticket written in Union is linked to an issue of the project, and unlinked', async () => {
   const id = written();
-  const checked = await send('POST', `/api/tickets/${id}/jira/check`, {
-    issue: `${SITE}/browse/abc-12`,
+  const checked = await send('POST', `/api/tickets/${id}/trackers/jira/link/check`, {
+    item: `${SITE}/browse/abc-12`,
   });
   expect(await checked.json()).toEqual({
-    key: 'ABC-12',
+    itemId: 'ABC-12',
     title: 'Dark mode',
     url: `${SITE}/browse/ABC-12`,
   });
   expect(getTicket(db, id).originKind).toBeNull();
-  expect((await send('PUT', `/api/tickets/${id}/jira`, { issue: 'ABC-12' })).status).toBe(200);
+  expect(
+    (await send('PUT', `/api/tickets/${id}/trackers/jira/link`, { item: 'ABC-12' })).status,
+  ).toBe(200);
   expect(getTicket(db, id)).toMatchObject({
     originKind: 'jira',
     originId: 'ABC-12',
     originUrl: `${SITE}/browse/ABC-12`,
   });
-  expect((await send('DELETE', `/api/tickets/${id}/jira`)).status).toBe(200);
+  expect((await send('DELETE', `/api/tickets/${id}/trackers/jira/link`)).status).toBe(200);
   expect(getTicket(db, id)).toMatchObject({ originKind: null, originId: null });
 });
 
 test('an issue of another project or site, a missing one, or no key is refused', async () => {
   const id = written();
   const check = (issue: string): Response | Promise<Response> =>
-    send('POST', `/api/tickets/${id}/jira/check`, { issue });
+    send('POST', `/api/tickets/${id}/trackers/jira/link/check`, { item: issue });
   expect((await check('XYZ-1')).status).toBe(409);
   const otherSite = await check('https://other.atlassian.net/browse/ABC-1');
   expect(otherSite.status).toBe(400);
@@ -113,22 +115,24 @@ test('a ticket keeps one origin: linking the other tracker, or unlinking its ite
       url: 'https://www.notion.so/x',
     },
   }).id;
-  const toJira = await send('PUT', `/api/tickets/${fromNotion}/jira`, { issue: 'ABC-12' });
+  const toJira = await send('PUT', `/api/tickets/${fromNotion}/trackers/jira/link`, {
+    item: 'ABC-12',
+  });
   expect(toJira.status).toBe(409);
   expect(await toJira.json()).toEqual({
     error: 'This ticket comes from Notion: unlink its Notion page first',
   });
-  expect((await send('DELETE', `/api/tickets/${fromNotion}/jira`)).status).toBe(409);
+  expect((await send('DELETE', `/api/tickets/${fromNotion}/trackers/jira/link`)).status).toBe(409);
   expect(getTicket(db, fromNotion).originKind).toBe('notion');
 
   const fromJira = written();
-  await send('PUT', `/api/tickets/${fromJira}/jira`, { issue: 'ABC-12' });
-  const toNotion = await send('PUT', `/api/tickets/${fromJira}/notion`, {
-    page: 'https://www.notion.so/x',
+  await send('PUT', `/api/tickets/${fromJira}/trackers/jira/link`, { item: 'ABC-12' });
+  const toNotion = await send('PUT', `/api/tickets/${fromJira}/trackers/notion/link`, {
+    item: 'https://www.notion.so/x',
   });
   expect(await toNotion.json()).toEqual({
     error: 'This ticket comes from Jira: unlink its Jira issue first',
   });
-  expect((await send('DELETE', `/api/tickets/${fromJira}/notion`)).status).toBe(409);
+  expect((await send('DELETE', `/api/tickets/${fromJira}/trackers/notion/link`)).status).toBe(409);
   expect(getTicket(db, fromJira).originKind).toBe('jira');
 });

@@ -63,7 +63,6 @@ export const FOLDER_SUMMARIES: Record<string, string> = {
     "Connecting Notion: its step and section, and the fields of an event rule's Notion action.",
   'web-client/components/investigations':
     'Investigations: their page and list by week, header, form, conversation and tabs, export, and the tickets written from them.',
-  'web-client/components/jira': "A ticket's Jira tab: its comments and replies.",
   'web-client/components/layout':
     "The app's frame: the main area and its lazy pages, the project bar and body, the sidebar and its parts, dialogs, help and shortcuts, the wizard host.",
   'web-client/components/markdown':
@@ -71,7 +70,6 @@ export const FOLDER_SUMMARIES: Record<string, string> = {
   'web-client/components/new-ticket':
     'Creating a ticket: the New ticket form, and importing a GitHub issue or pull request.',
   'web-client/components/notifications': 'The notification bell and its panel, groups and items.',
-  'web-client/components/notion': "A ticket's Notion tab: its discussions and replies.",
   'web-client/components/onboarding':
     'The new-project wizard: its steps (project, repository, connect, review), the stepper, the draft, the setup agent choice.',
   'web-client/components/previews':

@@ -47,7 +47,7 @@ beforeEach(() => {
 });
 
 function send(method: string, path: string, body?: unknown): Promise<Response> | Response {
-  return app.request(`/api/tickets/${ticketId}/notion${path}`, {
+  return app.request(`/api/tickets/${ticketId}/trackers/notion/link${path}`, {
     method,
     headers: { 'content-type': 'application/json' },
     body: body === undefined ? undefined : JSON.stringify(body),
@@ -62,11 +62,11 @@ function origin(): unknown {
 const UNLINKED = { originKind: null, originId: null, originUrl: null, body: 'As written' };
 
 test('a page is checked, linked by URL with the description kept, changed and unlinked', async () => {
-  const checked = await send('POST', '/check', { page: urlOf(PAGE) });
-  expect(await checked.json()).toEqual({ pageId: PAGE, title: 'Export to CSV', url: urlOf(PAGE) });
+  const checked = await send('POST', '/check', { item: urlOf(PAGE) });
+  expect(await checked.json()).toEqual({ itemId: PAGE, title: 'Export to CSV', url: urlOf(PAGE) });
   expect(origin()).toEqual(UNLINKED);
 
-  expect((await send('PUT', '', { page: urlOf(PAGE) })).status).toBe(200);
+  expect((await send('PUT', '', { item: urlOf(PAGE) })).status).toBe(200);
   expect(origin()).toEqual({
     ...UNLINKED,
     originKind: 'notion',
@@ -74,7 +74,7 @@ test('a page is checked, linked by URL with the description kept, changed and un
     originUrl: urlOf(PAGE),
   });
 
-  expect((await send('PUT', '', { page: OTHER })).status).toBe(200);
+  expect((await send('PUT', '', { item: OTHER })).status).toBe(200);
   expect(origin()).toEqual({
     ...UNLINKED,
     originKind: 'notion',
@@ -87,13 +87,13 @@ test('a page is checked, linked by URL with the description kept, changed and un
 });
 
 test('an unshared page, a bad URL, a missing ticket and a project without Notion are refused', async () => {
-  expect((await send('PUT', '', { page: urlOf(UNSHARED) })).status).toBe(404);
-  expect((await send('PUT', '', { page: 'not a page' })).status).toBe(400);
+  expect((await send('PUT', '', { item: urlOf(UNSHARED) })).status).toBe(404);
+  expect((await send('PUT', '', { item: 'not a page' })).status).toBe(400);
   expect(origin()).toEqual(UNLINKED);
 
-  const missing = await app.request('/api/tickets/999/notion', { method: 'DELETE' });
+  const missing = await app.request('/api/tickets/999/trackers/notion/link', { method: 'DELETE' });
   expect(missing.status).toBe(404);
 
   saveNotionConnection(db, projectId, { token: null, dataSourceId: null });
-  expect((await send('PUT', '', { page: urlOf(PAGE) })).status).toBe(409);
+  expect((await send('PUT', '', { item: urlOf(PAGE) })).status).toBe(409);
 });

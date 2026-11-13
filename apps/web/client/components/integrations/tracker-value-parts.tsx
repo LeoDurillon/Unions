@@ -8,9 +8,9 @@ import type { ReactElement } from 'react';
 import type { TrackerDraft } from '../../lib/integrations/tracker-draft';
 import { notionValueText } from '../../lib/integrations/tracker-value-text';
 import { useNotionUsers } from '../../lib/integrations/use-notion-users';
-import { JiraStatusInput } from '../jira/jira-status-input';
 import { PeopleField } from '../settings/people-field';
 import { JiraPickField } from './jira/jira-pick-field';
+import { JiraStatusInput } from './jira/jira-status-input';
 
 type Pick = { id: string; name: string };
 

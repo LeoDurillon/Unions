@@ -6,6 +6,7 @@ import type { IntegrationKindName } from './kinds';
 import type { IntegrationProvider } from './provider';
 import type { TrackerCommentInput, TrackerThreads } from './tracker-comments';
 import type { CheckedField, FieldChange, TrackerAccess, TrackerFieldInput } from './tracker-fields';
+import type { LinkedItem, TrackerItemFacts, TrackerMove } from './tracker-item';
 import type { TrackerRules } from './tracker-rules';
 
 /** Every capability an adapter may have, in the order `capabilitiesOf` lists them. */
@@ -21,6 +22,13 @@ type TrackerRefs = {
   error(input: string, config: unknown): string | null;
   /** The items the texts name (a pull request's title, branch, description), once each, in order. */
   namedIn(texts: readonly string[], config: unknown): string[];
+  /**
+   * The item `itemId` names, read to link it to a ticket: a Notion page shared with the integration,
+   * a Jira issue of the project's Jira project. Throws when the tracker does not give it.
+   */
+  check(secret: string, config: unknown, itemId: string): Promise<LinkedItem>;
+  /** The item's address in the tracker, when Union did not keep the one it was given. */
+  url(itemId: string, config: unknown): string;
 };
 
 /** The tracker's text. */
@@ -40,6 +48,10 @@ type TrackerComments = {
 
 /** An item's properties set by hand: checked against the item read now, then sent by the worker. */
 type TrackerFields = {
+  /** The item as its card shows it, read now; null when the tracker does not give it. */
+  read(access: TrackerAccess, itemId: string): Promise<TrackerItemFacts | null>;
+  /** The moves the item offers now, for a status of the shared type `move` (Jira's transitions). */
+  moves?(access: TrackerAccess, itemId: string): Promise<TrackerMove[]>;
   /** The change as the command keeps it; throws `TrackerValueError` (`tracker-value-error.ts`) when refused. */
   check(access: TrackerAccess, itemId: string, input: TrackerFieldInput): Promise<CheckedField>;
   set(access: TrackerAccess, change: FieldChange): Promise<void>;

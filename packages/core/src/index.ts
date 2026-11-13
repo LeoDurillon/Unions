@@ -108,6 +108,7 @@ export type * from './integrations/tracker-comments';
 export * from './integrations/tracker-refused';
 export * from './integrations/tracker-value-error';
 export * from './integrations/tracker-fields';
+export type * from './integrations/tracker-item';
 export * from './integrations/notion-threads';
 export * from './integrations/jira-threads';
 export * from './integrations/jira-hand-value';

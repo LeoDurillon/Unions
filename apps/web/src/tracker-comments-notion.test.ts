@@ -18,7 +18,7 @@ import type { Hono } from 'hono';
 import { createApp } from './app';
 import type { OnboardingGitHub } from './github-onboarding';
 import type { TrackerCommentsView } from './tracker-comment-types';
-import type { NotionItemView } from './tracker-item-types';
+import type { TrackerItemView } from './tracker-item-types';
 
 const PAGE = 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee';
 const PAGE_URL = 'https://www.notion.so/Export-aaaaaaaabbbb4ccc8dddeeeeeeeeeeee';
@@ -129,23 +129,25 @@ test('the discussions: the page one, then the one on the text with its quote', a
   ]);
 });
 
-function readItem(): Promise<NotionItemView> {
+function readItem(): Promise<TrackerItemView> {
   return Promise.resolve(app.request(`/api/tickets/${ticketId}/trackers/notion/item`)).then(
-    async (response) => (await response.json()) as NotionItemView,
+    async (response) => (await response.json()) as TrackerItemView,
   );
 }
 
 test('the item: the page with its title, status, last edit and properties; a failed read leaves them out', async () => {
   const view = await readItem();
-  expect(view.pageUrl).toBe(PAGE_URL);
-  expect(view.page).toEqual({
+  expect(view.url).toBe(PAGE_URL);
+  expect(view.item).toEqual({
     title: 'Export CSV',
-    status: { name: 'Avancement', value: 'En cours' },
-    editedAt: '2026-11-12T10:00:00.000Z',
+    key: null,
+    type: null,
+    status: { field: 'Avancement', name: 'En cours', stage: null },
+    changedAt: '2026-11-12T10:00:00.000Z',
     properties: PAGE_OBJECT.properties,
   });
   pageRead = () => Promise.reject(new NotionError('Not found', 404));
-  expect((await readItem()).page).toBeNull();
+  expect((await readItem()).item).toBeNull();
   const comments = (await (await read()).json()) as TrackerCommentsView;
   expect(comments.threads).toHaveLength(2);
 });

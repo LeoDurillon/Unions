@@ -10,17 +10,18 @@ import {
 import type { Context } from 'hono';
 
 import { CONFLICT, fail, NOT_FOUND } from './http';
-import { loadTicket } from './routes/tickets/ticket-notion-link';
+import { loadTicket } from './routes/tickets/ticket-load';
 
 /** The ticket, its item in the tracker `:kind` (the one it came from or was linked to), and the secret to read it. */
 export type TicketTrackerItem = {
   ticket: Ticket;
   kind: IntegrationKindName;
   item: { id: string; url: string | null };
-  integration: { secret: string; config: unknown };
+  integration: { secret: string; config: unknown; fields: unknown };
 };
 
-function kindParam(c: Context): IntegrationKindName {
+/** The tracker `:kind` names; 404 for one Union does not know. */
+export function kindParam(c: Context): IntegrationKindName {
   const kind = c.req.param('kind') ?? '';
   if (!isIntegrationKindName(kind)) {
     throw fail(NOT_FOUND, `Union does not know the tracker "${kind}"`);

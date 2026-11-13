@@ -1,31 +1,40 @@
 // `GET /api/tickets/:id/trackers/:kind/item`: the ticket's tracker item for its tab's card, read now.
-// Its facts, its properties, the changes being sent. One reader per tracker until the cards share one shape.
+// Its facts and properties, the changes being sent; `GET …/moves`: the moves it offers now, for its status.
 
-import type { Db, JiraApi, NotionApi } from '@union/core';
+import { trackerAdapter, type Db, type IntegrationApis } from '@union/core';
 import { Hono, type Context } from 'hono';
 
-import { jiraAuthFor, jiraIssueView } from '../jira-issue-view';
-import { notionPageOf, notionPageView } from '../notion-page-facts';
+import { NOT_FOUND, fail } from '../http';
 import { loadTicketTrackerItem } from '../ticket-tracker-item';
+import { pendingTrackerFields } from '../tracker-field-commands';
 import type { TrackerItemView } from '../tracker-item-types';
+import { guarded } from './notion';
 
-async function itemView(
-  db: Db,
-  apis: { notion: NotionApi; jira: JiraApi },
-  c: Context,
-): Promise<TrackerItemView> {
+async function itemView(db: Db, apis: IntegrationApis, c: Context): Promise<TrackerItemView> {
   const { ticket, kind, item, integration } = loadTicketTrackerItem(db, c);
-  if (kind === 'notion') {
-    const page = await notionPageView(db, apis.notion, integration.secret, ticket);
-    return { kind, pageUrl: notionPageOf(ticket).url, ...page };
-  }
-  const auth = jiraAuthFor(db, ticket);
-  const issue = await jiraIssueView(db, apis.jira, auth, ticket);
-  return { kind, key: item.id, issueUrl: item.url ?? `${auth.site}/browse/${item.id}`, ...issue };
+  const adapter = trackerAdapter(kind, apis);
+  const facts = adapter.fields
+    ? await adapter.fields.read(integration, item.id).catch(() => null)
+    : null;
+  return {
+    kind,
+    itemId: item.id,
+    url: item.url ?? adapter.refs?.url(item.id, integration.config) ?? '',
+    item: facts,
+    pendingFields: pendingTrackerFields(db, ticket.id),
+  };
 }
 
-export function ticketTrackerItemRoutes(db: Db, apis: { notion: NotionApi; jira: JiraApi }): Hono {
+export function ticketTrackerItemRoutes(db: Db, apis: IntegrationApis): Hono {
   const routes = new Hono();
   routes.get('/:id/trackers/:kind/item', async (c) => c.json(await itemView(db, apis, c)));
+  routes.get('/:id/trackers/:kind/moves', async (c) => {
+    const { kind, item, integration } = loadTicketTrackerItem(db, c);
+    const { fields } = trackerAdapter(kind, apis);
+    if (!fields?.moves) {
+      throw fail(NOT_FOUND, 'This tracker has no moves');
+    }
+    return c.json(await guarded(() => fields.moves?.(integration, item.id) ?? Promise.resolve([])));
+  });
   return routes;
 }

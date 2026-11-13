@@ -1,4 +1,4 @@
-// The `fields` cases of the adapter contract: a value set by hand checked against the item, refused, sent. Test helper.
+// The `fields` cases of the adapter contract: the item read, a value set by hand checked, refused, sent. Test helper.
 
 import { expect, test } from 'bun:test';
 
@@ -51,6 +51,16 @@ export function fieldsCases({ adapter, access, itemId, field, sent }: FieldsFixt
     const checked = await fields(adapter).check(access, itemId, input);
     await fields(adapter).set(access, { itemId, ...checked });
     expect(sent()).toBe(before + 1);
+  });
+  test('reads the item for its card, with the field among its properties', async () => {
+    const item = await fields(adapter).read(access, itemId);
+    expect(item?.title).not.toBe('');
+    expect(item?.properties.some((property) => property.id === field.id)).toBe(true);
+  });
+  test('reads the item a link names, to link it', async () => {
+    const linked = await adapter.refs?.check(access.secret, access.config, itemId);
+    expect(linked?.itemId.replaceAll('-', '')).toBe(itemId.replaceAll('-', ''));
+    expect(linked?.url).toStartWith('https://');
   });
   test("says why the tracker refused a change, in the error's words otherwise", () => {
     expect(fields(adapter).setFailure(new Error('Socket closed'), field.id)).toBe('Socket closed');

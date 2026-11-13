@@ -17,7 +17,7 @@ import type { Hono } from 'hono';
 
 import { createApp } from './app';
 import type { OnboardingGitHub } from './github-onboarding';
-import type { NotionItemView } from './tracker-item-types';
+import type { TrackerItemView } from './tracker-item-types';
 
 const PAGE = 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee';
 
@@ -70,10 +70,10 @@ function set(body: object): Promise<Response> | Response {
   });
 }
 
-async function tab(): Promise<NotionItemView> {
+async function tab(): Promise<TrackerItemView> {
   return (await (
     await app.request(`/api/tickets/${ticketId}/trackers/notion/item`)
-  ).json()) as NotionItemView;
+  ).json()) as TrackerItemView;
 }
 
 test('a property is checked against the page, queued for the worker, and shown saving', async () => {

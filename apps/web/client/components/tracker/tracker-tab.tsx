@@ -6,8 +6,7 @@ import type { ReactElement } from 'react';
 import type { TicketSummary } from '../../../src/api-types';
 import { useTrackerComments } from '../../lib/integrations/use-tracker-comments';
 import { useTrackerItem } from '../../lib/integrations/use-tracker-item';
-import { JiraIssueCard } from '../jira/jira-issue-card';
-import { NotionPageCard } from '../notion/notion-page-card';
+import { TicketItemCard } from './ticket-item-card';
 import { TrackerComments } from './tracker-comments';
 
 /** Imported from a Notion page, created as one, or linked to one: its comments can be read. */
@@ -50,18 +49,11 @@ function TabBody({ ticket, section }: TabProps): ReactElement {
   const below = (
     <TrackerComments ticketId={ticket.id} kind={integrationKind(section)} comments={comments} />
   );
-  const view = item.data ?? null;
   return (
     <div className="space-y-4">
-      {section === 'jira' ? (
-        <JiraIssueCard {...card} view={view?.kind === 'jira' ? view : null}>
-          {below}
-        </JiraIssueCard>
-      ) : (
-        <NotionPageCard {...card} view={view?.kind === 'notion' ? view : null}>
-          {below}
-        </NotionPageCard>
-      )}
+      <TicketItemCard {...card} kind={section} view={item.data ?? null}>
+        {below}
+      </TicketItemCard>
     </div>
   );
 }

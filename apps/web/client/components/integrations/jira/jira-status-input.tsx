@@ -3,9 +3,9 @@
 import { useQuery } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 
-import { request } from '../../lib/app/api';
-import type { TrackerDraft } from '../../lib/integrations/tracker-draft';
-import { ErrorText, Field, inputClass } from '../ui/ui';
+import { request } from '../../../lib/app/api';
+import type { TrackerDraft } from '../../../lib/integrations/tracker-draft';
+import { ErrorText, Field, inputClass } from '../../ui/ui';
 
 /** A transition as the route answers it: its id, its name, the status it leads to. */
 type Move = { id: string; name: string; toName: string };

@@ -1,7 +1,7 @@
 # One adapter per tracker
 
 Status: planned (2026-11-07), brought up to date 2026-11-13 after [tracker properties](archive/tracker-properties.md).
-Steps 1, 2 and 3 (3a, 3b, 3c) built (2026-11-13, branch `tracker-adapters`); the real check of step 3 waits.
+Steps 1 to 3 and 4a built (2026-11-13, branch `tracker-adapters`); step 3 checked on real Jira, Notion's check waits.
 Follows [Jira](archive/jira.md) and its gap plans, built and deployed; prepares a later
 tracker (Linear, GitHub Issues as a source, Asana…).
 
@@ -160,13 +160,25 @@ Each step moves Notion and Jira together, keeps the screens as they are, and is 
    `jira-property-input.tsx`. `TrackerProperty.type` stays the tracker's: the client maps it, so the routes and
    the stored rules did not change. Seen on screen: a Notion text property is a box of several lines in a rule (as
    in its tab); a Jira select set by hand lists the issue's options; a Notion status no longer an option says
-   "no longer an option in Notion". Still to do for step 3: the real check of one rule and one property set per
-   tracker (it writes to the user's Notion and Jira).
+   "no longer an option in Notion".
+   Real check, Jira (2026-11-13, test-GA's SCRUM-1, the branch's dispatcher and adapter over an in-memory database
+   holding only that connection): three rules (move, set labels, story points and due date, comment) all
+   succeeded, then values set by hand put the issue back (labels, story points, due date, a move back); the
+   rule's comment stays on the issue. Still to do: the same for Notion, on a page the user picks.
 4. **Linking, specs and reviews.** The Overview row, review specs, a review's links, suggestions and tab over `refs`
    and `text` (D4), and one item card in the ticket's and the review's tabs (`notion-page-card.tsx`,
    `jira-issue-card.tsx` into `tracker-item-card.tsx`). Removes `review-notion*.ts`, `review-jira*.ts`,
    `ticket-notion-link.ts`, `ticket-jira-link.ts`, `use-review-notion.ts`, `use-review-jira.ts` and their client
    files.
+   Split in two. 4a built (the ticket side): one item shape (`tracker-item.ts`: `TrackerItemFacts`) read by the
+   adapter's `fields.read` (Notion's options from the stored columns), its moves by `fields.moves`, an item a
+   pasted link names by `refs.check`, its address by `refs.url`. One item route with `…/moves`, one link route
+   (`/api/tickets/:id/trackers/:kind/link`), one card (`ticket-item-card.tsx`) and one Overview row per kind
+   (`ticket-tracker-row.tsx`), their wording from the kind (`namedByKey`, `linkPrompt`, `commentCount`,
+   `changedLabel`). Seen on screen: a card that could not read its item says "Its comments, read when the tab
+   opens" for Notion too. 4b, next: the review side (links, suggestions over `refs.namedIn`, the review's tabs and
+   specs).
+
 5. **Creating items and files.** `createItem` and attachments through the adapter; the investigation's "Also create
    it in" for every adapter that can.
 6. **The guard and the guide.** The ast-grep rule (D6) with its cases, set to fail; the Trackers page (D8);

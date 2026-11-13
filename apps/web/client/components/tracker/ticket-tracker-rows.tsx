@@ -1,10 +1,10 @@
-// The ticket's rows for the trackers it can come from, in its Overview: its Notion page (or Link a page), its Jira issue.
+// The ticket's rows for the trackers it can come from, in its Overview: one per kind, linked or offering a link.
 
+import { integrationKinds, type IntegrationKindName } from '@union/core/integration-kinds';
 import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../../src/api-types';
-import { TicketJiraRow } from './ticket-jira-row';
-import { TicketNotionRow } from './ticket-notion-row';
+import { TicketTrackerRow } from './ticket-tracker-row';
 
 export function TicketTrackerRows({
   detail,
@@ -12,22 +12,20 @@ export function TicketTrackerRows({
 }: {
   detail: TicketDetail;
   /** Opens the tracker's tab: the comments the row counts. */
-  onOpenTab: (tab: 'notion' | 'jira') => void;
+  onOpenTab: (tab: IntegrationKindName) => void;
 }): ReactElement {
   return (
     <>
-      <TicketNotionRow
-        detail={detail}
-        onOpenComments={() => {
-          onOpenTab('notion');
-        }}
-      />
-      <TicketJiraRow
-        detail={detail}
-        onOpenComments={() => {
-          onOpenTab('jira');
-        }}
-      />
+      {integrationKinds().map(({ kind }) => (
+        <TicketTrackerRow
+          key={kind}
+          detail={detail}
+          kind={kind}
+          onOpenComments={() => {
+            onOpenTab(kind);
+          }}
+        />
+      ))}
     </>
   );
 }

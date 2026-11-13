@@ -151,7 +151,7 @@ Containers never hold GitHub credentials. Tokens, the App's key and integration 
   `set_tracker_fields` command (kind `jira`, as for Notion): the Jira adapter's `fields.check` (core's
   `jira-fields.ts`) reads the issue again and checks the value with `jiraHandChange` (the rules' shaping, labels set as a whole), or,
   for the status, that the picked transition is one `GET /issue/{key}/transitions` offers now (also served at
-  `GET /api/tickets/:id/jira-transitions` for the editor). Its `fields.set` resolves "the active sprint",
+  `GET /api/tickets/:id/trackers/jira/moves` for the editor, the adapter's `fields.moves`). Its `fields.set` resolves "the active sprint",
   then `updateIssue` or `transitionIssue`; 403 names "Edit issues" or "Transition issues".
   A review's Notion and Jira tabs list the same properties for each linked page or issue (`review-notion.ts`,
   `review-jira.ts`), editable through `<review>/tracker-fields` (`routes/review/review-tracker-fields.ts`, refused

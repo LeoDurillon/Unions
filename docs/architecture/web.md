@@ -74,8 +74,9 @@
   (`tracker-comment-commands.ts`), `POST` queues one, `POST /import` adds a thread or one comment to the review
   (`tracker-review-import.ts`: one `general` draft, deduped by its link in `source_url`; `review-feedback.ts` puts
   these under "On the spec (Notion comments)" or "(Jira comments)", and `markSent` asks no reply for them). `routes/tracker-item.ts` (`…/item`) reads the
-  item for the tab's card. In the client, `tracker/tracker-tab.tsx` reads both (`lib/integrations/use-tracker-item.ts`,
-  `use-tracker-comments.ts`) and shows the tracker's card (`notion/notion-page-card.tsx`, `jira/jira-issue-card.tsx`),
+  item for the tab's card through the adapter's `fields.read` (one shape, `TrackerItemView`), and `…/moves` the moves
+  it offers (Jira's transitions, `fields.moves`) for its status. In the client, `tracker/tracker-tab.tsx` reads both (`lib/integrations/use-tracker-item.ts`,
+  `use-tracker-comments.ts`) and shows the item's card (`tracker/ticket-item-card.tsx`, its facts line `tracker-item-facts.tsx`),
   then `tracker-comments.tsx`, `tracker-thread-list.tsx`, `tracker-thread.tsx` and `tracker-reply.tsx` (which
   reuses the PR tab's `reply-box.tsx`); Add to review is `use-tracker-review-import.ts`. `PUT /api/tickets/:id/text`
   (`routes/tickets/ticket-edit.ts`) queues `edit_ticket` with the new title and description and the `base` the user started
@@ -160,14 +161,14 @@
   what each tracker takes is its kind's `ruleActions`: Notion sets properties, Jira also moves and comments). The
   editor's tracker parts come from `components/integrations/tracker-rule-editors.tsx`, the preview is one shape
   (`kind: 'tracker'`, from the tracker's `trackerRuleChecks(...).preview`)
-  (`tickets.origin_kind` `notion` and `origin_id`, set by the import or later from the ticket's **Notion** row:
-  `routes/tickets/ticket-notion-link.ts`, `POST /:id/notion/check`, `PUT` and `DELETE /:id/notion`, mounted with the
-  pull request link by `ticket-outside-links.ts`; the client's `ticket-notion-row.tsx`; older imports are
+  (`tickets.origin_kind` and `origin_id`, set by the import or later from the ticket's row for that tracker in its
+  Overview: `routes/tickets/ticket-tracker-link.ts`, `POST /:id/trackers/:kind/link/check` (the adapter's
+  `refs.check` reads the item a pasted key or link names), `PUT` and `DELETE /:id/trackers/:kind/link`, mounted with
+  the pull request link by `ticket-outside-links.ts`; the client's `ticket-tracker-row.tsx`, one per kind; older Notion imports are
   linked from their "Imported from Notion:" line by `backfillNotionPages` at worker start). Notion rules point at
   properties by id in the stored copy of the data source's columns (`integrations.fields`, read again on connect
   or "Refresh from Notion") and are checked against it on save (`notion-rule-check.ts`; each value keeps
-  `fieldId`, `fieldName`, `fieldType`). On a ticket linked to a Jira issue (the import, or later its **Jira** row:
-  `routes/tickets/ticket-jira-link.ts`, `POST /:id/jira/check`, `PUT` and `DELETE /:id/jira`), the Jira actions are
+  `fieldId`, `fieldName`, `fieldType`). On a ticket linked to a Jira issue, the Jira actions are
   checked against the stored statuses and fields (`jira-rule-check.ts`; the field pickers read
   `routes/jira-picks.ts`; details in `integrations.md`). Saving a rule calls no tracker
   (`event-action-checks.ts`); the old kinds (`notion_property`, `jira_*`) are read as tracker actions for one

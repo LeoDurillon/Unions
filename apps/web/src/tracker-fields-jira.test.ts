@@ -78,10 +78,8 @@ test('a field of the edit screen is checked, then queued with the issue’s key'
 });
 
 test('the status takes one of the transitions the issue offers now', async () => {
-  const transitions = await app.request(`/api/tickets/${ticketId}/jira-transitions`);
-  expect(await transitions.json()).toEqual([
-    { id: '31', name: 'Start', toId: '3', toName: 'In Progress' },
-  ]);
+  const moves = await app.request(`/api/tickets/${ticketId}/trackers/jira/moves`);
+  expect(await moves.json()).toEqual([{ id: '31', name: 'Start', toName: 'In Progress' }]);
   expect((await set({ fieldId: 'status', value: '', picks: [{ id: '99' }] })).status).toBe(400);
   const moved = await set({
     fieldId: 'status',

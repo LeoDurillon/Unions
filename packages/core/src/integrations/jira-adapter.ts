@@ -2,7 +2,7 @@
 
 import type { JiraApi } from './jira-api';
 import { jiraConfigOf } from './jira-config';
-import { checkJiraField, jiraFieldFailure, setJiraField } from './jira-fields';
+import { jiraFieldsCapability } from './jira-fields-capability';
 import { jiraKeysIn } from './jira-keys';
 import { jiraAccess, jiraProvider } from './jira-provider';
 import { deliverJiraRule } from './jira-rule-send';
@@ -26,6 +26,11 @@ export function jiraAdapter(jira: JiraApi): TrackerAdapter {
         const { projectKey, site } = jiraConfigOf(config);
         return jiraKeysIn(texts, projectKey, site);
       },
+      check: async (secret, config, key) => {
+        const item = await jiraProvider(jira).item(secret, config, key);
+        return { itemId: item.id, title: item.title || item.id, url: item.url };
+      },
+      url: (key, config) => `${jiraConfigOf(config).site}/browse/${key}`,
     },
     // The provider converts an issue's ADF to markdown already.
     text: { markdown: (raw) => kind.cleanMarkdown(raw) },
@@ -35,13 +40,7 @@ export function jiraAdapter(jira: JiraApi): TrackerAdapter {
         postJiraThreadComment(jira, jiraAccess(token, config).auth, post),
       postFailure: (error) => jiraPostFailure(error),
     },
-    fields: {
-      check: (access, key, input) =>
-        checkJiraField(jira, jiraAccess(access.secret, access.config).auth, key, input),
-      set: (access, change) =>
-        setJiraField(jira, jiraAccess(access.secret, access.config).auth, change),
-      setFailure: jiraFieldFailure,
-    },
+    fields: jiraFieldsCapability(jira),
     rules: {
       ...trackerRuleChecks('jira'),
       perTick: JIRA_PER_TICK,

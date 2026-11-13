@@ -1,14 +1,11 @@
 // `/api/tickets/:id/tracker-fields`: sets one property of the ticket's Notion page or Jira issue; the worker sends it.
-// Also `GET /:id/jira-transitions`: the moves the ticket's Jira issue offers now, for its status.
 
 import type { Db, JiraApi, NotionApi } from '@union/core';
 import { Hono } from 'hono';
 
 import { ACCEPTED, CONFLICT, fail, readObject } from '../http';
-import { jiraAuthFor, jiraIssueKeyOf } from '../jira-issue-view';
 import { queueFieldChange, trackerFieldInputOf } from '../tracker-field-input';
-import { guarded } from './notion';
-import { loadTicket } from './tickets/ticket-notion-link';
+import { loadTicket } from './tickets/ticket-load';
 
 /**
  * `POST` (`{ fieldId, value, text, picks? }`): the item is read first, so the property's type is the
@@ -27,12 +24,6 @@ export function ticketTrackerFieldRoutes(db: Db, notion: NotionApi, jira: JiraAp
     const target = { kind, projectId: ticket.projectId, itemId, place };
     const id = await queueFieldChange(db, { notion, jira }, target, input);
     return c.json({ id }, ACCEPTED);
-  });
-  routes.get('/:id/jira-transitions', async (c) => {
-    const ticket = loadTicket(db, c);
-    const key = jiraIssueKeyOf(ticket);
-    const auth = jiraAuthFor(db, ticket);
-    return c.json(await guarded(() => jira.transitions(auth, key)));
   });
   return routes;
 }
