@@ -4,6 +4,6 @@
   "ignore": ["**/node_modules/**", "**/dist/**", "**/drizzle/**", "**/*.test.ts"],
   "gitignore": true,
   "minTokens": 60,
-  "threshold": 0.35,
+  "threshold": 0.32,
   "reporters": ["console"]
 }
