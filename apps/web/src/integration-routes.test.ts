@@ -106,6 +106,7 @@ test('a project is created with its integrations, never returning the secret', a
       ready: true,
       config: { dataSourceId: SOURCE },
       fieldsReadAt: null,
+      hiddenFields: [],
     },
   ]);
   expect(JSON.stringify(created)).not.toContain('secret_ok');
@@ -154,6 +155,21 @@ test('import needs a connected project; settings connect, keep the secret, and d
   const listed = (await (await call('GET', '/api/projects')).json()) as PublicProject[];
   expect(listed[0]?.integrations).toEqual([]);
   expect((await call('PUT', '/api/projects/99/integrations/notion', NOTION)).status).toBe(404);
+});
+
+test('the properties hidden in the tracker tabs are kept, and survive a new secret', async () => {
+  const created = await project([NOTION]);
+  const base = `/api/projects/${created.id}/integrations/notion`;
+  const hidden = await call('PUT', `${base}/hidden-fields`, { fieldIds: ['a', 'b', 'a'] });
+  expect(await hidden.json()).toMatchObject({ hiddenFields: ['a', 'b'] });
+  expect(
+    (await call('PUT', base, { secret: 'secret_ok', config: { dataSourceId: SOURCE } })).ok,
+  ).toBe(true);
+  const listed = (await (await call('GET', '/api/projects')).json()) as PublicProject[];
+  expect(listed[0]?.integrations[0]?.hiddenFields).toEqual(['a', 'b']);
+  expect((await call('PUT', `${base}/hidden-fields`, { fieldIds: 'a' })).status).toBe(400);
+  const jira = `/api/projects/${created.id}/integrations/jira/hidden-fields`;
+  expect((await call('PUT', jira, { fieldIds: [] })).status).toBe(404);
 });
 
 test('event rules use the stored Notion columns; a ticket from an import previews its value', async () => {

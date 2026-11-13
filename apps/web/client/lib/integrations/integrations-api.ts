@@ -36,6 +36,13 @@ export const integrationsApi = {
     request('POST', `${base(projectId, kind)}/fields`),
   importItem: (projectId: number, kind: IntegrationKindName, ref: string): Promise<SourceImport> =>
     request('POST', `${base(projectId, kind)}/import`, { ref }),
+  /** The properties the tracker tabs hide, as a whole. */
+  hideFields: (
+    projectId: number,
+    kind: IntegrationKindName,
+    fieldIds: string[],
+  ): Promise<PublicIntegration> =>
+    request('PUT', `${base(projectId, kind)}/hidden-fields`, { fieldIds }),
 };
 
 export function projectIntegration(

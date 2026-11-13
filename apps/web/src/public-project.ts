@@ -14,6 +14,7 @@ export function toPublicIntegration(integration: Integration): PublicIntegration
     ready: 'config' in integrationKind(integration.kind).readConfig(integration.config),
     config: integration.config,
     fieldsReadAt: integration.fieldsReadAt,
+    hiddenFields: integration.hiddenFields,
   };
 }
 

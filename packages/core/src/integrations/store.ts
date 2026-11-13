@@ -1,4 +1,4 @@
-// A project's connections to trackers (`integrations`): reading, saving and removing one, and its columns as read.
+// A project's connections to trackers (`integrations`): reading, saving, removing one, its columns and hidden ones.
 import { and, eq } from 'drizzle-orm';
 
 import type { Db } from '../db';
@@ -64,6 +64,29 @@ export function storeFields(
     .update(schema.integrations)
     .set({ ...input, fieldsReadAt: Date.now() })
     .where(eq(schema.integrations.id, integrationId))
+    .returning()
+    .get();
+}
+
+/** Most a project hides: a data source has fewer columns. */
+const MAX_HIDDEN_FIELDS = 500;
+
+/** Keeps which properties the user hid in the tracker tabs; null when the project is not connected. */
+export function saveHiddenFields(
+  db: Db,
+  projectId: number,
+  kind: IntegrationKindName,
+  fieldIds: string[],
+): Integration | null {
+  const current = integrationOf(db, projectId, kind);
+  if (!current) {
+    return null;
+  }
+  const hiddenFields = [...new Set(fieldIds)].slice(0, MAX_HIDDEN_FIELDS);
+  return db
+    .update(schema.integrations)
+    .set({ hiddenFields })
+    .where(eq(schema.integrations.id, current.id))
     .returning()
     .get();
 }

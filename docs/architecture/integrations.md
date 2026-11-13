@@ -142,6 +142,9 @@ Containers never hold GitHub credentials. Tokens, the App's key and integration 
   for an item the review is not linked to; the issue's moves at `<review>/jira/:key/transitions`). Such a command has
   no ticket: its payload's `reviewId` names the review, its events have no ticket, and `pendingReviewFields` finds
   those not answered by item.
+  The properties the user hides in those tabs are `integrations.hidden_fields` (ids, per project and tracker; migration
+  `0088_hidden_fields`), sent with the project (`PublicIntegration.hiddenFields`) and saved whole by
+  `PUT /api/projects/:id/integrations/:kind/hidden-fields` (a plain record the web writes, `saveHiddenFields`).
 - A project reaches GitHub with a token (`projects.github_token`) or an installation of the GitHub App
   (`projects.github_installation_id`; the app's ID and private key are one row of `github_app`). Both are stored in
   plain text (local single-user app, like the original Union) and never reach the browser: responses use

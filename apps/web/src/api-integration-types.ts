@@ -10,6 +10,8 @@ export type PublicIntegration = {
   ready: boolean;
   config: Record<string, unknown>;
   fieldsReadAt: number | null;
+  /** The properties hidden in the tracker tabs, by id. */
+  hiddenFields: string[];
 };
 
 /** An item of a tracker fetched for import (a Notion page): shown as a preview, then turned into a ticket. */

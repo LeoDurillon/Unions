@@ -17,7 +17,7 @@ export function TrackerItemCard({
   reading,
   onRefresh,
   properties,
-  editing = null,
+  editing,
   children,
   below,
 }: {
@@ -30,8 +30,8 @@ export function TrackerItemCard({
   onRefresh: () => void;
   /** The item's properties as read; none before. */
   properties: TrackerProperty[];
-  /** What editing the properties needs; none: read only. */
-  editing?: TrackerPropertyEditing | null;
+  /** What editing and hiding the properties needs. */
+  editing: TrackerPropertyEditing;
   /** The heading: a title line, then a line of facts. */
   children: ReactNode;
   /** The tab's content under the card: errors, comments. */

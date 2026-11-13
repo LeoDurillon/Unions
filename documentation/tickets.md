@@ -208,7 +208,9 @@ Then come the tabs:
   status column, when it was last edited, **Open in Notion**), then the page's open comments, with its **Properties** in a column beside them, as the
   Overview's details (under them when the panel is narrow).
   **Properties** lists every property of the page but its title, with its value as Notion has it now; the empty ones
-  are folded under "N empty", click it to see them. A property Union can set (text, number, select, multi-select,
+  are folded under "N empty", click it to see them. **Hide** beside a property's name moves it under "N hidden" at
+  the bottom of the column, in every ticket's and review's Notion tab of the project (it is saved for the project);
+  open "N hidden" and click **Show** to bring one back. Jira fields hide the same way, in the Jira tabs. A property Union can set (text, number, select, multi-select,
   status, date, people, checkbox, URL, email, phone) has **Edit**: change the value with the input its type takes
   (a select's options are the data source's as last read; **Refresh from Notion** in the Rules settings reads them
   again), then **Save**. The new value shows "Saving…" until Notion has it, then the tab reads the page again; if

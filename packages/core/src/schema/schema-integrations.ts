@@ -1,4 +1,4 @@
-// The outside trackers a project is connected to (Notion): secret, config and the tracker's columns as read.
+// The outside trackers a project is connected to: secret, config, the tracker's columns as read, the hidden ones.
 
 import { integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
@@ -26,6 +26,8 @@ export const integrations = sqliteTable(
     /** The source's name for the UI (the data source's title); empty until verified. */
     title: text('title').notNull().default(''),
     fieldsReadAt: integer('fields_read_at'),
+    /** The properties the user hid in the tracker tabs (Notion property ids, Jira field ids). */
+    hiddenFields: text('hidden_fields', { mode: 'json' }).$type<string[]>().notNull().default([]),
     createdAt: integer('created_at').notNull().default(now),
     updatedAt: integer('updated_at')
       .notNull()

@@ -1,10 +1,12 @@
-// Connecting a project to a tracker, reading its columns again, and importing one of its items; the tracker is only read.
+// Connecting a project to a tracker, reading its columns again, importing one of its items, hiding some of its fields.
+// The tracker is only read.
 import {
   integrationKind,
   integrationOf,
   integrationProvider,
   isIntegrationKindName,
   removeIntegration,
+  saveHiddenFields,
   saveIntegration,
   schema,
   storeFields,
@@ -155,6 +157,19 @@ export function integrationRoutes(apis: IntegrationApis): Hono {
   return routes;
 }
 
+/** `PUT …/hidden-fields` (`{ fieldIds }`): the properties the tracker tabs hide, as a whole; a plain record. */
+async function hideFields(db: Db, c: Context): Promise<Response> {
+  const { fieldIds } = await readObject(c.req.raw);
+  if (!Array.isArray(fieldIds) || !fieldIds.every((id) => typeof id === 'string')) {
+    throw fail(BAD_REQUEST, 'Give the hidden properties as a list of ids');
+  }
+  const saved = saveHiddenFields(db, Number(c.req.param('projectId')), kindOf(c), fieldIds);
+  if (!saved) {
+    throw fail(NOT_FOUND, 'This project is not connected to this tracker');
+  }
+  return c.json(toPublicIntegration(saved));
+}
+
 /** `/api/projects/:projectId/integrations/:kind`: a project's connection to a tracker. */
 export function projectIntegrationRoutes(db: Db, apis: IntegrationApis): Hono {
   const routes = new Hono();
@@ -165,6 +180,7 @@ export function projectIntegrationRoutes(db: Db, apis: IntegrationApis): Hono {
   });
   routes.post('/:projectId/integrations/:kind/fields', (c) => refreshFields(db, apis, c));
   routes.post('/:projectId/integrations/:kind/import', (c) => importItem(db, apis, c));
+  routes.put('/:projectId/integrations/:kind/hidden-fields', (c) => hideFields(db, c));
   routes.route('/', jiraPickRoutes(db, apis.jira));
   return routes;
 }

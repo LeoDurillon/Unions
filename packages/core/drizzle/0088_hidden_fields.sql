@@ -1,0 +1,1 @@
+ALTER TABLE `integrations` ADD `hidden_fields` text DEFAULT '[]' NOT NULL;
