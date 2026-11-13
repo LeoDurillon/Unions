@@ -2,13 +2,16 @@
 
 /**
  * One property: its id in the tracker, its name, its tracker type (`select`, `option`…), its value
- * as text (empty when it holds none), and whether Union can set it.
+ * as text (empty when it holds none), and whether Union can set it. `value` is what an edit starts
+ * from, written as a rule's value is (a person's id, `true` for a ticked box); `options` a choice's.
  */
 export type TrackerProperty = {
   id: string;
   name: string;
   type: string;
   text: string;
+  value: string;
+  options: string[];
   settable: boolean;
 };
 

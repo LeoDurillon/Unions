@@ -79,17 +79,17 @@ function Discussions({
   );
 }
 
-export function NotionTab({ ticketId }: { ticketId: number }): ReactElement {
-  const comments = useNotionComments(ticketId);
-  const sender = useNotionCommentSend(ticketId);
-  const reviewImport = useNotionReviewImport(ticketId);
+export function NotionTab({ ticket }: { ticket: { id: number; projectId: number } }): ReactElement {
+  const comments = useNotionComments(ticket.id);
+  const sender = useNotionCommentSend(ticket.id);
+  const reviewImport = useNotionReviewImport(ticket.id);
   const { data } = comments;
   return (
     <div className="space-y-4">
       <NotionPageCard
-        facts={data?.page ?? null}
+        ticket={ticket}
+        view={data ?? null}
         loaded={data !== undefined || comments.error !== null}
-        pageUrl={data?.pageUrl ?? null}
         reading={comments.isFetching}
         onRefresh={() => {
           void comments.refetch();

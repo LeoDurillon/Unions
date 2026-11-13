@@ -7,6 +7,7 @@ import type { ReactElement, ReactNode } from 'react';
 import { Bone } from '../ui/skeleton';
 import { Button, CARD_CLASS } from '../ui/ui';
 import { TrackerProperties } from './tracker-properties';
+import type { TrackerPropertyEditing } from './tracker-property-row';
 
 export function TrackerItemCard({
   mark,
@@ -15,6 +16,7 @@ export function TrackerItemCard({
   reading,
   onRefresh,
   properties,
+  editing = null,
   children,
 }: {
   /** One letter for the tracker, in a tile. */
@@ -26,6 +28,8 @@ export function TrackerItemCard({
   onRefresh: () => void;
   /** The item's properties as read; none before. */
   properties: TrackerProperty[];
+  /** What editing the properties needs; none: read only. */
+  editing?: TrackerPropertyEditing | null;
   /** The heading: a title line, then a line of facts. */
   children: ReactNode;
 }): ReactElement {
@@ -62,7 +66,7 @@ export function TrackerItemCard({
           {reading ? 'Reading…' : 'Refresh'}
         </Button>
       </div>
-      <TrackerProperties properties={properties} />
+      <TrackerProperties properties={properties} editing={editing} />
     </>
   );
 }

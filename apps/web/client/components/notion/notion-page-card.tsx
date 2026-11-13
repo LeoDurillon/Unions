@@ -1,8 +1,11 @@
 // The Notion tab's page card: the page's title, its status column's value and its last edit, Open in Notion, Refresh.
+// Then its properties, each one Union can set with Edit.
 
 import type { ReactElement } from 'react';
 
-import type { NotionPageFacts } from '../../../src/notion-discussion-types';
+import type { NotionPageFacts, NotionTabView } from '../../../src/notion-discussion-types';
+import { notionCommentsKey } from '../../lib/integrations/use-notion-comments';
+import { useTrackerFieldSend } from '../../lib/integrations/use-tracker-fields';
 import { timeAgo } from '../../lib/ui/relative-time';
 import { useNow } from '../../lib/ui/use-now';
 import { TrackerItemCard } from '../tracker/tracker-item-card';
@@ -48,27 +51,31 @@ function Heading({ facts }: { facts: NotionPageFacts | null }): ReactElement {
 }
 
 export function NotionPageCard({
-  facts,
+  ticket,
+  view,
   loaded,
-  pageUrl,
   reading,
   onRefresh,
 }: {
-  facts: NotionPageFacts | null;
+  ticket: { id: number; projectId: number };
+  /** The tab's view, once read. */
+  view: NotionTabView | null;
   /** Notion answered (the page read or not). */
   loaded: boolean;
-  pageUrl: string | null;
   reading: boolean;
   onRefresh: () => void;
 }): ReactElement {
+  const sender = useTrackerFieldSend(ticket.id, notionCommentsKey(ticket.id));
+  const facts = view?.page ?? null;
   return (
     <TrackerItemCard
       mark="N"
       loaded={loaded}
-      open={pageUrl ? { url: pageUrl, label: 'Open in Notion' } : null}
+      open={view ? { url: view.pageUrl, label: 'Open in Notion' } : null}
       reading={reading}
       onRefresh={onRefresh}
       properties={facts?.properties ?? []}
+      editing={{ projectId: ticket.projectId, pending: view?.pendingFields ?? [], sender }}
     >
       <Heading facts={facts} />
     </TrackerItemCard>

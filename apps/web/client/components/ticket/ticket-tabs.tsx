@@ -171,7 +171,7 @@ export function PanelBody({
   }
   const tracker = trackerSection(detail.ticket);
   if (section === tracker.id && tracker.enabled) {
-    return <TrackerTab ticketId={detail.ticket.id} section={tracker.id} />;
+    return <TrackerTab ticket={detail.ticket} section={tracker.id} />;
   }
   return <WorkerBody detail={detail} tab={workerTab} onTab={onWorkerTab} />;
 }

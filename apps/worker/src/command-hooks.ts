@@ -4,6 +4,7 @@ import type {
   NotionCommentPost,
   PrCommentReply,
   ReviewVerdict,
+  TrackerFieldSet,
   WorkspaceOwner,
 } from '@union/core';
 
@@ -50,6 +51,8 @@ export type CommandHooks = {
   /** Posts a comment on a ticket's Notion page; `commandId` ties its event to the command. */
   postNotionComment: (commandId: number, post: NotionCommentPost) => void;
   postJiraComment: (commandId: number, post: JiraCommentPost) => void;
+  /** Sets one property of a tracker's item, typed by hand in a tab; `commandId` ties its event to the command. */
+  setTrackerField: (commandId: number, change: TrackerFieldSet) => void;
   /**
    * Starts, stops, resets, reads the logs of, or generates the compose file of a ticket's or a pull
    * request's preview; `update` moves a pull request's checkout to the commit its review reads.
@@ -95,6 +98,7 @@ export const NO_HOOKS: CommandHooks = {
   replyToPrComment: ignore,
   postNotionComment: ignore,
   postJiraComment: ignore,
+  setTrackerField: ignore,
   preview: ignore,
   syncAgentImage: ignore,
   sharedServices: ignore,

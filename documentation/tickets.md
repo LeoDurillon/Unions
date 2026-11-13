@@ -207,7 +207,12 @@ Then come the tabs:
 - **Notion**: for a ticket imported from Notion or linked to a page, a card for the page (its title, the value of its
   status column, when it was last edited, **Open in Notion**), its **Properties**, then the page's open comments.
   **Properties** lists every property of the page but its title, with its value as Notion has it now; the empty ones
-  are folded under "N empty", click it to see them.
+  are folded under "N empty", click it to see them. A property Union can set (text, number, select, multi-select,
+  status, date, people, checkbox, URL, email, phone) has **Edit**: change the value with the input its type takes
+  (a select's options are the data source's as last read; **Refresh from Notion** in the Rules settings reads them
+  again), then **Save**. The new value shows "Saving…" until Notion has it, then the tab reads the page again; if
+  Notion refuses it, the property keeps its old value and says why. Your Notion integration needs the **Update
+  content** capability.
   Comments on the whole page come first, then those on a passage of the text, under the passage they are about.
   The tab opens on a card for the page, with **Open in Notion** and **Refresh**, which reads the comments again;
   **Open in Notion** on a discussion opens it there. Resolved comments are not

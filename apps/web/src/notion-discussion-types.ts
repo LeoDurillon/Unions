@@ -2,6 +2,8 @@
 
 import type { TrackerProperty } from '@union/core';
 
+import type { PendingTrackerField } from './tracker-field-types';
+
 /** One comment: who wrote it, when, and its text as markdown. */
 export type NotionCommentView = { id: string; author: string; createdAt: string; markdown: string };
 
@@ -50,5 +52,7 @@ export type NotionTabView = NotionDiscussionsView & {
   /** Null when the page could not be read; the discussions still show. */
   page: NotionPageFacts | null;
   pending: PendingNotionComment[];
+  /** The properties being set: queued, not sent to Notion yet. */
+  pendingFields: PendingTrackerField[];
   review: NotionReviewState;
 };

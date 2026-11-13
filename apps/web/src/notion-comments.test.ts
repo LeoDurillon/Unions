@@ -53,7 +53,17 @@ const PAGE_OBJECT = {
   dataSourceId: null,
   editedAt: '2026-11-12T10:00:00.000Z',
   status: { name: 'Avancement', value: 'En cours' },
-  properties: [{ id: 'st', name: 'Avancement', type: 'status', text: 'En cours', settable: true }],
+  properties: [
+    {
+      id: 'st',
+      name: 'Avancement',
+      type: 'status',
+      text: 'En cours',
+      value: 'En cours',
+      options: [],
+      settable: true,
+    },
+  ],
 };
 let pageRead: () => Promise<unknown> = () => Promise.resolve(PAGE_OBJECT);
 

@@ -90,9 +90,22 @@ const READERS: Record<string, Reader> = {
   verification: (value) => (isRecord(value) ? scalar(value.state) : ''),
 };
 
+/** The values an edit starts from where they differ from the text: ids, `true`, a date as Notion gives it. */
+const VALUE_READERS: Record<string, Reader> = {
+  people: (value) =>
+    Array.isArray(value)
+      ? joined(value.map((person) => (isRecord(person) ? scalar(person.id) : '')))
+      : '',
+  checkbox: (value) => String(value === true),
+  date: (value) => (isRecord(value) ? scalar(value.start) : ''),
+};
+
 const SETTABLE: ReadonlySet<string> = new Set(WRITABLE_NOTION_TYPES);
 
-/** The page object's `properties`, in Notion's order, the title left out. */
+/**
+ * The page object's `properties`, in Notion's order, the title left out. The page does not give a
+ * choice's options: the caller adds them from the data source's columns.
+ */
 export function pagePropertiesOf(properties: unknown): TrackerProperty[] {
   if (!isRecord(properties)) {
     return [];
@@ -102,13 +115,16 @@ export function pagePropertiesOf(properties: unknown): TrackerProperty[] {
       return [];
     }
     const { type } = property;
-    const read = READERS[type];
+    const id = typeof property.id === 'string' ? property.id : name;
+    const text = READERS[type]?.(property[type]) ?? '';
     return [
       {
-        id: typeof property.id === 'string' ? property.id : name,
+        id,
         name,
         type,
-        text: read ? read(property[type]) : '',
+        text,
+        value: VALUE_READERS[type]?.(property[type]) ?? text,
+        options: [],
         settable: SETTABLE.has(type),
       },
     ];

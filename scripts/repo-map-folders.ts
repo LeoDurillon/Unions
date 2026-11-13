@@ -156,7 +156,7 @@ export const FOLDER_SUMMARIES: Record<string, string> = {
   'worker/implement': 'The implementation step: its loop, checks, prompts and size trimming.',
   'worker/investigation': 'Investigations: running one, and turning it into tickets.',
   'worker/jira': 'Posting Jira comments.',
-  'worker/notion': 'Posting Notion comments.',
+  'worker/notion': "Posting Notion comments and setting a page's properties.",
   'worker/preview':
     'Previews: compose up, the proxy and forwarder, health and readiness, idle stop, e2e runs and screenshots, variables, shared services.',
   'worker/pull-request':

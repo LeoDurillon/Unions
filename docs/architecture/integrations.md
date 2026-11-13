@@ -44,6 +44,13 @@ Containers never hold GitHub credentials. Tokens, the App's key and integration 
   `notion/comment-post.ts` converts the text (core's `notion-rich-text.ts`: links, `**bold**`, `` `code` ``) and
   posts it with `addComment` (`POST /v1/comments`, in the discussion or on the page), under the integration's name,
   and logs `notion_comment_posted` or `notion_comment_failed` (403 names the "Insert comments" capability).
+  A property edited in the Notion tab's Properties card is the `set_tracker_fields` command (core's
+  `tracker-field-set.ts`: `{ projectId, kind, itemId, ticketId | reviewId, field, value, text, picks }`, one property
+  each). `POST /api/tickets/:id/tracker-fields` (`routes/tracker-fields.ts`) reads the page first, so the property's
+  type is Notion's now, and refuses a value `notionHandValue` (the rules' `notionPropertyValue`, without variables)
+  cannot shape; the worker's `notion/field-set.ts` shapes it again, sends it with `updatePage`, and logs
+  `tracker_field_set` or `tracker_field_failed` (403 names the "Update content" capability). The tab shows a
+  change "Saving…" until one answers (`pendingTrackerFields`, over `pending-comments.ts`).
 - Trackers a project is connected to (Notion, Jira) are rows of `integrations`, one per kind: secret, config, the
   tracker's columns as read. Each kind has a browser-safe entry (`@union/core/integration-kinds`: label, ID parsing,
   config check) and a provider over its API client (`integrationProvider`, `integrations/providers.ts`). The web

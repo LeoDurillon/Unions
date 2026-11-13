@@ -30,15 +30,15 @@ export const TRACKER_LABELS = { notion: 'Notion', jira: 'Jira' } as const;
 
 /** The tracker tab's body, for a ticket `trackerSection` enables it on. */
 export function TrackerTab({
-  ticketId,
+  ticket,
   section,
 }: {
-  ticketId: number;
+  ticket: { id: number; projectId: number };
   section: 'notion' | 'jira';
 }): ReactElement {
   return section === 'jira' ? (
-    <JiraTab key={ticketId} ticketId={ticketId} />
+    <JiraTab key={ticket.id} ticketId={ticket.id} />
   ) : (
-    <NotionTab key={ticketId} ticketId={ticketId} />
+    <NotionTab key={ticket.id} ticket={ticket} />
   );
 }

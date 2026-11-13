@@ -1,6 +1,7 @@
 // What each type of event in the log carries, keyed by its `type`: the one place to add an event.
 
 import type { PortForward } from '../agent/agent-environment';
+import type { IntegrationKindName } from '../integrations/kinds';
 import type { ReviewVerdict } from '../pull-request/pr-review-verdicts';
 import type { BranchMove } from '../schema/schema-types';
 import type { Action, BoardStatus, Phase, Step } from '../states';
@@ -14,6 +15,16 @@ type Column<
 
 type Failure = { error: string };
 type Nothing = Record<string, never>;
+/** A property set by hand on a tracker's item: which item and field, the value as read, where from. */
+type TrackerFieldOutcome = {
+  commandId: number;
+  kind: IntegrationKindName;
+  itemId: string;
+  reviewId: number | null;
+  fieldId: string;
+  fieldName: string;
+  text: string;
+};
 type PullRequestNumber = { number: Column<typeof tables.tickets, 'prNumber'> };
 /** The `reply_pr_comment` command a reply came from; `commentId` for a suggested reply. */
 type ReplyOrigin = {
@@ -153,6 +164,13 @@ type GitHubPayloads = {
   jira_comment_posted: { commandId: number; commentId: string };
   /** `text` is the comment that was not posted, so its box gets it back; `replyTo` the comment it answered. */
   jira_comment_failed: { commandId: number; replyTo: string | null; text: string; error: string };
+  /**
+   * A property of a tracker's item set by hand from a ticket's tab (the event's ticket) or a
+   * review's (`reviewId`); `text` is the value as the user reads it.
+   */
+  tracker_field_set: TrackerFieldOutcome;
+  /** `error` is the tracker's reason; the tab shows it on the property. */
+  tracker_field_failed: TrackerFieldOutcome & { error: string };
   /** The implementer drafted replies to the imported comments of a revision. */
   pr_replies_suggested: PullRequestNumber & { count: number };
   pr_description_changed: {

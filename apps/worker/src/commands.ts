@@ -16,6 +16,8 @@ import {
   SHARED_RESTART,
   SHARED_STOP,
   SYNC_AGENT_IMAGE,
+  SET_TRACKER_FIELDS,
+  trackerFieldSetOf,
   type Db,
   type WorkspaceOwner,
 } from '@union/core';
@@ -264,6 +266,9 @@ const OTHER_COMMANDS: Record<string, (db: Db, command: Command, hooks: CommandHo
   },
   post_jira_comment: (_db, command, hooks) => {
     hooks.postJiraComment(command.id, jiraCommentOf(command.payload));
+  },
+  [SET_TRACKER_FIELDS]: (_db, command, hooks) => {
+    hooks.setTrackerField(command.id, trackerFieldSetOf(command.payload));
   },
   [SHARED_RESTART]: (_db, command, hooks) => {
     hooks.sharedServices(numberField(command, 'projectId'), 'restart');

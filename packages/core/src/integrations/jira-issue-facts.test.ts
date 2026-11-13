@@ -26,7 +26,15 @@ test('the summary, type, status with its category, assignee and last update', ()
     assignee: 'Ada Lovelace',
     updatedAt: '2026-11-12T10:00:00.000+0100',
     properties: [
-      { id: 'status', name: 'Status', type: 'status', text: 'In Review', settable: false },
+      {
+        id: 'status',
+        name: 'Status',
+        type: 'status',
+        text: 'In Review',
+        value: 'In Review',
+        options: [],
+        settable: false,
+      },
     ],
   });
 });
@@ -45,7 +53,17 @@ test('an unassigned issue, an unknown category and missing fields read as null',
     status: { name: 'Odd', category: null },
     assignee: null,
     updatedAt: null,
-    properties: [{ id: 'status', name: 'Status', type: 'status', text: 'Odd', settable: false }],
+    properties: [
+      {
+        id: 'status',
+        name: 'Status',
+        type: 'status',
+        text: 'Odd',
+        value: 'Odd',
+        options: [],
+        settable: false,
+      },
+    ],
   });
   expect(issueFactsOf(null).status).toBeNull();
 });

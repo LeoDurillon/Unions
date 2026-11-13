@@ -7,11 +7,12 @@ import { Hono } from 'hono';
 import type { ApiServices } from '../../services';
 import { ticketJiraCommentRoutes } from '../jira-comments';
 import { ticketNotionCommentRoutes } from '../notion-comments';
+import { ticketTrackerFieldRoutes } from '../tracker-fields';
 import { ticketJiraLinkRoutes } from './ticket-jira-link';
 import { ticketNotionRoutes } from './ticket-notion-link';
 import { linkPullRequest, unlinkPullRequest } from './ticket-pull-request';
 
-/** `/:id/pull-request`, `/:id/notion`, `/:id/notion-comments` and `/:id/jira-comments`. */
+/** `/:id/pull-request`, `/:id/notion`, `/:id/notion-comments`, `/:id/jira-comments` and `/:id/tracker-fields`. */
 export function ticketOutsideLinkRoutes(db: Db, { github, notion, jira }: ApiServices): Hono {
   const routes = new Hono();
   routes.put('/:id/pull-request', (c) => linkPullRequest(db, github, c));
@@ -20,5 +21,6 @@ export function ticketOutsideLinkRoutes(db: Db, { github, notion, jira }: ApiSer
   routes.route('/', ticketNotionCommentRoutes(db, notion));
   routes.route('/', ticketJiraCommentRoutes(db, jira));
   routes.route('/', ticketJiraLinkRoutes(db, jira));
+  routes.route('/', ticketTrackerFieldRoutes(db, notion));
   return routes;
 }

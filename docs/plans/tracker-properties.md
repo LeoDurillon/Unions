@@ -1,7 +1,8 @@
 # Edit the tracker item's properties from the ticket
 
-Status: steps 1 and 2 built (2026-11-13, branch `tracker-properties`): both tabs list the values, read only, and
-the value inputs are shared (`variables` off for a tab); steps 3 to 6 planned. Builds on the Notion and Jira tabs (comments, built) and the rules' field
+Status: steps 1 to 3 built (2026-11-13, branch `tracker-properties`): both tabs list the values, the value inputs
+are shared, and a Notion page's properties can be edited from the ticket's tab (real edit not checked yet); steps
+4 to 6 planned. Builds on the Notion and Jira tabs (comments, built) and the rules' field
 machinery ([Jira rule actions](archive/jira-rule-actions.md), [More Jira fields](archive/jira-more-fields.md)).
 Overlaps [One adapter per tracker](tracker-adapters.md): see D8.
 

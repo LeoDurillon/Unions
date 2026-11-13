@@ -1,47 +1,17 @@
 // `/api/tickets/:id/notion-comments`: the ticket's Notion page and its open discussions, read now.
 // Also the comments the user sends to it.
 
-import type { Db, NotionApi, Ticket } from '@union/core';
+import type { Db, NotionApi } from '@union/core';
 import { Hono } from 'hono';
 
 import { ACCEPTED, CONFLICT, fail, NOT_FOUND, readObject } from '../http';
 import { pendingNotionComments, queueNotionComment } from '../notion-comment-commands';
-import type { NotionPageFacts } from '../notion-discussion-types';
 import { readDiscussions } from '../notion-discussions';
+import { notionPageOf, notionPageView } from '../notion-page-facts';
 import { importedDiscussions, importNotionDiscussion } from '../notion-review-import';
 import { reviewImportRefusal } from '../review-import-refusal';
 import { notionTokenOf } from './notion';
 import { loadTicket } from './tickets/ticket-notion-link';
-
-const NOT_LINKED = 'This ticket is not linked to a Notion page';
-
-/** The ticket's page: the one it was imported from, created as, or linked to. */
-function pageOf(ticket: Ticket): { id: string; url: string } {
-  if (ticket.originKind !== 'notion' || !ticket.originId) {
-    throw fail(CONFLICT, NOT_LINKED);
-  }
-  const url = ticket.originUrl ?? `https://www.notion.so/${ticket.originId.replaceAll('-', '')}`;
-  return { id: ticket.originId, url };
-}
-
-/** The page's title, status, last edit and properties; null when Notion does not give the page (the tab shows the rest). */
-async function pageFacts(
-  notion: NotionApi,
-  token: string,
-  pageId: string,
-): Promise<NotionPageFacts | null> {
-  try {
-    const page = await notion.page(token, pageId);
-    return {
-      title: page.title,
-      status: page.status ?? null,
-      editedAt: page.editedAt ?? null,
-      properties: page.properties ?? [],
-    };
-  } catch {
-    return null;
-  }
-}
 
 /**
  * `GET` reads the page and the discussions from Notion on each call (the tab reads once per opening), with the
@@ -53,15 +23,15 @@ export function ticketNotionCommentRoutes(db: Db, notion: NotionApi): Hono {
   const routes = new Hono();
   routes.get('/:id/notion-comments', async (c) => {
     const ticket = loadTicket(db, c);
-    const page = pageOf(ticket);
+    const page = notionPageOf(ticket);
     const token = notionTokenOf(db, ticket.projectId);
     const [view, facts] = await Promise.all([
       readDiscussions(notion, token, page),
-      pageFacts(notion, token, page.id),
+      notionPageView(db, notion, token, ticket),
     ]);
     return c.json({
       ...view,
-      page: facts,
+      ...facts,
       pending: pendingNotionComments(db, ticket.id),
       review: {
         importedIds: importedDiscussions(db, ticket.id, page.id, view.discussions),
@@ -71,7 +41,7 @@ export function ticketNotionCommentRoutes(db: Db, notion: NotionApi): Hono {
   });
   routes.post('/:id/notion-comments/import', async (c) => {
     const ticket = loadTicket(db, c);
-    const page = pageOf(ticket);
+    const page = notionPageOf(ticket);
     const refusal = reviewImportRefusal(ticket);
     if (refusal !== null) {
       throw fail(CONFLICT, refusal);
@@ -93,7 +63,7 @@ export function ticketNotionCommentRoutes(db: Db, notion: NotionApi): Hono {
   });
   routes.post('/:id/notion-comments', async (c) => {
     const ticket = loadTicket(db, c);
-    const page = pageOf(ticket);
+    const page = notionPageOf(ticket);
     notionTokenOf(db, ticket.projectId);
     const input = await readObject(c.req.raw);
     return c.json({ id: queueNotionComment(db, ticket, page.id, input) }, ACCEPTED);

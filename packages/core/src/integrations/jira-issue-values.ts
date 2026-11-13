@@ -54,12 +54,30 @@ function schemaOf(field: Record<string, unknown>): { type: string; items: string
   };
 }
 
+/** A select's or checkboxes' options, as the edit screen lists them. */
+function optionsOf(field: Record<string, unknown>): string[] {
+  const allowed = Array.isArray(field.allowedValues) ? field.allowedValues : [];
+  return allowed.flatMap((option: unknown) =>
+    isRecord(option) && typeof option.value === 'string' ? [option.value] : [],
+  );
+}
+
 /** The status, first: it is not on the edit screen, Jira moves it through the workflow. */
 function statusRow(fields: Record<string, unknown>): TrackerProperty[] {
   const status = valueText(fields.status);
   return status === ''
     ? []
-    : [{ id: 'status', name: 'Status', type: 'status', text: status, settable: false }];
+    : [
+        {
+          id: 'status',
+          name: 'Status',
+          type: 'status',
+          text: status,
+          value: status,
+          options: [],
+          settable: false,
+        },
+      ];
 }
 
 /** The issue's status, then the fields of its edit screen in Jira's order, its text and files left out. */
@@ -74,12 +92,15 @@ export function issuePropertiesOf(body: unknown): TrackerProperty[] {
     }
     const schema = schemaOf(field);
     const type = fieldTypeOf(id, schema);
+    const shown = valueText(fields[id]);
     return [
       {
         id,
         name: text(field, 'name') || id,
         type: type ?? schema.type,
-        text: valueText(fields[id]),
+        text: shown,
+        value: shown,
+        options: optionsOf(field),
         settable: type !== null,
       },
     ];

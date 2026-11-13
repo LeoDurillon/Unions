@@ -1,22 +1,23 @@
 // A tracker tab's Properties card (Notion page, Jira issue): each property and its value, the empty ones folded.
+// Each one Union can set has Edit when the card is given what editing needs.
 
 import type { TrackerProperty } from '@union/core';
 import { useState, type ReactElement } from 'react';
 
 import { CARD_CLASS } from '../ui/ui';
+import { TrackerPropertyRow, type TrackerPropertyEditing } from './tracker-property-row';
 
-function Rows({ properties }: { properties: TrackerProperty[] }): ReactElement {
+function Rows({
+  properties,
+  editing,
+}: {
+  properties: TrackerProperty[];
+  editing: TrackerPropertyEditing | null;
+}): ReactElement {
   return (
     <dl className="grid grid-cols-[minmax(0,10rem)_minmax(0,1fr)] gap-x-4 gap-y-1.5 text-sm">
       {properties.map((property) => (
-        <div key={property.id} className="contents">
-          <dt className="truncate text-zinc-500" title={property.name}>
-            {property.name}
-          </dt>
-          <dd className="min-w-0 break-words">
-            {property.text === '' ? <span className="text-zinc-400">Empty</span> : property.text}
-          </dd>
-        </div>
+        <TrackerPropertyRow key={property.id} property={property} editing={editing} />
       ))}
     </dl>
   );
@@ -24,8 +25,11 @@ function Rows({ properties }: { properties: TrackerProperty[] }): ReactElement {
 
 export function TrackerProperties({
   properties,
+  editing,
 }: {
   properties: TrackerProperty[];
+  /** Null: read only. */
+  editing: TrackerPropertyEditing | null;
 }): ReactElement | null {
   const [showEmpty, setShowEmpty] = useState(false);
   if (properties.length === 0) {
@@ -36,7 +40,7 @@ export function TrackerProperties({
   return (
     <section className={CARD_CLASS} aria-label="Properties">
       <h3 className="text-sm font-semibold">Properties</h3>
-      {filled.length > 0 ? <Rows properties={filled} /> : null}
+      {filled.length > 0 ? <Rows properties={filled} editing={editing} /> : null}
       {empty.length > 0 ? (
         <button
           type="button"
@@ -49,7 +53,7 @@ export function TrackerProperties({
           {showEmpty ? '▾' : '▸'} {empty.length} empty
         </button>
       ) : null}
-      {showEmpty ? <Rows properties={empty} /> : null}
+      {showEmpty ? <Rows properties={empty} editing={editing} /> : null}
     </section>
   );
 }

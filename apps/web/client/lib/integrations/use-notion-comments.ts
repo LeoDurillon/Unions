@@ -16,7 +16,8 @@ export function replyKey(discussionId: string | null): string {
   return discussionId ?? 'page';
 }
 
-function key(ticketId: number): unknown[] {
+/** The tab's view in the query cache: changes to its page update it. */
+export function notionCommentsKey(ticketId: number): unknown[] {
   return ['notion-comments', ticketId];
 }
 
@@ -27,7 +28,7 @@ function url(ticketId: number): string {
 /** `refetch` is the tab's Refresh. */
 export function useNotionComments(ticketId: number): UseQueryResult<NotionTabView> {
   return useQuery({
-    queryKey: key(ticketId),
+    queryKey: notionCommentsKey(ticketId),
     queryFn: () => request<NotionTabView>('GET', url(ticketId)),
     staleTime: Infinity,
     retry: false,
@@ -37,7 +38,7 @@ export function useNotionComments(ticketId: number): UseQueryResult<NotionTabVie
 /** How many discussions the tab found, once it has been read; null before (never read from here). */
 export function useNotionDiscussionCount(ticketId: number): number | null {
   const { data } = useQuery<NotionTabView>({
-    queryKey: key(ticketId),
+    queryKey: notionCommentsKey(ticketId),
     enabled: false,
     staleTime: Infinity,
   });
@@ -82,13 +83,13 @@ export function useNotionCommentSend(ticketId: number): NotionCommentSend {
     if (failure) {
       setFailures((old) => new Map(old).set(failure.key, failure));
     }
-    void client.invalidateQueries({ queryKey: key(ticketId) });
+    void client.invalidateQueries({ queryKey: notionCommentsKey(ticketId) });
   });
   return {
     send: async (discussionId, text) => {
       const { id } = await request<{ id: number }>('POST', url(ticketId), { discussionId, text });
       dismiss(replyKey(discussionId));
-      client.setQueryData<NotionTabView>(key(ticketId), (old) =>
+      client.setQueryData<NotionTabView>(notionCommentsKey(ticketId), (old) =>
         old
           ? {
               ...old,
