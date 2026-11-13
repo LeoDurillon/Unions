@@ -1,7 +1,7 @@
 # One adapter per tracker
 
 Status: planned (2026-11-07), brought up to date 2026-11-13 after [tracker properties](archive/tracker-properties.md).
-Steps 1 to 4 built (2026-11-13, branch `tracker-adapters`); step 3 checked on real Jira, Notion's check waits.
+Steps 1 to 4 built and deployed, step 5 built (2026-11-13, branch `tracker-adapters`); step 3 checked on real Jira, Notion's check waits.
 Follows [Jira](archive/jira.md) and its gap plans, built and deployed; prepares a later
 tracker (Linear, GitHub Issues as a source, Asana…).
 
@@ -188,6 +188,12 @@ Each step moves Notion and Jira together, keeps the screens as they are, and is 
 
 5. **Creating items and files.** `createItem` and attachments through the adapter; the investigation's "Also create
    it in" for every adapter that can.
+   Built: the adapters' `files` capability (`files.fetch`, over `tracker-files.ts`, moved into core with Notion's
+   and Jira's sources); the new-ticket route asks the adapter of the origin's kind. Creating an item was already the
+   adapter's provider (`createItem`, the worker's `withTargetItem`), and "Also create it in" already lists every
+   kind that `createsItems`: they did not change. Checked on real data: a Notion page's 4 images and a Jira issue's
+   2 attachments downloaded through the adapters, kept in memory only.
+
 6. **The guard and the guide.** The ast-grep rule (D6) with its cases, set to fail; the Trackers page (D8);
    `docs/architecture/integrations.md` describes adapters; this plan's status.
 7. **GitHub Project fields (optional).** D7.

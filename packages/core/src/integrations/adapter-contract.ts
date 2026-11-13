@@ -57,6 +57,12 @@ function refsCases(fixture: ContractFixture): void {
   });
 }
 
+/** A fetch that fails the case when it is called. */
+const refuseFetch: typeof fetch = Object.assign(
+  (): Promise<Response> => Promise.reject(new Error('Fetched a link')),
+  { preconnect: fetch.preconnect },
+);
+
 export function adapterContract(fixture: ContractFixture): void {
   const { adapter, secret, config, item } = fixture;
   const kind = integrationKind(adapter.kind);
@@ -79,6 +85,16 @@ export function adapterContract(fixture: ContractFixture): void {
     refsCases(fixture);
     commentsCases({ adapter, secret, config, itemId: fixture.commented });
     fieldsCases({ adapter, access: { secret, config, fields: null }, ...fixture.fields });
+    test("downloads none of a text's links that are not the tracker's files", async () => {
+      const text =
+        'See [the docs](https://example.com/guide.pdf) and ![a chart](https://example.com/c.png)';
+      const kept = await required(adapter.files, 'files').fetch(
+        text,
+        { secret, config, fields: null },
+        refuseFetch,
+      );
+      expect(kept).toEqual({ markdown: text, files: [] });
+    });
     test("reads the tracker's markdown as plain markdown", () => {
       expect(required(adapter.text, 'text').markdown(fixture.markdown.raw)).toBe(
         fixture.markdown.clean,

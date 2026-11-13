@@ -6,11 +6,12 @@ import type { IntegrationKindName } from './kinds';
 import type { IntegrationProvider } from './provider';
 import type { TrackerCommentInput, TrackerThreads } from './tracker-comments';
 import type { CheckedField, FieldChange, TrackerAccess, TrackerFieldInput } from './tracker-fields';
+import type { TrackerFile } from './tracker-files';
 import type { LinkedItem, TrackerItemFacts, TrackerItemText, TrackerMove } from './tracker-item';
 import type { TrackerRules } from './tracker-rules';
 
 /** Every capability an adapter may have, in the order `capabilitiesOf` lists them. */
-const TRACKER_CAPABILITIES = ['refs', 'text', 'comments', 'fields', 'rules'] as const;
+const TRACKER_CAPABILITIES = ['refs', 'text', 'comments', 'fields', 'rules', 'files'] as const;
 
 export type TrackerCapability = (typeof TRACKER_CAPABILITIES)[number];
 
@@ -62,6 +63,19 @@ type TrackerFields = {
   setFailure(error: unknown, fieldId: string): string;
 };
 
+/** An item's images and files, downloaded to be kept as a new ticket's (`tracker-files.ts`). */
+type TrackerFiles = {
+  /**
+   * The text with the files it links that were kept named `attachment:<name>`, and those files.
+   * Without `access` (no integration), a tracker whose files need its credentials keeps the links.
+   */
+  fetch(
+    markdown: string,
+    access: TrackerAccess | null,
+    fetchFn?: typeof fetch,
+  ): Promise<{ markdown: string; files: TrackerFile[] }>;
+};
+
 /** One tracker: the provider's calls, its kind, and each capability it has. */
 export type TrackerAdapter = IntegrationProvider & {
   kind: IntegrationKindName;
@@ -71,6 +85,7 @@ export type TrackerAdapter = IntegrationProvider & {
   fields?: TrackerFields;
   /** The rule actions its kind's `ruleActions` names: checked, previewed and sent (`tracker-rules.ts`). */
   rules?: TrackerRules;
+  files?: TrackerFiles;
 };
 
 /** The capabilities the adapter has, in `TRACKER_CAPABILITIES`'s order. */

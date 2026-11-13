@@ -1,6 +1,6 @@
 // `POST /api/tickets`: a new ticket; one imported from a tracker (Notion) keeps the item's images and files as its own.
 
-import { createTicket, schema, type Db } from '@union/core';
+import { createTicket, schema, type Db, type IntegrationApis } from '@union/core';
 import type { Context } from 'hono';
 
 import { BAD_REQUEST, CREATED, fail, optionalText, readObject, requireText } from '../../http';
@@ -14,7 +14,7 @@ import { originOf, withOriginFiles } from './ticket-origin';
  * fetched before it is created (their links expire within the hour), so its text never points to
  * a link about to break.
  */
-export async function addTicket(db: Db, c: Context): Promise<Response> {
+export async function addTicket(db: Db, apis: IntegrationApis, c: Context): Promise<Response> {
   const body = await readObject(c.req.raw);
   const projectId = Number(body.projectId);
   const known = db
@@ -33,7 +33,7 @@ export async function addTicket(db: Db, c: Context): Promise<Response> {
   const origin = originOf(body);
   const flow = flowOf(db, body) ?? null;
   const { markdown, files } = await withOriginFiles(
-    db,
+    { db, apis },
     projectId,
     origin,
     optionalText(body, 'body') ?? '',

@@ -3,13 +3,10 @@
 import type { JiraApi, JiraAuth } from './jira-api';
 import { issueMarkdown } from './jira-attachments';
 import { jiraAccess, jiraProvider } from './jira-provider';
+import type { TrackerAdapter } from './tracker-adapter';
 import type { LinkedItem, TrackerItemText } from './tracker-item';
 
-export async function readJiraText(
-  jira: JiraApi,
-  auth: JiraAuth,
-  key: string,
-): Promise<TrackerItemText> {
+async function readJiraText(jira: JiraApi, auth: JiraAuth, key: string): Promise<TrackerItemText> {
   const issue = await jira.issue(auth, key);
   return {
     markdown: issueMarkdown(issue, auth.site).trim(),
@@ -35,4 +32,12 @@ export async function checkJiraItem(
   const { auth } = jiraAccess(secret, config);
   const issue = await jira.issue(auth, key);
   return { itemId: issue.key, title: issue.summary, url: `${auth.site}/browse/${issue.key}` };
+}
+
+/** Jira's `text` capability: the provider converts an issue's ADF to markdown already; an issue's text read now. */
+export function jiraText(jira: JiraApi): NonNullable<TrackerAdapter['text']> {
+  return {
+    markdown: (raw) => raw,
+    read: (secret, config, key) => readJiraText(jira, jiraAccess(secret, config).auth, key),
+  };
 }

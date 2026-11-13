@@ -1,12 +1,9 @@
 // Downloads the images and files a tracker item links (a Notion page, a Jira issue), kept as the
 // ticket's files. Each kept one is referenced as `attachment:<name>` in the markdown. Each tracker
 // gives its source.
-import {
-  fileNameOfUrl,
-  MAX_ATTACHMENT_BYTES,
-  MAX_TICKET_ATTACHMENT_BYTES,
-  safeFileName,
-} from '@union/core';
+import { MAX_ATTACHMENT_BYTES, MAX_TICKET_ATTACHMENT_BYTES } from '../ticket/attachment-limits';
+import { safeFileName } from '../ticket/attachments';
+import { fileNameOfUrl } from './notion-media';
 
 /** `![alt](url)` or `[text](url)`, the text allowed to hold escaped brackets. */
 const LINK = /(?<bang>!?)\[(?<text>(?:\\.|[^\]\\])*)\]\((?<url>https:\/\/[^)\s]+)\)/gu;

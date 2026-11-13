@@ -105,7 +105,7 @@ Containers never hold GitHub credentials. Tokens, the App's key and integration 
   redirects the attachment's download when the text has a file card without a name (`jira-media-ids.ts`), else by
   file name; the rest listed under
   "Attachments"), as `/rest/api/3/attachment/content/<id>` of the site; creating the ticket downloads them
-  (`apps/web/src/jira-files.ts`, over the shared `tracker-files.ts` that Notion's `notion-files.ts` uses too: only
+  (core's `jira-files.ts`, over the shared `tracker-files.ts` that Notion's `notion-files.ts` uses too, each the adapter's `files` capability that `routes/tickets/ticket-origin.ts` asks: only
   that path of the configured site, with the token; Jira's redirect to its media host is followed by hand without
   it, and only to https) into private ticket files, within the attachment limits. Jira writes happen in the worker
   only, from event rules on tickets imported from Jira, or for `pr_review_posted` the Jira issues the review is

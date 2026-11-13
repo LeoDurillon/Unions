@@ -3,10 +3,9 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
-import { createDb, createTicket, migrateDb, schema } from '@union/core';
+import { createDb, createTicket, fetchNotionFiles, migrateDb, schema } from '@union/core';
 
 import { createApp } from './app';
-import { fetchNotionFiles } from './notion-files';
 import { addAttachment } from './routes/attachments';
 
 const root = await mkdtemp(path.join(tmpdir(), 'union-notion-files-'));

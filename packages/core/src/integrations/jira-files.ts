@@ -1,8 +1,8 @@
 // Downloads a Jira issue's attachments its text links as the ticket's files, with the integration's
 // token. The links are `/rest/api/3/attachment/content/<id>` of the site; the token is never sent
 // off the site.
-import type { JiraConfig } from '@union/core';
-
+import { jiraConfigOf, type JiraConfig } from './jira-config';
+import type { TrackerAdapter } from './tracker-adapter';
 import { fetchTrackerFiles, type FileSource, type TrackerFile } from './tracker-files';
 
 const CONTENT_PATH = /^\/rest\/api\/3\/attachment\/content\/\d+$/u;
@@ -59,3 +59,15 @@ export function fetchJiraFiles(
   };
   return fetchTrackerFiles(markdown, source, fetchFn);
 }
+
+/** Jira's `files` capability: without the integration, an attachment needs its token, so its link stays. */
+export const jiraFiles: NonNullable<TrackerAdapter['files']> = {
+  fetch: (markdown, access, fetchFn) =>
+    access === null
+      ? Promise.resolve({ markdown, files: [] })
+      : fetchJiraFiles(
+          markdown,
+          { secret: access.secret, config: jiraConfigOf(access.config) },
+          fetchFn,
+        ),
+};

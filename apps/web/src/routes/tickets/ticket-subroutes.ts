@@ -23,7 +23,7 @@ import { ticketWorkspaceRoutes } from './ticket-workspace';
 export function ticketSubroutes(db: Db, services: ApiServices): Hono {
   const { github } = services;
   const routes = new Hono();
-  routes.post('/', (c) => addTicket(db, c));
+  routes.post('/', (c) => addTicket(db, { notion: services.notion, jira: services.jira }, c));
   routes.route('/', githubImportRoutes(db, github));
   routes.route('/:id/attachments', attachmentRoutes(db));
   routes.route('/:id/preview', previewRoutes(db));
