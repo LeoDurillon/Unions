@@ -66,7 +66,8 @@ Open findings of the security reviews (2026-10-24 audit, 2026-11-08 review), to 
 - [One adapter per tracker](tracker-adapters.md): what Notion and Jira do (comments, statuses, fields, links,
   specs, reviews, files) behind one `TrackerAdapter` with capabilities, shared field types and rule actions, one
   contract test suite and an ast-grep guard, so a new tracker is an adapter and its settings. Planned (2026-11-07),
-  updated 2026-11-13: step 3 now also takes over tracker properties.
+  updated 2026-11-13: step 3 now also takes over tracker properties. Step 1 built (2026-11-13, branch
+  `tracker-adapters`).
 - [Code quality](code-quality.md): a coverage floor and a check for untested files, tests for the client's hooks,
   import boundaries with dependency-cruiser, mutation testing of the state machine, splitting the files at the
   300-line limit, and smaller checks. Planned (2026-10-23), decisions to confirm.

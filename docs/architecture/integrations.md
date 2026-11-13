@@ -53,7 +53,12 @@ Containers never hold GitHub credentials. Tokens, the App's key and integration 
   change "Saving…" until one answers (`pendingTrackerFields`, over `pending-comments.ts`).
 - Trackers a project is connected to (Notion, Jira) are rows of `integrations`, one per kind: secret, config, the
   tracker's columns as read. Each kind has a browser-safe entry (`@union/core/integration-kinds`: label, ID parsing,
-  config check) and a provider over its API client (`integrationProvider`, `integrations/providers.ts`). The web
+  config check, the capabilities its adapter has) and an adapter over its API client (`trackerAdapter`, whose
+  `IntegrationProvider` part `integrationProvider` returns, `integrations/providers.ts`). A `TrackerAdapter`
+  (`integrations/tracker-adapter.ts`) is the provider plus optional capabilities: `refs` (an item's id from a key or
+  a link, why another site's link is refused, the items a text names) and `text` (the tracker's markdown as plain
+  markdown); features are moving onto them ([plan](../plans/tracker-adapters.md)). Every adapter passes the same
+  cases (`adapter-contract.ts`) against its fake API (`fake-notion-api.ts`, `fake-jira-api.ts`). The web
   routes are generic (`routes/integrations.ts`): `POST /api/integrations/:kind/verify` (no project: onboarding),
   and under `/api/projects/:id/integrations/:kind`, `PUT` (reads the columns with the new secret and config, then
   saves; no secret keeps the stored one), `DELETE`, `POST /fields` (read the columns again) and `POST /import` (an

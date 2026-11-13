@@ -1,6 +1,7 @@
 # One adapter per tracker
 
 Status: planned (2026-11-07), brought up to date 2026-11-13 after [tracker properties](archive/tracker-properties.md).
+Step 1 built (2026-11-13, branch `tracker-adapters`).
 Follows [Jira](archive/jira.md) and its gap plans, built and deployed; prepares a later
 tracker (Linear, GitHub Issues as a source, Asana…).
 
@@ -107,6 +108,11 @@ Each step moves Notion and Jira together, keeps the screens as they are, and is 
 
 1. **The adapter and its contract.** `TrackerAdapter` (D1) with `refs` and `text`; Notion and Jira adapters
    wrapping their providers; the contract suite (D5) for these two capabilities; the registry. No caller changes.
+   Built: `text` reads only (the tracker's markdown as plain markdown). Markdown to the tracker's format moves to
+   step 2, where comments use it: Notion takes two formats (rich text for a comment, markdown for a new page), so the
+   capability is shaped by its calls rather than guessed. The kinds name their capabilities, and the contract
+   checks the adapter has those. The fakes are new (`fake-notion-api.ts`, `fake-jira-api.ts`); the providers' own
+   tests keep their inline fakes until a step touches them.
 2. **Comments.** The `comments` capability; one comments route and one ticket tab (D4) for both; the post commands
    (`post_notion_comment`, `post_jira_comment`) become `post_tracker_comment` (the worker reads the old names for one
    release, so commands queued before the deploy still run). Add to review over the adapter.

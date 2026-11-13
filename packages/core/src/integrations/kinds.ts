@@ -3,6 +3,7 @@
 import { jiraRefSiteError, parseJiraKey, readJiraConfig } from './jira-config';
 import { parseNotionId } from './notion-id';
 import { notionMarkdown } from './notion-markdown';
+import type { TrackerCapability } from './tracker-adapter';
 
 export type IntegrationKindName = 'notion' | 'jira';
 
@@ -21,6 +22,8 @@ export type IntegrationKind = {
   refError?(input: string, config: unknown): string | null;
   /** Whether Union can add an item to the source (a ticket written from an investigation). */
   createsItems: boolean;
+  /** What the kind's adapter can do, so the browser shows only what it supports. */
+  capabilities: readonly TrackerCapability[];
   /** The tracker's markdown as plain GitHub-flavored markdown. */
   cleanMarkdown(markdown: string): string;
   /** A config as sent by the browser, checked and normalized; or what is wrong with it. */
@@ -49,6 +52,7 @@ const KINDS: Record<IntegrationKindName, IntegrationKind> = {
     cleanMarkdown: (markdown) => notionMarkdown(markdown),
     readConfig: readNotionConfig,
     createsItems: true,
+    capabilities: ['refs', 'text'],
   },
   jira: {
     kind: 'jira',
@@ -61,6 +65,7 @@ const KINDS: Record<IntegrationKindName, IntegrationKind> = {
     readConfig: readJiraConfig,
     refError: jiraRefSiteError,
     createsItems: true,
+    capabilities: ['refs', 'text'],
   },
 };
 
