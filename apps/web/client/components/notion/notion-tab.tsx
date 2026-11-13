@@ -12,30 +12,12 @@ import {
   useNotionReviewImport,
   type NotionReviewImport,
 } from '../../lib/integrations/use-notion-review-import';
+import { TrackerEmpty } from '../tracker/tracker-empty';
 import { Loading, SkeletonList } from '../ui/skeleton';
 import { CARD_CLASS, ErrorText } from '../ui/ui';
 import { NotionDiscussion } from './notion-discussion';
 import { NotionPageCard } from './notion-page-card';
 import { NotionReply } from './notion-reply';
-
-/** The page has no open discussion: what would show here. */
-function NoDiscussions(): ReactElement {
-  return (
-    <div className="flex flex-col items-center gap-1 rounded-xl border border-dashed border-zinc-300 bg-white px-6 py-8 text-center dark:border-zinc-700 dark:bg-zinc-900">
-      <span
-        aria-hidden
-        className="flex size-8 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-300"
-      >
-        ✓
-      </span>
-      <p className="mt-1 text-sm font-semibold">No open comments</p>
-      <p className="max-w-sm text-xs text-zinc-500">
-        When someone comments on the Notion page, the discussion shows here: reply to it, or add it
-        to the review.
-      </p>
-    </div>
-  );
-}
 
 function Discussions({
   view,
@@ -57,7 +39,10 @@ function Discussions({
         </p>
       ) : null}
       {view.discussions.length === 0 ? (
-        <NoDiscussions />
+        <TrackerEmpty title="No open comments">
+          When someone comments on the Notion page, the discussion shows here: reply to it, or add
+          it to the review.
+        </TrackerEmpty>
       ) : (
         view.discussions.map((discussion) => (
           <NotionDiscussion

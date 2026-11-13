@@ -1,21 +1,23 @@
 // One comment of a ticket's Jira issue: who wrote it and when, who may see it, and its text. Also
-// where it is in Jira, and what can be done with it (Reply).
+// where it is in Jira, and what can be done with it (Add to review, Reply).
 
 import type { JiraComment } from '@union/core';
 import type { ReactElement, ReactNode } from 'react';
 
 import { formatWhen } from '../../lib/ui/relative-time';
 import { Markdown } from '../markdown/markdown';
-import { Badge } from '../ui/ui';
+import { Badge, CARD_CLASS } from '../ui/ui';
 
-const CARD =
-  'space-y-2 rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm dark:border-zinc-800 dark:bg-zinc-900';
+const CARD = `${CARD_CLASS} text-sm`;
 
 export function JiraCommentCard({
   comment,
+  action,
   children,
 }: {
   comment: JiraComment;
+  /** Beside the author: Add to review. */
+  action?: ReactNode;
   /** Under the text: Reply, what is being sent in answer. */
   children?: ReactNode;
 }): ReactElement {
@@ -28,6 +30,7 @@ export function JiraCommentCard({
           {comment.edited ? ' · edited' : ''}
         </span>
         {comment.restriction === null ? null : <Badge tone="amber">{comment.restriction}</Badge>}
+        {action}
         <a
           href={comment.url}
           target="_blank"

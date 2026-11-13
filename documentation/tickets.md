@@ -220,10 +220,12 @@ Then come the tabs:
   **Capabilities**); without them the tab says which.
 - **Jira**, in the Notion tab's place for a ticket imported from Jira (the Overview's **Jira** row links the issue,
   and once the tab has read them says how many comments it has; see
-  [Link a ticket to its Notion page or Jira issue](#link-a-ticket-to-its-notion-page-or-jira-issue)): the issue's comments, oldest first, each with
+  [Link a ticket to its Notion page or Jira issue](#link-a-ticket-to-its-notion-page-or-jira-issue)): a card for
+  the issue (its summary, key, type, status, assignee and when it was last updated, **Open in Jira** and
+  **Refresh**, which reads the issue and its comments again), then the issue's comments, oldest first, each with
   its author, time ("edited" when changed), **Open in Jira**, and a badge when not everyone can see it (a role or
-  group, or an internal note). **Refresh** reads them again; an issue with more than 500 comments shows the latest 500. **Reply** under a comment posts a new comment that starts with a mention of its author, so Jira notifies
-  them (Jira comments have no threads); **New comment** at the bottom posts a plain one. You can write
+  group, or an internal note). An issue with more than 500 comments shows the latest 500. **Reply** under a comment posts a new comment that starts with a mention of its author, so Jira notifies
+  them (Jira comments have no threads); **New comment** in the **Comment on the issue** card at the bottom posts a plain one. You can write
   markdown: `**bold**`, `` `code` ``, `[links](https://…)`, lists, code blocks and quotes keep their shape in Jira
   (inline code cannot be bold in Jira, so bold around it is dropped). Comments are posted as the Atlassian account of the project's Jira connection and visible to everyone
   who can see the issue. The comment shows "Sending to Jira…" until Jira has it; if Jira refuses it, the box opens

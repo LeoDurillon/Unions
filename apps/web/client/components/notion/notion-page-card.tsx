@@ -5,8 +5,7 @@ import type { ReactElement } from 'react';
 import type { NotionPageFacts } from '../../../src/notion-discussion-types';
 import { timeAgo } from '../../lib/ui/relative-time';
 import { useNow } from '../../lib/ui/use-now';
-import { Bone } from '../ui/skeleton';
-import { Button, CARD_CLASS } from '../ui/ui';
+import { TrackerItemCard } from '../tracker/tracker-item-card';
 
 /** `status In review · edited 2 h ago`, or what Notion did not give left out. */
 function PageFacts({ facts }: { facts: NotionPageFacts }): ReactElement {
@@ -28,22 +27,8 @@ function PageFacts({ facts }: { facts: NotionPageFacts }): ReactElement {
   );
 }
 
-/** Before Notion answered: shapes; a page it could not read: what the tab still shows. */
-function Heading({
-  facts,
-  loaded,
-}: {
-  facts: NotionPageFacts | null;
-  loaded: boolean;
-}): ReactElement {
-  if (!loaded) {
-    return (
-      <div className="space-y-1.5">
-        <Bone className="h-3.5" width="45%" />
-        <Bone className="h-2.5" width="30%" />
-      </div>
-    );
-  }
+/** A page Notion could not read: what the tab still shows. */
+function Heading({ facts }: { facts: NotionPageFacts | null }): ReactElement {
   if (facts === null) {
     return (
       <>
@@ -77,29 +62,14 @@ export function NotionPageCard({
   onRefresh: () => void;
 }): ReactElement {
   return (
-    <div className={`${CARD_CLASS} flex items-center gap-3 space-y-0`}>
-      <span
-        aria-hidden
-        className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50 font-semibold dark:border-zinc-700 dark:bg-zinc-800"
-      >
-        N
-      </span>
-      <div className="min-w-0 flex-1">
-        <Heading facts={facts} loaded={loaded} />
-      </div>
-      {pageUrl ? (
-        <a
-          href={pageUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="shrink-0 text-sm text-indigo-600 hover:underline dark:text-indigo-400"
-        >
-          Open in Notion ↗
-        </a>
-      ) : null}
-      <Button className="shrink-0" disabled={reading} onClick={onRefresh}>
-        {reading ? 'Reading…' : 'Refresh'}
-      </Button>
-    </div>
+    <TrackerItemCard
+      mark="N"
+      loaded={loaded}
+      open={pageUrl ? { url: pageUrl, label: 'Open in Notion' } : null}
+      reading={reading}
+      onRefresh={onRefresh}
+    >
+      <Heading facts={facts} />
+    </TrackerItemCard>
   );
 }

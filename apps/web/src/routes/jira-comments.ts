@@ -1,7 +1,7 @@
-// `/api/tickets/:id/jira-comments`: the comments of the Jira issue a ticket was imported from, read
+// `/api/tickets/:id/jira-comments`: the Jira issue a ticket was imported from and its comments, read
 // now. Also those the user sends to it, posted by the worker.
 
-import { jiraAuthOf, type Db, type JiraApi, type Ticket } from '@union/core';
+import { jiraAuthOf, readJiraIssueFacts, type Db, type JiraApi, type Ticket } from '@union/core';
 import { Hono } from 'hono';
 
 import { ACCEPTED, CONFLICT, fail, NOT_FOUND, readObject } from '../http';
@@ -30,7 +30,7 @@ function authFor(db: Db, ticket: Ticket): NonNullable<ReturnType<typeof jiraAuth
 }
 
 /**
- * `GET` reads the comments from Jira on each call (the tab reads them once per opening, and on
+ * `GET` reads the issue and its comments from Jira on each call (the tab reads them once per opening, and on
  * Refresh), with those not posted yet and those in the review. `POST` (`{ text, replyTo? }`) queues a
  * comment; `POST /import` (`{ commentId }`) adds one to the review.
  */
@@ -40,10 +40,14 @@ export function ticketJiraCommentRoutes(db: Db, jira: JiraApi): Hono {
     const ticket = loadTicket(db, c);
     const key = issueKeyOf(ticket);
     const auth = authFor(db, ticket);
-    const read = await guarded(() => jira.comments(auth, key));
+    const [read, issue] = await Promise.all([
+      guarded(() => jira.comments(auth, key)),
+      readJiraIssueFacts(jira, auth, key),
+    ]);
     const view: JiraTabView = {
       key,
       issueUrl: ticket.originUrl ?? `${auth.site}/browse/${key}`,
+      issue,
       comments: read.comments,
       total: read.total,
       pending: pendingJiraComments(db, ticket.id),

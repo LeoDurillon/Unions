@@ -1,5 +1,5 @@
-// What the ticket's Jira tab reads: the issue's comments, read from Jira now, and those still being sent.
-import type { JiraComment } from '@union/core';
+// What the ticket's Jira tab reads: the issue and its comments, read from Jira now, and those still being sent.
+import type { JiraComment, JiraIssueFacts } from '@union/core';
 
 /** A comment queued for the worker; `replyTo` is the comment it answers, null for a new one. */
 export type PendingJiraComment = {
@@ -13,6 +13,8 @@ export type PendingJiraComment = {
 export type JiraTabView = {
   key: string;
   issueUrl: string;
+  /** Null when the issue could not be read; the comments still show. */
+  issue: JiraIssueFacts | null;
   comments: JiraComment[];
   total: number;
   pending: PendingJiraComment[];

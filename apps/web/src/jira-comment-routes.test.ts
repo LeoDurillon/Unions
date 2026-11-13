@@ -39,8 +39,21 @@ let app: Hono;
 let projectId: number;
 let asked: { token: string; key: string }[];
 let failure: Error | null;
+let issueRefused: boolean;
+
+const ISSUE_BODY = {
+  fields: {
+    summary: 'Dark mode',
+    issuetype: { name: 'Story' },
+    status: { name: 'In Review', statusCategory: { key: 'indeterminate' } },
+    assignee: null,
+    updated: '2026-11-12T10:00:00.000+0100',
+  },
+};
 
 const jira = {
+  read: () =>
+    issueRefused ? Promise.reject(new JiraError('Not found', 404)) : Promise.resolve(ISSUE_BODY),
   comments: (auth, key) => {
     asked.push({ token: auth.token, key });
     return failure ? Promise.reject(failure) : Promise.resolve({ comments: [COMMENT], total: 1 });
@@ -60,6 +73,7 @@ beforeEach(() => {
   saveIntegration(db, projectId, 'jira', { secret: 'tok', config });
   asked = [];
   failure = null;
+  issueRefused = false;
 });
 
 function jiraTicket(): number {
@@ -79,12 +93,26 @@ test("the tab reads the issue's comments with the project's token", async () => 
   expect(await response.json()).toEqual({
     key: 'ABC-1',
     issueUrl: `${SITE}/browse/ABC-1`,
+    issue: {
+      summary: 'Dark mode',
+      type: 'Story',
+      status: { name: 'In Review', category: 'indeterminate' },
+      assignee: null,
+      updatedAt: '2026-11-12T10:00:00.000+0100',
+    },
     comments: [COMMENT],
     total: 1,
     pending: [],
     review: { importedIds: [], refusal: 'Available once the ticket is implemented' },
   });
   expect(asked).toEqual([{ token: 'tok', key: 'ABC-1' }]);
+});
+
+test('an issue Jira does not give leaves its card empty; the comments still show', async () => {
+  issueRefused = true;
+  const view = (await (await read(jiraTicket())).json()) as { issue: unknown; comments: unknown[] };
+  expect(view.issue).toBeNull();
+  expect(view.comments).toEqual([COMMENT]);
 });
 
 test('a ticket not from Jira, or a project no longer connected, is refused without calling Jira', async () => {
