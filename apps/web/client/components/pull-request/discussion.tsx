@@ -17,7 +17,7 @@ import {
 } from '../../lib/review/use-review';
 import { CommentCard } from '../review/comment-card';
 import { CARD_CLASS, ErrorText } from '../ui/ui';
-import { LineThreads } from './line-threads';
+import { TicketLineThreads } from './line-threads';
 import { DiscussionLoading, NoteCard } from './note-card';
 import { filterNotes, NoteFilterControl, useNoteFilter } from './note-filter';
 import { ReplyArea, SendAllReplies } from './reply-area';
@@ -118,7 +118,7 @@ export function Discussion({ ticketId, pr }: { ticketId: number; pr: number }): 
     <div className="space-y-4">
       <SendAllReplies replies={replies} />
       <ImportedDrafts comments={comments.data ?? []} mutations={mutations} />
-      <LineThreads ticketId={ticketId} discussion={discussion.data} replies={replies} />
+      <TicketLineThreads ticketId={ticketId} discussion={discussion.data} replies={replies} />
       <Notes discussion={discussion.data} importNote={importNote} replies={replies} />
     </div>
   );

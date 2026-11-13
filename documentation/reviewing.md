@@ -187,16 +187,16 @@ left ("5 of 15 open").
 
 **Open review** opens the same review page, with these tabs:
 
-| Tab             | What it shows                                                                                                                            |
-| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| **Description** | The pull request's description, and the Notion pages and Jira issues it implements (**Link** them here).                                 |
-| **Notion**      | The text of the linked Notion pages, once there are some, each followed by its open comments (read only).                                |
-| **Jira**        | The description of the linked Jira issues, once there are some, each followed by its comments (read only; reply in Jira).                |
-| **Comments**    | Its review summaries, conversation and line threads, each with **Reply** or **Quote reply**; a thread's file and lines open in the diff. |
-| **Report**      | The [spec report](#spec-report), as for a ticket.                                                                                        |
-| **Agents**      | [Your review agents](#your-review-agents), as for a ticket.                                                                              |
-| **Preview**     | A [preview](previews.md#previews-of-pull-requests-under-review) of the pull request's code.                                              |
-| **Diff**        | The diff, comments, Explain and Review with agent, as for a ticket.                                                                      |
+| Tab             | What it shows                                                                                                                                                                                    |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Description** | The pull request's description, and the Notion pages and Jira issues it implements (**Link** them here).                                                                                         |
+| **Notion**      | The text of the linked Notion pages, once there are some, each followed by its open comments (read only).                                                                                        |
+| **Jira**        | The description of the linked Jira issues, once there are some, each followed by its comments (read only; reply in Jira).                                                                        |
+| **Comments**    | Its line threads (the resolved ones folded below the open ones), then its review summaries and conversation, each with **Reply** or **Quote reply**; a thread's file and lines open in the diff. |
+| **Report**      | The [spec report](#spec-report), as for a ticket.                                                                                                                                                |
+| **Agents**      | [Your review agents](#your-review-agents), as for a ticket.                                                                                                                                      |
+| **Preview**     | A [preview](previews.md#previews-of-pull-requests-under-review) of the pull request's code.                                                                                                      |
+| **Diff**        | The diff, comments, Explain and Review with agent, as for a ticket.                                                                                                                              |
 
 When the project is connected to Jira, the **Description** tab also has **Jira issues**. Issues of your Jira project
 that the pull request names, in its title, its branch (`feature/ABC-123-dark-mode`) or its description (the key or a
