@@ -1,7 +1,8 @@
-// A page or issue a review is linked to, in its Notion or Jira tab: its text and comments, its properties beside them.
+// An item a review is linked to, in its tracker's tab: its text and comments, its properties beside them.
 // The properties are editable, as in a ticket's tab.
 
 import type { TrackerProperty } from '@union/core';
+import type { IntegrationKindName } from '@union/core/integration-kinds';
 import type { ReactElement, ReactNode } from 'react';
 
 import type { CurrentReview } from '../../../src/api-types';
@@ -20,7 +21,7 @@ export function ReviewTrackerItem({
   review: CurrentReview;
   /** The linked item: its tracker and id, its properties and those being set. */
   item: {
-    kind: 'notion' | 'jira';
+    kind: IntegrationKindName;
     itemId: string;
     properties: TrackerProperty[];
     pendingFields: PendingTrackerField[];
@@ -32,10 +33,7 @@ export function ReviewTrackerItem({
 }): ReactElement {
   const { kind, itemId } = item;
   const sender = useTrackerFieldSend(reviewFieldTarget(review, { kind, itemId }, queryKey));
-  const transitionsUrl =
-    kind === 'jira'
-      ? `${reviewTrackerBase(review)}/jira/${encodeURIComponent(itemId)}/transitions`
-      : null;
+  const transitionsUrl = `${reviewTrackerBase(review)}/trackers/${kind}/${encodeURIComponent(itemId)}/moves`;
   const editing = {
     kind,
     projectId: review.projectId,

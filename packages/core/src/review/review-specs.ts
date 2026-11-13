@@ -167,6 +167,26 @@ function unlinkItem(db: Db, owner: AgentReviewOwner, kind: TrackerSpec, ref: str
 
 const PREFIXES: Record<TrackerSpec, string> = { notion: NOTION_PREFIX, jira: JIRA_PREFIX };
 
+/** Links an item of a tracker (`title` as its list shows it: "KEY summary" for Jira), as a page is. */
+export function linkTrackerItem(
+  db: Db,
+  owner: AgentReviewOwner,
+  kind: TrackerSpec,
+  item: LinkedPage,
+): void {
+  linkItem(db, owner, { kind, item, label: `${PREFIXES[kind]}${item.title}` });
+}
+
+/** Unlinks an item: its spec is removed (kept removed, so a ticket's origin item is not added back). */
+export function unlinkTrackerItem(
+  db: Db,
+  owner: AgentReviewOwner,
+  kind: TrackerSpec,
+  ref: string,
+): void {
+  unlinkItem(db, owner, kind, ref);
+}
+
 /** The items of a tracker linked to the review: its specs of that kind not removed. */
 export function linkedTrackerItems(
   db: Db,
@@ -186,11 +206,6 @@ export function linkNotionPage(db: Db, owner: AgentReviewOwner, page: LinkedPage
   linkItem(db, owner, { kind: 'notion', item: page, label: `${NOTION_PREFIX}${page.title}` });
 }
 
-/** Unlinks a page: its spec is removed (kept removed, so a ticket's origin page is not added back). */
-export function unlinkNotionPage(db: Db, owner: AgentReviewOwner, pageId: string): void {
-  unlinkItem(db, owner, 'notion', pageId);
-}
-
 /** The Jira issues linked to the review: its `jira` specs not removed (`id` the key, `title` "KEY summary"). */
 export function linkedJiraIssues(db: Db, owner: AgentReviewOwner): LinkedPage[] {
   return linkedItems(db, owner, 'jira', JIRA_PREFIX);
@@ -199,8 +214,4 @@ export function linkedJiraIssues(db: Db, owner: AgentReviewOwner): LinkedPage[] 
 /** Links an issue (`title` "KEY summary"), as a page is. */
 export function linkJiraIssue(db: Db, owner: AgentReviewOwner, issue: LinkedPage): void {
   linkItem(db, owner, { kind: 'jira', item: issue, label: `${JIRA_PREFIX}${issue.title}` });
-}
-
-export function unlinkJiraIssue(db: Db, owner: AgentReviewOwner, key: string): void {
-  unlinkItem(db, owner, 'jira', key);
 }

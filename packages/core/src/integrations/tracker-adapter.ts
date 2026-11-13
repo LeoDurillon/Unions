@@ -6,7 +6,7 @@ import type { IntegrationKindName } from './kinds';
 import type { IntegrationProvider } from './provider';
 import type { TrackerCommentInput, TrackerThreads } from './tracker-comments';
 import type { CheckedField, FieldChange, TrackerAccess, TrackerFieldInput } from './tracker-fields';
-import type { LinkedItem, TrackerItemFacts, TrackerMove } from './tracker-item';
+import type { LinkedItem, TrackerItemFacts, TrackerItemText, TrackerMove } from './tracker-item';
 import type { TrackerRules } from './tracker-rules';
 
 /** Every capability an adapter may have, in the order `capabilitiesOf` lists them. */
@@ -23,10 +23,11 @@ type TrackerRefs = {
   /** The items the texts name (a pull request's title, branch, description), once each, in order. */
   namedIn(texts: readonly string[], config: unknown): string[];
   /**
-   * The item `itemId` names, read to link it to a ticket: a Notion page shared with the integration,
-   * a Jira issue of the project's Jira project. Throws when the tracker does not give it.
+   * The item `itemId` names, read to link it: a Notion page shared with the integration, a Jira issue
+   * of the project's Jira project, or with `anywhere` (a review's) any the account sees. Throws when the
+   * tracker does not give it.
    */
-  check(secret: string, config: unknown, itemId: string): Promise<LinkedItem>;
+  check(secret: string, config: unknown, itemId: string, anywhere?: boolean): Promise<LinkedItem>;
   /** The item's address in the tracker, when Union did not keep the one it was given. */
   url(itemId: string, config: unknown): string;
 };
@@ -35,6 +36,8 @@ type TrackerRefs = {
 type TrackerText = {
   /** The tracker's markdown, as a ticket imported from it stores it, as plain GitHub-flavored markdown. */
   markdown(raw: string): string;
+  /** The item's text as markdown, read now; `truncated` when the tracker cut a long one short. */
+  read(secret: string, config: unknown, itemId: string): Promise<TrackerItemText>;
 };
 
 /** An item's comments: read as threads, and one posted (a reply as the kind's `commentReplies` says). */

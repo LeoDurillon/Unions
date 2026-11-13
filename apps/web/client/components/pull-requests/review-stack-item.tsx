@@ -5,6 +5,7 @@ import type { ReactElement } from 'react';
 import type { CurrentReview } from '../../../src/api-types';
 import { Badge } from '../ui/ui';
 import { ReviewCardActions } from './review-item';
+import { StackTrackerBadges } from './review-tracker-badges';
 
 /** `stack` is bottom first; Open review opens its bottom pull request. */
 export function ReviewStackItem({
@@ -22,7 +23,6 @@ export function ReviewStackItem({
   const posting = stack.some((review) => review.submitStatus === 'sending');
   const failed = stack.some((review) => review.submitStatus === 'failed');
   const previewing = stack.some((review) => review.previewStatus === 'running');
-  const linked = stack.filter((review) => review.notionPages.length > 0);
   return (
     <li className="flex flex-col gap-2 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
       <p className="truncate font-mono text-[11px] text-zinc-500">
@@ -35,21 +35,7 @@ export function ReviewStackItem({
           {posting ? <Badge tone="blue">posting…</Badge> : null}
           {failed ? <Badge tone="red">posting failed</Badge> : null}
           {previewing ? <Badge tone="green">preview running</Badge> : null}
-          {linked.length > 0 ? (
-            <Badge
-              tone="neutral"
-              title={linked
-                .map(
-                  (review) =>
-                    `#${review.prNumber}: ${review.notionPages.map((page) => page.title).join(', ')}`,
-                )
-                .join('\n')}
-            >
-              {linked.length === stack.length
-                ? 'Notion'
-                : `Notion ${linked.length}/${stack.length}`}
-            </Badge>
-          ) : null}
+          <StackTrackerBadges stack={stack} />
         </p>
       </div>
       <ReviewCardActions

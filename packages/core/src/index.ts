@@ -123,6 +123,7 @@ export * from './integrations/notion-mentions';
 export * from './integrations/notion-provider';
 export * from './integrations/provider';
 export * from './integrations/providers';
+export type { TrackerAdapter } from './integrations/tracker-adapter';
 export * from './integrations/store';
 export * from './pull-request/pr-descriptions';
 export * from './pull-request/pr-description-outdated';

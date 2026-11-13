@@ -255,16 +255,19 @@
   error) and `PUT /specs` (the whole list; a Notion spec's ref becomes the page id). The client: the bar
   `specs-bar.tsx` under the header (`review-top.tsx`), the dialog `specs-dialog.tsx` and `spec-row.tsx`, its open
   state in `specs-editing.tsx` (the agent dialogs' "Edit the specs"), `lib/review/use-review-specs.ts`.
-- A review's Notion pages: its `notion` specs. `routes/review/review-notion.ts` (mounted from `review-workspace.ts`) reads
-  each linked page's text and its open discussions (`GET`, one page at a time; core's `notionThreadsOfPage`
-  reuses the markdown already read, and a refused comment read becomes the page's `threads.error`, so the text
-  still shows), checks a page before linking (`POST /check`), links one more (`PUT`) and unlinks
-  one (`DELETE /:pageId`); `{ page, stack: true }` also links the reviews of its GitHub stack without a page
-  (`github_stack_number`). The reviews list carries `notionPages` (`current-review-list.ts`). `GET
-  /notion/suggestions` (`review-notion-suggestions.ts`) reads the description's Notion links (`notionUrlsIn`,
-  `@union/core` `notion-links.ts`) and returns the readable ones not linked yet. The client's row is `review-notion-link.tsx` (suggestions and the stack button in `review-notion-offers.tsx`) in the
-  Description tab (`review-description.tsx`), the tab `review-notion-tab.tsx`, both through
-  `lib/review/use-review-notion.ts`; `prReviewSections` adds the tab when the review has pages.
+- A review's tracker items: its specs of each tracker's kind, under `<review>/trackers/:kind` (`routes/review/`,
+  mounted by `review-trackers.ts`). `review-tracker-items.ts` reads each linked item's text, properties and
+  comments (`GET`, one item at a time, through the adapter's `text.read`, `fields.read` and `comments.read`; a
+  refused comment read becomes the item's `threads.error`, so the text still shows) and its moves
+  (`GET /:itemId/moves`). `review-tracker-links.ts` checks an item before linking (`POST /check`: any item the
+  account sees, the adapter's `refs.check` with `anywhere`), links one more (`PUT`; `{ item, stack: true }` also
+  links the reviews of its GitHub stack without an item of the tracker, `github_stack_number`), unlinks one
+  (`DELETE /:itemId`), and suggests the items the title, head branch and description name (`GET /suggestions`,
+  the adapter's `refs.namedIn`, readable ones not linked yet, at most 10). The reviews list carries `linkedItems`
+  by kind (`current-review-list.ts`). In the client, each tracker's row in the Description tab is
+  `review-tracker-link.tsx` (suggestions and the stack button in `review-tracker-offers.tsx`), its tab
+  `review-tracker-tab.tsx`, both through `lib/review/use-review-tracker.ts`; `prReviewSections` adds a tracker's
+  tab when the review has its items, and the cards show them as `review-tracker-badges.tsx`.
 - Grouping by spec: the file panel's "By spec" switch (`group-by-spec-button.tsx`) opens `group-by-spec-dialog.tsx`,
   which sends the review's specs as one text (`groupingText`; sources read by `routes/spec-sources.ts`: the PR
   description without Union's links, the ticket's text, a GitHub issue, any Notion page the integration can read)

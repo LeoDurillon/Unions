@@ -1,9 +1,11 @@
-// A Notion page as its card shows it: title, status column, last edit, properties with the data source's options.
+// A Notion page as its card shows it (title, status column, last edit, properties with options), and its text.
 
 import type { NotionApi } from './notion-api';
 import { isDataSource } from './notion-integration';
+import { notionMarkdown } from './notion-markdown';
+import { mentionTitles } from './notion-mentions';
 import type { TrackerAccess } from './tracker-fields';
-import type { TrackerItemFacts } from './tracker-item';
+import type { TrackerItemFacts, TrackerItemText } from './tracker-item';
 import type { TrackerProperty } from './tracker-property';
 
 /** A choice's options are the data source's as last read: the page does not give them. */
@@ -29,4 +31,15 @@ export async function readNotionItem(
     changedAt: page.editedAt ?? null,
     properties: withOptions(access, page.properties ?? []),
   };
+}
+
+/** The page's text as markdown, its mentions named; `truncated` when Notion cut a long page short. */
+export async function readNotionText(
+  notion: NotionApi,
+  token: string,
+  pageId: string,
+): Promise<TrackerItemText> {
+  const { markdown, truncated } = await notion.pageMarkdown(token, pageId);
+  const titles = await mentionTitles(notion, token, markdown);
+  return { markdown: notionMarkdown(markdown, titles).trim(), truncated };
 }

@@ -1,7 +1,7 @@
 # One adapter per tracker
 
 Status: planned (2026-11-07), brought up to date 2026-11-13 after [tracker properties](archive/tracker-properties.md).
-Steps 1 to 3 and 4a built (2026-11-13, branch `tracker-adapters`); step 3 checked on real Jira, Notion's check waits.
+Steps 1 to 4 built (2026-11-13, branch `tracker-adapters`); step 3 checked on real Jira, Notion's check waits.
 Follows [Jira](archive/jira.md) and its gap plans, built and deployed; prepares a later
 tracker (Linear, GitHub Issues as a source, Asana…).
 
@@ -176,8 +176,15 @@ Each step moves Notion and Jira together, keeps the screens as they are, and is 
    (`/api/tickets/:id/trackers/:kind/link`), one card (`ticket-item-card.tsx`) and one Overview row per kind
    (`ticket-tracker-row.tsx`), their wording from the kind (`namedByKey`, `linkPrompt`, `commentCount`,
    `changedLabel`). Seen on screen: a card that could not read its item says "Its comments, read when the tab
-   opens" for Notion too. 4b, next: the review side (links, suggestions over `refs.namedIn`, the review's tabs and
-   specs).
+   opens" for Notion too. 4b built (the review side): `<review>/trackers/:kind` reads the linked items (the
+   adapter's `text.read`, `fields.read`, `comments.read`), checks, links and unlinks them (`refs.check` with
+   `anywhere`: a review may link another Jira project's issue), suggests those the pull request names
+   (`refs.namedIn`); the reviews list carries `linkedItems` by kind. One row, tab, offers and badges in the client.
+   Compared on the user's three reviews with Notion pages: the same text (but the signed image links), discussions
+   and properties as before. Seen on screen: Notion's suggestions read the title and branch too and show as
+   Jira's did ("Named in the pull request: … Link"); Jira's row shows its field at once when no issue is linked,
+   as Notion's did; linking the whole stack works for Jira too; a review's card shows a Jira badge as it showed
+   Notion's; an item without text says "No text."
 
 5. **Creating items and files.** `createItem` and attachments through the adapter; the investigation's "Also create
    it in" for every adapter that can.

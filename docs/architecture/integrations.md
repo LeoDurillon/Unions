@@ -82,7 +82,7 @@ Containers never hold GitHub credentials. Tokens, the App's key and integration 
   `routes/notion.ts`, through the Notion
   `IntegrationProvider`), the pages a pull
   request under review is linked to and the review's Notion specs (any page shared with the integration;
-  `routes/review/review-notion.ts`, `routes/review/review-specs.ts`, their text (and in the review's Notion tab, their open discussions) read fresh each time, mention titles from core's `integrations/notion-mentions.ts`), and the open
+  the review's tracker routes (web.md), `routes/review/review-specs.ts`, their text (and in the review's Notion tab, their open discussions) read fresh each time, mention titles from core's `integrations/notion-mentions.ts`), and the open
   discussions of a ticket's page (the comments route below; core's `notion-threads.ts` reads the page's comments,
   then those of each block its markdown marks as commented, one block at a time and at most 30;
   `notion-comments.ts` groups them and quotes the commented text; needs the integration's "Read comments"
@@ -126,12 +126,10 @@ Containers never hold GitHub credentials. Tokens, the App's key and integration 
   `POST /rest/api/3/issue` with the summary (255 characters at most) and the description converted by core's
   `markdown-adf.ts` (mdast with GitHub's extensions, from the `markdown` catalog; inline code keeps only a link
   mark, as ADF requires). Jira's refusal (a required field) is the investigation's `ticket_error`.
-- A review of someone else's pull request links Jira issues as its `jira` specs (core's `review-specs.ts`:
-  `linkJiraIssue`, `linkedJiraIssues`, `unlinkJiraIssue`). `routes/review/review-jira.ts` (under `<review>/jira`) reads
-  their descriptions and comments for the review's Jira tab, checks a key or link of the site (any project, as
-  specs), links and unlinks; `/suggestions` reads the keys the title, head branch and description name (core's
-  `jira-keys.ts`: the project's key prefix only, bare or as a `/browse/` link of the site), reads each (at most 10)
-  and drops the linked and unreadable ones. Nothing is written to Jira.
+- A review of someone else's pull request links Jira issues as its `jira` specs, as it links Notion pages (the
+  review's tracker routes, web.md): a key or link of the site, of any project (the adapter's `refs.check` with
+  `anywhere`); its suggestions are the keys the title, head branch and description name (core's `jira-keys.ts`:
+  the project's key prefix only, bare or as a `/browse/` link of the site). Nothing is written to Jira.
 - A ticket's tracker comments, for every tracker: `routes/tracker-comments.ts` (`/api/tickets/:id/trackers/:kind/comments`)
   reads them through the adapter's `comments.read` as threads (core's `tracker-comments.ts`: a Notion discussion is a
   thread; a Jira comment a thread of one), with the comments not posted yet (`tracker-comment-commands.ts` over
@@ -153,9 +151,9 @@ Containers never hold GitHub credentials. Tokens, the App's key and integration 
   for the status, that the picked transition is one `GET /issue/{key}/transitions` offers now (also served at
   `GET /api/tickets/:id/trackers/jira/moves` for the editor, the adapter's `fields.moves`). Its `fields.set` resolves "the active sprint",
   then `updateIssue` or `transitionIssue`; 403 names "Edit issues" or "Transition issues".
-  A review's Notion and Jira tabs list the same properties for each linked page or issue (`review-notion.ts`,
-  `review-jira.ts`), editable through `<review>/tracker-fields` (`routes/review/review-tracker-fields.ts`, refused
-  for an item the review is not linked to; the issue's moves at `<review>/jira/:key/transitions`). Such a command has
+  A review's tracker tabs list the same properties for each linked item (`review-tracker-items.ts`), editable
+  through `<review>/tracker-fields` (`routes/review/review-tracker-fields.ts`, refused for an item the review is
+  not linked to; an issue's moves at `<review>/trackers/:kind/:itemId/moves`). Such a command has
   no ticket: its payload's `reviewId` names the review, its events have no ticket, and `pendingReviewFields` finds
   those not answered by item.
   A value is typed in one input, in those tabs and in the rule editor's rows alike (the client's

@@ -2,6 +2,7 @@
 // the description from GitHub.
 
 import { githubText } from '@union/core/github-text';
+import { integrationKinds } from '@union/core/integration-kinds';
 import type { ReactElement } from 'react';
 
 import type { CurrentReview } from '../../../src/api-types';
@@ -9,8 +10,7 @@ import type { ReviewTarget } from '../../lib/review/review-target';
 import { useReviewDiscussion } from '../../lib/review/use-review';
 import { Markdown } from '../markdown/markdown';
 import { ErrorText } from '../ui/ui';
-import { ReviewJiraLinkRow } from './review-jira-link';
-import { ReviewNotionLinkRow } from './review-notion-link';
+import { ReviewTrackerLinkRow } from './review-tracker-link';
 
 export function ReviewLoading({ error }: { error: Error | null }): ReactElement {
   return error ? (
@@ -45,8 +45,9 @@ export function ReviewDescription({
 }): ReactElement {
   return (
     <div className="space-y-6">
-      <ReviewNotionLinkRow review={review} />
-      <ReviewJiraLinkRow review={review} />
+      {integrationKinds().map(({ kind }) => (
+        <ReviewTrackerLinkRow key={kind} review={review} kind={kind} />
+      ))}
       <DescriptionText target={target} />
     </div>
   );

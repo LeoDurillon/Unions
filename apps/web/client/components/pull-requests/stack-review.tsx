@@ -1,6 +1,7 @@
 // A pull request under review opened full page; one of a stack gets a tab per pull request of it, to switch between them.
 
 import type { ProjectScript } from '@union/core';
+import { integrationKinds } from '@union/core/integration-kinds';
 import type { ReactElement } from 'react';
 
 import type { CurrentReview } from '../../../src/api-types';
@@ -54,7 +55,9 @@ export function StackReview({
       ? stack.map((member) => ({
           number: member.prNumber,
           title: member.title,
-          linked: member.notionPages.length > 0,
+          linked: integrationKinds()
+            .filter(({ kind }) => member.linkedItems[kind].length > 0)
+            .map(({ kind }) => kind),
         }))
       : null;
   return (

@@ -78,7 +78,7 @@ function threadOf(pageId: string, discussion: NotionDiscussion): TrackerThread {
 }
 
 /** The open discussions of the page, from its `markdown` as Notion gives it (not cleaned), already read. */
-export async function notionThreadsOfPage(
+async function notionThreadsOfPage(
   notion: NotionApi,
   token: string,
   page: { id: string; markdown: string },

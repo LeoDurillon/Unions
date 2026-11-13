@@ -203,11 +203,14 @@ left ("5 of 15 open").
 | **Preview**     | A [preview](previews.md#previews-of-pull-requests-under-review) of the pull request's code.                                                                                                      |
 | **Diff**        | The diff, comments, Explain and Review with agent, as for a ticket.                                                                                                                              |
 
-When the project is connected to Jira, the **Description** tab also has **Jira issues**. Issues of your Jira project
-that the pull request names, in its title, its branch (`feature/ABC-123-dark-mode`) or its description (the key or a
-link to the issue), are offered with **Link**. **Link a Jira issue** takes any issue's key or link by hand; **Check**
-shows its summary first. A linked issue has **Unlink**. Linked issues are specs of the review, and the rules on "You
-post a review" act on them (see [Automation](automation.md)). Nothing is written to Jira when you link or unlink.
+The **Description** tab has a section for each tracker the project is connected to: **Notion pages**, **Jira
+issues**. The pages and issues the pull request names, in its title, its branch (`feature/ABC-123-dark-mode`) or its
+description (a Notion link, a Jira key or link to the issue), are offered with **Link**. With nothing linked yet, the
+field to paste a link or a key shows at once; else click **Link another page** (or issue). **Check** shows the
+item's title first; a Jira issue can be any issue of your Jira site the account can see. A linked item has
+**Unlink**, and, for a pull request in a stack, **Link the whole stack to this page** (or issue) gives it to the
+stack's pull requests that have none. Linked items are specs of the review, and the rules on "You post a review" act
+on them (see [Automation](automation.md)). Nothing is written to Notion or Jira when you link or unlink.
 
 **Send review** posts one review on GitHub, signed by your token or the GitHub App: **Comment**, **Approve** or
 **Request changes**. Your overall note becomes its body, and each draft a line comment. Drafts on lines that are no

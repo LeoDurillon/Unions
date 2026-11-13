@@ -7,6 +7,7 @@ import { formatWhen } from '../../lib/ui/relative-time';
 import { ConfirmButton } from '../ui/confirm-button';
 import { TrashIcon } from '../ui/icon-button';
 import { Badge, Button } from '../ui/ui';
+import { ReviewTrackerBadges } from './review-tracker-badges';
 
 /** The foot of a review's card: what it says (when added, by whom), Stop reviewing (asks first) and Open review. */
 export function ReviewCardActions({
@@ -70,14 +71,7 @@ export function ReviewItem({
         {review.submitStatus === 'sending' ? <Badge tone="blue">posting…</Badge> : null}
         {review.submitStatus === 'failed' ? <Badge tone="red">posting failed</Badge> : null}
         {review.previewStatus === 'running' ? <Badge tone="green">preview running</Badge> : null}
-        {review.notionPages.length > 0 ? (
-          <Badge
-            tone="neutral"
-            title={review.notionPages.map((page) => `Notion: ${page.title}`).join('\n')}
-          >
-            {review.notionPages.length > 1 ? `Notion ${review.notionPages.length}` : 'Notion'}
-          </Badge>
-        ) : null}
+        <ReviewTrackerBadges review={review} />
       </p>
       <ReviewCardActions
         label={`Stop reviewing #${review.prNumber}`}

@@ -1,5 +1,7 @@
 // Where a property set from a review's tab goes: the review's route, its item's events, the tab's list of items.
 
+import type { IntegrationKindName } from '@union/core/integration-kinds';
+
 import type { CurrentReview } from '../../../src/api-types';
 import { hasPendingFields, type TrackerFieldTarget } from '../integrations/use-tracker-fields';
 import { reviewBase } from './review-target';
@@ -9,15 +11,14 @@ export function reviewTrackerBase(review: CurrentReview): string {
   return reviewBase({ kind: 'pull-request', projectId: review.projectId, number: review.prNumber });
 }
 
-/** A Notion page's or a Jira issue's id in the tab's list (`pageId`, `key`). */
+/** An item's id in the tab's list. */
 function idOf(item: unknown): string | null {
-  if (typeof item !== 'object' || item === null) {
-    return null;
-  }
-  if ('pageId' in item && typeof item.pageId === 'string') {
-    return item.pageId;
-  }
-  return 'key' in item && typeof item.key === 'string' ? item.key : null;
+  return typeof item === 'object' &&
+    item !== null &&
+    'itemId' in item &&
+    typeof item.itemId === 'string'
+    ? item.itemId
+    : null;
 }
 
 function isOwn(payload: unknown, reviewId: number, itemId: string): boolean {
@@ -34,7 +35,7 @@ function isOwn(payload: unknown, reviewId: number, itemId: string): boolean {
 /** One linked item of the review (`itemId` of `kind`), in the tab's list cached under `queryKey`. */
 export function reviewFieldTarget(
   review: CurrentReview,
-  item: { kind: 'notion' | 'jira'; itemId: string },
+  item: { kind: IntegrationKindName; itemId: string },
   queryKey: unknown[],
 ): TrackerFieldTarget {
   return {

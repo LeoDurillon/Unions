@@ -117,6 +117,11 @@ export function isIntegrationKindName(value: string): value is IntegrationKindNa
   return Object.hasOwn(KINDS, value);
 }
 
+/** One value per kind, made by `make`. */
+export function byKind<T>(make: (kind: IntegrationKindName) => T): Record<IntegrationKindName, T> {
+  return { notion: make('notion'), jira: make('jira') };
+}
+
 /** Every kind, in the order the UI lists them. */
 export function integrationKinds(): IntegrationKind[] {
   return Object.values(KINDS);

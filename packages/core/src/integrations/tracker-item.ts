@@ -21,6 +21,9 @@ export type TrackerItemFacts = {
   properties: TrackerProperty[];
 };
 
+/** An item's text as markdown; its title when reading the text gives it (a Jira issue's summary). */
+export type TrackerItemText = { markdown: string; truncated: boolean; title?: string };
+
 /** An item found for linking: its id (a page id, an issue key), its title and its address. */
 export type LinkedItem = { itemId: string; title: string; url: string };
 

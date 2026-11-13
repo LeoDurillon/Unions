@@ -74,7 +74,7 @@ beforeEach(() => {
     })
     .returning()
     .get().id;
-  base = `/api/projects/${projectId}/pull-requests/reviews/7/jira`;
+  base = `/api/projects/${projectId}/pull-requests/reviews/7/trackers/jira`;
 });
 
 function send(method: string, path: string, body?: unknown): Response | Promise<Response> {
@@ -83,28 +83,33 @@ function send(method: string, path: string, body?: unknown): Response | Promise<
 }
 
 test('the issues the pull request names are suggested: title, branch, description, readable ones only', async () => {
-  const suggested = (await (await send('GET', `${base}/suggestions`)).json()) as { key: string }[];
-  expect(suggested.map((issue) => issue.key)).toEqual(['ABC-12', 'ABC-13', 'ABC-14', 'ABC-15']);
+  const suggested = (await (await send('GET', `${base}/suggestions`)).json()) as {
+    itemId: string;
+  }[];
+  expect(suggested.map((issue) => issue.itemId)).toEqual(['ABC-12', 'ABC-13', 'ABC-14', 'ABC-15']);
 });
 
 test('an issue is linked as a spec of the review, read with its text, and unlinked', async () => {
-  expect(await (await send('POST', `${base}/check`, { issue: 'XYZ-3' })).json()).toEqual({
-    key: 'XYZ-3',
-    summary: 'Summary of XYZ-3',
+  expect(await (await send('POST', `${base}/check`, { item: 'XYZ-3' })).json()).toEqual({
+    itemId: 'XYZ-3',
+    title: 'Summary of XYZ-3',
     url: `${SITE}/browse/XYZ-3`,
   });
-  expect((await send('PUT', base, { issue: `${SITE}/browse/abc-12` })).status).toBe(200);
+  expect((await send('PUT', base, { item: `${SITE}/browse/abc-12` })).status).toBe(200);
   expect(linkedJiraIssues(db, { kind: 'review', id: reviewId })).toEqual([
     { id: 'ABC-12', title: 'ABC-12 Summary of ABC-12', url: `${SITE}/browse/ABC-12` },
   ]);
-  const suggested = (await (await send('GET', `${base}/suggestions`)).json()) as { key: string }[];
-  expect(suggested.map((issue) => issue.key)).not.toContain('ABC-12');
+  const suggested = (await (await send('GET', `${base}/suggestions`)).json()) as {
+    itemId: string;
+  }[];
+  expect(suggested.map((issue) => issue.itemId)).not.toContain('ABC-12');
   expect(await (await send('GET', base)).json()).toEqual([
     {
-      key: 'ABC-12',
-      summary: 'Summary of ABC-12',
+      itemId: 'ABC-12',
+      title: 'Summary of ABC-12',
       url: `${SITE}/browse/ABC-12`,
       markdown: 'Do it.',
+      truncated: false,
       threads: { error: 'Jira refused it.' },
       properties: [],
       pendingFields: [],
@@ -116,11 +121,11 @@ test('an issue is linked as a spec of the review, read with its text, and unlink
 
 test('a link of another site, a missing issue, or a project not connected is refused', async () => {
   expect(
-    (await send('POST', `${base}/check`, { issue: 'https://other.atlassian.net/browse/ABC-1' }))
+    (await send('POST', `${base}/check`, { item: 'https://other.atlassian.net/browse/ABC-1' }))
       .status,
   ).toBe(400);
-  expect((await send('POST', `${base}/check`, { issue: 'ABC-404' })).status).toBe(404);
+  expect((await send('POST', `${base}/check`, { item: 'ABC-404' })).status).toBe(404);
   db.delete(schema.integrations).run();
-  expect((await send('PUT', base, { issue: 'ABC-12' })).status).toBe(409);
+  expect((await send('PUT', base, { item: 'ABC-12' })).status).toBe(409);
   expect(await (await send('GET', `${base}/suggestions`)).json()).toEqual([]);
 });

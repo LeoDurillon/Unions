@@ -1,6 +1,5 @@
-// What the routes reading Notion share: its errors as HTTP answers, page IDs, the project's secret.
+// What the routes reading the trackers share: their errors as HTTP answers; Notion's secret for a project.
 import {
-  integrationKind,
   integrationOf,
   ItemOutsideSourceError,
   JiraError,
@@ -11,15 +10,7 @@ import {
 } from '@union/core';
 import { HTTPException } from 'hono/http-exception';
 
-import {
-  BAD_GATEWAY,
-  BAD_REQUEST,
-  CONFLICT,
-  fail,
-  NOT_FOUND,
-  requireText,
-  UNAUTHORIZED,
-} from '../http';
+import { BAD_GATEWAY, BAD_REQUEST, CONFLICT, fail, NOT_FOUND, UNAUTHORIZED } from '../http';
 
 /** A tracker's own answer (bad secret, not found) kept as the status; anything else is the tracker failing. */
 function trackerStatus(
@@ -54,14 +45,6 @@ export async function guarded<T>(work: () => Promise<T>): Promise<T> {
     const message = error instanceof Error ? error.message : 'The tracker request failed';
     throw fail(trackerStatus(error), message);
   }
-}
-
-export function requireNotionId(body: Record<string, unknown>, key: string, label: string): string {
-  const id = integrationKind('notion').parseRef(requireText(body, key));
-  if (!id) {
-    throw fail(BAD_REQUEST, `That is not a Notion ${label} ID or URL`);
-  }
-  return id;
 }
 
 const NOT_CONNECTED = 'This project is not connected to Notion: set it up in the project settings';

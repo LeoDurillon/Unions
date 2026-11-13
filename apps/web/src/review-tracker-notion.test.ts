@@ -14,7 +14,7 @@ import type { Hono } from 'hono';
 
 import { createApp } from './app';
 import type { OnboardingGitHub } from './github-onboarding';
-import type { ReviewNotionPage } from './review-notion-types';
+import type { ReviewTrackerItem } from './review-tracker-types';
 
 const PAGE = 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee';
 const MENTIONED = 'bbbbbbbb-bbbb-4ccc-8ddd-eeeeeeeeeeee';
@@ -107,11 +107,14 @@ function send(
   body?: unknown,
   number = 7,
 ): Promise<Response> | Response {
-  return app.request(`/api/projects/${projectId}/pull-requests/reviews/${number}/notion${path}`, {
-    method,
-    headers: { 'content-type': 'application/json' },
-    body: body === undefined ? undefined : JSON.stringify(body),
-  });
+  return app.request(
+    `/api/projects/${projectId}/pull-requests/reviews/${number}/trackers/notion${path}`,
+    {
+      method,
+      headers: { 'content-type': 'application/json' },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    },
+  );
 }
 
 /** The pages linked to PR `number`, by id. */
@@ -129,15 +132,15 @@ function linked(number = 7): string[] {
 test('pages are checked, linked by URL (several), read with their mentions titled, and unlinked', async () => {
   expect(await (await send('GET', '')).json()).toEqual([]);
 
-  const checked = await send('POST', '/check', { page: urlOf(PAGE) });
-  expect(await checked.json()).toEqual({ pageId: PAGE, title: 'Export to CSV', url: urlOf(PAGE) });
+  const checked = await send('POST', '/check', { item: urlOf(PAGE) });
+  expect(await checked.json()).toEqual({ itemId: PAGE, title: 'Export to CSV', url: urlOf(PAGE) });
   expect(linked()).toEqual([]);
 
-  expect((await send('PUT', '', { page: urlOf(PAGE) })).status).toBe(200);
-  expect((await send('PUT', '', { page: MENTIONED })).status).toBe(200);
+  expect((await send('PUT', '', { item: urlOf(PAGE) })).status).toBe(200);
+  expect((await send('PUT', '', { item: MENTIONED })).status).toBe(200);
   expect(linked()).toEqual([PAGE, MENTIONED]);
 
-  const read = (await (await send('GET', '')).json()) as ReviewNotionPage[];
+  const read = (await (await send('GET', '')).json()) as ReviewTrackerItem[];
   expect(read.map((page) => page.title)).toEqual(['Export to CSV', 'Data model']);
   expect(read[0]?.markdown).toContain('[Data model]');
   expect(read[0]?.truncated).toBe(false);
@@ -147,12 +150,12 @@ test('pages are checked, linked by URL (several), read with their mentions title
 });
 
 test('an unshared page, a bad URL and a project without Notion are refused', async () => {
-  expect((await send('PUT', '', { page: urlOf(UNSHARED) })).status).toBe(404);
-  expect((await send('PUT', '', { page: 'not a page' })).status).toBe(400);
+  expect((await send('PUT', '', { item: urlOf(UNSHARED) })).status).toBe(404);
+  expect((await send('PUT', '', { item: 'not a page' })).status).toBe(400);
   expect(linked()).toEqual([]);
 
   saveNotionConnection(db, projectId, { token: null, dataSourceId: null });
-  expect((await send('PUT', '', { page: urlOf(PAGE) })).status).toBe(409);
+  expect((await send('PUT', '', { item: urlOf(PAGE) })).status).toBe(409);
 });
 
 /** `stack`: the GitHub stack it is in. */
@@ -189,9 +192,9 @@ test('linking the whole stack sets the page on its members without one, nowhere 
   // In no GitHub stack, and in another one.
   addReview(10, 'other', null);
   addReview(11, 'other-2', 2);
-  expect((await send('PUT', '', { page: MENTIONED }, 8)).status).toBe(200);
+  expect((await send('PUT', '', { item: MENTIONED }, 8)).status).toBe(200);
 
-  expect((await send('PUT', '', { page: PAGE, stack: true })).status).toBe(200);
+  expect((await send('PUT', '', { item: PAGE, stack: true })).status).toBe(200);
   expect(pages()).toEqual({ 7: [PAGE], 8: [MENTIONED], 9: [PAGE], 10: [], 11: [] });
 });
 
@@ -201,14 +204,14 @@ test("the description's readable Notion pages are suggested, never the linked on
       (page) => page.title,
     );
   expect(await titles()).toEqual(['Export to CSV', 'Data model']);
-  await send('PUT', '', { page: PAGE });
+  await send('PUT', '', { item: PAGE });
   expect(await titles()).toEqual(['Data model']);
 });
 
 test("each page comes with its open discussions; a refused read keeps the page's text", async () => {
-  await send('PUT', '', { page: PAGE });
-  await send('PUT', '', { page: MENTIONED });
-  const [spec, model] = (await (await send('GET', '')).json()) as ReviewNotionPage[];
+  await send('PUT', '', { item: PAGE });
+  await send('PUT', '', { item: MENTIONED });
+  const [spec, model] = (await (await send('GET', '')).json()) as ReviewTrackerItem[];
   expect(spec?.threads).toMatchObject({
     truncated: false,
     threads: [{ id: 'd1', place: 'item', comments: [{ author: 'Grace', markdown: 'CSV only?' }] }],

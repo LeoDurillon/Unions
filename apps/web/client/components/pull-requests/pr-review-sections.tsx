@@ -1,6 +1,7 @@
-// The tabs a pull request review shows before its diff: Notion and Jira once it is linked, then the
+// The tabs a pull request review shows before its diff: a tracker's once it is linked to its items, then the
 // spec report. The review agents come last.
 
+import { integrationKinds } from '@union/core/integration-kinds';
 import type { ReactElement } from 'react';
 
 import type { CurrentReview } from '../../../src/api-types';
@@ -10,8 +11,7 @@ import { ReviewAgentsTab } from '../review/review-agents-tab';
 import type { ReviewSection } from '../review/review-page';
 import { ReviewCommentsTab } from './review-comments-tab';
 import { ReviewDescription } from './review-description';
-import { ReviewJiraTab } from './review-jira-tab';
-import { ReviewNotionTab } from './review-notion-tab';
+import { ReviewTrackerTab } from './review-tracker-tab';
 
 /** A tracker's tab once the review is linked to one of its items or more: "Notion", "Notion (2)". */
 function trackerTab(
@@ -28,17 +28,13 @@ function trackerTab(
 
 /** The tabs a pull request review shows before its diff; Notion and Jira once linked. */
 export function prReviewSections(target: ReviewTarget, review: CurrentReview): ReviewSection[] {
-  const notion = trackerTab(
-    'notion',
-    'Notion',
-    review.notionPages.length,
-    <ReviewNotionTab review={review} />,
-  );
-  const jira = trackerTab(
-    'jira',
-    'Jira',
-    review.jiraIssues.length,
-    <ReviewJiraTab review={review} />,
+  const trackers = integrationKinds().flatMap(({ kind, label }) =>
+    trackerTab(
+      kind,
+      label,
+      review.linkedItems[kind].length,
+      <ReviewTrackerTab review={review} kind={kind} />,
+    ),
   );
   return [
     {
@@ -46,8 +42,7 @@ export function prReviewSections(target: ReviewTarget, review: CurrentReview): R
       label: 'Description',
       content: <ReviewDescription target={target} review={review} />,
     },
-    ...notion,
-    ...jira,
+    ...trackers,
     {
       id: 'comments',
       label: 'Comments',

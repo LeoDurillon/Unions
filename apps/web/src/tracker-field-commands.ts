@@ -1,12 +1,10 @@
 // Properties of a tracker's item set by hand, as the web hands them to the worker: one queued, and those not sent yet.
 import {
-  notionSchemaOf,
   SET_TRACKER_FIELDS,
   schema,
   trackerFieldSetOf,
   type Db,
   type TrackerFieldSet,
-  type TrackerProperty,
 } from '@union/core';
 
 import { pendingComments, type CommentCommand } from './pending-comments';
@@ -53,17 +51,4 @@ export function pendingReviewFields(
   return pendingComments(db, null, TRACKER_FIELDS, now)
     .filter(({ post }) => post.reviewId === reviewId && post.itemId === itemId)
     .map((pending) => pendingOf(pending));
-}
-
-/** A Notion page's properties with their options, which the page does not give: the data source's columns'. */
-export function withNotionOptions(
-  db: Db,
-  projectId: number,
-  properties: TrackerProperty[],
-): TrackerProperty[] {
-  const columns = notionSchemaOf(db, projectId)?.properties ?? [];
-  return properties.map((property) => ({
-    ...property,
-    options: columns.find((column) => column.id === property.id)?.options ?? property.options,
-  }));
 }
