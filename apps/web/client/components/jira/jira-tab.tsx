@@ -27,16 +27,17 @@ export function JiraTab({ ticket }: { ticket: { id: number; projectId: number } 
         onRefresh={() => {
           void comments.refetch();
         }}
-      />
-      <ErrorText error={comments.error ?? reviewImport.error} />
-      {!data && comments.isFetching ? (
-        <section className={CARD_CLASS}>
-          <Loading label="Reading the comments" reason="Reading the issue from Jira">
-            <SkeletonList count={2} lines={2} />
-          </Loading>
-        </section>
-      ) : null}
-      {data ? <JiraComments view={data} sender={sender} reviewImport={reviewImport} /> : null}
+      >
+        <ErrorText error={comments.error ?? reviewImport.error} />
+        {!data && comments.isFetching ? (
+          <section className={CARD_CLASS}>
+            <Loading label="Reading the comments" reason="Reading the issue from Jira">
+              <SkeletonList count={2} lines={2} />
+            </Loading>
+          </section>
+        ) : null}
+        {data ? <JiraComments view={data} sender={sender} reviewImport={reviewImport} /> : null}
+      </JiraIssueCard>
     </div>
   );
 }

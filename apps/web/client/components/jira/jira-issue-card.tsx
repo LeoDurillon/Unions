@@ -2,7 +2,7 @@
 // Then its fields, each one Union can set with Edit.
 
 import type { JiraIssueFacts } from '@union/core';
-import type { ReactElement } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 
 import type { PendingTrackerField } from '../../../src/tracker-field-types';
 import type { Tone } from '../../lib/board/labels';
@@ -82,6 +82,7 @@ export function JiraIssueCard({
   loaded,
   reading,
   onRefresh,
+  children,
 }: {
   ticket: { id: number; projectId: number };
   /** The issue's key and address, and its facts (null when Jira did not give them). */
@@ -92,6 +93,8 @@ export function JiraIssueCard({
   loaded: boolean;
   reading: boolean;
   onRefresh: () => void;
+  /** The tab's content under the card. */
+  children: ReactNode;
 }): ReactElement {
   const sender = useTrackerFieldSend(ticketFieldTarget(ticket.id, jiraCommentsKey(ticket.id)));
   return (
@@ -101,6 +104,7 @@ export function JiraIssueCard({
       open={issue ? { url: issue.url, label: 'Open in Jira' } : null}
       reading={reading}
       onRefresh={onRefresh}
+      below={children}
       properties={issue?.facts?.properties ?? []}
       editing={{
         kind: 'jira',

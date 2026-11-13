@@ -1,11 +1,12 @@
 // The card at the top of a tracker tab (Notion page, Jira issue): its mark, what it says, Open, Refresh.
-// Then the item's properties, once read.
+// The tab's content goes under it, the item's properties beside them, as the Overview's details.
 
 import type { TrackerProperty } from '@union/core';
 import type { ReactElement, ReactNode } from 'react';
 
 import { Bone } from '../ui/skeleton';
 import { Button, CARD_CLASS } from '../ui/ui';
+import { TrackerItemLayout } from './tracker-item-layout';
 import { TrackerProperties } from './tracker-properties';
 import type { TrackerPropertyEditing } from './tracker-property-row';
 
@@ -18,6 +19,7 @@ export function TrackerItemCard({
   properties,
   editing = null,
   children,
+  below,
 }: {
   /** One letter for the tracker, in a tile. */
   mark: string;
@@ -32,9 +34,13 @@ export function TrackerItemCard({
   editing?: TrackerPropertyEditing | null;
   /** The heading: a title line, then a line of facts. */
   children: ReactNode;
+  /** The tab's content under the card: errors, comments. */
+  below: ReactNode;
 }): ReactElement {
+  const side =
+    properties.length > 0 ? <TrackerProperties properties={properties} editing={editing} /> : null;
   return (
-    <>
+    <TrackerItemLayout side={side}>
       <div className={`${CARD_CLASS} flex items-center gap-3 space-y-0`}>
         <span
           aria-hidden
@@ -66,7 +72,7 @@ export function TrackerItemCard({
           {reading ? 'Reading…' : 'Refresh'}
         </Button>
       </div>
-      <TrackerProperties properties={properties} editing={editing} />
-    </>
+      {below}
+    </TrackerItemLayout>
   );
 }

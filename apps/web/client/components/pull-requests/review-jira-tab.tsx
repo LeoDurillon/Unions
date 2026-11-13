@@ -8,7 +8,7 @@ import { reviewJiraKey, useReviewJiraIssues } from '../../lib/review/use-review-
 import { JiraCommentCard } from '../jira/jira-comment';
 import { FoldedMarkdown } from '../markdown/folded-markdown';
 import { Button, ErrorText } from '../ui/ui';
-import { ReviewItemProperties } from './review-item-properties';
+import { ReviewTrackerItem } from './review-tracker-item';
 
 /** The issue's comments, read only: replying and Add to review are a ticket's. */
 function IssueComments({ issue }: { issue: ReviewJiraIssue }): ReactElement | null {
@@ -51,17 +51,18 @@ function IssueText({
           {issue.key} {issue.summary}
         </a>
       </h3>
-      <ReviewItemProperties
+      <ReviewTrackerItem
         review={review}
         item={{ kind: 'jira', itemId: issue.key, ...issue }}
         queryKey={reviewJiraKey(review)}
-      />
-      {issue.markdown === '' ? (
-        <p className="text-sm text-zinc-500">No description.</p>
-      ) : (
-        <FoldedMarkdown>{issue.markdown}</FoldedMarkdown>
-      )}
-      <IssueComments issue={issue} />
+      >
+        {issue.markdown === '' ? (
+          <p className="text-sm text-zinc-500">No description.</p>
+        ) : (
+          <FoldedMarkdown>{issue.markdown}</FoldedMarkdown>
+        )}
+        <IssueComments issue={issue} />
+      </ReviewTrackerItem>
     </section>
   );
 }

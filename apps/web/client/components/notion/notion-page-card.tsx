@@ -1,7 +1,7 @@
 // The Notion tab's page card: the page's title, its status column's value and its last edit, Open in Notion, Refresh.
 // Then its properties, each one Union can set with Edit.
 
-import type { ReactElement } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 
 import type { NotionPageFacts, NotionTabView } from '../../../src/notion-discussion-types';
 import { notionCommentsKey } from '../../lib/integrations/use-notion-comments';
@@ -56,6 +56,7 @@ export function NotionPageCard({
   loaded,
   reading,
   onRefresh,
+  children,
 }: {
   ticket: { id: number; projectId: number };
   /** The tab's view, once read. */
@@ -64,6 +65,8 @@ export function NotionPageCard({
   loaded: boolean;
   reading: boolean;
   onRefresh: () => void;
+  /** The tab's content under the card. */
+  children: ReactNode;
 }): ReactElement {
   const sender = useTrackerFieldSend(ticketFieldTarget(ticket.id, notionCommentsKey(ticket.id)));
   const facts = view?.page ?? null;
@@ -74,6 +77,7 @@ export function NotionPageCard({
       open={view ? { url: view.pageUrl, label: 'Open in Notion' } : null}
       reading={reading}
       onRefresh={onRefresh}
+      below={children}
       properties={facts?.properties ?? []}
       editing={{
         kind: 'notion',

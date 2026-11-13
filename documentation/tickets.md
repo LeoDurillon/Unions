@@ -205,7 +205,8 @@ Then come the tabs:
 - **PR**: the ticket's pull request, its CI checks and branch operations. See
   [Branches and pull requests](branches.md).
 - **Notion**: for a ticket imported from Notion or linked to a page, a card for the page (its title, the value of its
-  status column, when it was last edited, **Open in Notion**), its **Properties**, then the page's open comments.
+  status column, when it was last edited, **Open in Notion**), then the page's open comments, with its **Properties** in a column beside them, as the
+  Overview's details (under them when the panel is narrow).
   **Properties** lists every property of the page but its title, with its value as Notion has it now; the empty ones
   are folded under "N empty", click it to see them. A property Union can set (text, number, select, multi-select,
   status, date, people, checkbox, URL, email, phone) has **Edit**: change the value with the input its type takes
@@ -229,7 +230,7 @@ Then come the tabs:
   and once the tab has read them says how many comments it has; see
   [Link a ticket to its Notion page or Jira issue](#link-a-ticket-to-its-notion-page-or-jira-issue)): a card for
   the issue (its summary, key, type, status, assignee and when it was last updated, **Open in Jira** and
-  **Refresh**, which reads the issue and its comments again), its **Properties** (its status, then the fields of
+  **Refresh**, which reads the issue and its comments again), its **Properties** in a column beside the comments (its status, then the fields of
   the issue's edit screen in Jira, its summary, description and files left out, the empty ones folded under
   "N empty"), then the issue's comments, oldest first. A field Union can set (text, numbers, dates, selects,
   checkboxes, labels, people, versions, components, the sprint) has **Edit**: change it with the input its type

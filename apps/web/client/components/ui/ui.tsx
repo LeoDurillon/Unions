@@ -79,15 +79,18 @@ const INPUT_CLASS =
 export function Field({
   label,
   hint,
+  labelHidden = false,
   children,
 }: {
   label: string;
   hint?: string;
+  /** Read by screen readers only: what the input is for already shows above it. */
+  labelHidden?: boolean;
   children: ReactNode;
 }): ReactElement {
   return (
     <label data-field className="block space-y-1">
-      <span className="text-sm font-medium">{label}</span>
+      <span className={labelHidden ? 'sr-only' : 'text-sm font-medium'}>{label}</span>
       {children}
       {hint ? <span className="block text-xs text-zinc-500">{hint}</span> : null}
     </label>

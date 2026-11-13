@@ -94,16 +94,17 @@ export function NotionTab({ ticket }: { ticket: { id: number; projectId: number 
         onRefresh={() => {
           void comments.refetch();
         }}
-      />
-      <ErrorText error={comments.error ?? reviewImport.error} />
-      {!data && comments.isFetching ? (
-        <section className={CARD_CLASS}>
-          <Loading label="Reading the comments" reason="Reading the page from Notion">
-            <SkeletonList count={2} lines={2} />
-          </Loading>
-        </section>
-      ) : null}
-      {data ? <Discussions view={data} sender={sender} reviewImport={reviewImport} /> : null}
+      >
+        <ErrorText error={comments.error ?? reviewImport.error} />
+        {!data && comments.isFetching ? (
+          <section className={CARD_CLASS}>
+            <Loading label="Reading the comments" reason="Reading the page from Notion">
+              <SkeletonList count={2} lines={2} />
+            </Loading>
+          </section>
+        ) : null}
+        {data ? <Discussions view={data} sender={sender} reviewImport={reviewImport} /> : null}
+      </NotionPageCard>
     </div>
   );
 }

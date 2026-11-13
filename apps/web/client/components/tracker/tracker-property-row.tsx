@@ -1,4 +1,4 @@
-// One row of a tracker tab's Properties card: the name, the value (or the new one being saved), Edit, why it was refused.
+// One property in a tracker tab's side panel: its name and Edit, its value or the one being saved, why it was refused.
 
 import type { TrackerProperty } from '@union/core';
 import { useState, type ReactElement } from 'react';
@@ -48,16 +48,10 @@ export function TrackerPropertyRow({
   const failure = editing?.sender.failures.get(property.id);
   const canEdit = editing !== null && property.settable && !saving && !open;
   return (
-    <div className="contents">
-      <dt className="truncate text-zinc-500" title={property.name}>
-        {property.name}
-      </dt>
-      <dd className="group flex min-w-0 items-start justify-between gap-2 break-words">
-        <span className="min-w-0">
-          <Value property={property} saving={saving} />
-          {failure ? (
-            <span className="block text-xs text-red-700 dark:text-red-400">{failure}</span>
-          ) : null}
+    <div className="space-y-1 py-3 text-sm first:pt-0 last:pb-0">
+      <div className="flex min-h-6 items-center justify-between gap-2">
+        <span className="truncate text-xs text-zinc-500 dark:text-zinc-400" title={property.name}>
+          {property.name}
         </span>
         {canEdit ? (
           <Button
@@ -72,22 +66,27 @@ export function TrackerPropertyRow({
             Edit
           </Button>
         ) : null}
-      </dd>
+      </div>
       {open && editing ? (
-        <dd className="col-span-2">
-          <TrackerPropertyEditor
-            context={editing}
-            property={property}
-            onSave={async (draft) => {
-              await editing.sender.send(property.id, draft);
-              setOpen(false);
-            }}
-            onCancel={() => {
-              setOpen(false);
-            }}
-          />
-        </dd>
-      ) : null}
+        <TrackerPropertyEditor
+          context={editing}
+          property={property}
+          onSave={async (draft) => {
+            await editing.sender.send(property.id, draft);
+            setOpen(false);
+          }}
+          onCancel={() => {
+            setOpen(false);
+          }}
+        />
+      ) : (
+        <div className="min-w-0 break-words">
+          <Value property={property} saving={saving} />
+          {failure ? (
+            <span className="block text-xs text-red-700 dark:text-red-400">{failure}</span>
+          ) : null}
+        </div>
+      )}
     </div>
   );
 }

@@ -116,7 +116,7 @@ export function JiraValueField({
   const hint = variables ? HINTS[type] : PLAIN_HINTS[type];
   if (isPickedType(type)) {
     return (
-      <Field label="Value" hint={hint}>
+      <Field label="Value" hint={hint} labelHidden={!variables}>
         <JiraPickField
           projectId={projectId}
           label={`${entry.fieldName} value`}
@@ -130,7 +130,7 @@ export function JiraValueField({
     );
   }
   return (
-    <Field label="Value" hint={hint}>
+    <Field label="Value" hint={hint} labelHidden={!variables}>
       <ValueInput
         entry={entry}
         type={type}

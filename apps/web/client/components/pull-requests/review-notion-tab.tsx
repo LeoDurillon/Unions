@@ -9,7 +9,7 @@ import { reviewNotionKey, useReviewNotionPages } from '../../lib/review/use-revi
 import { FoldedMarkdown } from '../markdown/folded-markdown';
 import { NotionDiscussion } from '../notion/notion-discussion';
 import { Button, ErrorText } from '../ui/ui';
-import { ReviewItemProperties } from './review-item-properties';
+import { ReviewTrackerItem } from './review-tracker-item';
 
 /** The page's open discussions, read only: replying and Add to review are a ticket's. */
 function PageDiscussions({ page }: { page: ReviewNotionPage }): ReactElement | null {
@@ -57,22 +57,23 @@ function PageText({
           {page.title}
         </a>
       </h3>
-      <ReviewItemProperties
+      <ReviewTrackerItem
         review={review}
         item={{ kind: 'notion', itemId: page.pageId, ...page }}
         queryKey={reviewNotionKey(review)}
-      />
-      {page.truncated ? (
-        <p className="text-xs text-amber-700 dark:text-amber-400">
-          The page is very long: Notion returned only its first part.
-        </p>
-      ) : null}
-      {page.markdown === '' ? (
-        <p className="text-sm text-zinc-500">Empty page.</p>
-      ) : (
-        <FoldedMarkdown>{page.markdown}</FoldedMarkdown>
-      )}
-      <PageDiscussions page={page} />
+      >
+        {page.truncated ? (
+          <p className="text-xs text-amber-700 dark:text-amber-400">
+            The page is very long: Notion returned only its first part.
+          </p>
+        ) : null}
+        {page.markdown === '' ? (
+          <p className="text-sm text-zinc-500">Empty page.</p>
+        ) : (
+          <FoldedMarkdown>{page.markdown}</FoldedMarkdown>
+        )}
+        <PageDiscussions page={page} />
+      </ReviewTrackerItem>
     </section>
   );
 }

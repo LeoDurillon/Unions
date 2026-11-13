@@ -68,7 +68,7 @@ function ChoiceField({
   const status = property.type === 'status';
   const custom = other && !status;
   return (
-    <Field label="Value">
+    <Field label="Value" labelHidden={!variables}>
       <select
         className={inputClass}
         value={custom ? OTHER : value}
@@ -130,7 +130,7 @@ function MultiChoiceField({
   };
   return (
     <fieldset className="space-y-1">
-      <legend className="text-sm font-medium">Values</legend>
+      <legend className={variables ? 'text-sm font-medium' : 'sr-only'}>Values</legend>
       <ChipGroup>
         {property.options.map((option) => (
           <CheckChip

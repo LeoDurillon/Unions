@@ -85,7 +85,7 @@ export function PlainValueInput({
   onChange: (value: string) => void;
 }): ReactElement {
   return (
-    <Field label="Value">
+    <Field label="Value" labelHidden>
       <Input type={type} value={value} onChange={onChange} />
     </Field>
   );
