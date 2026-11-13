@@ -1,5 +1,6 @@
-// `/api/union-settings`: Union's machine settings, the memory (in whole GB) and the CPU cores its containers may use.
+// `/api/union-settings`: Union's machine settings: container memory (in whole GB) and cores, runs at once, images.
 import {
+  MB_PER_GB,
   saveUnionSettings,
   unionSettings,
   UnionSettingsError,
@@ -10,20 +11,21 @@ import { Hono } from 'hono';
 
 import { BAD_REQUEST, fail, readObject } from '../http';
 
-const MB_PER_GB = 1024;
-
-/** The settings as the page edits them: whole GB. */
-export type UnionSettingsView = {
+/** The settings as the pages edit them: memory in whole GB, the rest as stored. */
+export type UnionSettingsView = Omit<UnionSettings, 'agentMemoryMb' | 'previewServiceMemoryMb'> & {
   agentMemoryGb: number;
   previewServiceMemoryGb: number;
-  cpus: number;
 };
 
-function viewOf(settings: UnionSettings): UnionSettingsView {
+function viewOf({
+  agentMemoryMb,
+  previewServiceMemoryMb,
+  ...rest
+}: UnionSettings): UnionSettingsView {
   return {
-    agentMemoryGb: Math.round(settings.agentMemoryMb / MB_PER_GB),
-    previewServiceMemoryGb: Math.round(settings.previewServiceMemoryMb / MB_PER_GB),
-    cpus: settings.cpus,
+    ...rest,
+    agentMemoryGb: Math.round(agentMemoryMb / MB_PER_GB),
+    previewServiceMemoryGb: Math.round(previewServiceMemoryMb / MB_PER_GB),
   };
 }
 

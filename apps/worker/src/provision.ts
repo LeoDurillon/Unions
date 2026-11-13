@@ -11,6 +11,7 @@ import {
   type Db,
   type Ticket,
   agentContainerLimits,
+  imageSetting,
 } from '@union/core';
 import { eq } from 'drizzle-orm';
 
@@ -25,7 +26,7 @@ export const REPO_DIR = AGENT_REPO_DIR;
 
 export type ProvisionConfig = {
   /** The base agent image; a project with its own runs on what `imageFor` gives. */
-  image: string;
+  readonly image: string;
   /** The image a project's agents run on (`AgentImages.imageFor`); absent: `image` for all. */
   imageFor?: (projectId: number) => Promise<string>;
   /** Base URL repositories are cloned from: `<base>/<owner>/<repo>.git`. */
@@ -34,9 +35,19 @@ export type ProvisionConfig = {
   credentialsPath: string;
 };
 
-export function defaultProvisionConfig(): ProvisionConfig {
+/**
+ * The worker's: the image Union settings name (read each time, so a change applies to the next
+ * container), the rest from its environment. `imageFor`: where a project's agents run, when given.
+ */
+export function defaultProvisionConfig(
+  db: Db,
+  imageFor?: ProvisionConfig['imageFor'],
+): ProvisionConfig {
   return {
-    image: process.env.UNION_AGENT_IMAGE ?? 'union-agent:local',
+    get image(): string {
+      return imageSetting(db, 'agentImage');
+    },
+    imageFor,
     gitBaseUrl: process.env.UNION_GIT_BASE_URL ?? 'https://github.com',
     credentialsPath:
       process.env.UNION_CLAUDE_CREDENTIALS ?? path.join(homedir(), '.claude', '.credentials.json'),

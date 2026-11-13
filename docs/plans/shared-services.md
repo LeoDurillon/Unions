@@ -67,7 +67,7 @@ networks.
   container is on that one, the stack goes down, its volumes kept. Docker's state is the truth, so worker restarts
   need nothing; a per-project lock in the worker keeps a start and a release from crossing.
 - A preview's Reset, Restart and Stop act on the preview alone; the stack's data stays.
-- It does not count towards `UNION_MAX_PREVIEWS` nor the project's limit.
+- It does not count towards the previews at once (Union settings) nor the project's limit.
 - Removing the setting: the next start runs the services in the preview again; the stack goes down at its next
   release.
 

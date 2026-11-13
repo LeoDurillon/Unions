@@ -1,5 +1,12 @@
 // The worker's entry point: opens the database and starts the scheduler and the GitHub loop.
-import { DockerCli, emitEvent, migrateDb, openDb, recoverGitHubSends } from '@union/core';
+import {
+  DockerCli,
+  emitEvent,
+  migrateDb,
+  openDb,
+  recoverGitHubSends,
+  unionSettings,
+} from '@union/core';
 
 import { agentImageProvision } from './agent-image/images';
 import { drainCommands } from './commands';
@@ -12,8 +19,7 @@ import { Scheduler } from './scheduler';
 import { startSideRuns } from './side-runs';
 
 const POLL_MS = 500;
-const DEFAULT_MAX_CONCURRENT = 2;
-const DEFAULT_GITHUB_PULL_MS = 30_000;
+const MS_PER_SECOND = 1000;
 
 const db = openDb();
 migrateDb(db);
@@ -29,7 +35,6 @@ process.on('unhandledRejection', (reason: unknown) => {
   }
 });
 
-const maxConcurrent = Number(process.env.UNION_MAX_CONCURRENT ?? DEFAULT_MAX_CONCURRENT);
 const runtime = new DockerCli();
 const { config: provisionConfig, agentImages } = agentImageProvision(db, runtime);
 agentImages.recover();
@@ -37,12 +42,13 @@ agentImages.recover();
 const apiFor = githubApis(db);
 
 const executor = createExecutor(db, runtime, provisionConfig, apiFor);
-const scheduler = new Scheduler(db, executor, maxConcurrent);
+// Read on every take: a change in Union settings → Resources applies to the next run.
+const scheduler = new Scheduler(db, executor, () => unionSettings(db).maxConcurrentRuns);
 await scheduler.recover((name) => runtime.stop(name));
 // A review or reply cut off mid-post goes back to the user, to check GitHub and send again.
 recoverGitHubSends(db);
 // Investigations, agent reviews and description rewrites take their runs from the scheduler's slots:
-// UNION_MAX_CONCURRENT caps all.
+// the setting's agent runs at once cap all.
 const sideRuns = await startSideRuns({
   db,
   runtime,
@@ -71,12 +77,12 @@ process.on('SIGTERM', stop);
 
 const githubLoop = runGitHubLoop(
   new GitHubMirror(db, apiFor),
-  Number(process.env.UNION_GITHUB_PULL_MS ?? DEFAULT_GITHUB_PULL_MS),
+  () => unionSettings(db).githubPullSeconds * MS_PER_SECOND,
   shutdown.signal,
 );
 
 console.log(
-  `worker running (max ${maxConcurrent} concurrent runs, GitHub sync per project credentials)`,
+  `worker running (max ${unionSettings(db).maxConcurrentRuns} concurrent runs, GitHub sync per project credentials)`,
 );
 while (!shutdown.signal.aborted) {
   drainCommands(db, hooks);

@@ -69,7 +69,8 @@ sidebar's **Previews** entry lists every preview running, grouped by project, wi
   it off), except while the agent works on the ticket or its end-to-end tests run.
 - Once the ticket's pull request is merged, or the ticket is cancelled, its preview is removed for good, with its
   data and the images it built.
-- At most 3 previews run at once (`UNION_MAX_PREVIEWS`); a project can allow fewer.
+- At most 3 previews run at once (**Previews at once** in **Union settings → Resources**); a project can allow
+  fewer.
 
 ### Edit the Compose file for one ticket
 

@@ -7,22 +7,25 @@ import { and, asc, eq } from 'drizzle-orm';
 
 import type { Db } from '../db';
 import * as schema from '../tables';
+import { unionSettings } from '../union/union-settings';
+import { COUNT_BOUNDS } from '../union/union-settings-fields';
 import { attachmentsRoot, privateAttachments } from './attachments';
 
 export type ProjectFile = typeof schema.projectFiles.$inferSelect;
 
 const KIBIBYTE = 1024;
 const MEBIBYTE = KIBIBYTE * KIBIBYTE;
-const DEFAULT_MAX_MIB = 2048;
 const MAX_PATH_LENGTH = 200;
 /** One folder or file name: characters the workspace scripts never need to quote. */
 const SEGMENT = /^[\w.@+-]+$/u;
 
-/** The largest project file, in bytes: `UNION_MAX_PROJECT_FILE_MB` (2048 by default). */
-export function maxProjectFileBytes(): number {
-  const configured = Number(process.env.UNION_MAX_PROJECT_FILE_MB);
-  return (Number.isFinite(configured) && configured > 0 ? configured : DEFAULT_MAX_MIB) * MEBIBYTE;
+/** The largest project file, in bytes (Union settings → Resources). */
+export function maxProjectFileBytes(db: Db): number {
+  return unionSettings(db).maxProjectFileMb * MEBIBYTE;
 }
+
+/** The largest the setting allows, in bytes: what the server lets a request body reach. */
+export const PROJECT_FILE_BYTES_CEILING = COUNT_BOUNDS.maxProjectFileMb.max * MEBIBYTE;
 
 /** The host folder holding one project's files, each under its row id. */
 export function projectFilesDir(projectId: number): string {

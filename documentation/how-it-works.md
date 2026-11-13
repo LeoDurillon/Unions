@@ -110,7 +110,7 @@ To use less:
 
 - pick the **Quick** or **Standard** flow for small tickets;
 - use lighter models for the steps that do not need Opus (**Union settings → All agents**);
-- lower `UNION_MAX_CONCURRENT` to run fewer agents at once.
+- lower **Agent runs at once** (**Union settings → Resources**) to run fewer agents at once.
 
 ## What GitHub sees
 

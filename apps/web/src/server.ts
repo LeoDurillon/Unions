@@ -2,7 +2,7 @@
 import path from 'node:path';
 
 import { serveStatic } from '@hono/bun';
-import { maxProjectFileBytes, migrateDb, openDb } from '@union/core';
+import { migrateDb, openDb, PROJECT_FILE_BYTES_CEILING } from '@union/core';
 
 import { createApp } from './app';
 import { watchForRestart } from './restart-watch';
@@ -27,6 +27,7 @@ export default {
   // This machine only: compose publishes Vite's port on loopback the same way.
   hostname: process.env.UNION_HOST ?? '127.0.0.1',
   idleTimeout: 0, // SSE streams are long-lived
-  maxRequestBodySize: maxProjectFileBytes() + REQUEST_ENVELOPE_BYTES,
+  // The most the setting allows: the upload route checks the setting itself.
+  maxRequestBodySize: PROJECT_FILE_BYTES_CEILING + REQUEST_ENVELOPE_BYTES,
   fetch: app.fetch,
 };

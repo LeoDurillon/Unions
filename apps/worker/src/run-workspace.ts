@@ -8,7 +8,7 @@ import {
   type ContainerRuntime,
 } from '@union/core';
 
-import { previewSettings } from './preview/compose';
+import { workerPreviewSettings } from './preview/compose';
 import { previewEnv } from './preview/preview-env';
 import { loadTarget } from './preview/target';
 import { ensureTicketContainer } from './provision';
@@ -54,7 +54,7 @@ async function ticketWorkspace(deps: TargetDeps, ticketId: number): Promise<Work
 /** The plain variables the agent's commands would get (the setting's choice); none without settings. */
 function reviewVariables(deps: TargetDeps, reviewId: number): Record<string, string> {
   try {
-    const target = loadTarget({ ...deps, settings: previewSettings() }, { reviewId });
+    const target = loadTarget({ ...deps, settings: workerPreviewSettings(deps.db) }, { reviewId });
     return agentVariables(target.plain, target.config.agentVariables);
   } catch {
     return {};

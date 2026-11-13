@@ -9,6 +9,7 @@ import {
   ownerKey,
   previewOwner,
   ticketOwnerId,
+  unionSettings,
   type WorkspaceOwner,
 } from '@union/core';
 
@@ -82,7 +83,7 @@ async function ensureProxy(deps: PreviewDeps): Promise<void> {
 async function startTarget(deps: PreviewDeps, target: Target): Promise<void> {
   const self = ownerKey(target.owner);
   const others = activePreviews(deps.db).filter((row) => ownerKey(previewOwner(row)) !== self);
-  if (others.length >= deps.settings.maxRunning) {
+  if (others.length >= unionSettings(deps.db).maxPreviews) {
     throw new PreviewError(
       `${others.length} previews are running already (the limit): stop one first`,
       true,

@@ -3,10 +3,12 @@
 export class RunSlots {
   private used = 0;
 
-  constructor(readonly max: number) {}
+  /** `max`: read on every take, so a change of the setting applies to the next run. */
+  constructor(private readonly max: number | (() => number)) {}
 
   tryTake(): boolean {
-    if (this.used >= this.max) {
+    const max = typeof this.max === 'number' ? this.max : this.max();
+    if (this.used >= max) {
       return false;
     }
     this.used += 1;

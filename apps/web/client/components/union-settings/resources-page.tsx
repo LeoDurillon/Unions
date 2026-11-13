@@ -1,68 +1,26 @@
-// Union settings → Resources: the memory each agent container and each preview service may use, and the CPU cores of each.
+// Union settings → Resources: each container's memory and CPU cores, and how many agent runs and previews at once.
 
+import { COUNT_BOUNDS, GB_BOUNDS } from '@union/core/union-settings-fields';
 import type { ReactElement } from 'react';
 
 import type { UnionSettingsView } from '../../../src/routes/union-settings';
-import { useResourcesForm, useUnionSettings } from '../../lib/union-settings/use-resources-form';
+import type { SettingsForm } from '../../lib/settings/use-settings-form';
+import { useUnionSettingsForm } from '../../lib/union-settings/use-union-settings-form';
 import { SaveBar } from '../settings/save-bar';
-import { SettingsIntro } from '../settings/settings-intro';
-import { Loading, SkeletonRows } from '../ui/skeleton';
-import { ErrorText, Field, inputClass } from '../ui/ui';
+import { NumberField } from './union-settings-fields';
+import { UnionSettingsLoader } from './union-settings-loader';
 
-const MIN_GB = 1;
-const MAX_GB = 64;
 /** The fields the form shows, for its shape while it is read. */
-const FIELDS = 3;
+const FIELDS = 5;
 
-function NumberField({
-  label,
-  hint,
-  unit,
-  value,
-  onChange,
-}: {
-  label: string;
-  hint: string;
-  unit: string;
-  value: number;
-  onChange: (value: number) => void;
-}): ReactElement {
-  return (
-    <Field label={label} hint={hint}>
-      <span className="flex items-center gap-2">
-        <input
-          type="number"
-          min={MIN_GB}
-          max={MAX_GB}
-          step={1}
-          className={`${inputClass} w-24`}
-          value={value}
-          onChange={(event) => {
-            onChange(Number(event.target.value));
-          }}
-        />
-        {unit}
-      </span>
-    </Field>
-  );
-}
+type FormProps = { form: SettingsForm<UnionSettingsView> };
 
-function ResourcesIntro(): ReactElement {
+function ContainerFields({ form }: FormProps): ReactElement {
   return (
-    <SettingsIntro>
-      How much memory and how many CPU cores each container Union starts may use. Past it, the
-      biggest process in that container is stopped, instead of your whole computer running out of
-      memory. A change applies the next time a container starts.
-    </SettingsIntro>
-  );
-}
-
-function ResourcesForm({ saved }: { saved: UnionSettingsView }): ReactElement {
-  const form = useResourcesForm(saved);
-  return (
-    <section className="space-y-4">
+    <>
       <NumberField
         unit="GB"
+        bounds={GB_BOUNDS}
         label="Memory per agent container"
         hint="Each ticket's container, and those of reviews, investigations and checkouts. 4 GB fits most builds; raise it if a build or test run is killed."
         value={form.value.agentMemoryGb}
@@ -72,6 +30,7 @@ function ResourcesForm({ saved }: { saved: UnionSettingsView }): ReactElement {
       />
       <NumberField
         unit="GB"
+        bounds={GB_BOUNDS}
         label="Memory per preview service"
         hint="Each service of a preview (the app, its database, …), unless the compose file sets a lower limit itself."
         value={form.value.previewServiceMemoryGb}
@@ -81,6 +40,7 @@ function ResourcesForm({ saved }: { saved: UnionSettingsView }): ReactElement {
       />
       <NumberField
         unit="cores"
+        bounds={COUNT_BOUNDS.cpus}
         label="CPUs per container"
         hint="The cores each agent container and each preview may use. Tools that size their workers to the machine (nproc, Vitest, recent Jest) then start fewer; a few, like Next.js builds, still count every core of the computer."
         value={form.value.cpus}
@@ -88,6 +48,43 @@ function ResourcesForm({ saved }: { saved: UnionSettingsView }): ReactElement {
           form.set({ ...form.value, cpus });
         }}
       />
+    </>
+  );
+}
+
+function AtOnceFields({ form }: FormProps): ReactElement {
+  return (
+    <>
+      <NumberField
+        unit="runs"
+        bounds={COUNT_BOUNDS.maxConcurrentRuns}
+        label="Agent runs at once"
+        hint="Ticket steps, investigations, agent reviews and rewrites share these; the others wait their turn. Each uses its container's memory, and your Claude usage."
+        value={form.value.maxConcurrentRuns}
+        onChange={(maxConcurrentRuns) => {
+          form.set({ ...form.value, maxConcurrentRuns });
+        }}
+      />
+      <NumberField
+        unit="previews"
+        bounds={COUNT_BOUNDS.maxPreviews}
+        label="Previews at once"
+        hint="Across all projects; a project can allow fewer (its Environments → Limits). Past it, starting one asks you to stop another first."
+        value={form.value.maxPreviews}
+        onChange={(maxPreviews) => {
+          form.set({ ...form.value, maxPreviews });
+        }}
+      />
+    </>
+  );
+}
+
+function ResourcesForm({ saved }: { saved: UnionSettingsView }): ReactElement {
+  const form = useUnionSettingsForm(saved);
+  return (
+    <section className="space-y-4">
+      <ContainerFields form={form} />
+      <AtOnceFields form={form} />
       <SaveBar state={form} />
     </section>
   );
@@ -95,32 +92,12 @@ function ResourcesForm({ saved }: { saved: UnionSettingsView }): ReactElement {
 
 /** The page: the saved values, then the form. */
 export function ResourcesPage(): ReactElement {
-  const settings = useUnionSettings();
-  if (settings.data === undefined) {
-    return (
-      <>
-        <ResourcesIntro />
-        <section className="space-y-4">
-          {settings.error ? (
-            <ErrorText error={settings.error} />
-          ) : (
-            <Loading label="Reading the resources" className="space-y-4">
-              <SkeletonRows
-                count={FIELDS}
-                columns="grid-cols-[10rem_6rem]"
-                cells={1}
-                rowClassName="h-8"
-              />
-            </Loading>
-          )}
-        </section>
-      </>
-    );
-  }
   return (
-    <>
-      <ResourcesIntro />
-      <ResourcesForm saved={settings.data} />
-    </>
+    <UnionSettingsLoader
+      intro="How much memory and how many CPU cores each container Union starts may use, and how many run at once. Past its memory, the biggest process in that container is stopped, instead of your whole computer running out of memory. A change applies the next time a container or a run starts."
+      label="Reading the resources"
+      fields={FIELDS}
+      form={ResourcesForm}
+    />
   );
 }

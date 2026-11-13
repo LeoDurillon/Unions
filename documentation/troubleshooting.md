@@ -61,7 +61,7 @@ Your subscription's usage limit was reached. The step is paused, and Union runs 
 minutes after the limit resets: the notice says when. **Retry now** runs it at once (it stops again if the limit
 is still reached). **Claude usage** in the sidebar says which window is full and when it starts over. When Union
 cannot tell the reset time, it tries again every 30 minutes or so. To use it more slowly,
-lower `UNION_MAX_CONCURRENT` or pick lighter models in **Union settings → All agents**.
+lower **Agent runs at once** in **Union settings → Resources**, or pick lighter models in **Union settings → All agents**.
 
 **The implementation stops after a few attempts with failing checks.**
 The agent reached the project's iteration limit. Read the check output in the Log, then **Request revision** with

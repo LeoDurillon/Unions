@@ -358,9 +358,14 @@
   `branch_pushed` event came after the last `pull_request_opened` or `pr_description_sent`. Union's links ("Closes
   #n", the PR it builds on, a stack's list) are never part of the draft: `withoutUnionLinks` strips them,
   `pullRequestBody` (with the stack, for a split ticket) adds them back.
-- Union settings → Resources (`union-settings/resources-page.tsx`, `lib/use-resources-form.ts`) reads and saves
-  `/api/union-settings` (`routes/union-settings.ts`, in GB; core `unionSettings` / `saveUnionSettings`, which refuse
-  anything but 1 to 64 whole GB): the memory of each agent container and each preview service.
+- Union settings → Resources (`union-settings/resources-page.tsx`: container memory and cores, agent runs and
+  previews at once) and → System (`system-page.tsx`: the GitHub pull interval, the largest project file, the agent,
+  minimal agent and preview helper images) read and save `/api/union-settings` (`routes/union-settings.ts`, memory
+  in GB; `lib/use-union-settings-form.ts`, each page saving the whole row). Core `unionSettings` /
+  `saveUnionSettings` (`union/union-settings.ts`) store it; `changedSettings` (`union-settings-fields.ts`, pure,
+  also read by the client for its bounds and default images) refuses a number out of its bounds or a name that is
+  not an image's. An empty image is null: Union's default (`DEFAULT_IMAGES`). The server's body limit is the
+  setting's ceiling (`PROJECT_FILE_BYTES_CEILING`); the upload route checks the setting itself.
 - Union's update: the sidebar's Update entry (`components/union-update/`, `lib/use-union-update.ts`, polled
   every 5 s) reads `routes/union-update.ts` (the worker's last check and the work in progress, from core
   `activeWork`) and queues `union_update_check` or `union_update`. `src/restart-watch.ts` (under compose only,

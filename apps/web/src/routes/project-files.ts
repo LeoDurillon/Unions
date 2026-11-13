@@ -41,9 +41,8 @@ function projectIdOf(db: Db, c: Context): number {
   return id;
 }
 
-/** Streams the request body to `to`, refusing it past the size limit. Returns its size. */
-async function receive(body: ReadableStream<Uint8Array>, to: string): Promise<number> {
-  const max = maxProjectFileBytes();
+/** Streams the request body to `to`, refusing it past `max` bytes. Returns its size. */
+async function receive(body: ReadableStream<Uint8Array>, to: string, max: number): Promise<number> {
   const writer = Bun.file(to).writer();
   let size = 0;
   try {
@@ -107,7 +106,7 @@ async function upload(db: Db, c: Context): Promise<Response> {
   await mkdir(projectFilesDir(projectId), { recursive: true });
   const temporary = path.join(incoming, `p${projectId}-${crypto.randomUUID()}`);
   try {
-    const size = await receive(body, temporary);
+    const size = await receive(body, temporary, maxProjectFileBytes(db));
     const existed = listProjectFiles(db, projectId).some((file) => file.path === filePath);
     const row = save(db, projectId, filePath, { size, ...(await hashes(temporary, size)) });
     await rename(temporary, projectFileHostPath(row));

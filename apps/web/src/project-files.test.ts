@@ -1,4 +1,4 @@
-import { afterAll, afterEach, beforeEach, expect, test } from 'bun:test';
+import { afterAll, beforeEach, expect, test } from 'bun:test';
 import { access, mkdtemp, readdir, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -12,6 +12,7 @@ import {
   privatePushFiles,
   projectFileHostPath,
   projectFilePathProblem,
+  saveUnionSettings,
   schema,
   type Db,
 } from '@union/core';
@@ -35,10 +36,6 @@ beforeEach(() => {
     .values({ owner: 'o', repo: 'r', githubProjectNodeId: 'P_1', config: { baseBranch: 'main' } })
     .returning()
     .get().id;
-});
-
-afterEach(() => {
-  delete process.env.UNION_MAX_PROJECT_FILE_MB;
 });
 
 afterAll(async () => {
@@ -87,9 +84,11 @@ test('paths stay inside the repository and out of .git', async () => {
   expect(listProjectFiles(db, projectId)).toEqual([]);
 });
 
+const MEBIBYTE = 1024 * 1024;
+
 test('a file over the limit is refused and leaves nothing behind', async () => {
-  process.env.UNION_MAX_PROJECT_FILE_MB = String(10 / (1024 * 1024));
-  expect((await put('big.sql', 'x'.repeat(11))).status).toBe(413);
+  saveUnionSettings(db, { maxProjectFileMb: 1 });
+  expect((await put('big.sql', 'x'.repeat(MEBIBYTE + 1))).status).toBe(413);
   expect(listProjectFiles(db, projectId)).toEqual([]);
   expect(await readdirOrEmpty(path.join(root, '.incoming'))).toEqual([]);
 });

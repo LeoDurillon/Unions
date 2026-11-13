@@ -13,7 +13,7 @@ A one-off agent run on a custom prompt, outside the ticket pipeline (project bar
   inserts the row as `queued`; the worker claims it (`claimInvestigation`), runs `claude -p` once in a throwaway
   container `union-i<id>` with its own volumes, stores the final answer or the error, and removes the container
   and volumes. A ticket investigation runs in the ticket's container instead, stopped afterwards unless a step
-  started there. Investigations share the `UNION_MAX_CONCURRENT` slots with tickets.
+  started there. Investigations share the run slots (Union settings → Resources, `maxConcurrentRuns`) with tickets.
 - **Status:** queued → running → succeeded | failed | cancelled. Cancel is a `cancel_investigation` command (a
   queued run is cancelled at once, a running one is aborted). Run again re-queues a finished one with the same
   prompt. A run left `running` by a stopped worker is failed at the next start and its container removed.

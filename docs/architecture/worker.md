@@ -10,6 +10,11 @@
 - `commands.ts` maps UI commands to state-machine actions; `scheduler.ts` runs one step per ticket with a
   concurrency cap through an injected `StepExecutor`; `executor.ts` is the real one (planning, implement, review
   and rebase steps).
+- The Union settings are read where they apply, not at startup, so a change needs no restart: `RunSlots` reads
+  `maxConcurrentRuns` on every take, `runGitHubLoop` the pull interval before every pull, `startTarget` the previews
+  at once, and the images are getters (`ProvisionConfig.image`, `AgentImages`' `baseImages`,
+  `PreviewSettings.image` from `workerPreviewSettings`) over `imageSetting`. Never spread one of those objects: a
+  spread copies the getter's value once.
 - Memory limits: every container Union creates (tickets, throwaway checkouts, review agents, a PR's own container)
   gets `--memory` = `--memory-swap`, `--cpuset-cpus` and `--pids-limit` from `agentContainerLimits(db, name)` (core
   `union-settings.ts`, `container-limits.ts`: `cpusetFor` gives `cpus` consecutive cores, placed by the name's hash
@@ -472,7 +477,7 @@
   `prompts.ts` lists them for every step but the rebase. `pushBranch` refuses a branch whose history holds a
   file not allowed in the repository (matched by git blob id, `PrivateFilesError`).
 - Project files (project settings → Files, `routes/project-files.ts`, `project_files`): uploads streamed to
-  `attachments/p<project>/<id>` (up to `UNION_MAX_PROJECT_FILE_MB`, 2048 by default), never readable from the
+  `attachments/p<project>/<id>` (up to `maxProjectFileMb` of the Union settings, 2048 by default), never readable from the
   browser. `project-files-sync.ts` puts them at their paths in the ticket's repository on provisioning (every step)
   and before each preview start, through a compose helper on the workspace volume (`copyIntoVolume`); unchanged
   files (sha256) are left alone, removed ones deleted, and every path goes in `.git/info/exclude`. Pushes refuse

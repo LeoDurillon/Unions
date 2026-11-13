@@ -4,7 +4,7 @@ import { customAgentId, isCustomStep, type CustomStep } from '@union/core/states
 
 /** The fixed pages; the custom agents' (`agent_<id>`) come after the built-in agents' groups. */
 export const UNION_SETTINGS_GROUPS = [
-  { label: 'General', sections: ['shared', 'models', 'resources'] },
+  { label: 'General', sections: ['shared', 'models', 'resources', 'system'] },
   { label: 'Planning', sections: ['intake', 'summary', 'technical', 'test_plan'] },
   { label: 'Implementation', sections: ['implement', 'trim', 'final_review'] },
   {

@@ -41,6 +41,7 @@
     "./github-text": "./src/github/github-text.ts",
     "./investigation-defaults": "./src/investigation/investigation-defaults.ts",
     "./union-update": "./src/union/union-update.ts",
+    "./union-settings-fields": "./src/union/union-settings-fields.ts",
     "./review-spec-lists": "./src/review/review-spec-lists.ts",
     "./agent-review-slices": "./src/review/agent-review-slices.ts",
     "./prompt-formats": "./src/agent/prompt-formats.ts",

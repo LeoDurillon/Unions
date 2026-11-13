@@ -83,9 +83,9 @@ export class Scheduler {
   constructor(
     private readonly db: Db,
     private readonly executor: StepExecutor,
-    limit: number | RunSlots,
+    limit: number | (() => number) | RunSlots,
   ) {
-    this.slots = typeof limit === 'number' ? new RunSlots(limit) : limit;
+    this.slots = limit instanceof RunSlots ? limit : new RunSlots(limit);
   }
 
   /**

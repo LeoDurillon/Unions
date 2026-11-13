@@ -10,6 +10,7 @@ import {
   writeAgentImageOutput,
   type AgentImageRow,
   DockerImages,
+  imageSetting,
   type AppliedAgentImage,
   type ContainerRuntime,
   type Db,
@@ -199,17 +200,21 @@ export function agentImageProvision(
   db: Db,
   runtime: ContainerRuntime,
 ): { config: ProvisionConfig; agentImages: AgentImages } {
-  const base = defaultProvisionConfig();
+  // Getters: a change of the images in Union settings applies to the next build and container.
   const agentImages = new AgentImages(db, {
     runtime,
     images: new DockerImages(),
     baseImages: {
-      'union-agent': base.image,
-      'union-agent-base': process.env.UNION_AGENT_BASE_IMAGE ?? 'union-agent-base:local',
+      get 'union-agent'(): string {
+        return imageSetting(db, 'agentImage');
+      },
+      get 'union-agent-base'(): string {
+        return imageSetting(db, 'agentBaseImage');
+      },
     },
   });
   return {
-    config: { ...base, imageFor: (projectId) => agentImages.imageFor(projectId) },
+    config: defaultProvisionConfig(db, (projectId) => agentImages.imageFor(projectId)),
     agentImages,
   };
 }

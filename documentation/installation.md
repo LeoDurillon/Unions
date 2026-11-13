@@ -19,7 +19,7 @@ The simplest way to run all of it is Docker Compose.
   comments** for the ticket's Notion tab (and **Read user information** to pick people in event rules).
 
 Agents run on your Claude subscription. Each step of each ticket uses some of your Claude usage, and by default two
-runs can happen at the same time (see `UNION_MAX_CONCURRENT` in the [settings reference](settings.md#environment-variables)).
+runs can happen at the same time (**Agent runs at once** in [Union settings → Resources](settings.md#resources)).
 
 ## Start Union with Docker Compose
 

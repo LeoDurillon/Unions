@@ -243,7 +243,7 @@ test('a run the user asks for is kept on the preview, and the container stops af
       db,
       runtime,
       config: provision(),
-      settings: { image: 'i', publicPort: 8080, proxyUrl: 'http://proxy', maxRunning: 3 },
+      settings: { image: 'i', publicPort: 8080, proxyUrl: 'http://proxy' },
       fetchFn: () => Promise.resolve(new Response('ok')),
     },
     { ticketId },
@@ -263,7 +263,7 @@ test('one e2e run at a time across tickets: a second request says why it did not
     db,
     runtime,
     config: provision(),
-    settings: { image: 'i', publicPort: 8080, proxyUrl: 'http://proxy', maxRunning: 3 },
+    settings: { image: 'i', publicPort: 8080, proxyUrl: 'http://proxy' },
     fetchFn: () => Promise.resolve(new Response('ok')),
   });
   const other = createTicket(db, { projectId: 1, title: 'Search', body: '' }).id;

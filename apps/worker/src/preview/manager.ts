@@ -10,7 +10,7 @@ import {
 } from '@union/core';
 
 import type { PreviewAction, PreviewOptions, SharedAction } from '../commands';
-import { previewSettings } from './compose';
+import { workerPreviewSettings } from './compose';
 import { runRequestedE2e } from './e2e-request';
 import { failStoppedPreview, HealthWatcher } from './health';
 import { IdleWatcher, readProxyMetrics } from './idle';
@@ -252,7 +252,7 @@ export class PreviewManager {
   }
 }
 
-/** The worker's manager, with the settings from its environment. */
+/** The worker's manager, with the proxy from its environment and the image from Union settings. */
 export function createPreviewManager(deps: Omit<PreviewDeps, 'settings'>): PreviewManager {
-  return new PreviewManager({ ...deps, settings: previewSettings() });
+  return new PreviewManager({ ...deps, settings: workerPreviewSettings(deps.db) });
 }

@@ -1,4 +1,4 @@
-// The Resources page's form: how much memory each agent container and each preview service may use, saved together.
+// The Union settings read once for the Resources and System pages, and each page's form, saved whole.
 
 import { useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 
@@ -15,7 +15,7 @@ export function useUnionSettings(): UseQueryResult<UnionSettingsView> {
   });
 }
 
-export function useResourcesForm(saved: UnionSettingsView): SettingsForm<UnionSettingsView> {
+export function useUnionSettingsForm(saved: UnionSettingsView): SettingsForm<UnionSettingsView> {
   const queryClient = useQueryClient();
   return useSettingsForm(
     () => saved,

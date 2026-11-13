@@ -84,7 +84,7 @@ only the Claude login (`throwaway-container.ts`).
 
 ## The image
 
-Every container starts from the default agent image (`union-agent:local`, `UNION_AGENT_IMAGE`, the last stage of
+Every container starts from the default agent image (`union-agent:local`, or Union settings → System's `agentImage`, the last stage of
 `docker/agent.Dockerfile`: the `base` stage plus node/npm, Bun, corepack and Playwright's libraries), unless its
 project has its own (Settings → Agents → Agent image,
 `docs/plans/archive/project-agent-image.md`). `ProvisionConfig.imageFor` (`AgentImages.imageFor`,
@@ -93,7 +93,7 @@ of the project is created: the ticket's (`provision.ts`), investigations (`Throw
 and review agents' checkouts (`throwawayCheckout`) and a pull request's own container (`review-checkout.ts`). Runs
 with no repository (the lesson writer, the prompt writer, the connector check, ticket drafts) keep the base image.
 
-- **The base stage** (`union-agent-base:local`, `UNION_AGENT_BASE_IMAGE`) holds only what Union needs: git, the
+- **The base stage** (`union-agent-base:local`, or `agentBaseImage`) holds only what Union needs: git, the
   `claude` CLI and the `node` user (uid 1000) with `/workspace`. The CLI is its release binary at the pinned version,
   checked against the release's manifest, in `/usr/local/bin` (not `install.sh`, which installs under HOME, the
   volume), with `DISABLE_AUTOUPDATER=1`. `docs/plans/archive/agent-image-layers.md`.

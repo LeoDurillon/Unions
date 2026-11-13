@@ -190,6 +190,7 @@ export * from './ticket/ticket-links';
 export * from './stack/ticket-slices';
 export * from './ticket/tickets';
 export * from './union/union-settings';
+export * from './union/union-settings-fields';
 export * from './preview/preview-memory-caps';
 export * from './union/union-update';
 export * from './union/union-update-store';

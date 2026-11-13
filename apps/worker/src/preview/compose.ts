@@ -1,40 +1,50 @@
 // `docker compose <args>` in a helper container holding the Docker socket, and the ticket's
 // workspace when given. The workspace is at `/workspace`, the repository in `/workspace/repo`.
-import { PREVIEW_REPO_DIR, type ContainerRuntime } from '@union/core';
+import {
+  DEFAULT_IMAGES,
+  imageSetting,
+  PREVIEW_REPO_DIR,
+  type ContainerRuntime,
+  type Db,
+} from '@union/core';
 
 import { workspaceScript } from './workspace-script';
 
-/**
- * The Docker CLI image (with the compose plugin) the helper containers run. Pinned by digest: the
- * helpers hold the Docker socket, and a tag could be taken over locally by a build.
- */
-const COMPOSE_IMAGE =
-  'docker:29.0.0-cli@sha256:87858a6dd14149240f4a2c33e0ec0f32a5ac1bb2548c04f5a20694ea25cb6157';
 const SOCKET = '/var/run/docker.sock';
 const DEFAULT_PROXY_PORT = 8080;
-const DEFAULT_MAX_PREVIEWS = 3;
 /** Lines of output kept for the panel and the failure reason. */
 const TAIL_LINES = 200;
 
 export type PreviewSettings = {
-  image: string;
+  /** The Docker CLI image (with the compose plugin) the helper containers run. */
+  readonly image: string;
   /** Port the proxy listens on, for the address shown to the user. */
   publicPort: number;
   /** How the worker reaches the proxy, for the ready check. */
   proxyUrl: string;
-  maxRunning: number;
 };
 
+/**
+ * The proxy's address from the environment, and the helpers' image from `composeImage`, read each
+ * time it is used (Union settings → Resources), so a change applies to the next compose command.
+ */
 export function previewSettings(
   env: Record<string, string | undefined> = process.env,
+  composeImage: () => string = () => DEFAULT_IMAGES.composeImage,
 ): PreviewSettings {
   const publicPort = Number(env.UNION_PREVIEW_PORT ?? DEFAULT_PROXY_PORT);
   return {
-    image: env.UNION_COMPOSE_IMAGE ?? COMPOSE_IMAGE,
+    get image(): string {
+      return composeImage();
+    },
     publicPort,
     proxyUrl: env.UNION_PREVIEW_PROXY ?? `http://localhost:${publicPort}`,
-    maxRunning: Number(env.UNION_MAX_PREVIEWS ?? DEFAULT_MAX_PREVIEWS),
   };
+}
+
+/** The worker's: the proxy from its environment, the helpers' image from Union settings. */
+export function workerPreviewSettings(db: Db): PreviewSettings {
+  return previewSettings(process.env, () => imageSetting(db, 'composeImage'));
 }
 
 /** `tail`: the last lines, for logs and reasons; `lines`: all of them, when asked (`keepAll`). */

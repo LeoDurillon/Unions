@@ -69,7 +69,7 @@ The **Environment settings** entry of the **⋯** menu on a ticket's Preview tab
 
 | Menu    | Pages                                                                                                  |
 | ------- | ------------------------------------------------------------------------------------------------------ |
-| General | Shared instructions, Resources                                                                         |
+| General | Shared instructions, Resources, System                                                                 |
 | Agents  | **All agents**: every agent, yours included, with its model and effort; click one to open its own page |
 | Tools   | Tools, Connectors                                                                                      |
 | GitHub  | GitHub App                                                                                             |
@@ -81,7 +81,8 @@ See [Agents, flows and memory](agents.md) for what each page does.
 
 ### Resources
 
-**Union settings → Resources** sets how much memory and how many CPU cores the containers Union starts may use:
+**Union settings → Resources** sets how much memory and how many CPU cores the containers Union starts may use,
+and how many run at once:
 
 - **Memory per agent container** (4 GB to start with): each ticket's container, and those of reviews,
   investigations and checkouts.
@@ -91,13 +92,35 @@ See [Agents, flows and memory](agents.md) for what each page does.
   start one worker per core (`nproc`, Vitest, recent Jest) then start fewer, and a busy run leaves the rest of your
   computer responsive. A few tools, such as a Next.js build, still count every core of the computer: if one of them
   is killed for its memory, give its container more memory, or set its own worker count in the project.
+- **Agent runs at once** (2 to start with): ticket steps, investigations, agent reviews and rewrites share these;
+  the others wait for a free one. Lower it if your computer struggles, or to spend your Claude usage more slowly.
+- **Previews at once** (3 to start with), across all projects. A project can allow fewer, in its
+  **Environments → Limits**. Past it, starting a preview asks you to stop another first.
 
 When a container reaches its limit, its biggest process is stopped (for example a build), instead of your whole
 computer running out of memory and freezing. The step's log then says the process was killed with exit 137. Raise
-the limit there if your builds or tests need more; a change applies the next time a container starts.
+the limit there if your builds or tests need more; a change applies the next time a container or a run starts.
 
 With two runs at once and a preview, the defaults use about 11 GB at most. On Windows, also give WSL a limit
 that leaves room for Windows (`memory=` in `C:\Users\<you>\.wslconfig`).
+
+### System
+
+**Union settings → System** holds the rest of what Union does on your machine:
+
+- **Read GitHub every** (30 seconds to start with): how often Union reads what changed on GitHub, such as pull
+  requests, reviews, comments and the GitHub Project. A lower number shows changes sooner and uses more of
+  GitHub's rate limit.
+- **Largest project file** (2048 MB to start with): the biggest file you can give a project in its
+  [Files](previews.md#project-files) settings.
+- **Agent image**, **Minimal agent image**: the images agents run in, and what `FROM union-agent` and
+  `FROM union-agent-base` mean in [a project's Dockerfile](agents.md#the-agent-image). Leave them empty to use the
+  images Union builds (`union-agent:local`, `union-agent-base:local`). A project that builds its own image builds
+  it again on the new one.
+- **Preview helper image**: the Docker CLI image that runs `docker compose` for previews. Leave it empty to use the
+  one Union pins. It holds the Docker socket, so name only an image you trust, pinned by its digest.
+
+A change applies to the next pull, upload or container.
 
 ## Environment variables
 
@@ -105,22 +128,16 @@ All are optional. Put them in a `.env` file at the root of Union's checkout: Bun
 without Compose. Under Compose, variables set in your shell do not reach Union, except `GITHUB_TOKEN` and the ones
 `compose.yaml` itself reads (ports, user and group ids).
 
-| Variable                    | Default                        | Purpose                                                                                                          |
-| --------------------------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
-| `GITHUB_TOKEN`              | none                           | Token for projects that have no GitHub access of their own                                                       |
-| `UNION_MAX_CONCURRENT`      | `2`                            | Agent runs at the same time, tickets and investigations                                                          |
-| `UNION_MAX_PREVIEWS`        | `3`                            | Previews running at the same time, across projects                                                               |
-| `UNION_GITHUB_PULL_MS`      | `30000`                        | How often Union reads the changes made on GitHub                                                                 |
-| `DB_PATH`                   | `union.sqlite` in the checkout | The database file                                                                                                |
-| `UNION_ATTACHMENTS_DIR`     | `attachments/` in the checkout | Where ticket and preview files are kept                                                                          |
-| `UNION_MAX_PROJECT_FILE_MB` | `2048`                         | The largest project file                                                                                         |
-| `UNION_CLAUDE_CREDENTIALS`  | `~/.claude/.credentials.json`  | The Claude login given to the agents (set by `compose.yaml` under Compose)                                       |
-| `UNION_AGENT_IMAGE`         | `union-agent:local`            | The image agents run in, and `FROM union-agent` in a project's Dockerfile                                        |
-| `UNION_AGENT_BASE_IMAGE`    | `union-agent-base:local`       | The minimal image: `FROM union-agent-base` in a project's Dockerfile                                             |
-| `UNION_ALLOWED_HOSTS`       | none                           | Host names Union answers to besides `localhost` and `127.0.0.1`, for both the page and the API (comma-separated) |
-| `UNION_GIT_BASE_URL`        | `https://github.com`           | Where agents clone the repositories from                                                                         |
-| `PORT`                      | `3000`                         | Union's port with `bun run start`                                                                                |
-| `UNION_HOST`                | `127.0.0.1`                    | The address Union listens on with `bun run start`                                                                |
+| Variable                   | Default                        | Purpose                                                                                                          |
+| -------------------------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| `GITHUB_TOKEN`             | none                           | Token for projects that have no GitHub access of their own                                                       |
+| `DB_PATH`                  | `union.sqlite` in the checkout | The database file                                                                                                |
+| `UNION_ATTACHMENTS_DIR`    | `attachments/` in the checkout | Where ticket and preview files are kept                                                                          |
+| `UNION_CLAUDE_CREDENTIALS` | `~/.claude/.credentials.json`  | The Claude login given to the agents (set by `compose.yaml` under Compose)                                       |
+| `UNION_ALLOWED_HOSTS`      | none                           | Host names Union answers to besides `localhost` and `127.0.0.1`, for both the page and the API (comma-separated) |
+| `UNION_GIT_BASE_URL`       | `https://github.com`           | Where agents clone the repositories from                                                                         |
+| `PORT`                     | `3000`                         | Union's port with `bun run start`                                                                                |
+| `UNION_HOST`               | `127.0.0.1`                    | The address Union listens on with `bun run start`                                                                |
 
 Read by `compose.yaml`:
 

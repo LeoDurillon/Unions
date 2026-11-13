@@ -12,7 +12,7 @@ import {
 import { runIn } from '../container-exec';
 import { GATE_TIMEOUT_MS, tail } from '../gate';
 import { REPO_DIR } from '../provision';
-import { previewSettings } from './compose';
+import { workerPreviewSettings } from './compose';
 import { collectScreenshots, type Screenshot, type Screenshots } from './e2e-screenshots';
 import { baseUrl, previewEnv } from './preview-env';
 import { startPreview, type PreviewDeps } from './run';
@@ -76,7 +76,12 @@ export async function runE2e(run: E2eRun): Promise<E2eResult | null> {
     return null;
   }
   const started = await startPreview(
-    { db: run.db, runtime: run.runtime, settings: previewSettings(), ...run.previewOverrides },
+    {
+      db: run.db,
+      runtime: run.runtime,
+      settings: workerPreviewSettings(run.db),
+      ...run.previewOverrides,
+    },
     run.owner,
   );
   if (!started.ok) {
