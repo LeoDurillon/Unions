@@ -11,7 +11,9 @@ import {
 } from './notion-comments';
 import { notionCommentUrl, notionDiscussionUrl } from './notion-discussion-link';
 import { NotionError } from './notion-error';
+import { notionPeople } from './notion-people';
 import { toRichText } from './notion-rich-text';
+import type { TrackerComments } from './tracker-adapter';
 import {
   commentCount,
   type TrackerCommentInput,
@@ -92,7 +94,7 @@ async function notionThreadsOfPage(
 }
 
 /** The open discussions of the page, from its current text. */
-export async function notionThreads(
+async function notionThreads(
   notion: NotionApi,
   token: string,
   pageId: string,
@@ -102,7 +104,7 @@ export async function notionThreads(
 }
 
 /** A reply in the discussion `threadId`, else a new comment on the page. */
-export async function postNotionThreadComment(
+async function postNotionThreadComment(
   notion: NotionApi,
   token: string,
   post: TrackerCommentInput,
@@ -113,7 +115,7 @@ export async function postNotionThreadComment(
 }
 
 /** Notion's reason, with the capability named when it refused one. */
-export function notionPostFailure(error: unknown, inThread: boolean): string {
+function notionPostFailure(error: unknown, inThread: boolean): string {
   if (error instanceof NotionError && error.status === FORBIDDEN) {
     return 'Notion refused it: in the integration’s settings, Capabilities, turn on “Insert comments”';
   }
@@ -121,4 +123,14 @@ export function notionPostFailure(error: unknown, inThread: boolean): string {
     return 'Notion did not find the discussion: it may have been resolved or deleted';
   }
   return error instanceof Error ? error.message : String(error);
+}
+
+/** Notion's `comments` capability: discussions read and posted, people to tag. */
+export function notionComments(notion: NotionApi): TrackerComments {
+  return {
+    read: (token, _config, pageId) => notionThreads(notion, token, pageId),
+    post: (token, _config, post) => postNotionThreadComment(notion, token, post),
+    postFailure: notionPostFailure,
+    people: (token, _config, _pageId, query) => notionPeople(notion, token, query),
+  };
 }

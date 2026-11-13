@@ -86,7 +86,7 @@ const KINDS: Record<IntegrationKindName, IntegrationKind> = {
     fieldShape: notionFieldShape,
     ruleActions: ['tracker_fields'],
     commentReplies: 'thread',
-    commentsPostAs: 'Posts under the Notion integration’s name',
+    commentsPostAs: '@ to tag someone. Posts under the Notion integration’s name',
   },
   jira: {
     kind: 'jira',
@@ -112,7 +112,7 @@ const KINDS: Record<IntegrationKindName, IntegrationKind> = {
     ruleActions: ['tracker_status', 'tracker_fields', 'tracker_comment'],
     commentReplies: 'mention',
     commentsPostAs:
-      'Markdown: **bold**, `code`, [links](https://…), lists. Posts as the Atlassian account of the Jira connection, visible to everyone who can see the issue',
+      'Markdown: **bold**, `code`, [links](https://…), lists; @ to tag someone. Posts as the Atlassian account of the Jira connection, visible to everyone who can see the issue',
   },
 };
 

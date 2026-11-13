@@ -37,9 +37,20 @@ export type FakeJiraData = {
   bodies?: Record<string, unknown>;
   /** The changes sent: field updates and transitions. */
   updates?: { key: string; change: unknown }[];
+  /** The accounts `GET /user/viewissue/search` finds, whatever the issue. */
+  people?: { accountId: string; displayName: string; accountType: string }[];
 };
 
 const ISSUE_PATH = /^\/issue\/(?<key>[^?]+)/u;
+const PEOPLE_PATH = '/user/viewissue/search?';
+
+/** The accounts whose name starts with the search's `query`. */
+function peopleFound(data: FakeJiraData, path: string): unknown[] {
+  const query = new URLSearchParams(path.slice(PEOPLE_PATH.length)).get('query') ?? '';
+  return (data.people ?? []).filter((one) =>
+    one.displayName.toLowerCase().startsWith(query.toLowerCase()),
+  );
+}
 
 /** The field updates and transitions, recorded. */
 function writes(
@@ -107,6 +118,9 @@ export function fakeJiraApi(
         : missing();
     },
     read: (_auth, path) => {
+      if (path.startsWith(PEOPLE_PATH)) {
+        return Promise.resolve(peopleFound(data, path));
+      }
       const key = decodeURIComponent(ISSUE_PATH.exec(path)?.groups?.key ?? '');
       const body = data.bodies?.[key];
       return body === undefined ? missing() : Promise.resolve(body);

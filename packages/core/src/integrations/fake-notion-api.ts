@@ -1,6 +1,6 @@
-// In-memory Notion for tests: one data source, its pages and their comments; the calls it does not hold reject.
+// In-memory Notion for tests: one data source, its pages and their comments, its users; the calls it does not hold reject.
 
-import type { NotionApi, NotionPage } from './notion-api';
+import type { NotionApi, NotionPage, NotionUser } from './notion-api';
 import type { NotionComment } from './notion-comment-parse';
 import { NotionError } from './notion-error';
 import type { NotionRichTextInput } from './notion-rich-text';
@@ -42,16 +42,26 @@ function pageOf(page: FakeNotionPage): NotionPage {
 const sameId = (left: string, right: string): boolean =>
   left.replaceAll('-', '') === right.replaceAll('-', '');
 
-/** A comment's runs as Notion reads them back. */
-function runsOf(richText: NotionRichTextInput[]): NotionComment['richText'] {
-  return richText.map((run) => ({
-    text: run.text.content,
-    href: run.text.link?.url ?? null,
-    bold: run.annotations.bold,
-    italic: false,
-    strikethrough: false,
-    code: run.annotations.code,
-  }));
+const PLAIN = { href: null, bold: false, italic: false, strikethrough: false, code: false };
+
+/** A comment's runs as Notion reads them back: a mention as `@Name`, the name from the fake's users. */
+function runsOf(
+  richText: NotionRichTextInput[],
+  users: readonly NotionUser[],
+): NotionComment['richText'] {
+  return richText.map((run) => {
+    if (run.type === 'mention') {
+      const { id } = run.mention.user;
+      return { ...PLAIN, text: `@${users.find((user) => user.id === id)?.name ?? id}` };
+    }
+    return {
+      ...PLAIN,
+      text: run.text.content,
+      href: run.text.link?.url ?? null,
+      bold: run.annotations.bold,
+      code: run.annotations.code,
+    };
+  });
 }
 
 /** Comments are kept on the pages given, so a test reads back what it posted; property updates go to `updates`. */
@@ -59,6 +69,7 @@ export function fakeNotionApi(
   source: { id: string; title: string },
   pages: readonly FakeNotionPage[],
   updates: { pageId: string; properties: Record<string, unknown> }[] = [],
+  users: readonly NotionUser[] = [],
 ): NotionApi {
   let next = 0;
   const find = (id: string): FakeNotionPage | undefined =>
@@ -82,7 +93,7 @@ export function fakeNotionApi(
       blockId: null,
       author: 'Union',
       createdAt: new Date(POSTED_FROM + next * MINUTE).toISOString(),
-      richText: runsOf(richText),
+      richText: runsOf(richText, users),
     };
     owner.comments = [...(owner.comments ?? []), comment];
     return Promise.resolve(comment);
@@ -96,7 +107,7 @@ export function fakeNotionApi(
       const { markdown } = await page(id);
       return { markdown, truncated: false };
     },
-    users: () => Promise.resolve([]),
+    users: () => Promise.resolve([...users]),
     comments: async (_token, id) => {
       const found = await page(id);
       return found.comments ?? [];

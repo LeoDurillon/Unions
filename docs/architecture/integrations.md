@@ -43,7 +43,8 @@ Containers never hold GitHub credentials. Tokens, the App's key and integration 
   (`{ projectId, ticketId, kind, itemId, threadId | null, mention | null, text }`, core's
   `tracker-comment-post.ts`, whose length checks are each tracker's: `notion-comment-post.ts`,
   `jira-comment-post.ts`); the worker posts it through the adapter's `comments.post`. For Notion
-  (`notion-threads.ts`), the text becomes rich text (`notion-rich-text.ts`: links, `**bold**`, `` `code` ``) posted
+  (`notion-threads.ts`), the text becomes rich text (`notion-rich-text.ts`: links, `**bold**`, `` `code` ``, mention
+  tokens as user mentions) posted
   with `addComment` (`POST /v1/comments`, in the discussion or on the page) under the integration's name; a 403 names
   the "Insert comments" capability.
   A property edited in the Notion tab's Properties card is the `set_tracker_fields` command (core's
@@ -137,7 +138,13 @@ Containers never hold GitHub credentials. Tokens, the App's key and integration 
   thread again and adds it whole, or one comment of a thread on the item, as a `general` draft whose `source_url` is
   the thread's or comment's link (`tracker-review-import.ts`); sending the review never asks such a draft a GitHub
   reply (`markSent` leaves out Notion's and Jira's links). How a reply answers is the kind's `commentReplies`: in the
-  thread (Notion), or a new comment starting with a mention of the author (Jira). The tab's card reads the item
+  thread (Notion), or a new comment starting with a mention of the author (Jira). `GET …/comments/people?q=` lists
+  the people a comment can tag through the adapter's `comments.people` (Notion: `GET /v1/users`, matched on the start
+  of a name, a 403 naming "Read user information"; Jira: `/user/viewissue/search`, people who can see the issue,
+  apps left out). The comment box (`components/tracker/mention-textarea.tsx`) writes a pick as the token
+  `[@Name](mention:<id>)` (core's browser-safe `tracker-mention.ts`); each tracker's converter sends it as its
+  mention (Notion's `mention.user`, Jira's ADF `mention` from `markdown-adf-inline.ts`), and the panel shows it as
+  `@Name` while it is sent. The tab's card reads the item
   separately (`routes/tracker-item.ts`, `GET …/trackers/:kind/item`: one shape per tracker until step 4 of the
   [adapters plan](../plans/tracker-adapters.md)).
 - A Jira ticket's comments: core's `jira-threads.ts` reads them (`JiraApi.comments`, newest first, 100 a page, 5

@@ -8,6 +8,7 @@ import type { TrackerCommentInput, TrackerThreads } from './tracker-comments';
 import type { CheckedField, FieldChange, TrackerAccess, TrackerFieldInput } from './tracker-fields';
 import type { TrackerFile } from './tracker-files';
 import type { LinkedItem, TrackerItemFacts, TrackerItemText, TrackerMove } from './tracker-item';
+import type { TrackerPerson } from './tracker-mention';
 import type { TrackerRules } from './tracker-rules';
 
 /** Every capability an adapter may have, in the order `capabilitiesOf` lists them. */
@@ -42,10 +43,15 @@ type TrackerText = {
 };
 
 /** An item's comments: read as threads, and one posted (a reply as the kind's `commentReplies` says). */
-type TrackerComments = {
+export type TrackerComments = {
   /** The item's threads; throws `TrackerRefusedError` (`tracker-refused.ts`) when the integration may not read comments. */
   read(secret: string, config: unknown, itemId: string): Promise<TrackerThreads>;
   post(secret: string, config: unknown, post: TrackerCommentInput): Promise<{ commentId: string }>;
+  /**
+   * The people a comment on the item can tag (`[@Name](mention:<id>)`, `tracker-mention.ts`) whose
+   * name matches `query`, a few; throws `TrackerRefusedError` when the integration may not list them.
+   */
+  people(secret: string, config: unknown, itemId: string, query: string): Promise<TrackerPerson[]>;
   /** Why the tracker refused a post, the permission named when it lacks one; `inThread`: it was a reply. */
   postFailure(error: unknown, inThread: boolean): string;
 };

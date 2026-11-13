@@ -4,13 +4,39 @@ import { notionCommentOf, notionCommentProblem } from './notion-comment-post';
 import { toRichText } from './notion-rich-text';
 
 function shape(text: string): [string, string | null, boolean, boolean][] {
-  return toRichText(text).map((item) => [
-    item.text.content,
-    item.text.link?.url ?? null,
-    item.annotations.bold,
-    item.annotations.code,
-  ]);
+  return toRichText(text).map((item) =>
+    item.type === 'mention'
+      ? [`@${item.mention.user.id}`, null, false, false]
+      : [
+          item.text.content,
+          item.text.link?.url ?? null,
+          item.annotations.bold,
+          item.annotations.code,
+        ],
+  );
 }
+
+test('a mention token becomes a user mention, in its place among the text', () => {
+  expect(toRichText('Hi [@Ada Lovelace](mention:3f2a-1), **look**')).toEqual([
+    {
+      type: 'text',
+      text: { content: 'Hi ', link: null },
+      annotations: { bold: false, code: false },
+    },
+    { type: 'mention', mention: { type: 'user', user: { id: '3f2a-1' } } },
+    {
+      type: 'text',
+      text: { content: ', ', link: null },
+      annotations: { bold: false, code: false },
+    },
+    {
+      type: 'text',
+      text: { content: 'look', link: null },
+      annotations: { bold: true, code: false },
+    },
+  ]);
+  expect(shape('[@Ada](https://x.y)')).toEqual([['@Ada', 'https://x.y', false, false]]);
+});
 
 test('links, bold and code become marks; the rest, line breaks included, stays as typed', () => {
   expect(
@@ -33,7 +59,7 @@ test('a link without http stays literal', () => {
 });
 
 test('a run longer than Notion takes is split at 2000 characters', () => {
-  const parts = toRichText('a'.repeat(4500)).map((item) => item.text.content.length);
+  const parts = shape('a'.repeat(4500)).map(([content]) => content.length);
   expect(parts).toEqual([2000, 2000, 500]);
 });
 

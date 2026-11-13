@@ -8,6 +8,7 @@ import { fieldsCases, type FieldsFixture } from './adapter-contract-fields';
 import { integrationKind } from './kinds';
 import { ItemOutsideSourceError } from './provider';
 import { capabilitiesOf, type TrackerAdapter } from './tracker-adapter';
+import type { TrackerPerson } from './tracker-mention';
 
 /** What the fake API holds, as the cases read it. */
 export type ContractFixture = {
@@ -26,6 +27,8 @@ export type ContractFixture = {
   markdown: { raw: string; clean: string };
   /** An item with at least one thread of comments (one whose author can be mentioned, for mention replies). */
   commented: string;
+  /** Someone a comment on `commented` can tag, as the fake lists them. */
+  person: TrackerPerson;
   /** A settable field of an item and a value it takes, and what the fake was sent. */
   fields: Omit<FieldsFixture, 'adapter' | 'access'>;
 };
@@ -83,7 +86,7 @@ export function adapterContract(fixture: ContractFixture): void {
       expect(refused).toBeInstanceOf(ItemOutsideSourceError);
     });
     refsCases(fixture);
-    commentsCases({ adapter, secret, config, itemId: fixture.commented });
+    commentsCases({ adapter, secret, config, itemId: fixture.commented, person: fixture.person });
     fieldsCases({ adapter, access: { secret, config, fields: null }, ...fixture.fields });
     test("downloads none of a text's links that are not the tracker's files", async () => {
       const text =

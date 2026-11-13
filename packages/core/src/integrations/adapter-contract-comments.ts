@@ -1,10 +1,11 @@
-// The `comments` cases of the adapter contract: reading threads, posting a comment, replying as the kind says. Test helper.
+// The `comments` cases of the adapter contract: reading threads, posting, replying as the kind says, tagging people. Test helper.
 
 import { expect, test } from 'bun:test';
 
 import { integrationKind } from './kinds';
 import type { TrackerAdapter } from './tracker-adapter';
 import { commentCount, type TrackerThread } from './tracker-comments';
+import { mentionToken, type TrackerPerson } from './tracker-mention';
 
 /** What the comments cases need: an item of the fake with at least one thread. */
 export type CommentsFixture = {
@@ -12,6 +13,7 @@ export type CommentsFixture = {
   secret: string;
   config: unknown;
   itemId: string;
+  person: TrackerPerson;
 };
 
 function comments(adapter: TrackerAdapter): NonNullable<TrackerAdapter['comments']> {
@@ -25,7 +27,8 @@ function threadWith(threads: TrackerThread[], commentId: string): TrackerThread 
   return threads.find((thread) => thread.comments.some((comment) => comment.id === commentId));
 }
 
-export function commentsCases({ adapter, secret, config, itemId }: CommentsFixture): void {
+export function commentsCases(fixture: CommentsFixture): void {
+  const { adapter, secret, config, itemId } = fixture;
   const kind = integrationKind(adapter.kind);
   const read = (): ReturnType<ReturnType<typeof comments>['read']> =>
     comments(adapter).read(secret, config, itemId);
@@ -69,7 +72,26 @@ export function commentsCases({ adapter, secret, config, itemId }: CommentsFixtu
       kind.commentReplies === 'mention' ? `@${answered.mention?.name ?? ''}` : 'Done',
     );
   });
+  mentionCases(fixture);
   test("says why the tracker refused a post, in the error's words otherwise", () => {
     expect(comments(adapter).postFailure(new Error('Socket closed'), false)).toBe('Socket closed');
+  });
+}
+
+function mentionCases({ adapter, secret, config, itemId, person }: CommentsFixture): void {
+  test('finds the people a comment can tag by the start of their name', async () => {
+    const [word = ''] = person.name.split(' ');
+    const found = await comments(adapter).people(secret, config, itemId, word.toLowerCase());
+    expect(found).toContainEqual(person);
+  });
+  test('posts a mention token as a mention, read back as @Name', async () => {
+    const text = `${mentionToken(person)} can you look?`;
+    const post = { itemId, threadId: null, mention: null, text };
+    const { commentId } = await comments(adapter).post(secret, config, post);
+    const after = await comments(adapter).read(secret, config, itemId);
+    const posted = threadWith(after.threads, commentId);
+    const markdown = posted?.comments.find((comment) => comment.id === commentId)?.markdown;
+    expect(markdown).toContain(`@${person.name}`);
+    expect(markdown).not.toContain('mention:');
   });
 }

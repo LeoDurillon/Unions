@@ -1,7 +1,9 @@
 // A reply in a tracker thread, or a new comment on the item: the comments being sent, then a button that opens
-// the box. Where replies are new comments (Jira), it mentions the author first. A refused comment reopens the box.
+// the box. Where replies are new comments (Jira), it mentions the author first; typing `@` tags anyone. A refused
+// comment reopens the box.
 
 import { integrationKind, type IntegrationKindName } from '@union/core/integration-kinds';
+import { mentionsAsText } from '@union/core/tracker-mention';
 import { useState, type ReactElement } from 'react';
 
 import type { PendingTrackerComment } from '../../../src/tracker-comment-types';
@@ -14,7 +16,7 @@ function Sending({ label, text }: { label: string; text: string }): ReactElement
   return (
     <div className="space-y-1 opacity-70">
       <span className="text-xs text-zinc-500">Sending to {label}…</span>
-      <Markdown compact>{text}</Markdown>
+      <Markdown compact>{mentionsAsText(text)}</Markdown>
     </div>
   );
 }
@@ -57,6 +59,7 @@ export function TrackerReply({
               : tracker.commentsPostAs
           }
           canPost
+          mentions={sender.target}
           onSend={async (text) => {
             await sender.send(threadId, mention, text);
             setOpen(false);

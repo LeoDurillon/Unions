@@ -7,7 +7,7 @@ import { notionText, readNotionItem } from './notion-item-read';
 import { notionProvider } from './notion-provider';
 import { notionRefs } from './notion-refs';
 import { deliverNotionRule } from './notion-rule-send';
-import { notionPostFailure, notionThreads, postNotionThreadComment } from './notion-threads';
+import { notionComments } from './notion-threads';
 import type { TrackerAdapter } from './tracker-adapter';
 import { trackerRuleChecks } from './tracker-rules';
 
@@ -20,11 +20,7 @@ export function notionAdapter(notion: NotionApi): TrackerAdapter {
     kind: 'notion',
     refs: notionRefs(notion),
     text: notionText(notion),
-    comments: {
-      read: (token, _config, pageId) => notionThreads(notion, token, pageId),
-      post: (token, _config, post) => postNotionThreadComment(notion, token, post),
-      postFailure: notionPostFailure,
-    },
+    comments: notionComments(notion),
     fields: {
       read: (access, pageId) => readNotionItem(notion, access, pageId),
       check: (access, pageId, input) => checkNotionField(notion, access, pageId, input),

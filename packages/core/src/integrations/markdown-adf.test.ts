@@ -186,3 +186,12 @@ test("an agent's draft comes back the same through the import's converter", () =
   ].join('\n\n');
   expect(adfMarkdown(markdownAdf(draft))).toBe(draft);
 });
+
+test('a mention token is a mention of the account, read back as @Name', () => {
+  const markdown = 'Ping [@Ada Lovelace](mention:557058:ada-1) about **this**';
+  const mention = { type: 'mention', attrs: { id: '557058:ada-1', text: '@Ada Lovelace' } };
+  expect(blocks(markdown)).toEqual([
+    paragraph(text('Ping '), mention, text(' about '), text('this', { type: 'strong' })),
+  ]);
+  expect(adfMarkdown(markdownAdf(markdown))).toContain('@Ada Lovelace');
+});

@@ -1,19 +1,29 @@
-// A comment typed in Union as Notion rich text: markdown links, **bold** and `code` become marks, the rest stays as typed.
+// A comment typed in Union as Notion rich text: links, **bold**, `code` and mentions become Notion's, the rest stays.
+
+import { MENTION_TOKEN } from './tracker-mention';
 
 /** One text object as Notion takes it in a comment. */
-export type NotionRichTextInput = {
+type NotionTextInput = {
   type: 'text';
   text: { content: string; link: { url: string } | null };
   annotations: { bold: boolean; code: boolean };
 };
+
+/** A person tagged: Notion shows `@Name` and notifies them. */
+type NotionMentionInput = { type: 'mention'; mention: { type: 'user'; user: { id: string } } };
+
+/** One rich text object of a comment, as Notion takes it. */
+export type NotionRichTextInput = NotionTextInput | NotionMentionInput;
 
 /** Notion refuses a text object longer than this. */
 const MAX_TEXT_OBJECT = 2000;
 /** Notion refuses a rich text array longer than this. */
 export const MAX_TEXT_OBJECTS = 100;
 
-const MARKS =
-  /\[(?<label>[^\]\n]+)\]\((?<url>https?:\/\/[^\s)]+)\)|\*\*(?<bold>[^*\n]+)\*\*|`(?<code>[^`\n]+)`/gu;
+const MARKS = new RegExp(
+  `${MENTION_TOKEN.source}|\\[(?<label>[^\\]\\n]+)\\]\\((?<url>https?:\\/\\/[^\\s)]+)\\)|\\*\\*(?<bold>[^*\\n]+)\\*\\*|\`(?<code>[^\`\\n]+)\``,
+  'gu',
+);
 
 type Run = { content: string; url: string | null; bold: boolean; code: boolean };
 
@@ -32,24 +42,8 @@ function runOf(groups: Record<string, string | undefined>): Run {
   return { ...plainRun(code ?? ''), code: true };
 }
 
-function runsOf(text: string): Run[] {
-  const runs: Run[] = [];
-  let last = 0;
-  for (const match of text.matchAll(MARKS)) {
-    if (match.index > last) {
-      runs.push(plainRun(text.slice(last, match.index)));
-    }
-    runs.push(runOf(match.groups ?? {}));
-    last = match.index + match[0].length;
-  }
-  if (last < text.length) {
-    runs.push(plainRun(text.slice(last)));
-  }
-  return runs;
-}
-
-function objectsOf(run: Run): NotionRichTextInput[] {
-  const objects: NotionRichTextInput[] = [];
+function textObjects(run: Run): NotionTextInput[] {
+  const objects: NotionTextInput[] = [];
   for (let start = 0; start < run.content.length; start += MAX_TEXT_OBJECT) {
     objects.push({
       type: 'text',
@@ -63,7 +57,27 @@ function objectsOf(run: Run): NotionRichTextInput[] {
   return objects;
 }
 
+function objectsOf(groups: Record<string, string | undefined>): NotionRichTextInput[] {
+  const { id } = groups;
+  if (id !== undefined) {
+    return [{ type: 'mention', mention: { type: 'user', user: { id } } }];
+  }
+  return textObjects(runOf(groups));
+}
+
 /** The text as Notion rich text; longer runs are split at Notion's 2000 characters. */
 export function toRichText(text: string): NotionRichTextInput[] {
-  return runsOf(text).flatMap((run) => objectsOf(run));
+  const objects: NotionRichTextInput[] = [];
+  let last = 0;
+  for (const match of text.matchAll(MARKS)) {
+    if (match.index > last) {
+      objects.push(...textObjects(plainRun(text.slice(last, match.index))));
+    }
+    objects.push(...objectsOf(match.groups ?? {}));
+    last = match.index + match[0].length;
+  }
+  if (last < text.length) {
+    objects.push(...textObjects(plainRun(text.slice(last))));
+  }
+  return objects;
 }

@@ -28,6 +28,10 @@ const jira = fakeJiraApi(
   {
     bodies: { 'ABC-1': ISSUE_BODY },
     updates,
+    people: [
+      { accountId: '557058:grace', displayName: 'Grace Hopper', accountType: 'atlassian' },
+      { accountId: '557058:bot', displayName: 'Grace Bot', accountType: 'app' },
+    ],
     comments: {
       'ABC-1': [
         {
@@ -58,6 +62,7 @@ adapterContract({
   },
   markdown: { raw: '## Goal\n\nMake it **fast**', clean: '## Goal\n\nMake it **fast**' },
   commented: 'ABC-1',
+  person: { id: '557058:grace', name: 'Grace Hopper' },
   fields: {
     itemId: 'ABC-1',
     field: { id: 'duedate', value: '2026-12-01' },

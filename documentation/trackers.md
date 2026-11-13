@@ -32,8 +32,9 @@ of your rules, change something in it. Notion and Jira work the same way in Unio
   with your Notion integration.
 - The integration needs capabilities for each feature: **Read content** to import, **Update content** to set
   properties, **Insert content** to create pages, **Read comments** and **Insert comments** for the tab, and **Read
-  user information** to pick people in rules. Without one, Union says which to turn on.
+  user information** to pick people in rules and to tag them in a comment. Without one, Union says which to turn on.
 - Comments are discussions: **Reply** answers in the discussion. Comments appear under your integration's name.
+  Type `@` in a comment to tag a member of the workspace; Notion notifies them.
 - A select can take a new option, which Notion creates; a status only takes its own options.
 - Rules set the page's properties. Union reads the database's columns when you connect, and again with **Refresh
   from Notion** above the rules.
@@ -44,7 +45,8 @@ of your rules, change something in it. Notion and Jira work the same way in Unio
   project; linking a review takes any issue of the site your account can see.
 - Union acts as the Atlassian account of the connection, with its permissions: **Edit issues**, **Transition
   issues**, **Add comments**.
-- Comments have no threads: **Reply** posts a new comment that mentions its author, so Jira notifies them.
+- Comments have no threads: **Reply** posts a new comment that mentions its author, so Jira notifies them. Type
+  `@` in a comment to tag anyone who can see the issue.
 - The status moves through the transitions the issue's workflow offers, as Jira's own status button does.
 - Rules can also move the issue to a status and comment on it. Picked fields (people, versions, components) and
   sprints come from Jira's lists; **The active sprint** and **The next sprint** are the board's when the rule runs.

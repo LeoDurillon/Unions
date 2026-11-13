@@ -28,6 +28,7 @@
     "./tracker-field-types": "./src/integrations/tracker-field-types.ts",
     "./jira-comment-post": "./src/integrations/jira-comment-post.ts",
     "./jira-comment-link": "./src/integrations/jira-comment-link.ts",
+    "./tracker-mention": "./src/integrations/tracker-mention.ts",
     "./event-actions": "./src/event/event-actions.ts",
     "./event-tracker-actions": "./src/event/event-tracker-actions.ts",
     "./event-catalog": "./src/event/event-catalog.ts",

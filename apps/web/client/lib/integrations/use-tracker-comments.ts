@@ -68,6 +68,8 @@ function failureOf(payload: unknown): ({ key: string } & CommentFailure) | null 
 }
 
 export type TrackerCommentSend = {
+  /** The ticket and tracker the comments go to. */
+  target: { ticketId: number; kind: IntegrationKindName };
   /** Queues the comment; resolves once queued, the box closes then and shows it "Sending…". */
   send: (threadId: string | null, mention: Mention | null, text: string) => Promise<void>;
   failures: ReadonlyMap<string, CommentFailure>;
@@ -99,6 +101,7 @@ export function useTrackerCommentSend(
     void client.invalidateQueries({ queryKey });
   });
   return {
+    target: { ticketId, kind },
     send: async (threadId, mention, text) => {
       const body = { threadId, mention, text };
       const { id } = await request<{ id: number }>('POST', url(ticketId, kind), body);

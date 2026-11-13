@@ -223,11 +223,13 @@ Then come the tabs:
   bottom starts a discussion on the page. **Add to review** puts the whole discussion in the ticket's review, for the implementer with your next
   **Send review** (see [Reviewing](reviewing.md)); it shows **In the review** after. On a comment on the whole
   page, **Add to review** is next to each comment of the discussion and adds that comment alone, without the
-  replies. You can write `**bold**`, `` `code` `` and `[links](https://…)`. The comment shows "Sending to Notion…"
+  replies. You can write `**bold**`, `` `code` `` and `[links](https://…)`, and tag someone: type `@` and the start of
+  their name, then pick them in the list under the box (arrows and Enter, or a click); Notion notifies them. The comment shows "Sending to Notion…"
   until Notion has it, then the tab reads the comments again; if Notion refuses it, the box opens again with your
   text and the reason. Comments appear in Notion under your integration's name. Your Notion integration needs the
   **Read comments** and **Insert comments** capabilities (in Notion, the integration's settings, then
-  **Capabilities**); without them the tab says which.
+  **Capabilities**), and a **Read user information** option to list people when you type `@`; without them the tab
+  says which.
 - **Jira**, in the Notion tab's place for a ticket imported from Jira (the Overview's **Jira** row links the issue,
   and once the tab has read them says how many comments it has; see
   [Link a ticket to its Notion page or Jira issue](#link-a-ticket-to-its-notion-page-or-jira-issue)): a card for
@@ -244,7 +246,8 @@ Then come the tabs:
   group, or an internal note). An issue with more than 500 comments shows the latest 500. **Reply** under a comment posts a new comment that starts with a mention of its author, so Jira notifies
   them (Jira comments have no threads); **New comment** in the **Comment on the issue** card at the bottom posts a plain one. You can write
   markdown: `**bold**`, `` `code` ``, `[links](https://…)`, lists, code blocks and quotes keep their shape in Jira
-  (inline code cannot be bold in Jira, so bold around it is dropped). Comments are posted as the Atlassian account of the project's Jira connection and visible to everyone
+  (inline code cannot be bold in Jira, so bold around it is dropped). Type `@` and the start of a name to tag
+  someone who can see the issue: pick them in the list under the box, and Jira notifies them. Comments are posted as the Atlassian account of the project's Jira connection and visible to everyone
   who can see the issue. The comment shows "Sending to Jira…" until Jira has it; if Jira refuses it, the box opens
   again with your text and the reason (the account needs the **Add comments** permission in the Jira project).
   **Add to review** puts the comment in the ticket's review, for the implementer with your next **Send review**;

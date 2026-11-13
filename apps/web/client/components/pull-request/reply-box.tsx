@@ -1,11 +1,14 @@
 // The box a reply to a pull request comment is written in: its text, Resolve for a thread, who
-// posts. Also the error, with the text kept.
+// posts. Also the error, with the text kept. Given a tracker item (`mentions`), typing `@` tags its people.
 
 import { useState, type ReactElement } from 'react';
 
+import type { MentionTarget } from '../../lib/integrations/use-tracker-people';
+import { MentionTextarea } from '../tracker/mention-textarea';
 import { Button, inputClass } from '../ui/ui';
 
 const ROWS = 4;
+const TEXTAREA_CLASS = `${inputClass} font-mono text-xs`;
 
 /** What the box says and does; `onSend` rejects with GitHub's or the server's reason. */
 export type ReplyBoxProps = {
@@ -18,12 +21,48 @@ export type ReplyBoxProps = {
   /** A failure the box opened with (a reply GitHub refused). */
   error?: string | null;
   sendLabel?: string;
+  /** The tracker item whose people `@` lists; none for a plain box. */
+  mentions?: MentionTarget;
   onSend: (body: string, resolve: boolean) => Promise<void>;
   onCancel: () => void;
 };
 
 function errorText(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
+}
+
+/** The reply's textarea: one that tags the item's people when given `mentions`. */
+function ReplyText({
+  mentions,
+  value,
+  onChange,
+}: {
+  mentions: MentionTarget | undefined;
+  value: string;
+  onChange: (value: string) => void;
+}): ReactElement {
+  if (mentions) {
+    return (
+      <MentionTextarea
+        target={mentions}
+        className={TEXTAREA_CLASS}
+        rows={ROWS}
+        value={value}
+        onChange={onChange}
+      />
+    );
+  }
+  return (
+    <textarea
+      aria-label="Reply"
+      className={TEXTAREA_CLASS}
+      rows={ROWS}
+      value={value}
+      onChange={(event) => {
+        onChange(event.target.value);
+      }}
+    />
+  );
 }
 
 /** The text, Resolve the thread, then Send and Cancel; the text stays when sending fails. */
@@ -46,15 +85,7 @@ export function ReplyBox(props: ReplyBoxProps): ReactElement {
   };
   return (
     <div className="space-y-2 rounded-md border border-zinc-200 p-2 dark:border-zinc-800">
-      <textarea
-        aria-label="Reply"
-        className={`${inputClass} font-mono text-xs`}
-        rows={ROWS}
-        value={body}
-        onChange={(event) => {
-          setBody(event.target.value);
-        }}
-      />
+      <ReplyText mentions={props.mentions} value={body} onChange={setBody} />
       {resolvable ? (
         <label className="flex items-center gap-2 text-xs">
           <input

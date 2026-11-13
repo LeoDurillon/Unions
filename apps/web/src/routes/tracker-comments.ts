@@ -1,7 +1,8 @@
 // `/api/tickets/:id/trackers/:kind/comments`: the comments of the ticket's tracker item, read now through its
-// adapter. Also those the user sends to it, posted by the worker, and Add to review.
+// adapter. Also those the user sends to it, posted by the worker, the people they can tag, and Add to review.
 
 import { trackerAdapter, type Db, type IntegrationApis, type TrackerThreads } from '@union/core';
+import type { TrackerPerson } from '@union/core/tracker-mention';
 import { Hono, type Context } from 'hono';
 
 import { ACCEPTED, CONFLICT, fail, NOT_FOUND, readObject } from '../http';
@@ -12,7 +13,10 @@ import type { TrackerCommentsView } from '../tracker-comment-types';
 import { importedThreads, importThread } from '../tracker-review-import';
 import { guarded } from './tracker-errors';
 
-type Loaded = TicketTrackerItem & { read: () => Promise<TrackerThreads> };
+type Loaded = TicketTrackerItem & {
+  read: () => Promise<TrackerThreads>;
+  people: (query: string) => Promise<TrackerPerson[]>;
+};
 
 /** The ticket's item, and how to read its threads; refused for a tracker without comments. */
 function load(db: Db, apis: IntegrationApis, c: Context): Loaded {
@@ -25,6 +29,7 @@ function load(db: Db, apis: IntegrationApis, c: Context): Loaded {
   return {
     ...loaded,
     read: () => guarded(() => comments.read(secret, config, loaded.item.id)),
+    people: (query) => guarded(() => comments.people(secret, config, loaded.item.id, query)),
   };
 }
 
@@ -65,7 +70,8 @@ async function addToReview(db: Db, loaded: Loaded, c: Context): Promise<Response
 
 /**
  * `GET` reads the threads on each call (the tab reads once per opening, and on Refresh), with the
- * comments not posted yet and those in the review. `POST` (`{ threadId?, mention?, text }`) queues a
+ * comments not posted yet and those in the review. `GET /people?q=` reads the people whose name starts
+ * with `q`, to tag in a comment. `POST` (`{ threadId?, mention?, text }`) queues a
  * reply or a new comment; `POST /import` (`{ threadId, commentId? }`) adds a thread, or one of its
  * comments, to the review.
  */
@@ -73,6 +79,9 @@ export function ticketTrackerCommentRoutes(db: Db, apis: IntegrationApis): Hono 
   const routes = new Hono();
   const path = '/:id/trackers/:kind/comments';
   routes.get(path, async (c) => c.json(await view(db, load(db, apis, c))));
+  routes.get(`${path}/people`, async (c) =>
+    c.json(await load(db, apis, c).people(c.req.query('q') ?? '')),
+  );
   routes.post(`${path}/import`, (c) => addToReview(db, load(db, apis, c), c));
   routes.post(path, async (c) => {
     const { ticket, kind, item } = load(db, apis, c);

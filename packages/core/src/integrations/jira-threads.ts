@@ -5,7 +5,10 @@ import { withLeadingMention } from './adf-mention';
 import type { JiraApi, JiraAuth } from './jira-api';
 import type { JiraComment } from './jira-comments';
 import { JiraError } from './jira-error';
+import { jiraPeople } from './jira-people';
+import { jiraAccess } from './jira-provider';
 import { markdownAdf } from './markdown-adf';
+import type { TrackerComments } from './tracker-adapter';
 import type { TrackerCommentInput, TrackerThread, TrackerThreads } from './tracker-comments';
 
 const FORBIDDEN = 403;
@@ -37,17 +40,13 @@ function threadOf(comment: JiraComment): TrackerThread {
 }
 
 /** The issue's comments, the latest Jira gives; `total` counts those left out. */
-export async function jiraThreads(
-  jira: JiraApi,
-  auth: JiraAuth,
-  key: string,
-): Promise<TrackerThreads> {
+async function jiraThreads(jira: JiraApi, auth: JiraAuth, key: string): Promise<TrackerThreads> {
   const page = await jira.comments(auth, key);
   return { threads: page.comments.map(threadOf), total: page.total, truncated: false };
 }
 
 /** A new comment on the issue, its markdown as Jira's rich text, the mention first when it replies. */
-export async function postJiraThreadComment(
+async function postJiraThreadComment(
   jira: JiraApi,
   auth: JiraAuth,
   post: TrackerCommentInput,
@@ -62,7 +61,7 @@ export async function postJiraThreadComment(
 }
 
 /** Jira's reason, with the permission named when it refused one. */
-export function jiraPostFailure(error: unknown): string {
+function jiraPostFailure(error: unknown): string {
   if (error instanceof JiraError && error.status === FORBIDDEN) {
     return 'Jira refused it: the account needs the "Add comments" permission in the Jira project';
   }
@@ -70,4 +69,18 @@ export function jiraPostFailure(error: unknown): string {
     return 'Jira did not find the issue: it may have been moved or deleted';
   }
   return error instanceof Error ? error.message : String(error);
+}
+
+function authOf(token: string, config: unknown): JiraAuth {
+  return jiraAccess(token, config).auth;
+}
+
+/** Jira's `comments` capability: comments read and posted, people to tag. */
+export function jiraComments(jira: JiraApi): TrackerComments {
+  return {
+    read: (token, config, key) => jiraThreads(jira, authOf(token, config), key),
+    post: (token, config, post) => postJiraThreadComment(jira, authOf(token, config), post),
+    postFailure: (error) => jiraPostFailure(error),
+    people: (token, config, key, query) => jiraPeople(jira, authOf(token, config), key, query),
+  };
 }

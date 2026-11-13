@@ -1,7 +1,8 @@
-// Markdown's inline content (an mdast phrasing tree) as ADF inline nodes: text with its marks, breaks, links.
+// Markdown's inline content (an mdast phrasing tree) as ADF inline nodes: text with its marks, breaks, links, mentions.
 import type { Nodes, PhrasingContent } from 'mdast';
 
 import type { AdfInlineNode, AdfMark } from './adf-types';
+import { MENTION_SCHEME } from './tracker-mention';
 
 /** What converting needs from the whole document: link definitions, and unique ids for task lists. */
 export type MarkdownContext = { definitions: ReadonlyMap<string, string>; nextId: () => string };
@@ -53,8 +54,17 @@ const CONVERTERS: Partial<Record<PhrasingContent['type'], Converter>> = {
   inlineCode: (node, marks) => textNode(plainText(node), [...marks, { type: 'code' }]),
   break: () => [{ type: 'hardBreak' }],
   html: (node, marks) => textNode(plainText(node), marks),
-  link: (node, marks, context) =>
-    node.type === 'link' ? inlineAdf(node.children, linked(node.url, marks), context) : [],
+  link: (node, marks, context) => {
+    if (node.type !== 'link') {
+      return [];
+    }
+    // A mention token (`tracker-mention.ts`): Jira shows `@Name` and notifies them.
+    if (node.url.startsWith(MENTION_SCHEME)) {
+      const id = node.url.slice(MENTION_SCHEME.length);
+      return [{ type: 'mention', attrs: { id, text: plainText(node) } }];
+    }
+    return inlineAdf(node.children, linked(node.url, marks), context);
+  },
   linkReference: (node, marks, context) => {
     if (node.type !== 'linkReference') {
       return [];

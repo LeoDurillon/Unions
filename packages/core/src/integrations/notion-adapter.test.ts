@@ -57,6 +57,7 @@ const notion = fakeNotionApi(
     },
   ],
   updates,
+  [{ id: 'user-ada', name: 'Ada Lovelace' }],
 );
 
 adapterContract({
@@ -84,5 +85,6 @@ adapterContract({
     clean: `See [Notion page](https://www.notion.so/${hex(OTHER)})`,
   },
   commented: PAGE,
+  person: { id: 'user-ada', name: 'Ada Lovelace' },
   fields: { itemId: PAGE, field: { id: NOTES.id, value: 'Shipped' }, sent: () => updates.length },
 });
