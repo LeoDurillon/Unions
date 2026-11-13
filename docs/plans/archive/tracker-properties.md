@@ -1,10 +1,11 @@
 # Edit the tracker item's properties from the ticket
 
-Status: steps 1 to 5 built (2026-11-13, branch `tracker-properties`): a ticket's and a review's Notion and Jira
-tabs list the item's properties and edit them (Jira's status through its transitions); no real edit checked yet.
-Step 6 (docs) done with each step; archive once a real edit is checked. Builds on the Notion and Jira tabs (comments, built) and the rules' field
-machinery ([Jira rule actions](archive/jira-rule-actions.md), [More Jira fields](archive/jira-more-fields.md)).
-Overlaps [One adapter per tracker](tracker-adapters.md): see D8.
+Status: built, deployed and checked (2026-11-13): a ticket's and a review's Notion and Jira tabs show the item's
+properties in a side column, as the Overview's details, edit them (Jira's status through its transitions), and hide
+the ones the project does not want to see (`integrations.hidden_fields`, added after the plan). Tested on the live
+instance by the user. Builds on the Notion and Jira tabs (comments, built) and the rules' field
+machinery ([Jira rule actions](jira-rule-actions.md), [More Jira fields](jira-more-fields.md)).
+Overlaps [One adapter per tracker](../tracker-adapters.md): see D8.
 
 ## Why
 
@@ -59,7 +60,7 @@ value and send it; only a rule can use that today, not the user by hand.
 - **D7. Shared value inputs.** The rule editor's value inputs (`notion-value-row.tsx`, `jira-field-row.tsx`,
   `jira-pick-field.tsx`) are split so the input itself (by type, with its option and pick lists) is one component
   the rule rows and the tab both use, with variables offered only in the rule editor.
-- **D8. With the adapters plan.** If [tracker adapters](tracker-adapters.md) step 3 (shared field types) is built
+- **D8. With the adapters plan.** If [tracker adapters](../tracker-adapters.md) step 3 (shared field types) is built
   first, this feature is one `fields` capability call and one component for both trackers. If this is built first,
   it stays within the two trackers' folders, keeps the tracker-neutral command (D1), and the adapters plan's step 3
   moves it behind the capability with the rule actions. Recommendation: build this first, it is what the user sees;

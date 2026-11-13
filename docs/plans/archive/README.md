@@ -138,3 +138,6 @@ the spec (`docs/spec/`); open work is in the [plans README](../README.md).
 - [UI overhaul](ui-overhaul.md): every page redesigned from the Claude Design canvases (cards, ticket tabs, loading
   placeholders, New ticket, the dialogs), then a dark and a light contrast pass over all of them. Built
   (2026-11-12).
+- [Edit the tracker item's properties](tracker-properties.md): a ticket's and a review's Notion and Jira tabs list the
+  item's properties in a side column, edit them through the worker (Jira's status by its transitions) and hide the
+  ones the project does not want. Built and deployed (2026-11-13).
