@@ -48,7 +48,8 @@ export const EMPTY_DRAFT: Draft = {
     notion: { secret: '', config: { dataSourceId: '' }, title: null },
     jira: { secret: '', config: { site: '', email: '', projectKey: '' }, title: null },
   },
-  setupAgent: false,
+  // On by default: the switch says it uses the Claude subscription, and can be turned off.
+  setupAgent: true,
   setupModel: SETUP_DEFAULT_MODEL,
 };
 

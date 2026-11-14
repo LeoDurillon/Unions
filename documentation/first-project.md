@@ -90,8 +90,8 @@ Your account must be able to see the project's issues. The token stays on this m
 
 ## Let an agent set up the project
 
-With **Let an agent set up this project** on in the wizard, an agent reads your repository once the project is
-created: its README, package scripts, compose files, CI workflows, env examples and test configs, along with this
+**Let an agent set up this project** is on by default in the wizard's last step; turn it off to set the project up
+by hand. With it on, an agent reads your repository once the project is created: its README, package scripts, compose files, CI workflows, env examples and test configs, along with this
 guide, to see how Union uses each setting. It proposes the install and
 check commands, the preview, the e2e command, saved scripts, project instructions and, when your code needs a
 toolchain the default image lacks, an agent image. It also lists the secrets and files you must add yourself, and

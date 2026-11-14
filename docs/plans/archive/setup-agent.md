@@ -180,7 +180,8 @@ the diff makes the cards show only what differs from the current settings.
 
 ## Decisions (2026-11-10)
 
-1. **Checkbox off by default**: it uses Claude usage, and AGENTS.md asks for consent before that.
+1. **Checkbox off by default**: it uses Claude usage, and AGENTS.md asks for consent before that. Changed
+   2026-11-14 at the user's request: on by default, the switch saying it uses the Claude subscription.
 2. **Read-only agent** (Read, Grep, Glob); the worker checks the result (step 3) instead of the agent running
    commands. Cheaper and safer than a full agent session with `Bash`.
 3. **Model chosen by the user, Sonnet by default**: reading configs, not writing code. The wizard and Run setup
