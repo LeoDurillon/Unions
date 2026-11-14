@@ -22,8 +22,9 @@ function SidebarTitle({
   onToggle: () => void;
 }): ReactElement {
   return (
-    <div className="flex items-center justify-between pt-1 pl-2 group-data-[compact]/side:justify-center group-data-[compact]/side:pl-0">
-      <h1 className="text-base font-semibold group-data-[compact]/side:sr-only">union</h1>
+    <div className="flex items-center gap-2 pt-1 pl-2 group-data-[compact]/side:flex-col group-data-[compact]/side:pl-0">
+      <img src="/logo.svg" alt="" className="size-6" />
+      <h1 className="flex-1 text-base font-semibold group-data-[compact]/side:sr-only">union</h1>
       <button
         type="button"
         aria-label={compact ? 'Expand the sidebar' : 'Collapse the sidebar'}
