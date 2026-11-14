@@ -129,14 +129,22 @@ section:
 
 ## Step 3: check the proposal without Claude
 
-Before the cards show, the worker tries what it can, at no Claude usage, and puts the result on each card:
+The worker tries what it can, at no Claude usage, and puts the result on each card. The cards show as soon as
+the agent's proposal is read, without waiting for the checks: on a large repository the install alone can take
+minutes. Each card shows "Checking…" until its result arrives, which the worker announces through `events`.
 
 - **Checks**: the install command, then the gate, in a throwaway container of the project's agent image on the
-  clone, with the gate's timeout. The card shows passed or failed, with the end of the output.
+  clone, in the background. The install has its own timeout, so a slow install does not use up the gate's
+  time; the gate keeps the gate's timeout. The card shows its stage (installing, running the checks), then
+  passed, failed or timed out (saying whether the install or the gate ran out), with the end of the output. The
+  user may apply before the result arrives. **Test again** on the card runs it again, after an edit or a fix.
 - **Preview**: the proposed compose file and additions resolved through the compose helper
   (`docker compose config`) and checked with `composeProblems`. The services and ports are checked against what
   the resolved file declares. No preview is started: it needs a ticket's workspace.
 - **Agent image**: `agent-image-source` checks only (building waits for Apply, as on the settings page).
+- The preview and agent image checks take seconds; only the Checks card waits on the install.
+- The throwaway container and its installed dependencies are removed after the check. Keeping them for the
+  first ticket is left out: it would need its own cleanup.
 - A failed check offers **Ask the agent to fix**. It sends a follow-up with the output, as the e2e "Send to agent"
   does, reusing the command-output path (`docs/plans/README.md`, loose ends).
 - Stored on the investigation (`setup_checks` JSON column), written by the worker only. The web reads it.
