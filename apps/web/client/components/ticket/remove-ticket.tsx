@@ -44,6 +44,7 @@ export function RemoveTicket({
     <div className="space-y-1">
       <ConfirmButton
         label={remove.isPending ? 'Removing…' : 'Remove ticket'}
+        wide
         question={`Remove it from Union, with its runs, outputs, reviews, files and agent container?${keptElsewhere(ticket)}`}
         confirmLabel="Remove for good"
         disabled={remove.isPending}

@@ -15,6 +15,7 @@ function CancelTicket({ ticketId }: { ticketId: number }): ReactElement {
     <div className="space-y-1">
       <ConfirmButton
         label="Cancel ticket"
+        wide
         question="Stop it, and close its issue and open pull requests on GitHub?"
         confirmLabel="Cancel ticket"
         disabled={command.isPending}

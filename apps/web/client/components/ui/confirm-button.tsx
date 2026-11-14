@@ -10,12 +10,14 @@ function Trigger({
   label,
   name,
   icon,
+  wide,
   disabled,
   onClick,
 }: {
   label: string;
   name: string | undefined;
   icon: ReactNode;
+  wide: boolean;
   disabled: boolean;
   onClick: () => void;
 }): ReactElement {
@@ -27,7 +29,13 @@ function Trigger({
     );
   }
   return (
-    <Button variant="quietDanger" aria-label={name} disabled={disabled} onClick={onClick}>
+    <Button
+      variant="quietDanger"
+      aria-label={name}
+      className={wide ? 'w-full text-left' : ''}
+      disabled={disabled}
+      onClick={onClick}
+    >
       {label}
     </Button>
   );
@@ -44,6 +52,7 @@ export function ConfirmButton({
   confirmLabel,
   disabled = false,
   icon = null,
+  wide = false,
   onConfirm,
 }: {
   /** The button's text, or its accessible name when `icon` is set. */
@@ -55,6 +64,8 @@ export function ConfirmButton({
   disabled?: boolean;
   /** Shows an icon-only button (a row action) instead of the quiet red one. */
   icon?: ReactNode;
+  /** Fills its row, text on the left: an item of a ⋯ menu. */
+  wide?: boolean;
   onConfirm: () => void;
 }): ReactElement {
   const [asking, setAsking] = useState(false);
@@ -64,6 +75,7 @@ export function ConfirmButton({
         label={label}
         name={name}
         icon={icon}
+        wide={wide}
         disabled={disabled}
         onClick={() => {
           setAsking(true);
