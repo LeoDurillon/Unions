@@ -16,6 +16,7 @@ import { REPO_DIR } from '../provision';
 import type { AgentReviewDeps } from './agent-review';
 import { parseFindings } from './agent-review-findings';
 import type { PartAnswer } from './agent-review-merge';
+import { parseSame } from './agent-review-same';
 import { missingBlock } from './outcome-text';
 
 /** Runs the `step` agent with `prompt` in the review's checkout, in a fresh session. */
@@ -53,6 +54,6 @@ export function answerOf(title: string, outcome: AgentOutcome): PartAnswer {
   }
   const findings = parseFindings(outcome.text);
   return findings
-    ? { title, findings, error: null }
+    ? { title, findings, error: null, same: parseSame(outcome.text) }
     : { title, findings: null, error: missingBlock('comments', outcome.text) };
 }

@@ -99,6 +99,10 @@ export function ReviewHeader({
         canSend={diff?.canSend ?? false}
         pending={mutations.send.isPending}
         error={mutations.send.error}
+        keeping={mutations.keepAll.isPending}
+        onKeepAll={() => {
+          mutations.keepAll.mutate();
+        }}
         onSend={(summary, verdict) => {
           mutations.send.mutate(
             { summary, verdict },

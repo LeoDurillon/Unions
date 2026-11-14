@@ -86,7 +86,9 @@ ticket runs a step.
 ## Review with agent
 
 **Review with agent** asks an agent (Opus by default) to read the change against its specs and leave line comments.
-They arrive as drafts, like yours: keep, edit or delete each one before you send the review. The agent may also
+They arrive as drafts, like yours: keep, edit or delete each one before you send the review (the **Send review**
+panel also has **Keep all**). Suggestions you neither kept nor edited are replaced the next time the agent runs; sent
+ones are posted all the same. The agent may also
 leave a remark on the whole change, and findings about code outside the diff, shown above the files. Once it has
 run, the button reads **Review again with agent**. On a split ticket, it reviews slice by slice.
 
@@ -97,8 +99,10 @@ the agent should read it:
   you ran it on this commit, otherwise a new grouping), or by folder when there are no specs. Each part gets its own
   agent, which reviews that part's files and reads the rest only to follow a call. Then one more agent checks how
   the parts fit together. While it runs, the button says which part it reads ("Agent reviewing part 3 of 6: …").
-  The comments of every part arrive together as drafts, a comment two agents made on the same lines kept once, and
-  the remark on the whole change lists what each part found. Up to 10 agent runs, one after another: slower, and it
+  The comments of every part arrive together as drafts. A comment two agents made on the same lines is kept once,
+  and comments that report one problem in several places are folded into one that names the other places. The
+  remark on the whole change lists what each part found. A part that covers several parts of your specs is named
+  after the first ("Publication and 2 more"). Up to 10 agent runs, one after another: slower, and it
   uses more of your Claude usage, but one agent alone leaves about half of a change this size unread.
 - **In one pass**: one agent reads the whole change, as on a small one.
 

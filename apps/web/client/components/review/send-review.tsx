@@ -14,6 +14,10 @@ type SendProps = {
   canSend: boolean;
   pending: boolean;
   error: Error | null;
+  /** Keeping every agent suggestion is under way. */
+  keeping: boolean;
+  /** Keeps every agent suggestion as the user's, so another agent run does not replace them. */
+  onKeepAll: () => void;
   /** No verdict for a ticket's review (`copy.verdicts` false). */
   onSend: (summary: string, verdict?: ReviewVerdict) => void;
 };
@@ -71,12 +75,38 @@ function SendButtons({
   );
 }
 
+/** The agent suggestions not kept yet, and the button that keeps them all. */
+function Suggestions({
+  count,
+  keeping,
+  onKeepAll,
+}: {
+  count: number;
+  keeping: boolean;
+  onKeepAll: () => void;
+}): ReactElement {
+  return (
+    <div className="flex items-start justify-between gap-3">
+      <p className="text-sm text-amber-700 dark:text-amber-400">
+        {count === 1
+          ? '1 of them is an agent suggestion you have not kept or edited.'
+          : `${count} of them are agent suggestions you have not kept or edited.`}
+      </p>
+      <Button disabled={keeping} onClick={onKeepAll}>
+        {keeping ? 'Keeping…' : `Keep all (${count})`}
+      </Button>
+    </div>
+  );
+}
+
 function SendPanel({
   copy,
   drafts,
   suggestions,
   pending,
   error,
+  keeping,
+  onKeepAll,
   onSend,
   onCancel,
   anchor,
@@ -96,11 +126,7 @@ function SendPanel({
         {drafts} comment{drafts === 1 ? '' : 's'} {copy.destination}
       </p>
       {suggestions > 0 ? (
-        <p className="text-sm text-amber-700 dark:text-amber-400">
-          {suggestions === 1
-            ? '1 of them is an agent suggestion you have not kept or edited.'
-            : `${suggestions} of them are agent suggestions you have not kept or edited.`}
-        </p>
+        <Suggestions count={suggestions} keeping={keeping} onKeepAll={onKeepAll} />
       ) : null}
       <textarea
         className={`${inputClass} min-h-20`}

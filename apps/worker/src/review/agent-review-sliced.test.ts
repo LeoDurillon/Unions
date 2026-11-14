@@ -67,7 +67,11 @@ function replyTo(prompt: string): string {
   }
   const part = /You review part (?<n>\d+)/u.exec(prompt)?.groups?.n;
   if (part === undefined) {
-    return block({ summary: 'Whole change fine.', comments: [comment('api/a.ts', 3, 'seam')] });
+    return block({
+      summary: 'Whole change fine.',
+      same: [[1, 2]],
+      comments: [comment('api/a.ts', 3, 'seam')],
+    });
   }
   return Number(part) === failPart
     ? 'No block.'
@@ -148,9 +152,9 @@ test('without specs, the change is cut by folder: one agent per part, then the s
   expect(runs).toHaveLength(3);
   expect(runs[0]?.prompt).toContain('You review part 1: **api/a.ts**');
   expect(runs[1]?.prompt).toContain('You review part 2: **web/b.ts**');
-  expect(runs[2]?.prompt).toContain('- `api/a.ts:3`: from 1');
+  expect(runs[2]?.prompt).toContain('- [1] `api/a.ts:3`: from 1');
   const saved = latestAgentReview(db, { kind: 'ticket', id: ticketId });
-  expect(saved).toMatchObject({ status: 'succeeded', mode: 'sliced', comments: 3 });
+  expect(saved).toMatchObject({ status: 'succeeded', mode: 'sliced', comments: 2 });
   expect(saved?.slices?.map((slice) => [slice.title, slice.status, slice.comments])).toEqual([
     ['api/a.ts', 'succeeded', 1],
     ['web/b.ts', 'succeeded', 1],
@@ -163,8 +167,9 @@ test('without specs, the change is cut by folder: one agent per part, then the s
     .map((draft) => draft.body);
   expect(bodies[0]).toStartWith('Whole change fine.\n\nReviewed in 2 parts');
   expect(bodies[0]).toContain('The parts come from by folder.');
-  // The seams agent's comment on line 3 of api/a.ts repeats part 1's: kept once.
-  expect(bodies.slice(1)).toEqual(['from 1', 'from 2']);
+  // The seams agent found parts 1 and 2's comments to be one problem: folded into the first. Its
+  // own comment on line 3 of api/a.ts repeats part 1's: kept once.
+  expect(bodies.slice(1)).toEqual(['from 1\n\nThe same problem at `web/b.ts:3`.']);
 });
 
 test('with specs, a grouping cuts the change first, and a failed part does not fail the review', async () => {

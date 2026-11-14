@@ -27,7 +27,9 @@ review summaries, conversation comments and line threads, each to reply to: see 
 **Notion** once the review is linked to a page (**Notion (2)** for two), **Report** (see [Spec report](#spec-report)), **Agents** (the user's review agents, see
 [Custom agents](custom-agents.md#review-agents)), **Preview** (see [Previews of pull requests under review](preview-environments.md#previews-of-pull-requests-under-review)), then **Diff**. The pull request's head commit and files are read from GitHub when the page opens and
 kept on the review (`current_reviews.files`, `head_sha`): comments are checked against those lines, and those
-written on an earlier head read as outdated. **Send review** offers **Comment**, **Approve** and **Request changes**;
+written on an earlier head read as outdated. The agent's drafts (`author` `agent`) are kept one by one (`POST
+…/comments/:id/keep`) or all at once from the send panel's **Keep all (n)** (`POST …/comments/keep-all`, the drafts
+of that review or ticket only); either way they become the user's, which the next agent run does not replace. **Send review** offers **Comment**, **Approve** and **Request changes**;
 each queues a `submit_pr_review` command with that verdict, and the worker posts one review of that kind on the pull
 request: the overall note as its body, each draft on the reviewed head and inside one hunk of its diff as a line comment,
 and the others quoted in the body with their code (GitHub refuses the whole review for one line comment outside the
@@ -119,12 +121,15 @@ the dialog offers **In slices** (default) or **In one pass**; a stack is reviewe
 `mode: 'sliced'`, saved on `agent_reviews.mode`. The worker cuts the change (`agent-review-cut.ts`): the newest
 succeeded grouping of the same head, else with specs a grouping run now (not saved as the page's), else by folder
 (`slicesByFolder`). Each hunk is owned by one slice; slices over 1200 lines are split by folder, those under 50
-merged into a neighbour, at most 8 (`agent-review-slices.ts`). One agent per slice, then one on the seams (given
+merged into a neighbour, at most 8 (`agent-review-slices.ts`); a slice merged from several groups keeps their
+titles in `parts` and is titled after the first ("… and 2 more"). One agent per slice, then one on the seams (given
 every slice's findings and the spec parts no change implements), each in a fresh session in the same checkout;
 their progress is saved in `agent_reviews.slices` and shown on the button. The findings are merged
-(`agent-review-merge.ts`): comments on lines their slice owns first, then the others, then the seams', one on lines
+(`agent-review-merge.ts`): the seams prompt numbers the slices' comments, and the seams agent names in `same` the
+groups that report one problem in different places; each group is folded into one comment (the first on owned lines,
+else the first) naming the other places (`agent-review-same.ts`). Then comments on lines their slice owns first, then the others, then the seams', one on lines
 an earlier one covers dropped, at most 60. The general draft starts with the seams agent's summary and lists each
-part's. A failed part is named there; the review fails only when every part did. Coverage is read from all of the
+part's (the seams' line gives only its count). The slice agents are told not to list the files they read. A failed part is named there; the review fails only when every part did. Coverage is read from all of the
 run's agents.
 
 ### Explain

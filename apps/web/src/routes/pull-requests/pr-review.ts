@@ -28,6 +28,7 @@ import {
   deleteComment,
   draftsOf,
   editComment,
+  keepAllComments,
   keepComment,
   listComments,
   type CommentDiff,
@@ -159,5 +160,6 @@ export function prReviewRoutes(db: Db, github: OnboardingGitHub): Hono {
   routes.post('/review', (c) => submit(db, c));
   prAgentReviewRoutes(routes, db, github);
   routes.post('/comments/:commentId/keep', (c) => keepComment(c, db, owner(load(db, c).review)));
+  routes.post('/comments/keep-all', (c) => keepAllComments(c, db, owner(load(db, c).review)));
   return routes;
 }

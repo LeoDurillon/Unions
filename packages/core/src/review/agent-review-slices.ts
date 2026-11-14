@@ -12,7 +12,10 @@ export type SliceSource = { path: string; hunks: Hunk[] };
 type SliceFile = { path: string; hunks: string[] | null; lines: number };
 
 export type ReviewSlice = {
+  /** Its first part's name, and how many more it covers. */
   title: string;
+  /** The groups of the grouping (or the folders) merged into it, each named whole. */
+  parts: string[];
   /** The part of the specification it covers, quoted; empty for a slice by folder. */
   spec: string;
   summary: string;
@@ -54,8 +57,24 @@ function sum(files: readonly SliceFile[]): number {
   return files.reduce((total, file) => total + file.lines, 0);
 }
 
-function sliceOf(title: string, files: SliceFile[], spec = '', summary = ''): ReviewSlice {
-  return { title, spec, summary, files, lines: sum(files) };
+/** A slice's title: its first part, then how many more it covers. */
+function titleOf(parts: readonly string[]): string {
+  const [first = ''] = parts;
+  return parts.length > 1 ? `${first} and ${parts.length - 1} more` : first;
+}
+
+/** A slice's spec and summary, and its title when not its parts'. */
+type SliceText = { spec: string; summary: string; title?: string };
+
+function sliceOf(parts: string[], files: SliceFile[], text?: SliceText): ReviewSlice {
+  return {
+    title: text?.title ?? titleOf(parts),
+    parts,
+    spec: text?.spec ?? '',
+    summary: text?.summary ?? '',
+    files,
+    lines: sum(files),
+  };
 }
 
 /** Takes the hunks `keys` of `source` not owned yet; null when none is left. */
@@ -99,10 +118,10 @@ export function slicesFromGrouping(
       ...group.files.filter((path) => !(path in split)).flatMap((path) => takeFrom(path)),
       ...Object.entries(split).flatMap(([path, keys]) => takeFrom(path, keys)),
     ];
-    return sliceOf(group.title, files, group.spec, group.summary);
+    return sliceOf([group.title], files, { spec: group.spec, summary: group.summary });
   });
   const rest = sources.flatMap((source) => takeFrom(source.path));
-  return normalize([...groups, sliceOf(UNRELATED_TITLE, rest)]);
+  return normalize([...groups, sliceOf([UNRELATED_TITLE], rest)]);
 }
 
 function keyAt(path: string, depth: number): string {
@@ -170,7 +189,7 @@ export function slicesByFolder(sources: readonly SliceSource[]): ReviewSlice[] {
     lines: source.hunks.reduce((total, hunk) => total + hunkLines(hunk), 0),
   }));
   const target = Math.max(SLICE_TARGET_LINES, Math.ceil(sum(files) / MAX_SLICES));
-  return normalize(packByFolder(files, target).map((pack) => sliceOf(pack.title, pack.files)));
+  return normalize(packByFolder(files, target).map((pack) => sliceOf([pack.title], pack.files)));
 }
 
 function join(x: string, y: string): string {
@@ -178,12 +197,10 @@ function join(x: string, y: string): string {
 }
 
 function merged(a: ReviewSlice, b: ReviewSlice): ReviewSlice {
-  return sliceOf(
-    `${a.title} + ${b.title}`,
-    [...a.files, ...b.files],
-    join(a.spec, b.spec),
-    join(a.summary, b.summary),
-  );
+  return sliceOf([...a.parts, ...b.parts], [...a.files, ...b.files], {
+    spec: join(a.spec, b.spec),
+    summary: join(a.summary, b.summary),
+  });
 }
 
 function splitLarge(slice: ReviewSlice): ReviewSlice[] {
@@ -191,7 +208,11 @@ function splitLarge(slice: ReviewSlice): ReviewSlice[] {
     return [slice];
   }
   return packByFolder(slice.files, SLICE_TARGET_LINES).map((pack) =>
-    sliceOf(`${slice.title} (${pack.title})`, pack.files, slice.spec, slice.summary),
+    sliceOf(slice.parts, pack.files, {
+      spec: slice.spec,
+      summary: slice.summary,
+      title: `${slice.title} (${pack.title})`,
+    }),
   );
 }
 

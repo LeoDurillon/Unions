@@ -227,7 +227,7 @@
   `askReviewAgent` (`agent-review-ask.ts`), which logs it under the review. A run with `mode` sliced
   (`agent-review-sliced.ts`) cuts the change (`agent-review-cut.ts`: the grouping of the same head, a grouping
   run now, or by folder), runs one agent per slice and one on the seams with `agent-review-slice-prompt.ts`, saves
-  their progress with `setAgentReviewSlices`, and merges the findings (`agent-review-merge.ts`).
+  their progress with `setAgentReviewSlices`, and merges the findings (`agent-review-merge.ts`, with `agent-review-same.ts` folding the comments the seams agent found to be one problem).
   Given specs go in the prompt (`specsSection`), in place of the ticket's text. A stack run (members in
   `agent_review_members`, `agent-review-stack.ts`) checks every PR out in one container at its reviewed commit as
   `refs/union/pr-<n>` (`clonePullRequests`), the top one at HEAD; the prompt gives each PR's own diff

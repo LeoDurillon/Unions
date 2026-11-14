@@ -83,7 +83,9 @@ test('a slice too small is merged into the one before it', () => {
     missing: [],
   };
   const slices = slicesFromGrouping(result, sources);
-  expect(slices.map((slice) => [slice.title, slice.lines])).toEqual([['Big + Tiny', 310]]);
+  expect(slices.map((slice) => [slice.title, slice.parts, slice.lines])).toEqual([
+    ['Big and 1 more', ['Big', 'Tiny'], 310],
+  ]);
   expect(slices[0]?.spec).toBe('spec of Big\n\nspec of Tiny');
 });
 

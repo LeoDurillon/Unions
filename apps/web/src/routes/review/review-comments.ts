@@ -211,6 +211,23 @@ export function keepComment(c: Context, db: Db, owner: CommentOwner): Response {
   return c.json(kept);
 }
 
+/** Keeps every suggestion of the agent among the owner's drafts as is: they become the user's. */
+export function keepAllComments(c: Context, db: Db, owner: CommentOwner): Response {
+  const kept = db
+    .update(schema.reviewComments)
+    .set({ author: 'user' })
+    .where(
+      and(
+        owns(owner),
+        eq(schema.reviewComments.status, 'draft'),
+        eq(schema.reviewComments.author, 'agent'),
+      ),
+    )
+    .returning({ id: schema.reviewComments.id })
+    .all();
+  return c.json({ kept: kept.length });
+}
+
 export function deleteComment(c: Context, db: Db, owner: CommentOwner): Response {
   const comment = draftOf(c, db, owner);
   db.delete(schema.reviewComments).where(eq(schema.reviewComments.id, comment.id)).run();

@@ -127,7 +127,10 @@ export async function runSlicedReview(
     return CANCELLED;
   }
   progress.finish(seamsIndex, seams);
-  const merged = mergeSliced(cut.slices, parts, seams, target.patchOf);
+  const merged = mergeSliced(
+    { slices: cut.slices, parts, seams, same: seams.same ?? [] },
+    target.patchOf,
+  );
   const findings = {
     ...merged,
     summary: `${merged.summary}\n\nThe parts come from ${cut.source}.`,

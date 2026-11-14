@@ -19,6 +19,7 @@ import {
   deleteComment,
   draftsOf,
   editComment,
+  keepAllComments,
   keepComment,
   listTicketComments,
   markSent,
@@ -136,6 +137,7 @@ function agentReviewRoutes(routes: Hono, db: Db): void {
     cancelAgentReview(c, db, owner(loadTicket(db, c))),
   );
   routes.post('/:id/comments/:commentId/keep', (c) => keepComment(c, db, owner(loadTicket(db, c))));
+  routes.post('/:id/comments/keep-all', (c) => keepAllComments(c, db, owner(loadTicket(db, c))));
 }
 
 export function reviewRoutes(db: Db, github: OnboardingGitHub): Hono {

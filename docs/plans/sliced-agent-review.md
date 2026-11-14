@@ -274,6 +274,11 @@ What to fix, seen on this run:
    coverage is measured.
 5. **Time.** Running the parts in parallel (2 or 3 at a time, within the run slots) would bring 24 min near 10.
 
+Built (2026-11-14): 1, 2, 3 and 4. A merged slice keeps its groups' titles in `parts` and is titled "first and N
+more"; the seams line gives only its count; the seams prompt numbers the parts' comments and the seams agent names
+the groups that are one problem in `same`, each folded into one comment naming the other places
+(`agent-review-same.ts`); the part agents are told to say what they found, not what they read. 5 is left for later.
+
 Conclusion so far: keep slices as the default above 1200 lines, with **In one pass** for when usage matters more.
 Recheck on a second large pull request before closing step 3.
 
@@ -288,6 +293,9 @@ clicks **Keep** on each, and any not kept are replaced by the next **Review with
   the warning goes. Sending afterwards posts them as before.
 - On a stack, it keeps the drafts of the pull request whose panel it is, not the whole stack's.
 - Docs: `documentation/reviewing.md` (Send review, Review with agent), `docs/spec/pull-requests.md`.
+
+Built (2026-11-14) as described: `keepAllComments` in `review-comments.ts`, on the ticket's and the pull request's
+review routes.
 
 ## Tests
 

@@ -78,10 +78,15 @@ function parseJson(source: string): unknown {
   }
 }
 
+/** The last `json` block of the answer, parsed; null when there is none or it is not JSON. */
+export function lastJsonBlock(answer: string): unknown {
+  const block = [...answer.matchAll(JSON_BLOCK)].at(-1)?.groups?.json;
+  return block === undefined ? null : parseJson(block);
+}
+
 /** The last `json` block of the answer; null when there is none or it is not the expected shape. */
 export function parseFindings(answer: string): Findings | null {
-  const block = [...answer.matchAll(JSON_BLOCK)].at(-1)?.groups?.json;
-  const parsed = block === undefined ? null : parseJson(block);
+  const parsed = lastJsonBlock(answer);
   if (!isRecord(parsed) || !Array.isArray(parsed.comments)) {
     return null;
   }

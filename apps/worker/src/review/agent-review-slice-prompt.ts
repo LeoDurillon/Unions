@@ -7,13 +7,21 @@ import { hunksOf, type AgentReviewSpec, type Db, type ReviewSlice } from '@union
 import { changeFiles, filesSection, readingSection, reviewHeader } from './agent-review-change';
 import { FINDINGS_FORMAT } from './agent-review-findings';
 import type { PartAnswer } from './agent-review-merge';
+import { numberedFindings, SAME_FORMAT, type Numbered } from './agent-review-same';
 import type { ReviewTarget } from './agent-review-target';
 
 /** A finding's first line in the seams prompt, at most this long. */
 const MAX_FINDING_TEXT = 200;
 
+const PART_READING =
+  'Review every file of your part, its tests and docs included: a test belongs with the code it tests and a doc with what it describes, and either can contradict it. Start where your part starts and follow it through. In your `summary`, say what you found, not which files you read: Union measures that.';
+
 const SEAMS_READING =
   'Open the files you need to check where the parts meet: the callers of what changed, the types both sides share, the tests across parts.';
+
+/** The findings format, with the groups of the parts' comments that are one problem. */
+const SEAMS_FORMAT = `${FINDINGS_FORMAT.replace('"comments": [', '"same": [], "comments": [')}
+${SAME_FORMAT}`;
 
 /** The change of a sliced review: what is reviewed, its specs and its slices. */
 export type SlicedChange = {
@@ -61,8 +69,12 @@ function partSection(slices: readonly ReviewSlice[], index: number): string {
       ? ''
       : `\nThe part of the specification it implements:\n\n${quoted(slice.spec)}\n`;
   const summary = slice.summary === '' ? '' : `\n${slice.summary}\n`;
+  const covers =
+    slice.parts.length > 1
+      ? `\nIt covers these parts of the change:\n\n${slice.parts.map((part) => `- ${part}`).join('\n')}\n`
+      : '';
   return `This change is too large for one review: it is cut into ${slices.length} parts, each reviewed by its own agent, then one more agent looks at how they fit together. You review part ${index + 1}: **${slice.title}**.
-${spec}${summary}
+${covers}${spec}${summary}
 The other parts, which other agents review:
 
 ${others}
@@ -83,7 +95,7 @@ ${partSection(slices, index)}
 
 ## How to read it
 
-${readingSection(target, files)}
+${readingSection(target, files, PART_READING)}
 
 ## Your answer
 
@@ -95,13 +107,20 @@ function clip(text: string): string {
   return first.length > MAX_FINDING_TEXT ? `${first.slice(0, MAX_FINDING_TEXT)}…` : first;
 }
 
-function answerLines(slice: ReviewSlice, answer: PartAnswer | undefined): string {
+function answerLines(
+  slice: ReviewSlice,
+  answer: PartAnswer | undefined,
+  numbered: readonly Numbered[],
+): string {
   const files = slice.files.map((file) => `\`${file.path}\``).join(', ');
   const found =
     answer?.findings === null || answer === undefined
       ? `  Not reviewed: ${answer?.error ?? 'no answer'}.`
-      : answer.findings.comments
-          .map((finding) => `  - \`${finding.path}:${finding.startLine}\`: ${clip(finding.body)}`)
+      : numbered
+          .map(
+            ({ number, finding }) =>
+              `  - [${number}] \`${finding.path}:${finding.startLine}\`: ${clip(finding.body)}`,
+          )
           .join('\n');
   return `- **${slice.title}** (${files})\n${found === '' ? '  No comment.' : found}`;
 }
@@ -114,7 +133,16 @@ export function seamsPrompt(
   missing: readonly MissingPart[],
 ): string {
   const { target, specs, slices } = change;
-  const parts = slices.map((slice, index) => answerLines(slice, answers[index])).join('\n');
+  const numbered = numberedFindings(answers);
+  const parts = slices
+    .map((slice, index) =>
+      answerLines(
+        slice,
+        answers[index],
+        numbered.filter((entry) => entry.part === index),
+      ),
+    )
+    .join('\n');
   const gaps =
     missing.length === 0
       ? ''
@@ -126,7 +154,7 @@ This change was reviewed in ${slices.length} parts by separate agents. Each read
 
 ${parts}
 ${gaps}
-Look only at how the parts fit together: a function, a type or a contract changed in one part and used in another, a migration or a schema against the code that reads it, a test that no longer tests what its code does, a part of the specification no change implements. Do not repeat their comments. In your \`summary\`, say in a few lines what the change does as a whole and what matters most before it is merged.
+Look only at how the parts fit together: a function, a type or a contract changed in one part and used in another, a migration or a schema against the code that reads it, a test that no longer tests what its code does, a part of the specification no change implements. Do not repeat their comments. When some of their comments report one problem in different places, give their numbers in \`same\`. In your \`summary\`, say in a few lines what the change does as a whole and what matters most before it is merged.
 
 ## How to read it
 
@@ -134,5 +162,5 @@ ${readingSection(target, filesSection(changeFiles(db, target)), SEAMS_READING)}
 
 ## Your answer
 
-${FINDINGS_FORMAT}`;
+${SEAMS_FORMAT}`;
 }

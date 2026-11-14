@@ -22,4 +22,7 @@ export const agentReviewApi = {
     request('POST', `${base}/agent-review/cancel`),
   keepComment: (base: string, commentId: number): Promise<unknown> =>
     request('POST', `${base}/comments/${commentId}/keep`),
+  /** Keeps every suggestion of the agent among the review's drafts. */
+  keepAll: (base: string): Promise<{ kept: number }> =>
+    request('POST', `${base}/comments/keep-all`),
 };

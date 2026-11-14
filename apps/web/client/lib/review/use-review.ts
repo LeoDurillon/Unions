@@ -124,6 +124,7 @@ export function useCommentMutations(target: ReviewTarget): {
   edit: ReturnType<typeof useMutation<unknown, Error, { id: number; body: string }>>;
   remove: ReturnType<typeof useMutation<unknown, Error, number>>;
   keep: ReturnType<typeof useMutation<unknown, Error, number>>;
+  keepAll: ReturnType<typeof useMutation<unknown, Error, void>>;
   send: ReturnType<typeof useMutation<unknown, Error, SendInput>>;
 } {
   const queryClient = useQueryClient();
@@ -151,6 +152,10 @@ export function useCommentMutations(target: ReviewTarget): {
     }),
     keep: useMutation({
       mutationFn: (id: number) => agentReviewApi.keepComment(base, id),
+      onSuccess: refresh,
+    }),
+    keepAll: useMutation({
+      mutationFn: () => agentReviewApi.keepAll(base),
       onSuccess: refresh,
     }),
     send: useMutation({

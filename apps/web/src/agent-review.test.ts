@@ -120,6 +120,29 @@ test('keeping or editing a suggestion makes it the user’s', async () => {
   expect(authors).toEqual(['user', 'user']);
 });
 
+test('keeping all keeps every suggestion of the ticket, and only its drafts', async () => {
+  addDraft('agent');
+  addDraft('agent');
+  addDraft('user');
+  const other = createTicket(db, { projectId, title: 'other' }).id;
+  db.update(schema.reviewComments)
+    .set({ ticketId: other })
+    .where(eq(schema.reviewComments.id, 2))
+    .run();
+  const response = await send('POST', `/api/tickets/${ticketId}/comments/keep-all`);
+  expect(await response.json()).toEqual({ kept: 1 });
+  const authors = db
+    .select()
+    .from(schema.reviewComments)
+    .all()
+    .map((comment) => [comment.ticketId === ticketId, comment.author]);
+  expect(authors).toEqual([
+    [true, 'user'],
+    [false, 'agent'],
+    [true, 'user'],
+  ]);
+});
+
 test("a pull request's review needs its files read first", async () => {
   const review = db
     .insert(schema.currentReviews)

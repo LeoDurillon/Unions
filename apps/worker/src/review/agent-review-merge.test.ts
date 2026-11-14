@@ -18,6 +18,7 @@ function patchOf(path: string): string | undefined {
 
 const FIRST: ReviewSlice = {
   title: 'First',
+  parts: ['First'],
   spec: '',
   summary: '',
   lines: 2,
@@ -25,6 +26,7 @@ const FIRST: ReviewSlice = {
 };
 const SECOND: ReviewSlice = {
   title: 'Second',
+  parts: ['Second'],
   spec: '',
   summary: '',
   lines: 3,
@@ -51,16 +53,19 @@ test('a comment is owned by the slice whose hunk holds its lines', () => {
 
 test("the owner's comment wins a duplicate; the seams' come last", () => {
   const merged = mergeSliced(
-    [FIRST, SECOND],
-    [
-      part('First', [comment('a.ts', 42, 'seen from first'), comment('a.ts', 2, 'first')]),
-      part('Second', [comment('a.ts', 42, 'owner')], 'fine'),
-    ],
-    part(
-      'How the parts fit together',
-      [comment('b.ts', 1, 'seam'), comment('a.ts', 2, 'again')],
-      'Overall good.',
-    ),
+    {
+      slices: [FIRST, SECOND],
+      parts: [
+        part('First', [comment('a.ts', 42, 'seen from first'), comment('a.ts', 2, 'first')]),
+        part('Second', [comment('a.ts', 42, 'owner')], 'fine'),
+      ],
+      seams: part(
+        'How the parts fit together',
+        [comment('b.ts', 1, 'seam'), comment('a.ts', 2, 'again')],
+        'Overall good.',
+      ),
+      same: [],
+    },
     patchOf,
   );
   expect(merged.comments.map((finding) => finding.body)).toEqual(['first', 'owner', 'seam']);
@@ -68,17 +73,44 @@ test("the owner's comment wins a duplicate; the seams' come last", () => {
     'Overall good.\n\nReviewed in 2 parts, then how they fit together:\n\n' +
       '- **First** (2 comments): nothing to add.\n' +
       '- **Second** (1 comments): fine\n' +
-      '- **How the parts fit together** (2 comments): Overall good.',
+      '- **How the parts fit together** (2 comments).',
   );
 });
 
 test('a failed part is named in the summary', () => {
   const failed: PartAnswer = { title: 'Second', findings: null, error: 'usage limit' };
   const merged = mergeSliced(
-    [FIRST, SECOND],
-    [part('First', []), failed],
-    part('Seams', []),
+    {
+      slices: [FIRST, SECOND],
+      parts: [part('First', []), failed],
+      seams: part('Seams', []),
+      same: [],
+    },
     patchOf,
   );
   expect(merged.summary).toContain('- **Second**: not reviewed (usage limit).');
+});
+
+test('comments the seams agent found to be one problem are folded into the owned one', () => {
+  const merged = mergeSliced(
+    {
+      slices: [FIRST, SECOND],
+      parts: [
+        part('First', [comment('a.ts', 42, 'leak seen from first'), comment('a.ts', 2, 'other')]),
+        part('Second', [comment('b.ts', 2, 'leak')]),
+      ],
+      seams: part('Seams', []),
+      // 1 is on Second's lines, 3 on Second's own file: 3 is kept, owned; 1 is named in it.
+      same: [
+        [1, 3],
+        [2, 2],
+        [9, 2],
+      ],
+    },
+    patchOf,
+  );
+  expect(merged.comments.map((finding) => finding.body)).toEqual([
+    'other',
+    'leak\n\nThe same problem at `a.ts:42`.',
+  ]);
 });
