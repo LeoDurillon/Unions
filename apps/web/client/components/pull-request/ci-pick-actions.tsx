@@ -5,6 +5,7 @@ import { useState, type ReactElement } from 'react';
 
 import type { CiPick } from '../../../src/ci-api-types';
 import type { usePrChecks } from '../../lib/pull-request/use-pr-checks';
+import { plural } from '../../lib/ui/plural';
 import { SendForm } from '../steps/run-agent-actions';
 import { Button, ErrorText } from '../ui/ui';
 
@@ -21,7 +22,7 @@ function Preview({ preview }: { preview: Hooks['preview'] }): ReactElement | nul
         <details key={`${item.kind}|${item.name}`} open={preview.data.items.length === 1}>
           <summary className="cursor-pointer text-sm">
             {item.name}{' '}
-            <span className="text-xs text-zinc-500">({item.text.length} characters)</span>
+            <span className="text-xs text-zinc-500">({plural(item.text.length, 'character')})</span>
           </summary>
           <pre className="mt-1 max-h-80 overflow-auto rounded-md bg-zinc-100 p-2 text-xs whitespace-pre-wrap dark:bg-zinc-900">
             {item.text}

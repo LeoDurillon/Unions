@@ -5,6 +5,7 @@ import type { ReactElement } from 'react';
 
 import type { UnionSettingsView } from '../../../src/routes/union-settings';
 import type { SettingsForm } from '../../lib/settings/use-settings-form';
+import { firstNumberProblem } from '../../lib/union-settings/number-problem';
 import { useUnionSettingsForm } from '../../lib/union-settings/use-union-settings-form';
 import { SaveBar } from '../settings/save-bar';
 import { ImageField, NumberField } from './union-settings-fields';
@@ -78,11 +79,23 @@ function ImageFields({ form }: FormProps): ReactElement {
 
 function SystemForm({ saved }: { saved: UnionSettingsView }): ReactElement {
   const form = useUnionSettingsForm(saved);
+  const invalid = firstNumberProblem([
+    {
+      label: 'Read GitHub every',
+      value: form.value.githubPullSeconds,
+      bounds: COUNT_BOUNDS.githubPullSeconds,
+    },
+    {
+      label: 'Largest project file',
+      value: form.value.maxProjectFileMb,
+      bounds: COUNT_BOUNDS.maxProjectFileMb,
+    },
+  ]);
   return (
     <section className="space-y-4">
       <LimitFields form={form} />
       <ImageFields form={form} />
-      <SaveBar state={form} />
+      <SaveBar state={form} invalid={invalid} />
     </section>
   );
 }

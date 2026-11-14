@@ -161,7 +161,7 @@ export function InvestigationForm({
       />
       <ErrorText error={create.error} />
       <Button type="submit" variant="primary" disabled={!ready || create.isPending}>
-        Run investigation
+        {create.isPending ? 'Starting…' : 'Run investigation'}
       </Button>
     </form>
   );

@@ -2,13 +2,14 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { Preview } from '@union/core';
-import { useState, type ReactElement } from 'react';
+import { useEffect, useState, type ReactElement } from 'react';
 
 import type { PreviewView } from '../../../src/api-types';
 import { previewCalls, previewKey, type PreviewTarget } from '../../lib/preview/preview-target';
 import { formatWhen } from '../../lib/ui/relative-time';
 import { CodeTextarea } from '../ui/code-textarea';
-import { Button, Dialog, ErrorText } from '../ui/ui';
+import { Dialog } from '../ui/dialog';
+import { Button, ErrorText } from '../ui/ui';
 
 /** "ticket" or "pull request": whose file it is. */
 function whoseOf(target: PreviewTarget): string {
@@ -27,7 +28,11 @@ function sourceLine(preview: Preview | null, composeFile: string, whose: string)
   return `Not generated yet: Generate reads ${composeFile} from ${from} without starting anything.`;
 }
 
-function useFileActions(target: PreviewTarget): {
+/** Saving or generating; `onSaved` runs once a save went through (the edits are the file now). */
+function useFileActions(
+  target: PreviewTarget,
+  onSaved: () => void,
+): {
   handleSave: (yaml: string | null) => void;
   handleGenerate: () => void;
   busy: boolean;
@@ -42,7 +47,7 @@ function useFileActions(target: PreviewTarget): {
   });
   return {
     handleSave: (yaml) => {
-      mutation.mutate(() => previewCalls(target).saveOwnFile(yaml));
+      mutation.mutate(() => previewCalls(target).saveOwnFile(yaml), { onSuccess: onSaved });
     },
     handleGenerate: () => {
       mutation.mutate(previewCalls(target).generate);
@@ -100,12 +105,31 @@ function FileButtons({
   );
 }
 
-function Editor({ target, view }: { target: PreviewTarget; view: PreviewView }): ReactElement {
+/**
+ * The file and its buttons. Until edited, the text follows the file shown (a new generation, a
+ * save); once edited, the edits stay until saved or the dialog is closed. `onDirty` says whether
+ * closing would lose them.
+ */
+function Editor({
+  target,
+  view,
+  onDirty,
+}: {
+  target: PreviewTarget;
+  view: PreviewView;
+  onDirty: (dirty: boolean) => void;
+}): ReactElement {
   const whose = whoseOf(target);
   const { preview } = view;
   const shown = preview?.override ?? preview?.composeYaml ?? '';
-  const [text, setText] = useState(shown);
-  const actions = useFileActions(target);
+  const [edit, setEdit] = useState<string | null>(null);
+  const text = edit ?? shown;
+  const actions = useFileActions(target, () => {
+    setEdit(null);
+  });
+  useEffect(() => {
+    onDirty(text !== shown);
+  }, [text, shown, onDirty]);
   const refused = preview?.override ? null : (preview?.composeError ?? null);
   return (
     <div className="space-y-3">
@@ -120,7 +144,7 @@ function Editor({ target, view }: { target: PreviewTarget; view: PreviewView }):
         aria-label="Compose file"
         className="h-[60vh]"
         value={text}
-        onChange={setText}
+        onChange={setEdit}
       />
       <ErrorText error={actions.error} />
       <FileButtons view={view} text={text} shown={shown} actions={actions} whose={whose} />
@@ -145,14 +169,19 @@ export function PreviewComposeDialog({
   open: boolean;
   onClose: () => void;
 }): ReactElement {
-  const { preview } = view;
+  const [dirty, setDirty] = useState(false);
   return (
-    <Dialog open={open} onClose={onClose} title="Preview compose file" wide>
-      <Editor
-        key={`${preview?.overrideAt ?? 0}-${preview?.composeAt ?? 0}`}
-        target={target}
-        view={view}
-      />
+    <Dialog
+      open={open}
+      dirty={dirty}
+      onClose={() => {
+        setDirty(false);
+        onClose();
+      }}
+      title="Preview compose file"
+      wide
+    >
+      <Editor target={target} view={view} onDirty={setDirty} />
     </Dialog>
   );
 }

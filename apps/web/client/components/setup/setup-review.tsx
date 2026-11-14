@@ -7,7 +7,8 @@ import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
 import { useSetupDismissed } from '../../lib/setup/use-setup-dismissed';
-import { Dialog } from '../ui/ui';
+import { plural } from '../../lib/ui/plural';
+import { Dialog } from '../ui/dialog';
 import { QuestionsCard, TicketsCard } from './setup-agent-cards';
 import type { SetupCardProps } from './setup-card-props';
 import { SetupCards } from './setup-cards';
@@ -56,7 +57,7 @@ function Dropped({ dropped }: { dropped: readonly string[] }): ReactElement | nu
   return (
     <details className="text-xs text-zinc-500">
       <summary className="cursor-pointer">
-        Left out: {dropped.length} values Union would refuse
+        Left out: {plural(dropped.length, 'value')} Union would refuse
       </summary>
       <ul className="mt-1 list-disc pl-5">
         {dropped.map((line) => (

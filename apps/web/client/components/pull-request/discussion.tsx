@@ -15,7 +15,7 @@ import {
   useDiscussion,
   useImportMutations,
 } from '../../lib/review/use-review';
-import { CommentCard } from '../review/comment-card';
+import { ReviewCommentCard } from '../review/comment-card';
 import { CARD_CLASS, ErrorText } from '../ui/ui';
 import { TicketLineThreads } from './line-threads';
 import { DiscussionLoading, NoteCard } from './note-card';
@@ -46,15 +46,11 @@ function ImportedDrafts({
         Sent to the implementer with the line comments, from Review changes → Send review.
       </p>
       {general.map((comment) => (
-        <CommentCard
+        <ReviewCommentCard
           key={comment.id}
           comment={comment}
-          onSave={(body) => {
-            mutations.edit.mutate({ id: comment.id, body });
-          }}
-          onDelete={() => {
-            mutations.remove.mutate(comment.id);
-          }}
+          mutations={mutations}
+          keepable={false}
         />
       ))}
     </section>

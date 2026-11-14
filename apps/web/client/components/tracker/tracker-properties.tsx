@@ -61,7 +61,7 @@ function Fold({
         className="text-xs text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
         onClick={onToggle}
       >
-        {open ? '▾ Fold' : '▸'} {count} {noun}
+        {open ? '▾ Hide' : '▸'} {count} {noun}
       </button>
     </div>
   );

@@ -5,6 +5,7 @@ import type { NotionSchema } from '@union/core';
 import type { ReactElement } from 'react';
 
 import { integrationsApi } from '../../../lib/integrations/integrations-api';
+import { plural } from '../../../lib/ui/plural';
 import { formatWhen } from '../../../lib/ui/relative-time';
 import { Button, ErrorText } from '../../ui/ui';
 
@@ -25,7 +26,7 @@ export function NotionColumnsBar({
     <div className="flex items-center gap-3 text-sm">
       <p className="min-w-0 flex-1 text-zinc-500">
         {notion
-          ? `Notion columns of “${notion.title}”, read ${formatWhen(notion.fetchedAt)} (${notion.properties.length} properties).`
+          ? `Notion columns of “${notion.title}”, read ${formatWhen(notion.fetchedAt)} (${plural(notion.properties.length, 'property', 'properties')}).`
           : 'The Notion columns are not read yet.'}
       </p>
       <ErrorText error={refresh.error} />

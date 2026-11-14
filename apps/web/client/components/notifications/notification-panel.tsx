@@ -17,7 +17,8 @@ import { NotificationSections } from './notification-section';
 function useDismiss(box: RefObject<HTMLDivElement | null>, close: () => void): void {
   useEffect(() => {
     const onKey = (event: KeyboardEvent): void => {
-      if (event.key === 'Escape') {
+      // Escape already taken by an open question (Delete all) only closes that question.
+      if (event.key === 'Escape' && !event.defaultPrevented) {
         close();
       }
     };
@@ -80,10 +81,10 @@ function DesktopToggle({
 
 function PanelHeader({ notifications }: { notifications: Notifications }): ReactElement {
   return (
-    <div className="flex items-center gap-2">
-      <h2 className="text-sm font-semibold">Notifications</h2>
+    <div className="flex flex-wrap items-center justify-end gap-2">
+      <h2 className="mr-auto text-sm font-semibold">Notifications</h2>
       <Button
-        className="ml-auto"
+        className="shrink-0 whitespace-nowrap"
         disabled={notifications.unread === 0}
         onClick={() => {
           notifications.markAllRead();

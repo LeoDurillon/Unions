@@ -4,7 +4,8 @@ import type { ReactElement } from 'react';
 
 import type { UnionUpdateView } from '../../../src/union-update-types';
 import { useStartUpdate } from '../../lib/union-settings/use-union-update';
-import { Button, Dialog, ErrorText } from '../ui/ui';
+import { Dialog } from '../ui/dialog';
+import { Button, ErrorText } from '../ui/ui';
 
 type Active = UnionUpdateView['active'];
 

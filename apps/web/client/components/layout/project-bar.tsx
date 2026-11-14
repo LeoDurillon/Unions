@@ -4,6 +4,7 @@
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
+import { FOCUS_RING } from '../ui/focus';
 import { Button } from '../ui/ui';
 
 export type ProjectView =
@@ -47,7 +48,7 @@ function ViewTabs({
             onClick={() => {
               onView(entry.view);
             }}
-            className={`border-b-2 px-2.5 pt-1 pb-3 text-sm font-medium whitespace-nowrap transition ${on ? 'border-zinc-900 text-zinc-900 dark:border-zinc-100 dark:text-zinc-100' : 'border-transparent text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100'}`}
+            className={`border-b-2 px-2.5 pt-1 pb-3 ${FOCUS_RING} text-sm font-medium whitespace-nowrap transition ${on ? 'border-zinc-900 text-zinc-900 dark:border-zinc-100 dark:text-zinc-100' : 'border-transparent text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100'}`}
           >
             {entry.label}
           </button>

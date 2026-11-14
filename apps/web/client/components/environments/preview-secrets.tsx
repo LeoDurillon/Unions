@@ -6,6 +6,7 @@ import { useState, type ReactElement } from 'react';
 import type { PreviewSettingsView } from '../../../src/api-types';
 import { useLeaveGuard } from '../../lib/app/leave-guard';
 import { previewApi } from '../../lib/preview/preview-api';
+import { ConfirmButton } from '../ui/confirm-button';
 import { Button, ErrorText, inputClass } from '../ui/ui';
 
 type Save = (run: () => Promise<PreviewSettingsView>) => void;
@@ -13,10 +14,12 @@ type Save = (run: () => Promise<PreviewSettingsView>) => void;
 function SecretList({
   projectId,
   names,
+  busy,
   save,
 }: {
   projectId: number;
   names: string[];
+  busy: boolean;
   save: Save;
 }): ReactElement {
   return (
@@ -27,15 +30,16 @@ function SecretList({
           className="flex items-center gap-1 rounded bg-zinc-100 px-2 py-0.5 font-mono text-xs dark:bg-zinc-800"
         >
           {secret} = ••••
-          <button
-            type="button"
-            className="ml-1 text-red-600 hover:underline dark:text-red-400"
-            onClick={() => {
+          <ConfirmButton
+            label="Remove"
+            name={`Remove ${secret}`}
+            question={`Remove ${secret}?`}
+            confirmLabel="Remove"
+            disabled={busy}
+            onConfirm={() => {
               save(() => previewApi.deleteSecret(projectId, secret));
             }}
-          >
-            remove
-          </button>
+          />
         </li>
       ))}
     </ul>
@@ -120,7 +124,7 @@ export function PreviewSecrets({
         Given to the services like the others, but never shown again once saved: write a new value
         to change one. Saved and removed one at a time, apart from the page&apos;s Save.
       </p>
-      <SecretList projectId={projectId} names={names} save={save} />
+      <SecretList projectId={projectId} names={names} busy={mutation.isPending} save={save} />
       <SecretForm projectId={projectId} busy={mutation.isPending} save={save} />
       <ErrorText error={mutation.error} />
     </fieldset>

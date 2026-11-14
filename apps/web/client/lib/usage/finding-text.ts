@@ -3,6 +3,7 @@
 import type { FindingItem, FindingKind } from '@union/core';
 
 import { count } from '../log/token-counts';
+import { plural } from '../ui/plural';
 import { costText } from './usage-format';
 
 /** Results are counted in characters; a token is about four of them. */
@@ -23,13 +24,14 @@ export const FINDING_TEXTS: Record<FindingKind, FindingText> = {
     title: 'Large sessions',
     advice:
       'These steps carry a large context on average, and every turn reads it again. Fresh sessions for them would cost less.',
-    figure: (item) => `${count(item.value)} tokens on average, ${item.calls} calls`,
+    figure: (item) => `${count(item.value)} tokens on average, ${plural(item.calls, 'call')}`,
   },
   costly_tickets: {
     title: 'Tickets costing far more than the others',
     advice:
       'Over three times the median ticket. Look at their revisions and review rounds: a smaller ticket or a clearer spec usually costs less.',
-    figure: (item) => `${costText(item.value / MICRO)}, ${item.calls} implementation calls`,
+    figure: (item) =>
+      `${costText(item.value / MICRO)}, ${plural(item.calls, 'implementation call')}`,
     isTicket: true,
   },
   review_rounds: {
@@ -44,7 +46,7 @@ export const FINDING_TEXTS: Record<FindingKind, FindingText> = {
     advice:
       'Their output stays in the session and is read again at every turn. Ask for less (a summary, one file at a time), or give the repository a script that prints only what matters.',
     figure: (item) =>
-      `about ${count(Math.round(item.value / CHARS_PER_TOKEN))} tokens over ${item.calls} calls`,
+      `about ${count(Math.round(item.value / CHARS_PER_TOKEN))} tokens over ${plural(item.calls, 'call')}`,
   },
   check_variants: {
     title: 'Checks run in many different ways',

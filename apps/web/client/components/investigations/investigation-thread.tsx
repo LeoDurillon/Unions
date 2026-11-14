@@ -6,6 +6,7 @@ import type { Investigation } from '@union/core';
 import { useState, type ReactElement, type ReactNode, type SubmitEvent } from 'react';
 
 import { api } from '../../lib/app/api';
+import { onModEnter } from '../../lib/ui/mod-enter';
 import { Markdown } from '../markdown/markdown';
 import { Button, ErrorText } from '../ui/ui';
 import { isActive } from './investigation-labels';
@@ -147,6 +148,7 @@ export function FollowUpForm({ investigation }: { investigation: Investigation }
     mutationFn: () => api.askFollowUp(investigation, prompt),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['investigations'] }),
   });
+  const canAsk = prompt.trim() !== '' && !ask.isPending;
   const handleSubmit = (event: SubmitEvent): void => {
     event.preventDefault();
     ask.mutate();
@@ -163,9 +165,12 @@ export function FollowUpForm({ investigation }: { investigation: Investigation }
           onChange={(event) => {
             setPrompt(event.target.value);
           }}
+          onKeyDown={onModEnter(() => {
+            ask.mutate();
+          }, canAsk)}
         />
-        <Button type="submit" variant="primary" disabled={prompt.trim() === '' || ask.isPending}>
-          Ask
+        <Button type="submit" variant="primary" disabled={!canAsk}>
+          {ask.isPending ? 'Asking…' : 'Ask'}
         </Button>
       </div>
       <p className="px-2 text-xs text-zinc-500">

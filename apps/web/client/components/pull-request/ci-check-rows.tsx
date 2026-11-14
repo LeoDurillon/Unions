@@ -57,9 +57,17 @@ function duration(ms: number | null): string {
 
 function Name({ name, url }: { name: string; url: string | null }): ReactElement {
   return url === null ? (
-    <span className="truncate">{name}</span>
+    <span className="truncate" title={name}>
+      {name}
+    </span>
   ) : (
-    <a className="truncate hover:underline" href={url} target="_blank" rel="noreferrer">
+    <a
+      className="truncate hover:underline"
+      title={name}
+      href={url}
+      target="_blank"
+      rel="noreferrer"
+    >
       {name}
     </a>
   );
@@ -118,7 +126,9 @@ export function CheckRow({
       <Badge tone={STATE_TONES[check.state]}>{check.conclusion ?? check.state}</Badge>
       <Name name={check.name} url={check.url} />
       {check.summary ? (
-        <span className="truncate text-xs text-zinc-500">{check.summary}</span>
+        <span className="truncate text-xs text-zinc-500" title={check.summary}>
+          {check.summary}
+        </span>
       ) : null}
       <span className="ml-auto shrink-0 text-xs text-zinc-500">{duration(check.durationMs)}</span>
       {rerun ? <RerunButton check={check} rerun={rerun} /> : null}

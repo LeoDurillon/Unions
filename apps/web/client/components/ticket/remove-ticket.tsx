@@ -1,66 +1,57 @@
-// A cancelled ticket can leave Union; a second click confirms, since nothing brings it back.
+// A cancelled ticket can leave Union; it asks first, since nothing brings it back.
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState, type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
+import type { TicketDetail } from '../../../src/api-types';
 import { api } from '../../lib/app/api';
-import { Button, ErrorText } from '../ui/ui';
+import { originName } from '../../lib/ticket/ticket-origin';
+import { ConfirmButton } from '../ui/confirm-button';
+import { ErrorText } from '../ui/ui';
 
-/** A cancelled ticket can leave Union; a second click confirms, since nothing brings it back. */
+/** What removing leaves alone: "The GitHub issue and the Notion page stay as they are." */
+function keptElsewhere(ticket: TicketDetail['ticket']): string {
+  const origin = originName(ticket.originKind);
+  const kept = [
+    ...(ticket.issueNumber === null ? [] : ['the GitHub issue']),
+    ...(origin === null ? [] : [`the ${origin}`]),
+  ];
+  if (kept.length === 0) {
+    return '';
+  }
+  const sentence = `${kept.join(' and ')} ${kept.length === 1 ? 'stays as it is' : 'stay as they are'}.`;
+  return ` ${sentence.charAt(0).toUpperCase()}${sentence.slice(1)}`;
+}
+
+/** A cancelled ticket can leave Union; it asks first, since nothing brings it back. */
 export function RemoveTicket({
-  ticketId,
+  ticket,
   onRemoved,
 }: {
-  ticketId: number;
+  ticket: TicketDetail['ticket'];
   onRemoved: () => void;
 }): ReactElement {
   const queryClient = useQueryClient();
-  const [confirming, setConfirming] = useState(false);
   const remove = useMutation({
-    mutationFn: () => api.removeTicket(ticketId),
+    mutationFn: () => api.removeTicket(ticket.id),
     onSuccess: async () => {
       onRemoved();
-      queryClient.removeQueries({ queryKey: ['ticket', ticketId] });
+      queryClient.removeQueries({ queryKey: ['ticket', ticket.id] });
       await queryClient.invalidateQueries({ queryKey: ['tickets'] });
     },
   });
-  if (!confirming) {
-    return (
-      <Button
-        variant="danger"
-        onClick={() => {
-          setConfirming(true);
-        }}
-      >
-        Remove ticket
-      </Button>
-    );
-  }
   return (
-    <div className="space-y-2 rounded-lg border border-red-300 p-3 dark:border-red-900">
-      <p className="text-sm">
-        Remove this ticket from Union, with its runs, outputs, reviews, files and agent container?
-        The GitHub issue and the Notion page stay as they are.
-      </p>
+    <div className="space-y-1">
+      <ConfirmButton
+        label={remove.isPending ? 'Removing…' : 'Remove ticket'}
+        question={`Remove it from Union, with its runs, outputs, reviews, files and agent container?${keptElsewhere(ticket)}`}
+        confirmLabel="Remove for good"
+        disabled={remove.isPending}
+        onConfirm={() => {
+          remove.mutate();
+        }}
+      />
       <ErrorText error={remove.error} />
-      <div className="flex gap-2">
-        <Button
-          variant="danger"
-          disabled={remove.isPending}
-          onClick={() => {
-            remove.mutate();
-          }}
-        >
-          {remove.isPending ? 'Removing…' : 'Remove for good'}
-        </Button>
-        <Button
-          onClick={() => {
-            setConfirming(false);
-          }}
-        >
-          Keep it
-        </Button>
-      </div>
     </div>
   );
 }

@@ -5,6 +5,7 @@ import type { ReactElement } from 'react';
 
 import type { UnionSettingsView } from '../../../src/routes/union-settings';
 import type { SettingsForm } from '../../lib/settings/use-settings-form';
+import { firstNumberProblem } from '../../lib/union-settings/number-problem';
 import { useUnionSettingsForm } from '../../lib/union-settings/use-union-settings-form';
 import { SaveBar } from '../settings/save-bar';
 import { NumberField } from './union-settings-fields';
@@ -81,11 +82,26 @@ function AtOnceFields({ form }: FormProps): ReactElement {
 
 function ResourcesForm({ saved }: { saved: UnionSettingsView }): ReactElement {
   const form = useUnionSettingsForm(saved);
+  const invalid = firstNumberProblem([
+    { label: 'Memory per agent container', value: form.value.agentMemoryGb, bounds: GB_BOUNDS },
+    {
+      label: 'Memory per preview service',
+      value: form.value.previewServiceMemoryGb,
+      bounds: GB_BOUNDS,
+    },
+    { label: 'CPUs per container', value: form.value.cpus, bounds: COUNT_BOUNDS.cpus },
+    {
+      label: 'Agent runs at once',
+      value: form.value.maxConcurrentRuns,
+      bounds: COUNT_BOUNDS.maxConcurrentRuns,
+    },
+    { label: 'Previews at once', value: form.value.maxPreviews, bounds: COUNT_BOUNDS.maxPreviews },
+  ]);
   return (
     <section className="space-y-4">
       <ContainerFields form={form} />
       <AtOnceFields form={form} />
-      <SaveBar state={form} />
+      <SaveBar state={form} invalid={invalid} />
     </section>
   );
 }

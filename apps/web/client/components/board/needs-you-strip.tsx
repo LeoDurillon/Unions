@@ -103,7 +103,7 @@ export function NeedsYouStrip({
         <span className="ml-auto text-xs text-zinc-500">
           Press{' '}
           <kbd className="rounded border border-current px-1 font-mono text-[10px] opacity-70">
-            N
+            n
           </kbd>{' '}
           to open the first
         </span>

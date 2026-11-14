@@ -23,6 +23,7 @@ function RepoCard({
   return (
     <button
       type="button"
+      aria-pressed={selected}
       onClick={() => {
         onSelect(repo);
       }}
@@ -55,6 +56,7 @@ export function RepositoryStep({ draft, patch }: StepProps): ReactElement {
   return (
     <div className="space-y-3">
       <input
+        aria-label="Filter repositories"
         className={inputClass}
         placeholder="Filter repositories…"
         value={filter}
@@ -73,6 +75,14 @@ export function RepositoryStep({ draft, patch }: StepProps): ReactElement {
             onSelect={select}
           />
         ))}
+        {query.isSuccess && shown.length === 0 ? (
+          <p className="text-sm text-zinc-500">
+            {repos.length === 0 ? 'No repository found.' : 'No repository matches.'}
+            {query.hasNextPage
+              ? ' The filter searches the pages loaded: load more to search further.'
+              : null}
+          </p>
+        ) : null}
         {query.hasNextPage ? (
           <Button
             disabled={query.isFetchingNextPage}

@@ -53,9 +53,7 @@ function NotUsefulForm({
         >
           {rule.trim() === '' ? 'Hide it' : 'Hide it and keep the rule'}
         </Button>
-        <Button variant="ghost" onClick={onClose}>
-          Cancel
-        </Button>
+        <Button onClick={onClose}>Cancel</Button>
       </div>
     </div>
   );

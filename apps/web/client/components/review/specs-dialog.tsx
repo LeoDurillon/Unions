@@ -7,7 +7,8 @@ import { useState, type ReactElement } from 'react';
 import type { ReviewSpecView } from '../../../src/review-spec-types';
 import type { ReviewTarget } from '../../lib/review/review-target';
 import { useReviewSpecs } from '../../lib/review/use-review-specs';
-import { Button, Dialog, ErrorText } from '../ui/ui';
+import { Dialog } from '../ui/dialog';
+import { Button, ErrorText } from '../ui/ui';
 import { SourcePicker, SpecLoader, useSpecLoad, type SpecDraft } from './spec-picker';
 import { SpecRow, type SpecItem } from './spec-row';
 

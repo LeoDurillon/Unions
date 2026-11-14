@@ -86,7 +86,7 @@ when your rules, comments or investigations ask it to.
    project's first type.
 
 Your account must be able to see the project's issues. The token stays on this machine; to stop, click
-**Disconnect** in the settings.
+**Disconnect** in the settings and confirm: the token is deleted and imports stop.
 
 ## Let an agent set up the project
 
@@ -101,6 +101,9 @@ It runs on your Claude subscription.
 A **Project setup** card above the board follows the run. **Follow its log** shows what the agent is doing. If the
 run failed (for example, Claude is not logged in on this machine) or was cancelled, the card says why: pick a model
 and click **Run setup** to try again.
+
+If the agent could not even start, the wizard says why once the project is created, then **Open the project**
+takes you to it; run the agent again from Settings as below.
 
 You can also run it later, for a project made without it or after the repository changed: **Settings → General →
 Setup agent → Run setup** (see [The setup agent](settings.md#the-setup-agent)).

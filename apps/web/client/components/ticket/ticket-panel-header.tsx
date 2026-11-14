@@ -34,7 +34,7 @@ function Crumb({ href, children }: { href: string; children: string }): ReactEle
 function Breadcrumb({ detail }: { detail: TicketDetail | undefined }): ReactElement {
   if (!detail) {
     return (
-      <span className="flex-1">
+      <span className="flex-[1_1_12rem]">
         <Bone width="40%" />
       </span>
     );
@@ -44,7 +44,7 @@ function Breadcrumb({ detail }: { detail: TicketDetail | undefined }): ReactElem
   return (
     <nav
       aria-label="Where the ticket lives"
-      className="flex min-w-0 flex-1 items-center gap-2 font-mono text-xs text-zinc-500"
+      className="flex min-w-0 flex-[1_1_12rem] items-center gap-2 font-mono text-xs text-zinc-500"
     >
       <span className="truncate">
         {project.owner}/{project.repo}
@@ -107,32 +107,35 @@ export function TicketPanelHeader({
   onOpenTicket: (id: number) => void;
 }): ReactElement {
   return (
-    <header className="flex items-center gap-2 px-6 pt-4 pb-2">
+    <header className="flex flex-wrap items-center gap-2 px-6 pt-4 pb-2">
       <Breadcrumb detail={detail} />
-      <NextNeeding next={needing.next} others={needing.others} onOpen={onOpenTicket} />
-      {detail ? (
-        <Button
-          className="whitespace-nowrap"
-          title="Run an investigation in this ticket's workspace, as its agent left it"
-          onClick={() => {
-            investigateTicket(detail.ticket.id);
-          }}
-        >
-          Investigate
-        </Button>
-      ) : null}
-      {detail?.ticket.branch ? (
-        <Button
-          className="whitespace-nowrap"
-          variant={waitsForCodeReview(detail) ? 'primary' : 'secondary'}
-          title="Review the changes (r)"
-          onClick={onReview}
-        >
-          Review changes
-        </Button>
-      ) : null}
-      {detail ? <TicketMenu detail={detail} onRemoved={onRemoved} /> : null}
-      <CloseButton onClick={onClose} />
+      {/* On a narrow screen the actions go under the breadcrumb, at the right, instead of overflowing. */}
+      <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
+        <NextNeeding next={needing.next} others={needing.others} onOpen={onOpenTicket} />
+        {detail ? (
+          <Button
+            className="whitespace-nowrap"
+            title="Run an investigation in this ticket's workspace, as its agent left it"
+            onClick={() => {
+              investigateTicket(detail.ticket.id);
+            }}
+          >
+            Investigate
+          </Button>
+        ) : null}
+        {detail?.ticket.branch ? (
+          <Button
+            className="whitespace-nowrap"
+            variant={waitsForCodeReview(detail) ? 'primary' : 'secondary'}
+            title="Review the changes (r)"
+            onClick={onReview}
+          >
+            Review changes
+          </Button>
+        ) : null}
+        {detail ? <TicketMenu detail={detail} onRemoved={onRemoved} /> : null}
+        <CloseButton onClick={onClose} />
+      </div>
     </header>
   );
 }

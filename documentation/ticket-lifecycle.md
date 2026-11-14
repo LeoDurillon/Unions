@@ -42,7 +42,8 @@ Under each output:
 
 - **Approve** runs the next step: the button says which one and on which model, for example **Approve → Test plan
   (Sonnet)**.
-- **Request revision** asks for changes: write what is wrong, then **Send feedback**. The same agent revises its
+- **Request revision** asks for changes: write what is wrong, then **Send feedback** (or **Ctrl+Enter**, **⌘+Enter**
+  on a Mac). The same agent revises its
   output, in the same session, so it remembers what it wrote.
 - **Edit** changes the output yourself, for example to fix a detail without spending a run. **Save new version**,
   then approve.

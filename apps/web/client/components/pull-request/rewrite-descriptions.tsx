@@ -4,6 +4,7 @@ import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../../src/api-types';
 import { usePrDescription } from '../../lib/pull-request/use-pr-description';
+import { plural } from '../../lib/ui/plural';
 import { Button, ErrorText } from '../ui/ui';
 
 const HINT =
@@ -32,7 +33,9 @@ export function RewriteDescriptions({
         title={view.refusal ?? HINT}
         onClick={actions.handleRewrite}
       >
-        Rewrite all {open.length} descriptions
+        {open.length === 1
+          ? 'Rewrite the description'
+          : `Rewrite all ${plural(open.length, 'description')}`}
       </Button>
       <ErrorText error={actions.error} />
     </div>

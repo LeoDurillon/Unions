@@ -3,6 +3,7 @@
 import { useRef, useState, type ReactElement, type RefObject } from 'react';
 
 import { useDismiss } from '../../lib/ui/use-dismiss';
+import { FOCUS_RING } from './focus';
 
 export type MenuItem = {
   label: string;
@@ -68,9 +69,10 @@ export function OverflowMenu({ label, items }: { label: string; items: MenuItem[
       <button
         type="button"
         aria-label={label}
+        aria-haspopup="menu"
         aria-expanded={open}
         title={label}
-        className="rounded-md px-2 py-1 text-sm leading-none text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+        className={`rounded-md px-2 py-1 text-sm leading-none text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-zinc-100 ${FOCUS_RING}`}
         onClick={() => {
           setOpen(!open);
         }}

@@ -6,6 +6,7 @@ import { useState, type ReactElement } from 'react';
 import type { AgentReviewView } from '../../../src/api-types';
 import type { ReviewTarget } from '../../lib/review/review-target';
 import { isActive, useAgentReview } from '../../lib/review/use-agent-review';
+import { plural } from '../../lib/ui/plural';
 import { Button, ErrorText } from '../ui/ui';
 import { AgentReviewDialog } from './agent-review-dialog';
 
@@ -22,14 +23,17 @@ function Coverage({ coverage }: { coverage: AgentReviewCoverage | null }): React
     return <span className="text-xs text-zinc-500">· opened every file</span>;
   }
   const lines = unopened.reduce((sum, file) => sum + file.lines, 0);
-  const listed = unopened.slice(0, LISTED).map((file) => `${file.path} (${file.lines} lines)`);
+  const listed = unopened
+    .slice(0, LISTED)
+    .map((file) => `${file.path} (${plural(file.lines, 'line')})`);
   const more = unopened.length > LISTED ? [`and ${unopened.length - LISTED} more`] : [];
   return (
     <span
       title={['Never opened by the agent:', ...listed, ...more].join('\n')}
       className="cursor-help text-xs text-amber-700 dark:text-amber-400"
     >
-      · did not open {unopened.length} of {coverage.files} files ({lines} of {coverage.lines} lines)
+      · did not open {unopened.length} of {plural(coverage.files, 'file')} ({lines} of{' '}
+      {plural(coverage.lines, 'line')})
     </span>
   );
 }
@@ -70,7 +74,7 @@ function LastRun({ review }: { review: AgentReviewView | null | undefined }): Re
     return (
       <>
         <span className="text-xs text-zinc-500">
-          {count === 0 ? 'No suggestion' : `${count} suggestion${count === 1 ? '' : 's'}`}
+          {count === 0 ? 'No suggestions' : plural(count, 'suggestion')}
         </span>
         <Coverage coverage={review.coverage} />
       </>

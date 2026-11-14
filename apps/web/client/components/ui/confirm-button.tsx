@@ -1,38 +1,45 @@
 // A destructive action that asks first: a quiet red button, then the question with confirm and keep.
-import { useState, type ReactElement, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactElement, type ReactNode } from 'react';
 
+import { useDismiss } from '../../lib/ui/use-dismiss';
 import { IconButton } from './icon-button';
 import { Button } from './ui';
 
 /** The button before the question: an icon for a row action, else quiet red text. */
 function Trigger({
   label,
+  name,
   icon,
   disabled,
   onClick,
 }: {
   label: string;
+  name: string | undefined;
   icon: ReactNode;
   disabled: boolean;
   onClick: () => void;
 }): ReactElement {
   if (icon !== null) {
     return (
-      <IconButton label={label} danger disabled={disabled} onClick={onClick}>
+      <IconButton label={name ?? label} danger disabled={disabled} onClick={onClick}>
         {icon}
       </IconButton>
     );
   }
   return (
-    <Button variant="quietDanger" disabled={disabled} onClick={onClick}>
+    <Button variant="quietDanger" aria-label={name} disabled={disabled} onClick={onClick}>
       {label}
     </Button>
   );
 }
 
-/** A destructive action that asks first: a quiet red button, then the question with confirm and keep. */
+/**
+ * A destructive action that asks first: a quiet red button, then the question with confirm and keep.
+ * While it asks, "Keep it" has the focus, and Escape or a press outside keeps.
+ */
 export function ConfirmButton({
   label,
+  name,
   question,
   confirmLabel,
   disabled = false,
@@ -41,6 +48,8 @@ export function ConfirmButton({
 }: {
   /** The button's text, or its accessible name when `icon` is set. */
   label: string;
+  /** The accessible name when `label` alone does not say what goes ("Remove" on every row). */
+  name?: string;
   question: string;
   confirmLabel: string;
   disabled?: boolean;
@@ -53,6 +62,7 @@ export function ConfirmButton({
     return (
       <Trigger
         label={label}
+        name={name}
         icon={icon}
         disabled={disabled}
         onClick={() => {
@@ -62,23 +72,48 @@ export function ConfirmButton({
     );
   }
   return (
-    <span className="flex flex-wrap items-center gap-2 text-sm">
+    <Question
+      question={question}
+      confirmLabel={confirmLabel}
+      disabled={disabled}
+      onConfirm={() => {
+        setAsking(false);
+        onConfirm();
+      }}
+      onKeep={() => {
+        setAsking(false);
+      }}
+    />
+  );
+}
+
+/** The question, with "Keep it" focused; Escape or a press outside keeps. */
+function Question({
+  question,
+  confirmLabel,
+  disabled,
+  onConfirm,
+  onKeep,
+}: {
+  question: string;
+  confirmLabel: string;
+  disabled: boolean;
+  onConfirm: () => void;
+  onKeep: () => void;
+}): ReactElement {
+  const root = useRef<HTMLSpanElement>(null);
+  const keep = useRef<HTMLButtonElement>(null);
+  useDismiss(root, onKeep);
+  useEffect(() => {
+    keep.current?.focus();
+  }, []);
+  return (
+    <span ref={root} className="flex flex-wrap items-center gap-2 text-sm">
       <span>{question}</span>
-      <Button
-        variant="danger"
-        disabled={disabled}
-        onClick={() => {
-          setAsking(false);
-          onConfirm();
-        }}
-      >
+      <Button variant="danger" disabled={disabled} onClick={onConfirm}>
         {confirmLabel}
       </Button>
-      <Button
-        onClick={() => {
-          setAsking(false);
-        }}
-      >
+      <Button ref={keep} onClick={onKeep}>
         Keep it
       </Button>
     </span>

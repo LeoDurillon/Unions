@@ -5,6 +5,7 @@ import type { ReactElement } from 'react';
 
 import type { TicketSummary } from '../../../src/api-types';
 import { COLUMNS } from '../../lib/board/labels';
+import { FOCUS_RING } from '../ui/focus';
 
 export function ColumnSwitcher({
   tickets,
@@ -33,7 +34,7 @@ export function ColumnSwitcher({
             onClick={() => {
               onPick(status);
             }}
-            className={`h-9 shrink-0 rounded-full px-3 text-[12.5px] whitespace-nowrap ${on ? 'bg-zinc-900 font-semibold text-white dark:bg-zinc-100 dark:text-zinc-900' : 'border border-zinc-200 bg-white text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400'}`}
+            className={`h-9 shrink-0 rounded-full ${FOCUS_RING} px-3 text-[12.5px] whitespace-nowrap ${on ? 'bg-zinc-900 font-semibold text-white dark:bg-zinc-100 dark:text-zinc-900' : 'border border-zinc-200 bg-white text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400'}`}
           >
             {title} <span className="opacity-70">{count}</span>
           </button>

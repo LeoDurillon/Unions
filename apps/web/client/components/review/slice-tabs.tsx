@@ -6,6 +6,7 @@ import type { ReactElement } from 'react';
 import type { CommentView } from '../../../src/api-types';
 import { draftsByTab } from '../../lib/review/slice-view';
 import type { SliceView } from '../../lib/review/use-slice-view';
+import { plural } from '../../lib/ui/plural';
 import { Segmented } from '../ui/choice';
 
 const ALL = 'all';
@@ -15,7 +16,7 @@ function TabLabel({ text, drafts }: { text: string; drafts: number }): ReactElem
     <span className="flex items-center gap-1.5">
       {text}
       {drafts > 0 ? (
-        <span className="text-amber-700 dark:text-amber-400" aria-label={`${drafts} drafts`}>
+        <span className="text-amber-700 dark:text-amber-400" aria-label={plural(drafts, 'draft')}>
           {drafts}
         </span>
       ) : null}

@@ -67,7 +67,7 @@ export function TicketHero({
   const flow = flowName(resolveFlow(ticket, project.config), project.config);
   return (
     <div className="space-y-4 px-6 pt-1 pb-5">
-      <h2 className="max-w-4xl text-2xl leading-tight font-semibold tracking-tight text-balance">
+      <h2 className="max-w-4xl text-2xl leading-tight font-semibold tracking-tight text-balance wrap-anywhere">
         {ticket.title}
       </h2>
       <div className="flex flex-wrap items-center gap-2">

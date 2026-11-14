@@ -1,10 +1,10 @@
 // Small icon-only buttons for row actions (edit, delete, move, done), and their icons.
 import type { ReactElement, ReactNode } from 'react';
 
-const ICON_BUTTON =
-  'flex size-7 shrink-0 items-center justify-center rounded text-zinc-500 hover:bg-zinc-200 hover:text-zinc-800 disabled:opacity-30 dark:hover:bg-zinc-800 dark:hover:text-zinc-200';
-const DANGER =
-  'flex size-7 shrink-0 items-center justify-center rounded text-zinc-500 hover:bg-red-50 hover:text-red-600 disabled:opacity-30 dark:hover:bg-red-950/40 dark:hover:text-red-400';
+import { FOCUS_RING } from './focus';
+
+const ICON_BUTTON = `flex size-7 shrink-0 items-center justify-center rounded text-zinc-500 hover:bg-zinc-200 hover:text-zinc-800 disabled:opacity-30 dark:hover:bg-zinc-800 dark:hover:text-zinc-200 ${FOCUS_RING}`;
+const DANGER = `flex size-7 shrink-0 items-center justify-center rounded text-zinc-500 hover:bg-red-50 hover:text-red-600 disabled:opacity-30 dark:hover:bg-red-950/40 dark:hover:text-red-400 ${FOCUS_RING}`;
 
 /** An icon-only button; `label` is its title and its accessible name. */
 export function IconButton({

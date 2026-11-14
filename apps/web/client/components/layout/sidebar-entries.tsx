@@ -1,9 +1,10 @@
 // The sidebar's projects (with Add project) and its Union settings entry. On the rail, a project
-// shows the first two letters of its name.
+// shows the initials of its repository's name.
 
 import type { ReactElement } from 'react';
 
 import type { ListedProject } from '../../../src/api-types';
+import { repoInitials } from '../../lib/app/repo-initials';
 import { Button } from '../ui/ui';
 import { HelpMenu } from './help-menu';
 import { RAIL_ONLY, SIDE_BADGE, SIDE_ITEM, SIDE_LABEL } from './sidebar-classes';
@@ -59,7 +60,7 @@ function ProjectItem({
         className={`${SIDE_ITEM} ${active ? ACTIVE : IDLE}`}
       >
         <span aria-hidden className={`${RAIL_ONLY} text-xs font-semibold`}>
-          {project.repo.slice(0, 2)}
+          {repoInitials(project.repo)}
         </span>
         <span className={SIDE_LABEL}>
           <span className="text-zinc-500">{project.owner}/</span>

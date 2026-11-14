@@ -51,11 +51,14 @@ function WindowRow({
   const percent = Math.round(window.utilization * PERCENT);
   const level = levelOf(window, rejected);
   return (
-    <div className="space-y-0.5" title={over ? `Started over at ${reset}` : `Starts over ${reset}`}>
+    <div
+      className="space-y-0.5"
+      title={over ? `Reset at ${reset}: no call reported since` : `Resets ${reset}`}
+    >
       <div className="flex items-baseline justify-between gap-2 text-xs">
         <span className="text-zinc-600 dark:text-zinc-300">{label}</span>
         <span className="tabular-nums">
-          {over ? 'reset' : `${percent}%`}
+          {over ? '—' : `${percent}%`}
           {level === 'limit' && !over ? ' · limit' : ''}
         </span>
       </div>
@@ -66,16 +69,18 @@ function WindowRow({
         />
       </div>
       <div className="text-xs text-zinc-500">
-        {over ? `started over ${reset}` : `resets ${reset}`}
+        {over ? `Reset ${reset}, no use since` : `Resets ${reset}`}
       </div>
     </div>
   );
 }
 
+/** The windows; dimmed, with their age, once the last report is old. */
 function Windows({ limits, now }: { limits: ClaudeLimits; now: number }): ReactElement {
   const rejected = limits.status === 'rejected';
+  const stale = now - limits.at > STALE_MS;
   return (
-    <>
+    <div className={`space-y-2 ${stale ? 'opacity-60' : ''}`}>
       {limits.fiveHour ? (
         <WindowRow
           label="5 hours"
@@ -88,10 +93,10 @@ function Windows({ limits, now }: { limits: ClaudeLimits; now: number }): ReactE
       {limits.sevenDay ? (
         <WindowRow label="Week" window={limits.sevenDay} rejected={rejected} now={now} long />
       ) : null}
-      {now - limits.at > STALE_MS ? (
-        <p className="text-xs text-zinc-500">As of {timeAgo(limits.at, now)}</p>
+      {stale ? (
+        <p className="text-xs text-zinc-500">Last reported {timeAgo(limits.at, now)}</p>
       ) : null}
-    </>
+    </div>
   );
 }
 

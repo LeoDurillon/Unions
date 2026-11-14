@@ -3,6 +3,7 @@
 import type { AgentConfig, CustomAgentInfo } from '@union/core';
 import { useState, type ReactElement } from 'react';
 
+import { useLeaveGuard } from '../../lib/app/leave-guard';
 import { useCustomAgent, type CustomAgentActions } from '../../lib/union-settings/use-custom-agent';
 import { ConfirmButton } from '../ui/confirm-button';
 import { Badge, Button, ErrorText, Field, inputClass } from '../ui/ui';
@@ -37,6 +38,7 @@ function RoleField({
   const [role, setRole] = useState(custom.role);
   const writing = custom.promptStatus === 'queued' || custom.promptStatus === 'running';
   const edited = role.trim() !== custom.role;
+  useLeaveGuard(edited);
   return (
     <div className="space-y-2">
       <Field
@@ -59,7 +61,7 @@ function RoleField({
             actions.edit.mutate({ role });
           }}
         >
-          Save role
+          {actions.edit.isPending ? 'Saving…' : 'Save role'}
         </Button>
         <Button
           disabled={edited || writing || actions.regenerate.isPending}

@@ -8,36 +8,16 @@ import { useReviewStack, type StackPull } from '../../lib/review/review-stack';
 import type { ReviewTarget } from '../../lib/review/review-target';
 import { useAgentReview } from '../../lib/review/use-agent-review';
 import { useReviewSpecs, useStackSpecs } from '../../lib/review/use-review-specs';
-import { Segmented } from '../ui/choice';
-import { Button, Dialog, ErrorText } from '../ui/ui';
-import { ModePicker, useSliceOffer, type ReviewMode } from './agent-review-mode';
+import { Dialog } from '../ui/dialog';
+import { Button, ErrorText } from '../ui/ui';
+import {
+  ModePicker,
+  ScopePicker,
+  useSliceOffer,
+  type ReviewMode,
+  type Scope,
+} from './agent-review-mode';
 import { SpecSummary } from './spec-summary';
-
-type Scope = 'stack' | 'one';
-
-/** Whole stack or this pull request: shown only when the review is part of a stack. */
-function ScopePicker({
-  stack,
-  scope,
-  onChange,
-}: {
-  stack: StackPull[];
-  scope: Scope;
-  onChange: (scope: Scope) => void;
-}): ReactElement {
-  return (
-    <Segmented
-      legend="What the agent reviews"
-      size="sm"
-      options={[
-        { value: 'stack', label: `The whole stack (${stack.length} pull requests)` },
-        { value: 'one', label: 'This pull request only' },
-      ]}
-      value={scope}
-      onChange={onChange}
-    />
-  );
-}
 
 /** The specs the run reads: this review's, or every member's of the stack. */
 function useScopeSpecs(

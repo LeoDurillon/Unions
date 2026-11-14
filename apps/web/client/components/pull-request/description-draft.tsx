@@ -6,7 +6,8 @@ import type { PrDescriptionDraft } from '../../../src/api-types';
 import { lineDiff } from '../../lib/review/line-diff';
 import { Markdown } from '../markdown/markdown';
 import { Segmented } from '../ui/choice';
-import { Button } from '../ui/ui';
+import { ConfirmButton } from '../ui/confirm-button';
+import { Button, inputClass } from '../ui/ui';
 
 type Mode = 'preview' | 'edit' | 'changes';
 
@@ -39,8 +40,44 @@ function Changes({ before, after }: { before: string; after: string }): ReactEle
   );
 }
 
+/** Discard or rewrite: once the text was edited by hand, they ask first, as they lose the edits. */
+function LosingButton({
+  label,
+  question,
+  edited,
+  disabled,
+  quiet,
+  onClick,
+}: {
+  label: string;
+  question: string;
+  edited: boolean;
+  disabled: boolean;
+  /** Red text: the action throws the draft away. */
+  quiet: boolean;
+  onClick: () => void;
+}): ReactElement {
+  if (edited) {
+    return (
+      <ConfirmButton
+        label={label}
+        question={question}
+        confirmLabel={label}
+        disabled={disabled}
+        onConfirm={onClick}
+      />
+    );
+  }
+  return (
+    <Button variant={quiet ? 'quietDanger' : 'secondary'} disabled={disabled} onClick={onClick}>
+      {label}
+    </Button>
+  );
+}
+
 function DraftButtons({
   text,
+  edited,
   busy,
   sending,
   onSend,
@@ -49,6 +86,8 @@ function DraftButtons({
   rewriteLabel,
 }: {
   text: string;
+  /** The text differs from the agent's draft. */
+  edited: boolean;
   busy: boolean;
   sending: boolean;
   onSend: (text: string) => void;
@@ -57,7 +96,7 @@ function DraftButtons({
   rewriteLabel: string | null;
 }): ReactElement {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap items-center gap-2">
       <Button
         variant="primary"
         disabled={busy || sending || text.trim() === ''}
@@ -67,15 +106,62 @@ function DraftButtons({
       >
         {sending ? 'Updating on GitHub…' : 'Update on GitHub'}
       </Button>
-      <Button disabled={busy || sending} onClick={onDiscard}>
-        Discard
-      </Button>
       {rewriteLabel === null ? null : (
-        <Button disabled={busy || sending} onClick={onRewrite}>
-          {rewriteLabel}
-        </Button>
+        <LosingButton
+          label={rewriteLabel}
+          question="Rewrite it and lose your edits?"
+          edited={edited}
+          disabled={busy || sending}
+          quiet={false}
+          onClick={onRewrite}
+        />
       )}
+      <LosingButton
+        label="Discard"
+        question="Discard the new description and your edits?"
+        edited={edited}
+        disabled={busy || sending}
+        quiet
+        onClick={onDiscard}
+      />
     </div>
+  );
+}
+
+/** The draft as the picked mode shows it: rendered, in its textarea, or against GitHub's. */
+function DraftView({
+  mode,
+  original,
+  text,
+  sending,
+  onChange,
+}: {
+  mode: Mode;
+  original: string;
+  text: string;
+  sending: boolean;
+  onChange: (text: string) => void;
+}): ReactElement {
+  if (mode === 'changes') {
+    return <Changes before={original} after={text} />;
+  }
+  if (mode === 'preview') {
+    return (
+      <div className="max-h-96 overflow-auto rounded-lg border border-zinc-200 px-4 py-2 dark:border-zinc-800">
+        <Markdown github>{text}</Markdown>
+      </div>
+    );
+  }
+  return (
+    <textarea
+      aria-label="New description"
+      className={`${inputClass} h-72 font-mono`}
+      value={text}
+      readOnly={sending}
+      onChange={(event) => {
+        onChange(event.target.value);
+      }}
+    />
   );
 }
 
@@ -107,25 +193,16 @@ export function DescriptionDraft({
         value={mode}
         onChange={setMode}
       />
-      {mode === 'changes' ? <Changes before={draft.original ?? ''} after={text} /> : null}
-      {mode === 'preview' ? (
-        <div className="max-h-96 overflow-auto rounded-lg border border-zinc-200 px-4 py-2 dark:border-zinc-800">
-          <Markdown github>{text}</Markdown>
-        </div>
-      ) : null}
-      {mode === 'edit' ? (
-        <textarea
-          aria-label="New description"
-          className="h-72 w-full rounded-lg border border-zinc-300 bg-white p-3 font-mono text-xs dark:border-zinc-700 dark:bg-zinc-950"
-          value={text}
-          readOnly={sending}
-          onChange={(event) => {
-            setText(event.target.value);
-          }}
-        />
-      ) : null}
+      <DraftView
+        mode={mode}
+        original={draft.original ?? ''}
+        text={text}
+        sending={sending}
+        onChange={setText}
+      />
       <DraftButtons
         text={text}
+        edited={text !== (draft.text ?? '')}
         busy={busy}
         sending={sending}
         onSend={onSend}

@@ -3,6 +3,7 @@
 import type { ReactElement } from 'react';
 
 import type { DiffFileSummary } from '../../../src/api-types';
+import { plural } from '../../lib/ui/plural';
 import { useViewed } from './viewed-context';
 
 const PERCENT = 100;
@@ -21,7 +22,7 @@ export function ReviewProgress({ files }: { files: DiffFileSummary[] }): ReactEl
     >
       <span className="text-[11.5px] text-zinc-500">
         <strong className="font-semibold text-zinc-900 dark:text-zinc-100">{done}</strong> of{' '}
-        {files.length} files viewed
+        {plural(files.length, 'file')} viewed
       </span>
       <span className="h-1.5 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800">
         <span

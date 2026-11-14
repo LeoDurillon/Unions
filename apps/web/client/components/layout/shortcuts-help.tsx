@@ -5,7 +5,7 @@ import { useState, type ReactElement } from 'react';
 import { useHelpRequest } from '../../lib/app/help-requests';
 import { useUrlParam } from '../../lib/app/url-state';
 import { useShortcuts } from '../../lib/ui/shortcuts';
-import { Dialog } from '../ui/ui';
+import { Dialog } from '../ui/dialog';
 
 type Group = { title: string; keys: [string, string][] };
 
@@ -23,8 +23,13 @@ const GROUPS: Group[] = [
     ],
   },
   {
-    title: 'New ticket',
-    keys: [['Ctrl / ⌘ Enter', 'Create the ticket']],
+    title: 'A box you write in',
+    keys: [
+      [
+        'Ctrl / ⌘ Enter',
+        'Send it: create the ticket, post the comment or reply, send the feedback or the review',
+      ],
+    ],
   },
   {
     title: 'Ticket',
@@ -55,10 +60,11 @@ function GroupList({ group }: { group: Group }): ReactElement {
   return (
     <section className="space-y-1.5">
       <h3 className="text-xs font-semibold tracking-wide text-zinc-500 uppercase">{group.title}</h3>
-      <dl className="space-y-1 text-sm">
+      {/* The same keys' column in every group, wide enough for "Ctrl / ⌘ Enter" on one line. */}
+      <dl className="grid grid-cols-[8.5rem_1fr] items-center gap-x-3 gap-y-1 text-sm">
         {group.keys.map(([key, what]) => (
-          <div key={`${group.title}-${key}`} className="flex items-center gap-3">
-            <dt className="w-14 shrink-0">
+          <div key={`${group.title}-${key}`} className="contents">
+            <dt className="whitespace-nowrap">
               <kbd className="rounded border border-zinc-300 bg-zinc-50 px-1.5 py-0.5 font-mono text-xs dark:border-zinc-700 dark:bg-zinc-800">
                 {key}
               </kbd>

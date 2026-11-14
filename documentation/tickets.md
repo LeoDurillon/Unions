@@ -102,11 +102,13 @@ lets you:
 - pick the ticket it **depends on** (see below).
 
 Press **Ctrl+Enter** (**⌘+Enter** on a Mac) in the title or the description to create the ticket, or click
-**Create ticket**; **Cancel** closes the dialog without creating it.
+**Create ticket**; **Cancel** closes the dialog without creating it. The title and description you typed are kept,
+for each project, when you switch tabs or close the dialog: they are still there when you open **New ticket** again,
+until the ticket is created.
 
 To attach files to an imported Notion page or Jira issue, or give it a parent, click **Edit before creating**: the
 ticket opens in the **Write** tab, still linked to its page or issue. You can also add files later, in the ticket's
-Overview.
+Overview, where a file's **Remove** asks you to confirm before deleting it.
 
 The new ticket lands in Backlog. Union creates its GitHub issue, unless the project turned issues off (**Settings →
 General → Mirror tickets as GitHub issues**), and adds it to the GitHub Project when one is connected.
@@ -266,22 +268,23 @@ badge says how many there are). Use it after approving a step to go straight to 
 ## Keyboard shortcuts
 
 Press **?** to see them in Union, or click **Help** in the sidebar, then **Keyboard shortcuts**. They do nothing while you type in a text field or while a dialog is open, and
-Ctrl, ⌘ and Alt combinations stay the browser's, except Ctrl+Enter in the New ticket dialog.
+Ctrl, ⌘ and Alt combinations stay the browser's, except Ctrl+Enter, which sends what you wrote in a text box.
 
-| Where             | Key                          | What it does                                                                |
-| ----------------- | ---------------------------- | --------------------------------------------------------------------------- |
-| Anywhere          | **?**                        | List the shortcuts.                                                         |
-| Board             | **/**                        | Jump to the search.                                                         |
-| Board             | **c**                        | Write a new ticket.                                                         |
-| Board             | **n**                        | Open the first ticket that needs you, else go to the next project with one. |
-| New ticket dialog | **Ctrl+Enter** (**⌘+Enter**) | Create the ticket.                                                          |
-| Ticket            | **n / p**                    | Open the next or previous ticket that needs you.                            |
-| Ticket            | **r**                        | Review the changes.                                                         |
-| Ticket            | **1 – 5**                    | Switch to Overview, Preview, Steps, PR, or Notion or Jira.                  |
-| Ticket            | **Esc**                      | Close the panel.                                                            |
-| Review page       | **j / k**                    | Open the next or previous file.                                             |
-| Review page       | **v**                        | Mark the open file viewed and open the next one.                            |
-| Repository        | **/**                        | Jump to **Go to file**.                                                     |
+| Where              | Key                          | What it does                                                                |
+| ------------------ | ---------------------------- | --------------------------------------------------------------------------- |
+| Anywhere           | **?**                        | List the shortcuts.                                                         |
+| Board              | **/**                        | Jump to the search.                                                         |
+| Board              | **c**                        | Write a new ticket.                                                         |
+| Board              | **n**                        | Open the first ticket that needs you, else go to the next project with one. |
+| New ticket dialog  | **Ctrl+Enter** (**⌘+Enter**) | Create the ticket.                                                          |
+| A box you write in | **Ctrl+Enter** (**⌘+Enter**) | Send it: a comment, a reply, feedback, an edited output, a follow-up.       |
+| Ticket             | **n / p**                    | Open the next or previous ticket that needs you.                            |
+| Ticket             | **r**                        | Review the changes.                                                         |
+| Ticket             | **1 – 5**                    | Switch to Overview, Preview, Steps, PR, or Notion or Jira.                  |
+| Ticket             | **Esc**                      | Close the panel.                                                            |
+| Review page        | **j / k**                    | Open the next or previous file.                                             |
+| Review page        | **v**                        | Mark the open file viewed and open the next one.                            |
+| Repository         | **/**                        | Jump to **Go to file**.                                                     |
 
 ## Cancel and remove
 

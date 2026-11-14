@@ -8,6 +8,7 @@ import type { PublicProject, TicketSummary } from '../../../src/api-types';
 import { needsYou } from '../../lib/board/board-filter';
 import { orderColumn } from '../../lib/board/board-order';
 import type { StartState } from '../../lib/board/use-start-tickets';
+import { FOCUS_RING } from '../ui/focus';
 import { TicketCard } from './ticket-card';
 import { TicketRow } from './ticket-row';
 
@@ -25,8 +26,8 @@ const EMPTY: Record<BoardColumn, string> = {
   merged: 'Nothing merged lately',
 };
 
-const FOLD_BUTTON =
-  'rounded px-1 text-zinc-500 hover:bg-zinc-200 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-zinc-100';
+/** At least 24px square, to hit; hidden on a phone, where the column switcher picks the one column shown. */
+const FOLD_BUTTON = `flex size-6 shrink-0 items-center justify-center rounded max-sm:hidden ${FOCUS_RING} text-zinc-500 hover:bg-zinc-200 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-zinc-100`;
 
 /** Two grey cards that pulse while the board's tickets are read. */
 function Placeholders(): ReactElement {
@@ -116,7 +117,7 @@ export function Column({
   const cards = ordered.filter((ticket) => !rows.includes(ticket));
   return (
     <section
-      className={`flex h-full min-w-64 flex-1 flex-col gap-2.5 rounded-2xl bg-zinc-100/80 p-3 sm:max-w-sm dark:bg-zinc-900/60 ${className}`}
+      className={`flex h-full min-w-60 flex-1 flex-col gap-2.5 rounded-2xl bg-zinc-100/80 p-3 sm:max-w-sm dark:bg-zinc-900/60 ${className}`}
     >
       <ColumnTitle title={title} count={tickets.length} onFold={onFold} />
       <div className="-mx-1 flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto px-1 pt-0.5 pb-1">

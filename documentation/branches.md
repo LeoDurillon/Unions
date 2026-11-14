@@ -19,7 +19,8 @@ in the template's language, and ends with `Closes #<issue>`.
   away behind a line you click.
 - **Rewrite description** writes the description again from the current code; you review the draft before it is
   sent to GitHub. The draft opens as it will read on GitHub (**Preview**); **Edit** changes its text, and
-  **Changes from GitHub's** shows what it changes line by line.
+  **Changes from GitHub's** shows what it changes line by line. Once you edited the text, **Discard** and
+  **Rewrite again** ask before they throw your edits away.
 - **Line comments** come first: the open threads, then the resolved ones folded behind a line you click.
 - **In the review** lists the comments you added to the next review; they leave the list once you send it.
 - **Discussion on GitHub** shows the pull request's comments and reviews, one row each with its author, and
@@ -141,7 +142,7 @@ Turn on **Split pull requests into stacks** in **Settings → Pull requests** fi
 
 1. **Split into a stack** in the PR tab asks an agent for a plan: one slice per part of the spec, each with its
    description and why it stands on its own. **Approve and split**, **Request revision**, **Edit**, or **Drop the
-   split**.
+   split** (it asks first, as the plan is forgotten).
 2. The implementation agent rewrites the commits into those slices. Union checks that the code is the same and, with
    **Check every slice** (on by default), runs the project's checks on each slice.
 3. Union pushes every slice's branch in one atomic push and opens one pull request per lower slice; the ticket's own

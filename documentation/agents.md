@@ -61,7 +61,7 @@ On an agent's page:
 - **Effort**: how hard the agent thinks (`low` to `max`). **Default** leaves it to Claude Code.
 - **Tools**: what the agent may do. The planning and review agents read; the implementer also edits and runs
   commands.
-- **Reset to default** brings back Union's prompt.
+- **Reset to default** brings back Union's prompt, after asking: your changes to that agent are lost.
 
 **All agents**, in Union settings' menu, lists every agent, yours included: its model and effort, changed in place with
 one **Save**, and a dot on the ones whose settings you changed. Click an agent's name to open its page (prompt, tools).

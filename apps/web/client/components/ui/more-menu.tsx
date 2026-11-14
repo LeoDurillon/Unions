@@ -1,33 +1,24 @@
-// A ⋯ button that opens a small menu under it, for the actions a header keeps out of the way. A press outside
-// the menu closes it.
+// A ⋯ button that opens a small menu under it, for the actions a header keeps out of the way. Escape or a
+// press outside the menu closes it.
 
-import { useCallback, useEffect, useRef, useState, type ReactElement, type ReactNode } from 'react';
+import {
+  useCallback,
+  useRef,
+  useState,
+  type ReactElement,
+  type ReactNode,
+  type RefObject,
+} from 'react';
 
-/** The open menu; a press outside it and its button closes it. */
-function MenuPopup({
-  onClose,
-  children,
-}: {
-  onClose: () => void;
-  children: ReactNode;
-}): ReactElement {
-  const box = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const onPointer = (event: PointerEvent): void => {
-      const toggle = box.current?.parentElement;
-      if (event.target instanceof Node && !toggle?.contains(event.target)) {
-        onClose();
-      }
-    };
-    globalThis.addEventListener('pointerdown', onPointer);
-    return () => {
-      globalThis.removeEventListener('pointerdown', onPointer);
-    };
-  }, [onClose]);
+import { useDismiss } from '../../lib/ui/use-dismiss';
+import { FOCUS_RING } from './focus';
+
+/** The open menu: as wide as its widest item, within bounds. */
+function MenuPopup({ children }: { children: ReactNode }): ReactElement {
   return (
     <div
-      ref={box}
-      className="absolute top-full right-0 z-20 mt-2 w-80 rounded-xl border border-zinc-200 bg-white p-2 shadow-lg dark:border-zinc-800 dark:bg-zinc-900"
+      role="menu"
+      className="absolute top-full right-0 z-20 mt-2 w-max max-w-80 min-w-44 rounded-xl border border-zinc-200 bg-white p-2 shadow-lg dark:border-zinc-800 dark:bg-zinc-900"
     >
       {children}
     </div>
@@ -43,17 +34,19 @@ export function MoreMenu({
   children: ReactNode;
 }): ReactElement {
   const [open, setOpen] = useState(false);
+  const root = useRef<HTMLDivElement>(null);
   const close = useCallback((): void => {
     setOpen(false);
   }, []);
   return (
-    <div className="relative">
+    <div ref={root} className="relative">
       <button
         type="button"
         aria-label={label}
+        aria-haspopup="menu"
         aria-expanded={open}
         title={label}
-        className="flex size-8 items-center justify-center rounded-lg border border-zinc-200 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-800 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+        className={`flex size-8 items-center justify-center rounded-lg border border-zinc-200 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-800 dark:hover:bg-zinc-800 dark:hover:text-zinc-100 ${FOCUS_RING}`}
         onClick={() => {
           setOpen(!open);
         }}
@@ -64,7 +57,25 @@ export function MoreMenu({
           <circle cx="19" cy="12" r="1.8" />
         </svg>
       </button>
-      {open ? <MenuPopup onClose={close}>{children}</MenuPopup> : null}
+      {open ? (
+        <OpenMenu root={root} onClose={close}>
+          {children}
+        </OpenMenu>
+      ) : null}
     </div>
   );
+}
+
+/** Mounted while open, so Escape and outside presses are heard only then. */
+function OpenMenu({
+  root,
+  onClose,
+  children,
+}: {
+  root: RefObject<HTMLDivElement | null>;
+  onClose: () => void;
+  children: ReactNode;
+}): ReactElement {
+  useDismiss(root, onClose);
+  return <MenuPopup>{children}</MenuPopup>;
 }

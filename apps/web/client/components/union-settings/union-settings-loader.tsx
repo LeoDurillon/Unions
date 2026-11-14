@@ -8,6 +8,34 @@ import { SettingsIntro } from '../settings/settings-intro';
 import { Loading, SkeletonRows } from '../ui/skeleton';
 import { ErrorText } from '../ui/ui';
 
+/** A settings page still read: its error, else a skeleton of `fields` rows labelled `label`. */
+export function SettingsPending({
+  error,
+  label,
+  fields,
+}: {
+  error: Error | null;
+  label: string;
+  fields: number;
+}): ReactElement {
+  return (
+    <section className="space-y-4">
+      {error ? (
+        <ErrorText error={error} />
+      ) : (
+        <Loading label={label} className="space-y-4">
+          <SkeletonRows
+            count={fields}
+            columns="grid-cols-[10rem_6rem]"
+            cells={1}
+            rowClassName="h-8"
+          />
+        </Loading>
+      )}
+    </section>
+  );
+}
+
 /** `fields`: how many the form shows, for its shape while it is read. */
 export function UnionSettingsLoader({
   intro,
@@ -26,20 +54,7 @@ export function UnionSettingsLoader({
     <>
       <SettingsIntro>{intro}</SettingsIntro>
       {settings.data === undefined ? (
-        <section className="space-y-4">
-          {settings.error ? (
-            <ErrorText error={settings.error} />
-          ) : (
-            <Loading label={label} className="space-y-4">
-              <SkeletonRows
-                count={fields}
-                columns="grid-cols-[10rem_6rem]"
-                cells={1}
-                rowClassName="h-8"
-              />
-            </Loading>
-          )}
-        </section>
+        <SettingsPending error={settings.error} label={label} fields={fields} />
       ) : (
         <Form saved={settings.data} />
       )}

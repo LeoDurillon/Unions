@@ -43,9 +43,11 @@ branch is pushed.
 ### Comment and send
 
 1. Click a line number to comment on that line. Shift-click another line number to extend it to a block.
-2. Your comments stay drafts in Union until you send them.
+2. Your comments stay drafts in Union until you send them. **Edit** a draft, then **Save** or **Cancel**; **Delete**
+   asks before it removes one. **Ctrl+Enter** (**⌘+Enter** on a Mac) adds or saves the comment you are writing.
 3. **Send review** sends them all to the implementer, as a revision. While it cannot be sent (the ticket is not
-   waiting on you, the pull request is merged), hover the button to read why.
+   waiting on you, the pull request is merged), hover the button to read why. The overall note you write in its panel
+   is kept if you close the panel, and **Ctrl+Enter** in it sends the review (as **Comment** on a pull request).
 
 You can send a review while the ticket waits for you at the implementation or the final review, or once it is Done
 (its pull request open and not merged). Sent at the implementation, the revised code waits for you there again. Sent

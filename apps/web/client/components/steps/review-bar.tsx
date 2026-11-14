@@ -1,33 +1,17 @@
 // Approve, ask for a revision, or edit the output by hand (for example to answer questions).
 
 import type { AfterApproval, Step } from '@union/core';
-import { stepTitle } from '@union/core/step-titles';
 import { useState, type ReactElement } from 'react';
 
 import { useTicketCommands } from '../../lib/ticket/use-ticket-commands';
 import { findingsOf, parseVerdict } from '../../lib/ticket/verdict';
-import { useCustomAgentNames } from '../../lib/union-settings/use-custom-agents';
+import { onModEnter } from '../../lib/ui/mod-enter';
+import { ConfirmButton } from '../ui/confirm-button';
 import { Button, ErrorText, inputClass } from '../ui/ui';
+import { useApproveLabel } from './approve-label';
 import { StartOver } from './start-over';
 
 type Mode = 'idle' | 'revise' | 'edit';
-
-/** What Approve says: what it finishes, or the step it starts and its model ("Approve → Test plan (Sonnet)"). */
-function useApproveLabel(step: Step, next: AfterApproval | null): string {
-  const names = useCustomAgentNames();
-  if (step === 'final_review') {
-    return 'Approve and mark PR ready';
-  }
-  if (step === 'split_plan') {
-    return 'Approve and split';
-  }
-  return next ? `Approve → ${stepTitle(next.step, names)} (${modelName(next.model)})` : 'Approve';
-}
-
-/** A model as the button names it: `sonnet` → Sonnet. */
-function modelName(model: AfterApproval['model']): string {
-  return model.charAt(0).toUpperCase() + model.slice(1);
-}
 
 function IdleButtons({
   ticketId,
@@ -57,9 +41,12 @@ function IdleButtons({
         {label}
       </Button>
       {onSendFindings ? (
-        <Button onClick={onSendFindings}>Send findings to the implementer</Button>
+        <Button disabled={busy} onClick={onSendFindings}>
+          Send findings to the implementer
+        </Button>
       ) : null}
       <Button
+        disabled={busy}
         onClick={() => {
           onChoose('revise');
         }}
@@ -67,6 +54,7 @@ function IdleButtons({
         {finalReview ? 'Request changes' : 'Request revision'}
       </Button>
       <Button
+        disabled={busy}
         onClick={() => {
           onChoose('edit');
         }}
@@ -75,9 +63,13 @@ function IdleButtons({
       </Button>
       <StartOver ticketId={ticketId} phase={{ kind: 'awaiting_approval', step }} />
       {onDrop ? (
-        <Button disabled={busy} onClick={onDrop}>
-          Drop the split
-        </Button>
+        <ConfirmButton
+          label="Drop the split"
+          question="Forget this split plan?"
+          confirmLabel="Drop it"
+          disabled={busy}
+          onConfirm={onDrop}
+        />
       ) : null}
     </>
   );
@@ -104,15 +96,8 @@ function EditingButtons({
   );
 }
 
-function DraftArea({
-  mode,
-  text,
-  onChange,
-}: {
-  mode: Mode;
-  text: string;
-  onChange: (text: string) => void;
-}): ReactElement | null {
+function DraftArea({ review }: { review: Review }): ReactElement | null {
+  const { mode, text, canSubmit } = review;
   if (mode === 'idle') {
     return null;
   }
@@ -120,10 +105,12 @@ function DraftArea({
     <textarea
       className={`${inputClass} min-h-32 font-mono`}
       value={text}
+      aria-label={mode === 'revise' ? 'What should change' : 'New version of the output'}
       placeholder={mode === 'revise' ? 'What should change?' : undefined}
       onChange={(event) => {
-        onChange(event.target.value);
+        review.handleChange(event.target.value);
       }}
+      onKeyDown={onModEnter(review.handleSubmit, canSubmit)}
     />
   );
 }
@@ -133,6 +120,8 @@ type Review = {
   mode: Mode;
   text: string;
   busy: boolean;
+  /** Something written, and nothing under way. */
+  canSubmit: boolean;
   error: Error | null;
   handleChoose: (mode: Mode) => void;
   handleChange: (text: string) => void;
@@ -193,6 +182,7 @@ function useReview({ ticketId, step, saved, pending, onEditing }: ReviewInput): 
     mode,
     text,
     busy,
+    canSubmit: !busy && text.trim() !== '',
     error: act.error ?? edit.error,
     handlePrefill,
     handleChoose,
@@ -241,7 +231,7 @@ export function ReviewBar({
       className={`space-y-3 rounded-lg border border-amber-300 bg-amber-50 p-3 dark:border-amber-900 dark:bg-amber-950 ${review.mode === 'idle' ? 'sticky bottom-0 z-[1] shadow-[0_-4px_12px_rgb(0_0_0/0.06)]' : ''}`}
     >
       {finalReview && review.mode === 'revise' ? <FinalReviewReviseHint /> : null}
-      <DraftArea mode={review.mode} text={review.text} onChange={review.handleChange} />
+      <DraftArea review={review} />
       <ErrorText error={review.error} />
       <div className="flex flex-wrap gap-2">
         {review.mode === 'idle' ? (
@@ -264,7 +254,7 @@ export function ReviewBar({
         ) : (
           <EditingButtons
             mode={review.mode}
-            disabled={review.busy || review.text.trim() === ''}
+            disabled={!review.canSubmit}
             onSubmit={review.handleSubmit}
             onCancel={() => {
               review.handleChoose('idle');

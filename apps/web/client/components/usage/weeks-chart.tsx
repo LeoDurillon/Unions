@@ -5,8 +5,10 @@ import type { ProjectUsage } from '@union/core';
 import { useState, type ReactElement } from 'react';
 
 import { count } from '../../lib/log/token-counts';
+import { plural } from '../../lib/ui/plural';
 import { niceTicks } from '../../lib/usage/nice-scale';
 import { costText } from '../../lib/usage/usage-format';
+import { FOCUS_RING } from '../ui/focus';
 
 type Week = ProjectUsage['weeks'][number];
 
@@ -46,7 +48,7 @@ function Bar({
   return (
     <button
       type="button"
-      aria-label={`Week of ${weekName(week)}: ${costText(week.costUsd)}, ${week.calls} calls`}
+      aria-label={`Week of ${weekName(week)}: ${costText(week.costUsd)}, ${plural(week.calls, 'call')}`}
       onMouseEnter={() => {
         onShow(week.start);
       }}
@@ -59,7 +61,7 @@ function Bar({
       onBlur={() => {
         onShow(null);
       }}
-      className="relative flex h-full min-w-0 flex-1 items-end focus:outline-none"
+      className={`relative flex h-full min-w-0 flex-1 items-end rounded-t-[4px] ${FOCUS_RING}`}
     >
       <span
         className={`mx-auto w-full max-w-12 rounded-t-[4px] transition ${shown ? 'bg-indigo-600 dark:bg-indigo-300' : 'bg-indigo-500 dark:bg-indigo-400'}`}

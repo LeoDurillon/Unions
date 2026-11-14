@@ -105,6 +105,8 @@ and how many run at once:
 - **Previews at once** (3 to start with), across all projects. A project can allow fewer, in its
   **Environments → Limits**. Past it, starting a preview asks you to stop another first.
 
+Each field takes a whole number within its limits; until it does, the field says so and **Save** stays off.
+
 When a container reaches its limit, its biggest process is stopped (for example a build), instead of your whole
 computer running out of memory and freezing. The step's log then says the process was killed with exit 137. Raise
 the limit there if your builds or tests need more; a change applies the next time a container or a run starts.

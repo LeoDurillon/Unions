@@ -5,6 +5,7 @@ import { useState, type ReactElement, type ReactNode } from 'react';
 
 import { fileProblem } from '../../lib/ticket/attachments-api';
 import { Switch } from '../ui/choice';
+import { ConfirmButton } from '../ui/confirm-button';
 import { Dropzone } from '../ui/dropzone';
 import { Button, inputClass } from '../ui/ui';
 
@@ -110,6 +111,21 @@ export function FileDetails({
   );
 }
 
+type FileRowProps = {
+  name: string;
+  href?: string;
+  size: number;
+  note: string;
+  allowInRepo: boolean;
+  disabled: boolean;
+  /** Open the note and the switch from the start (a file just picked). */
+  startOpen?: boolean;
+  /** Called when the note is done being edited (on blur), with the new text. */
+  onNote: (note: string) => void;
+  onAllow: (allow: boolean) => void;
+  onRemove: () => void;
+};
+
 /**
  * One file on one line: its name, size, note and whether it may be committed; Edit opens the note
  * and the switch.
@@ -125,20 +141,7 @@ export function FileRow({
   onNote,
   onAllow,
   onRemove,
-}: {
-  name: string;
-  href?: string;
-  size: number;
-  note: string;
-  allowInRepo: boolean;
-  disabled: boolean;
-  /** Open the note and the switch from the start (a file just picked). */
-  startOpen?: boolean;
-  /** Called when the note is done being edited (on blur), with the new text. */
-  onNote: (note: string) => void;
-  onAllow: (allow: boolean) => void;
-  onRemove: () => void;
-}): ReactElement {
+}: FileRowProps): ReactElement {
   const [open, setOpen] = useState(startOpen);
   const summary = { name, href, size, note, allowInRepo };
   return (
@@ -146,7 +149,8 @@ export function FileRow({
       <div className="flex items-center gap-2">
         <FileSummary {...summary} />
         <Button
-          className="shrink-0 px-2 py-0.5 text-xs"
+          size="sm"
+          className="shrink-0"
           aria-expanded={open}
           onClick={() => {
             setOpen(!open);
@@ -154,14 +158,14 @@ export function FileRow({
         >
           {open ? 'Done' : 'Edit'}
         </Button>
-        <Button
-          variant="quietDanger"
-          className="shrink-0 px-2 py-0.5 text-xs"
+        <ConfirmButton
+          label="Remove"
+          name={`Remove ${name}`}
+          question="Delete this file?"
+          confirmLabel="Delete"
           disabled={disabled}
-          onClick={onRemove}
-        >
-          Remove
-        </Button>
+          onConfirm={onRemove}
+        />
       </div>
       {open ? (
         <FileDetails

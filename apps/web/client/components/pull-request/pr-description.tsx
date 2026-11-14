@@ -88,7 +88,7 @@ function Idle({
           </span>
         )}
         {view.draft?.status === 'conflict' ? (
-          <Button disabled={actions.busy} onClick={actions.handleDiscard}>
+          <Button variant="quietDanger" disabled={actions.busy} onClick={actions.handleDiscard}>
             Discard the draft
           </Button>
         ) : null}

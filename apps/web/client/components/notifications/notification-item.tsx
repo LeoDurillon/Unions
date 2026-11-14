@@ -32,12 +32,14 @@ export function NotificationItem({
         className="flex w-full gap-2 rounded-md px-2 py-2 text-left transition hover:bg-zinc-100 dark:hover:bg-zinc-800/60"
       >
         <span
-          aria-label={unread ? 'Unread' : undefined}
+          aria-hidden
           className={`mt-1.5 size-2 shrink-0 rounded-full ${unread ? 'bg-indigo-500' : 'bg-transparent'}`}
         />
+        {unread ? <span className="sr-only">Unread: </span> : null}
         <span className="min-w-0 flex-1 space-y-0.5">
           <span className="flex items-center gap-2">
             <span
+              title={notification.title}
               className={`truncate text-sm ${unread ? 'font-semibold' : 'text-zinc-600 dark:text-zinc-400'}`}
             >
               {notification.title}

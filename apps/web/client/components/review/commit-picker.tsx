@@ -6,14 +6,14 @@ import { useState, type ReactElement } from 'react';
 import { SINCE_REVIEW, type CommitsResponse, type ReviewCommit } from '../../../src/api-types';
 import { useCommits } from '../../lib/pull-request/use-commits';
 import { formatWhen } from '../../lib/ui/relative-time';
+import { FOCUS_RING } from '../ui/focus';
 import { ErrorText } from '../ui/ui';
 
 const SHORT_SHA = 7;
-const ROW = 'block w-full rounded px-2 py-1 text-left text-xs';
+const ROW = `block w-full rounded px-2 py-1 text-left text-xs ${FOCUS_RING}`;
 const ROW_ON = 'bg-indigo-100 font-medium dark:bg-indigo-950';
 const ROW_OFF = 'hover:bg-zinc-100 dark:hover:bg-zinc-800';
-const STEP =
-  'rounded border border-zinc-300 px-1.5 text-xs disabled:opacity-40 dark:border-zinc-700';
+const STEP = `rounded border border-zinc-300 px-1.5 text-xs disabled:opacity-40 dark:border-zinc-700 ${FOCUS_RING}`;
 
 function commitLine(commit: ReviewCommit): string {
   return `${commit.sha.slice(0, SHORT_SHA)} ${commit.title}`;
@@ -189,6 +189,7 @@ export function CommitPicker({
     return null;
   }
   const at = list.findIndex((commit) => commit.sha === value);
+  const picked = pickedLabel(value, commits.data);
   const pick = (sha: string | null): void => {
     onChange(sha);
     setOpen(false);
@@ -199,12 +200,13 @@ export function CommitPicker({
         <button
           type="button"
           aria-expanded={open}
-          className="min-w-0 flex-1 truncate rounded px-1 py-0.5 text-left text-xs font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800"
+          title={picked}
+          className={`min-w-0 flex-1 truncate rounded px-1 py-0.5 text-left text-xs font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800 ${FOCUS_RING}`}
           onClick={() => {
             setOpen(!open);
           }}
         >
-          {pickedLabel(value, commits.data)} ▾
+          {picked} ▾
         </button>
         <StepButtons list={list} at={at} onPick={pick} />
       </div>

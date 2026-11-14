@@ -22,7 +22,8 @@ also drops fixed `container_name`s.
 
 Then, in **Environments → Variables**, add the environment variables the services need. Values can use
 templates such as `{service.api.url}`, the address of another service. Secret values are kept on the server and
-never shown again in the browser. You can also have the variables written as a file inside one service.
+never shown again in the browser; a secret's **Remove** asks before deleting it. You can also have the variables
+written as a file inside one service.
 
 The templates, for ticket 12 with an exposed service `api` (prefix `api`):
 
@@ -81,7 +82,8 @@ sidebar's **Previews** entry lists every preview running, grouped by project, wi
 ticket only, edit it and click **Save as this ticket's file**: the menu then reads **Compose file (yours)**, and
 **Start** and **Restart** run your version as it is, ignoring changes the branch makes to the Compose file. **Use
 the generated file again** goes back. Your file is checked like the generated one (see below), and changes apply at
-the next Start or Restart. A pull request's preview has the same menu.
+the next Start or Restart. Closing the file with edits you have not saved asks first. A pull request's preview has
+the same menu.
 
 ### Start over with a fresh preview
 
@@ -223,7 +225,8 @@ shared. If you pick one, the preview won't start and says why.
 
 **Settings → Files** holds files that every ticket's workspace gets at a path of your choice: a database dump for
 the preview's seed, a local config file. Union puts them in place before each step and preview, keeps them out of
-git, and refuses to push them. They cannot be read back from the browser.
+git, and refuses to push them. They cannot be read back from the browser. A file's **Remove** asks before deleting
+it.
 
 ## Previews of pull requests under review
 

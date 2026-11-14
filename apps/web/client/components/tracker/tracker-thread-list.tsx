@@ -2,7 +2,7 @@
 // It first says what the read left out.
 
 import type { TrackerThread } from '@union/core';
-import { integrationKind, type IntegrationKind } from '@union/core/integration-kinds';
+import { integrationKind } from '@union/core/integration-kinds';
 import type { ReactElement } from 'react';
 
 import type { TrackerCommentsView } from '../../../src/tracker-comment-types';
@@ -15,42 +15,9 @@ import {
   type TrackerReviewImport,
 } from '../../lib/integrations/use-tracker-review-import';
 import { CARD_CLASS, ErrorText } from '../ui/ui';
-import { TrackerEmpty } from './tracker-empty';
+import { LeftOut, NoComments } from './tracker-list-notes';
 import { TrackerReply } from './tracker-reply';
 import { TrackerThreadCard } from './tracker-thread';
-
-const NOTE = 'text-xs text-amber-700 dark:text-amber-400';
-
-/** What the read left out: places of the item not read, or its oldest comments. */
-function LeftOut({
-  view,
-  kind,
-}: {
-  view: TrackerCommentsView;
-  kind: IntegrationKind;
-}): ReactElement | null {
-  const { label, itemLabel } = kind;
-  const shown = view.threads.reduce((sum, thread) => sum + thread.comments.length, 0);
-  const left = view.total - shown;
-  if (view.truncated) {
-    return (
-      <p className={NOTE}>
-        The {itemLabel} has many commented passages: only the first ones were read. Open the{' '}
-        {itemLabel} in {label} for the rest.
-      </p>
-    );
-  }
-  if (left <= 0) {
-    return null;
-  }
-  return (
-    <p className={NOTE}>
-      The {itemLabel} has {view.total} comments:{' '}
-      {left === 1 ? 'the oldest is not shown' : `the ${left} oldest are not shown`}. Open the{' '}
-      {itemLabel} in {label} for it.
-    </p>
-  );
-}
 
 /** One thread: Add to review for it (or each comment on the item), Reply and its replies being sent. */
 function Thread({
@@ -105,10 +72,7 @@ export function TrackerThreadList({
       <ErrorText error={reviewImport.error} />
       <LeftOut view={view} kind={kind} />
       {view.threads.length === 0 ? (
-        <TrackerEmpty title="No open comments">
-          When someone comments on the {kind.label} {kind.itemLabel}, it shows here: reply to it, or
-          add it to the review.
-        </TrackerEmpty>
+        <NoComments kind={kind} />
       ) : (
         view.threads.map((thread) => (
           <Thread

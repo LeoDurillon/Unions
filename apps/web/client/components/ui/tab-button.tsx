@@ -1,6 +1,8 @@
 // A tab of a tab bar (`role="tab"`): underlined when selected.
 import type { ReactElement, ReactNode } from 'react';
 
+import { FOCUS_RING } from './focus';
+
 export function TabButton<T extends string>({
   tab,
   current,
@@ -21,7 +23,7 @@ export function TabButton<T extends string>({
       onClick={() => {
         onSelect(tab);
       }}
-      className={`border-b-2 px-3 py-2 text-sm font-medium ${on ? 'border-zinc-900 text-zinc-900 dark:border-zinc-100 dark:text-zinc-100' : 'border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'}`}
+      className={`border-b-2 px-3 py-2 text-sm font-medium ${FOCUS_RING} ${on ? 'border-zinc-900 text-zinc-900 dark:border-zinc-100 dark:text-zinc-100' : 'border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'}`}
     >
       {label}
     </button>

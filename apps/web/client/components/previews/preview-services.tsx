@@ -53,12 +53,15 @@ export function PreviewServices({
       {rows.map((row) => (
         <li key={row.name} className="flex items-center gap-2.5 py-2 text-sm">
           <span aria-hidden className={`size-2 shrink-0 rounded-full ${state.dot}`} />
-          <span className="w-32 shrink-0 truncate font-mono text-xs">{row.name}</span>
+          <span className="w-32 shrink-0 truncate font-mono text-xs" title={row.name}>
+            {row.name}
+          </span>
           <span className="flex-1 text-zinc-500">{state.label}</span>
           {row.url ? (
             <a
               className="min-w-0 truncate text-xs text-indigo-600 hover:underline dark:text-indigo-400"
               href={row.url}
+              title={row.url}
               target="_blank"
               rel="noreferrer"
             >

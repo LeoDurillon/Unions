@@ -6,6 +6,7 @@ import { useState, type ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
 import { openInvestigation } from '../../lib/investigations/opened-investigation';
+import { plural } from '../../lib/ui/plural';
 import { Button } from '../ui/ui';
 import { SetupReview } from './setup-review';
 
@@ -13,9 +14,7 @@ function leftText(left: number): string {
   if (left === 0) {
     return 'Its proposed settings are all in the project now.';
   }
-  return left === 1
-    ? '1 part of it is not applied yet.'
-    : `${left} parts of it are not applied yet.`;
+  return `${plural(left, 'part')} of it ${left === 1 ? 'is' : 'are'} not applied yet.`;
 }
 
 export function SetupAnswered({

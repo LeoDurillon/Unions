@@ -1,14 +1,9 @@
-// Shared UI pieces: buttons, badges, fields, text inputs, error text and dialogs.
+// Shared UI pieces: buttons, badges, fields, text inputs, error text and the close button.
 
-import {
-  useEffect,
-  useRef,
-  type ButtonHTMLAttributes,
-  type ReactElement,
-  type ReactNode,
-} from 'react';
+import type { ButtonHTMLAttributes, ReactElement, ReactNode, Ref } from 'react';
 
 import type { Tone } from '../../lib/board/labels';
+import { FOCUS_RING } from './focus';
 
 const BUTTON_VARIANTS = {
   primary: 'bg-indigo-600 text-white hover:bg-indigo-500 disabled:bg-indigo-400',
@@ -26,6 +21,7 @@ const BUTTON_VARIANTS = {
 const BUTTON_SIZES = { md: 'px-3 py-1.5 text-sm', sm: 'px-2 py-0.5 text-xs' } as const;
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+  ref?: Ref<HTMLButtonElement>;
   variant?: keyof typeof BUTTON_VARIANTS;
   size?: keyof typeof BUTTON_SIZES;
 };
@@ -39,7 +35,7 @@ export function Button({
   return (
     <button
       type="button"
-      className={`rounded-md font-medium transition disabled:cursor-not-allowed disabled:opacity-60 ${BUTTON_SIZES[size]} ${BUTTON_VARIANTS[variant]} ${className}`}
+      className={`rounded-md font-medium transition disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING} ${BUTTON_SIZES[size]} ${BUTTON_VARIANTS[variant]} ${className}`}
       {...props}
     />
   );
@@ -136,51 +132,10 @@ export function CloseButton({ onClick }: { onClick: () => void }): ReactElement 
       type="button"
       aria-label="Close"
       title="Close"
-      className="shrink-0 rounded-md px-2 py-1 text-lg leading-none text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+      className={`shrink-0 rounded-md px-2 py-1 text-lg leading-none text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-zinc-100 ${FOCUS_RING}`}
       onClick={onClick}
     >
       ✕
     </button>
-  );
-}
-
-export function Dialog({
-  open,
-  onClose,
-  title,
-  wide = false,
-  children,
-}: {
-  open: boolean;
-  onClose: () => void;
-  title: string;
-  /** For files and long text: most of the screen's width. */
-  wide?: boolean;
-  children: ReactNode;
-}): ReactElement {
-  const ref = useRef<HTMLDialogElement>(null);
-  useEffect(() => {
-    const dialog = ref.current;
-    if (dialog && open && !dialog.open) {
-      dialog.showModal();
-    } else if (dialog && !open && dialog.open) {
-      dialog.close();
-    }
-  }, [open]);
-
-  return (
-    <dialog
-      ref={ref}
-      onClose={onClose}
-      className={`m-auto w-full ${wide ? 'max-w-4xl' : 'max-w-xl'} rounded-2xl border border-zinc-200 bg-white p-0 text-zinc-900 shadow-2xl dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100`}
-    >
-      <div className="space-y-4 p-6">
-        <header className="flex items-start justify-between gap-4">
-          <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
-          <CloseButton onClick={onClose} />
-        </header>
-        {open ? children : null}
-      </div>
-    </dialog>
   );
 }

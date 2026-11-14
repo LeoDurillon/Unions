@@ -3,6 +3,7 @@
 import { useEffect, useState, type ReactElement } from 'react';
 
 import type { Selection } from '../../lib/review/diff-selection';
+import { onModEnter } from '../../lib/ui/mod-enter';
 import { Button, ErrorText, inputClass } from '../ui/ui';
 import { useExplain, type ExplainState } from './explain-context';
 
@@ -70,6 +71,10 @@ function Editor({
   explain,
 }: EditorProps & { initial: string; explain: ExplainState | null }): ReactElement {
   const [body, setBody] = useState(initial);
+  const canSave = body.trim() !== '' && !pending;
+  const save = (): void => {
+    onSave(body);
+  };
   const range =
     selection.start === selection.end
       ? `line ${selection.start}`
@@ -86,16 +91,11 @@ function Editor({
         onChange={(event) => {
           setBody(event.target.value);
         }}
+        onKeyDown={onModEnter(save, canSave)}
       />
       <ErrorText error={error ?? explain?.error ?? null} />
       <div className="flex flex-wrap items-start gap-2">
-        <Button
-          variant="primary"
-          disabled={body.trim() === '' || pending}
-          onClick={() => {
-            onSave(body);
-          }}
-        >
+        <Button variant="primary" disabled={!canSave} onClick={save}>
           Add comment
         </Button>
         {explain ? <ExplainControls explain={explain} path={path} selection={selection} /> : null}

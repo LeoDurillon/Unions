@@ -1,11 +1,12 @@
 // Review with agent on a large change: in slices (one agent per part, then one on the seams) or in one pass.
 // Offered when the change's lines, ignored files left out, go over the project's
-// `sliceReviewAbove`; a stack is always reviewed in one pass.
+// `sliceReviewAbove`; a stack is always reviewed in one pass. Also the scope picker: the whole stack or one pull request.
 
 import { MAX_SLICES, sliceReviewAbove } from '@union/core/agent-review-slices';
 import type { ReactElement } from 'react';
 
 import { useActiveProject } from '../../lib/app/use-active-project';
+import type { StackPull } from '../../lib/review/review-stack';
 import type { ReviewTarget } from '../../lib/review/review-target';
 import { useDiff } from '../../lib/review/use-review';
 import { Segmented } from '../ui/choice';
@@ -51,5 +52,31 @@ export function ModePicker({
           : `One agent reads the ${lines} changed lines: faster, but it usually leaves part of a change this size unread.`}
       </p>
     </div>
+  );
+}
+
+export type Scope = 'stack' | 'one';
+
+/** Whole stack or this pull request: shown only when the review is part of a stack. */
+export function ScopePicker({
+  stack,
+  scope,
+  onChange,
+}: {
+  stack: StackPull[];
+  scope: Scope;
+  onChange: (scope: Scope) => void;
+}): ReactElement {
+  return (
+    <Segmented
+      legend="What the agent reviews"
+      size="sm"
+      options={[
+        { value: 'stack', label: `The whole stack (${stack.length} pull requests)` },
+        { value: 'one', label: 'This pull request only' },
+      ]}
+      value={scope}
+      onChange={onChange}
+    />
   );
 }

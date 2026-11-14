@@ -8,6 +8,8 @@ import type { CommentView } from '../../../src/api-types';
 import type { ReviewTarget } from '../../lib/review/review-target';
 import { focusOf, hunkTags, inHunks, type Focus } from '../../lib/review/spec-hunks';
 import { useReviewGrouping } from '../../lib/review/use-review-grouping';
+import { plural } from '../../lib/ui/plural';
+import { FOCUS_RING } from '../ui/focus';
 
 function FocusBar({
   focus,
@@ -28,13 +30,13 @@ function FocusBar({
     <div className="flex items-center justify-between gap-3 rounded-md border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs text-indigo-900 dark:border-indigo-900 dark:bg-indigo-950/40 dark:text-indigo-200">
       <span>
         {showAll
-          ? `All ${total} hunks: ${shown} for ${focus.title}`
-          : `Showing ${shown} of ${total} hunks for ${focus.title}`}
+          ? `All ${plural(total, 'hunk')}: ${shown} for ${focus.title}`
+          : `Showing ${shown} of ${plural(total, 'hunk')} for ${focus.title}`}
         {!showAll && hiddenComments > 0
-          ? ` · ${hiddenComments} comment${hiddenComments === 1 ? '' : 's'} in the other hunks`
+          ? ` · ${plural(hiddenComments, 'comment')} in the other hunks`
           : ''}
       </span>
-      <button type="button" className="underline" onClick={onToggle}>
+      <button type="button" className={`underline ${FOCUS_RING}`} onClick={onToggle}>
         {showAll ? `Only ${focus.title}` : 'Show all'}
       </button>
     </div>

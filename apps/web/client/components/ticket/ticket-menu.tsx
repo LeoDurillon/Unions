@@ -42,7 +42,7 @@ export function TicketMenu({
   return (
     <MoreMenu>
       {kind === 'cancelled' ? (
-        <RemoveTicket ticketId={detail.ticket.id} onRemoved={onRemoved} />
+        <RemoveTicket ticket={detail.ticket} onRemoved={onRemoved} />
       ) : (
         <CancelTicket ticketId={detail.ticket.id} />
       )}

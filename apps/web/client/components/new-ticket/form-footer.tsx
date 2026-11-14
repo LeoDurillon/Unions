@@ -38,7 +38,9 @@ export function FormFooter({
 }): ReactElement {
   return (
     <div className="-mx-6 -mb-6 flex justify-end gap-2 rounded-b-2xl border-t border-zinc-200 bg-zinc-50 px-6 py-3 dark:border-zinc-800 dark:bg-zinc-950">
-      <Button onClick={onCancel}>Cancel</Button>
+      <Button onClick={onCancel} disabled={pending}>
+        Cancel
+      </Button>
       <Button type="submit" variant="primary" disabled={pending}>
         {submitLabel(pending, created)}
         <kbd className="ml-2 font-sans font-normal opacity-70">{submitKeys()}</kbd>

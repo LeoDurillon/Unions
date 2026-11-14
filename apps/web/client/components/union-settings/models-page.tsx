@@ -8,8 +8,11 @@ import { api } from '../../lib/app/api';
 import { modelRows, useModelsForm } from '../../lib/union-settings/use-models-form';
 import { SaveBar } from '../settings/save-bar';
 import { SettingsIntro } from '../settings/settings-intro';
-import { ErrorText } from '../ui/ui';
 import { CELL, ModelRow } from './agent-row';
+import { SettingsPending } from './union-settings-loader';
+
+/** The rows the table shows while the agents are read. */
+const MODEL_ROWS = 8;
 
 function ModelsForm({ configs }: { configs: AgentConfig[] }): ReactElement {
   const form = useModelsForm(configs);
@@ -53,7 +56,7 @@ export function ModelsPage(): ReactElement {
         Click an agent for its prompt and tools; a dot marks one you customized.
       </SettingsIntro>
       {agents.data === undefined ? (
-        <ErrorText error={agents.error} />
+        <SettingsPending error={agents.error} label="Reading the agents" fields={MODEL_ROWS} />
       ) : (
         <ModelsForm configs={agents.data} />
       )}

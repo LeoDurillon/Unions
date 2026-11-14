@@ -15,6 +15,9 @@ import { ParentField } from './parent-field';
 /** A tracker item (a Notion page) whose import is edited before the ticket is created. */
 export type SourceRef = TicketOrigin & { title: string };
 
+/** What was typed in the form. */
+export type TicketText = { title: string; body: string };
+
 /** The ticket stays linked to the item (and gets its images) unless unlinked here. */
 function SourceLink({ item, onUnlink }: { item: SourceRef; onUnlink: () => void }): ReactElement {
   return (
@@ -52,16 +55,7 @@ function TitleInput({
   );
 }
 
-export function TicketForm({
-  projectId,
-  flow,
-  onCreated,
-  onCancel,
-  initialTitle = '',
-  initialBody = '',
-  source = null,
-  flowField = null,
-}: {
+type FormProps = {
   projectId: number;
   /** Chosen in `flowField`, shared with the other ways of creating the ticket. */
   flow: PipelineStep[] | null;
@@ -69,12 +63,23 @@ export function TicketForm({
   flowField?: ReactNode;
   onCreated: (ticketId: number) => void;
   onCancel: () => void;
-  initialTitle?: string;
-  initialBody?: string;
+  /** The title and description, kept by the dialog so they survive a tab switch or a close. */
+  text: TicketText;
+  onText: (text: TicketText) => void;
   source?: SourceRef | null;
-}): ReactElement {
-  const [title, setTitle] = useState(initialTitle);
-  const [body, setBody] = useState(initialBody);
+};
+
+export function TicketForm({
+  projectId,
+  flow,
+  text,
+  onText,
+  onCreated,
+  onCancel,
+  source = null,
+  flowField = null,
+}: FormProps): ReactElement {
+  const { title, body } = text;
   const [parentId, setParentId] = useState<number | null>(null);
   const [files, setFiles] = useState<PendingFile[]>([]);
   const [linked, setLinked] = useState(source);
@@ -87,6 +92,10 @@ export function TicketForm({
 
   const submit = (event: SubmitEvent): void => {
     event.preventDefault();
+    // Ctrl+Enter submits too: a second press while creating would create a second ticket.
+    if (create.isPending) {
+      return;
+    }
     create.mutate();
   };
 
@@ -100,8 +109,20 @@ export function TicketForm({
           }}
         />
       ) : null}
-      <TitleInput title={title} onTitle={setTitle} />
-      <DescriptionField body={body} onBody={setBody} files={files} onFiles={setFiles} />
+      <TitleInput
+        title={title}
+        onTitle={(next) => {
+          onText({ title: next, body });
+        }}
+      />
+      <DescriptionField
+        body={body}
+        onBody={(next) => {
+          onText({ title, body: next });
+        }}
+        files={files}
+        onFiles={setFiles}
+      />
       {flowField}
       <ParentField projectId={projectId} value={parentId} onChange={setParentId} />
       <ErrorText error={create.error} />

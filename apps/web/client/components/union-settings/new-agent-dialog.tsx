@@ -2,26 +2,38 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { CustomAgentKind } from '@union/core';
-import { useState, type ReactElement } from 'react';
+import { useEffect, useState, type ReactElement } from 'react';
 
 import { customAgentsApi } from '../../lib/union-settings/custom-agents-api';
 import { openUnionSettings } from '../../lib/union-settings/union-settings-sections';
-import { Button, Dialog, ErrorText, Field, inputClass, TextInput } from '../ui/ui';
+import { Dialog } from '../ui/dialog';
+import { Button, ErrorText, Field, inputClass, TextInput } from '../ui/ui';
 import { AgentKindField, KIND_TEXTS } from './agent-kind-field';
 
 const ROLE_ROWS = 5;
 
+/** Tells `onDirty` whether something is typed, each time that changes. */
+function useTyped(typed: boolean, onDirty: (dirty: boolean) => void): void {
+  useEffect(() => {
+    onDirty(typed);
+  }, [typed, onDirty]);
+}
+
 function NewAgentForm({
   onClose,
+  onDirty,
   initialKind,
 }: {
   onClose: () => void;
+  /** Whether a name or a role is typed, which closing would lose. */
+  onDirty: (dirty: boolean) => void;
   initialKind: CustomAgentKind;
 }): ReactElement {
   const queryClient = useQueryClient();
   const [name, setName] = useState('');
   const [role, setRole] = useState('');
   const [kind, setKind] = useState<CustomAgentKind>(initialKind);
+  useTyped(name.trim() !== '' || role.trim() !== '', onDirty);
   const create = useMutation({
     mutationFn: () => customAgentsApi.create({ name, role, kind }),
     onSuccess: async (config) => {
@@ -80,8 +92,10 @@ export function NewAgentButton({
   label?: string;
 }): ReactElement {
   const [open, setOpen] = useState(false);
+  const [dirty, setDirty] = useState(false);
   const close = (): void => {
     setOpen(false);
+    setDirty(false);
   };
   return (
     <>
@@ -93,8 +107,8 @@ export function NewAgentButton({
       >
         {label}
       </Button>
-      <Dialog open={open} onClose={close} title="New agent">
-        {open ? <NewAgentForm onClose={close} initialKind={kind} /> : null}
+      <Dialog open={open} onClose={close} title="New agent" dirty={dirty}>
+        {open ? <NewAgentForm onClose={close} onDirty={setDirty} initialKind={kind} /> : null}
       </Dialog>
     </>
   );

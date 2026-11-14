@@ -5,6 +5,7 @@ import type { ReactElement } from 'react';
 
 import type { CurrentReview } from '../../../src/api-types';
 import { useDraftCounts } from '../../lib/review/use-review';
+import { plural } from '../../lib/ui/plural';
 import { Segmented } from '../ui/choice';
 import { Badge } from '../ui/ui';
 
@@ -21,7 +22,7 @@ function PullLabel({ review, drafts }: { review: CurrentReview; drafts: number }
     <span className="flex items-center gap-1.5">
       #{review.prNumber}
       {drafts > 0 ? (
-        <span className="text-amber-700 dark:text-amber-400" aria-label={`${drafts} drafts`}>
+        <span className="text-amber-700 dark:text-amber-400" aria-label={plural(drafts, 'draft')}>
           {drafts}
         </span>
       ) : null}

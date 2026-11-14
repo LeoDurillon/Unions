@@ -1,7 +1,7 @@
 // The box a reply to a pull request comment is written in: its text, Resolve for a thread, who
 // posts. Also the error, with the text kept. Given a tracker item (`mentions`), typing `@` tags its people.
 
-import { useState, type ReactElement } from 'react';
+import { useEffect, useRef, useState, type ReactElement, type RefObject } from 'react';
 
 import type { MentionTarget } from '../../lib/integrations/use-tracker-people';
 import { MentionTextarea } from '../tracker/mention-textarea';
@@ -65,6 +65,32 @@ function ReplyText({
   );
 }
 
+/**
+ * Ctrl/⌘+Enter in the box runs `action` when `enabled`. Heard on the wrapper, so it works for the
+ * plain textarea and the one that tags people alike.
+ */
+function useModEnterWithin(
+  box: RefObject<HTMLElement | null>,
+  action: () => void,
+  enabled: boolean,
+): void {
+  useEffect(() => {
+    const element = box.current;
+    const onKey = (event: KeyboardEvent): void => {
+      if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+        event.preventDefault();
+        if (enabled) {
+          action();
+        }
+      }
+    };
+    element?.addEventListener('keydown', onKey);
+    return () => {
+      element?.removeEventListener('keydown', onKey);
+    };
+  }, [box, action, enabled]);
+}
+
 /** The text, Resolve the thread, then Send and Cancel; the text stays when sending fails. */
 export function ReplyBox(props: ReplyBoxProps): ReactElement {
   const { resolvable, postsAs, canPost, sendLabel = 'Send', onSend, onCancel } = props;
@@ -83,9 +109,14 @@ export function ReplyBox(props: ReplyBoxProps): ReactElement {
       setSending(false);
     }
   };
+  const canSend = !sending && canPost && body.trim() !== '';
+  const box = useRef<HTMLDivElement>(null);
+  useModEnterWithin(box, () => void send(), canSend);
   return (
     <div className="space-y-2 rounded-md border border-zinc-200 p-2 dark:border-zinc-800">
-      <ReplyText mentions={props.mentions} value={body} onChange={setBody} />
+      <div ref={box}>
+        <ReplyText mentions={props.mentions} value={body} onChange={setBody} />
+      </div>
       {resolvable ? (
         <label className="flex items-center gap-2 text-xs">
           <input
@@ -102,14 +133,14 @@ export function ReplyBox(props: ReplyBoxProps): ReactElement {
       <div className="flex flex-wrap items-center gap-2">
         <Button
           variant="primary"
-          disabled={sending || !canPost || body.trim() === ''}
+          disabled={!canSend}
           onClick={() => {
             void send();
           }}
         >
-          {sendLabel}
+          {sending ? `${sendLabel === 'Save' ? 'Saving' : 'Sending'}…` : sendLabel}
         </Button>
-        <Button variant="ghost" disabled={sending} onClick={onCancel}>
+        <Button disabled={sending} onClick={onCancel}>
           Cancel
         </Button>
         <span className="ml-auto text-xs text-zinc-500">{postsAs}</span>
