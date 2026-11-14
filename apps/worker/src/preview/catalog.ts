@@ -3,18 +3,18 @@
 import { isRecord, PREVIEW_ADDITIONS_FILE } from '@union/core';
 
 import { compose, printedJson } from './compose';
-import type { PreviewDeps, Target } from './target';
+import type { ComposeTarget, PreviewDeps } from './target';
 
 /** Every service of the compose file and the profiles it belongs to (none: always enabled). */
 export type Catalog = { services: Record<string, string[]> };
 
 /** `--profile <name>` for each profile the settings enable. */
-export function profileArgs(target: Target): string[] {
+export function profileArgs(target: ComposeTarget): string[] {
   return (target.config.profiles ?? []).flatMap((profile) => ['--profile', profile]);
 }
 
 /** The repository's compose file, then the settings' additions merged over it, when there are some. */
-export function composeFileArgs(target: Target): string[] {
+export function composeFileArgs(target: ComposeTarget): string[] {
   return [
     '-f',
     target.config.composeFile,
@@ -23,7 +23,7 @@ export function composeFileArgs(target: Target): string[] {
 }
 
 /** The additions, written in the compose helper (never in the workspace) for `composeFileArgs`. */
-export function additionsFiles(target: Target): { path: string; content: string }[] {
+export function additionsFiles(target: ComposeTarget): { path: string; content: string }[] {
   const additions = target.config.composeAdditions;
   return additions ? [{ path: PREVIEW_ADDITIONS_FILE, content: additions }] : [];
 }
@@ -33,7 +33,7 @@ export function additionsFiles(target: Target): { path: string; content: string 
  * to explain a service that is missing because its profile is not enabled. Best effort: a file that
  * cannot be read gives an empty catalog (resolving it reports why).
  */
-export async function readCatalog(deps: PreviewDeps, target: Target): Promise<Catalog> {
+export async function readCatalog(deps: PreviewDeps, target: ComposeTarget): Promise<Catalog> {
   const output = await compose(deps.runtime, deps.settings, {
     args: [
       '-p',

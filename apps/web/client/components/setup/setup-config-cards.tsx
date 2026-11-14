@@ -79,7 +79,12 @@ export function AgentImageCard({
   dismissed,
   onDismiss,
   image,
-}: SetupCardProps & { image: SetupText }): ReactElement {
+  problem,
+}: SetupCardProps & {
+  image: SetupText;
+  /** Why the agent image settings would refuse the proposed Dockerfile; null: they would not. */
+  problem: string | null;
+}): ReactElement {
   const [dockerfile, setDockerfile] = useState(image.text);
   const { image: current } = useAgentImage(project.id);
   const { apply, pending, error } = useSetupApply(() =>
@@ -103,6 +108,9 @@ export function AgentImageCard({
         value={dockerfile}
         onChange={setDockerfile}
       />
+      {problem !== null && dockerfile === image.text ? (
+        <p className="text-sm text-red-600 dark:text-red-400">Union would refuse it: {problem}</p>
+      ) : null}
       <p className="text-xs text-zinc-500">
         Apply saves it; Union builds it, and the agents use it once the build has passed.
       </p>

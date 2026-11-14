@@ -144,7 +144,7 @@
 - `throwaway-container.ts`: `inThrowaway` starts a container from the agent image with only the Claude login, runs the
   work in it and removes it whatever happened (what a stopped worker left under the name is cleared first; a failed
   removal is a `container_cleanup_failed` event, not an error). The investigations, ticket drafts, lesson and prompt
-  writers and the connector check run in one.
+  writers and the connector check run in one; the setup checks too, without the Claude login (`noLogin`).
 - `run-pool.ts`: `RunPool`, the lifecycle the queued side runs share. A runner extends it with how it claims a row,
   runs it, and finishes it (`failed` for a run that threw, `stopped` for one cancelled or stopped by the worker);
   the pool claims while a `RunSlots` slot is free (a run that throws before returning its promise fails the same way), keeps an `AbortController` per run (`cancel(id)`, `stop()`), and
@@ -183,7 +183,14 @@
   `cancel_investigation` command hook. It also drives `TicketDrafter` (`investigation-ticket.ts`), which writes
   the tickets asked from investigations, in `union-i<id>-ticket` containers, and creates them in the tracker the
   user picked too (`ticket_target`; `investigation-ticket-target.ts`, through the provider's `createItem`, Notion's
-  `createPage`), the ticket's origin set to the new item.
+  `createPage`), the ticket's origin set to the new item. A finished setup run queues the checks of its answer
+  (`queueProposalChecks`).
+- `setup/`: `SetupChecker` (a `RunPool` with two slots of its own, driven by `throwaway-runs.ts`) runs the checks
+  of a setup proposal in `union-sc<id>` (`setup-check-run.ts`: clone, project files, then one of the two):
+  `setup-check-commands.ts` runs the install command (20 minutes) then the check command (`GATE_TIMEOUT_MS`), each
+  stage written for the card; `setup-preview-check.ts` resolves the proposed preview on the clone with the compose
+  helper and refuses it with `buildFile`, as Start would, without a ticket (`ComposeTarget`: the parts of a target
+  that resolving reads). A stopped worker's checks fail and their containers go on start.
 - `event-dispatcher.ts`: follows the `events` log (cursor in `event_cursors`), queues one `event_deliveries` row
   per matching rule and event (unique), and hands each due one to the target of its action's kind
   (`event-actions/`: `tracker.ts` does the tracker actions (`tracker_status`, `tracker_fields`, `tracker_comment`)

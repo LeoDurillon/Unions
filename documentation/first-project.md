@@ -118,7 +118,14 @@ Once the agent has answered, the card says how many parts of its proposal are no
     and the compose additions here; change the rest in **Environments** afterwards.
   - **End-to-end tests** can be applied once the preview is.
   - **Project instructions** replaces the project's instructions when it has some.
-  - **Agent image** saves the Dockerfile; Union builds it, and the agents use it once the build has passed.
+  - **Agent image** saves the Dockerfile; Union builds it, and the agents use it once the build has passed. If
+    the Dockerfile would be refused, the card says why before you apply it.
+- **Checks** and **Preview** are tested by Union, without using your Claude subscription: it clones your repository
+  and runs the install command, then the check command, or reads the compose file as a preview would. The cards
+  show at once, with **Checking…** and what runs now; an install can take a few minutes on a large repository, and
+  you can apply before the result arrives. Then they say **Passed**, **Failed** or **Timed out**, with the end of
+  the output. **Test again** tests what the fields hold now, after you edit a value. When a test fails, **Ask the
+  agent to fix** sends the agent what failed: it proposes everything again (on your Claude subscription).
 - **Secret variables** and **Project files** are for you to give: enter each secret's value (kept on the server,
   never shown again) and upload each file.
 - **Changes the repository needs**: **Create ticket** puts each one you want in the Backlog.

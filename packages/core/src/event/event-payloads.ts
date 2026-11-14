@@ -262,6 +262,11 @@ type InvestigationPayloads = {
   investigation_ticket_started: Nothing;
   investigation_ticket_created: { ticketId: number };
   investigation_ticket_failed: Failure;
+  /** A check of a setup proposal was queued, moved on to its next stage, or ended. */
+  setup_check_changed: Pick<
+    (typeof tables.setupChecks)['$inferSelect'],
+    'kind' | 'status' | 'stage'
+  > & { checkId: number };
 };
 
 /** Logged without a ticket: the Union settings page follows its custom agents' prompts. */

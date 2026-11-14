@@ -16,6 +16,7 @@ import {
   type NotionApi,
   type Project,
   projectInstructions,
+  queueProposalChecks,
   schema,
 } from '@union/core';
 import { eq } from 'drizzle-orm';
@@ -187,6 +188,8 @@ export class InvestigationRunner extends RunPool<Investigation, InvestigationOut
       stopped: { status: 'cancelled' },
       finish: (investigation, outcome) => {
         finishInvestigation(deps.db, investigation.id, outcome);
+        // A setup run's answer is checked without Claude before the user applies it.
+        queueProposalChecks(deps.db, investigation.id);
       },
     });
     this.tickets = new TicketDrafter(deps);

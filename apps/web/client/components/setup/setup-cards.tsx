@@ -15,9 +15,11 @@ export type CardOf = (key: string) => SetupCardProps;
 export function SetupCards({
   cardOf,
   proposal,
+  agentImageProblem,
 }: {
   cardOf: CardOf;
   proposal: SetupProposal;
+  agentImageProblem: string | null;
 }): ReactElement {
   const { checks, scripts, preview, e2e, secrets, projectFiles, instructions, agentImage } =
     proposal;
@@ -34,7 +36,9 @@ export function SetupCards({
       {instructions ? (
         <InstructionsCard {...cardOf('instructions')} instructions={instructions} />
       ) : null}
-      {agentImage ? <AgentImageCard {...cardOf('agentImage')} image={agentImage} /> : null}
+      {agentImage ? (
+        <AgentImageCard {...cardOf('agentImage')} image={agentImage} problem={agentImageProblem} />
+      ) : null}
     </div>
   );
 }

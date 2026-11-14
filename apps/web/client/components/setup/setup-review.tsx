@@ -1,7 +1,7 @@
 // The setup agent's proposal to review: summary and questions, a card per section to apply, the
 // tickets it asks for.
 
-import type { Investigation, SetupProposal } from '@union/core';
+import type { SetupProposal, SetupView } from '@union/core';
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
@@ -33,19 +33,22 @@ function Dropped({ dropped }: { dropped: readonly string[] }): ReactElement | nu
 
 export function SetupReview({
   project,
-  investigation,
+  setup,
   proposal,
   onClose,
 }: {
   project: PublicProject;
-  investigation: Investigation;
+  setup: SetupView;
   proposal: SetupProposal;
   onClose: () => void;
 }): ReactElement {
+  const { investigation } = setup;
   const [keys, toggle] = useSetupDismissed(investigation.id);
   const cardOf = (key: string): SetupCardProps => ({
     project,
+    investigation,
     proposal,
+    checkResults: setup.checks,
     dismissed: keys.includes(key),
     onDismiss: (dismissed) => {
       toggle(key, dismissed);
@@ -70,7 +73,7 @@ export function SetupReview({
           onAsked={onClose}
         />
       ) : null}
-      <SetupCards cardOf={cardOf} proposal={proposal} />
+      <SetupCards cardOf={cardOf} proposal={proposal} agentImageProblem={setup.agentImageProblem} />
       {proposal.tickets.length > 0 ? (
         <TicketsCard
           projectId={project.id}

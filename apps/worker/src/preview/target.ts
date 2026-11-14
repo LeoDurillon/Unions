@@ -162,8 +162,14 @@ export function loadTarget(deps: PreviewDeps, owner: WorkspaceOwner): Target {
   };
 }
 
+/** What resolving and checking a compose file reads of a target: no owner, no addresses. */
+export type ComposeTarget = Pick<
+  Target,
+  'project' | 'config' | 'workspaceVolume' | 'exposed' | 'plain' | 'secrets' | 'shared'
+>;
+
 /** Where relative paths of the compose file start: its own folder in the repository. */
-export function projectDirectory(target: Target): string {
+export function projectDirectory(target: ComposeTarget): string {
   return path.posix.dirname(path.posix.join(PREVIEW_REPO_DIR, target.config.composeFile));
 }
 

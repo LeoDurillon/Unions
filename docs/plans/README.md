@@ -55,7 +55,8 @@ Open findings of the security reviews (2026-10-24 audit, 2026-11-08 review), to 
   repository and proposes the checks, preview, e2e command, saved scripts, instructions and agent image; the worker
   checks them without Claude, the user applies them card by card, and repository changes become tickets. Steps 1
   and 2 built (2026-11-10, branch `setup-agent`: the wizard's choice, the run with Union's guide, the proposal
-  reviewed and applied card by card); steps 3 (checks without Claude) and 4 (Run setup from Settings) planned.
+  reviewed and applied card by card); step 3 built (2026-11-14, branch `setup-checks`: the checks and the
+  preview tested without Claude, in the background); step 4 (Run setup from Settings) planned.
 
 ## Planned
 

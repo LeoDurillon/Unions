@@ -48,7 +48,7 @@ export async function startSideRuns(
   await investigations.recover();
   const reviews = await startReviewRuns(deps);
   prDescriptions.recover();
-  throwaway.recover();
+  await throwaway.recover();
   containerRuns.recover();
   backfillNotionPages(deps.db);
   return {

@@ -161,6 +161,8 @@ export const FOLDER_SUMMARIES: Record<string, string> = {
     'Rebasing a ticket on its base: fetch, attempt, the agent on conflicts, publish, retarget, resync.',
   'worker/review':
     'Review side runs: agent reviews, explanations, groupings by spec, review reports.',
+  'worker/setup':
+    "Checking a setup agent's proposal without Claude: its install and check commands run, its preview resolved.",
   'worker/simplify': "Simplifying a branch's history, alone or across its stack.",
   'worker/stack':
     'Stacks: splitting a branch into slices, publishing, pushing, following and revising them.',

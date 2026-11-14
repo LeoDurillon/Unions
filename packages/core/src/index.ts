@@ -196,5 +196,6 @@ export * from './union/union-update';
 export * from './union/union-update-store';
 export * from './preview/workspace-owner';
 export * from './setup/setup-agent';
+export * from './setup/setup-checks';
 export type * from './setup/setup-proposal-types';
 export * from './setup/setup-guide';

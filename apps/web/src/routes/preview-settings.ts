@@ -176,7 +176,7 @@ function profileList(value: unknown): string[] {
 }
 
 /** The settings as sent, checked; null clears them. */
-function previewConfig(
+export function previewConfig(
   body: Record<string, unknown>,
   secrets: string[],
 ): PreviewConfig | undefined {

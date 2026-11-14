@@ -1,6 +1,6 @@
 // The Project setup card once the agent answered: what is left to apply, Review the setup, and its raw answer.
 
-import type { Investigation, SetupProposal } from '@union/core';
+import type { SetupProposal, SetupView } from '@union/core';
 import { pendingSections } from '@union/core/setup-apply';
 import { useState, type ReactElement } from 'react';
 
@@ -20,13 +20,14 @@ function leftText(left: number): string {
 
 export function SetupAnswered({
   project,
-  investigation,
+  setup,
   proposal,
 }: {
   project: PublicProject;
-  investigation: Investigation;
+  setup: SetupView;
   proposal: SetupProposal;
 }): ReactElement {
+  const { investigation } = setup;
   const [open, setOpen] = useState(false);
   const left = pendingSections(proposal, project.config).length;
   return (
@@ -55,7 +56,7 @@ export function SetupAnswered({
       {open ? (
         <SetupReview
           project={project}
-          investigation={investigation}
+          setup={setup}
           proposal={proposal}
           onClose={() => {
             setOpen(false);

@@ -1,4 +1,4 @@
-// Tests the setup agent's routes: queuing a run with the chosen model, and reading the latest with its proposal.
+// Tests the setup agent's routes: queuing a run with the chosen model, reading the latest with its proposal, Test again.
 import { beforeEach, expect, test } from 'bun:test';
 
 import { createDb, finishInvestigation, migrateDb, schema, type Db } from '@union/core';
@@ -21,8 +21,8 @@ beforeEach(() => {
     .get().id;
 });
 
-function post(body: unknown, id = projectId): Response | Promise<Response> {
-  return app.request(`/api/projects/${id}/setup`, {
+function post(body: unknown, id = projectId, path = ''): Response | Promise<Response> {
+  return app.request(`/api/projects/${id}/setup${path}`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify(body),
@@ -57,5 +57,32 @@ test('reads the latest run with its proposal', async () => {
   expect(await latest()).toMatchObject({
     investigation: { id: run.id, model: 'opus' },
     proposal: { summary: 'ok', checks: { gateCommand: 'bun test' } },
+  });
+});
+
+test('Test again queues a check of the values given, checked as their settings page checks them', async () => {
+  const retest = (body: unknown): Response | Promise<Response> => post(body, projectId, '/checks');
+  expect((await retest({ kind: 'checks', gateCommand: 'bun test' })).status).toBe(409);
+  const run = (await (await post({})).json()) as { id: number };
+  finishInvestigation(db, run.id, { status: 'succeeded', result: 'No block.' });
+  const queued = await retest({ kind: 'checks', installCommand: ' bun install ', gateCommand: '' });
+  expect(queued.status).toBe(201);
+  expect(await queued.json()).toMatchObject({
+    investigationId: run.id,
+    status: 'queued',
+    input: { kind: 'checks', installCommand: 'bun install', gateCommand: '' },
+  });
+  expect((await retest({ kind: 'checks', gateCommand: '' })).status).toBe(400);
+  expect((await retest({ kind: 'preview', preview: { composeFile: '../out.yaml' } })).status).toBe(
+    400,
+  );
+  expect((await retest({ kind: 'other' })).status).toBe(400);
+  const preview = await retest({
+    kind: 'preview',
+    preview: { composeFile: 'compose.yaml', services: [{ name: 'web', port: 3000 }], env: {} },
+  });
+  expect(preview.status).toBe(201);
+  expect(await latest()).toMatchObject({
+    checks: { checks: { status: 'queued' }, preview: { input: { kind: 'preview' } } },
   });
 });

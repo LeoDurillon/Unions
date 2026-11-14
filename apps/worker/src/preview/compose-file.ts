@@ -38,6 +38,7 @@ import {
   loadTarget,
   PreviewError,
   projectDirectory,
+  type ComposeTarget,
   type PreviewDeps,
   type Target,
 } from './target';
@@ -63,7 +64,7 @@ function toYaml(file: ComposeJson): string {
  */
 async function resolve(
   deps: PreviewDeps,
-  target: Target,
+  target: ComposeTarget,
   source: { repository: true } | { yaml: string },
   env: Record<string, string>,
 ): Promise<ComposeJson> {
@@ -111,7 +112,7 @@ ${lastLines(output.tail)}`,
   );
 }
 
-function sharedContext(target: Target): SharedContext {
+function sharedContext(target: ComposeTarget): SharedContext {
   return {
     exposed: target.exposed.map(({ service }) => service),
     variables: Object.keys({ ...target.plain, ...target.secrets }),
@@ -124,7 +125,7 @@ function refuse(problems: string[], heading: string): void {
   }
 }
 
-function exposedProblems(resolved: ComposeJson, target: Target, catalog: Catalog): string[] {
+function exposedProblems(resolved: ComposeJson, target: ComposeTarget, catalog: Catalog): string[] {
   return target.exposed.flatMap(({ service }) => {
     const problem = exposedServiceProblem(resolved, service);
     if (!problem) {
@@ -138,10 +139,13 @@ function exposedProblems(resolved: ComposeJson, target: Target, catalog: Catalog
   });
 }
 
-/** The file from the repository's: to run (`shown` false) or to show, secrets as references. */
-async function buildFile(
+/**
+ * The file from the repository's: to run (`shown` false) or to show, secrets as references. Throws
+ * a `PreviewError` saying why it cannot run as a preview.
+ */
+export async function buildFile(
   deps: PreviewDeps,
-  target: Target,
+  target: ComposeTarget,
   shown: boolean,
   catalog: Catalog,
 ): Promise<ComposeJson> {

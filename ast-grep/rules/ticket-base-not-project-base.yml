@@ -4,7 +4,7 @@ severity: error
 message: A ticket's base branch is ticketBase(project, ticket), not project.config.baseBranch.
 note: |
   The parent's branch the ticket was cloned from comes first (AGENTS.md, Rules). The files ignored below need the
-  project's own branch: investigations without a ticket, the fallback when no base resolves, and the comparisons
+  project's own branch: investigations without a ticket (a setup run's checks among them), the fallback when no base resolves, and the comparisons
   with it. Add a file here only for the same reason.
 files:
   - apps/worker/**
@@ -14,6 +14,7 @@ ignores:
   - '**/*.test.ts'
   - apps/worker/src/investigation/investigate.ts
   - apps/worker/src/investigation/investigate-ticket.ts
+  - apps/worker/src/setup/setup-check-run.ts
   - apps/worker/src/provision.ts
   - apps/worker/src/prompts.ts
   - apps/worker/src/github/follow-base.ts

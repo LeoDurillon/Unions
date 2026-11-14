@@ -1,6 +1,15 @@
 # Plan: a setup agent at the end of the wizard
 
-Status: steps 1 and 2 built (2026-11-10, branch `setup-agent`); steps 3 and 4 planned. Decisions made (see the end).
+Status: steps 1 and 2 built (2026-11-10, branch `setup-agent`), step 3 built (2026-11-14, branch `setup-checks`);
+step 4 planned. Decisions made (see the end).
+
+Step 3 built differently from below: the checks are rows of a `setup_checks` table (one per test, the latest of
+each kind shown), not a JSON column, so Test again can queue one from the web like a container run. The agent
+image check runs in the web when the setup view is read (it is pure), not in the worker. The checks container
+gets no Claude login. The preview check passes the variables with their templates unfilled: only the file's
+shape is checked. Checked against real Docker (a fixture repository: a failing check command, a passing one, a
+preview that passes and one refused for `privileged` and an undeclared service) and in headless Chromium on a
+scratch database (stubbed results, writes blocked).
 
 Step 2 built differently from below: the review is a dialog opened by **Review the setup** on the board's Project
 setup card, not a `?setup=` page. Edit is not a separate mode: every card shows its values in fields. The preview

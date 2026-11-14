@@ -57,6 +57,19 @@ A one-off agent run on a custom prompt, outside the ticket pipeline (project bar
   whether the settings hold it already); secrets and project files are entered on their cards; tickets are created
   in the Backlog; the questions go back as a follow-up asking for the whole proposal again. Dismissed cards and
   created tickets are remembered per run in the browser. Plan: [`docs/plans/setup-agent.md`](../plans/setup-agent.md).
+- **Setup checks:** when a setup run succeeds (its first answer or a follow-up), the worker queues checks of its
+  answer without Claude (`queueProposalChecks`, table `setup_checks`): its install and check commands, and its
+  preview as Apply would save it (`previewAfter`). `SetupChecker` (`apps/worker/src/setup/`, two at a time, not
+  in the agents' run slots) runs each in a throwaway `union-sc<id>` container from the project's agent image,
+  with no Claude login, on a fresh clone of the base branch with the project's files: the install command (20
+  minutes), then the check command (the gate's 15), or the compose file resolved and refused as Start would
+  (`buildFile`: what a preview may not do, a served service it does not declare, shared services). Each
+  `setup_check_changed` event (stages `cloning`, `installing`, `checking`, `resolving`; ends `passed`, `failed`,
+  `timed_out`) refreshes the cards, which show without waiting for them; the setup view carries the latest check
+  of each kind and `agentImageProblem` (the agent image settings' own check of the Dockerfile; building waits for
+  Apply). **Test again** (`POST /api/projects/:projectId/setup/checks`, checked as the settings pages check the
+  values) queues the card's current values; one still waiting takes the newer values. **Ask the agent to fix**
+  sends a follow-up with what was tested and the end of the output.
 - **No Claude login:** any run (an investigation, a ticket step) fails with "Claude is not logged in on this
   machine…" when the credentials file is missing or holds no subscription login.
 - **Not yet:** resuming the agent's own session on a follow-up, choosing another branch than the base or a

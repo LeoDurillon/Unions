@@ -3,6 +3,7 @@
 import { and, desc, eq } from 'drizzle-orm';
 
 import type { Db } from '../db';
+import { AgentImageError, parseAgentImageSource } from '../docker/agent-image-source';
 import { SETUP_DEFAULT_MODEL } from '../investigation/investigation-defaults';
 import {
   createInvestigation,
@@ -10,6 +11,7 @@ import {
   type Investigation,
 } from '../investigation/investigations';
 import * as schema from '../schema/schema';
+import { latestSetupChecks, type SetupCheckResults } from './setup-checks';
 import { setupPrompt } from './setup-prompt';
 import { parseSetupProposal } from './setup-proposal';
 import type { SetupProposal } from './setup-proposal-types';
@@ -56,8 +58,32 @@ export function queueSetup(
   });
 }
 
-/** A setup run and what its answer proposes (null while unanswered, or when the answer has no block). */
-export type SetupView = { investigation: Investigation; proposal: SetupProposal | null };
+/**
+ * A setup run and what its answer proposes (null while unanswered, or when the answer has no block),
+ * the worker's latest checks of it, and why its agent image would be refused (null: it would not).
+ */
+export type SetupView = {
+  investigation: Investigation;
+  proposal: SetupProposal | null;
+  checks: SetupCheckResults;
+  agentImageProblem: string | null;
+};
+
+/** What the agent image's settings would say of the proposed Dockerfile; building waits for Apply. */
+function agentImageProblem(proposal: SetupProposal | null): string | null {
+  if (!proposal?.agentImage) {
+    return null;
+  }
+  try {
+    parseAgentImageSource({ kind: 'dockerfile', dockerfile: proposal.agentImage.text });
+    return null;
+  } catch (error) {
+    if (error instanceof AgentImageError) {
+      return error.message;
+    }
+    throw error;
+  }
+}
 
 /** The project's latest setup run; null when it never had one. */
 export function latestSetup(db: Db, projectId: number): SetupView | null {
@@ -66,5 +92,11 @@ export function latestSetup(db: Db, projectId: number): SetupView | null {
     return null;
   }
   const answer = investigation.status === 'succeeded' ? (investigation.result ?? '') : '';
-  return { investigation, proposal: answer === '' ? null : parseSetupProposal(answer) };
+  const proposal = answer === '' ? null : parseSetupProposal(answer);
+  return {
+    investigation,
+    proposal,
+    checks: latestSetupChecks(db, investigation.id),
+    agentImageProblem: agentImageProblem(proposal),
+  };
 }

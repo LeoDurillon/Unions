@@ -8,10 +8,13 @@ import { setupWrites, useSetupApply } from '../../lib/setup/use-setup-apply';
 import { inputClass } from '../ui/ui';
 import { SetupCard } from './setup-card';
 import type { SetupCardProps } from './setup-card-props';
+import { SetupCheckSection } from './setup-check-result';
 import { SetupField } from './setup-values';
 
 export function ChecksCard({
   project,
+  investigation,
+  checkResults,
   proposal,
   dismissed,
   onDismiss,
@@ -53,6 +56,16 @@ export function ChecksCard({
           }}
         />
       </SetupField>
+      <SetupCheckSection
+        investigation={investigation}
+        check={checkResults.checks}
+        values={{
+          kind: 'checks',
+          installCommand: draft.installCommand,
+          gateCommand: draft.gateCommand,
+        }}
+        what="install and check commands"
+      />
     </SetupCard>
   );
 }

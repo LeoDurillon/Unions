@@ -31,7 +31,8 @@ function Open({
 }
 
 /** What the card says, from the run's state. */
-function body({ investigation, proposal }: SetupView, project: PublicProject): ReactNode {
+function body(setup: SetupView, project: PublicProject): ReactNode {
+  const { investigation, proposal } = setup;
   const { status } = investigation;
   if (status === 'queued' || status === 'running') {
     return (
@@ -43,7 +44,7 @@ function body({ investigation, proposal }: SetupView, project: PublicProject): R
   }
   if (status === 'succeeded') {
     return proposal ? (
-      <SetupAnswered project={project} investigation={investigation} proposal={proposal} />
+      <SetupAnswered project={project} setup={setup} proposal={proposal} />
     ) : (
       <>
         <p>The setup agent answered without a proposal Union can read.</p>

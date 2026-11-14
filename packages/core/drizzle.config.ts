@@ -29,6 +29,7 @@ export default defineConfig({
     './src/schema/schema-review-reports.ts',
     './src/schema/schema-review-specs.ts',
     './src/schema/schema-reviews.ts',
+    './src/schema/schema-setup-checks.ts',
     './src/schema/schema-ticket-slices.ts',
     './src/schema/schema-union-update.ts',
     './src/schema/schema-union-settings.ts',

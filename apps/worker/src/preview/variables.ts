@@ -2,7 +2,7 @@
 // secrets hidden in the one people read.
 import { PREVIEW_ENV_FILE } from '@union/core';
 
-import type { Target } from './target';
+import type { ComposeTarget } from './target';
 
 /** The project's variables as they go into a compose file, and as the env file's content. */
 export type Written = { env: Record<string, string>; content: string };
@@ -26,7 +26,7 @@ function content(env: Record<string, string>): string {
 }
 
 /** For the file Docker runs: every value, secrets included, escaped. */
-export function runVariables(target: Target): Written {
+export function runVariables(target: ComposeTarget): Written {
   const env = Object.fromEntries(
     Object.entries({ ...target.plain, ...target.secrets }).map(([key, value]) => [
       key,
@@ -40,7 +40,7 @@ export function runVariables(target: Target): Written {
  * For the file people read (and may save as their own): each secret is `${NAME}`, which compose
  * fills in from the worker's environment when that file runs; its value never reaches the browser.
  */
-export function shownVariables(target: Target): Written {
+export function shownVariables(target: ComposeTarget): Written {
   const env = {
     ...Object.fromEntries(
       Object.entries(target.plain).map(([key, value]) => [key, escapeDollars(value)]),
@@ -55,7 +55,7 @@ export function shownVariables(target: Target): Written {
  * secret is its own `${NAME}`, which compose prints escaped (`$${NAME}`): `unmaskSecrets` turns it
  * back into a reference.
  */
-export function configEnvironment(target: Target, shown: boolean): Record<string, string> {
+export function configEnvironment(target: ComposeTarget, shown: boolean): Record<string, string> {
   const secrets = shown
     ? Object.fromEntries(Object.keys(target.secrets).map((name) => [name, secretReference(name)]))
     : target.secrets;
@@ -86,14 +86,14 @@ export function envFileValue(value: string): string {
 }
 
 /** Union's env file (`PREVIEW_ENV_FILE`), written in the helper that runs compose; none without variables. */
-export function unionEnvFile(target: Target): { path: string; content: string }[] {
+export function unionEnvFile(target: ComposeTarget): { path: string; content: string }[] {
   const variables = { ...target.plain, ...target.secrets };
   const lines = Object.entries(variables).map(([key, value]) => `${key}=${envFileValue(value)}\n`);
   return lines.length === 0 ? [] : [{ path: PREVIEW_ENV_FILE, content: lines.join('') }];
 }
 
 /** The comment the file people read starts with: what Union's env file gives, secrets hidden. */
-export function variablesComment(target: Target): string {
+export function variablesComment(target: ComposeTarget): string {
   const plain = Object.entries(target.plain).map(([key, value]) => `#   ${key}=${value}`);
   const secrets = Object.keys(target.secrets).map((name) => `#   ${name}=(secret)`);
   if (plain.length + secrets.length === 0) {
