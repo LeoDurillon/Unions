@@ -141,3 +141,7 @@ the spec (`docs/spec/`); open work is in the [plans README](../README.md).
 - [Edit the tracker item's properties](tracker-properties.md): a ticket's and a review's Notion and Jira tabs list the
   item's properties in a side column, edit them through the worker (Jira's status by its transitions) and hide the
   ones the project does not want. Built and deployed (2026-11-13).
+- [A setup agent at the end of the wizard](setup-agent.md): an agent reads the repository and proposes the checks,
+  preview, e2e command, saved scripts, instructions and agent image; Union tests the checks and the preview without
+  Claude, the user applies them card by card, and Run setup sits in Settings → General. Built, steps 1 to 4
+  (branches `setup-agent`, `setup-checks`, `setup-rerun`, 2026-11-14).

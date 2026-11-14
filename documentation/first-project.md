@@ -102,10 +102,13 @@ A **Project setup** card above the board follows the run. **Follow its log** sho
 run failed (for example, Claude is not logged in on this machine) or was cancelled, the card says why: pick a model
 and click **Run setup** to try again.
 
+You can also run it later, for a project made without it or after the repository changed: **Settings → General →
+Setup agent → Run setup** (see [The setup agent](settings.md#the-setup-agent)).
+
 ### Review the setup
 
 Once the agent has answered, the card says how many parts of its proposal are not in your settings yet. Click
-**Review the setup**:
+**Review the setup**. Parts your settings already hold are named in one line under the summary, without a card:
 
 - **The agent's questions** come first: what it could not decide from your files. Answer the ones you can and click
   **Ask the agent again**: it reads your answers and proposes everything again (on your Claude subscription).

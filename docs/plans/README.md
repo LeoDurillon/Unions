@@ -51,13 +51,6 @@ Open findings of the security reviews (2026-10-24 audit, 2026-11-08 review), to 
   Postgres with a tenant per preview) run once per project and joined to each preview's network. Phases 1,
   1b and 2 built (2026-11-10); drift warnings left.
 
-- [A setup agent at the end of the wizard](setup-agent.md): the wizard's last step offers an agent that reads the
-  repository and proposes the checks, preview, e2e command, saved scripts, instructions and agent image; the worker
-  checks them without Claude, the user applies them card by card, and repository changes become tickets. Steps 1
-  and 2 built (2026-11-10, branch `setup-agent`: the wizard's choice, the run with Union's guide, the proposal
-  reviewed and applied card by card); step 3 built (2026-11-14, branch `setup-checks`: the checks and the
-  preview tested without Claude, in the background); step 4 (Run setup from Settings) planned.
-
 ## Planned
 
 - [Agent reviews of large changes, slice by slice](sliced-agent-review.md): the agent review given the change's

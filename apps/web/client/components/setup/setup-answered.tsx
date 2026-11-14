@@ -1,6 +1,6 @@
 // The Project setup card once the agent answered: what is left to apply, Review the setup, and its raw answer.
 
-import type { SetupProposal, SetupView } from '@union/core';
+import type { ProjectConfig, SetupProposal, SetupView } from '@union/core';
 import { pendingSections } from '@union/core/setup-apply';
 import { useState, type ReactElement } from 'react';
 
@@ -28,7 +28,8 @@ export function SetupAnswered({
   proposal: SetupProposal;
 }): ReactElement {
   const { investigation } = setup;
-  const [open, setOpen] = useState(false);
+  // The settings when the review opened: what it leaves out as already applied.
+  const [openedWith, setOpenedWith] = useState<ProjectConfig | null>(null);
   const left = pendingSections(proposal, project.config).length;
   return (
     <>
@@ -39,7 +40,7 @@ export function SetupAnswered({
         <Button
           variant="primary"
           onClick={() => {
-            setOpen(true);
+            setOpenedWith(project.config);
           }}
         >
           Review the setup
@@ -53,13 +54,14 @@ export function SetupAnswered({
           Read its answer
         </Button>
       </div>
-      {open ? (
+      {openedWith ? (
         <SetupReview
           project={project}
+          openedWith={openedWith}
           setup={setup}
           proposal={proposal}
           onClose={() => {
-            setOpen(false);
+            setOpenedWith(null);
           }}
         />
       ) : null}

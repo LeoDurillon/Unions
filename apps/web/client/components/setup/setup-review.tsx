@@ -1,7 +1,8 @@
 // The setup agent's proposal to review: summary and questions, a card per section to apply, the
-// tickets it asks for.
+// tickets it asks for. Sections the settings already hold when it opens are only named.
 
-import type { SetupProposal, SetupView } from '@union/core';
+import type { ProjectConfig, SetupProposal, SetupView } from '@union/core';
+import { unappliedProposal, type SetupSection } from '@union/core/setup-apply';
 import type { ReactElement } from 'react';
 
 import type { PublicProject } from '../../../src/api-types';
@@ -12,6 +13,41 @@ import type { SetupCardProps } from './setup-card-props';
 import { SetupCards } from './setup-cards';
 
 const CREATED = 'ticket:';
+
+const SECTION_LABELS: Record<SetupSection, string> = {
+  checks: 'Checks',
+  scripts: 'Saved scripts',
+  preview: 'Preview',
+  e2e: 'End-to-end tests',
+  instructions: 'Project instructions',
+};
+
+/** The summary, what Union left out, and the sections already in the settings. */
+function ReviewHeader({
+  proposal,
+  matching,
+}: {
+  proposal: SetupProposal;
+  matching: readonly SetupSection[];
+}): ReactElement {
+  return (
+    <>
+      <div className="space-y-1">
+        <p className="text-[15px] leading-relaxed">{proposal.summary}</p>
+        <p className="text-sm text-zinc-500">
+          Nothing is applied until you click Apply on a card. Edit a value first if you want.
+        </p>
+        {matching.length > 0 ? (
+          <p className="text-sm text-zinc-500">
+            Already in your settings, so not shown:{' '}
+            {matching.map((section) => SECTION_LABELS[section]).join(', ')}.
+          </p>
+        ) : null}
+      </div>
+      <Dropped dropped={proposal.dropped} />
+    </>
+  );
+}
 
 function Dropped({ dropped }: { dropped: readonly string[] }): ReactElement | null {
   if (dropped.length === 0) {
@@ -33,21 +69,26 @@ function Dropped({ dropped }: { dropped: readonly string[] }): ReactElement | nu
 
 export function SetupReview({
   project,
+  openedWith,
   setup,
   proposal,
   onClose,
 }: {
   project: PublicProject;
+  /** The settings when the review opened. */
+  openedWith: ProjectConfig;
   setup: SetupView;
   proposal: SetupProposal;
   onClose: () => void;
 }): ReactElement {
   const { investigation } = setup;
   const [keys, toggle] = useSetupDismissed(investigation.id);
+  // From the settings as they were when it opened: a card applied meanwhile stays, with its badge.
+  const { proposal: shown, matching } = unappliedProposal(proposal, openedWith);
   const cardOf = (key: string): SetupCardProps => ({
     project,
     investigation,
-    proposal,
+    proposal: shown,
     checkResults: setup.checks,
     dismissed: keys.includes(key),
     onDismiss: (dismissed) => {
@@ -59,13 +100,7 @@ export function SetupReview({
     .map((key) => Number(key.slice(CREATED.length)));
   return (
     <Dialog open wide title="Review the setup" onClose={onClose}>
-      <div className="space-y-1">
-        <p className="text-[15px] leading-relaxed">{proposal.summary}</p>
-        <p className="text-sm text-zinc-500">
-          Nothing is applied until you click Apply on a card. Edit a value first if you want.
-        </p>
-      </div>
-      <Dropped dropped={proposal.dropped} />
+      <ReviewHeader proposal={proposal} matching={matching} />
       {proposal.questions.length > 0 ? (
         <QuestionsCard
           investigation={investigation}
@@ -73,7 +108,7 @@ export function SetupReview({
           onAsked={onClose}
         />
       ) : null}
-      <SetupCards cardOf={cardOf} proposal={proposal} agentImageProblem={setup.agentImageProblem} />
+      <SetupCards cardOf={cardOf} proposal={shown} agentImageProblem={setup.agentImageProblem} />
       {proposal.tickets.length > 0 ? (
         <TicketsCard
           projectId={project.id}

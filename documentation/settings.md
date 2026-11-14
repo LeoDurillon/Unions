@@ -14,7 +14,7 @@ How the previews run is not here but in the project's **Environments** tab, besi
 
 | Group             | Page           | What it holds                                                                                                                                      |
 | ----------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Project**       | General        | GitHub access (token or GitHub App installation), the base branch, and whether tickets get GitHub issues.                                          |
+| **Project**       | General        | GitHub access (token or GitHub App installation), the base branch, whether tickets get GitHub issues, and the [setup agent](#the-setup-agent).     |
 |                   | Files          | [Project files](previews.md#project-files) every workspace gets, kept out of git.                                                                  |
 | **Agents**        | Instructions   | [Notes every agent of the project reads](agents.md#project-instructions).                                                                          |
 |                   | Memory         | [Feedback and lessons](agents.md#memory).                                                                                                          |
@@ -46,6 +46,14 @@ Deleting a project removes its tickets from Union, with their containers and vol
   In Progress on GitHub starts the ticket. **Change** moves the tickets to another Project. **Disconnect** stops
   updating it; the Project and its cards stay on GitHub as they are. Without a Project, Union's board is the only
   board.
+
+### The setup agent
+
+**General → Setup agent** says what the [setup agent](first-project.md#let-an-agent-set-up-the-project)'s last run
+did. Pick a model and click **Run setup** to run it again: for a project made before the setup agent existed, after
+the repository changed, or when a run failed (for example, Claude was not logged in). It uses your Claude
+subscription. Its proposal shows above the board, where you review it, and replaces the previous one. The review
+lists the parts your settings already hold in one line and shows a card only for what differs.
 
 ## Environments
 

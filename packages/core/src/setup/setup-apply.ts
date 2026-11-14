@@ -115,3 +115,21 @@ export function sectionApplied(
 export function pendingSections(proposal: SetupProposal, config: ProjectConfig): SetupSection[] {
   return SETUP_SECTIONS.filter((section) => !sectionApplied(section, proposal, config));
 }
+
+/**
+ * The proposal without the sections the settings already hold, and which those are: a run on a
+ * project set up already shows only what differs.
+ */
+export function unappliedProposal(
+  proposal: SetupProposal,
+  config: ProjectConfig,
+): { proposal: SetupProposal; matching: SetupSection[] } {
+  const matching = SETUP_SECTIONS.filter(
+    (section) => proposal[section] !== null && sectionApplied(section, proposal, config),
+  );
+  const left: SetupProposal = { ...proposal };
+  for (const section of matching) {
+    left[section] = null;
+  }
+  return { proposal: left, matching };
+}

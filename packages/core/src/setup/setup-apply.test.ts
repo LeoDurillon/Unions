@@ -8,6 +8,7 @@ import {
   previewAfter,
   scriptsAfter,
   sectionApplied,
+  unappliedProposal,
 } from './setup-apply';
 import type { SetupPreview, SetupProposal } from './setup-proposal-types';
 
@@ -130,4 +131,22 @@ test('the agent switches are kept as the settings keep them: only where they dif
     forwardPorts: false,
     startForImplementation: true,
   });
+});
+
+test('a run on a project set up already leaves out the sections its settings hold', () => {
+  const config: ProjectConfig = {
+    ...BLANK,
+    gateCommand: 'bun run check',
+    instructions: 'Use Bun.',
+  };
+  const full = proposal({
+    checks: { installCommand: '', gateCommand: 'bun run check', why: 'w' },
+    instructions: { text: 'Use pnpm.', why: 'w' },
+    e2e: null,
+  });
+  const { proposal: left, matching } = unappliedProposal(full, config);
+  expect(matching).toEqual(['checks']);
+  expect(left.checks).toBeNull();
+  expect(left.instructions?.text).toBe('Use pnpm.');
+  expect(left.summary).toBe(full.summary);
 });

@@ -56,7 +56,10 @@ A one-off agent run on a custom prompt, outside the ticket pipeline (project bar
   section: Apply sends it through the endpoint its settings page uses (`setup-apply.ts` says what each writes and
   whether the settings hold it already); secrets and project files are entered on their cards; tickets are created
   in the Backlog; the questions go back as a follow-up asking for the whole proposal again. Dismissed cards and
-  created tickets are remembered per run in the browser. Plan: [`docs/plans/setup-agent.md`](../plans/setup-agent.md).
+  created tickets are remembered per run in the browser. The review leaves out the sections the settings held when
+  it opened (`unappliedProposal`), naming them in one line. **Run setup** also sits on Settings → General
+  (`SetupAgentSection`: the last run's state, then the model picker and Start, the same `POST`), for a project
+  made before the setup agent or a repository that changed. Plan: [`docs/plans/archive/setup-agent.md`](../plans/archive/setup-agent.md).
 - **Setup checks:** when a setup run succeeds (its first answer or a follow-up), the worker queues checks of its
   answer without Claude (`queueProposalChecks`, table `setup_checks`): its install and check commands, and its
   preview as Apply would save it (`previewAfter`). `SetupChecker` (`apps/worker/src/setup/`, two at a time, not

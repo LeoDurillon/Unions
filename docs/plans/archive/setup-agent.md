@@ -1,7 +1,12 @@
 # Plan: a setup agent at the end of the wizard
 
-Status: steps 1 and 2 built (2026-11-10, branch `setup-agent`), step 3 built (2026-11-14, branch `setup-checks`);
-step 4 planned. Decisions made (see the end).
+Status: built. Steps 1 and 2 (2026-11-10, branch `setup-agent`), step 3 (2026-11-14, branch `setup-checks`),
+step 4 (2026-11-14, branch `setup-rerun`). Decisions made (see the end).
+
+Step 4 built as: a **Setup agent** card on Settings → General (the page holding the project's own settings), with
+the last run's state and, when none waits or runs, the model picker and **Run setup** (`SetupStart`, as on the
+board). "Only what differs" is `unappliedProposal` (core, `setup-apply.ts`): the review leaves out the sections the
+settings held when it opened and names them in one line; a card applied while it is open keeps its Applied badge.
 
 Step 3 built differently from below: the checks are rows of a `setup_checks` table (one per test, the latest of
 each kind shown), not a JSON column, so Test again can queue one from the web like a container run. The agent
