@@ -316,12 +316,17 @@
   (`explanation-request.ts`: up to 10 subjects, lines, a file or the change, each checked against the diff, a
   line's excerpt from `diffExcerpt`; specs through `parseAgentReviewSpecs`, kept from the last turn when not sent;
   one waiting turn per conversation), renames and deletes a conversation (`/conversations/:id`, refused while a
-  turn waits), cancels a turn through a command, and serves its agent lines (`/log`). The client: `explain-context.tsx` (provided by `ReviewPage`: the panel's open
-  state, the review's specs, asking, and the lines to show), the panel
-  `explain-panel.tsx` beside the diff in `diff-area.tsx`, `explanation-card.tsx` (a conversation),
-  `explanation-answer.tsx`, `explanation-progress.tsx`, `lib/review/use-explanations.ts` (refreshed by its events; the answer's log is polled while it runs, agent output is not on the stream).
-  Opening an explanation's lines picks the file in `diff-body.tsx` and selects them in `open-file.tsx` until the
-  user picks or selects another; Copy as comment starts the comment editor with the answer quoted.
+  turn waits), cancels a turn through a command, and serves its agent lines (`/log`). The client, in
+  `components/explain/`: `explain-section.tsx` adds the Explain tab to every `ReviewPage` (after Report, counted while
+  a conversation waits); `ReviewPage` provides `explain-context.tsx` under its tab state (asking adds the review's
+  specs and opens the tab on the conversation, through `open-conversation.ts`, `?explain=<id>`; the lines to show in
+  the diff); `explain-tab.tsx` lays out `conversation-list.tsx` (state, search) beside the open conversation
+  (`conversation-header.tsx`: rename, export from `explain-export.ts`, delete; `explain-turn.tsx` per turn: subject
+  chips, `explanation-answer.tsx`, `explanation-progress.tsx`; `explain-composer.tsx`). Bubbles and cards are shared
+  with investigations (`components/ui/conversation-parts.tsx`). `lib/review/use-explanations.ts` reads the
+  conversations (refreshed by their events; a turn's log is polled while it runs, agent output is not on the stream).
+  A chip or citation opens the Diff tab and picks the file in `diff-body.tsx`, selecting the lines in `open-file.tsx`
+  until the user picks or selects another; Copy as comment starts the comment editor there with the answer quoted.
 - Agent image: project settings → Agents → Agent image (`agent-image-section.tsx`, `agent-image-status.tsx`,
   `lib/use-agent-image.ts`, polled while a save builds; `routes/agent-image.ts`, mounted with the preview settings
   and the project files by `routes/workspace-settings.ts`). A save writes the `agent_images` row's `pending` and a

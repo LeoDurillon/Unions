@@ -1,5 +1,4 @@
-// The whole change, or one of its commits or the change since the last review (read only), with the
-// Explain panel. The panel sits on the right.
+// The whole change, or one of its commits or the change since the last review (read only).
 
 import { useState, type ReactElement } from 'react';
 
@@ -7,7 +6,6 @@ import { reviewBase, reviewSlice } from '../../lib/review/review-target';
 import { CommitDiffBody } from './commit-diff';
 import { CommitPicker } from './commit-picker';
 import { DiffBody } from './diff-body';
-import { ExplainPanel } from './explain-panel';
 
 /**
  * A split ticket's slice: its own change, written on like the whole one. Its commits, the grouping
@@ -21,10 +19,7 @@ function SliceArea(props: Omit<Parameters<typeof DiffBody>[0], 'picker'>): React
   );
 }
 
-/**
- * The whole change, or one of its commits or the change since the last review (read only), with
- * the Explain panel on the right.
- */
+/** The whole change, or one of its commits or the change since the last review (read only). */
 export function DiffArea(props: Omit<Parameters<typeof DiffBody>[0], 'picker'>): ReactElement {
   const [commit, setCommit] = useState<string | null>(null);
   const base = reviewBase(props.target);
@@ -39,7 +34,6 @@ export function DiffArea(props: Omit<Parameters<typeof DiffBody>[0], 'picker'>):
       ) : (
         <CommitBody {...props} base={base} commit={commit} picker={picker} onAll={setCommit} />
       )}
-      <ExplainPanel paths={new Set(props.files.map((file) => file.path))} />
     </div>
   );
 }

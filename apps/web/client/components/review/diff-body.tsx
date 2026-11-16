@@ -4,7 +4,7 @@ import { useState, type ReactElement, type ReactNode } from 'react';
 
 import type { CommentView, DiffResponse } from '../../../src/api-types';
 import type { ReviewTarget } from '../../lib/review/review-target';
-import { useExplain, type ExplainFocus } from './explain-context';
+import { useExplain, type ExplainFocus } from '../explain/explain-context';
 import type { DiffView } from './file-diff';
 import { useFilteredFiles } from './file-filter-bar';
 import { FileList } from './file-list';

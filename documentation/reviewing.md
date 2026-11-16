@@ -71,18 +71,29 @@ once the fix is in.
 
 ## Explain
 
-Select lines and click **Explain**, click **Explain** on a hunk, or **Explain file** next to a file's name. An agent
-answers in the **Explain** panel on the right:
+Ask an agent how the change works, in conversations kept in the review's **Explain** tab.
+
+To start one from the diff, select lines and click **Explain** (open **Ask a question** first to ask something
+specific), click **Explain** on a hunk, or click **Explain file** next to a file's name. Union opens the Explain tab on
+the new conversation, where the answer comes:
 
 - **How it works**, with links to the code it cites;
 - **Specs**: quotes from the specs this code implements;
 - **Docs**: the repository's own documents that relate to it;
 - or **Not in the spec**, when nothing asked for it.
 
-Ask a follow-up, or click **Copy as comment** to quote the answer in a draft comment on those lines. Explanations
-asked on an older commit show as **Outdated**, with **Explain again**.
+You can also start one in the tab itself: click **+ New** and type a question about the change.
 
-Each explanation is an agent run (Haiku by default) on your Claude usage. On a ticket, it is refused while the
+Each conversation keeps its questions and answers, oldest first. Type a follow-up in the box at the bottom and press
+**Ask** (or Ctrl+Enter) once the last answer is in: the agent remembers the earlier questions. Click a file or lines
+under a question to see them in the Diff tab; the Explain tab stays on the same conversation when you come back.
+
+The list on the left shows every conversation of the review, the latest first, with a search. On the open one,
+**Rename** gives it a title, **Export** downloads it as a Markdown file, and **Delete** removes it. Click **Copy as
+comment** under an answer to quote it in a draft comment on those lines. An answer given on an older commit shows as
+**Outdated**, with **Ask again**.
+
+Each question is an agent run (Haiku by default) on your Claude usage. On a ticket, it is refused while the
 ticket runs a step.
 
 ## Review with agent

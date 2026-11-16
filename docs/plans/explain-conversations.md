@@ -1,8 +1,8 @@
 # Plan: Explain as conversations, in their own tab
 
-Status: step 1 built (2026-11-16, branch `explain-conversations`): conversations and turns in the database, the
-migration of the existing threads, the API and the worker; today's side panel reads them (each thread a
-conversation). Steps 2 to 5 left. Decisions settled at the end.
+Status: steps 1 and 2 built (2026-11-16, branch `explain-conversations`): conversations and turns in the database,
+the migration of the existing threads, the API and the worker (step 1); the Explain tab, the side panel and its
+toggle removed, Explain file asking about the file as a subject (step 2). Steps 3 to 5 left. Decisions settled at the end.
 
 ## Idea
 

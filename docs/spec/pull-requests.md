@@ -134,26 +134,35 @@ run's agents.
 
 ### Explain
 
-On either review page (a ticket's branch or a pull request under review), **Explain** asks an agent about lines of
-the diff: in the editor under selected lines (with an optional question folded under **Ask a question**), on a hunk
-header, or **Explain file** beside the file's name. The answer comes in the **Explain** side panel, on the right of
-the diff, opened by the header's **Explain** toggle (with the count on the way, remembered in the browser) or by
-asking. Each explanation shows its lines (a link that opens the file and selects them), the **Spec parts** a
-grouping by spec put them under (from the newest grouping, without the agent; "older grouping" when it read another
-commit), "Waiting for a run slot" or "Explaining…" with the agent's last steps and **Cancel**, then the answer:
-**How it works** (with links to the code it cites in the change), **Specs** (quotes of the specs, each with its
-source), **Docs** (the repository's own documents) or **Not in the spec**. The host keeps a spec quote only when it is
-found in a spec that was sent, and a doc only when its path is in the checkout; the panel counts what it dropped.
-Each ask starts a **conversation** ([plan](../plans/explain-conversations.md)): its turns, oldest first, each a
-question and the **subjects** it is about (lines of the diff, a file of it, or the whole change; up to 10, checked
-against the diff; none for a plain follow-up). **Ask a follow-up** adds a turn to the conversation, once its last
-answer is in (one turn waits per conversation). On a ticket, the next turn resumes the agent's session while the
-conversation has at most 8 turns; a pull request's, or a longer conversation, runs fresh with the newest 6 earlier
-turns (20,000 characters at most) as text. When the change moved since the turn before, the prompt says so. A
-conversation is titled by its first question's first line, else its first subject, and can be renamed or deleted
-(not while a turn waits). **Copy as comment** opens the comment editor on the first lines with the answer quoted,
-nothing sent. Older conversations are folded below the one asked in last; a turn asked on another commit is
-**Outdated**, with **Explain again**.
+On either review page (a ticket's branch or a pull request under review), **Explain** asks an agent about the change,
+in **conversations** ([plan](../plans/explain-conversations.md)) kept in the **Explain** tab (after **Report**,
+"Explain (n)" while n conversations wait for an answer). From the diff: **Explain** in the editor under selected lines
+(with an optional question folded under **Ask a question**), on a hunk header, or **Explain file** beside the file's
+name; each starts a new conversation and opens the tab on it. In the tab, **+ New** starts one with a question alone.
+The tab and the open conversation are in the URL (`tab=explain`, `explain=<id>`; `explain=new` for a new one,
+none for the latest).
+
+The tab lists the conversations on the left, the one asked in last first: a dot for its last question's state
+(answering, failed, outdated, answered), its title, its question count and its date, with a search on the titles
+and questions. The open one shows its title (**Rename** in place), **Export** (a Markdown file of every question,
+what it was about and its answer) and **Delete** (asked first; not while a question waits). Then each turn, oldest
+first: the question in a bubble with its **subjects** as chips (lines `path:3-5` and a file open the Diff tab on
+them; "The whole change" does not link), the **Spec parts** a grouping by spec put its lines under (from the newest
+grouping, without the agent; "older grouping" when it read another commit), then the answer card: "Waiting for a
+run slot" or "Explaining…" with the agent's last steps and **Cancel**, the error, or **How it works** (with links to
+the code it cites in the change, opening the Diff tab), **Specs** (quotes of the specs, each with its source),
+**Docs** (the repository's own documents) or **Not in the spec**. The host keeps a spec quote only when it is found in
+a spec that was sent, and a doc only when its path is in the checkout; the answer counts what it dropped. An answer
+read on another commit is **Outdated**, with **Ask again** (the same question about the same subjects, in the same
+conversation); **Copy as comment** opens the Diff tab with the comment editor on the turn's first lines and the answer
+quoted, nothing sent. At the foot, the box asks a follow-up (Ctrl+Enter), once the last answer is in.
+
+A turn holds a question and up to 10 subjects (lines of the diff, a file of it, or the whole change), each checked
+against the diff; a follow-up has none. One turn waits per conversation. On a ticket, the next turn resumes the
+agent's session while the conversation has at most 8 turns; a pull request's, or a longer conversation, runs fresh
+with the newest 6 earlier turns (20,000 characters at most) as text. When the change moved since the turn before, the
+prompt says so, and a resumed turn gets the specs again when they changed. A conversation is titled by its first
+question's first line, else its first subject. On a split ticket's slice, the tab says Explain reads the whole change.
 
 The specs are the review's (its **Specs** bar). The agent is `review_explain` in Union settings (Haiku by default, read-only
 tools and git reads). A ticket's runs in its own container, refused while the ticket runs; a pull request's in a

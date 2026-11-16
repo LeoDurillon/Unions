@@ -71,7 +71,7 @@
    and works like Request changes: the
    implementer works on the comments, then the final review runs again (from Done, the feedback is recorded on the
    final review and the ticket goes back to In progress).
-   **Explain** asks an agent about selected lines, a hunk or a file, in a side panel (see
+   **Explain** asks an agent about selected lines, a hunk or a file, in the review's Explain tab (see
    [Pull requests](pull-requests.md#explain)); it is refused while the ticket runs.
    A ticket written in Union or imported from GitHub can be linked afterwards, from the Overview, to a Notion page
    or to an issue of the project's Jira project (`routes/ticket-*-link.ts`): it becomes the ticket's origin, as if

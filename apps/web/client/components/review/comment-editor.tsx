@@ -4,8 +4,8 @@ import { useEffect, useState, type ReactElement } from 'react';
 
 import type { Selection } from '../../lib/review/diff-selection';
 import { onModEnter } from '../../lib/ui/mod-enter';
+import { useExplain, type ExplainState } from '../explain/explain-context';
 import { Button, ErrorText, inputClass } from '../ui/ui';
-import { useExplain, type ExplainState } from './explain-context';
 
 /** Explain, and the question folded under it; nothing outside a review page. */
 function ExplainControls({

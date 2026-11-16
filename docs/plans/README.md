@@ -55,8 +55,8 @@ Open findings of the security reviews (2026-10-24 audit, 2026-11-08 review), to 
 
 - [Explain as conversations, in their own tab](explain-conversations.md): an Explain tab on the review page
   holding conversations like Investigations; each turn a question with subjects (lines, a hunk, a file, the whole
-  change), and every Explain entry point offers New conversation or Add to an existing one. Step 1 built
-  (2026-11-16, branch `explain-conversations`: database, migration, API, worker); steps 2 to 5 left.
+  change), and every Explain entry point offers New conversation or Add to an existing one. Steps 1 and 2
+  built (2026-11-16, branch `explain-conversations`: database, migration, API, worker; the tab); steps 3 to 5 left.
 - [Agent reviews of large changes, slice by slice](sliced-agent-review.md): the agent review given the change's
   file list and hunk index, then, above a size threshold, one agent per slice of a grouping by spec (or by folder
   without specs), a pass on the seams between slices, and the drafts merged. Steps 0 and 1 done (the file list, one

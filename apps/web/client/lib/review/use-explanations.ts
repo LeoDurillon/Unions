@@ -55,6 +55,30 @@ export function useExplanations(target: ReviewTarget): {
   };
 }
 
+type Mutation<Input> = ReturnType<typeof useMutation<unknown, Error, Input>>;
+
+/** Renaming and deleting a conversation, the list refetched after. */
+export function useConversationChanges(target: ReviewTarget): {
+  rename: Mutation<{ id: number; title: string }>;
+  remove: Mutation<number>;
+} {
+  const queryClient = useQueryClient();
+  const base = reviewBase(target);
+  const refresh = (): Promise<void> =>
+    queryClient.invalidateQueries({ queryKey: ['review', base, 'explanations'] });
+  return {
+    rename: useMutation({
+      mutationFn: ({ id, title }: { id: number; title: string }) =>
+        explanationApi.rename(base, id, title),
+      onSuccess: refresh,
+    }),
+    remove: useMutation({
+      mutationFn: (id: number) => explanationApi.remove(base, id),
+      onSuccess: refresh,
+    }),
+  };
+}
+
 /** What the agent printed so far, polled while it runs. */
 export function useExplanationLog(
   target: ReviewTarget,

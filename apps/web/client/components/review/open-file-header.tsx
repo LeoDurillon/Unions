@@ -2,7 +2,7 @@
 
 import type { ReactElement } from 'react';
 
-import type { WholeExplain } from './explain-context';
+import type { WholeExplain } from '../explain/explain-context';
 import { useViewed } from './viewed-context';
 
 /** How many lines the file adds and removes. */
@@ -31,7 +31,7 @@ export function FileHeader({
           type="button"
           className="shrink-0 text-xs font-medium text-indigo-700 hover:underline dark:text-indigo-300"
           onClick={() => {
-            whole.file(file.patch);
+            whole.file();
           }}
         >
           Explain file

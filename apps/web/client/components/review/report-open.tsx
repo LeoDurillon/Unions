@@ -1,9 +1,10 @@
 // Links from the spec report to the diff: a file, its key lines as chips, opened in the Diff tab.
 // Or a draft comment started on them; the file shows its name, then its folder, shortened.
+
 import type { ReportCite, ReportLines } from '@union/core';
 import type { ReactElement } from 'react';
 
-import { useExplain } from './explain-context';
+import { useExplain } from '../explain/explain-context';
 
 /** Opens the Diff tab on a file, at some lines when given, with a draft comment when given. */
 export type OpenLines = (path: string, lines?: ReportLines, draft?: string) => void;

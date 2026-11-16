@@ -31,4 +31,8 @@ export const explanationApi = {
     request('POST', `${base}/explanations/${id}/cancel`),
   log: (base: string, id: number): Promise<ExplanationLogView> =>
     request('GET', `${base}/explanations/${id}/log`),
+  rename: (base: string, id: number, title: string): Promise<unknown> =>
+    request('PATCH', `${base}/explanations/conversations/${id}`, { title }),
+  remove: (base: string, id: number): Promise<unknown> =>
+    request('DELETE', `${base}/explanations/conversations/${id}`),
 };

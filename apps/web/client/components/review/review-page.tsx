@@ -1,11 +1,17 @@
-// The review page, with what its parts share (the Explain panel, the specs dialog, the files marked viewed).
+// The review page, with what its parts share (Explain, the specs dialog, the files marked viewed) and its tabs.
 
-import { useState, type ReactElement, type ReactNode } from 'react';
+import { useCallback, useState, type ReactElement, type ReactNode } from 'react';
 
 import type { ReviewTarget } from '../../lib/review/review-target';
 import { useReviewData } from '../../lib/review/use-review-data';
+import {
+  EXPLAIN_TAB,
+  ExplainOff,
+  ExplainProvider,
+  useExplainSection,
+  withExplain,
+} from '../explain/explain-section';
 import { DiffArea } from './diff-area';
-import { ExplainOff } from './explain-context';
 import { ReviewProviders } from './review-providers';
 import { ReviewTop } from './review-top';
 import { SlicePickProvider } from './slice-pick';
@@ -20,6 +26,8 @@ export type ReviewSection = {
   id: string;
   label: string;
   content: ReactNode | ((actions: SectionActions) => ReactNode);
+  /** Laid out wider: a list beside its content. */
+  wide?: boolean;
 };
 
 function SectionTabs({
@@ -83,14 +91,16 @@ function useSectionTab(
 
 function SectionBody({
   banner,
+  wide,
   children,
 }: {
   banner: ReactNode;
+  wide: boolean;
   children: ReactNode;
 }): ReactElement {
   return (
     <main className="min-h-0 flex-1 overflow-y-auto p-4">
-      <div className="mx-auto max-w-4xl">
+      <div className={`mx-auto ${wide ? 'max-w-6xl' : 'max-w-4xl'}`}>
         {banner}
         {children}
       </div>
@@ -118,25 +128,14 @@ type ReviewPageProps = {
   posting?: boolean;
 };
 
-/**
- * Full-page review of a ticket's branch or of a pull request: touched files on the left, one file at
- * a time on the right. `sections` add tabs before the diff, and it opens on the first; `banner` shows
- * above the content (a pull request review's posting status); `stackTabs` go under the header.
- */
-function ReviewPageBody({
-  target,
-  title,
-  onClose,
-  sections = NO_SECTIONS,
-  startOn,
-  tab: kept,
-  stackTabs,
-  banner,
-  posting = false,
-}: ReviewPageProps): ReactElement {
+type Tabs = ReturnType<typeof useSectionTab> & { sections: ReviewSection[] };
+
+/** The header, the stack's or slices' tabs, the page's tabs, then the open tab or the diff. */
+function ReviewLayout({ props, tabs }: { props: ReviewPageProps; tabs: Tabs }): ReactElement {
+  const { target, title, onClose, stackTabs, banner, posting = false } = props;
   const { diff, comments, slices, error, mutations, copy, empty } = useReviewData(target, posting);
   const [view, setView] = useDiffView();
-  const { tab, setTab, section } = useSectionTab(sections, startOn, kept);
+  const { tab, setTab, section, sections } = tabs;
   return (
     <ExplainOff off={slices.slice !== null}>
       <SlicePickProvider view={slices}>
@@ -153,11 +152,9 @@ function ReviewPageBody({
             onClose={onClose}
           />
           {stackTabs ?? <SliceTabs view={slices} comments={comments} />}
-          {sections.length > 0 ? (
-            <SectionTabs sections={[...sections, DIFF_TAB]} current={tab} onChange={setTab} />
-          ) : null}
+          <SectionTabs sections={[...sections, DIFF_TAB]} current={tab} onChange={setTab} />
           {section ? (
-            <SectionBody banner={banner}>
+            <SectionBody banner={banner} wide={section.wide ?? false}>
               {contentOf(section, () => {
                 setTab(DIFF_TAB.id);
               })}
@@ -178,6 +175,26 @@ function ReviewPageBody({
         </div>
       </SlicePickProvider>
     </ExplainOff>
+  );
+}
+
+/**
+ * Full-page review of a ticket's branch or of a pull request: touched files on the left, one file at
+ * a time on the right. `sections` add tabs before the diff (Explain after Report), and it opens on
+ * the first; `banner` shows above the content (a pull request review's posting status); `stackTabs`
+ * go under the header.
+ */
+function ReviewPageBody(props: ReviewPageProps): ReactElement {
+  const sections = withExplain(props.sections ?? NO_SECTIONS, useExplainSection(props.target));
+  const tabs = useSectionTab(sections, props.startOn, props.tab);
+  const { setTab } = tabs;
+  const openExplain = useCallback(() => {
+    setTab(EXPLAIN_TAB);
+  }, [setTab]);
+  return (
+    <ExplainProvider target={props.target} onOpenTab={openExplain}>
+      <ReviewLayout props={props} tabs={{ ...tabs, sections }} />
+    </ExplainProvider>
   );
 }
 

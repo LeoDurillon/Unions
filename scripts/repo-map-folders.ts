@@ -50,6 +50,8 @@ export const FOLDER_SUMMARIES: Record<string, string> = {
     "The board: its page, top and toolbar, the project at a glance, the Needs you strip, columns (a phone's switcher), cards and their parts, finished rows, getting started.",
   'web-client/components/environments':
     "A project's Environments tab: the preview settings (compose, services, variables, secrets, limits, e2e, agent) and the shared services.",
+  'web-client/components/explain':
+    "A review page's Explain tab: its conversations, their turns and answers, asking, the Explain state the diff shares.",
   'web-client/components/flow':
     "A ticket's flow: the picker, its row in the details, the custom agents of a flow.",
   'web-client/components/github-app':
@@ -81,7 +83,7 @@ export const FOLDER_SUMMARIES: Record<string, string> = {
   'web-client/components/repository':
     'The repository browser: the file tree, the file viewer, refs and commits.',
   'web-client/components/review':
-    'The review page: diffs and the file list, comments and threads, explanations, specs and grouping by spec, review reports, agent reviews, slices, sending the review.',
+    'The review page: diffs and the file list, comments and threads, specs and grouping by spec, review reports, agent reviews, slices, sending the review.',
   'web-client/components/settings':
     "A project's settings page: its sections (flows, scripts, checks, size, files, memory and lessons, agent image, GitHub access, issues, pull requests, events and rules), nav and save bar.",
   'web-client/components/setup': "The setup agent's proposal, reviewed and applied card by card.",

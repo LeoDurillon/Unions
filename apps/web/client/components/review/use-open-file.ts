@@ -7,7 +7,7 @@ import type { CommentView } from '../../../src/api-types';
 import type { Selection } from '../../lib/review/diff-selection';
 import type { ReviewTarget } from '../../lib/review/review-target';
 import { useDiffFile } from '../../lib/review/use-review';
-import { useWholeExplain, type ExplainFocus, type WholeExplain } from './explain-context';
+import { useWholeExplain, type ExplainFocus, type WholeExplain } from '../explain/explain-context';
 import { useHunkFocus } from './hunk-focus';
 
 /** The selected lines: the user's, or the ones an explanation opened in the panel shows, until the user selects others. */
