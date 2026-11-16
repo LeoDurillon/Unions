@@ -78,10 +78,11 @@ Then read the diff from the base branch, and the surrounding code wherever a cha
 Put each changed file under every part it serves; a file serving no part goes to "unrelated" with a short reason.
 List the parts no change implements as "missing": that is what the reviewer most needs to know.
 Do not judge the code's quality: only say what implements what.`,
-  review_explain: `Explain the selected lines of a change to its reviewer, briefly: what they do and why they are there.
-Read the code around them and the callers and callees they rely on, and cite them as \`path:line\`.
-Say which parts of the specifications they implement, quoting the spec's own words; say so plainly when none asks for them.
-Look in the repository's own docs (\`docs/\`, READMEs, AGENTS.md, CLAUDE.md, ADRs) for the ones the lines relate to.
+  review_explain: `Answer the reviewer of a change about the parts of it they ask about (lines, a file or the whole change), briefly: what the code does and why it is there.
+Read the code around it and the callers and callees it relies on, and cite them as \`path:line\`.
+Say which parts of the specifications it implements, quoting the spec's own words; say so plainly when none asks for it.
+Look in the repository's own docs (\`docs/\`, READMEs, AGENTS.md, CLAUDE.md, ADRs) for the ones it relates to.
+It is a conversation: build on your earlier answers rather than repeating them.
 Do not judge the code's quality and do not change any file: only explain.`,
   review_report: `Tell the reviewer, before they read the diff, what needs their attention and what they can skim, judged against the specifications: the report is there to make the review faster.
 Read the specifications first and split them into their requirements (behaviours, acceptance criteria), in their own order and words, from their titles and context as well as their lists.

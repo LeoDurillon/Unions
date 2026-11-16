@@ -1,6 +1,7 @@
-// The parts of a grouping by spec that selected lines of a file touch, without asking an agent. Pure.
+// The parts of a grouping by spec that selected lines of a file (or a turn's lines) touch, without asking an agent. Pure.
 
 import { hunksOf, type Hunk } from '../diff/diff-hunks';
+import type { ExplainSubject } from '../schema/schema-review-explanations';
 import type { GroupingResult } from '../schema/schema-review-groupings';
 
 /** A part of the spec the lines belong to, as the grouping named and quoted it. */
@@ -38,4 +39,23 @@ export function explanationSpecParts(
       return keys === undefined || keys.some((key) => touched.has(key));
     })
     .map(({ key, title, spec }) => ({ key, title, spec }));
+}
+
+/** The parts every line subject of a turn falls in, each part once; files and the change name none. */
+export function turnSpecParts(
+  grouping: GroupingResult,
+  subjects: ExplainSubject[],
+  patchOf: (path: string) => string | undefined,
+): SpecPart[] {
+  const parts = new Map<string, SpecPart>();
+  for (const subject of subjects) {
+    const patch = subject.kind === 'lines' ? patchOf(subject.path) : undefined;
+    if (subject.kind === 'lines' && patch !== undefined) {
+      const { path, side, start, end } = subject;
+      for (const part of explanationSpecParts(grouping, { path, patch }, { side, start, end })) {
+        parts.set(part.key, part);
+      }
+    }
+  }
+  return [...parts.values()];
 }

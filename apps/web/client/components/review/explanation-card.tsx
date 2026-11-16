@@ -1,8 +1,10 @@
-// One explanation and its follow-ups: the lines asked about, their spec parts, each answer, and what to do next.
+// One Explain conversation: what it is about, its spec parts, each question and answer, and what to do next.
 
+import type { ExplainLines } from '@union/core';
+import { subjectLabel } from '@union/core/explain-subjects';
 import { useState, type ReactElement } from 'react';
 
-import type { ExplanationView } from '../../../src/routes/review/review-explanations';
+import type { ExplanationView } from '../../../src/routes/review/explanation-views';
 import type { useExplanations } from '../../lib/review/use-explanations';
 import { Badge, Button, ErrorText, inputClass } from '../ui/ui';
 import type { ExplainState } from './explain-context';
@@ -11,11 +13,14 @@ import { ExplanationProgress } from './explanation-progress';
 
 type Explanations = ReturnType<typeof useExplanations>;
 
-/** `src/a.ts 40-58 (new)`. */
-export function linesLabel(explanation: ExplanationView): string {
-  const { path, startLine, endLine, side } = explanation;
-  const lines = startLine === endLine ? `${startLine}` : `${startLine}-${endLine}`;
-  return `${path} ${lines} (${side})`;
+/** `src/a.ts:40-58, src/b.ts`. */
+function subjectsLabel(turn: ExplanationView): string {
+  return turn.subjects.map((subject) => subjectLabel(subject)).join(', ');
+}
+
+/** The first lines the turn asks about: what its link opens, and a comment goes on. */
+function firstLines(turn: ExplanationView): ExplainLines | undefined {
+  return turn.subjects.find((subject): subject is ExplainLines => subject.kind === 'lines');
 }
 
 /** The answer quoted, for a comment the user edits before adding it. */
@@ -34,18 +39,22 @@ function Header({
   explanation: ExplanationView;
   explain: ExplainState;
 }): ReactElement {
-  const { path, side, startLine: start, endLine: end } = explanation;
+  const lines = firstLines(explanation);
   return (
     <div className="space-y-1">
-      <button
-        type="button"
-        className="text-left font-mono text-xs break-all text-indigo-700 hover:underline dark:text-indigo-300"
-        onClick={() => {
-          explain.show({ path, side, start, end });
-        }}
-      >
-        {linesLabel(explanation)}
-      </button>
+      {lines ? (
+        <button
+          type="button"
+          className="text-left font-mono text-xs break-all text-indigo-700 hover:underline dark:text-indigo-300"
+          onClick={() => {
+            explain.show(lines);
+          }}
+        >
+          {subjectsLabel(explanation)}
+        </button>
+      ) : (
+        <p className="font-mono text-xs break-all">{subjectsLabel(explanation)}</p>
+      )}
       {explanation.specParts.length > 0 ? (
         <p className="flex flex-wrap items-center gap-1 text-xs">
           <span className="text-zinc-500">Spec parts:</span>
@@ -59,14 +68,14 @@ function Header({
           ) : null}
         </p>
       ) : null}
-      {explanation.outdated ? (
+      {explanation.outdated && lines ? (
         <p className="flex items-center gap-2 text-xs">
           <Badge tone="amber">Outdated</Badge>
           <button
             type="button"
             className="text-indigo-700 hover:underline dark:text-indigo-300"
             onClick={() => {
-              explain.explain({ path, side, start, end, question: explanation.question });
+              explain.explain({ ...lines, question: explanation.question });
             }}
           >
             Explain again
@@ -124,18 +133,19 @@ function Turn({
   );
 }
 
-/** Ask a follow-up (in the same session) and Copy as comment, under the last answer. */
+/** Ask a follow-up (in the same conversation) and Copy as comment, under the last answer. */
 function Actions({
   last,
+  lines,
   explain,
   explanations,
 }: {
   last: ExplanationView;
+  lines: ExplainLines | undefined;
   explain: ExplainState;
   explanations: Explanations;
 }): ReactElement {
   const [question, setQuestion] = useState('');
-  const { path, side, startLine: start, endLine: end } = last;
   return (
     <div className="space-y-2 border-t border-zinc-200 pt-2 dark:border-zinc-800">
       <input
@@ -153,7 +163,7 @@ function Actions({
           disabled={question.trim() === '' || explanations.ask.isPending}
           onClick={() => {
             explanations.ask.mutate(
-              { parentId: last.id, question: question.trim() },
+              { conversationId: last.conversationId, subjects: [], question: question.trim() },
               {
                 onSuccess: () => {
                   setQuestion('');
@@ -164,19 +174,21 @@ function Actions({
         >
           Ask a follow-up
         </Button>
-        <Button
-          onClick={() => {
-            explain.show({ path, side, start, end, draft: quoted(last) });
-          }}
-        >
-          Copy as comment
-        </Button>
+        {lines ? (
+          <Button
+            onClick={() => {
+              explain.show({ ...lines, draft: quoted(last) });
+            }}
+          >
+            Copy as comment
+          </Button>
+        ) : null}
       </div>
     </div>
   );
 }
 
-/** A thread: the first explanation of some lines, then its follow-ups, oldest first. */
+/** A conversation's turns, oldest first, under what its first one asked about. */
 export function ExplanationThread({
   thread,
   explain,
@@ -206,7 +218,12 @@ export function ExplanationThread({
         />
       ))}
       {last.status === 'succeeded' ? (
-        <Actions last={last} explain={explain} explanations={explanations} />
+        <Actions
+          last={last}
+          lines={firstLines(first)}
+          explain={explain}
+          explanations={explanations}
+        />
       ) : null}
     </div>
   );

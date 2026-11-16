@@ -1,23 +1,19 @@
-// Reads a request to explain lines of the diff, or to follow up on an explanation, into what is queued.
+// Reads a turn to ask, in a new Explain conversation or an existing one: its subjects checked against the diff.
 
 import {
   diffExcerpt,
-  explanationOwner,
-  getExplanation,
+  isRecord,
   parseAgentReviewSpecs,
-  type AgentReviewOwner,
-  type Db,
+  type AgentReviewSpec,
+  type ExplainSubject,
   type ExplanationRequest,
 } from '@union/core';
 
-import { BAD_REQUEST, CONFLICT, fail, NOT_FOUND, optionalText, requireText } from '../../http';
+import { BAD_REQUEST, fail, optionalText } from '../../http';
 import type { GroupingTarget } from './review-groupings';
 
 const MAX_QUESTION_CHARS = 2000;
-
-function sameOwner(a: AgentReviewOwner, b: AgentReviewOwner): boolean {
-  return a.kind === b.kind && a.id === b.id;
-}
+const MAX_SUBJECTS = 10;
 
 function questionOf(body: Record<string, unknown>): string | null {
   const question = optionalText(body, 'question') ?? null;
@@ -27,71 +23,106 @@ function questionOf(body: Record<string, unknown>): string | null {
   return question;
 }
 
-/** A follow-up asks about the same lines, against the same specs, as the explanation it follows. */
-function followUp(
-  db: Db,
-  target: GroupingTarget,
-  parentId: number,
-  question: string | null,
-): ExplanationRequest {
-  const parent = getExplanation(db, parentId);
-  if (!parent || !sameOwner(explanationOwner(parent), target.owner)) {
-    throw fail(NOT_FOUND, 'Unknown explanation');
+function pathIn(target: GroupingTarget, value: unknown): { path: string; patch: string } {
+  const path = typeof value === 'string' ? value.trim() : '';
+  const patch = path === '' ? undefined : target.patchOf(path);
+  if (patch === undefined) {
+    throw fail(BAD_REQUEST, `${path || 'That file'} is not in the current diff`);
   }
-  if (question === null) {
-    throw fail(BAD_REQUEST, 'A follow-up needs a question');
-  }
-  if (parent.status !== 'succeeded') {
-    throw fail(CONFLICT, 'Follow up once the explanation has an answer');
-  }
-  const { path, side, startLine: start, endLine: end, excerpt, specs, headSha } = parent;
-  return { path, side, start, end, excerpt, question, specs, headSha, parentId };
+  return { path, patch };
 }
 
-function rangeOf(
-  body: Record<string, unknown>,
-): Pick<ExplanationRequest, 'side' | 'start' | 'end'> {
-  const start = Number(body.start);
-  const end = Number(body.end ?? body.start);
+/** Lines of a file of the diff, with the text the diff shows for them. */
+function linesOf(target: GroupingTarget, item: Record<string, unknown>): ExplainSubject {
+  const { path, patch } = pathIn(target, item.path);
+  const start = Number(item.start);
+  const end = Number(item.end ?? item.start);
   if (!Number.isInteger(start) || !Number.isInteger(end) || start < 1 || end < start) {
     throw fail(BAD_REQUEST, 'Give a valid start and end line');
   }
-  return { side: body.side === 'old' ? 'old' : 'new', start, end };
-}
-
-/** The lines asked about, checked against the diff the review shows, with the specs sent. */
-export function explanationRequest(
-  db: Db,
-  target: GroupingTarget,
-  body: Record<string, unknown>,
-): ExplanationRequest {
-  const question = questionOf(body);
-  if (typeof body.parentId === 'number') {
-    return followUp(db, target, body.parentId, question);
-  }
-  const path = requireText(body, 'path');
-  const { side, start, end } = rangeOf(body);
-  const patch = target.patchOf(path);
-  if (patch === undefined || target.headSha === null) {
-    throw fail(BAD_REQUEST, `${path} is not in the current diff`);
-  }
+  const side = item.side === 'old' ? 'old' : 'new';
   const excerpt = diffExcerpt(patch, side, start, end);
   if (excerpt === null) {
     throw fail(BAD_REQUEST, 'Those lines are not part of the diff');
   }
-  const specs = parseAgentReviewSpecs(body.specs ?? []);
+  return { kind: 'lines', path, side, start, end, excerpt };
+}
+
+function subjectOf(target: GroupingTarget, item: unknown): ExplainSubject {
+  if (!isRecord(item)) {
+    throw fail(BAD_REQUEST, 'A subject is an object');
+  }
+  switch (item.kind) {
+    case 'lines': {
+      return linesOf(target, item);
+    }
+    case 'file': {
+      return { kind: 'file', path: pathIn(target, item.path).path };
+    }
+    case 'change': {
+      return { kind: 'change' };
+    }
+    default: {
+      throw fail(BAD_REQUEST, 'A subject is lines, a file or the change');
+    }
+  }
+}
+
+/** The subjects asked about, each checked against the diff the review shows, the same one once. */
+function subjectsOf(target: GroupingTarget, value: unknown): ExplainSubject[] {
+  const items = value ?? [];
+  if (!Array.isArray(items) || items.length > MAX_SUBJECTS) {
+    throw fail(BAD_REQUEST, `Give at most ${MAX_SUBJECTS} subjects`);
+  }
+  const seen = new Set<string>();
+  return items
+    .map((item) => subjectOf(target, item))
+    .filter((subject) => {
+      const key = JSON.stringify(subject);
+      const fresh = !seen.has(key);
+      seen.add(key);
+      return fresh;
+    });
+}
+
+/** The specs sent, or null when none were given (a later turn keeps its conversation's). */
+function specsOf(body: Record<string, unknown>): AgentReviewSpec[] | null {
+  if (body.specs === undefined) {
+    return null;
+  }
+  const specs = parseAgentReviewSpecs(body.specs);
   if ('error' in specs) {
     throw fail(BAD_REQUEST, specs.error);
   }
+  return specs.specs;
+}
+
+function conversationOf(body: Record<string, unknown>): number | null {
+  const id = body.conversationId ?? null;
+  if (id !== null && (typeof id !== 'number' || !Number.isInteger(id))) {
+    throw fail(BAD_REQUEST, 'Give a valid conversation id');
+  }
+  return id;
+}
+
+/** A turn: what it asks about (at least a subject or a question), where, and against which specs. */
+export function explanationRequest(
+  target: GroupingTarget,
+  body: Record<string, unknown>,
+): ExplanationRequest {
+  if (target.headSha === null) {
+    throw fail(BAD_REQUEST, 'The review has no diff to explain yet');
+  }
+  const question = questionOf(body);
+  const subjects = subjectsOf(target, body.subjects);
+  if (subjects.length === 0 && question === null) {
+    throw fail(BAD_REQUEST, 'Ask a question or pick something to explain');
+  }
   return {
-    path,
-    side,
-    start,
-    end,
-    excerpt,
+    conversationId: conversationOf(body),
+    subjects,
     question,
-    specs: specs.specs,
+    specs: specsOf(body),
     headSha: target.headSha,
-    parentId: null,
   };
 }

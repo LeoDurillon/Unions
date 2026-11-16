@@ -1,4 +1,4 @@
-// The prompts of an Explain: a fresh one with the specs, the change and the lines, and a follow-up's.
+// The prompts of an Explain turn, fresh (specs, change, subjects, the conversation so far) or resumed, and when to resume.
 import {
   resolveAgent,
   sharedPrompt,
@@ -9,20 +9,29 @@ import {
 } from '@union/core';
 
 import type { ReviewTarget } from './agent-review-target';
+import { questionOf, subjectNames, subjectsOf } from './review-explain-subjects';
+
+/** A fresh prompt carries at most this many earlier turns, newest kept... */
+const MAX_HISTORY_TURNS = 6;
+/** ...and at most this many characters of them. */
+const MAX_HISTORY_CHARS = 20_000;
+
+/** Past this many turns, a conversation goes on in a fresh session with its turns as text. */
+const MAX_RESUMED_TURNS = 8;
 
 /** Appended by the host, never editable: the explanation is read from this block. */
 const EXPLANATION_FORMAT = `End your answer with one fenced \`json\` block, and nothing after it:
 
 \`\`\`json
-{"explanation": "Markdown: what the lines do and how, citing code as \`path:line\`.",
- "specs": [{"source": "the spec's name, exactly as given", "quote": "its words, copied exactly", "how": "how the lines implement it"}],
- "docs": [{"path": "docs/spec/export.md", "heading": "Limits", "why": "how it relates to the lines"}],
- "notInSpec": "only when no spec asks for these lines: why they are there anyway"}
+{"explanation": "Markdown: your answer, citing code as \`path:line\`.",
+ "specs": [{"source": "the spec's name, exactly as given", "quote": "its words, copied exactly", "how": "how the code implements it"}],
+ "docs": [{"path": "docs/spec/export.md", "heading": "Limits", "why": "how it relates to the code"}],
+ "notInSpec": "only when no spec asks for this code: why it is there anyway"}
 \`\`\`
 
 - \`explanation\`: a few short paragraphs at most.
 - \`specs\`: only quotes copied word for word from the specifications above; leave it empty when none applies.
-- \`docs\`: the repository's own documents the lines relate to, paths from the repository root.`;
+- \`docs\`: the repository's own documents the code relates to, paths from the repository root.`;
 
 function specsOf(specs: AgentReviewSpec[]): string {
   if (specs.length === 0) {
@@ -40,70 +49,114 @@ function partsOf(parts: SpecPart[]): string {
   return `\n\nA grouping of the change by spec put these lines under:\n\n${listed}`;
 }
 
-function linesOf(target: ReviewTarget, explanation: ReviewExplanation): string {
-  const { path, side, startLine, endLine, excerpt } = explanation;
-  const where =
-    side === 'new'
-      ? `\`${path}\`, lines ${startLine}-${endLine} at HEAD`
-      : `\`${path}\`, lines ${startLine}-${endLine} before the change (removed by it: \`git show ${target.base}:${path}\`)`;
-  return `## The lines\n\n${where}:\n\n\`\`\`\n${excerpt}\n\`\`\``;
+function turnOf(turn: ReviewExplanation): string {
+  const about = turn.subjects.length === 0 ? '' : `About ${subjectNames(turn)}.\n\n`;
+  const answer = turn.result?.explanation ?? '(no answer: it did not finish)';
+  return `### ${questionOf(turn)}\n\n${about}${answer}`;
 }
 
-function questionOf(explanation: ReviewExplanation): string {
-  return explanation.question ?? 'Explain how these lines work, and why the change has them.';
-}
-
-/** The earlier questions and answers of a thread, for a follow-up that runs in a fresh session. */
-function threadOf(earlier: ReviewExplanation[]): string {
-  if (earlier.length === 0) {
+/** The earlier turns, newest kept within the budget, oldest first. */
+function historyOf(earlier: ReviewExplanation[]): string {
+  const kept: string[] = [];
+  let size = 0;
+  for (const turn of earlier.toReversed()) {
+    const text = turnOf(turn);
+    if (kept.length === MAX_HISTORY_TURNS || size + text.length > MAX_HISTORY_CHARS) {
+      break;
+    }
+    kept.unshift(text);
+    size += text.length;
+  }
+  if (kept.length === 0) {
     return '';
   }
-  const turns = earlier.map(
-    (turn) =>
-      `### ${questionOf(turn)}\n\n${turn.result?.explanation ?? '(no answer: it did not finish)'}`,
-  );
-  return `\n\n## Earlier in this thread\n\n${turns.join('\n\n')}`;
+  const left = earlier.length - kept.length;
+  const note = left > 0 ? `${left} earlier questions are left out.\n\n` : '';
+  return `\n\n## Earlier in this conversation\n\n${note}${kept.join('\n\n')}`;
 }
 
-/** Everything the agent needs, for a first question or a follow-up whose session is gone. */
+/** Said when the change moved since the turn before: the earlier answers read older code. */
+function movedOf(turn: ReviewExplanation, before: ReviewExplanation | undefined): string {
+  if (!before || before.headSha === turn.headSha) {
+    return '';
+  }
+  return `\n\nThe change moved since the earlier answers: they read commit ${before.headSha}, it is now at ${turn.headSha} (HEAD). Check again what they said about code that changed.`;
+}
+
+function section(text: string): string {
+  return text === '' ? '' : `\n\n${text}`;
+}
+
+/** Everything the agent needs, for a new conversation or a turn whose session is not resumed. */
 export function explainPrompt(
   db: Db,
   target: ReviewTarget,
   thread: ReviewExplanation[],
   parts: SpecPart[],
 ): string {
-  const explanation = thread.at(-1);
-  if (!explanation) {
+  const turn = thread.at(-1);
+  if (!turn) {
     throw new Error('An explanation thread is never empty');
   }
+  const earlier = thread.slice(0, -1);
   return `${sharedPrompt(db, target.projectId)}
 
 ${resolveAgent(db, 'review_explain').prompt}
 
-${specsOf(explanation.specs)}
+${specsOf(turn.specs)}
 
 ## The change
 
 ${target.about}
 
-The change is checked out in the repository root, at HEAD. Read it with \`git diff ${target.base}...HEAD -- <path>\` and read any file you need. Run one git command per call: no \`&&\`, no \`cd\`. Do not change any file.
-
-${linesOf(target, explanation)}${partsOf(parts)}${threadOf(thread.slice(0, -1))}
+The change is checked out in the repository root, at HEAD. Read it with \`git diff ${target.base}...HEAD -- <path>\` and read any file you need. Run one git command per call: no \`&&\`, no \`cd\`. Do not change any file.${section(subjectsOf(target, turn))}${partsOf(parts)}${historyOf(earlier)}${movedOf(turn, earlier.at(-1))}
 
 ## The question
 
-${questionOf(explanation)}
+${questionOf(turn)}
 
 ## Your answer
 
 ${EXPLANATION_FORMAT}`;
 }
 
-/** A follow-up in the session that gave the earlier answers. */
-export function followUpPrompt(explanation: ReviewExplanation): string {
-  return `A follow-up question on the same lines:
+/** The next turn, in the session that gave the earlier answers. */
+export function followUpPrompt(
+  target: ReviewTarget,
+  turn: ReviewExplanation,
+  before: ReviewExplanation,
+  parts: SpecPart[],
+): string {
+  const specs =
+    JSON.stringify(turn.specs) === JSON.stringify(before.specs)
+      ? ''
+      : `\n\nThe reviewer changed the specifications; read them again:\n\n${specsOf(turn.specs)}`;
+  return `The next question in this conversation.${movedOf(turn, before)}${specs}${section(subjectsOf(target, turn))}${partsOf(parts)}
 
-${questionOf(explanation)}
+## The question
+
+${questionOf(turn)}
 
 ${EXPLANATION_FORMAT}`;
+}
+
+/** The thread's last turn, the one asked, and the turn before it. */
+export function lastTurns(thread: ReviewExplanation[]): {
+  turn: ReviewExplanation | undefined;
+  before: ReviewExplanation | undefined;
+} {
+  return { turn: thread.at(-1), before: thread.slice(0, -1).at(-1) };
+}
+
+/**
+ * The session a turn resumes: a ticket's, from the answer just before it, while the conversation is
+ * short. A pull request's container is new each time, and a longer conversation starts a fresh
+ * session with the earlier turns as text, so a session does not grow without end. Null: run fresh.
+ */
+export function resumedSession(thread: ReviewExplanation[]): string | null {
+  const { turn, before } = lastTurns(thread);
+  if (!turn || turn.ticketId === null || before?.status !== 'succeeded') {
+    return null;
+  }
+  return thread.length > MAX_RESUMED_TURNS ? null : before.sessionId;
 }

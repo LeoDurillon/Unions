@@ -142,6 +142,8 @@ export * from './preview/shared-stacks';
 export * from './ticket/project-files';
 export * from './custom-agents/prompt-writer';
 export * from './ticket/project-scripts';
+export * from './review/explain-conversations';
+export * from './review/explain-subjects';
 export * from './review/review-explanations';
 export * from './review/explanation-spec-parts';
 export * from './review/review-groupings';

@@ -237,6 +237,12 @@ type ReviewPayloads = {
     status: Column<typeof tables.reviewExplanations, 'status'>;
     error: string | null;
   };
+  review_explain_conversation_changed: {
+    conversationId: number;
+    reviewId: number | null;
+    /** The conversation was deleted. */
+    removed: boolean;
+  };
   agent_review_changed: {
     agentReviewId: number;
     reviewId: number | null;

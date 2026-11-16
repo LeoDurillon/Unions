@@ -102,7 +102,11 @@ export function ExplainProvider({
       },
       explain: ({ path, side, start, end, question }) => {
         choose(true);
-        mutate({ path, side, start, end, question, specs: specs ?? [] });
+        mutate({
+          subjects: [{ kind: 'lines', path, side, start, end }],
+          question,
+          specs: specs ?? [],
+        });
       },
       pending: isPending,
       error,

@@ -1,27 +1,30 @@
-// The explanation routes of a review, under its API root (`reviewBase`).
+// The Explain routes of a review, under its API root (`reviewBase`): conversations, turns, their logs.
 
 import type { AgentReviewSpec } from '@union/core';
 
 import type {
-  ExplanationLogView,
+  ConversationView,
   ExplanationView,
-} from '../../../src/routes/review/review-explanations';
+} from '../../../src/routes/review/explanation-views';
+import type { ExplanationLogView } from '../../../src/routes/review/review-explanations';
 import { request } from '../app/api';
 
-/** New lines to explain, or a follow-up (`parentId` and `question`) on an explanation. */
-export type ExplanationAsk =
-  | {
-      path: string;
-      side: 'old' | 'new';
-      start: number;
-      end: number;
-      question: string | null;
-      specs: AgentReviewSpec[];
-    }
-  | { parentId: number; question: string };
+/** What a turn asks about; the server reads the lines' text from the diff. */
+type SubjectAsk =
+  | { kind: 'lines'; path: string; side: 'old' | 'new'; start: number; end: number }
+  | { kind: 'file'; path: string }
+  | { kind: 'change' };
+
+/** A turn: in a new conversation, or in `conversationId`; without `specs` it keeps the last turn's. */
+export type ExplanationAsk = {
+  conversationId?: number;
+  subjects: SubjectAsk[];
+  question: string | null;
+  specs?: AgentReviewSpec[];
+};
 
 export const explanationApi = {
-  list: (base: string): Promise<ExplanationView[]> => request('GET', `${base}/explanations`),
+  list: (base: string): Promise<ConversationView[]> => request('GET', `${base}/explanations`),
   start: (base: string, ask: ExplanationAsk): Promise<ExplanationView> =>
     request('POST', `${base}/explanations`, ask),
   cancel: (base: string, id: number): Promise<ExplanationView> =>

@@ -311,12 +311,14 @@
   refreshes on its events while a report is queued or running; labels and Copy as markdown come from the browser-safe
   `@union/core/review-report-markdown`.
 - Explain: `routes/review/review-explanations.ts` (mounted beside the groupings from `grouping-targets.ts`, on the same
-  `GroupingTarget` and its refusal) lists a review's explanations with their spec parts and `outdated`, queues one
-  (`explanation-request.ts`: lines checked against the file's patch, excerpt from `diffExcerpt`, specs through
-  `parseAgentReviewSpecs`; a follow-up copies its parent's lines and specs), cancels one through a command, and
-  serves its agent lines (`/log`). The client: `explain-context.tsx` (provided by `ReviewPage`: the panel's open
+  `GroupingTarget` and its refusal) lists a review's conversations with their turns (`explanation-views.ts`: spec
+  parts and `outdated` per turn), queues a turn in a new conversation or `conversationId`
+  (`explanation-request.ts`: up to 10 subjects, lines, a file or the change, each checked against the diff, a
+  line's excerpt from `diffExcerpt`; specs through `parseAgentReviewSpecs`, kept from the last turn when not sent;
+  one waiting turn per conversation), renames and deletes a conversation (`/conversations/:id`, refused while a
+  turn waits), cancels a turn through a command, and serves its agent lines (`/log`). The client: `explain-context.tsx` (provided by `ReviewPage`: the panel's open
   state, the review's specs, asking, and the lines to show), the panel
-  `explain-panel.tsx` beside the diff in `diff-area.tsx`, `explanation-card.tsx` (a thread),
+  `explain-panel.tsx` beside the diff in `diff-area.tsx`, `explanation-card.tsx` (a conversation),
   `explanation-answer.tsx`, `explanation-progress.tsx`, `lib/review/use-explanations.ts` (refreshed by its events; the answer's log is polled while it runs, agent output is not on the stream).
   Opening an explanation's lines picks the file in `diff-body.tsx` and selects them in `open-file.tsx` until the
   user picks or selects another; Copy as comment starts the comment editor with the answer quoted.

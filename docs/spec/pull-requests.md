@@ -144,9 +144,16 @@ commit), "Waiting for a run slot" or "Explaining…" with the agent's last steps
 **How it works** (with links to the code it cites in the change), **Specs** (quotes of the specs, each with its
 source), **Docs** (the repository's own documents) or **Not in the spec**. The host keeps a spec quote only when it is
 found in a spec that was sent, and a doc only when its path is in the checkout; the panel counts what it dropped.
-**Ask a follow-up** resumes the agent's session on a ticket (a pull request's runs again with the thread), and
-**Copy as comment** opens the comment editor on the lines with the answer quoted, nothing sent. Older explanations
-are folded below the newest; one asked on another commit is **Outdated**, with **Explain again**.
+Each ask starts a **conversation** ([plan](../plans/explain-conversations.md)): its turns, oldest first, each a
+question and the **subjects** it is about (lines of the diff, a file of it, or the whole change; up to 10, checked
+against the diff; none for a plain follow-up). **Ask a follow-up** adds a turn to the conversation, once its last
+answer is in (one turn waits per conversation). On a ticket, the next turn resumes the agent's session while the
+conversation has at most 8 turns; a pull request's, or a longer conversation, runs fresh with the newest 6 earlier
+turns (20,000 characters at most) as text. When the change moved since the turn before, the prompt says so. A
+conversation is titled by its first question's first line, else its first subject, and can be renamed or deleted
+(not while a turn waits). **Copy as comment** opens the comment editor on the first lines with the answer quoted,
+nothing sent. Older conversations are folded below the one asked in last; a turn asked on another commit is
+**Outdated**, with **Explain again**.
 
 The specs are the review's (its **Specs** bar). The agent is `review_explain` in Union settings (Haiku by default, read-only
 tools and git reads). A ticket's runs in its own container, refused while the ticket runs; a pull request's in a

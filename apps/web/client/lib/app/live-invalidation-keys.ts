@@ -16,6 +16,7 @@ const REVIEW_RUN_PARTS: Record<string, string> = {
   review_grouping_changed: 'grouping',
   review_report_changed: 'report',
   review_explanation_changed: 'explanations',
+  review_explain_conversation_changed: 'explanations',
   review_agent_run_changed: 'review-agents',
 };
 

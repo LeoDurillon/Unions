@@ -1,4 +1,4 @@
-// Tests the explanation runner with a fake agent: answers, failures, follow-ups and the pull request container.
+// Tests the Explain runner with a fake agent: answers, failures, the next turns and the pull request container.
 
 import { afterEach, beforeEach, expect, test } from 'bun:test';
 import { cp, mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
@@ -86,15 +86,11 @@ function answer(block: unknown, sessionId = 's1'): AgentOutcome {
 
 function ask(extra: Partial<ExplanationRequest> = {}): ExplanationRequest {
   return {
-    path: 'a.ts',
-    side: 'new',
-    start: 2,
-    end: 2,
-    excerpt: 'const b = 3;',
+    conversationId: null,
+    subjects: [{ kind: 'lines', path: 'a.ts', side: 'new', start: 2, end: 2, excerpt: 'b = 3' }],
     question: null,
     specs: [{ kind: 'pr', label: 'PR description', text: 'B becomes 3.', prs: [] }],
     headSha: 'h1',
-    parentId: null,
     ...extra,
   };
 }
@@ -196,7 +192,7 @@ test('an answer without the block fails, saying how it ended', async () => {
   expect(explanationsOf(db, ticket)[0]?.error).toContain('no explanation block');
 });
 
-test('a follow-up resumes the session; a lost session runs again with the thread', async () => {
+test('the next turn resumes the session; a lost session runs again with the conversation', async () => {
   const parent = queueExplanation(db, ticket, ask());
   db.update(schema.reviewExplanations)
     .set({ status: 'running' })
@@ -208,16 +204,22 @@ test('a follow-up resumes the session; a lost session runs again with the thread
     result: { ...first, notInSpec: null, dropped: 0 },
     sessionId: 's1',
   });
-  queueExplanation(db, ticket, ask({ parentId: parent.id, question: 'And a?' }));
+  const next = { conversationId: parent.conversationId, subjects: [], question: 'And a?' };
+  queueExplanation(db, ticket, ask(next));
   replies = [
     { kind: 'error', message: 'No conversation found with session ID: s1' },
     answer({ explanation: 'a stays 1.' }, 's2'),
   ];
   await drain();
   expect(runs[0]?.resumeSessionId).toBe('s1');
-  expect(runs[0]?.prompt).toStartWith('A follow-up question on the same lines:\n\nAnd a?');
+  expect(runs[0]?.prompt).toStartWith(
+    'The next question in this conversation.\n\n## The question\n\nAnd a?',
+  );
   expect(runs[1]?.resumeSessionId).toBeNull();
-  expect(runs[1]?.prompt).toContain('## Earlier in this thread\n\n### Explain how');
+  expect(runs[1]?.prompt).toContain(
+    '## Earlier in this conversation\n\n### Explain how these lines work',
+  );
+  expect(runs[1]?.prompt).toContain('About a.ts:2.');
   expect(runs[1]?.prompt).toContain('Sets b.');
   expect(explanationsOf(db, ticket)[0]).toMatchObject({ status: 'succeeded', sessionId: 's2' });
 });

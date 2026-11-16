@@ -666,6 +666,13 @@
       "when": 1794644695281,
       "tag": "0094_setup_checks",
       "breakpoints": true
+    },
+    {
+      "idx": 95,
+      "version": "6",
+      "when": 1794826123512,
+      "tag": "0095_explain_conversations",
+      "breakpoints": true
     }
   ]
 }

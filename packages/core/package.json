@@ -19,6 +19,7 @@
     "./diff": "./src/diff/diff.ts",
     "./diff-hunks": "./src/diff/diff-hunks.ts",
     "./diff-links": "./src/diff/diff-links.ts",
+    "./explain-subjects": "./src/review/explain-subjects.ts",
     "./pr-stacks": "./src/stack/pr-stacks.ts",
     "./github-stacks": "./src/stack/github-stacks.ts",
     "./notion-markdown": "./src/integrations/notion-markdown.ts",

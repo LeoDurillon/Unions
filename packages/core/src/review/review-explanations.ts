@@ -1,13 +1,20 @@
-// The explanations of a review's lines: queued by the web, claimed and finished by the worker.
+// The turns of a review's Explain conversations: queued by the web, claimed and finished by the worker.
 
-import { and, asc, desc, eq, gt, inArray, type SQL } from 'drizzle-orm';
+import { and, asc, desc, eq, gt, lte, type SQL } from 'drizzle-orm';
 
 import type { Db } from '../db';
-import type { ExplanationResult } from '../schema/schema-review-explanations';
+import type { ExplainSubject, ExplanationResult } from '../schema/schema-review-explanations';
 import * as schema from '../tables';
 import { emitEvent } from '../ticket/tickets';
 import type { AgentReviewSpec } from './agent-review-specs';
 import type { AgentReviewOwner } from './agent-reviews';
+import {
+  conversationChanged,
+  ConversationBusyError,
+  createConversation,
+  ownedConversation,
+} from './explain-conversations';
+import { conversationTitle } from './explain-subjects';
 import {
   cancelQueuedReviewRun,
   claimReviewRun,
@@ -19,6 +26,8 @@ export type ReviewExplanation = typeof schema.reviewExplanations.$inferSelect;
 export type {
   ExplainedDoc,
   ExplainedSpec,
+  ExplainLines,
+  ExplainSubject,
   ExplanationResult,
 } from '../schema/schema-review-explanations';
 
@@ -27,24 +36,21 @@ export type ExplanationOutcome =
   | { status: 'failed'; error: string }
   | { status: 'cancelled' };
 
-/** What the user asked about: lines of a file of the diff shown at `headSha`. */
+/** A turn to ask: in a new conversation (`conversationId` null) or an existing one of the review. */
 export type ExplanationRequest = {
-  path: string;
-  side: 'old' | 'new';
-  start: number;
-  end: number;
-  excerpt: string;
+  conversationId: number | null;
+  subjects: ExplainSubject[];
   question: string | null;
-  specs: AgentReviewSpec[];
+  /** The specs sent; null keeps the conversation's last turn's (none for a new one). */
+  specs: AgentReviewSpec[] | null;
+  /** The commit the review shows. */
   headSha: string;
-  /** The explanation a follow-up follows. */
-  parentId: number | null;
 };
 
-const ACTIVE = ['queued', 'running'] as const;
+const ACTIVE = new Set<string>(['queued', 'running']);
 
-/** The same lines (or the same thread) already wait for an answer. */
-export class ExplanationBusyError extends Error {}
+/** Thrown when the conversation asked into is not the review's. */
+export class UnknownConversationError extends Error {}
 
 type Executor = Parameters<typeof emitEvent>[0];
 
@@ -60,7 +66,7 @@ export function explanationOwner(explanation: ReviewExplanation): AgentReviewOwn
     : { kind: 'ticket', id: explanation.ticketId };
 }
 
-/** Every change is an event, as for the groupings: the panel polls while one is active. */
+/** Every change is an event, as for the groupings: the page polls while one is active. */
 function changed(db: Executor, explanation: ReviewExplanation): void {
   emitEvent(db, {
     type: 'review_explanation_changed',
@@ -74,7 +80,7 @@ function changed(db: Executor, explanation: ReviewExplanation): void {
   });
 }
 
-/** The owner's explanations, newest first. */
+/** The owner's turns, newest first. */
 export function explanationsOf(db: Db, owner: AgentReviewOwner): ReviewExplanation[] {
   return db
     .select()
@@ -91,64 +97,67 @@ export function getExplanation(db: Db, id: number): ReviewExplanation | null {
   );
 }
 
-/** The explanation and the ones it follows, first question first. */
+/** The turns of the explanation's conversation up to it, first question first. */
 export function explanationThread(db: Db, explanation: ReviewExplanation): ReviewExplanation[] {
-  const thread = [explanation];
-  for (
-    let parent = explanation.parentId === null ? null : getExplanation(db, explanation.parentId);
-    parent !== null;
-    parent = parent.parentId === null ? null : getExplanation(db, parent.parentId)
-  ) {
-    thread.unshift(parent);
-  }
-  return thread;
-}
-
-/** Waiting for the same thread, or for the same lines when it starts one. */
-function sameAsk(request: ExplanationRequest): SQL | undefined {
   const table = schema.reviewExplanations;
-  if (request.parentId !== null) {
-    return eq(table.parentId, request.parentId);
-  }
-  return and(
-    eq(table.path, request.path),
-    eq(table.side, request.side),
-    eq(table.startLine, request.start),
-    eq(table.endLine, request.end),
-  );
+  return db
+    .select()
+    .from(table)
+    .where(and(eq(table.conversationId, explanation.conversationId), lte(table.id, explanation.id)))
+    .orderBy(asc(table.id))
+    .all();
 }
 
-/** Queues an explanation; refused while the same lines (or thread) wait for one. */
+function lastTurn(db: Executor, conversationId: number): ReviewExplanation | undefined {
+  const table = schema.reviewExplanations;
+  return db
+    .select()
+    .from(table)
+    .where(eq(table.conversationId, conversationId))
+    .orderBy(desc(table.id))
+    .get();
+}
+
+/**
+ * Queues a turn, in a new conversation or after the last turn of one; refused while that one's last
+ * turn waits for its answer.
+ */
 export function queueExplanation(
   db: Db,
   owner: AgentReviewOwner,
   request: ExplanationRequest,
 ): ReviewExplanation {
   return db.transaction((tx) => {
-    const waiting = tx
-      .select()
-      .from(schema.reviewExplanations)
-      .where(and(owns(owner), inArray(schema.reviewExplanations.status, ACTIVE), sameAsk(request)))
-      .get();
-    if (waiting) {
-      throw new ExplanationBusyError('The agent is already explaining these lines');
+    const { conversationId, subjects, question, headSha } = request;
+    const existing = conversationId === null ? null : ownedConversation(tx, owner, conversationId);
+    if (conversationId !== null && existing === null) {
+      throw new UnknownConversationError('Unknown conversation');
     }
+    const last = existing ? lastTurn(tx, existing.id) : undefined;
+    if (last && ACTIVE.has(last.status)) {
+      throw new ConversationBusyError('The agent is still answering in this conversation');
+    }
+    const conversation =
+      existing ?? createConversation(tx, owner, conversationTitle(question, subjects));
     const explanation = tx
       .insert(schema.reviewExplanations)
       .values({
         ...(owner.kind === 'ticket' ? { ticketId: owner.id } : { reviewId: owner.id }),
-        parentId: request.parentId,
-        path: request.path,
-        side: request.side,
-        startLine: request.start,
-        endLine: request.end,
-        excerpt: request.excerpt,
-        question: request.question,
-        specs: request.specs,
-        headSha: request.headSha,
+        conversationId: conversation.id,
+        subjects,
+        question,
+        specs: request.specs ?? last?.specs ?? [],
+        headSha,
       })
       .returning()
       .get();
+    const touched = tx
+      .update(schema.reviewExplainConversations)
+      .set({ updatedAt: Date.now() })
+      .where(eq(schema.reviewExplainConversations.id, conversation.id))
+      .returning()
+      .get();
+    conversationChanged(tx, touched);
     changed(tx, explanation);
     return explanation;
   });
@@ -158,7 +167,7 @@ function ownerKey(explanation: ReviewExplanation): string {
   return explanation.ticketId === null ? `r${explanation.reviewId}` : `t${explanation.ticketId}`;
 }
 
-/** The next queued explanation that can start, now running; null when none can. */
+/** The next queued turn that can start, now running; null when none can. */
 export function claimExplanation(db: Db): ReviewExplanation | null {
   return claimReviewRun(db, life);
 }
@@ -180,17 +189,17 @@ export function finishExplanation(db: Db, id: number, outcome: ExplanationOutcom
   changed(db, explanation);
 }
 
-/** Cancels a explanation still waiting for a slot; false when it already started (the runner stops it). */
+/** Cancels a turn still waiting for a slot; false when it already started (the runner stops it). */
 export function cancelQueuedExplanation(db: Db, id: number): boolean {
   return cancelQueuedReviewRun(db, life, id);
 }
 
-/** Fails the explanations a stopped worker left running, and returns them. */
+/** Fails the turns a stopped worker left running, and returns them. */
 export function failInterruptedExplanations(db: Db): ReviewExplanation[] {
   return failInterruptedReviewRuns(db, life);
 }
 
-/** The agent's output lines of an explanation after line `after`, oldest first. */
+/** The agent's output lines of a turn after line `after`, oldest first. */
 export function explanationLines(
   db: Db,
   id: number,
@@ -213,7 +222,7 @@ const life: ReviewRunLife<ReviewExplanation> = {
     finishExplanation(db, id, { status: 'failed', error });
   },
   noun: 'explanation',
-  // One explanation at a time per review: the oldest queued one whose review has none running.
+  // One turn at a time per review: the oldest queued one whose review has none running.
   pick: (active) => {
     const busy = new Set(
       active.filter((row) => row.status === 'running').map((row) => ownerKey(row)),

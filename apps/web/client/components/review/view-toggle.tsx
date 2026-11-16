@@ -2,7 +2,7 @@
 
 import { useState, type ReactElement } from 'react';
 
-import { isExplaining, useExplanations } from '../../lib/review/use-explanations';
+import { explainingCount, useExplanations } from '../../lib/review/use-explanations';
 import { Segmented, type SegmentOption } from '../ui/choice';
 import { useExplain, type ExplainState } from './explain-context';
 import type { DiffView } from './file-diff';
@@ -38,8 +38,7 @@ export function useDiffView(): [DiffView, (view: DiffView) => void] {
 }
 
 function ExplainButton({ explain }: { explain: ExplainState }): ReactElement {
-  const rows = useExplanations(explain.target).explanations.data ?? [];
-  const running = rows.filter((row) => isExplaining(row)).length;
+  const running = explainingCount(useExplanations(explain.target).explanations.data ?? []);
   return (
     <button
       type="button"

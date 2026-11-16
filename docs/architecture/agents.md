@@ -72,7 +72,7 @@ their own prompt from `sharedPrompt` and the agent's prompt, in the modules of t
 | `pr_replies`                                          | ticket's                            | implementer's                  | no      | `pr-reply-suggestions.ts`                      |
 | `review_comments`                                     | ticket's, or `union-a<id>` for a PR | fresh                          | no      | `agent-review.ts`, `agent-review-stack.ts`     |
 | `review_groups`                                       | ticket's, or `union-g<id>` for a PR | fresh                          | no      | `review-grouping.ts`                           |
-| `review_explain`                                      | ticket's, or `union-e<id>` for a PR | a ticket's follow-up resumes   | no      | `review-explain.ts`                            |
+| `review_explain`                                      | ticket's, or `union-e<id>` for a PR | a ticket's next turn resumes   | no      | `review-explain.ts`                            |
 | `review_report`                                       | ticket's, or `union-s<id>` for a PR | fresh                          | its own | `review-report.ts`                             |
 | review agents (custom, of the review kind)            | `union-v<id>`, for a ticket too     | fresh                          | yes     | `review-agent-run.ts`                          |
 | `lesson_writer`, `lesson_tidier`                      | throwaway, no repository            | fresh                          | no      | `lesson-writer-run.ts`                         |

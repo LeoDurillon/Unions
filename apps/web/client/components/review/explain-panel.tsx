@@ -1,28 +1,15 @@
-// The Explain side panel of the review: the specs explanations use, and the threads, newest first.
+// The Explain side panel of the review: the specs explanations use, and the conversations, the latest asked first.
 
 import type { ReactElement } from 'react';
 
-import type { ExplanationView } from '../../../src/routes/review/review-explanations';
+import type { ConversationView } from '../../../src/routes/review/explanation-views';
 import { useExplanations } from '../../lib/review/use-explanations';
 import { ErrorText } from '../ui/ui';
 import { useExplain, type ExplainState } from './explain-context';
-import { ExplanationThread, linesLabel } from './explanation-card';
+import { ExplanationThread } from './explanation-card';
 
-/** Each first explanation with its follow-ups, oldest first; the threads newest first. */
-export function threadsOf(rows: ExplanationView[]): ExplanationView[][] {
-  const oldest = rows.toSorted((a, b) => a.id - b.id);
-  const threads = new Map<number, ExplanationView[]>();
-  const rootOf = new Map<number, number>();
-  for (const row of oldest) {
-    const root = row.parentId === null ? row.id : (rootOf.get(row.parentId) ?? row.id);
-    rootOf.set(row.id, root);
-    threads.set(root, [...(threads.get(root) ?? []), row]);
-  }
-  return [...threads.values()].toReversed();
-}
-
-function statusOf(thread: ExplanationView[]): string {
-  const last = thread.at(-1);
+function statusOf(conversation: ConversationView): string {
+  const last = conversation.turns.at(-1);
   if (last?.status === 'queued' || last?.status === 'running') {
     return ' · explaining';
   }
@@ -37,14 +24,13 @@ function Body({
   paths: ReadonlySet<string>;
 }): ReactElement {
   const explanations = useExplanations(explain.target);
-  const threads = threadsOf(explanations.explanations.data ?? []);
-  const [newest, ...older] = threads;
+  const [newest, ...older] = explanations.explanations.data ?? [];
   return (
     <div className="space-y-4">
       <ErrorText error={explanations.explanations.error} />
       {newest ? (
         <ExplanationThread
-          thread={newest}
+          thread={newest.turns}
           explain={explain}
           explanations={explanations}
           paths={paths}
@@ -55,18 +41,18 @@ function Body({
           the specs and docs they relate to.
         </p>
       )}
-      {older.map((thread) => (
+      {older.map((conversation) => (
         <details
-          key={thread[0]?.id}
+          key={conversation.id}
           className="rounded-md border border-zinc-200 p-2 dark:border-zinc-800"
         >
           <summary className="cursor-pointer truncate font-mono text-xs">
-            {thread[0] ? linesLabel(thread[0]) : ''}
-            {statusOf(thread)}
+            {conversation.title}
+            {statusOf(conversation)}
           </summary>
           <div className="mt-2">
             <ExplanationThread
-              thread={thread}
+              thread={conversation.turns}
               explain={explain}
               explanations={explanations}
               paths={paths}

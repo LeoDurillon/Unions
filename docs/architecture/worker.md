@@ -242,12 +242,16 @@
   review; the summary and comments on no PR of the stack go to the top one, the comments as general ones that
   start with "Not tied to a pull request".
 - `review-explain.ts`: `ReviewExplainRunner` (in `review-runs.ts` with the agent reviews and the groupings, same
-  slots) runs queued `review_explanations`, one per review at a time (`claimExplanation`): a ticket's in its own
+  slots) runs the queued turns of the Explain conversations (`review_explanations`, each in a
+  `review_explain_conversations` row), one per review at a time (`claimExplanation`): a ticket's in its own
   container, a pull request's in a throwaway `union-e<id>` container (`openTarget`, removed after the run and by
-  `recover`). The prompt (`review-explain-prompt.ts`) gives the specs sent, the spec parts of the newest grouping
-  (`explanationSpecParts`), the change, the lines and the question; a ticket's follow-up resumes the session of the
-  answer it follows (`runResumable`, the whole thread in a fresh prompt when it is lost), a pull request's runs
-  fresh with the thread. `review-explain-result.ts` reads the JSON block and keeps the spec quotes found in a spec
+  `recover`). The prompt (`review-explain-prompt.ts`) gives the specs sent, the change, the turn's subjects
+  (`review-explain-subjects.ts`: lines with their text, a file with its counts, the whole change as its file list),
+  the spec parts of the newest grouping its lines fall in (`turnSpecParts`), the earlier turns (the newest 6, at
+  most 20,000 characters), a note when the change moved since the turn before, and the question. `resumedSession`
+  decides: a ticket's turn resumes the session of the answer just before it while the conversation has at most 8
+  turns (`runResumable`, the fresh prompt when the session is lost); a pull request's, or a longer conversation,
+  runs fresh. `review-explain-result.ts` reads the JSON block and keeps the spec quotes found in a spec
   sent and the docs whose path exists in the checkout. Lines go to `agent_log` with `explanation_id` (and the
   ticket, so its usage counts them). Cancellation: the `cancel_review_explanation` command (`command-cancels.ts`).
 - `review-report.ts`: `ReviewReportRunner` (in `review-runs.ts`, same slots) runs queued `review_reports`: a

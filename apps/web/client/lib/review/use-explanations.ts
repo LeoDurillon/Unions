@@ -1,11 +1,12 @@
-// The review's explanations, polled while one waits or runs, with asking, following up and cancelling.
+// The review's Explain conversations, polled while a turn waits or runs, with asking and cancelling.
 
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 
 import type {
-  ExplanationLogView,
+  ConversationView,
   ExplanationView,
-} from '../../../src/routes/review/review-explanations';
+} from '../../../src/routes/review/explanation-views';
+import type { ExplanationLogView } from '../../../src/routes/review/review-explanations';
 import { explanationApi, type ExplanationAsk } from './explanation-api';
 import { reviewBase, type ReviewTarget } from './review-target';
 
@@ -14,12 +15,20 @@ const SAFETY_POLL_MS = 30_000;
 /** An explanation's agent output is not on the live stream: its log is polled while it runs. */
 const LOG_POLL_MS = 3000;
 
-export function isExplaining(explanation: ExplanationView): boolean {
+function isExplaining(explanation: ExplanationView): boolean {
   return explanation.status === 'queued' || explanation.status === 'running';
 }
 
+/** The conversations whose last turn waits for or gets its answer. */
+export function explainingCount(conversations: ConversationView[]): number {
+  return conversations.filter((conversation) => {
+    const last = conversation.turns.at(-1);
+    return last !== undefined && isExplaining(last);
+  }).length;
+}
+
 export function useExplanations(target: ReviewTarget): {
-  explanations: UseQueryResult<ExplanationView[]>;
+  explanations: UseQueryResult<ConversationView[]>;
   ask: ReturnType<typeof useMutation<ExplanationView, Error, ExplanationAsk>>;
   cancel: ReturnType<typeof useMutation<ExplanationView, Error, number>>;
 } {
@@ -30,7 +39,7 @@ export function useExplanations(target: ReviewTarget): {
     queryKey,
     queryFn: () => explanationApi.list(base),
     refetchInterval: (query) =>
-      query.state.data?.some((row) => isExplaining(row)) ? SAFETY_POLL_MS : false,
+      explainingCount(query.state.data ?? []) > 0 ? SAFETY_POLL_MS : false,
   });
   const refresh = (): Promise<void> => queryClient.invalidateQueries({ queryKey });
   return {
