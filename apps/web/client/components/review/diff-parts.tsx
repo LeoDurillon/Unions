@@ -9,6 +9,7 @@ import type { Token } from '../../lib/markdown/highlight';
 import type { Selection, Side } from '../../lib/review/diff-selection';
 import type { SubjectAsk } from '../../lib/review/explanation-api';
 import { headerKey } from '../../lib/review/spec-hunks';
+import { ExplainMarkButton, useExplainMark, type ExplainMark } from '../explain/explain-line-marks';
 import { ExplainSplit } from '../explain/explain-split';
 import { useLineMark, type LineMark } from './report-line-marks';
 
@@ -48,39 +49,68 @@ function Mark({ mark }: { mark: LineMark }): ReactElement | null {
   return (
     <span
       title={mark.titles.join('\n')}
-      className="absolute top-0 left-0.5 rounded bg-red-100 px-1 font-sans text-[10px] font-medium text-red-700 dark:bg-red-950 dark:text-red-300"
+      className="rounded bg-red-100 px-1 font-sans text-[10px] font-medium text-red-700 dark:bg-red-950 dark:text-red-300"
     >
       {mark.numbers.join('·')}
     </span>
   );
 }
 
+/** The marks at the top left of a line number: the spec report's, then Explain's. */
+function Marks({
+  mark,
+  asked,
+}: {
+  mark: LineMark | null;
+  asked: ExplainMark | null;
+}): ReactElement | null {
+  if (!mark?.first && !asked?.first) {
+    return null;
+  }
+  return (
+    <span className="absolute top-0 left-0.5 flex gap-0.5">
+      {mark ? <Mark mark={mark} /> : null}
+      {asked ? <ExplainMarkButton mark={asked} /> : null}
+    </span>
+  );
+}
+
+/** The cell's bars: red for the report's lines (right), indigo for the lines Explain asked about (left). */
+function cellClass(mark: LineMark | null, asked: ExplainMark | null): string {
+  const report = mark ? 'border-r-2 border-red-400' : '';
+  const explain = asked
+    ? 'border-l-2 border-l-indigo-500 bg-indigo-50 dark:border-l-indigo-400 dark:bg-indigo-950/50'
+    : '';
+  return `w-12 select-none px-2 text-right align-top ${mark || asked ? 'relative' : ''} ${report} ${explain}`;
+}
+
 /**
- * A line number; a button that starts (shift: extends) a selection when the line takes comments.
- * `marked`: a line of the new side, which the spec report's items can point at.
+ * A line number of `side`; a button that starts (shift: extends) a selection when the line takes
+ * comments. The new side's lines carry the spec report's marks; both sides, Explain's.
  */
 export function Gutter({
   value,
+  side,
   onPick,
-  marked = false,
 }: {
   value: number | null;
+  side: Side;
   onPick: ((extend: boolean) => void) | null;
-  marked?: boolean;
 }): ReactElement {
-  const mark = useLineMark(marked ? value : null);
-  const cell = `w-12 select-none px-2 text-right align-top ${mark ? 'relative border-r-2 border-red-400' : ''}`;
+  const mark = useLineMark(side === 'new' ? value : null);
+  const asked = useExplainMark(side, value);
+  const cell = cellClass(mark, asked);
   if (value === null || !onPick) {
     return (
       <td className={`${cell} text-zinc-500`}>
-        {mark ? <Mark mark={mark} /> : null}
+        <Marks mark={mark} asked={asked} />
         {value ?? ''}
       </td>
     );
   }
   return (
     <td className={cell}>
-      {mark ? <Mark mark={mark} /> : null}
+      <Marks mark={mark} asked={asked} />
       <button
         type="button"
         className="text-zinc-500 hover:text-indigo-600"

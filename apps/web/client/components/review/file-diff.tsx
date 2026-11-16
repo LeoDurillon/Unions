@@ -70,8 +70,8 @@ function Row({
   const tone = selected ? SELECTED_TONE : ROW_TONE[line.kind];
   return (
     <tr className={tone}>
-      <Gutter value={oldNumber} onPick={anchor?.side === 'old' ? onPick : null} />
-      <Gutter value={newNumber} onPick={anchor?.side === 'new' ? onPick : null} marked />
+      <Gutter value={oldNumber} side="old" onPick={anchor?.side === 'old' ? onPick : null} />
+      <Gutter value={newNumber} side="new" onPick={anchor?.side === 'new' ? onPick : null} />
       <td className="whitespace-pre px-2">
         <span className="select-none text-zinc-500">{SIGN[line.kind]} </span>
         <Code line={line} tokens={tokens} />

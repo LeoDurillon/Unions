@@ -325,7 +325,9 @@
   chips, `explanation-answer.tsx`, `explanation-progress.tsx`; `explain-composer.tsx`, with the conversation's
   draft). The diff's Explain buttons are `explain-split.tsx` (ask in a new conversation, or Add to one of
   `offeredConversations`); `explain-collect.ts` keeps the drafts (`explain-drafts.ts`, in `localStorage` per review),
-  the conversation added to last and the notice (`explain-notice.tsx`, rendered by `ExplainScope`). Bubbles and cards are shared
+  the conversation added to last and the notice (`explain-notice.tsx`, rendered by `ExplainScope`).
+  `explain-line-marks.tsx` (provided by `report-file-diff.tsx` around the open file's diff) gives each line number
+  of `Gutter` (`diff-parts.tsx`, both sides) the conversations asking about it, from their current answers. Bubbles and cards are shared
   with investigations (`components/ui/conversation-parts.tsx`). `lib/review/use-explanations.ts` reads the
   conversations (refreshed by their events; a turn's log is polled while it runs, agent output is not on the stream).
   A chip or citation opens the Diff tab and picks the file in `diff-body.tsx`, selecting the lines in `open-file.tsx`

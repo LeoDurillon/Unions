@@ -101,6 +101,9 @@ The list on the left shows every conversation of the review, the latest first, w
 comment** under an answer to quote it in a draft comment on those lines. An answer given on an older commit shows as
 **Outdated**, with **Ask again**.
 
+In the diff, the line numbers of lines a conversation asked about are tinted, with a small **?** on the first one:
+click it to open that conversation. Answers given on an older commit leave no mark, as their lines may have moved.
+
 Each question is an agent run (Haiku by default) on your Claude usage. On a ticket, it is refused while the
 ticket runs a step.
 

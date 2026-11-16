@@ -1,10 +1,10 @@
 # Plan: Explain as conversations, in their own tab
 
-Status: steps 1 to 3 built (2026-11-16, branch `explain-conversations`): conversations and turns in the database,
-the migration of the existing threads, the API and the worker (step 1); the Explain tab, the side panel and its
-toggle removed, Explain file asking about the file as a subject (step 2); the split buttons with New conversation and
-Add to, drafts kept in the browser, the notice, Explain the whole change in the tab (step 3; not in the review
-header, which has no room). Steps 4 and 5 left. Decisions settled at the end.
+Status: built (2026-11-16, branch `explain-conversations`). Step 1: conversations and turns in the database, the
+migration of the existing threads, the API and the worker. Step 2: the Explain tab, the side panel and its toggle
+removed, Explain file asking about the file as a subject. Step 3: the split buttons with New conversation and Add to,
+drafts kept in the browser, the notice, Explain the whole change in the tab (not in the review header, which has no
+room). Step 4: the gutter marks, from answers on the commit shown only. Step 5: the docs, written with each step. Decisions settled at the end.
 
 ## Idea
 
@@ -53,7 +53,7 @@ conversation** or **Add to "…"** (an existing one), so a conversation can gath
   (questions, subjects named, answers' `explanation`), the oldest dropped past a budget (say the last 6 turns or
   ~20k characters), as `threadOf` does today without a cap.
 - A long ticket session grows its context on every turn: past a size (the implementer's limit in
-  [agent-token-savings.md](agent-token-savings.md), step 3), start a fresh session with the turns as text.
+  [agent-token-savings.md](../agent-token-savings.md), step 3), start a fresh session with the turns as text.
 - The agent stays `review_explain` (Haiku, read-only tools). Each turn is one run on the user's Claude usage, as
   today.
 
@@ -91,7 +91,9 @@ conversation** or **Add to "…"** (an existing one), so a conversation can gath
    content moved into the tab. The current entry points start a new conversation and open the tab on it.
 3. **New or Add to.** The split button on every entry point, the drafts, **Explain the change**, the toast, the
    current conversation.
-4. **Marks in the diff.** The gutter marks on lines a conversation covers, opening it in the tab.
+4. **Marks in the diff.** The gutter marks on lines a conversation covers, opening it in the tab (built: a tinted
+   line number with an indigo bar on each line, a `?` on a range's first line opening the newest conversation; only
+   answers on the commit shown, since older ones' lines may have moved).
 5. **Docs.** `docs/spec/pull-requests.md` (Explain), `documentation/reviewing.md` (Explain), the maps.
 
 Each step is checked in the browser (`scripts/ui-check/`), and step 1 against real Docker on ticket 9001 with a

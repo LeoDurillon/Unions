@@ -57,7 +57,7 @@ function Half({
         };
   return (
     <>
-      <Gutter value={number} onPick={pick} marked={side === 'new'} />
+      <Gutter value={number} side={side} onPick={pick} />
       <td className={`${CODE_CELL} ${tone}`}>
         <span className="select-none text-zinc-500">{SIGN[line.kind]} </span>
         <Code line={line} tokens={props.tokens.get(line)} />

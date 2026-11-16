@@ -135,7 +135,7 @@ run's agents.
 ### Explain
 
 On either review page (a ticket's branch or a pull request under review), **Explain** asks an agent about the change,
-in **conversations** ([plan](../plans/explain-conversations.md)) kept in the **Explain** tab (after **Report**,
+in **conversations** ([plan](../plans/archive/explain-conversations.md)) kept in the **Explain** tab (after **Report**,
 "Explain (n)" while n conversations wait for an answer). From the diff: **Explain** in the editor under selected lines
 (with an optional question folded under **Ask a question**), on a hunk header, or **Explain file** beside the file's
 name; each is a split button. Its main part starts a new conversation and opens the tab on it; its **▾** offers **New
@@ -145,7 +145,9 @@ that conversation's draft, stays on the diff, and shows a notice "Added to «tit
 seconds). A conversation's draft (its subjects as chips with ✕, **+ The whole change**, and its question) waits in
 the box under it, kept in the browser per review, until **Ask** sends it as one turn and clears it. In the tab,
 **+ New** starts one with a question, or **Explain the whole change** asks about the whole change at once. **Explain
-file** asks about the file as a subject, not its changed lines.
+file** asks about the file as a subject, not its changed lines. In the diff, the line numbers of lines a conversation
+asks about are tinted with an indigo bar (on their side, from answers on the commit shown); a range's first line has
+a **?** that opens the newest conversation asking about it, the others named on hover.
 The tab and the open conversation are in the URL (`tab=explain`, `explain=<id>`; `explain=new` for a new one,
 none for the latest).
 

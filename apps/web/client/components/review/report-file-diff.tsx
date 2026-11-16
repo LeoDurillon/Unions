@@ -6,6 +6,7 @@ import { useMemo, type ComponentProps, type ReactElement } from 'react';
 
 import type { ReviewTarget } from '../../lib/review/review-target';
 import { useReviewReport } from '../../lib/review/use-review-report';
+import { ExplainMarksProvider } from '../explain/explain-line-marks';
 import { FileDiff } from './file-diff';
 import { LineMarksProvider, type FileItem } from './report-line-marks';
 
@@ -73,7 +74,7 @@ function Note({ notes }: { notes: FileNotes }): ReactElement | null {
   );
 }
 
-/** The file's diff, with the report's note above it and its items' lines marked. */
+/** The file's diff, with the report's note above it, its items' lines and the lines Explain asked about marked. */
 export function ReportFileDiff({
   target,
   ...props
@@ -83,7 +84,9 @@ export function ReportFileDiff({
     <>
       <Note notes={notes} />
       <LineMarksProvider items={notes.items}>
-        <FileDiff {...props} />
+        <ExplainMarksProvider path={props.path}>
+          <FileDiff {...props} />
+        </ExplainMarksProvider>
       </LineMarksProvider>
     </>
   );

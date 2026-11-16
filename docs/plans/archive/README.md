@@ -145,3 +145,7 @@ the spec (`docs/spec/`); open work is in the [plans README](../README.md).
   preview, e2e command, saved scripts, instructions and agent image; Union tests the checks and the preview without
   Claude, the user applies them card by card, and Run setup sits in Settings → General. Built, steps 1 to 4
   (branches `setup-agent`, `setup-checks`, `setup-rerun`, 2026-11-14).
+- [Explain as conversations, in their own tab](explain-conversations.md): an Explain tab on the review page holding
+  conversations like Investigations, each turn a question about lines, a hunk, a file or the whole change; New
+  conversation or Add to from every Explain button, drafts, and marks in the diff's gutter. Built (branch
+  `explain-conversations`, 2026-11-16).
