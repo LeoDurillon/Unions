@@ -244,6 +244,7 @@ left ("5 of 15 open").
 | **Jira**        | Each linked Jira issue's **Properties** (edit them, or move its status, as in a ticket's Jira tab), its description, its comments.                                                               |
 | **Comments**    | Its line threads (the resolved ones folded below the open ones), then its review summaries and conversation, each with **Reply** or **Quote reply**; a thread's file and lines open in the diff. |
 | **Report**      | The [spec report](#spec-report), as for a ticket.                                                                                                                                                |
+| **Explain**     | [Explain](#explain) conversations about the change, as for a ticket.                                                                                                                             |
 | **Agents**      | [Your review agents](#your-review-agents), as for a ticket.                                                                                                                                      |
 | **Preview**     | A [preview](previews.md#previews-of-pull-requests-under-review) of the pull request's code.                                                                                                      |
 | **Diff**        | The diff, comments, Explain and Review with agent, as for a ticket.                                                                                                                              |
