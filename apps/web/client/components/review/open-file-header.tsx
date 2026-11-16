@@ -3,6 +3,7 @@
 import type { ReactElement } from 'react';
 
 import type { WholeExplain } from '../explain/explain-context';
+import { ExplainSplit } from '../explain/explain-split';
 import { useViewed } from './viewed-context';
 
 /** How many lines the file adds and removes. */
@@ -27,15 +28,12 @@ export function FileHeader({
         <span className="text-red-700 dark:text-red-400">−{file.deletions}</span>
       </span>
       {whole ? (
-        <button
-          type="button"
-          className="shrink-0 text-xs font-medium text-indigo-700 hover:underline dark:text-indigo-300"
-          onClick={() => {
-            whole.file();
-          }}
-        >
-          Explain file
-        </button>
+        <ExplainSplit
+          subject={whole.file}
+          label="Explain file"
+          look="chip"
+          title="An agent explains this file in a new conversation of the Explain tab"
+        />
       ) : null}
       <label className="flex shrink-0 cursor-pointer items-center gap-1.5 text-xs text-zinc-600 dark:text-zinc-400">
         <input

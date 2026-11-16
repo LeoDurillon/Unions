@@ -7,7 +7,7 @@ import { useReviewData } from '../../lib/review/use-review-data';
 import {
   EXPLAIN_TAB,
   ExplainOff,
-  ExplainProvider,
+  ExplainScope,
   useExplainSection,
   withExplain,
 } from '../explain/explain-section';
@@ -192,9 +192,9 @@ function ReviewPageBody(props: ReviewPageProps): ReactElement {
     setTab(EXPLAIN_TAB);
   }, [setTab]);
   return (
-    <ExplainProvider target={props.target} onOpenTab={openExplain}>
+    <ExplainScope target={props.target} onOpenTab={openExplain}>
       <ReviewLayout props={props} tabs={{ ...tabs, sections }} />
-    </ExplainProvider>
+    </ExplainScope>
   );
 }
 

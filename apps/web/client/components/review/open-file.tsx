@@ -53,7 +53,7 @@ export function OpenFile({
         view={view}
         patch={focus.patch}
         hunkTags={focus.tags}
-        onHunk={whole?.hunk}
+        hunkSubject={whole?.hunk}
         comments={forFile}
         selection={selection}
         onSelect={setSelection}

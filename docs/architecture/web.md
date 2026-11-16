@@ -322,7 +322,10 @@
   specs and opens the tab on the conversation, through `open-conversation.ts`, `?explain=<id>`; the lines to show in
   the diff); `explain-tab.tsx` lays out `conversation-list.tsx` (state, search) beside the open conversation
   (`conversation-header.tsx`: rename, export from `explain-export.ts`, delete; `explain-turn.tsx` per turn: subject
-  chips, `explanation-answer.tsx`, `explanation-progress.tsx`; `explain-composer.tsx`). Bubbles and cards are shared
+  chips, `explanation-answer.tsx`, `explanation-progress.tsx`; `explain-composer.tsx`, with the conversation's
+  draft). The diff's Explain buttons are `explain-split.tsx` (ask in a new conversation, or Add to one of
+  `offeredConversations`); `explain-collect.ts` keeps the drafts (`explain-drafts.ts`, in `localStorage` per review),
+  the conversation added to last and the notice (`explain-notice.tsx`, rendered by `ExplainScope`). Bubbles and cards are shared
   with investigations (`components/ui/conversation-parts.tsx`). `lib/review/use-explanations.ts` reads the
   conversations (refreshed by their events; a turn's log is polled while it runs, agent output is not on the stream).
   A chip or citation opens the Diff tab and picks the file in `diff-body.tsx`, selecting the lines in `open-file.tsx`

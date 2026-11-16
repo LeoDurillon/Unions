@@ -5,6 +5,7 @@ import { useEffect, useState, type ReactElement } from 'react';
 import type { Selection } from '../../lib/review/diff-selection';
 import { onModEnter } from '../../lib/ui/mod-enter';
 import { useExplain, type ExplainState } from '../explain/explain-context';
+import { ExplainSplit } from '../explain/explain-split';
 import { Button, ErrorText, inputClass } from '../ui/ui';
 
 /** Explain, and the question folded under it; nothing outside a review page. */
@@ -22,19 +23,16 @@ function ExplainControls({
   useEffect(() => {
     wantSpecs();
   }, [wantSpecs]);
-  const reading = explain.specs === null;
   return (
     <>
-      <Button
-        disabled={reading || explain.pending}
-        title={reading ? 'Reading the specs…' : 'An agent explains these lines in the side panel'}
-        onClick={() => {
-          explain.explain({ path, ...selection, question: question.trim() || null });
+      <ExplainSplit
+        subject={{ kind: 'lines', path, ...selection }}
+        title="An agent explains these lines in a new conversation of the Explain tab"
+        question={question.trim() || null}
+        onDone={() => {
           setQuestion('');
         }}
-      >
-        Explain
-      </Button>
+      />
       <details className="text-xs text-zinc-500">
         <summary className="cursor-pointer">Ask a question</summary>
         <input

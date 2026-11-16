@@ -1,8 +1,10 @@
 # Plan: Explain as conversations, in their own tab
 
-Status: steps 1 and 2 built (2026-11-16, branch `explain-conversations`): conversations and turns in the database,
+Status: steps 1 to 3 built (2026-11-16, branch `explain-conversations`): conversations and turns in the database,
 the migration of the existing threads, the API and the worker (step 1); the Explain tab, the side panel and its
-toggle removed, Explain file asking about the file as a subject (step 2). Steps 3 to 5 left. Decisions settled at the end.
+toggle removed, Explain file asking about the file as a subject (step 2); the split buttons with New conversation and
+Add to, drafts kept in the browser, the notice, Explain the whole change in the tab (step 3; not in the review
+header, which has no room). Steps 4 and 5 left. Decisions settled at the end.
 
 ## Idea
 

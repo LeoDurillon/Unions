@@ -55,14 +55,14 @@ function Row({
   selected,
   onPick,
   hunkTags,
-  onHunk,
+  hunkSubject,
 }: {
   line: DiffLine;
   tokens: Token[] | undefined;
   selected: boolean;
   onPick: (extend: boolean) => void;
   hunkTags: Map<string, string[]> | undefined;
-  onHunk: ((header: string) => void) | undefined;
+  hunkSubject: DiffViewProps['hunkSubject'];
 }): ReactElement {
   const anchor = anchorOf(line);
   const oldNumber = line.kind === 'del' || line.kind === 'context' ? line.oldLine : null;
@@ -75,7 +75,7 @@ function Row({
       <td className="whitespace-pre px-2">
         <span className="select-none text-zinc-500">{SIGN[line.kind]} </span>
         <Code line={line} tokens={tokens} />
-        <HunkTags line={line} tags={hunkTags} onHunk={onHunk} />
+        <HunkTags line={line} tags={hunkTags} hunkSubject={hunkSubject} />
       </td>
     </tr>
   );
@@ -89,7 +89,7 @@ function UnifiedDiff({
   onSelect,
   renderBelow,
   hunkTags,
-  onHunk,
+  hunkSubject,
 }: DiffViewProps & { lines: { line: DiffLine; key: string }[] }): ReactElement {
   return (
     <table className="w-full border-collapse">
@@ -109,7 +109,7 @@ function UnifiedDiff({
                 line={line}
                 tokens={tokens.get(line)}
                 hunkTags={hunkTags}
-                onHunk={onHunk}
+                hunkSubject={hunkSubject}
                 selected={anchor !== null && isSelected(selection, anchor.side, anchor.number)}
                 onPick={(extend) => {
                   if (anchor) {

@@ -12,6 +12,7 @@ import { ConversationHeader } from './conversation-header';
 import { ConversationList, conversationState } from './conversation-list';
 import { ExplainComposer } from './explain-composer';
 import { useExplain, type ExplainState } from './explain-context';
+import { ExplainSplit } from './explain-split';
 import { ExplainTurn, type OpenAt } from './explain-turn';
 
 type Explanations = ReturnType<typeof useExplanations>;
@@ -89,7 +90,14 @@ function NewConversation({
 }): ReactElement {
   return (
     <div className="min-w-0 flex-1 space-y-3">
-      <h2 className="text-[15px] font-semibold">New conversation</h2>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-[15px] font-semibold">New conversation</h2>
+        <ExplainSplit
+          subject={{ kind: 'change' }}
+          label="Explain the whole change"
+          title="An agent explains how the whole change works, its main path first"
+        />
+      </div>
       {empty ? (
         <p className="text-sm text-zinc-500">
           Ask an agent how the change works. Select lines in the Diff tab and click Explain, click

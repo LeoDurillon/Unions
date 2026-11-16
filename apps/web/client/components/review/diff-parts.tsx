@@ -7,7 +7,9 @@ import type { ReactElement, ReactNode } from 'react';
 import type { CommentView } from '../../../src/api-types';
 import type { Token } from '../../lib/markdown/highlight';
 import type { Selection, Side } from '../../lib/review/diff-selection';
+import type { SubjectAsk } from '../../lib/review/explanation-api';
 import { headerKey } from '../../lib/review/spec-hunks';
+import { ExplainSplit } from '../explain/explain-split';
 import { useLineMark, type LineMark } from './report-line-marks';
 
 export const ROW_TONE = {
@@ -29,8 +31,8 @@ export type DiffViewProps = {
   renderBelow: (side: Side, line: number, comments: CommentView[]) => ReactNode;
   /** By hunk key, the parts of the spec each hunk serves: shown on its header (By spec). */
   hunkTags?: Map<string, string[]>;
-  /** Explain on a hunk's header: asks about the whole hunk. */
-  onHunk?: (header: string) => void;
+  /** What Explain on a hunk's header asks about: the whole hunk. */
+  hunkSubject?: (header: string) => SubjectAsk | null;
 };
 
 /** The comments that end on this line of this side. */
@@ -109,14 +111,15 @@ export function Code({ line, tokens }: { line: DiffLine; tokens: Token[] | undef
 export function HunkTags({
   line,
   tags,
-  onHunk,
+  hunkSubject,
 }: {
   line: DiffLine;
   tags: Map<string, string[]> | undefined;
-  onHunk?: (header: string) => void;
+  hunkSubject?: (header: string) => SubjectAsk | null;
 }): ReactNode {
   const key = line.kind === 'hunk' && tags ? headerKey(line.text) : null;
   const names = key === null ? [] : (tags?.get(key) ?? []);
+  const subject = line.kind === 'hunk' ? (hunkSubject?.(line.text) ?? null) : null;
   return (
     <>
       {names.map((name) => (
@@ -127,18 +130,14 @@ export function HunkTags({
           {name}
         </span>
       ))}
-      {line.kind === 'hunk' && onHunk ? (
-        <button
-          type="button"
-          title="Explain this hunk"
-          aria-label="Explain this hunk"
-          className="ml-2 rounded border border-indigo-300 px-1.5 font-sans text-xs text-indigo-700 hover:bg-indigo-50 dark:border-indigo-800 dark:text-indigo-300 dark:hover:bg-indigo-950"
-          onClick={() => {
-            onHunk(line.text);
-          }}
-        >
-          Explain
-        </button>
+      {subject ? (
+        <span className="ml-2 inline-flex align-middle">
+          <ExplainSplit
+            subject={subject}
+            look="chip"
+            title="An agent explains this hunk in a new conversation of the Explain tab"
+          />
+        </span>
       ) : null}
     </>
   );

@@ -11,20 +11,19 @@ import {
   type ReactNode,
 } from 'react';
 
-import { useUrlParam } from '../../lib/app/url-state';
 import { hunkSelection, type Selection } from '../../lib/review/diff-selection';
-import type { ExplanationAsk } from '../../lib/review/explanation-api';
-import type { ReviewTarget } from '../../lib/review/review-target';
-import { diffLinesOf } from '../../lib/review/review-url';
+import type { ExplanationAsk, SubjectAsk } from '../../lib/review/explanation-api';
+import { reviewBase, type ReviewTarget } from '../../lib/review/review-target';
 import { useExplanations } from '../../lib/review/use-explanations';
 import { useReviewSpecs } from '../../lib/review/use-review-specs';
+import { useExplainCollect, type ExplainCollect } from './explain-collect';
+import { useAskedLines, type ExplainFocus } from './explain-focus';
 import { useOpenConversation, type OpenConversation } from './open-conversation';
-
-/** Lines to pick in the diff (opening a cited line), with a comment to start on them. */
-export type ExplainFocus = Selection & { path: string; draft: string | null; seq: number };
 
 /** A turn to ask; the review's specs are added. */
 type ExplainAsk = Omit<ExplanationAsk, 'specs'>;
+
+export type { ExplainFocus } from './explain-focus';
 
 export type ExplainState = {
   target: ReviewTarget;
@@ -42,6 +41,8 @@ export type ExplainState = {
   show: (lines: Selection & { path: string; draft?: string }) => void;
   /** The conversation the Explain tab shows, and opening one (`new` for a new one) there. */
   conversation: OpenConversation;
+  /** Subjects gathered from the diff into a conversation's next question. */
+  collect: ExplainCollect;
 };
 
 const ExplainContext = createContext<ExplainState | null>(null);
@@ -49,19 +50,6 @@ const ExplainContext = createContext<ExplainState | null>(null);
 /** The Explain state; null outside a review page (a commit's diff on its own). */
 export function useExplain(): ExplainState | null {
   return useContext(ExplainContext);
-}
-
-type SetFocus = (next: (last: ExplainFocus | null) => ExplainFocus) => void;
-
-/** Shows the lines the URL asks for (`?lines=`, a line comment's link from the PR tab). */
-function useAskedLines(setFocus: SetFocus): void {
-  const asked = useUrlParam('lines');
-  useEffect(() => {
-    const lines = diffLinesOf(asked);
-    if (lines) {
-      setFocus((last) => ({ ...lines, draft: null, seq: (last?.seq ?? 0) + 1 }));
-    }
-  }, [asked, setFocus]);
 }
 
 /** `onOpenTab` switches the review page to its Explain tab. */
@@ -80,6 +68,7 @@ export function ExplainProvider({
   const specs = useReviewSpecs(target, wanted).active;
   const { mutate, isPending, error } = useExplanations(target).ask;
   const conversation = useOpenConversation(onOpenTab);
+  const collect = useExplainCollect(reviewBase(target));
   const state = useMemo((): ExplainState => {
     const ask = (turn: ExplainAsk, onAsked?: () => void): void => {
       mutate(specs === null ? turn : { ...turn, specs }, {
@@ -106,13 +95,14 @@ export function ExplainProvider({
         setFocus((last) => ({ ...lines, draft, seq: (last?.seq ?? 0) + 1 }));
       },
       conversation,
+      collect,
     };
-  }, [target, specs, mutate, isPending, error, focus, conversation]);
+  }, [target, specs, mutate, isPending, error, focus, conversation, collect]);
   return <ExplainContext.Provider value={state}>{children}</ExplainContext.Provider>;
 }
 
-/** Explain on a hunk's header (the whole hunk) and on a file's name (the file). */
-export type WholeExplain = { hunk: (header: string) => void; file: () => void };
+/** What Explain asks about from a file's header (the file) and its hunks' headers (the hunk). */
+export type WholeExplain = { file: SubjectAsk; hunk: (header: string) => SubjectAsk | null };
 
 /** Undefined outside a review page, and until the specs are read. */
 export function useWholeExplain(path: string | undefined): WholeExplain | undefined {
@@ -125,14 +115,10 @@ export function useWholeExplain(path: string | undefined): WholeExplain | undefi
     return undefined;
   }
   return {
+    file: { kind: 'file', path },
     hunk: (header) => {
       const range = hunkSelection(header);
-      if (range) {
-        explain.explain({ path, ...range, question: null });
-      }
-    },
-    file: () => {
-      explain.ask({ subjects: [{ kind: 'file', path }], question: null });
+      return range ? { kind: 'lines', path, ...range } : null;
     },
   };
 }

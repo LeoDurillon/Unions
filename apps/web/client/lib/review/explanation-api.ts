@@ -10,7 +10,7 @@ import type { ExplanationLogView } from '../../../src/routes/review/review-expla
 import { request } from '../app/api';
 
 /** What a turn asks about; the server reads the lines' text from the diff. */
-type SubjectAsk =
+export type SubjectAsk =
   | { kind: 'lines'; path: string; side: 'old' | 'new'; start: number; end: number }
   | { kind: 'file'; path: string }
   | { kind: 'change' };

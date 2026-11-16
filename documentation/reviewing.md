@@ -82,7 +82,15 @@ the new conversation, where the answer comes:
 - **Docs**: the repository's own documents that relate to it;
 - or **Not in the spec**, when nothing asked for it.
 
-You can also start one in the tab itself: click **+ New** and type a question about the change.
+You can also start one in the tab itself: click **+ New**, then type a question about the change, or click **Explain
+the whole change**.
+
+To ask about several parts of the change at once, click **▾** next to an **Explain** button instead and pick **Add to
+"…"**: the conversation you looked at or added to last comes first, then the latest ones. The lines, the hunk or the
+file wait under the conversation's question box, and you stay on the diff; a notice says where they went, with
+**Open**. Add as many as you like, then open the conversation, type your question and click **Ask**: the agent gets
+them all. Click **✕** on one to take it out, or **+ The whole change** to add the whole change. What you gathered and
+typed is kept in this browser until you ask.
 
 Each conversation keeps its questions and answers, oldest first. Type a follow-up in the box at the bottom and press
 **Ask** (or Ctrl+Enter) once the last answer is in: the agent remembers the earlier questions. Click a file or lines
