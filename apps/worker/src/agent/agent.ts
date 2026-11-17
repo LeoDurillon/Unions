@@ -8,6 +8,7 @@ import {
   type ExecResult,
 } from '@union/core';
 
+import { refusedLoginNote, withClaudeLogin } from '../claude-login';
 import { killedNote } from '../container-exec';
 import { IDLE_GRACE_MS, RUN_MARKER, stopAborted, watchIdle } from './agent-idle';
 import { RATE_LIMIT, rejectedResetAt, resetFromMessage } from './rate-limit';
@@ -112,7 +113,7 @@ export function connectorEnv(tools: readonly string[]): Record<string, string> {
  */
 function failure(message: string, rejectedReset: number | null): AgentOutcome {
   if (rejectedReset === null && !RATE_LIMIT.test(message)) {
-    return { kind: 'error', message };
+    return { kind: 'error', message: `${message}${refusedLoginNote(message)}` };
   }
   return {
     kind: 'rate_limited',
@@ -164,7 +165,7 @@ async function readEvents(
 /** Runs `claude -p` inside the ticket's container and streams its events to `onEvent`. */
 export async function runAgent(runtime: ContainerRuntime, run: AgentRun): Promise<AgentOutcome> {
   const token = crypto.randomUUID();
-  const stream = runtime.exec(run.container, claudeArgs(run), {
+  const stream = runtime.exec(run.container, withClaudeLogin(claudeArgs(run)), {
     cwd: run.cwd,
     stdin: run.prompt,
     env: { ...connectorEnv(run.tools), [RUN_MARKER]: token },

@@ -82,6 +82,17 @@ Runs without an agent page: the prompt writer (Sonnet, throwaway, `prompt-writer
 `investigate.ts`) and the ticket drafts written from them (`investigation-ticket.ts`). Throwaway containers hold
 only the Claude login (`throwaway-container.ts`).
 
+## The Claude login
+
+`seedCredentials` (`apps/worker/src/claude-login.ts`) seeds every agent container, on each run: the long-lived token
+from Union settings → Claude login (`claude_token`, one row, `union/claude-token.ts` in core) when one is set, else
+only `claudeAiOauth` copied from the host's credentials file (`UNION_CLAUDE_CREDENTIALS`). The token goes to
+`~/.claude/oauth-token`; the other login's file is emptied, so a HOME volume never keeps a refresh token once a
+token is set. Every `claude` call goes through `withClaudeLogin`, a `sh -c` wrapper that exports the file into
+`CLAUDE_CODE_OAUTH_TOKEN` inside the container, so the token is never on a command line. A refused login adds
+`refusedLoginNote` to the run's error; there is no fallback from the token to the copied login. The web route
+(`claude-token.ts`) only says whether a token is set, and queues a connector check when it changes.
+
 ## The image
 
 Every container starts from the default agent image (`union-agent:local`, or Union settings → System's `agentImage`, the last stage of

@@ -31,7 +31,7 @@ function runtimePrinting(lines: unknown[], exit: ExecResult | undefined): Contai
   return {
     async *exec(_name: string, command: string[]) {
       await Promise.resolve();
-      if (command[0] === 'claude') {
+      if (command.includes('claude-login')) {
         yield* lines.map((line) => JSON.stringify(line));
         return exit ?? { exitCode: 1, stderr: '' };
       }

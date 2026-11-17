@@ -42,12 +42,12 @@ function hangingRuntime(calls: Call[]): ContainerRuntime {
     async *exec(_name: string, command: string[], options?: ExecOptions) {
       const env = options?.env ?? {};
       calls.push({ command, env });
-      if (command[0] === 'claude') {
+      if (command.includes('claude-login')) {
         yield JSON.stringify(result);
         await killed;
         return { exitCode: 143, stderr: '' };
       }
-      const marker = calls.find((call) => call.command[0] === 'claude')?.env[RUN_MARKER];
+      const marker = calls.find((call) => call.command.includes('claude-login'))?.env[RUN_MARKER];
       if (command.includes('TERM') && command.at(-1) === `${RUN_MARKER}=${marker}`) {
         release(null);
       }
@@ -73,5 +73,6 @@ test('a process that stays up after its last result is stopped and its result us
   });
   expect(outcome).toEqual({ kind: 'ok', text: 'Done.', sessionId: 's' });
   expect(logged).toContainEqual({ type: 'union_agent_idle_stopped', idleMs: 10 });
-  expect(calls.map((call) => call.command[0])).toEqual(['claude', 'sh']);
+  // The agent's call (wrapped with its login), then the stop.
+  expect(calls.map((call) => call.command.includes('claude-login'))).toEqual([true, false]);
 });

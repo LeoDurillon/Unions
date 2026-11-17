@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 
 import {
+  AGENT_HOME,
   createDb,
   createTicket,
   migrateDb,
@@ -14,7 +15,7 @@ import {
 } from '@union/core';
 import { eq } from 'drizzle-orm';
 
-import { AGENT_HOME, REPO_DIR } from '../provision';
+import { REPO_DIR } from '../provision';
 import { ensureFollowedBase } from './followed-base-ref';
 
 type StepContext = Parameters<typeof ensureFollowedBase>[1];

@@ -10,6 +10,7 @@ export default defineConfig({
     './src/schema/schema-agent-images.ts',
     './src/schema/schema-attachments.ts',
     './src/schema/schema-ci-outputs.ts',
+    './src/schema/schema-claude-token.ts',
     './src/schema/schema-container-runs.ts',
     './src/schema/schema-custom-agents.ts',
     './src/schema/schema-diff-commits.ts',

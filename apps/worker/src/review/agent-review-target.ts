@@ -14,12 +14,12 @@ import {
 } from '@union/core';
 import { desc, eq } from 'drizzle-orm';
 
+import { seedCredentials } from '../claude-login';
 import { projectGitToken } from '../credentials';
 import {
   cloneSource,
   ensureTicketContainer,
   projectImage,
-  seedCredentials,
   type CloneSource,
   type ProvisionConfig,
   type TicketContainer,
@@ -126,7 +126,7 @@ export async function throwawayCheckout(
       limits: agentContainerLimits(db, names.name),
     });
     await runtime.start(names.name);
-    await seedCredentials(runtime, names.name, config.credentialsPath);
+    await seedCredentials(runtime, names.name, config);
     const token = await projectGitToken(db, project);
     await clone(cloneSource(config.gitBaseUrl, project.owner, project.repo, token));
   } catch (error) {

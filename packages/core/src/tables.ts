@@ -8,6 +8,7 @@ export * from './schema/schema-agent-tool-usage';
 export * from './schema/schema-agent-images';
 export * from './schema/schema-attachments';
 export * from './schema/schema-ci-outputs';
+export * from './schema/schema-claude-token';
 export * from './schema/schema-container-runs';
 export * from './schema/schema-custom-agents';
 export * from './schema/schema-diff-commits';

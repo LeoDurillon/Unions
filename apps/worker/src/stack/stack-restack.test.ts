@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 
 import {
+  AGENT_HOME,
   createDb,
   createTicket,
   listSlices,
@@ -18,7 +19,7 @@ import {
 import { eq } from 'drizzle-orm';
 
 import { FakeGitHubApi } from '../github/fake-api';
-import { AGENT_HOME, REPO_DIR } from '../provision';
+import { REPO_DIR } from '../provision';
 import { runRestackStep } from '../restack';
 
 const INBOX = '/tmp/union-fetch';

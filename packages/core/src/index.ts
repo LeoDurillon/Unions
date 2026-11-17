@@ -154,6 +154,7 @@ export * from './review/review-spec-lists';
 export * from './review/review-specs';
 export * from './integrations/notion-markdown';
 export * from './integrations/notion-media';
+export * from './union/claude-token';
 export * from './union/notifications';
 export * from './agent/json-block';
 export {

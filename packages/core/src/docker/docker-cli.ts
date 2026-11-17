@@ -1,6 +1,7 @@
 // The container runtime that drives the `docker` command line to run ticket containers.
 import { spawn } from 'node:child_process';
 
+import { AGENT_HOME } from '../agent/agent-tools';
 import { CONTAINER_FORMAT, parseProjectContainers } from './compose-containers';
 import { limitArgs } from './container-limits';
 import { checkCopiedFile } from './copied-file';
@@ -15,7 +16,6 @@ import type {
   TicketContainerSpec,
 } from './runtime';
 
-const AGENT_HOME = '/home/node';
 const WORKSPACE = '/workspace';
 
 type Captured = { code: number; stdout: string; stderr: string };

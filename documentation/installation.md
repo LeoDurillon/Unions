@@ -8,7 +8,9 @@ The simplest way to run all of it is Docker Compose.
 - **Linux or WSL2** with **Docker** and Compose v2. The worker starts the agents' containers through the Docker
   socket.
 - **Claude Code**, logged in on this machine with a Claude Max account. Union gives each ticket's container the
-  login from `~/.claude/.credentials.json`. If that file does not exist, run `claude` once and log in.
+  login from `~/.claude/.credentials.json`. If that file does not exist, run `claude` once and log in. Once Union
+  runs, you can give the agents a long-lived token instead, which cannot renew itself
+  ([Claude login](settings.md#claude-login)).
 - An **`~/.ssh` folder**. Compose gives it to the worker, read-only, so the sidebar's **Update** can fetch Union's
   own repository when you cloned it over SSH. Compose does not start if the folder is missing: create it
   (`mkdir -p ~/.ssh`), or set `UNION_SSH_DIR` in `.env` to another folder.

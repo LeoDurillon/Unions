@@ -10,8 +10,10 @@ Set `DOCKER_GID` to the socket's group, and `UNION_UID`/`UNION_GID` to your user
 [Installation](installation.md#if-the-worker-cannot-reach-docker).
 
 **Agents fail at once with an authentication error.**
-Union gives the agents the Claude login from `~/.claude/.credentials.json`. Run `claude` on the host and log in
-again, then **Retry** the step.
+If a token is set in **Union settings → Claude login**, Claude refused it: it was revoked or has expired. Make a
+new one with `claude setup-token`, replace it there, then **Retry** the step. Otherwise Union gives the agents the
+Claude login from `~/.claude/.credentials.json`: run `claude` on the host and log in again, then **Retry** the
+step.
 
 **The image `union-agent:local` (or `union-agent-base:local`) is missing.**
 Compose builds both on start. Without Compose, build them:

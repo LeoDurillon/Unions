@@ -11,6 +11,7 @@ import {
   type Db,
 } from '@union/core';
 
+import { withClaudeLogin } from './claude-login';
 import { runIn } from './container-exec';
 import type { ProvisionConfig } from './provision';
 import { inThrowaway, type ThrowawayDeps } from './throwaway-container';
@@ -28,7 +29,7 @@ const CHECK_CONTAINER = {
  */
 export function readConnectors(deps: ThrowawayDeps): Promise<ReturnType<typeof parseMcpList>> {
   return inThrowaway(deps, CHECK_CONTAINER, async (container) => {
-    const listed = await runIn(deps.runtime, container, ['claude', 'mcp', 'list']);
+    const listed = await runIn(deps.runtime, container, withClaudeLogin(['claude', 'mcp', 'list']));
     if (listed.exitCode !== 0) {
       throw new Error(`claude mcp list failed: ${(listed.stderr || listed.stdout).trim()}`);
     }

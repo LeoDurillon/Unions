@@ -12,6 +12,7 @@ const OTHER_LABELS: Record<Exclude<UnionSection, AgentId>, string> = {
   system: 'System',
   tools: 'Tools',
   connectors: 'Connectors',
+  'claude-login': 'Claude login',
   'github-app': 'GitHub App',
 };
 

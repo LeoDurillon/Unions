@@ -25,8 +25,8 @@
   `FROM union-agent` or `FROM union-agent-base`, or an image built on one elsewhere, built (or pulled) and checked when
   saved and used only once it passes (`docs/plans/archive/project-agent-image.md`).
 - Host clones the repo into the ticket's workspace volume.
-- HOME volume is **writable** and seeded with only the `claudeAiOauth` credential and
-  `{"hasCompletedOnboarding":true}`. A read-only HOME breaks `--resume`.
+- HOME volume is **writable** and seeded with the long-lived token from Union settings (else only the
+  `claudeAiOauth` credential) and `{"hasCompletedOnboarding":true}`. A read-only HOME breaks `--resume`.
 - Containers are stopped between steps (`docker stop`) and started for each step (`docker start` + `docker exec`).
   Volumes survive container recreation.
 

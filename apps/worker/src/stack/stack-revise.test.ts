@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 
 import {
+  AGENT_HOME,
   createDb,
   createTicket,
   listSlices,
@@ -18,7 +19,7 @@ import {
 import { eq } from 'drizzle-orm';
 
 import { captureDiff } from '../diff-snapshot';
-import { AGENT_HOME, REPO_DIR } from '../provision';
+import { REPO_DIR } from '../provision';
 import { runRebaseStep } from '../rebase/rebase';
 import { pushRevision, restackRevision, stackSection } from './stack-revise';
 

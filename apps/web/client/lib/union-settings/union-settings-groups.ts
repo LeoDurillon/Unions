@@ -17,6 +17,7 @@ export const UNION_SETTINGS_GROUPS = [
   },
   { label: 'Memory', sections: ['lesson_writer', 'lesson_tidier'] },
   { label: 'Tools', sections: ['tools', 'connectors'] },
+  { label: 'Claude', sections: ['claude-login'] },
   { label: 'GitHub', sections: ['github-app'] },
 ] as const;
 

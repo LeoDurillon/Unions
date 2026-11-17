@@ -131,8 +131,9 @@ files and uses `union.sqlite` here, which holds the user's real projects.
   or actions need a test in `states.test.ts`.
 - In `apps/` and `packages/`, reach Docker only through `ContainerRuntime` (and `ImageRuntime` for the projects'
   agent images). Do not call `docker` from anywhere else there: `docker-cli.ts` is the one file that runs it.
-- Never mount a ticket's HOME volume read-only: `claude --resume` needs to write session files there. Seed only the
-  `claudeAiOauth` credential. Never copy `mcpOAuth` or history into a container.
+- Never mount a ticket's HOME volume read-only: `claude --resume` needs to write session files there. Seed the
+  long-lived token when one is set, else only the `claudeAiOauth` credential (`claude-login.ts`), and run `claude`
+  through `withClaudeLogin`. Never copy `mcpOAuth` or history into a container.
 - SSE handlers use Hono's `streamSSE` and loop on `!stream.aborted`. Event ids are `events.seq`, so resume works
   through `Last-Event-ID`. Keep `idleTimeout: 0` on `Bun.serve`.
 - `events` is append-only. Do not update or delete rows. Every event type and its payload is declared in `packages/core/src/event/event-payloads.ts`;

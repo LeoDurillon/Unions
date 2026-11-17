@@ -673,6 +673,13 @@
       "when": 1794826123512,
       "tag": "0095_explain_conversations",
       "breakpoints": true
+    },
+    {
+      "idx": 96,
+      "version": "6",
+      "when": 1794903365860,
+      "tag": "0096_claude_token",
+      "breakpoints": true
     }
   ]
 }

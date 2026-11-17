@@ -11,6 +11,8 @@ import { connectorTool, listConnectors } from './mcp-connectors';
 
 /** Where the worker checks out the repository inside an agent container. */
 export const AGENT_REPO_DIR = '/workspace/repo';
+/** The agent's HOME in its container (the `node` user's), on the ticket's HOME volume. */
+export const AGENT_HOME = '/home/node';
 
 const READ_ONLY = ['Read', 'Grep', 'Glob'] as const;
 const READ_GIT = ['diff', 'log', 'show', 'status'] as const;

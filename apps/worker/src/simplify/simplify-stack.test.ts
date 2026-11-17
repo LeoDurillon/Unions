@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 
 import {
+  AGENT_HOME,
   createDb,
   createTicket,
   listSlices,
@@ -18,7 +19,7 @@ import { eq } from 'drizzle-orm';
 
 import type { AgentFn } from '../agent/agent';
 import { runHistoryStep } from '../history-steps';
-import { AGENT_HOME, REPO_DIR } from '../provision';
+import { REPO_DIR } from '../provision';
 import type { StepResult } from '../scheduler';
 
 const INBOX = '/tmp/union-fetch';

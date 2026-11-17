@@ -33,6 +33,7 @@ const UNION_PAGE_GUIDE: Partial<Record<string, GuideTarget>> = {
   system: ['settings', 'system'],
   tools: ['agents', 'tools-and-connectors'],
   connectors: ['agents', 'tools-and-connectors'],
+  'claude-login': ['settings', 'claude-login'],
   'github-app': ['first-project', 'use-a-github-app'],
   lesson_writer: ['agents', 'memory'],
   lesson_tidier: ['agents', 'memory'],

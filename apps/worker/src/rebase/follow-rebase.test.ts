@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 
 import {
+  AGENT_HOME,
   createDb,
   createTicket,
   migrateDb,
@@ -15,7 +16,7 @@ import {
 import { eq } from 'drizzle-orm';
 
 import type { AgentFn, AgentRun } from '../agent/agent';
-import { AGENT_HOME, REPO_DIR } from '../provision';
+import { REPO_DIR } from '../provision';
 import { runRebaseStep } from './rebase';
 import { runRetargetStep } from './retarget';
 

@@ -45,8 +45,9 @@ its step.
 
 ## Credentials
 
-- **Your Claude login**: each container gets the Claude credential from `~/.claude/.credentials.json`, and nothing
-  else from your Claude configuration: no history, no MCP logins.
+- **Your Claude login**: each container gets the long-lived token set in
+  [Union settings → Claude login](settings.md#claude-login), or else the Claude credential from
+  `~/.claude/.credentials.json`, and nothing else from your Claude configuration: no history, no MCP logins.
 - **GitHub**: tokens and the GitHub App's key stay in the database. They never reach the browser nor the agents'
   containers. The worker clones, fetches and pushes for the agents, from the host. The agents cannot push.
 - **Notion**: the integration secret stays in the database, and only the worker writes to Notion.

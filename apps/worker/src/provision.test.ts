@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 
 import {
+  AGENT_HOME,
   createDb,
   createTicket,
   migrateDb,
@@ -12,13 +13,7 @@ import {
   type ExecResult,
 } from '@union/core';
 
-import {
-  AGENT_HOME,
-  cloneInto,
-  cloneSource,
-  ensureTicketContainer,
-  seedCredentials,
-} from './provision';
+import { cloneInto, cloneSource, ensureTicketContainer } from './provision';
 
 const cleanup: string[] = [];
 afterEach(async () => {
@@ -127,30 +122,4 @@ test('every run hands the ticket container the host login as it is now', async (
     { claudeAiOauth: { accessToken: 'first' } },
     { claudeAiOauth: { accessToken: 'second' } },
   ]);
-});
-
-test('without a Claude login, seeding says to log in and writes nothing', async () => {
-  const root = await mkdtemp(path.join(tmpdir(), 'union-login-test-'));
-  cleanup.push(root);
-  const written: string[] = [];
-  const runtime = {
-    writeFile: (_container: string, file: string) => {
-      written.push(file);
-      return Promise.resolve();
-    },
-  } as unknown as ContainerRuntime;
-  const missing = path.join(root, 'missing.json');
-  async function failure(file: string): Promise<string> {
-    try {
-      await seedCredentials(runtime, 'c', file);
-      return 'seeded';
-    } catch (error) {
-      return String(error);
-    }
-  }
-  expect(await failure(missing)).toContain('Claude is not logged in');
-  const other = path.join(root, 'other.json');
-  await writeFile(other, JSON.stringify({ mcpOAuth: {} }));
-  expect(await failure(other)).toContain('Claude is not logged in');
-  expect(written).toEqual([]);
 });

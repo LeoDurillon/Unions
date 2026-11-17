@@ -62,7 +62,8 @@ project mirrors tickets as issues (the default).
 ## Open risks
 
 1. OAuth refresh inside a ticket volume may invalidate the host login (untested; needs a test near token expiry).
-   Fallback: `claude setup-token` → `CLAUDE_CODE_OAUTH_TOKEN`.
+   Avoided by setting a long-lived token (`claude setup-token`) in Union settings → Claude login: containers then
+   get `CLAUDE_CODE_OAUTH_TOKEN` and no refresh token.
 2. Hono SSE behaviour on client disconnect in production (checked in the skeleton).
 3. Max rate limit under parallel tickets → `rate_limited` is a first-class ticket state, retried after the reset
    (from the CLI's rejected `rate_limit_event`, else its "resets 6:20pm (UTC)" message, else a full window's reset

@@ -54,9 +54,16 @@ test('a custom agent has a page, after the built-in agents, named after it', () 
   expect(unionSectionLabel('agent_3', [SECURITY])).toBe('Custom agent');
 });
 
-test('the menu lists All agents instead of a page per agent, then Tools and the GitHub App', () => {
+test('the menu lists All agents instead of a page per agent, then Tools, Claude and GitHub', () => {
   const groups = navGroups([SECURITY, MERGE]);
-  expect(groups.map((group) => group.label)).toEqual(['General', 'Agents', 'Tools', 'GitHub']);
+  expect(groups.map((group) => group.label)).toEqual([
+    'General',
+    'Agents',
+    'Tools',
+    'Claude',
+    'GitHub',
+  ]);
+  expect(groups[3]?.sections).toEqual([{ id: 'claude-login', label: 'Claude login' }]);
   expect(groups[1]?.sections).toEqual([{ id: 'models', label: 'All agents' }]);
 });
 

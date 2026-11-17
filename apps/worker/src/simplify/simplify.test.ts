@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 
 import {
+  AGENT_HOME,
   createDb,
   createTicket,
   decideRefusal,
@@ -17,7 +18,7 @@ import {
 import { eq } from 'drizzle-orm';
 
 import type { AgentFn } from '../agent/agent';
-import { AGENT_HOME, REPO_DIR } from '../provision';
+import { REPO_DIR } from '../provision';
 import type { StepContext, StepResult } from '../scheduler';
 import { runSimplifyStep } from './simplify';
 

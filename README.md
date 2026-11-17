@@ -221,7 +221,8 @@ Compose.
 - Union runs on your machine only. There is no authentication on the web UI: do not expose it.
 - GitHub tokens, the GitHub App key, the Notion secret and the Jira API token stay in the local database. They never
   reach the browser or the agent containers: the host does every clone, push and GitHub, Notion or Jira call.
-- A ticket's container gets only the `claudeAiOauth` credential, not your Claude history or MCP logins. Known risks
+- A ticket's container gets the long-lived token set in Union settings → Claude login, or else only the
+  `claudeAiOauth` credential; never your Claude history or MCP logins. Known risks
   are listed in the [spec](docs/spec/README.md#open-risks).
 
 ## Documentation

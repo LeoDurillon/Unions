@@ -1,6 +1,6 @@
 // Creates a ticket's container. Only the Claude subscription credential is seeded, the host clones,
 // the files are copied in.
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { mkdtemp, rm } from 'node:fs/promises';
 import { homedir, tmpdir } from 'node:os';
 import path from 'node:path';
 
@@ -11,28 +11,25 @@ import {
   type Db,
   type Ticket,
   agentContainerLimits,
+  claudeToken,
   imageSetting,
 } from '@union/core';
 import { eq } from 'drizzle-orm';
 
-import { syncAttachments } from './attachments-sync';
+import { seedCredentials, type ClaudeLoginSource } from './claude-login';
 import { projectGitToken } from './credentials';
-import { rejoinRunningPreview } from './preview/network';
-import { syncProjectFiles } from './project-files-sync';
 import { resolveTicketBase } from './ticket-base';
+import { syncTicketContainer } from './ticket-files-sync';
 
-export const AGENT_HOME = '/home/node';
 export const REPO_DIR = AGENT_REPO_DIR;
 
-export type ProvisionConfig = {
+export type ProvisionConfig = ClaudeLoginSource & {
   /** The base agent image; a project with its own runs on what `imageFor` gives. */
   readonly image: string;
   /** The image a project's agents run on (`AgentImages.imageFor`); absent: `image` for all. */
   imageFor?: (projectId: number) => Promise<string>;
   /** Base URL repositories are cloned from: `<base>/<owner>/<repo>.git`. */
   gitBaseUrl: string;
-  /** Host path of the Claude credentials file to seed from. */
-  credentialsPath: string;
 };
 
 /**
@@ -51,6 +48,7 @@ export function defaultProvisionConfig(
     gitBaseUrl: process.env.UNION_GIT_BASE_URL ?? 'https://github.com',
     credentialsPath:
       process.env.UNION_CLAUDE_CREDENTIALS ?? path.join(homedir(), '.claude', '.credentials.json'),
+    claudeToken: () => claudeToken(db),
   };
 }
 
@@ -67,47 +65,6 @@ export function containerNames(ticketId: number): TicketContainer {
     homeVolume: `union-t${ticketId}-home`,
     workspaceVolume: `union-t${ticketId}-ws`,
   };
-}
-
-/** What a run without a Claude login fails with: what to do, never the file's contents. */
-function notLoggedIn(credentialsPath: string): string {
-  return `Claude is not logged in on this machine (no subscription login in ${credentialsPath}): run \`claude\` and log in (see Installation), then try again.`;
-}
-
-/** The subscription login in the credentials file; throws `notLoggedIn` when there is none. */
-async function readOauth(credentialsPath: string): Promise<unknown> {
-  let raw: unknown = null;
-  try {
-    raw = JSON.parse(await readFile(credentialsPath, 'utf8'));
-  } catch {
-    // Missing or unreadable: the same as no login.
-  }
-  const oauth =
-    typeof raw === 'object' && raw !== null && 'claudeAiOauth' in raw ? raw.claudeAiOauth : null;
-  if (!oauth) {
-    throw new Error(notLoggedIn(credentialsPath));
-  }
-  return oauth;
-}
-
-/** Only the Claude subscription credential is seeded: no MCP tokens, no history. */
-export async function seedCredentials(
-  runtime: ContainerRuntime,
-  container: string,
-  credentialsPath: string,
-): Promise<void> {
-  const oauth = await readOauth(credentialsPath);
-  await runtime.writeFile(
-    container,
-    `${AGENT_HOME}/.claude/.credentials.json`,
-    JSON.stringify({ claudeAiOauth: oauth }),
-  );
-  await runtime.writeFile(
-    container,
-    `${AGENT_HOME}/.claude.json`,
-    JSON.stringify({ hasCompletedOnboarding: true }),
-    '644',
-  );
 }
 
 async function hasFile(
@@ -208,17 +165,16 @@ export async function ensureTicketContainer(
   if (!(await runtime.isRunning(names.name))) {
     await runtime.start(names.name);
   }
-  // Every run: the host refreshes the login, and a refresh retires the token a stale copy holds.
-  await seedCredentials(runtime, names.name, config.credentialsPath);
+  // Every run: the host refreshes its login (a refresh retires the token a stale copy holds), and
+  // the token in Union settings may have been set, replaced or removed.
+  await seedCredentials(runtime, names.name, config);
   if (!(await hasFile(runtime, names.name, `${REPO_DIR}/.git`))) {
     const token = await projectGitToken(db, project);
     const source = cloneSource(config.gitBaseUrl, project.owner, project.repo, token);
     const base = await resolveTicketBase(db, ticket, source);
     await cloneInto(runtime, names.name, source, base ?? project.config.baseBranch);
   }
-  await syncAttachments(db, runtime, names.name, ticket.id);
-  await syncProjectFiles(db, runtime, project.id, { volume: names.workspaceVolume });
-  await rejoinRunningPreview(db, runtime, ticket.id);
+  await syncTicketContainer(db, runtime, ticket, names);
   db.update(schema.tickets)
     .set({
       containerName: names.name,

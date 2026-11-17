@@ -1,12 +1,8 @@
 // Runs work in a throwaway container from the agent image, with only the Claude login (or none), removed after.
 import { emitEvent, type ContainerRuntime, type Db, agentContainerLimits } from '@union/core';
 
-import {
-  projectImage,
-  seedCredentials,
-  type ProvisionConfig,
-  type TicketContainer,
-} from './provision';
+import { seedCredentials } from './claude-login';
+import { projectImage, type ProvisionConfig, type TicketContainer } from './provision';
 
 export type ThrowawayDeps = {
   db: Db;
@@ -61,7 +57,7 @@ export async function inThrowaway<T>(
     await runtime.create({ ...names, image, limits: agentContainerLimits(deps.db, names.name) });
     await runtime.start(names.name);
     if (deps.noLogin !== true) {
-      await seedCredentials(runtime, names.name, config.credentialsPath);
+      await seedCredentials(runtime, names.name, config);
     }
     return await work(names.name);
   } finally {

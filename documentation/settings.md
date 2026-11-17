@@ -80,6 +80,7 @@ The **Environment settings** entry of the **⋯** menu on a ticket's Preview tab
 | General | Shared instructions, Resources, System                                                                 |
 | Agents  | **All agents**: every agent, yours included, with its model and effort; click one to open its own page |
 | Tools   | Tools, Connectors                                                                                      |
+| Claude  | Claude login                                                                                           |
 | GitHub  | GitHub App                                                                                             |
 
 **New agent**, under the menu, creates a custom agent. Each agent's page (opened from All agents, and shown under it
@@ -132,6 +133,27 @@ that leaves room for Windows (`memory=` in `C:\Users\<you>\.wslconfig`).
 
 A change applies to the next pull, upload or container.
 
+### Claude login
+
+**Union settings → Claude login** says how the agents log in to Claude to run on your subscription.
+
+With no token set, each agent's container gets a copy of the Claude login of this machine, refresh token included.
+An agent could read a credential that renews itself, and one container renewing it can log the others out.
+
+A long-lived token is safer: it cannot renew itself, and you can revoke it alone. To use one:
+
+1. In a terminal, run `claude setup-token` and sign in with the Claude account the agents use.
+2. Paste the token it prints (it starts with `sk-ant-oat01-`) and click **Save the token**.
+
+From the next run on, containers get the token and no longer hold your login. The token is never shown again:
+**Replace the token** saves a new one, **Remove** goes back to the copy of your login.
+
+If Claude refuses the token (you revoked it, or it expired), runs fail and say so; Union does not fall back to your
+login. Make a new token and replace it here, then **Retry** the step.
+
+Saving or removing the token reads your connectors again: **Tools → Connectors** then lists the ones the agents
+reach with it.
+
 ## Environment variables
 
 All are optional. Put them in a `.env` file at the root of Union's checkout: Bun reads it when Union starts, with or
@@ -143,7 +165,7 @@ without Compose. Under Compose, variables set in your shell do not reach Union, 
 | `GITHUB_TOKEN`             | none                           | Token for projects that have no GitHub access of their own                                                       |
 | `DB_PATH`                  | `union.sqlite` in the checkout | The database file                                                                                                |
 | `UNION_ATTACHMENTS_DIR`    | `attachments/` in the checkout | Where ticket and preview files are kept                                                                          |
-| `UNION_CLAUDE_CREDENTIALS` | `~/.claude/.credentials.json`  | The Claude login given to the agents (set by `compose.yaml` under Compose)                                       |
+| `UNION_CLAUDE_CREDENTIALS` | `~/.claude/.credentials.json`  | The Claude login given to the agents when no token is set (set by `compose.yaml` under Compose)                  |
 | `UNION_ALLOWED_HOSTS`      | none                           | Host names Union answers to besides `localhost` and `127.0.0.1`, for both the page and the API (comma-separated) |
 | `UNION_GIT_BASE_URL`       | `https://github.com`           | Where agents clone the repositories from                                                                         |
 | `PORT`                     | `3000`                         | Union's port with `bun run start`                                                                                |

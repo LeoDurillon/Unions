@@ -1,4 +1,4 @@
-// The Union settings pages that are not an agent's: All agents, Resources, System, Tools, Connectors and the GitHub App.
+// The Union settings pages that are not an agent's: All agents, Resources, System, Tools, Connectors, Claude login…
 
 import type { AgentId } from '@union/core';
 import type { ReactElement } from 'react';
@@ -7,6 +7,7 @@ import type { UnionSection } from '../../lib/union-settings/union-settings-group
 import { ConnectorList } from '../agents/connector-list';
 import { ToolList } from '../agents/tool-list';
 import { GitHubAppSection } from '../github-app/github-app-section';
+import { ClaudeLoginPage } from './claude-login-page';
 import { ModelsPage } from './models-page';
 import { ResourcesPage } from './resources-page';
 import { SystemPage } from './system-page';
@@ -17,5 +18,6 @@ export const OTHER_PAGES: Record<Exclude<UnionSection, AgentId>, () => ReactElem
   system: () => <SystemPage />,
   tools: () => <ToolList />,
   connectors: () => <ConnectorList />,
+  'claude-login': () => <ClaudeLoginPage />,
   'github-app': () => <GitHubAppSection />,
 };
