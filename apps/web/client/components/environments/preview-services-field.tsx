@@ -115,7 +115,7 @@ export function serviceOfRow(row: ServiceRow): PreviewService {
   };
 }
 
-/** What the paths cannot be saved for, and that the ticket's container does not route them yet. */
+/** What the paths cannot be saved for, and when they apply. */
 function PathsNotes({ rows }: { rows: readonly ServiceRow[] }): ReactElement | null {
   if (!rows.some((row) => row.paths.length > 0)) {
     return null;
@@ -128,10 +128,7 @@ function PathsNotes({ rows }: { rows: readonly ServiceRow[] }): ReactElement | n
           {problem}
         </p>
       ))}
-      <p className="text-amber-700 dark:text-amber-400">
-        Your browser gets them from a preview&apos;s next start; inside the ticket&apos;s container
-        (the agent, the e2e tests) a path still reaches the app.
-      </p>
+      <p className="text-zinc-500">A running preview gets new paths at its next start.</p>
     </div>
   );
 }

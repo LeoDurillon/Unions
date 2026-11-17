@@ -1,11 +1,14 @@
 // Routes the preview's public addresses inside its owner's container, to its services on their network.
+// Paths on a host (an API at /api of an app's address) go to their own service.
 import {
   exposedServices,
   getPreview,
+  previewPathAddresses,
   ownerKey,
   schema,
   type ContainerRuntime,
   type Db,
+  type PathAddress,
   type PreviewConfig,
   type WorkspaceOwner,
 } from '@union/core';
@@ -56,7 +59,24 @@ export function previewRoutes(
       hosts[parsed.hostname] = { service, port: exposed.port };
     }
   }
-  return port === null ? null : { port, hosts };
+  if (port === null) {
+    return null;
+  }
+  return { port, hosts: withPaths(hosts, previewPathAddresses(urls, services)) };
+}
+
+/** Each host's paths, longest first, so `/api/v2` is tried before `/api`. */
+function withPaths(hosts: HostRoutes['hosts'], paths: readonly PathAddress[]): HostRoutes['hosts'] {
+  const routed = { ...hosts };
+  for (const { url, path, strip, service, port } of paths) {
+    const host = new URL(url).hostname;
+    const entry = routed[host];
+    if (entry) {
+      const list = [...(entry.paths ?? []), { path, strip, service, port }];
+      routed[host] = { ...entry, paths: list.toSorted((a, b) => b.path.length - a.path.length) };
+    }
+  }
+  return routed;
 }
 
 /**

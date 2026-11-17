@@ -16,8 +16,8 @@ addresses and **Stop**.
    call their API under their own address (`/api`, as a reverse proxy serves it in production), click **+ Also
    serve at a path of another service's address** under the API's row: pick an app's address, type the path
    (`/api`), and keep **Remove the path** ticked when the API expects requests without it (`/api/users`
-   reaches it as `/users`). Your browser reaches them at the next start of a preview. The agent's and the end-to-end
-   tests' browser does not yet: inside the ticket's container, the path still reaches the app.
+   reaches it as `/users`). A running preview gets new paths at its next start, in your browser and in the
+   agent's and the end-to-end tests' alike.
 3. Optional: **Profiles** to enable, and **compose additions**: YAML merged over the repository's file, for what
    Union adds without changing the repository (a database restore, migrations, a seed).
 

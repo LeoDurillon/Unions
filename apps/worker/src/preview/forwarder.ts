@@ -9,8 +9,18 @@ const SERVICES_BASE = '/tmp/union-forward';
 /** The preview router's: its own process, so neither replaces the other. */
 const HOSTS_BASE = '/tmp/union-hosts';
 
-/** One port routed by host name to the preview's services: `{ "api-t12.union.localhost": { service: "api", port: 3000 } }`. */
-export type HostRoutes = { port: number; hosts: Record<string, { service: string; port: number }> };
+/** A path on a host that goes to another service, the path removed first when `strip` is set. */
+type PathRoute = { path: string; strip: boolean; service: string; port: number };
+
+/**
+ * One port routed by host name to the preview's services:
+ * `{ "api-t12.union.localhost": { service: "api", port: 3000 } }`. A host with `paths` (longest
+ * first) is routed request by request; the others, connection by connection.
+ */
+export type HostRoutes = {
+  port: number;
+  hosts: Record<string, { service: string; port: number; paths?: PathRoute[] }>;
+};
 
 /**
  * Starts the forwarder unless it already runs with the same spec (a run sharing the container

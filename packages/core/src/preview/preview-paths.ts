@@ -105,3 +105,32 @@ export function parsePreviewPaths(value: unknown, service: string): PreviewPath[
   }
   return value.map((item: unknown) => pathOf(item, service));
 }
+
+/** A path of an exposed service at the address of the service whose host it is on. */
+export type PathAddress = {
+  service: string;
+  port: number;
+  /** The host's address without the path: `http://t12.union.localhost:8080`. */
+  url: string;
+  path: string;
+  strip: boolean;
+};
+
+/**
+ * Every path of the exposed services at the public address of the host it is on, from the
+ * preview's addresses (`urls`): a host whose service has no address is left out.
+ */
+export function previewPathAddresses(
+  urls: readonly { service: string; url: string }[],
+  services: readonly PreviewService[],
+): PathAddress[] {
+  return services.flatMap((service) =>
+    (service.paths ?? []).flatMap(({ host, path, strip }) => {
+      const owner = services.find((candidate) => candidate.prefix === host);
+      const url = urls.find((candidate) => candidate.service === owner?.name)?.url;
+      return url === undefined
+        ? []
+        : [{ service: service.name, port: service.port, url, path, strip }];
+    }),
+  );
+}

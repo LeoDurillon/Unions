@@ -1,8 +1,11 @@
 # Plan: a preview service also served under a path of another service's host
 
-Status: steps 1 and 2 built (2026-11-17, branch `preview-path-routes`): the paths are saved, checked, and served
-by the proxy (checked with real Docker: a Traefik of Union's image and echo servers, stripped and kept paths,
-`/apis` left to the app, `X-Forwarded-Prefix`, SSE streamed event by event). Steps 3 to 5 planned.
+Status: steps 1 to 4 built (2026-11-17, branch `preview-path-routes`): the paths are saved, checked, served by the
+proxy (checked with real Docker: a Traefik of Union's image and echo servers, stripped and kept paths, `/apis` left
+to the app, `X-Forwarded-Prefix`, SSE streamed event by event) and by the router in the owner's container
+(checked in `union-agent:local` against services on a Docker network; it also routes each request by its own host,
+as a client may reuse a connection for another host). Not checked: a Playwright page in a ticket's container, nor
+a real preview through the live proxy. Step 5 (one domain per preview) left.
 
 ## Problem
 

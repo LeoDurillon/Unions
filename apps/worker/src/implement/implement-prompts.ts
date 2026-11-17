@@ -2,6 +2,8 @@
 // and its report.
 
 import {
+  exposedServices,
+  previewPathAddresses,
   previewUrlVariable,
   shortSha,
   type AgentInputs,
@@ -35,9 +37,14 @@ export function previewHint(
   if (!urls || !url) {
     return '';
   }
-  const addresses = urls.map(
-    (entry) => `${entry.service} at ${entry.url} (${previewUrlVariable(entry.service)})`,
-  );
+  const paths = preview ? previewPathAddresses(urls, exposedServices(preview)) : [];
+  const addresses = urls.map((entry) => {
+    const also = paths
+      .filter((path) => path.service === entry.service)
+      .map((path) => `${path.url}${path.path}`);
+    const more = also.length > 0 ? `, and under ${also.join(', ')}` : '';
+    return `${entry.service} at ${entry.url} (${previewUrlVariable(entry.service)})${more}`;
+  });
   const outside =
     addresses.length > 0
       ? ` From here its services answer at the same addresses as in the user's browser: ${addresses.join(', ')}. Point a browser at these, so its pages, their calls to the other services and the login cookies work as for the user.`
