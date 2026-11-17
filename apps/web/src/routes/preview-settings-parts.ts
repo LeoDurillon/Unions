@@ -1,8 +1,10 @@
-// The parts of the preview settings that core checks: the agent's environment, the shared services'
-// commands. Their refusals are answered as 400s.
+// The parts of the preview settings that core checks, their refusals answered as 400s. They are the
+// agent's environment, the shared services' commands and the exposed services' paths.
 import {
   parseAgentEnvironment,
+  parsePreviewPaths,
   parseSharedCommands,
+  previewPathProblems,
   type PreviewConfig,
   type PreviewService,
 } from '@union/core';
@@ -36,4 +38,18 @@ export function sharedSettings(
     ...(sharedServices.length === 0 ? {} : { sharedServices }),
     ...(sharedCommands.length === 0 ? {} : { sharedCommands }),
   };
+}
+
+/** A service's paths on other services' hosts, kept only when it has some. */
+export function servicePaths(value: unknown, service: string): Pick<PreviewService, 'paths'> {
+  const paths = asBadRequest(() => parsePreviewPaths(value, service));
+  return paths.length === 0 ? {} : { paths };
+}
+
+/** Refuses paths that point at no other exposed service, or that two services both claim. */
+export function checkServicePaths(services: readonly PreviewService[]): void {
+  const [problem] = previewPathProblems(services);
+  if (problem !== undefined) {
+    throw fail(BAD_REQUEST, problem);
+  }
 }

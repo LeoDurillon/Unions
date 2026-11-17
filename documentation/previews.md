@@ -12,7 +12,11 @@ addresses and **Stop**.
 
 1. **Compose file**: the path of the Compose file in the repository, for example `compose.yaml`.
 2. **Exposed services**: the services you want to open in the browser, with their port. The first one is the one
-   **Open** goes to. Give the others a prefix (`api`, `admin`) to tell their addresses apart.
+   **Open** goes to. Give the others a prefix (`api`, `admin`) to tell their addresses apart. If your apps
+   call their API under their own address (`/api`, as a reverse proxy serves it in production), click **+ Also
+   serve at a path of another service's address** under the API's row: pick an app's address, type the path
+   (`/api`), and keep **Remove the path** ticked when the API expects requests without it (`/api/users`
+   reaches it as `/users`). Union checks the paths when you save; it does not route them yet.
 3. Optional: **Profiles** to enable, and **compose additions**: YAML merged over the repository's file, for what
    Union adds without changing the repository (a database restore, migrations, a seed).
 

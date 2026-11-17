@@ -137,6 +137,7 @@ export * from './preview/preview-screenshots';
 export * from './preview/preview-secrets';
 export * from './preview/preview-shared';
 export * from './preview/preview-shared-commands';
+export * from './preview/preview-paths';
 export * from './preview/preview-shared-proxy';
 export * from './preview/shared-stacks';
 export * from './ticket/project-files';

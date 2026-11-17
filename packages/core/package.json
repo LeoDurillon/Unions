@@ -39,6 +39,7 @@
     "./pr-comment-reply": "./src/pull-request/pr-comment-reply.ts",
     "./pr-review-verdicts": "./src/pull-request/pr-review-verdicts.ts",
     "./preview": "./src/preview/preview-config.ts",
+    "./preview-paths": "./src/preview/preview-paths.ts",
     "./github-client": "./src/github/github-client.ts",
     "./github-text": "./src/github/github-text.ts",
     "./investigation-defaults": "./src/investigation/investigation-defaults.ts",

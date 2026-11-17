@@ -4,8 +4,18 @@ import type { DiffStatus } from '../diff/diff';
 import type { FlowPreset } from '../flow/flows';
 import type { BoardStatus } from '../states';
 
-/** A service the proxy serves: at `t<id>.union.localhost` when `prefix` is empty, else `<prefix>-t<id>.union.localhost`. */
-export type PreviewService = { name: string; port: number; prefix: string };
+/**
+ * A further address of an exposed service: a path on another exposed service's host (`host` is
+ * that service's prefix, `''` the preview's main host), the path removed before the request is
+ * passed on when `strip` is set.
+ */
+export type PreviewPath = { host: string; path: string; strip: boolean };
+
+/**
+ * A service the proxy serves: at `t<id>.union.localhost` when `prefix` is empty, else
+ * `<prefix>-t<id>.union.localhost`, and under each of its `paths`.
+ */
+export type PreviewService = { name: string; port: number; prefix: string; paths?: PreviewPath[] };
 
 /**
  * A shared service's own settings, at least one set: the commands run in its container for one

@@ -1,6 +1,7 @@
 # Plan: a preview service also served under a path of another service's host
 
-Status: planned (2026-11-17). Nothing built.
+Status: step 1 built (2026-11-17, branch `preview-path-routes`): the paths are saved and checked, not served
+yet. Steps 2 to 5 planned.
 
 ## Problem
 
@@ -96,7 +97,7 @@ service. The agent's prompt, which lists the preview's addresses, adds each extr
 ### Settings page
 
 Environments → Compose, under each exposed service: an "Also serve at" list with a host select (the other exposed
-services), a path field and "Remove the path before passing the request on" (on by default), with the check's
+services), a path field and "Remove the path" (on by default), with the check's
 messages inline. The guide's Previews page says what it is for (an API served under each app's own address, as in
 production) and what to type.
 

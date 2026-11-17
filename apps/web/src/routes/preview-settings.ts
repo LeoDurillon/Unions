@@ -18,7 +18,12 @@ import { Hono, type Context } from 'hono';
 import type { PreviewSettingsView } from '../api-types';
 import { BAD_REQUEST, fail, NOT_FOUND, readObject, requireId } from '../http';
 import { publicProjectOf } from '../public-project';
-import { agentEnvironment, sharedSettings } from './preview-settings-parts';
+import {
+  agentEnvironment,
+  checkServicePaths,
+  servicePaths,
+  sharedSettings,
+} from './preview-settings-parts';
 
 const SERVICE_NAME = /^[a-zA-Z0-9][a-zA-Z0-9_.-]*$/u;
 const VARIABLE_NAME = /^[A-Za-z_][A-Za-z0-9_]*$/u;
@@ -104,7 +109,7 @@ function service(value: unknown): PreviewService {
   if (!PREFIX.test(prefix)) {
     throw fail(BAD_REQUEST, `"${prefix}" cannot start a host name: letters, digits and dashes`);
   }
-  return { name, port, prefix };
+  return { name, port, prefix, ...servicePaths(input.paths, name) };
 }
 
 function services(value: unknown): PreviewService[] {
@@ -117,6 +122,7 @@ function services(value: unknown): PreviewService[] {
   if (names.size < list.length || prefixes.size < list.length) {
     throw fail(BAD_REQUEST, 'Each exposed service needs its own name and its own host');
   }
+  checkServicePaths(list);
   return list;
 }
 

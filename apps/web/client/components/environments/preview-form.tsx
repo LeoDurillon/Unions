@@ -10,7 +10,7 @@ import { envLines, parseEnvLines } from '../../lib/settings/env-lines';
 import { useSettingsForm, type SettingsForm } from '../../lib/settings/use-settings-form';
 import { SaveBar } from '../settings/save-bar';
 import { Button, ErrorText } from '../ui/ui';
-import { serviceRows, type ServiceRow } from './preview-services-field';
+import { serviceOfRow, serviceRows, type ServiceRow } from './preview-services-field';
 
 /**
  * The preview settings as the pages edit them. Each page starts from what is saved and saves the
@@ -39,7 +39,7 @@ export type Form = {
 const EMPTY: Form = {
   composeFile: 'compose.yaml',
   additions: '',
-  rows: [{ name: '', port: '', prefix: '' }],
+  rows: [{ name: '', port: '', prefix: '', paths: [] }],
   env: '',
   envFileService: '',
   envFilePath: '',
@@ -108,11 +108,7 @@ function settingsOf(form: Form): PreviewConfig {
   return {
     composeFile: form.composeFile,
     ...(form.additions.trim() === '' ? {} : { composeAdditions: form.additions }),
-    services: form.rows.map((row) => ({
-      name: row.name,
-      port: Number(row.port),
-      prefix: row.prefix,
-    })),
+    services: form.rows.map((row) => serviceOfRow(row)),
     env: parseEnvLines(form.env),
     ...(form.envFileService.trim() === ''
       ? {}
