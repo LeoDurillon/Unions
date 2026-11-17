@@ -45,7 +45,7 @@ function UploadForm({ projectId }: { projectId: number }): ReactElement {
           aria-label="Path in the repository"
           className={`${inputClass} font-mono`}
           value={path}
-          placeholder="goreno.sql"
+          placeholder="seed.sql"
           onChange={(event) => {
             setPath(event.target.value);
           }}

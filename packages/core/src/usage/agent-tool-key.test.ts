@@ -5,13 +5,13 @@ import { commandTarget, commandVariant, mainCommand, toolKey } from './agent-too
 
 test('the main command drops the cd, variables and timeout before it, and what follows it', () => {
   expect(
-    mainCommand('cd /workspace/repo/goreno && FOO=1 timeout 400 pnpm install 2>&1 | tail -5'),
+    mainCommand('cd /workspace/repo/app && FOO=1 timeout 400 pnpm install 2>&1 | tail -5'),
   ).toBe('pnpm install');
   expect(mainCommand('git status --short; git log')).toBe('git status --short');
 });
 
 test('git commands are told apart by what they print', () => {
-  expect(commandTarget('git diff senova-dev...HEAD')).toBe('git diff');
+  expect(commandTarget('git diff develop...HEAD')).toBe('git diff');
   expect(commandTarget('git diff --stat main...HEAD')).toBe('git diff --stat');
   expect(commandTarget('git diff main...HEAD -- src/a.ts')).toBe('git diff -- <path>');
   expect(commandTarget('git -C /repo log --oneline')).toBe('git log');

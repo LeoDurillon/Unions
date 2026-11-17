@@ -1,6 +1,6 @@
 # Jira
 
-Status: built and deployed (2026-11-07), steps 1 to 5; checked on a real Jira Cloud site (SCRUM-1: text, link card, table, a screenshot and an xlsx kept as ticket files, each in its place in the text). Scope: Jira Cloud, an API token, importing an issue as a ticket. Rule actions,
+Status: built and deployed (2026-11-07), steps 1 to 5; checked on a real Jira Cloud site (PROJ-1: text, link card, table, a screenshot and an xlsx kept as ticket files, each in its place in the text). Scope: Jira Cloud, an API token, importing an issue as a ticket. Rule actions,
 creating issues from investigations and a comments tab were later plans (listed at the end), all built since.
 
 ## Why
@@ -185,7 +185,7 @@ Each step ships on its own; `bun run check` after each.
    ticket files. Then `docs/architecture/integrations.md` (Jira reads, D2, D3, D8), `docs/spec/flow.md` if it
    names Notion as the only source, `documentation/` (a page on connecting Jira and importing an issue), this plan's
    status and `docs/plans/README.md`.
-   Done on the user's site: SCRUM-1 imported its heading, paragraphs, link card and table as markdown, and its
+   Done on the user's site: PROJ-1 imported its heading, paragraphs, link card and table as markdown, and its
    screenshot (matched by name) and an xlsx as ticket files. It showed two flaws, both fixed: a line break at the end
    of a paragraph left a stray `\` (dropped since), and the xlsx's file card, which carries no name, read
    _attachment_ in the text and was listed again under Attachments (matched by media id since, D7). Imported again

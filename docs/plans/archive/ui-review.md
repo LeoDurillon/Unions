@@ -73,7 +73,7 @@ of the live instance, light and dark, at 1400, 1024 and 390 px wide.
 - [x] Investigations: no "done" badge in the list; the tool chips show the selected tools and "+ Add a tool (N
       more)" (agent pages too); wide tables in answers scroll on their own.
 - [x] Notifications: **Delete all** (asks first); the desktop setting folded to one line saying where it stands.
-- [x] Review page: a file's name always shows in full, its folders cut from the left (`…/conception/package.json`).
+- [x] Review page: a file's name always shows in full, its folders cut from the left (`…/editor/package.json`).
       Not done: Tree by default, no longer needed once the names show.
 - [x] Settings: the Notion group is **Integrations › Notion**; Iteration limit a narrow number field; Flows show
       Implementation and Final review as locked chips (in New ticket too) and the default flow cannot be

@@ -1,6 +1,6 @@
 # Plan: agent reviews of large changes, slice by slice
 
-Status: planned (2026-11-13); step 0 done (recording built, commit `25105a4`; #1756 rerun and read), step 1 built and measured (commit `c75b8c7`, run 25): it fixes the line numbers, not the coverage; step 2 built (branch `sliced-agent-review`), its run on #1756 left.
+Status: planned (2026-11-13); step 0 done (recording built, commit `25105a4`; #200 rerun and read), step 1 built and measured (commit `c75b8c7`, run 25): it fixes the line numbers, not the coverage; step 2 built (branch `sliced-agent-review`), its run on #200 left.
 
 ## Problem
 
@@ -24,27 +24,27 @@ What already exists to build on:
 
 ## Step 0: measure
 
-### What PR #1756 shows (2026-11-13)
+### What PR #200 shows (2026-11-13)
 
-Agent review 23 of the pull request #1756 (review 51, project 1): 77 files, 3721 lines added and 907 removed,
+Agent review 23 of the pull request #200 (review 51, project 1): 77 files, 3721 lines added and 907 removed,
 5.3k characters of specs. The run took 4 min 20 s and left 6 drafts, all kept and sent. They are good: two
-blocking bugs (the author's name leaking into a file clients can download, and unpublishing that checks only
-the current mode) and three real smaller issues.
+blocking bugs (personal data leaking into a file clients can download, and a removal that checks only
+one of two modes) and three real smaller issues.
 
 Where those 6 comments landed:
 
-| Area                                    | Changed lines | Files | Files commented |
-| --------------------------------------- | ------------- | ----- | --------------- |
-| `goreno/simulator`                      | 1605          | 20    | 0               |
-| `goreno/api`                            | 1111          | 12    | 2               |
-| `goreno/conception`                     | 889           | 25    | 1               |
-| `goreno/packages/financial-engineering` | 593           | 9     | 0               |
-| `goreno/e2e`                            | 230           | 3     | 0               |
-| `docs`                                  | 172           | 4     | 0               |
+| Area                      | Changed lines | Files | Files commented |
+| ------------------------- | ------------- | ----- | --------------- |
+| `app/viewer`              | 1605          | 20    | 0               |
+| `app/api`                 | 1111          | 12    | 2               |
+| `app/editor`              | 889           | 25    | 1               |
+| `app/packages/shared-lib` | 593           | 9     | 0               |
+| `app/e2e`                 | 230           | 3     | 0               |
+| `docs`                    | 172           | 4     | 0               |
 
-The agent went deep on the API's publication path and found real bugs there. It said nothing about the simulator
-(the largest area, with `useActionsDetailsData.ts` alone 487 changed lines) nor about the new
-`publishedProgramme.ts` (369 lines) of the shared package. That is the pattern this plan is for: depth on one part,
+The agent went deep on the API's main write path and found real bugs there. It said nothing about the viewer
+(the largest area, with `useDetailsData.ts` alone 487 changed lines) nor about the new
+`newModule.ts` (369 lines) of the shared package. That is the pattern this plan is for: depth on one part,
 silence on the rest. With one pass, silence does not tell "read and fine" from "never read".
 
 That run's log could not be read: a pull request's agent review kept none, and recorded no usage. Built since
@@ -59,36 +59,36 @@ Opus, 3 min 5 s, 28 turns, 9 drafts. Peak context 160k (of a 1M window), startin
 
 How it read the change, in order:
 
-1. `git diff --stat`, then `git diff <base>...HEAD -- goreno/api/src`. That output (58 KB) was too large for the CLI,
+1. `git diff --stat`, then `git diff <base>...HEAD -- app/api/src`. That output (58 KB) was too large for the CLI,
    which saved it to a file in the session and showed a 2 KB preview; the agent then read the file (1546 lines).
 2. Nine `Grep`s and a few reads around the API: the file authorization rules, the Prisma schema (its `Decimal` and
    `DateTime` fields). About 30k of context spent there.
-3. The shared package: `publishedProgramme.ts` and `publicationSummary.ts`, read whole.
-4. The simulator: the diffs of three hooks and helpers, of `src/app`, `types.ts` and the API client; two new files
+3. The shared package: `newModule.ts` and `summary.ts`, read whole.
+4. The viewer: the diffs of three hooks and helpers, of `src/app`, `types.ts` and the API client; two new files
    read whole.
-5. The Conception: one `git diff` whose paths did not exist (`src/components/...` for `src/parts/...`), then
+5. The Editor: one `git diff` whose paths did not exist (`src/components/...` for `src/parts/...`), then
    `--name-only`, then the diffs of three folders.
 6. Then it answered.
 
 What it never opened, 45% of the changed lines (2092 of 4628):
 
-| File                                                     | Changed lines |
-| -------------------------------------------------------- | ------------- |
-| `goreno/simulator/src/hooks/useActionsDetailsData.ts`    | 487           |
-| `goreno/e2e/.../financial-engineering.e2e-spec.ts`       | 174           |
-| every test of the change (`*.spec.ts(x)`), together      | about 500     |
-| `conception/.../publishedScenarios.helpers.ts`           | 116           |
-| `conception/.../PublishedActionsTable.tsx` (and 4 views) | about 250     |
-| `docs/adr/0013-a-publication-freezes-...md` and the docs | 172           |
-| `simulator/src/helpers/actionsTotals.ts`                 | 70            |
-| `packages/.../publishedScenarioSnapshot.ts`              | 66            |
+| File                                                | Changed lines |
+| --------------------------------------------------- | ------------- |
+| `app/viewer/src/hooks/useDetailsData.ts`            | 487           |
+| `app/e2e/.../shared-lib.e2e-spec.ts`                | 174           |
+| every test of the change (`*.spec.ts(x)`), together | about 500     |
+| `editor/.../items.helpers.ts`                       | 116           |
+| `editor/.../ItemsTable.tsx` (and 4 views)           | about 250     |
+| `docs/adr/0013-...md` and the docs                  | 172           |
+| `viewer/src/helpers/totals.ts`                      | 70            |
+| `packages/.../snapshot.ts`                          | 66            |
 
-Its 9 drafts: 7 on the API (one of them general), 1 on the shared package, none on the simulator or the
-Conception, though it read part of both. Its summary does not say what it left out.
+Its 9 drafts: 7 on the API (one of them general), 1 on the shared package, none on the viewer or the
+Editor, though it read part of both. Its summary does not say what it left out.
 
-Compared with run 23 on the same head: 3 findings in both (the author's name readable by clients, the mode served
-against the project's mode, the silent fallback in `publication.helpers.ts`), 6 only in run 24, 2 only in run 23
-(the cache missed by every simulator at once, `isPublished` reading the current mode). Two runs of one pass find
+Compared with run 23 on the same head: 3 findings in both (the data readable by clients, a mode checked
+against the wrong setting, a silent fallback in a helper), 6 only in run 24, 2 only in run 23
+(the cache missed by every viewer at once, a flag reading the current mode). Two runs of one pass find
 different bugs: neither run covers the change.
 
 What this says for the plan:
@@ -96,9 +96,9 @@ What this says for the plan:
 - **Coverage, not context, is the problem.** The context never filled. The agent chose to stop. Slicing helps by
   giving each part its own agent, and so does a plain list of files the answer must account for.
 - **Order decides what gets reviewed.** It started with the API (the backend) and spent a third of its turns there;
-  the largest file, in the simulator, was never opened. A slice per area removes that choice.
+  the largest file, in the viewer, was never opened. A slice per area removes that choice.
 - **A large `git diff` is read through the CLI's saved file**, whose line numbers are the file's, not the source's.
-  One finding cited `stored-inputs.reviver.ts` lines 504-518 (the file has 40) and became a general draft. Step 1's
+  One finding cited `inputs.reviver.ts` lines 504-518 (the file has 40) and became a general draft. Step 1's
   "one file at a time" and the hunk index avoid it.
 - **The tests, the e2e test and the ADR were skipped.** The ADR is close to a spec of the change; the slices should
   give the docs to the slice they describe, and the tests to the slice of the code they test, not to `unrelated`.
@@ -112,7 +112,7 @@ list below: the generated files are the ones the review page already hides (lock
 `reviewIgnore`), not a new list; and the coverage is shown next to the button, its files on hover. A stack's prompt
 is unchanged and its run not measured.
 
-### Measured: run 25 on #1756, same head
+### Measured: run 25 on #200, same head
 
 |                                  | Run 24 (before) | Run 25 (step 1) |
 | -------------------------------- | --------------- | --------------- |
@@ -126,12 +126,12 @@ is unchanged and its run not measured.
 | Comments placed on wrong lines   | 1               | 0               |
 
 - **What step 1 fixed.** The agent read the hunk index first, then diffed file by file: no output went through the
-  CLI's saved file, and every line comment sits on its lines. It reached more of the simulator and the Conception
-  (`publishedScenarios.helpers.ts`, `actionsTotals.ts`, `publishedScenarioSnapshot.ts`, the e2e test).
+  CLI's saved file, and every line comment sits on its lines. It reached more of the viewer and the Editor
+  (`items.helpers.ts`, `totals.ts`, `snapshot.ts`, the e2e test).
 - **What it did not fix.** Coverage is the same: 45% of the changed lines never opened. The tests are still left
-  almost whole, and `useActionsDetailsData.ts` (487 lines, the largest file) again.
+  almost whole, and `useDetailsData.ts` (487 lines, the largest file) again.
 - **The agent's own account is wrong.** Its summary says "every file read through its diff, except
-  `useActionsDetailsData.ts`, `PublishedActionsTable` and the Conception's views, skimmed": 50 files were never
+  `useDetailsData.ts`, `ItemsTable` and the Editor's views, skimmed": 50 files were never
   opened, the tests among them. The measured coverage on the page is the only reliable signal.
 - **Both runs stop near 160-170k of context**, in a 1M window: about 130k of reading after a 35k prompt, whatever
   the instructions. That is the budget one agent spends here, about 2500 changed lines with the files around them.
@@ -237,7 +237,7 @@ on hover), not on a card.
   commented, the bugs found only at seams, and the usage.
 - Set the threshold's default from that, or drop slicing if step 1 is enough.
 
-### Measured: run 26 on #1756, in slices (2026-11-13, same head)
+### Measured: run 26 on #200, in slices (2026-11-13, same head)
 
 |                                      | Run 24 (one pass) | Run 25 (step 1) | Run 26 (in slices)               |
 | ------------------------------------ | ----------------- | --------------- | -------------------------------- |
@@ -252,11 +252,11 @@ on hover), not on a card.
   1162 lines; every part succeeded. The grouping's 30 spec parts were merged into 8 slices.
 - **Coverage is solved.** Every changed file was opened by some agent, and no agent came near its budget: the
   largest part (1162 lines, 16 files) peaked at 140k.
-- **The seams pass found what no part could:** the "served" publication mode is followed only by the modules the
-  change touched; the individual-order campaign still reads `project.computeIndividualQuantityMode`.
-- **The comments are specific:** the publisher's name leaking through `metadata.json`, a republication left half
-  written when an upload fails, the simulator showing a 0 € share under its "not available" alert, an option
-  locked as incompatible but still checked, no test on `loadComputedInputs`. Within an hour the user had kept or
+- **The seams pass found what no part could:** a new mode is followed only by the modules the change touched;
+  another module still reads the old setting.
+- **The comments are specific:** personal data leaking through a generated file, a write left half done
+  when an upload fails, the viewer showing a zero under its "not available" alert, an option locked as
+  incompatible but still checked, a loader with no test. Within an hour the user had kept or
   edited 10 of the 38.
 - **The price:** 5× the usage of one pass and 8× the time, since the parts run one after another.
 
@@ -266,9 +266,8 @@ What to fix, seen on this run:
    spec headings long. Name the first group and "and N more", and keep the full list for the prompt.
 2. **The seams summary is shown twice:** as the review's remark, then again on the "How the parts fit together"
    line. That line should give only its comment count.
-3. **The same finding in two files is kept twice.** Duplicates are only dropped on overlapping lines: the name leak
-   is at `publishedScenarioSnapshot.ts:66` and `financial-computation-saving.service.ts:233`, the half-written
-   republication at lines 494 and 566. Ask the seams agent to name the comments that say the same thing, and drop
+3. **The same finding in two files is kept twice.** Duplicates are only dropped on overlapping lines: the data leak
+   is at `snapshot.ts:66` and `saving.service.ts:233`, the half-written write at lines 494 and 566. Ask the seams agent to name the comments that say the same thing, and drop
    all but the owner's.
 4. **Part summaries open with "Fichiers lus : …"** (files read): tell the part agents not to list what they read;
    coverage is measured.

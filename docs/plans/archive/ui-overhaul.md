@@ -45,7 +45,7 @@ Then the Preview tab's board (2026-11-12), client only: a red failure card with 
 (`preview-failure.tsx`); the card (`preview-card.tsx`) lists the settings' exposed services, one row each with the
 preview's state, the port and, while it runs, the address (`preview-services.tsx`); the e2e tests are a card whose
 line says why they cannot run (`e2eRefusal`); scripts are ▸ chips. Union records the preview's state, not each
-service's: per-service state (db Ready, simulator No answer) would need the worker to store each container's state
+service's: per-service state (db Ready, viewer No answer) would need the worker to store each container's state
 (a migration); the user chose not to for now.
 
 Then the Log's board (2026-11-12), client only: a tool call keeps its id and whole input, its result its id and

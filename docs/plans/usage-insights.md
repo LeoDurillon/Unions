@@ -5,7 +5,7 @@ part 3 planned.
 
 ## Idea
 
-The Usage tab says how much each step and ticket cost, not why. A first look at the Senova logs by hand
+The Usage tab says how much each step and ticket cost, not why. A first look at the Acme logs by hand
 (2026-11-05, 32 tickets, $860 API-equivalent) found causes that the logs show directly:
 
 | Seen                                               | Figure                                              | Points at                    |
@@ -70,7 +70,7 @@ The guide (`documentation/how-it-works.md`, Usage and cost) says what each means
 ### Checked
 
 - On a copy of the live database: the backfill recorded the tool uses of 594 past calls in 6 s; the findings for
-  Senova over all time take about 50 ms.
+  Acme over all time take about 50 ms.
 - To deploy: the migration adds the table, then `bun run usage:backfill` once fills it for past calls.
 
 ## Part 2: "Suggest improvements" (uses Claude)
@@ -93,7 +93,7 @@ log, follow-ups, the Markdown export and the tickets drafted from an answer, and
   repository's `.claude/settings.json`, compound commands are checked part by part, `gh` and `curl` are denied on
   purpose, the worker owns the branch; then each step that ran, with its tools (`toolsFor`, the user's choices
   included) and what it is denied (`deniedFor`, core `agent-denied.ts`, the lists the worker passes). The first
-  Senova answer (investigation 42) proposed allowing `gh pr diff` and a rebase recipe with `git checkout
+  Acme answer (investigation 42) proposed allowing `gh pr diff` and a rebase recipe with `git checkout
   --theirs`, both denied by Union: this is what it lacked.
 
 Left for later:

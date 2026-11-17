@@ -2,7 +2,7 @@
 
 Status: built (2026-10-17), steps 1 to 5, branch `pr-checks` (core: `ci-output-text.ts`, `ci-outputs.ts`,
 `agent-inputs.ts`, table `ci_outputs`, migration 0049; each step below "as built"). Step 0 done: the GitHub App now has the permissions (below), and the reads work on
-SenovaFR/Senova. Decisions taken: the log is fetched when the user keeps or sends; failed checks only; one revision
+acme-org/acme. Decisions taken: the log is fetched when the user keeps or sends; failed checks only; one revision
 per send.
 
 ## Want
@@ -64,7 +64,7 @@ So: possible. Full logs only for GitHub Actions; other CI gives its summary, ann
   `pull-request/check-failure.tsx` (the text the agent gets, expandable), the send box reusing
   `run-agent-actions.tsx`. Placed after `BranchStatus` in `pull-request-tab.tsx`. Merged PRs: hidden.
 
-## Step 0: checked on SenovaFR/Senova (2026-10-16, read only, the App)
+## Step 0: checked on acme-org/acme (2026-10-16, read only, the App)
 
 - 25 check runs per PR head, all `github-actions`; `output.title`, `summary` and `text` empty on every one: for
   Actions, the useful text is the job log and the annotations. One commit status (CodeRabbit). The rollup gives
@@ -161,5 +161,5 @@ So: possible. Full logs only for GitHub Actions; other CI gives its summary, ann
 - `SPEC.md` (Pull requests → CI checks), `docs/architecture/web.md`, `docs/architecture/integrations.md` (the
   web's CI reads, the App's permissions), the plans index.
 - The GitHub App form is pre-filled with Checks, Commit statuses and Actions read (`app-setup-form.tsx`), and the
-  token hint names them for fine-grained tokens. Existing installations accept them on GitHub (done for SenovaFR on
+  token hint names them for fine-grained tokens. Existing installations accept them on GitHub (done for acme-org on
   2026-10-16).

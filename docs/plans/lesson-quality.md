@@ -2,11 +2,11 @@
 
 Status: steps 1 to 3 built (2026-11-06, commits `47c615c` and `8efcd3d`), each checked on a copy of the live
 database in headless Chromium with every write blocked. Step 4 planned. Left: the real lesson writer and tidier
-seen on Senova (a first tidy run worked as expected, by the user's account).
+seen on Acme (a first tidy run worked as expected, by the user's account).
 
 ## Idea
 
-An audit of Senova's 65 lessons (project 1, 2026-11-06) found what the lesson writer and the Memory page let
+An audit of Acme's 65 lessons (project 1, 2026-11-06) found what the lesson writer and the Memory page let
 through:
 
 - **The same rule twice**: the S3 deletion fact in Summary and in Technical; two barrel `index.ts` rules that pull
@@ -24,7 +24,7 @@ Why: the writer saw each step as one line with nothing it cannot do, read the fe
 was told "do not repeat a lesson" once and ran on Haiku with 60 lessons in view. Nothing looked at the lessons
 again once saved, and a save deleted and re-inserted them all, so no lesson had an id that lasted.
 
-The Senova list was fixed by hand the same day through `PUT /api/projects/1/lessons` (65 → 62 lessons; the list
+The Acme list was fixed by hand the same day through `PUT /api/projects/1/lessons` (65 → 62 lessons; the list
 before is in the session's scratch folder, not kept), before any of the steps below.
 
 ## Step 1: tell the writer where a lesson goes (built)
@@ -70,7 +70,7 @@ Each part is small and independent. None needs the worker or a migration.
 
 1. **A likely repeat, said when a lesson is added or accepted.** A pure `similarLessons(rule, lessons)` in core
    (browser-safe, `lesson-similarity.ts`): lowercased words of four letters or more, stop words left out, overlap
-   over the shorter set; above a threshold (start at 0.6, tune on Senova's list before and after the cleanup),
+   over the shorter set; above a threshold (start at 0.6, tune on Acme's list before and after the cleanup),
    the card or the proposal says "Close to: <step>: <rule>". Shown, never blocking. Across steps too: a repeat on
    another step is the case the audit found most.
 2. **Each step's role beside its lessons.** Move `STEP_ROLES` where the client can read it (it is already pure, in
@@ -79,7 +79,7 @@ Each part is small and independent. None needs the worker or a migration.
 3. **Change a lesson's step by hand.** A card can only move up or down within its step today. Add a step picker
    to the card's edit mode (`lesson-card.tsx`); the lesson keeps its id (step 2). On a proposal, the same picker
    before **Accept** or **Replace**, so a lesson on the wrong step is fixed without editing it after.
-4. **A count per step, with a warning.** The step's title says how many lessons it has; above 25 (Senova's
+4. **A count per step, with a warning.** The step's title says how many lessons it has; above 25 (Acme's
    Implementation had 33) a line suggests **Tidy lessons**, since every lesson is in every run of that step.
 
 Tests: `similarLessons` on the audit's real pairs (the S3 pair, the barrel pair: both found) and on lessons that

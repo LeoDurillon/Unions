@@ -1,6 +1,6 @@
 # Formatted Jira comments
 
-Status: built and deployed (2026-11-07), steps 1 to 3; checked on a real Jira Cloud site (SCRUM-1). Follows [Jira comments on the ticket](jira-comments.md) and [Create Jira issues from
+Status: built and deployed (2026-11-07), steps 1 to 3; checked on a real Jira Cloud site (PROJ-1). Follows [Jira comments on the ticket](jira-comments.md) and [Create Jira issues from
 investigations](jira-create-issues.md), built: the second brought `markdownAdf`, a markdown to Jira rich text
 converter.
 
@@ -41,11 +41,11 @@ issue's description now exists: comments can use it.
    paragraphs fit. The worker's `jira/comment-post.ts` converts with `markdownAdf`, so a bare link is still a link
    (GitHub's autolinks). Rule comments (`event-actions/jira-comment.ts`) still use `textAdf` (D2).
 2. **The tab.** The box's hint, the pending comment rendered (D4). UI check with the post stubbed; a real comment on
-   the user's SCRUM-1 after asking.
+   the user's PROJ-1 after asking.
    Built: the hint is the start of the box's note (the reply box's `postsAs` line: "Markdown: **bold**, `code`,
    [links](https://…), lists. Posts as …"); "Sending to Jira…" renders the text with `Markdown`. UI check on a
    scratch database, the read and the post stubbed: the note, and a pending comment shown with its code and list,
-   no raw `**`. Deployed (`5aac2d5`): the user's comment on SCRUM-1, "The fix is in `auth.ts`, **see the PR**:",
+   no raw `**`. Deployed (`5aac2d5`): the user's comment on PROJ-1, "The fix is in `auth.ts`, **see the PR**:",
    reads back from Jira with its code and its bold (a list was not part of it: lists are checked by the tests and
    the UI check only).
 3. **Docs.** `documentation/tickets.md` (the Jira tab: what a comment can hold), this plan's status.

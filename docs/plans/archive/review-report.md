@@ -237,7 +237,7 @@ the same weight, so the reviewer still read everything. It also showed gaps in w
 
 Built 2026-10-27 (`review-report-7`). Its first run on ticket 24 found every gap above; then (`review-report-7-fixes`):
 each requirement says what its code does unasked (`unasked`), which the host adds to **Needs you** when the agent
-did not raise it, even past the 5 and even on a done requirement (the first run left "also shown on loan campaigns"
+did not raise it, even past the 5 and even on a done requirement (the first run left "also shown on the other campaign kind"
 in a folded note); a **Needs you** risk is also in **Risks** with that severity, and shared code changed without a
 test of its other users is at least medium; a new way for a page or request to fail counts as a risk (the first run
 dropped one); quotes read without markdown's escapes and bold marks. The report's language follows the specs'
@@ -264,8 +264,8 @@ the lines the diff adds.
 The **Needs you** items and the **Skim** files marked on the diff itself; **Not useful** on an item, kept as a
 project lesson so the agent stops raising that kind of item on that repository.
 
-Built 2026-10-27 (`review-report-9`). Each run varies in what it notices (the third run missed "shown on loan
-campaigns", which the second found): a project lesson ("Flag a page shared by loan and subsidy campaigns") makes such
+Built 2026-10-27 (`review-report-9`). Each run varies in what it notices (the third run missed "shown on the other
+campaign kind", which the second found): a project lesson ("Flag a page shared by both campaign kinds") makes such
 a finding stable, as **Not useful** makes an unwanted one go. The lessons of the spec report are a group of the
 Memory page (`review_report`); the Memory page's save accepts it. The marks on the diff are on the new side only.
 

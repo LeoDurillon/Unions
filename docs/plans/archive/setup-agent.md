@@ -22,13 +22,13 @@ card edits the compose file and additions only; the rest of the preview is shown
 browser-safe) holds what each Apply writes and whether a section is already applied; it keeps values as the
 settings store them (agent switches only where they differ from the defaults, additions ending with one line
 break), so an applied section reads as applied. Checked in headless Chromium on a scratch database with the third
-Senova answer: every card applied through the real endpoints and then read Applied.
+Acme answer: every card applied through the real endpoints and then read Applied.
 
 Built differently from step 1 below: the board shows the run in a **Project setup** card above Getting started
 (not as a checklist item), and until step 2 its proposal opens as the investigation's answer. The "not logged in"
 failure is in `seedCredentials`, so every run without a login gets it, not only setup.
 
-Added after two real runs on Senova (2026-11-10): the worker copies the user guide (`documentation/`) into the
+Added after two real runs on Acme (2026-11-10): the worker copies the user guide (`documentation/`) into the
 container at `/workspace/union-guide` (`setup-guide.ts`), and the prompt sends the agent there first. The prompt
 also says what to read in a monorepo and how to adapt a dev compose file, and that the agent has no shell. The
 format gained `composeAdditions` and `sharedCommands`. Without the guide, the agent proposed no preview and a

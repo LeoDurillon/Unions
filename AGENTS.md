@@ -114,6 +114,11 @@ files and uses `union.sqlite` here, which holds the user's real projects.
   approve, revise, retry, cancel) is a row in `commands`, handled by the worker. The web may write plain records
   directly: creating projects and tickets, and saving an edited step output. It reads state from SQLite and
   streams `events` over SSE.
+- This repository is public. Never write the internals of the projects Union runs on (their names, owners,
+  folders, files, branches, pull request or issue numbers, environment variables, databases, business domain,
+  tracker sites and keys) into code, tests, plans, docs or commit messages. Describe a real check generically ("a
+  monorepo with an API and two front ends, 4,451 files") and use placeholders in examples and tests: `acme-org/acme`,
+  `develop`, `app/`, `PROJ-1`, `seed.sql`.
 - Trackers (Notion, Jira) sit behind one adapter each (`TrackerAdapter`, `packages/core/src/integrations/`): a
   feature asks a capability (`adapter.comments`) or its kind (`integrationKind(kind).label`), never a tracker by
   name. A `'notion'` or `'jira'` literal belongs in core's `integrations/`, the client's `components/integrations/`

@@ -3,7 +3,7 @@ import { expect, test } from 'bun:test';
 import { previewCompose } from '../preview/preview-compose';
 import { agentForwards, agentVariables, PUBLISHED_PORTS_KEY } from './agent-environment';
 
-/** Senova's agent services, as `config --format json` prints them. */
+/** A project's agent services, as `config --format json` prints them. */
 const resolved = {
   services: {
     db: {

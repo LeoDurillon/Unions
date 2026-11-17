@@ -5,7 +5,7 @@ Status: built (2026-10-23, branch `follow-merged-base`); decisions D1 to D6 conf
 from its merged PR's pull ref first, its branch only without one (what was merged is what to leave behind); a
 rebase that finds no trace of the left base still clears `left_base` (event `left_base_dropped`); R2 is handled by
 the executor fetching the new base before any step of a followed ticket that lacks it (`followed-base-ref.ts`).
-R1 checked on Senova: the App token fetches `refs/pull/1629/head` after the branch was deleted. No Log line of its
+R1 checked on Acme: the App token fetches `refs/pull/101/head` after the branch was deleted. No Log line of its
 own for `base_followed`: the PR tab's notice shows it, with its own Rebase button when the branch is up to date
 with the new base (the behind count then offers none). Not tried yet on a ticket whose base merged.
 
@@ -13,7 +13,7 @@ with the new base (the behind count then offers none). Not tried yet on a ticket
 
 A ticket built on another branch (a parent ticket's, or one chosen in Overview) keeps that branch as its base
 (`tickets.base_branch`) until a [change of target](../../spec/retarget.md). When that base's own pull request merges and
-GitHub deletes the branch (`delete_branch_on_merge`, on for Senova), GitHub moves the ticket's PR onto the base's
+GitHub deletes the branch (`delete_branch_on_merge`, on for Acme), GitHub moves the ticket's PR onto the base's
 target by itself. Union does not notice:
 
 - **Rebase** fails at the fetch: `fatal: couldn't find remote ref refs/heads/<old base>`.
@@ -21,9 +21,9 @@ target by itself. Union does not notice:
   to the ticket's base (`leftBase`) as the branch it leaves, and that branch is gone ("no longer exist on GitHub").
 - The review diff, the Overview and later steps still use the deleted branch.
 
-Seen on ticket 18 (2026-10-23): base `conception/14/tax-notice-14-social-survey-grid`, merged into `senova-dev` by
-#1629 and deleted, PR #1643 retargeted by GitHub. Fixed by hand: the ticket's base set to `senova-dev` in the
-database, then a plain Rebase (clean, since #1629 was a merge commit). With a squash merge the same rebase would
+Seen on ticket 18 (2026-10-23): base `editor/14/new-grid`, merged into `develop` by
+#101 and deleted, PR #102 retargeted by GitHub. Fixed by hand: the ticket's base set to `develop` in the
+database, then a plain Rebase (clean, since #101 was a merge commit). With a squash merge the same rebase would
 replay the old base's commits and stop on conflicts.
 
 ## Design in short
@@ -33,7 +33,7 @@ replay the old base's commits and stop on conflicts.
   `chosen_base_branch` become the new base, and the branch it left is kept in a new column `tickets.left_base`
   (`{ branch, prNumber }`: the old base and its merged PR, when there is one). Event `base_followed
   { from, to, prNumber, reason }`. Only the database is written; nothing goes to GitHub.
-- **The PR tab says so**: "`<old>` was merged into `<new>` (#1629); this pull request now targets `<new>`." The
+- **The PR tab says so**: "`<old>` was merged into `<new>` (#101); this pull request now targets `<new>`." The
   behind count and **Rebase** are as usual.
 - **The next Rebase moves only the ticket's own commits** while `left_base` is set: it runs as the retarget's move
   (`git rebase --onto origin/<new> <fork>`, the check that none of the old base's commits came along), without the

@@ -1,7 +1,7 @@
 # Plan: the agent services on `localhost`, and which variables the agent's commands get
 
 Status: built (branch `agent-service-ports`), phases 1 to 3. Decisions: the variables setting defaults to `all`
-(nothing changes for existing projects; Senova set to `none`); Commands always get the agent's environment. The list
+(nothing changes for existing projects; Acme set to `none`); Commands always get the agent's environment. The list
 of forwarded ports is shown in the ticket's log (`agent_ports_forwarded`) and the agent's prompt, not in the settings
 (it is known only once a ticket's file is resolved). Checked with real Docker: `localhost`, `127.0.0.1` and `::1`
 reach Postgres through the forwarder; a taken port is reported, the others work; the same ports reuse the
@@ -12,23 +12,23 @@ still open, so a client gets a reset (not a refusal) and a port check (`wait-on 
 ## Problem
 
 Repositories are written for a laptop, where the dev compose file publishes its services on the machine:
-`localhost:5432` for Postgres, `localhost:9000` for S3. Their test and dev settings say so (Senova:
-`goreno/api/.env.test` has `GORENO_DATABASE_URL=…@localhost:5432/goreno_test_template`, `S3_URL=http://localhost:9000`,
+`localhost:5432` for Postgres, `localhost:9000` for S3. Their test and dev settings say so (Acme:
+`app/api/.env.test` has `APP_DATABASE_URL=…@localhost:5432/app_test_template`, `S3_URL=http://localhost:9000`,
 `SMTP_CONNECTION_URL=smtp://localhost:1025`, `CLAMAV_HOST=localhost`).
 
 In Union the agent works in the ticket's container (`union-t<id>`). The agent services
-(`config.preview.agentServices`: Senova's `db`, `s3`, `clamav`, `mailhog`) run beside it in the ticket's compose
+(`config.preview.agentServices`: Acme's `db`, `s3`, `clamav`, `mailhog`) run beside it in the ticket's compose
 project, on its network: they answer at `db:5432`, `s3:9000`…, never on the container's `localhost`. So the API e2e
 tests cannot reach their database when the agent runs them.
 
 A second problem hides behind the first. For implementation and rebase steps, `withEnvironment` gives every command
-in the container the preview's plain variables (`target.plain`), Senova's `GORENO_DATABASE_URL=…@db:5432/goreno`
+in the container the preview's plain variables (`target.plain`), Acme's `APP_DATABASE_URL=…@db:5432/app`
 among them. The tests load `.env.test` with dotenvx, which never overrides a variable already set (dotenvx 1.51.4,
-`overload` off by default). So once the network works, the agent's test run would use the preview's `goreno`
-database, not `goreno_test_template`, and could change or wipe the preview's data.
+`overload` off by default). So once the network works, the agent's test run would use the preview's `app`
+database, not `app_test_template`, and could change or wipe the preview's data.
 
 Saved scripts as checks or as agent tools do not fix either: they run in the same container. The "Run API E2E"
-script works today only because its command spells out `db:5432/goreno_test_template`, and only while the services
+script works today only because its command spells out `db:5432/app_test_template`, and only while the services
 are up (the Commands section does not start them; see "Commands" below).
 
 ## Today
@@ -57,11 +57,11 @@ Rules:
 - `published` missing (a bare `"5432"`: a random port on the machine) → `localhost:<target>`.
 - A range (`"9000-9001:9000-9001"`) → one forward per port.
 - `host_ip` is ignored (`127.0.0.1:5432:5432` forwards like `5432:5432`).
-- Only agent services, and only services that publish something; the exposed preview services (api, conception…)
+- Only agent services, and only services that publish something; the exposed preview services (api, editor…)
   are not forwarded, so the agent can start the app itself on 3000.
 - Two services publishing the same port: the first wins, the other is reported (setting check and event).
 
-A pure core function `agentForwards(resolved, agentServices): { forwards, problems }`, tested on Senova's shapes.
+A pure core function `agentForwards(resolved, agentServices): { forwards, problems }`, tested on Acme's shapes.
 `startAgentServices` gets the list from the file it already resolves (`fileToRun`), so nothing new is stored. The
 Preview settings show the list under the agent services ("Reachable on localhost: db 5432, s3 9000…").
 
@@ -108,8 +108,8 @@ Stored as `config.preview.agentVariables?: { mode: 'all' | 'none' | 'chosen'; na
 settings route (names must be plain variables of the project). `startAgentServices` returns the filtered map;
 `withEnvironment` is unchanged. Secrets never reach the agent, whatever the mode (as today).
 
-For Senova the right choice is `none` (or `chosen` without `GORENO_DATABASE_URL`): the tests then read
-`goreno_test_template` on `localhost:5432`, forwarded to the ticket's own Postgres.
+For Acme the right choice is `none` (or `chosen` without `APP_DATABASE_URL`): the tests then read
+`app_test_template` on `localhost:5432`, forwarded to the ticket's own Postgres.
 
 ### 3. Commands get the same environment as the agent
 
@@ -143,12 +143,12 @@ No new reach: the container is already on the services' network; forwarding only
    restart after `pkill node`, a taken port.
 2. The variables setting: config, route check, settings UI, `startAgentServices` filtering; tests that `none` and
    `chosen` reach the step's `exec` environment.
-3. Commands with the agent's environment (shared helper), and the Senova script rewritten to the repository's own
+3. Commands with the agent's environment (shared helper), and the Acme script rewritten to the repository's own
    command.
 
 ## Decisions taken (2026-10-15)
 
-1. The variables setting defaults to `all` (today's behavior); Senova uses `none`.
+1. The variables setting defaults to `all` (today's behavior); Acme uses `none`.
 2. Commands always get the agent's environment (no per-project switch).
 3. The forwarding can be turned off per project (`config.preview.forwardPorts: false`, "Reach them on localhost" in
    Previews → Services), for repositories whose dev setup already runs in Docker and uses the services' names.

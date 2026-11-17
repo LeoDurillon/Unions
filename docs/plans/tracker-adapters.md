@@ -161,7 +161,7 @@ Each step moves Notion and Jira together, keeps the screens as they are, and is 
    the stored rules did not change. Seen on screen: a Notion text property is a box of several lines in a rule (as
    in its tab); a Jira select set by hand lists the issue's options; a Notion status no longer an option says
    "no longer an option in Notion".
-   Real check, Jira (2026-11-13, test-GA's SCRUM-1, the branch's dispatcher and adapter over an in-memory database
+   Real check, Jira (2026-11-13, a test project's PROJ-1, the branch's dispatcher and adapter over an in-memory database
    holding only that connection): three rules (move, set labels, story points and due date, comment) all
    succeeded, then values set by hand put the issue back (labels, story points, due date, a move back); the
    rule's comment stays on the issue. Still to do: the same for Notion, on a page the user picks.

@@ -76,41 +76,41 @@ afterAll(async () => {
 });
 
 test('a new file is copied to its path, its folders made, and git told to ignore it', async () => {
-  const id = addFile('dev/data/goreno.sql', 'aaa');
+  const id = addFile('dev/data/seed.sql', 'aaa');
   await sync();
   expect(copies).toEqual([
     [
       {
         hostPath: path.join(root, `p${projectId}`, String(id)),
-        volumePath: 'repo/dev/data/goreno.sql',
+        volumePath: 'repo/dev/data/seed.sql',
       },
     ],
   ]);
   expect(scripts[1]).toContain("mkdir 'dev/data'");
-  expect(scripts[2]).toContain("echo '/dev/data/goreno.sql' >> .git/info/exclude");
+  expect(scripts[2]).toContain("echo '/dev/data/seed.sql' >> .git/info/exclude");
   expect(scripts[2]).toContain(
-    String.raw`printf '%s\n' 'dev/data/goreno.sql' > .git/union-project-files`,
+    String.raw`printf '%s\n' 'dev/data/seed.sql' > .git/union-project-files`,
   );
 });
 
 test('a workspace already holding the same content is left alone', async () => {
-  addFile('goreno.sql', 'aaa');
-  workspace = ['OLD goreno.sql', 'HAS aaa  goreno.sql'];
+  addFile('seed.sql', 'aaa');
+  workspace = ['OLD seed.sql', 'HAS aaa  seed.sql'];
   await sync();
   expect(scripts).toHaveLength(1);
   expect(copies).toEqual([]);
 });
 
 test('a changed file is copied again; a removed one disappears from the workspace', async () => {
-  addFile('goreno.sql', 'new');
-  workspace = ['OLD goreno.sql', 'OLD old.env', 'HAS old  goreno.sql'];
+  addFile('seed.sql', 'new');
+  workspace = ['OLD seed.sql', 'OLD old.env', 'HAS old  seed.sql'];
   await sync();
-  expect(copies.flat().map((file) => file.volumePath)).toEqual(['repo/goreno.sql']);
+  expect(copies.flat().map((file) => file.volumePath)).toEqual(['repo/seed.sql']);
   expect(scripts[1]).toContain("rm -f 'old.env'");
 });
 
 test('without a repository yet there is nothing to do', async () => {
-  addFile('goreno.sql', 'aaa');
+  addFile('seed.sql', 'aaa');
   workspace = ['NOREPO'];
   await sync();
   expect(scripts).toHaveLength(1);
@@ -122,7 +122,7 @@ test('the agents are told where the project files are and not to commit them', (
     {
       id: 1,
       projectId: 1,
-      path: 'goreno.sql',
+      path: 'seed.sql',
       size: 2048,
       sha256: 's',
       blobId: 'b',
@@ -130,6 +130,6 @@ test('the agents are told where the project files are and not to commit them', (
       updatedAt: 0,
     },
   ]);
-  expect(section).toContain('- `goreno.sql` (2.0 KB)');
+  expect(section).toContain('- `seed.sql` (2.0 KB)');
   expect(section).toContain('Never commit them');
 });

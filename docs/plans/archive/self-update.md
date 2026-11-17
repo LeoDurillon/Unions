@@ -53,9 +53,9 @@ The worker checks every 10 minutes (and on a `union_update_check` command, sent 
 The fetch uses `origin` as the user cloned it, so an SSH clone and an HTTPS clone both work without a second
 remote:
 
-- **SSH** (`git@github.com-personal:LeoDurillon/Unions.git` here): the worker mounts the host's `~/.ssh` read-only
+- **SSH** (`git@github.com-alias:LeoDurillon/Unions.git` here): the worker mounts the host's `~/.ssh` read-only
   at `/home/bun/.ssh` (`${UNION_SSH_DIR:-~/.ssh}` in `compose.yaml`), so the user's `config` (host aliases such as
-  `github.com-personal`), keys and `known_hosts` apply as on the host. The dev image gets `openssh-client`. Read-only
+  `github.com-alias`), keys and `known_hosts` apply as on the host. The dev image gets `openssh-client`. Read-only
   is enough: the host key is already in `known_hosts` since the user cloned with it; the fetch runs with
   `StrictHostKeyChecking=yes` so an unknown host fails with a clear message instead of prompting. A key with a
   passphrase cannot be used without an agent: then mount `SSH_AUTH_SOCK` instead (a compose override, documented,

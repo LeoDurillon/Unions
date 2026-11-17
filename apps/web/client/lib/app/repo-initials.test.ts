@@ -6,7 +6,7 @@ import { repoInitials } from './repo-initials';
 test('takes the first letters of the first two words', () => {
   expect(repoInitials('union-next')).toBe('UN');
   expect(repoInitials('my_cool.app')).toBe('MC');
-  expect(repoInitials('SenovaPortal')).toBe('SP');
+  expect(repoInitials('AcmePortal')).toBe('AP');
 });
 
 test('a single word keeps its first two letters, the first capitalised', () => {

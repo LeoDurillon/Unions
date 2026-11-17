@@ -4,19 +4,19 @@ import { expect, test } from 'bun:test';
 import { parseSharedCommands, renderSharedCommands } from './preview-shared-commands';
 
 const EXPOSED = [{ name: 'api', port: 3000, prefix: 'api' }];
-const CREATE = 'createdb -U postgres goreno_{ticket.id}';
+const CREATE = 'createdb -U postgres app_{ticket.id}';
 
 test('commands are kept for shared services only, trimmed, empty ones dropped', () => {
   expect(
     parseSharedCommands(
       [
-        { service: 'db', create: `  ${CREATE} `, drop: 'dropdb -U postgres goreno_{ticket.id}' },
+        { service: 'db', create: `  ${CREATE} `, drop: 'dropdb -U postgres app_{ticket.id}' },
         { service: 's3', create: '', drop: ' ' },
       ],
       ['db', 's3'],
       EXPOSED,
     ),
-  ).toEqual([{ service: 'db', create: CREATE, drop: 'dropdb -U postgres goreno_{ticket.id}' }]);
+  ).toEqual([{ service: 'db', create: CREATE, drop: 'dropdb -U postgres app_{ticket.id}' }]);
   expect(parseSharedCommands(undefined, ['db'], EXPOSED)).toEqual([]);
 });
 
@@ -46,10 +46,10 @@ test("a preview's commands name its own data: a ticket's id, a pull request's r<
   ];
   const context = { prNumber: null, publicPort: 8080, exposed: EXPOSED };
   expect(renderSharedCommands(commands, ['db'], { ...context, owner: { ticketId: 41 } })).toEqual([
-    { service: 'db', create: 'createdb -U postgres goreno_41' },
+    { service: 'db', create: 'createdb -U postgres app_41' },
   ]);
   expect(renderSharedCommands(commands, ['db'], { ...context, owner: { reviewId: 5 } })).toEqual([
-    { service: 'db', create: 'createdb -U postgres goreno_r5' },
+    { service: 'db', create: 'createdb -U postgres app_r5' },
   ]);
 });
 

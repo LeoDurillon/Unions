@@ -6,7 +6,7 @@ const PULLS = [
   {
     number: 1743,
     title: 'add the customer order review page',
-    headBranch: 'goreno/16/order-review',
+    headBranch: 'web/16/order-review',
     draft: false,
     ticketId: null,
   },

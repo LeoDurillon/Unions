@@ -1,9 +1,9 @@
 # Plan: services shared between a project's previews
 
-Status: phase 1 built (commit `ca49236`, 2026-11-10), checked on Senova with `clamav` and `mailhog` shared by two
+Status: phase 1 built (commit `ca49236`, 2026-11-10), checked on Acme with `clamav` and `mailhog` shared by two
 previews. Phase 2 built (branch `shared-tenants`, 2026-11-10): `config.preview.sharedCommands`, a `create` and a
 `drop` command per shared service. Checked with real Docker (two previews on one Postgres, a database each, made at
-each start and dropped with the preview's data). Not built from phase 2: Senova's template database (a settings
+each start and dropped with the preview's data). Not built from phase 2: Acme's template database (a settings
 change, below). Phase 1b built (branch `shared-state`, 2026-11-10): the shared services' state on Environments → Shared, with
 Restart and Stop (`shared_stacks`, migration 0085). The shared services' web pages through the proxy built (branch `shared-proxy`, migration 0086). Phase 3
 planned.
@@ -12,7 +12,7 @@ planned.
 
 Each preview is its own compose project (`union-t<id>`, `union-r<id>`), so each one runs its own copy of every
 service in the repository's compose file. Some of those services are utilities that every preview could use:
-Senova's `clamav` (it loads its whole signature database in memory, more than a gigabyte), `mailhog`, `s3` (MinIO)
+Acme's `clamav` (it loads its whole signature database in memory, more than a gigabyte), `mailhog`, `s3` (MinIO)
 and `db` (Postgres). With three previews running, the machine holds three of each, and each preview restores,
 migrates and seeds its own Postgres.
 
@@ -76,7 +76,7 @@ networks.
 `config.preview.agentServices` that are shared are not started in the ticket's project: Union brings the stack up,
 puts the ticket's container on its network (`union-p<id>-shared_default`), and forwards their published ports to
 the container's `localhost` as before. Phase 1 shares only services without state, so two tickets testing at once
-cannot clash. Postgres is phase 2: a repository's `.env.test` names fixed databases (`goreno_test_template`), which
+cannot clash. Postgres is phase 2: a repository's `.env.test` names fixed databases (`app_test_template`), which
 two tickets' tests would share; until each ticket gets its own names, a stateful shared service should stay out of
 the agent services.
 
@@ -88,9 +88,9 @@ the agent services.
    record the web can read, since the web never asks Docker), with Restart and Stop.
 2. **A tenant per preview** (built as `sharedCommands`; `create` runs at each start, so it must be idempotent,
    rather than at a first start Union would have to record): per shared service, a command run in its container at a preview's first start and one
-   at its reset and removal (`createdb -T goreno_template goreno_{ticket.id}`, `mc mb local/uploads-{ticket.id}`,
-   `dropdb …`), with `{ticket.id}` in the preview's variables (`…/goreno_{ticket.id}`). For Senova: the restore
-   and the seed run once into `goreno_template`, each preview's database is a copy (seconds), only `migrate` runs
+   at its reset and removal (`createdb -T app_template app_{ticket.id}`, `mc mb local/uploads-{ticket.id}`,
+   `dropdb …`), with `{ticket.id}` in the preview's variables (`…/app_{ticket.id}`). For Acme: the restore
+   and the seed run once into `app_template`, each preview's database is a copy (seconds), only `migrate` runs
    per preview. Then S3 and Postgres.
 3. **Drift and opt-out**: a preview whose resolved definition of a shared service differs from the running stack's
    says so on its Preview tab; a preview can run its own copy (a ticket's own compose file already can).

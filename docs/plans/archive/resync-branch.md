@@ -24,7 +24,7 @@ force-push it, Union doesn't notice. The workspace keeps the old history:
 - The review diff and the final review read the workspace's old commits.
 
 Seen on ticket 24 (2026-11-06, PR #1659, Done). Union's last rebase pushed `461e760`, and the next poll had it
-22 commits behind `senova-dev`. A co-worker then rebased the branch on GitHub: the PR head is now `c9ffb82` and
+22 commits behind `develop`. A co-worker then rebased the branch on GitHub: the PR head is now `c9ffb82` and
 `behind_by` is 0. Union still holds `461e760` in `union-t24-ws`. It already reads the new head through the checks
 poll (`pr_checks_sha`), but never compares it with what it pushed.
 

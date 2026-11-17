@@ -214,7 +214,7 @@ pull request in the middle lands every one below it), and a Rebase stack button.
 below), `GET /repos/{o}/{r}/stacks?pull_request=<n>`, `POST .../stacks/{n}/add`, `POST .../stacks/{n}/unstack`;
 merging a stack needs the async merge API (`PUT .../pulls/{n}/merge-async`).
 
-Tried on LeoDurillon/Schems (2026-10-20), with the project's classic token: two stacked pull requests, a stack
+Tried on a personal test repository (2026-10-20), with the project's classic token: two stacked pull requests, a stack
 created over them (201), the bottom one squash-merged with `merge-async`. Within seconds, with no one clicking,
 GitHub retargeted the top pull request onto `main` and rewrote its branch onto the squash commit, keeping only its
 own commit. The merged branch was not deleted. Probe pull requests #4 (merged: its squash commit stays on `main`)

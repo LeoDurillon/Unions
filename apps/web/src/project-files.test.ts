@@ -50,16 +50,16 @@ function put(filePath: string, content: string): Response | Promise<Response> {
 }
 
 test('a file is stored under the project, and the browser never sees its content or hashes', async () => {
-  const created = await put('goreno.sql', 'CREATE TABLE a;');
+  const created = await put('seed.sql', 'CREATE TABLE a;');
   expect(created.status).toBe(201);
   const [row] = listProjectFiles(db, projectId);
-  expect(row).toMatchObject({ path: 'goreno.sql', size: 15 });
+  expect(row).toMatchObject({ path: 'seed.sql', size: 15 });
   expect(row?.blobId).toBe(gitBlobId(new TextEncoder().encode('CREATE TABLE a;')));
   expect(await readFile(projectFileHostPath(row ?? { projectId, id: 0 }), 'utf8')).toBe(
     'CREATE TABLE a;',
   );
   const listed: unknown = await (await app.request(`/api/projects/${projectId}/files`)).json();
-  expect(listed).toEqual([expect.objectContaining({ path: 'goreno.sql', size: 15 })]);
+  expect(listed).toEqual([expect.objectContaining({ path: 'seed.sql', size: 15 })]);
   expect(JSON.stringify(listed)).not.toMatch(/sha256|blobId/u);
 });
 
@@ -79,7 +79,7 @@ test('paths stay inside the repository and out of .git', async () => {
     expect(projectFilePathProblem(bad)).not.toBeNull();
   }
   expect(projectFilePathProblem('.env.local')).toBeNull();
-  expect(projectFilePathProblem('dev/data/goreno.sql')).toBeNull();
+  expect(projectFilePathProblem('dev/data/seed.sql')).toBeNull();
   expect((await put('../escape', 'x')).status).toBe(400);
   expect(listProjectFiles(db, projectId)).toEqual([]);
 });
@@ -98,11 +98,11 @@ function readdirOrEmpty(dir: string): Promise<string[]> {
 }
 
 test('removing a file deletes it from disk; a push must not contain any project file', async () => {
-  await put('goreno.sql', 'dump');
+  await put('seed.sql', 'dump');
   const [row] = listProjectFiles(db, projectId);
   const ticket = createTicket(db, { projectId, title: 'Seed' });
   expect(privatePushFiles(db, ticket)).toEqual([
-    { name: 'goreno.sql (a project file)', blobId: row?.blobId ?? '' },
+    { name: 'seed.sql (a project file)', blobId: row?.blobId ?? '' },
   ]);
   const removed = await app.request(`/api/projects/${projectId}/files/${row?.id}`, {
     method: 'DELETE',
