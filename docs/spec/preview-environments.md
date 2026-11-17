@@ -12,6 +12,11 @@ Built (phases 1 to 4). Full design and what was built: [`docs/plans/archive/prev
   repository, external volumes, builds tagged as an image Union runs, `union-…` volume and network names, `provider`
   services), turns source mounts into mounts of the workspace volume, and writes a new file with
   Traefik labels on the exposed services: `http://t<id>.union.localhost`, `http://api-t<id>.union.localhost`.
+  An exposed service can also answer under a path of another exposed service's host (`paths`, Environments →
+  Compose; plan [`docs/plans/preview-path-routes.md`](../plans/preview-path-routes.md)): a router
+  `Host(...) && (Path(/api) || PathPrefix(/api/))` above the host routers, to the same Traefik service, with a
+  `stripprefix` middleware (which sets `X-Forwarded-Prefix`) when the path is removed. Checked on save and before a
+  start. Not yet routed inside the owner's container (step 3).
   Every preview's hosts end with `union.localhost`, so a browser files the logins it saves on one preview under the
   same site and offers them on the others.
 - Per-project environment variables (secrets kept server side) with templates such as `{service.api.url}`, given to

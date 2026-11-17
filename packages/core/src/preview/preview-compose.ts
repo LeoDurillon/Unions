@@ -17,11 +17,10 @@ import {
   type ComposeJson,
 } from './preview-compose-check';
 import { previewProxyNetwork } from './preview-proxy-network';
+import { previewRouting, type ExposedService } from './preview-routing';
 
 export { PREVIEW_ENV_FILE, PREVIEW_NETWORK } from './preview-compose-check';
-
-/** A service the proxy serves, at `host` (`t12.union.localhost`, `api-t12.union.localhost`). */
-export type ExposedService = { service: string; port: number; host: string };
+export type { ExposedService } from './preview-routing';
 
 /**
  * What a ticket's preview is: its compose project, its workspace, the services the proxy serves,
@@ -65,17 +64,6 @@ function withoutTraefik(labels: unknown): Record<string, unknown> {
   );
 }
 
-function routing(project: string, exposed: ExposedService): Record<string, string> {
-  const router = `${project}-${exposed.service}`;
-  return {
-    'traefik.enable': 'true',
-    'traefik.docker.network': previewProxyNetwork(project),
-    [`traefik.http.routers.${router}.rule`]: `Host(\`${exposed.host}\`)`,
-    [`traefik.http.routers.${router}.entrypoints`]: 'web',
-    [`traefik.http.services.${router}.loadbalancer.server.port`]: String(exposed.port),
-  };
-}
-
 function withEnvFile(service: Record<string, unknown>, target: string): unknown[] {
   const configs: unknown[] = Array.isArray(service.configs) ? service.configs : [];
   return [...configs, { source: PREVIEW_ENV_KEY, target }];
@@ -104,7 +92,7 @@ function rewriteService(
     ...(target.variables.length > 0 ? { env_file: [PREVIEW_ENV_FILE] } : {}),
     labels: {
       ...withoutTraefik(service.labels),
-      ...(exposed ? routing(target.project, exposed) : {}),
+      ...(exposed ? previewRouting(target.project, exposed) : {}),
     },
     ...(exposed ? { networks: { ...networks, [PREVIEW_NETWORK_KEY]: null } } : {}),
     ...(target.envFile?.service === name

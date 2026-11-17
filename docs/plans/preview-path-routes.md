@@ -1,7 +1,8 @@
 # Plan: a preview service also served under a path of another service's host
 
-Status: step 1 built (2026-11-17, branch `preview-path-routes`): the paths are saved and checked, not served
-yet. Steps 2 to 5 planned.
+Status: steps 1 and 2 built (2026-11-17, branch `preview-path-routes`): the paths are saved, checked, and served
+by the proxy (checked with real Docker: a Traefik of Union's image and echo servers, stripped and kept paths,
+`/apis` left to the app, `X-Forwarded-Prefix`, SSE streamed event by event). Steps 3 to 5 planned.
 
 ## Problem
 

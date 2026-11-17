@@ -115,7 +115,7 @@ export function serviceOfRow(row: ServiceRow): PreviewService {
   };
 }
 
-/** What the paths cannot be saved for, and that they are not served yet. */
+/** What the paths cannot be saved for, and that the ticket's container does not route them yet. */
 function PathsNotes({ rows }: { rows: readonly ServiceRow[] }): ReactElement | null {
   if (!rows.some((row) => row.paths.length > 0)) {
     return null;
@@ -129,7 +129,8 @@ function PathsNotes({ rows }: { rows: readonly ServiceRow[] }): ReactElement | n
         </p>
       ))}
       <p className="text-amber-700 dark:text-amber-400">
-        Paths are saved but not served yet: a later version of Union routes them.
+        Your browser gets them from a preview&apos;s next start; inside the ticket&apos;s container
+        (the agent, the e2e tests) a path still reaches the app.
       </p>
     </div>
   );
