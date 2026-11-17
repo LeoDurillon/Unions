@@ -31,7 +31,7 @@ A diagram Union cannot draw shows as its text.
 
 | Step          | Default model | What it writes                                                                          |
 | ------------- | ------------- | --------------------------------------------------------------------------------------- |
-| **Intake**    | Haiku         | The questions the request leaves open, each followed by an `Answer:` line for you.      |
+| **Intake**    | Haiku         | The questions on what to build the request leaves open, each with an `Answer:` line.    |
 | **Summary**   | Sonnet        | What the ticket asks for, with numbered acceptance criteria, decisions and assumptions. |
 | **Technical** | Opus          | The technical plan: the approach, the files to change, the risks, the estimated size.   |
 | **Test plan** | Sonnet        | The tests that prove the change works.                                                  |

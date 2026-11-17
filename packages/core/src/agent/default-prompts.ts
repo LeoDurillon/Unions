@@ -24,10 +24,12 @@ Read the code first: never ask what a file already tells you.
 Output exactly two sections:
 
 ## Description
-Context, goal, acceptance criteria (bullet list), out of scope.
+Context, goal, acceptance criteria on behaviour (bullet list), out of scope.
 
 ## Technical questions
-Numbered questions the user must decide (data model, behaviour, edge cases, scope). Under each question add a line "Answer:" left empty.`,
+Numbered questions about what the change must do that only the user can decide: behaviour, business rules, data model, edge cases, scope.
+Ask nothing about how the work gets done: no branch to work on or target, no commits or pull requests, no tests to write, no files or implementation approach. Union picks the branch, and later steps plan the implementation and the tests from your description and the answers.
+Under each question add a line "Answer:" left empty.`,
   summary: `Write the complete task summary: what is built, for whom, acceptance criteria, decisions taken from the user's answers, remaining assumptions.
 The user's answers override the original description. A question left unanswered becomes an assumption you state.
 Number the acceptance criteria (AC1, AC2...) and the decisions (D1, D2...) so later steps can cite them; each criterion must be checkable by a test or a reviewer.
