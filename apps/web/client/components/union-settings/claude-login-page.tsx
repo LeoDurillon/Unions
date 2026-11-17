@@ -10,7 +10,7 @@ import { Badge, Button, ErrorText } from '../ui/ui';
 import { ClaudeTokenForm } from './claude-token-form';
 
 const CONNECTORS_NOTE =
-  'Saving or removing the token reads your connectors again (Tools → Connectors): the list shows the ones the agents reach with it.';
+  'claude.ai connectors (Figma…) do not work with a token: while one is set, agents get none of their tools (Tools → Connectors).';
 
 function TokenSet({ savedAt }: { savedAt: number }): ReactElement {
   const { save, remove } = useClaudeToken();

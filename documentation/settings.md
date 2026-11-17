@@ -151,8 +151,9 @@ From the next run on, containers get the token and no longer hold your login. Th
 If Claude refuses the token (you revoked it, or it expired), runs fail and say so; Union does not fall back to your
 login. Make a new token and replace it here, then **Retry** the step.
 
-Saving or removing the token reads your connectors again: **Tools → Connectors** then lists the ones the agents
-reach with it.
+Connectors (Figma, for example) do not work with a token: while one is set, agents get none of their tools, and
+**Tools → Connectors** says so. Remove the token to use them again. Saving or removing the token reads your
+connectors again.
 
 ## Environment variables
 

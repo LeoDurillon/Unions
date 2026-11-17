@@ -97,6 +97,10 @@ Some things stay refused whatever you allow: agents never push, and they never h
 on an agent gives that agent all its tools. The connector's login stays with Anthropic: nothing about it is copied
 into the container.
 
+Connectors do not work with a long-lived token. While one is set in
+[Union settings → Claude login](settings.md#claude-login), the list is empty and the page says why: agents get none
+of the connectors' tools, even with one selected. Remove the token to use them again.
+
 ## Custom agents
 
 **Union settings → New agent** asks first what kind of agent you want. You cannot change the kind later.

@@ -5,9 +5,25 @@ import type { ReactElement } from 'react';
 
 import type { ConnectorsResponse } from '../../../src/api-types';
 import { formatWhen } from '../../lib/ui/relative-time';
+import { useClaudeToken } from '../../lib/union-settings/use-claude-token';
 import { useConnectors } from '../../lib/union-settings/use-connectors';
 import { SettingsIntro } from '../settings/settings-intro';
 import { Badge, Button, ErrorText } from '../ui/ui';
+
+/** Connectors do not load with a long-lived token (checked 2026-11-17): say so rather than list none. */
+function TokenNote(): ReactElement | null {
+  const { status } = useClaudeToken();
+  if (status.data?.configured !== true) {
+    return null;
+  }
+  return (
+    <p className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
+      The agents run with a long-lived token (Union settings → Claude login), and claude.ai
+      connectors do not load with it: agents get none of their tools, even with one selected. Remove
+      the token to use them again.
+    </p>
+  );
+}
 
 function CheckStatus({
   check,
@@ -62,6 +78,7 @@ export function ConnectorList(): ReactElement {
             {list.length === 0 ? 'Read connectors' : 'Check again'}
           </Button>
         </header>
+        <TokenNote />
         <ErrorText error={connectors.error ?? check.error} />
         {list.length === 0 ? (
           <p className="text-sm text-zinc-500">No connector read yet.</p>

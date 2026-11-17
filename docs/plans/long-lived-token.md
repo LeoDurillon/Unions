@@ -1,6 +1,7 @@
 # Plan: a long-lived Claude token for the agent containers
 
-Status: steps 2 to 4 built (2026-11-17, branch `long-lived-token`); step 1 is the real run with a token, left. First item of "Security first" in the
+Status: built and deployed (2026-11-17, commit `4af649c`), checked on a real run; resuming a session with the
+token left to see. First item of "Security first" in the
 [plans index](README.md).
 
 ## The problem
@@ -32,7 +33,17 @@ Run `claude setup-token` on the host, then in a throwaway agent container (ticke
   `rate_limit_event` (the rate-limit parsing in `agent/rate-limit.ts` relies on it);
 - not the connectors: they are checked once the token is in Settings (step 4).
 
-Write the results here before step 2.
+Results (2026-11-17, done after steps 2 to 4 on the live instance, ticket 62's intake, instead of by hand):
+
+- The run succeeded on the token. The HOME volume held the token (mode 600, owner `node`) and a `.credentials.json`
+  of `{}`: no refresh token. The CLI's init reported `apiKeySource: none`.
+- `stream-json` still carries `rate_limit_event` (five-hour window, its reset), so usage limits are still read.
+- Connectors do **not** load with the token: the check run on saving it read none (Figma was listed before). Per
+  decision 3 nothing falls back; the Connectors page says so while a token is set.
+- `--resume` with the token not seen yet: ticket 62's next resumed step (PR description, replies, rebase or a
+  revision of the implementation) will show it.
+- Earlier, on real Docker with a fake token (ticket 9001): no process's arguments held the token, and the CLI's
+  refusal (`401 OAuth access token is invalid`) got the renewal note.
 
 ### Step 2: where Union reads the token
 

@@ -9,7 +9,8 @@ Open findings of the security reviews (2026-10-24 audit, 2026-11-08 review), to 
 
 - Agent containers hold the full Claude login, refresh token included, with open network access; one container's
   refresh can also retire the others' token. [Plan](long-lived-token.md): an optional long-lived token from
-  `claude setup-token`, built 2026-11-17 (branch `long-lived-token`); a real run with a token left.
+  `claude setup-token`, built and deployed 2026-11-17; claude.ai connectors do not work with it; a resumed
+  session on the token left to see.
 - `union.sqlite*` is readable by any local user and holds the integrations' secrets in plain text.
 - Tokens appear on command lines (git URLs, `docker exec -e`), visible in the process list.
 - Agents can edit `.github/workflows/*`, which CI runs with the repository's secrets.
