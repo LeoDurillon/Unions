@@ -86,6 +86,12 @@ export type PreviewConfig = {
    */
   startForImplementation?: boolean;
   /**
+   * Hosts as `<prefix>.t<id>.union.localhost` rather than `<prefix>-t<id>.union.localhost` (off when
+   * unset): the preview's services then share a domain of its own, `t<id>.union.localhost`, where
+   * its apps can set a login cookie that no other preview gets.
+   */
+  domainPerPreview?: boolean;
+  /**
    * Minutes without a visit after which a running preview stops (60 when unset; 0: never). Never
    * while the agent runs a step on the ticket or its e2e tests run.
    */

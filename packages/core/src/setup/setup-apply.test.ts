@@ -150,3 +150,33 @@ test('a run on a project set up already leaves out the sections its settings hol
   expect(left.instructions?.text).toBe('Use pnpm.');
   expect(left.summary).toBe(full.summary);
 });
+
+test('a proposed service keeps the paths of the current one of its name, on hosts still exposed', () => {
+  const current = {
+    composeFile: 'compose.yaml',
+    env: {},
+    services: [
+      { name: 'web', port: 3000, prefix: '' },
+      {
+        name: 'api',
+        port: 4000,
+        prefix: 'api',
+        paths: [
+          { host: '', path: '/api', strip: true },
+          { host: 'admin', path: '/api', strip: true },
+        ],
+      },
+    ],
+  };
+  const proposed = {
+    ...PREVIEW,
+    services: [
+      { name: 'web', port: 3000, prefix: '' },
+      { name: 'api', port: 4001, prefix: 'api' },
+    ],
+  };
+  expect(previewAfter(current, proposed).services).toEqual([
+    { name: 'web', port: 3000, prefix: '' },
+    { name: 'api', port: 4001, prefix: 'api', paths: [{ host: '', path: '/api', strip: true }] },
+  ]);
+});

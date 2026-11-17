@@ -16,7 +16,11 @@ export const PREVIEW_TEMPLATES = [
   { name: 'service.X.host', description: "A service's host name inside the environment" },
   { name: 'ticket.id', description: 'The ticket number (r3 for a pull request under review)' },
   { name: 'pr.number', description: "The pull request's number under review (empty for a ticket)" },
-  { name: 'preview.host', description: 'The preview host (t12.union.localhost)' },
+  {
+    name: 'preview.host',
+    description:
+      "The preview host (t12.union.localhost): its apps' cookie domain, with a domain per preview",
+  },
   { name: 'preview.url', description: "The first exposed service's address" },
 ] as const;
 
@@ -41,10 +45,22 @@ export function exposedServices(config: PreviewConfig): PreviewService[] {
 /** What every preview's host ends with: one site, so a browser offers a login saved on one preview on the others. */
 export const PREVIEW_DOMAIN = 'union.localhost';
 
-/** `t12.union.localhost`, `api-t12.union.localhost`, `api-r3.union.localhost`. */
-export function previewServiceHost(owner: WorkspaceOwner, prefix: string): string {
+/**
+ * `t12.union.localhost`, `api-t12.union.localhost`, `api-r3.union.localhost`; with a domain per
+ * preview, `api.t12.union.localhost`.
+ */
+export function previewServiceHost(
+  owner: WorkspaceOwner,
+  prefix: string,
+  domainPerPreview = false,
+): string {
   const id = ownerKey(owner);
-  return prefix === '' ? `${id}.${PREVIEW_DOMAIN}` : `${prefix}-${id}.${PREVIEW_DOMAIN}`;
+  if (prefix === '') {
+    return `${id}.${PREVIEW_DOMAIN}`;
+  }
+  return domainPerPreview
+    ? `${prefix}.${id}.${PREVIEW_DOMAIN}`
+    : `${prefix}-${id}.${PREVIEW_DOMAIN}`;
 }
 
 export function previewAddress(host: string, publicPort: number): string {
@@ -58,7 +74,16 @@ export type TemplateContext = {
   prNumber: number | null;
   publicPort: number;
   exposed: PreviewService[];
+  /** `config.domainPerPreview`: hosts as `api.t12.union.localhost`. */
+  domainPerPreview?: boolean;
 };
+
+function serviceAddress(context: TemplateContext, prefix: string): string {
+  return previewAddress(
+    previewServiceHost(context.owner, prefix, context.domainPerPreview),
+    context.publicPort,
+  );
+}
 
 function serviceValue(context: TemplateContext, service: string, part: string): string | null {
   if (part === 'host') {
@@ -70,7 +95,7 @@ function serviceValue(context: TemplateContext, service: string, part: string): 
   }
   return part === 'internal'
     ? `http://${service}:${exposed.port}`
-    : previewAddress(previewServiceHost(context.owner, exposed.prefix), context.publicPort);
+    : serviceAddress(context, exposed.prefix);
 }
 
 function templateValue(context: TemplateContext, name: string): string | null {
@@ -83,9 +108,7 @@ function templateValue(context: TemplateContext, name: string): string | null {
     'ticket.id': ownerHostId(context.owner),
     'pr.number': context.prNumber === null ? '' : String(context.prNumber),
     'preview.host': previewServiceHost(context.owner, ''),
-    'preview.url': first
-      ? previewAddress(previewServiceHost(context.owner, first.prefix), context.publicPort)
-      : null,
+    'preview.url': first ? serviceAddress(context, first.prefix) : null,
   };
   return values[name] ?? null;
 }

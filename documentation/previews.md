@@ -18,6 +18,13 @@ addresses and **Stop**.
    (`/api`), and keep **Remove the path** ticked when the API expects requests without it (`/api/users`
    reaches it as `/users`). A running preview gets new paths at its next start, in your browser and in the
    agent's and the end-to-end tests' alike.
+
+   If your apps share a login through a cookie on a parent domain (both apps of a site reading the cookie of
+   `.example.com`), turn on **One domain per preview**: `api` is then served at `api.t<ticket>.union.localhost`
+   rather than `api-t<ticket>.union.localhost`, and the app can set its cookie on `{preview.host}`
+   (`t<ticket>.union.localhost`), which no other preview gets. Running previews move to their new addresses at
+   their next start.
+
 3. Optional: **Profiles** to enable, and **compose additions**: YAML merged over the repository's file, for what
    Union adds without changing the repository (a database restore, migrations, a seed).
 

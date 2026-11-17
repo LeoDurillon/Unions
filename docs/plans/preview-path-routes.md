@@ -5,7 +5,11 @@ proxy (checked with real Docker: a Traefik of Union's image and echo servers, st
 to the app, `X-Forwarded-Prefix`, SSE streamed event by event) and by the router in the owner's container
 (checked in `union-agent:local` against services on a Docker network; it also routes each request by its own host,
 as a client may reuse a connection for another host). Not checked: a Playwright page in a ticket's container, nor
-a real preview through the live proxy. Step 5 (one domain per preview) left.
+a real preview through the live proxy. Step 5 built too (same branch): the "One domain per preview" setting, after
+the browser check below passed in headless Chromium and Firefox: a cookie with `Domain=t9001.union.localhost` set
+from `editor.t9001.union.localhost` reached `viewer.t9001` and `t9001`, not `viewer.t9002`; one on
+`union.localhost` (the only shared domain before) reached `viewer-t9002` too. Not checked: a real preview with the
+setting on.
 
 ## Problem
 

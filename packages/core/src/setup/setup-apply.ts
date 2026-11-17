@@ -1,6 +1,11 @@
 // What applying each section of a setup proposal makes of the project's settings, and whether it
 // already matches. Browser-safe.
-import type { PreviewConfig, ProjectConfig, ProjectScript } from '../schema/schema-types';
+import type {
+  PreviewConfig,
+  PreviewService,
+  ProjectConfig,
+  ProjectScript,
+} from '../schema/schema-types';
 import type { SetupChecks, SetupPreview, SetupProposal } from './setup-proposal-types';
 
 /** The sections Apply writes to the settings; the agent image is read from its own table. */
@@ -63,6 +68,23 @@ function withSwitches(preview: PreviewConfig, proposed: SetupPreview): PreviewCo
   };
 }
 
+/**
+ * The proposed services, each with the paths the current service of its name has (the setup agent
+ * proposes none), those on a host the proposal still exposes.
+ */
+function withCurrentPaths(
+  current: readonly PreviewService[] | undefined,
+  proposed: readonly PreviewService[],
+): PreviewService[] {
+  return proposed.map((service) => {
+    const paths = (current?.find((old) => old.name === service.name)?.paths ?? []).filter(
+      (path) =>
+        path.host !== service.prefix && proposed.some((other) => other.prefix === path.host),
+    );
+    return paths.length === 0 ? service : { ...service, paths };
+  });
+}
+
 /** The current preview settings with the proposal over them; variables are added, not replaced. */
 export function previewAfter(
   current: PreviewConfig | undefined,
@@ -74,6 +96,9 @@ export function previewAfter(
     env: { ...current?.env, ...proposed.env },
     ...previewExtras(proposed),
   };
+  if (proposed.services.length > 0) {
+    merged.services = withCurrentPaths(current?.services, proposed.services);
+  }
   return withSwitches(merged, proposed);
 }
 

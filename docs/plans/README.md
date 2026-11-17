@@ -59,7 +59,8 @@ Open findings of the security reviews (2026-10-24 audit, 2026-11-08 review), to 
   `/api` on each front end's preview address, as a production reverse proxy serves it (Traefik path routers with
   the prefix stripped, a per-request router in the owner's container); optionally one parent domain per preview
   for cookies shared between its apps. Steps 1 to 4 built (2026-11-17, branch `preview-path-routes`:
-  settings, checks, the proxy's routers, the container's router); step 5 (one domain per preview) left.
+  settings, checks, the proxy's routers, the container's router, one domain per preview); a real preview
+  through the live proxy left to check.
 - [Agent reviews of large changes, slice by slice](sliced-agent-review.md): the agent review given the change's
   file list and hunk index, then, above a size threshold, one agent per slice of a grouping by spec (or by folder
   without specs), a pass on the seams between slices, and the drafts merged. Steps 0 and 1 done (the file list, one

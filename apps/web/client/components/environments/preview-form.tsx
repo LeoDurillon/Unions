@@ -25,6 +25,7 @@ export type Form = {
   envFilePath: string;
   e2eCommand: string;
   startForImplementation: boolean;
+  domainPerPreview: boolean;
   profiles: string[];
   agentServices: string[];
   sharedServices: string[];
@@ -45,6 +46,7 @@ const EMPTY: Form = {
   envFilePath: '',
   e2eCommand: '',
   startForImplementation: false,
+  domainPerPreview: false,
   profiles: [],
   agentServices: [],
   sharedServices: [],
@@ -84,6 +86,7 @@ function initial(project: PublicProject): Form {
     envFilePath: preview.envFile?.path ?? '',
     e2eCommand: preview.e2eCommand ?? '',
     startForImplementation: preview.startForImplementation === true,
+    domainPerPreview: preview.domainPerPreview === true,
     profiles: preview.profiles ?? [],
     ...agentChoices(preview),
     idleStopMinutes: preview.idleStopMinutes === undefined ? '' : String(preview.idleStopMinutes),
@@ -104,6 +107,17 @@ function sentCommands(form: Form): Pick<PreviewConfig, 'sharedCommands'> {
   return sharedCommands.length === 0 ? {} : { sharedCommands };
 }
 
+/** The switches, kept only where they differ from the defaults. */
+function switches(
+  form: Form,
+): Pick<PreviewConfig, 'startForImplementation' | 'domainPerPreview' | 'forwardPorts'> {
+  return {
+    ...(form.startForImplementation ? { startForImplementation: true } : {}),
+    ...(form.domainPerPreview ? { domainPerPreview: true } : {}),
+    ...(form.forwardPorts ? {} : { forwardPorts: false }),
+  };
+}
+
 function settingsOf(form: Form): PreviewConfig {
   return {
     composeFile: form.composeFile,
@@ -114,13 +128,12 @@ function settingsOf(form: Form): PreviewConfig {
       ? {}
       : { envFile: { service: form.envFileService, path: form.envFilePath } }),
     ...(form.e2eCommand.trim() === '' ? {} : { e2eCommand: form.e2eCommand }),
-    ...(form.startForImplementation ? { startForImplementation: true } : {}),
+    ...switches(form),
     ...(form.profiles.length === 0 ? {} : { profiles: form.profiles }),
     ...(form.agentServices.length === 0 ? {} : { agentServices: form.agentServices }),
     ...(form.sharedServices.length === 0 ? {} : { sharedServices: form.sharedServices }),
     ...sentCommands(form),
     ...(form.agentVariables.mode === 'all' ? {} : { agentVariables: form.agentVariables }),
-    ...(form.forwardPorts ? {} : { forwardPorts: false }),
     ...(form.idleStopMinutes.trim() === ''
       ? {}
       : { idleStopMinutes: Number(form.idleStopMinutes) }),

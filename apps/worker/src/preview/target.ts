@@ -125,16 +125,20 @@ function previewConfigOf(db: Db, projectId: number): PreviewConfig {
 }
 
 /** A service as the proxy serves it: its host, and its paths on the other services' hosts. */
-function exposedOf(owner: WorkspaceOwner, service: PreviewService): ExposedService {
+function exposedOf(
+  owner: WorkspaceOwner,
+  service: PreviewService,
+  domainPerPreview: boolean,
+): ExposedService {
   const paths = (service.paths ?? []).map(({ host, path: prefix, strip }) => ({
-    host: previewServiceHost(owner, host),
+    host: previewServiceHost(owner, host, domainPerPreview),
     path: prefix,
     strip,
   }));
   return {
     service: service.name,
     port: service.port,
-    host: previewServiceHost(owner, service.prefix),
+    host: previewServiceHost(owner, service.prefix, domainPerPreview),
     ...(paths.length === 0 ? {} : { paths }),
   };
 }
@@ -153,12 +157,19 @@ export function loadTarget(deps: PreviewDeps, owner: WorkspaceOwner): Target {
   }
   const { publicPort } = deps.settings;
   const shared = source.secrets ? (config.sharedServices ?? []) : [];
-  const context = { owner, prNumber: source.prNumber, publicPort, exposed: services };
+  const domainPerPreview = config.domainPerPreview === true;
+  const context = {
+    owner,
+    prNumber: source.prNumber,
+    publicPort,
+    exposed: services,
+    domainPerPreview,
+  };
   const [pathProblem] = previewPathProblems(services);
   if (pathProblem !== undefined) {
     throw new PreviewError(`${pathProblem} (the project's Environments tab)`);
   }
-  const exposed = services.map((service) => exposedOf(owner, service));
+  const exposed = services.map((service) => exposedOf(owner, service, domainPerPreview));
   return {
     owner,
     projectId: source.projectId,

@@ -79,3 +79,14 @@ test('a bad path, an unknown host, its own host or a path given twice is refused
     expect(response.status).toBe(400);
   }
 });
+
+test('a domain per preview is kept only when on', async () => {
+  const on = (await (
+    await put({ ...settings([]), domainPerPreview: true })
+  ).json()) as PublicProject;
+  expect(on.config.preview?.domainPerPreview).toBe(true);
+  const off = (await (
+    await put({ ...settings([]), domainPerPreview: false })
+  ).json()) as PublicProject;
+  expect(off.config.preview).not.toHaveProperty('domainPerPreview');
+});

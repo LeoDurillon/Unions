@@ -19,6 +19,10 @@ Built (phases 1 to 4). Full design and what was built: [`docs/plans/archive/prev
   start. The router in the owner's container proxies a host with paths request by request (the same paths,
   stripping and `X-Forwarded-*` headers; bodies streamed, upgrades piped, each request routed by its own host); a
   host without paths is still piped connection by connection. The implementer is told each path's address.
+  With **One domain per preview** (`config.preview.domainPerPreview`, off by default), a prefix becomes a label under
+  the preview's host (`api.t<id>.union.localhost`), so `{preview.host}` is a cookie domain the preview's apps share
+  and no other preview gets (checked in Chromium and Firefox). A setup proposal's services keep the paths of the
+  current services of their names.
   Every preview's hosts end with `union.localhost`, so a browser files the logins it saves on one preview under the
   same site and offers them on the others.
 - Per-project environment variables (secrets kept server side) with templates such as `{service.api.url}`, given to

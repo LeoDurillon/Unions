@@ -16,31 +16,51 @@ import { PreviewPathsField, type HostChoice } from './preview-paths-field';
 
 export type ServiceRow = { name: string; port: string; prefix: string; paths: PreviewPath[] };
 
-function hostOf(prefix: string): string {
-  return prefix === '' ? 't<ticket>.union.localhost' : `${prefix}-t<ticket>.union.localhost`;
+/** The address a prefix gives, as the settings show it. */
+function hostOf(prefix: string, domainPerPreview: boolean): string {
+  if (prefix === '') {
+    return 't<ticket>.union.localhost';
+  }
+  return domainPerPreview
+    ? `${prefix}.t<ticket>.union.localhost`
+    : `${prefix}-t<ticket>.union.localhost`;
 }
 
 /** The hosts of the other services, where this one can also answer under a path. */
-function otherHosts(rows: readonly ServiceRow[], row: ServiceRow): HostChoice[] {
+function otherHosts(
+  rows: readonly ServiceRow[],
+  row: ServiceRow,
+  domainPerPreview: boolean,
+): HostChoice[] {
   return rows
     .filter((other) => other !== row && other.name.trim() !== '' && other.prefix !== row.prefix)
-    .map((other) => ({ prefix: other.prefix, label: `${other.name} (${hostOf(other.prefix)})` }));
+    .map((other) => ({
+      prefix: other.prefix,
+      label: `${other.name} (${hostOf(other.prefix, domainPerPreview)})`,
+    }));
 }
 
 function Row({
   row,
   hosts,
+  domainPerPreview,
   onChange,
   onRemove,
 }: {
   row: ServiceRow;
   hosts: readonly HostChoice[];
+  domainPerPreview: boolean;
   onChange: (row: ServiceRow) => void;
   onRemove: () => void;
 }): ReactElement {
   return (
     <div className="space-y-1">
-      <ServiceInputs row={row} onChange={onChange} onRemove={onRemove} />
+      <ServiceInputs
+        row={row}
+        title={hostOf(row.prefix, domainPerPreview)}
+        onChange={onChange}
+        onRemove={onRemove}
+      />
       <PreviewPathsField
         paths={row.paths}
         hosts={hosts}
@@ -54,10 +74,13 @@ function Row({
 
 function ServiceInputs({
   row,
+  title,
   onChange,
   onRemove,
 }: {
   row: ServiceRow;
+  /** The address its prefix gives. */
+  title: string;
   onChange: (row: ServiceRow) => void;
   onRemove: () => void;
 }): ReactElement {
@@ -86,7 +109,7 @@ function ServiceInputs({
         className={`${inputClass} font-mono`}
         value={row.prefix}
         placeholder="(none)"
-        title={hostOf(row.prefix)}
+        title={title}
         onChange={(event) => {
           onChange({ ...row, prefix: event.target.value });
         }}
@@ -184,10 +207,12 @@ function AddServices({
 export function PreviewServicesField({
   rows,
   found,
+  domainPerPreview,
   onChange,
 }: {
   rows: ServiceRow[];
   found: PreviewSettingsView['composeServices'];
+  domainPerPreview: boolean;
   onChange: (rows: ServiceRow[]) => void;
 }): ReactElement {
   return (
@@ -196,9 +221,9 @@ export function PreviewServicesField({
       <p className="text-xs text-zinc-500">
         Name in the compose file, port it listens on, and host prefix: none serves it at{' '}
         <code>t&lt;ticket&gt;.union.localhost</code> (the first one is what &quot;Open&quot; goes
-        to), <code>api</code> at <code>api-t&lt;ticket&gt;.union.localhost</code>. A service can
-        also answer under a path of another one&apos;s address: an API at <code>/api</code> of each
-        app, as your production proxy serves it.
+        to), <code>api</code> at <code>{hostOf('api', domainPerPreview)}</code>. A service can also
+        answer under a path of another one&apos;s address: an API at <code>/api</code> of each app,
+        as your production proxy serves it.
       </p>
       {rows.map((row, index) => (
         <Row
@@ -206,7 +231,8 @@ export function PreviewServicesField({
           // oxlint-disable-next-line react/no-array-index-key
           key={index}
           row={row}
-          hosts={otherHosts(rows, row)}
+          hosts={otherHosts(rows, row, domainPerPreview)}
+          domainPerPreview={domainPerPreview}
           onChange={(next) => {
             onChange(rows.map((item, position) => (position === index ? next : item)));
           }}

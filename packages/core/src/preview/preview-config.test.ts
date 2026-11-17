@@ -2,6 +2,7 @@ import { expect, test } from 'bun:test';
 
 import {
   exposedServices,
+  previewServiceHost,
   previewUrlVariables,
   renderPreviewTemplate,
   templateProblems,
@@ -73,4 +74,16 @@ test("each service's public address is in a UNION_URL_ variable named after it",
     UNION_URL_API: 'http://api-t12.union.localhost:8080',
     UNION_URL_BACK_OFFICE_V2: 'http://bo-t12.union.localhost:8080',
   });
+});
+
+test('with a domain per preview, a prefix is a label under the preview host, which stays the same', () => {
+  expect(previewServiceHost({ ticketId: 12 }, 'api', true)).toBe('api.t12.union.localhost');
+  expect(previewServiceHost({ reviewId: 3 }, 'api', true)).toBe('api.r3.union.localhost');
+  expect(previewServiceHost({ ticketId: 12 }, '', true)).toBe('t12.union.localhost');
+  expect(
+    renderPreviewTemplate('{service.api.url} {preview.host} {preview.url}', {
+      ...CONTEXT,
+      domainPerPreview: true,
+    }),
+  ).toBe('http://api.t12.union.localhost:8080 t12.union.localhost http://t12.union.localhost:8080');
 });

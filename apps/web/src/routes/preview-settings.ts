@@ -220,6 +220,7 @@ export function previewConfig(
     ...(agentServices.length === 0 ? {} : { agentServices }),
     ...sharedSettings(serviceList(input.sharedServices), input.sharedCommands, exposed),
     ...agentEnvironment(input, Object.keys(env)),
+    ...(input.domainPerPreview === true ? { domainPerPreview: true } : {}),
     ...(idleStopMinutes === undefined ? {} : { idleStopMinutes }),
     ...(maxRunning === undefined ? {} : { maxRunning }),
   };
