@@ -45,6 +45,18 @@ test('a failed split is retried, still going back to done', () => {
   });
 });
 
+test('a failed split is dropped, going back to where it was asked', () => {
+  const failed: Phase = { kind: 'failed', step: 'split', error: 'hook refused' };
+  expect(transition(failed, { type: 'drop_split' })).toEqual(atReview);
+  expect(transition({ ...failed, thenDone: true }, { type: 'drop_split' })).toEqual({
+    kind: 'done',
+  });
+  const plan: Phase = { kind: 'failed', step: 'split_plan', error: 'no plan' };
+  expect(transition(plan, { type: 'drop_split' })).toEqual(atReview);
+  const other: Phase = { kind: 'failed', step: 'simplify', error: 'x' };
+  expect(() => transition(other, { type: 'drop_split' })).toThrow(InvalidTransition);
+});
+
 test('a clean restack keeps the review; one an agent worked on runs the review again', () => {
   const p = transition(atReview, { type: 'restack' });
   expect(p).toEqual({ kind: 'running', step: 'restack', thenRun: 'final_review' });

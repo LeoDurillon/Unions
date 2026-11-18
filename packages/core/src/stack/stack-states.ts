@@ -1,6 +1,6 @@
 // The state machine's moves for a stack of pull requests: planning a split, splitting, restacking.
 
-import { backToReview, running, thenDoneOf, type Action, type Phase } from '../phases';
+import { backToReview, running, thenDoneOf, type Action, type Phase, type Step } from '../phases';
 
 /**
  * A split or a restack is asked at the final review, or once done: the branch is reviewed, and a
@@ -48,6 +48,25 @@ function fromStackRun(phase: Phase & { kind: 'running' }, action: Action): Phase
   return undefined;
 }
 
+/** The steps of a split: its plan, then the rewrite into slices. */
+function isSplitStep(step: Step): boolean {
+  return step === 'split_plan' || step === 'split';
+}
+
+function fromFailed(phase: Phase & { kind: 'failed' }, action: Action): Phase | undefined {
+  // The PR tab's Restack after a restack failed (one the worker started stops on a conflict): the
+  // user asks for it, so the agent may resolve the conflict, as a Retry would.
+  if (phase.step === 'restack' && action.type === 'restack') {
+    const next = running('restack');
+    return next.kind === 'running' ? { ...next, ...thenDoneOf(phase) } : next;
+  }
+  // A failed split leaves the branch as it was: dropping it goes back to where it was asked.
+  if (isSplitStep(phase.step) && action.type === 'drop_split') {
+    return backToReview(phase);
+  }
+  return undefined;
+}
+
 /**
  * The phase a stack action leads to; null when it is refused there, undefined when the generic
  * moves decide (a run that failed, a retry, a cancel).
@@ -59,11 +78,11 @@ export function stackTransition(phase: Phase, action: Action): Phase | null | un
   if (phase.kind === 'running') {
     return fromStackRun(phase, action);
   }
-  // The PR tab's Restack after a restack failed (one the worker started stops on a conflict): the
-  // user asks for it, so the agent may resolve the conflict, as a Retry would.
-  if (phase.kind === 'failed' && phase.step === 'restack' && action.type === 'restack') {
-    const next = running('restack');
-    return next.kind === 'running' ? { ...next, ...thenDoneOf(phase) } : next;
+  if (phase.kind === 'failed') {
+    const failed = fromFailed(phase, action);
+    if (failed) {
+      return failed;
+    }
   }
   const reviewed = fromReviewed(phase, action);
   if (reviewed !== undefined) {

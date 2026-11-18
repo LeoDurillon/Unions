@@ -149,6 +149,10 @@ Turn on **Split pull requests into stacks** in **Settings → Pull requests** fi
    pull request becomes the top of the stack. Each slice gets its own description, and the stack becomes a GitHub
    stack where GitHub supports it.
 
+If the split fails (for example, a git hook refuses a slice's commit), nothing is pushed and the branch stays as it
+was. **Retry** tries again; **Drop the split** takes the ticket back to its review, so you can fix what stopped it
+(or simplify the history) and split again later.
+
 The stack stays one ticket, with one card and one issue. Approving its final review marks every slice's pull
 request ready. The review page shows each slice as a tab, and **Review with agent** reviews slice by slice. The review page's PR tab follows the slice you pick: it shows that slice's pull request (the top one under **All**), and picking a pull request there shows its slice's diff. The browser's Back and Forward buttons move between the slices you looked at, and the page's address keeps the slice, so a reload or a copied link opens on it.
 

@@ -11,6 +11,9 @@ import { Button, ErrorText } from '../ui/ui';
 import { RefusedCommitPanel } from './refused-commit';
 import { StartOver } from './start-over';
 
+/** A failed split leaves the branch as it was: it can be dropped, back to the review. */
+const SPLIT_STEPS: ReadonlySet<Step> = new Set<Step>(['split_plan', 'split']);
+
 type StalledPhase = Extract<Phase, { kind: 'failed' | 'rate_limited' }>;
 
 /** The card's title: what stopped the step. */
@@ -65,6 +68,16 @@ function Stalled({ detail, step }: { detail: TicketDetail; step: Step }): ReactE
       >
         {waits ? 'Retry now' : 'Retry'}
       </Button>
+      {phase.kind === 'failed' && SPLIT_STEPS.has(phase.step) ? (
+        <Button
+          disabled={command.isPending}
+          onClick={() => {
+            command.mutate({ type: 'drop_split' });
+          }}
+        >
+          Drop the split
+        </Button>
+      ) : null}
       <StartOver ticketId={id} phase={phase} />
     </section>
   );
