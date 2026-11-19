@@ -44,6 +44,35 @@ export function contains(
   return succeeds(runtime, container, ['merge-base', '--is-ancestor', ancestor, ref]);
 }
 
+/** What GitHub had, just fetched: the ticket's branch at `lease`, and other branches checked with it. */
+export type FetchedBranches = {
+  branch: string;
+  lease: string;
+  pushed: string | null;
+  extra: readonly string[];
+};
+
+/**
+ * Refuses to rewrite a branch whose copy on GitHub (`origin/<name>`) has commits HEAD lacks: someone
+ * pushed to it. The ticket's branch still at the commit Union last pushed passes: only Union's own
+ * commits are missing (the workspace rewrote them), and the push's lease catches a push meanwhile.
+ */
+export async function foreignCommits(
+  runtime: ContainerRuntime,
+  container: string,
+  fetched: FetchedBranches,
+): Promise<{ error: string } | null> {
+  for (const name of [fetched.branch, ...fetched.extra]) {
+    const ownPush = name === fetched.branch && fetched.lease === fetched.pushed;
+    if (!ownPush && !(await contains(runtime, container, 'HEAD', `origin/${name}`))) {
+      return {
+        error: `\`${name}\` on GitHub has commits this ticket's workspace does not: rewriting would drop them.`,
+      };
+    }
+  }
+  return null;
+}
+
 /** Why the agent left the repository unusable: a rebase half-done, or another branch checked out. */
 export async function branchProblem(
   runtime: ContainerRuntime,

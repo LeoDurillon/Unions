@@ -31,7 +31,8 @@ While the pull request is open, the PR tab shows **Split into a stack**, usable 
    to where it was asked).
 2. **Split:** the implementer's session is resumed with the `split` prompt and the approved plan. It rewrites the
    commits into the slices, each commit ending with a `Slice: <n>` trailer, in order. The host first fetches the
-   ticket's branch and any slice branch already on GitHub, and stops when one has commits the workspace lacks.
+   ticket's branch and any slice branch already on GitHub, and stops when one has commits the workspace lacks (the ticket's branch
+   still at the commit Union last pushed passes: those commits are Union's own, rewritten in the workspace).
 3. **Checks by the host:** as for [Simplify history](simplify-history.md) (on the branch, nothing uncommitted, the
    same fork point, the same tree), plus every commit's trailer in order and every slice with a commit, plus the
    project's checks on each lower slice's tip. Problems go back to the same session, up to twice; then the step

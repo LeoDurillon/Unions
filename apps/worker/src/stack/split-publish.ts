@@ -6,7 +6,7 @@ import { remoteOf } from '../branch-push';
 import { captureDiff } from '../diff-snapshot';
 import type { Rebase } from '../rebase/rebase-agent';
 import { fetchIntoContainer } from '../rebase/rebase-fetch';
-import { branchTip, contains } from '../rebase/rebase-git';
+import { branchTip, foreignCommits } from '../rebase/rebase-git';
 import type { PublishedSlice } from './split-agent';
 import { remoteSliceBranches, setBranches } from './stack-git';
 import { publishStack } from './stack-publish';
@@ -17,7 +17,7 @@ export type Fetched = { lease: string; slices: Map<string, string> };
 
 /**
  * Fetches the ticket's branch and any slice branch already on GitHub; refuses when one has commits
- * the workspace lacks (someone pushed to it): rewriting would drop them.
+ * the workspace lacks that Union did not push itself: rewriting would drop them.
  */
 export async function fetchStack(rebase: Rebase): Promise<Fetched | { error: string }> {
   const { deps, container, branch, base, project, context } = rebase;
@@ -31,14 +31,13 @@ export async function fetchStack(rebase: Rebase): Promise<Fetched | { error: str
   const slices = await remoteSliceBranches(remote, branch);
   const extra = [...slices.keys()];
   const lease = await fetchIntoContainer(deps.runtime, container, remote, { base, branch, extra });
-  for (const name of [branch, ...extra]) {
-    if (!(await contains(deps.runtime, container, 'HEAD', `origin/${name}`))) {
-      return {
-        error: `\`${name}\` on GitHub has commits this ticket's workspace does not: rewriting would drop them.`,
-      };
-    }
-  }
-  return { lease, slices };
+  const refused = await foreignCommits(deps.runtime, container, {
+    branch,
+    lease,
+    pushed: ticket.pushedSha,
+    extra,
+  });
+  return refused ?? { lease, slices };
 }
 
 function branchesToPush(

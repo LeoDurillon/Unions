@@ -7,7 +7,7 @@ import { rateLimited, type StepResult } from '../step-outcome';
 import { runRebaseAgent, type Pushed, type Rebase } from './rebase-agent';
 import { pushClean, upToDate } from './rebase-clean';
 import { fetchIntoContainer } from './rebase-fetch';
-import { contains, forkPoint } from './rebase-git';
+import { foreignCommits, forkPoint } from './rebase-git';
 import {
   checksFailedHint,
   retargetCommand,
@@ -28,7 +28,7 @@ function leftRefs(retarget: Rebase['retarget']): { left?: { name: string; source
 
 /**
  * Fetches the branch (and a stack's lower slices) as GitHub has them; refuses when one has commits
- * the workspace lacks. The lower slices' branches are put where they were last pushed.
+ * the workspace lacks that Union did not push itself. The lower slices' branches are put where they were last pushed.
  */
 export async function fetchChecked(
   rebase: Rebase,
@@ -43,12 +43,14 @@ export async function fetchChecked(
     extra,
     ...leftRefs(rebase.retarget),
   });
-  for (const name of [branch, ...extra]) {
-    if (!(await contains(deps.runtime, container, 'HEAD', `origin/${name}`))) {
-      return {
-        error: `\`${name}\` on GitHub has commits this ticket's workspace does not: rewriting would drop them.`,
-      };
-    }
+  const refused = await foreignCommits(deps.runtime, container, {
+    branch,
+    lease: pushed,
+    pushed: context.ticket.pushedSha,
+    extra,
+  });
+  if (refused) {
+    return refused;
   }
   await syncLowerBranches(deps.runtime, container, lower);
   return { pushed, extra };

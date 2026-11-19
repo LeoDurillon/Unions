@@ -17,7 +17,8 @@ The host pushes the result.
    the pushed branch with the project's credentials, writes them as a `git bundle`, copies it in and fetches from it
    inside the container (`origin/<base>`, the local `<base>` that diffs compare with, and `origin/<branch>`). If the
    pushed branch has commits the workspace lacks (someone pushed), the rebase stops before the agent runs: rewriting
-   would drop them.
+   would drop them. A branch still at the commit Union last pushed passes even when the workspace rewrote those
+   commits: they are Union's own, and the lease catches a push made meanwhile.
 3. **Host rebase first (decided):** the host runs `git rebase origin/<base>` in the container (no hook runs on
    picked commits). A branch already holding the base is up to date: nothing is pushed and no agent runs. A clean
    rebase runs the project's check command; when it passes, the host pushes (step 5) and no agent runs. Each case

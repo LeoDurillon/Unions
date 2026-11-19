@@ -5,7 +5,7 @@ import { remoteOf } from '../branch-push';
 import type { ImplementDeps } from '../implement/implement-checks';
 import type { Rebase } from '../rebase/rebase-agent';
 import { fetchIntoContainer } from '../rebase/rebase-fetch';
-import { contains, restoreBranch } from '../rebase/rebase-git';
+import { foreignCommits, restoreBranch } from '../rebase/rebase-git';
 import { prepareBranch } from '../rebase/rebase-prepare';
 import { pendingRefusal } from '../refused-commit';
 import { notFinished, type StepContext, type StepResult } from '../step-outcome';
@@ -17,11 +17,15 @@ async function attempt(rebase: Rebase): Promise<StepResult> {
   const { deps, container, branch, base } = rebase;
   const remote = await remoteOf(deps, rebase.project);
   const lease = await fetchIntoContainer(deps.runtime, container, remote, { base, branch });
-  if (!(await contains(deps.runtime, container, 'HEAD', `origin/${branch}`))) {
-    return {
-      kind: 'error',
-      error: `\`${branch}\` on GitHub has commits this ticket's workspace does not: rewriting would drop them.`,
-    };
+  const pushed = rebase.context.ticket.pushedSha;
+  const refused = await foreignCommits(deps.runtime, container, {
+    branch,
+    lease,
+    pushed,
+    extra: [],
+  });
+  if (refused) {
+    return { kind: 'error', error: refused.error };
   }
   const start = await historyOf(deps.runtime, container, { base });
   const outcome = await runSimplifyAgent(rebase, start);

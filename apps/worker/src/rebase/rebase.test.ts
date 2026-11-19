@@ -251,6 +251,16 @@ test('commits on GitHub the workspace lacks stop the rebase before the agent run
   expect(agentCalls).toBe(0);
 });
 
+test("the workspace rewriting Union's own last push does not stop the rebase", async () => {
+  const pushedSha = await git(origin(), 'rev-parse', 'feature');
+  db.update(schema.tickets).set({ pushedSha }).where(eq(schema.tickets.id, ticketId)).run();
+  await git(container(), 'commit', '--quiet', '--amend', '-m', 'add the feature');
+
+  const result = await run(rebases);
+  expect(result.kind).toBe('ok');
+  expect(await git(origin(), 'log', '--format=%s', '-1', 'feature')).toBe('add the feature');
+});
+
 test('a push made during the rebase is never overwritten: the lease refuses', async () => {
   const pushesMeanwhile: AgentFn = async (...args) => {
     const other = path.join(root, 'other');
