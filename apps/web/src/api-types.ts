@@ -74,6 +74,8 @@ export type TicketSummary = Ticket & {
   parent: TicketRef | null;
   /** Null when the ticket is not split (or the listing did not read it). */
   stack?: StackView | null;
+  /** The context, in tokens, its implementer session's next resume starts from; null: none or unknown. */
+  sessionContext?: number | null;
 };
 
 export type TicketDetail = {

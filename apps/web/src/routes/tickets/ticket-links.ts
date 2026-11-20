@@ -4,6 +4,7 @@ import {
   blockingParent,
   boardColumn,
   getTicket,
+  implementerContext,
   schema,
   setParent,
   StartBlocked,
@@ -33,13 +34,17 @@ export function summarize(ticket: Ticket, find: (id: number) => Ticket | undefin
   return { ...ticket, board: boardColumn(ticket), parent: parent ? ticketRef(parent) : null };
 }
 
-/** The summary with the ticket's stack, for the board and the ticket's panel. */
+/** The summary with the ticket's stack and session size, for the board and the ticket's panel. */
 export function summarizeWithStack(
   db: Db,
   ticket: Ticket,
   find: (id: number) => Ticket | undefined,
 ): TicketSummary {
-  return { ...summarize(ticket, find), stack: stackView(db, ticket) };
+  return {
+    ...summarize(ticket, find),
+    stack: stackView(db, ticket),
+    sessionContext: implementerContext(db, ticket.id),
+  };
 }
 
 export function findTicket(db: Db): (id: number) => Ticket | undefined {

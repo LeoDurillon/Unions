@@ -1,6 +1,6 @@
 // Records an agent call's usage from its `result` line in `agent_log`, live or replayed from the past.
 
-import { and, asc, desc, eq, gt, lt, notInArray, sql, type SQL } from 'drizzle-orm';
+import { and, asc, desc, eq, gt, lt, notInArray, or, sql, type SQL } from 'drizzle-orm';
 
 import type { Db } from '../db';
 import * as schema from '../tables';
@@ -12,6 +12,7 @@ import {
   type CallUsage,
   type Turn,
 } from './agent-usage';
+import { endContext } from './session-end';
 
 type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
 export type Executor = Db | Tx;
@@ -52,29 +53,32 @@ export function previousResult(db: Executor, line: AgentLine, session: SQL): Age
     .get();
 }
 
-/** The session's result before this one, and the call's own turns since. */
+/**
+ * The session's result before this one, the call's own turns since, and the context it ends with
+ * (the `system` lines carry its compactions).
+ */
 function before(
   db: Executor,
   line: AgentLine,
   session: SQL,
-): { previous: AgentLine | undefined; turns: Turn[] } {
+): { previous: AgentLine | undefined; turns: Turn[]; end: number | null } {
   const previous = previousResult(db, line, session);
-  const turns = db
+  const payloads = db
     .select({ payload: schema.agentLog.payload })
     .from(schema.agentLog)
     .where(
       and(
         session,
-        ofType('assistant'),
+        or(ofType('assistant'), ofType('system')),
         gt(schema.agentLog.id, previous?.id ?? 0),
         lt(schema.agentLog.id, line.id),
       ),
     )
     .orderBy(asc(schema.agentLog.id))
     .all()
-    .map((row) => parseTurn(row.payload))
-    .filter((turn) => turn !== null);
-  return { previous, turns };
+    .map((row) => row.payload);
+  const turns = payloads.map((payload) => parseTurn(payload)).filter((turn) => turn !== null);
+  return { previous, turns, end: endContext(payloads) };
 }
 
 function micro(costUsd: number | null): number | null {
@@ -91,7 +95,7 @@ export function recordUsage(db: Executor, line: AgentLine): boolean {
   if (!result || !session) {
     return false;
   }
-  const { previous, turns } = before(db, line, session);
+  const { previous, turns, end } = before(db, line, session);
   const { peak, model } = peakOf(turns);
   const usages = callUsage(result, previous ? parseResult(previous.payload) : null, model);
   const own = (usage: CallUsage): Partial<typeof schema.agentUsage.$inferInsert> =>
@@ -101,6 +105,7 @@ export function recordUsage(db: Executor, line: AgentLine): boolean {
           durationMs: result.durationMs,
           apiDurationMs: result.apiDurationMs,
           peakContext: peak,
+          endContext: end,
           failed: result.failed,
         }
       : {};

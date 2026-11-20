@@ -3,30 +3,22 @@
 import type { ReactElement } from 'react';
 
 import type { SessionCompactionView } from '../../../src/routes/tickets/ticket-session';
+import { thousands } from '../../lib/ticket/session-context';
 import { useSessionCompaction } from '../../lib/ticket/use-session-compaction';
 import { Button, ErrorText } from '../ui/ui';
-
-const TOKENS_PER_K = 1000;
 
 const HINT =
   'Every step that writes code resumes this conversation and reads all of it again on each turn. Compact asks Claude Code to summarize it, so the next step starts from the summary: it uses less of your plan, and may forget details.';
 
-function thousands(tokens: number): string {
-  return `${Math.round(tokens / TOKENS_PER_K)}k`;
-}
-
 type Latest = NonNullable<SessionCompactionView['latest']>;
 
-/** What the session holds now, and what the last compaction did. */
+/** What the session holds now, and where the last compaction (Union's) took it from. */
 function sizeText(view: SessionCompactionView, latest: Latest | null): string {
   const context = view.session?.context ?? null;
-  if (context !== null) {
-    return `${thousands(context)} tokens of context`;
-  }
-  if (latest?.status === 'succeeded' && latest.contextBefore !== null) {
-    return `Compacted from ${thousands(latest.contextBefore)} tokens; the next step resumes the summary`;
-  }
-  return latest?.status === 'succeeded' ? 'Compacted' : 'Size not known yet';
+  const now = context === null ? 'Size not known yet' : `${thousands(context)} tokens of context`;
+  return latest?.status === 'succeeded' && latest.contextBefore !== null
+    ? `${now} · compacted from ${thousands(latest.contextBefore)}`
+    : now;
 }
 
 function Action({

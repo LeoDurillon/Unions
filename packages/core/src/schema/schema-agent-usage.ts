@@ -36,6 +36,11 @@ export const agentUsage = sqliteTable(
     /** The largest context of one of its turns: input, cache reads and writes. */
     peakContext: integer('peak_context'),
     contextWindow: integer('context_window'),
+    /**
+     * The session's context when the call ended: its last turn's, or a compaction's after it. What
+     * the next resume starts from; null on rows recorded before it was kept.
+     */
+    endContext: integer('end_context'),
     failed: integer('failed', { mode: 'boolean' }).notNull().default(false),
     at: integer('at').notNull().default(now),
   },
@@ -45,5 +50,6 @@ export const agentUsage = sqliteTable(
     index('agent_usage_run_idx').on(t.runId),
     index('agent_usage_investigation_idx').on(t.investigationId),
     index('agent_usage_agent_review_idx').on(t.agentReviewId),
+    index('agent_usage_session_idx').on(t.sessionId, t.id),
   ],
 );

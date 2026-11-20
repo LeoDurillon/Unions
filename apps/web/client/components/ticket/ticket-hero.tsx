@@ -1,4 +1,4 @@
-// The top of the ticket panel's page: its title, its state, flow and branch, its progress and what it needs.
+// The top of the ticket panel's page: its title, state, flow, branch and session size, its progress and what it needs.
 
 import { flowName, resolveFlow } from '@union/core/flows';
 import type { Step } from '@union/core/states';
@@ -6,13 +6,15 @@ import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../../src/api-types';
 import { describePhase } from '../../lib/board/labels';
+import { sessionContextLabel } from '../../lib/ticket/session-context';
 import { useCustomAgentNames } from '../../lib/union-settings/use-custom-agents';
 import { StatusPill } from './status-pill';
 import { TicketAttention } from './ticket-attention';
 import { TicketProgress } from './ticket-progress';
 
-const CHIP =
-  'inline-flex h-6.5 items-center gap-1.5 rounded-full border border-zinc-200 px-2.5 text-xs text-zinc-600 dark:border-zinc-800 dark:text-zinc-400';
+const CHIP_SHAPE = 'inline-flex h-6.5 items-center gap-1.5 rounded-full border px-2.5 text-xs';
+const CHIP = `${CHIP_SHAPE} border-zinc-200 text-zinc-600 dark:border-zinc-800 dark:text-zinc-400`;
+const AMBER_CHIP = `${CHIP_SHAPE} border-amber-300 text-amber-800 dark:border-amber-800 dark:text-amber-300`;
 
 function TicketStatus({ detail }: { detail: TicketDetail }): ReactElement {
   const names = useCustomAgentNames();
@@ -50,6 +52,19 @@ function BranchChip({ detail }: { detail: TicketDetail }): ReactElement | null {
   );
 }
 
+/** The implementer session's size, amber when large: the Overview's row compacts it. */
+function ContextChip({ detail }: { detail: TicketDetail }): ReactElement | null {
+  const label = sessionContextLabel(detail.ticket);
+  if (!label) {
+    return null;
+  }
+  return (
+    <span className={label.large ? AMBER_CHIP : CHIP} title={label.title}>
+      {label.text} context
+    </span>
+  );
+}
+
 /** The top of the ticket panel's page: title, state, progress, and what the ticket needs. */
 export function TicketHero({
   detail,
@@ -74,6 +89,7 @@ export function TicketHero({
         <TicketStatus detail={detail} />
         <span className={CHIP}>{flow} flow</span>
         <BranchChip detail={detail} />
+        <ContextChip detail={detail} />
       </div>
       {ticket.phase.kind === 'backlog' ? null : (
         <TicketProgress detail={detail} onOpenStep={onOpenStep} />

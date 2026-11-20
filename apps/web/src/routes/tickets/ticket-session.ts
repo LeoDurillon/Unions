@@ -20,7 +20,7 @@ import { ticketUsage } from '../usage';
 
 /** The implementer's session as the panel shows it, its latest compaction, and why one cannot start. */
 export type SessionCompactionView = {
-  /** Null: no implementation ran yet. `context`: null right after a compaction, until the next call. */
+  /** Null: no implementation ran yet. `context`: where its last call ended; null when not known. */
   session: { context: number | null } | null;
   latest: Pick<
     SessionCompaction,

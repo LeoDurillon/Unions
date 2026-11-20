@@ -1,6 +1,6 @@
 // The ticket's implementer session (the one the code steps resume), and how large its context is now.
 
-import { and, desc, eq, gt, inArray, isNotNull } from 'drizzle-orm';
+import { and, desc, eq, inArray, isNotNull } from 'drizzle-orm';
 
 import type { Step } from '../phases';
 import * as schema from '../tables';
@@ -41,21 +41,22 @@ export function implementerSession(db: Executor, ticketId: number): string | nul
 }
 
 /**
- * The context of the session's last call made after `since` (ms), in tokens: the size the next
- * resume starts from. Null when no call since says so (none, or only the compaction itself).
+ * The context the session's next resume starts from, in tokens: where its last call ended (after a
+ * compaction, the summary's size), else that call's peak for calls recorded before the end was
+ * kept. Null when no call says.
  */
-export function sessionContext(db: Executor, sessionId: string, since = 0): number | null {
+export function sessionContext(db: Executor, sessionId: string): number | null {
   const row = db
-    .select({ peak: schema.agentUsage.peakContext })
+    .select({ end: schema.agentUsage.endContext, peak: schema.agentUsage.peakContext })
     .from(schema.agentUsage)
-    .where(
-      and(
-        eq(schema.agentUsage.sessionId, sessionId),
-        eq(schema.agentUsage.main, true),
-        gt(schema.agentUsage.at, since),
-      ),
-    )
+    .where(and(eq(schema.agentUsage.sessionId, sessionId), eq(schema.agentUsage.main, true)))
     .orderBy(desc(schema.agentUsage.id))
     .get();
-  return row?.peak ?? null;
+  return row ? (row.end ?? row.peak) : null;
+}
+
+/** The context of the ticket's implementer session, for its card and panel; null without one. */
+export function implementerContext(db: Executor, ticketId: number): number | null {
+  const sessionId = implementerSession(db, ticketId);
+  return sessionId === null ? null : sessionContext(db, sessionId);
 }

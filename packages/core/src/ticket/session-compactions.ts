@@ -60,7 +60,7 @@ export function latestSessionCompaction(db: Executor, ticketId: number): Session
   );
 }
 
-/** The implementer's session, and its context since its last compaction (null: just compacted). */
+/** The implementer's session, and the context its next resume starts from (null: not known). */
 export type ImplementerSessionSize = { sessionId: string; context: number | null };
 
 export function implementerSessionSize(
@@ -68,13 +68,7 @@ export function implementerSessionSize(
   ticketId: number,
 ): ImplementerSessionSize | null {
   const sessionId = implementerSession(db, ticketId);
-  if (sessionId === null) {
-    return null;
-  }
-  const last = latestSessionCompaction(db, ticketId);
-  const since =
-    last?.status === 'succeeded' && last.sessionId === sessionId ? (last.finishedAt ?? 0) : 0;
-  return { sessionId, context: sessionContext(db, sessionId, since) };
+  return sessionId === null ? null : { sessionId, context: sessionContext(db, sessionId) };
 }
 
 /** Why the session cannot be compacted now; null when it can. */

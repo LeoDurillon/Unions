@@ -1,5 +1,5 @@
 // A ticket card for the board: its issue and pull request, title, the ticket it builds on, state
-// and way through the flow. It also shows its CI checks, stack and a branch moved on GitHub, what
+// and way through the flow. It also shows its CI checks, stack, session size and a branch moved on GitHub, what
 // its agent is doing while it runs, and Start while it waits in the backlog.
 
 import type { ReactElement } from 'react';

@@ -61,7 +61,10 @@ When the line is a call's `result`, it also records what the call consumed in `a
 (`agent-usage-record.ts`). The result's `modelUsage` and cost add up over a resumed session, so a call's share is
 its result minus the session's previous one of the same owner, a ticket, an investigation or an agent review
 (`agent-usage.ts`, pure); its peak context comes from
-its own `assistant` lines since then. Its tool uses since then go to `agent_tool_usage` (`agent-tool-record.ts`),
+its own `assistant` lines since then, and its `end_context` (`session-end.ts`) from its last `assistant` line or a
+later `compact_boundary` (`post_tokens`): the size the session's next resume starts from, after a manual or an
+automatic compaction alike (`sessionContext` in `implementer-session.ts` falls back to the peak on rows recorded
+before it was kept). Its tool uses since then go to `agent_tool_usage` (`agent-tool-record.ts`),
 a row per key: `agent-tool-key.ts` names the Bash command's family (`git diff`, `git diff --stat`, `jest`…) and its
 form (family and flags), the file a `Read` read, the skill, the subagent type; `agent-tool-calls.ts` adds up the
 calls, errors, refusals (`permission_denied` lines) and result sizes, a subagent's apart. `backfillUsage` and

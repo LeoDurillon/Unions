@@ -103,3 +103,22 @@ test('the backfill records the calls not recorded yet, once', () => {
       .toSorted((a, b) => a - b),
   ).toEqual([30, 50]);
 });
+
+test('a call ends with its last turn’s context, or with the summary of a compaction after it', () => {
+  appendAgentLine(db, { ticketId: 1, runId: 7, payload: turn('m1', 900) });
+  appendAgentLine(db, { ticketId: 1, runId: 7, payload: result(10, 1) });
+  appendAgentLine(db, {
+    ticketId: 1,
+    payload: {
+      type: 'system',
+      subtype: 'compact_boundary',
+      session_id: 's1',
+      compact_metadata: { trigger: 'manual', pre_tokens: 900, post_tokens: 40 },
+    },
+  });
+  appendAgentLine(db, { ticketId: 1, payload: result(20, 2) });
+  expect(rows().map((row) => [row.peakContext, row.endContext])).toEqual([
+    [900, 900],
+    [null, 40],
+  ]);
+});

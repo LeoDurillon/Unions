@@ -1,8 +1,9 @@
-// A board card's bottom line: its pull request's CI checks, a branch moved on GitHub, a split ticket's stack.
+// A board card's bottom line: its PR's CI checks, a branch moved on GitHub, a split ticket's stack, its session's size.
 
 import type { ReactElement, ReactNode } from 'react';
 
 import type { TicketSummary } from '../../../src/api-types';
+import { sessionContextLabel } from '../../lib/ticket/session-context';
 
 const SHORT_SHA = 7;
 
@@ -64,12 +65,28 @@ function Stack({ stack }: { stack: NonNullable<TicketSummary['stack']> }): React
   );
 }
 
+/** The implementer session's size, amber when large; its meaning on hover. */
+function Context({ ticket }: { ticket: TicketSummary }): ReactElement | null {
+  const label = sessionContextLabel(ticket);
+  if (!label) {
+    return null;
+  }
+  const color = label.large
+    ? 'text-amber-700 dark:text-amber-300'
+    : 'text-zinc-500 dark:text-zinc-400';
+  return (
+    <Signal icon="◔" color={color} title={label.title}>
+      {label.text} context
+    </Signal>
+  );
+}
+
 /** Nothing when the ticket has none of them. */
 export function CardSignals({ ticket }: { ticket: TicketSummary }): ReactElement | null {
   // The branch moved on GitHub since Union pushed it: the Pull request tab offers a resync.
   const moved = ticket.prState === 'open' && ticket.remoteMoved !== null;
   const checks = ticket.prState === 'open' && ticket.prChecksState !== null;
-  if (!moved && !checks && !ticket.stack) {
+  if (!moved && !checks && !ticket.stack && !sessionContextLabel(ticket)) {
     return null;
   }
   return (
@@ -85,6 +102,7 @@ export function CardSignals({ ticket }: { ticket: TicketSummary }): ReactElement
         </Signal>
       ) : null}
       {ticket.stack ? <Stack stack={ticket.stack} /> : null}
+      <Context ticket={ticket} />
     </div>
   );
 }

@@ -13,7 +13,9 @@ moving a card to In Progress on GitHub starts the ticket. Without one, Union's b
 | **Merged / Closed** | Tickets whose pull request was merged or closed in the last three weeks.         |
 
 Each card shows its issue and pull request numbers on top (and the flow's name when it is not Full), then its title
-and the ticket it depends on. Below them come:
+and the ticket it depends on. Once the implementation ran and until the ticket is done, its bottom line also shows the
+size of the agent's session, such as **◔ 341k context** (thousands of tokens): its next step reads all of it again on
+every turn, so it turns amber above 150k. The same size sits beside the branch at the top of the ticket's panel. Below them come:
 
 - its state ("Waiting for you · Technical", "Running · Implementation"), except in Backlog and Done, where the
   column already says it;
@@ -207,8 +209,9 @@ Then come the tabs:
   step resumes (a revision, a rebase, a simplified history). Every turn of that step reads all of it, so a large
   session uses your Claude plan quickly. **Compact** asks Claude Code to summarize the conversation, and the next step
   starts from the summary: it is smaller, and may have dropped details the agent had seen. Compacting is itself a
-  short agent run, so it waits for a free run slot, and it is not offered while a step runs on the ticket. Until the
-  next step, the row says what size the session was compacted from; **Cancel** stops a compaction that has not
+  short agent run, so it waits for a free run slot, and it is not offered while a step runs on the ticket. The row then
+  says the size after it and what it was compacted from (such as **12k tokens of context · compacted from 896k**),
+  and the size also follows the compactions Claude Code makes on its own; **Cancel** stops a compaction that has not
   ended. To have every session compacted once it reaches a size, see **Compact agent sessions at** in
   [Union settings → System](settings.md#system).
 

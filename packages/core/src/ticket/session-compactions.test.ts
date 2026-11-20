@@ -1,4 +1,4 @@
-// Tests of compacting a ticket's implementer session: when it is refused, the queue, the size shown after.
+// Tests of compacting a ticket's implementer session: when it is refused, the queue, the size it shows.
 
 import { beforeEach, expect, test } from 'bun:test';
 
@@ -11,7 +11,6 @@ import {
   cancelQueuedSessionCompaction,
   claimSessionCompaction,
   compactionRefusal,
-  finishSessionCompaction,
   implementerSessionSize,
   latestSessionCompaction,
   queueSessionCompaction,
@@ -23,7 +22,6 @@ let db: Db;
 let ticketId: number;
 
 const SESSION = 'session-a';
-const DAY_MS = 86_400_000;
 
 beforeEach(() => {
   db = createDb(':memory:');
@@ -42,10 +40,14 @@ function implemented(sessionId = SESSION): void {
     .run();
 }
 
-function call(peakContext: number, at = Date.now()): void {
+let line = 0;
+
+/** A recorded call of the session: its peak, and where it ended (null: before that was kept). */
+function call(peakContext: number, ended?: { peak: number | null; end: number | null }): void {
+  line += 1;
   db.insert(schema.agentUsage)
     .values({
-      resultLineId: peakContext,
+      resultLineId: line,
       ticketId,
       sessionId: SESSION,
       model: 'opus',
@@ -56,8 +58,8 @@ function call(peakContext: number, at = Date.now()): void {
       output: 0,
       thinking: 0,
       webSearches: 0,
-      peakContext,
-      at,
+      peakContext: ended ? ended.peak : peakContext,
+      endContext: ended?.end ?? null,
     })
     .run();
 }
@@ -86,15 +88,12 @@ test('one at a time; it records the session and its size, and is claimed once', 
   expect(claimSessionCompaction(db)).toBeNull();
 });
 
-test('after a compaction the size is unknown until the next call, then that call says it', () => {
+test('the size is where the last call ended: a compaction’s summary, else the peak', () => {
   implemented();
-  call(400_000, Date.now() - DAY_MS);
-  const row = queueSessionCompaction(db, ticketId);
-  claimSessionCompaction(db);
-  finishSessionCompaction(db, row.id, { status: 'succeeded' });
-  expect(implementerSessionSize(db, ticketId)).toEqual({ sessionId: SESSION, context: null });
-  call(60_000, Date.now() + DAY_MS);
-  expect(implementerSessionSize(db, ticketId)?.context).toBe(60_000);
+  call(400_000);
+  expect(implementerSessionSize(db, ticketId)?.context).toBe(400_000);
+  call(0, { peak: null, end: 12_000 });
+  expect(implementerSessionSize(db, ticketId)).toEqual({ sessionId: SESSION, context: 12_000 });
 });
 
 test('waits while the description is rewritten in the same session', () => {
