@@ -11,6 +11,7 @@ import {
   type Db,
   type Ticket,
   agentContainerLimits,
+  autoCompactWindow,
   claudeToken,
   imageSetting,
 } from '@union/core';
@@ -49,6 +50,7 @@ export function defaultProvisionConfig(
     credentialsPath:
       process.env.UNION_CLAUDE_CREDENTIALS ?? path.join(homedir(), '.claude', '.credentials.json'),
     claudeToken: () => claudeToken(db),
+    autoCompactWindow: () => autoCompactWindow(db),
   };
 }
 

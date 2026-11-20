@@ -1,6 +1,10 @@
-// Union settings → System: how often GitHub is read, the largest project file, and the images Union runs.
+// Union settings → System: how often GitHub is read, the largest project file, auto-compaction, and the images.
 
-import { COUNT_BOUNDS, DEFAULT_IMAGES } from '@union/core/union-settings-fields';
+import {
+  AUTO_COMPACT_K_BOUNDS,
+  COUNT_BOUNDS,
+  DEFAULT_IMAGES,
+} from '@union/core/union-settings-fields';
 import type { ReactElement } from 'react';
 
 import type { UnionSettingsView } from '../../../src/routes/union-settings';
@@ -8,11 +12,11 @@ import type { SettingsForm } from '../../lib/settings/use-settings-form';
 import { firstNumberProblem } from '../../lib/union-settings/number-problem';
 import { useUnionSettingsForm } from '../../lib/union-settings/use-union-settings-form';
 import { SaveBar } from '../settings/save-bar';
-import { ImageField, NumberField } from './union-settings-fields';
+import { ImageField, NumberField, OptionalNumberField } from './union-settings-fields';
 import { UnionSettingsLoader } from './union-settings-loader';
 
 /** The fields the form shows, for its shape while it is read. */
-const FIELDS = 5;
+const FIELDS = 6;
 
 type FormProps = { form: SettingsForm<UnionSettingsView> };
 
@@ -37,6 +41,17 @@ function LimitFields({ form }: FormProps): ReactElement {
         value={form.value.maxProjectFileMb}
         onChange={(maxProjectFileMb) => {
           form.set({ ...form.value, maxProjectFileMb });
+        }}
+      />
+      <OptionalNumberField
+        unit="thousand tokens"
+        bounds={AUTO_COMPACT_K_BOUNDS}
+        label="Compact agent sessions at"
+        placeholder="Off"
+        hint="When an agent's conversation reaches this size, Claude Code summarizes it and carries on from the summary. Smaller sessions use less of your Claude plan's limit on every turn, at the cost of details the summary drops. Empty: Claude Code's own limit, close to the model's full window."
+        value={form.value.autoCompactK}
+        onChange={(autoCompactK) => {
+          form.set({ ...form.value, autoCompactK });
         }}
       />
     </>
@@ -90,6 +105,15 @@ function SystemForm({ saved }: { saved: UnionSettingsView }): ReactElement {
       value: form.value.maxProjectFileMb,
       bounds: COUNT_BOUNDS.maxProjectFileMb,
     },
+    ...(form.value.autoCompactK === null
+      ? []
+      : [
+          {
+            label: 'Compact agent sessions at',
+            value: form.value.autoCompactK,
+            bounds: AUTO_COMPACT_K_BOUNDS,
+          },
+        ]),
   ]);
   return (
     <section className="space-y-4">
@@ -104,7 +128,7 @@ function SystemForm({ saved }: { saved: UnionSettingsView }): ReactElement {
 export function SystemPage(): ReactElement {
   return (
     <UnionSettingsLoader
-      intro="How often Union reads GitHub, the largest file a project can hold, and the images its containers start from. A change applies to the next pull, upload or container; a project's own agent image is built again on a changed base."
+      intro="How often Union reads GitHub, the largest file a project can hold, when agents compact their sessions, and the images its containers start from. A change applies to the next pull, upload, agent run or container; a project's own agent image is built again on a changed base."
       label="Reading the system settings"
       fields={FIELDS}
       form={SystemForm}

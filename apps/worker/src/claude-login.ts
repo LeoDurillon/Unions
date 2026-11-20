@@ -1,5 +1,6 @@
 // How agents log in to Claude: the long-lived token from Union settings, else a copy of the host's login.
-// Seeds the container with one of them, and wraps each `claude` call so the token never reaches a command line.
+// Seeds the container with one of them and Union's CLI settings, and wraps each `claude` call so the token never
+// reaches a command line.
 import { readFile } from 'node:fs/promises';
 
 import { AGENT_HOME, type ContainerRuntime } from '@union/core';
@@ -7,6 +8,8 @@ import { AGENT_HOME, type ContainerRuntime } from '@union/core';
 const CREDENTIALS_FILE = `${AGENT_HOME}/.claude/.credentials.json`;
 /** Where the token is written; the `claude` wrapper reads it into `CLAUDE_CODE_OAUTH_TOKEN`. */
 const TOKEN_FILE = `${AGENT_HOME}/.claude/oauth-token`;
+/** The CLI's user settings: Union writes the whole file; a repository's own settings still load. */
+const SETTINGS_FILE = `${AGENT_HOME}/.claude/settings.json`;
 
 /** Where the login comes from: the token, when one is set, else the host's credentials file. */
 export type ClaudeLoginSource = {
@@ -14,7 +17,14 @@ export type ClaudeLoginSource = {
   credentialsPath: string;
   /** The long-lived token from Union settings; absent or null: the login is copied. */
   claudeToken?: () => string | null;
+  /** The context, in tokens, at which the CLI compacts a session; absent or null: the CLI's own. */
+  autoCompactWindow?: () => number | null;
 };
+
+/** The CLI's user settings Union gives agents: only the auto-compact window, when one is set. */
+export function claudeSettings(autoCompactWindow: number | null): string {
+  return JSON.stringify(autoCompactWindow === null ? {} : { autoCompactWindow });
+}
 
 /** What a run without a Claude login fails with: what to do, never the file's contents. */
 function notLoggedIn(credentialsPath: string): string {
@@ -39,7 +49,8 @@ async function readOauth(credentialsPath: string): Promise<unknown> {
 
 /**
  * Seeds one login and empties the other's file, which a HOME volume may still hold: the token (it
- * cannot renew itself), else only the `claudeAiOauth` credential. No MCP tokens, no history.
+ * cannot renew itself), else only the `claudeAiOauth` credential. No MCP tokens, no history. Then the
+ * CLI settings, every run, so a changed auto-compact window applies to the next run.
  */
 export async function seedCredentials(
   runtime: ContainerRuntime,
@@ -59,6 +70,12 @@ export async function seedCredentials(
     container,
     `${AGENT_HOME}/.claude.json`,
     JSON.stringify({ hasCompletedOnboarding: true }),
+    '644',
+  );
+  await runtime.writeFile(
+    container,
+    SETTINGS_FILE,
+    claudeSettings(source.autoCompactWindow?.() ?? null),
     '644',
   );
 }

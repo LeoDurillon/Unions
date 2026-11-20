@@ -8,6 +8,8 @@ export type UnionSettings = {
   maxPreviews: number;
   githubPullSeconds: number;
   maxProjectFileMb: number;
+  /** The context, in thousands of tokens, at which agents compact their session; null: the CLI's own. */
+  autoCompactK: number | null;
   /** null: Union's default (`DEFAULT_IMAGES`). */
   agentImage: string | null;
   agentBaseImage: string | null;
@@ -32,6 +34,16 @@ export type ImageSetting = keyof typeof DEFAULT_IMAGES;
 const IMAGE_SETTINGS: readonly ImageSetting[] = ['agentImage', 'agentBaseImage', 'composeImage'];
 
 type Bounds = { min: number; max: number };
+
+/** The window the CLI accepts for `autoCompactWindow`: 100k to 1M tokens. */
+export const AUTO_COMPACT_K_BOUNDS: Bounds = { min: 100, max: 1000 };
+
+const TOKENS_PER_K = 1000;
+
+/** The `autoCompactWindow` the settings give agents, in tokens; null: the CLI decides. */
+export function autoCompactTokens(settings: UnionSettings): number | null {
+  return settings.autoCompactK === null ? null : settings.autoCompactK * TOKENS_PER_K;
+}
 
 /** The whole numbers a change gives as they are stored, with their bounds. */
 export const COUNT_BOUNDS = {
@@ -91,6 +103,7 @@ export const DEFAULT_UNION_SETTINGS: UnionSettings = {
   previewServiceMemoryMb: DEFAULT_PREVIEW_SERVICE_GB * MB_PER_GB,
   cpus: DEFAULT_CPUS,
   ...DEFAULT_COUNTS,
+  autoCompactK: null,
   agentImage: null,
   agentBaseImage: null,
   composeImage: null,
@@ -113,6 +126,15 @@ function wholeNumber(value: unknown, bounds: Bounds, name: string): number {
     throw new UnionSettingsError(`${name} is a whole number from ${bounds.min} to ${bounds.max}`);
   }
   return value;
+}
+
+const AUTO_COMPACT_NAME = 'The auto-compact window (in thousands of tokens)';
+
+/** A whole number within bounds, or null when none is given (null, missing or empty). */
+function optionalNumber(value: unknown, bounds: Bounds, name: string): number | null {
+  return value === null || value === undefined || value === ''
+    ? null
+    : wholeNumber(value, bounds, name);
 }
 
 /** An image name, or null for the default (an empty or missing name). */
@@ -150,6 +172,13 @@ export function changedSettings(
     if (key in change) {
       next[key] = wholeNumber(change[key], COUNT_BOUNDS[key], COUNT_NAMES[key]);
     }
+  }
+  if ('autoCompactK' in change) {
+    next.autoCompactK = optionalNumber(
+      change.autoCompactK,
+      AUTO_COMPACT_K_BOUNDS,
+      AUTO_COMPACT_NAME,
+    );
   }
   for (const key of IMAGE_SETTINGS) {
     if (key in change) {

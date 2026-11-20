@@ -3,7 +3,12 @@
 import { beforeEach, expect, test } from 'bun:test';
 
 import { createDb, migrateDb, type Db } from '../db';
-import { imageSetting, saveUnionSettings, unionSettings } from './union-settings';
+import {
+  autoCompactWindow,
+  imageSetting,
+  saveUnionSettings,
+  unionSettings,
+} from './union-settings';
 import {
   DEFAULT_IMAGES,
   DEFAULT_UNION_SETTINGS,
@@ -92,4 +97,13 @@ test('a value that is not an image name is refused', () => {
   const bad = ['-v /:/host', 'a b', 'img;rm -rf', 'Upper/Case', 4, 'x'.repeat(256)];
   expect(refused('composeImage', bad)).toHaveLength(bad.length);
   expect(refused('composeImage', [DEFAULT_IMAGES.composeImage])).toHaveLength(0);
+});
+
+test('the auto-compact window is off by default, in thousands of tokens from 100 to 1000', () => {
+  expect(autoCompactWindow(db)).toBeNull();
+  expect(refused('autoCompactK', [99, 1001, 150.5, '200'])).toHaveLength(4);
+  saveUnionSettings(db, { autoCompactK: 200 });
+  expect(autoCompactWindow(db)).toBe(200_000);
+  saveUnionSettings(db, { autoCompactK: '' });
+  expect(unionSettings(db).autoCompactK).toBeNull();
 });

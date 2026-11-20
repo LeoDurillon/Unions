@@ -8,6 +8,7 @@ import type { Db } from '../db';
 import { cpusetFor, type ContainerLimits } from '../docker/container-limits';
 import * as schema from '../tables';
 import {
+  autoCompactTokens,
   changedSettings,
   DEFAULT_IMAGES,
   DEFAULT_UNION_SETTINGS,
@@ -41,6 +42,11 @@ export function saveUnionSettings(db: Db, change: Record<string, unknown>): Unio
 /** The image the settings name, or Union's default. */
 export function imageSetting(db: Db, key: ImageSetting): string {
   return unionSettings(db)[key] ?? DEFAULT_IMAGES[key];
+}
+
+/** The `autoCompactWindow` agents get, in tokens (read each run); null: the CLI's own. */
+export function autoCompactWindow(db: Db): number | null {
+  return autoCompactTokens(unionSettings(db));
 }
 
 /** An agent container's limits from the settings: its memory, and its cores (named by the container). */

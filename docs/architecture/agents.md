@@ -93,6 +93,11 @@ token is set. Every `claude` call goes through `withClaudeLogin`, a `sh -c` wrap
 `refusedLoginNote` to the run's error; there is no fallback from the token to the copied login. The web route
 (`claude-token.ts`) only says whether a token is set, and queues a connector check when it changes.
 
+With the login, `seedCredentials` writes the CLI's user settings (`~/.claude/settings.json`, the whole file): `{}`,
+or `{ "autoCompactWindow": <tokens> }` from Union settings → System (`autoCompactK`, in thousands; null by default,
+where the CLI compacts near the model's full window). The CLI takes the lowest window across its settings files, so a
+repository's own `.claude/settings.json` can only lower it.
+
 ## The image
 
 Every container starts from the default agent image (`union-agent:local`, or Union settings → System's `agentImage`, the last stage of

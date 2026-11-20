@@ -5,7 +5,7 @@ import path from 'node:path';
 
 import { AGENT_HOME, type ContainerRuntime } from '@union/core';
 
-import { refusedLoginNote, seedCredentials, withClaudeLogin } from './claude-login';
+import { claudeSettings, refusedLoginNote, seedCredentials, withClaudeLogin } from './claude-login';
 
 const TOKEN = `sk-ant-oat01-${'t'.repeat(40)}`;
 
@@ -79,6 +79,17 @@ test('without a Claude login, seeding says to log in and writes nothing', async 
     'Claude is not logged in',
   );
   expect(seen.written.size).toBe(0);
+});
+
+test('the CLI settings carry the auto-compact window when one is set, and are emptied when not', async () => {
+  const seen: Seen = { written: new Map() };
+  const settingsFile = `${AGENT_HOME}/.claude/settings.json`;
+  const source = { credentialsPath: '/nowhere', claudeToken: () => TOKEN };
+  await seedCredentials(fakeRuntime(seen), 'c', { ...source, autoCompactWindow: () => 200_000 });
+  expect(JSON.parse(seen.written.get(settingsFile) ?? '')).toEqual({ autoCompactWindow: 200_000 });
+  await seedCredentials(fakeRuntime(seen), 'c', { ...source, autoCompactWindow: () => null });
+  expect(seen.written.get(settingsFile)).toBe('{}');
+  expect(claudeSettings(null)).toBe('{}');
 });
 
 test('the wrapped command reads the token inside the container, never from its arguments', () => {

@@ -30,6 +30,8 @@ export const unionSettings = sqliteTable('union_settings', {
   maxProjectFileMb: integer('max_project_file_mb')
     .notNull()
     .default(DEFAULT_COUNTS.maxProjectFileMb),
+  /** The context, in thousands of tokens, at which agents compact their session; null: the CLI's own. */
+  autoCompactK: integer('auto_compact_k'),
   /** The image agents run in (`FROM union-agent`); null: `union-agent:local`. */
   agentImage: text('agent_image'),
   /** The minimal image (`FROM union-agent-base`); null: `union-agent-base:local`. */

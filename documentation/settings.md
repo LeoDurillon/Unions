@@ -124,6 +124,11 @@ that leaves room for Windows (`memory=` in `C:\Users\<you>\.wslconfig`).
   GitHub's rate limit.
 - **Largest project file** (2048 MB to start with): the biggest file you can give a project in its
   [Files](previews.md#project-files) settings.
+- **Compact agent sessions at** (empty to start with): the size, in thousands of tokens (100 to 1000), at which an
+  agent's conversation is summarized and continued from the summary. An agent re-reads its whole conversation on
+  every turn, so a smaller one uses less of your Claude plan's limit, but the summary can drop details the agent
+  had seen. Left empty, Claude Code compacts only near the model's full window (1 million tokens for Opus). 200 is
+  a good place to start.
 - **Agent image**, **Minimal agent image**: the images agents run in, and what `FROM union-agent` and
   `FROM union-agent-base` mean in [a project's Dockerfile](agents.md#the-agent-image). Leave them empty to use the
   images Union builds (`union-agent:local`, `union-agent-base:local`). A project that builds its own image builds
@@ -131,7 +136,7 @@ that leaves room for Windows (`memory=` in `C:\Users\<you>\.wslconfig`).
 - **Preview helper image**: the Docker CLI image that runs `docker compose` for previews. Leave it empty to use the
   one Union pins. It holds the Docker socket, so name only an image you trust, pinned by its digest.
 
-A change applies to the next pull, upload or container.
+A change applies to the next pull, upload, agent run or container.
 
 ### Claude login
 

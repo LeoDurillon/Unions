@@ -1,0 +1,1 @@
+ALTER TABLE `union_settings` ADD `auto_compact_k` integer;
