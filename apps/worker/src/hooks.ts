@@ -22,6 +22,7 @@ type HookDeps = Pick<
   | 'reviewReports'
   | 'reviewAgentRuns'
   | 'prDescriptions'
+  | 'compactions'
   | 'containerRuns'
   | 'previews'
   | 'updater'
@@ -64,6 +65,9 @@ export function workerHooks(deps: HookDeps): CommandHooks {
     },
     cancelPrDescription: (id) => {
       prDescriptions.cancel(id);
+    },
+    cancelSessionCompaction: (id) => {
+      deps.compactions.cancel(id);
     },
     cancelContainerRun: (id) => {
       containerRuns.cancel(id);

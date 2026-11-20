@@ -42,6 +42,12 @@ export const ACTIVE_WORK: ActiveWorkKind[] = [
     onRestart: 'fails',
   },
   {
+    table: 'session_compactions',
+    where: "status in ('queued','running')",
+    label: 'session compaction',
+    onRestart: 'fails',
+  },
+  {
     table: 'previews',
     where: "status in ('starting','stopping') or e2e_status = 'running'",
     label: 'preview starting, stopping or testing',

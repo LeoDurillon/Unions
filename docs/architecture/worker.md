@@ -284,6 +284,14 @@
   its prompt, the specs (`specSections`), `checkedOutChange` with the hunk index (`withHunkIndex`), the commits,
   how the checkout was prepared, and the citing rules, always appended. The answer is kept as is; `recover` fails
   interrupted runs and removes their containers; cancel: the `cancel_review_agent_run` command (`runId`).
+- `compaction/compaction-run.ts` (the runner: `compaction-runner.ts`; with `PrDescriptionRunner` in
+  `session-runs.ts`): `CompactionRunner` (same slots) runs a queued `session_compactions` row: it resumes the
+  implementer's session (`implementerSession` in core) in the ticket's container with the prompt `/compact`, on
+  the implementer's model, so the CLI summarizes the conversation and keeps the session's id; the next step resumes
+  the summary. It fails without an agent when a step started since it was queued or the implementer moved to
+  another session, and it never falls back to a fresh session. `claimSessionCompaction` skips a ticket whose PR
+  description is being rewritten (the same session); cancel: the `cancel_session_compaction` command
+  (`compactionId`).
 - `pr-description-run.ts` (the runner: `pr-description-runner.ts`): `PrDescriptionRunner` (same slots) rewrites a PR's description in the ticket's
   container, resuming the implementer's session (`runResumable`), from GitHub's current description, the PR template
   and the branch; a ticket's rewrites run one at a time (`claimPrDescription`). On a split ticket each open slice's

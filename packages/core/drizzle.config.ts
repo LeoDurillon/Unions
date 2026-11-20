@@ -23,6 +23,7 @@ export default defineConfig({
     './src/schema/schema-previews.ts',
     './src/schema/schema-project-files.ts',
     './src/schema/schema-refused-commits.ts',
+    './src/schema/schema-session-compactions.ts',
     './src/schema/schema-shared-stacks.ts',
     './src/schema/schema-review-agent-runs.ts',
     './src/schema/schema-review-explanations.ts',

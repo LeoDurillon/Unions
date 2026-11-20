@@ -165,6 +165,8 @@ export const FOLDER_SUMMARIES: Record<string, string> = {
     'Review side runs: agent reviews, explanations, groupings by spec, review reports.',
   'worker/setup':
     "Checking a setup agent's proposal without Claude: its install and check commands run, its preview resolved.",
+  'worker/compaction':
+    "Compacting a ticket's implementer session on demand: `/compact` resumed in it, queued in the run slots.",
   'worker/simplify': "Simplifying a branch's history, alone or across its stack.",
   'worker/stack':
     'Stacks: splitting a branch into slices, publishing, pushing, following and revising them.',

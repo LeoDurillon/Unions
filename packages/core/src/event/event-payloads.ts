@@ -194,6 +194,11 @@ type GitHubPayloads = {
     error: string | null;
   };
   pr_description_sent: { prNumber: number };
+  session_compaction_changed: {
+    compactionId: number;
+    status: Column<typeof tables.sessionCompactions, 'status'>;
+    error: string | null;
+  };
 };
 
 type PreviewPayloads = {

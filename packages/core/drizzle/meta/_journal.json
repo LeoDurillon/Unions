@@ -687,6 +687,13 @@
       "when": 1795194765963,
       "tag": "0097_union_auto_compact",
       "breakpoints": true
+    },
+    {
+      "idx": 98,
+      "version": "6",
+      "when": 1795195242653,
+      "tag": "0098_session_compactions",
+      "breakpoints": true
     }
   ]
 }

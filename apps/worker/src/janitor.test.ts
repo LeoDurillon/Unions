@@ -42,6 +42,9 @@ test('remove_containers hands every container to the hook', () => {
     cancelPrDescription: () => {
       // Not under test.
     },
+    cancelSessionCompaction: () => {
+      // Not under test.
+    },
     cancelContainerRun: () => {
       // Not under test.
     },

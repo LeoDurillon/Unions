@@ -1,10 +1,11 @@
-// The ticket panel's overview tab: the description beside the details the ticket is attached to, then its runs.
+// The ticket panel's overview tab: the description beside the details, then its implementer session and its runs.
 
 import type { IntegrationKindName } from '@union/core/integration-kinds';
 import type { ReactElement } from 'react';
 
 import type { TicketDetail } from '../../../src/api-types';
 import { RunTable } from './run-table';
+import { SessionCompaction } from './session-compaction';
 import { TicketDescription } from './ticket-description';
 import { TicketDetails } from './ticket-details';
 
@@ -27,6 +28,7 @@ export function OverviewTab({
         <TicketDescription ticket={ticket} />
         <TicketDetails detail={detail} onOpenTicket={onOpenTicket} onOpenTab={onOpenTab} />
       </div>
+      <SessionCompaction ticketId={ticket.id} />
       <RunTable ticketId={ticket.id} runs={runs} />
     </div>
   );

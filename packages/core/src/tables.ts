@@ -18,6 +18,7 @@ export * from './schema/schema-lesson-suggestions';
 export * from './schema/schema-mcp';
 export * from './schema/schema-notifications';
 export * from './schema/schema-pr-descriptions';
+export * from './schema/schema-session-compactions';
 export * from './schema/schema-previews';
 export * from './schema/schema-project-files';
 export * from './schema/schema-refused-commits';

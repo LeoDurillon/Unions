@@ -1,23 +1,23 @@
 // The routes about a ticket's workspace: its base branch, the steps it runs, its title and
 // description, its commands. In full: the branch it starts from (a change of target, a resync
-// later), the steps it runs, its title and description, the commands run in it, and what its agents
-// used.
+// later), the steps it runs, its title and description, the commands run in it, what its agents
+// used, and compacting its implementer session.
 
 import type { Db } from '@union/core';
 import { Hono } from 'hono';
 
 import type { OnboardingGitHub } from '../../github-onboarding';
 import { containerRunRoutes } from '../container-runs';
-import { ticketUsage } from '../usage';
 import { ticketBaseRoutes } from './ticket-base';
 import { ticketEditRoutes } from './ticket-edit';
 import { ticketFlowRoutes } from './ticket-flow';
 import { ticketResyncRoutes } from './ticket-resync';
 import { ticketRetargetRoutes } from './ticket-retarget';
+import { ticketSessionRoutes } from './ticket-session';
 
 /**
  * The routes about a ticket's workspace: the branch it starts from (a change of target, a resync from GitHub later), the steps it runs, its title and
- * description, the commands run in it, and what its agents used.
+ * description, the commands run in it, what its agents used, and compacting its implementer session.
  */
 export function ticketWorkspaceRoutes(db: Db, github: OnboardingGitHub): Hono {
   const routes = new Hono();
@@ -27,6 +27,6 @@ export function ticketWorkspaceRoutes(db: Db, github: OnboardingGitHub): Hono {
   routes.route('/', ticketFlowRoutes(db));
   routes.route('/', ticketEditRoutes(db));
   routes.route('/:id/container-runs', containerRunRoutes(db));
-  routes.get('/:id/usage', (c) => ticketUsage(db, c));
+  routes.route('/', ticketSessionRoutes(db));
   return routes;
 }

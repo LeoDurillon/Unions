@@ -362,6 +362,11 @@
   previews that hold containers (starting, running, stopping), tickets' and pull requests' alike, from
   `GET /api/previews` (`routes/running-previews.ts`, polled every 5 s); the sidebar entry shows their count. Stop
   queues `preview_stop` for the preview's owner (`POST /api/previews/:id/stop`); a ticket's row opens the ticket.
+- Session compaction: the Overview's Implementer session row (`ticket/session-compaction.tsx`,
+  `routes/tickets/ticket-session.ts`, `@union/core` `session-compactions.ts`) shows the context of the implementer
+  session's last call (`agent_usage.peak_context`, unknown right after a compaction until the next call) and queues
+  a `session_compactions` row; refused while a step runs, before the implementation has a session, or while the PR
+  description is rewritten (`compactionRefusal`). Cancel is the `cancel_session_compaction` command.
 - PR description rewrite: the PR tab's Description section (`pull-request/pr-description.tsx`,
   `routes/pull-requests/pr-description.ts`, `@union/core` `pr-descriptions.ts`) queues a `pr_descriptions` row, one per open
   slice's pull request on a split ticket (one button rewrites them all; `?pr=` picks the draft shown, the same

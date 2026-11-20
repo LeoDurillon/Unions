@@ -1,14 +1,14 @@
-// Starts the work outside the ticket pipeline: investigations, review agents, PR descriptions. It
+// Starts the work outside the ticket pipeline: investigations, review agents, PR descriptions, compactions. It
 // first fails what a stopped worker left running.
 
 import { backfillNotionPages, FetchNotionApi, type Project } from '@union/core';
 
+import { startSessionRuns, type SessionRuns } from './compaction/session-runs';
 import { ContainerRunner } from './container-run';
 import { EventDispatcher } from './event-dispatcher';
 import type { GitHubApi } from './github/api';
 import { InvestigationRunner, type InvestigationDeps } from './investigation/investigate';
 import { startPreviewRuns, type PreviewRuns } from './preview/preview-runs';
-import { PrDescriptionRunner } from './pull-request/pr-description-runner';
 import { reviewRunners, startReviewRuns, type ReviewRuns } from './review/review-runs';
 import { ThrowawayRuns } from './throwaway-runs';
 import { UnionUpdater } from './union-update/union-update';
@@ -20,24 +20,24 @@ import { UnionUpdater } from './union-update/union-update';
  * removing finished tickets'), reading the account's claude.ai connectors, and the commands users
  * run in workspaces.
  */
-export type SideRuns = ReviewRuns & {
-  investigations: InvestigationRunner;
-  prDescriptions: PrDescriptionRunner;
-  containerRuns: ContainerRunner;
-  previews: PreviewRuns['previews'];
-  /** Union's own update; while it runs, the worker starts nothing new. */
-  updater: UnionUpdater;
-  tick: () => void;
-  stop: () => void;
-  idle: () => Promise<void>;
-};
+export type SideRuns = ReviewRuns &
+  SessionRuns & {
+    investigations: InvestigationRunner;
+    containerRuns: ContainerRunner;
+    previews: PreviewRuns['previews'];
+    /** Union's own update; while it runs, the worker starts nothing new. */
+    updater: UnionUpdater;
+    tick: () => void;
+    stop: () => void;
+    idle: () => Promise<void>;
+  };
 
 /** Fails what a stopped worker left running, then returns the runners. */
 export async function startSideRuns(
   deps: InvestigationDeps & { apiFor: (project: Project) => GitHubApi | null },
 ): Promise<SideRuns> {
   const investigations = new InvestigationRunner(deps);
-  const prDescriptions = new PrDescriptionRunner(deps);
+  const { all: sessionRunners, ...sessions } = startSessionRuns(deps);
   const previewRuns = startPreviewRuns(deps);
   const { previews } = previewRuns;
   const events = new EventDispatcher(deps.db, new FetchNotionApi(), deps.apiFor);
@@ -47,23 +47,21 @@ export async function startSideRuns(
   await updater.recover();
   await investigations.recover();
   const reviews = await startReviewRuns(deps);
-  prDescriptions.recover();
   await throwaway.recover();
   containerRuns.recover();
   backfillNotionPages(deps.db);
   return {
     ...reviews,
     investigations,
-    prDescriptions,
+    ...sessions,
     containerRuns,
     previews,
     updater,
     tick: () => {
       investigations.tick();
-      for (const runner of reviewRunners(reviews)) {
+      for (const runner of [...reviewRunners(reviews), ...sessionRunners]) {
         runner.tick();
       }
-      prDescriptions.tick();
       events.tick();
       previewRuns.tick();
       throwaway.tick();
@@ -71,18 +69,16 @@ export async function startSideRuns(
     },
     stop: () => {
       investigations.stop();
-      for (const runner of reviewRunners(reviews)) {
+      for (const runner of [...reviewRunners(reviews), ...sessionRunners]) {
         runner.stop();
       }
-      prDescriptions.stop();
       throwaway.stop();
       containerRuns.stop();
     },
     idle: async () => {
       await Promise.all([
         investigations.idle(),
-        ...reviewRunners(reviews).map((runner) => runner.idle()),
-        prDescriptions.idle(),
+        ...[...reviewRunners(reviews), ...sessionRunners].map((runner) => runner.idle()),
         previewRuns.idle(),
         events.idle(),
         throwaway.idle(),

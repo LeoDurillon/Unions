@@ -12,6 +12,7 @@ const TICKET_WORK: [table: string, column: string][] = [
   ['investigations', 'on_ticket_id'],
   ['agent_reviews', 'ticket_id'],
   ['pr_descriptions', 'ticket_id'],
+  ['session_compactions', 'ticket_id'],
   ['review_groupings', 'ticket_id'],
   ['review_explanations', 'ticket_id'],
   ['review_reports', 'ticket_id'],

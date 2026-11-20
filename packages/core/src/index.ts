@@ -129,6 +129,8 @@ export { fetchNotionFiles } from './integrations/notion-files';
 export type { TrackerAdapter } from './integrations/tracker-adapter';
 export * from './integrations/store';
 export * from './pull-request/pr-descriptions';
+export * from './ticket/implementer-session';
+export * from './ticket/session-compactions';
 export * from './pull-request/pr-description-outdated';
 export * from './preview/preview-compose';
 export * from './preview/preview-config';

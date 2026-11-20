@@ -5,13 +5,12 @@ import {
   deniedFor,
   type Db,
   effortFor,
+  implementerSession,
   modelFor,
   resolveAgent,
-  schema,
   sharedPrompt,
   toolsFor,
 } from '@union/core';
-import { and, desc, eq, inArray, isNotNull } from 'drizzle-orm';
 
 import { runResumable, type AgentOutcome, type AgentRun } from '../agent/agent';
 import { approvedBefore } from '../approved';
@@ -52,34 +51,6 @@ export type SessionTask = {
   instructions: string;
   denied: readonly string[];
 };
-
-/**
- * The implementer's session (or the last run that continued it), resumed for the task. A clean
- * rebase ran no agent and saved no session: it is skipped.
- */
-function implementerSession(db: Db, ticketId: number): string | null {
-  const run = db
-    .select()
-    .from(schema.runs)
-    .where(
-      and(
-        eq(schema.runs.ticketId, ticketId),
-        eq(schema.runs.status, 'succeeded'),
-        isNotNull(schema.runs.sessionId),
-        inArray(schema.runs.step, [
-          'implement',
-          'rebase',
-          'retarget',
-          'simplify',
-          'split',
-          'restack',
-        ]),
-      ),
-    )
-    .orderBy(desc(schema.runs.id))
-    .get();
-  return run?.sessionId ?? null;
-}
 
 /** The rebase prompt; `why` says what the host's own rebase left for the agent. */
 function rebaseTask(db: Db, rebase: Rebase, why = ''): SessionTask {

@@ -8,6 +8,7 @@ import {
   cancelQueuedPrDescription,
   cancelQueuedReport,
   cancelQueuedReviewAgentRun,
+  cancelQueuedSessionCompaction,
   type Db,
 } from '@union/core';
 
@@ -73,6 +74,13 @@ const CANCELS: Record<
     queued: cancelQueuedPrDescription,
     running: (hooks, id) => {
       hooks.cancelPrDescription(id);
+    },
+  },
+  cancel_session_compaction: {
+    key: 'compactionId',
+    queued: cancelQueuedSessionCompaction,
+    running: (hooks, id) => {
+      hooks.cancelSessionCompaction(id);
     },
   },
   cancel_container_run: {

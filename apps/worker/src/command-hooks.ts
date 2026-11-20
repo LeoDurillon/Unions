@@ -33,6 +33,8 @@ export type CommandHooks = {
   ) => void;
   /** Stops a running rewrite of a PR description. */
   cancelPrDescription: (id: number) => void;
+  /** Stops a running compaction of a ticket's implementer session. */
+  cancelSessionCompaction: (id: number) => void;
   /** Stops a command running in a ticket's workspace. */
   cancelContainerRun: (id: number) => void;
   /** Writes a rewritten PR description, as the user left it, to GitHub. */
@@ -87,6 +89,7 @@ export const NO_HOOKS: CommandHooks = {
   cancelReviewAgentRun: ignore,
   submitPullRequestReview: ignore,
   cancelPrDescription: ignore,
+  cancelSessionCompaction: ignore,
   cancelContainerRun: ignore,
   sendPrDescription: ignore,
   editTicket: ignore,

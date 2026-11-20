@@ -200,8 +200,18 @@ GitHub. Under the title:
 Then come the tabs:
 
 - **Overview**: the description, with the details beside it (where the ticket comes from, its parent and the
-  tickets that build on it, the base branch and flow, its size, files and preview), then every run with its
-  model, duration and token usage.
+  tickets that build on it, the base branch and flow, its size, files and preview), then the implementer's session
+  and every run with its model, duration and token usage.
+
+  **Implementer session** says how much context the agent that writes the code will read again when its next
+  step resumes (a revision, a rebase, a simplified history). Every turn of that step reads all of it, so a large
+  session uses your Claude plan quickly. **Compact** asks Claude Code to summarize the conversation, and the next step
+  starts from the summary: it is smaller, and may have dropped details the agent had seen. Compacting is itself a
+  short agent run, so it waits for a free run slot, and it is not offered while a step runs on the ticket. Until the
+  next step, the row says what size the session was compacted from; **Cancel** stops a compaction that has not
+  ended. To have every session compacted once it reaches a size, see **Compact agent sessions at** in
+  [Union settings → System](settings.md#system).
+
 - **Preview**: the ticket's [preview environment](previews.md), its end-to-end tests and commands.
 - **Steps**: one tab per step with the agent's output, then the **Log**, which shows what the agent does live: a
   card per run, the last one open. A run's card says when it ran, how many tools it called, its model and what it
